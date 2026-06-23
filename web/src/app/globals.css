@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #060c1d;
+  --bg-panel: #0b142e;
+  --line: rgba(141, 168, 230, 0.12);
+  --brand: #2e4a8f;
+  --brand-bright: #4f7fe6;
+  --brand-soft: #9db8f5;
+  --ink: #e9eefb;
+  --ink-dim: #93a3c7;
+  --teal: #34d6a8;
+  --gold: #e8c468;
+  --font-manrope: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--bg-panel);
+  --color-brand: var(--brand);
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-soft: var(--brand-soft);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --font-sans: var(--font-manrope);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Торон цаас — math aesthetic */
+.grid-bg {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 100%);
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50% { transform: translateY(-18px) rotate(var(--rot, 0deg)); }
+}
+.float-sym {
+  animation: floatY 7s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes shimmerCell {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 1; }
+}
+.shimmer-cell {
+  animation: shimmerCell 2.2s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 24px rgba(79, 127, 230, 0.25); }
+  50% { box-shadow: 0 0 48px rgba(79, 127, 230, 0.55); }
+}
+.glow-pulse { animation: pulseGlow 3.4s ease-in-out infinite; }
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.text-shine {
+  background: linear-gradient(110deg, #9db8f5, #4f7fe6 30%, #e9eefb 50%, #4f7fe6 70%, #9db8f5);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 5.5s ease-in-out infinite;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes barFill {
+  from { width: 0; }
+}
+.bar-fill { animation: barFill 1.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .float-sym, .shimmer-cell, .glow-pulse, .text-shine { animation: none; }
+  .reveal { transition: none; opacity: 1; transform: none; }
+}

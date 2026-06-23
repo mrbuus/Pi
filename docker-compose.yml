@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pimn-db
+    environment:
+      POSTGRES_USER: pi
+      POSTGRES_PASSWORD: pi_dev_password
+      POSTGRES_DB: pimn
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pi -d pimn"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  s3:
+    image: minio/minio:latest
+    container_name: pimn-s3
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: pim
+      MINIO_ROOT_PASSWORD: pi_dev_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - s3data:/data
+
+volumes:
+  pgdata:
+  s3data:

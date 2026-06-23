@@ -1,0 +1,191 @@
+{
+  "sourceDir": "/Users/mr.buus/Desktop/future/100x100 V2",
+  "generatedAt": "2026-06-14T11:35:44.706Z",
+  "skippedFiles": [],
+  "warnings": [],
+  "byTopic": {
+    "ИЛТГЭГЧ ТЭГШИТГЭЛ": {
+      "tests": 18,
+      "problems": 168,
+      "autoTests": 10,
+      "manualTests": 8,
+      "answerVerified": 154,
+      "answerMissing": 14,
+      "reviewRequiredProblems": 14,
+      "formats": {
+        "CHOICE": 154,
+        "FILL_NUMBER": 14,
+        "OPEN": 0
+      }
+    },
+    "ИЛТГЭГЧ ТЭНЦЭТГЭЛ БИШ": {
+      "tests": 14,
+      "problems": 126,
+      "autoTests": 10,
+      "manualTests": 4,
+      "answerVerified": 118,
+      "answerMissing": 8,
+      "reviewRequiredProblems": 8,
+      "formats": {
+        "CHOICE": 118,
+        "FILL_NUMBER": 8,
+        "OPEN": 0
+      }
+    },
+    "ИРРАЦИОНАЛЬ ТЭГШИТГЭЛ": {
+      "tests": 10,
+      "problems": 92,
+      "autoTests": 4,
+      "manualTests": 6,
+      "answerVerified": 80,
+      "answerMissing": 12,
+      "reviewRequiredProblems": 12,
+      "formats": {
+        "CHOICE": 80,
+        "FILL_NUMBER": 12,
+        "OPEN": 0
+      }
+    },
+    "ИРРАЦИОНАЛЬ ТЭНЦЭТГЭЛ БИШ": {
+      "tests": 8,
+      "problems": 90,
+      "autoTests": 4,
+      "manualTests": 4,
+      "answerVerified": 82,
+      "answerMissing": 8,
+      "reviewRequiredProblems": 8,
+      "formats": {
+        "CHOICE": 82,
+        "FILL_NUMBER": 8,
+        "OPEN": 0
+      }
+    },
+    "ЛОГАРИФМ ИЛЭРХИЙЛЭЛ": {
+      "tests": 20,
+      "problems": 196,
+      "autoTests": 16,
+      "manualTests": 4,
+      "answerVerified": 188,
+      "answerMissing": 8,
+      "reviewRequiredProblems": 8,
+      "formats": {
+        "CHOICE": 188,
+        "FILL_NUMBER": 8,
+        "OPEN": 0
+      }
+    },
+    "ЛОГАРИФМ ТЭГШИТГЭЛ": {
+      "tests": 12,
+      "problems": 128,
+      "autoTests": 8,
+      "manualTests": 4,
+      "answerVerified": 120,
+      "answerMissing": 8,
+      "reviewRequiredProblems": 8,
+      "formats": {
+        "CHOICE": 120,
+        "FILL_NUMBER": 8,
+        "OPEN": 0
+      }
+    },
+    "ЛОГАРИФМ ТЭНЦЭТГЭЛ БИШ": {
+      "tests": 12,
+      "problems": 122,
+      "autoTests": 6,
+      "manualTests": 6,
+      "answerVerified": 112,
+      "answerMissing": 10,
+      "reviewRequiredProblems": 10,
+      "formats": {
+        "CHOICE": 112,
+        "FILL_NUMBER": 10,
+        "OPEN": 0
+      }
+    },
+    "МОДУЛЬТАЙ ТЭГШИТГЭЛ": {
+      "tests": 10,
+      "problems": 96,
+      "autoTests": 4,
+      "manualTests": 6,
+      "answerVerified": 84,
+      "answerMissing": 12,
+      "reviewRequiredProblems": 12,
+      "formats": {
+        "CHOICE": 84,
+        "FILL_NUMBER": 12,
+        "OPEN": 0
+      }
+    },
+    "МОДУЛЬТАЙ ТЭНЦЭТГЭЛ БИШ": {
+      "tests": 14,
+      "problems": 130,
+      "autoTests": 4,
+      "manualTests": 10,
+      "answerVerified": 110,
+      "answerMissing": 20,
+      "reviewRequiredProblems": 20,
+      "formats": {
+        "CHOICE": 110,
+        "FILL_NUMBER": 20,
+        "OPEN": 0
+      }
+    },
+    "ТОО ТООЛОЛ": {
+      "tests": 24,
+      "problems": 234,
+      "autoTests": 18,
+      "manualTests": 6,
+      "answerVerified": 224,
+      "answerMissing": 10,
+      "reviewRequiredProblems": 10,
+      "formats": {
+        "CHOICE": 224,
+        "FILL_NUMBER": 10,
+        "OPEN": 0
+      }
+    },
+    "РАЦИОНАЛЬ ТЭГШИТГЭЛ": {
+      "tests": 22,
+      "problems": 268,
+      "autoTests": 12,
+      "manualTests": 10,
+      "answerVerified": 248,
+      "answerMissing": 20,
+      "reviewRequiredProblems": 20,
+      "formats": {
+        "CHOICE": 248,
+        "FILL_NUMBER": 20,
+        "OPEN": 0
+      }
+    },
+    "РАЦИОНАЛЬ ТЭНЦЭТГЭЛ БИШ": {
+      "tests": 30,
+      "problems": 324,
+      "autoTests": 30,
+      "manualTests": 0,
+      "answerVerified": 324,
+      "answerMissing": 0,
+      "reviewRequiredProblems": 0,
+      "formats": {
+        "CHOICE": 324,
+        "FILL_NUMBER": 0,
+        "OPEN": 0
+      }
+    }
+  },
+  "totals": {
+    "pdfFiles": 97,
+    "tests": 194,
+    "problems": 1974,
+    "autoTests": 126,
+    "manualTests": 68,
+    "answerVerified": 1844,
+    "answerMissing": 130,
+    "reviewRequiredProblems": 130,
+    "formats": {
+      "CHOICE": 1844,
+      "FILL_NUMBER": 130,
+      "OPEN": 0
+    }
+  }
+}

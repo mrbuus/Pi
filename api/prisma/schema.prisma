@@ -1,0 +1,675 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============ Хэрэглэгчид ============
+
+enum Role {
+  ADMIN
+  TEACHER_PLUS
+  TEACHER
+  STUDENT
+  PARENT
+  BUYER
+}
+
+enum StudentType {
+  CLASSROOM // танхимын сурагч
+  ONLINE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  // Нэвтрэх түлхүүрүүд: утас, имэйл (gmail), эсвэл username — аль нэгээр нэвтэрнэ.
+  // Утсыг сонголттой болгосон тул зөвхөн имэйлээр ч бүртгүүлж болно.
+  phone        String?  @unique
+  email        String?  @unique
+  username     String?  @unique // нийтэд харагдах нэр (овог нэр эсвэл өөрийн nickname)
+  studentCode  String?  @unique // сурагчийн дотоод код (дугаараас тусдаа)
+  firstName    String
+  lastName     String
+  passwordHash String
+  role         Role
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+
+  parentLinks      ParentLink[]      @relation("ParentSide")
+  childLinks       ParentLink[]      @relation("ChildSide")
+  payments         Payment[]
+  userPasses       UserPass[]
+  attempts         Attempt[]
+  attendances      Attendance[]      @relation("AttendanceStudent")
+  submissions      Submission[]
+  testResults      TestResult[]
+  predictions      Prediction[]
+  colorTags        StudentColorTag[] @relation("TaggedStudent")
+  ownedClassrooms  Classroom[]       @relation("ClassroomTeacher")
+  enrollments      Enrollment[]
+}
+
+model StudentProfile {
+  userId          String      @id
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            StudentType
+  grade           Int? // 1–12, бүртгүүлэхдээ сонгоно
+  school          String?
+  // Танхимын сурагч идэвхжүүлэх код (= тухайн өдрийн огноо) оруулсан эсэх
+  activatedAt     DateTime?
+  activationCode  String?
+}
+
+model TeacherProfile {
+  userId            String  @id
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Админ олгодог эрх: сурагч нэмэх/хасах/анги солих (зөвхөн TEACHER_PLUS-д утгатай)
+  canManageStudents Boolean @default(false)
+}
+
+model ParentLink {
+  id        String   @id @default(cuid())
+  parentId  String
+  parent    User     @relation("ParentSide", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User     @relation("ChildSide", fields: [studentId], references: [id], onDelete: Cascade)
+  // Багш+/Админ баталгаажуулсан эсэх
+  verifiedAt   DateTime?
+  verifiedById String?
+
+  @@unique([parentId, studentId])
+}
+
+// ============ Анги ============
+
+enum ClassroomType {
+  IN_PERSON
+  ONLINE
+}
+
+model Classroom {
+  id        String        @id @default(cuid())
+  name      String
+  type      ClassroomType
+  grade     Int?
+  teacherId String?
+  teacher   User?         @relation("ClassroomTeacher", fields: [teacherId], references: [id])
+  archived  Boolean       @default(false)
+  createdAt DateTime      @default(now())
+
+  enrollments  Enrollment[]
+  attendances  Attendance[]
+  assignments  Assignment[]
+  testAccess   TestAccess[]
+  dailySummaries DailyClassSummary[]
+  announcementTargets AnnouncementClassroomTarget[]
+}
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  studentId   String
+  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classroomId String
+  classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  // Орсон өдрөөс хойшхи мэдээлэл л сурагчид харагдана; анги солиход leftAt бөглөгдөж шинэ бичилт үүснэ
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+  movedById String?
+
+  @@index([studentId, leftAt])
+  @@index([classroomId, leftAt])
+}
+
+// ============ Ирц ============
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  classroomId String
+  classroom   Classroom        @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     User             @relation("AttendanceStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  date        DateTime         @db.Date
+  status      AttendanceStatus
+  markedById  String
+
+  @@unique([classroomId, studentId, date])
+  @@index([studentId, date])
+}
+
+// ============ Даалгавар ============
+
+enum AssignmentType {
+  DAILY
+  EXTRA
+}
+
+enum SubmissionState {
+  NOT_DONE
+  SUBMITTED      // сурагч илгээсэн, багш хараагүй
+  DONE_ONLINE    // багш онлайнаар баталгаажуулсан
+  DONE_IN_CLASS  // багш ангид дэвтрийг биетээр шалгасан
+  RETURNED       // буцаасан — дахин илгээнэ
+}
+
+model Assignment {
+  id          String         @id @default(cuid())
+  classroomId String
+  classroom   Classroom      @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  type        AssignmentType @default(DAILY)
+  title       String
+  description String?
+  imageKeys   String[] // S3 түлхүүрүүд
+  dueDate     DateTime?
+  createdById String
+  createdAt   DateTime       @default(now())
+
+  submissions Submission[]
+}
+
+model Submission {
+  id           String          @id @default(cuid())
+  assignmentId String
+  assignment   Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  state        SubmissionState @default(NOT_DONE)
+  imageKeys    String[]
+  note         String?
+  checkedById  String?
+  submittedAt  DateTime?
+  checkedAt    DateTime?
+  updatedAt    DateTime        @updatedAt
+
+  @@unique([assignmentId, studentId])
+  @@index([studentId])
+}
+
+// ============ Контент: Ном → Бүлэг сэдэв → Бодлого ============
+
+model Book {
+  id       String  @id @default(cuid())
+  code     String  @unique // нийтэд харагдах цэвэр код: "100", "200", "300", "1000"
+  title    String // нийтэд харагдах цэвэр нэр: "100x100"
+  coverKey String?
+  // Жинхэнэ эх фолдер (админд мөрдөгдөх): UI-д "100x100" гэж харагдах ч дата нь
+  // "100x100 V2" фолдероос ирснийг тэмдэглэнэ. ProblemAnalysis.sourcePath-тай уялдана.
+  sourceLabel String?
+  // Хуучин (V2 биш) шилжүүлсэн ном — каталогт харагдахгүй, харин дата нь хэвээр.
+  archived Boolean @default(false)
+
+  chapters Chapter[]
+
+  @@index([archived])
+}
+
+model Chapter {
+  id          String  @id @default(cuid())
+  bookId      String?
+  book        Book?   @relation(fields: [bookId], references: [id])
+  title       String
+  order       Int
+  grade       Int? // аль ангийн хүүхдэд харагдах вэ
+  // Нийтэд үнэгүй preview эсэх (эхний онол + эхний тест)
+  freePreview Boolean @default(false)
+
+  problems Problem[]
+  theories TheoryBlock[]
+  videos   Video[]
+  tests    Test[]
+
+  @@index([grade, order])
+}
+
+model TheoryBlock {
+  id          String  @id @default(cuid())
+  chapterId   String
+  chapter     Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  title       String
+  content     String // markdown
+  imageKeys   String[]
+  order       Int
+  freePreview Boolean @default(false)
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  title     String
+  s3Key     String
+  duration  Int? // секунд
+  chapterId String?
+  chapter   Chapter? @relation(fields: [chapterId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+enum ProblemFormat {
+  CHOICE      // сонгох тест (A,B,C,D…)
+  FILL_NUMBER // ЭЕШ маягийн тоо нөхөх (a=…, b=…)
+  OPEN        // задгай хариулт
+}
+
+// Сурагч буруу хариу сонгосон бол ЯАГААД сонгосон шалтгааны төрөл.
+// Энэ нь "энэ хүүхэд ингэж алдсан" гэсэн дата цуглуулахад чухал (SPEC §9).
+enum MistakeType {
+  NONE             // зөв хариу — алдаа биш
+  SIGN_ERROR       // тэмдэг алдсан (+/−)
+  INCOMPLETE_STEP  // үйлдэл дутуу хийж зогссон
+  CALC_ERROR_NEAR  // энгийн нэмэх/хасах алдаа → ойролцоо хариу дугуйлсан
+  CONCEPT_GAP      // ухагдахуун/арга ойлгоогүйгээс
+  UNRELATED_GUESS  // огт хамааралгүй хариу → буудсан
+  OTHER            // бусад (тайлбар бичнэ)
+}
+
+// Бодлогын нэг сонголт (A–E). Зөв/буруу эсэх + буруу бол ЯАГААД алдсаныг хадгална.
+// Багш/Багш+ гараар нэг бүрчлэн засна (AI автоматаар "баталгаажсан" гэж тэмдэглэхгүй).
+model ProblemChoice {
+  id          String      @id @default(cuid())
+  problemId   String
+  problem     Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  label       String      // "A".."E" эсвэл "a".."e"
+  text        String      // сонголтын утга (LaTeX-тэй байж болно)
+  isCorrect   Boolean     @default(false)
+  mistakeType MistakeType @default(NONE) // буруу бол алдааны төрөл
+  mistakeNote String?     // багшийн тайлбар: яагаад энэ хариу руу хүрдэг вэ
+  order       Int
+
+  @@unique([problemId, label])
+  @@index([problemId])
+}
+
+model Problem {
+  id           String        @id @default(cuid())
+  token        String        @unique // "100-23-05" = ном-хуудас-бодлого
+  chapterId    String
+  chapter      Chapter       @relation(fields: [chapterId], references: [id])
+  page         Int?
+  number       Int?
+  format       ProblemFormat
+  statementText String?
+  imageKey     String?
+  choices      Json? // CHOICE форматын сонголтууд
+  correctAnswer Json // форматаас хамаарсан бүтэцтэй
+  points       Int           @default(1)
+  price        Int? // дэлгүүрт тусдаа зарагдвал (₮)
+  createdById  String
+  createdAt    DateTime      @default(now())
+
+  // Датанаас тооцогддог үзүүлэлтүүд — гараар оноохгүй (SPEC §9.3)
+  eloRating    Float @default(1000)
+  attemptCount Int   @default(0)
+  correctRate  Float?
+
+  tags      ProblemTag[]
+  formulas  ProblemFormula[]
+  analysis  ProblemAnalysis?
+  choiceOptions ProblemChoice[] // бүтэцтэй сонголтууд (correct/wrong + алдааны шалтгаан)
+  attempts  Attempt[]
+  testItems TestProblem[]
+
+  @@index([chapterId])
+}
+
+// Таксономи: бодлогыг ангилах ангилалууд. Tag нь нэрлэгдсэн REFERENCED entity —
+// нэрийг нь нэг өөрчлөхөд тэрхүү tag-тай холбоотой БҮХ бодлого автоматаар
+// шинэчлэгддэг (admin code-руу орох шаардлагагүй, багш гараар нэрлэнэ).
+enum TagType {
+  METHOD        // бодох арга: орлуулах, хувиргах…
+  QUESTION_FORM // асуултын хэлбэр: утга олох, график унших…
+  SUBTOPIC      // дэд сэдэв: бутархай, тойрог…
+  SKILL         // ур чадвар: анхаарал, тооцоолол…
+  SOLUTION_TYPE // бодогдох төрөл: "Дискриминантаар бодох", "Виетээр бодох"… (багш засна)
+}
+
+model Tag {
+  id   String  @id @default(cuid())
+  type TagType
+  name String
+
+  problems ProblemTag[]
+
+  @@unique([type, name])
+}
+
+model ProblemTag {
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, tagId])
+}
+
+// Томьёо бүр бүртгэлтэй объект (SPEC §7.2)
+model Formula {
+  id          String  @id @default(cuid())
+  name        String  @unique // "Виетийн теорем"
+  latex       String?
+  description String?
+
+  problems ProblemFormula[]
+}
+
+model ProblemFormula {
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  formulaId String
+  formula   Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, formulaId])
+}
+
+// Бодлого бүрийн нарийн шинжилгээ — сэдэв, томьёо, тодорхойлох муж,
+// тэмдэг солигдох дүрэм, нийтлэг алдааг source-оос салгаж хадгална.
+enum ProblemAnalysisStatus {
+  AUTO_DRAFT      // системийн дүрмээр автоматаар үүсгэсэн, багш баталгаажуулаагүй
+  REVIEW_REQUIRED // source/хариу/parse тодорхойгүй тул заавал хүн шалгана
+  VERIFIED        // багш/админ баталгаажуулсан
+}
+
+enum AnswerKeyStatus {
+  VERIFIED        // хариуны түлхүүрээс үсэг/утга баталгаатай олдсон
+  MISSING         // хариуны түлхүүрт хоосон эсвэл олдоогүй
+  REVIEW_REQUIRED // source болон хариу зөрөх магадлалтай тул хүн шалгана
+}
+
+model ProblemAnalysis {
+  problemId       String                @id
+  problem         Problem               @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  status          ProblemAnalysisStatus @default(AUTO_DRAFT)
+  answerKeyStatus AnswerKeyStatus       @default(VERIFIED)
+  confidence      Float                 @default(0)
+  sourcePath      String?
+  sourceVariant   String?
+  topic           String
+  subtopic        String?
+  skills          String[]
+  methods         String[]
+  formulas        Json
+  domainNotes     String[]
+  signRules       String[]
+  commonMistakes  String[]
+  solutionOutline String?
+  auditNotes      String[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([status])
+  @@index([answerKeyStatus])
+  @@index([topic])
+}
+
+// ============ Тест / Шалгалт ============
+
+enum TestType {
+  DAILY        // өдөр тутмын
+  CHAPTER_EXAM // сэдвийн бүлгийн шалгалт (36+4, дүнг багш оруулна)
+  EESH_MOCK    // ЭЕШ сорил
+  CUSTOM
+}
+
+enum TestGradingMode {
+  AUTO   // зөв хариу баталгаатай, систем шууд оноо бодно
+  MANUAL // PDF/source орсон ч хариу баталгаажаагүй эсвэл багш гараар дүн оруулна
+}
+
+model Test {
+  id           String   @id @default(cuid())
+  title        String
+  type         TestType
+  gradingMode  TestGradingMode @default(AUTO)
+  chapterId    String?
+  chapter      Chapter? @relation(fields: [chapterId], references: [id])
+  timeLimitMin Int?
+  pdfKey       String? // PDF-ээр оруулсан тест (Багш+/Админ)
+  price        Int?
+  // A/B хувилбарууд: groupKey ижил, variantLabel ялгаатай (ж: "Тест 18" → A, B)
+  groupKey     String?
+  variantLabel String?
+  createdById  String
+  createdAt    DateTime @default(now())
+
+  problems TestProblem[]
+  access   TestAccess[]
+  results  TestResult[]
+}
+
+model TestProblem {
+  testId    String
+  test      Test    @relation(fields: [testId], references: [id], onDelete: Cascade)
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  order     Int
+  points    Int     @default(1)
+
+  @@id([testId, problemId])
+}
+
+// Тест аль ангиудад харагдахыг сонгоно — автоматаар бүх ангид харагдахгүй
+model TestAccess {
+  testId      String
+  test        Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  classroomId String
+  classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@id([testId, classroomId])
+}
+
+model TestResult {
+  id          String   @id @default(cuid())
+  testId      String
+  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  totalScore  Float
+  maxScore    Float
+  enteredById String? // CHAPTER_EXAM үед багш гараар оруулна
+  source      AttemptSource
+  createdAt   DateTime @default(now())
+
+  @@unique([testId, studentId])
+  @@index([studentId])
+}
+
+// ============ Оролдлого — аналитикийн цөм (SPEC §9) ============
+
+enum SelfState {
+  SOLVED_CLEAN     // ✅ 100% ойлгож, алдалгүй бодсон
+  FIXED_AFTER_ERROR // 🔁 эхэлж алдаад засч дуусгасан
+  FAILED           // ❌ алдсан / чадаагүй
+  GUESSED          // 🎯 буудсан — таамгаар оноо авсан
+}
+
+enum AttemptSource {
+  EVENING_SELF_REPORT // оройн өөрийн тэмдэглэгээ (танхимд утас хураадаг тул)
+  ONLINE_TEST         // системийн авто шалгалт
+  CHAPTER_EXAM        // 36+4 шалгалт, багш оруулсан
+  OMR_IMPORT          // хариултын хуудас уншигч машин
+}
+
+model Attempt {
+  id           String        @id @default(cuid())
+  studentId    String
+  student      User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  problemId    String
+  problem      Problem       @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  source       AttemptSource
+  // Аль өдрийн хичээлд хамаарах вэ (оройн тэмдэглэгээ өчигдрийнхөө өдрөөр бичигдэнэ)
+  occurredOn   DateTime      @db.Date
+  autoCorrect  Boolean? // системийн авто үр дүн (онлайн тест, OMR)
+  selfState    SelfState? // өөрийн тэмдэглэгээ
+  timeSpentSec Int?
+  testId       String?
+  classroomId  String?
+  createdAt    DateTime      @default(now())
+
+  @@index([studentId, occurredOn])
+  @@index([problemId])
+  @@index([studentId, problemId])
+}
+
+// Шөнө бүрийн cron-ийн анги тус бүрийн өдрийн дүгнэлт (SPEC §9.1.1)
+model DailyClassSummary {
+  id          String    @id @default(cuid())
+  classroomId String
+  classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  date        DateTime  @db.Date
+  stats       Json // тэмдэглэсэн/тэмдэглээгүй, төлөвийн тархалт, сэдвийн зураглал
+  createdAt   DateTime  @default(now())
+
+  @@unique([classroomId, date])
+}
+
+// Таамаглал бүр хадгалагдаж бодит үр дүнтэй харьцуулагдана (SPEC §9.3)
+enum PredictionKind {
+  ERROR_RISK // "энэ сэдэв/бодлогод алдах магадлал X%"
+  EESH_SCORE // таамаглах ЭЕШ онооны муж
+}
+
+model Prediction {
+  id          String         @id @default(cuid())
+  studentId   String
+  student     User           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  kind        PredictionKind
+  payload     Json // таамаглалын утга, муж, ашигласан загварын хувилбар
+  predictedAt DateTime       @default(now())
+  evaluatedAt DateTime?
+  actual      Json? // бодит үр дүн — загварын нарийвчлалыг хэмжихэд
+
+  @@index([studentId, kind])
+}
+
+// Багшийн өнгөний тэмдэглэгээ — зөвхөн багш нар + админд харагдана (SPEC §13.1)
+model StudentColorTag {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     User     @relation("TaggedStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  color       String // hex эсвэл нэрлэсэн өнгө
+  note        String?
+  createdById String
+  updatedAt   DateTime @updatedAt
+
+  @@unique([studentId, createdById])
+}
+
+// ============ Эрх (named pass) ба Төлбөр ============
+
+model Pass {
+  id           String  @id @default(cuid())
+  name         String  @unique // "Сарын онлайн эрх", "ЭЕШ багц", "Тоо тоолол бүлэг"…
+  durationDays Int
+  // Хамрах хүрээ: chapterIds, bookIds, videoIds, testIds жагсаалтууд
+  scope        Json
+  price        Int? // заавал биш — чөлөөт дүнгийн зарчимтай зэрэгцэнэ
+  active       Boolean @default(true)
+
+  userPasses UserPass[]
+}
+
+model UserPass {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passId    String
+  pass      Pass     @relation(fields: [passId], references: [id])
+  startsAt  DateTime @default(now())
+  expiresAt DateTime
+  paymentId String?
+
+  @@index([userId, expiresAt])
+}
+
+enum PaymentMethod {
+  QPAY
+  BANK_TRANSFER
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  amount        Int // хэрэглэгчийн өөрөө бичсэн дүн (₮)
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  description   String? // төлсөн зам, тайлбар
+  forMonth      String? // "2026-09" — аль сарын төлбөр
+  paidAt        DateTime?
+  confirmedById String? // данс/бэлэн үед Багш+/Админ гараар баталгаажуулна
+  qpayInvoiceId String?
+  createdAt     DateTime      @default(now())
+
+  @@index([userId, forMonth])
+  @@index([status])
+}
+
+// Төвийн зарлал — танхимын сурагчдын нийтийн самбарт харагдана
+enum AnnouncementAudience {
+  ALL_STUDENTS  // бүх сурагч
+  ALL_CLASSROOM // бүх танхимын сурагчид
+  ALL_ONLINE    // бүх онлайн сурагч
+  ONE_CLASSROOM // тодорхой нэг анги (хуучин compatibility)
+  SELECTED_CLASSROOMS // олон тодорхой анги
+}
+
+model Announcement {
+  id          String               @id @default(cuid())
+  title       String
+  body        String
+  audience    AnnouncementAudience @default(ALL_CLASSROOM)
+  classroomId String? // ONE_CLASSROOM үед
+  pinned      Boolean              @default(false)
+  createdById String
+  createdAt   DateTime             @default(now())
+  classroomTargets AnnouncementClassroomTarget[]
+
+  @@index([audience, createdAt])
+  @@index([classroomId])
+}
+
+model AnnouncementClassroomTarget {
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  classroomId    String
+  classroom      Classroom    @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, classroomId])
+  @@index([classroomId])
+}
+
+// Анги тухайн өдөр ямар тест/шалгалт хийснийг багш бүртгэнэ.
+// Сурагч оройн тэмдэглэгээндээ token мэдэхгүйгээр бодлогуудаа эндээс шууд хардаг.
+model ClassTestSession {
+  id          String   @id @default(cuid())
+  classroomId String
+  testId      String
+  date        DateTime @db.Date
+  createdById String
+  createdAt   DateTime @default(now())
+
+  // Тухайн анги уг өдөр ХИЙГЭЭГҮЙ (алгассан) бодлогуудын Problem.id.
+  // Хоосон = бүх бодлого орсон. Сурагчийн оройн тэмдэглэгээнд эдгээр харагдахгүй.
+  excludedProblemIds String[] @default([])
+
+  @@unique([classroomId, testId, date])
+  @@index([classroomId, date])
+}
