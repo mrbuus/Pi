@@ -182,3 +182,21 @@ export function gradeAnswer(
     canonicalAnswer: rawAnswer ?? null,
   };
 }
+
+// Импортын явцад хариу тодорхойлогдоогүй бодлогыг илрүүлнэ (ж: 300x300 —
+// эх docx-д хариуны түлхүүр байгаагүй тул correctAnswer нь
+// {reason:'ANSWER_KEY_MISSING'} placeholder, ямар ч choice isCorrect биш).
+// Ийм бодлогыг maxScore/correctRate тооцооноос хасна — эс тэгвээс сурагч
+// ЮУ Ч бичсэн "буруу" гэж автоматаар дүгнэгдэж, дүн шударга бус болно.
+export function hasKnownAnswer(p: GradableProblem): boolean {
+  const mode = choiceModeOf(p);
+  if (mode === 'TEXT') {
+    return (p.choiceOptions ?? []).some((o) => o.isCorrect);
+  }
+  const c = p.correctAnswer;
+  if (c === null || c === undefined || c === '') return false;
+  if (typeof c === 'object' && (c as Record<string, unknown>).manualReview) {
+    return false;
+  }
+  return true;
+}

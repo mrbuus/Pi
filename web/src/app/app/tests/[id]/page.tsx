@@ -56,6 +56,8 @@ interface ReviewItem {
   statementText?: string | null;
   answered: boolean;
   correct: boolean;
+  // Импортын явцад хариу тодорхойгүй үлдсэн бодлого — "буруу" гэж бүү харуул
+  answerUnknown?: boolean;
   myAnswer: string | null;
   // Багш баталгаажуулсан бодолт (VERIFIED үед л ирнэ — Шийдвэр Д)
   solution?: string | null;
@@ -546,7 +548,7 @@ export default function TakeTestPage() {
                 <div
                   key={it.n}
                   className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
-                    !it.answered
+                    !it.answered || it.answerUnknown
                       ? "border-white/8 opacity-60"
                       : it.correct
                         ? "border-teal-400/25 bg-teal-400/5"
@@ -555,7 +557,7 @@ export default function TakeTestPage() {
                 >
                   <span
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
-                      !it.answered
+                      !it.answered || it.answerUnknown
                         ? "bg-white/10 text-ink-dim"
                         : it.correct
                           ? "bg-teal-400/20 text-teal-300"
@@ -573,6 +575,10 @@ export default function TakeTestPage() {
                     <p className="mt-1">
                       {!it.answered ? (
                         <span className="text-ink-dim">Хариулаагүй</span>
+                      ) : it.answerUnknown ? (
+                        <span className="text-ink-dim">
+                          Зөв хариу тодорхойгүй — дүнд тооцогдоогүй
+                        </span>
                       ) : (
                         <>
                           <span className={it.correct ? "text-teal-300" : "text-red-300"}>

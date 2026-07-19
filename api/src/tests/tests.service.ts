@@ -25,6 +25,7 @@ import {
   choiceTextsOf,
   gradeAnswer,
   GradableProblem,
+  hasKnownAnswer,
 } from './grading';
 
 const TEACHER_ROLES: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
@@ -444,6 +445,10 @@ export class TestsService {
         imageKey: tp.problem.imageKey,
         answered,
         correct: answered ? correct : false,
+        // Импортын явцад хариу тодорхойгүй үлдсэн бодлого (жиш: 300x300,
+        // эх docx-д хариуны түлхүүр байгаагүй) — review дэлгэц дээр "буруу"
+        // гэж бүү харуул, учир нь бид ч мэдэхгүй.
+        answerUnknown: !hasKnownAnswer(g),
         myAnswer: answered ? String(canonicalAnswer ?? '') : null,
         solution:
           a?.status === 'VERIFIED' && a.solutionOutline
@@ -711,7 +716,13 @@ export class TestsService {
     >;
 
     let totalScore = 0;
-    const maxScore = test.problems.reduce((s, tp) => s + tp.points, 0);
+    // Хариу тодорхойгүй (импортын явцад ANSWER_KEY_MISSING) бодлогыг дүнгийн
+    // хуваарьт оруулахгүй — эс тэгвээс сурагч зөв бичсэн ч "буруу" гэж
+    // тооцогдож, дүнгийн хувь шударга бус болно.
+    const maxScore = test.problems.reduce(
+      (s, tp) => (hasKnownAnswer(toGradable(tp)) ? s + tp.points : s),
+      0,
+    );
     const graded: { problemId: string; correct: boolean; points: number }[] =
       [];
     const attempts: Prisma.AttemptCreateManyInput[] = [];
@@ -724,9 +735,15 @@ export class TestsService {
       const selfState = m.states[pid] as SelfState | undefined;
       const answered = raw !== undefined && raw !== null && String(raw) !== '';
 
-      const { correct } = gradeAnswer(toGradable(tp), raw, choiceOrder[pid]);
-      if (answered && correct) totalScore += tp.points;
-      graded.push({ problemId: pid, correct: answered && correct, points: tp.points });
+      const gradable = toGradable(tp);
+      const known = hasKnownAnswer(gradable);
+      const { correct } = gradeAnswer(gradable, raw, choiceOrder[pid]);
+      if (answered && correct && known) totalScore += tp.points;
+      graded.push({
+        problemId: pid,
+        correct: answered && correct && known,
+        points: tp.points,
+      });
 
       // Attempt зөвхөн бодит үйлдэлтэй бодлогод — хоосон мөрөөр дата бохирдуулахгүй
       if (answered || selfState) {
@@ -735,7 +752,7 @@ export class TestsService {
           problemId: pid,
           source: AttemptSource.ONLINE_TEST,
           occurredOn,
-          autoCorrect: answered ? correct : null,
+          autoCorrect: answered && known ? correct : null,
           selfState: selfState ?? null,
           timeSpentSec:
             typeof m.times[pid] === 'number' ? (m.times[pid] as number) : null,
@@ -743,7 +760,9 @@ export class TestsService {
           classroomId: enrollment?.classroomId ?? null,
         });
       }
-      if (answered) statUpdates.push({ id: pid, correct });
+      // Хариу тодорхойгүй бодлогыг Problem.correctRate/attemptCount
+      // статистикт оруулахгүй (тухайн бодлогын чанарыг буруу муутгахгүй)
+      if (answered && known) statUpdates.push({ id: pid, correct });
     }
 
     const byId = new Map(test.problems.map((tp) => [tp.problemId, tp.problem]));

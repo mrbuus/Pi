@@ -6,6 +6,7 @@ import {
   choiceTextsOf,
   gradeAnswer,
   GradableProblem,
+  hasKnownAnswer,
   isPlaceholderChoices,
   mulberry32,
   shuffledIndices,
@@ -163,5 +164,49 @@ describe('gradeAnswer — горим бүрийн дүн', () => {
       correctAnswer: { manualReview: true },
     });
     expect(gradeAnswer(g, '5').correct).toBe(false);
+  });
+});
+
+describe('hasKnownAnswer — импортын хариуны түлхүүр илрүүлэлт', () => {
+  it('TEXT горим: isCorrect=true choice байхгүй бол мэдэгдэхгүй', () => {
+    const g = p({
+      choiceOptions: [
+        { order: 0, text: 'A', isCorrect: false },
+        { order: 1, text: 'B', isCorrect: false },
+      ],
+    });
+    expect(hasKnownAnswer(g)).toBe(false);
+  });
+
+  it('TEXT горим: isCorrect=true choice байвал мэдэгдэнэ', () => {
+    const g = p({
+      choiceOptions: [
+        { order: 0, text: 'A', isCorrect: true },
+        { order: 1, text: 'B', isCorrect: false },
+      ],
+    });
+    expect(hasKnownAnswer(g)).toBe(true);
+  });
+
+  it('manualReview placeholder correctAnswer-тай бол мэдэгдэхгүй', () => {
+    const g = p({
+      format: FILL,
+      correctAnswer: { manualReview: true, reason: 'ANSWER_KEY_MISSING' },
+    });
+    expect(hasKnownAnswer(g)).toBe(false);
+  });
+
+  it('бодит correctAnswer утгатай бол мэдэгдэнэ', () => {
+    const g = p({ format: FILL, correctAnswer: '-4' });
+    expect(hasKnownAnswer(g)).toBe(true);
+  });
+
+  it('correctAnswer хоосон/null бол мэдэгдэхгүй', () => {
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: null }))).toBe(
+      false,
+    );
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: '' }))).toBe(
+      false,
+    );
   });
 });
