@@ -674,11 +674,30 @@ grading.ts-ийн дагуу сурагч ямар хариулт өгсөн ч 
 олдох (эсвэл Problem Editor-оор гараар 1737 удаа орох) хүртэл 300x300-г ЯМАР Ч
 ангид бүү оноо** — эсрэг тохиолдолд сурагчид бүгд 0 оноо авна.
 
-**Deploy (Vercel+Render, chátын хүсэлтээр):** `render.yaml` Blueprint бэлдэж,
-`mrbuus/Pi` GitHub руу push хийж (mrbuus акаунтаар gh device-flow нэвтэрсэн),
-Render Blueprint deploy эхлүүлсэн. `pimn-db` Live боллоо; `pimn-api` эхний
-deploy `start:prod`-ийн зам буруу (`dist/main` → зөв нь `dist/src/main`) тул
-Failed болсон, засаад дахин push хийсэн — Render дахин deploy хийж байгаа.
-Vercel login (`mrbuus` эсвэл GitHub-ээр) хэрэглэгчийн зөвшөөрлийг хүлээж байна.
+**Deploy (Vercel+Render) — ✅ 2026-07-20 бүрэн дууссан, E2E баталгаажсан.**
+- `render.yaml` Blueprint → `pimn-db` (Postgres) + `pimn-api` (Web Service),
+  `mrbuus/Pi` GitHub-тай холбогдсон, auto-deploy идэвхтэй
+- `start:prod`-ийн замын алдаа (`dist/main`→`dist/src/main`) засагдсан
+- Vercel-д frontend deploy хийсэн: **https://web-one-pi-59.vercel.app**
+  (`NEXT_PUBLIC_API_URL=https://pimn-api.onrender.com/api`)
+- Render CLI (`brew install render`, device-flow login)-оор API токен аваад,
+  Render REST API-г шууд ашиглаж (dashboard-гүйгээр): `pimn-api` URL,
+  `pimn-db` external connection string-ийг олж, `WEB_ORIGIN` env var-ыг
+  Vercel URL руу тохируулж, deploy trigger хийсэн
+- Локал DB-ийг `pg_dump -Fc` + `pg_restore --data-only` (Classroom→бусад
+  хамааралтай хүснэгтүүд гэсэн дарааллаар 2 үе шаттайгаар, учир нь
+  `--disable-triggers` Render-ийн managed Postgres дээр зөвшөөрөгдөөгүй)
+  Render Postgres руу бүрэн шилжүүлсэн — **бүх 37 хүснэгтийн мөрийн тоо
+  локалтай 100% таарсныг баталгаажуулсан** (`_prisma_migrations`
+  давхардлыг дараа нь цэвэрлэсэн)
+- Эцсийн E2E: шинэ browser tab дээр `https://web-one-pi-59.vercel.app/login`-д
+  Бадрал (Багш+)-аар бодитоор нэвтэрч, Багшийн самбар бодит өгөгдөлтэйгөө
+  (сурагч, ирц, хуучин тестүүд) зөв ачаалагдсаныг screenshot-оор баталгаажуулсан
+
+**Мэдэгдэж буй хязгаарлалт:** upload (зураг/PDF) локал диск дээр хадгалагддаг тул
+Render free tier дээр redeploy/restart болгонд алдагдана — production-д бол
+S3/Cloudflare R2 руу шилжих шаардлагатай (одоохондоо демо-д хангалттай).
+Render free Postgres 30 хоногийн дараа устах тул урт хугацаанд ашиглах бол
+paid plan руу шилжих хэрэгтэй.
 
 > Тэмдэглэл: одоогоор **код засаагүй** — шийдэл бүрийг эндээс баталгаажуулж байж эхэлнэ.
