@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import MathText from "@/components/MathText";
-import { api } from "@/lib/api";
+import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
+import { api, getRole } from "@/lib/api";
 
 interface Chapter {
   id: string;
@@ -12,7 +13,7 @@ interface Chapter {
   grade?: number;
   freePreview: boolean;
   book?: { code: string; title: string };
-  _count: { problems: number; theories: number };
+  _count: { problems: number; theories: number; tests: number };
 }
 interface Problem {
   id: string;
@@ -42,6 +43,7 @@ interface Book {
   code: string;
   title: string;
   problemCount?: number;
+  testCount?: number;
   _count: { chapters: number };
 }
 
@@ -60,6 +62,7 @@ interface TopicGroup {
   chapters: Chapter[];
   problems: number;
   theories: number;
+  tests: number;
   free: number;
 }
 
@@ -128,6 +131,10 @@ function splitChapterTitle(title: string) {
   };
 }
 
+function cleanBookCode(value: string) {
+  return value.toLowerCase().replaceAll("×", "x").replace(/[^a-zа-яөөгү0-9]/gi, "");
+}
+
 function groupChapters(chapters: Chapter[]): TopicGroup[] {
   const groups = new Map<string, Omit<TopicGroup, "tone">>();
   for (const chapter of chapters) {
@@ -139,11 +146,13 @@ function groupChapters(chapters: Chapter[]): TopicGroup[] {
         chapters: [],
         problems: 0,
         theories: 0,
+        tests: 0,
         free: 0,
       } satisfies Omit<TopicGroup, "tone">);
     current.chapters.push(chapter);
     current.problems += chapter._count.problems;
     current.theories += chapter._count.theories;
+    current.tests += chapter._count.tests;
     if (chapter.freePreview) current.free += 1;
     groups.set(topic, current);
   }
@@ -165,23 +174,47 @@ export default function LibraryPage() {
   const [locked, setLocked] = useState(false);
   const [loadingProblems, setLoadingProblems] = useState(false);
   const [catalogError, setCatalogError] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+
+  // Ангилал засах эрх зөвхөн багш/багш+/админд (tests/teacher хуудасны хэв маяг)
+  const role = typeof window !== "undefined" ? getRole() : null;
+  const canEdit =
+    role === "ADMIN" || role === "TEACHER" || role === "TEACHER_PLUS";
+  // Агуулга (статемент/сонголт/зөв хариу/зураг) засах эрх — зөвхөн ADMIN/TEACHER_PLUS.
+  // Энгийн TEACHER-д зөвхөн дээрх canEdit-ийн хуучин ангилал/tag засах горим үлдэнэ.
+  const canEditContent = role === "ADMIN" || role === "TEACHER_PLUS";
 
   const topicGroups = useMemo(() => groupChapters(chapters), [chapters]);
   const activeGroup =
     topicGroups.find((group) => group.topic === activeTopic) ?? topicGroups[0];
   const currentBook = books.find((b) => b.id === bookId);
   const totalProblems = topicGroups.reduce((sum, group) => sum + group.problems, 0);
+  const totalTests = topicGroups.reduce((sum, group) => sum + group.tests, 0);
 
   useEffect(() => {
     api<Book[]>("/books")
       .then((bs) => {
-        const withProblems = bs.filter((b) =>
-          typeof b.problemCount === "number"
-            ? b.problemCount > 0
-            : b._count.chapters > 0,
+        // Бүтэц (сэдэв/тест) байвал л харуулна — бодлого хараахан ороогүй ч
+        // metadata-only номууд (Хавтгай, Огторгуй г.м.) шатлалаа харуулна
+        const withProblems = bs.filter(
+          (b) => b._count.chapters > 0 || (b.problemCount ?? 0) > 0,
         );
         setBooks(withProblems);
-        if (withProblems.length > 0) setBookId((id) => id || withProblems[0].id);
+        if (withProblems.length > 0) {
+          const requested =
+            typeof window !== "undefined"
+              ? new URLSearchParams(window.location.search).get("book")
+              : null;
+          const requestedKey = requested ? cleanBookCode(requested) : "";
+          const requestedBook = requestedKey
+            ? withProblems.find(
+                (book) =>
+                  cleanBookCode(book.code) === requestedKey ||
+                  cleanBookCode(book.title) === requestedKey,
+              )
+            : null;
+          setBookId((id) => id || (requestedBook ?? withProblems[0]).id);
+        }
       })
       .catch((error) => {
         setCatalogError(
@@ -247,7 +280,7 @@ export default function LibraryPage() {
                 : "border-white/10 text-ink-dim hover:border-white/30"
             }`}
           >
-            <span className="font-mono">{b.code}</span> · {b._count.chapters} тест
+            <span className="font-mono">{b.code}</span> · {b.testCount ?? 0} тест
           </button>
         ))}
       </div>
@@ -269,7 +302,7 @@ export default function LibraryPage() {
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <Metric label="Сэдэв" value={topicGroups.length} />
-              <Metric label="Тест" value={currentBook._count.chapters} />
+              <Metric label="Тест" value={totalTests} />
               <Metric label="Бодлого" value={totalProblems} />
             </div>
           </div>
@@ -314,7 +347,7 @@ export default function LibraryPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-bold">{group.topic}</span>
                       <span className="mt-0.5 block text-xs text-ink-dim">
-                        {group.chapters.length} тест · {group.problems} бодлого
+                        {group.tests} тест · {group.problems} бодлого
                       </span>
                     </span>
                   </div>
@@ -358,7 +391,7 @@ export default function LibraryPage() {
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <span className="rounded-full bg-white/8 px-3 py-1 font-semibold">
-                    {activeGroup.chapters.length} тест
+                    {activeGroup.tests} тест
                   </span>
                   <span className="rounded-full bg-white/8 px-3 py-1 font-semibold">
                     {activeGroup.problems} бодлого
@@ -414,7 +447,8 @@ export default function LibraryPage() {
                           )}
                         </div>
                         <p className="mt-0.5 text-sm text-ink-dim">
-                          {ch.book?.code} ном · {ch._count.problems} бодлого
+                          {ch.book?.code} ном · {ch._count.tests} тест ·{" "}
+                          {ch._count.problems} бодлого
                           {ch._count.theories > 0 && ` · ${ch._count.theories} онол`}
                         </p>
                       </div>
@@ -440,7 +474,12 @@ export default function LibraryPage() {
                           </div>
                         )}
                         {!loadingProblems && !locked && (
-                          <ProblemList problems={problems} tone={activeGroup.tone} />
+                          <ProblemList
+                            problems={problems}
+                            tone={activeGroup.tone}
+                            canEdit={canEdit}
+                            onEdit={setEditId}
+                          />
                         )}
                       </div>
                     )}
@@ -450,6 +489,15 @@ export default function LibraryPage() {
             </div>
           </section>
         </div>
+      )}
+
+      {editId && (
+        <ProblemClassifyEditor
+          key={editId}
+          problemId={editId}
+          onClose={() => setEditId(null)}
+          canEditContent={canEditContent}
+        />
       )}
     </div>
   );
@@ -464,7 +512,17 @@ function Metric({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ProblemList({ problems, tone }: { problems: Problem[]; tone: TopicTone }) {
+function ProblemList({
+  problems,
+  tone,
+  canEdit,
+  onEdit,
+}: {
+  problems: Problem[];
+  tone: TopicTone;
+  canEdit?: boolean;
+  onEdit?: (id: string) => void;
+}) {
   if (problems.length === 0) {
     return <p className="text-sm text-ink-dim">Бодлого алга</p>;
   }
@@ -503,6 +561,14 @@ function ProblemList({ problems, tone }: { problems: Problem[]; tone: TopicTone 
                 <span className="rounded bg-teal-400/15 px-2 py-0.5 text-teal-300">
                   Хариу: {formatAnswer(p.correctAnswer)}
                 </span>
+              )}
+              {canEdit && (
+                <button
+                  onClick={() => onEdit?.(p.id)}
+                  className="rounded bg-brand-bright/15 px-2 py-0.5 text-brand-soft transition hover:bg-brand-bright/25"
+                >
+                  ✎ Ангилал засах
+                </button>
               )}
             </div>
             {p.analysis && <ProblemAnalysisDetails analysis={p.analysis} />}

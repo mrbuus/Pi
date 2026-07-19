@@ -55,6 +55,7 @@ model User {
   colorTags        StudentColorTag[] @relation("TaggedStudent")
   ownedClassrooms  Classroom[]       @relation("ClassroomTeacher")
   enrollments      Enrollment[]
+  attemptSessions  TestAttemptSession[]
 }
 
 model StudentProfile {
@@ -104,6 +105,9 @@ model Classroom {
   teacher   User?         @relation("ClassroomTeacher", fields: [teacherId], references: [id])
   archived  Boolean       @default(false)
   createdAt DateTime      @default(now())
+  // Хөтөлбөрийн түгжээний гараар override (Шийдвэр 5). null = ClassTestSession-ээс
+  // автоматаар тооцно; багш гараар урагшлуулж/буцаах бол энд Chapter.id тавина.
+  progressChapterId String?
 
   enrollments  Enrollment[]
   attendances  Attendance[]
@@ -226,6 +230,9 @@ model Chapter {
   grade       Int? // аль ангийн хүүхдэд харагдах вэ
   // Нийтэд үнэгүй preview эсэх (эхний онол + эхний тест)
   freePreview Boolean @default(false)
+  // БҮТ-ийн үндсэн сэдвийн муж (админ засварладаг, Шийдвэр 5)
+  topicId     String?
+  topic       Topic?  @relation(fields: [topicId], references: [id])
 
   problems Problem[]
   theories TheoryBlock[]
@@ -233,6 +240,17 @@ model Chapter {
   tests    Test[]
 
   @@index([grade, order])
+  @@index([topicId])
+}
+
+// БҮТ-ийн үндсэн агуулгын муж (Тоо тоолол, Алгебр, Функц, Геометр, Магадлал...).
+// Админ засварладаг жагсаалт — код хөндөхгүйгээр нэр/дараалал өөрчлөгдөнө (Шийдвэр 5).
+model Topic {
+  id    String @id @default(cuid())
+  name  String @unique
+  order Int    @default(0)
+
+  chapters Chapter[]
 }
 
 model TheoryBlock {
@@ -419,6 +437,7 @@ enum TestType {
   CHAPTER_EXAM // сэдвийн бүлгийн шалгалт (36+4, дүнг багш оруулна)
   EESH_MOCK    // ЭЕШ сорил
   CUSTOM
+  THEORY       // онолын асуулт-хариултын модуль (Шийдвэр 8)
 }
 
 enum TestGradingMode {
@@ -442,9 +461,10 @@ model Test {
   createdById  String
   createdAt    DateTime @default(now())
 
-  problems TestProblem[]
-  access   TestAccess[]
-  results  TestResult[]
+  problems        TestProblem[]
+  access          TestAccess[]
+  results         TestResult[]
+  attemptSessions TestAttemptSession[]
 }
 
 model TestProblem {
@@ -466,6 +486,40 @@ model TestAccess {
   classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
 
   @@id([testId, classroomId])
+}
+
+// Онлайн шалгалтын session — сервер-эрхт таймер, shuffle, autosave (Шийдвэр 2).
+// Дараалал анх нэг удаа санамсаргүй үүсээд session дуустал хөлдөнө; явц нь
+// draftAnswers-т хадгалагдах тул refresh/гацалтад тэсвэртэй. Дуусмагц хөлддөг.
+enum AttemptSessionStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
+model TestAttemptSession {
+  id        String @id @default(cuid())
+  testId    String
+  test      Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  seed         Int // shuffle-ийн үр (аудит мөрдлөгт)
+  problemOrder Json // [problemId] — харуулах дараалал (одоогоор каноник)
+  choiceOrder  Json // { problemId: [эх индексүүд display дарааллаар] } — TEXT горимд л
+  draftAnswers Json @default("{}") // { problemId: displayIdx | үсэг | утга }
+  draftStates  Json @default("{}") // { problemId: SelfState }
+  problemTimes Json @default("{}") // { problemId: сек } — бодлого бүрийн бодит хугацаа
+  leaveCount   Int  @default(0) // шалгалтын горимоос гарсан тоо (анти-чит)
+  events       Json @default("[]") // [{t, type}] — сүүлийн 100 үйл явдал
+
+  startedAt   DateTime             @default(now())
+  deadlineAt  DateTime? // null = хугацаагүй; шалгалтыг сервер энэ цагаар хаана
+  status      AttemptSessionStatus @default(IN_PROGRESS)
+  submittedAt DateTime?
+  updatedAt   DateTime             @updatedAt
+
+  @@unique([testId, studentId])
+  @@index([studentId, status])
 }
 
 model TestResult {

@@ -2,24 +2,96 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import LogoMark from "@/components/LogoMark";
-import { clearAuth, getRole, getToken } from "@/lib/api";
+import { api, clearAuth, fileUrl, getRole, getToken } from "@/lib/api";
+
+// Role бүрийн монгол нэр — header identity badge-д ашиглана
+const ROLE_LABEL: Record<string, string> = {
+  ADMIN: "Админ",
+  TEACHER_PLUS: "Багш+",
+  TEACHER: "Багш",
+  STUDENT: "Сурагч",
+  PARENT: "Эцэг эх",
+  BUYER: "Худалдан авагч",
+};
+
+interface Me {
+  firstName: string;
+  lastName: string;
+  role: string;
+  avatarUrl?: string | null;
+}
+interface ChildLink {
+  verified: boolean;
+  student: { firstName: string; lastName: string };
+}
+
+function initials(firstName: string, lastName: string): string {
+  return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
+}
+
+// Дээд буланд харагдах identity — нэвтэрсэн ямар ч role-той хүн өөрийн нэр
+// + role-оо, эцэг эх бол баталгаажсан хүүхдийнхээ нэрийг давхар харна.
+// Header дотор байрладаг тул БҮХ дотоод хуудсан дээр байнга харагдана.
+function IdentityBadge() {
+  const [me, setMe] = useState<Me | null>(null);
+  const [children, setChildren] = useState<ChildLink[]>([]);
+
+  useEffect(() => {
+    api<Me>("/auth/me").then(setMe).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (me?.role === "PARENT") {
+      api<ChildLink[]>("/parent/children").then(setChildren).catch(() => {});
+    }
+  }, [me?.role]);
+
+  if (!me) return null;
+  const verifiedChild = children.find((c) => c.verified)?.student;
+
+  return (
+    <div className="flex shrink-0 items-center gap-2 rounded-lg border border-white/10 px-2 py-1">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-bright/20 text-[11px] font-bold text-brand-soft">
+        {me.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={fileUrl(me.avatarUrl)}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          initials(me.firstName, me.lastName)
+        )}
+      </span>
+      <span className="hidden text-sm leading-tight sm:block">
+        <span className="block font-semibold">{me.firstName}</span>
+        <span className="block text-[11px] text-ink-dim">
+          {ROLE_LABEL[me.role] ?? me.role}
+          {verifiedChild && ` · ${verifiedChild.firstName}`}
+        </span>
+      </span>
+    </div>
+  );
+}
 
 const NAV: Record<string, { href: string; label: string }[]> = {
   STUDENT: [
     { href: "/app/student", label: "Миний самбар" },
     { href: "/app/library", label: "Бодлогын сан" },
+    { href: "/app/videos", label: "Онлайн хичээл" },
     { href: "/app/tests", label: "Шалгалт" },
   ],
   TEACHER: [
     { href: "/app/teacher", label: "Багшийн самбар" },
     { href: "/app/library", label: "Бодлогын сан" },
+    { href: "/app/videos", label: "Онлайн хичээл" },
     { href: "/app/tests", label: "Шалгалт" },
   ],
   TEACHER_PLUS: [
     { href: "/app/teacher", label: "Багшийн самбар" },
     { href: "/app/library", label: "Бодлогын сан" },
+    { href: "/app/videos", label: "Онлайн хичээл" },
     { href: "/app/tests", label: "Шалгалт" },
     { href: "/app/payments", label: "Төлбөр" },
   ],
@@ -27,11 +99,13 @@ const NAV: Record<string, { href: string; label: string }[]> = {
     { href: "/app/admin", label: "Удирдлага" },
     { href: "/app/teacher", label: "Багшийн самбар" },
     { href: "/app/library", label: "Бодлогын сан" },
+    { href: "/app/videos", label: "Онлайн хичээл" },
     { href: "/app/tests", label: "Шалгалт" },
   ],
   BUYER: [
     { href: "/app/buyer", label: "Миний эрхүүд" },
     { href: "/app/library", label: "Бодлогын сан" },
+    { href: "/app/videos", label: "Онлайн хичээл" },
   ],
   PARENT: [{ href: "/app/parent", label: "Хүүхдийн явц" }],
 };
@@ -57,11 +131,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b border-white/5 bg-[#060c1d]/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-5 px-4">
-          <Link href="/" className="flex shrink-0 items-center gap-2">
-            <LogoMark size={28} />
-            <span className="hidden font-extrabold sm:inline">
-              Pi<span className="text-brand-bright">.mn</span>
-            </span>
+          <Link href="/" className="flex shrink-0 items-center">
+            <LogoMark variant="full" size={34} />
           </Link>
           <nav className="flex flex-1 items-center gap-1 overflow-x-auto text-sm">
             {(NAV[role] ?? []).map((item) => (
@@ -78,12 +149,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             ))}
           </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <IdentityBadge />
+            <Link
+              href="/app/password"
+              title="Нууц үг солих"
+              className="shrink-0 rounded-lg border border-white/10 px-2.5 py-1.5 text-sm text-ink-dim transition hover:text-ink"
+            >
+              🔑
+            </Link>
+          </div>
           <button
             onClick={() => {
               clearAuth();
               router.push("/login");
             }}
-            className="ml-auto rounded-lg border border-white/10 px-3 py-1.5 text-sm text-ink-dim transition hover:text-ink"
+            className="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-ink-dim transition hover:text-ink"
           >
             Гарах
           </button>

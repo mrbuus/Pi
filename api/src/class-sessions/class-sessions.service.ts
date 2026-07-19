@@ -1,18 +1,19 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { Role, SelfState } from '../generated/prisma/enums';
+import {
+  addDateDays,
+  dateKey,
+  daysBetweenDateOnly,
+  parseDateOnly,
+  todayUB,
+} from '../common/date';
+import { EVENING_MARKING_WINDOW_DAYS } from '../common/marking';
 import { PrismaService } from '../prisma/prisma.service';
-
-function todayUB(): Date {
-  return new Date(
-    new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ulaanbaatar' }).format(
-      new Date(),
-    ),
-  );
-}
 
 /**
  * Анги тухайн өдөр ямар тест хийснийг багш бүртгэдэг, сурагч түүнийгээ оройн
@@ -49,7 +50,14 @@ export class ClassSessionsService {
     await this.assertClassAccess(classroomId, userId, role);
     const test = await this.prisma.test.findUnique({ where: { id: testId } });
     if (!test) throw new NotFoundException('Тест олдсонгүй');
-    const date = dateStr ? new Date(dateStr) : todayUB();
+    let date = todayUB();
+    if (dateStr) {
+      try {
+        date = parseDateOnly(dateStr);
+      } catch {
+        throw new BadRequestException('Огноо буруу байна');
+      }
+    }
 
     return this.prisma.classTestSession.upsert({
       where: { classroomId_testId_date: { classroomId, testId, date } },
@@ -138,12 +146,14 @@ export class ClassSessionsService {
     });
     if (!enrollment) return [];
 
-    // Сүүлийн 5 хоногийн тест сессүүд
-    const since = todayUB();
-    since.setDate(since.getDate() - 5);
+    const today = todayUB();
+    const since = addDateDays(today, -(EVENING_MARKING_WINDOW_DAYS - 1));
 
     const sessions = await this.prisma.classTestSession.findMany({
-      where: { classroomId: enrollment.classroomId, date: { gte: since } },
+      where: {
+        classroomId: enrollment.classroomId,
+        date: { gte: since, lte: today },
+      },
       orderBy: { date: 'desc' },
       take: 10,
     });
@@ -191,9 +201,18 @@ export class ClassSessionsService {
           (tp) => !excluded.has(tp.problemId),
         );
         if (included.length === 0) return null;
+        const ageDays = daysBetweenDateOnly(today, s.date);
         return {
           sessionId: s.id,
           date: s.date,
+          windowDays: EVENING_MARKING_WINDOW_DAYS,
+          daysLeft: Math.max(
+            0,
+            EVENING_MARKING_WINDOW_DAYS - ageDays - 1,
+          ),
+          markingClosesOn: dateKey(
+            addDateDays(s.date, EVENING_MARKING_WINDOW_DAYS - 1),
+          ),
           test: { id: test.id, title: test.title },
           problems: included.map((tp, i) => ({
             index: i + 1,

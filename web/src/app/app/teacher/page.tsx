@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import AnnouncementCompose from "@/components/AnnouncementCompose";
 import ClassDidTest from "@/components/ClassDidTest";
+import DashboardGreeting from "@/components/DashboardGreeting";
+import AttentionSection, {
+  type AttentionResponse,
+} from "@/components/TeacherDashboard/AttentionSection";
 import AttendanceSection from "@/components/TeacherDashboard/AttendanceSection";
 import AssignmentsSection from "@/components/TeacherDashboard/AssignmentsSection";
 import SummarySection from "@/components/TeacherDashboard/SummarySection";
@@ -63,6 +67,12 @@ interface ParentRequest {
   };
 }
 
+function todayUBKey() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ulaanbaatar",
+  }).format(new Date());
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -82,7 +92,7 @@ export default function TeacherDashboard() {
   // ========================================================================
   // State
   // ========================================================================
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayUBKey();
   const role = typeof window !== "undefined" ? getRole() : null;
   const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
 
@@ -94,6 +104,7 @@ export default function TeacherDashboard() {
   const [openAssignment, setOpenAssignment] = useState<string>("");
   const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [attention, setAttention] = useState<AttentionResponse | null>(null);
   const [unassigned, setUnassigned] = useState<Unassigned[]>([]);
   const [parentRequests, setParentRequests] = useState<ParentRequest[]>([]);
   const [colorTags, setColorTags] = useState<
@@ -161,6 +172,10 @@ export default function TeacherDashboard() {
     api<Summary>(`/classrooms/${selected}/daily-summary?date=${today}`)
       .then(setSummary)
       .catch(() => setSummary(null));
+
+    api<AttentionResponse>(`/classrooms/${selected}/attention?date=${today}`)
+      .then(setAttention)
+      .catch(() => setAttention(null));
 
     // Зөвхөн админ - ангид ороогүй сурагч авах
     if (canManage) {
@@ -268,6 +283,7 @@ export default function TeacherDashboard() {
     <div className="space-y-6 md:space-y-8">
       {/* Header + Classroom Selector */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <DashboardGreeting />
         <h1 className="text-2xl font-extrabold">Багшийн самбар</h1>
         <select
           value={selected}
@@ -322,6 +338,10 @@ export default function TeacherDashboard() {
         {/* Summary Section */}
         <div className="md:col-span-2 lg:col-span-1">
           <SummarySection summary={summary} />
+        </div>
+
+        <div className="md:col-span-2 lg:col-span-1">
+          <AttentionSection attention={attention} />
         </div>
 
         {/* Unassigned Students (Admin Only) */}

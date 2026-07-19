@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -13,7 +14,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
-import { SubmitTestDto } from './dto/submit-test.dto';
+import { SaveSessionDto, SubmitTestDto } from './dto/submit-test.dto';
 import { TestsService } from './tests.service';
 
 interface AuthedRequest {
@@ -43,8 +44,26 @@ export class TestsController {
   }
 
   @Get(':id')
-  getForTaking(@Param('id') id: string, @Req() req: AuthedRequest) {
-    return this.tests.getForTaking(id, req.user.userId, req.user.role);
+  getOne(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.getOne(id, req.user.userId, req.user.role);
+  }
+
+  // Шалгалт эхлэх/үргэлжлүүлэх — session үүсгэж бодлогуудыг хөлдсөн дараалалтай буцаана
+  @Roles(Role.STUDENT)
+  @Post(':id/start')
+  start(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.start(id, req.user.userId);
+  }
+
+  // Autosave + анти-чит үйл явдал
+  @Roles(Role.STUDENT)
+  @Patch(':id/session')
+  saveSession(
+    @Param('id') id: string,
+    @Body() dto: SaveSessionDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.tests.saveSession(id, req.user.userId, dto);
   }
 
   @Roles(Role.STUDENT)
@@ -55,6 +74,13 @@ export class TestsController {
     @Req() req: AuthedRequest,
   ) {
     return this.tests.submit(id, dto, req.user.userId);
+  }
+
+  // Дууссан шалгалтын эргэн харах (өөрийн)
+  @Roles(Role.STUDENT)
+  @Get(':id/review')
+  review(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.review(id, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)

@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
@@ -18,16 +19,17 @@ import { ContentService } from './content.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { CreateProblemDto } from './dto/create-problem.dto';
+import { UpdateProblemDto } from './dto/update-problem.dto';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
 }
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class ContentController {
   constructor(private content: ContentService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Post('books')
   createBook(@Body() dto: CreateBookDto) {
@@ -39,6 +41,7 @@ export class ContentController {
     return this.content.listBooks();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Post('chapters')
   createChapter(@Body() dto: CreateChapterDto) {
@@ -56,12 +59,26 @@ export class ContentController {
     );
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Post('problems')
   createProblem(@Body() dto: CreateProblemDto, @Req() req: AuthedRequest) {
     return this.content.createProblem(dto, req.user.userId);
   }
 
+  // Агуулга (статемент/сонголт/хариу/зураг) гараар засах — ЗӨВХӨН ADMIN,
+  // TEACHER_PLUS (энгийн TEACHER биш — тэд зөвхөн ангилал/tag засна).
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Patch('problems/:problemId')
+  updateProblem(
+    @Param('problemId') problemId: string,
+    @Body() dto: UpdateProblemDto,
+  ) {
+    return this.content.updateProblem(problemId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('chapters/:id/problems')
   listProblems(
     @Param('id') chapterId: string,
@@ -78,12 +95,14 @@ export class ContentController {
     );
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('tags')
   listTags(@Query('type') type?: string) {
     return this.content.listTags(type);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('formulas')
   listFormulas() {

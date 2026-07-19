@@ -1,3 +1,6 @@
+// .env-ийг хамгийн түрүүнд ачаална — module decorator-ууд (JwtModule.register)
+// import үед үнэлэгддэг тул ConfigModule-ээс өмнө орчны хувьсагч хэрэгтэй.
+import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';

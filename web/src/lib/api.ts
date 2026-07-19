@@ -47,6 +47,34 @@ export async function api<T = unknown>(
   return data;
 }
 
+// Файл (жишээ нь профайл зураг) сервер рүү явуулж key-г нь буцаана.
+// api()-аас тусдаа — FormData-д Content-Type-ийг браузер өөрөө тохируулна.
+export async function uploadFile(
+  file: File,
+): Promise<{ key: string; size: number; mime: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  const headers: Record<string, string> = {};
+  const token = getToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${API_URL}/uploads`, {
+    method: "POST",
+    headers,
+    body: form,
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(data?.message ?? `Байршуулах алдаа ${res.status}`);
+  }
+  return data;
+}
+
+// Хадгалсан файлын key-гээс шууд харах URL үүсгэнэ (профайл зураг, imageKey гэх мэт)
+export function fileUrl(key?: string | null): string | undefined {
+  if (!key) return undefined;
+  return `${API_URL}/files/${key}`;
+}
+
 export function homeForRole(role: string): string {
   if (role === "ADMIN") return "/app/admin";
   if (role === "TEACHER" || role === "TEACHER_PLUS") return "/app/teacher";

@@ -27,6 +27,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
@@ -97,7 +98,19 @@ body {
 }
 .bar-fill { animation: barFill 1.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+@keyframes drawSine {
+  from { stroke-dashoffset: 760; }
+  to { stroke-dashoffset: 0; }
+}
+.sine-wave-line {
+  stroke-dasharray: 760;
+  animation: drawSine 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.sine-dot {
+  filter: drop-shadow(0 0 10px rgba(157, 184, 245, 0.85));
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .float-sym, .shimmer-cell, .glow-pulse, .text-shine { animation: none; }
+  .float-sym, .shimmer-cell, .glow-pulse, .text-shine, .sine-wave-line { animation: none; }
   .reveal { transition: none; opacity: 1; transform: none; }
 }

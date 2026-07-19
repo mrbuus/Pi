@@ -68,4 +68,19 @@ export class AttemptsController {
       req.user.role,
     );
   }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/attention')
+  attention(
+    @Param('id') classroomId: string,
+    @Query('date') date: string | undefined,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.attempts.getAttention(
+      classroomId,
+      date,
+      req.user.userId,
+      req.user.role,
+    );
+  }
 }

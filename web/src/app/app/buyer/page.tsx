@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { getBookMeta } from "@/lib/bookMeta";
 
 interface UserPass {
   id: string;
@@ -13,6 +14,12 @@ interface Pass {
   name: string;
   durationDays: number;
   price?: number;
+}
+interface Book {
+  id: string;
+  code: string;
+  title: string;
+  problemCount?: number;
 }
 
 // Дансны мэдээлэл — админ тохиргооноос ирэх ёстой (одоогоор жишээ)
@@ -31,6 +38,7 @@ function formatAmount(raw: string): string {
 export default function BuyerDashboard() {
   const [myPasses, setMyPasses] = useState<UserPass[]>([]);
   const [shop, setShop] = useState<Pass[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [selected, setSelected] = useState<Pass | null>(null);
   const [amount, setAmount] = useState(""); // форматтай харагдах утга
   const [desc, setDesc] = useState("");
@@ -41,6 +49,7 @@ export default function BuyerDashboard() {
   function load() {
     api<UserPass[]>("/me/passes").then(setMyPasses).catch(() => {});
     api<Pass[]>("/catalog/passes", { auth: false }).then(setShop).catch(() => {});
+    api<Book[]>("/books", { auth: false }).then(setBooks).catch(() => {});
   }
   useEffect(load, []);
 
@@ -115,6 +124,37 @@ export default function BuyerDashboard() {
             );
           })}
         </div>
+      </section>
+
+      {/* Номын сан — одоохондоо нэрсээр нь л (тун удахгүй тус тусад нь худалдана) */}
+      <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-6">
+        <h2 className="mb-1 font-bold text-brand-soft">Ном</h2>
+        <p className="mb-4 text-sm text-ink-dim">
+          Тун удахгүй ном тус бүрээр нь эрх худалдаж авах боломжтой болно
+        </p>
+        {books.length === 0 ? (
+          <p className="text-sm text-ink-dim">Ном ачаалж байна…</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {books.map((b) => {
+              const meta = getBookMeta(b.code, b.title);
+              return (
+                <div
+                  key={b.id}
+                  className="rounded-xl border p-4 text-center transition hover:-translate-y-0.5"
+                  style={{ borderColor: `${meta.accent}55`, background: meta.soft }}
+                >
+                  <p className="font-extrabold" style={{ color: meta.accent }}>
+                    {meta.label}
+                  </p>
+                  {meta.desc && (
+                    <p className="mt-1 text-xs text-ink-dim">{meta.desc}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Дэлгүүр — багц сонгоно */}

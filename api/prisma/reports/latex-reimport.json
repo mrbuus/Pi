@@ -1,0 +1,139 @@
+{
+  "generatedAt": "2026-07-07T01:25:06.716Z",
+  "sourceDir": "/Users/mr.buus/new future/100x100 V2",
+  "dryRun": false,
+  "files": 97,
+  "updatedChoices": 1817,
+  "updatedStatementOnly": 130,
+  "notFoundInDb": [],
+  "parseIssues": [
+    {
+      "file": "Тэнцэтгэл-биш-15.docx",
+      "variant": "A",
+      "issue": "Дугуйлсан дугаар олдсонгүй"
+    }
+  ],
+  "reviewRequired": [
+    {
+      "token": "100V2-RATINEQ-13-A-02",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-A-05",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-A-07",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-A-08",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-A-10",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-B-02",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-B-05",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-B-07",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-B-08",
+      "reason": "сонголт 0"
+    },
+    {
+      "token": "100V2-RATINEQ-13-B-10",
+      "reason": "statement хоосон"
+    },
+    {
+      "token": "100V2-RATINEQ-15-B-03",
+      "reason": "сонголт 15"
+    },
+    {
+      "token": "100V2-RATINEQ-15-B-07",
+      "reason": "сонголт 10"
+    },
+    {
+      "token": "100V2-RATINEQ-15-B-08",
+      "reason": "statement хоосон"
+    }
+  ],
+  "samples": [
+    {
+      "token": "100V2-EXPEQ-01-A-01",
+      "statement": "$2^{x} = 8$ тэгшитгэлийг бод.",
+      "choices": [
+        "4",
+        "0.25",
+        "16",
+        "6",
+        "3"
+      ]
+    },
+    {
+      "token": "100V2-EXPEQ-01-A-02",
+      "statement": "$10^{x} = 1$ тэгшитгэлийг бод.",
+      "choices": [
+        "1",
+        "10",
+        "0.1",
+        "0",
+        "шийдгүй"
+      ]
+    },
+    {
+      "token": "100V2-EXPEQ-01-A-03",
+      "statement": "$5^{x} = - 25$ тэгшитгэлийг бод.",
+      "choices": [
+        "- 2",
+        "2",
+        "- 5",
+        "5",
+        "шийдгүй"
+      ]
+    },
+    {
+      "token": "100V2-EXPEQ-01-A-04",
+      "statement": "${0.5}^{x} = 0.125$ тэгшитгэлийг бод.",
+      "choices": [
+        "- 3",
+        "0.5",
+        "3",
+        "0.25",
+        "5"
+      ]
+    },
+    {
+      "token": "100V2-EXPEQ-01-A-05",
+      "statement": "$4^{x} = \\frac{1}{16}$ тэгшитгэлийг бод.",
+      "choices": [
+        "2",
+        "- 2",
+        "64",
+        "4",
+        "- 4"
+      ]
+    },
+    {
+      "token": "100V2-EXPEQ-01-A-06",
+      "statement": "$\\left( \\frac{1}{6} \\right)^{x} = 36$ тэгшитгэлийг бод.",
+      "choices": [
+        "216",
+        "- 6",
+        "6",
+        "- 2",
+        "2"
+      ]
+    }
+  ],
+  "testsRenamed": 0
+}

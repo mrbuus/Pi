@@ -1,32 +1,31 @@
-// √∞ лого — брэндийн тэмдгийг SVG-ээр (хар дэвсгэр дээр цэвэрхэн харагдана)
-export default function LogoMark({ size = 40 }: { size?: number }) {
+import Image from "next/image";
+
+interface LogoMarkProps {
+  size?: number;
+  variant?: "mark" | "full";
+  className?: string;
+  priority?: boolean;
+}
+
+const FULL_RATIO = 1686 / 746;
+
+export default function LogoMark({
+  size = 40,
+  variant = "mark",
+  className = "",
+  priority = false,
+}: LogoMarkProps) {
+  const isFull = variant === "full";
+  const width = isFull ? Math.round(size * FULL_RATIO) : size;
   return (
-    <svg
-      width={size}
+    <Image
+      src={isFull ? "/logo-full.png" : "/logo-mark.png"}
+      alt="Шинэ ирээдүйн эзэд"
+      width={width}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      aria-label="Шинэ ирээдүйн эзэд лого"
-    >
-      <circle cx="50" cy="50" r="48" fill="#2e4a8f" />
-      <path
-        d="M14 62 L34 62 L43 78 L57 32 L88 32"
-        stroke="white"
-        strokeWidth="5.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <text
-        x="63"
-        y="63"
-        fontSize="30"
-        fontWeight="700"
-        fill="white"
-        fontFamily="serif"
-      >
-        ∞
-      </text>
-    </svg>
+      priority={priority}
+      className={`object-contain ${className}`}
+      style={{ width, height: size }}
+    />
   );
 }

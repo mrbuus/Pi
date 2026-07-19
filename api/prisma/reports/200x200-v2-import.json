@@ -1,0 +1,1799 @@
+{
+  "generatedAt": "2026-07-07T17:02:54.017Z",
+  "sourceDir": "/Users/mr.buus/new future/200x200 V2",
+  "answerFile": "/Users/mr.buus/new future/200x200 V2/200x200-тестийн-хариу-A,B.docx",
+  "dryRun": false,
+  "imagesEnabled": true,
+  "limit": null,
+  "only": null,
+  "processedFiles": [
+    {
+      "order": 1,
+      "file": "Интеграл-1-OK.docx",
+      "chapterTitle": "Интеграл · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 2,
+      "file": "Интеграл-2-OK.docx",
+      "chapterTitle": "Интеграл · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 3,
+      "file": "Интеграл-3-OK.docx",
+      "chapterTitle": "Интеграл · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 40
+    },
+    {
+      "order": 4,
+      "file": "Интеграл-4-OK.docx",
+      "chapterTitle": "Интеграл · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "order": 5,
+      "file": "Интеграл-5-OK.docx",
+      "chapterTitle": "Интеграл · Тест 5",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 14
+    },
+    {
+      "order": 6,
+      "file": "Интеграл-6-OK.docx",
+      "chapterTitle": "Интеграл · Тест 6",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 32
+    },
+    {
+      "order": 7,
+      "file": "Интеграл-7-OK.docx",
+      "chapterTitle": "Интеграл · Тест 7",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 40
+    },
+    {
+      "order": 8,
+      "file": "Интеграл-8-OK.docx",
+      "chapterTitle": "Интеграл · Тест 8",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 9,
+      "file": "Интеграл-9-OK.docx",
+      "chapterTitle": "Интеграл · Тест 9",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 22
+    },
+    {
+      "order": 10,
+      "file": "Интеграл-10-OK.docx",
+      "chapterTitle": "Интеграл · Тест 10",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 11,
+      "file": "Интеграл-11-OK.docx",
+      "chapterTitle": "Интеграл · Тест 11",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 12,
+      "file": "Интеграл-12-OK.docx",
+      "chapterTitle": "Интеграл · Тест 12",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "order": 13,
+      "file": "Интеграл-13 OK.docx",
+      "chapterTitle": "Интеграл · Тест 13",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 22
+    },
+    {
+      "order": 14,
+      "file": "Интеграл-14-OK.docx",
+      "chapterTitle": "Интеграл · Тест 14",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 15,
+      "file": "Интеграл-15-OK.docx",
+      "chapterTitle": "Интеграл · Тест 15",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "order": 16,
+      "file": "Интеграл-16-OK.docx",
+      "chapterTitle": "Интеграл · Тест 16",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 17,
+      "file": "Интеграл-17 OK.docx",
+      "chapterTitle": "Интеграл · Тест 17",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 18,
+      "file": "Интеграл-18-OK.docx",
+      "chapterTitle": "Интеграл · Тест 18",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "order": 19,
+      "file": "Интегралын хэрэглээ-1.docx",
+      "chapterTitle": "Интегралын хэрэглээ · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 21
+    },
+    {
+      "order": 20,
+      "file": "Интегралын хэрэглээ-2.docx",
+      "chapterTitle": "Интегралын хэрэглээ · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 19
+    },
+    {
+      "order": 21,
+      "file": "Интегралын хэрэглээ-3.docx",
+      "chapterTitle": "Интегралын хэрэглээ · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "order": 22,
+      "file": "Интегралын хэрэглээ-4.docx",
+      "chapterTitle": "Интегралын хэрэглээ · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 10
+    },
+    {
+      "order": 23,
+      "file": "Интегралын хэрэглээ-5.docx",
+      "chapterTitle": "Интегралын хэрэглээ · Тест 5",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 24,
+      "file": "Квадрат-тэгшитгэлийн-шийдийн-хамаарал-1 OK.docx",
+      "chapterTitle": "Квадрат тэгшитгэлийн шийдийн хамаарал · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 34
+    },
+    {
+      "order": 25,
+      "file": "Квадрат-тэгшитгэлийн-шийдийн-хамаарал-2 OK.docx",
+      "chapterTitle": "Квадрат тэгшитгэлийн шийдийн хамаарал · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 26,
+      "file": "Квадрат-тэгшитгэлийн-шийдийн-хамаарал-3.docx",
+      "chapterTitle": "Квадрат тэгшитгэлийн шийдийн хамаарал · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 27,
+      "file": "Квадрат-тэгшитгэлийн-шийдийн-хамаарал-4 OK.docx",
+      "chapterTitle": "Квадрат тэгшитгэлийн шийдийн хамаарал · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 28,
+      "file": "Квадрат-тэгшитгэлийн-шийдийн-хамаарал-5 OK.docx",
+      "chapterTitle": "Квадрат тэгшитгэлийн шийдийн хамаарал · Тест 5",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "order": 29,
+      "file": "Квадрат-функцийн-график-1 OK.docx",
+      "chapterTitle": "Квадрат функцийн график · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 6
+    },
+    {
+      "order": 30,
+      "file": "Квадрат-функцийн-график-2 OK.docx",
+      "chapterTitle": "Квадрат функцийн график · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 31,
+      "file": "Квадрат-функцийн-график-3 OK.docx",
+      "chapterTitle": "Квадрат функцийн график · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 22
+    },
+    {
+      "order": 32,
+      "file": "Олон-гишүүнт-1 OK.docx",
+      "chapterTitle": "Олон гишүүнт · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 33,
+      "file": "Олон-гишүүнт-2 OK.docx",
+      "chapterTitle": "Олон гишүүнт · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "order": 34,
+      "file": "Олон-гишүүнт-3.docx",
+      "chapterTitle": "Олон гишүүнт · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 35,
+      "file": "Олон-гишүүнт-4-d.docx",
+      "chapterTitle": "Олон гишүүнт · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 18
+    },
+    {
+      "order": 36,
+      "file": "Тодорхойлогдох-муж-1 OK.docx",
+      "chapterTitle": "Тодорхойлогдох муж · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 37,
+      "file": "Тодорхойлогдох-муж-2 OK.docx",
+      "chapterTitle": "Тодорхойлогдох муж · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 38,
+      "file": "Тодорхойлогдох-муж-3 OK.docx",
+      "chapterTitle": "Тодорхойлогдох муж · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 10
+    },
+    {
+      "order": 39,
+      "file": "Тригонометр-илэрхийлэл-1-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 40,
+      "file": "Тригонометр-илэрхийлэл-2-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "order": 41,
+      "file": "Тригонометр-илэрхийлэл-3-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "order": 42,
+      "file": "Тригонометр-илэрхийлэл-4-d-OK.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 19
+    },
+    {
+      "order": 43,
+      "file": "Тригонометр-илэрхийлэл-5-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 5",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "order": 44,
+      "file": "Тригонометр-илэрхийлэл-6-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 6",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 12
+    },
+    {
+      "order": 45,
+      "file": "Тригонометр-илэрхийлэл-7-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 7",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 46,
+      "file": "Тригонометр-илэрхийлэл-8-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 8",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 47,
+      "file": "Тригонометр-илэрхийлэл-9-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 9",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 48,
+      "file": "Тригонометр-илэрхийлэл-10-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 10",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 49,
+      "file": "Тригонометр-илэрхийлэл-11-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 11",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 50,
+      "file": "Тригонометр-илэрхийлэл-12-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 12",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 51,
+      "file": "Тригонометр-илэрхийлэл-13-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 13",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 52,
+      "file": "Тригонометр-илэрхийлэл-14-d-OKahlahdund.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 14",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 53,
+      "file": "Тригонометр-илэрхийлэл-15-d.docx",
+      "chapterTitle": "Тригонометр илэрхийлэл · Тест 15",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 12
+    },
+    {
+      "order": 54,
+      "file": "Тригонометр-тэгшитгэл-1.docx",
+      "chapterTitle": "Тригонометр тэгшитгэл · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "order": 55,
+      "file": "Тригонометр-тэгшитгэл-2.docx",
+      "chapterTitle": "Тригонометр тэгшитгэл · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "order": 56,
+      "file": "Тригонометр-тэгшитгэл-3.docx",
+      "chapterTitle": "Тригонометр тэгшитгэл · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 57,
+      "file": "Тригонометр-тэгшитгэл-4.docx",
+      "chapterTitle": "Тригонометр тэгшитгэл · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "order": 58,
+      "file": "Тригонометр-тэгшитгэл-5.docx",
+      "chapterTitle": "Тригонометр тэгшитгэл · Тест 5",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 59,
+      "file": "Тригонометр-тэгшитгэл-6-d.docx",
+      "chapterTitle": "Тригонометр тэгшитгэл · Тест 6",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 60,
+      "file": "Тригонометр-урвуу-функц-1-d.docx",
+      "chapterTitle": "Тригонометр урвуу функц · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 14
+    },
+    {
+      "order": 61,
+      "file": "Тригонометр-урвуу-функц-2-d.docx",
+      "chapterTitle": "Тригонометр урвуу функц · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 62,
+      "file": "Тригонометр-урвуу-функц-3-d.docx",
+      "chapterTitle": "Тригонометр урвуу функц · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 22
+    },
+    {
+      "order": 63,
+      "file": "Тригонометр-урвуу-функц-4-d.docx",
+      "chapterTitle": "Тригонометр урвуу функц · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 14
+    },
+    {
+      "order": 66,
+      "file": "Тэгш-сондгой-функц-1 OK.docx",
+      "chapterTitle": "Тэгш сондгой функц · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "order": 67,
+      "file": "Тэгш-сондгой-функц-2 OK.docx",
+      "chapterTitle": "Тэгш сондгой функц · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "order": 68,
+      "file": "Уламжлал-1-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 40
+    },
+    {
+      "order": 69,
+      "file": "Уламжлал-2-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 70,
+      "file": "Уламжлал-3-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 71,
+      "file": "Уламжлал-4-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 72,
+      "file": "Уламжлал-5-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 5",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "order": 73,
+      "file": "Уламжлал-6-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 6",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "order": 74,
+      "file": "Уламжлал-7-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 7",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "order": 75,
+      "file": "Уламжлал-8-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 8",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 76,
+      "file": "Уламжлал-9-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 9",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 77,
+      "file": "Уламжлал-10-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 10",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 78,
+      "file": "Уламжлал-11-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 11",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 79,
+      "file": "Уламжлал-12-OK.docx",
+      "chapterTitle": "Уламжлал · Тест 12",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 80,
+      "file": "Уламжлалын хэрэглээ-1.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "order": 81,
+      "file": "Уламжлалын хэрэглээ-2.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 82,
+      "file": "Уламжлалын хэрэглээ-3.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 83,
+      "file": "Уламжлалын хэрэглээ-4.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 84,
+      "file": "Уламжлалын хэрэглээ-5.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 5",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 18
+    },
+    {
+      "order": 85,
+      "file": "Уламжлалын хэрэглээ-6.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 6",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 86,
+      "file": "Уламжлалын хэрэглээ-7.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 7",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 29
+    },
+    {
+      "order": 87,
+      "file": "Уламжлалын хэрэглээ-8.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 8",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 88,
+      "file": "Уламжлалын хэрэглээ-9.docx",
+      "chapterTitle": "Уламжлалын хэрэглээ · Тест 9",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 89,
+      "file": "Урвуу-функц-1 OK.docx",
+      "chapterTitle": "Урвуу функц · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 90,
+      "file": "Урвуу-функц-2 OK.docx",
+      "chapterTitle": "Урвуу функц · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 91,
+      "file": "Урвуу-функц-3 OK.docx",
+      "chapterTitle": "Урвуу функц · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 92,
+      "file": "Утгын-муж-1 OK.docx",
+      "chapterTitle": "Утгын муж · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "order": 93,
+      "file": "Утгын-муж-2 OK.docx",
+      "chapterTitle": "Утгын муж · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "order": 94,
+      "file": "Функц-1 OK.docx",
+      "chapterTitle": "Функц · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "order": 95,
+      "file": "Функц-2 OK.docx",
+      "chapterTitle": "Функц · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 29
+    },
+    {
+      "order": 96,
+      "file": "Функц-3 OK.docx",
+      "chapterTitle": "Функц · Тест 3",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 97,
+      "file": "Функц-4 OK.docx",
+      "chapterTitle": "Функц · Тест 4",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "order": 98,
+      "file": "Функцийн-үе-1 OK.docx",
+      "chapterTitle": "Функцийн үе · Тест 1",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "order": 99,
+      "file": "Функцийн-үе-2 OK.docx",
+      "chapterTitle": "Функцийн үе · Тест 2",
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    }
+  ],
+  "skippedFiles": [
+    {
+      "file": "Тригонометр-функцийн-график-1-d.docx",
+      "reason": "Тест:N-A/B толгой олдсонгүй тул бодлого задлах боломжгүй (гараар импорт хийх)"
+    },
+    {
+      "file": "Тригонометр-функцийн-график-2-d.docx",
+      "reason": "Тест:N-A/B толгой олдсонгүй тул бодлого задлах боломжгүй (гараар импорт хийх)"
+    }
+  ],
+  "totals": {
+    "chapters": 97,
+    "problems": 2337,
+    "choiceProblems": 2207,
+    "fillProblems": 74,
+    "openProblems": 56,
+    "problemChoices": 11005,
+    "choicesWithLatex": 6933,
+    "answerVerified": 2314,
+    "answerMissing": 23,
+    "reviewRequired": 73,
+    "imagesDetected": 2244,
+    "imagesDecorativeSkipped": 2281,
+    "graphicalChoiceOverrides": 25
+  },
+  "parseIssues": [
+    {
+      "file": "Тригонометр-тэгшитгэл-3.docx",
+      "variant": "A",
+      "issue": "Дугуйлсан дугаар дараалал алдаатай (эх файлд 5 давхардсан/буурсан) — 6 болгож автоматаар засав."
+    },
+    {
+      "file": "Тригонометр-функцийн-график-1-d.docx",
+      "issue": "Тест:N-A/B толгой олдсонгүй"
+    },
+    {
+      "file": "Тригонометр-функцийн-график-2-d.docx",
+      "issue": "Тест:N-A/B толгой олдсонгүй"
+    }
+  ],
+  "samples": [
+    {
+      "token": "200V2-INTEGRAL-01-A-01",
+      "topic": "ИНТЕГРАЛ",
+      "statement": "$f(x) = 2$ функцийн эх функцийг ол.",
+      "choices": [
+        "0",
+        "$2x$",
+        "$2x + C$",
+        "$2 + C$",
+        "$C$"
+      ],
+      "correct": "C",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-INTEGRAL-01-A-02",
+      "topic": "ИНТЕГРАЛ",
+      "statement": "$f(x) = 4x$ функцийн эх функцийг ол.",
+      "choices": [
+        "$4x^{2} + C$",
+        "$4 + C$",
+        "$x^{2} + C$",
+        "4",
+        "$2x^{2} + C$"
+      ],
+      "correct": "E",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-11",
+      "topic": "ИНТЕГРАЛЫН ХЭРЭГЛЭЭ",
+      "statement": "$y = x^{2} - 2x$ ба $y = 4 - x^{2}$ параболуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "choices": [
+        "4",
+        "9",
+        "12",
+        "15",
+        "6"
+      ],
+      "correct": "B",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-14",
+      "topic": "ИНТЕГРАЛЫН ХЭРЭГЛЭЭ",
+      "statement": "$y = x^{2} - 4x + 3$ ба $y = - x^{2} + 6x - 5$ функцийн графикуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "choices": [
+        "12",
+        "6",
+        "7",
+        "9",
+        "8"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-KVADRAT_TEGSHITGELIIN_SHIIDIIN_HAMAARAL-01-A-01",
+      "topic": "КВАДРАТ ТЭГШИТГЭЛИЙН ШИЙДИЙН ХАМААРАЛ",
+      "statement": "$x^{2} - 5x - q = 0$ тэгшитгэлийн нэг шийд 3 бол $q$ тоог ол.",
+      "choices": [
+        "6",
+        "2",
+        "- 6",
+        "- 2",
+        "1"
+      ],
+      "correct": "C",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-KVADRAT_TEGSHITGELIIN_SHIIDIIN_HAMAARAL-01-A-02",
+      "topic": "КВАДРАТ ТЭГШИТГЭЛИЙН ШИЙДИЙН ХАМААРАЛ",
+      "statement": "$2x^{2} + (m + 3)x + 2m - 3 = 0$ тэгшитгэлийн нэг шийд - 1 бол нөгөө шийдийг ол.",
+      "choices": [
+        "4",
+        "1.5",
+        "- 2.5",
+        "- 3",
+        "- 5"
+      ],
+      "correct": "A",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-01-A-01",
+      "topic": "КВАДРАТ ФУНКЦИЙН ГРАФИК",
+      "statement": "$y = x^{2} - 2x - 3$ функцийн график аль нь вэ?",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "correct": "B",
+      "hasImage": true
+    },
+    {
+      "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-01-A-02",
+      "topic": "КВАДРАТ ФУНКЦИЙН ГРАФИК",
+      "statement": "$y = 2x - x^{2}$ функцийн график аль нь вэ? Дараах зурагт үзүүлсэн функцийн графикийн тэгшитгэлийг бич.",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "correct": "A",
+      "hasImage": true
+    },
+    {
+      "token": "200V2-OLON_GISHUUNT-01-A-01",
+      "topic": "ОЛОН ГИШҮҮНТ",
+      "statement": "$6x^{3}y^{4}$ нэг гишүүнтийн зэргийг тодорхойл.",
+      "choices": [
+        "3",
+        "6",
+        "4",
+        "7",
+        "5"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-OLON_GISHUUNT-01-A-02",
+      "topic": "ОЛОН ГИШҮҮНТ",
+      "statement": "$(x - 1)(ax + b) = 3x^{2} + 2x + c$ бол $a \\bullet b \\bullet c -$ ийн утгыг ол.",
+      "choices": [
+        "- 100",
+        "- 75",
+        "- 50",
+        "- 25",
+        "- 10"
+      ],
+      "correct": "B",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TODORHOILOGDOH_MUJ-01-A-01",
+      "topic": "ТОДОРХОЙЛОГДОХ МУЖ",
+      "statement": "$y = \\frac{2}{3x}$ функцийн тодорхойлогдох мужийг ол.",
+      "choices": [
+        "$\\left\\rbrack - \\infty; + \\infty \\right\\lbrack$",
+        "$\\left\\rbrack - 3; + \\infty \\right\\lbrack$",
+        "$\\left\\rbrack 0; + \\infty \\right\\lbrack$",
+        "$\\left\\rbrack - \\infty;0 \\right\\lbrack \\cup \\left\\rbrack 0; + \\infty \\right\\lbrack$",
+        "$\\left\\rbrack - \\infty; - 3 \\right\\lbrack \\cup \\left\\rbrack - 3; + \\infty \\right\\lbrack$"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TODORHOILOGDOH_MUJ-01-A-02",
+      "topic": "ТОДОРХОЙЛОГДОХ МУЖ",
+      "statement": "$y = \\sqrt{x - 2}$ функцийн тодорхойлогдох мужийг ол.",
+      "choices": [
+        "$\\left\\rbrack 2; + \\infty \\right\\lbrack$",
+        "$\\left\\rbrack - \\infty;2 \\right\\rbrack$",
+        "$\\left\\rbrack - \\infty; + \\infty \\right\\lbrack$",
+        "$\\left\\rbrack - \\infty;2 \\right\\lbrack$",
+        "$\\left\\lbrack 2; + \\infty \\right\\lbrack$"
+      ],
+      "correct": "E",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TRIGONOMETR_ILERHIILEL-01-A-01",
+      "topic": "ТРИГОНОМЕТР ИЛЭРХИЙЛЭЛ",
+      "statement": "$4730'$ минутыг градусаар илэрхийл.",
+      "choices": [
+        "$78{^\\circ}50'$",
+        "$79{^\\circ}10'$",
+        "$78{^\\circ}40'$",
+        "$79{^\\circ}20'$",
+        "$78{^\\circ}5'$"
+      ],
+      "correct": "A",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TRIGONOMETR_ILERHIILEL-01-A-02",
+      "topic": "ТРИГОНОМЕТР ИЛЭРХИЙЛЭЛ",
+      "statement": "$6{^\\circ}22'33^{''}$ градусыг секундээр илэрхийл.",
+      "choices": [
+        "${37353}^{''}$",
+        "$4953^{''}$",
+        "$22923^{''}$",
+        "$22953''$",
+        "$2073^{''}$"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TRIGONOMETR_TEGSHITGEL-01-A-01",
+      "topic": "ТРИГОНОМЕТР ТЭГШИТГЭЛ",
+      "statement": "$sinx = 1$ тэгшитгэлийг бод. $(k \\in Z)$",
+      "choices": [
+        "$- 0.5\\pi + 2\\pi k$",
+        "$\\pi + 2\\pi k$",
+        "$2\\pi k$",
+        "$\\pi k$",
+        "$0.5\\pi + 2\\pi k$"
+      ],
+      "correct": "E",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TRIGONOMETR_TEGSHITGEL-01-A-02",
+      "topic": "ТРИГОНОМЕТР ТЭГШИТГЭЛ",
+      "statement": "$sinx = 0$ тэгшитгэлийг бод. $(k \\in Z)$",
+      "choices": [
+        "$- 0.5\\pi + 2\\pi k$",
+        "$\\pi + 2\\pi k$",
+        "$2\\pi k$",
+        "$\\pi k$",
+        "$0.5\\pi + 2\\pi k$"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TRIGONOMETR_URVUU_FUNKTS-01-A-01",
+      "topic": "ТРИГОНОМЕТР УРВУУ ФУНКЦ",
+      "statement": "$\\arcsin1 + \\arcsin\\frac{1}{2}$ утгыг ол.",
+      "choices": [
+        "$\\frac{\\pi}{2}$",
+        "$\\frac{\\pi}{6}$",
+        "$\\frac{\\pi}{3}$",
+        "$\\frac{2\\pi}{3}$",
+        "$\\frac{4\\pi}{3}$"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TRIGONOMETR_URVUU_FUNKTS-01-A-02",
+      "topic": "ТРИГОНОМЕТР УРВУУ ФУНКЦ",
+      "statement": "${\\arctg}1 + \\arcctg\\sqrt{3}$ утгыг ол.",
+      "choices": [
+        "$\\frac{3\\pi}{4}$",
+        "$\\frac{2\\pi}{3}$",
+        "$\\frac{7\\pi}{12}$",
+        "$\\frac{\\pi}{2}$",
+        "$\\frac{5\\pi}{12}$"
+      ],
+      "correct": "E",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TEGSH_SONDGOI_FUNKTS-01-A-01",
+      "topic": "ТЭГШ СОНДГОЙ ФУНКЦ",
+      "statement": "$f(x) = 3x^{5} - 6x^{3} - 100x$ дараах функцийн тэгш, сондгой аль нь болохыг тодорхойл.",
+      "choices": [
+        "сондгой",
+        "аль нь ч биш",
+        "тэгш",
+        "тодорхойлогдохгүй"
+      ],
+      "correct": "A",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-TEGSH_SONDGOI_FUNKTS-01-A-02",
+      "topic": "ТЭГШ СОНДГОЙ ФУНКЦ",
+      "statement": "$f(x) = x^{4} - 2x^{2} + 4$ дараах функцийн тэгш, сондгой аль нь болохыг тодорхойл.",
+      "choices": [
+        "сондгой",
+        "аль нь ч биш",
+        "тэгш",
+        "тодорхойлогдохгүй"
+      ],
+      "correct": "C",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-ULAMJLAL-01-A-01",
+      "topic": "УЛАМЖЛАЛ",
+      "statement": "$y = 2$ функцийн уламжлалыг ол.",
+      "choices": [
+        "$2x$",
+        "$x^{2}$",
+        "2",
+        "0",
+        "$x$"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-ULAMJLAL-01-A-02",
+      "topic": "УЛАМЖЛАЛ",
+      "statement": "$y = 2x + 1$ функцийн уламжлалыг ол.",
+      "choices": [
+        "$2x$",
+        "- 1",
+        "$x$",
+        "1",
+        "2"
+      ],
+      "correct": "E",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-01-A-01",
+      "topic": "УЛАМЖЛАЛЫН ХЭРЭГЛЭЭ",
+      "statement": "$y = x^{2} - x + 1$ функцийн $x_{0} = - 1$ цэг дээрх өнцгийн коэффициентийг ол.",
+      "choices": [
+        "1",
+        "- 1",
+        "3",
+        "- 2",
+        "-3"
+      ],
+      "correct": "E",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-01-A-02",
+      "topic": "УЛАМЖЛАЛЫН ХЭРЭГЛЭЭ",
+      "statement": "$y = x^{2}$ функцийн $x_{0} = 3$ цэгт татсан шүргэгчийн тэгшитгэлийг бич.",
+      "choices": [
+        "$y = 6x + 9$",
+        "$y = 6x - 9$",
+        "$y = 6x + 27$",
+        "$y = 2x + 3$",
+        "$y = 3x + 18$"
+      ],
+      "correct": "B",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-URVUU_FUNKTS-01-A-01",
+      "topic": "УРВУУ ФУНКЦ",
+      "statement": "$f(x) = 3x - 5$ функцийн урвуу функцийг ол.",
+      "choices": [
+        "${ f}^{- 1}(x) = \\frac{1}{3x - 5}$",
+        "${ f}^{- 1}(x) = \\frac{x - 5}{3}$",
+        "${ f}^{- 1}(x) = 5 - 3x$",
+        "${ f}^{- 1}(x) = \\frac{x + 5}{3}$",
+        "${ f}^{- 1}(x) = 5x - 3$"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-URVUU_FUNKTS-01-A-02",
+      "topic": "УРВУУ ФУНКЦ",
+      "statement": "$f(x) = \\frac{x}{2} - 4$ бол ${ f}^{- 1}( - 2) -$ ийн утгыг ол.",
+      "choices": [
+        "0",
+        "2",
+        "- 8",
+        "4",
+        "8"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-UTGYN_MUJ-01-A-01",
+      "topic": "УТГЫН МУЖ",
+      "statement": "$f(x) = 2x - 4$ функцийн утгын мужийг ол.",
+      "choices": [
+        "$\\lbrack - 4;\\infty\\lbrack$",
+        "$\\lbrack 0;\\infty\\lbrack$",
+        "$\\lbrack 2;\\infty\\lbrack$",
+        "$\\lbrack - 1;\\infty\\left\\lbrack$",
+        "$\\right\\rbrack - \\infty;\\infty\\lbrack$"
+      ],
+      "correct": "E",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-UTGYN_MUJ-01-A-02",
+      "topic": "УТГЫН МУЖ",
+      "statement": "$f(x) = 4 - x$ функцийн $x \\in \\left\\rbrack 1;6 \\right\\rbrack$ завсар дахь утгын мужийг ол.",
+      "choices": [
+        "$\\lbrack 0;3\\rbrack$",
+        "$\\lbrack - 2;0\\rbrack$",
+        "$\\lbrack - 2;5\\rbrack$",
+        "$\\lbrack - 2;3\\lbrack$",
+        "$\\lbrack 0;5\\rbrack$"
+      ],
+      "correct": "D",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-FUNKTS-01-A-01",
+      "topic": "ФУНКЦ",
+      "statement": "$D$ ба $E$ нь бодит тоон олонлогийн дэд олонлог байг. Дараах $f:D \\rightarrow E$ харгалзаануудаас аль нь функц болохгүй вэ?",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "correct": "B",
+      "hasImage": true
+    },
+    {
+      "token": "200V2-FUNKTS-01-A-02",
+      "topic": "ФУНКЦ",
+      "statement": "Хэрэв $D = \\left\\{ - 1;0;1 \\right\\}$ ба $E = \\left\\{ 0;1;2;3 \\right\\}$ олонлог өгсөн бол $D \\rightarrow E$ гэсэн харгалзаануудаас аль нь функц болохгүй вэ?",
+      "choices": [
+        "$x \\rightarrow x^{2}$",
+        "$x \\rightarrow 2|x|$",
+        "$x \\rightarrow 2x + 1$",
+        "$x \\rightarrow x^{3} + 1$",
+        "$x \\rightarrow x^{2} + 2|x|$"
+      ],
+      "correct": "C",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-FUNKTSIIN_UE-01-A-01",
+      "topic": "ФУНКЦИЙН ҮЕ",
+      "statement": "$f(x) = 3 \\bullet \\sin 2x$ функцийн хамгийн бага эерэг үеийг ол.",
+      "choices": [
+        "$2\\pi$",
+        "$\\pi$",
+        "$\\frac{\\pi}{2}$",
+        "$4\\pi$",
+        "$\\frac{\\pi}{2}$"
+      ],
+      "correct": "B",
+      "hasImage": false
+    },
+    {
+      "token": "200V2-FUNKTSIIN_UE-01-A-02",
+      "topic": "ФУНКЦИЙН ҮЕ",
+      "statement": "$f(x) = 2 \\bullet \\cos{3x + 1}$ функцийн хамгийн бага эерэг үеийг ол.",
+      "choices": [
+        "$\\frac{\\pi}{2}$",
+        "$\\frac{\\pi}{3}$",
+        "$\\frac{2\\pi}{3}$",
+        "$\\pi$",
+        "$2\\pi$"
+      ],
+      "correct": "C",
+      "hasImage": false
+    }
+  ],
+  "openSamples": [
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-02",
+      "statement": "$y = x + 2;x = - 1;x = 3$ шулуунууд ба $Ox$ тэнхлэгээр хзгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-04",
+      "statement": "$y = x^{2} + 2x - 3$ ба $y = 0$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-06",
+      "statement": "$y = x^{2}$ парабол ба $y = x + 2$ шулуунаар хашигдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (15), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-08",
+      "statement": "",
+      "audits": [
+        "Сонголтын маркер олдсонгүй (нөхөх/задгай бодлого байж болзошгүй).",
+        "Statement богино эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-09",
+      "statement": "$y = x^{2} - 3x + 2$ ба $y = x - 1$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-12",
+      "statement": "$y = 4x^{3}$ парабол ба $x = 0.5$ шулуун ба абсцисс тэнхлэгээр хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-15",
+      "statement": "$y = x^{3}$ муруй; $y = 8$ шулуун ба $Oy$ тэнхлэгээр хашигдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-A-17",
+      "statement": "$y = x^{3};y = x^{2}$ муруйнуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (15), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-B-02",
+      "statement": "$y = 3 - x;x = - 2;x = 1$ шулуунууд болон $Ox$ тэнхлэгээр хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-B-04",
+      "statement": "$y = 3x - x^{2};y = 0$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-B-06",
+      "statement": "$y = x^{2}$ парабол ба $y = x + 6$ шулуунаар хашигдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (15), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-B-09",
+      "statement": "$y = 4x - x^{2};y = 4 - x$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-B-12",
+      "statement": "$y = 16x^{3}$ парабол ба $x = 0.25$ шулуун ба абсцисс тэнхлэгээр хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-B-15",
+      "statement": "$y = x^{3}; y = - 1$ ба $Oy$ тэнхлэгээр хашигдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-01-B-17",
+      "statement": "$y = x^{3};y = {3x}^{2}$ муруйнуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (15), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-A-01",
+      "statement": "$y = x^{2} - 4x$ ба $y = - (x - 4)^{2}$ функцүүдийн графикуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-A-03",
+      "statement": "$y = x^{2} + 5x; y = 7 - x^{2}$ ба $x = - 1; x = 1$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-A-04",
+      "statement": "",
+      "audits": [
+        "Сонголтын маркер олдсонгүй (нөхөх/задгай бодлого байж болзошгүй).",
+        "Statement богино эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-A-05",
+      "statement": "$y = x^{2} + 2x + 1$ ба $y = x^{3} + 1$ функцүүдийн графикуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-A-09",
+      "statement": "$y = 9\\sqrt{x}$ муруй ба $x = 4;y = 0$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-A-11",
+      "statement": "$f(x) = \\sqrt{x}$ муруй; $g(x) = - x + 2$ ба $x = 4$ шулуунуудаар хашигдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-01",
+      "statement": "$y = x^{2} - 2x;y = - (2 - x)^{2}$ функцүүдийн графикуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-03",
+      "statement": "$y = x^{2} - 5;y = 3x - x^{2};x = 1;x = 2$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-05",
+      "statement": "$y = x^{2} + 6x + 2;y = x^{3} + 2$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-07",
+      "statement": "$y = (x + 2)^{2};y = (x - 1)^{2}$ муруй ба $Ox$ тэнхлэгээр хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-09",
+      "statement": "$y = 3\\sqrt{x}$ муруй ба $x = 9;y = 0$ шугамуудаар хязгаарлагдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-11",
+      "statement": "$f(x) = \\sqrt{x}$ муруй; $g(x) = - x + 6$ ба $x = 9$ шулуунуудаар хашигдсан дүрсийн талбайг ол.",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-14",
+      "statement": "$f(x) = - 4x - x^{2}$ функцийн график, энэ функцийн абсцисс тэнхлэгтэй огтлолцох цэгт татсан шүргэгчүүдээр хязгаарлагдса",
+      "audits": [
+        "Сонголтын маркер олдсонгүй (нөхөх/задгай бодлого байж болзошгүй)."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-15",
+      "statement": "$f(x) = \\frac{1}{2}x^{2} - 2x - \\frac{5}{2}$ ба $g(x) = - \\frac{1}{2}x^{2} + \\frac{1}{2}$ функцууд өгөгдөв. $I$ Уг хоёр ",
+      "audits": [
+        "Сонголтын маркер олдсонгүй (нөхөх/задгай бодлого байж болзошгүй)."
+      ]
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-04-A-04",
+      "statement": "Тэнцүү гурван завсартай трапецийн дүрэм ашиглан $\\int_{\\frac{\\pi}{6}}^{\\frac{2\\pi}{3}}{cosx}dx$ интегралыг бод. $\\left($",
+      "audits": [
+        "Сонголт бүрэн бус (10), эсвэл LaTeX баланс алдаатай."
+      ]
+    }
+  ],
+  "missingAnswers": [
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-01",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-03",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-05",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-07",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-09",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-11",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-13",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-14",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-INTEGRALYN_HEREGLEE-02-B-15",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-A-09",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-A-10",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-A-11",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-A-12",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-A-13",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-A-14",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-B-09",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-B-10",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-B-11",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-B-12",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-B-13",
+      "format": "CHOICE"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-B-14",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-ULAMJLALYN_HEREGLEE-07-B-15",
+      "format": "OPEN"
+    },
+    {
+      "token": "200V2-FUNKTS-04-A-04",
+      "format": "CHOICE"
+    }
+  ],
+  "reviewByFile": {
+    "Интегралын хэрэглээ-1.docx": 15,
+    "Интегралын хэрэглээ-2.docx": 15,
+    "Интегралын хэрэглээ-4.docx": 2,
+    "Интегралын хэрэглээ-5.docx": 4,
+    "Квадрат-функцийн-график-1 OK.docx": 1,
+    "Тригонометр-илэрхийлэл-4-d-OK.docx": 4,
+    "Уламжлалын хэрэглээ-3.docx": 4,
+    "Уламжлалын хэрэглээ-7.docx": 13,
+    "Уламжлалын хэрэглээ-8.docx": 4,
+    "Урвуу-функц-2 OK.docx": 1,
+    "Функц-1 OK.docx": 4,
+    "Функц-2 OK.docx": 2,
+    "Функц-3 OK.docx": 2,
+    "Функц-4 OK.docx": 2
+  },
+  "dbResult": {
+    "bookId": "cmqcelpkv00098k7nzo9iztkm",
+    "importedProblems": 2337,
+    "importedChoices": 11005,
+    "testsUpserted": 194
+  }
+}

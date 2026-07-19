@@ -1,0 +1,1762 @@
+{
+  "generatedAt": "2026-07-07T16:59:59.848Z",
+  "sourceDir": "/Users/mr.buus/new future/300x300",
+  "dryRun": false,
+  "totals": {
+    "filesTotal": 73,
+    "filesProcessed": 73,
+    "filesSkipped": 0,
+    "problems": 1737,
+    "choiceProblems": 1612,
+    "openProblems": 125,
+    "problemChoices": 8060,
+    "reviewRequired": 1737,
+    "parseFailedSkipped": 130,
+    "testsMatchedExisting": 73,
+    "testsWillCreate": 0,
+    "fallbackHeaderSplit": 5
+  },
+  "skippedFiles": [],
+  "parseIssues": [
+    {
+      "file": "Вектор-1 d.docx",
+      "variant": "A",
+      "issue": "\"A\" доторх дугуйлсан дугаар 2 удаа дахин эхэлсэн (толгой text-box-д алдагдсан) — задалж таслав"
+    },
+    {
+      "file": "Вектор-6 d.docx",
+      "variant": null,
+      "issue": "Толгой (Тест:N-A/B) огт олдоогүй (магадгүй text-box)"
+    },
+    {
+      "file": "Вектор-6 d.docx",
+      "variant": "A",
+      "issue": "\"A\" доторх дугуйлсан дугаар 2 удаа дахин эхэлсэн (толгой text-box-д алдагдсан) — задалж таслав"
+    },
+    {
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": null,
+      "issue": "Толгой (Тест:N-A/B) огт олдоогүй (магадгүй text-box)"
+    },
+    {
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "issue": "\"A\" доторх дугуйлсан дугаар 2 удаа дахин эхэлсэн (толгой text-box-д алдагдсан) — задалж таслав"
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": null,
+      "issue": "Толгой (Тест:N-A/B) огт олдоогүй (магадгүй text-box)"
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": "A",
+      "issue": "\"A\" доторх дугуйлсан дугаар 2 удаа дахин эхэлсэн (толгой text-box-д алдагдсан) — задалж таслав"
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-4 d.docx",
+      "variant": null,
+      "issue": "Толгой (Тест:N-A/B) огт олдоогүй (магадгүй text-box)"
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-4 d.docx",
+      "variant": "A",
+      "issue": "\"A\" доторх дугуйлсан дугаар 2 удаа дахин эхэлсэн (толгой text-box-д алдагдсан) — задалж таслав"
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": null,
+      "issue": "Толгой (Тест:N-A/B) огт олдоогүй (магадгүй text-box)"
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "A",
+      "issue": "\"A\" доторх дугуйлсан дугаар 2 удаа дахин эхэлсэн (толгой text-box-д алдагдсан) — задалж таслав"
+    }
+  ],
+  "reviewRequired": [
+    {
+      "token": "300-ANALITIK_GEOMETR-04-A-03",
+      "file": "Аналитик-геометр-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-04-B-03",
+      "file": "Аналитик-геометр-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-05-A-05",
+      "file": "Аналитик-геометр-5 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-05-B-05",
+      "file": "Аналитик-геометр-5 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-05-B-11",
+      "file": "Аналитик-геометр-5 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-06-A-11",
+      "file": "Аналитик-геометр-6 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-06-A-13",
+      "file": "Аналитик-геометр-6 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-01-B-01",
+      "file": "Вектор-1 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-01-B-14",
+      "file": "Вектор-1 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-06-A-05",
+      "file": "Вектор-6 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-06-A-11",
+      "file": "Вектор-6 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-06-B-05",
+      "file": "Вектор-6 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-06-B-11",
+      "file": "Вектор-6 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-06-B-15",
+      "file": "Вектор-6 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-01",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-02",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-03",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-04",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-05",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-06",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-07",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-08",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-09",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-10",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-A-11",
+      "file": "Вектор-7 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-01",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-02",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-03",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-04",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-05",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-06",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-07",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-09",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-10",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-11",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-12",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-07-B-13",
+      "file": "Вектор-7 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-01",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-02",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-03",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-04",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-05",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-06",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-07",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-08",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-09",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-10",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-11",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-12",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-13",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-14",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-15",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-16",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-A-17",
+      "file": "Вектор-8 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-01",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-02",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-03",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-04",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-05",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-06",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-07",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-08",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-09",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-10",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-11",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-12",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-13",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-14",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-16",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-17",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-VEKTOR-08-B-18",
+      "file": "Вектор-8 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-A-04",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-A-05",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-A-08",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-A-09",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-B-04",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-B-05",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-B-08",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-B-09",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-GEOMETR_HUVIRGALT-03-B-12",
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-KOMBINATORIK-01-B-15",
+      "file": "Комбинаторик-1 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-KOMBINATORIK-02-A-06",
+      "file": "Комбинаторик-2 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-KOMBINATORIK-02-B-06",
+      "file": "Комбинаторик-2 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-KOMBINATORIK-03-A-12",
+      "file": "Комбинаторик-3 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-KOMBINATORIK-03-B-12",
+      "file": "Комбинаторик-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-KOMBINATORIK-04-A-12",
+      "file": "Комбинаторик-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-KOMBINATORIK-04-B-12",
+      "file": "Комбинаторик-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-02-A-09",
+      "file": "Өгөгдлийн-шинжилгээ-2 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-02-B-09",
+      "file": "Өгөгдлийн-шинжилгээ-2 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-A-01",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-A-02",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-A-04",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-A-05",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-A-07",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-A-08",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-A-09",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-B-01",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-B-02",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-B-04",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-B-05",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-B-07",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-B-08",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-OGOGDLIIN_SHINJILGEE-04-B-09",
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-TOIRGIIN_TEGSHITGEL-01-B-09",
+      "file": "Тойргийн-тэгшитгэл-1 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-TOIRGIIN_TEGSHITGEL-03-B-08",
+      "file": "Тойргийн-тэгшитгэл-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-TOIRGIIN_TEGSHITGEL-04-B-04",
+      "file": "Тойргийн-тэгшитгэл-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-01-A-08",
+      "file": "Уламжлалын-хэрэглээ-1 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-01-B-09",
+      "file": "Уламжлалын-хэрэглээ-1 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-02-A-06",
+      "file": "Уламжлалын-хэрэглээ-2 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-02-A-09",
+      "file": "Уламжлалын-хэрэглээ-2 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-02-A-11",
+      "file": "Уламжлалын-хэрэглээ-2 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-02-B-05",
+      "file": "Уламжлалын-хэрэглээ-2 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-02-B-09",
+      "file": "Уламжлалын-хэрэглээ-2 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-03-A-06",
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-03-A-08",
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-03-B-03",
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-03-B-06",
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-03-B-07",
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-03-B-08",
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-04-B-04",
+      "file": "Уламжлалын-хэрэглээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-04-B-08",
+      "file": "Уламжлалын-хэрэглээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-04-B-10",
+      "file": "Уламжлалын-хэрэглээ-4 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-A-01",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-A-04",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-A-08",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-A-12",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "A",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-B-01",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-B-04",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-B-08",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    },
+    {
+      "token": "300-ULAMJLALYN_HEREGLEE-05-B-12",
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "variant": "B",
+      "reason": "statement хоосон/тэнцвэргүй (БИЧИГДЭЭГҮЙ)"
+    }
+  ],
+  "perFile": [
+    {
+      "file": "Аналитик-геометр-1 d.docx",
+      "chapter": "Аналитик геометр",
+      "testTitle": "Аналитик геометр 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Аналитик-геометр-2 d.docx",
+      "chapter": "Аналитик геометр",
+      "testTitle": "Аналитик геометр 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "file": "Аналитик-геометр-3 d.docx",
+      "chapter": "Аналитик геометр",
+      "testTitle": "Аналитик геометр 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 27
+    },
+    {
+      "file": "Аналитик-геометр-4 d.docx",
+      "chapter": "Аналитик геометр",
+      "testTitle": "Аналитик геометр 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "file": "Аналитик-геометр-5 d.docx",
+      "chapter": "Аналитик геометр",
+      "testTitle": "Аналитик геометр 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "file": "Аналитик-геометр-6 d.docx",
+      "chapter": "Аналитик геометр",
+      "testTitle": "Аналитик геометр 6",
+      "testNumber": 6,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 29
+    },
+    {
+      "file": "Арифметик-прогресс-1 d.docx",
+      "chapter": "Арифметик прогресс",
+      "testTitle": "Арифметик прогресс 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Арифметик-прогресс-2 d.docx",
+      "chapter": "Арифметик прогресс",
+      "testTitle": "Арифметик прогресс 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "file": "Арифметик-прогресс-3 d.docx",
+      "chapter": "Арифметик прогресс",
+      "testTitle": "Арифметик прогресс 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "file": "Арифметик-прогресс-4 d.docx",
+      "chapter": "Арифметик прогресс",
+      "testTitle": "Арифметик прогресс 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "file": "Бином-задаргаа d.docx",
+      "chapter": "Бином задаргаа",
+      "testTitle": "Бином задаргаа 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 32
+    },
+    {
+      "file": "Вектор-1 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Вектор-2 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "file": "Вектор-3 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Вектор-4 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 32
+    },
+    {
+      "file": "Вектор-5 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 14
+    },
+    {
+      "file": "Вектор-6 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 6",
+      "testNumber": 6,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 25
+    },
+    {
+      "file": "Вектор-7 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 7",
+      "testNumber": 7,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 3
+    },
+    {
+      "file": "Вектор-8 d.docx",
+      "chapter": "Вектор",
+      "testTitle": "Вектор 8",
+      "testNumber": 8,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 2
+    },
+    {
+      "file": "Геометр-прогресс-1 d.docx",
+      "chapter": "Геометр прогресс",
+      "testTitle": "Геометр прогресс 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Геометр-прогресс-2 d.docx",
+      "chapter": "Геометр прогресс",
+      "testTitle": "Геометр прогресс 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Геометр-прогресс-3 d.docx",
+      "chapter": "Геометр прогресс",
+      "testTitle": "Геометр прогресс 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "file": "Геометр-прогресс-4 d.docx",
+      "chapter": "Геометр прогресс",
+      "testTitle": "Геометр прогресс 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 22
+    },
+    {
+      "file": "Геометр-прогресс-5 d.docx",
+      "chapter": "Геометр прогресс",
+      "testTitle": "Геометр прогресс 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "file": "Геометр-хувиргалт-1 d.docx",
+      "chapter": "Геометр хувиргалт",
+      "testTitle": "Геометр хувиргалт 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Геометр-хувиргалт-2 d.docx",
+      "chapter": "Геометр хувиргалт",
+      "testTitle": "Геометр хувиргалт 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 32
+    },
+    {
+      "file": "Геометр-хувиргалт-3 d.docx",
+      "chapter": "Геометр хувиргалт",
+      "testTitle": "Геометр хувиргалт 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 7
+    },
+    {
+      "file": "Геометр-хувиргалт-4 d.docx",
+      "chapter": "Геометр хувиргалт",
+      "testTitle": "Геометр хувиргалт 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "file": "Дараалал 1 d.docx",
+      "chapter": "Дараалал",
+      "testTitle": "Дараалал 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "file": "Дараалал 2 d.docx",
+      "chapter": "Дараалал",
+      "testTitle": "Дараалал 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 40
+    },
+    {
+      "file": "Дараалал 3 d.docx",
+      "chapter": "Дараалал",
+      "testTitle": "Дараалал 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 40
+    },
+    {
+      "file": "Дараалал 4 d.docx",
+      "chapter": "Дараалал",
+      "testTitle": "Дараалал 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "file": "Дараалал-5 d.docx",
+      "chapter": "Дараалал",
+      "testTitle": "Дараалал 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Комбинаторик-1 d.docx",
+      "chapter": "Комбинаторик",
+      "testTitle": "Комбинаторик 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 29
+    },
+    {
+      "file": "Комбинаторик-2 d.docx",
+      "chapter": "Комбинаторик",
+      "testTitle": "Комбинаторик 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "file": "Комбинаторик-3 d.docx",
+      "chapter": "Комбинаторик",
+      "testTitle": "Комбинаторик 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "file": "Комбинаторик-4 d.docx",
+      "chapter": "Комбинаторик",
+      "testTitle": "Комбинаторик 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 22
+    },
+    {
+      "file": "Комбинаторик-5 d.docx",
+      "chapter": "Комбинаторик",
+      "testTitle": "Комбинаторик 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "file": "Комплекс-тоо-1 d.docx",
+      "chapter": "Комплекс тоо",
+      "testTitle": "Комплекс тоо 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 40
+    },
+    {
+      "file": "Комплекс-тоо-2 d.docx",
+      "chapter": "Комплекс тоо",
+      "testTitle": "Комплекс тоо 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "file": "Комплекс-тоо-3 d.docx",
+      "chapter": "Комплекс тоо",
+      "testTitle": "Комплекс тоо 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "file": "Комплекс-тоо-4 d.docx",
+      "chapter": "Комплекс тоо",
+      "testTitle": "Комплекс тоо 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "file": "Комплекс-тоо-5 d.docx",
+      "chapter": "Комплекс тоо",
+      "testTitle": "Комплекс тоо 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "file": "Комплекс-тоо-6 d.docx",
+      "chapter": "Комплекс тоо",
+      "testTitle": "Комплекс тоо 6",
+      "testNumber": 6,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "file": "Комплекс-тоо-7 d.docx",
+      "chapter": "Комплекс тоо",
+      "testTitle": "Комплекс тоо 7",
+      "testNumber": 7,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 40
+    },
+    {
+      "file": "Магадлал-1 d.docx",
+      "chapter": "Магадлал",
+      "testTitle": "Магадлал 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "file": "Магадлал-2 d.docx",
+      "chapter": "Магадлал",
+      "testTitle": "Магадлал 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "file": "Магадлал-3 d.docx",
+      "chapter": "Магадлал",
+      "testTitle": "Магадлал 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 26
+    },
+    {
+      "file": "Магадлал-4 d.docx",
+      "chapter": "Магадлал",
+      "testTitle": "Магадлал 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "file": "Магадлал-5 d.docx",
+      "chapter": "Магадлал",
+      "testTitle": "Магадлал 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "file": "Магадлал-6 d.docx",
+      "chapter": "Магадлал",
+      "testTitle": "Магадлал 6",
+      "testNumber": 6,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 18
+    },
+    {
+      "file": "Магадлал-7 d.docx",
+      "chapter": "Магадлал",
+      "testTitle": "Магадлал 7",
+      "testNumber": 7,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 16
+    },
+    {
+      "file": "Матриц-1 d.docx",
+      "chapter": "Матриц",
+      "testTitle": "Матриц 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "file": "Матриц-2 d.docx",
+      "chapter": "Матриц",
+      "testTitle": "Матриц 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "file": "Матриц-3 d.docx",
+      "chapter": "Матриц",
+      "testTitle": "Матриц 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "file": "Матриц-4 d.docx",
+      "chapter": "Матриц",
+      "testTitle": "Матриц 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 28
+    },
+    {
+      "file": "Матриц-5 d.docx",
+      "chapter": "Матриц",
+      "testTitle": "Матриц 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 32
+    },
+    {
+      "file": "Матриц-6 d.docx",
+      "chapter": "Матриц",
+      "testTitle": "Матриц 6",
+      "testNumber": 6,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 36
+    },
+    {
+      "file": "Өгөгдлийн-шинжилгээ-2 d.docx",
+      "chapter": "Өгөгдлийн шинжилгээ",
+      "testTitle": "Өгөгдлийн шинжилгээ 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 6
+    },
+    {
+      "file": "Өгөгдлийн-шинжилгээ-4 d.docx",
+      "chapter": "Өгөгдлийн шинжилгээ",
+      "testTitle": "Өгөгдлийн шинжилгээ 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 2
+    },
+    {
+      "file": "Полином-задаргаа d.docx",
+      "chapter": "Полином задаргаа",
+      "testTitle": "Полином задаргаа 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    },
+    {
+      "file": "Тойргийн-тэгшитгэл-1 d.docx",
+      "chapter": "Тойргийн тэгшитгэл",
+      "testTitle": "Тойргийн тэгшитгэл 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 24
+    },
+    {
+      "file": "Тойргийн-тэгшитгэл-2 d.docx",
+      "chapter": "Тойргийн тэгшитгэл",
+      "testTitle": "Тойргийн тэгшитгэл 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 12
+    },
+    {
+      "file": "Тойргийн-тэгшитгэл-3 d.docx",
+      "chapter": "Тойргийн тэгшитгэл",
+      "testTitle": "Тойргийн тэгшитгэл 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 17
+    },
+    {
+      "file": "Тойргийн-тэгшитгэл-4 d.docx",
+      "chapter": "Тойргийн тэгшитгэл",
+      "testTitle": "Тойргийн тэгшитгэл 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 6
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-1 d.docx",
+      "chapter": "Уламжлалын хэрэглээ",
+      "testTitle": "Уламжлалын хэрэглээ 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 21
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-2 d.docx",
+      "chapter": "Уламжлалын хэрэглээ",
+      "testTitle": "Уламжлалын хэрэглээ 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 21
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-3 d.docx",
+      "chapter": "Уламжлалын хэрэглээ",
+      "testTitle": "Уламжлалын хэрэглээ 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 11
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-4 d.docx",
+      "chapter": "Уламжлалын хэрэглээ",
+      "testTitle": "Уламжлалын хэрэглээ 4",
+      "testNumber": 4,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 15
+    },
+    {
+      "file": "Уламжлалын-хэрэглээ-5 d.docx",
+      "chapter": "Уламжлалын хэрэглээ",
+      "testTitle": "Уламжлалын хэрэглээ 5",
+      "testNumber": 5,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 14
+    },
+    {
+      "file": "Факториал-1 d.docx",
+      "chapter": "Факториал",
+      "testTitle": "Факториал 1",
+      "testNumber": 1,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Факториал-2 d.docx",
+      "chapter": "Факториал",
+      "testTitle": "Факториал 2",
+      "testNumber": 2,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 30
+    },
+    {
+      "file": "Факториал-3 d.docx",
+      "chapter": "Факториал",
+      "testTitle": "Факториал 3",
+      "testNumber": 3,
+      "variants": [
+        "A",
+        "B"
+      ],
+      "problems": 20
+    }
+  ],
+  "samples": [
+    {
+      "token": "300-ANALITIK_GEOMETR-01-A-01",
+      "testTitle": "Аналитик геометр 1",
+      "statement": "$M( - 2;4)$ цэг координатын хавтгайн аль мөчид орших вэ?",
+      "choices": [
+        "$I$",
+        "$II$",
+        "$III$",
+        "$IV$",
+        "$II$ ба $III$"
+      ]
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-02-A-03",
+      "testTitle": "Аналитик геометр 2",
+      "statement": "$A( - 1;4);B(15; - 4); C(x;y)$ цэгүүд нэг хэрчим дээр оршино. $C \\in AB$ ба $|AB|:|BC| = 4:1$ бол $x + y$ нийлбэрийг ол.",
+      "choices": [
+        "5",
+        "7",
+        "9",
+        "11",
+        "13"
+      ]
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-03-A-01",
+      "testTitle": "Аналитик геометр 3",
+      "statement": "$A(3;1)$ ба $B(2;3)$ цэгүүдийг дайрсан шулууны налалтыг ол.",
+      "choices": [
+        "- 2",
+        "3",
+        "0.5",
+        "0.25",
+        "4"
+      ]
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-04-A-01",
+      "testTitle": "Аналитик геометр 4",
+      "statement": "$L(4;1)$ ба $K(n;6)$ цэгүүдийг дайрсан шулуун ординат тэнхлэгтэй параллель бол $n -$ ийн утгыг ол.",
+      "choices": [
+        "1",
+        "6",
+        "0",
+        "2",
+        "4"
+      ]
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-05-A-01",
+      "testTitle": "Аналитик геометр 5",
+      "statement": "$3x - ay = 6$ ба $6x - 14y - b = 0$ шулуунууд давхцсан бол $a + b$ тоог ол.",
+      "choices": [
+        "17",
+        "12",
+        "7",
+        "5",
+        "19"
+      ]
+    },
+    {
+      "token": "300-ANALITIK_GEOMETR-06-A-01",
+      "testTitle": "Аналитик геометр 6",
+      "statement": "$x + 5y + 9 = 0;2x - 3y + 1 = 0$ шулуунуудын хоорондох хурц өнцгийг ол.",
+      "choices": [
+        "$45{^\\circ}$",
+        "$60{^\\circ}$",
+        "$30{^\\circ}$",
+        "$120{^\\circ}$",
+        "$135{^\\circ}$"
+      ]
+    },
+    {
+      "token": "300-ARIFMETIK_PROGRESS-01-A-01",
+      "testTitle": "Арифметик прогресс 1",
+      "statement": "Арифметик прогрессын ерөнхий гишүүний томьёо $a_{n} = 3n - 4$ бол энэ арифметик прогрессын $5 -$ р гишүүнийг ол.",
+      "choices": [
+        "10",
+        "11",
+        "12",
+        "9",
+        "13"
+      ]
+    },
+    {
+      "token": "300-ARIFMETIK_PROGRESS-02-A-01",
+      "testTitle": "Арифметик прогресс 2",
+      "statement": "Арифметик прогрессын хувьд $a_{1} - a_{2} = 3$ бол $a_{20} - a_{19} -$ ийн утгыг ол.",
+      "choices": [
+        "2",
+        "- 2",
+        "6",
+        "- 3",
+        "3"
+      ]
+    }
+  ]
+}

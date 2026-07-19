@@ -38,6 +38,9 @@ interface TodoProblem {
 interface TodoSession {
   sessionId: string;
   date: string;
+  windowDays: number;
+  daysLeft: number;
+  markingClosesOn: string;
   test: { id: string; title: string };
   problems: TodoProblem[];
 }
@@ -104,10 +107,15 @@ export default function EveningMarking() {
               key={s.sessionId}
               className="rounded-xl border border-white/8 bg-[#0b142e] p-4"
             >
-              <div className="mb-3 flex items-center justify-between">
-                <p className="font-semibold">{s.test.title}</p>
-                <span className="text-xs text-ink-dim">
-                  {done}/{s.problems.length} · {s.date.slice(0, 10)}
+              <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{s.test.title}</p>
+                  <p className="text-xs text-ink-dim">
+                    {s.date.slice(0, 10)} · хаагдах {s.markingClosesOn}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-lg bg-white/5 px-2.5 py-1 text-xs text-ink-dim">
+                  {done}/{s.problems.length} · {s.daysLeft + 1} өдөр үлдсэн
                 </span>
               </div>
               <div className="space-y-2.5">

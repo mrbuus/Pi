@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LogoMark from "@/components/LogoMark";
@@ -7,7 +8,9 @@ import { api, homeForRole, setAuth } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  // Утас, имэйл, username аль нэгээр нэвтэрнэ — backend /auth/login
+  // "identifier" талбарыг гурвуулаа шалгадаг (auth.service.ts)
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +22,7 @@ export default function LoginPage() {
     try {
       const res = await api<{ accessToken: string; role: string }>(
         "/auth/login",
-        { method: "POST", body: { phone, password }, auth: false },
+        { method: "POST", body: { identifier, password }, auth: false },
       );
       setAuth(res.accessToken, res.role);
       router.push(homeForRole(res.role));
@@ -34,25 +37,22 @@ export default function LoginPage() {
     <main className="relative flex min-h-screen items-center justify-center px-5">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
       <div className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-[#0b142e] p-8">
-        <div className="mb-7 flex items-center gap-3">
-          <LogoMark size={40} />
-          <div>
-            <p className="text-lg font-extrabold">
-              Pi<span className="text-brand-bright">.mn</span>
-            </p>
-            <p className="text-xs text-ink-dim">Шинэ ирээдүйн эзэд</p>
-          </div>
-        </div>
+        <Link
+          href="/"
+          aria-label="Pi.mn үндсэн нүүр"
+          className="mb-7 flex w-fit rounded-xl outline-none transition hover:opacity-85 focus-visible:ring-2 focus-visible:ring-brand-bright/70"
+        >
+          <LogoMark variant="full" size={58} priority />
+        </Link>
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="mb-1.5 block text-sm text-ink-dim">
-              Утасны дугаар
+              Утас, имэйл эсвэл нэвтрэх нэр
             </label>
             <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              inputMode="numeric"
-              placeholder="99112233"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="99112233 / you@gmail.com / username"
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none transition focus:border-brand-bright"
               required
             />

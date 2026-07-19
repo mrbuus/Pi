@@ -29,6 +29,29 @@ async function upsertBook({ code, title, coverKey }) {
   });
 }
 
+async function upsertTopic({ name, order }) {
+  return prisma.topic.upsert({
+    where: { name },
+    update: { order },
+    create: { name, order },
+  });
+}
+
+const TOPICS = [
+  { name: 'Тоо тоолол', order: 1 },
+  { name: 'Алгебр', order: 2 },
+  { name: 'Функц', order: 3 },
+  { name: 'Геометр', order: 4 },
+  { name: 'Магадлал, статистик', order: 5 },
+];
+
+async function seedTopics() {
+  for (const topic of TOPICS) {
+    await upsertTopic(topic);
+  }
+  console.log(`Topics: ${TOPICS.length} үндсэн сэдэв бэлэн.`);
+}
+
 async function upsertChapter({ bookId, title, order, grade, freePreview }) {
   const existing = await prisma.chapter.findFirst({
     where: { bookId, title },
@@ -631,6 +654,23 @@ async function main() {
     role: 'BUYER',
   });
 
+  const parent = await upsertUser({
+    phone: '99887766',
+    firstName: 'Оюун',
+    lastName: 'Ээж',
+    role: 'PARENT',
+  });
+  await prisma.parentLink.upsert({
+    where: { parentId_studentId: { parentId: parent.id, studentId: student.id } },
+    update: { verifiedAt: new Date(), verifiedById: admin.id },
+    create: {
+      parentId: parent.id,
+      studentId: student.id,
+      verifiedAt: new Date(),
+      verifiedById: admin.id,
+    },
+  });
+
   let classroom = await prisma.classroom.findFirst({
     where: { name: 'Ахлах-12А' },
   });
@@ -675,6 +715,8 @@ async function main() {
       data: { studentId: onlineStudent.id, classroomId: onlineClassroom.id },
     });
   }
+
+  await seedTopics();
 
   await prisma.announcement.upsert({
     where: { id: 'seed-all-students-announcement' },

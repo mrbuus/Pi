@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AnnouncementsModule } from './announcements/announcements.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -20,10 +22,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { StorageModule } from './storage/storage.module';
 import { TestsModule } from './tests/tests.module';
 import { UsersModule } from './users/users.module';
+import { VideosModule } from './videos/videos.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Глобал rate limit (IP бүрд) — login brute-force болон autosave-ийн
+    // хэт ачааллаас хамгаална; auth дээр нарийн хязгаар тусдаа (@Throttle)
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
     ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
@@ -42,8 +48,12 @@ import { UsersModule } from './users/users.module';
     AnnouncementsModule,
     ClassSessionsModule,
     ClassificationModule,
+    VideosModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}

@@ -23,6 +23,20 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export const UPLOAD_DIR = join(process.cwd(), 'uploads');
 if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true });
 
+// Зөвшөөрөгдсөн файлын төрөл: зураг + PDF л. HTML/SVG/JS зэргийг хориглосноор
+// serve хийх үед stored-XSS үүсэх замыг хаана.
+const ALLOWED_EXT = /\.(jpe?g|png|gif|webp|heic)$/i;
+const ALLOWED_PDF = /\.pdf$/i;
+function isAllowedUpload(file: {
+  originalname: string;
+  mimetype: string;
+}): boolean {
+  const name = file.originalname;
+  if (ALLOWED_EXT.test(name)) return file.mimetype.startsWith('image/');
+  if (ALLOWED_PDF.test(name)) return file.mimetype === 'application/pdf';
+  return false;
+}
+
 @Controller()
 export class UploadsController {
   @UseGuards(JwtAuthGuard)
@@ -32,9 +46,19 @@ export class UploadsController {
       storage: diskStorage({
         destination: UPLOAD_DIR,
         filename: (_req, file, cb) =>
-          cb(null, `${randomUUID()}${extname(file.originalname)}`),
+          cb(null, `${randomUUID()}${extname(file.originalname).toLowerCase()}`),
       }),
       limits: { fileSize: 25 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        if (isAllowedUpload(file)) cb(null, true);
+        else
+          cb(
+            new BadRequestException(
+              'Зөвхөн зураг (jpg, png, gif, webp, heic) эсвэл PDF оруулна',
+            ),
+            false,
+          );
+      },
     }),
   )
   upload(@UploadedFile() file?: Express.Multer.File) {
@@ -49,6 +73,8 @@ export class UploadsController {
     }
     const path = join(UPLOAD_DIR, key);
     if (!existsSync(path)) throw new NotFoundException('Файл олдсонгүй');
+    // Хөтөч агуулгыг таамаглаж (sniff) өөр төрлөөр ажиллуулахыг хориглоно
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.sendFile(path);
   }
 }

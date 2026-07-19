@@ -86,14 +86,17 @@ export default function RegisterPage() {
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
       <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0b142e] p-8">
-        <div className="mb-6 flex items-center gap-3">
-          <LogoMark size={40} />
-          <div>
-            <p className="text-lg font-extrabold">
-              Pi<span className="text-brand-bright">.mn</span> бүртгүүлэх
-            </p>
-            <p className="text-xs text-ink-dim">Шинэ ирээдүйн эзэд</p>
-          </div>
+        <div className="mb-6">
+          <Link
+            href="/"
+            aria-label="Pi.mn үндсэн нүүр"
+            className="inline-flex rounded-xl outline-none transition hover:opacity-85 focus-visible:ring-2 focus-visible:ring-brand-bright/70"
+          >
+            <LogoMark variant="full" size={58} priority />
+          </Link>
+          <p className="mt-2 text-sm font-semibold text-brand-soft">
+            Бүртгэл үүсгэх
+          </p>
         </div>
 
         {/* Төрөл сонгох */}

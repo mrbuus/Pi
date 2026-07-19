@@ -10,6 +10,8 @@ interface ResultRow {
   maxScore: number;
   source: string;
   student: { id: string; firstName: string; lastName: string };
+  // Шалгалтын горимоос (таб/апп) гарсан тоо — анти-читийн дохио (Шийдвэр Е)
+  leaveCount?: number | null;
 }
 
 export default function TestResultsPage() {
@@ -94,7 +96,8 @@ export default function TestResultsPage() {
         )}
         <div className="space-y-2">
           {rows.map((r, i) => {
-            const pct = Math.round((r.totalScore / r.maxScore) * 100);
+            // maxScore=0 бичилтэд NaN гарахаас хамгаална
+            const pct = r.maxScore > 0 ? Math.round((r.totalScore / r.maxScore) * 100) : 0;
             return (
               <div
                 key={r.id}
@@ -105,6 +108,14 @@ export default function TestResultsPage() {
                   {r.student.firstName} {r.student.lastName}
                 </span>
                 <span className="text-ink-dim">{r.source === "CHAPTER_EXAM" ? "Цаасан" : "Онлайн"}</span>
+                {(r.leaveCount ?? 0) > 0 && (
+                  <span
+                    title="Шалгалтын үеэр горимоос (таб/апп) гарсан тоо"
+                    className="rounded-lg bg-amber-400/15 px-2 py-0.5 text-xs font-bold text-amber-300"
+                  >
+                    ⚠ {r.leaveCount}
+                  </span>
+                )}
                 <span className="font-bold">
                   {r.totalScore}/{r.maxScore}
                 </span>

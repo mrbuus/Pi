@@ -1,41 +1,28 @@
-import { Type } from 'class-transformer';
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsDefined,
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Min,
-  ValidateNested,
-} from 'class-validator';
-import { SelfState } from '../../generated/prisma/enums';
+import { IsIn, IsObject, IsOptional } from 'class-validator';
 
-export class TestAnswerDto {
-  @IsString()
-  @IsNotEmpty()
-  problemId: string;
-
-  @IsDefined()
-  answer: unknown;
-
-  // Өөрийн тэмдэглэгээ — буудсанаа шударгаар тэмдэглэвэл аналитик сайжирна (SPEC §9.1)
+// Session-ийн autosave БА эцсийн илгээлт хоёул ижил хэлбэртэй: клиент юу
+// өөрчлөгдснөө л явуулна, сервер session-ий draft дээр нэгтгэнэ. Ингэснээр
+// «эцсийн хариулт тооцогдоно» (last-answer-wins) зарчим автоматаар биелнэ.
+export class SaveSessionDto {
+  // { problemId: displayIdx(number) | үсэг | утга } — горимоос хамаарна
   @IsOptional()
-  @IsEnum(SelfState)
-  selfState?: SelfState;
+  @IsObject()
+  answers?: Record<string, unknown>;
 
+  // { problemId: SelfState } — өөрийн тэмдэглэгээ (SPEC §9.1)
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  timeSpentSec?: number;
+  @IsObject()
+  selfStates?: Record<string, string>;
+
+  // { problemId: сек } — бодлого бүр дээр зарцуулсан бодит хугацаа
+  @IsOptional()
+  @IsObject()
+  problemTimes?: Record<string, number>;
+
+  // Анти-чит үйл явдал: шалгалтын горимоос гарсан/буцсан (Шийдвэр 3)
+  @IsOptional()
+  @IsIn(['LEAVE', 'RETURN', 'FULLSCREEN_EXIT'])
+  event?: 'LEAVE' | 'RETURN' | 'FULLSCREEN_EXIT';
 }
 
-export class SubmitTestDto {
-  @IsArray()
-  @ArrayNotEmpty()
-  @ValidateNested({ each: true })
-  @Type(() => TestAnswerDto)
-  answers: TestAnswerDto[];
-}
+export class SubmitTestDto extends SaveSessionDto {}

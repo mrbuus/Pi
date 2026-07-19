@@ -1,0 +1,1 @@
+export const EVENING_MARKING_WINDOW_DAYS = 3;

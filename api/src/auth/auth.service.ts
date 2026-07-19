@@ -144,6 +144,35 @@ export class AuthService {
     return this.issueToken(user.id, user.role);
   }
 
+  // Нууц үг солих — анхны нууц үг = утасны дугаар тул энэ урсгал заавал хэрэгтэй
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!ok) {
+      throw new BadRequestException('Одоогийн нууц үг буруу байна');
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+    return { changed: true };
+  }
+
+  // Профайл зураг — /uploads-аар өмнө нь хадгалсан файлын key-г холбоно
+  async setAvatar(userId: string, key: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: key },
+    });
+    return { avatarUrl: key };
+  }
+
   async me(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },

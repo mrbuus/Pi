@@ -3,13 +3,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy, requireJwtSecret } from './jwt.strategy';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET ?? 'dev_only_change_in_production',
+      // Секрет байхгүй бол асахгүй (fail-fast) — таамаглагдах fallback-аар
+      // чимээгүй ажиллах аюулыг хаана
+      secret: requireJwtSecret(),
       signOptions: { expiresIn: '7d' },
     }),
   ],

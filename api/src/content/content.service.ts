@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { CreateProblemDto } from './dto/create-problem.dto';
+import { UpdateProblemDto } from './dto/update-problem.dto';
 
 const TEACHER_ROLES: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
 
@@ -32,7 +33,7 @@ export class ContentService {
         _count: { select: { chapters: true } },
         chapters: {
           select: {
-            _count: { select: { problems: true } },
+            _count: { select: { problems: true, tests: true } },
           },
         },
       },
@@ -45,6 +46,7 @@ export class ContentService {
         (sum, chapter) => sum + chapter._count.problems,
         0,
       ),
+      testCount: chapters.reduce((sum, chapter) => sum + chapter._count.tests, 0),
     }));
   }
 
@@ -62,7 +64,7 @@ export class ContentService {
       },
       include: {
         book: { select: { code: true, title: true } },
-        _count: { select: { problems: true, theories: true } },
+        _count: { select: { problems: true, theories: true, tests: true } },
       },
       orderBy: [{ grade: 'asc' }, { order: 'asc' }],
     });
@@ -188,6 +190,86 @@ export class ContentService {
       }
       throw e;
     }
+  }
+
+  // Багш+/Админ бодлогын АГУУЛГЫГ (статемент/сонголт/хариу/зураг) гараар засна.
+  // LaTeX импортын алдааг засварлах зориулалттай — TEACHER (энгийн) энд ирэхгүй,
+  // Roles guard controller талд шүүнэ (ADMIN, TEACHER_PLUS).
+  async updateProblem(problemId: string, dto: UpdateProblemDto) {
+    const problem = await this.prisma.problem.findUnique({
+      where: { id: problemId },
+    });
+    if (!problem) throw new NotFoundException('Бодлого олдсонгүй');
+
+    const data: Prisma.ProblemUpdateInput = {};
+    if (dto.statementText !== undefined) data.statementText = dto.statementText;
+    if (dto.imageKey !== undefined) data.imageKey = dto.imageKey;
+    if (dto.points !== undefined) data.points = dto.points;
+    if (dto.format !== undefined) data.format = dto.format;
+
+    // Шинэ загвар: сонголтын текст + isCorrect ирвэл createProblem-тэй ижил
+    // зарчмаар шалгаад ProblemChoice мөрүүдийг бүхэлд нь дахин үүсгэнэ.
+    const opts = dto.choiceOptions;
+    let choiceOptionsReplace:
+      | {
+          label: string;
+          text: string;
+          isCorrect: boolean;
+          mistakeType: MistakeType;
+          order: number;
+        }[]
+      | undefined;
+    if (opts && opts.length > 0) {
+      if (opts.length < 2) {
+        throw new BadRequestException('Дор хаяж 2 сонголт оруулна уу');
+      }
+      const correctCount = opts.filter((o) => o.isCorrect).length;
+      if (correctCount !== 1) {
+        throw new BadRequestException('Яг 1 сонголтыг зөв гэж тэмдэглэх ёстой');
+      }
+      data.correctAnswer = opts.find((o) => o.isCorrect)!
+        .text as Prisma.InputJsonValue;
+      data.choices = Prisma.JsonNull; // шинэ загварт A–E placeholder choices хэрэггүй
+      choiceOptionsReplace = opts.map((o, i) => ({
+        label: String.fromCharCode(65 + i),
+        text: o.text,
+        isCorrect: o.isCorrect,
+        mistakeType: o.isCorrect ? MistakeType.NONE : MistakeType.OTHER,
+        order: i + 1,
+      }));
+    } else {
+      // Хуучин загвар: choices/correctAnswer-ийг шууд утгаар шинэчилнэ
+      if (dto.choices !== undefined) {
+        data.choices = dto.choices as Prisma.InputJsonValue;
+      }
+      if (dto.correctAnswer !== undefined) {
+        if (
+          dto.correctAnswer === null ||
+          (typeof dto.correctAnswer === 'string' && dto.correctAnswer === '')
+        ) {
+          throw new BadRequestException('Зөв хариу хоосон байж болохгүй');
+        }
+        data.correctAnswer = dto.correctAnswer as Prisma.InputJsonValue;
+      }
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      if (choiceOptionsReplace) {
+        await tx.problemChoice.deleteMany({ where: { problemId } });
+        await tx.problemChoice.createMany({
+          data: choiceOptionsReplace.map((c) => ({ ...c, problemId })),
+        });
+      }
+      return tx.problem.update({
+        where: { id: problemId },
+        data,
+        include: {
+          choiceOptions: { orderBy: { order: 'asc' } },
+          tags: { include: { tag: true } },
+          formulas: { include: { formula: true } },
+        },
+      });
+    });
   }
 
   // Хандалтын дүрэм: багш нар бүгдийг; нээлттэй бүлгийг хэн ч; танхимын идэвхтэй

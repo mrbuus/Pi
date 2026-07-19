@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import LogoMark from "./LogoMark";
+import { api } from "@/lib/api";
 
 const Hero3D = dynamic(() => import("./Hero3D"), { ssr: false });
 
@@ -54,22 +55,76 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   return <span ref={ref}>0</span>;
 }
 
-// Жишээ зурган дээрх шиг гялалзсан цэгэн progress bar
-function ShimmerBar({ progress = 0.62 }: { progress?: number }) {
-  const cells = 28;
-  const lit = Math.round(cells * progress);
+function SineWaveCard() {
+  const points = Array.from({ length: 80 }, (_, i) => {
+    const x = (i / 79) * Math.PI * 2;
+    const px = 20 + (i / 79) * 440;
+    const py = 78 - Math.sin(x) * 42;
+    return [px.toFixed(2), py.toFixed(2)] as const;
+  });
+  const samples = points.map(([x, y]) => `${x},${y}`).join(" ");
+  const pathD = points.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x} ${y}`).join(" ");
   return (
-    <div className="flex items-center gap-[5px] rounded-full bg-[#0d1733] px-3 py-2.5 border border-white/5">
-      {Array.from({ length: cells }).map((_, i) => (
-        <span
-          key={i}
-          className={`h-2.5 min-w-0 flex-1 rounded-[4px] ${
-            i < lit ? "shimmer-cell bg-[#8ea4e8]" : "bg-white/10"
-          }`}
-          style={{ ["--d" as string]: `${(i % 9) * 0.18}s` }}
+    <div className="rounded-2xl border border-brand-bright/25 bg-[#0b142e]/90 p-4 shadow-2xl shadow-black/25">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <span className="font-serif text-lg font-bold text-brand-soft">
+          y = sin x
+        </span>
+        <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-ink-dim">
+          −π → 2π
+        </span>
+      </div>
+      <svg
+        viewBox="0 0 480 150"
+        role="img"
+        aria-label="y equals sin x долгион график"
+        className="h-32 w-full overflow-visible"
+      >
+        <defs>
+          <linearGradient id="sineStroke" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stopColor="#34d6a8" />
+            <stop offset="48%" stopColor="#9db8f5" />
+            <stop offset="100%" stopColor="#4f7fe6" />
+          </linearGradient>
+          <filter id="sineGlow" x="-20%" y="-70%" width="140%" height="240%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <line x1="16" y1="78" x2="464" y2="78" stroke="rgba(233,238,251,.18)" />
+        <line x1="240" y1="18" x2="240" y2="134" stroke="rgba(233,238,251,.13)" />
+        {[-1, 0, 1].map((value) => (
+          <line
+            key={value}
+            x1="18"
+            x2="462"
+            y1={78 - value * 42}
+            y2={78 - value * 42}
+            stroke="rgba(233,238,251,.07)"
+          />
+        ))}
+        <polyline
+          points={samples}
+          fill="none"
+          stroke="url(#sineStroke)"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          filter="url(#sineGlow)"
+          className="sine-wave-line"
         />
-      ))}
-      <span className="ml-1 h-5 w-7 rounded-lg bg-[#ece9ff] glow-pulse" />
+        <circle r="6" fill="#e9eefb" className="sine-dot">
+          <animateMotion dur="5.2s" repeatCount="indefinite" path={pathD} />
+        </circle>
+      </svg>
+      <div className="mt-1 grid grid-cols-3 gap-2 text-center text-[11px] text-ink-dim">
+        <span>амплитуд 1</span>
+        <span>период 2π</span>
+        <span>огтлолцол 0</span>
+      </div>
     </div>
   );
 }
@@ -83,6 +138,8 @@ const FLOATING = [
   { sym: "∞", top: "55%", left: "95%", size: 36, delay: "2.6s", rot: "-5deg" },
 ];
 
+// Жинхэнэ, одоо DB-д бодитоор байгаа сэдвүүд (100x100, Хавтгай, Огторгуй) —
+// маркетингийн жишээ учир статик, гэхдээ бодлогогүй нэр зохиохгүй
 const LEVELS = [
   {
     title: "Тоо тоолол",
@@ -90,20 +147,40 @@ const LEVELS = [
     state: "done" as const,
   },
   {
-    title: "Бутархай",
-    sub: "9/14 бодлого · үргэлжилж байна",
+    title: "Рациональ тэнцэтгэл биш",
+    sub: "9/15 бодлого · үргэлжилж байна",
     state: "active" as const,
-    progress: 9 / 14,
+    progress: 9 / 15,
   },
-  { title: "Тэгшитгэл", sub: "Эрх нээгдээгүй", state: "locked" as const },
-  { title: "Геометр", sub: "Эрх нээгдээгүй", state: "locked" as const },
+  { title: "Хавтгай геометр I", sub: "Эрх нээгдээгүй", state: "locked" as const },
+  { title: "Огторгуйн геометр", sub: "Эрх нээгдээгүй", state: "locked" as const },
 ];
 
 const BOOKS = [
-  { code: "100×100", desc: "Суурь түвшний 100 сэдэв", accent: "#4f7fe6" },
-  { code: "200×200", desc: "Ахисан түвшний бодлогууд", accent: "#7c5fe6" },
-  { code: "300×300", desc: "ЭЕШ-ийн өндөр түвшин", accent: "#34d6a8" },
-  { code: "П-тест", desc: "11 цуврал жишиг тест", accent: "#e8c468" },
+  {
+    code: "100×100",
+    aliases: ["100", "100x100", "100×100"],
+    desc: "Суурь түвшний 100 сэдэв",
+    accent: "#4f7fe6",
+  },
+  {
+    code: "200×200",
+    aliases: ["200", "200x200", "200×200"],
+    desc: "Ахисан түвшний бодлогууд",
+    accent: "#7c5fe6",
+  },
+  {
+    code: "300×300",
+    aliases: ["300", "300x300", "300×300"],
+    desc: "ЭЕШ-ийн өндөр түвшин",
+    accent: "#34d6a8",
+  },
+  {
+    code: "П-тест",
+    aliases: ["П-тест", "ptest", "P-test"],
+    desc: "11 цуврал жишиг тест",
+    accent: "#e8c468",
+  },
 ];
 
 const ADAPTIVE = [
@@ -124,18 +201,158 @@ const ADAPTIVE = [
   },
 ];
 
+interface Book {
+  id: string;
+  code: string;
+  title: string;
+  problemCount?: number;
+  _count: { chapters: number };
+}
+
+interface Chapter {
+  id: string;
+  title: string;
+  order: number;
+  freePreview: boolean;
+  _count: { problems: number; theories: number };
+}
+
+const SAMPLE_CHAPTERS: Record<string, Chapter[]> = {
+  "100×100": [
+    {
+      id: "sample-100-1",
+      title: "Тоо тоолол · Натурал тоо",
+      order: 1,
+      freePreview: true,
+      _count: { problems: 25, theories: 1 },
+    },
+    {
+      id: "sample-100-2",
+      title: "Бутархай · Энгийн бутархай",
+      order: 2,
+      freePreview: true,
+      _count: { problems: 30, theories: 1 },
+    },
+    {
+      id: "sample-100-3",
+      title: "Тэгшитгэл · Шугаман тэгшитгэл",
+      order: 3,
+      freePreview: false,
+      _count: { problems: 28, theories: 1 },
+    },
+  ],
+  "200×200": [
+    {
+      id: "sample-200-1",
+      title: "Алгебр · Квадрат тэгшитгэл",
+      order: 1,
+      freePreview: true,
+      _count: { problems: 35, theories: 1 },
+    },
+    {
+      id: "sample-200-2",
+      title: "Функц · График унших",
+      order: 2,
+      freePreview: false,
+      _count: { problems: 32, theories: 1 },
+    },
+  ],
+  "300×300": [
+    {
+      id: "sample-300-1",
+      title: "Тригонометр · sin, cos график",
+      order: 1,
+      freePreview: true,
+      _count: { problems: 36, theories: 1 },
+    },
+    {
+      id: "sample-300-2",
+      title: "Анализ · Уламжлал",
+      order: 2,
+      freePreview: false,
+      _count: { problems: 40, theories: 1 },
+    },
+  ],
+  "П-тест": [
+    {
+      id: "sample-p-1",
+      title: "П-тест · Жишиг хувилбар 1",
+      order: 1,
+      freePreview: true,
+      _count: { problems: 40, theories: 0 },
+    },
+  ],
+};
+
+function cleanCode(value: string) {
+  return value.toLowerCase().replaceAll("×", "x").replace(/[^a-zа-яөөгү0-9]/gi, "");
+}
+
+function splitChapterTitle(title: string) {
+  const [topic, ...rest] = title.split(" · ");
+  return {
+    topic: topic?.trim() || title,
+    label: rest.join(" · ").trim() || title,
+  };
+}
+
 export default function Landing() {
   useReveal();
+  const [catalogBooks, setCatalogBooks] = useState<Book[]>([]);
+  const [selectedBookCode, setSelectedBookCode] = useState("");
+  const [selectedChapters, setSelectedChapters] = useState<Chapter[]>([]);
+  const [bookLoading, setBookLoading] = useState(false);
+  const [bookNotice, setBookNotice] = useState("");
+
+  useEffect(() => {
+    api<Book[]>("/books", { auth: false })
+      .then(setCatalogBooks)
+      .catch(() => setCatalogBooks([]));
+  }, []);
+
+  async function openBook(card: (typeof BOOKS)[number]) {
+    setSelectedBookCode(card.code);
+    setBookLoading(true);
+    setBookNotice("");
+    try {
+      let sourceBooks = catalogBooks;
+      if (sourceBooks.length === 0) {
+        sourceBooks = await api<Book[]>("/books", { auth: false });
+        setCatalogBooks(sourceBooks);
+      }
+      const aliases = card.aliases.map(cleanCode);
+      const book = sourceBooks.find(
+        (b) =>
+          aliases.includes(cleanCode(b.code)) ||
+          aliases.includes(cleanCode(b.title)),
+      );
+      if (!book) {
+        setSelectedChapters(SAMPLE_CHAPTERS[card.code] ?? []);
+        setBookNotice("Жишээ сэдвүүдийг харуулж байна");
+        return;
+      }
+      const chapters = await api<Chapter[]>(`/chapters?bookId=${book.id}`, {
+        auth: false,
+      });
+      setSelectedChapters(chapters);
+      if (chapters.length === 0) {
+        setBookNotice("Энэ номд бүлэг сэдэв хараахан нэмэгдээгүй байна");
+      }
+    } catch {
+      setSelectedChapters(SAMPLE_CHAPTERS[card.code] ?? []);
+      setBookNotice("Жишээ сэдвүүдийг харуулж байна");
+    } finally {
+      setBookLoading(false);
+    }
+  }
+
   return (
     <main className="relative">
       {/* Navbar */}
       <header className="fixed top-0 z-50 w-full border-b border-white/5 bg-[#060c1d]/80 backdrop-blur-md">
         <nav className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-5">
-          <a href="#" className="flex items-center gap-2.5">
-            <LogoMark size={34} />
-            <span className="text-lg font-extrabold tracking-tight">
-              Pi<span className="text-brand-bright">.mn</span>
-            </span>
+          <a href="#" className="flex items-center">
+            <LogoMark variant="full" size={38} priority />
           </a>
           <div className="ml-auto hidden items-center gap-7 text-sm font-medium text-ink-dim md:flex">
             <a href="#levels" className="transition hover:text-ink">
@@ -178,7 +395,8 @@ export default function Landing() {
         ))}
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[1.15fr_1fr]">
-          <div>
+          {/* min-w-0: grid багана контентоосоо (ялангуяа canvas) томрохгүй */}
+          <div className="min-w-0">
             <span className="reveal visible inline-flex items-center gap-2 rounded-full border border-brand-bright/30 bg-brand-bright/10 px-4 py-1.5 text-[13px] font-semibold text-brand-soft">
               <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
               Шинэ ирээдүйн эзэд сургалтын төв
@@ -228,16 +446,13 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="relative h-[380px] md:h-[460px]">
+          <div className="relative min-w-0 h-[380px] md:h-[460px]">
             <Hero3D />
-            <p className="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-xs text-ink-dim/60">
-              Хулганаар эргүүлж үзээрэй
-            </p>
           </div>
         </div>
 
-        <div className="relative mx-auto mt-14 max-w-md px-5">
-          <ShimmerBar />
+        <div className="relative mx-auto mt-14 max-w-xl px-5">
+          <SineWaveCard />
         </div>
       </section>
 
@@ -297,19 +512,26 @@ export default function Landing() {
       </section>
 
       {/* Books */}
-      <section id="books" className="relative py-24">
+      <section id="books" className="relative scroll-mt-20 overflow-hidden py-24">
         <div className="mx-auto max-w-6xl px-5">
           <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-brand-bright">
             Номын сан
           </p>
-          <h2 className="reveal mt-3 text-3xl font-extrabold md:text-4xl">
+          <h2 className="reveal mt-3 max-w-4xl text-3xl font-extrabold leading-tight md:text-4xl">
             Олон жилийн шилмэл бодлогууд — цахим хэлбэрээр
           </h2>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {BOOKS.map((b, i) => (
-              <div
+              <button
+                type="button"
                 key={b.code}
-                className="reveal group relative overflow-hidden rounded-2xl border border-white/8 bg-panel p-6 transition hover:-translate-y-1.5 hover:border-white/20"
+                onClick={() => void openBook(b)}
+                aria-expanded={selectedBookCode === b.code}
+                className={`reveal group relative overflow-hidden rounded-2xl border bg-panel p-6 text-left transition hover:-translate-y-1.5 hover:border-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-bright/70 ${
+                  selectedBookCode === b.code
+                    ? "border-brand-bright/60"
+                    : "border-white/8"
+                }`}
                 style={{ transitionDelay: `${i * 90}ms` }}
               >
                 <div
@@ -326,11 +548,72 @@ export default function Landing() {
                   {b.desc}
                 </p>
                 <p className="mt-6 text-xs font-semibold text-brand-soft/70">
-                  Сэдэв бүрээр нээгдэнэ →
+                  {selectedBookCode === b.code ? "Нээгдсэн ↓" : "Сэдэв бүрээр нээх →"}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
+
+          {selectedBookCode && (
+            <div className="mt-6 rounded-2xl border border-white/8 bg-[#0b142e] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase text-brand-soft">
+                    {selectedBookCode} бүлэг сэдэв
+                  </p>
+                  <h3 className="mt-1 text-xl font-extrabold">
+                    Дарааллаар нь нээж бодно
+                  </h3>
+                </div>
+                <a
+                  href={`/app/library?book=${encodeURIComponent(selectedBookCode)}`}
+                  className="rounded-lg border border-white/15 px-4 py-2 text-sm font-semibold text-ink-dim transition hover:border-white/40 hover:text-ink"
+                >
+                  Апп дээр үргэлжлүүлэх
+                </a>
+              </div>
+              {bookLoading ? (
+                <p className="mt-4 text-sm text-ink-dim">Сэдвүүд ачаалж байна…</p>
+              ) : (
+                <>
+                  {bookNotice && (
+                    <p className="mt-4 rounded-lg bg-white/5 px-3 py-2 text-xs text-ink-dim">
+                      {bookNotice}
+                    </p>
+                  )}
+                  <div className="mt-4 grid gap-2 md:grid-cols-2">
+                    {selectedChapters.slice(0, 8).map((chapter, index) => {
+                      const { topic, label } = splitChapterTitle(chapter.title);
+                      return (
+                        <div
+                          key={chapter.id}
+                          className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] p-3"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-bright/15 text-sm font-bold text-brand-soft">
+                            {index + 1}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-semibold">
+                              {label}
+                            </span>
+                            <span className="mt-0.5 block truncate text-xs text-ink-dim">
+                              {topic} · {chapter._count.problems} бодлого
+                              {chapter.freePreview ? " · үнэгүй" : ""}
+                            </span>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {selectedChapters.length > 8 && (
+                    <p className="mt-3 text-xs text-ink-dim">
+                      +{selectedChapters.length - 8} сэдэв апп дотор харагдана
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </section>
 

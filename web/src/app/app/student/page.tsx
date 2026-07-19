@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import DashboardGreeting from "@/components/DashboardGreeting";
 import EveningMarking from "@/components/EveningMarking";
 import { api } from "@/lib/api";
 
@@ -77,6 +78,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-8">
+      <DashboardGreeting />
       <h1 className="text-2xl font-extrabold">Миний самбар</h1>
       {msg && (
         <div className="rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">
