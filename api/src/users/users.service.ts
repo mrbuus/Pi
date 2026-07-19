@@ -23,10 +23,16 @@ export class UsersService {
     if (!dto.phone && !dto.email) {
       throw new BadRequestException('Утас эсвэл имэйл заавал хэрэгтэй');
     }
-    if (dto.phone && (await this.prisma.user.findUnique({ where: { phone: dto.phone } }))) {
+    if (
+      dto.phone &&
+      (await this.prisma.user.findUnique({ where: { phone: dto.phone } }))
+    ) {
       throw new ConflictException('Энэ утасны дугаар бүртгэлтэй байна');
     }
-    if (dto.email && (await this.prisma.user.findUnique({ where: { email: dto.email } }))) {
+    if (
+      dto.email &&
+      (await this.prisma.user.findUnique({ where: { email: dto.email } }))
+    ) {
       throw new ConflictException('Энэ имэйл хаяг бүртгэлтэй байна');
     }
 
@@ -34,7 +40,9 @@ export class UsersService {
     const tempPassword = dto.phone ?? randomTempPassword();
     const passwordHash = await bcrypt.hash(tempPassword, 10);
 
-    let username = `${dto.lastName}.${dto.firstName}`.trim().replace(/\s+/g, '');
+    let username = `${dto.lastName}.${dto.firstName}`
+      .trim()
+      .replace(/\s+/g, '');
     let n = 1;
     while (await this.prisma.user.findUnique({ where: { username } })) {
       n += 1;
@@ -107,9 +115,7 @@ export class UsersService {
     if (!user) throw new NotFoundException('Хэрэглэгч олдсонгүй');
 
     if (userId === actorId && role !== Role.ADMIN) {
-      throw new BadRequestException(
-        'Өөрийн админ эрхийг өөрчлөх боломжгүй',
-      );
+      throw new BadRequestException('Өөрийн админ эрхийг өөрчлөх боломжгүй');
     }
 
     if (user.role === Role.ADMIN && role !== Role.ADMIN) {

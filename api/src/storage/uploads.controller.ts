@@ -46,7 +46,10 @@ export class UploadsController {
       storage: diskStorage({
         destination: UPLOAD_DIR,
         filename: (_req, file, cb) =>
-          cb(null, `${randomUUID()}${extname(file.originalname).toLowerCase()}`),
+          cb(
+            null,
+            `${randomUUID()}${extname(file.originalname).toLowerCase()}`,
+          ),
       }),
       limits: { fileSize: 25 * 1024 * 1024 },
       fileFilter: (_req, file, cb) => {

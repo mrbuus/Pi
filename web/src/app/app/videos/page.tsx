@@ -110,10 +110,7 @@ export default function VideosPage() {
   }, [canManage]);
 
   useEffect(() => {
-    if (!activeChapter) {
-      setVideos([]);
-      return;
-    }
+    if (!activeChapter) return;
     api<Video[]>(`/videos?chapterId=${activeChapter}`)
       .then(setVideos)
       .catch(() => setVideos([]));

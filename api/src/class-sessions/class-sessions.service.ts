@@ -206,10 +206,7 @@ export class ClassSessionsService {
           sessionId: s.id,
           date: s.date,
           windowDays: EVENING_MARKING_WINDOW_DAYS,
-          daysLeft: Math.max(
-            0,
-            EVENING_MARKING_WINDOW_DAYS - ageDays - 1,
-          ),
+          daysLeft: Math.max(0, EVENING_MARKING_WINDOW_DAYS - ageDays - 1),
           markingClosesOn: dateKey(
             addDateDays(s.date, EVENING_MARKING_WINDOW_DAYS - 1),
           ),

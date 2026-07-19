@@ -205,8 +205,6 @@ describe('hasKnownAnswer — импортын хариуны түлхүүр ил
     expect(hasKnownAnswer(p({ format: FILL, correctAnswer: null }))).toBe(
       false,
     );
-    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: '' }))).toBe(
-      false,
-    );
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: '' }))).toBe(false);
   });
 });

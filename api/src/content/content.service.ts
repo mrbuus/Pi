@@ -46,7 +46,10 @@ export class ContentService {
         (sum, chapter) => sum + chapter._count.problems,
         0,
       ),
-      testCount: chapters.reduce((sum, chapter) => sum + chapter._count.tests, 0),
+      testCount: chapters.reduce(
+        (sum, chapter) => sum + chapter._count.tests,
+        0,
+      ),
     }));
   }
 
@@ -130,7 +133,9 @@ export class ContentService {
       correctAnswer === null ||
       correctAnswer === ''
     ) {
-      throw new BadRequestException('Зөв хариу эсвэл сонголтууд заавал хэрэгтэй');
+      throw new BadRequestException(
+        'Зөв хариу эсвэл сонголтууд заавал хэрэгтэй',
+      );
     }
 
     try {
@@ -227,8 +232,7 @@ export class ContentService {
       if (correctCount !== 1) {
         throw new BadRequestException('Яг 1 сонголтыг зөв гэж тэмдэглэх ёстой');
       }
-      data.correctAnswer = opts.find((o) => o.isCorrect)!
-        .text as Prisma.InputJsonValue;
+      data.correctAnswer = opts.find((o) => o.isCorrect)!.text;
       data.choices = Prisma.JsonNull; // шинэ загварт A–E placeholder choices хэрэггүй
       choiceOptionsReplace = opts.map((o, i) => ({
         label: String.fromCharCode(65 + i),
@@ -240,7 +244,7 @@ export class ContentService {
     } else {
       // Хуучин загвар: choices/correctAnswer-ийг шууд утгаар шинэчилнэ
       if (dto.choices !== undefined) {
-        data.choices = dto.choices as Prisma.InputJsonValue;
+        data.choices = dto.choices;
       }
       if (dto.correctAnswer !== undefined) {
         if (
@@ -249,7 +253,7 @@ export class ContentService {
         ) {
           throw new BadRequestException('Зөв хариу хоосон байж болохгүй');
         }
-        data.correctAnswer = dto.correctAnswer as Prisma.InputJsonValue;
+        data.correctAnswer = dto.correctAnswer;
       }
     }
 

@@ -20,6 +20,7 @@ import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
 import { SaveSessionDto } from './dto/submit-test.dto';
 import {
+  answerToken,
   buildChoiceOrder,
   choiceModeOf,
   choiceTextsOf,
@@ -435,7 +436,7 @@ export class TestsService {
         choiceOrder[pid],
       );
       const answered =
-        raw !== undefined && raw !== null && String(raw) !== '';
+        raw !== undefined && raw !== null && answerToken(raw) !== '';
       // Бодолт зөвхөн VERIFIED статустай үед нээгдэнэ — AI/авто ноорог задрахгүй
       const a = tp.problem.analysis;
       return {
@@ -449,7 +450,13 @@ export class TestsService {
         // эх docx-д хариуны түлхүүр байгаагүй) — review дэлгэц дээр "буруу"
         // гэж бүү харуул, учир нь бид ч мэдэхгүй.
         answerUnknown: !hasKnownAnswer(g),
-        myAnswer: answered ? String(canonicalAnswer ?? '') : null,
+        // canonicalAnswer нь gradeAnswer-ийн бүх салбарт string|null (харуулах
+        // зориулалттай тул answerToken (жижиг үсэг рүү хөрвүүлдэг) ашиглахгүй)
+        myAnswer: answered
+          ? typeof canonicalAnswer === 'string'
+            ? canonicalAnswer
+            : ''
+          : null,
         solution:
           a?.status === 'VERIFIED' && a.solutionOutline
             ? a.solutionOutline
@@ -658,13 +665,11 @@ export class TestsService {
     for (const [pid, v] of Object.entries(dto.answers ?? {})) {
       if (!validIds.has(pid)) continue;
       if (v === null || v === undefined || v === '') delete answers[pid];
-      else if (typeof v === 'number' || typeof v === 'string')
-        answers[pid] = v;
+      else if (typeof v === 'number' || typeof v === 'string') answers[pid] = v;
     }
     const validStates = new Set(Object.values(SelfState));
     for (const [pid, v] of Object.entries(dto.selfStates ?? {})) {
-      if (validIds.has(pid) && validStates.has(v as SelfState))
-        states[pid] = v;
+      if (validIds.has(pid) && validStates.has(v as SelfState)) states[pid] = v;
     }
     for (const [pid, v] of Object.entries(dto.problemTimes ?? {})) {
       if (!validIds.has(pid)) continue;
@@ -681,7 +686,8 @@ export class TestsService {
         leaveCount += 1;
       }
       events.push({ t: new Date().toISOString(), type: dto.event });
-      if (events.length > MAX_EVENTS) events.splice(0, events.length - MAX_EVENTS);
+      if (events.length > MAX_EVENTS)
+        events.splice(0, events.length - MAX_EVENTS);
     }
 
     return { answers, states, times, leaveCount, events };
@@ -695,17 +701,15 @@ export class TestsService {
     studentId: string,
     merged?: ReturnType<TestsService['mergeDrafts']>,
   ) {
-    const m =
-      merged ??
-      ({
-        answers: asRecord(session.draftAnswers),
-        states: asRecord(session.draftStates),
-        times: asRecord(session.problemTimes),
-        leaveCount: session.leaveCount,
-        events: Array.isArray(session.events)
-          ? (session.events as unknown[])
-          : [],
-      } as ReturnType<TestsService['mergeDrafts']>);
+    const m = merged ?? {
+      answers: asRecord(session.draftAnswers),
+      states: asRecord(session.draftStates),
+      times: asRecord(session.problemTimes),
+      leaveCount: session.leaveCount,
+      events: Array.isArray(session.events)
+        ? (session.events as unknown[])
+        : [],
+    };
 
     const enrollment = await this.prisma.enrollment.findFirst({
       where: { studentId, leftAt: null },
@@ -733,7 +737,8 @@ export class TestsService {
       const pid = tp.problemId;
       const raw = m.answers[pid];
       const selfState = m.states[pid] as SelfState | undefined;
-      const answered = raw !== undefined && raw !== null && String(raw) !== '';
+      const answered =
+        raw !== undefined && raw !== null && answerToken(raw) !== '';
 
       const gradable = toGradable(tp);
       const known = hasKnownAnswer(gradable);
@@ -754,8 +759,7 @@ export class TestsService {
           occurredOn,
           autoCorrect: answered && known ? correct : null,
           selfState: selfState ?? null,
-          timeSpentSec:
-            typeof m.times[pid] === 'number' ? (m.times[pid] as number) : null,
+          timeSpentSec: typeof m.times[pid] === 'number' ? m.times[pid] : null,
           testId: test.id,
           classroomId: enrollment?.classroomId ?? null,
         });

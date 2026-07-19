@@ -134,7 +134,9 @@ export class AttemptsService {
         classroomId: enrollment.classroomId,
       };
     });
-    const rows = [...new Map(resolvedRows.map((r) => [r.problemId, r])).values()];
+    const rows = [
+      ...new Map(resolvedRows.map((r) => [r.problemId, r])).values(),
+    ];
 
     await this.prisma.$transaction(async (tx) => {
       await tx.attempt.deleteMany({
