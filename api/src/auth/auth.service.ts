@@ -6,6 +6,12 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import {
+  generateStudentCode,
+  generateTeacherCode,
+  resolveUniqueUsername,
+  StudentCodeSubject,
+} from '../common/codes';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
@@ -60,7 +66,9 @@ export class AuthService {
     }
 
     const isStudent = !!dto.studentType;
-    const role = isStudent
+    // Role: public register-ээр өнөөдөр зөвхөн эдгээр 3 боломжтой ч TEACHER(_PLUS)-ыг
+    // доор код үүсгэх логикт бүрэн байлгах үүднээс төрлийг Role гэж өргөтгөв.
+    const role: Role = isStudent
       ? Role.STUDENT
       : dto.asParent
         ? Role.PARENT
@@ -81,17 +89,41 @@ export class AuthService {
     const rawPassword = dto.password ?? dto.phone!;
     const passwordHash = await bcrypt.hash(rawPassword, 10);
     // username: өгсөн бол түүнийг, үгүй бол овог нэрээс автоматаар (давхцалгүй)
-    const username = await this.resolveUsername(
-      dto.username,
+    const username = await resolveUniqueUsername(
+      this.prisma,
       dto.firstName,
       dto.lastName,
+      dto.username,
     );
+
+    // Танигдах код: сурагч бол SIE-<жил>-<хичээл>-<дараалал>, багш бол SIE-T-<дараалал>
+    // (public register-ээр өнөөдөр багш үүсгэдэггүй ч бүрэн байлгах үүднээс энд ч тооцов)
+    // Wave 1-ийн дутагдал: dto.subject байхгүй байснаас код бүр 'B' үсэгтэй гардаг
+    // асуудлыг эндээс засав — RegisterDto.subject-ийг codes.ts-ийн үсэг рүү буулгана.
+    const subjectLetterMap: Record<string, StudentCodeSubject> = {
+      MATH: 'M',
+      SOCIAL_STUDIES: 'N',
+      BOTH: 'B',
+    };
+    const studentCode = isStudent
+      ? await generateStudentCode(this.prisma, {
+          subject: dto.subject ? subjectLetterMap[dto.subject] : undefined,
+        })
+      : undefined;
+    // (role нь энэ функцэд боломжит 3 утгаар л шахагдсан тул array.includes-ээр
+    // шалгаж, TS-ийн "давхцалгүй literal" алдааг зөв зохистойгоор тойрч гарав)
+    const teacherRoles: Role[] = [Role.TEACHER, Role.TEACHER_PLUS];
+    const teacherCode = teacherRoles.includes(role)
+      ? await generateTeacherCode(this.prisma)
+      : undefined;
 
     const user = await this.prisma.user.create({
       data: {
         phone: dto.phone ?? null,
         email: dto.email ?? null,
         username,
+        studentCode,
+        teacherCode,
         firstName: dto.firstName,
         lastName: dto.lastName,
         passwordHash,
@@ -112,7 +144,12 @@ export class AuthService {
       include: { studentProfile: true },
     });
 
-    return this.issueToken(user.id, user.role);
+    // UI-д шинэ хэрэглэгчид өөрийн кодыг нэн даруй харуулах боломжтой болгоно
+    return {
+      ...this.issueToken(user.id, user.role),
+      studentCode: user.studentCode,
+      teacherCode: user.teacherCode,
+    };
   }
 
   async login(dto: LoginDto) {
@@ -182,6 +219,7 @@ export class AuthService {
         email: true,
         username: true,
         studentCode: true,
+        teacherCode: true,
         firstName: true,
         lastName: true,
         role: true,
@@ -190,27 +228,6 @@ export class AuthService {
         teacherProfile: true,
       },
     });
-  }
-
-  // Овог нэрээс эсвэл өгсөн nickname-ээс давхцалгүй username гаргана
-  private async resolveUsername(
-    desired: string | undefined,
-    firstName: string,
-    lastName: string,
-  ): Promise<string> {
-    const base = (desired ?? `${lastName}.${firstName}`)
-      .trim()
-      .replace(/\s+/g, '');
-    let candidate = base;
-    let n = 1;
-    // Давхцвал ард нь тоо нэмж давтахгүй болгоно
-    while (
-      await this.prisma.user.findUnique({ where: { username: candidate } })
-    ) {
-      n += 1;
-      candidate = `${base}${n}`;
-    }
-    return candidate;
   }
 
   private issueToken(userId: string, role: Role) {

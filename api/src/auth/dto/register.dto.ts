@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsEnum,
   IsBoolean,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -12,6 +13,10 @@ import {
   Min,
 } from 'class-validator';
 import { StudentType } from '../../generated/prisma/enums';
+
+// Сурагчийн хичээл — сурагчийн кодын үсгийг тодорхойлно (common/codes.ts):
+// MATH -> M, SOCIAL_STUDIES -> N, BOTH -> B (эсвэл заагаагүй бол мөн B)
+export type RegisterSubject = 'MATH' | 'SOCIAL_STUDIES' | 'BOTH';
 
 export class RegisterDto {
   // Утас эсвэл имэйл аль нэг нь заавал (доор service шалгана).
@@ -46,6 +51,13 @@ export class RegisterDto {
   @IsOptional()
   @IsEnum(StudentType)
   studentType?: StudentType;
+
+  // Заавал биш — заагаагүй бол сурагчийн код 'B' (аль аль/тодорхойгүй) үсэгтэй үүснэ
+  @IsOptional()
+  @IsIn(['MATH', 'SOCIAL_STUDIES', 'BOTH'], {
+    message: 'Хичээл буруу байна',
+  })
+  subject?: RegisterSubject;
 
   // Эцэг эхийн account үүсгэхэд true; багш/админ role-ийг public register-ээр нээхгүй
   @IsOptional()

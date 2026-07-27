@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UsersService } from './users.service';
 
 class SetTeacherStatusDto {
@@ -66,6 +68,33 @@ export class UsersController {
   @Get('teachers')
   listTeachers() {
     return this.users.listTeachers();
+  }
+
+  // Сурагч хайх (код/нэр/username-ээр) — cuid гараар бичихийг сольж, дүн
+  // бүртгэх маягтад ашиглана. Класс дээрх @Roles(ADMIN)-г энд өргөтгөнө.
+  @Get('search')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  searchStudents(@Query('q') q?: string) {
+    return this.users.searchStudents(q ?? '');
+  }
+
+  // Ажилтны дэлгэрэнгүй харагдац: профайл + идэвхтэй анги + код + тоолуур.
+  // 🚨 Утасны дугаарын хамгаалалт (Багш+/Админ л харна) service дотор хийгдэнэ.
+  @Get(':id')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  getDetail(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.users.getUserDetail(id, req.user.userId, req.user.role);
+  }
+
+  // Сурагчийн бүтэн бүртгэл засах — Багш+/Админ (эрхийн матриц)
+  @Patch(':id/profile')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  updateProfile(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserProfileDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.updateProfile(id, dto, req.user.userId, req.user.role);
   }
 
   @Post('promote-teacher')
