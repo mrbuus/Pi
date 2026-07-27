@@ -61,6 +61,7 @@ export type LeadCountAggregateOutputType = {
   name: number
   phone: number
   subject: number
+  subjects: number
   grade: number
   status: number
   createdAt: number
@@ -104,6 +105,7 @@ export type LeadCountAggregateInputType = {
   name?: true
   phone?: true
   subject?: true
+  subjects?: true
   grade?: true
   status?: true
   createdAt?: true
@@ -202,6 +204,7 @@ export type LeadGroupByOutputType = {
   name: string
   phone: string
   subject: $Enums.LeadSubject
+  subjects: $Enums.Subject[]
   grade: number
   status: $Enums.LeadStatus
   createdAt: Date
@@ -236,6 +239,7 @@ export type LeadWhereInput = {
   name?: Prisma.StringFilter<"Lead"> | string
   phone?: Prisma.StringFilter<"Lead"> | string
   subject?: Prisma.EnumLeadSubjectFilter<"Lead"> | $Enums.LeadSubject
+  subjects?: Prisma.EnumSubjectNullableListFilter<"Lead">
   grade?: Prisma.IntFilter<"Lead"> | number
   status?: Prisma.EnumLeadStatusFilter<"Lead"> | $Enums.LeadStatus
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
@@ -247,6 +251,7 @@ export type LeadOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   subject?: Prisma.SortOrder
+  subjects?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -261,6 +266,7 @@ export type LeadWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Lead"> | string
   phone?: Prisma.StringFilter<"Lead"> | string
   subject?: Prisma.EnumLeadSubjectFilter<"Lead"> | $Enums.LeadSubject
+  subjects?: Prisma.EnumSubjectNullableListFilter<"Lead">
   grade?: Prisma.IntFilter<"Lead"> | number
   status?: Prisma.EnumLeadStatusFilter<"Lead"> | $Enums.LeadStatus
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
@@ -272,6 +278,7 @@ export type LeadOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   subject?: Prisma.SortOrder
+  subjects?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -291,6 +298,7 @@ export type LeadScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Lead"> | string
   phone?: Prisma.StringWithAggregatesFilter<"Lead"> | string
   subject?: Prisma.EnumLeadSubjectWithAggregatesFilter<"Lead"> | $Enums.LeadSubject
+  subjects?: Prisma.EnumSubjectNullableListFilter<"Lead">
   grade?: Prisma.IntWithAggregatesFilter<"Lead"> | number
   status?: Prisma.EnumLeadStatusWithAggregatesFilter<"Lead"> | $Enums.LeadStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Lead"> | Date | string
@@ -302,6 +310,7 @@ export type LeadCreateInput = {
   name: string
   phone: string
   subject: $Enums.LeadSubject
+  subjects?: Prisma.LeadCreatesubjectsInput | $Enums.Subject[]
   grade: number
   status?: $Enums.LeadStatus
   createdAt?: Date | string
@@ -313,6 +322,7 @@ export type LeadUncheckedCreateInput = {
   name: string
   phone: string
   subject: $Enums.LeadSubject
+  subjects?: Prisma.LeadCreatesubjectsInput | $Enums.Subject[]
   grade: number
   status?: $Enums.LeadStatus
   createdAt?: Date | string
@@ -324,6 +334,7 @@ export type LeadUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.EnumLeadSubjectFieldUpdateOperationsInput | $Enums.LeadSubject
+  subjects?: Prisma.LeadUpdatesubjectsInput | $Enums.Subject[]
   grade?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -335,6 +346,7 @@ export type LeadUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.EnumLeadSubjectFieldUpdateOperationsInput | $Enums.LeadSubject
+  subjects?: Prisma.LeadUpdatesubjectsInput | $Enums.Subject[]
   grade?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -346,6 +358,7 @@ export type LeadCreateManyInput = {
   name: string
   phone: string
   subject: $Enums.LeadSubject
+  subjects?: Prisma.LeadCreatesubjectsInput | $Enums.Subject[]
   grade: number
   status?: $Enums.LeadStatus
   createdAt?: Date | string
@@ -357,6 +370,7 @@ export type LeadUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.EnumLeadSubjectFieldUpdateOperationsInput | $Enums.LeadSubject
+  subjects?: Prisma.LeadUpdatesubjectsInput | $Enums.Subject[]
   grade?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -368,10 +382,19 @@ export type LeadUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.EnumLeadSubjectFieldUpdateOperationsInput | $Enums.LeadSubject
+  subjects?: Prisma.LeadUpdatesubjectsInput | $Enums.Subject[]
   grade?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EnumSubjectNullableListFilter<$PrismaModel = never> = {
+  equals?: $Enums.Subject[] | Prisma.ListEnumSubjectFieldRefInput<$PrismaModel> | null
+  has?: $Enums.Subject | Prisma.EnumSubjectFieldRefInput<$PrismaModel> | null
+  hasEvery?: $Enums.Subject[] | Prisma.ListEnumSubjectFieldRefInput<$PrismaModel>
+  hasSome?: $Enums.Subject[] | Prisma.ListEnumSubjectFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type LeadCountOrderByAggregateInput = {
@@ -379,6 +402,7 @@ export type LeadCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   subject?: Prisma.SortOrder
+  subjects?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -415,8 +439,17 @@ export type LeadSumOrderByAggregateInput = {
   grade?: Prisma.SortOrder
 }
 
+export type LeadCreatesubjectsInput = {
+  set: $Enums.Subject[]
+}
+
 export type EnumLeadSubjectFieldUpdateOperationsInput = {
   set?: $Enums.LeadSubject
+}
+
+export type LeadUpdatesubjectsInput = {
+  set?: $Enums.Subject[]
+  push?: $Enums.Subject | $Enums.Subject[]
 }
 
 export type EnumLeadStatusFieldUpdateOperationsInput = {
@@ -430,6 +463,7 @@ export type LeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   phone?: boolean
   subject?: boolean
+  subjects?: boolean
   grade?: boolean
   status?: boolean
   createdAt?: boolean
@@ -441,6 +475,7 @@ export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   phone?: boolean
   subject?: boolean
+  subjects?: boolean
   grade?: boolean
   status?: boolean
   createdAt?: boolean
@@ -452,6 +487,7 @@ export type LeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   phone?: boolean
   subject?: boolean
+  subjects?: boolean
   grade?: boolean
   status?: boolean
   createdAt?: boolean
@@ -463,13 +499,14 @@ export type LeadSelectScalar = {
   name?: boolean
   phone?: boolean
   subject?: boolean
+  subjects?: boolean
   grade?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "subject" | "grade" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["lead"]>
+export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "subject" | "subjects" | "grade" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["lead"]>
 
 export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Lead"
@@ -479,6 +516,7 @@ export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     phone: string
     subject: $Enums.LeadSubject
+    subjects: $Enums.Subject[]
     grade: number
     status: $Enums.LeadStatus
     createdAt: Date
@@ -910,6 +948,7 @@ export interface LeadFieldRefs {
   readonly name: Prisma.FieldRef<"Lead", 'String'>
   readonly phone: Prisma.FieldRef<"Lead", 'String'>
   readonly subject: Prisma.FieldRef<"Lead", 'LeadSubject'>
+  readonly subjects: Prisma.FieldRef<"Lead", 'Subject[]'>
   readonly grade: Prisma.FieldRef<"Lead", 'Int'>
   readonly status: Prisma.FieldRef<"Lead", 'LeadStatus'>
   readonly createdAt: Prisma.FieldRef<"Lead", 'DateTime'>

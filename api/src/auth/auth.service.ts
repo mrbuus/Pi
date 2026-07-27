@@ -12,7 +12,12 @@ import {
   resolveUniqueUsername,
   StudentCodeSubject,
 } from '../common/codes';
-import { Role, StudentType } from '../generated/prisma/enums';
+import {
+  Role,
+  StudentType,
+  Subject,
+  SubjectAvailability,
+} from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -82,6 +87,33 @@ export class AuthService {
       }
       if (dto.activationCode !== todayCodeUB()) {
         throw new BadRequestException('Идэвхжүүлэх код буруу байна');
+      }
+    }
+
+    // 🎯 Онлайн сурагч зөвхөн танхимд заадаг хичээл сонгож болохгүй (эзний
+    // дүрэм, CLAUDE.md). Дүрмийг код руу chit хийхгүй, EnrollmentWindow-ийн
+    // availability-аас л уншина — ирээдүйд Нийгэм судлалыг онлайнаар нээвэл
+    // энэ шалгалт кодоо огт хөндөхгүйгээр өөрөө зөвшөөрнө.
+    if (dto.studentType === StudentType.ONLINE && dto.subject) {
+      const subjectsToCheck: Subject[] =
+        dto.subject === 'MATH'
+          ? [Subject.MATH]
+          : dto.subject === 'SOCIAL_STUDIES'
+            ? [Subject.SOCIAL_STUDIES]
+            : [Subject.MATH, Subject.SOCIAL_STUDIES]; // 'BOTH'
+
+      const windows = await this.prisma.enrollmentWindow.findMany({
+        where: { subject: { in: subjectsToCheck } },
+      });
+      const classroomOnly = windows.find(
+        (w) => w.availability === SubjectAvailability.CLASSROOM_ONLY,
+      );
+      if (classroomOnly) {
+        const label =
+          classroomOnly.subject === Subject.MATH ? 'Математик' : 'Нийгэм судлал';
+        throw new BadRequestException(
+          `${label} зөвхөн танхимын ангид байдаг`,
+        );
       }
     }
 

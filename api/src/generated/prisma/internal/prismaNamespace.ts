@@ -423,6 +423,7 @@ export const ModelName = {
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
   ClassTestSession: 'ClassTestSession',
   LearningEvent: 'LearningEvent',
+  EnrollmentWindow: 'EnrollmentWindow',
   Lead: 'Lead',
   StaffTask: 'StaffTask',
   StaffTaskAssignee: 'StaffTaskAssignee',
@@ -445,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "studentProfile" | "teacherProfile" | "parentLink" | "classroom" | "enrollment" | "attendance" | "assignment" | "submission" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "payment" | "announcement" | "announcementClassroomTarget" | "classTestSession" | "learningEvent" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "academicCalendarDay" | "studentGoal" | "streakFreeze"
+    modelProps: "user" | "studentProfile" | "teacherProfile" | "parentLink" | "classroom" | "enrollment" | "attendance" | "assignment" | "submission" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "payment" | "announcement" | "announcementClassroomTarget" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "academicCalendarDay" | "studentGoal" | "streakFreeze"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3335,6 +3336,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EnrollmentWindow: {
+      payload: Prisma.$EnrollmentWindowPayload<ExtArgs>
+      fields: Prisma.EnrollmentWindowFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EnrollmentWindowFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EnrollmentWindowFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>
+        }
+        findFirst: {
+          args: Prisma.EnrollmentWindowFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EnrollmentWindowFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>
+        }
+        findMany: {
+          args: Prisma.EnrollmentWindowFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>[]
+        }
+        create: {
+          args: Prisma.EnrollmentWindowCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>
+        }
+        createMany: {
+          args: Prisma.EnrollmentWindowCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EnrollmentWindowCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>[]
+        }
+        delete: {
+          args: Prisma.EnrollmentWindowDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>
+        }
+        update: {
+          args: Prisma.EnrollmentWindowUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>
+        }
+        deleteMany: {
+          args: Prisma.EnrollmentWindowDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EnrollmentWindowUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EnrollmentWindowUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>[]
+        }
+        upsert: {
+          args: Prisma.EnrollmentWindowUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnrollmentWindowPayload>
+        }
+        aggregate: {
+          args: Prisma.EnrollmentWindowAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEnrollmentWindow>
+        }
+        groupBy: {
+          args: Prisma.EnrollmentWindowGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnrollmentWindowGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EnrollmentWindowCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnrollmentWindowCountAggregateOutputType> | number
+        }
+      }
+    }
     Lead: {
       payload: Prisma.$LeadPayload<ExtArgs>
       fields: Prisma.LeadFieldRefs
@@ -4435,11 +4510,25 @@ export const LearningEventScalarFieldEnum = {
 export type LearningEventScalarFieldEnum = (typeof LearningEventScalarFieldEnum)[keyof typeof LearningEventScalarFieldEnum]
 
 
+export const EnrollmentWindowScalarFieldEnum = {
+  id: 'id',
+  subject: 'subject',
+  status: 'status',
+  availability: 'availability',
+  note: 'note',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnrollmentWindowScalarFieldEnum = (typeof EnrollmentWindowScalarFieldEnum)[keyof typeof EnrollmentWindowScalarFieldEnum]
+
+
 export const LeadScalarFieldEnum = {
   id: 'id',
   name: 'name',
   phone: 'phone',
   subject: 'subject',
+  subjects: 'subjects',
   grade: 'grade',
   status: 'status',
   createdAt: 'createdAt',
@@ -5003,6 +5092,34 @@ export type ListEnumLearningEventTypeFieldRefInput<$PrismaModel> = FieldRefInput
 
 
 /**
+ * Reference to a field of type 'EnrollmentStatus'
+ */
+export type EnumEnrollmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnrollmentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EnrollmentStatus[]'
+ */
+export type ListEnumEnrollmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnrollmentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SubjectAvailability'
+ */
+export type EnumSubjectAvailabilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubjectAvailability'>
+    
+
+
+/**
+ * Reference to a field of type 'SubjectAvailability[]'
+ */
+export type ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubjectAvailability[]'>
+    
+
+
+/**
  * Reference to a field of type 'LeadSubject'
  */
 export type EnumLeadSubjectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadSubject'>
@@ -5220,6 +5337,7 @@ export type GlobalOmitConfig = {
   announcementClassroomTarget?: Prisma.AnnouncementClassroomTargetOmit
   classTestSession?: Prisma.ClassTestSessionOmit
   learningEvent?: Prisma.LearningEventOmit
+  enrollmentWindow?: Prisma.EnrollmentWindowOmit
   lead?: Prisma.LeadOmit
   staffTask?: Prisma.StaffTaskOmit
   staffTaskAssignee?: Prisma.StaffTaskAssigneeOmit

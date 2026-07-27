@@ -23,7 +23,9 @@ export default function Branches() {
               <h3 className="mt-1.5 text-xl font-extrabold text-ink">
                 {b.label}
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-ink-dim">
+              {/* selectable — хаягийг хуулах боломжтой байх ёстой (газрын
+                  зураг/такси руу буулгахад хэрэглэгддэг) */}
+              <p className="selectable mt-3 text-sm leading-relaxed text-ink-dim">
                 {b.address}
               </p>
             </div>

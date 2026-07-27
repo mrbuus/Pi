@@ -779,6 +779,40 @@ export type EnumLearningEventTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumLearningEventTypeFilter<$PrismaModel>
 }
 
+export type EnumEnrollmentStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.EnrollmentStatus | Prisma.EnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEnrollmentStatusFilter<$PrismaModel> | $Enums.EnrollmentStatus
+}
+
+export type EnumSubjectAvailabilityFilter<$PrismaModel = never> = {
+  equals?: $Enums.SubjectAvailability | Prisma.EnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  in?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSubjectAvailabilityFilter<$PrismaModel> | $Enums.SubjectAvailability
+}
+
+export type EnumEnrollmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EnrollmentStatus | Prisma.EnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEnrollmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.EnrollmentStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEnrollmentStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEnrollmentStatusFilter<$PrismaModel>
+}
+
+export type EnumSubjectAvailabilityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SubjectAvailability | Prisma.EnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  in?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSubjectAvailabilityWithAggregatesFilter<$PrismaModel> | $Enums.SubjectAvailability
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSubjectAvailabilityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSubjectAvailabilityFilter<$PrismaModel>
+}
+
 export type EnumLeadSubjectFilter<$PrismaModel = never> = {
   equals?: $Enums.LeadSubject | Prisma.EnumLeadSubjectFieldRefInput<$PrismaModel>
   in?: $Enums.LeadSubject[] | Prisma.ListEnumLeadSubjectFieldRefInput<$PrismaModel>
@@ -1581,6 +1615,40 @@ export type NestedEnumLearningEventTypeWithAggregatesFilter<$PrismaModel = never
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLearningEventTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLearningEventTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumEnrollmentStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.EnrollmentStatus | Prisma.EnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEnrollmentStatusFilter<$PrismaModel> | $Enums.EnrollmentStatus
+}
+
+export type NestedEnumSubjectAvailabilityFilter<$PrismaModel = never> = {
+  equals?: $Enums.SubjectAvailability | Prisma.EnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  in?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSubjectAvailabilityFilter<$PrismaModel> | $Enums.SubjectAvailability
+}
+
+export type NestedEnumEnrollmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EnrollmentStatus | Prisma.EnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EnrollmentStatus[] | Prisma.ListEnumEnrollmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEnrollmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.EnrollmentStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEnrollmentStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEnrollmentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumSubjectAvailabilityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SubjectAvailability | Prisma.EnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  in?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SubjectAvailability[] | Prisma.ListEnumSubjectAvailabilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSubjectAvailabilityWithAggregatesFilter<$PrismaModel> | $Enums.SubjectAvailability
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSubjectAvailabilityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSubjectAvailabilityFilter<$PrismaModel>
 }
 
 export type NestedEnumLeadSubjectFilter<$PrismaModel = never> = {

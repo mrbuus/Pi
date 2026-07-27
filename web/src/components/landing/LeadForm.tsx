@@ -2,14 +2,11 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
-
-type LeadSubject = "MATH" | "SOCIAL_STUDIES" | "BOTH";
-
-const SUBJECT_OPTIONS: { value: LeadSubject; label: string }[] = [
-  { value: "MATH", label: "Математик" },
-  { value: "SOCIAL_STUDIES", label: "Нийгмийн ухаан" },
-  { value: "BOTH", label: "Аль аль нь" },
-];
+import SubjectPicker, {
+  SUBJECT_LABELS,
+  useEnrollmentWindows,
+  type Subject,
+} from "./SubjectPicker";
 
 // Төв одоогоор зөвхөн 9-12-р ангийн сурагч авдаг (баталгаажсан бизнесийн
 // баримт) — сервер талд 1-12 хүлээж авдаг ч энд бодит хамрах хүрээгээрээ
@@ -35,12 +32,16 @@ export default function LeadForm({
   const idPrefix = useId();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [subject, setSubject] = useState<LeadSubject>("MATH");
+  const [subjects, setSubjects] = useState<Subject[]>(["MATH"]);
   const [grade, setGrade] = useState(12);
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">(
     "idle",
   );
   const [error, setError] = useState("");
+  // Энэ маягтын зочны сурагчийн төрөл (танхим/онлайн) тодорхойгүй тул бүх
+  // хичээлийг харуулна — CLASSROOM_ONLY-г зөвхөн шошгоор мэдээлнэ (5-р
+  // талбар нэмэхгүй, хөрвүүлэлтэд муугаар нөлөөлнө).
+  const windowsHook = useEnrollmentWindows();
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -55,6 +56,10 @@ export default function LeadForm({
       setError("Утасны дугаар 8 оронтой байх ёстой (жишээ: 99112233)");
       return;
     }
+    if (subjects.length === 0) {
+      setError("Хамгийн багадаа нэг хичээл сонгоно уу");
+      return;
+    }
 
     setStatus("loading");
     setError("");
@@ -62,16 +67,32 @@ export default function LeadForm({
       await api("/leads", {
         method: "POST",
         auth: false,
-        body: { name: trimmedName, phone: cleanedPhone, subject, grade },
+        body: { name: trimmedName, phone: cleanedPhone, subjects, grade },
       });
       setStatus("done");
       setName("");
       setPhone("");
     } catch (err) {
       setStatus("error");
-      setError(
-        err instanceof Error ? err.message : "Илгээхэд алдаа гарлаа, дахин оролдоно уу",
-      );
+      // Сонгосон хичээлийн аль нэг нь маягт бөглөж байх хооронд хаагдсан
+      // байж болзошгүй (400) — ерөнхий "алдаа гарлаа" гэхээс илүү, шинэ
+      // цонхны мэдээлэл татаж яг аль хичээл боломжгүй болсныг нэрлэнэ.
+      const freshWindows = await windowsHook.refetch();
+      const nowUnavailable = subjects.filter((s) => {
+        const w = freshWindows.find((fw) => fw.subject === s);
+        return !w || w.status !== "OPEN";
+      });
+      if (nowUnavailable.length > 0) {
+        const names = nowUnavailable.map((s) => SUBJECT_LABELS[s]).join(", ");
+        setSubjects((cur) => cur.filter((s) => !nowUnavailable.includes(s)));
+        setError(
+          `${names} хичээлийн элсэлт таны бөглөж байх хооронд хаагдсан байна. Бусад хичээлээ дахин шалгаад дахин илгээнэ үү.`,
+        );
+      } else {
+        setError(
+          err instanceof Error ? err.message : "Илгээхэд алдаа гарлаа, дахин оролдоно уу",
+        );
+      }
     }
   }
 
@@ -144,44 +165,30 @@ export default function LeadForm({
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor={`${idPrefix}-subject`} className={labelClass}>
-              Хичээл
-            </label>
-            <select
-              id={`${idPrefix}-subject`}
-              name="subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value as LeadSubject)}
-              className={inputClass}
-            >
-              {SUBJECT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <SubjectPicker
+          value={subjects}
+          onChange={setSubjects}
+          windows={windowsHook.windows}
+          loading={windowsHook.loading}
+        />
 
-          <div>
-            <label htmlFor={`${idPrefix}-grade`} className={labelClass}>
-              Ангийн түвшин
-            </label>
-            <select
-              id={`${idPrefix}-grade`}
-              name="grade"
-              value={grade}
-              onChange={(e) => setGrade(Number(e.target.value))}
-              className={inputClass}
-            >
-              {GRADE_OPTIONS.map((g) => (
-                <option key={g} value={g}>
-                  {g}-р анги
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label htmlFor={`${idPrefix}-grade`} className={labelClass}>
+            Ангийн түвшин
+          </label>
+          <select
+            id={`${idPrefix}-grade`}
+            name="grade"
+            value={grade}
+            onChange={(e) => setGrade(Number(e.target.value))}
+            className={inputClass}
+          >
+            {GRADE_OPTIONS.map((g) => (
+              <option key={g} value={g}>
+                {g}-р анги
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

@@ -235,6 +235,11 @@ export type ClassTestSession = Prisma.ClassTestSessionModel
  */
 export type LearningEvent = Prisma.LearningEventModel
 /**
+ * Model EnrollmentWindow
+ * 
+ */
+export type EnrollmentWindow = Prisma.EnrollmentWindowModel
+/**
  * Model Lead
  * 
  */

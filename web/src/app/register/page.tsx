@@ -5,9 +5,23 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LogoMark from "@/components/LogoMark";
 import { api, homeForRole, setAuth } from "@/lib/api";
+import SubjectPicker, { type Subject } from "@/components/landing/SubjectPicker";
 
 type Kind = "CLASSROOM" | "ONLINE" | "PARENT" | "BUYER";
-type Subject = "MATH" | "SOCIAL_STUDIES" | "BOTH";
+// Сервер (RegisterDto.subject) хараахан олон хичээл авдаггүй, зөвхөн энэ
+// 3 хуучин утгыг хүлээж авдаг тул сурагчийн кодын үсгийг тодорхойлохын
+// тулд шинэ subjects[]-ээс энэ рүү буулгана (leads.service.ts-ийн
+// toLegacyLeadSubject-тэй яг ижил дүрэм): ганц MATH/SOCIAL_STUDIES бол
+// шууд тэрийг нь, бусад бүх тохиолдолд (олон хичээл, эсвэл SAT ганцаараа)
+// BOTH — өөрөөр хэлбэл кодын үсэг B.
+type LegacyRegisterSubject = "MATH" | "SOCIAL_STUDIES" | "BOTH";
+function toLegacyRegisterSubject(subjects: Subject[]): LegacyRegisterSubject {
+  if (subjects.length === 1) {
+    if (subjects[0] === "MATH") return "MATH";
+    if (subjects[0] === "SOCIAL_STUDIES") return "SOCIAL_STUDIES";
+  }
+  return "BOTH";
+}
 
 const KINDS: { value: Kind; title: string; desc: string }[] = [
   {
@@ -32,12 +46,6 @@ const KINDS: { value: Kind; title: string; desc: string }[] = [
   },
 ];
 
-const SUBJECTS: { value: Subject; title: string }[] = [
-  { value: "MATH", title: "Математик" },
-  { value: "SOCIAL_STUDIES", title: "Нийгэм судлал" },
-  { value: "BOTH", title: "Хоёулаа" },
-];
-
 const GRADES = [9, 10, 11, 12];
 
 interface FieldErrors {
@@ -45,6 +53,7 @@ interface FieldErrors {
   firstName?: string;
   phone?: string;
   activationCode?: string;
+  subjects?: string;
 }
 
 interface RegisterResult {
@@ -52,7 +61,7 @@ interface RegisterResult {
   studentCode?: string;
 }
 
-function isStudentKind(kind: Kind): boolean {
+function isStudentKind(kind: Kind): kind is "CLASSROOM" | "ONLINE" {
   return kind === "CLASSROOM" || kind === "ONLINE";
 }
 
@@ -67,7 +76,7 @@ export default function RegisterPage() {
     school: "",
     activationCode: "",
   });
-  const [subject, setSubject] = useState<Subject>("BOTH");
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,6 +100,9 @@ export default function RegisterPage() {
     if (activeKind === "CLASSROOM" && !/^\d{8}$/.test(form.activationCode)) {
       errs.activationCode = "Багшаас авсан 8 оронтой кодоо оруулна уу";
     }
+    if (isStudentKind(activeKind) && subjects.length === 0) {
+      errs.subjects = "Дор хаяж нэг хичээл сонгоно уу";
+    }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -113,7 +125,9 @@ export default function RegisterPage() {
       if (isStudentKind(kind)) {
         body.studentType = kind;
         body.grade = parseInt(form.grade, 10);
-        body.subject = subject;
+        // Сервер олон хичээл авдаггүй (RegisterDto.subject хуучин 3 утга) тул
+        // энд буулгана — logic register.dto.ts-ийн тайлбарыг үз.
+        body.subject = toLegacyRegisterSubject(subjects);
         if (form.school) body.school = form.school;
       }
       if (kind === "CLASSROOM") body.activationCode = form.activationCode;
@@ -237,7 +251,14 @@ export default function RegisterPage() {
                     name="kind"
                     value={k.value}
                     checked={kind === k.value}
-                    onChange={() => setKind(k.value)}
+                    onChange={() => {
+                      setKind(k.value);
+                      // Танхим/онлайн сонголт өөрчлөгдвөл өмнөх хичээлийн
+                      // сонголт (шинэ төрөлд зөвшөөрөгдөхгүй байж болзошгүй
+                      // тул) цэвэрлэнэ — жишээ нь Нийгэм судлал сонгоод дараа
+                      // нь Онлайн руу шилжсэн бол чимээгүй дамжуулахгүй.
+                      setSubjects([]);
+                    }}
                     className="sr-only"
                   />
                   <p className="text-sm font-semibold text-ink">{k.title}</p>
@@ -360,31 +381,22 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <span className="mb-1.5 block text-xs text-ink-dim">
-                    Ямар хичээлээр суралцах вэ?
-                  </span>
-                  <div role="radiogroup" aria-label="Хичээл" className="grid grid-cols-3 gap-2">
-                    {SUBJECTS.map((s) => (
-                      <label
-                        key={s.value}
-                        className={`cursor-pointer rounded-lg border px-2 py-2 text-center text-xs font-medium transition ${
-                          subject === s.value
-                            ? "border-brand bg-brand/10 text-ink"
-                            : "border-line text-ink-dim hover:border-brand/40"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="subject"
-                          value={s.value}
-                          checked={subject === s.value}
-                          onChange={() => setSubject(s.value)}
-                          className="sr-only"
-                        />
-                        {s.title}
-                      </label>
-                    ))}
-                  </div>
+                  <SubjectPicker
+                    value={subjects}
+                    onChange={(next) => {
+                      setSubjects(next);
+                      if (fieldErrors.subjects) {
+                        setFieldErrors((errs) => ({ ...errs, subjects: undefined }));
+                      }
+                    }}
+                    studentType={kind}
+                    legend="Ямар хичээлээр суралцах вэ?"
+                  />
+                  {fieldErrors.subjects && (
+                    <p role="alert" className="mt-1 text-xs text-error">
+                      {fieldErrors.subjects}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-ink-dim">
                     Энэ сонголт таны сурагчийн кодод тусгагдана
                   </p>

@@ -1,29 +1,31 @@
 import LeadForm from "./LeadForm";
 
-// Зөвхөн баталгаажсан бодит тоо (2026-07-26) ашиглана — сурагчийн
-// тоо/дүн ХЭЗЭЭ Ч зохиохгүй.
-const BREAKDOWN = [
-  { label: "12-р анги", value: "209" },
-  { label: "11-р анги", value: "76" },
-  { label: "9-10-р анги", value: "74" },
-] as const;
+/**
+ * Жил бүрийн ЭЕШ-ийн үр дүн — тогтвортой, амьдардаггүй тоо.
+ *
+ * ⚠️ Эзэн (2026-07-27) эдгээр тоог ОДООГООР МЭДЭХГҮЙ гэдгээ тодорхой хэлсэн.
+ * Зохиомол он, тоо ХЭЗЭЭ Ч бичихгүй — хоосон "" утгатай мөрүүд үлдээж,
+ * доор автоматаар "20__" / "__" гэж харуулна. Бодит тоо гарч ирвэл энэ
+ * массивт нэг мөр нэмэх/засахад л хангалттай.
+ */
+interface YearlyExamResult {
+  /** жишээ нь "2025" — "20" гэсэн угтвар автоматаар нэмэгддэг тул сүүлийн 2 оронг л бич */
+  yearSuffix: string;
+  scored700Plus: string;
+  scored600Plus: string;
+}
 
-const HIGHLIGHTS = [
-  {
-    value: "80+",
-    label: "өөр сургуулиас ирсэн сурагчид",
-    detail: "Улаанбаатарын өөр өөр дүүргийн сургуулиудаас итгэж ирдэг.",
-  },
-  {
-    value: "88%",
-    label: "секц дүүрсэн (251/286)",
-    detail: "Суудлын тоо хязгаарлагдмал — эрт бүртгүүлсэн нь тав тухтай суудалтай.",
-  },
-  {
-    value: "2",
-    label: "салбартай",
-    detail: "16 ажилтантай, тогтвортой үйл ажиллагаатай сургалтын төв.",
-  },
+const YEARLY_EXAM_RESULTS: YearlyExamResult[] = [
+  { yearSuffix: "", scored700Plus: "", scored600Plus: "" }, // TODO: төвөөс бодит тоо авах
+  { yearSuffix: "", scored700Plus: "", scored600Plus: "" }, // TODO: төвөөс бодит тоо авах
+  { yearSuffix: "", scored700Plus: "", scored600Plus: "" }, // TODO: төвөөс бодит тоо авах
+];
+
+/** Баталгаажсан, тогтвортой суурь тоо (2026-07-26) — амжилтын жагсаалтын дараа нам дуугаар. */
+const STABLE_FACTS = [
+  { value: "2", label: "салбартай" },
+  { value: "359", label: "идэвхтэй сурагчтай" },
+  { value: "16", label: "ажилтантай" },
 ] as const;
 
 export default function Achievements() {
@@ -34,34 +36,44 @@ export default function Achievements() {
           Бидний амжилтууд
         </p>
         <h2 className="reveal mt-3 max-w-2xl text-3xl font-extrabold md:text-4xl">
-          Тоогоор батлагдсан тогтвортой үр дүн
+          10+ жилийн туршлага
         </h2>
+        <p className="reveal mt-3 max-w-2xl text-base leading-relaxed text-ink-dim">
+          Жил бүр сурагчдаа ЭЕШ-д өндөр оноо авахуйц бэлдэж ирсэн — жилийн
+          үр дүнгээ доор харуулж байна.
+        </p>
 
-        <div className="reveal mt-10 grid gap-4 rounded-2xl border border-line bg-panel p-6 sm:grid-cols-3">
-          <p className="sm:col-span-3 text-sm font-semibold text-ink-dim">
-            359 идэвхтэй сурагчийн ангиллаар:
+        <div className="reveal mt-8 rounded-2xl border border-line bg-panel p-6">
+          <div className="grid gap-4">
+            {YEARLY_EXAM_RESULTS.map((row, i) => (
+              <p
+                key={i}
+                className="border-b border-line pb-4 text-base leading-relaxed text-ink last:border-0 last:pb-0"
+              >
+                <span className="font-bold">20{row.yearSuffix || "__"}</span>{" "}
+                онд{" "}
+                <span className="font-bold text-brand">
+                  {row.scored700Plus || "__"}
+                </span>{" "}
+                сурагч ЭЕШ-д <span className="font-bold">700+</span> оноо,{" "}
+                <span className="font-bold text-brand">
+                  {row.scored600Plus || "__"}
+                </span>{" "}
+                сурагч <span className="font-bold">600+</span> оноо авсан.
+              </p>
+            ))}
+          </div>
+          <p className="mt-5 text-xs text-ink-dim">
+            Дээрх тоонуудыг төвөөс баталгаажуулмагц энд нэмэх болно.
           </p>
-          {BREAKDOWN.map((b) => (
-            <div key={b.label} className="text-center">
-              <p className="text-2xl font-extrabold text-ink">{b.value}</p>
-              <p className="mt-1 text-sm text-ink-dim">{b.label}</p>
-            </div>
-          ))}
         </div>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-3">
-          {HIGHLIGHTS.map((h, i) => (
-            <div
-              key={h.label}
-              className="reveal rounded-2xl border border-line bg-panel p-6"
-              style={{ transitionDelay: `${i * 90}ms` }}
-            >
-              <p className="text-3xl font-extrabold text-brand">{h.value}</p>
-              <p className="mt-1 text-sm font-bold text-ink">{h.label}</p>
-              <p className="mt-2 text-sm leading-relaxed text-ink-dim">
-                {h.detail}
-              </p>
-            </div>
+        {/* Тогтвортой суурь тоо — нам дуугаар, амжилтын жагсаалтын дараа */}
+        <div className="reveal mt-6 flex flex-wrap items-center gap-x-8 gap-y-2 text-sm text-ink-dim">
+          {STABLE_FACTS.map((f) => (
+            <span key={f.label}>
+              <span className="font-bold text-ink">{f.value}</span> {f.label}
+            </span>
           ))}
         </div>
 

@@ -90,6 +90,7 @@ export const ModelName = {
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
   ClassTestSession: 'ClassTestSession',
   LearningEvent: 'LearningEvent',
+  EnrollmentWindow: 'EnrollmentWindow',
   Lead: 'Lead',
   StaffTask: 'StaffTask',
   StaffTaskAssignee: 'StaffTaskAssignee',
@@ -658,11 +659,25 @@ export const LearningEventScalarFieldEnum = {
 export type LearningEventScalarFieldEnum = (typeof LearningEventScalarFieldEnum)[keyof typeof LearningEventScalarFieldEnum]
 
 
+export const EnrollmentWindowScalarFieldEnum = {
+  id: 'id',
+  subject: 'subject',
+  status: 'status',
+  availability: 'availability',
+  note: 'note',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnrollmentWindowScalarFieldEnum = (typeof EnrollmentWindowScalarFieldEnum)[keyof typeof EnrollmentWindowScalarFieldEnum]
+
+
 export const LeadScalarFieldEnum = {
   id: 'id',
   name: 'name',
   phone: 'phone',
   subject: 'subject',
+  subjects: 'subjects',
   grade: 'grade',
   status: 'status',
   createdAt: 'createdAt',

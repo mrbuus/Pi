@@ -78,7 +78,8 @@ export type SubmissionState = (typeof SubmissionState)[keyof typeof SubmissionSt
 
 export const Subject = {
   MATH: 'MATH',
-  SOCIAL_STUDIES: 'SOCIAL_STUDIES'
+  SOCIAL_STUDIES: 'SOCIAL_STUDIES',
+  SAT: 'SAT'
 } as const
 
 export type Subject = (typeof Subject)[keyof typeof Subject]
@@ -247,6 +248,24 @@ export const LearningEventType = {
 } as const
 
 export type LearningEventType = (typeof LearningEventType)[keyof typeof LearningEventType]
+
+
+export const EnrollmentStatus = {
+  OPEN: 'OPEN',
+  CLOSED: 'CLOSED',
+  COMING_SOON: 'COMING_SOON'
+} as const
+
+export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus]
+
+
+export const SubjectAvailability = {
+  CLASSROOM_ONLY: 'CLASSROOM_ONLY',
+  ONLINE_ONLY: 'ONLINE_ONLY',
+  BOTH: 'BOTH'
+} as const
+
+export type SubjectAvailability = (typeof SubjectAvailability)[keyof typeof SubjectAvailability]
 
 
 export const LeadSubject = {

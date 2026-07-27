@@ -1,6 +1,11 @@
 import LogoMark from "@/components/LogoMark";
 import { BRANCHES, ORG, PHONES } from "@/lib/orgInfo";
 
+// Instagram холбоос orgInfo.ts-д хараахан алга (ORG нь энэ ажлын хамрах
+// хүрээнээс гадуурх файл) тул энд шууд бичсэн. Дараа нь orgInfo.ts-д
+// нэгтгэвэл энэ мөрийг устгаад ORG.instagram ашиглана.
+const INSTAGRAM_URL = "https://www.instagram.com/shineireedui_official";
+
 export default function Footer() {
   // Энэ хөл bg-brand-navy өвлөгөө өнгөтэй бөгөөд ХОЁУЛАН theme-д харанхуй хэвээр
   // үлддэг (лого, hero band, footer шиг). Тиймээс доtorх text-white/xx
@@ -16,14 +21,24 @@ export default function Footer() {
           </span>
           <p className="mt-3 text-sm leading-relaxed">{ORG.name}</p>
           <p className="mt-1 text-sm">{ORG.slogan}</p>
-          <a
-            href={ORG.facebook}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-block text-sm font-semibold text-white/90 hover:underline"
-          >
-            Facebook хуудас →
-          </a>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1">
+            <a
+              href={ORG.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-white/90 hover:underline"
+            >
+              Facebook хуудас →
+            </a>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-white/90 hover:underline"
+            >
+              Instagram хуудас →
+            </a>
+          </div>
         </div>
 
         <div>
@@ -57,7 +72,8 @@ export default function Footer() {
             {BRANCHES.map((b) => (
               <div key={b.id} className="text-sm">
                 <p className="font-semibold text-white/90">{b.label}</p>
-                <p className="mt-0.5 text-white/60">{b.address}</p>
+                {/* selectable — хаяг хуулагдах ёстой */}
+                <p className="selectable mt-0.5 text-white/60">{b.address}</p>
               </div>
             ))}
           </div>

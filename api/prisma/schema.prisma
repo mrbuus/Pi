@@ -253,12 +253,15 @@ model Submission {
 
 // ============ Контент: Ном → Бүлэг сэдэв → Бодлого ============
 
-// Хичээлийн төрөл — төв Математикаас гадна Нийгэм судлал мөн заадаг болсон.
+// Хичээлийн төрөл — төв Математикаас гадна Нийгэм судлал, SAT мөн заадаг болсон.
 // Enum-ыг Book дээр л тавьсан (тусдаа Subject модель биш): Chapter/Test/Topic-ийн
 // хичээл нь Book-оор дамжин л тодорхойлогдоно (энэ migration-д тэдгээрт нэмэхгүй).
+// SAT: одоогоор ЗӨВХӨН танхимд, бат бэх болоогүй тул EnrollmentWindow-д
+// COMING_SOON статустай эхэлнэ (доор харна уу).
 enum Subject {
   MATH
   SOCIAL_STUDIES
+  SAT
 }
 
 model Book {
@@ -926,6 +929,43 @@ model LearningEvent {
   @@index([userId, occurredAt])
 }
 
+// ============ Элсэлтийн цонх (Enrollment Windows) ============
+// Эзний тогтоосон дүрэм (2026-07-27): элсэлт жилийн турш бүх цагт нээлттэй
+// биш, хичээл БҮР ӨӨРСДИЙН ХУВЬД дүүрч болно. Багш+/Админ хичээл тус бүрийг
+// өөрсдөө нээж/хааж чадах ёстой тул статусыг код руу chit хийхгүй, энэ
+// хүснэгтэд дата болгож хадгална.
+enum EnrollmentStatus {
+  OPEN
+  CLOSED
+  COMING_SOON
+}
+
+// 🎯 Танхим/онлайн сурагчид аль хичээл нээлттэйг тодорхойлно — ЭНЭ БОЛ
+// ЭЗНИЙ ГОЛ ДҮРМИЙГ ДАТА БОЛГОСОН хэсэг (UI дотор hardcode хийхгүй):
+//   Математик        → BOTH (танхим ба онлайн хоёуланд)
+//   Нийгэм судлал     → CLASSROOM_ONLY
+//   SAT               → CLASSROOM_ONLY (мөн одоогоор COMING_SOON)
+// Ирээдүйд төв Нийгэм судлалыг онлайнаар нээвэл энэ зөвхөн НЭГ МӨРИЙН
+// (EnrollmentWindow.availability) утга солих байх ёстой — код өөрчлөх
+// шаардлагагүй.
+enum SubjectAvailability {
+  CLASSROOM_ONLY
+  ONLINE_ONLY
+  BOTH
+}
+
+// Хичээл тус бүрийн элсэлтийн цонх — landing page (нийтэд) болон Lead
+// баталгаажуулалт (сервер талд) хоёул үүнийг эх сурвалж болгон уншина.
+model EnrollmentWindow {
+  id           String              @id @default(cuid())
+  subject      Subject             @unique
+  status       EnrollmentStatus
+  availability SubjectAvailability
+  note         String?
+  updatedById  String
+  updatedAt    DateTime            @updatedAt
+}
+
 // ============ Нийтийн лийд бүртгэл (Landing page lead-capture) ============
 // Бизнесийн контекст: төв Facebook-ийн 7,900 followers-тэй ч бүх элсэлтийг
 // гараар Messenger DM-ээр боловсруулдаг байсан (шөнө/амралтын өдөр алдагдсан
@@ -956,7 +996,13 @@ model Lead {
   id        String      @id @default(cuid())
   name      String
   phone     String
+  // ХАСАГДСАН (deprecated): хуучин "нэг хичээл" талбар. Зөвхөн ХУУЧИН
+  // бичлэгүүд алдагдахгүй байхын тулд үлдээв — шинэ код бүгд `subjects`-ийг
+  // ашиглана. Шинэ бичилт хийхдээ энэ талбарыг `subjects`-ээс тооцоолж
+  // бөглөнө (нэг хичээл → тэр утга; олон хичээл → BOTH).
   subject   LeadSubject
+  // Сонирхогчийн сонгосон хичээлүүд (1–3ыг зөвшөөрнө, DTO дээр шалгана).
+  subjects  Subject[]
   grade     Int
   status    LeadStatus  @default(NEW)
   createdAt DateTime    @default(now())

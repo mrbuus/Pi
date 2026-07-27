@@ -18,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
 import { ClassroomsModule } from './classrooms/classrooms.module';
 import { ColorTagsModule } from './colortags/colortags.module';
 import { ContentModule } from './content/content.module';
+import { EnrollmentWindowsModule } from './enrollment-windows/enrollment-windows.module';
 import { EventsModule } from './events/events.module';
 import { GoalsModule } from './goals/goals.module';
 import { LeadsModule } from './leads/leads.module';
@@ -62,6 +63,7 @@ import { VideosModule } from './videos/videos.module';
     ClassificationModule,
     VideosModule,
     EventsModule,
+    EnrollmentWindowsModule,
     LeadsModule,
     LessonsModule,
     GatewaysModule,

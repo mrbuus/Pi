@@ -2,6 +2,7 @@
 
 import Achievements from "./landing/Achievements";
 import Branches from "./landing/Branches";
+import CentreInfo from "./landing/CentreInfo";
 import Footer from "./landing/Footer";
 import Hero from "./landing/Hero";
 import HowItWorks from "./landing/HowItWorks";
@@ -24,6 +25,7 @@ export default function Landing() {
       <Subjects />
       <Achievements />
       <HowItWorks />
+      <CentreInfo />
       <Branches />
       <Tuition />
       <Footer />
