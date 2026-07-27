@@ -20,6 +20,55 @@ export function clearAuth() {
   localStorage.removeItem("pi_role");
 }
 
+/**
+ * ⏰ RENDER-ИЙН "СЭРЭХ" АСУУДАЛ.
+ *
+ * Render-ийн үнэгүй багц ~15 минут идэвхгүй байвал сервисээ УНТРААДАГ. Дараа нь
+ * ирсэн ЭХНИЙ хүсэлт серверийг сэрээх хугацааг (ихэвчлэн 30–60 секунд) бүтнээр нь
+ * хүлээдэг. Өмнө нь fetch дээр ямар ч timeout байгаагүй тул хэрэглэгч тодорхойгүй
+ * удаан өлгөгдөөд эцэст нь "ачаалж чадсангүй" маягийн алдаа хардаг байв.
+ *
+ * Хамгийн зальтай нь: хөгжүүлэгчийн машин дээр сервер аль хэдийн сэрсэн байдаг тул
+ * асуудал ХАРАГДДАГГҮЙ — зөвхөн өөр компьютер дээр, эсвэл удаан ашиглаагүй үед л
+ * илэрдэг. Сонгодог "миний машин дээр ажиллаж байна" тохиолдол.
+ *
+ * Шийдэл: эхний оролдлогод богино (12с) timeout тавина. Хэрэв сүлжээний түвшинд
+ * унавал — сервер унтарсан байх магадлалтай гэж үзээд НЭГ удаа урт (60с) timeout-той
+ * дахин оролдоно. Эхний хүсэлт нь ихэвчлэн серверийг сэрээчихсэн байдаг тул хоёр дахь
+ * нь амжилттай болдог.
+ *
+ * ⚠️ Энэ бол зөвхөн зөөлрүүлэлт. Жинхэнэ засвар нь Render-ийн ТӨЛБӨРТЭЙ багц
+ * (DEPLOY.md-ийг үз) — тэнд сервис унтардаггүй.
+ */
+const FIRST_TRY_TIMEOUT_MS = 12_000;
+const WAKE_TRY_TIMEOUT_MS = 60_000;
+
+async function fetchWithWakeRetry(
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(FIRST_TRY_TIMEOUT_MS),
+    });
+  } catch {
+    // Сүлжээний алдаа/timeout — сервер унтсан байж болзошгүй тул урт хүлээлттэйгээр
+    // ганц удаа дахин оролдоно.
+    try {
+      return await fetch(url, {
+        ...init,
+        signal: AbortSignal.timeout(WAKE_TRY_TIMEOUT_MS),
+      });
+    } catch {
+      throw new Error(
+        "Сервер хариу өгсөнгүй. Сервер удаан идэвхгүй байсан бол сэрэхэд " +
+          "1 минут хүртэл хугацаа шаардагдана — хуудсаа шинэчилж дахин оролдоно уу.",
+      );
+    }
+  }
+}
+
 export async function api<T = unknown>(
   path: string,
   opts: { method?: string; body?: unknown; auth?: boolean } = {},
@@ -30,18 +79,22 @@ export async function api<T = unknown>(
     const token = getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
+  const init: RequestInit = {
+    method: opts.method ?? "GET",
+    headers,
+    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+  };
+
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
-      method: opts.method ?? "GET",
-      headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-    });
-  } catch {
+    res = await fetchWithWakeRetry(`${API_URL}${path}`, init);
+  } catch (e) {
     // fetch эсэргүүцвэл (сүлжээгүй, сервер унтарсан гэх мэт) англи "Failed to
     // fetch" гараад ирдэг байсныг монгол, ойлгомжтой мессежээр сольсон.
     throw new Error(
-      "Сүлжээний алдаа — интернэт холболтоо шалгаад дахин оролдоно уу.",
+      e instanceof Error && e.message
+        ? e.message
+        : "Сүлжээний алдаа — интернэт холболтоо шалгаад дахин оролдоно уу.",
     );
   }
   const data = (await res.json().catch(() => null)) as T & {
