@@ -12,8 +12,10 @@ import {
   AttemptSource,
   Role,
   SelfState,
+  Subject,
   TestGradingMode,
 } from '../generated/prisma/enums';
+import { collectPassScope, hasCoveringPass, TEACHER_ROLES } from '../common/access';
 import { todayUB } from '../common/date';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTestDto } from './dto/create-test.dto';
@@ -28,8 +30,6 @@ import {
   GradableProblem,
   hasKnownAnswer,
 } from './grading';
-
-const TEACHER_ROLES: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
 
 // Хугацаа дууссаны дараах уужим байдал: сүлжээний саатал, эцсийн autosave-д
 const GRACE_MS = 30_000;
@@ -90,6 +90,56 @@ function toGradable(row: TestProblemRow): GradableProblem {
 export class TestsService {
   constructor(private prisma: PrismaService) {}
 
+  // TODO(followUp): api/src/audit/audit.service.ts бэлэн болмогц энэ
+  // helper-ийг хасаад тэрхүү нэгдсэн AuditService-ийг DI-аар ашиглах.
+  private toAuditJson(v: unknown): Prisma.InputJsonValue | typeof Prisma.JsonNull {
+    if (v === null || v === undefined) return Prisma.JsonNull;
+    return JSON.parse(JSON.stringify(v)) as Prisma.InputJsonValue;
+  }
+
+  private async recordAudit(
+    actorId: string,
+    actorRole: Role,
+    action: string,
+    entity: string,
+    entityId: string,
+    before: unknown,
+    after: unknown,
+  ) {
+    await this.prisma.auditLog.create({
+      data: {
+        actorId,
+        actorRole,
+        action,
+        entity,
+        entityId,
+        before: this.toAuditJson(before),
+        after: this.toAuditJson(after),
+      },
+    });
+  }
+
+  // Багш+/Админ тестийг зөөлөн устгана — TestResult/Attempt зэрэг түүхэн
+  // бичлэгүүд орфон үлдэхгүйн тулд hard DELETE хийхгүй.
+  async remove(testId: string, actorId: string, actorRole: Role) {
+    const test = await this.prisma.test.findUnique({ where: { id: testId } });
+    if (!test || test.deletedAt) throw new NotFoundException('Тест олдсонгүй');
+    const updated = await this.prisma.test.update({
+      where: { id: testId },
+      data: { deletedAt: new Date() },
+    });
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'DELETE',
+      'Test',
+      testId,
+      test,
+      updated,
+    );
+    return { deleted: true };
+  }
+
   async create(dto: CreateTestDto, userId: string) {
     return this.prisma.test.create({
       data: {
@@ -125,10 +175,16 @@ export class TestsService {
     });
   }
 
-  // Багш бүгдийг, сурагч зөвхөн ангидаа оноогдсон тестүүдийг харна
-  async list(userId: string, role: Role) {
+  // Багш бүгдийг, сурагч ангидаа оноогдсон ЭСВЭЛ хүчинтэй эрхийнхээ (pass)
+  // хамрах хүрээнд орсон тестүүдийг харна (Bug 2 fix — SPEC §11)
+  async list(userId: string, role: Role, subject?: Subject) {
+    const subjectFilter: Prisma.TestWhereInput = subject
+      ? { chapter: { book: { subject } } }
+      : {};
+
     if (TEACHER_ROLES.includes(role)) {
       return this.prisma.test.findMany({
+        where: { ...subjectFilter, deletedAt: null },
         include: {
           _count: { select: { problems: true, results: true } },
           access: { include: { classroom: { select: { name: true } } } },
@@ -137,14 +193,32 @@ export class TestsService {
         orderBy: { createdAt: 'desc' },
       });
     }
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId: userId, leftAt: null },
-    });
-    if (!enrollment) return [];
+    const [enrollment, scope] = await Promise.all([
+      this.prisma.enrollment.findFirst({
+        where: { studentId: userId, leftAt: null },
+      }),
+      collectPassScope(this.prisma, userId),
+    ]);
+
+    let accessFilter: Prisma.TestWhereInput | undefined;
+    if (!scope.all) {
+      const accessOr: Prisma.TestWhereInput[] = [];
+      if (enrollment) {
+        accessOr.push({ access: { some: { classroomId: enrollment.classroomId } } });
+      }
+      if (scope.testIds.length) accessOr.push({ id: { in: scope.testIds } });
+      if (scope.chapterIds.length) {
+        accessOr.push({ chapterId: { in: scope.chapterIds } });
+      }
+      if (scope.bookIds.length) {
+        accessOr.push({ chapter: { bookId: { in: scope.bookIds } } });
+      }
+      if (accessOr.length === 0) return [];
+      accessFilter = { OR: accessOr };
+    }
+
     const rows = await this.prisma.test.findMany({
-      where: {
-        access: { some: { classroomId: enrollment.classroomId } },
-      },
+      where: { ...subjectFilter, ...accessFilter, deletedAt: null },
       select: {
         id: true,
         title: true,
@@ -199,7 +273,7 @@ export class TestsService {
           access: true,
         },
       });
-      if (!test) throw new NotFoundException('Тест олдсонгүй');
+      if (!test || test.deletedAt) throw new NotFoundException('Тест олдсонгүй');
       return test;
     }
 
@@ -210,8 +284,8 @@ export class TestsService {
         access: true,
       },
     });
-    if (!test) throw new NotFoundException('Тест олдсонгүй');
-    await this.assertStudentAccess(testId, userId, test.access);
+    if (!test || test.deletedAt) throw new NotFoundException('Тест олдсонгүй');
+    await this.assertStudentAccess(test, userId);
 
     const [result, session] = await Promise.all([
       this.prisma.testResult.findUnique({
@@ -252,7 +326,7 @@ export class TestsService {
     if (test.problems.length === 0) {
       throw new BadRequestException('Энэ тестэд бодлого оруулаагүй байна');
     }
-    await this.assertStudentAccess(testId, userId, test.access);
+    await this.assertStudentAccess(test, userId);
 
     let session = (await this.prisma.testAttemptSession.findUnique({
       where: { testId_studentId: { testId, studentId: userId } },
@@ -388,6 +462,7 @@ export class TestsService {
         'Энэ тестийн хариу баталгаажаагүй тул авто оноо бодохгүй. Багш дүнг гараар оруулна.',
       );
     }
+    await this.assertStudentAccess(test, userId);
     const session = (await this.prisma.testAttemptSession.findUnique({
       where: { testId_studentId: { testId, studentId: userId } },
     })) as SessionRow | null;
@@ -570,25 +645,46 @@ export class TestsService {
         access: true,
       },
     });
-    if (!test) throw new NotFoundException('Тест олдсонгүй');
+    if (!test || test.deletedAt) throw new NotFoundException('Тест олдсонгүй');
     return test;
   }
 
+  // Ангийн (Enrollment + TestAccess) ЭСВЭЛ хүчинтэй эрхийн (UserPass.scope,
+  // Bug 2 fix) аль нэгээр нэвтэрсэн байхыг шаардана.
   private async assertStudentAccess(
-    testId: string,
+    test: {
+      id: string;
+      chapterId: string | null;
+      access: { classroomId: string }[];
+    },
     userId: string,
-    access: { classroomId: string }[],
-  ) {
+  ): Promise<void> {
     const enrollment = await this.prisma.enrollment.findFirst({
       where: { studentId: userId, leftAt: null },
     });
-    const allowed =
+    if (
       enrollment &&
-      access.some((a) => a.classroomId === enrollment.classroomId);
-    if (!allowed) {
+      test.access.some((a) => a.classroomId === enrollment.classroomId)
+    ) {
+      return;
+    }
+
+    let bookId: string | null = null;
+    if (test.chapterId) {
+      const chapter = await this.prisma.chapter.findUnique({
+        where: { id: test.chapterId },
+        select: { bookId: true },
+      });
+      bookId = chapter?.bookId ?? null;
+    }
+    const viaPass = await hasCoveringPass(this.prisma, userId, {
+      testId: test.id,
+      chapterId: test.chapterId,
+      bookId,
+    });
+    if (!viaPass) {
       throw new ForbiddenException('Энэ тест танай ангид оноогдоогүй байна');
     }
-    return enrollment;
   }
 
   private isExpired(session: SessionRow): boolean {

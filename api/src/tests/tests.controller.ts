@@ -1,16 +1,19 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { parseSubjectQuery } from '../common/subject';
 import { Role } from '../generated/prisma/enums';
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
@@ -33,8 +36,12 @@ export class TestsController {
   }
 
   @Get()
-  list(@Req() req: AuthedRequest) {
-    return this.tests.list(req.user.userId, req.user.role);
+  list(@Req() req: AuthedRequest, @Query('subject') subject?: string) {
+    return this.tests.list(
+      req.user.userId,
+      req.user.role,
+      parseSubjectQuery(subject),
+    );
   }
 
   @Roles(Role.STUDENT)
@@ -97,5 +104,13 @@ export class TestsController {
   @Get(':id/results')
   results(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.results(id, req.user.userId, req.user.role);
+  }
+
+  // Тестийг зөөлөн устгах — TestResult/Attempt зэрэг түүхэн бичлэгийг
+  // орфон үлдээхгүй.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Delete(':id')
+  remove(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.remove(id, req.user.userId, req.user.role);
   }
 }
