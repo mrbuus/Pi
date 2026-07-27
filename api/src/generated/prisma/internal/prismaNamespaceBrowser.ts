@@ -81,12 +81,22 @@ export const ModelName = {
   DailyClassSummary: 'DailyClassSummary',
   Prediction: 'Prediction',
   StudentColorTag: 'StudentColorTag',
+  StudentNote: 'StudentNote',
+  AuditLog: 'AuditLog',
   Pass: 'Pass',
   UserPass: 'UserPass',
   Payment: 'Payment',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
-  ClassTestSession: 'ClassTestSession'
+  ClassTestSession: 'ClassTestSession',
+  LearningEvent: 'LearningEvent',
+  Lead: 'Lead',
+  StaffTask: 'StaffTask',
+  StaffTaskAssignee: 'StaffTaskAssignee',
+  ClassSchedule: 'ClassSchedule',
+  AcademicCalendarDay: 'AcademicCalendarDay',
+  StudentGoal: 'StudentGoal',
+  StreakFreeze: 'StreakFreeze'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -111,6 +121,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   username: 'username',
   studentCode: 'studentCode',
+  teacherCode: 'teacherCode',
   firstName: 'firstName',
   lastName: 'lastName',
   passwordHash: 'passwordHash',
@@ -129,7 +140,17 @@ export const StudentProfileScalarFieldEnum = {
   grade: 'grade',
   school: 'school',
   activatedAt: 'activatedAt',
-  activationCode: 'activationCode'
+  activationCode: 'activationCode',
+  fatherPhone: 'fatherPhone',
+  motherPhone: 'motherPhone',
+  guardianNote: 'guardianNote',
+  branch: 'branch',
+  section: 'section',
+  tuitionAmount: 'tuitionAmount',
+  tuitionPlan: 'tuitionPlan',
+  tuitionNote: 'tuitionNote',
+  joinedOn: 'joinedOn',
+  leftOn: 'leftOn'
 } as const
 
 export type StudentProfileScalarFieldEnum = (typeof StudentProfileScalarFieldEnum)[keyof typeof StudentProfileScalarFieldEnum]
@@ -201,7 +222,8 @@ export const AssignmentScalarFieldEnum = {
   imageKeys: 'imageKeys',
   dueDate: 'dueDate',
   createdById: 'createdById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type AssignmentScalarFieldEnum = (typeof AssignmentScalarFieldEnum)[keyof typeof AssignmentScalarFieldEnum]
@@ -229,7 +251,9 @@ export const BookScalarFieldEnum = {
   title: 'title',
   coverKey: 'coverKey',
   sourceLabel: 'sourceLabel',
-  archived: 'archived'
+  archived: 'archived',
+  subject: 'subject',
+  deletedAt: 'deletedAt'
 } as const
 
 export type BookScalarFieldEnum = (typeof BookScalarFieldEnum)[keyof typeof BookScalarFieldEnum]
@@ -242,7 +266,8 @@ export const ChapterScalarFieldEnum = {
   order: 'order',
   grade: 'grade',
   freePreview: 'freePreview',
-  topicId: 'topicId'
+  topicId: 'topicId',
+  deletedAt: 'deletedAt'
 } as const
 
 export type ChapterScalarFieldEnum = (typeof ChapterScalarFieldEnum)[keyof typeof ChapterScalarFieldEnum]
@@ -251,7 +276,8 @@ export type ChapterScalarFieldEnum = (typeof ChapterScalarFieldEnum)[keyof typeo
 export const TopicScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  order: 'order'
+  order: 'order',
+  deletedAt: 'deletedAt'
 } as const
 
 export type TopicScalarFieldEnum = (typeof TopicScalarFieldEnum)[keyof typeof TopicScalarFieldEnum]
@@ -276,7 +302,8 @@ export const VideoScalarFieldEnum = {
   s3Key: 's3Key',
   duration: 'duration',
   chapterId: 'chapterId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type VideoScalarFieldEnum = (typeof VideoScalarFieldEnum)[keyof typeof VideoScalarFieldEnum]
@@ -313,7 +340,8 @@ export const ProblemScalarFieldEnum = {
   createdAt: 'createdAt',
   eloRating: 'eloRating',
   attemptCount: 'attemptCount',
-  correctRate: 'correctRate'
+  correctRate: 'correctRate',
+  deletedAt: 'deletedAt'
 } as const
 
 export type ProblemScalarFieldEnum = (typeof ProblemScalarFieldEnum)[keyof typeof ProblemScalarFieldEnum]
@@ -390,7 +418,8 @@ export const TestScalarFieldEnum = {
   groupKey: 'groupKey',
   variantLabel: 'variantLabel',
   createdById: 'createdById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type TestScalarFieldEnum = (typeof TestScalarFieldEnum)[keyof typeof TestScalarFieldEnum]
@@ -503,6 +532,37 @@ export const StudentColorTagScalarFieldEnum = {
 export type StudentColorTagScalarFieldEnum = (typeof StudentColorTagScalarFieldEnum)[keyof typeof StudentColorTagScalarFieldEnum]
 
 
+export const StudentNoteScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  type: 'type',
+  body: 'body',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  resolvedAt: 'resolvedAt',
+  resolvedById: 'resolvedById'
+} as const
+
+export type StudentNoteScalarFieldEnum = (typeof StudentNoteScalarFieldEnum)[keyof typeof StudentNoteScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  actorRole: 'actorRole',
+  action: 'action',
+  entity: 'entity',
+  entityId: 'entityId',
+  before: 'before',
+  after: 'after',
+  reason: 'reason',
+  at: 'at'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
 export const PassScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -552,7 +612,8 @@ export const AnnouncementScalarFieldEnum = {
   classroomId: 'classroomId',
   pinned: 'pinned',
   createdById: 'createdById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type AnnouncementScalarFieldEnum = (typeof AnnouncementScalarFieldEnum)[keyof typeof AnnouncementScalarFieldEnum]
@@ -577,6 +638,124 @@ export const ClassTestSessionScalarFieldEnum = {
 } as const
 
 export type ClassTestSessionScalarFieldEnum = (typeof ClassTestSessionScalarFieldEnum)[keyof typeof ClassTestSessionScalarFieldEnum]
+
+
+export const LearningEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  occurredAt: 'occurredAt',
+  sessionId: 'sessionId',
+  problemId: 'problemId',
+  testId: 'testId',
+  chapterId: 'chapterId',
+  videoId: 'videoId',
+  durationMs: 'durationMs',
+  device: 'device',
+  meta: 'meta'
+} as const
+
+export type LearningEventScalarFieldEnum = (typeof LearningEventScalarFieldEnum)[keyof typeof LearningEventScalarFieldEnum]
+
+
+export const LeadScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  subject: 'subject',
+  grade: 'grade',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
+export const StaffTaskScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  priority: 'priority',
+  startDate: 'startDate',
+  dueDate: 'dueDate',
+  parentTaskId: 'parentTaskId',
+  createdById: 'createdById',
+  classroomId: 'classroomId',
+  subject: 'subject',
+  estimateHours: 'estimateHours',
+  orderIndex: 'orderIndex',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaffTaskScalarFieldEnum = (typeof StaffTaskScalarFieldEnum)[keyof typeof StaffTaskScalarFieldEnum]
+
+
+export const StaffTaskAssigneeScalarFieldEnum = {
+  taskId: 'taskId',
+  userId: 'userId',
+  assignedAt: 'assignedAt'
+} as const
+
+export type StaffTaskAssigneeScalarFieldEnum = (typeof StaffTaskAssigneeScalarFieldEnum)[keyof typeof StaffTaskAssigneeScalarFieldEnum]
+
+
+export const ClassScheduleScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  weekday: 'weekday',
+  startMinute: 'startMinute',
+  endMinute: 'endMinute',
+  teacherId: 'teacherId',
+  room: 'room',
+  subject: 'subject',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  createdAt: 'createdAt'
+} as const
+
+export type ClassScheduleScalarFieldEnum = (typeof ClassScheduleScalarFieldEnum)[keyof typeof ClassScheduleScalarFieldEnum]
+
+
+export const AcademicCalendarDayScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  type: 'type',
+  title: 'title',
+  note: 'note',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type AcademicCalendarDayScalarFieldEnum = (typeof AcademicCalendarDayScalarFieldEnum)[keyof typeof AcademicCalendarDayScalarFieldEnum]
+
+
+export const StudentGoalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  title: 'title',
+  description: 'description',
+  targetDate: 'targetDate',
+  status: 'status',
+  subject: 'subject',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StudentGoalScalarFieldEnum = (typeof StudentGoalScalarFieldEnum)[keyof typeof StudentGoalScalarFieldEnum]
+
+
+export const StreakFreezeScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  date: 'date',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type StreakFreezeScalarFieldEnum = (typeof StreakFreezeScalarFieldEnum)[keyof typeof StreakFreezeScalarFieldEnum]
 
 
 export const SortOrder = {

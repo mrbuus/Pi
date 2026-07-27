@@ -247,6 +247,8 @@ export type ClassroomWhereInput = {
   testAccess?: Prisma.TestAccessListRelationFilter
   dailySummaries?: Prisma.DailyClassSummaryListRelationFilter
   announcementTargets?: Prisma.AnnouncementClassroomTargetListRelationFilter
+  staffTasks?: Prisma.StaffTaskListRelationFilter
+  classSchedules?: Prisma.ClassScheduleListRelationFilter
 }
 
 export type ClassroomOrderByWithRelationInput = {
@@ -265,6 +267,8 @@ export type ClassroomOrderByWithRelationInput = {
   testAccess?: Prisma.TestAccessOrderByRelationAggregateInput
   dailySummaries?: Prisma.DailyClassSummaryOrderByRelationAggregateInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetOrderByRelationAggregateInput
+  staffTasks?: Prisma.StaffTaskOrderByRelationAggregateInput
+  classSchedules?: Prisma.ClassScheduleOrderByRelationAggregateInput
 }
 
 export type ClassroomWhereUniqueInput = Prisma.AtLeast<{
@@ -286,6 +290,8 @@ export type ClassroomWhereUniqueInput = Prisma.AtLeast<{
   testAccess?: Prisma.TestAccessListRelationFilter
   dailySummaries?: Prisma.DailyClassSummaryListRelationFilter
   announcementTargets?: Prisma.AnnouncementClassroomTargetListRelationFilter
+  staffTasks?: Prisma.StaffTaskListRelationFilter
+  classSchedules?: Prisma.ClassScheduleListRelationFilter
 }, "id">
 
 export type ClassroomOrderByWithAggregationInput = {
@@ -333,6 +339,8 @@ export type ClassroomCreateInput = {
   testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateInput = {
@@ -350,6 +358,8 @@ export type ClassroomUncheckedCreateInput = {
   testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUpdateInput = {
@@ -367,6 +377,8 @@ export type ClassroomUpdateInput = {
   testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateInput = {
@@ -384,6 +396,8 @@ export type ClassroomUncheckedUpdateInput = {
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateManyInput = {
@@ -472,6 +486,11 @@ export type ClassroomSumOrderByAggregateInput = {
 export type ClassroomScalarRelationFilter = {
   is?: Prisma.ClassroomWhereInput
   isNot?: Prisma.ClassroomWhereInput
+}
+
+export type ClassroomNullableScalarRelationFilter = {
+  is?: Prisma.ClassroomWhereInput | null
+  isNot?: Prisma.ClassroomWhereInput | null
 }
 
 export type ClassroomCreateNestedManyWithoutTeacherInput = {
@@ -604,6 +623,36 @@ export type ClassroomUpdateOneRequiredWithoutAnnouncementTargetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClassroomUpdateToOneWithWhereWithoutAnnouncementTargetsInput, Prisma.ClassroomUpdateWithoutAnnouncementTargetsInput>, Prisma.ClassroomUncheckedUpdateWithoutAnnouncementTargetsInput>
 }
 
+export type ClassroomCreateNestedOneWithoutStaffTasksInput = {
+  create?: Prisma.XOR<Prisma.ClassroomCreateWithoutStaffTasksInput, Prisma.ClassroomUncheckedCreateWithoutStaffTasksInput>
+  connectOrCreate?: Prisma.ClassroomCreateOrConnectWithoutStaffTasksInput
+  connect?: Prisma.ClassroomWhereUniqueInput
+}
+
+export type ClassroomUpdateOneWithoutStaffTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.ClassroomCreateWithoutStaffTasksInput, Prisma.ClassroomUncheckedCreateWithoutStaffTasksInput>
+  connectOrCreate?: Prisma.ClassroomCreateOrConnectWithoutStaffTasksInput
+  upsert?: Prisma.ClassroomUpsertWithoutStaffTasksInput
+  disconnect?: Prisma.ClassroomWhereInput | boolean
+  delete?: Prisma.ClassroomWhereInput | boolean
+  connect?: Prisma.ClassroomWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClassroomUpdateToOneWithWhereWithoutStaffTasksInput, Prisma.ClassroomUpdateWithoutStaffTasksInput>, Prisma.ClassroomUncheckedUpdateWithoutStaffTasksInput>
+}
+
+export type ClassroomCreateNestedOneWithoutClassSchedulesInput = {
+  create?: Prisma.XOR<Prisma.ClassroomCreateWithoutClassSchedulesInput, Prisma.ClassroomUncheckedCreateWithoutClassSchedulesInput>
+  connectOrCreate?: Prisma.ClassroomCreateOrConnectWithoutClassSchedulesInput
+  connect?: Prisma.ClassroomWhereUniqueInput
+}
+
+export type ClassroomUpdateOneRequiredWithoutClassSchedulesNestedInput = {
+  create?: Prisma.XOR<Prisma.ClassroomCreateWithoutClassSchedulesInput, Prisma.ClassroomUncheckedCreateWithoutClassSchedulesInput>
+  connectOrCreate?: Prisma.ClassroomCreateOrConnectWithoutClassSchedulesInput
+  upsert?: Prisma.ClassroomUpsertWithoutClassSchedulesInput
+  connect?: Prisma.ClassroomWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClassroomUpdateToOneWithWhereWithoutClassSchedulesInput, Prisma.ClassroomUpdateWithoutClassSchedulesInput>, Prisma.ClassroomUncheckedUpdateWithoutClassSchedulesInput>
+}
+
 export type ClassroomCreateWithoutTeacherInput = {
   id?: string
   name: string
@@ -618,6 +667,8 @@ export type ClassroomCreateWithoutTeacherInput = {
   testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutTeacherInput = {
@@ -634,6 +685,8 @@ export type ClassroomUncheckedCreateWithoutTeacherInput = {
   testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutTeacherInput = {
@@ -690,6 +743,8 @@ export type ClassroomCreateWithoutEnrollmentsInput = {
   testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutEnrollmentsInput = {
@@ -706,6 +761,8 @@ export type ClassroomUncheckedCreateWithoutEnrollmentsInput = {
   testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutEnrollmentsInput = {
@@ -738,6 +795,8 @@ export type ClassroomUpdateWithoutEnrollmentsInput = {
   testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutEnrollmentsInput = {
@@ -754,6 +813,8 @@ export type ClassroomUncheckedUpdateWithoutEnrollmentsInput = {
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutAttendancesInput = {
@@ -770,6 +831,8 @@ export type ClassroomCreateWithoutAttendancesInput = {
   testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutAttendancesInput = {
@@ -786,6 +849,8 @@ export type ClassroomUncheckedCreateWithoutAttendancesInput = {
   testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutAttendancesInput = {
@@ -818,6 +883,8 @@ export type ClassroomUpdateWithoutAttendancesInput = {
   testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutAttendancesInput = {
@@ -834,6 +901,8 @@ export type ClassroomUncheckedUpdateWithoutAttendancesInput = {
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutAssignmentsInput = {
@@ -850,6 +919,8 @@ export type ClassroomCreateWithoutAssignmentsInput = {
   testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutAssignmentsInput = {
@@ -866,6 +937,8 @@ export type ClassroomUncheckedCreateWithoutAssignmentsInput = {
   testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutAssignmentsInput = {
@@ -898,6 +971,8 @@ export type ClassroomUpdateWithoutAssignmentsInput = {
   testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutAssignmentsInput = {
@@ -914,6 +989,8 @@ export type ClassroomUncheckedUpdateWithoutAssignmentsInput = {
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutTestAccessInput = {
@@ -930,6 +1007,8 @@ export type ClassroomCreateWithoutTestAccessInput = {
   assignments?: Prisma.AssignmentCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutTestAccessInput = {
@@ -946,6 +1025,8 @@ export type ClassroomUncheckedCreateWithoutTestAccessInput = {
   assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutTestAccessInput = {
@@ -978,6 +1059,8 @@ export type ClassroomUpdateWithoutTestAccessInput = {
   assignments?: Prisma.AssignmentUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutTestAccessInput = {
@@ -994,6 +1077,8 @@ export type ClassroomUncheckedUpdateWithoutTestAccessInput = {
   assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutDailySummariesInput = {
@@ -1010,6 +1095,8 @@ export type ClassroomCreateWithoutDailySummariesInput = {
   assignments?: Prisma.AssignmentCreateNestedManyWithoutClassroomInput
   testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutDailySummariesInput = {
@@ -1026,6 +1113,8 @@ export type ClassroomUncheckedCreateWithoutDailySummariesInput = {
   assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutClassroomInput
   testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutDailySummariesInput = {
@@ -1058,6 +1147,8 @@ export type ClassroomUpdateWithoutDailySummariesInput = {
   assignments?: Prisma.AssignmentUpdateManyWithoutClassroomNestedInput
   testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutDailySummariesInput = {
@@ -1074,6 +1165,8 @@ export type ClassroomUncheckedUpdateWithoutDailySummariesInput = {
   assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutClassroomNestedInput
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutAnnouncementTargetsInput = {
@@ -1090,6 +1183,8 @@ export type ClassroomCreateWithoutAnnouncementTargetsInput = {
   assignments?: Prisma.AssignmentCreateNestedManyWithoutClassroomInput
   testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutAnnouncementTargetsInput = {
@@ -1106,6 +1201,8 @@ export type ClassroomUncheckedCreateWithoutAnnouncementTargetsInput = {
   assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutClassroomInput
   testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutAnnouncementTargetsInput = {
@@ -1138,6 +1235,8 @@ export type ClassroomUpdateWithoutAnnouncementTargetsInput = {
   assignments?: Prisma.AssignmentUpdateManyWithoutClassroomNestedInput
   testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutAnnouncementTargetsInput = {
@@ -1154,6 +1253,184 @@ export type ClassroomUncheckedUpdateWithoutAnnouncementTargetsInput = {
   assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutClassroomNestedInput
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+}
+
+export type ClassroomCreateWithoutStaffTasksInput = {
+  id?: string
+  name: string
+  type: $Enums.ClassroomType
+  grade?: number | null
+  archived?: boolean
+  createdAt?: Date | string
+  progressChapterId?: string | null
+  teacher?: Prisma.UserCreateNestedOneWithoutOwnedClassroomsInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutClassroomInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutClassroomInput
+  assignments?: Prisma.AssignmentCreateNestedManyWithoutClassroomInput
+  testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
+  dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+}
+
+export type ClassroomUncheckedCreateWithoutStaffTasksInput = {
+  id?: string
+  name: string
+  type: $Enums.ClassroomType
+  grade?: number | null
+  teacherId?: string | null
+  archived?: boolean
+  createdAt?: Date | string
+  progressChapterId?: string | null
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutClassroomInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutClassroomInput
+  assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutClassroomInput
+  testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
+  dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+}
+
+export type ClassroomCreateOrConnectWithoutStaffTasksInput = {
+  where: Prisma.ClassroomWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClassroomCreateWithoutStaffTasksInput, Prisma.ClassroomUncheckedCreateWithoutStaffTasksInput>
+}
+
+export type ClassroomUpsertWithoutStaffTasksInput = {
+  update: Prisma.XOR<Prisma.ClassroomUpdateWithoutStaffTasksInput, Prisma.ClassroomUncheckedUpdateWithoutStaffTasksInput>
+  create: Prisma.XOR<Prisma.ClassroomCreateWithoutStaffTasksInput, Prisma.ClassroomUncheckedCreateWithoutStaffTasksInput>
+  where?: Prisma.ClassroomWhereInput
+}
+
+export type ClassroomUpdateToOneWithWhereWithoutStaffTasksInput = {
+  where?: Prisma.ClassroomWhereInput
+  data: Prisma.XOR<Prisma.ClassroomUpdateWithoutStaffTasksInput, Prisma.ClassroomUncheckedUpdateWithoutStaffTasksInput>
+}
+
+export type ClassroomUpdateWithoutStaffTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumClassroomTypeFieldUpdateOperationsInput | $Enums.ClassroomType
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progressChapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacher?: Prisma.UserUpdateOneWithoutOwnedClassroomsNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutClassroomNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutClassroomNestedInput
+  assignments?: Prisma.AssignmentUpdateManyWithoutClassroomNestedInput
+  testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
+  dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+}
+
+export type ClassroomUncheckedUpdateWithoutStaffTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumClassroomTypeFieldUpdateOperationsInput | $Enums.ClassroomType
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progressChapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutClassroomNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutClassroomNestedInput
+  assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutClassroomNestedInput
+  testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
+  dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+}
+
+export type ClassroomCreateWithoutClassSchedulesInput = {
+  id?: string
+  name: string
+  type: $Enums.ClassroomType
+  grade?: number | null
+  archived?: boolean
+  createdAt?: Date | string
+  progressChapterId?: string | null
+  teacher?: Prisma.UserCreateNestedOneWithoutOwnedClassroomsInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutClassroomInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutClassroomInput
+  assignments?: Prisma.AssignmentCreateNestedManyWithoutClassroomInput
+  testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
+  dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+}
+
+export type ClassroomUncheckedCreateWithoutClassSchedulesInput = {
+  id?: string
+  name: string
+  type: $Enums.ClassroomType
+  grade?: number | null
+  teacherId?: string | null
+  archived?: boolean
+  createdAt?: Date | string
+  progressChapterId?: string | null
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutClassroomInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutClassroomInput
+  assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutClassroomInput
+  testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
+  dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+}
+
+export type ClassroomCreateOrConnectWithoutClassSchedulesInput = {
+  where: Prisma.ClassroomWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClassroomCreateWithoutClassSchedulesInput, Prisma.ClassroomUncheckedCreateWithoutClassSchedulesInput>
+}
+
+export type ClassroomUpsertWithoutClassSchedulesInput = {
+  update: Prisma.XOR<Prisma.ClassroomUpdateWithoutClassSchedulesInput, Prisma.ClassroomUncheckedUpdateWithoutClassSchedulesInput>
+  create: Prisma.XOR<Prisma.ClassroomCreateWithoutClassSchedulesInput, Prisma.ClassroomUncheckedCreateWithoutClassSchedulesInput>
+  where?: Prisma.ClassroomWhereInput
+}
+
+export type ClassroomUpdateToOneWithWhereWithoutClassSchedulesInput = {
+  where?: Prisma.ClassroomWhereInput
+  data: Prisma.XOR<Prisma.ClassroomUpdateWithoutClassSchedulesInput, Prisma.ClassroomUncheckedUpdateWithoutClassSchedulesInput>
+}
+
+export type ClassroomUpdateWithoutClassSchedulesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumClassroomTypeFieldUpdateOperationsInput | $Enums.ClassroomType
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progressChapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacher?: Prisma.UserUpdateOneWithoutOwnedClassroomsNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutClassroomNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutClassroomNestedInput
+  assignments?: Prisma.AssignmentUpdateManyWithoutClassroomNestedInput
+  testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
+  dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+}
+
+export type ClassroomUncheckedUpdateWithoutClassSchedulesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumClassroomTypeFieldUpdateOperationsInput | $Enums.ClassroomType
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progressChapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutClassroomNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutClassroomNestedInput
+  assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutClassroomNestedInput
+  testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
+  dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateManyTeacherInput = {
@@ -1180,6 +1457,8 @@ export type ClassroomUpdateWithoutTeacherInput = {
   testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutTeacherInput = {
@@ -1196,6 +1475,8 @@ export type ClassroomUncheckedUpdateWithoutTeacherInput = {
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
   dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateManyWithoutTeacherInput = {
@@ -1220,6 +1501,8 @@ export type ClassroomCountOutputType = {
   testAccess: number
   dailySummaries: number
   announcementTargets: number
+  staffTasks: number
+  classSchedules: number
 }
 
 export type ClassroomCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1229,6 +1512,8 @@ export type ClassroomCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   testAccess?: boolean | ClassroomCountOutputTypeCountTestAccessArgs
   dailySummaries?: boolean | ClassroomCountOutputTypeCountDailySummariesArgs
   announcementTargets?: boolean | ClassroomCountOutputTypeCountAnnouncementTargetsArgs
+  staffTasks?: boolean | ClassroomCountOutputTypeCountStaffTasksArgs
+  classSchedules?: boolean | ClassroomCountOutputTypeCountClassSchedulesArgs
 }
 
 /**
@@ -1283,6 +1568,20 @@ export type ClassroomCountOutputTypeCountAnnouncementTargetsArgs<ExtArgs extends
   where?: Prisma.AnnouncementClassroomTargetWhereInput
 }
 
+/**
+ * ClassroomCountOutputType without action
+ */
+export type ClassroomCountOutputTypeCountStaffTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StaffTaskWhereInput
+}
+
+/**
+ * ClassroomCountOutputType without action
+ */
+export type ClassroomCountOutputTypeCountClassSchedulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClassScheduleWhereInput
+}
+
 
 export type ClassroomSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1300,6 +1599,8 @@ export type ClassroomSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   testAccess?: boolean | Prisma.Classroom$testAccessArgs<ExtArgs>
   dailySummaries?: boolean | Prisma.Classroom$dailySummariesArgs<ExtArgs>
   announcementTargets?: boolean | Prisma.Classroom$announcementTargetsArgs<ExtArgs>
+  staffTasks?: boolean | Prisma.Classroom$staffTasksArgs<ExtArgs>
+  classSchedules?: boolean | Prisma.Classroom$classSchedulesArgs<ExtArgs>
   _count?: boolean | Prisma.ClassroomCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["classroom"]>
 
@@ -1347,6 +1648,8 @@ export type ClassroomInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   testAccess?: boolean | Prisma.Classroom$testAccessArgs<ExtArgs>
   dailySummaries?: boolean | Prisma.Classroom$dailySummariesArgs<ExtArgs>
   announcementTargets?: boolean | Prisma.Classroom$announcementTargetsArgs<ExtArgs>
+  staffTasks?: boolean | Prisma.Classroom$staffTasksArgs<ExtArgs>
+  classSchedules?: boolean | Prisma.Classroom$classSchedulesArgs<ExtArgs>
   _count?: boolean | Prisma.ClassroomCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClassroomIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1366,6 +1669,8 @@ export type $ClassroomPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     testAccess: Prisma.$TestAccessPayload<ExtArgs>[]
     dailySummaries: Prisma.$DailyClassSummaryPayload<ExtArgs>[]
     announcementTargets: Prisma.$AnnouncementClassroomTargetPayload<ExtArgs>[]
+    staffTasks: Prisma.$StaffTaskPayload<ExtArgs>[]
+    classSchedules: Prisma.$ClassSchedulePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1777,6 +2082,8 @@ export interface Prisma__ClassroomClient<T, Null = never, ExtArgs extends runtim
   testAccess<T extends Prisma.Classroom$testAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$testAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dailySummaries<T extends Prisma.Classroom$dailySummariesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$dailySummariesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyClassSummaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   announcementTargets<T extends Prisma.Classroom$announcementTargetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$announcementTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnouncementClassroomTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  staffTasks<T extends Prisma.Classroom$staffTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$staffTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  classSchedules<T extends Prisma.Classroom$classSchedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$classSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2375,6 +2682,54 @@ export type Classroom$announcementTargetsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.AnnouncementClassroomTargetScalarFieldEnum | Prisma.AnnouncementClassroomTargetScalarFieldEnum[]
+}
+
+/**
+ * Classroom.staffTasks
+ */
+export type Classroom$staffTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffTask
+   */
+  select?: Prisma.StaffTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffTask
+   */
+  omit?: Prisma.StaffTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffTaskInclude<ExtArgs> | null
+  where?: Prisma.StaffTaskWhereInput
+  orderBy?: Prisma.StaffTaskOrderByWithRelationInput | Prisma.StaffTaskOrderByWithRelationInput[]
+  cursor?: Prisma.StaffTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StaffTaskScalarFieldEnum | Prisma.StaffTaskScalarFieldEnum[]
+}
+
+/**
+ * Classroom.classSchedules
+ */
+export type Classroom$classSchedulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClassSchedule
+   */
+  select?: Prisma.ClassScheduleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClassSchedule
+   */
+  omit?: Prisma.ClassScheduleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClassScheduleInclude<ExtArgs> | null
+  where?: Prisma.ClassScheduleWhereInput
+  orderBy?: Prisma.ClassScheduleOrderByWithRelationInput | Prisma.ClassScheduleOrderByWithRelationInput[]
+  cursor?: Prisma.ClassScheduleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClassScheduleScalarFieldEnum | Prisma.ClassScheduleScalarFieldEnum[]
 }
 
 /**

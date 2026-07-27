@@ -41,6 +41,7 @@ export type VideoMinAggregateOutputType = {
   duration: number | null
   chapterId: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type VideoMaxAggregateOutputType = {
@@ -50,6 +51,7 @@ export type VideoMaxAggregateOutputType = {
   duration: number | null
   chapterId: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type VideoCountAggregateOutputType = {
@@ -59,6 +61,7 @@ export type VideoCountAggregateOutputType = {
   duration: number
   chapterId: number
   createdAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -78,6 +81,7 @@ export type VideoMinAggregateInputType = {
   duration?: true
   chapterId?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type VideoMaxAggregateInputType = {
@@ -87,6 +91,7 @@ export type VideoMaxAggregateInputType = {
   duration?: true
   chapterId?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type VideoCountAggregateInputType = {
@@ -96,6 +101,7 @@ export type VideoCountAggregateInputType = {
   duration?: true
   chapterId?: true
   createdAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -192,6 +198,7 @@ export type VideoGroupByOutputType = {
   duration: number | null
   chapterId: string | null
   createdAt: Date
+  deletedAt: Date | null
   _count: VideoCountAggregateOutputType | null
   _avg: VideoAvgAggregateOutputType | null
   _sum: VideoSumAggregateOutputType | null
@@ -224,6 +231,7 @@ export type VideoWhereInput = {
   duration?: Prisma.IntNullableFilter<"Video"> | number | null
   chapterId?: Prisma.StringNullableFilter<"Video"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Video"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Video"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterNullableScalarRelationFilter, Prisma.ChapterWhereInput> | null
 }
 
@@ -234,6 +242,7 @@ export type VideoOrderByWithRelationInput = {
   duration?: Prisma.SortOrderInput | Prisma.SortOrder
   chapterId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chapter?: Prisma.ChapterOrderByWithRelationInput
 }
 
@@ -247,6 +256,7 @@ export type VideoWhereUniqueInput = Prisma.AtLeast<{
   duration?: Prisma.IntNullableFilter<"Video"> | number | null
   chapterId?: Prisma.StringNullableFilter<"Video"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Video"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Video"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterNullableScalarRelationFilter, Prisma.ChapterWhereInput> | null
 }, "id">
 
@@ -257,6 +267,7 @@ export type VideoOrderByWithAggregationInput = {
   duration?: Prisma.SortOrderInput | Prisma.SortOrder
   chapterId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.VideoCountOrderByAggregateInput
   _avg?: Prisma.VideoAvgOrderByAggregateInput
   _max?: Prisma.VideoMaxOrderByAggregateInput
@@ -274,6 +285,7 @@ export type VideoScalarWhereWithAggregatesInput = {
   duration?: Prisma.IntNullableWithAggregatesFilter<"Video"> | number | null
   chapterId?: Prisma.StringNullableWithAggregatesFilter<"Video"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Video"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Video"> | Date | string | null
 }
 
 export type VideoCreateInput = {
@@ -282,6 +294,7 @@ export type VideoCreateInput = {
   s3Key: string
   duration?: number | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   chapter?: Prisma.ChapterCreateNestedOneWithoutVideosInput
 }
 
@@ -292,6 +305,7 @@ export type VideoUncheckedCreateInput = {
   duration?: number | null
   chapterId?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type VideoUpdateInput = {
@@ -300,6 +314,7 @@ export type VideoUpdateInput = {
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneWithoutVideosNestedInput
 }
 
@@ -310,6 +325,7 @@ export type VideoUncheckedUpdateInput = {
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VideoCreateManyInput = {
@@ -319,6 +335,7 @@ export type VideoCreateManyInput = {
   duration?: number | null
   chapterId?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type VideoUpdateManyMutationInput = {
@@ -327,6 +344,7 @@ export type VideoUpdateManyMutationInput = {
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VideoUncheckedUpdateManyInput = {
@@ -336,6 +354,7 @@ export type VideoUncheckedUpdateManyInput = {
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VideoListRelationFilter = {
@@ -355,6 +374,7 @@ export type VideoCountOrderByAggregateInput = {
   duration?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type VideoAvgOrderByAggregateInput = {
@@ -368,6 +388,7 @@ export type VideoMaxOrderByAggregateInput = {
   duration?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type VideoMinOrderByAggregateInput = {
@@ -377,6 +398,7 @@ export type VideoMinOrderByAggregateInput = {
   duration?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type VideoSumOrderByAggregateInput = {
@@ -431,6 +453,7 @@ export type VideoCreateWithoutChapterInput = {
   s3Key: string
   duration?: number | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type VideoUncheckedCreateWithoutChapterInput = {
@@ -439,6 +462,7 @@ export type VideoUncheckedCreateWithoutChapterInput = {
   s3Key: string
   duration?: number | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type VideoCreateOrConnectWithoutChapterInput = {
@@ -477,6 +501,7 @@ export type VideoScalarWhereInput = {
   duration?: Prisma.IntNullableFilter<"Video"> | number | null
   chapterId?: Prisma.StringNullableFilter<"Video"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Video"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Video"> | Date | string | null
 }
 
 export type VideoCreateManyChapterInput = {
@@ -485,6 +510,7 @@ export type VideoCreateManyChapterInput = {
   s3Key: string
   duration?: number | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type VideoUpdateWithoutChapterInput = {
@@ -493,6 +519,7 @@ export type VideoUpdateWithoutChapterInput = {
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VideoUncheckedUpdateWithoutChapterInput = {
@@ -501,6 +528,7 @@ export type VideoUncheckedUpdateWithoutChapterInput = {
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VideoUncheckedUpdateManyWithoutChapterInput = {
@@ -509,6 +537,7 @@ export type VideoUncheckedUpdateManyWithoutChapterInput = {
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -520,6 +549,7 @@ export type VideoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   duration?: boolean
   chapterId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
 
@@ -530,6 +560,7 @@ export type VideoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   duration?: boolean
   chapterId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
 
@@ -540,6 +571,7 @@ export type VideoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   duration?: boolean
   chapterId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
 
@@ -550,9 +582,10 @@ export type VideoSelectScalar = {
   duration?: boolean
   chapterId?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
 }
 
-export type VideoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "s3Key" | "duration" | "chapterId" | "createdAt", ExtArgs["result"]["video"]>
+export type VideoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "s3Key" | "duration" | "chapterId" | "createdAt" | "deletedAt", ExtArgs["result"]["video"]>
 export type VideoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }
@@ -575,6 +608,7 @@ export type $VideoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     duration: number | null
     chapterId: string | null
     createdAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["video"]>
   composites: {}
 }
@@ -1005,6 +1039,7 @@ export interface VideoFieldRefs {
   readonly duration: Prisma.FieldRef<"Video", 'Int'>
   readonly chapterId: Prisma.FieldRef<"Video", 'String'>
   readonly createdAt: Prisma.FieldRef<"Video", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Video", 'DateTime'>
 }
     
 

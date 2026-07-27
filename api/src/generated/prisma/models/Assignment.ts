@@ -33,6 +33,7 @@ export type AssignmentMinAggregateOutputType = {
   dueDate: Date | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type AssignmentMaxAggregateOutputType = {
@@ -44,6 +45,7 @@ export type AssignmentMaxAggregateOutputType = {
   dueDate: Date | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type AssignmentCountAggregateOutputType = {
@@ -56,6 +58,7 @@ export type AssignmentCountAggregateOutputType = {
   dueDate: number
   createdById: number
   createdAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -69,6 +72,7 @@ export type AssignmentMinAggregateInputType = {
   dueDate?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type AssignmentMaxAggregateInputType = {
@@ -80,6 +84,7 @@ export type AssignmentMaxAggregateInputType = {
   dueDate?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type AssignmentCountAggregateInputType = {
@@ -92,6 +97,7 @@ export type AssignmentCountAggregateInputType = {
   dueDate?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -177,6 +183,7 @@ export type AssignmentGroupByOutputType = {
   dueDate: Date | null
   createdById: string
   createdAt: Date
+  deletedAt: Date | null
   _count: AssignmentCountAggregateOutputType | null
   _min: AssignmentMinAggregateOutputType | null
   _max: AssignmentMaxAggregateOutputType | null
@@ -210,6 +217,7 @@ export type AssignmentWhereInput = {
   dueDate?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
   createdById?: Prisma.StringFilter<"Assignment"> | string
   createdAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
   classroom?: Prisma.XOR<Prisma.ClassroomScalarRelationFilter, Prisma.ClassroomWhereInput>
   submissions?: Prisma.SubmissionListRelationFilter
 }
@@ -224,6 +232,7 @@ export type AssignmentOrderByWithRelationInput = {
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   classroom?: Prisma.ClassroomOrderByWithRelationInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
 }
@@ -241,6 +250,7 @@ export type AssignmentWhereUniqueInput = Prisma.AtLeast<{
   dueDate?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
   createdById?: Prisma.StringFilter<"Assignment"> | string
   createdAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
   classroom?: Prisma.XOR<Prisma.ClassroomScalarRelationFilter, Prisma.ClassroomWhereInput>
   submissions?: Prisma.SubmissionListRelationFilter
 }, "id">
@@ -255,6 +265,7 @@ export type AssignmentOrderByWithAggregationInput = {
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AssignmentCountOrderByAggregateInput
   _max?: Prisma.AssignmentMaxOrderByAggregateInput
   _min?: Prisma.AssignmentMinOrderByAggregateInput
@@ -273,6 +284,7 @@ export type AssignmentScalarWhereWithAggregatesInput = {
   dueDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Assignment"> | Date | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"Assignment"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Assignment"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Assignment"> | Date | string | null
 }
 
 export type AssignmentCreateInput = {
@@ -284,6 +296,7 @@ export type AssignmentCreateInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   classroom: Prisma.ClassroomCreateNestedOneWithoutAssignmentsInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
 }
@@ -298,6 +311,7 @@ export type AssignmentUncheckedCreateInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
 }
 
@@ -310,6 +324,7 @@ export type AssignmentUpdateInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   classroom?: Prisma.ClassroomUpdateOneRequiredWithoutAssignmentsNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutAssignmentNestedInput
 }
@@ -324,6 +339,7 @@ export type AssignmentUncheckedUpdateInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentNestedInput
 }
 
@@ -337,6 +353,7 @@ export type AssignmentCreateManyInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type AssignmentUpdateManyMutationInput = {
@@ -348,6 +365,7 @@ export type AssignmentUpdateManyMutationInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AssignmentUncheckedUpdateManyInput = {
@@ -360,6 +378,7 @@ export type AssignmentUncheckedUpdateManyInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AssignmentListRelationFilter = {
@@ -390,6 +409,7 @@ export type AssignmentCountOrderByAggregateInput = {
   dueDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AssignmentMaxOrderByAggregateInput = {
@@ -401,6 +421,7 @@ export type AssignmentMaxOrderByAggregateInput = {
   dueDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AssignmentMinOrderByAggregateInput = {
@@ -412,6 +433,7 @@ export type AssignmentMinOrderByAggregateInput = {
   dueDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AssignmentScalarRelationFilter = {
@@ -497,6 +519,7 @@ export type AssignmentCreateWithoutClassroomInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
 }
 
@@ -509,6 +532,7 @@ export type AssignmentUncheckedCreateWithoutClassroomInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
 }
 
@@ -551,6 +575,7 @@ export type AssignmentScalarWhereInput = {
   dueDate?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
   createdById?: Prisma.StringFilter<"Assignment"> | string
   createdAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
 }
 
 export type AssignmentCreateWithoutSubmissionsInput = {
@@ -562,6 +587,7 @@ export type AssignmentCreateWithoutSubmissionsInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   classroom: Prisma.ClassroomCreateNestedOneWithoutAssignmentsInput
 }
 
@@ -575,6 +601,7 @@ export type AssignmentUncheckedCreateWithoutSubmissionsInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type AssignmentCreateOrConnectWithoutSubmissionsInput = {
@@ -602,6 +629,7 @@ export type AssignmentUpdateWithoutSubmissionsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   classroom?: Prisma.ClassroomUpdateOneRequiredWithoutAssignmentsNestedInput
 }
 
@@ -615,6 +643,7 @@ export type AssignmentUncheckedUpdateWithoutSubmissionsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AssignmentCreateManyClassroomInput = {
@@ -626,6 +655,7 @@ export type AssignmentCreateManyClassroomInput = {
   dueDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type AssignmentUpdateWithoutClassroomInput = {
@@ -637,6 +667,7 @@ export type AssignmentUpdateWithoutClassroomInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissions?: Prisma.SubmissionUpdateManyWithoutAssignmentNestedInput
 }
 
@@ -649,6 +680,7 @@ export type AssignmentUncheckedUpdateWithoutClassroomInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentNestedInput
 }
 
@@ -661,6 +693,7 @@ export type AssignmentUncheckedUpdateManyWithoutClassroomInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -704,6 +737,7 @@ export type AssignmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   dueDate?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.Assignment$submissionsArgs<ExtArgs>
   _count?: boolean | Prisma.AssignmentCountOutputTypeDefaultArgs<ExtArgs>
@@ -719,6 +753,7 @@ export type AssignmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   dueDate?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["assignment"]>
 
@@ -732,6 +767,7 @@ export type AssignmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   dueDate?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["assignment"]>
 
@@ -745,9 +781,10 @@ export type AssignmentSelectScalar = {
   dueDate?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
 }
 
-export type AssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "type" | "title" | "description" | "imageKeys" | "dueDate" | "createdById" | "createdAt", ExtArgs["result"]["assignment"]>
+export type AssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "type" | "title" | "description" | "imageKeys" | "dueDate" | "createdById" | "createdAt" | "deletedAt", ExtArgs["result"]["assignment"]>
 export type AssignmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.Assignment$submissionsArgs<ExtArgs>
@@ -776,6 +813,7 @@ export type $AssignmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     dueDate: Date | null
     createdById: string
     createdAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["assignment"]>
   composites: {}
 }
@@ -1210,6 +1248,7 @@ export interface AssignmentFieldRefs {
   readonly dueDate: Prisma.FieldRef<"Assignment", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"Assignment", 'String'>
   readonly createdAt: Prisma.FieldRef<"Assignment", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Assignment", 'DateTime'>
 }
     
 

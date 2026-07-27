@@ -28,10 +28,12 @@ export type AggregateStudentProfile = {
 
 export type StudentProfileAvgAggregateOutputType = {
   grade: number | null
+  tuitionAmount: number | null
 }
 
 export type StudentProfileSumAggregateOutputType = {
   grade: number | null
+  tuitionAmount: number | null
 }
 
 export type StudentProfileMinAggregateOutputType = {
@@ -41,6 +43,16 @@ export type StudentProfileMinAggregateOutputType = {
   school: string | null
   activatedAt: Date | null
   activationCode: string | null
+  fatherPhone: string | null
+  motherPhone: string | null
+  guardianNote: string | null
+  branch: string | null
+  section: string | null
+  tuitionAmount: number | null
+  tuitionPlan: $Enums.TuitionPlan | null
+  tuitionNote: string | null
+  joinedOn: Date | null
+  leftOn: Date | null
 }
 
 export type StudentProfileMaxAggregateOutputType = {
@@ -50,6 +62,16 @@ export type StudentProfileMaxAggregateOutputType = {
   school: string | null
   activatedAt: Date | null
   activationCode: string | null
+  fatherPhone: string | null
+  motherPhone: string | null
+  guardianNote: string | null
+  branch: string | null
+  section: string | null
+  tuitionAmount: number | null
+  tuitionPlan: $Enums.TuitionPlan | null
+  tuitionNote: string | null
+  joinedOn: Date | null
+  leftOn: Date | null
 }
 
 export type StudentProfileCountAggregateOutputType = {
@@ -59,16 +81,28 @@ export type StudentProfileCountAggregateOutputType = {
   school: number
   activatedAt: number
   activationCode: number
+  fatherPhone: number
+  motherPhone: number
+  guardianNote: number
+  branch: number
+  section: number
+  tuitionAmount: number
+  tuitionPlan: number
+  tuitionNote: number
+  joinedOn: number
+  leftOn: number
   _all: number
 }
 
 
 export type StudentProfileAvgAggregateInputType = {
   grade?: true
+  tuitionAmount?: true
 }
 
 export type StudentProfileSumAggregateInputType = {
   grade?: true
+  tuitionAmount?: true
 }
 
 export type StudentProfileMinAggregateInputType = {
@@ -78,6 +112,16 @@ export type StudentProfileMinAggregateInputType = {
   school?: true
   activatedAt?: true
   activationCode?: true
+  fatherPhone?: true
+  motherPhone?: true
+  guardianNote?: true
+  branch?: true
+  section?: true
+  tuitionAmount?: true
+  tuitionPlan?: true
+  tuitionNote?: true
+  joinedOn?: true
+  leftOn?: true
 }
 
 export type StudentProfileMaxAggregateInputType = {
@@ -87,6 +131,16 @@ export type StudentProfileMaxAggregateInputType = {
   school?: true
   activatedAt?: true
   activationCode?: true
+  fatherPhone?: true
+  motherPhone?: true
+  guardianNote?: true
+  branch?: true
+  section?: true
+  tuitionAmount?: true
+  tuitionPlan?: true
+  tuitionNote?: true
+  joinedOn?: true
+  leftOn?: true
 }
 
 export type StudentProfileCountAggregateInputType = {
@@ -96,6 +150,16 @@ export type StudentProfileCountAggregateInputType = {
   school?: true
   activatedAt?: true
   activationCode?: true
+  fatherPhone?: true
+  motherPhone?: true
+  guardianNote?: true
+  branch?: true
+  section?: true
+  tuitionAmount?: true
+  tuitionPlan?: true
+  tuitionNote?: true
+  joinedOn?: true
+  leftOn?: true
   _all?: true
 }
 
@@ -192,6 +256,16 @@ export type StudentProfileGroupByOutputType = {
   school: string | null
   activatedAt: Date | null
   activationCode: string | null
+  fatherPhone: string | null
+  motherPhone: string | null
+  guardianNote: string | null
+  branch: string | null
+  section: string | null
+  tuitionAmount: number | null
+  tuitionPlan: $Enums.TuitionPlan | null
+  tuitionNote: string | null
+  joinedOn: Date | null
+  leftOn: Date | null
   _count: StudentProfileCountAggregateOutputType | null
   _avg: StudentProfileAvgAggregateOutputType | null
   _sum: StudentProfileSumAggregateOutputType | null
@@ -224,6 +298,16 @@ export type StudentProfileWhereInput = {
   school?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   activatedAt?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
   activationCode?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  fatherPhone?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  motherPhone?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  guardianNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  branch?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  section?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  tuitionAmount?: Prisma.IntNullableFilter<"StudentProfile"> | number | null
+  tuitionPlan?: Prisma.EnumTuitionPlanNullableFilter<"StudentProfile"> | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  joinedOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
+  leftOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -234,6 +318,16 @@ export type StudentProfileOrderByWithRelationInput = {
   school?: Prisma.SortOrderInput | Prisma.SortOrder
   activatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   activationCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  fatherPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  motherPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  guardianNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  branch?: Prisma.SortOrderInput | Prisma.SortOrder
+  section?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionPlan?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  joinedOn?: Prisma.SortOrderInput | Prisma.SortOrder
+  leftOn?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -247,6 +341,16 @@ export type StudentProfileWhereUniqueInput = Prisma.AtLeast<{
   school?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   activatedAt?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
   activationCode?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  fatherPhone?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  motherPhone?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  guardianNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  branch?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  section?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  tuitionAmount?: Prisma.IntNullableFilter<"StudentProfile"> | number | null
+  tuitionPlan?: Prisma.EnumTuitionPlanNullableFilter<"StudentProfile"> | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  joinedOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
+  leftOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "userId">
 
@@ -257,6 +361,16 @@ export type StudentProfileOrderByWithAggregationInput = {
   school?: Prisma.SortOrderInput | Prisma.SortOrder
   activatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   activationCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  fatherPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  motherPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  guardianNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  branch?: Prisma.SortOrderInput | Prisma.SortOrder
+  section?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionPlan?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  joinedOn?: Prisma.SortOrderInput | Prisma.SortOrder
+  leftOn?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StudentProfileCountOrderByAggregateInput
   _avg?: Prisma.StudentProfileAvgOrderByAggregateInput
   _max?: Prisma.StudentProfileMaxOrderByAggregateInput
@@ -274,6 +388,16 @@ export type StudentProfileScalarWhereWithAggregatesInput = {
   school?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
   activatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentProfile"> | Date | string | null
   activationCode?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  fatherPhone?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  motherPhone?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  guardianNote?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  branch?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  section?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  tuitionAmount?: Prisma.IntNullableWithAggregatesFilter<"StudentProfile"> | number | null
+  tuitionPlan?: Prisma.EnumTuitionPlanNullableWithAggregatesFilter<"StudentProfile"> | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  joinedOn?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentProfile"> | Date | string | null
+  leftOn?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentProfile"> | Date | string | null
 }
 
 export type StudentProfileCreateInput = {
@@ -282,6 +406,16 @@ export type StudentProfileCreateInput = {
   school?: string | null
   activatedAt?: Date | string | null
   activationCode?: string | null
+  fatherPhone?: string | null
+  motherPhone?: string | null
+  guardianNote?: string | null
+  branch?: string | null
+  section?: string | null
+  tuitionAmount?: number | null
+  tuitionPlan?: $Enums.TuitionPlan | null
+  tuitionNote?: string | null
+  joinedOn?: Date | string | null
+  leftOn?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutStudentProfileInput
 }
 
@@ -292,6 +426,16 @@ export type StudentProfileUncheckedCreateInput = {
   school?: string | null
   activatedAt?: Date | string | null
   activationCode?: string | null
+  fatherPhone?: string | null
+  motherPhone?: string | null
+  guardianNote?: string | null
+  branch?: string | null
+  section?: string | null
+  tuitionAmount?: number | null
+  tuitionPlan?: $Enums.TuitionPlan | null
+  tuitionNote?: string | null
+  joinedOn?: Date | string | null
+  leftOn?: Date | string | null
 }
 
 export type StudentProfileUpdateInput = {
@@ -300,6 +444,16 @@ export type StudentProfileUpdateInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fatherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutStudentProfileNestedInput
 }
 
@@ -310,6 +464,16 @@ export type StudentProfileUncheckedUpdateInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fatherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentProfileCreateManyInput = {
@@ -319,6 +483,16 @@ export type StudentProfileCreateManyInput = {
   school?: string | null
   activatedAt?: Date | string | null
   activationCode?: string | null
+  fatherPhone?: string | null
+  motherPhone?: string | null
+  guardianNote?: string | null
+  branch?: string | null
+  section?: string | null
+  tuitionAmount?: number | null
+  tuitionPlan?: $Enums.TuitionPlan | null
+  tuitionNote?: string | null
+  joinedOn?: Date | string | null
+  leftOn?: Date | string | null
 }
 
 export type StudentProfileUpdateManyMutationInput = {
@@ -327,6 +501,16 @@ export type StudentProfileUpdateManyMutationInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fatherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentProfileUncheckedUpdateManyInput = {
@@ -336,6 +520,16 @@ export type StudentProfileUncheckedUpdateManyInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fatherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentProfileNullableScalarRelationFilter = {
@@ -350,10 +544,21 @@ export type StudentProfileCountOrderByAggregateInput = {
   school?: Prisma.SortOrder
   activatedAt?: Prisma.SortOrder
   activationCode?: Prisma.SortOrder
+  fatherPhone?: Prisma.SortOrder
+  motherPhone?: Prisma.SortOrder
+  guardianNote?: Prisma.SortOrder
+  branch?: Prisma.SortOrder
+  section?: Prisma.SortOrder
+  tuitionAmount?: Prisma.SortOrder
+  tuitionPlan?: Prisma.SortOrder
+  tuitionNote?: Prisma.SortOrder
+  joinedOn?: Prisma.SortOrder
+  leftOn?: Prisma.SortOrder
 }
 
 export type StudentProfileAvgOrderByAggregateInput = {
   grade?: Prisma.SortOrder
+  tuitionAmount?: Prisma.SortOrder
 }
 
 export type StudentProfileMaxOrderByAggregateInput = {
@@ -363,6 +568,16 @@ export type StudentProfileMaxOrderByAggregateInput = {
   school?: Prisma.SortOrder
   activatedAt?: Prisma.SortOrder
   activationCode?: Prisma.SortOrder
+  fatherPhone?: Prisma.SortOrder
+  motherPhone?: Prisma.SortOrder
+  guardianNote?: Prisma.SortOrder
+  branch?: Prisma.SortOrder
+  section?: Prisma.SortOrder
+  tuitionAmount?: Prisma.SortOrder
+  tuitionPlan?: Prisma.SortOrder
+  tuitionNote?: Prisma.SortOrder
+  joinedOn?: Prisma.SortOrder
+  leftOn?: Prisma.SortOrder
 }
 
 export type StudentProfileMinOrderByAggregateInput = {
@@ -372,10 +587,21 @@ export type StudentProfileMinOrderByAggregateInput = {
   school?: Prisma.SortOrder
   activatedAt?: Prisma.SortOrder
   activationCode?: Prisma.SortOrder
+  fatherPhone?: Prisma.SortOrder
+  motherPhone?: Prisma.SortOrder
+  guardianNote?: Prisma.SortOrder
+  branch?: Prisma.SortOrder
+  section?: Prisma.SortOrder
+  tuitionAmount?: Prisma.SortOrder
+  tuitionPlan?: Prisma.SortOrder
+  tuitionNote?: Prisma.SortOrder
+  joinedOn?: Prisma.SortOrder
+  leftOn?: Prisma.SortOrder
 }
 
 export type StudentProfileSumOrderByAggregateInput = {
   grade?: Prisma.SortOrder
+  tuitionAmount?: Prisma.SortOrder
 }
 
 export type StudentProfileCreateNestedOneWithoutUserInput = {
@@ -426,12 +652,26 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
+export type NullableEnumTuitionPlanFieldUpdateOperationsInput = {
+  set?: $Enums.TuitionPlan | null
+}
+
 export type StudentProfileCreateWithoutUserInput = {
   type: $Enums.StudentType
   grade?: number | null
   school?: string | null
   activatedAt?: Date | string | null
   activationCode?: string | null
+  fatherPhone?: string | null
+  motherPhone?: string | null
+  guardianNote?: string | null
+  branch?: string | null
+  section?: string | null
+  tuitionAmount?: number | null
+  tuitionPlan?: $Enums.TuitionPlan | null
+  tuitionNote?: string | null
+  joinedOn?: Date | string | null
+  leftOn?: Date | string | null
 }
 
 export type StudentProfileUncheckedCreateWithoutUserInput = {
@@ -440,6 +680,16 @@ export type StudentProfileUncheckedCreateWithoutUserInput = {
   school?: string | null
   activatedAt?: Date | string | null
   activationCode?: string | null
+  fatherPhone?: string | null
+  motherPhone?: string | null
+  guardianNote?: string | null
+  branch?: string | null
+  section?: string | null
+  tuitionAmount?: number | null
+  tuitionPlan?: $Enums.TuitionPlan | null
+  tuitionNote?: string | null
+  joinedOn?: Date | string | null
+  leftOn?: Date | string | null
 }
 
 export type StudentProfileCreateOrConnectWithoutUserInput = {
@@ -464,6 +714,16 @@ export type StudentProfileUpdateWithoutUserInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fatherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentProfileUncheckedUpdateWithoutUserInput = {
@@ -472,6 +732,16 @@ export type StudentProfileUncheckedUpdateWithoutUserInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fatherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motherPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
+  tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -483,6 +753,16 @@ export type StudentProfileSelect<ExtArgs extends runtime.Types.Extensions.Intern
   school?: boolean
   activatedAt?: boolean
   activationCode?: boolean
+  fatherPhone?: boolean
+  motherPhone?: boolean
+  guardianNote?: boolean
+  branch?: boolean
+  section?: boolean
+  tuitionAmount?: boolean
+  tuitionPlan?: boolean
+  tuitionNote?: boolean
+  joinedOn?: boolean
+  leftOn?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentProfile"]>
 
@@ -493,6 +773,16 @@ export type StudentProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   school?: boolean
   activatedAt?: boolean
   activationCode?: boolean
+  fatherPhone?: boolean
+  motherPhone?: boolean
+  guardianNote?: boolean
+  branch?: boolean
+  section?: boolean
+  tuitionAmount?: boolean
+  tuitionPlan?: boolean
+  tuitionNote?: boolean
+  joinedOn?: boolean
+  leftOn?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentProfile"]>
 
@@ -503,6 +793,16 @@ export type StudentProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   school?: boolean
   activatedAt?: boolean
   activationCode?: boolean
+  fatherPhone?: boolean
+  motherPhone?: boolean
+  guardianNote?: boolean
+  branch?: boolean
+  section?: boolean
+  tuitionAmount?: boolean
+  tuitionPlan?: boolean
+  tuitionNote?: boolean
+  joinedOn?: boolean
+  leftOn?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentProfile"]>
 
@@ -513,9 +813,19 @@ export type StudentProfileSelectScalar = {
   school?: boolean
   activatedAt?: boolean
   activationCode?: boolean
+  fatherPhone?: boolean
+  motherPhone?: boolean
+  guardianNote?: boolean
+  branch?: boolean
+  section?: boolean
+  tuitionAmount?: boolean
+  tuitionPlan?: boolean
+  tuitionNote?: boolean
+  joinedOn?: boolean
+  leftOn?: boolean
 }
 
-export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "type" | "grade" | "school" | "activatedAt" | "activationCode", ExtArgs["result"]["studentProfile"]>
+export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "type" | "grade" | "school" | "activatedAt" | "activationCode" | "fatherPhone" | "motherPhone" | "guardianNote" | "branch" | "section" | "tuitionAmount" | "tuitionPlan" | "tuitionNote" | "joinedOn" | "leftOn", ExtArgs["result"]["studentProfile"]>
 export type StudentProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -538,6 +848,16 @@ export type $StudentProfilePayload<ExtArgs extends runtime.Types.Extensions.Inte
     school: string | null
     activatedAt: Date | null
     activationCode: string | null
+    fatherPhone: string | null
+    motherPhone: string | null
+    guardianNote: string | null
+    branch: string | null
+    section: string | null
+    tuitionAmount: number | null
+    tuitionPlan: $Enums.TuitionPlan | null
+    tuitionNote: string | null
+    joinedOn: Date | null
+    leftOn: Date | null
   }, ExtArgs["result"]["studentProfile"]>
   composites: {}
 }
@@ -968,6 +1288,16 @@ export interface StudentProfileFieldRefs {
   readonly school: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly activatedAt: Prisma.FieldRef<"StudentProfile", 'DateTime'>
   readonly activationCode: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly fatherPhone: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly motherPhone: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly guardianNote: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly branch: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly section: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly tuitionAmount: Prisma.FieldRef<"StudentProfile", 'Int'>
+  readonly tuitionPlan: Prisma.FieldRef<"StudentProfile", 'TuitionPlan'>
+  readonly tuitionNote: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly joinedOn: Prisma.FieldRef<"StudentProfile", 'DateTime'>
+  readonly leftOn: Prisma.FieldRef<"StudentProfile", 'DateTime'>
 }
     
 

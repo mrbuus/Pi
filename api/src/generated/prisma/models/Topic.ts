@@ -38,18 +38,21 @@ export type TopicMinAggregateOutputType = {
   id: string | null
   name: string | null
   order: number | null
+  deletedAt: Date | null
 }
 
 export type TopicMaxAggregateOutputType = {
   id: string | null
   name: string | null
   order: number | null
+  deletedAt: Date | null
 }
 
 export type TopicCountAggregateOutputType = {
   id: number
   name: number
   order: number
+  deletedAt: number
   _all: number
 }
 
@@ -66,18 +69,21 @@ export type TopicMinAggregateInputType = {
   id?: true
   name?: true
   order?: true
+  deletedAt?: true
 }
 
 export type TopicMaxAggregateInputType = {
   id?: true
   name?: true
   order?: true
+  deletedAt?: true
 }
 
 export type TopicCountAggregateInputType = {
   id?: true
   name?: true
   order?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -171,6 +177,7 @@ export type TopicGroupByOutputType = {
   id: string
   name: string
   order: number
+  deletedAt: Date | null
   _count: TopicCountAggregateOutputType | null
   _avg: TopicAvgAggregateOutputType | null
   _sum: TopicSumAggregateOutputType | null
@@ -200,6 +207,7 @@ export type TopicWhereInput = {
   id?: Prisma.StringFilter<"Topic"> | string
   name?: Prisma.StringFilter<"Topic"> | string
   order?: Prisma.IntFilter<"Topic"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"Topic"> | Date | string | null
   chapters?: Prisma.ChapterListRelationFilter
 }
 
@@ -207,6 +215,7 @@ export type TopicOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chapters?: Prisma.ChapterOrderByRelationAggregateInput
 }
 
@@ -217,6 +226,7 @@ export type TopicWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.TopicWhereInput[]
   NOT?: Prisma.TopicWhereInput | Prisma.TopicWhereInput[]
   order?: Prisma.IntFilter<"Topic"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"Topic"> | Date | string | null
   chapters?: Prisma.ChapterListRelationFilter
 }, "id" | "name">
 
@@ -224,6 +234,7 @@ export type TopicOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TopicCountOrderByAggregateInput
   _avg?: Prisma.TopicAvgOrderByAggregateInput
   _max?: Prisma.TopicMaxOrderByAggregateInput
@@ -238,12 +249,14 @@ export type TopicScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Topic"> | string
   name?: Prisma.StringWithAggregatesFilter<"Topic"> | string
   order?: Prisma.IntWithAggregatesFilter<"Topic"> | number
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Topic"> | Date | string | null
 }
 
 export type TopicCreateInput = {
   id?: string
   name: string
   order?: number
+  deletedAt?: Date | string | null
   chapters?: Prisma.ChapterCreateNestedManyWithoutTopicInput
 }
 
@@ -251,6 +264,7 @@ export type TopicUncheckedCreateInput = {
   id?: string
   name: string
   order?: number
+  deletedAt?: Date | string | null
   chapters?: Prisma.ChapterUncheckedCreateNestedManyWithoutTopicInput
 }
 
@@ -258,6 +272,7 @@ export type TopicUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapters?: Prisma.ChapterUpdateManyWithoutTopicNestedInput
 }
 
@@ -265,6 +280,7 @@ export type TopicUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapters?: Prisma.ChapterUncheckedUpdateManyWithoutTopicNestedInput
 }
 
@@ -272,18 +288,21 @@ export type TopicCreateManyInput = {
   id?: string
   name: string
   order?: number
+  deletedAt?: Date | string | null
 }
 
 export type TopicUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TopicUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TopicNullableScalarRelationFilter = {
@@ -295,6 +314,7 @@ export type TopicCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type TopicAvgOrderByAggregateInput = {
@@ -305,12 +325,14 @@ export type TopicMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type TopicMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type TopicSumOrderByAggregateInput = {
@@ -337,12 +359,14 @@ export type TopicCreateWithoutChaptersInput = {
   id?: string
   name: string
   order?: number
+  deletedAt?: Date | string | null
 }
 
 export type TopicUncheckedCreateWithoutChaptersInput = {
   id?: string
   name: string
   order?: number
+  deletedAt?: Date | string | null
 }
 
 export type TopicCreateOrConnectWithoutChaptersInput = {
@@ -365,12 +389,14 @@ export type TopicUpdateWithoutChaptersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TopicUncheckedUpdateWithoutChaptersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -408,6 +434,7 @@ export type TopicSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   id?: boolean
   name?: boolean
   order?: boolean
+  deletedAt?: boolean
   chapters?: boolean | Prisma.Topic$chaptersArgs<ExtArgs>
   _count?: boolean | Prisma.TopicCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["topic"]>
@@ -416,21 +443,24 @@ export type TopicSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   name?: boolean
   order?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["topic"]>
 
 export type TopicSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   order?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["topic"]>
 
 export type TopicSelectScalar = {
   id?: boolean
   name?: boolean
   order?: boolean
+  deletedAt?: boolean
 }
 
-export type TopicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "order", ExtArgs["result"]["topic"]>
+export type TopicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "order" | "deletedAt", ExtArgs["result"]["topic"]>
 export type TopicInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapters?: boolean | Prisma.Topic$chaptersArgs<ExtArgs>
   _count?: boolean | Prisma.TopicCountOutputTypeDefaultArgs<ExtArgs>
@@ -447,6 +477,7 @@ export type $TopicPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     id: string
     name: string
     order: number
+    deletedAt: Date | null
   }, ExtArgs["result"]["topic"]>
   composites: {}
 }
@@ -874,6 +905,7 @@ export interface TopicFieldRefs {
   readonly id: Prisma.FieldRef<"Topic", 'String'>
   readonly name: Prisma.FieldRef<"Topic", 'String'>
   readonly order: Prisma.FieldRef<"Topic", 'Int'>
+  readonly deletedAt: Prisma.FieldRef<"Topic", 'DateTime'>
 }
     
 

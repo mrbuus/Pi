@@ -29,6 +29,16 @@ export const StudentType = {
 export type StudentType = (typeof StudentType)[keyof typeof StudentType]
 
 
+export const TuitionPlan = {
+  FULL_YEAR: 'FULL_YEAR',
+  INSTALLMENT: 'INSTALLMENT',
+  MONTHLY: 'MONTHLY',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type TuitionPlan = (typeof TuitionPlan)[keyof typeof TuitionPlan]
+
+
 export const ClassroomType = {
   IN_PERSON: 'IN_PERSON',
   ONLINE: 'ONLINE'
@@ -64,6 +74,14 @@ export const SubmissionState = {
 } as const
 
 export type SubmissionState = (typeof SubmissionState)[keyof typeof SubmissionState]
+
+
+export const Subject = {
+  MATH: 'MATH',
+  SOCIAL_STUDIES: 'SOCIAL_STUDIES'
+} as const
+
+export type Subject = (typeof Subject)[keyof typeof Subject]
 
 
 export const ProblemFormat = {
@@ -172,6 +190,14 @@ export const PredictionKind = {
 export type PredictionKind = (typeof PredictionKind)[keyof typeof PredictionKind]
 
 
+export const StudentNoteType = {
+  GENERAL: 'GENERAL',
+  PAYMENT: 'PAYMENT'
+} as const
+
+export type StudentNoteType = (typeof StudentNoteType)[keyof typeof StudentNoteType]
+
+
 export const PaymentMethod = {
   QPAY: 'QPAY',
   BANK_TRANSFER: 'BANK_TRANSFER',
@@ -184,7 +210,8 @@ export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
 export const PaymentStatus = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
-  REJECTED: 'REJECTED'
+  REJECTED: 'REJECTED',
+  REVERSED: 'REVERSED'
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
@@ -199,3 +226,75 @@ export const AnnouncementAudience = {
 } as const
 
 export type AnnouncementAudience = (typeof AnnouncementAudience)[keyof typeof AnnouncementAudience]
+
+
+export const LearningEventType = {
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT',
+  SEARCH: 'SEARCH',
+  CHAPTER_OPENED: 'CHAPTER_OPENED',
+  VIDEO_STARTED: 'VIDEO_STARTED',
+  VIDEO_COMPLETED: 'VIDEO_COMPLETED',
+  PROBLEM_OPENED: 'PROBLEM_OPENED',
+  ANSWER_SUBMITTED: 'ANSWER_SUBMITTED',
+  HINT_USED: 'HINT_USED',
+  RETRY: 'RETRY',
+  BOOKMARK: 'BOOKMARK',
+  TEST_STARTED: 'TEST_STARTED',
+  TEST_FINISHED: 'TEST_FINISHED',
+  EVENING_MARK: 'EVENING_MARK',
+  PAGE_VIEW: 'PAGE_VIEW'
+} as const
+
+export type LearningEventType = (typeof LearningEventType)[keyof typeof LearningEventType]
+
+
+export const LeadSubject = {
+  MATH: 'MATH',
+  SOCIAL_STUDIES: 'SOCIAL_STUDIES',
+  BOTH: 'BOTH'
+} as const
+
+export type LeadSubject = (typeof LeadSubject)[keyof typeof LeadSubject]
+
+
+export const LeadStatus = {
+  NEW: 'NEW',
+  CONTACTED: 'CONTACTED',
+  ENROLLED: 'ENROLLED',
+  LOST: 'LOST'
+} as const
+
+export type LeadStatus = (typeof LeadStatus)[keyof typeof LeadStatus]
+
+
+export const TaskStatus = {
+  PLANNED: 'PLANNED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+  BLOCKED: 'BLOCKED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
+
+
+export const TaskPriority = {
+  LOW: 'LOW',
+  NORMAL: 'NORMAL',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT'
+} as const
+
+export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
+
+
+export const CalendarDayType = {
+  HOLIDAY: 'HOLIDAY',
+  BREAK: 'BREAK',
+  EXAM_DAY: 'EXAM_DAY',
+  SPECIAL: 'SPECIAL',
+  NO_CLASS: 'NO_CLASS'
+} as const
+
+export type CalendarDayType = (typeof CalendarDayType)[keyof typeof CalendarDayType]

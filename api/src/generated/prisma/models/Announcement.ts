@@ -33,6 +33,7 @@ export type AnnouncementMinAggregateOutputType = {
   pinned: boolean | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type AnnouncementMaxAggregateOutputType = {
@@ -44,6 +45,7 @@ export type AnnouncementMaxAggregateOutputType = {
   pinned: boolean | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type AnnouncementCountAggregateOutputType = {
@@ -55,6 +57,7 @@ export type AnnouncementCountAggregateOutputType = {
   pinned: number
   createdById: number
   createdAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -68,6 +71,7 @@ export type AnnouncementMinAggregateInputType = {
   pinned?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type AnnouncementMaxAggregateInputType = {
@@ -79,6 +83,7 @@ export type AnnouncementMaxAggregateInputType = {
   pinned?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type AnnouncementCountAggregateInputType = {
@@ -90,6 +95,7 @@ export type AnnouncementCountAggregateInputType = {
   pinned?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -174,6 +180,7 @@ export type AnnouncementGroupByOutputType = {
   pinned: boolean
   createdById: string
   createdAt: Date
+  deletedAt: Date | null
   _count: AnnouncementCountAggregateOutputType | null
   _min: AnnouncementMinAggregateOutputType | null
   _max: AnnouncementMaxAggregateOutputType | null
@@ -206,6 +213,7 @@ export type AnnouncementWhereInput = {
   pinned?: Prisma.BoolFilter<"Announcement"> | boolean
   createdById?: Prisma.StringFilter<"Announcement"> | string
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
   classroomTargets?: Prisma.AnnouncementClassroomTargetListRelationFilter
 }
 
@@ -218,6 +226,7 @@ export type AnnouncementOrderByWithRelationInput = {
   pinned?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   classroomTargets?: Prisma.AnnouncementClassroomTargetOrderByRelationAggregateInput
 }
 
@@ -233,6 +242,7 @@ export type AnnouncementWhereUniqueInput = Prisma.AtLeast<{
   pinned?: Prisma.BoolFilter<"Announcement"> | boolean
   createdById?: Prisma.StringFilter<"Announcement"> | string
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
   classroomTargets?: Prisma.AnnouncementClassroomTargetListRelationFilter
 }, "id">
 
@@ -245,6 +255,7 @@ export type AnnouncementOrderByWithAggregationInput = {
   pinned?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AnnouncementCountOrderByAggregateInput
   _max?: Prisma.AnnouncementMaxOrderByAggregateInput
   _min?: Prisma.AnnouncementMinOrderByAggregateInput
@@ -262,6 +273,7 @@ export type AnnouncementScalarWhereWithAggregatesInput = {
   pinned?: Prisma.BoolWithAggregatesFilter<"Announcement"> | boolean
   createdById?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Announcement"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
 }
 
 export type AnnouncementCreateInput = {
@@ -273,6 +285,7 @@ export type AnnouncementCreateInput = {
   pinned?: boolean
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   classroomTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutAnnouncementInput
 }
 
@@ -285,6 +298,7 @@ export type AnnouncementUncheckedCreateInput = {
   pinned?: boolean
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   classroomTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutAnnouncementInput
 }
 
@@ -297,6 +311,7 @@ export type AnnouncementUpdateInput = {
   pinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   classroomTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutAnnouncementNestedInput
 }
 
@@ -309,6 +324,7 @@ export type AnnouncementUncheckedUpdateInput = {
   pinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   classroomTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutAnnouncementNestedInput
 }
 
@@ -321,6 +337,7 @@ export type AnnouncementCreateManyInput = {
   pinned?: boolean
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type AnnouncementUpdateManyMutationInput = {
@@ -332,6 +349,7 @@ export type AnnouncementUpdateManyMutationInput = {
   pinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AnnouncementUncheckedUpdateManyInput = {
@@ -343,6 +361,7 @@ export type AnnouncementUncheckedUpdateManyInput = {
   pinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AnnouncementCountOrderByAggregateInput = {
@@ -354,6 +373,7 @@ export type AnnouncementCountOrderByAggregateInput = {
   pinned?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AnnouncementMaxOrderByAggregateInput = {
@@ -365,6 +385,7 @@ export type AnnouncementMaxOrderByAggregateInput = {
   pinned?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AnnouncementMinOrderByAggregateInput = {
@@ -376,6 +397,7 @@ export type AnnouncementMinOrderByAggregateInput = {
   pinned?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AnnouncementScalarRelationFilter = {
@@ -410,6 +432,7 @@ export type AnnouncementCreateWithoutClassroomTargetsInput = {
   pinned?: boolean
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type AnnouncementUncheckedCreateWithoutClassroomTargetsInput = {
@@ -421,6 +444,7 @@ export type AnnouncementUncheckedCreateWithoutClassroomTargetsInput = {
   pinned?: boolean
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type AnnouncementCreateOrConnectWithoutClassroomTargetsInput = {
@@ -448,6 +472,7 @@ export type AnnouncementUpdateWithoutClassroomTargetsInput = {
   pinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AnnouncementUncheckedUpdateWithoutClassroomTargetsInput = {
@@ -459,6 +484,7 @@ export type AnnouncementUncheckedUpdateWithoutClassroomTargetsInput = {
   pinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -501,6 +527,7 @@ export type AnnouncementSelect<ExtArgs extends runtime.Types.Extensions.Internal
   pinned?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   classroomTargets?: boolean | Prisma.Announcement$classroomTargetsArgs<ExtArgs>
   _count?: boolean | Prisma.AnnouncementCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["announcement"]>
@@ -514,6 +541,7 @@ export type AnnouncementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   pinned?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["announcement"]>
 
 export type AnnouncementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -525,6 +553,7 @@ export type AnnouncementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   pinned?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["announcement"]>
 
 export type AnnouncementSelectScalar = {
@@ -536,9 +565,10 @@ export type AnnouncementSelectScalar = {
   pinned?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
 }
 
-export type AnnouncementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "body" | "audience" | "classroomId" | "pinned" | "createdById" | "createdAt", ExtArgs["result"]["announcement"]>
+export type AnnouncementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "body" | "audience" | "classroomId" | "pinned" | "createdById" | "createdAt" | "deletedAt", ExtArgs["result"]["announcement"]>
 export type AnnouncementInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   classroomTargets?: boolean | Prisma.Announcement$classroomTargetsArgs<ExtArgs>
   _count?: boolean | Prisma.AnnouncementCountOutputTypeDefaultArgs<ExtArgs>
@@ -560,6 +590,7 @@ export type $AnnouncementPayload<ExtArgs extends runtime.Types.Extensions.Intern
     pinned: boolean
     createdById: string
     createdAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["announcement"]>
   composites: {}
 }
@@ -992,6 +1023,7 @@ export interface AnnouncementFieldRefs {
   readonly pinned: Prisma.FieldRef<"Announcement", 'Boolean'>
   readonly createdById: Prisma.FieldRef<"Announcement", 'String'>
   readonly createdAt: Prisma.FieldRef<"Announcement", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Announcement", 'DateTime'>
 }
     
 

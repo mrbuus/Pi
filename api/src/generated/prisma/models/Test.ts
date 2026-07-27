@@ -49,6 +49,7 @@ export type TestMinAggregateOutputType = {
   variantLabel: string | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type TestMaxAggregateOutputType = {
@@ -64,6 +65,7 @@ export type TestMaxAggregateOutputType = {
   variantLabel: string | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type TestCountAggregateOutputType = {
@@ -79,6 +81,7 @@ export type TestCountAggregateOutputType = {
   variantLabel: number
   createdById: number
   createdAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -106,6 +109,7 @@ export type TestMinAggregateInputType = {
   variantLabel?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type TestMaxAggregateInputType = {
@@ -121,6 +125,7 @@ export type TestMaxAggregateInputType = {
   variantLabel?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type TestCountAggregateInputType = {
@@ -136,6 +141,7 @@ export type TestCountAggregateInputType = {
   variantLabel?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -238,6 +244,7 @@ export type TestGroupByOutputType = {
   variantLabel: string | null
   createdById: string
   createdAt: Date
+  deletedAt: Date | null
   _count: TestCountAggregateOutputType | null
   _avg: TestAvgAggregateOutputType | null
   _sum: TestSumAggregateOutputType | null
@@ -276,6 +283,7 @@ export type TestWhereInput = {
   variantLabel?: Prisma.StringNullableFilter<"Test"> | string | null
   createdById?: Prisma.StringFilter<"Test"> | string
   createdAt?: Prisma.DateTimeFilter<"Test"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Test"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterNullableScalarRelationFilter, Prisma.ChapterWhereInput> | null
   problems?: Prisma.TestProblemListRelationFilter
   access?: Prisma.TestAccessListRelationFilter
@@ -296,6 +304,7 @@ export type TestOrderByWithRelationInput = {
   variantLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chapter?: Prisma.ChapterOrderByWithRelationInput
   problems?: Prisma.TestProblemOrderByRelationAggregateInput
   access?: Prisma.TestAccessOrderByRelationAggregateInput
@@ -319,6 +328,7 @@ export type TestWhereUniqueInput = Prisma.AtLeast<{
   variantLabel?: Prisma.StringNullableFilter<"Test"> | string | null
   createdById?: Prisma.StringFilter<"Test"> | string
   createdAt?: Prisma.DateTimeFilter<"Test"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Test"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterNullableScalarRelationFilter, Prisma.ChapterWhereInput> | null
   problems?: Prisma.TestProblemListRelationFilter
   access?: Prisma.TestAccessListRelationFilter
@@ -339,6 +349,7 @@ export type TestOrderByWithAggregationInput = {
   variantLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TestCountOrderByAggregateInput
   _avg?: Prisma.TestAvgOrderByAggregateInput
   _max?: Prisma.TestMaxOrderByAggregateInput
@@ -362,6 +373,7 @@ export type TestScalarWhereWithAggregatesInput = {
   variantLabel?: Prisma.StringNullableWithAggregatesFilter<"Test"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"Test"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Test"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Test"> | Date | string | null
 }
 
 export type TestCreateInput = {
@@ -376,6 +388,7 @@ export type TestCreateInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   chapter?: Prisma.ChapterCreateNestedOneWithoutTestsInput
   problems?: Prisma.TestProblemCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessCreateNestedManyWithoutTestInput
@@ -396,6 +409,7 @@ export type TestUncheckedCreateInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   problems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessUncheckedCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
@@ -414,6 +428,7 @@ export type TestUpdateInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneWithoutTestsNestedInput
   problems?: Prisma.TestProblemUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUpdateManyWithoutTestNestedInput
@@ -434,6 +449,7 @@ export type TestUncheckedUpdateInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.TestProblemUncheckedUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUncheckedUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
@@ -453,6 +469,7 @@ export type TestCreateManyInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type TestUpdateManyMutationInput = {
@@ -467,6 +484,7 @@ export type TestUpdateManyMutationInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestUncheckedUpdateManyInput = {
@@ -482,6 +500,7 @@ export type TestUncheckedUpdateManyInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestListRelationFilter = {
@@ -507,6 +526,7 @@ export type TestCountOrderByAggregateInput = {
   variantLabel?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type TestAvgOrderByAggregateInput = {
@@ -527,6 +547,7 @@ export type TestMaxOrderByAggregateInput = {
   variantLabel?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type TestMinOrderByAggregateInput = {
@@ -542,6 +563,7 @@ export type TestMinOrderByAggregateInput = {
   variantLabel?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type TestSumOrderByAggregateInput = {
@@ -672,6 +694,7 @@ export type TestCreateWithoutChapterInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   problems?: Prisma.TestProblemCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultCreateNestedManyWithoutTestInput
@@ -690,6 +713,7 @@ export type TestUncheckedCreateWithoutChapterInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   problems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessUncheckedCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
@@ -738,6 +762,7 @@ export type TestScalarWhereInput = {
   variantLabel?: Prisma.StringNullableFilter<"Test"> | string | null
   createdById?: Prisma.StringFilter<"Test"> | string
   createdAt?: Prisma.DateTimeFilter<"Test"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Test"> | Date | string | null
 }
 
 export type TestCreateWithoutProblemsInput = {
@@ -752,6 +777,7 @@ export type TestCreateWithoutProblemsInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   chapter?: Prisma.ChapterCreateNestedOneWithoutTestsInput
   access?: Prisma.TestAccessCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultCreateNestedManyWithoutTestInput
@@ -771,6 +797,7 @@ export type TestUncheckedCreateWithoutProblemsInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   access?: Prisma.TestAccessUncheckedCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
@@ -804,6 +831,7 @@ export type TestUpdateWithoutProblemsInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneWithoutTestsNestedInput
   access?: Prisma.TestAccessUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUpdateManyWithoutTestNestedInput
@@ -823,6 +851,7 @@ export type TestUncheckedUpdateWithoutProblemsInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   access?: Prisma.TestAccessUncheckedUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
@@ -840,6 +869,7 @@ export type TestCreateWithoutAccessInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   chapter?: Prisma.ChapterCreateNestedOneWithoutTestsInput
   problems?: Prisma.TestProblemCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultCreateNestedManyWithoutTestInput
@@ -859,6 +889,7 @@ export type TestUncheckedCreateWithoutAccessInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   problems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
@@ -892,6 +923,7 @@ export type TestUpdateWithoutAccessInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneWithoutTestsNestedInput
   problems?: Prisma.TestProblemUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUpdateManyWithoutTestNestedInput
@@ -911,6 +943,7 @@ export type TestUncheckedUpdateWithoutAccessInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.TestProblemUncheckedUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
@@ -928,6 +961,7 @@ export type TestCreateWithoutAttemptSessionsInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   chapter?: Prisma.ChapterCreateNestedOneWithoutTestsInput
   problems?: Prisma.TestProblemCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessCreateNestedManyWithoutTestInput
@@ -947,6 +981,7 @@ export type TestUncheckedCreateWithoutAttemptSessionsInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   problems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessUncheckedCreateNestedManyWithoutTestInput
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
@@ -980,6 +1015,7 @@ export type TestUpdateWithoutAttemptSessionsInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneWithoutTestsNestedInput
   problems?: Prisma.TestProblemUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUpdateManyWithoutTestNestedInput
@@ -999,6 +1035,7 @@ export type TestUncheckedUpdateWithoutAttemptSessionsInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.TestProblemUncheckedUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUncheckedUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
@@ -1016,6 +1053,7 @@ export type TestCreateWithoutResultsInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   chapter?: Prisma.ChapterCreateNestedOneWithoutTestsInput
   problems?: Prisma.TestProblemCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessCreateNestedManyWithoutTestInput
@@ -1035,6 +1073,7 @@ export type TestUncheckedCreateWithoutResultsInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
   problems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutTestInput
   access?: Prisma.TestAccessUncheckedCreateNestedManyWithoutTestInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
@@ -1068,6 +1107,7 @@ export type TestUpdateWithoutResultsInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneWithoutTestsNestedInput
   problems?: Prisma.TestProblemUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUpdateManyWithoutTestNestedInput
@@ -1087,6 +1127,7 @@ export type TestUncheckedUpdateWithoutResultsInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.TestProblemUncheckedUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUncheckedUpdateManyWithoutTestNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
@@ -1104,6 +1145,7 @@ export type TestCreateManyChapterInput = {
   variantLabel?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type TestUpdateWithoutChapterInput = {
@@ -1118,6 +1160,7 @@ export type TestUpdateWithoutChapterInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.TestProblemUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUpdateManyWithoutTestNestedInput
@@ -1136,6 +1179,7 @@ export type TestUncheckedUpdateWithoutChapterInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.TestProblemUncheckedUpdateManyWithoutTestNestedInput
   access?: Prisma.TestAccessUncheckedUpdateManyWithoutTestNestedInput
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
@@ -1154,6 +1198,7 @@ export type TestUncheckedUpdateManyWithoutChapterInput = {
   variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -1227,6 +1272,7 @@ export type TestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   variantLabel?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.Test$chapterArgs<ExtArgs>
   problems?: boolean | Prisma.Test$problemsArgs<ExtArgs>
   access?: boolean | Prisma.Test$accessArgs<ExtArgs>
@@ -1248,6 +1294,7 @@ export type TestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   variantLabel?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.Test$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["test"]>
 
@@ -1264,6 +1311,7 @@ export type TestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   variantLabel?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.Test$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["test"]>
 
@@ -1280,9 +1328,10 @@ export type TestSelectScalar = {
   variantLabel?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
 }
 
-export type TestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "gradingMode" | "chapterId" | "timeLimitMin" | "pdfKey" | "price" | "groupKey" | "variantLabel" | "createdById" | "createdAt", ExtArgs["result"]["test"]>
+export type TestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "gradingMode" | "chapterId" | "timeLimitMin" | "pdfKey" | "price" | "groupKey" | "variantLabel" | "createdById" | "createdAt" | "deletedAt", ExtArgs["result"]["test"]>
 export type TestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapter?: boolean | Prisma.Test$chapterArgs<ExtArgs>
   problems?: boolean | Prisma.Test$problemsArgs<ExtArgs>
@@ -1320,6 +1369,7 @@ export type $TestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     variantLabel: string | null
     createdById: string
     createdAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["test"]>
   composites: {}
 }
@@ -1760,6 +1810,7 @@ export interface TestFieldRefs {
   readonly variantLabel: Prisma.FieldRef<"Test", 'String'>
   readonly createdById: Prisma.FieldRef<"Test", 'String'>
   readonly createdAt: Prisma.FieldRef<"Test", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Test", 'DateTime'>
 }
     
 

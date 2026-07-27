@@ -168,6 +168,16 @@ export type Prediction = Prisma.PredictionModel
  */
 export type StudentColorTag = Prisma.StudentColorTagModel
 /**
+ * Model StudentNote
+ * 
+ */
+export type StudentNote = Prisma.StudentNoteModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
  * Model Pass
  * 
  */
@@ -197,3 +207,43 @@ export type AnnouncementClassroomTarget = Prisma.AnnouncementClassroomTargetMode
  * 
  */
 export type ClassTestSession = Prisma.ClassTestSessionModel
+/**
+ * Model LearningEvent
+ * 
+ */
+export type LearningEvent = Prisma.LearningEventModel
+/**
+ * Model Lead
+ * 
+ */
+export type Lead = Prisma.LeadModel
+/**
+ * Model StaffTask
+ * 
+ */
+export type StaffTask = Prisma.StaffTaskModel
+/**
+ * Model StaffTaskAssignee
+ * 
+ */
+export type StaffTaskAssignee = Prisma.StaffTaskAssigneeModel
+/**
+ * Model ClassSchedule
+ * 
+ */
+export type ClassSchedule = Prisma.ClassScheduleModel
+/**
+ * Model AcademicCalendarDay
+ * 
+ */
+export type AcademicCalendarDay = Prisma.AcademicCalendarDayModel
+/**
+ * Model StudentGoal
+ * 
+ */
+export type StudentGoal = Prisma.StudentGoalModel
+/**
+ * Model StreakFreeze
+ * 
+ */
+export type StreakFreeze = Prisma.StreakFreezeModel

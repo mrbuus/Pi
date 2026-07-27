@@ -62,6 +62,7 @@ export type ProblemMinAggregateOutputType = {
   eloRating: number | null
   attemptCount: number | null
   correctRate: number | null
+  deletedAt: Date | null
 }
 
 export type ProblemMaxAggregateOutputType = {
@@ -80,6 +81,7 @@ export type ProblemMaxAggregateOutputType = {
   eloRating: number | null
   attemptCount: number | null
   correctRate: number | null
+  deletedAt: Date | null
 }
 
 export type ProblemCountAggregateOutputType = {
@@ -100,6 +102,7 @@ export type ProblemCountAggregateOutputType = {
   eloRating: number
   attemptCount: number
   correctRate: number
+  deletedAt: number
   _all: number
 }
 
@@ -140,6 +143,7 @@ export type ProblemMinAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  deletedAt?: true
 }
 
 export type ProblemMaxAggregateInputType = {
@@ -158,6 +162,7 @@ export type ProblemMaxAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  deletedAt?: true
 }
 
 export type ProblemCountAggregateInputType = {
@@ -178,6 +183,7 @@ export type ProblemCountAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -285,6 +291,7 @@ export type ProblemGroupByOutputType = {
   eloRating: number
   attemptCount: number
   correctRate: number | null
+  deletedAt: Date | null
   _count: ProblemCountAggregateOutputType | null
   _avg: ProblemAvgAggregateOutputType | null
   _sum: ProblemSumAggregateOutputType | null
@@ -328,6 +335,7 @@ export type ProblemWhereInput = {
   eloRating?: Prisma.FloatFilter<"Problem"> | number
   attemptCount?: Prisma.IntFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableFilter<"Problem"> | number | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterScalarRelationFilter, Prisma.ChapterWhereInput>
   tags?: Prisma.ProblemTagListRelationFilter
   formulas?: Prisma.ProblemFormulaListRelationFilter
@@ -355,6 +363,7 @@ export type ProblemOrderByWithRelationInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chapter?: Prisma.ChapterOrderByWithRelationInput
   tags?: Prisma.ProblemTagOrderByRelationAggregateInput
   formulas?: Prisma.ProblemFormulaOrderByRelationAggregateInput
@@ -385,6 +394,7 @@ export type ProblemWhereUniqueInput = Prisma.AtLeast<{
   eloRating?: Prisma.FloatFilter<"Problem"> | number
   attemptCount?: Prisma.IntFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableFilter<"Problem"> | number | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterScalarRelationFilter, Prisma.ChapterWhereInput>
   tags?: Prisma.ProblemTagListRelationFilter
   formulas?: Prisma.ProblemFormulaListRelationFilter
@@ -412,6 +422,7 @@ export type ProblemOrderByWithAggregationInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ProblemCountOrderByAggregateInput
   _avg?: Prisma.ProblemAvgOrderByAggregateInput
   _max?: Prisma.ProblemMaxOrderByAggregateInput
@@ -440,6 +451,7 @@ export type ProblemScalarWhereWithAggregatesInput = {
   eloRating?: Prisma.FloatWithAggregatesFilter<"Problem"> | number
   attemptCount?: Prisma.IntWithAggregatesFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableWithAggregatesFilter<"Problem"> | number | null
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Problem"> | Date | string | null
 }
 
 export type ProblemCreateInput = {
@@ -459,6 +471,7 @@ export type ProblemCreateInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
@@ -486,6 +499,7 @@ export type ProblemUncheckedCreateInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
@@ -511,6 +525,7 @@ export type ProblemUpdateInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
@@ -538,6 +553,7 @@ export type ProblemUncheckedUpdateInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
@@ -564,6 +580,7 @@ export type ProblemCreateManyInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
 }
 
 export type ProblemUpdateManyMutationInput = {
@@ -583,6 +600,7 @@ export type ProblemUpdateManyMutationInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ProblemUncheckedUpdateManyInput = {
@@ -603,6 +621,7 @@ export type ProblemUncheckedUpdateManyInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ProblemListRelationFilter = {
@@ -638,6 +657,7 @@ export type ProblemCountOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type ProblemAvgOrderByAggregateInput = {
@@ -666,6 +686,7 @@ export type ProblemMaxOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type ProblemMinOrderByAggregateInput = {
@@ -684,6 +705,7 @@ export type ProblemMinOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type ProblemSumOrderByAggregateInput = {
@@ -859,6 +881,7 @@ export type ProblemCreateWithoutChapterInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
@@ -884,6 +907,7 @@ export type ProblemUncheckedCreateWithoutChapterInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
@@ -939,6 +963,7 @@ export type ProblemScalarWhereInput = {
   eloRating?: Prisma.FloatFilter<"Problem"> | number
   attemptCount?: Prisma.IntFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableFilter<"Problem"> | number | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
 }
 
 export type ProblemCreateWithoutChoiceOptionsInput = {
@@ -958,6 +983,7 @@ export type ProblemCreateWithoutChoiceOptionsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
@@ -984,6 +1010,7 @@ export type ProblemUncheckedCreateWithoutChoiceOptionsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
@@ -1024,6 +1051,7 @@ export type ProblemUpdateWithoutChoiceOptionsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
@@ -1050,6 +1078,7 @@ export type ProblemUncheckedUpdateWithoutChoiceOptionsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
@@ -1074,6 +1103,7 @@ export type ProblemCreateWithoutTagsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
@@ -1100,6 +1130,7 @@ export type ProblemUncheckedCreateWithoutTagsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
@@ -1140,6 +1171,7 @@ export type ProblemUpdateWithoutTagsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
@@ -1166,6 +1198,7 @@ export type ProblemUncheckedUpdateWithoutTagsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
@@ -1190,6 +1223,7 @@ export type ProblemCreateWithoutFormulasInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
@@ -1216,6 +1250,7 @@ export type ProblemUncheckedCreateWithoutFormulasInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
@@ -1256,6 +1291,7 @@ export type ProblemUpdateWithoutFormulasInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
@@ -1282,6 +1318,7 @@ export type ProblemUncheckedUpdateWithoutFormulasInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
@@ -1306,6 +1343,7 @@ export type ProblemCreateWithoutAnalysisInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
@@ -1332,6 +1370,7 @@ export type ProblemUncheckedCreateWithoutAnalysisInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
@@ -1372,6 +1411,7 @@ export type ProblemUpdateWithoutAnalysisInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
@@ -1398,6 +1438,7 @@ export type ProblemUncheckedUpdateWithoutAnalysisInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
@@ -1422,6 +1463,7 @@ export type ProblemCreateWithoutTestItemsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
@@ -1448,6 +1490,7 @@ export type ProblemUncheckedCreateWithoutTestItemsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
@@ -1488,6 +1531,7 @@ export type ProblemUpdateWithoutTestItemsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
@@ -1514,6 +1558,7 @@ export type ProblemUncheckedUpdateWithoutTestItemsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
@@ -1538,6 +1583,7 @@ export type ProblemCreateWithoutAttemptsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
@@ -1564,6 +1610,7 @@ export type ProblemUncheckedCreateWithoutAttemptsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
@@ -1604,6 +1651,7 @@ export type ProblemUpdateWithoutAttemptsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
@@ -1630,6 +1678,7 @@ export type ProblemUncheckedUpdateWithoutAttemptsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
@@ -1654,6 +1703,7 @@ export type ProblemCreateManyChapterInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  deletedAt?: Date | string | null
 }
 
 export type ProblemUpdateWithoutChapterInput = {
@@ -1673,6 +1723,7 @@ export type ProblemUpdateWithoutChapterInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
@@ -1698,6 +1749,7 @@ export type ProblemUncheckedUpdateWithoutChapterInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
@@ -1723,6 +1775,7 @@ export type ProblemUncheckedUpdateManyWithoutChapterInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -1810,6 +1863,7 @@ export type ProblemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
   tags?: boolean | Prisma.Problem$tagsArgs<ExtArgs>
   formulas?: boolean | Prisma.Problem$formulasArgs<ExtArgs>
@@ -1838,6 +1892,7 @@ export type ProblemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problem"]>
 
@@ -1859,6 +1914,7 @@ export type ProblemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  deletedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problem"]>
 
@@ -1880,9 +1936,10 @@ export type ProblemSelectScalar = {
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  deletedAt?: boolean
 }
 
-export type ProblemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "chapterId" | "page" | "number" | "format" | "statementText" | "imageKey" | "choices" | "correctAnswer" | "points" | "price" | "createdById" | "createdAt" | "eloRating" | "attemptCount" | "correctRate", ExtArgs["result"]["problem"]>
+export type ProblemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "chapterId" | "page" | "number" | "format" | "statementText" | "imageKey" | "choices" | "correctAnswer" | "points" | "price" | "createdById" | "createdAt" | "eloRating" | "attemptCount" | "correctRate" | "deletedAt", ExtArgs["result"]["problem"]>
 export type ProblemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
   tags?: boolean | Prisma.Problem$tagsArgs<ExtArgs>
@@ -1929,6 +1986,7 @@ export type $ProblemPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     eloRating: number
     attemptCount: number
     correctRate: number | null
+    deletedAt: Date | null
   }, ExtArgs["result"]["problem"]>
   composites: {}
 }
@@ -2376,6 +2434,7 @@ export interface ProblemFieldRefs {
   readonly eloRating: Prisma.FieldRef<"Problem", 'Float'>
   readonly attemptCount: Prisma.FieldRef<"Problem", 'Int'>
   readonly correctRate: Prisma.FieldRef<"Problem", 'Float'>
+  readonly deletedAt: Prisma.FieldRef<"Problem", 'DateTime'>
 }
     
 

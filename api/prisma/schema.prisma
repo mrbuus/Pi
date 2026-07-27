@@ -32,6 +32,7 @@ model User {
   email        String?  @unique
   username     String?  @unique // нийтэд харагдах нэр (овог нэр эсвэл өөрийн nickname)
   studentCode  String?  @unique // сурагчийн дотоод код (дугаараас тусдаа)
+  teacherCode  String?  @unique // багшийн дотоод код (дугаараас тусдаа)
   firstName    String
   lastName     String
   passwordHash String
@@ -43,30 +44,67 @@ model User {
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
 
-  parentLinks      ParentLink[]      @relation("ParentSide")
-  childLinks       ParentLink[]      @relation("ChildSide")
-  payments         Payment[]
-  userPasses       UserPass[]
-  attempts         Attempt[]
-  attendances      Attendance[]      @relation("AttendanceStudent")
-  submissions      Submission[]
-  testResults      TestResult[]
-  predictions      Prediction[]
-  colorTags        StudentColorTag[] @relation("TaggedStudent")
-  ownedClassrooms  Classroom[]       @relation("ClassroomTeacher")
-  enrollments      Enrollment[]
-  attemptSessions  TestAttemptSession[]
+  parentLinks     ParentLink[]         @relation("ParentSide")
+  childLinks      ParentLink[]         @relation("ChildSide")
+  payments        Payment[]
+  userPasses      UserPass[]
+  attempts        Attempt[]
+  attendances     Attendance[]         @relation("AttendanceStudent")
+  submissions     Submission[]
+  testResults     TestResult[]
+  predictions     Prediction[]
+  colorTags       StudentColorTag[]    @relation("TaggedStudent")
+  ownedClassrooms Classroom[]          @relation("ClassroomTeacher")
+  enrollments     Enrollment[]
+  attemptSessions TestAttemptSession[]
+  learningEvents  LearningEvent[]
+
+  // Wave 3: ажилтны төлөвлөгч / хуваарь / сурагчийн зорилго / стрийк
+  createdStaffTasks    StaffTask[]
+  staffTaskAssignments StaffTaskAssignee[]
+  taughtSchedules      ClassSchedule[]
+  studentGoals         StudentGoal[]
+  streakFreezes        StreakFreeze[]
+
+  // Эцсийн долгион: сурагчийн тэмдэглэл
+  studentNotes StudentNote[]
+}
+
+// Жилийн төлбөрийн багц: Excel-ийн бүртгэлд байдаг төлбөрийн нөхцөл.
+// UNKNOWN = хуучин импортоос орж ирсэн, төлбөрийн нөхцөл нь бүртгэлд
+// тэмдэглэгдээгүй сурагч (дараа нь багш/багш+ гараар тодруулна).
+enum TuitionPlan {
+  FULL_YEAR
+  INSTALLMENT
+  MONTHLY
+  UNKNOWN
 }
 
 model StudentProfile {
-  userId          String      @id
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type            StudentType
-  grade           Int? // 1–12, бүртгүүлэхдээ сонгоно
-  school          String?
+  userId         String      @id
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           StudentType
+  grade          Int? // 1–12, бүртгүүлэхдээ сонгоно
+  school         String?
   // Танхимын сурагч идэвхжүүлэх код (= тухайн өдрийн огноо) оруулсан эсэх
-  activatedAt     DateTime?
-  activationCode  String?
+  activatedAt    DateTime?
+  activationCode String?
+
+  // Excel-ийн бүртгэлээс ирсэн бодит мэдээлэл (импортоор type/grade/school-оос
+  // цааш алдагдаж байсан дата) — гэр бүлийн холбоо барих, байршил, төлбөр.
+  fatherPhone   String?
+  motherPhone   String?
+  guardianNote  String?
+  branch        String? // "Баруун 4" | "Зүүн 4"
+  section       String? // "12-2" — бүртгэлд тэмдэглэсэн ангийн шошго (label)
+  tuitionAmount Int?
+  tuitionPlan   TuitionPlan?
+  tuitionNote   String?
+  joinedOn      DateTime?    @db.Date
+  leftOn        DateTime?    @db.Date
+
+  @@index([branch])
+  @@index([section])
 }
 
 model TeacherProfile {
@@ -77,11 +115,11 @@ model TeacherProfile {
 }
 
 model ParentLink {
-  id        String   @id @default(cuid())
-  parentId  String
-  parent    User     @relation("ParentSide", fields: [parentId], references: [id], onDelete: Cascade)
-  studentId String
-  student   User     @relation("ChildSide", fields: [studentId], references: [id], onDelete: Cascade)
+  id           String    @id @default(cuid())
+  parentId     String
+  parent       User      @relation("ParentSide", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      User      @relation("ChildSide", fields: [studentId], references: [id], onDelete: Cascade)
   // Багш+/Админ баталгаажуулсан эсэх
   verifiedAt   DateTime?
   verifiedById String?
@@ -97,24 +135,28 @@ enum ClassroomType {
 }
 
 model Classroom {
-  id        String        @id @default(cuid())
-  name      String
-  type      ClassroomType
-  grade     Int?
-  teacherId String?
-  teacher   User?         @relation("ClassroomTeacher", fields: [teacherId], references: [id])
-  archived  Boolean       @default(false)
-  createdAt DateTime      @default(now())
+  id                String        @id @default(cuid())
+  name              String
+  type              ClassroomType
+  grade             Int?
+  teacherId         String?
+  teacher           User?         @relation("ClassroomTeacher", fields: [teacherId], references: [id])
+  archived          Boolean       @default(false)
+  createdAt         DateTime      @default(now())
   // Хөтөлбөрийн түгжээний гараар override (Шийдвэр 5). null = ClassTestSession-ээс
   // автоматаар тооцно; багш гараар урагшлуулж/буцаах бол энд Chapter.id тавина.
   progressChapterId String?
 
-  enrollments  Enrollment[]
-  attendances  Attendance[]
-  assignments  Assignment[]
-  testAccess   TestAccess[]
-  dailySummaries DailyClassSummary[]
+  enrollments         Enrollment[]
+  attendances         Attendance[]
+  assignments         Assignment[]
+  testAccess          TestAccess[]
+  dailySummaries      DailyClassSummary[]
   announcementTargets AnnouncementClassroomTarget[]
+
+  // Wave 3: ажилтны төлөвлөгч / хичээлийн хуваарь
+  staffTasks     StaffTask[]
+  classSchedules ClassSchedule[]
 }
 
 model Enrollment {
@@ -124,9 +166,9 @@ model Enrollment {
   classroomId String
   classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   // Орсон өдрөөс хойшхи мэдээлэл л сурагчид харагдана; анги солиход leftAt бөглөгдөж шинэ бичилт үүснэ
-  joinedAt DateTime  @default(now())
-  leftAt   DateTime?
-  movedById String?
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
+  movedById   String?
 
   @@index([studentId, leftAt])
   @@index([classroomId, leftAt])
@@ -164,10 +206,10 @@ enum AssignmentType {
 
 enum SubmissionState {
   NOT_DONE
-  SUBMITTED      // сурагч илгээсэн, багш хараагүй
-  DONE_ONLINE    // багш онлайнаар баталгаажуулсан
-  DONE_IN_CLASS  // багш ангид дэвтрийг биетээр шалгасан
-  RETURNED       // буцаасан — дахин илгээнэ
+  SUBMITTED // сурагч илгээсэн, багш хараагүй
+  DONE_ONLINE // багш онлайнаар баталгаажуулсан
+  DONE_IN_CLASS // багш ангид дэвтрийг биетээр шалгасан
+  RETURNED // буцаасан — дахин илгээнэ
 }
 
 model Assignment {
@@ -182,7 +224,13 @@ model Assignment {
   createdById String
   createdAt   DateTime       @default(now())
 
+  // Зөөлөн устгал: hard DELETE хийвэл Submission-ы түүхэн бичлэгүүд орфон
+  // үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
+  deletedAt DateTime?
+
   submissions Submission[]
+
+  @@index([deletedAt])
 }
 
 model Submission {
@@ -205,20 +253,38 @@ model Submission {
 
 // ============ Контент: Ном → Бүлэг сэдэв → Бодлого ============
 
+// Хичээлийн төрөл — төв Математикаас гадна Нийгэм судлал мөн заадаг болсон.
+// Enum-ыг Book дээр л тавьсан (тусдаа Subject модель биш): Chapter/Test/Topic-ийн
+// хичээл нь Book-оор дамжин л тодорхойлогдоно (энэ migration-д тэдгээрт нэмэхгүй).
+enum Subject {
+  MATH
+  SOCIAL_STUDIES
+}
+
 model Book {
-  id       String  @id @default(cuid())
-  code     String  @unique // нийтэд харагдах цэвэр код: "100", "200", "300", "1000"
-  title    String // нийтэд харагдах цэвэр нэр: "100x100"
-  coverKey String?
+  id          String  @id @default(cuid())
+  code        String  @unique // нийтэд харагдах цэвэр код: "100", "200", "300", "1000"
+  title       String // нийтэд харагдах цэвэр нэр: "100x100"
+  coverKey    String?
   // Жинхэнэ эх фолдер (админд мөрдөгдөх): UI-д "100x100" гэж харагдах ч дата нь
   // "100x100 V2" фолдероос ирснийг тэмдэглэнэ. ProblemAnalysis.sourcePath-тай уялдана.
   sourceLabel String?
   // Хуучин (V2 биш) шилжүүлсэн ном — каталогт харагдахгүй, харин дата нь хэвээр.
-  archived Boolean @default(false)
+  archived    Boolean @default(false)
+  // Аль хичээлд хамаарах вэ. Одоо байгаа ~6000 мөр Математик тул @default(MATH)
+  // автоматаар бөглөнө.
+  subject     Subject @default(MATH)
+
+  // Зөөлөн устгал (soft delete): Attempt/TestResult зэрэг түүхэн бичлэгийг
+  // орфон үлдээхгүйн тулд hard DELETE хийхгүй. Уншихдаа заавал deletedAt: null
+  // гэж шүүнэ.
+  deletedAt DateTime?
 
   chapters Chapter[]
 
   @@index([archived])
+  @@index([subject])
+  @@index([deletedAt])
 }
 
 model Chapter {
@@ -234,6 +300,10 @@ model Chapter {
   topicId     String?
   topic       Topic?  @relation(fields: [topicId], references: [id])
 
+  // Зөөлөн устгал: hard DELETE хийвэл Attempt/TestResult зэрэг түүхэн
+  // бичлэгүүд орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
+  deletedAt DateTime?
+
   problems Problem[]
   theories TheoryBlock[]
   videos   Video[]
@@ -241,6 +311,7 @@ model Chapter {
 
   @@index([grade, order])
   @@index([topicId])
+  @@index([deletedAt])
 }
 
 // БҮТ-ийн үндсэн агуулгын муж (Тоо тоолол, Алгебр, Функц, Геометр, Магадлал...).
@@ -250,18 +321,24 @@ model Topic {
   name  String @unique
   order Int    @default(0)
 
+  // Зөөлөн устгал: hard DELETE хийвэл холбогдох Chapter-үүдийн түүхэн дата
+  // орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
+  deletedAt DateTime?
+
   chapters Chapter[]
+
+  @@index([deletedAt])
 }
 
 model TheoryBlock {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   chapterId   String
-  chapter     Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   title       String
   content     String // markdown
   imageKeys   String[]
   order       Int
-  freePreview Boolean @default(false)
+  freePreview Boolean  @default(false)
 }
 
 model Video {
@@ -272,24 +349,30 @@ model Video {
   chapterId String?
   chapter   Chapter? @relation(fields: [chapterId], references: [id])
   createdAt DateTime @default(now())
+
+  // Зөөлөн устгал: hard DELETE хийвэл холбогдох LearningEvent зэрэг түүхэн
+  // лог орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
+  deletedAt DateTime?
+
+  @@index([deletedAt])
 }
 
 enum ProblemFormat {
-  CHOICE      // сонгох тест (A,B,C,D…)
+  CHOICE // сонгох тест (A,B,C,D…)
   FILL_NUMBER // ЭЕШ маягийн тоо нөхөх (a=…, b=…)
-  OPEN        // задгай хариулт
+  OPEN // задгай хариулт
 }
 
 // Сурагч буруу хариу сонгосон бол ЯАГААД сонгосон шалтгааны төрөл.
 // Энэ нь "энэ хүүхэд ингэж алдсан" гэсэн дата цуглуулахад чухал (SPEC §9).
 enum MistakeType {
-  NONE             // зөв хариу — алдаа биш
-  SIGN_ERROR       // тэмдэг алдсан (+/−)
-  INCOMPLETE_STEP  // үйлдэл дутуу хийж зогссон
-  CALC_ERROR_NEAR  // энгийн нэмэх/хасах алдаа → ойролцоо хариу дугуйлсан
-  CONCEPT_GAP      // ухагдахуун/арга ойлгоогүйгээс
-  UNRELATED_GUESS  // огт хамааралгүй хариу → буудсан
-  OTHER            // бусад (тайлбар бичнэ)
+  NONE // зөв хариу — алдаа биш
+  SIGN_ERROR // тэмдэг алдсан (+/−)
+  INCOMPLETE_STEP // үйлдэл дутуу хийж зогссон
+  CALC_ERROR_NEAR // энгийн нэмэх/хасах алдаа → ойролцоо хариу дугуйлсан
+  CONCEPT_GAP // ухагдахуун/арга ойлгоогүйгээс
+  UNRELATED_GUESS // огт хамааралгүй хариу → буудсан
+  OTHER // бусад (тайлбар бичнэ)
 }
 
 // Бодлогын нэг сонголт (A–E). Зөв/буруу эсэх + буруу бол ЯАГААД алдсаныг хадгална.
@@ -298,11 +381,11 @@ model ProblemChoice {
   id          String      @id @default(cuid())
   problemId   String
   problem     Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  label       String      // "A".."E" эсвэл "a".."e"
-  text        String      // сонголтын утга (LaTeX-тэй байж болно)
+  label       String // "A".."E" эсвэл "a".."e"
+  text        String // сонголтын утга (LaTeX-тэй байж болно)
   isCorrect   Boolean     @default(false)
   mistakeType MistakeType @default(NONE) // буруу бол алдааны төрөл
-  mistakeNote String?     // багшийн тайлбар: яагаад энэ хариу руу хүрдэг вэ
+  mistakeNote String? // багшийн тайлбар: яагаад энэ хариу руу хүрдэг вэ
   order       Int
 
   @@unique([problemId, label])
@@ -310,45 +393,50 @@ model ProblemChoice {
 }
 
 model Problem {
-  id           String        @id @default(cuid())
-  token        String        @unique // "100-23-05" = ном-хуудас-бодлого
-  chapterId    String
-  chapter      Chapter       @relation(fields: [chapterId], references: [id])
-  page         Int?
-  number       Int?
-  format       ProblemFormat
+  id            String        @id @default(cuid())
+  token         String        @unique // "100-23-05" = ном-хуудас-бодлого
+  chapterId     String
+  chapter       Chapter       @relation(fields: [chapterId], references: [id])
+  page          Int?
+  number        Int?
+  format        ProblemFormat
   statementText String?
-  imageKey     String?
-  choices      Json? // CHOICE форматын сонголтууд
+  imageKey      String?
+  choices       Json? // CHOICE форматын сонголтууд
   correctAnswer Json // форматаас хамаарсан бүтэцтэй
-  points       Int           @default(1)
-  price        Int? // дэлгүүрт тусдаа зарагдвал (₮)
-  createdById  String
-  createdAt    DateTime      @default(now())
+  points        Int           @default(1)
+  price         Int? // дэлгүүрт тусдаа зарагдвал (₮)
+  createdById   String
+  createdAt     DateTime      @default(now())
 
   // Датанаас тооцогддог үзүүлэлтүүд — гараар оноохгүй (SPEC §9.3)
-  eloRating    Float @default(1000)
-  attemptCount Int   @default(0)
+  eloRating    Float  @default(1000)
+  attemptCount Int    @default(0)
   correctRate  Float?
 
-  tags      ProblemTag[]
-  formulas  ProblemFormula[]
-  analysis  ProblemAnalysis?
+  // Зөөлөн устгал: hard DELETE хийвэл Attempt зэрэг аналитикийн түүхэн
+  // бичлэгүүд орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
+  deletedAt DateTime?
+
+  tags          ProblemTag[]
+  formulas      ProblemFormula[]
+  analysis      ProblemAnalysis?
   choiceOptions ProblemChoice[] // бүтэцтэй сонголтууд (correct/wrong + алдааны шалтгаан)
-  attempts  Attempt[]
-  testItems TestProblem[]
+  attempts      Attempt[]
+  testItems     TestProblem[]
 
   @@index([chapterId])
+  @@index([deletedAt])
 }
 
 // Таксономи: бодлогыг ангилах ангилалууд. Tag нь нэрлэгдсэн REFERENCED entity —
 // нэрийг нь нэг өөрчлөхөд тэрхүү tag-тай холбоотой БҮХ бодлого автоматаар
 // шинэчлэгддэг (admin code-руу орох шаардлагагүй, багш гараар нэрлэнэ).
 enum TagType {
-  METHOD        // бодох арга: орлуулах, хувиргах…
+  METHOD // бодох арга: орлуулах, хувиргах…
   QUESTION_FORM // асуултын хэлбэр: утга олох, график унших…
-  SUBTOPIC      // дэд сэдэв: бутархай, тойрог…
-  SKILL         // ур чадвар: анхаарал, тооцоолол…
+  SUBTOPIC // дэд сэдэв: бутархай, тойрог…
+  SKILL // ур чадвар: анхаарал, тооцоолол…
   SOLUTION_TYPE // бодогдох төрөл: "Дискриминантаар бодох", "Виетээр бодох"… (багш засна)
 }
 
@@ -393,14 +481,14 @@ model ProblemFormula {
 // Бодлого бүрийн нарийн шинжилгээ — сэдэв, томьёо, тодорхойлох муж,
 // тэмдэг солигдох дүрэм, нийтлэг алдааг source-оос салгаж хадгална.
 enum ProblemAnalysisStatus {
-  AUTO_DRAFT      // системийн дүрмээр автоматаар үүсгэсэн, багш баталгаажуулаагүй
+  AUTO_DRAFT // системийн дүрмээр автоматаар үүсгэсэн, багш баталгаажуулаагүй
   REVIEW_REQUIRED // source/хариу/parse тодорхойгүй тул заавал хүн шалгана
-  VERIFIED        // багш/админ баталгаажуулсан
+  VERIFIED // багш/админ баталгаажуулсан
 }
 
 enum AnswerKeyStatus {
-  VERIFIED        // хариуны түлхүүрээс үсэг/утга баталгаатай олдсон
-  MISSING         // хариуны түлхүүрт хоосон эсвэл олдоогүй
+  VERIFIED // хариуны түлхүүрээс үсэг/утга баталгаатай олдсон
+  MISSING // хариуны түлхүүрт хоосон эсвэл олдоогүй
   REVIEW_REQUIRED // source болон хариу зөрөх магадлалтай тул хүн шалгана
 }
 
@@ -433,25 +521,25 @@ model ProblemAnalysis {
 // ============ Тест / Шалгалт ============
 
 enum TestType {
-  DAILY        // өдөр тутмын
+  DAILY // өдөр тутмын
   CHAPTER_EXAM // сэдвийн бүлгийн шалгалт (36+4, дүнг багш оруулна)
-  EESH_MOCK    // ЭЕШ сорил
+  EESH_MOCK // ЭЕШ сорил
   CUSTOM
-  THEORY       // онолын асуулт-хариултын модуль (Шийдвэр 8)
+  THEORY // онолын асуулт-хариултын модуль (Шийдвэр 8)
 }
 
 enum TestGradingMode {
-  AUTO   // зөв хариу баталгаатай, систем шууд оноо бодно
+  AUTO // зөв хариу баталгаатай, систем шууд оноо бодно
   MANUAL // PDF/source орсон ч хариу баталгаажаагүй эсвэл багш гараар дүн оруулна
 }
 
 model Test {
-  id           String   @id @default(cuid())
+  id           String          @id @default(cuid())
   title        String
   type         TestType
   gradingMode  TestGradingMode @default(AUTO)
   chapterId    String?
-  chapter      Chapter? @relation(fields: [chapterId], references: [id])
+  chapter      Chapter?        @relation(fields: [chapterId], references: [id])
   timeLimitMin Int?
   pdfKey       String? // PDF-ээр оруулсан тест (Багш+/Админ)
   price        Int?
@@ -459,12 +547,18 @@ model Test {
   groupKey     String?
   variantLabel String?
   createdById  String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime        @default(now())
+
+  // Зөөлөн устгал: hard DELETE хийвэл TestResult/Attempt зэрэг түүхэн
+  // бичлэгүүд орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
+  deletedAt DateTime?
 
   problems        TestProblem[]
   access          TestAccess[]
   results         TestResult[]
   attemptSessions TestAttemptSession[]
+
+  @@index([deletedAt])
 }
 
 model TestProblem {
@@ -523,16 +617,16 @@ model TestAttemptSession {
 }
 
 model TestResult {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   testId      String
-  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  test        Test          @relation(fields: [testId], references: [id], onDelete: Cascade)
   studentId   String
-  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student     User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   totalScore  Float
   maxScore    Float
   enteredById String? // CHAPTER_EXAM үед багш гараар оруулна
   source      AttemptSource
-  createdAt   DateTime @default(now())
+  createdAt   DateTime      @default(now())
 
   @@unique([testId, studentId])
   @@index([studentId])
@@ -541,17 +635,17 @@ model TestResult {
 // ============ Оролдлого — аналитикийн цөм (SPEC §9) ============
 
 enum SelfState {
-  SOLVED_CLEAN     // ✅ 100% ойлгож, алдалгүй бодсон
+  SOLVED_CLEAN // ✅ 100% ойлгож, алдалгүй бодсон
   FIXED_AFTER_ERROR // 🔁 эхэлж алдаад засч дуусгасан
-  FAILED           // ❌ алдсан / чадаагүй
-  GUESSED          // 🎯 буудсан — таамгаар оноо авсан
+  FAILED // ❌ алдсан / чадаагүй
+  GUESSED // 🎯 буудсан — таамгаар оноо авсан
 }
 
 enum AttemptSource {
   EVENING_SELF_REPORT // оройн өөрийн тэмдэглэгээ (танхимд утас хураадаг тул)
-  ONLINE_TEST         // системийн авто шалгалт
-  CHAPTER_EXAM        // 36+4 шалгалт, багш оруулсан
-  OMR_IMPORT          // хариултын хуудас уншигч машин
+  ONLINE_TEST // системийн авто шалгалт
+  CHAPTER_EXAM // 36+4 шалгалт, багш оруулсан
+  OMR_IMPORT // хариултын хуудас уншигч машин
 }
 
 model Attempt {
@@ -619,6 +713,57 @@ model StudentColorTag {
   @@unique([studentId, createdById])
 }
 
+// ============ Сурагчийн тэмдэглэл (Student Notes) ============
+// Ерөнхий (GENERAL) болон төлбөртэй холбоотой (PAYMENT) тэмдэглэлийг тусад
+// нь ялгаж хадгална — эрхийн матриц дахь мөнгөтэй холбоотой асуудлыг зөвхөн
+// Багш+ шийддэг зарчимтай уялдана.
+enum StudentNoteType {
+  GENERAL
+  PAYMENT
+}
+
+// БИЗНЕСИЙН ДҮРЭМ (StudentNotesService дотор шалгагдана):
+// Жилийн төлбөрөө бүтэн төлсөн сурагчид PAYMENT төрлийн тэмдэглэл үүсгэхийг
+// хориглоно (tuitionPlan = FULL_YEAR бөгөөд төлбөр баталгаажсан). Бусад
+// сурагчдад зөвшөөрнө. Шалгалт нь StudentNotesService дотор.
+model StudentNote {
+  id           String          @id @default(cuid())
+  studentId    String
+  student      User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type         StudentNoteType
+  body         String // 1–4000 тэмдэгт
+  createdById  String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  resolvedAt   DateTime?
+  resolvedById String?
+
+  @@index([studentId, type])
+  @@index([createdAt])
+}
+
+// ============ Аудит лог (Audit Log) ============
+// Эрхийн матрицаар контент/төлбөр/дүн засварлах эрх Багш+-д нээгдсэнтэй
+// холбоотойгоор бүх мөнгөтэй болон бусад засварлагдах бичлэгийн өөрчлөлтийг
+// хэн, юуг, хэзээ, ямар шалтгаанаар өөрчилснийг бүрэн хадгална.
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  actorRole String
+  action    String // ж: "UPDATE", "CONFIRM", "REVERSE", "DELETE"
+  entity    String // ж: "Payment", "StudentProfile", "TestResult"
+  entityId  String
+  before    Json?
+  after     Json?
+  reason    String?
+  at        DateTime @default(now())
+
+  @@index([actorId])
+  @@index([at])
+  @@index([entity, entityId])
+  @@index([actorId, at])
+}
+
 // ============ Эрх (named pass) ба Төлбөр ============
 
 model Pass {
@@ -656,6 +801,7 @@ enum PaymentStatus {
   PENDING
   CONFIRMED
   REJECTED
+  REVERSED // Багш+/Админ баталгаажсан төлбөрийг буцаасан — эрх автоматаар цуцлагдана
 }
 
 model Payment {
@@ -678,26 +824,31 @@ model Payment {
 
 // Төвийн зарлал — танхимын сурагчдын нийтийн самбарт харагдана
 enum AnnouncementAudience {
-  ALL_STUDENTS  // бүх сурагч
+  ALL_STUDENTS // бүх сурагч
   ALL_CLASSROOM // бүх танхимын сурагчид
-  ALL_ONLINE    // бүх онлайн сурагч
+  ALL_ONLINE // бүх онлайн сурагч
   ONE_CLASSROOM // тодорхой нэг анги (хуучин compatibility)
   SELECTED_CLASSROOMS // олон тодорхой анги
 }
 
 model Announcement {
-  id          String               @id @default(cuid())
-  title       String
-  body        String
-  audience    AnnouncementAudience @default(ALL_CLASSROOM)
-  classroomId String? // ONE_CLASSROOM үед
-  pinned      Boolean              @default(false)
-  createdById String
-  createdAt   DateTime             @default(now())
+  id               String                        @id @default(cuid())
+  title            String
+  body             String
+  audience         AnnouncementAudience          @default(ALL_CLASSROOM)
+  classroomId      String? // ONE_CLASSROOM үед
+  pinned           Boolean                       @default(false)
+  createdById      String
+  createdAt        DateTime                      @default(now())
   classroomTargets AnnouncementClassroomTarget[]
+
+  // Зөөлөн устгал: hard DELETE-ийн оронд түүхийг хадгална. Уншихдаа заавал
+  // deletedAt: null гэж шүүнэ.
+  deletedAt DateTime?
 
   @@index([audience, createdAt])
   @@index([classroomId])
+  @@index([deletedAt])
 }
 
 model AnnouncementClassroomTarget {
@@ -726,4 +877,233 @@ model ClassTestSession {
 
   @@unique([classroomId, testId, date])
   @@index([classroomId, date])
+}
+
+// ============ Сурагчийн үйлдлийн урсгал (Knowledge-Tracing/аналитикийн суурь) ============
+
+enum LearningEventType {
+  LOGIN
+  LOGOUT
+  SEARCH
+  CHAPTER_OPENED
+  VIDEO_STARTED
+  VIDEO_COMPLETED
+  PROBLEM_OPENED
+  ANSWER_SUBMITTED
+  HINT_USED
+  RETRY
+  BOOKMARK
+  TEST_STARTED
+  TEST_FINISHED
+  EVENING_MARK
+  PAGE_VIEW
+}
+
+// Зөвхөн нэмэгддэг (append-only) төлөвийн урсгал — ирээдүйн Knowledge-Tracing/
+// аналитик давхаргын суурь. problemId/testId/chapterId/videoId-г санаатайгаар
+// холбоос (foreign key) биш, чөлөөт String болгосон: энэ бол аналитикийн лог тул
+// холбогдох контент устсан ч (Problem/Test/Chapter/Video устгагдсан ч) хуучин
+// event-үүд алдагдахгүй, лог бүрэн хадгалагдана.
+model LearningEvent {
+  id         String            @id @default(cuid())
+  userId     String
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       LearningEventType
+  occurredAt DateTime          @default(now())
+  // Клиент талд үүсгэсэн session бүлэглэлт (нэг landing-аас гарах хүртэлх урсгал)
+  sessionId  String?
+  problemId  String?
+  testId     String?
+  chapterId  String?
+  videoId    String?
+  durationMs Int?
+  device     String?
+  meta       Json?
+
+  @@index([userId])
+  @@index([occurredAt])
+  @@index([sessionId])
+  @@index([userId, occurredAt])
+}
+
+// ============ Нийтийн лийд бүртгэл (Landing page lead-capture) ============
+// Бизнесийн контекст: төв Facebook-ийн 7,900 followers-тэй ч бүх элсэлтийг
+// гараар Messenger DM-ээр боловсруулдаг байсан (шөнө/амралтын өдөр алдагдсан
+// лийд, хэмжигдэхгүй урсгал). Энэ хүснэгт нүүр хуудасны 4 талбарт маягтаас
+// (Нэр/Утас/Хичээл/Анги) ирсэн хүсэлтийг бодитоор хадгалж, ADMIN/TEACHER_PLUS
+// нар статусыг нь ажиллуулна.
+
+// LeadSubject нь Content модулийн Subject enum-тай яг адилгүй: энд лийд
+// "аль аль хичээлээр" сонирхож болох тул BOTH нэмэлт утгатай. Тиймээс
+// Book/Chapter-д ашиглагдаж буй Subject enum-ыг өөрчлөхгүй, тусад нь
+// зарлав — өөр модулийн миграцтай мөргөлдөхгүй.
+enum LeadSubject {
+  MATH
+  SOCIAL_STUDIES
+  BOTH
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  ENROLLED
+  LOST
+}
+
+// Нийтийн (нэвтрэлтгүй) маягтаас ирдэг тул userId огт байхгүй — зөвхөн
+// сонирхогчийн бөглөсөн 4 талбар + ажилтны ажиллуулах статус.
+model Lead {
+  id        String      @id @default(cuid())
+  name      String
+  phone     String
+  subject   LeadSubject
+  grade     Int
+  status    LeadStatus  @default(NEW)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+// ============ Ажилтны төлөвлөгч (Staff Work Planner) ============
+// Жилийн турш 16 ажилтан ажлаа жижиг даалгавар болгон хуваан төлөвлөнө
+// (Taskly загварчлал). parentTaskId нь нэг том ажлыг дэд даалгавар
+// (subtask) болгон "жижиг хэсэг болгон хуваах" шаардлагыг хангана.
+
+enum TaskStatus {
+  PLANNED
+  IN_PROGRESS
+  DONE
+  BLOCKED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model StaffTask {
+  id            String       @id @default(cuid())
+  title         String
+  description   String?
+  status        TaskStatus   @default(PLANNED)
+  priority      TaskPriority @default(NORMAL)
+  startDate     DateTime?
+  dueDate       DateTime?
+  // Эцэг даалгавар устахад дэд даалгаварууд устахгүй, харин дээд
+  // түвшний бие даасан даалгавар болж үлдэнэ (parentTaskId = null).
+  parentTaskId  String?
+  parentTask    StaffTask?   @relation("StaffTaskSubtasks", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  subtasks      StaffTask[]  @relation("StaffTaskSubtasks")
+  createdById   String
+  createdBy     User         @relation(fields: [createdById], references: [id])
+  classroomId   String?
+  classroom     Classroom?   @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  subject       Subject?
+  estimateHours Int?
+  orderIndex    Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  assignees StaffTaskAssignee[]
+
+  @@index([status, dueDate])
+  @@index([dueDate])
+}
+
+// Нэг даалгавар дээр олон ажилтан хамтарч болно (олон-олон холбоос).
+model StaffTaskAssignee {
+  taskId     String
+  task       StaffTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAt DateTime  @default(now())
+
+  @@id([taskId, userId])
+}
+
+// ============ Хичээлийн хуваарь (Class Schedule) ============
+// Хуваарь долоо хоног бүр бараг өөрчлөгддөггүй тул тодорхой огноон дээрх
+// мөр мөрөөр биш, ДАВТАГДАХ ХЭВ МАЯГ (recurring pattern) байдлаар хадгална.
+// startMinute/endMinute-ийг DateTime биш, шөнө дундаас хойшхи МИНУТ тоогоор
+// хадгалсан: хуваарь бол тодорхой ХУАНЛИЙН ОГНОО огт байхгүй, зөвхөн 7
+// хоногийн өдөр дээр давтагддаг хэв маяг тул огноо шаарддаг DateTime төрөл
+// ашиглавал шаардлагагүй цагийн бүсийн (timezone) асуудлыг датандаа чирж
+// оруулах болно — минутаар хадгалснаар энэ асуудал огт үүсэхгүй.
+model ClassSchedule {
+  id            String    @id @default(cuid())
+  classroomId   String
+  classroom     Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  weekday       Int // 0=Ням, 1=Даваа … 6=Бямба (JS Date.getDay()-тэй ижил дараалал)
+  startMinute   Int // шөнө дундаас хойшхи минут (жишээ нь 09:00 = 540)
+  endMinute     Int
+  teacherId     String?
+  teacher       User?     @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  room          String?
+  subject       Subject?
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@unique([classroomId, weekday, startMinute, effectiveFrom])
+  @@index([classroomId, weekday])
+}
+
+// ============ Сургалтын хуанли (Academic Calendar) ============
+// Төвөөс тогтоосон амралт/чөлөөт өдрүүд. Идэвхийн heatmap-д амралтын
+// өдрийг сурагчийн "алгассан" өдөр гэж ХЭЗЭЭ Ч харуулж болохгүй — тэр
+// шударга байдлыг л энэ хүснэгт хангана.
+enum CalendarDayType {
+  HOLIDAY
+  BREAK
+  EXAM_DAY
+  SPECIAL
+  NO_CLASS
+}
+
+model AcademicCalendarDay {
+  id          String          @id @default(cuid())
+  date        DateTime        @unique @db.Date
+  type        CalendarDayType
+  title       String
+  note        String?
+  createdById String
+  createdAt   DateTime        @default(now())
+}
+
+// ============ Сурагчийн зорилго (Student Goals) ============
+// Ажилтны төлөвлөгчийн сурагч талын хувилбар — сурагч өөрөө богино
+// хугацааны зорилго тавьж, явцаа TaskStatus-оор ажиглана.
+model StudentGoal {
+  id          String     @id @default(cuid())
+  studentId   String
+  student     User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  targetDate  DateTime?
+  status      TaskStatus @default(PLANNED)
+  subject     Subject?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([studentId, status])
+}
+
+// ============ Стрийк хамгаалалт (Streak Freeze) ============
+// Хүндэтгэх шалтгаантай (өвчтэй, айлын хэрэгтэй гэх мэт) тасалдалд
+// сурагчийн стрийкийг хамгаална — стрийк тасрахад сурагч сургалтаа
+// орхидог (churn) гэдгийг дата харуулсан тул үүнийг бууруулах зорилготой.
+model StreakFreeze {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, date])
 }
