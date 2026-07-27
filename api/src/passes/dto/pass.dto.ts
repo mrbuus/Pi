@@ -37,3 +37,28 @@ export class GrantPassDto {
   @IsNotEmpty()
   userId: string;
 }
+
+// Админ л засна — нэр/хугацаа/хамрах хүрээ/үнэ/идэвх солино
+export class UpdatePassDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  name?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  durationDays?: number;
+
+  @IsOptional()
+  scope?: unknown;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  price?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}

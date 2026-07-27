@@ -1,6 +1,8 @@
 import {
+  IsDateString,
   IsEnum,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
@@ -36,4 +38,50 @@ export class ConfirmPaymentDto {
   @IsOptional()
   @IsString()
   note?: string;
+}
+
+export class RejectPaymentDto {
+  // Заавал биш — гэхдээ өгвол аудит лог-д хадгалагдана
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
+
+// Багш+/Админ бүртгэл/төлбөр/огнооны маргаантай асуудлыг бүрэн засах боломж
+// (SPEC/эзэмшигчийн шаардлага): дүн, арга, огноо, сар, тайлбар засна.
+// Мөнгөтэй холбоотой ЗАСВАР болгонд шалтгаан заавал (аудит лог-д before/after-тай хамт).
+export class UpdatePaymentDto {
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: 'Дүн 0-ээс их байх ёстой' })
+  amount?: number;
+
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  method?: PaymentMethod;
+
+  // ISO огноо — төлсөн цагийг нь буруу бичсэн бол засна
+  @IsOptional()
+  @IsDateString()
+  paidAt?: string;
+
+  // "2026-09" — аль сард хамаарахыг нь засна
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}$/, { message: 'Сар YYYY-MM хэлбэртэй байна' })
+  forMonth?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Засварын шалтгааныг заавал бичнэ' })
+  reason: string;
+}
+
+// Баталгаажсан төлбөрийг буцаах — олгосон эрхийг автоматаар цуцална
+export class ReversePaymentDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Буцаах шалтгааныг заавал бичнэ' })
+  reason: string;
 }
