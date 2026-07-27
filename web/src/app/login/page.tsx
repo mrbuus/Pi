@@ -6,18 +6,37 @@ import { useState } from "react";
 import LogoMark from "@/components/LogoMark";
 import { api, homeForRole, setAuth } from "@/lib/api";
 
+interface FieldErrors {
+  identifier?: string;
+  password?: string;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   // Утас, имэйл, username аль нэгээр нэвтэрнэ — backend /auth/login
   // "identifier" талбарыг гурвуулаа шалгадаг (auth.service.ts)
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [authError, setAuthError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  function validate(): boolean {
+    const errs: FieldErrors = {};
+    if (!identifier.trim()) {
+      errs.identifier = "Утас, имэйл эсвэл нэвтрэх нэрээ оруулна уу";
+    }
+    if (!password) {
+      errs.password = "Нууц үгээ оруулна уу";
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setAuthError("");
+    if (!validate()) return;
     setLoading(true);
     try {
       const res = await api<{ accessToken: string; role: string }>(
@@ -27,16 +46,19 @@ export default function LoginPage() {
       setAuth(res.accessToken, res.role);
       router.push(homeForRole(res.role));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Алдаа гарлаа");
+      // Backend ямар талбар буруу болохыг ялгаж хэлдэггүй (нууцлалын үүднээс) тул
+      // алдааг нууц үгийн талбарын дор inline харуулна — дэлгэцийн дээд талд
+      // тусдаа banner биш.
+      setAuthError(err instanceof Error ? err.message : "Алдаа гарлаа");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center px-5">
+    <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-[#0b142e] p-8">
+      <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
         <Link
           href="/"
           aria-label="Pi.mn үндсэн нүүр"
@@ -44,47 +66,86 @@ export default function LoginPage() {
         >
           <LogoMark variant="full" size={58} priority />
         </Link>
-        <form onSubmit={submit} className="space-y-4">
+
+        <form onSubmit={submit} noValidate className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm text-ink-dim">
+            <label htmlFor="identifier" className="mb-1.5 block text-sm font-medium text-ink">
               Утас, имэйл эсвэл нэвтрэх нэр
             </label>
+            <p id="identifier-hint" className="mb-1.5 text-xs text-ink-dim">
+              Гурвын аль нэгээр нэвтэрч болно: утасны дугаар, имэйл хаяг, эсвэл нэвтрэх нэр
+            </p>
             <input
+              id="identifier"
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              onChange={(e) => {
+                setIdentifier(e.target.value);
+                if (fieldErrors.identifier) setFieldErrors((f) => ({ ...f, identifier: undefined }));
+              }}
               placeholder="99112233 / you@gmail.com / username"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none transition focus:border-brand-bright"
-              required
+              autoComplete="username"
+              aria-describedby={
+                fieldErrors.identifier ? "identifier-hint identifier-error" : "identifier-hint"
+              }
+              aria-invalid={!!fieldErrors.identifier}
+              className={`w-full rounded-xl border bg-bg px-4 py-3 text-ink outline-none transition focus:border-brand ${
+                fieldErrors.identifier ? "border-error" : "border-line"
+              }`}
             />
+            {fieldErrors.identifier && (
+              <p id="identifier-error" role="alert" className="mt-1.5 text-sm text-error">
+                {fieldErrors.identifier}
+              </p>
+            )}
           </div>
+
           <div>
-            <label className="mb-1.5 block text-sm text-ink-dim">Нууц үг</label>
+            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-ink">
+              Нууц үг
+            </label>
+            <p id="password-hint" className="mb-1.5 text-xs text-ink-dim">
+              Анх удаа нэвтэрч байгаа бол нууц үг тань 8 оронтой утасны дугаар
+            </p>
             <input
+              id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Эхний нууц үг = утасны дугаар"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none transition focus:border-brand-bright"
-              required
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password) setFieldErrors((f) => ({ ...f, password: undefined }));
+                if (authError) setAuthError("");
+              }}
+              autoComplete="current-password"
+              aria-describedby={
+                fieldErrors.password || authError ? "password-hint password-error" : "password-hint"
+              }
+              aria-invalid={!!fieldErrors.password || !!authError}
+              className={`w-full rounded-xl border bg-bg px-4 py-3 text-ink outline-none transition focus:border-brand ${
+                fieldErrors.password || authError ? "border-error" : "border-line"
+              }`}
             />
+            {(fieldErrors.password || authError) && (
+              <p id="password-error" role="alert" className="mt-1.5 text-sm text-error">
+                {fieldErrors.password || authError}
+              </p>
+            )}
           </div>
-          {error && (
-            <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
-              {error}
-            </p>
-          )}
+
           <button
+            type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-brand-bright py-3 font-bold text-white transition hover:bg-[#6190f0] disabled:opacity-50"
+            aria-busy={loading}
+            className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
           >
             {loading ? "Нэвтэрч байна…" : "Нэвтрэх"}
           </button>
         </form>
+
         <p className="mt-5 text-center text-sm text-ink-dim">
           Шинэ хэрэглэгч үү?{" "}
-          <a href="/register" className="text-brand-soft hover:underline">
+          <Link href="/register" className="text-brand hover:underline">
             Бүртгүүлэх
-          </a>
+          </Link>
         </p>
       </div>
     </main>

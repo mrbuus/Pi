@@ -7,6 +7,7 @@ import LogoMark from "@/components/LogoMark";
 import { api, homeForRole, setAuth } from "@/lib/api";
 
 type Kind = "CLASSROOM" | "ONLINE" | "PARENT" | "BUYER";
+type Subject = "MATH" | "SOCIAL_STUDIES" | "BOTH";
 
 const KINDS: { value: Kind; title: string; desc: string }[] = [
   {
@@ -31,9 +32,33 @@ const KINDS: { value: Kind; title: string; desc: string }[] = [
   },
 ];
 
+const SUBJECTS: { value: Subject; title: string }[] = [
+  { value: "MATH", title: "Математик" },
+  { value: "SOCIAL_STUDIES", title: "Нийгэм судлал" },
+  { value: "BOTH", title: "Хоёулаа" },
+];
+
+const GRADES = [9, 10, 11, 12];
+
+interface FieldErrors {
+  lastName?: string;
+  firstName?: string;
+  phone?: string;
+  activationCode?: string;
+}
+
+interface RegisterResult {
+  role: string;
+  studentCode?: string;
+}
+
+function isStudentKind(kind: Kind): boolean {
+  return kind === "CLASSROOM" || kind === "ONLINE";
+}
+
 export default function RegisterPage() {
   const router = useRouter();
-  const [kind, setKind] = useState<Kind>("CLASSROOM");
+  const [kind, setKind] = useState<Kind | null>(null);
   const [form, setForm] = useState({
     lastName: "",
     firstName: "",
@@ -42,16 +67,39 @@ export default function RegisterPage() {
     school: "",
     activationCode: "",
   });
-  const [error, setError] = useState("");
+  const [subject, setSubject] = useState<Subject>("BOTH");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<RegisterResult | null>(null);
+  const [copied, setCopied] = useState(false);
 
   function set(k: keyof typeof form, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
+    if (fieldErrors[k as keyof FieldErrors]) {
+      setFieldErrors((e) => ({ ...e, [k]: undefined }));
+    }
+  }
+
+  function validate(activeKind: Kind): boolean {
+    const errs: FieldErrors = {};
+    if (!form.lastName.trim()) errs.lastName = "Овгоо оруулна уу";
+    if (!form.firstName.trim()) errs.firstName = "Нэрээ оруулна уу";
+    if (!/^\d{8}$/.test(form.phone)) {
+      errs.phone = "Утасны дугаар яг 8 оронтой байх ёстой";
+    }
+    if (activeKind === "CLASSROOM" && !/^\d{8}$/.test(form.activationCode)) {
+      errs.activationCode = "Багшаас авсан 8 оронтой кодоо оруулна уу";
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setSubmitError("");
+    if (!kind) return;
+    if (!validate(kind)) return;
     setLoading(true);
     try {
       const body: Record<string, unknown> = {
@@ -62,30 +110,89 @@ export default function RegisterPage() {
       if (kind === "PARENT") {
         body.asParent = true;
       }
-      if (kind !== "BUYER" && kind !== "PARENT") {
+      if (isStudentKind(kind)) {
         body.studentType = kind;
         body.grade = parseInt(form.grade, 10);
+        body.subject = subject;
         if (form.school) body.school = form.school;
       }
       if (kind === "CLASSROOM") body.activationCode = form.activationCode;
 
-      const res = await api<{ accessToken: string; role: string }>(
-        "/auth/register",
-        { method: "POST", body, auth: false },
-      );
+      const res = await api<{
+        accessToken: string;
+        role: string;
+        studentCode?: string;
+      }>("/auth/register", { method: "POST", body, auth: false });
       setAuth(res.accessToken, res.role);
-      router.push(homeForRole(res.role));
+
+      if (isStudentKind(kind) && res.studentCode) {
+        // Сурагчийн кодыг эндээс тэр даруй харуулна — нэвтэрсний дараа биш,
+        // яг үүсгэсэн мөчид (энэ бол кодыг чухалчилж харуулах цорын ганц мөч)
+        setResult({ role: res.role, studentCode: res.studentCode });
+      } else {
+        router.push(homeForRole(res.role));
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Алдаа гарлаа");
+      setSubmitError(err instanceof Error ? err.message : "Алдаа гарлаа");
     } finally {
       setLoading(false);
     }
   }
 
+  async function copyCode() {
+    if (!result?.studentCode) return;
+    try {
+      await navigator.clipboard.writeText(result.studentCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API боломжгүй үед ч кодыг дэлгэцэн дээр харуулсан хэвээр байна
+    }
+  }
+
+  // Амжилттай бүртгэгдээд сурагчийн код гарсан бол — кодыг онцолж харуулна
+  if (result?.studentCode) {
+    return (
+      <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
+        <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
+        <div className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
+          <p className="text-sm font-semibold text-success">✓ Бүртгэл амжилттай үүслээ</p>
+          <h1 className="mt-3 text-lg font-bold text-ink">Таны сурагчийн код</h1>
+          <p className="mt-1 text-sm text-ink-dim">
+            Энэ бол таны сургалтын төв дэх байнгын танигдах код. Шалгалт, дэвтэр,
+            гэрчилгээ бүх газар энэ кодоор тань таних тул хадгалж авна уу.
+          </p>
+
+          <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-brand/30 bg-brand/10 px-4 py-4">
+            <span className="font-mono text-2xl font-extrabold tracking-wider text-ink">
+              {result.studentCode}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={copyCode}
+            className="mt-3 w-full rounded-xl border border-line bg-bg py-2.5 text-sm font-semibold text-ink transition hover:border-brand"
+          >
+            {copied ? "✓ Хуулагдлаа" : "Кодыг хуулах"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push(homeForRole(result.role))}
+            className="mt-3 w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90"
+          >
+            Үргэлжлүүлэх
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0b142e] p-8">
+      <div className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-8 shadow-sm">
         <div className="mb-6">
           <Link
             href="/"
@@ -94,116 +201,247 @@ export default function RegisterPage() {
           >
             <LogoMark variant="full" size={58} priority />
           </Link>
-          <p className="mt-2 text-sm font-semibold text-brand-soft">
-            Бүртгэл үүсгэх
-          </p>
+          <p className="mt-2 text-sm font-semibold text-brand">Бүртгэл үүсгэх</p>
         </div>
 
-        {/* Төрөл сонгох */}
-        <div className="mb-5 space-y-2">
-          {KINDS.map((k) => (
-            <button
-              key={k.value}
-              type="button"
-              onClick={() => setKind(k.value)}
-              className={`w-full rounded-xl border p-3 text-left transition ${
-                kind === k.value
-                  ? "border-brand-bright bg-brand-bright/10"
-                  : "border-white/10 hover:border-white/25"
-              }`}
-            >
-              <p className="text-sm font-semibold">{k.title}</p>
-              <p className="mt-0.5 text-xs text-ink-dim">{k.desc}</p>
-            </button>
-          ))}
-        </div>
-
-        <form onSubmit={submit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              value={form.lastName}
-              onChange={(e) => set("lastName", e.target.value)}
-              placeholder="Овог"
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-brand-bright"
-              required
-            />
-            <input
-              value={form.firstName}
-              onChange={(e) => set("firstName", e.target.value)}
-              placeholder="Нэр"
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-brand-bright"
-              required
-            />
-          </div>
-          <input
-            value={form.phone}
-            onChange={(e) => set("phone", e.target.value)}
-            inputMode="numeric"
-            placeholder="Утасны дугаар (8 орон)"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-brand-bright"
-            required
-          />
-
-          {kind !== "BUYER" && kind !== "PARENT" && (
-            <div className="grid grid-cols-2 gap-3">
-              <select
-                value={form.grade}
-                onChange={(e) => set("grade", e.target.value)}
-                className="rounded-xl border border-white/10 bg-[#0b142e] px-3 py-2.5 text-sm outline-none"
+        {/* Алхам 1: Та хэн бэ? Эхлээд үүнийг сонговол ЗӨВХӨН хэрэгтэй талбарууд харагдана */}
+        <div className="mb-5">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-ink">1. Та хэн бэ?</h2>
+            {kind && (
+              <button
+                type="button"
+                onClick={() => setKind(null)}
+                className="text-xs font-medium text-brand hover:underline"
               >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => (
-                  <option key={g} value={g}>
-                    {g}-р анги
-                  </option>
-                ))}
-              </select>
-              <input
-                value={form.school}
-                onChange={(e) => set("school", e.target.value)}
-                placeholder="Сургууль"
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-brand-bright"
-              />
-            </div>
-          )}
+                Өөрчлөх
+              </button>
+            )}
+          </div>
 
-          {kind === "CLASSROOM" && (
-            <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-3">
-              <input
-                value={form.activationCode}
-                onChange={(e) => set("activationCode", e.target.value)}
-                inputMode="numeric"
-                placeholder="Багшаас авсан код (ж: 20260613)"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-brand-bright"
-                required
-              />
-              <p className="mt-2 text-xs text-amber-200/70">
-                Танхимын ангид бүртгүүлэхэд багшаас өнөөдрийн кодыг авах шаардлагатай
+          {kind ? (
+            <div className="rounded-xl border border-brand/30 bg-brand/10 p-3">
+              <p className="text-sm font-semibold text-ink">
+                {KINDS.find((k) => k.value === kind)?.title}
               </p>
             </div>
+          ) : (
+            <div role="radiogroup" aria-label="Та хэн бэ?" className="space-y-2">
+              {KINDS.map((k) => (
+                <label
+                  key={k.value}
+                  className="block cursor-pointer rounded-xl border border-line p-3 transition hover:border-brand/50"
+                >
+                  <input
+                    type="radio"
+                    name="kind"
+                    value={k.value}
+                    checked={kind === k.value}
+                    onChange={() => setKind(k.value)}
+                    className="sr-only"
+                  />
+                  <p className="text-sm font-semibold text-ink">{k.title}</p>
+                  <p className="mt-0.5 text-xs text-ink-dim">{k.desc}</p>
+                </label>
+              ))}
+            </div>
           )}
+        </div>
 
-          {error && (
-            <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
-              {error}
-            </p>
-          )}
+        {/* Алхам 2: тухайн төрөлд хэрэгтэй мэдээлэл */}
+        {kind && (
+          <form onSubmit={submit} noValidate className="space-y-3">
+            <h2 className="text-sm font-semibold text-ink">2. Мэдээллээ бөглөнө үү</h2>
 
-          <button
-            disabled={loading}
-            className="w-full rounded-xl bg-brand-bright py-3 font-bold text-white transition hover:bg-[#6190f0] disabled:opacity-50"
-          >
-            {loading ? "Бүртгэж байна…" : "Бүртгүүлэх"}
-          </button>
-        </form>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="lastName" className="sr-only">
+                  Овог
+                </label>
+                <input
+                  id="lastName"
+                  value={form.lastName}
+                  onChange={(e) => set("lastName", e.target.value)}
+                  placeholder="Овог"
+                  aria-invalid={!!fieldErrors.lastName}
+                  aria-describedby={fieldErrors.lastName ? "lastName-error" : undefined}
+                  className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                    fieldErrors.lastName ? "border-error" : "border-line"
+                  }`}
+                />
+                {fieldErrors.lastName && (
+                  <p id="lastName-error" role="alert" className="mt-1 text-xs text-error">
+                    {fieldErrors.lastName}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="firstName" className="sr-only">
+                  Нэр
+                </label>
+                <input
+                  id="firstName"
+                  value={form.firstName}
+                  onChange={(e) => set("firstName", e.target.value)}
+                  placeholder="Нэр"
+                  aria-invalid={!!fieldErrors.firstName}
+                  aria-describedby={fieldErrors.firstName ? "firstName-error" : undefined}
+                  className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                    fieldErrors.firstName ? "border-error" : "border-line"
+                  }`}
+                />
+                {fieldErrors.firstName && (
+                  <p id="firstName-error" role="alert" className="mt-1 text-xs text-error">
+                    {fieldErrors.firstName}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="sr-only">
+                Утасны дугаар
+              </label>
+              <input
+                id="phone"
+                value={form.phone}
+                onChange={(e) => set("phone", e.target.value)}
+                inputMode="numeric"
+                placeholder="Утасны дугаар (8 орон)"
+                aria-invalid={!!fieldErrors.phone}
+                aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
+                className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                  fieldErrors.phone ? "border-error" : "border-line"
+                }`}
+              />
+              {fieldErrors.phone ? (
+                <p id="phone-error" role="alert" className="mt-1 text-xs text-error">
+                  {fieldErrors.phone}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-ink-dim">
+                  Эхний нууц үг тань энэ дугаар байна
+                </p>
+              )}
+            </div>
+
+            {isStudentKind(kind) && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="grade" className="mb-1 block text-xs text-ink-dim">
+                      Анги
+                    </label>
+                    <select
+                      id="grade"
+                      value={form.grade}
+                      onChange={(e) => set("grade", e.target.value)}
+                      className="w-full rounded-xl border border-line bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
+                    >
+                      {GRADES.map((g) => (
+                        <option key={g} value={g}>
+                          {g}-р анги
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="school" className="mb-1 block text-xs text-ink-dim">
+                      Сургууль (заавал биш)
+                    </label>
+                    <input
+                      id="school"
+                      value={form.school}
+                      onChange={(e) => set("school", e.target.value)}
+                      placeholder="Сургууль"
+                      className="w-full rounded-xl border border-line bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <span className="mb-1.5 block text-xs text-ink-dim">
+                    Ямар хичээлээр суралцах вэ?
+                  </span>
+                  <div role="radiogroup" aria-label="Хичээл" className="grid grid-cols-3 gap-2">
+                    {SUBJECTS.map((s) => (
+                      <label
+                        key={s.value}
+                        className={`cursor-pointer rounded-lg border px-2 py-2 text-center text-xs font-medium transition ${
+                          subject === s.value
+                            ? "border-brand bg-brand/10 text-ink"
+                            : "border-line text-ink-dim hover:border-brand/40"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="subject"
+                          value={s.value}
+                          checked={subject === s.value}
+                          onChange={() => setSubject(s.value)}
+                          className="sr-only"
+                        />
+                        {s.title}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-1 text-xs text-ink-dim">
+                    Энэ сонголт таны сурагчийн кодод тусгагдана
+                  </p>
+                </div>
+              </>
+            )}
+
+            {kind === "CLASSROOM" && (
+              <div className="rounded-xl border border-warning/30 bg-warning/10 p-3">
+                <label htmlFor="activationCode" className="mb-1.5 block text-xs font-medium text-ink">
+                  Багшаас авсан өнөөдрийн код
+                </label>
+                <input
+                  id="activationCode"
+                  value={form.activationCode}
+                  onChange={(e) => set("activationCode", e.target.value)}
+                  inputMode="numeric"
+                  placeholder="ж: 20260726"
+                  aria-invalid={!!fieldErrors.activationCode}
+                  aria-describedby="activationCode-hint"
+                  className={`w-full rounded-lg border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                    fieldErrors.activationCode ? "border-error" : "border-line"
+                  }`}
+                />
+                <p id="activationCode-hint" className="mt-1.5 text-xs text-ink-dim">
+                  Танхимын ангид бүртгүүлэхэд багшаас өнөөдрийн 8 оронтой кодыг авах шаардлагатай
+                </p>
+                {fieldErrors.activationCode && (
+                  <p role="alert" className="mt-1 text-xs text-error">
+                    {fieldErrors.activationCode}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {submitError && (
+              <p role="alert" className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+                {submitError}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              aria-busy={loading}
+              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+            >
+              {loading ? "Бүртгэж байна…" : "Бүртгүүлэх"}
+            </button>
+          </form>
+        )}
 
         <p className="mt-5 text-center text-sm text-ink-dim">
           Бүртгэлтэй юу?{" "}
-          <Link href="/login" className="text-brand-soft hover:underline">
+          <Link href="/login" className="text-brand hover:underline">
             Нэвтрэх
           </Link>
-        </p>
-        <p className="mt-2 text-center text-xs text-ink-dim">
-          Эхний нууц үг тань утасны дугаар тань байна
         </p>
       </div>
     </main>

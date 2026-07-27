@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Edges, OrbitControls } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 /* ============================================================================
@@ -16,10 +16,65 @@ import * as THREE from "three";
  *   - Модель файл татахгүй — Three.js-ийн бэлэн геометрүүд (сүлжээний ачаалал ~0)
  *   - prefers-reduced-motion үед автомат эргэлтгүй + frameloop="demand"
  *     (зөвхөн хэрэглэгч эргүүлэх үед л рендерлэнэ — батарей хэмнэнэ)
+ *
+ * Өнгө нь ТЕМАТАЙ уялдана: canvas-ийн материалууд (Three.js WebGL context)
+ * Tailwind/CSS хувьсагчийг шууд ашиглаж чадахгүй тул globals.css-ийн
+ * --brand-bright / --teal / --brand-soft хувьсагчдыг runtime-д
+ * getComputedStyle-ээр уншиж, LIGHT/DARK хоёуланд зөв харагдана.
  * ========================================================================== */
 
-const BODY = "#4f7fe6"; // биеийн wireframe — брэндийн хөх
-const MEASURE = "#2dd4a8"; // ялгарах хэмжигдэхүүн — ногоон
+interface ThemeColors {
+  body: string; // биеийн wireframe — брэндийн хөх (тема бүрдээ тааруулсан)
+  measure: string; // ялгарах хэмжигдэхүүн — teal accent
+  soft: string; // зөөлөн тодруулга — edges/particles
+}
+
+const FALLBACK_COLORS: ThemeColors = {
+  body: "#4f7fe6",
+  measure: "#34d6a8",
+  soft: "#9db8f5",
+};
+
+function readThemeColors(): ThemeColors {
+  if (typeof window === "undefined") return FALLBACK_COLORS;
+  const style = getComputedStyle(document.documentElement);
+  const read = (name: string, fallback: string) => {
+    const value = style.getPropertyValue(name).trim();
+    return value || fallback;
+  };
+  return {
+    body: read("--brand-bright", FALLBACK_COLORS.body),
+    measure: read("--teal", FALLBACK_COLORS.measure),
+    soft: read("--brand-soft", FALLBACK_COLORS.soft),
+  };
+}
+
+// Хэрэглэгчийн сонгосон загвар (light/system/dark) солигдоход канвасын
+// материалын өнгийг шууд шинэчилнэ — дахин ачаалах шаардлагагүй.
+function useThemeColors(): ThemeColors {
+  const [colors, setColors] = useState<ThemeColors>(FALLBACK_COLORS);
+
+  useEffect(() => {
+    const update = () => setColors(readThemeColors());
+    update();
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    media.addEventListener("change", update);
+
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    return () => {
+      media.removeEventListener("change", update);
+      observer.disconnect();
+    };
+  }, []);
+
+  return colors;
+}
 
 // Тэнхлэгийн дагуух хэмжилтийн шугам: нарийн цилиндр + хоёр үзүүрийн цэг.
 // axis="y" бол босоо (өндөр), "x" бол хэвтээ (радиус/ирмэг).
@@ -28,11 +83,13 @@ function MeasureLine({
   from,
   to,
   at = [0, 0],
+  color,
 }: {
   axis: "x" | "y";
   from: number;
   to: number;
   at?: [number, number]; // y-шугамд [x,z], x-шугамд [y,z]
+  color: string;
 }) {
   const len = Math.abs(to - from);
   const mid = (from + to) / 2;
@@ -46,12 +103,12 @@ function MeasureLine({
     <group>
       <mesh position={pos} rotation={rot}>
         <cylinderGeometry args={[0.022, 0.022, len, 8]} />
-        <meshBasicMaterial color={MEASURE} />
+        <meshBasicMaterial color={color} />
       </mesh>
       {[from, to].map((v) => (
         <mesh key={v} position={end(v)}>
           <sphereGeometry args={[0.055, 12, 12]} />
-          <meshBasicMaterial color={MEASURE} />
+          <meshBasicMaterial color={color} />
         </mesh>
       ))}
     </group>
@@ -62,106 +119,106 @@ interface Solid {
   title: string;
   measure: string; // ногоон шугам юуг заадаг вэ
   formula: string;
-  render: () => React.ReactNode;
+  render: (colors: ThemeColors) => React.ReactNode;
 }
 
 // Сургалтын хөтөлбөрийн үндсэн биетүүд — өдөр бүр дараагийнх нь гарна
 const CATALOG: Solid[] = [
   {
     title: "Куб",
-    measure: "ногоон шугам — ирмэг a",
+    measure: "тодруулсан шугам — ирмэг a",
     formula: "V = a³",
-    render: () => (
+    render: (c) => (
       <>
         <mesh>
           <boxGeometry args={[1.7, 1.7, 1.7]} />
-          <FlatWire />
+          <FlatWire colors={c} />
         </mesh>
-        <MeasureLine axis="y" from={-0.85} to={0.85} at={[0.85, 0.85]} />
+        <MeasureLine axis="y" from={-0.85} to={0.85} at={[0.85, 0.85]} color={c.measure} />
       </>
     ),
   },
   {
     title: "Тэгш өнцөгт параллелепипед",
-    measure: "ногоон шугам — өндөр h",
+    measure: "тодруулсан шугам — өндөр h",
     formula: "V = a·b·h",
-    render: () => (
+    render: (c) => (
       <>
         <mesh>
           <boxGeometry args={[2.1, 1.2, 1.4]} />
-          <FlatWire />
+          <FlatWire colors={c} />
         </mesh>
-        <MeasureLine axis="y" from={-0.6} to={0.6} at={[1.05, 0.7]} />
+        <MeasureLine axis="y" from={-0.6} to={0.6} at={[1.05, 0.7]} color={c.measure} />
       </>
     ),
   },
   {
     title: "Гурвалжин призм",
-    measure: "ногоон шугам — өндөр h",
+    measure: "тодруулсан шугам — өндөр h",
     formula: "V = S·h",
-    render: () => (
+    render: (c) => (
       <>
         <mesh>
           <cylinderGeometry args={[1.15, 1.15, 1.7, 3]} />
-          <FlatWire />
+          <FlatWire colors={c} />
         </mesh>
-        <MeasureLine axis="y" from={-0.85} to={0.85} />
+        <MeasureLine axis="y" from={-0.85} to={0.85} color={c.measure} />
       </>
     ),
   },
   {
     title: "Дөрвөн өнцөгт пирамид",
-    measure: "ногоон шугам — өндөр h",
+    measure: "тодруулсан шугам — өндөр h",
     formula: "V = ⅓·S·h",
-    render: () => (
+    render: (c) => (
       <>
         <mesh position={[0, -0.1, 0]}>
           <coneGeometry args={[1.35, 1.7, 4]} />
-          <FlatWire />
+          <FlatWire colors={c} />
         </mesh>
-        <MeasureLine axis="y" from={-0.95} to={0.75} />
+        <MeasureLine axis="y" from={-0.95} to={0.75} color={c.measure} />
       </>
     ),
   },
   {
     title: "Конус",
-    measure: "ногоон шугам — өндөр h",
+    measure: "тодруулсан шугам — өндөр h",
     formula: "V = ⅓·π·r²·h",
-    render: () => (
+    render: (c) => (
       <>
         <mesh position={[0, -0.05, 0]}>
           <coneGeometry args={[1.1, 1.8, 48]} />
-          <Wire />
+          <Wire colors={c} />
         </mesh>
-        <MeasureLine axis="y" from={-0.95} to={0.85} />
+        <MeasureLine axis="y" from={-0.95} to={0.85} color={c.measure} />
       </>
     ),
   },
   {
     title: "Цилиндр",
-    measure: "ногоон шугам — өндөр h",
+    measure: "тодруулсан шугам — өндөр h",
     formula: "V = π·r²·h",
-    render: () => (
+    render: (c) => (
       <>
         <mesh>
           <cylinderGeometry args={[1.0, 1.0, 1.7, 48]} />
-          <Wire />
+          <Wire colors={c} />
         </mesh>
-        <MeasureLine axis="y" from={-0.85} to={0.85} />
+        <MeasureLine axis="y" from={-0.85} to={0.85} color={c.measure} />
       </>
     ),
   },
   {
     title: "Бөмбөрцөг",
-    measure: "ногоон шугам — радиус r",
+    measure: "тодруулсан шугам — радиус r",
     formula: "V = 4⁄3·π·r³",
-    render: () => (
+    render: (c) => (
       <>
         <mesh>
           <sphereGeometry args={[1.4, 28, 20]} />
-          <Wire />
+          <Wire colors={c} />
         </mesh>
-        <MeasureLine axis="x" from={0} to={1.4} />
+        <MeasureLine axis="x" from={0} to={1.4} color={c.measure} />
       </>
     ),
   },
@@ -169,11 +226,15 @@ const CATALOG: Solid[] = [
 
 // Муруй гадаргуутай биет (бөмбөрцөг, конус, цилиндр) — нягт wireframe нь
 // өөрөө тод харагдана (knot-той ижил aesthetic)
-function Wire() {
+function Wire({ colors }: { colors: ThemeColors }) {
+  const emissive = useMemo(
+    () => `#${new THREE.Color(colors.body).multiplyScalar(0.3).getHexString()}`,
+    [colors.body],
+  );
   return (
     <meshStandardMaterial
-      color={BODY}
-      emissive="#1b3a7a"
+      color={colors.body}
+      emissive={emissive}
       wireframe
       transparent
       opacity={0.8}
@@ -183,16 +244,20 @@ function Wire() {
 
 // Хавтгай талст биет (куб, призм, пирамид) — цөөн ирмэгтэй тул wireframe
 // бүдэг гардаг: бүдэг дүүргэлт + Edges-ээр тод ирмэг зурна
-function FlatWire() {
+function FlatWire({ colors }: { colors: ThemeColors }) {
+  const emissive = useMemo(
+    () => `#${new THREE.Color(colors.body).multiplyScalar(0.3).getHexString()}`,
+    [colors.body],
+  );
   return (
     <>
       <meshStandardMaterial
-        color={BODY}
-        emissive="#1b3a7a"
+        color={colors.body}
+        emissive={emissive}
         transparent
         opacity={0.16}
       />
-      <Edges color="#7fa4ff" />
+      <Edges color={colors.soft} />
     </>
   );
 }
@@ -207,7 +272,7 @@ export function solidOfDay(date = new Date()): Solid {
   return CATALOG[key % CATALOG.length];
 }
 
-function Particles() {
+function Particles({ color }: { color: string }) {
   const points = useRef<THREE.Points>(null);
   const positions = useMemo(() => {
     const count = 350;
@@ -226,13 +291,14 @@ function Particles() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.025} color="#9db8f5" transparent opacity={0.6} />
+      <pointsMaterial size={0.025} color={color} transparent opacity={0.6} />
     </points>
   );
 }
 
 export default function Hero3D() {
   const solid = useMemo(() => solidOfDay(), []);
+  const colors = useThemeColors();
   // Хөдөлгөөн багасгах тохиргоотой хэрэглэгчид авто эргэлтгүй, зөвхөн
   // өөрөө эргүүлэх үед рендерлэнэ (сул төхөөрөмжид ч хөнгөн)
   const reducedMotion = useMemo(
@@ -255,13 +321,13 @@ export default function Hero3D() {
           frameloop={reducedMotion ? "demand" : "always"}
         >
           <ambientLight intensity={0.5} />
-          <pointLight position={[5, 5, 5]} intensity={80} color="#7fa4ff" />
-          <pointLight position={[-5, -3, 2]} intensity={40} color="#34d6a8" />
+          <pointLight position={[5, 5, 5]} intensity={80} color={colors.body} />
+          <pointLight position={[-5, -3, 2]} intensity={40} color={colors.measure} />
           {/* Биетийг багасгаж дээшлүүлнэ — доод тайлбарын карт халхлахгүй (Ё) */}
           <group scale={0.72} position={[0, 0.55, 0]}>
-            {solid.render()}
+            {solid.render(colors)}
           </group>
-          {!reducedMotion && <Particles />}
+          {!reducedMotion && <Particles color={colors.soft} />}
           <OrbitControls
             enableZoom={false}
             enablePan={false}
@@ -270,22 +336,22 @@ export default function Hero3D() {
           />
         </Canvas>
       </div>
-      <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-2xl border border-white/10 bg-[#060c1d]/82 px-4 py-3 text-left shadow-xl shadow-black/25 backdrop-blur">
+      <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-2xl border border-line bg-panel/90 px-4 py-3 text-left shadow-xl shadow-black/20 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-soft">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-dim">
               Өдрийн 3D жишээ
             </p>
             <p className="mt-0.5 truncate text-sm font-bold text-ink">
               {solid.title}
             </p>
           </div>
-          <span className="rounded-full bg-brand-bright/15 px-3 py-1 font-serif text-sm font-bold text-brand-soft">
+          <span className="rounded-full bg-brand/10 px-3 py-1 font-serif text-sm font-bold text-brand">
             {solid.formula}
           </span>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-ink-dim">
-          {solid.measure.replace("ногоон шугам — ", "Ногоон шугам: ")}
+          {solid.measure.replace("тодруулсан шугам — ", "Тодруулсан шугам: ")}
         </p>
       </div>
     </>
