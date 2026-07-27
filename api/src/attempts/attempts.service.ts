@@ -9,6 +9,7 @@ import {
   AttemptSource,
   Role,
   SelfState,
+  Subject,
 } from '../generated/prisma/enums';
 import {
   addDateDays,
@@ -328,6 +329,7 @@ export class AttemptsService {
     date: string | undefined,
     userId: string,
     role: Role,
+    subject?: Subject,
   ) {
     await this.assertClassReadAccess(classroomId, userId, role);
     const targetDate = date ? this.parseApiDate(date) : todayUB();
@@ -377,7 +379,10 @@ export class AttemptsService {
     ]);
 
     const tests = await this.prisma.test.findMany({
-      where: { id: { in: sessions.map((s) => s.testId) } },
+      where: {
+        id: { in: sessions.map((s) => s.testId) },
+        ...(subject ? { chapter: { book: { subject } } } : {}),
+      },
       select: {
         id: true,
         title: true,

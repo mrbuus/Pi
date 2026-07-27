@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -15,6 +17,7 @@ import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { ReviewDto } from './dto/review.dto';
 import { SubmitDto } from './dto/submit.dto';
+import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -74,6 +77,24 @@ export class AssignmentsController {
     @Req() req: AuthedRequest,
   ) {
     return this.assignments.review(id, dto, req.user.userId, req.user.role);
+  }
+
+  // Ангийг эзэмшигч Багш эсвэл Багш+/Админ засна
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Patch('assignments/:id')
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateAssignmentDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.assignments.update(id, dto, req.user.userId, req.user.role);
+  }
+
+  // Зөөлөн устгал — ангийг эзэмшигч Багш эсвэл Багш+/Админ
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Delete('assignments/:id')
+  remove(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.assignments.remove(id, req.user.userId, req.user.role);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)

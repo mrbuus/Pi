@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Role, SelfState } from '../generated/prisma/enums';
+import { Role, SelfState, Subject } from '../generated/prisma/enums';
 import {
   addDateDays,
   dateKey,
@@ -67,7 +67,12 @@ export class ClassSessionsService {
   }
 
   // Багш: ангийн бүртгэсэн тестүүд + бодлогууд (аль нь орсон/хассаныг тэмдэглэх)
-  async listForClass(classroomId: string, userId: string, role: Role) {
+  async listForClass(
+    classroomId: string,
+    userId: string,
+    role: Role,
+    subject?: Subject,
+  ) {
     await this.assertClassAccess(classroomId, userId, role);
     const sessions = await this.prisma.classTestSession.findMany({
       where: { classroomId },
@@ -75,7 +80,10 @@ export class ClassSessionsService {
       take: 30,
     });
     const tests = await this.prisma.test.findMany({
-      where: { id: { in: sessions.map((s) => s.testId) } },
+      where: {
+        id: { in: sessions.map((s) => s.testId) },
+        ...(subject ? { chapter: { book: { subject } } } : {}),
+      },
       include: {
         problems: {
           orderBy: { order: 'asc' },
@@ -139,7 +147,7 @@ export class ClassSessionsService {
 
   // Сурагч: сүүлийн өдрүүдэд ангид хийсэн тестүүд + бодлогууд + миний тэмдэглэгээ.
   // Token мэдэх шаардлагагүй — хүүхэд цаасаа хараад бодлого бүрийг тэмдэглэнэ.
-  async todoForStudent(studentId: string) {
+  async todoForStudent(studentId: string, subject?: Subject) {
     const enrollment = await this.prisma.enrollment.findFirst({
       where: { studentId, leftAt: null },
       select: { classroomId: true },
@@ -160,7 +168,10 @@ export class ClassSessionsService {
     if (sessions.length === 0) return [];
 
     const tests = await this.prisma.test.findMany({
-      where: { id: { in: sessions.map((s) => s.testId) } },
+      where: {
+        id: { in: sessions.map((s) => s.testId) },
+        ...(subject ? { chapter: { book: { subject } } } : {}),
+      },
       include: {
         problems: {
           orderBy: { order: 'asc' },

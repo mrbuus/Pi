@@ -4,15 +4,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { AuditService } from '../audit/audit.service';
 import { Role, SubmissionState } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { ReviewAction, ReviewDto } from './dto/review.dto';
 import { SubmitDto } from './dto/submit.dto';
+import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 
 @Injectable()
 export class AssignmentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+  ) {}
 
   private async assertClassAccess(
     classroomId: string,
@@ -55,7 +60,7 @@ export class AssignmentsService {
   async listForClass(classroomId: string, userId: string, role: Role) {
     await this.assertClassAccess(classroomId, userId, role);
     return this.prisma.assignment.findMany({
-      where: { classroomId },
+      where: { classroomId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       include: {
         _count: {
@@ -65,6 +70,77 @@ export class AssignmentsService {
         },
       },
     });
+  }
+
+  // Ангийг эзэмшигч Багш эсвэл Багш+/Админ засна
+  async update(
+    id: string,
+    dto: UpdateAssignmentDto,
+    userId: string,
+    role: Role,
+  ) {
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id },
+    });
+    if (!assignment || assignment.deletedAt) {
+      throw new NotFoundException('Даалгавар олдсонгүй');
+    }
+    await this.assertClassAccess(assignment.classroomId, userId, role);
+
+    const updated = await this.prisma.assignment.update({
+      where: { id },
+      data: {
+        ...(dto.title !== undefined ? { title: dto.title } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description }
+          : {}),
+        ...(dto.type !== undefined ? { type: dto.type } : {}),
+        ...(dto.imageKeys !== undefined ? { imageKeys: dto.imageKeys } : {}),
+        ...(dto.dueDate !== undefined
+          ? { dueDate: dto.dueDate ? new Date(dto.dueDate) : null }
+          : {}),
+      },
+    });
+
+    await this.audit.record({
+      actorId: userId,
+      actorRole: role,
+      action: 'UPDATE',
+      entity: 'Assignment',
+      entityId: id,
+      before: assignment,
+      after: updated,
+    });
+
+    return updated;
+  }
+
+  // Зөөлөн устгал: Submission-ы түүх орфон үлдэхгүйн тулд hard DELETE хийхгүй
+  async remove(id: string, userId: string, role: Role) {
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id },
+    });
+    if (!assignment || assignment.deletedAt) {
+      throw new NotFoundException('Даалгавар олдсонгүй');
+    }
+    await this.assertClassAccess(assignment.classroomId, userId, role);
+
+    const updated = await this.prisma.assignment.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    await this.audit.record({
+      actorId: userId,
+      actorRole: role,
+      action: 'DELETE',
+      entity: 'Assignment',
+      entityId: id,
+      before: assignment,
+      after: updated,
+    });
+
+    return { removed: true };
   }
 
   // Сурагч идэвхтэй ангийнхаа, элссэн өдрөөс хойшхи даалгавруудыг л харна (SPEC §6.3)
@@ -79,6 +155,7 @@ export class AssignmentsService {
       where: {
         classroomId: enrollment.classroomId,
         createdAt: { gte: enrollment.joinedAt },
+        deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -107,7 +184,9 @@ export class AssignmentsService {
     const assignment = await this.prisma.assignment.findUnique({
       where: { id: assignmentId },
     });
-    if (!assignment) throw new NotFoundException('Даалгавар олдсонгүй');
+    if (!assignment || assignment.deletedAt) {
+      throw new NotFoundException('Даалгавар олдсонгүй');
+    }
 
     const enrolled = await this.prisma.enrollment.findFirst({
       where: {
@@ -160,7 +239,9 @@ export class AssignmentsService {
     const assignment = await this.prisma.assignment.findUnique({
       where: { id: assignmentId },
     });
-    if (!assignment) throw new NotFoundException('Даалгавар олдсонгүй');
+    if (!assignment || assignment.deletedAt) {
+      throw new NotFoundException('Даалгавар олдсонгүй');
+    }
     await this.assertClassAccess(assignment.classroomId, userId, role);
 
     const existing = await this.prisma.submission.findUnique({
@@ -210,7 +291,9 @@ export class AssignmentsService {
     const assignment = await this.prisma.assignment.findUnique({
       where: { id: assignmentId },
     });
-    if (!assignment) throw new NotFoundException('Даалгавар олдсонгүй');
+    if (!assignment || assignment.deletedAt) {
+      throw new NotFoundException('Даалгавар олдсонгүй');
+    }
     await this.assertClassAccess(assignment.classroomId, userId, role);
 
     const enrollments = await this.prisma.enrollment.findMany({

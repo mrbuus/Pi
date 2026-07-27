@@ -4,14 +4,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { AuditService } from '../audit/audit.service';
 import { todayCodeUB } from '../auth/auth.service';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
+import { UpdateClassroomDto } from './dto/update-classroom.dto';
 
 @Injectable()
 export class ClassroomsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+  ) {}
 
   // Сурагч нэмэх/зөөх эрх: Админ үргэлж; Багш+ зөвхөн canManageStudents асаалттай үед (SPEC §13)
   private async assertCanManageStudents(userId: string, role: Role) {
@@ -127,6 +132,52 @@ export class ClassroomsService {
       throw new NotFoundException('Идэвхтэй бүртгэл олдсонгүй');
     }
     return { removed: true };
+  }
+
+  // Ангийн мэдээлэл засах — Админ (SPEC: ROLES = ADMIN only)
+  async update(id: string, dto: UpdateClassroomDto, actorId: string, actorRole: Role) {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id },
+    });
+    if (!classroom) throw new NotFoundException('Анги олдсонгүй');
+
+    if (dto.teacherId) {
+      const teacher = await this.prisma.user.findUnique({
+        where: { id: dto.teacherId },
+      });
+      if (
+        !teacher ||
+        (teacher.role !== Role.TEACHER && teacher.role !== Role.TEACHER_PLUS)
+      ) {
+        throw new BadRequestException(
+          'Заасан хэрэглэгч багшийн эрхгүй байна',
+        );
+      }
+    }
+
+    const updated = await this.prisma.classroom.update({
+      where: { id },
+      data: {
+        ...(dto.name !== undefined ? { name: dto.name } : {}),
+        ...(dto.type !== undefined ? { type: dto.type } : {}),
+        ...(dto.grade !== undefined ? { grade: dto.grade } : {}),
+        ...(dto.teacherId !== undefined
+          ? { teacherId: dto.teacherId || null }
+          : {}),
+      },
+    });
+
+    await this.audit.record({
+      actorId,
+      actorRole,
+      action: 'UPDATE',
+      entity: 'Classroom',
+      entityId: id,
+      before: classroom,
+      after: updated,
+    });
+
+    return updated;
   }
 
   // Анги шууд устгагдахгүй — өнөөдрийн кодоор баталгаажуулж архивлана (SPEC §15)

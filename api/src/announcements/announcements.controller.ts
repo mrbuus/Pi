@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -48,6 +49,36 @@ class CreateAnnouncementDto {
   pinned?: boolean;
 }
 
+// PATCH-д зориулсан хувилбар — бүх талбар optional (partial patch)
+class UpdateAnnouncementDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  body?: string;
+
+  @IsOptional()
+  @IsEnum(AnnouncementAudience)
+  audience?: AnnouncementAudience;
+
+  @IsOptional()
+  @IsString()
+  classroomId?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  classroomIds?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  pinned?: boolean;
+}
+
 interface AuthedRequest {
   user: { userId: string; role: Role };
 }
@@ -76,9 +107,25 @@ export class AnnouncementsController {
     return this.announcements.manageList();
   }
 
+  // Зохиогч эсвэл Багш+/Админ засна
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateAnnouncementDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.announcements.update(
+      id,
+      dto,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: AuthedRequest) {
-    return this.announcements.remove(id, req.user.role);
+    return this.announcements.remove(id, req.user.userId, req.user.role);
   }
 }

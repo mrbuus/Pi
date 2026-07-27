@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -16,6 +17,7 @@ import { Role } from '../generated/prisma/enums';
 import { ClassroomsService } from './classrooms.service';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
+import { UpdateClassroomDto } from './dto/update-classroom.dto';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -72,6 +74,16 @@ export class ClassroomsController {
       req.user.userId,
       req.user.role,
     );
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateClassroomDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.classrooms.update(id, dto, req.user.userId, req.user.role);
   }
 
   @Roles(Role.ADMIN)
