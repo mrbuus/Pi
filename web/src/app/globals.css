@@ -68,7 +68,6 @@
   --shine-3: #7C3AED;
   --shine-4: #1B1B18;
   --shine-5: #0B5FA8;
-  --sine-glow: rgba(29, 78, 216, 0.55);
 
   /* --- Брэндийн өв (BRAND HERITAGE) — лого, hero, footer-д зориулсан,
      ХОЁР горимд ЧХ хэвээр үлдэнэ (санаатайгаар үргэлж харанхуй) --- */
@@ -129,7 +128,6 @@
     --shine-3: #a78bfa;
     --shine-4: #f2f4ff;
     --shine-5: #5ec9f8;
-    --sine-glow: rgba(157, 184, 245, 0.85);
   }
 }
 
@@ -174,7 +172,6 @@
   --shine-3: #a78bfa;
   --shine-4: #f2f4ff;
   --shine-5: #5ec9f8;
-  --sine-glow: rgba(157, 184, 245, 0.85);
 }
 
 @theme inline {
@@ -309,19 +306,7 @@ body {
 }
 .bar-fill { animation: barFill 1.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-@keyframes drawSine {
-  from { stroke-dashoffset: 760; }
-  to { stroke-dashoffset: 0; }
-}
-.sine-wave-line {
-  stroke-dasharray: 760;
-  animation: drawSine 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.sine-dot {
-  filter: drop-shadow(0 0 10px var(--sine-glow));
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .float-sym, .shimmer-cell, .glow-pulse, .text-shine, .sine-wave-line { animation: none; }
+  .float-sym, .shimmer-cell, .glow-pulse, .text-shine { animation: none; }
   .reveal { transition: none; opacity: 1; transform: none; }
 }
