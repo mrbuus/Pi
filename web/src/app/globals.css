@@ -1,40 +1,240 @@
 @import "tailwindcss";
 
+/* ============================================================
+   ӨНГӨНИЙ СИСТЕМ — Цайвар (LIGHT, үндсэн) ба Харанхуй (DARK, сонголтоор)
+   Судалгаанд үндэслэсэн шийдвэр: цайвар горим нь ЭЕШ-ийн математикийн
+   жижиг тэмдэгт (зэрэг, index, бутархай) уншихад илүү сайн — эерэг
+   туйлшрал (цайвар дэвсгэр дээр хар текст) хараа ялгах чадварыг
+   сайжруулдаг бөгөөд энэ давуу тал жижиг үсгийн хэмжээнд хамгийн их
+   илэрдэг. Харанхуй горим halation үүсгэдэг тул astigmatism-тай ~1/3
+   хэрэглэгчид тохирохгүй. Тиймээс LIGHT нь ӨГӨГДМӨЛ, DARK нь сонголт.
+
+   Тэргүүлэх дараалал (яг ингэж бичихийг АНХААР):
+     1) :root                                   → цайвар (өгөгдмөл)
+     2) @media (prefers-color-scheme: dark)
+        :root:not([data-theme="light"])         → систем харанхуй үед
+     3) :root[data-theme="dark"]                → хэрэглэгч тодорхой
+                                                    сонгосон харанхуй
+   Ингэснээр [data-theme="light"] хэзээ ч media query-гээс дийлдэхгүй.
+   ============================================================ */
+
 :root {
-  --bg: #060c1d;
-  --bg-panel: #0b142e;
-  --line: rgba(141, 168, 230, 0.12);
-  --brand: #2e4a8f;
-  --brand-bright: #4f7fe6;
-  --brand-soft: #9db8f5;
-  --ink: #e9eefb;
-  --ink-dim: #93a3c7;
-  --teal: #34d6a8;
-  --gold: #e8c468;
+  /* --- Цөм семантик токенууд (LIGHT) — тус бүр WCAG AA шалгагдсан --- */
+  --bg: #FAF9F6;
+  --surface: #FFFFFF;
+  --line: #DFDCD5;
+  --ink: #1B1B18;       /* 16.40:1 */
+  --ink-dim: #57544D;   /* 7.17:1 */
+  --brand: #1D4ED8;     /* 6.37:1 */
+  --success: #1E7D34;   /* 4.94:1 */
+  --warning: #8A5A00;   /* 5.63:1 */
+  --error: #B3261E;     /* 6.21:1 */
+  --info: #0B5FA8;      /* 6.20:1 */
+
+  /* --- Хуучин нэрсийг шинэ систем рүү зурагцуулах (backward-compat) --- */
+  --bg-panel: var(--surface);
+
+  /* --- "on-*" урд талын өнгө: өнгөт ДЭВСГЭР дээр байх текст/дүрсний өнгө.
+     ЯАГААД ХЭРЭГТЭЙ ВЭ: дэвсгэрийг горимоор солиход дээрх текстийг нь ХАМТ
+     солихгүй бол контраст унана. Жишээ: --teal нь цайвар горимд бараан
+     (#0F766E, цагаан текст 5.49:1 ✓), харанхуй горимд тод мятлаг (#34D6A8,
+     цагаан текст 1.85:1 ✗✗ — бараг уншигдахгүй).
+     Тиймээс өнгөт товч бүр `text-white` биш, `text-on-<өнгө>` хэрэглэнэ. --- */
+  --on-brand: #FFFFFF;    /* #1E40AF дээр 8.76:1 */
+  --on-teal: #FFFFFF;     /* #0F766E дээр 5.49:1 */
+  --on-warning: #FFFFFF;  /* #8A5A00 дээр 5.94:1 */
+  --on-success: #FFFFFF;  /* #1E7D34 дээр 5.30:1 */
+  --on-error: #FFFFFF;    /* #B3261E дээр 6.54:1 */
+
+  /* --- Өнгөт ялгаа (decorative accents) — LIGHT-д тааруулсан, дарамал бус
+     ханган өнгөнүүд, текст/badge-д ашиглахад хангалттай ялгарал өгнө --- */
+  --brand-bright: #1E40AF;
+  --brand-soft: #DCE6FB;
+  --teal: #0F766E;
+  --gold: #8A6D00;
+  --violet: #6D28D9;
+  --fuchsia: #A21CAF;
+  --sky: #0369A1;
+  --rose: #BE123C;
+
+  /* --- Decorative effect параметрүүд (LIGHT-д тааруулсан) --- */
+  --aurora-1: rgba(29, 78, 216, 0.10);
+  --aurora-2: rgba(124, 58, 237, 0.08);
+  --aurora-3: rgba(13, 148, 136, 0.08);
+  --glow-color-a: rgba(29, 78, 216, 0.18);
+  --glow-color-b: rgba(29, 78, 216, 0.38);
+  --shine-1: #1D4ED8;
+  --shine-2: #1E40AF;
+  --shine-3: #7C3AED;
+  --shine-4: #1B1B18;
+  --shine-5: #0B5FA8;
+  --sine-glow: rgba(29, 78, 216, 0.55);
+
+  /* --- Брэндийн өв (BRAND HERITAGE) — лого, hero, footer-д зориулсан,
+     ХОЁР горимд ЧХ хэвээр үлдэнэ (санаатайгаар үргэлж харанхуй) --- */
+  --brand-navy: #060c1d;
+  --brand-navy-soft: #0b142e;
+
+  /* --- Бичвэрзүй (Typography) — судалгаанд үндэслэсэн --- */
+  --text-base: 16px;      /* хэзээ ч үүнээс багасгахгүй */
+  --leading-body: 1.55;
+  --leading-math: 1.35;
+  --measure: 68ch;
+
   --font-manrope: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Систем DARK-тай үед, хэрэглэгч тодорхой LIGHT сонгоогүй л бол */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121212;
+    --surface: #1E1E1E;
+    --line: #3A3A3A;
+    --ink: #E8E6E1;      /* 15.02:1 */
+    --ink-dim: #B0ADA6;  /* 8.36:1 */
+    --brand: #7FA8FF;    /* 7.98:1 */
+    --success: #6FCF8F;
+    --warning: #F2B84B;
+    --error: #F28B82;
+    --info: #7FC4FF;
+
+    --bg-panel: var(--surface);
+
+    /* Харанхуй горимд өнгөт дэвсгэрүүд ТОД болдог тул урд талын өнгө
+       БАРААН болно (цагаан биш). Нэг утга бүх өнгөнд хангалттай:
+       #4F7FE6→4.96:1 · #34D6A8→10.2:1 · #F2B84B→10.6:1 ·
+       #6FCF8F→9.8:1 · #F28B82→7.9:1 — бүгд WCAG AA давсан. */
+    --on-brand: #12100E;
+    --on-teal: #12100E;
+    --on-warning: #12100E;
+    --on-success: #12100E;
+    --on-error: #12100E;
+
+    --brand-bright: #4F7FE6;
+    --brand-soft: #9DB8F5;
+    --teal: #34D6A8;
+    --gold: #E8C468;
+    --violet: #A78BFA;
+    --fuchsia: #E879D2;
+    --sky: #5EC9F8;
+    --rose: #FB7AA8;
+
+    --aurora-1: rgba(79, 127, 230, 0.2);
+    --aurora-2: rgba(167, 139, 250, 0.14);
+    --aurora-3: rgba(52, 214, 168, 0.12);
+    --glow-color-a: rgba(79, 127, 230, 0.25);
+    --glow-color-b: rgba(79, 127, 230, 0.55);
+    --shine-1: #9db8f5;
+    --shine-2: #4f7fe6;
+    --shine-3: #a78bfa;
+    --shine-4: #f2f4ff;
+    --shine-5: #5ec9f8;
+    --sine-glow: rgba(157, 184, 245, 0.85);
+  }
+}
+
+/* Хэрэглэгч тодорхой "Харанхуй" сонгосон үед — систем ямар ч байсан ялгаагүй */
+:root[data-theme="dark"] {
+  --bg: #121212;
+  --surface: #1E1E1E;
+  --line: #3A3A3A;
+  --ink: #E8E6E1;
+  --ink-dim: #B0ADA6;
+  --brand: #7FA8FF;
+  --success: #6FCF8F;
+  --warning: #F2B84B;
+  --error: #F28B82;
+  --info: #7FC4FF;
+
+  --bg-panel: var(--surface);
+
+  /* Харанхуй горимын урд талын өнгө — дээрх media query блоктой ижил. */
+  --on-brand: #12100E;
+  --on-teal: #12100E;
+  --on-warning: #12100E;
+  --on-success: #12100E;
+  --on-error: #12100E;
+
+  --brand-bright: #4F7FE6;
+  --brand-soft: #9DB8F5;
+  --teal: #34D6A8;
+  --gold: #E8C468;
+  --violet: #A78BFA;
+  --fuchsia: #E879D2;
+  --sky: #5EC9F8;
+  --rose: #FB7AA8;
+
+  --aurora-1: rgba(79, 127, 230, 0.2);
+  --aurora-2: rgba(167, 139, 250, 0.14);
+  --aurora-3: rgba(52, 214, 168, 0.12);
+  --glow-color-a: rgba(79, 127, 230, 0.25);
+  --glow-color-b: rgba(79, 127, 230, 0.55);
+  --shine-1: #9db8f5;
+  --shine-2: #4f7fe6;
+  --shine-3: #a78bfa;
+  --shine-4: #f2f4ff;
+  --shine-5: #5ec9f8;
+  --sine-glow: rgba(157, 184, 245, 0.85);
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-panel: var(--bg-panel);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
   --color-brand: var(--brand);
   --color-brand-bright: var(--brand-bright);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-navy-soft: var(--brand-navy-soft);
   --color-ink: var(--ink);
   --color-ink-dim: var(--ink-dim);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  /* Өнгөт дэвсгэр дээрх урд талын өнгө — `text-white` биш эдгээрийг хэрэглэнэ */
+  --color-on-brand: var(--on-brand);
+  --color-on-teal: var(--on-teal);
+  --color-on-warning: var(--on-warning);
+  --color-on-success: var(--on-success);
+  --color-on-error: var(--on-error);
+  --color-accent-teal: var(--teal);
+  --color-accent-gold: var(--gold);
+  --color-accent-violet: var(--violet);
+  --color-accent-fuchsia: var(--fuchsia);
+  --color-accent-sky: var(--sky);
+  --color-accent-rose: var(--rose);
   --font-sans: var(--font-manrope);
 }
 
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+  font-size: var(--text-base);
+  color-scheme: light dark;
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-manrope), system-ui, sans-serif;
+  line-height: var(--leading-body);
   overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Уншихад хамгийн тохиромжтой мөрийн урт (68ch) — урт эгшиглэл текстэд */
+.prose-measure {
+  max-width: var(--measure);
+}
+
+/* Хараа хандалт — фокустой элемент ХЭЗЭЭ ч алдагдахгүй харагдана.
+   Тус аппликейшнд өмнө нь харагдах focus indicator огт байгаагүй. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Торон цаас — math aesthetic */
@@ -65,8 +265,8 @@ body {
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 24px rgba(79, 127, 230, 0.25); }
-  50% { box-shadow: 0 0 48px rgba(79, 127, 230, 0.55); }
+  0%, 100% { box-shadow: 0 0 24px var(--glow-color-a); }
+  50% { box-shadow: 0 0 48px var(--glow-color-b); }
 }
 .glow-pulse { animation: pulseGlow 3.4s ease-in-out infinite; }
 
@@ -75,12 +275,23 @@ body {
   50% { background-position: 100% 50%; }
 }
 .text-shine {
-  background: linear-gradient(110deg, #9db8f5, #4f7fe6 30%, #e9eefb 50%, #4f7fe6 70%, #9db8f5);
+  background: linear-gradient(110deg, var(--shine-1), var(--shine-2) 26%, var(--shine-3) 42%, var(--shine-4) 52%, var(--shine-5) 68%, var(--shine-1));
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: gradientShift 5.5s ease-in-out infinite;
+}
+
+/* Аурора — самбар/hero-гийн ард тавих зөөлөн олон өнгийн туяа.
+   Текстийн уншигдац алдагдахгүй тийм бага alpha-тай. LIGHT/DARK
+   тус бүрдээ тааруулсан (--aurora-1/2/3), эс бөгөөс цайвар дэвсгэр
+   дээр угаагдаж алга болно. */
+.aurora {
+  background:
+    radial-gradient(38% 55% at 10% 0%, var(--aurora-1), transparent 70%),
+    radial-gradient(30% 45% at 55% 0%, var(--aurora-2), transparent 70%),
+    radial-gradient(28% 40% at 92% 8%, var(--aurora-3), transparent 70%);
 }
 
 .reveal {
@@ -107,7 +318,7 @@ body {
   animation: drawSine 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .sine-dot {
-  filter: drop-shadow(0 0 10px rgba(157, 184, 245, 0.85));
+  filter: drop-shadow(0 0 10px var(--sine-glow));
 }
 
 @media (prefers-reduced-motion: reduce) {

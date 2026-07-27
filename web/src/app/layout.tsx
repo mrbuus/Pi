@@ -1,11 +1,41 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import ThemeProvider from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Pi.mn — Шинэ ирээдүйн эзэд",
+  title: "Шинэ Ирээдүйн Эзэд — ЭЕШ-ийн математик, нийгэм судлалын бэлтгэл",
   description:
-    "Математикт π шиг төгсгөлгүй ахиц. Алдаа бүрээс чинь суралцаж, яг хэрэгтэй бодлогыг чинь олж өгдөг адаптив систем.",
+    "Шинэ Ирээдүйн Эзэд сургалтын төвийн ЭЕШ-ийн математик болон нийгмийн ухааны бэлтгэл хөтөлбөр. Алдаа бүрээс чинь суралцаж, яг хэрэгтэй бодлогыг чинь олж өгдөг адаптив систем.",
+  openGraph: {
+    title: "Шинэ Ирээдүйн Эзэд — ЭЕШ-ийн математик, нийгэм судлалын бэлтгэл",
+    description:
+      "ЭЕШ-ийн математик болон нийгмийн ухааны бэлтгэлийг алдаа бүрээс чинь сурч, яг хэрэгтэй бодлогыг олж өгдөг адаптив системээр.",
+    siteName: "Шинэ Ирээдүйн Эзэд",
+    locale: "mn_MN",
+    type: "website",
+  },
 };
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+};
+
+// Эхний зурагт "буруу" горим гялсхийж харагдахаас сэргийлэх blocking script.
+// localStorage-с уншиж <html>-д data-theme-г эхний paint-аас ӨМНӨ тавина —
+// React effect бол хэтэрхий оройтно (нэг frame гялсхийх болно).
+const THEME_INIT_SCRIPT = `(function(){
+  try {
+    var KEY = "pi_theme";
+    var stored = localStorage.getItem(KEY);
+    var theme = (stored === "light" || stored === "dark" || stored === "system") ? stored : "system";
+    var resolved = theme === "system"
+      ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+      : theme;
+    var root = document.documentElement;
+    root.setAttribute("data-theme", theme);
+    root.style.colorScheme = resolved;
+  } catch (e) {}
+})();`;
 
 export default function RootLayout({
   children,
@@ -14,7 +44,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="mn" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
