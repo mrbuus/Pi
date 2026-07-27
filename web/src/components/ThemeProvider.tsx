@@ -26,17 +26,21 @@ function isTheme(value: string | null): value is Theme {
    тул cascading render болон hydration mismatch үүсэхгүй. */
 const themeListeners = new Set<Listener>();
 
+// ӨГӨГДМӨЛ нь "light" — layout.tsx дахь inline скрипттэй ЯГ ижил байх ёстой,
+// эс бөгөөс эхний paint дээр нэг frame гялсхийнэ.
+const DEFAULT_THEME: Theme = "light";
+
 function readStoredTheme(): Theme {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return isTheme(stored) ? stored : "system";
+    return isTheme(stored) ? stored : DEFAULT_THEME;
   } catch {
-    return "system";
+    return DEFAULT_THEME;
   }
 }
 
 function getServerTheme(): Theme {
-  return "system";
+  return DEFAULT_THEME;
 }
 
 function subscribeTheme(onStoreChange: Listener) {
