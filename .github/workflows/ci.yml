@@ -1,0 +1,83 @@
+name: CI
+
+# api/ болон web/ бие даасан төслүүд тул хоёр job зэрэг (parallel) ажиллана —
+# нэгнийх нь алдаа нөгөөг хүлээхгүй, CI хурдан дуусна.
+on:
+  push:
+  pull_request:
+
+# Нэг branch/PR дээр шинэ push ирвэл хуучин ажиллаж байгаа run-уудыг цуцална.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: api — typecheck, lint, unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    env:
+      # prisma.config.ts нь process.env.DATABASE_URL!-ийг шаарддаг тул
+      # `prisma generate`-д зөвхөн syntactically valid URL хэрэгтэй — бодит
+      # Postgres рүү холбогдохгүй тул жинхэнэ мэдээллийн сан ЗАЙЛШГҮЙ БИШ.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: api/.nvmrc
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prisma client үүсгэх
+        run: npx prisma generate
+
+      - name: Type-check (tsc --noEmit)
+        run: npx tsc --noEmit
+
+      - name: Lint (eslint)
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+
+      # 🚨 Зөвхөн src/tests/grading.spec.ts-г ажиллуулж байгаа нь санамсаргүй
+      # биш: энэ файл цэвэр функцүүд (grading.ts)-ийг шалгадаг тул DB огт
+      # хэрэггүй. api/test/app.e2e-spec.ts (e2e) болон бусад .spec.ts файл нь
+      # Nest DI/AppModule бүхэлдээ ачаалдаг тул бодит Postgres шаардаж болзошгүй.
+      # CI-д Postgres service container нэмэх нь удаашрал/тогтворгүй байдал
+      # авчрах эрсдэлтэй тул одоохондоо зөвхөн итгэлтэй, цэвэр unit test-ийг
+      # энд ажиллуулна. DB шаардсан тестүүд нэмэгдвэл тусад нь service
+      # container-той job үүсгэнэ.
+      - name: Unit tests (зөвхөн DB хэрэггүй, цэвэр tests)
+        run: npx jest src/tests/grading.spec.ts
+
+  web:
+    name: web — typecheck, lint, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check (tsc --noEmit)
+        run: npx tsc --noEmit
+
+      - name: Lint (eslint)
+        run: npx eslint
+
+      - name: Next.js build
+        run: npx next build

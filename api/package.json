@@ -10,6 +10,8 @@
     "audit:100x100-v2": "node prisma/import-100x100-v2.cjs --dry-run",
     "classify:100x100-v2": "node prisma/import-100x100-v2.cjs --dry-run",
     "import:100x100-v2": "node prisma/import-100x100-v2.cjs",
+    "backfill:codes": "node prisma/backfill-codes.cjs",
+    "import:students": "node prisma/import-students.cjs",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -82,6 +84,9 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
