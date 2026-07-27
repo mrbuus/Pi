@@ -291,12 +291,21 @@ body {
     radial-gradient(28% 40% at 92% 8%, var(--aurora-3), transparent 70%);
 }
 
-.reveal {
+/* Гүйлгэхэд эргэлдэн гарч ирэх анимац.
+   ⚠️ ПРОГРЕССИВ САЙЖРУУЛАЛТ: ӨГӨГДМӨЛ нь ХАРАГДАНА. Нуух төлөвийг зөвхөн
+   JS ажилласан үед (<html class="js">) хэрэглэнэ.
+   ЯАГААД: өмнө нь .reveal нь шууд opacity:0 байж, IntersectionObserver
+   .visible нэмэхийг хүлээдэг байв. Хэрэв JS унтраалттай, эсвэл hydration
+   алдаа гарсан, эсвэл observer ямар нэг шалтгаанаар ажиллаагүй бол
+   НИЙТИЙН нүүр хуудас БҮРМӨСӨН ХООСОН харагдана — маркетингийн хуудсанд
+   хүлээн зөвшөөрөхгүй эрсдэл. Одоо хамгийн муу тохиолдолд анимацгүй,
+   гэхдээ агуулга бүрэн харагдана. */
+.js .reveal {
   opacity: 0;
   transform: translateY(26px);
   transition: opacity 0.7s ease, transform 0.7s ease;
 }
-.reveal.visible {
+.js .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -308,5 +317,5 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .float-sym, .shimmer-cell, .glow-pulse, .text-shine { animation: none; }
-  .reveal { transition: none; opacity: 1; transform: none; }
+  .js .reveal { transition: none; opacity: 1; transform: none; }
 }

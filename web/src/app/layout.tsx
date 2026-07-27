@@ -24,6 +24,12 @@ export const viewport: Viewport = {
 // localStorage-с уншиж <html>-д data-theme-г эхний paint-аас ӨМНӨ тавина —
 // React effect бол хэтэрхий оройтно (нэг frame гялсхийх болно).
 const THEME_INIT_SCRIPT = `(function(){
+  var root = document.documentElement;
+  // "js" класс — JS ажиллаж байгаагийн тэмдэг. globals.css дахь .reveal
+  // анимац зөвхөн энэ класстай үед агуулгыг нуудаг. JS унтраалттай эсвэл
+  // энэ скрипт ажиллаагүй бол агуулга ХАРАГДСАН хэвээр үлдэнэ —
+  // нүүр хуудас хоосон харагдах эрсдэлээс сэргийлнэ.
+  root.classList.add("js");
   try {
     var KEY = "pi_theme";
     var stored = localStorage.getItem(KEY);
@@ -31,7 +37,6 @@ const THEME_INIT_SCRIPT = `(function(){
     var resolved = theme === "system"
       ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
       : theme;
-    var root = document.documentElement;
     root.setAttribute("data-theme", theme);
     root.style.colorScheme = resolved;
   } catch (e) {}
