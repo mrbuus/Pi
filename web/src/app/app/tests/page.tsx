@@ -1,98 +1,109 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, getRole } from "@/lib/api";
+import ContinueBanner from "@/components/test-list/ContinueBanner";
+import TopicGroup from "@/components/test-list/TopicGroup";
+import {
+  collapseVariants,
+  isExamType,
+  splitTopic,
+  SUBJECTS,
+  type AttendanceRow,
+  type GroupRow,
+  type Tab,
+  type TestRow,
+} from "@/components/test-list/types";
 
 /* ============================================================================
- * Шалгалтын жагсаалт — сэдвээр бүлэглэсэн, 2 ангилалтай, хайлттай.
+ * Шалгалтын жагсаалт — сэдвээр бүлэглэсэн, 2 ангилалтай, хайлт+хичээлийн
+ * шүүлттэй.
  *
  * - «Тест» = авто дүнтэй, онлайнаар өгч болно; «Шалгалт» = багш дүгнэдэг (цаасан)
  * - Сэдэв (ерөнхий гарчиг) → задлахад 1,2,3… дугаартай тестүүд дарааллаараа
  * - Хайлт: сэдвийн нэр болон тестийн нэрээр шүүнэ (таарсан сэдэв автоматаар нээгдэнэ)
+ * - Хичээлийн шүүлт (?subject=) сервер дээр хийгдэнэ — Математик/Нийгмийн ухаан
+ * - А/Б хувилбарууд: сурагчид зөвхөн өөрт «оноогдсон» нэгийг харна, багш бүгдийг
+ *   харна, тодорхой "Хувилбар А/Б" пилл-ээр (Аудит: variant-ыг санамсаргүй
+ *   онооддог логик алга гэсэн дутагдлын frontend fix)
+ * - Дуусаагүй (IN_PROGRESS) сесстэй бол — сэдвийн бүлэг рүү орж хайлгүйгээр,
+ *   хамгийн дээр том зурвасаар шууд буцаж орно
+ * - Сэдвийн бүлгүүдийг хуудаслана (backend /tests нь skip/take дэмждэггүй тул
+ *   render-ийг энд хязгаарлаж, DOM хэт томрохоос сэргийлнэ)
  * ========================================================================== */
 
-interface TestRow {
-  id: string;
-  title: string;
-  type: string;
-  gradingMode?: string;
-  timeLimitMin?: number;
-  variantLabel?: string;
-  groupKey?: string | null;
-  chapter?: { book?: { code: string } | null } | null;
-  _count: { problems: number };
-  results?: { totalScore: number; maxScore: number }[];
-  sessionStatus?: "IN_PROGRESS" | "SUBMITTED" | null;
-}
-
-interface AttendanceRow {
-  date: string;
-  status: string;
-}
-
-// Ном бүр өөрийн өнгөтэй — 100/200/300/1000 номын тестүүд ялгаатай харагдана
-const BOOK_COLORS: Record<string, { chip: string; bar: string }> = {
-  "100": { chip: "bg-sky-400/15 text-sky-300", bar: "border-l-sky-400/60" },
-  "200": { chip: "bg-fuchsia-400/15 text-fuchsia-300", bar: "border-l-fuchsia-400/60" },
-  "300": { chip: "bg-orange-400/15 text-orange-300", bar: "border-l-orange-400/60" },
-  "1000": { chip: "bg-teal-400/15 text-teal-300", bar: "border-l-teal-400/60" },
-};
-// Урт код түрүүлж таарна ("1000" нь "100"-аас өмнө)
-function bookColor(code?: string | null) {
-  const key = ["1000", "300", "200", "100"].find((k) => code?.startsWith(k));
-  return key ? { key, ...BOOK_COLORS[key] } : null;
-}
-
-// Шалгалт = жинхэнэ шалгалтын төрлүүд; бусад нь энгийн дасгал ТЕСТ
-function isExamType(type: string) {
-  return type === "CHAPTER_EXAM" || type === "EESH_MOCK";
-}
-
-// groupKey/title-ээс «сэдэв + тестийн дугаар»-ыг салгана:
-// "Илтгэгч тэгшитгэл 1" → { topic: "Илтгэгч тэгшитгэл", num: 1 }
-function splitTopic(t: TestRow): { topic: string; num: number | null } {
-  const key = (t.groupKey ?? t.title).trim();
-  const m = key.match(/^(.*?)\s+(\d+)$/);
-  if (m) return { topic: m[1], num: Number(m[2]) };
-  return { topic: "Бусад", num: null };
-}
-
-type Tab = "TEST" | "EXAM";
+// Хуудаслалт: /tests нь skip/take дэмждэггүй тул сэдвийн бүлгүүдийг энд
+// зүсэж, "Дараагийнхыг харах" товчоор нэмнэ (DOM хэт томрохоос сэргийлнэ).
+const PAGE_SIZE = 20;
 
 export default function TestsPage() {
   const role = typeof window !== "undefined" ? getRole() : null;
   const isTeacher = role === "ADMIN" || role === "TEACHER" || role === "TEACHER_PLUS";
+
   const [tests, setTests] = useState<TestRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [subject, setSubject] = useState("");
   const [tab, setTab] = useState<Tab>("TEST");
   const [query, setQuery] = useState("");
+  const [topicFilter, setTopicFilter] = useState("");
   const [open, setOpen] = useState<Set<string>>(new Set());
+  const [shownCount, setShownCount] = useState(PAGE_SIZE);
+  const [studentId, setStudentId] = useState<string | null>(null);
   // Ирц — зөвхөн танхимын сурагчид дээр нь харагдана (онлайн сурагч ирцгүй)
   const [attendance, setAttendance] = useState<AttendanceRow[] | null>(null);
 
+  const loadTests = useCallback(() => {
+    setLoading(true);
+    setError("");
+    api<TestRow[]>(`/tests${subject ? `?subject=${subject}` : ""}`)
+      .then(setTests)
+      .catch((e) => {
+        setError(e instanceof Error ? e.message : "Тестийн жагсаалт ачаалахад алдаа гарлаа");
+      })
+      .finally(() => setLoading(false));
+  }, [subject]);
+
   useEffect(() => {
-    api<TestRow[]>("/tests").then(setTests).catch(() => {});
+    loadTests();
+  }, [loadTests]);
+
+  useEffect(() => {
+    // Ирц/хэрэглэгчийн ID — туслах мэдээлэл тул амжилтгүй бол чимээгүй орхино;
+    // үндсэн тестийн жагсаалт дээрх loadTests өөрөө бүрэн алдаа+"Дахин
+    // оролдох" дэмждэг тул энд давхардуулах шаардлагагүй.
     if (!isTeacher && role === "STUDENT") {
-      api<{ studentProfile?: { type?: string } }>("/auth/me")
+      api<{ id: string; studentProfile?: { type?: string } }>("/auth/me")
         .then((me) => {
+          setStudentId(me.id);
           if (me.studentProfile?.type === "CLASSROOM") {
-            api<AttendanceRow[]>("/attendance/my")
-              .then((rows) => setAttendance(rows.slice(0, 10)))
-              .catch(() => {});
+            return api<AttendanceRow[]>("/attendance/my").then((rows) =>
+              setAttendance(rows.slice(0, 10)),
+            );
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          /* Ирц заавал биш нэмэлт мэдээлэл — үндсэн жагсаалтад нөлөөлөхгүй */
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Шүүлт/хайлт өөрчлөгдөхөд хуудаслалтыг эхнээс нь эхлүүлнэ
+  useEffect(() => {
+    setShownCount(PAGE_SIZE);
+  }, [tab, query, subject, topicFilter]);
+
   const q = query.trim().toLowerCase();
 
-  // Таб + хайлтаар шүүгээд сэдвээр бүлэглэнэ
-  const { groups, testCount, examCount } = useMemo(() => {
+  // Таб + хайлтаар шүүгээд сэдвээр бүлэглэнэ; сурагчид А/Б хувилбарыг нэгтгэнэ.
+  // Сэдвийн шүүлт (topicFilter) үүнээс тусдаа доор хийгдэнэ — dropdown-ий
+  // сонголтуудыг тухайн таб/хайлтад тохирсон хэвээр байлгахын тулд.
+  const { allGroups, testCount, examCount } = useMemo(() => {
     let testCount = 0;
     let examCount = 0;
-    const map = new Map<string, { row: TestRow; num: number | null }[]>();
+    const map = new Map<string, GroupRow[]>();
     for (const t of tests) {
       // Ангилал ТӨРЛӨӨР: сэдвийн шалгалт/сорил = Шалгалт; дасгал = Тест
       const isExam = isExamType(t.type);
@@ -112,9 +123,17 @@ export default function TestsPage() {
           (a.row.variantLabel ?? "").localeCompare(b.row.variantLabel ?? ""),
       );
     }
-    const groups = [...map.entries()].sort(([a], [b]) => a.localeCompare(b, "mn"));
-    return { groups, testCount, examCount };
-  }, [tests, tab, q]);
+    const allGroups = [...map.entries()]
+      .map(([topic, rows]) => [topic, isTeacher ? rows : collapseVariants(rows, studentId)] as const)
+      .sort(([a], [b]) => a.localeCompare(b, "mn"));
+    return { allGroups, testCount, examCount };
+  }, [tests, tab, q, isTeacher, studentId]);
+
+  // Сэдвийн шүүлт — багшид (100+ мөр үед) хамгийн хэрэгтэй, гэхдээ сурагчид ч
+  // хориглохгүй.
+  const groups = topicFilter ? allGroups.filter(([topic]) => topic === topicFilter) : allGroups;
+  const visibleGroups = groups.slice(0, shownCount);
+  const hasMore = groups.length > visibleGroups.length;
 
   function toggle(topic: string) {
     setOpen((s) => {
@@ -127,25 +146,68 @@ export default function TestsPage() {
 
   return (
     <div className="space-y-5">
-      {/* Толгой: гарчиг + хайлт */}
+      {/* Толгой: гарчиг + хайлт + хичээл + сэдэв */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold">Шалгалт</h1>
-        <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-extrabold text-ink">Шалгалт</h1>
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-dim">
+            <label htmlFor="test-search" className="sr-only">
+              Сэдэв, тестээр хайх
+            </label>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-dim"
+            >
               🔍
             </span>
             <input
+              id="test-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Сэдэв, тестээр хайх…"
-              className="w-56 rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-brand-bright sm:w-72"
+              className="h-11 w-56 rounded-xl border border-line bg-bg py-2 pl-9 pr-3 text-sm text-ink outline-none transition focus:border-brand sm:w-72"
             />
           </div>
+          <label htmlFor="test-subject" className="sr-only">
+            Хичээл шүүх
+          </label>
+          <select
+            id="test-subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="h-11 rounded-xl border border-line bg-bg px-3 text-sm text-ink outline-none focus:border-brand"
+          >
+            {SUBJECTS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          {/* Сэдвийн шүүлт — ялангуяа багшид олон зуун тест дундаас хайхад */}
+          {allGroups.length > 1 && (
+            <>
+              <label htmlFor="test-topic" className="sr-only">
+                Сэдэв шүүх
+              </label>
+              <select
+                id="test-topic"
+                value={topicFilter}
+                onChange={(e) => setTopicFilter(e.target.value)}
+                className="h-11 max-w-[12rem] rounded-xl border border-line bg-bg px-3 text-sm text-ink outline-none focus:border-brand"
+              >
+                <option value="">Бүх сэдэв</option>
+                {allGroups.map(([topic]) => (
+                  <option key={topic} value={topic}>
+                    {topic}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
           {isTeacher && (
             <Link
               href="/app/tests/new"
-              className="rounded-xl bg-brand-bright px-4 py-2 text-sm font-bold"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand transition hover:opacity-90"
             >
               + Тест үүсгэх
             </Link>
@@ -153,26 +215,36 @@ export default function TestsPage() {
         </div>
       </div>
 
+      {/* Дуусаагүй сесс — сурагч тасарсан бол шууд буцаж орох зам (сэдэв бүлэг,
+          хайлт, хуудаслалтаас үл хамааран, ХАМГИЙН дээр) */}
+      {!isTeacher && !loading && !error && <ContinueBanner tests={tests} />}
+
       {/* Ирц — зөвхөн танхимын сурагчид (Шийдвэр Г) */}
       {attendance && attendance.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/8 bg-[#0b142e] px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3">
           <span className="text-xs font-bold text-ink-dim">Миний ирц:</span>
           {attendance.map((a, i) => (
             <span
               key={i}
               title={a.date.slice(0, 10)}
-              className={`rounded-lg px-2 py-1 text-[11px] ${
+              className={`rounded-lg px-2 py-1 text-[11px] font-medium ${
                 a.status === "PRESENT"
-                  ? "bg-teal-400/15 text-teal-300"
+                  ? "bg-success/15 text-success"
                   : a.status === "LATE"
-                    ? "bg-amber-400/15 text-amber-300"
+                    ? "bg-warning/15 text-warning"
                     : a.status === "EXCUSED"
-                      ? "bg-white/10 text-ink-dim"
-                      : "bg-red-400/15 text-red-300"
+                      ? "bg-line/30 text-ink-dim"
+                      : "bg-error/15 text-error"
               }`}
             >
               {a.date.slice(5, 10)}{" "}
-              {a.status === "PRESENT" ? "✓" : a.status === "LATE" ? "хоц." : a.status === "EXCUSED" ? "чөл." : "✗"}
+              {a.status === "PRESENT"
+                ? "✓ ирсэн"
+                : a.status === "LATE"
+                  ? "⏱ хоцорсон"
+                  : a.status === "EXCUSED"
+                    ? "чөлөөтэй"
+                    : "✗ тасалсан"}
             </span>
           ))}
         </div>
@@ -188,131 +260,97 @@ export default function TestsPage() {
         ).map((tb) => (
           <button
             key={tb.key}
-            onClick={() => setTab(tb.key)}
-            className={`rounded-xl border px-4 py-2.5 text-sm transition ${
+            onClick={() => {
+              setTab(tb.key);
+              // Таб солигдоход тухайн табд байхгүй болсон сэдвийн шүүлтийг цэвэрлэнэ
+              setTopicFilter("");
+            }}
+            aria-pressed={tab === tb.key}
+            className={`min-h-11 rounded-xl border px-4 py-2.5 text-sm transition ${
               tab === tb.key
                 ? "border-brand-bright bg-brand-bright/15 text-brand-soft"
-                : "border-white/10 text-ink-dim hover:border-white/25"
+                : "border-line text-ink-dim hover:border-brand"
             }`}
           >
             <span className="font-bold">{tb.label}</span>
-            <span className="ml-1.5 rounded-full bg-white/10 px-2 py-0.5 text-xs">{tb.count}</span>
+            <span className="ml-1.5 rounded-full bg-line/40 px-2 py-0.5 text-xs text-ink">
+              {tb.count}
+            </span>
             <span className="ml-2 hidden text-xs opacity-70 sm:inline">{tb.hint}</span>
           </button>
         ))}
       </div>
 
-      {groups.length === 0 && (
-        <p className="rounded-2xl border border-white/8 bg-[#0b142e] p-6 text-center text-sm text-ink-dim">
-          {q ? `«${query}» гэсэн хайлтад таарах зүйл алга` : "Энэ ангилалд тест алга байна"}
+      {/* Ачаалж байгаа төлөв — скелетон, "тест алга" мессежээс тодорхой ялгаатай */}
+      {loading && (
+        <div className="space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              aria-hidden="true"
+              className="h-16 animate-pulse rounded-2xl border border-line bg-surface"
+            />
+          ))}
+          <p role="status" className="sr-only">
+            Тестийн жагсаалт ачаалж байна…
+          </p>
+        </div>
+      )}
+
+      {/* Алдааны төлөв — жинхэнэ алдаа, дахин оролдох боломжтой (.catch(()=>{})-той
+          андуурагдахгүй, ялгаатай харагдана) */}
+      {!loading && error && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error"
+        >
+          <span>Жагсаалт ачаалж чадсангүй: {error}</span>
+          <button
+            onClick={loadTests}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-error/40 px-3 text-xs font-semibold transition hover:bg-error/10"
+          >
+            Дахин оролдох
+          </button>
+        </div>
+      )}
+
+      {/* Хоосон төлөв — зөвхөн алдаагүй үед; хайлт vs бодит хоосон ялгана */}
+      {!loading && !error && groups.length === 0 && (
+        <p className="rounded-2xl border border-line bg-surface p-6 text-center text-sm text-ink-dim">
+          {q || topicFilter
+            ? `«${query || topicFilter}» гэсэн шүүлтэд таарах зүйл алга`
+            : tests.length === 0
+              ? "Тест хараахан үүсгээгүй байна"
+              : "Энэ ангилалд тест алга байна"}
         </p>
       )}
 
       {/* Сэдвийн бүлгүүд */}
-      <div className="space-y-3">
-        {groups.map(([topic, rows]) => {
-          const expanded = q !== "" || open.has(topic);
-          const doneCount = rows.filter((r) => (r.row.results?.length ?? 0) > 0).length;
-          // Номын өнгө — сэдвийн бүх тест нэг номд харьяалагддаг (Шийдвэр В)
-          const book = bookColor(rows[0]?.row.chapter?.book?.code);
-          return (
-            <div
+      {!loading && !error && groups.length > 0 && (
+        <div className="space-y-3">
+          {visibleGroups.map(([topic, rows]) => (
+            <TopicGroup
               key={topic}
-              className={`overflow-hidden rounded-2xl border border-white/8 bg-[#0b142e] ${book ? `border-l-4 ${book.bar}` : ""}`}
-            >
-              {/* Сэдвийн толгой — дарж задлана */}
-              <button
-                onClick={() => toggle(topic)}
-                className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-white/[0.03]"
-              >
-                <span
-                  className={`text-xs text-ink-dim transition-transform ${expanded ? "rotate-90" : ""}`}
-                >
-                  ▶
-                </span>
-                <span className="min-w-0 flex-1 truncate font-bold">{topic}</span>
-                {book && (
-                  <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${book.chip}`}>
-                    {book.key}
-                  </span>
-                )}
-                {!isTeacher && doneCount > 0 && (
-                  <span className="shrink-0 rounded-full bg-teal-400/15 px-2.5 py-0.5 text-xs text-teal-300">
-                    {doneCount}/{rows.length} өгсөн
-                  </span>
-                )}
-                <span className="shrink-0 text-xs text-ink-dim">{rows.length} тест</span>
-              </button>
+              topic={topic}
+              rows={rows}
+              isTeacher={isTeacher}
+              expanded={q !== "" || open.has(topic)}
+              onToggle={() => toggle(topic)}
+            />
+          ))}
 
-              {/* Тестүүд — 1,2,3… дарааллаараа */}
-              {expanded && (
-                <div className="border-t border-white/5">
-                  {rows.map(({ row: t, num }) => {
-                    const done = (t.results?.length ?? 0) > 0;
-                    return (
-                      <div
-                        key={t.id}
-                        className="flex items-center gap-3 border-b border-white/5 px-5 py-3 last:border-b-0"
-                      >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-bright/10 text-sm font-bold text-brand-soft">
-                          {num ?? "·"}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold">
-                            {num !== null ? `Тест ${num}` : t.title}
-                            {t.variantLabel && (
-                              <span className="ml-1 text-ink-dim">({t.variantLabel})</span>
-                            )}
-                          </p>
-                          <p className="text-xs text-ink-dim">
-                            {t._count.problems} бодлого
-                            {t.timeLimitMin ? ` · ${t.timeLimitMin} мин` : ""}
-                          </p>
-                        </div>
-                        <div className="shrink-0">
-                          {isTeacher ? (
-                            <Link
-                              href={`/app/tests/${t.id}/results`}
-                              className="inline-block rounded-lg border border-white/15 px-3 py-1.5 text-xs transition hover:border-white/40"
-                            >
-                              Дүн харах
-                            </Link>
-                          ) : done ? (
-                            <Link
-                              href={`/app/tests/${t.id}`}
-                              className="inline-block rounded-lg bg-teal-400/15 px-3 py-1.5 text-xs font-bold text-teal-300"
-                            >
-                              Өгсөн · {t.results![0].totalScore}/{t.results![0].maxScore}
-                            </Link>
-                          ) : t.gradingMode === "MANUAL" ? (
-                            <span className="inline-block rounded-lg bg-white/5 px-3 py-1.5 text-xs text-ink-dim">
-                              Багш дүгнэнэ
-                            </span>
-                          ) : t.sessionStatus === "IN_PROGRESS" ? (
-                            <Link
-                              href={`/app/tests/${t.id}`}
-                              className="inline-block rounded-lg bg-amber-400 px-3 py-1.5 text-xs font-bold text-amber-950"
-                            >
-                              Үргэлжлүүлэх
-                            </Link>
-                          ) : (
-                            <Link
-                              href={`/app/tests/${t.id}`}
-                              className="inline-block rounded-lg bg-brand-bright px-4 py-1.5 text-xs font-bold"
-                            >
-                              Эхлэх
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+          {hasMore && (
+            <button
+              onClick={() => setShownCount((c) => c + PAGE_SIZE)}
+              className="min-h-11 w-full rounded-xl border border-line py-3 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
+            >
+              Дараагийн {Math.min(PAGE_SIZE, groups.length - shownCount)} сэдвийг харах
+              {" · "}
+              {groups.length - shownCount} үлдсэн
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

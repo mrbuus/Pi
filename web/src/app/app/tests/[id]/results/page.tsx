@@ -1,140 +1,174 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import StudentPicker, { type StudentHit } from "@/components/exam/StudentPicker";
+import BulkScoreEntry from "@/components/results/BulkScoreEntry";
+import ResultsTable from "@/components/results/ResultsTable";
+import type { ClassroomOption, ResultRow } from "@/components/results/types";
 
-interface ResultRow {
+interface TestDetail {
   id: string;
-  totalScore: number;
-  maxScore: number;
-  source: string;
-  student: { id: string; firstName: string; lastName: string };
-  // Шалгалтын горимоос (таб/апп) гарсан тоо — анти-читийн дохио (Шийдвэр Е)
-  leaveCount?: number | null;
+  title: string;
+  access: { classroomId: string }[];
+}
+
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : "Алдаа гарлаа";
 }
 
 export default function TestResultsPage() {
   const params = useParams<{ id: string }>();
+
   const [rows, setRows] = useState<ResultRow[]>([]);
-  // Гараар дүн оруулах (36+4 цаасан шалгалт)
-  const [studentId, setStudentId] = useState("");
+  const [rowsLoading, setRowsLoading] = useState(true);
+  const [rowsError, setRowsError] = useState("");
+
+  const [testTitle, setTestTitle] = useState("");
+  const [classroomOptions, setClassroomOptions] = useState<ClassroomOption[]>([]);
+  const [classroomsLoading, setClassroomsLoading] = useState(true);
+
+  // Гараар нэг сурагч нэмэх (жишээ нь ангид биш, эрхээр нэвтэрсэн сурагч) —
+  // StudentPicker-ийг ашигласан хуучин урсгал, bulk горимын нэмэлт болгож үлдээв
+  const [student, setStudent] = useState<StudentHit | null>(null);
   const [total, setTotal] = useState("");
   const [max, setMax] = useState("100");
   const [msg, setMsg] = useState("");
+  const [msgTone, setMsgTone] = useState<"ok" | "error">("ok");
 
-  function load() {
-    api<ResultRow[]>(`/tests/${params.id}/results`).then(setRows).catch(() => {});
-  }
-  useEffect(load, [params.id]);
+  const loadResults = useCallback(() => {
+    setRowsLoading(true);
+    setRowsError("");
+    api<ResultRow[]>(`/tests/${params.id}/results`)
+      .then(setRows)
+      .catch((e) => setRowsError(errMsg(e)))
+      .finally(() => setRowsLoading(false));
+  }, [params.id]);
+
+  useEffect(loadResults, [loadResults]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setClassroomsLoading(true);
+    Promise.all([
+      api<TestDetail>(`/tests/${params.id}`),
+      api<ClassroomOption[]>("/classrooms"),
+    ])
+      .then(([test, classrooms]) => {
+        if (cancelled) return;
+        setTestTitle(test.title);
+        const accessIds = new Set((test.access ?? []).map((a) => a.classroomId));
+        const matched = classrooms.filter((c) => accessIds.has(c.id));
+        // Тестэд тодорхой анги оноогдоогүй бол багшийн бүх ангийг санал болгоно
+        setClassroomOptions(matched.length > 0 ? matched : classrooms);
+      })
+      .catch(() => {
+        if (!cancelled) setClassroomOptions([]);
+      })
+      .finally(() => {
+        if (!cancelled) setClassroomsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [params.id]);
 
   async function enterResult() {
     setMsg("");
+    if (!student) {
+      setMsgTone("error");
+      setMsg("Эхлээд сурагчаа хайж сонгоно уу");
+      return;
+    }
     try {
       await api(`/tests/${params.id}/results`, {
         method: "POST",
         body: {
-          studentId,
+          studentId: student.id,
           totalScore: parseFloat(total),
           maxScore: parseFloat(max),
         },
       });
-      setMsg("✓ Дүн орлоо");
-      setStudentId("");
+      setMsgTone("ok");
+      setMsg(`✓ ${student.firstName} ${student.lastName} — дүн орлоо`);
+      setStudent(null);
       setTotal("");
-      load();
+      loadResults();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Алдаа");
+      setMsgTone("error");
+      setMsg(errMsg(e));
     }
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-extrabold">Шалгалтын дүн</h1>
+      <div>
+        <h1 className="text-2xl font-extrabold text-ink">Шалгалтын дүн</h1>
+        {testTitle && <p className="mt-1 text-base text-ink-dim">{testTitle}</p>}
+      </div>
 
-      <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-6">
-        <h2 className="mb-4 font-bold text-brand-soft">
-          Цаасан шалгалтын дүн гараар оруулах
+      <BulkScoreEntry
+        testId={params.id}
+        classroomOptions={classroomOptions}
+        classroomsLoading={classroomsLoading}
+        existingResults={rows}
+        onSaved={loadResults}
+      />
+
+      <section className="rounded-2xl border border-line bg-surface p-6">
+        <h2 className="mb-1 text-lg font-bold text-brand-soft">
+          Ангийн жагсаалтад байхгүй сурагч нэмэх
         </h2>
-        <div className="flex flex-wrap gap-2">
+        <p className="mb-4 text-base text-ink-dim">
+          Сурагчийг код (жишээ нь SIE-26-M-0142) эсвэл нэрээр хайж сонгоод оноог оруулна.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <StudentPicker onSelect={setStudent} />
+          <label className="sr-only" htmlFor="score-total">
+            Авсан оноо
+          </label>
           <input
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-            placeholder="Сурагчийн ID"
-            className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
-          />
-          <input
+            id="score-total"
             value={total}
             onChange={(e) => setTotal(e.target.value)}
             inputMode="numeric"
             placeholder="Авсан оноо"
-            className="w-28 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none"
+            className="h-11 w-28 rounded-lg border border-line bg-surface px-3 text-base text-ink outline-none focus-visible:border-brand"
           />
+          <label className="sr-only" htmlFor="score-max">
+            Нийт оноо
+          </label>
           <input
+            id="score-max"
             value={max}
             onChange={(e) => setMax(e.target.value)}
             inputMode="numeric"
             placeholder="Нийт"
-            className="w-24 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none"
+            className="h-11 w-24 rounded-lg border border-line bg-surface px-3 text-base text-ink outline-none focus-visible:border-brand"
           />
           <button
             onClick={enterResult}
-            className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold"
+            className="h-11 rounded-lg bg-brand-bright px-4 text-base font-bold text-on-brand"
           >
             Оруулах
           </button>
         </div>
-        {msg && <p className="mt-2 text-sm text-teal-300">{msg}</p>}
+        {student && (
+          <p className="mt-2 text-sm text-ink-dim">
+            Сонгосон:{" "}
+            <span className="font-semibold text-ink">
+              {student.firstName} {student.lastName}
+            </span>
+            {student.studentCode && <span className="ml-1 font-mono">({student.studentCode})</span>}
+          </p>
+        )}
+        {msg && (
+          <p className={`mt-2 text-sm ${msgTone === "ok" ? "text-success" : "text-error"}`}>{msg}</p>
+        )}
       </section>
 
-      <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-6">
-        <h2 className="mb-4 font-bold text-brand-soft">
-          Дүнгийн жагсаалт ({rows.length})
-        </h2>
-        {rows.length === 0 && (
-          <p className="text-sm text-ink-dim">Дүн алга байна</p>
-        )}
-        <div className="space-y-2">
-          {rows.map((r, i) => {
-            // maxScore=0 бичилтэд NaN гарахаас хамгаална
-            const pct = r.maxScore > 0 ? Math.round((r.totalScore / r.maxScore) * 100) : 0;
-            return (
-              <div
-                key={r.id}
-                className="flex items-center gap-3 rounded-lg border border-white/8 px-4 py-2.5 text-sm"
-              >
-                <span className="w-6 text-ink-dim">{i + 1}.</span>
-                <span className="flex-1 font-medium">
-                  {r.student.firstName} {r.student.lastName}
-                </span>
-                <span className="text-ink-dim">{r.source === "CHAPTER_EXAM" ? "Цаасан" : "Онлайн"}</span>
-                {(r.leaveCount ?? 0) > 0 && (
-                  <span
-                    title="Шалгалтын үеэр горимоос (таб/апп) гарсан тоо"
-                    className="rounded-lg bg-amber-400/15 px-2 py-0.5 text-xs font-bold text-amber-300"
-                  >
-                    ⚠ {r.leaveCount}
-                  </span>
-                )}
-                <span className="font-bold">
-                  {r.totalScore}/{r.maxScore}
-                </span>
-                <span
-                  className={`w-12 text-right font-bold ${
-                    pct >= 80
-                      ? "text-teal-300"
-                      : pct >= 50
-                        ? "text-amber-300"
-                        : "text-red-300"
-                  }`}
-                >
-                  {pct}%
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      <ResultsTable rows={rows} loading={rowsLoading} error={rowsError} onRetry={loadResults} />
     </div>
   );
 }

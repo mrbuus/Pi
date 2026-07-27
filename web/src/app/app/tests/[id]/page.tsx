@@ -2,9 +2,21 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import MathText from "@/components/MathText";
-import NumericKeypad from "@/components/NumericKeypad";
+import { useTheme } from "@/components/ThemeProvider";
 import { api } from "@/lib/api";
+import { type SaveStatus } from "@/components/exam/AutosaveChip";
+import OfflineBanner from "@/components/exam/OfflineBanner";
+import ExamToast from "@/components/exam/ExamToast";
+import ExamHeader from "@/components/exam/ExamHeader";
+import QuestionCard from "@/components/exam/QuestionCard";
+import QuestionFooterNav from "@/components/exam/QuestionFooterNav";
+import QuestionNavigator, { type NavigatorCell } from "@/components/exam/QuestionNavigator";
+import PreSubmitReview from "@/components/exam/PreSubmitReview";
+import SubmitDialog from "@/components/exam/SubmitDialog";
+import LeaveWarningDialog from "@/components/exam/LeaveWarningDialog";
+import ExamIntro from "@/components/exam/ExamIntro";
+import ExamResult from "@/components/exam/ExamResult";
+import { parseFillSlots, slotsTotalLength } from "@/components/exam/fillSlots";
 
 /* ============================================================================
  * Тест бодох хуудас — session-т суурилсан шалгалтын орчин (Шийдвэр 2, 3, 6)
@@ -14,7 +26,15 @@ import { api } from "@/lib/api";
  * - Анти-чит: fullscreen + таб/цонхноос гарахыг мэдэрч 3 удаагийн дараа авто-илгээнэ
  * - Сонголтууд: TEXT горимд үсэггүй, зөвхөн утга (сурагч бүрд өөр дараалалтай);
  *   LETTER горимд (хуучин импортын дата) үсэг хэвээр, байрлал хөдлөхгүй
+ * - FILL_NUMBER: бодлогын текстэд [a]/[bc] мэт тэмдэглэгээ байвал цифрийн
+ *   нүднүүдээр (см. FillNumberAnswer/fillSlots), үгүй бол чөлөөт талбараар
  * - Дууссаны дараа review: аль бодлогод алдсанаа харна (зөв хариу задрахгүй)
+ *
+ * ЭНЭ ФАЙЛ бол зөвхөн UI/UX rebuild — дээрх сервер-талын механизмыг СУЛАРГААГҮЙ,
+ * зөвхөн дэлгэцийн харагдац/харилцан үйлдлийг өндөр эрсдэлт шалгалтын стандарт
+ * руу шинэчилсэн. Тэмдэглэсэн (⚑) төлөв нь зөвхөн клиент талд (энэ browser tab-ын
+ * үргэлжлэх хугацаанд) хадгалагдана — серверийн session схемд оноо бус тул
+ * дүнд нөлөөгүй, зөвхөн навигаторт л харагдана.
  * ========================================================================== */
 
 interface ProblemView {
@@ -68,62 +88,30 @@ interface ReviewResp {
   leaveCount: number;
 }
 
-const SELF_STATES = [
-  { value: "SOLVED_CLEAN", label: "Алдаагүй", tone: "ok" },
-  { value: "FIXED_AFTER_ERROR", label: "Зассан", tone: "warn" },
-  { value: "FAILED", label: "Алдсан", tone: "bad" },
-  { value: "GUESSED", label: "Буудсан", tone: "guess" },
-] as const;
-
-const SELF_TONE: Record<string, string> = {
-  ok: "bg-teal-400/20 text-teal-700 border-teal-400/50",
-  warn: "bg-amber-400/20 text-amber-700 border-amber-400/50",
-  bad: "bg-red-400/20 text-red-700 border-red-400/50",
-  guess: "bg-indigo-400/20 text-indigo-700 border-indigo-400/50",
-};
-
-type Theme = "navy" | "light";
-const THEMES: Record<
-  Theme,
-  { page: string; card: string; bar: string; dim: string; border: string; chip: string; navIdle: string }
-> = {
-  navy: {
-    page: "bg-[#060c1d] text-[#e9eefb]",
-    card: "bg-[#0b142e] border-white/8",
-    bar: "bg-[#060c1d]/95 border-white/8",
-    dim: "text-[#93a3c7]",
-    border: "border-white/10",
-    chip: "bg-white/5 text-[#93a3c7]",
-    navIdle: "border-white/10 text-[#93a3c7] hover:border-white/30",
-  },
-  light: {
-    page: "bg-white text-[#0b142e]",
-    card: "bg-[#f7f9fc] border-black/10",
-    bar: "bg-white/95 border-black/10",
-    dim: "text-[#5c6b8a]",
-    border: "border-black/15",
-    chip: "bg-black/5 text-[#5c6b8a]",
-    navIdle: "border-black/15 text-[#5c6b8a] hover:border-black/30",
-  },
-};
-
 const MAX_LEAVES = 3; // энэ тооны дараа шалгалт автоматаар дуусна
 const SAVE_DEBOUNCE_MS = 1200;
 const HEARTBEAT_MS = 20_000;
+const FIVE_MIN_TOAST_SEC = 300;
 
 export default function TakeTestPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  // NumericKeypad-ийн "navy"/"light" theme нь глобал light/dark системээс
+  // гаралтай — NumericKeypad.tsx-г засахгүйгээр, зөвхөн харагдах горимыг нь
+  // тухайн үеийн бодит (resolved) горимтой тааруулна (NumericKeypad "navy"
+  // өгөгдмөл нь LIGHT горимд бараг үл үзэгдэх контраст үүсгэдэг байсан).
+  const { resolvedTheme } = useTheme();
+  const keypadTheme = resolvedTheme === "light" ? "light" : "navy";
 
   const [meta, setMeta] = useState<Meta | null>(null);
   const [phase, setPhase] = useState<"loading" | "intro" | "taking" | "result">("loading");
-  const [theme, setTheme] = useState<Theme>("navy");
+  const [subView, setSubView] = useState<"question" | "review">("question");
   const [confirmStart, setConfirmStart] = useState(false);
-  const [confirmFinish, setConfirmFinish] = useState(false);
 
   const [problems, setProblems] = useState<ProblemView[]>([]);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [selfStates, setSelfStates] = useState<Record<string, string>>({});
+  const [flagged, setFlagged] = useState<Record<string, boolean>>({});
   const [pageIdx, setPageIdx] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [leaveCount, setLeaveCount] = useState(0);
@@ -132,6 +120,12 @@ export default function TakeTestPage() {
   const [review, setReview] = useState<ReviewResp | null>(null);
   const [error, setError] = useState("");
   const [starting, setStarting] = useState(false);
+
+  const [navigatorOpen, setNavigatorOpen] = useState(false);
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
+  const [offline, setOffline] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   // Refs — autosave/илгээлтэд үргэлж хамгийн сүүлийн утга очно (stale closure-гүй)
   const answersRef = useRef(answers);
@@ -142,19 +136,21 @@ export default function TakeTestPage() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const submittedRef = useRef(false);
   const phaseRef = useRef(phase);
+  const subViewRef = useRef(subView);
   const pageIdxRef = useRef(0);
   const problemsRef = useRef<ProblemView[]>([]);
   const leaveCountRef = useRef(0);
   const lastLeaveAtRef = useRef(0);
+  const fiveMinToastShownRef = useRef(false);
 
   useEffect(() => {
     phaseRef.current = phase;
+    subViewRef.current = subView;
     pageIdxRef.current = pageIdx;
     problemsRef.current = problems;
     leaveCountRef.current = leaveCount;
-  }, [phase, pageIdx, problems, leaveCount]);
+  }, [phase, subView, pageIdx, problems, leaveCount]);
 
-  const t = THEMES[theme];
   const manualGrading = meta?.gradingMode === "MANUAL";
 
   // ---------- Review ачаалах ----------
@@ -185,22 +181,35 @@ export default function TakeTestPage() {
   }, [params.id, loadReview]);
 
   // ---------- Autosave ----------
+  // Амжилтгүй болвол dirty-г ЦЭВЭРЛЭХГҮЙ (зөвхөн амжилттай илгээгдсэн, дараа нь
+  // дахин өөрчлөгдөөгүй утгуудыг л хасна) — сүлжээ тасрахад хариулт алдагдахгүй,
+  // OfflineBanner-ийн амлалт ("хадгалагдахгүй байна") жинхэнэ утгатай байх ёстой.
   const flushSave = useCallback(
     async (event?: "LEAVE" | "RETURN" | "FULLSCREEN_EXIT") => {
       if (submittedRef.current) return;
+      const answersSnapshot = { ...dirtyAnswersRef.current };
+      const statesSnapshot = { ...dirtyStatesRef.current };
+      const timesSnapshot = { ...timesRef.current };
       const body: Record<string, unknown> = {};
-      if (Object.keys(dirtyAnswersRef.current).length) body.answers = dirtyAnswersRef.current;
-      if (Object.keys(dirtyStatesRef.current).length) body.selfStates = dirtyStatesRef.current;
-      if (Object.keys(timesRef.current).length) body.problemTimes = timesRef.current;
+      if (Object.keys(answersSnapshot).length) body.answers = answersSnapshot;
+      if (Object.keys(statesSnapshot).length) body.selfStates = statesSnapshot;
+      if (Object.keys(timesSnapshot).length) body.problemTimes = timesSnapshot;
       if (event) body.event = event;
       if (Object.keys(body).length === 0) return;
-      dirtyAnswersRef.current = {};
-      dirtyStatesRef.current = {};
+      setSaveStatus("saving");
       try {
         const r = await api<{ status: string; remainingSec?: number | null; leaveCount?: number; result?: { totalScore: number; maxScore: number } }>(
           `/tests/${params.id}/session`,
           { method: "PATCH", body },
         );
+        for (const k of Object.keys(answersSnapshot)) {
+          if (dirtyAnswersRef.current[k] === answersSnapshot[k]) delete dirtyAnswersRef.current[k];
+        }
+        for (const k of Object.keys(statesSnapshot)) {
+          if (dirtyStatesRef.current[k] === statesSnapshot[k]) delete dirtyStatesRef.current[k];
+        }
+        setSaveStatus("saved");
+        setOffline(false);
         if (r.status === "SUBMITTED") {
           // Сервер хугацааг хаасан — үр дүн рүү шилжинэ
           submittedRef.current = true;
@@ -212,7 +221,8 @@ export default function TakeTestPage() {
         if (typeof r.remainingSec === "number") setSecondsLeft(r.remainingSec);
         if (typeof r.leaveCount === "number") setLeaveCount(r.leaveCount);
       } catch {
-        /* сүлжээний түр алдаа — дараагийн heartbeat дахин оролдоно */
+        // Сүлжээний алдаа — dirty өгөгдлийг хэвээр үлдээж, тогтмол banner харуулна
+        setOffline(true);
       }
     },
     [params.id, loadReview],
@@ -241,6 +251,10 @@ export default function TakeTestPage() {
     dirtyStatesRef.current[pid] = value;
     scheduleSave();
   }
+  // "Дараа эргэж харах" — зөвхөн клиент/навигаторт зориулсан, дүнд нөлөөгүй
+  function toggleFlag(pid: string) {
+    setFlagged((f) => ({ ...f, [pid]: !f[pid] }));
+  }
 
   // ---------- Илгээх ----------
   const finish = useCallback(
@@ -264,6 +278,7 @@ export default function TakeTestPage() {
         setResult({ total: res.result.totalScore, max: res.result.maxScore });
         await loadReview();
         setPhase("result");
+        setSubmitDialogOpen(false);
         if (reason !== "USER") setLeaveWarnOpen(false);
         void document.exitFullscreen?.().catch(() => {});
       } catch (e) {
@@ -304,6 +319,24 @@ export default function TakeTestPage() {
     return () => clearInterval(id);
   }, [phase, flushSave]);
 
+  // ---------- 5 минутын үлдэлтэй сануулга (нэг л удаа, non-blocking toast) ----------
+  useEffect(() => {
+    if (phase !== "taking" || secondsLeft === null) return;
+    if (secondsLeft <= FIVE_MIN_TOAST_SEC && !fiveMinToastShownRef.current) {
+      fiveMinToastShownRef.current = true;
+      const unanswered = problemsRef.current.filter(
+        (p) => answersRef.current[p.id] === undefined || answersRef.current[p.id] === "",
+      ).length;
+      setToastMsg(`5 минут үлдлээ — ${unanswered} бодлого хариулаагүй байна`);
+    }
+  }, [phase, secondsLeft]);
+
+  useEffect(() => {
+    if (!toastMsg) return;
+    const id = setTimeout(() => setToastMsg(null), 8000);
+    return () => clearTimeout(id);
+  }, [toastMsg]);
+
   // ---------- Анти-чит: горимоос гарахыг мэдрэх (Шийдвэр 3) ----------
   useEffect(() => {
     if (phase !== "taking") return;
@@ -343,20 +376,44 @@ export default function TakeTestPage() {
     };
   }, [phase, flushSave, finish]);
 
-  // ---------- FILL бодлогод гарын оролт (компьютерээс хурдан бөглөх) ----------
+  // ---------- Гарын товчлуур: FILL бодлогод шууд цифр, MC-д 1-5 сонголт ----------
   useEffect(() => {
     if (phase !== "taking") return;
     function onKey(e: KeyboardEvent) {
+      if (subViewRef.current !== "question") return;
       const target = e.target as HTMLElement;
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+      const typingInField = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
       const cur = problemsRef.current[pageIdxRef.current];
-      if (!cur || cur.format !== "FILL_NUMBER") return;
+      if (!cur) return;
       const pid = cur.id;
-      const prev = String(answersRef.current[pid] ?? "");
-      if (/^[0-9]$/.test(e.key)) setAnswer(pid, prev + e.key);
-      else if (e.key === "-" && !prev.includes("-")) setAnswer(pid, "-" + prev);
-      else if (e.key === "." && !prev.includes(".")) setAnswer(pid, prev + ".");
-      else if (e.key === "Backspace") setAnswer(pid, prev.slice(0, -1));
+
+      if (cur.format === "FILL_NUMBER") {
+        if (typingInField) return; // жинхэнэ input дээр байгаа бол native оролт ажиллана
+        const prev = String(answersRef.current[pid] ?? "");
+        // Бодлогын текстэд [a]/[bc] мэт нүдний тэмдэглэгээ байвал зөвхөн
+        // цифр (max нүдний тоо хүртэл) — тэмдэг/аравтын цэг энд хамаагүй.
+        const slotGroups = parseFillSlots(cur.statementText);
+        if (slotGroups.length > 0) {
+          const total = slotsTotalLength(slotGroups);
+          if (/^[0-9]$/.test(e.key) && prev.length < total) setAnswer(pid, prev + e.key);
+          else if (e.key === "Backspace") setAnswer(pid, prev.slice(0, -1));
+          return;
+        }
+        if (/^[0-9]$/.test(e.key)) setAnswer(pid, prev + e.key);
+        else if (e.key === "-" && !prev.includes("-")) setAnswer(pid, "-" + prev);
+        else if (e.key === "." && !prev.includes(".")) setAnswer(pid, prev + ".");
+        else if (e.key === "Backspace") setAnswer(pid, prev.slice(0, -1));
+        return;
+      }
+
+      if (typingInField) return;
+      if ((cur.choiceMode === "TEXT" || cur.choiceMode === "LETTER") && cur.choices) {
+        const n = Number(e.key);
+        if (Number.isInteger(n) && n >= 1 && n <= 5 && n <= cur.choices.length) {
+          if (cur.choiceMode === "TEXT") setAnswer(pid, n - 1);
+          else setAnswer(pid, cur.choices[n - 1]);
+        }
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -382,6 +439,7 @@ export default function TakeTestPage() {
       const draftA = r.session.draftAnswers ?? {};
       const draftS = r.session.draftStates ?? {};
       setProblems(r.problems ?? []);
+      problemsRef.current = r.problems ?? [];
       setAnswers(draftA);
       answersRef.current = draftA;
       setSelfStates(draftS);
@@ -390,6 +448,7 @@ export default function TakeTestPage() {
       setLeaveCount(r.session.leaveCount ?? 0);
       lastLeaveAtRef.current = Date.now(); // эхлэх мөчийн fullscreen шилжилтийг тооцохгүй
       setPageIdx(0);
+      setSubView("question");
       setPhase("taking");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Алдаа гарлаа");
@@ -403,11 +462,35 @@ export default function TakeTestPage() {
     () => problems.filter((p) => answers[p.id] !== undefined && answers[p.id] !== "").length,
     [answers, problems],
   );
+  const flaggedCount = useMemo(
+    () => problems.filter((p) => flagged[p.id]).length,
+    [flagged, problems],
+  );
+  const navigatorCells: NavigatorCell[] = useMemo(
+    () =>
+      problems.map((p) => ({
+        id: p.id,
+        answered: answers[p.id] !== undefined && answers[p.id] !== "",
+        flagged: !!flagged[p.id],
+      })),
+    [problems, answers, flagged],
+  );
+  // Хэсэг I (сонгох) / Хэсэг II (тоо нөхөх) хоорондын зааг — навигатор торыг
+  // бүлэглэхэд ашиглана (ЭЕШ загвар: эхлээд CHOICE, дараа нь FILL_NUMBER).
+  const partIIStart = useMemo(() => {
+    const idx = problems.findIndex((p) => p.format === "FILL_NUMBER");
+    return idx === -1 ? undefined : idx;
+  }, [problems]);
+
+  function jumpTo(idx: number) {
+    setPageIdx(idx);
+    setSubView("question");
+  }
 
   // ---------- Ачаалал / алдаа ----------
   if (error && phase === "loading") {
     return (
-      <div className="rounded-2xl border border-red-400/20 bg-red-400/5 p-6 text-center text-red-300">
+      <div className="rounded-2xl border border-error/30 bg-error/5 p-6 text-center text-error">
         {error}
       </div>
     );
@@ -420,202 +503,37 @@ export default function TakeTestPage() {
   if (phase === "intro") {
     const resume = meta.sessionStatus === "IN_PROGRESS";
     return (
-      <div className="mx-auto max-w-lg">
-        <div className="rounded-3xl border border-white/8 bg-[#0b142e] p-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-bright">
-            Шалгалт
-          </p>
-          <h1 className="mt-2 text-2xl font-extrabold">
-            {meta.title}
-            {meta.variantLabel && <span className="ml-1 text-ink-dim">({meta.variantLabel})</span>}
-          </h1>
-
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            <Stat label="Бодлого" value={`${meta.problemCount}`} />
-            <Stat label="Хугацаа" value={minutes ? `${minutes} мин` : "Хязгааргүй"} />
-            <Stat label="Нийт оноо" value={`${meta.totalPoints}`} />
-          </div>
-
-          {manualGrading ? (
-            <p className="mt-6 rounded-xl border border-amber-400/30 bg-amber-400/5 px-4 py-3 text-sm text-amber-200">
-              Энэ шалгалтын дүнг багш гараар оруулна — онлайнаар өгөгдөхгүй.
-            </p>
-          ) : (
-            <>
-              <ul className="mt-6 space-y-2 text-left text-sm text-ink-dim">
-                <li>• Хариулт бүр шууд хадгалагдана — гэнэт тасарсан ч үргэлжлүүлж болно.</li>
-                <li>• Шалгалтын горимоос ({MAX_LEAVES - 1} удаа хүртэл) гарвал анхааруулна, {MAX_LEAVES} дахь удаад автоматаар дуусна.</li>
-                {minutes > 0 && <li>• Цагийг сервер тоолно — цаг дуусахад автоматаар илгээгдэнэ.</li>}
-              </ul>
-
-              <div className="mt-6 flex items-center justify-center gap-2 text-sm">
-                <span className="text-ink-dim">Дэлгэцийн өнгө:</span>
-                {(["navy", "light"] as Theme[]).map((th) => (
-                  <button
-                    key={th}
-                    onClick={() => setTheme(th)}
-                    className={`rounded-lg border px-3 py-1.5 ${theme === th ? "border-brand-bright bg-brand-bright/15 text-brand-soft" : "border-white/10 text-ink-dim"}`}
-                  >
-                    {th === "navy" ? "Хар хөх" : "Цагаан"}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={() => (resume ? void beginTest() : setConfirmStart(true))}
-                disabled={starting}
-                className="glow-pulse mt-7 w-full rounded-xl bg-brand-bright py-4 text-lg font-bold text-white transition hover:bg-[#6190f0] disabled:opacity-50"
-              >
-                {starting ? "Ачаалж байна…" : resume ? "Үргэлжлүүлэх" : "Шалгалт эхлэх"}
-              </button>
-            </>
-          )}
-          <button
-            onClick={() => router.push("/app/tests")}
-            className="mt-3 text-sm text-ink-dim hover:text-ink"
-          >
-            Буцах
-          </button>
-          {error && (
-            <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>
-          )}
-        </div>
-
-        {confirmStart && (
-          <div className="mt-4 flex min-h-[200px] items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/5 p-6">
-            <div className="text-center">
-              <p className="text-lg font-bold text-amber-200">⏱ Анхаар!</p>
-              <p className="mt-2 text-sm text-amber-100/80">
-                {minutes > 0 ? (
-                  <>Танд <b>{minutes} минут</b> байна. Эхэлмэгц цагийг сервер тоолно. Бэлэн үү?</>
-                ) : (
-                  <>Шалгалтыг эхлүүлэх үү?</>
-                )}
-              </p>
-              <div className="mt-4 flex justify-center gap-3">
-                <button
-                  onClick={() => setConfirmStart(false)}
-                  className="rounded-lg border border-white/15 px-5 py-2 text-sm"
-                >
-                  Болих
-                </button>
-                <button
-                  onClick={() => void beginTest()}
-                  className="rounded-lg bg-amber-400 px-6 py-2 text-sm font-bold text-amber-950"
-                >
-                  Тийм, эхлэх
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      <ExamIntro
+        title={meta.title}
+        variantLabel={meta.variantLabel}
+        problemCount={meta.problemCount}
+        minutes={minutes}
+        totalPoints={meta.totalPoints}
+        manualGrading={manualGrading}
+        maxLeaves={MAX_LEAVES}
+        resume={resume}
+        starting={starting}
+        confirmStart={confirmStart}
+        error={error}
+        onStart={() => (resume ? void beginTest() : setConfirmStart(true))}
+        onConfirmStart={() => void beginTest()}
+        onCancelConfirm={() => setConfirmStart(false)}
+        onBack={() => router.push("/app/tests")}
+      />
     );
   }
 
   /* ====================== ҮР ДҮН + REVIEW ====================== */
   if (phase === "result") {
-    const total = result?.total ?? 0;
-    const max = result?.max ?? 0;
-    const pct = max > 0 ? Math.round((total / max) * 100) : 0;
     return (
-      <div className="mx-auto max-w-2xl space-y-5">
-        <div className="rounded-3xl border border-white/8 bg-[#0b142e] p-8 text-center">
-          <p className="text-sm text-ink-dim">{meta.title}</p>
-          <p className="my-4 text-5xl font-extrabold text-brand-soft">
-            {total}
-            <span className="text-2xl text-ink-dim">/{max}</span>
-          </p>
-          <div className="mx-auto mb-4 h-3 max-w-xs overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-brand-bright to-teal-400"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <p className="text-ink-dim">{pct}% оноо авлаа</p>
-          {review && review.leaveCount > 0 && (
-            <p className="mt-2 text-xs text-amber-300/80">
-              Шалгалтын горимоос {review.leaveCount} удаа гарсан нь бүртгэгдсэн.
-            </p>
-          )}
-        </div>
-
-        {review && review.items.length > 0 && (
-          <div className="rounded-2xl border border-white/8 bg-[#0b142e] p-6">
-            <h2 className="mb-4 font-bold text-brand-soft">Бодлого бүрийн дүн</h2>
-            <div className="space-y-2">
-              {review.items.map((it) => (
-                <div
-                  key={it.n}
-                  className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
-                    !it.answered || it.answerUnknown
-                      ? "border-white/8 opacity-60"
-                      : it.correct
-                        ? "border-teal-400/25 bg-teal-400/5"
-                        : "border-red-400/25 bg-red-400/5"
-                  }`}
-                >
-                  <span
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
-                      !it.answered || it.answerUnknown
-                        ? "bg-white/10 text-ink-dim"
-                        : it.correct
-                          ? "bg-teal-400/20 text-teal-300"
-                          : "bg-red-400/20 text-red-300"
-                    }`}
-                  >
-                    {it.n}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    {it.statementText && (
-                      <div className="line-clamp-2 text-xs text-ink-dim">
-                        <MathText>{it.statementText}</MathText>
-                      </div>
-                    )}
-                    <p className="mt-1">
-                      {!it.answered ? (
-                        <span className="text-ink-dim">Хариулаагүй</span>
-                      ) : it.answerUnknown ? (
-                        <span className="text-ink-dim">
-                          Зөв хариу тодорхойгүй — дүнд тооцогдоогүй
-                        </span>
-                      ) : (
-                        <>
-                          <span className={it.correct ? "text-teal-300" : "text-red-300"}>
-                            {it.correct ? "Зөв" : "Буруу"}
-                          </span>
-                          {it.myAnswer && (
-                            <span className="ml-2 text-ink-dim">
-                              Таны хариулт: <MathText>{it.myAnswer}</MathText>
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </p>
-                    {/* Багшийн баталгаажуулсан бодолт — байвал л харагдана */}
-                    {it.solution && (
-                      <div className="mt-2 rounded-lg border border-brand-bright/20 bg-brand-bright/5 px-3 py-2 text-xs leading-relaxed">
-                        <span className="font-bold text-brand-soft">Бодолт: </span>
-                        <MathText>{it.solution}</MathText>
-                      </div>
-                    )}
-                  </div>
-                  <span className="shrink-0 text-xs text-ink-dim">{it.points} оноо</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="text-center">
-          <button
-            onClick={() => router.push("/app/tests")}
-            className="rounded-xl bg-brand-bright px-6 py-3 font-bold text-white"
-          >
-            Шалгалтын жагсаалт руу
-          </button>
-        </div>
-      </div>
+      <ExamResult
+        title={meta.title}
+        total={result?.total ?? 0}
+        max={result?.max ?? 0}
+        leaveCount={review?.leaveCount ?? 0}
+        items={review?.items ?? []}
+        onBackToList={() => router.push("/app/tests")}
+      />
     );
   }
 
@@ -623,256 +541,102 @@ export default function TakeTestPage() {
   const tp = problems[pageIdx];
   if (!tp) return null;
   const pid = tp.id;
-  const mm = secondsLeft !== null ? Math.floor(secondsLeft / 60) : 0;
-  const ss = secondsLeft !== null ? secondsLeft % 60 : 0;
-  const lowTime = secondsLeft !== null && secondsLeft < 300;
   const isLast = pageIdx === problems.length - 1;
 
   return (
     // Exam горим: апп-ын цэсийг бүрэн далдалсан тусдаа давхарга (fixed inset-0)
     <div
-      className={`fixed inset-0 z-[60] select-none overflow-y-auto px-4 py-4 ${t.page}`}
+      className="fixed inset-0 z-[60] flex select-none flex-col overflow-hidden bg-bg text-ink"
       onContextMenu={(e) => e.preventDefault()}
       onCopy={(e) => e.preventDefault()}
     >
-      {/* Дээд мөр — гарчиг + таймер + theme */}
-      <div
-        className={`sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur ${t.bar}`}
-      >
-        <div className="min-w-0">
-          <p className="truncate font-bold">{meta.title}</p>
-          <p className={`text-xs ${t.dim}`}>
-            {answeredCount}/{problems.length} хариулсан
-            {leaveCount > 0 && (
-              <span className="ml-2 text-amber-400">⚠ {leaveCount}/{MAX_LEAVES}</span>
-            )}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setTheme(theme === "navy" ? "light" : "navy")}
-            className={`rounded-lg border px-2.5 py-2 text-xs ${t.navIdle}`}
-            title="Өнгө солих"
-          >
-            {theme === "navy" ? "☀" : "🌙"}
-          </button>
-          {secondsLeft !== null && (
-            <div
-              className={`rounded-xl px-4 py-2 font-mono text-lg font-bold ${lowTime ? "bg-red-500/15 text-red-400" : t.chip}`}
-            >
-              {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
-            </div>
-          )}
-        </div>
-      </div>
+      {offline && <OfflineBanner />}
 
-      {/* Навигатор */}
-      <div className="mt-4 flex flex-wrap gap-1.5">
-        {problems.map((p, i) => {
-          const done = answers[p.id] !== undefined && answers[p.id] !== "";
-          const cur = i === pageIdx;
-          return (
-            <button
-              key={p.id}
-              onClick={() => setPageIdx(i)}
-              className={`h-8 w-8 rounded-lg border text-xs font-bold transition ${
-                cur
-                  ? "border-brand-bright bg-brand-bright text-white"
-                  : done
-                    ? "border-teal-400/50 bg-teal-400/15 text-teal-300"
-                    : t.navIdle
-              }`}
-            >
-              {i + 1}
-            </button>
-          );
-        })}
-      </div>
+      <ExamHeader
+        title={meta.title}
+        saveStatus={saveStatus}
+        leaveCount={leaveCount}
+        maxLeaves={MAX_LEAVES}
+        answeredCount={answeredCount}
+        totalCount={problems.length}
+        onOpenNavigator={() => setNavigatorOpen(true)}
+        onFinish={() => setSubView("review")}
+        secondsLeft={secondsLeft}
+        totalSec={minutes ? minutes * 60 : null}
+      />
 
-      {/* Бодлого */}
-      <div className={`mt-4 rounded-2xl border p-6 ${t.card}`}>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-bright/15 text-base font-bold text-brand-soft">
-            {pageIdx + 1}
-          </span>
-          <span className={`text-[11px] ${t.dim}`}>{tp.points} оноо</span>
-        </div>
-
-        <div className="text-lg leading-relaxed">
-          <MathText>{tp.statementText ?? ""}</MathText>
-        </div>
-
-        {/* Хариулт — горим бүрд тохирсон оролт */}
-        {tp.choiceMode === "TEXT" && tp.choices ? (
-          // Бүтэцтэй сонголт: үсэггүй, зөвхөн утга (сурагч бүрд өөр дараалалтай)
-          <div className="mt-5 space-y-2">
-            {tp.choices.map((c, ci) => {
-              const sel = answers[pid] === ci;
-              return (
-                <button
-                  key={ci}
-                  onClick={() => setAnswer(pid, ci)}
-                  className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition ${
-                    sel ? "border-brand-bright bg-brand-bright/15" : t.navIdle
-                  }`}
-                >
-                  <span
-                    className={`h-4 w-4 shrink-0 rounded-full border-2 ${sel ? "border-brand-bright bg-brand-bright" : t.border}`}
-                  />
-                  <span className="flex-1">
-                    <MathText>{c}</MathText>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : tp.choiceMode === "LETTER" && tp.choices ? (
-          // Хуучин импортын дата: хувилбарууд бодлогын текст дотор — үсгээр сонгоно
-          <div className="mt-5 flex flex-wrap gap-2">
-            {tp.choices.map((letter) => {
-              const sel = answers[pid] === letter;
-              return (
-                <button
-                  key={letter}
-                  onClick={() => setAnswer(pid, letter)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-xl border text-lg font-bold transition ${
-                    sel ? "border-brand-bright bg-brand-bright text-white" : t.navIdle
-                  }`}
-                >
-                  {letter}
-                </button>
-              );
-            })}
-          </div>
-        ) : tp.format === "FILL_NUMBER" ? (
-          <NumericKeypad
-            value={String(answers[pid] ?? "")}
-            onChange={(update) => setAnswer(pid, update(String(answers[pid] ?? "")))}
-            theme={theme}
+      <main className="flex-1 overflow-y-auto px-4 py-4">
+        {subView === "review" ? (
+          <PreSubmitReview
+            cells={navigatorCells}
+            secondsLeft={secondsLeft}
+            onJump={jumpTo}
+            onBack={() => setSubView("question")}
+            onOpenSubmit={() => setSubmitDialogOpen(true)}
           />
         ) : (
-          <input
-            value={String(answers[pid] ?? "")}
-            onChange={(e) => setAnswer(pid, e.target.value)}
-            placeholder="Хариугаа бичнэ үү"
-            className={`mt-5 w-full max-w-xs rounded-xl border bg-transparent px-4 py-3 outline-none focus:border-brand-bright ${t.border}`}
-          />
+          <>
+            {/* Бодлого — нэг дэлгэцэнд НЭГ асуулт (урт scroll-той жагсаалт биш).
+                key={pid}: асуулт солигдох бүрт (тухайлбал FillNumberAnswer-ийн
+                идэвхтэй нүд гэх мэт) дотоод UI төлөв цэвэрхэн дахин эхэлнэ. */}
+            <QuestionCard
+              key={pid}
+              problem={tp}
+              problemNumber={pageIdx + 1}
+              answer={answers[pid]}
+              onAnswer={(value) => setAnswer(pid, value)}
+              selfState={selfStates[pid]}
+              onSelfState={(value) => setSelfState(pid, value)}
+              keypadTheme={keypadTheme}
+            />
+
+            <QuestionFooterNav
+              canGoPrev={pageIdx > 0}
+              onPrev={() => setPageIdx((i) => Math.max(0, i - 1))}
+              flagged={!!flagged[pid]}
+              onToggleFlag={() => toggleFlag(pid)}
+              isLast={isLast}
+              onNext={() => setPageIdx((i) => Math.min(problems.length - 1, i + 1))}
+              onReview={() => setSubView("review")}
+            />
+          </>
         )}
 
-        {/* Өөрийн тэмдэглэгээ (адаптив дата — SPEC §9.1) */}
-        <div className="mt-5 border-t border-white/5 pt-4">
-          <p className={`mb-2 text-xs ${t.dim}`}>Би энэ бодлогыг:</p>
-          <div className="flex flex-wrap gap-1.5">
-            {SELF_STATES.map((s) => {
-              const sel = selfStates[pid] === s.value;
-              return (
-                <button
-                  key={s.value}
-                  onClick={() => setSelfState(pid, s.value)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs transition ${sel ? SELF_TONE[s.tone] : t.navIdle}`}
-                >
-                  {s.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Доод навигац */}
-      <div className="mt-5 flex items-center gap-3 pb-6">
-        <button
-          onClick={() => setPageIdx((i) => Math.max(0, i - 1))}
-          disabled={pageIdx === 0}
-          className={`rounded-xl border px-5 py-3 font-semibold disabled:opacity-30 ${t.navIdle}`}
-        >
-          ← Өмнөх
-        </button>
-        {!isLast ? (
-          <button
-            onClick={() => setPageIdx((i) => Math.min(problems.length - 1, i + 1))}
-            className="flex-1 rounded-xl bg-brand-bright py-3 font-bold text-white"
-          >
-            Дараах →
-          </button>
-        ) : (
-          <button
-            onClick={() => setConfirmFinish(true)}
-            className="flex-1 rounded-xl bg-teal-500 py-3 font-bold text-white"
-          >
-            Шалгалт дуусгах
-          </button>
+        {error && (
+          <p className="mx-auto mb-4 max-w-2xl rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
         )}
-      </div>
+      </main>
 
-      {error && (
-        <p className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>
-      )}
+      <QuestionNavigator
+        open={navigatorOpen}
+        onClose={() => setNavigatorOpen(false)}
+        cells={navigatorCells}
+        currentIndex={pageIdx}
+        onJump={jumpTo}
+        partIIStart={partIIStart}
+      />
 
-      {/* Дуусгах баталгаажуулалт */}
-      {confirmFinish && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-6">
-          <div className={`w-full max-w-sm rounded-2xl border p-6 text-center ${t.card}`}>
-            <p className="font-bold">Шалгалтыг дуусгах уу?</p>
-            <p className={`mt-1 text-sm ${t.dim}`}>
-              {problems.length - answeredCount > 0
-                ? `${problems.length - answeredCount} бодлого хариулаагүй байна.`
-                : "Бүх бодлогыг хариулсан байна."}
-            </p>
-            <div className="mt-4 flex justify-center gap-3">
-              <button
-                onClick={() => setConfirmFinish(false)}
-                className={`rounded-lg border px-5 py-2 text-sm ${t.navIdle}`}
-              >
-                Үргэлжлүүлэх
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmFinish(false);
-                  void finish("USER");
-                }}
-                className="rounded-lg bg-teal-500 px-6 py-2 text-sm font-bold text-white"
-              >
-                Тийм, илгээх
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SubmitDialog
+        open={submitDialogOpen}
+        answeredCount={answeredCount}
+        total={problems.length}
+        flaggedCount={flaggedCount}
+        secondsLeft={secondsLeft}
+        onCancel={() => setSubmitDialogOpen(false)}
+        onConfirm={() => void finish("USER")}
+      />
 
-      {/* Горимоос гарсан анхааруулга (Шийдвэр 3) */}
-      {leaveWarnOpen && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/75 p-6">
-          <div className="w-full max-w-sm rounded-2xl border border-amber-400/40 bg-[#1a1204] p-6 text-center">
-            <p className="text-3xl">⚠️</p>
-            <p className="mt-2 text-lg font-bold text-amber-200">
-              Шалгалтын горимоос гарлаа! ({leaveCount}/{MAX_LEAVES})
-            </p>
-            <p className="mt-2 text-sm text-amber-100/80">
-              Өөр таб/апп руу шилжих нь бүртгэгдэж багшид харагдана.{" "}
-              {MAX_LEAVES}-Дахь удаад шалгалт автоматаар дуусна.
-            </p>
-            <button
-              onClick={() => {
-                setLeaveWarnOpen(false);
-                void document.documentElement.requestFullscreen?.().catch(() => {});
-              }}
-              className="mt-4 rounded-lg bg-amber-400 px-6 py-2.5 text-sm font-bold text-amber-950"
-            >
-              Ойлголоо, үргэлжлүүлэх
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+      {toastMsg && <ExamToast message={toastMsg} onDismiss={() => setToastMsg(null)} />}
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-white/5 p-3">
-      <p className="text-xl font-extrabold">{value}</p>
-      <p className="mt-0.5 text-[11px] text-ink-dim">{label}</p>
+      <LeaveWarningDialog
+        open={leaveWarnOpen}
+        leaveCount={leaveCount}
+        maxLeaves={MAX_LEAVES}
+        onAcknowledge={() => {
+          setLeaveWarnOpen(false);
+          void document.documentElement.requestFullscreen?.().catch(() => {});
+        }}
+      />
     </div>
   );
 }
