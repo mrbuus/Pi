@@ -29,11 +29,18 @@ const MISTAKE_TYPES: { value: string; label: string; hint: string }[] = [
   { value: "OTHER", label: "Бусад", hint: "тайлбар бичнэ" },
 ];
 
-interface Choice {
-  id?: string;
-  label: string;
+// Ангилал (classify) ба агуулга (content) tab-ийн сонголтын жагсаалт хоёулаа
+// хуваалцах ерөнхий хэлбэр — <ChoiceListEditor>, validateChoiceList хоёулаа
+// үүгээр дамжуулна.
+interface EditableChoiceBase {
+  label?: string;
   text: string;
   isCorrect: boolean;
+}
+
+interface Choice extends EditableChoiceBase {
+  id?: string;
+  label: string;
   mistakeType?: string;
   mistakeNote?: string;
 }
@@ -56,7 +63,7 @@ interface ProblemEdit {
 
 // Агуулга засах (PATCH /problems/:id) талын хялбаршуулсан сонголт —
 // зөвхөн текст + аль нь зөв (label/mistakeType шаардлагагүй, backend автоматаар үүсгэнэ).
-interface ContentChoice {
+interface ContentChoice extends EditableChoiceBase {
   text: string;
   isCorrect: boolean;
 }
@@ -76,6 +83,123 @@ function defaultLabel(index: number, format: string): string {
   const upper = "ABCDEFGH";
   const set = format === "FILL_NUMBER" ? lower : upper;
   return set[index] ?? String(index + 1);
+}
+
+// Сонголтын жагсаалтын хамгийн доод шаардлага — classify (label-тай) болон
+// content (label-гүй) tab хоёулаа хуваалцана: OPEN формат бол алгасна;
+// доод тал нь 2 сонголт, яг 1 нь зөв, хоосон текст байхгүй; label
+// давхцахгүй байхыг зөвхөн label ирсэн үед (getLabel) шалгана.
+function validateChoiceList<T extends EditableChoiceBase>(
+  choices: T[],
+  format: string,
+  opts: { treatEmptyAsValid?: boolean; getLabel?: (c: T) => string } = {},
+): string {
+  if (format === "OPEN") return "";
+  if (opts.treatEmptyAsValid && choices.length === 0) return "";
+  if (choices.length < 2) return "Дор хаяж 2 сонголт хэрэгтэй";
+  const correct = choices.filter((c) => c.isCorrect).length;
+  if (correct !== 1) return "Яг 1 сонголтыг зөв гэж тэмдэглэнэ";
+  if (choices.some((c) => !c.text.trim())) return "Хоосон сонголт байна";
+  if (opts.getLabel) {
+    const labels = choices.map((c) => opts.getLabel!(c).trim().toLowerCase());
+    if (new Set(labels).size !== labels.length) return "Сонголтын шошго давхцаж байна";
+  }
+  return "";
+}
+
+// ---- Сонголт засах хэсгийн НЭГ л хуваалцсан дэд компонент ----
+// Өмнө нь classify tab (patchChoice/markCorrect/addChoice/removeChoice) ба
+// content tab (patchCChoice/markCCorrect/addCChoice/removeCChoice) бүрэн
+// давхардсан UI+логиктой байсныг энд нэгтгэв. Ялгаа зөвхөн:
+//   - showLabelInput: classify-д сонголтын шошго (A/B/C…) засах жижиг талбар бий,
+//     content-д алга (backend автоматаар үүсгэнэ)
+//   - renderBelow: classify-д буруу сонголт бүрд "яагаад алдсан" (mistakeType)
+//     сонголтууд гарна, content-д алга
+function ChoiceListEditor<T extends EditableChoiceBase>({
+  choices,
+  showLabelInput = false,
+  onPatch,
+  onMarkCorrect,
+  onAdd,
+  onRemove,
+  error,
+  renderBelow,
+}: {
+  choices: T[];
+  showLabelInput?: boolean;
+  onPatch: (index: number, patch: Partial<T>) => void;
+  onMarkCorrect: (index: number) => void;
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  error?: string;
+  renderBelow?: (choice: T, index: number) => React.ReactNode;
+}) {
+  return (
+    <>
+      <div className="space-y-2">
+        {choices.map((c, i) => (
+          <div
+            key={i}
+            className={`rounded-xl border p-3 transition ${
+              c.isCorrect ? "border-success/40 bg-success/[0.06]" : "border-line bg-ink/[0.02]"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onMarkCorrect(i)}
+                title="Зөв хариу болгох"
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs transition ${
+                  c.isCorrect
+                    ? "border-success bg-success text-bg"
+                    : "border-line text-transparent hover:border-success/60"
+                }`}
+              >
+                ✓
+              </button>
+              {showLabelInput && (
+                <input
+                  value={c.label ?? ""}
+                  onChange={(e) => onPatch(i, { label: e.target.value } as Partial<T>)}
+                  className="w-12 rounded-lg border border-line bg-ink/5 px-2 py-1.5 text-center text-sm font-bold outline-none focus:border-brand-bright"
+                />
+              )}
+              <input
+                value={c.text}
+                onChange={(e) => onPatch(i, { text: e.target.value } as Partial<T>)}
+                placeholder="Сонголтын утга (LaTeX: $x^2$)"
+                className="min-w-0 flex-1 rounded-lg border border-line bg-ink/5 px-3 py-1.5 text-sm outline-none focus:border-brand-bright"
+              />
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                className="shrink-0 rounded-lg px-2 py-1 text-xs text-error transition hover:bg-error/10"
+              >
+                Устгах
+              </button>
+            </div>
+
+            {/* Урьдчилан харах — LaTeX/зэрэг зөв харагдаж буй эсэх */}
+            {c.text.trim() && (
+              <p className="mt-1.5 pl-8 text-xs text-ink-dim">
+                Харагдац: <MathText>{c.text}</MathText>
+              </p>
+            )}
+
+            {renderBelow?.(c, i)}
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={onAdd}
+        className="mt-2 rounded-lg border border-dashed border-line px-3 py-1.5 text-xs text-ink-dim transition hover:border-brand-bright hover:text-brand-soft"
+      >
+        + Сонголт нэмэх
+      </button>
+      {error && <p className="mt-2 text-xs text-warning">⚠ {error}</p>}
+    </>
+  );
 }
 
 export default function ProblemClassifyEditor({
@@ -235,16 +359,14 @@ export default function ProblemClassifyEditor({
   }
 
   // Хадгалахын өмнөх шалгалт (backend хоосон/олон зөвийг зогсоохгүй тул энд барина)
-  const choiceError = useMemo(() => {
-    if (format === "OPEN" || choices.length === 0) return "";
-    if (choices.length < 2) return "Дор хаяж 2 сонголт хэрэгтэй";
-    const correct = choices.filter((c) => c.isCorrect).length;
-    if (correct !== 1) return "Яг 1 сонголтыг зөв гэж тэмдэглэнэ";
-    if (choices.some((c) => !c.text.trim())) return "Хоосон сонголт байна";
-    const labels = choices.map((c) => c.label.trim().toLowerCase());
-    if (new Set(labels).size !== labels.length) return "Сонголтын шошго давхцаж байна";
-    return "";
-  }, [choices, format]);
+  const choiceError = useMemo(
+    () =>
+      validateChoiceList(choices, format, {
+        treatEmptyAsValid: true,
+        getLabel: (c) => c.label ?? "",
+      }),
+    [choices, format],
+  );
 
   async function saveAll() {
     if (choiceError) {
@@ -338,14 +460,10 @@ export default function ProblemClassifyEditor({
     setCChoices((prev) => prev.filter((_, idx) => idx !== i));
   }
 
-  const contentChoiceError = useMemo(() => {
-    if (cFormat === "OPEN") return "";
-    if (cChoices.length < 2) return "Дор хаяж 2 сонголт хэрэгтэй";
-    const correct = cChoices.filter((c) => c.isCorrect).length;
-    if (correct !== 1) return "Яг 1 сонголтыг зөв гэж тэмдэглэнэ";
-    if (cChoices.some((c) => !c.text.trim())) return "Хоосон сонголт байна";
-    return "";
-  }, [cChoices, cFormat]);
+  const contentChoiceError = useMemo(
+    () => validateChoiceList(cChoices, cFormat),
+    [cChoices, cFormat],
+  );
 
   // Зураг сонгоход шууд байршуулаад imageKey-г шинэчилнэ (хадгалахдаа явна)
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -432,7 +550,7 @@ export default function ProblemClassifyEditor({
       onClick={onClose}
     >
       <div
-        className="my-8 w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0b142e] p-6"
+        className="my-8 w-full max-w-2xl rounded-2xl border border-line bg-panel p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
@@ -444,7 +562,7 @@ export default function ProblemClassifyEditor({
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg px-2 py-1 text-ink-dim transition hover:bg-white/10 hover:text-ink"
+            className="rounded-lg px-2 py-1 text-ink-dim transition hover:bg-ink/10 hover:text-ink"
             aria-label="Хаах"
           >
             ✕
@@ -453,14 +571,14 @@ export default function ProblemClassifyEditor({
 
         {loading && <p className="text-sm text-ink-dim">Ачаалж байна…</p>}
         {loadError && (
-          <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+          <div className="rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
             {loadError}
           </div>
         )}
 
         {/* Ангилал / Агуулга tab сэлгэгч — зөвхөн ADMIN/TEACHER_PLUS-д Агуулга харагдана */}
         {problem && !loading && canEditContent && (
-          <div className="mb-4 flex gap-2 border-b border-white/8 pb-3">
+          <div className="mb-4 flex gap-2 border-b border-line pb-3">
             <button
               type="button"
               onClick={() => setTab("classify")}
@@ -489,9 +607,9 @@ export default function ProblemClassifyEditor({
         {problem && !loading && (!canEditContent || tab === "classify") && (
           <div className="space-y-6">
             {/* Бодлогын текст (эх дата — энд зөвхөн харна) */}
-            <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
+            <div className="rounded-xl border border-line bg-ink/[0.03] p-4">
               <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px]">
-                <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-ink-dim">
+                <span className="rounded bg-ink/5 px-2 py-0.5 font-mono text-ink-dim">
                   {problem.token}
                 </span>
                 <span className="rounded bg-brand-bright/15 px-2 py-0.5 text-brand-soft">
@@ -512,100 +630,47 @@ export default function ProblemClassifyEditor({
                     ● зөвийг сонго, буруу бүрд шалтгаан
                   </span>
                 </div>
-                <div className="space-y-2">
-                  {choices.map((c, i) => (
-                    <div
-                      key={i}
-                      className={`rounded-xl border p-3 transition ${
-                        c.isCorrect
-                          ? "border-teal-400/40 bg-teal-400/[0.06]"
-                          : "border-white/10 bg-white/[0.02]"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => markCorrect(i)}
-                          title="Зөв хариу болгох"
-                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs transition ${
-                            c.isCorrect
-                              ? "border-teal-400 bg-teal-400 text-[#0b142e]"
-                              : "border-white/30 text-transparent hover:border-teal-400/60"
-                          }`}
-                        >
-                          ✓
-                        </button>
-                        <input
-                          value={c.label}
-                          onChange={(e) => patchChoice(i, { label: e.target.value })}
-                          className="w-12 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-center text-sm font-bold outline-none focus:border-brand-bright"
-                        />
-                        <input
-                          value={c.text}
-                          onChange={(e) => patchChoice(i, { text: e.target.value })}
-                          placeholder="Сонголтын утга (LaTeX: $x^2$)"
-                          className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm outline-none focus:border-brand-bright"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeChoice(i)}
-                          className="shrink-0 rounded-lg px-2 py-1 text-xs text-red-300 transition hover:bg-red-400/10"
-                        >
-                          Устгах
-                        </button>
-                      </div>
-
-                      {/* Урьдчилан харах — LaTeX/зэрэг зөв харагдаж буй эсэх */}
-                      {c.text.trim() && (
-                        <p className="mt-1.5 pl-8 text-xs text-ink-dim">
-                          Харагдац: <MathText>{c.text}</MathText>
-                        </p>
-                      )}
-
-                      {/* Буруу сонголтод: ЯАГААД энэ хариу руу хүрдэг вэ */}
-                      {!c.isCorrect && (
-                        <div className="mt-2 pl-8">
-                          <div className="flex flex-wrap gap-1.5">
-                            {MISTAKE_TYPES.map((m) => {
-                              const on = (c.mistakeType ?? "OTHER") === m.value;
-                              return (
-                                <button
-                                  key={m.value}
-                                  type="button"
-                                  title={m.hint}
-                                  onClick={() => patchChoice(i, { mistakeType: m.value })}
-                                  className={`rounded-lg border px-2 py-1 text-[11px] transition ${
-                                    on
-                                      ? "border-amber-400/50 bg-amber-400/15 text-amber-200"
-                                      : "border-white/10 text-ink-dim hover:border-white/30"
-                                  }`}
-                                >
-                                  {m.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          <input
-                            value={c.mistakeNote ?? ""}
-                            onChange={(e) => patchChoice(i, { mistakeNote: e.target.value })}
-                            placeholder="Тайлбар (заавал биш): яагаад энэ хариу руу хүрдэг вэ"
-                            className="mt-1.5 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs outline-none focus:border-brand-bright"
-                          />
+                <ChoiceListEditor
+                  choices={choices}
+                  showLabelInput
+                  onPatch={patchChoice}
+                  onMarkCorrect={markCorrect}
+                  onAdd={addChoice}
+                  onRemove={removeChoice}
+                  error={choiceError}
+                  renderBelow={(c, i) =>
+                    !c.isCorrect && (
+                      <div className="mt-2 pl-8">
+                        <div className="flex flex-wrap gap-1.5">
+                          {MISTAKE_TYPES.map((m) => {
+                            const on = (c.mistakeType ?? "OTHER") === m.value;
+                            return (
+                              <button
+                                key={m.value}
+                                type="button"
+                                title={m.hint}
+                                onClick={() => patchChoice(i, { mistakeType: m.value })}
+                                className={`rounded-lg border px-2 py-1 text-[11px] transition ${
+                                  on
+                                    ? "border-warning/50 bg-warning/15 text-warning"
+                                    : "border-line text-ink-dim hover:border-brand-bright/40"
+                                }`}
+                              >
+                                {m.label}
+                              </button>
+                            );
+                          })}
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={addChoice}
-                  className="mt-2 rounded-lg border border-dashed border-white/20 px-3 py-1.5 text-xs text-ink-dim transition hover:border-brand-bright hover:text-brand-soft"
-                >
-                  + Сонголт нэмэх
-                </button>
-                {choiceError && (
-                  <p className="mt-2 text-xs text-amber-300">⚠ {choiceError}</p>
-                )}
+                        <input
+                          value={c.mistakeNote ?? ""}
+                          onChange={(e) => patchChoice(i, { mistakeNote: e.target.value })}
+                          placeholder="Тайлбар (заавал биш): яагаад энэ хариу руу хүрдэг вэ"
+                          className="mt-1.5 w-full rounded-lg border border-line bg-ink/5 px-3 py-1.5 text-xs outline-none focus:border-brand-bright"
+                        />
+                      </div>
+                    )
+                  }
+                />
               </section>
             )}
 
@@ -635,11 +700,11 @@ export default function ProblemClassifyEditor({
                             if (e.key === "Enter") saveRename();
                             if (e.key === "Escape") setRenameId(null);
                           }}
-                          className="w-32 rounded bg-white/10 px-2 py-0.5 text-xs outline-none"
+                          className="w-32 rounded bg-ink/10 px-2 py-0.5 text-xs outline-none"
                         />
                         <button
                           onClick={saveRename}
-                          className="text-xs text-teal-300 hover:underline"
+                          className="text-xs text-success hover:underline"
                         >
                           OK
                         </button>
@@ -652,7 +717,7 @@ export default function ProblemClassifyEditor({
                       className={`group flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs transition ${
                         on
                           ? "border-brand-bright bg-brand-bright/15 text-brand-soft"
-                          : "border-white/10 text-ink-dim hover:border-white/30"
+                          : "border-line text-ink-dim hover:border-brand-bright/40"
                       }`}
                     >
                       <button type="button" onClick={() => toggleTag(cat.id)}>
@@ -692,12 +757,12 @@ export default function ProblemClassifyEditor({
                   onChange={(e) => setNewCat(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && createCategory()}
                   placeholder="Шинэ бодогдох төрөл нэмэх…"
-                  className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm outline-none focus:border-brand-bright"
+                  className="min-w-0 flex-1 rounded-lg border border-line bg-ink/5 px-3 py-1.5 text-sm outline-none focus:border-brand-bright"
                 />
                 <button
                   type="button"
                   onClick={createCategory}
-                  className="shrink-0 rounded-lg border border-white/15 px-3 py-1.5 text-sm transition hover:border-brand-bright hover:text-brand-soft"
+                  className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-sm transition hover:border-brand-bright hover:text-brand-soft"
                 >
                   Нэмэх
                 </button>
@@ -709,10 +774,10 @@ export default function ProblemClassifyEditor({
             </section>
 
             {/* Хадгалах */}
-            <div className="flex items-center justify-between gap-3 border-t border-white/8 pt-4">
+            <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
               <span
                 className={`text-sm ${
-                  msg.startsWith("✓") ? "text-teal-300" : "text-amber-300"
+                  msg.startsWith("✓") ? "text-success" : "text-warning"
                 }`}
               >
                 {msg}
@@ -720,14 +785,14 @@ export default function ProblemClassifyEditor({
               <div className="flex gap-2">
                 <button
                   onClick={onClose}
-                  className="rounded-lg border border-white/15 px-4 py-2 text-sm text-ink-dim transition hover:text-ink"
+                  className="rounded-lg border border-line px-4 py-2 text-sm text-ink-dim transition hover:text-ink"
                 >
                   Болих
                 </button>
                 <button
                   onClick={saveAll}
                   disabled={saving || !!choiceError}
-                  className="rounded-lg bg-brand-bright px-5 py-2 text-sm font-bold text-white transition hover:bg-[#6190f0] disabled:opacity-50"
+                  className="rounded-lg bg-brand-bright px-5 py-2 text-sm font-bold text-on-brand transition hover:bg-brand-bright/90 disabled:opacity-50"
                 >
                   {saving ? "Хадгалж байна…" : "Хадгалах"}
                 </button>
@@ -747,10 +812,10 @@ export default function ProblemClassifyEditor({
                 onChange={(e) => setCStatement(e.target.value)}
                 rows={4}
                 placeholder="Бодлогын текст (LaTeX: $x^2$)"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+                className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
               />
               {cStatement.trim() && (
-                <div className="mt-2 rounded-xl border border-white/8 bg-white/[0.03] p-3 text-sm">
+                <div className="mt-2 rounded-xl border border-line bg-ink/[0.03] p-3 text-sm">
                   <MathText>{cStatement}</MathText>
                 </div>
               )}
@@ -765,7 +830,7 @@ export default function ProblemClassifyEditor({
                 <select
                   value={cFormat}
                   onChange={(e) => setCFormat(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+                  className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
                 >
                   <option value="CHOICE">Сонгох</option>
                   <option value="FILL_NUMBER">Тоо нөхөх</option>
@@ -783,7 +848,7 @@ export default function ProblemClassifyEditor({
                   onChange={(e) =>
                     setCPoints(Math.max(1, parseInt(e.target.value, 10) || 1))
                   }
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+                  className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
                 />
               </div>
             </section>
@@ -796,10 +861,10 @@ export default function ProblemClassifyEditor({
                 <img
                   src={fileUrl(cImageKey)}
                   alt="Бодлогын зураг"
-                  className="mb-2 max-h-56 rounded-lg border border-white/10 object-contain"
+                  className="mb-2 max-h-56 rounded-lg border border-line object-contain"
                 />
               )}
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-white/20 px-3 py-1.5 text-xs text-ink-dim transition hover:border-brand-bright hover:text-brand-soft">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line px-3 py-1.5 text-xs text-ink-dim transition hover:border-brand-bright hover:text-brand-soft">
                 {uploadingImage
                   ? "Байршуулж байна…"
                   : cImageKey
@@ -822,69 +887,22 @@ export default function ProblemClassifyEditor({
                   <h3 className="font-bold text-brand-soft">Сонголт</h3>
                   <span className="text-xs text-ink-dim">● зөв хариуг сонго</span>
                 </div>
-                <div className="space-y-2">
-                  {cChoices.map((c, i) => (
-                    <div
-                      key={i}
-                      className={`flex items-center gap-2 rounded-xl border p-3 transition ${
-                        c.isCorrect
-                          ? "border-teal-400/40 bg-teal-400/[0.06]"
-                          : "border-white/10 bg-white/[0.02]"
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => markCCorrect(i)}
-                        title="Зөв хариу болгох"
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs transition ${
-                          c.isCorrect
-                            ? "border-teal-400 bg-teal-400 text-[#0b142e]"
-                            : "border-white/30 text-transparent hover:border-teal-400/60"
-                        }`}
-                      >
-                        ✓
-                      </button>
-                      <div className="min-w-0 flex-1">
-                        <input
-                          value={c.text}
-                          onChange={(e) => patchCChoice(i, { text: e.target.value })}
-                          placeholder="Сонголтын утга (LaTeX: $x^2$)"
-                          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm outline-none focus:border-brand-bright"
-                        />
-                        {c.text.trim() && (
-                          <p className="mt-1 text-xs text-ink-dim">
-                            Харагдац: <MathText>{c.text}</MathText>
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeCChoice(i)}
-                        className="shrink-0 rounded-lg px-2 py-1 text-xs text-red-300 transition hover:bg-red-400/10"
-                      >
-                        Устгах
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={addCChoice}
-                  className="mt-2 rounded-lg border border-dashed border-white/20 px-3 py-1.5 text-xs text-ink-dim transition hover:border-brand-bright hover:text-brand-soft"
-                >
-                  + Сонголт нэмэх
-                </button>
-                {contentChoiceError && (
-                  <p className="mt-2 text-xs text-amber-300">⚠ {contentChoiceError}</p>
-                )}
+                <ChoiceListEditor
+                  choices={cChoices}
+                  onPatch={patchCChoice}
+                  onMarkCorrect={markCCorrect}
+                  onAdd={addCChoice}
+                  onRemove={removeCChoice}
+                  error={contentChoiceError}
+                />
               </section>
             )}
 
             {/* Хадгалах */}
-            <div className="flex items-center justify-between gap-3 border-t border-white/8 pt-4">
+            <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
               <span
                 className={`text-sm ${
-                  contentMsg.startsWith("✓") ? "text-teal-300" : "text-amber-300"
+                  contentMsg.startsWith("✓") ? "text-success" : "text-warning"
                 }`}
               >
                 {contentMsg}
@@ -892,14 +910,14 @@ export default function ProblemClassifyEditor({
               <div className="flex gap-2">
                 <button
                   onClick={onClose}
-                  className="rounded-lg border border-white/15 px-4 py-2 text-sm text-ink-dim transition hover:text-ink"
+                  className="rounded-lg border border-line px-4 py-2 text-sm text-ink-dim transition hover:text-ink"
                 >
                   Болих
                 </button>
                 <button
                   onClick={saveContent}
                   disabled={contentSaving || !!contentChoiceError}
-                  className="rounded-lg bg-brand-bright px-5 py-2 text-sm font-bold text-white transition hover:bg-[#6190f0] disabled:opacity-50"
+                  className="rounded-lg bg-brand-bright px-5 py-2 text-sm font-bold text-on-brand transition hover:bg-brand-bright/90 disabled:opacity-50"
                 >
                   {contentSaving ? "Хадгалж байна…" : "Хадгалах"}
                 </button>

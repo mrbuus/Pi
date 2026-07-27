@@ -1,0 +1,566 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import AnnouncementCompose from "@/components/AnnouncementCompose";
+import ClassActivityHeatmap from "@/components/activity/ClassActivityHeatmap";
+import ClassDidTest from "@/components/ClassDidTest";
+import DashboardGreeting from "@/components/DashboardGreeting";
+import AttentionSection, {
+  type AttentionResponse,
+} from "@/components/TeacherDashboard/AttentionSection";
+import AttendanceSection from "@/components/TeacherDashboard/AttendanceSection";
+import AssignmentsSection from "@/components/TeacherDashboard/AssignmentsSection";
+import SummarySection from "@/components/TeacherDashboard/SummarySection";
+import UnassignedStudentsSection from "@/components/TeacherDashboard/UnassignedStudentsSection";
+import ParentRequestsSection from "@/components/TeacherDashboard/ParentRequestsSection";
+import { api, getRole } from "@/lib/api";
+
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+interface Classroom {
+  id: string;
+  name: string;
+  type: string;
+  grade?: number;
+  _count: { enrollments: number };
+}
+interface RosterRow {
+  student: { id: string; firstName: string; lastName: string };
+  status: string | null;
+}
+interface Assignment {
+  id: string;
+  title: string;
+  type: string;
+  createdAt: string;
+}
+interface SubmissionRow {
+  student: { id: string; firstName: string; lastName: string };
+  state: string;
+  note: string | null;
+}
+interface Summary {
+  stats: {
+    studentsTotal: number;
+    studentsMarked: number;
+    totalAttempts: number;
+    byState: Record<string, number>;
+    byChapter: Record<string, { total: number; failed: number }>;
+  };
+}
+interface Unassigned {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  studentProfile?: { grade?: number };
+}
+interface ParentRequest {
+  id: string;
+  parent: { firstName: string; lastName: string; phone: string };
+  student: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    studentProfile?: { grade?: number };
+  };
+}
+
+function todayUBKey() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ulaanbaatar",
+  }).format(new Date());
+}
+
+/** API алдааг хэрэглэгчид харуулах эвтэй мессеж болгоно. */
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : "Алдаа гарлаа";
+}
+
+/** Хэсэг бүрийн ачаалж буй / алдаатай / хоосон төлвийг ялгаж харуулна. */
+function SectionStatus({
+  loading,
+  error,
+  onRetry,
+  empty,
+  emptyText,
+}: {
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
+  empty: boolean;
+  emptyText: string;
+}) {
+  if (loading) {
+    return (
+      <p className="animate-pulse text-sm text-ink-dim" role="status">
+        Ачаалж байна…
+      </p>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+        <span>⚠ {error}</span>
+        <button
+          onClick={onRetry}
+          className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
+        >
+          Дахин ачаалах
+        </button>
+      </div>
+    );
+  }
+  if (empty) {
+    return <p className="text-sm text-ink-dim">{emptyText}</p>;
+  }
+  return null;
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+/**
+ * Багшийн самбар (Teacher Dashboard)
+ *
+ * Гүйцэтгэл:
+ * - Ирцийн хяналт
+ * - Даалгавар үүсгэх, шалгах
+ * - Статистик үзүүлэх
+ * - Эцэг эхийн холболт батлах
+ *
+ * Mobile responsive - утас, компьютер хоёуланд төгс
+ */
+export default function TeacherDashboardClient() {
+  // ========================================================================
+  // State
+  // ========================================================================
+  const today = todayUBKey();
+  const role = typeof window !== "undefined" ? getRole() : null;
+  const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
+
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [classroomsLoading, setClassroomsLoading] = useState(true);
+  const [classroomsError, setClassroomsError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string>("");
+
+  const [roster, setRoster] = useState<RosterRow[]>([]);
+  const [rosterLoading, setRosterLoading] = useState(false);
+  const [rosterError, setRosterError] = useState<string | null>(null);
+  const [marks, setMarks] = useState<Record<string, string>>({});
+
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [assignmentsError, setAssignmentsError] = useState<string | null>(null);
+  const [openAssignment, setOpenAssignment] = useState<string>("");
+  const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
+
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+
+  const [attention, setAttention] = useState<AttentionResponse | null>(null);
+  const [attentionLoading, setAttentionLoading] = useState(false);
+  const [attentionError, setAttentionError] = useState<string | null>(null);
+
+  const [unassigned, setUnassigned] = useState<Unassigned[]>([]);
+  const [unassignedLoading, setUnassignedLoading] = useState(false);
+  const [unassignedError, setUnassignedError] = useState<string | null>(null);
+
+  const [parentRequests, setParentRequests] = useState<ParentRequest[]>([]);
+  const [parentRequestsLoading, setParentRequestsLoading] = useState(false);
+  const [parentRequestsError, setParentRequestsError] = useState<string | null>(
+    null,
+  );
+
+  const [newTitle, setNewTitle] = useState("");
+  const [msg, setMsg] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(
+    null,
+  );
+
+  // ========================================================================
+  // Effects
+  // ========================================================================
+
+  /**
+   * Анги сонгох опцион авах
+   */
+  useEffect(() => {
+    setClassroomsLoading(true);
+    setClassroomsError(null);
+    api<Classroom[]>("/classrooms")
+      .then((cs) => {
+        setClassrooms(cs);
+        if (cs.length > 0) setSelected((s) => s || cs[0].id);
+      })
+      .catch((e) => setClassroomsError(errMsg(e)))
+      .finally(() => setClassroomsLoading(false));
+  }, []);
+
+  /**
+   * Сонгосон ангийн өгөгдлийг авах
+   */
+  const loadClass = useCallback(() => {
+    // Зөвхөн админ - эцэг эхийн хүсэлт авах
+    if (canManage) {
+      setParentRequestsLoading(true);
+      setParentRequestsError(null);
+      api<ParentRequest[]>("/parent/links/pending")
+        .then(setParentRequests)
+        .catch((e) => setParentRequestsError(errMsg(e)))
+        .finally(() => setParentRequestsLoading(false));
+
+      setUnassignedLoading(true);
+      setUnassignedError(null);
+      api<Unassigned[]>("/classrooms/unassigned-students")
+        .then(setUnassigned)
+        .catch((e) => setUnassignedError(errMsg(e)))
+        .finally(() => setUnassignedLoading(false));
+    }
+
+    if (!selected) return;
+
+    // Өнөөдрийн ирцийн мэдээлэл авах
+    setRosterLoading(true);
+    setRosterError(null);
+    api<RosterRow[]>(`/classrooms/${selected}/attendance?date=${today}`)
+      .then((rows) => {
+        setRoster(rows);
+        setMarks(
+          Object.fromEntries(
+            rows.map((r) => [r.student.id, r.status ?? "PRESENT"]),
+          ),
+        );
+      })
+      .catch((e) => setRosterError(errMsg(e)))
+      .finally(() => setRosterLoading(false));
+
+    // Даалгаврыг авах
+    setAssignmentsLoading(true);
+    setAssignmentsError(null);
+    api<Assignment[]>(`/classrooms/${selected}/assignments`)
+      .then(setAssignments)
+      .catch((e) => setAssignmentsError(errMsg(e)))
+      .finally(() => setAssignmentsLoading(false));
+
+    // Дүгнэлтийн мэдээлэл авах
+    setSummaryLoading(true);
+    setSummaryError(null);
+    api<Summary>(`/classrooms/${selected}/daily-summary?date=${today}`)
+      .then(setSummary)
+      .catch((e) => {
+        setSummary(null);
+        setSummaryError(errMsg(e));
+      })
+      .finally(() => setSummaryLoading(false));
+
+    setAttentionLoading(true);
+    setAttentionError(null);
+    api<AttentionResponse>(`/classrooms/${selected}/attention?date=${today}`)
+      .then(setAttention)
+      .catch((e) => {
+        setAttention(null);
+        setAttentionError(errMsg(e));
+      })
+      .finally(() => setAttentionLoading(false));
+  }, [selected, today, canManage]);
+  useEffect(() => {
+    loadClass();
+  }, [loadClass]);
+
+  // ========================================================================
+  // Handlers
+  // ========================================================================
+
+  /**
+   * Ирцийг хадгалах
+   */
+  async function saveAttendance() {
+    try {
+      await api(`/classrooms/${selected}/attendance`, {
+        method: "POST",
+        body: {
+          date: today,
+          entries: roster.map((r) => ({
+            studentId: r.student.id,
+            status: marks[r.student.id],
+          })),
+        },
+      });
+      setMsg({ kind: "success", text: "✓ Ирц хадгалагдлаа" });
+      loadClass();
+    } catch (e) {
+      setMsg({ kind: "error", text: errMsg(e) });
+    }
+  }
+
+  /**
+   * Шинэ даалгавар үүсгэх
+   */
+  async function createAssignment() {
+    if (!newTitle.trim()) return;
+    try {
+      await api(`/classrooms/${selected}/assignments`, {
+        method: "POST",
+        body: { title: newTitle, type: "DAILY" },
+      });
+      setNewTitle("");
+      loadClass();
+    } catch (e) {
+      setMsg({ kind: "error", text: errMsg(e) });
+    }
+  }
+
+  /**
+   * Даалгаврын илгээлтүүдийг авах
+   */
+  async function openRoster(assignmentId: string) {
+    setOpenAssignment(assignmentId);
+    try {
+      setSubmissions(await api(`/assignments/${assignmentId}/submissions`));
+    } catch (e) {
+      setMsg({ kind: "error", text: errMsg(e) });
+    }
+  }
+
+  /**
+   * Даалгаврын илгээлтийг үнэлэх
+   */
+  async function review(studentId: string, action: string) {
+    try {
+      await api(`/assignments/${openAssignment}/review`, {
+        method: "POST",
+        body: { studentId, action },
+      });
+      setSubmissions(await api(`/assignments/${openAssignment}/submissions`));
+    } catch (e) {
+      setMsg({ kind: "error", text: errMsg(e) });
+    }
+  }
+
+  /**
+   * Сурагчийг ангид оруулах
+   */
+  async function enroll(studentId: string) {
+    try {
+      await api(`/classrooms/${selected}/enroll`, {
+        method: "POST",
+        body: { studentId },
+      });
+      loadClass();
+    } catch (e) {
+      setMsg({ kind: "error", text: errMsg(e) });
+    }
+  }
+
+  /**
+   * Эцэг эхийн холболтыг батлах
+   */
+  async function verifyParentLink(id: string) {
+    try {
+      await api(`/parent/links/${id}/verify`, { method: "POST" });
+      setMsg({ kind: "success", text: "✓ Эцэг эхийн холболт баталгаажлаа" });
+      loadClass();
+    } catch (e) {
+      setMsg({ kind: "error", text: errMsg(e) });
+    } finally {
+      setTimeout(() => setMsg(null), 3000);
+    }
+  }
+
+  /**
+   * Эцэг эхийн холболтын хүсэлтийг цуцлах
+   */
+  async function rejectParentLink(id: string) {
+    try {
+      await api(`/parent/links/${id}/reject`, { method: "POST" });
+      setMsg({ kind: "info", text: "Холболтын хүсэлт цуцлагдлаа" });
+      loadClass();
+    } catch (e) {
+      setMsg({ kind: "error", text: errMsg(e) });
+    } finally {
+      setTimeout(() => setMsg(null), 3000);
+    }
+  }
+
+  // ========================================================================
+  // Render
+  // ========================================================================
+
+  return (
+    <div className="space-y-6 md:space-y-8">
+      {/* Header + Classroom Selector */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <DashboardGreeting />
+        <h1 className="text-2xl font-extrabold">Багшийн самбар</h1>
+        <label className="sr-only" htmlFor="classroom-select">
+          Анги сонгох
+        </label>
+        <select
+          id="classroom-select"
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          disabled={classroomsLoading || classrooms.length === 0}
+          className="rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand"
+        >
+          {classrooms.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name} ({c._count.enrollments} сурагч)
+            </option>
+          ))}
+        </select>
+
+        {/* Status Message */}
+        {msg && (
+          <span
+            role="status"
+            className={`rounded-lg px-3 py-2 text-sm ${
+              msg.kind === "error"
+                ? "bg-error/10 text-error"
+                : msg.kind === "success"
+                  ? "bg-success/10 text-success"
+                  : "bg-info/10 text-info"
+            }`}
+          >
+            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.text}
+          </span>
+        )}
+      </div>
+
+      {classroomsError && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+          <span>⚠ Ангийн жагсаалт ачаалагдсангүй: {classroomsError}</span>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
+          >
+            Дахин ачаалах
+          </button>
+        </div>
+      )}
+      {!classroomsLoading && !classroomsError && classrooms.length === 0 && (
+        <p className="rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-dim">
+          Танд оноогдсон анги алга байна
+        </p>
+      )}
+
+      {/* Ангийн идэвхийн heatmap — сонгосон ангийн нэгдсэн дүр зураг */}
+      {selected && <ClassActivityHeatmap classroomId={selected} />}
+
+      {/* Ирц — багшийн өдөр тутмын гол үйлдэл (хамгийн дээр) */}
+      <section>
+        <SectionStatus
+          loading={rosterLoading}
+          error={rosterError}
+          onRetry={loadClass}
+          empty={!rosterLoading && !rosterError && !!selected && roster.length === 0}
+          emptyText="Энэ ангид сурагч алга байна"
+        />
+        {!rosterLoading && !rosterError && roster.length > 0 && (
+          <AttendanceSection
+            roster={roster}
+            marks={marks}
+            today={today}
+            onMarkChange={(studentId, status) =>
+              setMarks((m) => ({ ...m, [studentId]: status }))
+            }
+            onSave={saveAttendance}
+          />
+        )}
+      </section>
+
+      {/* Өнөөдөр хийсэн тест — сурагчдын оройн тэмдэглэгээг тэжээнэ */}
+      {selected && <ClassDidTest classroomId={selected} />}
+
+      {/* Assignments Section */}
+      <section>
+        <SectionStatus
+          loading={assignmentsLoading}
+          error={assignmentsError}
+          onRetry={loadClass}
+          empty={false}
+          emptyText=""
+        />
+        {!assignmentsLoading && !assignmentsError && (
+          <AssignmentsSection
+            assignments={assignments}
+            submissions={submissions}
+            openAssignmentId={openAssignment}
+            newTitle={newTitle}
+            onNewTitleChange={setNewTitle}
+            onCreate={createAssignment}
+            onOpen={openRoster}
+            onReview={review}
+          />
+        )}
+      </section>
+
+      {/* Summary + Management Sections (Grid) */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Summary Section */}
+        <div className="md:col-span-2 lg:col-span-1">
+          {summaryError ? (
+            <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
+              ⚠ Дүгнэлт ачаалагдсангүй: {summaryError}
+            </section>
+          ) : (
+            <SummarySection summary={summaryLoading ? null : summary} />
+          )}
+        </div>
+
+        <div className="md:col-span-2 lg:col-span-1">
+          {attentionError ? (
+            <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
+              ⚠ Анхаарах жагсаалт ачаалагдсангүй: {attentionError}
+            </section>
+          ) : (
+            <AttentionSection attention={attentionLoading ? null : attention} />
+          )}
+        </div>
+
+        {/* Unassigned Students (Admin Only) */}
+        {canManage && (
+          <div>
+            <SectionStatus
+              loading={unassignedLoading}
+              error={unassignedError}
+              onRetry={loadClass}
+              empty={false}
+              emptyText=""
+            />
+            {!unassignedLoading && !unassignedError && (
+              <UnassignedStudentsSection unassigned={unassigned} onEnroll={enroll} />
+            )}
+          </div>
+        )}
+
+        {/* Parent Requests (Admin Only) */}
+        {canManage && (
+          <div>
+            <SectionStatus
+              loading={parentRequestsLoading}
+              error={parentRequestsError}
+              onRetry={loadClass}
+              empty={false}
+              emptyText=""
+            />
+            {!parentRequestsLoading && !parentRequestsError && (
+              <ParentRequestsSection
+                parentRequests={parentRequests}
+                onVerify={verifyParentLink}
+                onReject={rejectParentLink}
+              />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Зар тавих — хамгийн доор (хэрэглэгчийн хүсэлтээр) */}
+      <AnnouncementCompose />
+    </div>
+  );
+}

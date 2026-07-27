@@ -79,7 +79,7 @@ export default function DashboardGreeting() {
         onClick={() => fileRef.current?.click()}
         disabled={uploading}
         title="Профайл зураг солих"
-        className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-brand-bright/15 text-lg font-extrabold text-brand-soft transition hover:border-brand-bright/50 disabled:opacity-60"
+        className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-line bg-brand-bright/15 text-lg font-extrabold text-brand-soft transition hover:border-brand-bright/50 disabled:opacity-60"
       >
         {me.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -93,6 +93,8 @@ export default function DashboardGreeting() {
             {initials(me.firstName, me.lastName)}
           </span>
         )}
+        {/* Профайл зурган дээрх bg-black/60 scrim — зурган overlay тул text-white
+            зөв, theme-хамааралтай text-on-* токен энд хэрэггүй. */}
         <span className="absolute inset-0 flex items-center justify-center bg-black/60 text-[10px] font-semibold text-white opacity-0 transition group-hover:opacity-100">
           {uploading ? "…" : "Солих"}
         </span>
@@ -125,7 +127,7 @@ export default function DashboardGreeting() {
       </div>
 
       {error && (
-        <p className="w-full rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-300">
+        <p className="w-full rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
           {error}
         </p>
       )}

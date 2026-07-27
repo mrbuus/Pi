@@ -19,7 +19,7 @@ interface SummarySectionProps {
 export default function SummarySection({ summary }: SummarySectionProps) {
   if (!summary) {
     return (
-      <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-4 md:p-6">
+      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">
           Өчигдрийн/өнөөдрийн дүгнэлт
         </h2>
@@ -33,14 +33,14 @@ export default function SummarySection({ summary }: SummarySectionProps) {
   const { stats } = summary;
 
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-4 md:p-6">
+    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
       <h2 className="mb-4 font-bold text-brand-soft">
         Өчигдрийн/өнөөдрийн дүгнэлт
       </h2>
 
       <div className="space-y-4 text-sm">
         {/* Main Stats */}
-        <div className="rounded-lg bg-white/5 px-3 py-2">
+        <div className="rounded-lg bg-ink/5 px-3 py-2">
           <p>
             Тэмдэглэсэн: <span className="font-semibold">{stats.studentsMarked}</span>/
             <span className="font-semibold">{stats.studentsTotal}</span> сурагч ·{" "}
@@ -56,7 +56,7 @@ export default function SummarySection({ summary }: SummarySectionProps) {
               {Object.entries(stats.byState).map(([state, count]) => (
                 <span
                   key={state}
-                  className="rounded-lg bg-white/5 px-3 py-1 text-xs font-medium"
+                  className="rounded-lg bg-ink/5 px-3 py-1 text-xs font-medium"
                 >
                   {state}: {count}
                 </span>
@@ -73,12 +73,12 @@ export default function SummarySection({ summary }: SummarySectionProps) {
               {Object.entries(stats.byChapter).map(([chapter, data]) => (
                 <div
                   key={chapter}
-                  className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-1.5"
+                  className="flex items-center justify-between rounded-lg bg-ink/5 px-3 py-1.5"
                 >
                   <span className="text-xs font-medium">{chapter}</span>
                   <span
                     className={`text-xs font-semibold ${
-                      data.failed > 0 ? "text-red-300" : "text-teal-300"
+                      data.failed > 0 ? "text-error" : "text-success"
                     }`}
                   >
                     {data.failed}/{data.total} алдаатай

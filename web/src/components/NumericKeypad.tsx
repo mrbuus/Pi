@@ -37,16 +37,25 @@ export default function NumericKeypad({
     });
   }
 
+  // Энэ keypad шалгалтын дэлгэцийн ("navy" эсвэл "light" гэсэн локал toggle)
+  // паапер загварыг дуурайдаг тул НЭГ л сайттай ерөнхий theme-ээс тусдаа —
+  // хоёул тогтмол (invariant) байх ёстой тул brand-navy/цагаан сурф зориулж
+  // үргэлж адилхан харагдана (ProblemStudentPreview.tsx-ийн navy-theme
+  // carve-out-той адил зарчим — theme-хамааралтай token биш).
+  // hover:bg-white/10 нь bg-brand-navy-soft дээр — navy heritage дэвсгэр тул
+  // ХОЁУЛАН theme-д харанхуй хэвээр үлддэг, text-on-* шилжүүлэх шаардлагагүй.
   const keyBase = isLight
-    ? "border-black/15 bg-white text-[#0b142e] hover:bg-black/5 active:bg-black/10"
-    : "border-white/15 bg-white/5 text-[#e9eefb] hover:bg-white/10 active:bg-white/15";
+    ? "border-black/15 bg-white text-brand-navy-soft hover:bg-black/5 active:bg-black/10"
+    : "border-line bg-brand-navy-soft text-brand-soft hover:bg-white/10 active:bg-white/15";
 
   return (
     <div className="mt-5 max-w-xs">
       {/* Одоогийн хариу */}
       <div
         className={`mb-3 flex h-12 items-center rounded-xl border px-4 font-mono text-xl ${
-          isLight ? "border-black/15 bg-black/5" : "border-white/10 bg-white/5"
+          isLight
+            ? "border-black/15 bg-black/5 text-brand-navy-soft"
+            : "border-line bg-brand-navy text-brand-soft"
         }`}
         aria-label="Таны хариу"
       >

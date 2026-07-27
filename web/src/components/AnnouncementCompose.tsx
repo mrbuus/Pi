@@ -102,7 +102,7 @@ export default function AnnouncementCompose() {
   }
 
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-6">
+    <section className="rounded-2xl border border-line bg-panel p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Төвийн самбар — зар тавих</h2>
       <p className="mb-4 text-sm text-ink-dim">
         Бүх сурагч, онлайн сурагчид эсвэл сонгосон ангиудад тусад нь зарлана.
@@ -112,19 +112,19 @@ export default function AnnouncementCompose() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Гарчиг"
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+          className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
         />
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Зарын агуулга…"
           rows={2}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+          className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
         />
         <select
           value={audience}
           onChange={(e) => setAudience(e.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-[#0b142e] px-3 py-2 text-sm outline-none focus:border-brand-bright"
+          className="w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
         >
           {AUDIENCES.map((item) => (
             <option key={item.value} value={item.value}>
@@ -144,7 +144,7 @@ export default function AnnouncementCompose() {
                   className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
                     selected
                       ? "border-brand-bright bg-brand-bright/15 text-brand-soft"
-                      : "border-white/8 text-ink-dim hover:border-white/25"
+                      : "border-line text-ink-dim hover:border-brand-bright/40"
                   }`}
                 >
                   <span className="block font-semibold">{c.name}</span>
@@ -168,7 +168,7 @@ export default function AnnouncementCompose() {
             📌 Дээр бэхлэх
           </label>
           <div className="flex items-center gap-3">
-            {msg && <span className="text-xs text-teal-300">{msg}</span>}
+            {msg && <span className="text-xs text-success">{msg}</span>}
             <button
               onClick={post}
               className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold"
@@ -180,21 +180,21 @@ export default function AnnouncementCompose() {
       </div>
 
       {list.length > 0 && (
-        <div className="mt-4 space-y-1.5 border-t border-white/8 pt-4">
+        <div className="mt-4 space-y-1.5 border-t border-line pt-4">
           {list.map((a) => (
             <div
               key={a.id}
-              className="flex items-center gap-2 rounded-lg border border-white/8 px-3 py-2 text-sm"
+              className="flex items-center gap-2 rounded-lg border border-line px-3 py-2 text-sm"
             >
               {a.pinned && <span>📌</span>}
               <span className="font-medium">{a.title}</span>
-              <span className="shrink-0 rounded bg-white/5 px-2 py-0.5 text-[11px] text-ink-dim">
+              <span className="shrink-0 rounded bg-ink/5 px-2 py-0.5 text-[11px] text-ink-dim">
                 {audienceLabel(a)}
               </span>
               <span className="truncate text-ink-dim">— {a.body}</span>
               <button
                 onClick={() => remove(a.id)}
-                className="ml-auto shrink-0 text-xs text-red-300 hover:underline"
+                className="ml-auto shrink-0 text-xs text-error hover:underline"
               >
                 Устгах
               </button>

@@ -34,15 +34,20 @@ interface AttentionSectionProps {
 }
 
 const SEVERITY_CLASS: Record<AttentionSeverity, string> = {
-  danger: "border-red-400/40 bg-red-400/10 text-red-200",
-  warning: "border-amber-400/40 bg-amber-400/10 text-amber-200",
+  danger: "border-error/40 bg-error/10 text-error",
+  warning: "border-warning/40 bg-warning/10 text-warning",
+};
+// Өнгө дангаараа утга илэрхийлэхгүй байхын тулд ноцтой байдал бүрд тэмдэг нэмнэ
+const SEVERITY_ICON: Record<AttentionSeverity, string> = {
+  danger: "●",
+  warning: "▲",
 };
 
 export type { AttentionResponse };
 
 export default function AttentionSection({ attention }: AttentionSectionProps) {
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-4 md:p-6">
+    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="font-bold text-brand-soft">Анхаарах</h2>
@@ -62,7 +67,7 @@ export default function AttentionSection({ attention }: AttentionSectionProps) {
       )}
 
       {attention && attention.rows.length === 0 && (
-        <div className="rounded-lg border border-teal-400/20 bg-teal-400/10 px-3 py-2 text-sm text-teal-200">
+        <div className="rounded-lg border border-success/20 bg-success/10 px-3 py-2 text-sm text-success">
           Одоогоор онцгой анхаарах сурагч алга.
         </div>
       )}
@@ -72,7 +77,7 @@ export default function AttentionSection({ attention }: AttentionSectionProps) {
           {attention.rows.slice(0, 12).map((row) => (
             <div
               key={row.student.id}
-              className="border-b border-white/8 pb-3 last:border-b-0 last:pb-0"
+              className="border-b border-line pb-3 last:border-b-0 last:pb-0"
             >
               <p className="text-sm font-semibold">{row.student.name}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -82,6 +87,7 @@ export default function AttentionSection({ attention }: AttentionSectionProps) {
                     className={`rounded-lg border px-2.5 py-1 text-xs ${SEVERITY_CLASS[flag.severity]}`}
                     title={flag.detail}
                   >
+                    <span aria-hidden>{SEVERITY_ICON[flag.severity]} </span>
                     {flag.title}
                   </span>
                 ))}

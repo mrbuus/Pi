@@ -18,18 +18,34 @@ interface RosterRow {
 interface AttendanceSectionProps {
   roster: RosterRow[];
   marks: Record<string, string>;
-  colorTags: Record<string, { color: string; note: string | null }>;
   onMarkChange: (studentId: string, status: string) => void;
   onSave: () => void;
   today: string;
-  onColorTagUpdate?: () => void;
 }
 
+// Өнгө дангаараа утга илэрхийлэхгүй байхын тулд icon-той хамт харуулна.
+// Ангийн нэрсийг Tailwind статик шинжилгээ хийдэг тул template literal-аар
+// динамикаар угсрахгүй — сонголт бүрийн бүрэн className-ийг шууд бичнэ.
 const ATTENDANCE_OPTIONS = [
-  { value: "PRESENT", label: "Ирсэн", color: "teal" },
-  { value: "LATE", label: "Хоцорсон", color: "amber" },
-  { value: "ABSENT", label: "Тасалсан", color: "red" },
-];
+  {
+    value: "PRESENT",
+    label: "Ирсэн",
+    icon: "✓",
+    selectedClass: "bg-success/25 text-success",
+  },
+  {
+    value: "LATE",
+    label: "Хоцорсон",
+    icon: "◐",
+    selectedClass: "bg-warning/25 text-warning",
+  },
+  {
+    value: "ABSENT",
+    label: "Тасалсан",
+    icon: "✕",
+    selectedClass: "bg-error/25 text-error",
+  },
+] as const;
 
 /**
  * Өнөөдрийн ирцийг заавал нэмнэ.
@@ -51,7 +67,7 @@ export default function AttendanceSection({
   };
 
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-4 md:p-6">
+    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
       {/* Header */}
       <div className="mb-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
         <h2 className="font-bold text-brand-soft">
@@ -74,7 +90,7 @@ export default function AttendanceSection({
           roster.map((r) => (
             <div
               key={r.student.id}
-              className="flex flex-col gap-3 rounded-lg border border-white/8 px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4 md:py-2"
+              className="flex flex-col gap-3 rounded-lg border border-line px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4 md:py-2"
             >
               {/* Student Name */}
               <span className="text-sm font-medium">
@@ -85,24 +101,15 @@ export default function AttendanceSection({
               <div className="flex gap-1.5">
                 {ATTENDANCE_OPTIONS.map((opt) => {
                   const isSelected = marks[r.student.id] === opt.value;
-                  const colorMap: Record<string, string> = {
-                    teal: isSelected
-                      ? "bg-teal-400/25 text-teal-200"
-                      : "bg-white/5 text-ink-dim",
-                    amber: isSelected
-                      ? "bg-amber-400/25 text-amber-200"
-                      : "bg-white/5 text-ink-dim",
-                    red: isSelected
-                      ? "bg-red-400/25 text-red-200"
-                      : "bg-white/5 text-ink-dim",
-                  };
-
                   return (
                     <button
                       key={opt.value}
                       onClick={() => onMarkChange(r.student.id, opt.value)}
-                      className={`rounded-lg px-3 py-1 text-xs font-medium transition ${colorMap[opt.color]}`}
+                      className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
+                        isSelected ? opt.selectedClass : "bg-ink/5 text-ink-dim"
+                      }`}
                     >
+                      {isSelected && <span aria-hidden>{opt.icon} </span>}
                       {opt.label}
                     </button>
                   );

@@ -7,8 +7,16 @@ import { api, getRole } from "@/lib/api";
  * Онлайн хичээл — бичлэг үзэх хуудас (Videos MVP).
  *
  * - Сурагч/бүх хэрэглэгч: ном → сэдэв сонгоод бичлэгээ үзнэ (YouTube-aware:
- *   YouTube холбоосыг iframe embed болгож, бусдыг шууд <video>-ээр тоглуулна)
+ *   YouTube холбоосыг iframe embed болгож, бусдыг зөвшөөрөгдсөн эх сурвалж
+ *   (allowlist) л бол шууд <video>-ээр тоглуулна)
  * - Багш/Багш+/Админ: дээр нь "Бичлэг нэмэх" жижиг форм харагдана
+ *
+ * АЮУЛГҮЙ БАЙДАЛ: багш (эсвэл эвдэрсэн багш аккаунт) дурын URL оруулбал өмнө нь
+ * шууд <video src> болгон ямар ч хостоос ачаалдаг байсан — сурагч бүрд ачаалагдах
+ * контентыг гуравдагч этгээдийн дурын сервер рүү чиглүүлэх боломж байсан. Одоо
+ * зөвхөн мэдэгдэж буй, найдвартай видео хостуудыг (YouTube, тухайн API-гийн
+ * files/uploads зам) шууд <video>-ээр тоглуулна; бусад бол аюулгүй "дэмжигдэхгүй
+ * холбоос" төлөвийг харуулна, шууд iframe/video рүү оруулахгүй.
  * ========================================================================== */
 
 interface ChapterOpt {
@@ -30,6 +38,20 @@ interface Chapter {
   book?: { code: string; title: string } | null;
 }
 
+// Шууд <video src>-ээр тоглуулахыг зөвшөөрсөн хостууд — зөвхөн төвийн эсвэл
+// найдвартай олон нийтийн видео сервер. Шинэ хост нэмэхэд зөвхөн энд нэмнэ.
+const ALLOWED_VIDEO_HOSTS = [
+  // Тухайн API-гийн өөрийн файл/байршуулалтын домэйн (NEXT_PUBLIC_API_URL-ийн host)
+  ...(() => {
+    try {
+      return [new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api").hostname];
+    } catch {
+      return [];
+    }
+  })(),
+  "localhost",
+];
+
 function youtubeEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url);
@@ -42,15 +64,29 @@ function youtubeEmbedUrl(url: string): string | null {
       if (u.pathname.startsWith("/embed/")) return url;
     }
   } catch {
-    /* буруу URL — доор нь шууд video tag-аар оролдоно */
+    /* буруу URL — доор нь хост шалгаж үзнэ */
   }
   return null;
 }
 
+// URL нь <video src>-ээр шууд тоглуулахад аюулгүй, мэдэгдэж буй хостоос эсэхийг шалгана
+function isAllowedDirectVideoUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+    return ALLOWED_VIDEO_HOSTS.some(
+      (host) => u.hostname === host || u.hostname.endsWith(`.${host}`),
+    );
+  } catch {
+    return false;
+  }
+}
+
 function VideoPlayer({ video }: { video: Video }) {
   const embed = youtubeEmbedUrl(video.s3Key);
+  const directAllowed = !embed && isAllowedDirectVideoUrl(video.s3Key);
   return (
-    <div className="overflow-hidden rounded-xl border border-white/8 bg-black">
+    <div className="overflow-hidden rounded-xl border border-line bg-brand-navy">
       <div className="aspect-video w-full">
         {embed ? (
           <iframe
@@ -60,9 +96,19 @@ function VideoPlayer({ video }: { video: Video }) {
             allowFullScreen
             className="h-full w-full"
           />
-        ) : (
-          // eslint-disable-next-line jsx-a11y/media-has-caption
+        ) : directAllowed ? (
           <video controls src={video.s3Key} className="h-full w-full" />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 px-4 text-center text-brand-soft">
+            <span className="text-2xl" aria-hidden>
+              ⚠
+            </span>
+            <p className="text-sm font-semibold">Дэмжигдэхгүй холбоос</p>
+            <p className="text-xs text-brand-soft/80">
+              Энэ бичлэгийн эх сурвалж танигдаагүй тул аюулгүй байдлын үүднээс
+              шууд ачаалахгүй.
+            </p>
+          </div>
         )}
       </div>
       <div className="p-3">
@@ -161,7 +207,7 @@ export default function VideosPage() {
             <select
               value={form.chapterId}
               onChange={(e) => setForm({ ...form, chapterId: e.target.value })}
-              className="min-w-[200px] flex-1 rounded-lg border border-white/10 bg-[#0b142e] px-3 py-2 text-sm outline-none focus:border-brand-bright"
+              className="min-w-[200px] flex-1 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
             >
               <option value="">Сэдэв сонгох…</option>
               {allChapters.map((c) => (
@@ -175,13 +221,13 @@ export default function VideosPage() {
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="Бичлэгийн нэр"
-              className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+              className="min-w-[160px] flex-1 rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
             />
             <input
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
               placeholder="YouTube эсвэл видео холбоос (URL)"
-              className="min-w-[220px] flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+              className="min-w-[220px] flex-1 rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
             />
             <button
               onClick={addVideo}
@@ -190,18 +236,23 @@ export default function VideosPage() {
               Нэмэх
             </button>
           </div>
-          {msg && <p className="mt-2 text-sm text-teal-300">{msg}</p>}
+          <p className="mt-2 text-xs text-ink-dim">
+            YouTube холбоос бол шууд шигтгэгдэнэ. Бусад холбоосыг зөвхөн
+            зөвшөөрөгдсөн видео сервертэй тохирвол тоглуулна — эс бол
+            &ldquo;дэмжигдэхгүй холбоос&rdquo; гэж харагдана.
+          </p>
+          {msg && <p className="mt-2 text-sm text-success">{msg}</p>}
         </section>
       )}
 
       {error && (
-        <p className="rounded-xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-300">
+        <p className="rounded-xl border border-error/20 bg-error/5 p-4 text-sm text-error">
           {error}
         </p>
       )}
 
       {chaptersWithVideos.length === 0 && !error && (
-        <p className="rounded-2xl border border-white/8 bg-[#0b142e] p-6 text-center text-sm text-ink-dim">
+        <p className="rounded-2xl border border-line bg-panel p-6 text-center text-sm text-ink-dim">
           Одоогоор бичлэг оруулаагүй байна.
         </p>
       )}
@@ -222,7 +273,7 @@ export default function VideosPage() {
                       className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition ${
                         activeChapter === c.id
                           ? "border-brand-bright bg-brand-bright/15 text-brand-soft"
-                          : "border-white/8 text-ink-dim hover:border-white/25"
+                          : "border-line text-ink-dim hover:border-brand-bright/40"
                       }`}
                     >
                       {c.title}

@@ -30,11 +30,20 @@ export async function api<T = unknown>(
     const token = getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
-  const res = await fetch(`${API_URL}${path}`, {
-    method: opts.method ?? "GET",
-    headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: opts.method ?? "GET",
+      headers,
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    });
+  } catch {
+    // fetch эсэргүүцвэл (сүлжээгүй, сервер унтарсан гэх мэт) англи "Failed to
+    // fetch" гараад ирдэг байсныг монгол, ойлгомжтой мессежээр сольсон.
+    throw new Error(
+      "Сүлжээний алдаа — интернэт холболтоо шалгаад дахин оролдоно уу.",
+    );
+  }
   const data = (await res.json().catch(() => null)) as T & {
     message?: string | string[];
   };
@@ -79,5 +88,6 @@ export function homeForRole(role: string): string {
   if (role === "ADMIN") return "/app/admin";
   if (role === "TEACHER" || role === "TEACHER_PLUS") return "/app/teacher";
   if (role === "STUDENT") return "/app/student";
+  if (role === "PARENT") return "/app/parent";
   return "/app/buyer";
 }

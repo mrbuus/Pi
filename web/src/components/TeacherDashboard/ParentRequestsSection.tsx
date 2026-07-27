@@ -27,7 +27,7 @@ export default function ParentRequestsSection({
   onReject,
 }: ParentRequestsSectionProps) {
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-4 md:p-6">
+    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
       <h2 className="mb-4 font-bold text-brand-soft">
         Эцэг эхийн холболтын хүсэлт
       </h2>
@@ -39,7 +39,7 @@ export default function ParentRequestsSection({
           {parentRequests.map((request) => (
             <div
               key={request.id}
-              className="rounded-lg border border-white/8 p-4"
+              className="rounded-lg border border-line p-4"
             >
               <div className="flex flex-col gap-3 md:gap-4">
                 {/* Parent Info */}
@@ -51,7 +51,7 @@ export default function ParentRequestsSection({
                 </div>
 
                 {/* Student Info */}
-                <div className="rounded-lg bg-white/5 px-3 py-2 text-sm">
+                <div className="rounded-lg bg-ink/5 px-3 py-2 text-sm">
                   <p className="text-xs text-ink-dim mb-1">Хүүхэд:</p>
                   <p className="font-medium">
                     {request.student.firstName} {request.student.lastName}
@@ -67,15 +67,15 @@ export default function ParentRequestsSection({
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => onVerify(request.id)}
-                    className="rounded bg-teal-400/20 px-4 py-2 text-xs font-bold text-teal-200 transition hover:bg-teal-400/30"
+                    className="rounded bg-success/20 px-4 py-2 text-xs font-bold text-success transition hover:bg-success/30"
                   >
-                    Батлах
+                    ✓ Батлах
                   </button>
                   <button
                     onClick={() => onReject(request.id)}
-                    className="rounded bg-red-400/20 px-4 py-2 text-xs font-bold text-red-200 transition hover:bg-red-400/30"
+                    className="rounded bg-error/20 px-4 py-2 text-xs font-bold text-error transition hover:bg-error/30"
                   >
-                    Цуцлах
+                    ✕ Цуцлах
                   </button>
                 </div>
               </div>

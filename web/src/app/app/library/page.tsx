@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import MathText from "@/components/MathText";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
-import { api, getRole } from "@/lib/api";
+import { api, getRole, getToken } from "@/lib/api";
 
 interface Chapter {
   id: string;
@@ -15,12 +15,20 @@ interface Chapter {
   book?: { code: string; title: string };
   _count: { problems: number; theories: number; tests: number };
 }
+interface ChoiceOption {
+  label: string;
+  text: string;
+  // Зөвхөн багш ролийн (ADMIN/TEACHER_PLUS/TEACHER) API хариунд ирнэ —
+  // сурагчид зөвхөн {label, text} авна (backend-ээс шүүгдсэн).
+  isCorrect?: boolean;
+}
 interface Problem {
   id: string;
   token: string;
   format: string;
   statementText?: string;
   choices?: string[];
+  choiceOptions?: ChoiceOption[];
   correctAnswer?: string | Record<string, number>;
   points: number;
   analysis?: {
@@ -47,13 +55,83 @@ interface Book {
   _count: { chapters: number };
 }
 
+type ToneKey = "brand" | "teal" | "gold" | "rose" | "violet" | "sky";
+
 interface TopicTone {
-  accent: string;
-  bg: string;
+  symbol: string;
   border: string;
+  bg: string;
   soft: string;
   text: string;
-  symbol: string;
+  solid: string;
+  line: string;
+}
+
+// globals.css-ийн токенууд (brand-bright + 5 accent-*)-аар барьсан 6 өнгөний
+// давталт — ХЭЗЭЭ Ч шууд hex/rgba бичихгүй тул LIGHT/DARK хоёуланд зөв харагдана.
+const TONE_STYLE: Record<ToneKey, Omit<TopicTone, "symbol">> = {
+  brand: {
+    border: "border-brand-bright/45",
+    bg: "bg-brand-bright/10",
+    soft: "bg-brand-bright/18",
+    text: "text-brand-bright",
+    solid: "bg-brand-bright",
+    line: "bg-brand-bright/40",
+  },
+  teal: {
+    border: "border-accent-teal/45",
+    bg: "bg-accent-teal/10",
+    soft: "bg-accent-teal/18",
+    text: "text-accent-teal",
+    solid: "bg-accent-teal",
+    line: "bg-accent-teal/40",
+  },
+  gold: {
+    border: "border-accent-gold/45",
+    bg: "bg-accent-gold/10",
+    soft: "bg-accent-gold/18",
+    text: "text-accent-gold",
+    solid: "bg-accent-gold",
+    line: "bg-accent-gold/40",
+  },
+  rose: {
+    border: "border-accent-rose/45",
+    bg: "bg-accent-rose/10",
+    soft: "bg-accent-rose/18",
+    text: "text-accent-rose",
+    solid: "bg-accent-rose",
+    line: "bg-accent-rose/40",
+  },
+  violet: {
+    border: "border-accent-violet/45",
+    bg: "bg-accent-violet/10",
+    soft: "bg-accent-violet/18",
+    text: "text-accent-violet",
+    solid: "bg-accent-violet",
+    line: "bg-accent-violet/40",
+  },
+  sky: {
+    border: "border-accent-sky/45",
+    bg: "bg-accent-sky/10",
+    soft: "bg-accent-sky/18",
+    text: "text-accent-sky",
+    solid: "bg-accent-sky",
+    line: "bg-accent-sky/40",
+  },
+};
+
+const TONE_ORDER: { key: ToneKey; symbol: string }[] = [
+  { key: "brand", symbol: "∑" },
+  { key: "teal", symbol: "√" },
+  { key: "gold", symbol: "π" },
+  { key: "rose", symbol: "|x|" },
+  { key: "violet", symbol: "log" },
+  { key: "sky", symbol: "f" },
+];
+
+function toneFor(index: number): TopicTone {
+  const { key, symbol } = TONE_ORDER[index % TONE_ORDER.length];
+  return { symbol, ...TONE_STYLE[key] };
 }
 
 interface TopicGroup {
@@ -72,56 +150,17 @@ const FORMAT_LABEL: Record<string, string> = {
   OPEN: "Задгай",
 };
 
-const TOPIC_TONES: TopicTone[] = [
-  {
-    accent: "#4f7fe6",
-    bg: "rgba(79, 127, 230, 0.11)",
-    border: "rgba(79, 127, 230, 0.45)",
-    soft: "rgba(79, 127, 230, 0.18)",
-    text: "#b8cbff",
-    symbol: "∑",
-  },
-  {
-    accent: "#34d6a8",
-    bg: "rgba(52, 214, 168, 0.1)",
-    border: "rgba(52, 214, 168, 0.4)",
-    soft: "rgba(52, 214, 168, 0.16)",
-    text: "#98f2d6",
-    symbol: "√",
-  },
-  {
-    accent: "#e8c468",
-    bg: "rgba(232, 196, 104, 0.1)",
-    border: "rgba(232, 196, 104, 0.42)",
-    soft: "rgba(232, 196, 104, 0.16)",
-    text: "#f3dc95",
-    symbol: "π",
-  },
-  {
-    accent: "#f07aa6",
-    bg: "rgba(240, 122, 166, 0.1)",
-    border: "rgba(240, 122, 166, 0.4)",
-    soft: "rgba(240, 122, 166, 0.16)",
-    text: "#ffc1d8",
-    symbol: "|x|",
-  },
-  {
-    accent: "#9c7df0",
-    bg: "rgba(156, 125, 240, 0.1)",
-    border: "rgba(156, 125, 240, 0.42)",
-    soft: "rgba(156, 125, 240, 0.16)",
-    text: "#cbbcfe",
-    symbol: "log",
-  },
-  {
-    accent: "#64c7f5",
-    bg: "rgba(100, 199, 245, 0.1)",
-    border: "rgba(100, 199, 245, 0.4)",
-    soft: "rgba(100, 199, 245, 0.16)",
-    text: "#b8e9ff",
-    symbol: "f",
-  },
+type SubjectKey = "MATH" | "SOCIAL_STUDIES";
+const SUBJECTS: { value: SubjectKey; label: string }[] = [
+  { value: "MATH", label: "Математик" },
+  { value: "SOCIAL_STUDIES", label: "Нийгмийн ухаан" },
 ];
+
+function readSubjectFromUrl(): SubjectKey {
+  if (typeof window === "undefined") return "MATH";
+  const q = new URLSearchParams(window.location.search).get("subject");
+  return q === "SOCIAL_STUDIES" ? "SOCIAL_STUDIES" : "MATH";
+}
 
 function splitChapterTitle(title: string) {
   const [topic, ...rest] = title.split(" · ");
@@ -160,11 +199,53 @@ function groupChapters(chapters: Chapter[]): TopicGroup[] {
   return [...groups.values()].map((group, index) => ({
     ...group,
     chapters: [...group.chapters].sort((a, b) => a.order - b.order),
-    tone: TOPIC_TONES[index % TOPIC_TONES.length],
+    tone: toneFor(index),
   }));
 }
 
+// ---- Бүлэг сэдвийн бодлого татах — 403 (жинхэнэ түгжээтэй) ба бусад алдааг
+// (сүлжээ/сервер) ялгаж таниулна. api()-ийн энгийн throw new Error(msg) нь
+// HTTP статус кодыг дамжуулдаггүй тул энд шууд fetch хийж res.status шалгана.
+class ChapterAccessDeniedError extends Error {}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
+
+async function fetchChapterProblems(chapterId: string): Promise<Problem[]> {
+  const headers: Record<string, string> = {};
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/chapters/${chapterId}/problems`, { headers });
+  } catch {
+    throw new Error("Сүлжээний алдаа — интернэт холболтоо шалгаад дахин оролдоно уу.");
+  }
+
+  if (res.status === 403) {
+    throw new ChapterAccessDeniedError(
+      "Энэ бүлгийг үзэх эрхгүй байна — эрх худалдаж авах эсвэл ангид элсэх шаардлагатай",
+    );
+  }
+
+  const data = (await res.json().catch(() => null)) as
+    | Problem[]
+    | { message?: string | string[] }
+    | null;
+
+  if (!res.ok) {
+    const message =
+      data && !Array.isArray(data)
+        ? (Array.isArray(data.message) ? data.message.join(", ") : data.message)
+        : undefined;
+    throw new Error(message ?? `Алдаа ${res.status}`);
+  }
+
+  return (data as Problem[]) ?? [];
+}
+
 export default function LibraryPage() {
+  const [subject, setSubject] = useState<SubjectKey>(readSubjectFromUrl);
   const [books, setBooks] = useState<Book[]>([]);
   const [bookId, setBookId] = useState<string>("");
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -172,6 +253,7 @@ export default function LibraryPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [problems, setProblems] = useState<Problem[]>([]);
   const [locked, setLocked] = useState(false);
+  const [problemsError, setProblemsError] = useState("");
   const [loadingProblems, setLoadingProblems] = useState(false);
   const [catalogError, setCatalogError] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
@@ -191,8 +273,26 @@ export default function LibraryPage() {
   const totalProblems = topicGroups.reduce((sum, group) => sum + group.problems, 0);
   const totalTests = topicGroups.reduce((sum, group) => sum + group.tests, 0);
 
+  function selectSubject(next: SubjectKey) {
+    if (next === subject) return;
+    setSubject(next);
+    setBookId("");
+    setChapters([]);
+    setActiveTopic("");
+    setOpenId(null);
+    setProblems([]);
+    setLocked(false);
+    setProblemsError("");
+    setCatalogError("");
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("subject", next);
+      window.history.replaceState(null, "", url.toString());
+    }
+  }
+
   useEffect(() => {
-    api<Book[]>("/books")
+    api<Book[]>(`/books?subject=${subject}`)
       .then((bs) => {
         // Бүтэц (сэдэв/тест) байвал л харуулна — бодлого хараахан ороогүй ч
         // metadata-only номууд (Хавтгай, Огторгуй г.м.) шатлалаа харуулна
@@ -221,7 +321,7 @@ export default function LibraryPage() {
           error instanceof Error ? error.message : "Номын сан ачаалахад алдаа гарлаа",
         );
       });
-  }, []);
+  }, [subject]);
 
   useEffect(() => {
     if (!bookId) return;
@@ -235,23 +335,34 @@ export default function LibraryPage() {
       });
   }, [bookId]);
 
+  async function loadProblemsFor(ch: Chapter) {
+    setProblems([]);
+    setLocked(false);
+    setProblemsError("");
+    setLoadingProblems(true);
+    try {
+      const probs = await fetchChapterProblems(ch.id);
+      setProblems(probs);
+    } catch (e) {
+      if (e instanceof ChapterAccessDeniedError) {
+        setLocked(true);
+      } else {
+        setProblemsError(
+          e instanceof Error ? e.message : "Бодлого ачаалахад алдаа гарлаа",
+        );
+      }
+    } finally {
+      setLoadingProblems(false);
+    }
+  }
+
   async function openChapter(ch: Chapter) {
     if (openId === ch.id) {
       setOpenId(null);
       return;
     }
     setOpenId(ch.id);
-    setProblems([]);
-    setLocked(false);
-    setLoadingProblems(true);
-    try {
-      const probs = await api<Problem[]>(`/chapters/${ch.id}/problems`);
-      setProblems(probs);
-    } catch {
-      setLocked(true);
-    } finally {
-      setLoadingProblems(false);
-    }
+    await loadProblemsFor(ch);
   }
 
   return (
@@ -261,6 +372,23 @@ export default function LibraryPage() {
         <p className="mt-1 text-sm text-ink-dim">
           Ном сонгоод сэдэв бүрийн тестүүдийг дарааллаар нь эзэмшинэ.
         </p>
+      </div>
+
+      {/* Хичээлийн сэлгэгч */}
+      <div className="flex flex-wrap gap-2">
+        {SUBJECTS.map((s) => (
+          <button
+            key={s.value}
+            onClick={() => selectSubject(s.value)}
+            className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
+              subject === s.value
+                ? "border-brand-bright bg-brand-bright/15 text-brand-soft"
+                : "border-line text-ink-dim hover:border-brand-bright/40"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
       </div>
 
       {/* Номын таб */}
@@ -273,11 +401,12 @@ export default function LibraryPage() {
               setOpenId(null);
               setProblems([]);
               setLocked(false);
+              setProblemsError("");
             }}
             className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
               bookId === b.id
                 ? "border-brand-bright bg-brand-bright/15 text-brand-soft"
-                : "border-white/10 text-ink-dim hover:border-white/30"
+                : "border-line text-ink-dim hover:border-brand-bright/40"
             }`}
           >
             <span className="font-mono">{b.code}</span> · {b.testCount ?? 0} тест
@@ -286,13 +415,19 @@ export default function LibraryPage() {
       </div>
 
       {catalogError && (
-        <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+        <div className="rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
           {catalogError}
         </div>
       )}
 
+      {books.length === 0 && !catalogError && (
+        <p className="text-sm text-ink-dim">
+          Энэ хичээлээр ном хараахан нэмэгдээгүй байна.
+        </p>
+      )}
+
       {currentBook && (
-        <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-5">
+        <section className="rounded-2xl border border-line bg-panel p-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase text-brand-soft">
@@ -309,7 +444,7 @@ export default function LibraryPage() {
         </section>
       )}
 
-      {chapters.length === 0 && !catalogError && (
+      {chapters.length === 0 && !catalogError && bookId && (
         <p className="text-sm text-ink-dim">
           Энэ номд бүлэг сэдэв хараахан нэмэгдээгүй байна.
         </p>
@@ -328,19 +463,17 @@ export default function LibraryPage() {
                     setOpenId(null);
                     setProblems([]);
                     setLocked(false);
+                    setProblemsError("");
                   }}
                   className={`w-full rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${
-                    selected ? "shadow-lg shadow-black/20" : "bg-white/[0.03]"
+                    selected
+                      ? `shadow-lg ${group.tone.border} ${group.tone.bg}`
+                      : "border-line bg-ink/[0.03]"
                   }`}
-                  style={{
-                    borderColor: selected ? group.tone.border : "rgba(255,255,255,0.1)",
-                    background: selected ? group.tone.bg : undefined,
-                  }}
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold"
-                      style={{ background: group.tone.soft, color: group.tone.text }}
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${group.tone.soft} ${group.tone.text}`}
                     >
                       {group.tone.symbol}
                     </span>
@@ -351,12 +484,11 @@ export default function LibraryPage() {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink/10">
                     <div
-                      className="h-full rounded-full"
+                      className={`h-full rounded-full ${group.tone.solid}`}
                       style={{
                         width: `${Math.min(100, Math.max(12, group.chapters.length * 8))}%`,
-                        background: group.tone.accent,
                       }}
                     />
                   </div>
@@ -366,19 +498,10 @@ export default function LibraryPage() {
           </aside>
 
           <section className="min-w-0 space-y-3">
-            <div
-              className="rounded-2xl border p-5"
-              style={{
-                borderColor: activeGroup.tone.border,
-                background: activeGroup.tone.bg,
-              }}
-            >
+            <div className={`rounded-2xl border p-5 ${activeGroup.tone.border} ${activeGroup.tone.bg}`}>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p
-                    className="text-xs font-bold uppercase"
-                    style={{ color: activeGroup.tone.text }}
-                  >
+                  <p className={`text-xs font-bold uppercase ${activeGroup.tone.text}`}>
                     Алгебр | Анализ
                   </p>
                   <h2 className="mt-1 text-2xl font-extrabold">
@@ -390,15 +513,15 @@ export default function LibraryPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full bg-white/8 px-3 py-1 font-semibold">
+                  <span className="rounded-full bg-ink/8 px-3 py-1 font-semibold">
                     {activeGroup.tests} тест
                   </span>
-                  <span className="rounded-full bg-white/8 px-3 py-1 font-semibold">
+                  <span className="rounded-full bg-ink/8 px-3 py-1 font-semibold">
                     {activeGroup.problems} бодлого
                   </span>
                   {activeGroup.free > 0 && (
-                    <span className="rounded-full bg-teal-400/15 px-3 py-1 font-semibold text-teal-300">
-                      {activeGroup.free} үнэгүй
+                    <span className="rounded-full bg-success/15 px-3 py-1 font-semibold text-success">
+                      ✓ {activeGroup.free} үнэгүй
                     </span>
                   )}
                 </div>
@@ -408,8 +531,7 @@ export default function LibraryPage() {
             <div className="relative space-y-3">
               <div
                 aria-hidden
-                className="absolute bottom-8 left-6 top-8 hidden w-px sm:block"
-                style={{ background: activeGroup.tone.border }}
+                className={`absolute bottom-8 left-6 top-8 hidden w-px sm:block ${activeGroup.tone.line}`}
               />
               {activeGroup.chapters.map((ch, index) => {
                 const isOpen = openId === ch.id;
@@ -418,22 +540,16 @@ export default function LibraryPage() {
                   <div key={ch.id} className="relative">
                     <button
                       onClick={() => openChapter(ch)}
-                      className="flex w-full items-center gap-4 rounded-2xl border bg-[#0b142e] p-5 text-left transition hover:border-white/25"
-                      style={{
-                        borderColor: isOpen
-                          ? activeGroup.tone.border
-                          : "rgba(255,255,255,0.08)",
-                        background: isOpen ? activeGroup.tone.bg : undefined,
-                      }}
+                      className={`flex w-full items-center gap-4 rounded-2xl border bg-panel p-5 text-left transition hover:border-brand-bright/40 ${
+                        isOpen ? `${activeGroup.tone.border} ${activeGroup.tone.bg}` : "border-line"
+                      }`}
                     >
                       <div
-                        className="z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg font-extrabold"
-                        style={{
-                          background: ch.freePreview
-                            ? "rgba(52, 214, 168, 0.18)"
-                            : activeGroup.tone.soft,
-                          color: ch.freePreview ? "#98f2d6" : activeGroup.tone.text,
-                        }}
+                        className={`z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg font-extrabold ${
+                          ch.freePreview
+                            ? "bg-success/18 text-success"
+                            : `${activeGroup.tone.soft} ${activeGroup.tone.text}`
+                        }`}
                       >
                         {index + 1}
                       </div>
@@ -441,8 +557,8 @@ export default function LibraryPage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-bold">{label}</p>
                           {ch.freePreview && (
-                            <span className="rounded-full bg-teal-400/15 px-2 py-0.5 text-[11px] font-bold text-teal-300">
-                              Үнэгүй
+                            <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
+                              ✓ Үнэгүй
                             </span>
                           )}
                         </div>
@@ -456,7 +572,7 @@ export default function LibraryPage() {
                     </button>
 
                     {isOpen && (
-                      <div className="mt-2 rounded-2xl border border-white/8 bg-[#0b142e] p-5">
+                      <div className="mt-2 rounded-2xl border border-line bg-panel p-5">
                         {loadingProblems && (
                           <p className="text-sm text-ink-dim">Ачаалж байна…</p>
                         )}
@@ -473,7 +589,18 @@ export default function LibraryPage() {
                             </Link>
                           </div>
                         )}
-                        {!loadingProblems && !locked && (
+                        {!loadingProblems && !locked && problemsError && (
+                          <div className="rounded-xl border border-error/30 bg-error/10 p-4 text-center text-sm text-error">
+                            <p>{problemsError}</p>
+                            <button
+                              onClick={() => loadProblemsFor(ch)}
+                              className="mt-3 rounded-lg border border-error/40 px-4 py-1.5 text-sm font-semibold text-error transition hover:bg-error/10"
+                            >
+                              Дахин оролдох
+                            </button>
+                          </div>
+                        )}
+                        {!loadingProblems && !locked && !problemsError && (
                           <ProblemList
                             problems={problems}
                             tone={activeGroup.tone}
@@ -505,7 +632,7 @@ export default function LibraryPage() {
 
 function Metric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="min-w-20 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2">
+    <div className="min-w-20 rounded-xl border border-line bg-ink/[0.03] px-3 py-2">
       <p className="text-lg font-extrabold">{value.toLocaleString()}</p>
       <p className="text-xs text-ink-dim">{label}</p>
     </div>
@@ -532,11 +659,10 @@ function ProblemList({
       {problems.map((p, idx) => (
         <div
           key={p.id}
-          className="flex items-start gap-3 rounded-xl border border-white/8 p-3"
+          className="flex items-start gap-3 rounded-xl border border-line p-3"
         >
           <span
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm font-bold"
-            style={{ background: tone.soft, color: tone.text }}
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${tone.soft} ${tone.text}`}
           >
             {idx + 1}
           </span>
@@ -544,21 +670,43 @@ function ProblemList({
             <p className="text-sm">
               <MathText>{p.statementText ?? ""}</MathText>
             </p>
+
+            {/* Сонголтууд — өмнө нь ФАЙЛД ОГТ ХАРУУЛДАГГҮЙ байсан (choiceOptions
+                API-д ирж байсан ч render хийгээгүй) — одоо бүх сурагчид харна.
+                Зөв хариуны тэмдэг зөвхөн багш ролид (canEdit) ба backend-ээс
+                isCorrect ирсэн үед л гарна. */}
+            {p.format === "CHOICE" && p.choiceOptions && p.choiceOptions.length > 0 && (
+              <ul className="mt-2 space-y-1">
+                {p.choiceOptions.map((o) => (
+                  <li key={o.label} className="flex items-start gap-2 text-sm">
+                    <span className="shrink-0 font-mono font-bold text-ink-dim">
+                      {o.label}.
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <MathText>{o.text}</MathText>
+                    </span>
+                    {canEdit && o.isCorrect && (
+                      <span className="shrink-0 rounded bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
+                        ✓ Зөв
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <div className="mt-1.5 flex flex-wrap gap-2 text-[11px]">
-              <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-ink-dim">
+              <span className="rounded bg-ink/5 px-2 py-0.5 font-mono text-ink-dim">
                 {p.token}
               </span>
-              <span
-                className="rounded px-2 py-0.5"
-                style={{ background: tone.soft, color: tone.text }}
-              >
+              <span className={`rounded px-2 py-0.5 ${tone.soft} ${tone.text}`}>
                 {FORMAT_LABEL[p.format] ?? p.format}
               </span>
-              <span className="rounded bg-white/5 px-2 py-0.5 text-ink-dim">
+              <span className="rounded bg-ink/5 px-2 py-0.5 text-ink-dim">
                 {p.points} оноо
               </span>
               {p.correctAnswer !== undefined && (
-                <span className="rounded bg-teal-400/15 px-2 py-0.5 text-teal-300">
+                <span className="rounded bg-success/15 px-2 py-0.5 text-success">
                   Хариу: {formatAnswer(p.correctAnswer)}
                 </span>
               )}
@@ -588,7 +736,7 @@ function formatAnswer(answer: Problem["correctAnswer"]) {
 
 function ProblemAnalysisDetails({ analysis }: { analysis: NonNullable<Problem["analysis"]> }) {
   return (
-    <details className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] p-3 text-xs text-ink-dim">
+    <details className="mt-3 rounded-xl border border-line bg-ink/[0.03] p-3 text-xs text-ink-dim">
       <summary className="cursor-pointer font-bold text-ink">
         Шинжилгээ · {analysis.subtopic || analysis.topic} · {analysis.answerKeyStatus}
       </summary>

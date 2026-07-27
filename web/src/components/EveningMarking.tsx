@@ -21,10 +21,10 @@ const STATES = [
 ] as const;
 
 const TONE: Record<string, string> = {
-  ok: "border-teal-400/60 bg-teal-400/20 text-teal-200",
-  warn: "border-amber-400/60 bg-amber-400/20 text-amber-200",
-  bad: "border-red-400/60 bg-red-400/20 text-red-200",
-  guess: "border-indigo-400/60 bg-indigo-400/20 text-indigo-200",
+  ok: "border-success/60 bg-success/20 text-success",
+  warn: "border-warning/60 bg-warning/20 text-warning",
+  bad: "border-error/60 bg-error/20 text-error",
+  guess: "border-accent-violet/60 bg-accent-violet/20 text-accent-violet",
 };
 
 interface TodoProblem {
@@ -50,10 +50,13 @@ export default function EveningMarking() {
   // problemId → одоогийн тэмдэглэгээ (optimistic)
   const [marks, setMarks] = useState<Record<string, string>>({});
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [markError, setMarkError] = useState("");
 
   const load = useCallback(() => {
     api<TodoSession[]>("/me/todo-marking")
       .then((data) => {
+        setLoadError("");
         setSessions(data);
         const initial: Record<string, string> = {};
         data.forEach((s) =>
@@ -64,20 +67,34 @@ export default function EveningMarking() {
         setMarks(initial);
         setLoaded(true);
       })
-      .catch(() => setLoaded(true));
+      .catch((e) => {
+        setLoadError(
+          e instanceof Error ? e.message : "Ачаалахад алдаа гарлаа",
+        );
+        setLoaded(true);
+      });
   }, []);
   useEffect(load, [load]);
 
   // Нэг товч дармагц шууд хадгална (optimistic UI)
   async function mark(problemId: string, value: string, date: string) {
+    setMarkError("");
+    const prevMarks = marks;
     setMarks((m) => ({ ...m, [problemId]: value }));
     try {
       await api("/attempts/evening", {
         method: "POST",
         body: { date, entries: [{ problemId, selfState: value }] },
       });
-    } catch {
-      // алдаа гарвал серверээс дахин ачаална
+    } catch (e) {
+      // алдаа гарвал optimistic таамаглалаа буцааж, хэрэглэгчид харагдахуйц
+      // алдаа мессеж үзүүлээд серверийн жинхэнэ төлөвийг дахин ачаална
+      setMarks(prevMarks);
+      setMarkError(
+        e instanceof Error
+          ? e.message
+          : "Тэмдэглэхэд алдаа гарлаа. Дахин оролдоно уу.",
+      );
       load();
     }
   }
@@ -91,8 +108,19 @@ export default function EveningMarking() {
         Өнөөдөр ангид хийсэн бодлогуудаа цаасан дээрээсээ хараад тэмдэглээрэй
       </p>
 
-      {sessions.length === 0 && (
-        <div className="mt-4 rounded-xl border border-white/8 bg-[#0b142e] p-5 text-center text-sm text-ink-dim">
+      {loadError && (
+        <div className="mt-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+          {loadError}
+        </div>
+      )}
+      {markError && (
+        <div className="mt-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+          {markError}
+        </div>
+      )}
+
+      {!loadError && sessions.length === 0 && (
+        <div className="mt-4 rounded-xl border border-line bg-panel p-5 text-center text-sm text-ink-dim">
           Өнөөдөр ангид хийсэн тест хараахан бүртгэгдээгүй байна.
           <br />
           Багш тестээ оруулмагц энд бодлогууд тань гарч ирнэ.
@@ -105,7 +133,7 @@ export default function EveningMarking() {
           return (
             <div
               key={s.sessionId}
-              className="rounded-xl border border-white/8 bg-[#0b142e] p-4"
+              className="rounded-xl border border-line bg-panel p-4"
             >
               <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
@@ -114,7 +142,7 @@ export default function EveningMarking() {
                     {s.date.slice(0, 10)} · хаагдах {s.markingClosesOn}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-lg bg-white/5 px-2.5 py-1 text-xs text-ink-dim">
+                <span className="shrink-0 rounded-lg bg-ink/5 px-2.5 py-1 text-xs text-ink-dim">
                   {done}/{s.problems.length} · {s.daysLeft + 1} өдөр үлдсэн
                 </span>
               </div>
@@ -122,7 +150,7 @@ export default function EveningMarking() {
                 {s.problems.map((p) => (
                   <div
                     key={p.problemId}
-                    className="rounded-lg border border-white/5 bg-white/[0.02] p-3"
+                    className="rounded-lg border border-line bg-ink/[0.02] p-3"
                   >
                     <div className="flex items-start gap-2.5">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand-bright/15 text-xs font-bold text-brand-soft">
@@ -146,7 +174,7 @@ export default function EveningMarking() {
                             className={`rounded-lg border px-2.5 py-1 text-xs transition ${
                               sel
                                 ? TONE[st.tone]
-                                : "border-white/10 text-ink-dim hover:border-white/30"
+                                : "border-line text-ink-dim hover:border-brand-bright/40"
                             }`}
                           >
                             {st.label}

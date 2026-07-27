@@ -49,7 +49,7 @@ export default function AssignmentsSection({
   };
 
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-4 md:p-6">
+    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
       <h2 className="mb-4 font-bold text-brand-soft">Даалгаврууд</h2>
 
       {/* Create New Assignment */}
@@ -58,7 +58,7 @@ export default function AssignmentsSection({
           value={newTitle}
           onChange={(e) => onNewTitleChange(e.target.value)}
           placeholder="Шинэ даалгаврын нэр…"
-          className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+          className="flex-1 rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
           disabled={isCreating}
         />
         <button
@@ -76,7 +76,7 @@ export default function AssignmentsSection({
           <p className="text-sm text-ink-dim">Даалгавар байхгүй</p>
         ) : (
           assignments.map((assignment) => (
-            <div key={assignment.id} className="rounded-lg border border-white/8">
+            <div key={assignment.id} className="rounded-lg border border-line">
               {/* Assignment Header Button */}
               <button
                 onClick={() => onOpen(assignment.id)}
@@ -90,14 +90,14 @@ export default function AssignmentsSection({
 
               {/* Submissions (Only shown when expanded) */}
               {openAssignmentId === assignment.id && (
-                <div className="space-y-2 border-t border-white/8 p-4">
+                <div className="space-y-2 border-t border-line p-4">
                   {submissions.length === 0 ? (
                     <p className="text-sm text-ink-dim">Илгээлт байхгүй</p>
                   ) : (
                     submissions.map((submission) => (
                       <div
                         key={submission.student.id}
-                        className="flex flex-col gap-3 rounded-lg border border-white/8 px-3 py-3 md:flex-row md:items-center md:justify-between md:gap-4 md:px-4 md:py-2"
+                        className="flex flex-col gap-3 rounded-lg border border-line px-3 py-3 md:flex-row md:items-center md:justify-between md:gap-4 md:px-4 md:py-2"
                       >
                         {/* Student Info */}
                         <div className="text-sm">
@@ -117,17 +117,17 @@ export default function AssignmentsSection({
                             onClick={() =>
                               onReview(submission.student.id, "APPROVE")
                             }
-                            className="rounded bg-teal-400/20 px-2.5 py-1.5 text-xs font-bold text-teal-200 transition hover:bg-teal-400/30"
+                            className="rounded bg-success/20 px-2.5 py-1.5 text-xs font-bold text-success transition hover:bg-success/30"
                           >
-                            Батлах
+                            ✓ Батлах
                           </button>
                           <button
                             onClick={() =>
                               onReview(submission.student.id, "RETURN")
                             }
-                            className="rounded bg-red-400/20 px-2.5 py-1.5 text-xs font-bold text-red-200 transition hover:bg-red-400/30"
+                            className="rounded bg-error/20 px-2.5 py-1.5 text-xs font-bold text-error transition hover:bg-error/30"
                           >
-                            Буцаах
+                            ✕ Буцаах
                           </button>
                           <button
                             onClick={() =>

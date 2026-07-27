@@ -22,7 +22,7 @@ export default function UnassignedStudentsSection({
   onEnroll,
 }: UnassignedStudentsSectionProps) {
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-4 md:p-6">
+    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
       <h2 className="mb-4 font-bold text-brand-soft">Ангид ороогүй сурагчид</h2>
 
       {unassigned.length === 0 ? (
@@ -32,7 +32,7 @@ export default function UnassignedStudentsSection({
           {unassigned.map((student) => (
             <div
               key={student.id}
-              className="flex flex-col gap-3 rounded-lg border border-white/8 px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4 md:py-2"
+              className="flex flex-col gap-3 rounded-lg border border-line px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4 md:py-2"
             >
               {/* Student Info */}
               <div className="text-sm">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
 interface ParentLink {
@@ -41,18 +41,18 @@ interface ParentLink {
 }
 
 const ATT_LABEL: Record<string, { text: string; cls: string }> = {
-  PRESENT: { text: "Ирсэн", cls: "bg-teal-400/15 text-teal-300" },
-  LATE: { text: "Хоцорсон", cls: "bg-amber-400/15 text-amber-300" },
-  ABSENT: { text: "Тасалсан", cls: "bg-red-400/15 text-red-300" },
+  PRESENT: { text: "Ирсэн", cls: "bg-success/15 text-success" },
+  LATE: { text: "Хоцорсон", cls: "bg-warning/15 text-warning" },
+  ABSENT: { text: "Тасалсан", cls: "bg-error/15 text-error" },
   EXCUSED: { text: "Чөлөөтэй", cls: "bg-brand-bright/15 text-brand-soft" },
 };
 
 const SUB_LABEL: Record<string, { text: string; cls: string }> = {
-  NOT_DONE: { text: "Хийгээгүй", cls: "bg-white/10 text-ink-dim" },
-  SUBMITTED: { text: "Илгээсэн", cls: "bg-amber-400/15 text-amber-300" },
-  DONE_ONLINE: { text: "Батлагдсан", cls: "bg-teal-400/15 text-teal-300" },
-  DONE_IN_CLASS: { text: "Ангид шалгасан", cls: "bg-teal-400/15 text-teal-300" },
-  RETURNED: { text: "Буцаасан", cls: "bg-red-400/15 text-red-300" },
+  NOT_DONE: { text: "Хийгээгүй", cls: "bg-panel text-ink-dim" },
+  SUBMITTED: { text: "Илгээсэн", cls: "bg-warning/15 text-warning" },
+  DONE_ONLINE: { text: "Батлагдсан", cls: "bg-success/15 text-success" },
+  DONE_IN_CLASS: { text: "Ангид шалгасан", cls: "bg-success/15 text-success" },
+  RETURNED: { text: "Буцаасан", cls: "bg-error/15 text-error" },
 };
 
 function pct(total: number, max: number) {
@@ -70,7 +70,7 @@ function ChildPanel({ link }: { link: ParentLink }) {
 
   if (!link.verified) {
     return (
-      <section className="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-6">
+      <section className="rounded-2xl border border-warning/20 bg-warning/5 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-bold">
@@ -78,7 +78,7 @@ function ChildPanel({ link }: { link: ParentLink }) {
             </h2>
             <p className="mt-1 text-sm text-ink-dim">{link.student.phone}</p>
           </div>
-          <span className="rounded-full bg-amber-400/15 px-3 py-1 text-xs font-bold text-amber-300">
+          <span className="rounded-full bg-warning/15 px-3 py-1 text-xs font-bold text-warning">
             Баталгаажуулалт хүлээж байна
           </span>
         </div>
@@ -87,7 +87,7 @@ function ChildPanel({ link }: { link: ParentLink }) {
   }
 
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-6">
+    <section className="rounded-2xl border border-line bg-panel p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-extrabold">
@@ -103,14 +103,14 @@ function ChildPanel({ link }: { link: ParentLink }) {
               : ""}
           </p>
         </div>
-        <span className="rounded-full bg-teal-400/15 px-3 py-1 text-xs font-bold text-teal-300">
+        <span className="rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success">
           Холбогдсон
         </span>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         {(["PRESENT", "LATE", "ABSENT"] as const).map((status) => (
-          <div key={status} className="rounded-xl border border-white/8 p-4">
+          <div key={status} className="rounded-xl border border-line p-4">
             <p className="text-2xl font-extrabold">
               {attendanceSummary[status] ?? 0}
             </p>
@@ -131,7 +131,7 @@ function ChildPanel({ link }: { link: ParentLink }) {
               return (
                 <div
                   key={`${r.test.title}-${i}`}
-                  className="rounded-xl border border-white/8 px-4 py-3 text-sm"
+                  className="rounded-xl border border-line px-4 py-3 text-sm"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-medium">{r.test.title}</span>
@@ -139,14 +139,14 @@ function ChildPanel({ link }: { link: ParentLink }) {
                       {r.totalScore}/{r.maxScore}
                     </span>
                   </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel">
                     <div
                       className={`h-full rounded-full ${
                         scorePct >= 80
-                          ? "bg-teal-400"
+                          ? "bg-success"
                           : scorePct >= 50
-                            ? "bg-amber-400"
-                            : "bg-red-400"
+                            ? "bg-warning"
+                            : "bg-error"
                       }`}
                       style={{ width: `${Math.max(scorePct, 4)}%` }}
                     />
@@ -168,7 +168,7 @@ function ChildPanel({ link }: { link: ParentLink }) {
               return (
                 <div
                   key={`${s.assignment.title}-${i}`}
-                  className="rounded-xl border border-white/8 px-4 py-3 text-sm"
+                  className="rounded-xl border border-line px-4 py-3 text-sm"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium">{s.assignment.title}</span>
@@ -207,18 +207,41 @@ function ChildPanel({ link }: { link: ParentLink }) {
   );
 }
 
+type LoadState = "loading" | "ready" | "error";
+
 export default function ParentPage() {
   const [links, setLinks] = useState<ParentLink[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [loadError, setLoadError] = useState("");
   const [phone, setPhone] = useState("");
   const [msg, setMsg] = useState("");
+  const [linkPending, setLinkPending] = useState(false);
 
-  const load = useCallback(() => {
-    api<ParentLink[]>("/parent/children").then(setLinks).catch(() => {});
-  }, []);
+  function fetchLinks() {
+    api<ParentLink[]>("/parent/children")
+      .then((data) => {
+        setLinks(data);
+        setLoadState("ready");
+      })
+      .catch((e) => {
+        setLoadError(e instanceof Error ? e.message : "Алдаа гарлаа");
+        setLoadState("error");
+      });
+  }
 
-  useEffect(load, [load]);
+  // Анхны төлөв аль хэдийн "loading" тул mount дээр дахин synchronous
+  // setState хийхгүй — зөвхөн дуудлагыг эхлүүлнэ.
+  useEffect(fetchLinks, []);
+
+  function reload() {
+    // Дахин оролдоход товч дарах мөчид (effect биш) шууд "ачаалж байна" болгоно.
+    setLoadState("loading");
+    fetchLinks();
+  }
 
   async function requestLink() {
+    if (linkPending) return;
+    setLinkPending(true);
     setMsg("");
     try {
       await api("/parent/links", {
@@ -227,9 +250,11 @@ export default function ParentPage() {
       });
       setPhone("");
       setMsg("Хүсэлт илгээгдлээ");
-      load();
+      reload();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Алдаа гарлаа");
+    } finally {
+      setLinkPending(false);
     }
   }
 
@@ -249,31 +274,64 @@ export default function ParentPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             inputMode="numeric"
+            aria-label="Сурагчийн утасны дугаар"
             placeholder="Сурагчийн утасны дугаар"
-            className="min-w-56 flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-brand-bright"
+            className="min-w-56 flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-brand-bright"
           />
           <button
             onClick={requestLink}
-            disabled={phone.replace(/\D/g, "").length !== 8}
-            className="rounded-xl bg-brand-bright px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={phone.replace(/\D/g, "").length !== 8 || linkPending}
+            aria-busy={linkPending}
+            className="rounded-xl bg-brand-bright px-5 py-3 text-sm font-bold text-on-brand disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Хүсэлт илгээх
+            {linkPending ? "Илгээж байна…" : "Хүсэлт илгээх"}
           </button>
         </div>
-        {msg && <p className="mt-3 text-sm text-teal-300">{msg}</p>}
+        {msg && <p className="mt-3 text-sm text-success">{msg}</p>}
       </section>
 
-      {links.length === 0 && (
-        <section className="rounded-2xl border border-white/8 bg-[#0b142e] p-6">
-          <p className="text-sm text-ink-dim">Холбосон хүүхэд алга байна</p>
+      {loadState === "loading" && (
+        <section className="rounded-2xl border border-line bg-panel p-6">
+          <p className="animate-pulse text-sm text-ink-dim" role="status">
+            Хүүхдийн мэдээлэл ачаалж байна…
+          </p>
         </section>
       )}
 
-      <div className="space-y-5">
-        {links.map((link) => (
-          <ChildPanel key={link.id} link={link} />
-        ))}
-      </div>
+      {loadState === "error" && (
+        <section className="rounded-2xl border border-error/30 bg-error/5 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-error">
+              Мэдээлэл ачааллахад алдаа гарлаа: {loadError}
+            </p>
+            <button
+              onClick={reload}
+              className="shrink-0 rounded-lg border border-error/40 px-3 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10"
+            >
+              Дахин оролдох
+            </button>
+          </div>
+        </section>
+      )}
+
+      {loadState === "ready" && links.length === 0 && (
+        <section className="rounded-2xl border border-line bg-panel p-6">
+          <h2 className="font-bold text-brand-soft">Холбосон хүүхэд алга байна</h2>
+          <p className="mt-2 text-sm text-ink-dim">
+            Дээрх хэсэгт сурагчийн утасны дугаараа оруулж хүсэлт илгээнэ үү.
+            Сурагч эсвэл төвийн ажилтан баталгаажуулмагц хүүхдийн ирц,
+            даалгавар, шалгалтын дүн энд харагдана.
+          </p>
+        </section>
+      )}
+
+      {loadState === "ready" && links.length > 0 && (
+        <div className="space-y-5">
+          {links.map((link) => (
+            <ChildPanel key={link.id} link={link} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
