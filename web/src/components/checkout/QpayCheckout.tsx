@@ -391,7 +391,7 @@ export default function QpayCheckout({
                     <a
                       key={d.name + d.link}
                       href={d.link}
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-line bg-surface p-2.5 text-center transition hover:border-brand/50 hover:bg-brand-soft/30"
+                      className="flex flex-col items-center gap-1.5 rounded-xl border border-line bg-surface p-2.5 text-center transition hover:border-brand/50 hover:bg-brand-tint/30"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img

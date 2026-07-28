@@ -132,7 +132,7 @@ export default function PaymentMethodPicker({
             onClick={() => onChange(m.value)}
             className={`flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition ${
               active
-                ? "border-brand bg-brand-soft/40 ring-1 ring-brand"
+                ? "border-brand bg-brand-tint/40 ring-1 ring-brand"
                 : "border-line bg-surface hover:border-brand/40"
             }`}
           >

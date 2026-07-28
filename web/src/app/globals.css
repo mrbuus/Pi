@@ -54,7 +54,16 @@
        #2563EB + цагаан = 5.12:1 ✓
      Ингэснээр өмнөх амьд цэнхэр төрх хадгалагдаж, уншигдац алдагдахгүй. */
   --brand-bright: #2563EB;
-  --brand-soft: #DCE6FB;
+  /* ⚠️ --brand-soft бол ТЕКСТИЙН өнгө (154 газар `text-brand-soft` — голчлон
+     хэсгийн гарчиг), ДЭВСГЭР биш. Өмнө нь цайвар горимд #DCE6FB байсан нь
+     цагаан дээр ~1.15:1 контрасттай — бараг үл үзэгдэх байв.
+     Одоо монохром хармони: --brand #1D4ED8 → --brand-bright #2563EB →
+     --brand-soft #1E3A8A. Нэг өнгөний өнцөг, гэрэлтэлт нь л өөр.
+     #1E3A8A нь #FAF9F6 дээр 9.87:1 — гарчигт тод, нүд цочроохгүй. */
+  --brand-soft: #1E3A8A;
+  /* Цайвар цэнхэр ДЭВСГЭРИЙН тон (bg-brand-tint). Текстэд ХЭЗЭЭ Ч
+     хэрэглэхгүй — энэ нь зөвхөн зөөлөн дэвсгэрийн угаалт. */
+  --brand-tint: #DCE6FB;
   --teal: #0F766E;
   --gold: #8A6D00;
   --violet: #6D28D9;
@@ -116,6 +125,7 @@
 
     --brand-bright: #4F7FE6;
     --brand-soft: #9DB8F5;
+    --brand-tint: #1B2A4A;
     --teal: #34D6A8;
     --gold: #E8C468;
     --violet: #A78BFA;
@@ -160,6 +170,7 @@
 
   --brand-bright: #4F7FE6;
   --brand-soft: #9DB8F5;
+  --brand-tint: #1B2A4A;
   --teal: #34D6A8;
   --gold: #E8C468;
   --violet: #A78BFA;
@@ -187,6 +198,7 @@
   --color-brand: var(--brand);
   --color-brand-bright: var(--brand-bright);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-tint: var(--brand-tint);
   --color-brand-navy: var(--brand-navy);
   --color-brand-navy-soft: var(--brand-navy-soft);
   --color-ink: var(--ink);
@@ -267,7 +279,9 @@ address,
 /* Сонголт input дотор ч харагдахуйц үлдэх ёстой (өнгө өөрчлөгдсөн ч
    тодрол хадгална). */
 ::selection {
-  background: var(--brand-soft);
+  /* ДЭВСГЭР тул --brand-tint (зөөлөн угаалт), --brand-soft (гарчгийн текстийн
+     бараан цэнхэр) БИШ — эс бөгөөс сонгосон текст бараан дээр бараан болно. */
+  background: var(--brand-tint);
   color: var(--ink);
 }
 
