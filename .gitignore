@@ -16,3 +16,6 @@ uploads/
 api/prisma/reports/student-import.json
 # Туршилтын сурагчийн seed тайлан — утас маскласан ч БОДИТ нэр, сургууль агуулна.
 api/prisma/reports/seed-test-students.json
+# Ажилтны (багш/админ) жагсаалт — БОДИТ нэр, хувийн утасны дугаар агуулна.
+# upsert-staff.cjs үүнийг уншдаг; скрипт өөрөө хувийн мэдээлэлгүй тул git-д орно.
+api/prisma/reports/staff-roster.json
