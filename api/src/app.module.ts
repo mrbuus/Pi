@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ActivityModule } from './activity/activity.module';
@@ -15,6 +16,7 @@ import { ClassificationModule } from './classification/classification.module';
 import { AttemptsModule } from './attempts/attempts.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuthModule } from './auth/auth.module';
+import { requireJwtSecret } from './auth/jwt.strategy';
 import { ClassroomsModule } from './classrooms/classrooms.module';
 import { ColorTagsModule } from './colortags/colortags.module';
 import { ContentModule } from './content/content.module';
@@ -40,9 +42,49 @@ import { VideosModule } from './videos/videos.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // Глобал rate limit (IP бүрд) — login brute-force болон autosave-ийн
-    // хэт ачааллаас хамгаална; auth дээр нарийн хязгаар тусдаа (@Throttle)
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
+    // Глобал rate limit — ЗӨВХӨН IP-ээр биш, БАТАЛГААЖСАН ХЭРЭГЛЭГЧЭЭР key
+    // хийнэ. Шалтгаан: сургалтын төвийн нэг анги (20-30 сурагч) ихэвчлэн НЭГ
+    // сургуулийн WiFi/NAT-аар дамжуулж ГАДНААС НЭГ IP шиг харагддаг тул зөвхөн
+    // IP-ээр limit тавивал бүтэн ангийг (эсвэл Render-ийн ард trust proxy
+    // тохируулаагүй бол БҮХ сургуулийг) шалгалтын дундуур зэрэг блоклох
+    // "self-inflicted outage" эрсдэлтэй (PERF-AUDIT.md §5.1).
+    //
+    // ThrottlerGuard нь APP_GUARD тул controller-ийн JwtAuthGuard-аас ӨМНӨ
+    // ажилладаг (req.user хараахан байхгүй) — иймд getTracker дотор
+    // Authorization header-ийн JWT-г ӨӨРӨӨ баталгаажуулж sub (userId)-ийг
+    // гаргаж авна. Токен байхгүй/хүчингүй (нэвтрээгүй маршрутууд: login,
+    // register, leads) бол л IP руу унана — тэнд буруу хэрэглээ бодитоор
+    // тохиолддог тул IP хязгаарлалт зохистой хэвээр байна.
+    ThrottlerModule.forRootAsync({
+      imports: [
+        JwtModule.register({
+          secret: requireJwtSecret(),
+          signOptions: { expiresIn: '7d' },
+        }),
+      ],
+      inject: [JwtService],
+      useFactory: (jwtService: JwtService) => ({
+        throttlers: [{ ttl: 60_000, limit: 300 }],
+        getTracker: async (req: Record<string, any>): Promise<string> => {
+          const header = req.headers?.authorization;
+          const token =
+            typeof header === 'string' && header.startsWith('Bearer ')
+              ? header.slice(7)
+              : undefined;
+          if (token) {
+            try {
+              const payload = await jwtService.verifyAsync<{ sub?: string }>(
+                token,
+              );
+              if (payload?.sub) return `user:${payload.sub}`;
+            } catch {
+              // Хүчингүй/хугацаа дууссан токен — доорх IP fallback ажиллана
+            }
+          }
+          return `ip:${req.ip ?? 'unknown'}`;
+        },
+      }),
+    }),
     ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,

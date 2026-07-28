@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   Patch,
   Req,
@@ -24,6 +25,11 @@ interface AuthedRequest {
 export class EnrollmentWindowsController {
   constructor(private windows: EnrollmentWindowsService) {}
 
+  // Нэвтрэлтгүй landing page-д ашиглагддаг нийтийн мэдээлэл (аль хичээл
+  // нээлттэй эсэх), хэрэглэгчээс хамаарахгүй, ховор өөрчлөгддөг тул
+  // Cache-Control тавьж Cloudflare edge дээр hit болгоно. PATCH (доор)
+  // authenticated бөгөөд мутаци тул кэшлэхгүй.
+  @Header('Cache-Control', 'public, max-age=120, stale-while-revalidate=60')
   @Get()
   findAll() {
     return this.windows.findAll();

@@ -410,11 +410,35 @@ export class TestsService {
 
   // Autosave: хариулт/тэмдэглэгээ/хугацааг нэгтгэж хадгална, үйл явдал бүртгэнэ.
   // Хугацаа дууссан байвал шууд дүгнэж SUBMITTED буцаана (клиент үр дүн рүү шилжинэ).
+  /**
+   * ⚡ ГҮЙЦЭТГЭЛИЙН ГОЛ ЗАМ. Автосэйв нь сурагч тутамд ~1.2 секунд тутам,
+   * 100 минутын шалгалтад ~300 удаа дуудагдана. 1000 сурагч зэрэг шалгалт
+   * өгвөл энэ нь тогтмол ~50 хүсэлт/сек.
+   *
+   * Өмнө нь энд loadTestWithProblems() дуудагдаж, ДУУДАЛТ БҮРТ 40 бодлогын
+   * бүтэн текст, choices, correctAnswer, бүх choiceOptions, analysis.
+   * solutionOutline-ыг DB-ээс татдаг байв — гэтэл үүнийг ЗӨВХӨН бодлогын
+   * id-нуудыг шалгахад ашигладаг (mergeDrafts → validIds).
+   *
+   * Одоо хөнгөн query-гээр зөвхөн problemId-г татна. Бүтэн тест зөвхөн
+   * хугацаа дуусаж finalize хийх үед л (сурагч тутамд ХАМГИЙН ИХДЭЭ 1 удаа)
+   * ачаалагдана.
+   */
+  private loadTestProblemIds(testId: string) {
+    return this.prisma.testProblem.findMany({
+      where: { testId },
+      orderBy: { order: 'asc' },
+      select: { problemId: true },
+    });
+  }
+
   async saveSession(testId: string, userId: string, dto: SaveSessionDto) {
-    const test = await this.loadTestWithProblems(testId);
-    const session = (await this.prisma.testAttemptSession.findUnique({
-      where: { testId_studentId: { testId, studentId: userId } },
-    })) as SessionRow | null;
+    const [problemRefs, session] = await Promise.all([
+      this.loadTestProblemIds(testId),
+      this.prisma.testAttemptSession.findUnique({
+        where: { testId_studentId: { testId, studentId: userId } },
+      }) as Promise<SessionRow | null>,
+    ]);
     if (!session) throw new NotFoundException('Шалгалт эхлээгүй байна');
 
     if (session.status === AttemptSessionStatus.SUBMITTED) {
@@ -425,9 +449,11 @@ export class TestsService {
       return { status: session.status, result };
     }
 
-    const merged = this.mergeDrafts(test.problems, session, dto);
+    const merged = this.mergeDrafts(problemRefs, session, dto);
 
     if (this.isExpired(session)) {
+      // Зөвхөн ЭНД бүтэн тест хэрэгтэй — оноо бодоход хариун түлхүүр шаардлагатай.
+      const test = await this.loadTestWithProblems(testId);
       const { result } = await this.finalize(test, session, userId, merged);
       return {
         status: AttemptSessionStatus.SUBMITTED,
@@ -748,8 +774,10 @@ export class TestsService {
 
   // dto-г session-ий draft дээр нэгтгэнэ. Зөвхөн тестийн бодлогын түлхүүрүүдийг
   // хүлээн авна (халдлагаар дурын түлхүүр шахахаас хамгаална).
+  // Зөвхөн problemId л хэрэгтэй тул хөнгөн төрөл хүлээж авна — ингэснээр
+  // автосэйвийн зам бүтэн TestProblemRow ачаалах шаардлагагүй болно.
   private mergeDrafts(
-    problems: TestProblemRow[],
+    problems: { problemId: string }[],
     session: SessionRow,
     dto: SaveSessionDto,
   ) {
@@ -896,21 +924,47 @@ export class TestsService {
           events: m.events as Prisma.InputJsonValue,
         },
       }),
-      // Бодлогын статистик: attemptCount + correctRate датанаас шинэчлэгдэнэ (SPEC §9.3)
-      ...statUpdates.map(({ id, correct }) => {
-        const p = byId.get(id)!;
-        const oldCount = p.attemptCount;
-        const oldRate = p.correctRate ?? 0;
-        const newRate =
-          (oldRate * oldCount + (correct ? 1 : 0)) / (oldCount + 1);
-        return this.prisma.problem.update({
-          where: { id },
-          data: {
-            attemptCount: { increment: 1 },
-            correctRate: Math.round(newRate * 1000) / 1000,
-          },
-        });
-      }),
+      // Бодлогын статистик: attemptCount + correctRate (SPEC §9.3).
+      //
+      // ⚡ ГҮЙЦЭТГЭЛ: өмнө нь бодлого тутамд ТУСДАА UPDATE явуулдаг байв.
+      // 1000 сурагч × ~30 бодлого = ~30,000 statement, тэгээд шалгалтын
+      // эцсийн хугацаа нийтлэг тул бүгд НЭГ мөчид бөөгнөрдөг. Одоо нэг
+      // bulk UPDATE ... FROM (VALUES ...) болов.
+      //
+      // 🔒 ЗӨВ БАЙДАЛ: өмнөх хувилбар correctRate-г JS дотор finalize
+      // эхлэхэд уншсан ХУУЧИРСАН attemptCount/correctRate-аас бодож байсан.
+      // Хоёр сурагч зэрэг илгээвэл хоёулаа ижил хуучин утга уншиж,
+      // сүүлчийнх нь өмнөхийг дарж бичдэг (read-modify-write race).
+      // Одоо мөрийн ОДООГИЙН утга дээр SQL дотор атомаар тооцно.
+      ...(statUpdates.length
+        ? [
+            this.prisma.$executeRaw`
+              UPDATE "Problem" AS p
+              SET "attemptCount" = p."attemptCount" + 1,
+                  -- correctRate нь double precision тул ROUND(x, n)-д шууд
+                  -- өгч болохгүй (тэр функц зөвхөн numeric-д байдаг) —
+                  -- numeric руу cast хийж бөөрөнхийлөөд буцааж хөрвүүлнэ.
+                  "correctRate" = ROUND(
+                    (
+                      (
+                        (COALESCE(p."correctRate", 0) * p."attemptCount")
+                        + v.correct
+                      ) / (p."attemptCount" + 1)
+                    )::numeric,
+                    3
+                  )::double precision
+              FROM (
+                VALUES ${Prisma.join(
+                  statUpdates.map(
+                    ({ id, correct }) =>
+                      Prisma.sql`(${id}, ${correct ? 1 : 0}::numeric)`,
+                  ),
+                )}
+              ) AS v(id, correct)
+              WHERE p.id = v.id
+            `,
+          ]
+        : []),
     ]);
 
     return { result, graded };

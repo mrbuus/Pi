@@ -934,7 +934,12 @@ model LearningEvent {
   device     String?
   meta       Json?
 
-  @@index([userId])
+  // Дан @@index([userId]) байсныг ХАССАН (PERF-AUDIT.md §0 олдвор #8): доорх
+  // composite [userId, occurredAt]-ийн prefix нь `WHERE userId = ...` query-г
+  // аль хэдийн бүрхдэг тул давхардал байсан — EXPLAIN-ээр баталгаажуулав (энэ
+  // migration-ий description-д дэлгэрэнгүй). Экзамен-hot биш ч write overhead-г
+  // (exam замд Attempt/TestAttemptSession bulk write-той зэрэгцэн ажилладаг DB
+  // instance) шалтгаангүй нэмдэг байсныг цэвэрлэв.
   @@index([occurredAt])
   @@index([sessionId])
   @@index([userId, occurredAt])

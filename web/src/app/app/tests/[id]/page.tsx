@@ -91,6 +91,19 @@ interface ReviewResp {
 const MAX_LEAVES = 3; // энэ тооны дараа шалгалт автоматаар дуусна
 const SAVE_DEBOUNCE_MS = 1200;
 const HEARTBEAT_MS = 20_000;
+// ±20% jitter — 1000 сурагч ойролцоо мөчид шалгалт эхэлбэл heartbeat-ууд нь
+// ФАЗААРАА синхрончлогдож 20с тутамд НЭГ ДОР бөөгнөрдөг (thundering herd) байсныг
+// тархаана. Тик бүрд шинэ санамсаргүй утга сонгоно (нэг л удаа биш).
+const HEARTBEAT_JITTER = 0.2;
+// Dirty өөрчлөлт байхгүй үед heartbeat-ыг бүрэн ЗОГСООХГҮЙ (сервертэй холбоо
+// тасраагүй эсэх, remainingSec clock-drift, force-SUBMITTED зэргийг мэдэх ёстой)
+// — гэхдээ ХЭД ДАХИН бага давтамжтай хөнгөн "keepalive"-аар сольно.
+const IDLE_KEEPALIVE_MS = 90_000;
+// Амжилтгүй болсон ЖИНХЭНЭ (хариулт/тэмдэглэгээ/үйл явдал агуулсан) save-д
+// exponential backoff + jitter — сервер богино хугацаанд ачаалалтай үед 1000
+// клиент зэрэг дахин оролдож улам дарамт өгөхөөс сэргийлнэ.
+const RETRY_BASE_MS = 2000;
+const RETRY_MAX_MS = 30_000;
 const FIVE_MIN_TOAST_SEC = 300;
 
 export default function TakeTestPage() {
@@ -133,6 +146,19 @@ export default function TakeTestPage() {
   const timesRef = useRef<Record<string, number>>({});
   const dirtyAnswersRef = useRef<Record<string, number | string>>({});
   const dirtyStatesRef = useRef<Record<string, string>>({});
+  // Сервер рүү сүүлд амжилттай илгээгдсэн problemTimes утгууд — дараагийн save
+  // бүрд БҮХ 40 бодлогын хуримтлагдсан секундыг биш, ЗӨВХӨН ӨӨРЧЛӨГДСӨН
+  // мөрүүдийг л дахин илгээхэд ашиглана (mergeDrafts сервер талд key тус
+  // бүрээр merge хийдэг тул бүтэн map илгээх шаардлагагүй — tests.service.ts).
+  const lastSavedTimesRef = useRef<Record<string, number>>({});
+  const lastContactAtRef = useRef(0); // сервертэй сүүлд амжилттай холбогдсон цаг
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryCountRef = useRef(0);
+  // flushSave өөрийгөө backoff timeout дотроос дуудах ёстой тул TDZ/lint-ийн
+  // "declared here дараа access" алдаанаас зайлсхийхийн тулд ref-ээр дамжуулна.
+  const flushSaveRef = useRef<
+    ((event?: "LEAVE" | "RETURN" | "FULLSCREEN_EXIT", opts?: { keepalive?: boolean }) => Promise<void>) | null
+  >(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const submittedRef = useRef(false);
   const phaseRef = useRef(phase);
@@ -184,19 +210,31 @@ export default function TakeTestPage() {
   // Амжилтгүй болвол dirty-г ЦЭВЭРЛЭХГҮЙ (зөвхөн амжилттай илгээгдсэн, дараа нь
   // дахин өөрчлөгдөөгүй утгуудыг л хасна) — сүлжээ тасрахад хариулт алдагдахгүй,
   // OfflineBanner-ийн амлалт ("хадгалагдахгүй байна") жинхэнэ утгатай байх ёстой.
+  // opts.keepalive: dirty өгөгдөл байхгүй атлаа сервертэй холбоо тасраагүй
+  // эсэх/remainingSec-ийг resync хийхийн тулд ХООСОН (эсвэл бараг хоосон) body-той
+  // ч гэсэн ЗААВАЛ илгээх — heartbeat effect-ээс л дуудагдана, ердийн debounce-оос үгүй.
   const flushSave = useCallback(
-    async (event?: "LEAVE" | "RETURN" | "FULLSCREEN_EXIT") => {
+    async (event?: "LEAVE" | "RETURN" | "FULLSCREEN_EXIT", opts?: { keepalive?: boolean }) => {
       if (submittedRef.current) return;
       const answersSnapshot = { ...dirtyAnswersRef.current };
       const statesSnapshot = { ...dirtyStatesRef.current };
-      const timesSnapshot = { ...timesRef.current };
+      // problemTimes: сүүлд амжилттай хадгалснаас ЯЛГААТАЙ мөрүүдийг л илгээнэ
+      // (сервер mergeDrafts дотор key тус бүрээр merge хийдэг тул бүтэн 40
+      // бодлогын хуримтлагдсан секундыг дахин дахин илгээх шаардлагагүй).
+      const timesSnapshot: Record<string, number> = {};
+      for (const [pid, sec] of Object.entries(timesRef.current)) {
+        if (lastSavedTimesRef.current[pid] !== sec) timesSnapshot[pid] = sec;
+      }
       const body: Record<string, unknown> = {};
       if (Object.keys(answersSnapshot).length) body.answers = answersSnapshot;
       if (Object.keys(statesSnapshot).length) body.selfStates = statesSnapshot;
       if (Object.keys(timesSnapshot).length) body.problemTimes = timesSnapshot;
       if (event) body.event = event;
-      if (Object.keys(body).length === 0) return;
-      setSaveStatus("saving");
+      const isRealSave = Object.keys(body).length > 0;
+      // Илгээх зүйлгүй, keepalive ч биш бол сүлжээгээр огт хүрэлцэхгүй —
+      // хамгийн хямд хүсэлт бол огт илгээгдээгүй хүсэлт.
+      if (!isRealSave && !opts?.keepalive) return;
+      if (isRealSave) setSaveStatus("saving");
       try {
         const r = await api<{ status: string; remainingSec?: number | null; leaveCount?: number; result?: { totalScore: number; maxScore: number } }>(
           `/tests/${params.id}/session`,
@@ -208,7 +246,16 @@ export default function TakeTestPage() {
         for (const k of Object.keys(statesSnapshot)) {
           if (dirtyStatesRef.current[k] === statesSnapshot[k]) delete dirtyStatesRef.current[k];
         }
-        setSaveStatus("saved");
+        for (const [pid, sec] of Object.entries(timesSnapshot)) {
+          lastSavedTimesRef.current[pid] = sec;
+        }
+        lastContactAtRef.current = Date.now();
+        retryCountRef.current = 0;
+        if (retryTimerRef.current) {
+          clearTimeout(retryTimerRef.current);
+          retryTimerRef.current = null;
+        }
+        if (isRealSave) setSaveStatus("saved");
         setOffline(false);
         if (r.status === "SUBMITTED") {
           // Сервер хугацааг хаасан — үр дүн рүү шилжинэ
@@ -221,15 +268,40 @@ export default function TakeTestPage() {
         if (typeof r.remainingSec === "number") setSecondsLeft(r.remainingSec);
         if (typeof r.leaveCount === "number") setLeaveCount(r.leaveCount);
       } catch {
-        // Сүлжээний алдаа — dirty өгөгдлийг хэвээр үлдээж, тогтмол banner харуулна
-        setOffline(true);
+        // Сүлжээний алдаа — dirty өгөгдлийг хэвээр үлдээж, тогтмол banner харуулна.
+        // ЖИНХЭНЭ save (хариулт/тэмдэглэгээ/үйл явдал) амжилтгүй бол л offline
+        // мэдэгдэл харуулна — хоосон keepalive л амжилтгүй болсноор "хариулт
+        // хадгалагдахгүй байна" гэсэн худал сануулга сурагчийг айлгах ёсгүй.
+        if (isRealSave) {
+          setOffline(true);
+          // exponential backoff + jitter: сервер богино хугацаанд ачаалалтай
+          // байвал 1000 клиент зэрэг дахин оролдож улам дарамт өгөхгүй байх.
+          if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+          const attempt = retryCountRef.current;
+          retryCountRef.current = Math.min(attempt + 1, 8);
+          const backoff = Math.min(RETRY_MAX_MS, RETRY_BASE_MS * 2 ** attempt);
+          const jittered = backoff * (0.7 + Math.random() * 0.6); // ±30%
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null;
+            void flushSaveRef.current?.();
+          }, jittered);
+        }
       }
     },
     [params.id, loadReview],
   );
+  useEffect(() => {
+    flushSaveRef.current = flushSave;
+  }, [flushSave]);
 
   const scheduleSave = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    // Шинэ засвар ирлээ — хуучин backoff-оор хүлээж буй дахин оролдлого илүү
+    // болно, шинэ debounce нь тэр өгөгдлийг барин авна.
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
     saveTimerRef.current = setTimeout(() => void flushSave(), SAVE_DEBOUNCE_MS);
   }, [flushSave]);
 
@@ -263,6 +335,7 @@ export default function TakeTestPage() {
       submittedRef.current = true;
       setError("");
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
       try {
         const res = await api<{ result: { totalScore: number; maxScore: number } }>(
           `/tests/${params.id}/submit`,
@@ -313,10 +386,40 @@ export default function TakeTestPage() {
   }, [phase]);
 
   // ---------- Heartbeat autosave ----------
+  // Blind 20с-ийн setInterval-ийн оронд өөрийгөө дахин товлодог setTimeout ашиглана:
+  // 1) Dirty (хариулт/тэмдэглэгээ) байвал л ЖИНХЭНЭ save явуулна.
+  // 2) Dirty байхгүй ч сервертэй холбоо ХАНГАЛТГҮЙ удаан (IDLE_KEEPALIVE_MS) бол
+  //    хөнгөн keepalive (remainingSec/force-SUBMITTED resync) явуулна — 20с
+  //    БҮРД биш, хамаагүй ховор.
+  // 3) Огт юу ч хийх шаардлагагүй бол СЕРВЕРТ ОГТ ХҮРЭЛЦЭХГҮЙ (хамгийн хямд запрос).
+  // 4) Дараагийн тикийн хугацааг ±20% jitter-ээр санамсаргүй болгоно — 1000
+  //    сурагч ойролцоо мөчид эхэлсэн ч heartbeat-үүд нь давхцаж бөөгнөрөхгүй.
   useEffect(() => {
     if (phase !== "taking") return;
-    const id = setInterval(() => void flushSave(), HEARTBEAT_MS);
-    return () => clearInterval(id);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const jitteredDelay = () =>
+      HEARTBEAT_MS * (1 - HEARTBEAT_JITTER + Math.random() * (2 * HEARTBEAT_JITTER));
+
+    const tick = () => {
+      if (cancelled) return;
+      const hasDirty =
+        Object.keys(dirtyAnswersRef.current).length > 0 ||
+        Object.keys(dirtyStatesRef.current).length > 0;
+      if (hasDirty) {
+        void flushSave();
+      } else if (Date.now() - lastContactAtRef.current >= IDLE_KEEPALIVE_MS) {
+        void flushSave(undefined, { keepalive: true });
+      }
+      timer = setTimeout(tick, jitteredDelay());
+    };
+
+    timer = setTimeout(tick, jitteredDelay());
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [phase, flushSave]);
 
   // ---------- 5 минутын үлдэлтэй сануулга (нэг л удаа, non-blocking toast) ----------
@@ -447,6 +550,14 @@ export default function TakeTestPage() {
       setSecondsLeft(r.session.remainingSec ?? null);
       setLeaveCount(r.session.leaveCount ?? 0);
       lastLeaveAtRef.current = Date.now(); // эхлэх мөчийн fullscreen шилжилтийг тооцохгүй
+      // Autosave/heartbeat-ийн төлөв цэвэрлэнэ (resume үед хуучин утга үлдэхгүй)
+      lastContactAtRef.current = Date.now();
+      lastSavedTimesRef.current = {};
+      retryCountRef.current = 0;
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = null;
+      }
       setPageIdx(0);
       setSubView("question");
       setPhase("taking");

@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -56,14 +57,22 @@ export class TestsController {
   }
 
   // Шалгалт эхлэх/үргэлжлүүлэх — session үүсгэж бодлогуудыг хөлдсөн дараалалтай буцаана
+  // Global throttler одоо userId-аар key хийдэг тул энэ лимит нь
+  // СУРАГЧ БҮРД (IP биш) хамаарна — 1 сурагч хуудсаа дахин ачаалах/сүлжээ
+  // тасрах зэргээс болж хэдэн удаа дахин дуудахад хангалттай зай үлдээнэ.
   @Roles(Role.STUDENT)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post(':id/start')
   start(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.start(id, req.user.userId);
   }
 
-  // Autosave + анти-чит үйл явдал
+  // Autosave + анти-чит үйл явдал — HOT PATH. Бодит дээд хурд/сурагч ≈
+  // debounce (1/1.2с ≈ 50/мин) + heartbeat (20с тутамд) ≈ 53/мин. 180/мин
+  // (userId-аар) нь үүнээс 3+ дахин их тул тогтмол ажиллагаанд огт
+  // хүрэхгүй, зөвхөн бодит хэтрүүлэг/чит хийх оролдлогыг барина.
   @Roles(Role.STUDENT)
+  @Throttle({ default: { limit: 180, ttl: 60_000 } })
   @Patch(':id/session')
   saveSession(
     @Param('id') id: string,
@@ -74,6 +83,7 @@ export class TestsController {
   }
 
   @Roles(Role.STUDENT)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post(':id/submit')
   submit(
     @Param('id') id: string,
