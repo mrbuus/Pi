@@ -40,16 +40,35 @@ export class ClassSessionsService {
   }
 
   // Багш: "энэ анги өнөөдөр энэ тестийг хийсэн"
+  /**
+   * Ангид хийсэн тестийг бүртгэнэ. ХОЁР горим:
+   *   1) Бодлогын сангийн тест — testId өгнө.
+   *   2) ГААРААР бичсэн (гаднын) тест — testId байхгүй, зөвхөн manualTitle.
+   *      Сурагчид заримдаа манай санд ОГТ байхгүй бодлого бодох тул багш
+   *      тестийн НЭРИЙГ нь бичээд бүртгэнэ. Жинхэнэ Test бичлэг үүсгэхгүй —
+   *      зөвхөн "ангид ийм нэртэй тест хийсэн" гэдгийг тэмдэглэнэ.
+   */
   async recordDidTest(
     classroomId: string,
-    testId: string,
+    testId: string | undefined,
     dateStr: string | undefined,
     userId: string,
     role: Role,
+    manual?: { title?: string; problemCount?: number },
   ) {
     await this.assertClassAccess(classroomId, userId, role);
-    const test = await this.prisma.test.findUnique({ where: { id: testId } });
-    if (!test) throw new NotFoundException('Тест олдсонгүй');
+
+    const manualTitle = manual?.title?.trim();
+    if (!testId && !manualTitle) {
+      throw new BadRequestException(
+        'Тест сонгох эсвэл тестийн нэрийг гараар бичнэ үү',
+      );
+    }
+    if (testId) {
+      const test = await this.prisma.test.findUnique({ where: { id: testId } });
+      if (!test) throw new NotFoundException('Тест олдсонгүй');
+    }
+
     let date = todayUB();
     if (dateStr) {
       try {
@@ -57,6 +76,21 @@ export class ClassSessionsService {
       } catch {
         throw new BadRequestException('Огноо буруу байна');
       }
+    }
+
+    // Гараар бичсэн бол давхардлын түлхүүр байхгүй (testId = null) тул шууд
+    // үүсгэнэ — нэг өдөр хэд хэдэн гаднын тест бүртгэж болно.
+    if (!testId) {
+      return this.prisma.classTestSession.create({
+        data: {
+          classroomId,
+          testId: null,
+          manualTitle,
+          manualProblemCount: manual?.problemCount ?? null,
+          date,
+          createdById: userId,
+        },
+      });
     }
 
     return this.prisma.classTestSession.upsert({
@@ -81,7 +115,8 @@ export class ClassSessionsService {
     });
     const tests = await this.prisma.test.findMany({
       where: {
-        id: { in: sessions.map((s) => s.testId) },
+        // Гараар бичсэн session-д testId = null тул шүүж хасна.
+        id: { in: sessions.flatMap((s) => (s.testId ? [s.testId] : [])) },
         ...(subject ? { chapter: { book: { subject } } } : {}),
       },
       include: {
@@ -95,12 +130,15 @@ export class ClassSessionsService {
     });
     const byId = new Map(tests.map((t) => [t.id, t]));
     return sessions.map((s) => {
-      const test = byId.get(s.testId);
+      const test = s.testId ? byId.get(s.testId) : undefined;
       const excluded = new Set(s.excludedProblemIds);
       return {
         id: s.id,
         date: s.date,
         excludedProblemIds: s.excludedProblemIds,
+        // Гараар бичсэн тест: жинхэнэ Problem мөр байхгүй тул дугаараар нь
+        // синтетик жагсаалт үүсгэнэ. Сурагч эдгээрийг адилхан тэмдэглэнэ.
+        manualTitle: s.manualTitle,
         test: test
           ? {
               id: test.id,
@@ -112,7 +150,21 @@ export class ClassSessionsService {
                 included: !excluded.has(tp.problemId),
               })),
             }
-          : null,
+          : s.manualTitle
+            ? {
+                id: null,
+                title: s.manualTitle,
+                problems: Array.from(
+                  { length: s.manualProblemCount ?? 0 },
+                  (_, i) => ({
+                    index: i + 1,
+                    problemId: `manual:${s.id}:${i + 1}`,
+                    token: String(i + 1),
+                    included: !excluded.has(`manual:${s.id}:${i + 1}`),
+                  }),
+                ),
+              }
+            : null,
       };
     });
   }
@@ -169,7 +221,8 @@ export class ClassSessionsService {
 
     const tests = await this.prisma.test.findMany({
       where: {
-        id: { in: sessions.map((s) => s.testId) },
+        // Гараар бичсэн session-д testId = null тул шүүж хасна.
+        id: { in: sessions.flatMap((s) => (s.testId ? [s.testId] : [])) },
         ...(subject ? { chapter: { book: { subject } } } : {}),
       },
       include: {
@@ -204,11 +257,32 @@ export class ClassSessionsService {
 
     return sessions
       .map((s) => {
-        const test = testById.get(s.testId);
-        if (!test) return null;
-        // Багшийн хассан бодлогуудыг сурагчид харуулахгүй (дахин дугаарлана)
         const excluded = new Set(s.excludedProblemIds);
-        const included = test.problems.filter(
+
+        // ГААРААР бичсэн тест: жинхэнэ Problem мөр байхгүй тул зөвхөн дугаараар
+        // синтетик бодлого үүсгэнэ. Сурагч цаасаа хараад адилхан тэмдэглэнэ —
+        // энэ нь "манай санд байхгүй гаднын бодлого"-ыг бүртгэх цорын ганц зам.
+        const manualProblems = s.testId
+          ? null
+          : Array.from({ length: s.manualProblemCount ?? 0 }, (_, i) => ({
+              problemId: `manual:${s.id}:${i + 1}`,
+              problem: {
+                token: String(i + 1),
+                statementText: null as string | null,
+                imageKey: null as string | null,
+              },
+            }));
+
+        const test = s.testId ? testById.get(s.testId) : undefined;
+        const source = test
+          ? { id: test.id as string | null, title: test.title, problems: test.problems }
+          : manualProblems && s.manualTitle
+            ? { id: null, title: s.manualTitle, problems: manualProblems }
+            : null;
+        if (!source) return null;
+
+        // Багшийн хассан бодлогуудыг сурагчид харуулахгүй (дахин дугаарлана)
+        const included = source.problems.filter(
           (tp) => !excluded.has(tp.problemId),
         );
         if (included.length === 0) return null;
@@ -221,7 +295,7 @@ export class ClassSessionsService {
           markingClosesOn: dateKey(
             addDateDays(s.date, EVENING_MARKING_WINDOW_DAYS - 1),
           ),
-          test: { id: test.id, title: test.title },
+          test: { id: source.id, title: source.title },
           problems: included.map((tp, i) => ({
             index: i + 1,
             problemId: tp.problemId,

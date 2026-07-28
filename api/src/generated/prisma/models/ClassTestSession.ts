@@ -20,14 +20,26 @@ export type ClassTestSessionModel = runtime.Types.Result.DefaultSelection<Prisma
 
 export type AggregateClassTestSession = {
   _count: ClassTestSessionCountAggregateOutputType | null
+  _avg: ClassTestSessionAvgAggregateOutputType | null
+  _sum: ClassTestSessionSumAggregateOutputType | null
   _min: ClassTestSessionMinAggregateOutputType | null
   _max: ClassTestSessionMaxAggregateOutputType | null
+}
+
+export type ClassTestSessionAvgAggregateOutputType = {
+  manualProblemCount: number | null
+}
+
+export type ClassTestSessionSumAggregateOutputType = {
+  manualProblemCount: number | null
 }
 
 export type ClassTestSessionMinAggregateOutputType = {
   id: string | null
   classroomId: string | null
   testId: string | null
+  manualTitle: string | null
+  manualProblemCount: number | null
   date: Date | null
   createdById: string | null
   createdAt: Date | null
@@ -37,6 +49,8 @@ export type ClassTestSessionMaxAggregateOutputType = {
   id: string | null
   classroomId: string | null
   testId: string | null
+  manualTitle: string | null
+  manualProblemCount: number | null
   date: Date | null
   createdById: string | null
   createdAt: Date | null
@@ -46,6 +60,8 @@ export type ClassTestSessionCountAggregateOutputType = {
   id: number
   classroomId: number
   testId: number
+  manualTitle: number
+  manualProblemCount: number
   date: number
   createdById: number
   createdAt: number
@@ -54,10 +70,20 @@ export type ClassTestSessionCountAggregateOutputType = {
 }
 
 
+export type ClassTestSessionAvgAggregateInputType = {
+  manualProblemCount?: true
+}
+
+export type ClassTestSessionSumAggregateInputType = {
+  manualProblemCount?: true
+}
+
 export type ClassTestSessionMinAggregateInputType = {
   id?: true
   classroomId?: true
   testId?: true
+  manualTitle?: true
+  manualProblemCount?: true
   date?: true
   createdById?: true
   createdAt?: true
@@ -67,6 +93,8 @@ export type ClassTestSessionMaxAggregateInputType = {
   id?: true
   classroomId?: true
   testId?: true
+  manualTitle?: true
+  manualProblemCount?: true
   date?: true
   createdById?: true
   createdAt?: true
@@ -76,6 +104,8 @@ export type ClassTestSessionCountAggregateInputType = {
   id?: true
   classroomId?: true
   testId?: true
+  manualTitle?: true
+  manualProblemCount?: true
   date?: true
   createdById?: true
   createdAt?: true
@@ -121,6 +151,18 @@ export type ClassTestSessionAggregateArgs<ExtArgs extends runtime.Types.Extensio
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ClassTestSessionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ClassTestSessionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ClassTestSessionMinAggregateInputType
@@ -151,6 +193,8 @@ export type ClassTestSessionGroupByArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   _count?: ClassTestSessionCountAggregateInputType | true
+  _avg?: ClassTestSessionAvgAggregateInputType
+  _sum?: ClassTestSessionSumAggregateInputType
   _min?: ClassTestSessionMinAggregateInputType
   _max?: ClassTestSessionMaxAggregateInputType
 }
@@ -158,12 +202,16 @@ export type ClassTestSessionGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type ClassTestSessionGroupByOutputType = {
   id: string
   classroomId: string
-  testId: string
+  testId: string | null
+  manualTitle: string | null
+  manualProblemCount: number | null
   date: Date
   createdById: string
   createdAt: Date
   excludedProblemIds: string[]
   _count: ClassTestSessionCountAggregateOutputType | null
+  _avg: ClassTestSessionAvgAggregateOutputType | null
+  _sum: ClassTestSessionSumAggregateOutputType | null
   _min: ClassTestSessionMinAggregateOutputType | null
   _max: ClassTestSessionMaxAggregateOutputType | null
 }
@@ -189,7 +237,9 @@ export type ClassTestSessionWhereInput = {
   NOT?: Prisma.ClassTestSessionWhereInput | Prisma.ClassTestSessionWhereInput[]
   id?: Prisma.StringFilter<"ClassTestSession"> | string
   classroomId?: Prisma.StringFilter<"ClassTestSession"> | string
-  testId?: Prisma.StringFilter<"ClassTestSession"> | string
+  testId?: Prisma.StringNullableFilter<"ClassTestSession"> | string | null
+  manualTitle?: Prisma.StringNullableFilter<"ClassTestSession"> | string | null
+  manualProblemCount?: Prisma.IntNullableFilter<"ClassTestSession"> | number | null
   date?: Prisma.DateTimeFilter<"ClassTestSession"> | Date | string
   createdById?: Prisma.StringFilter<"ClassTestSession"> | string
   createdAt?: Prisma.DateTimeFilter<"ClassTestSession"> | Date | string
@@ -199,7 +249,9 @@ export type ClassTestSessionWhereInput = {
 export type ClassTestSessionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
-  testId?: Prisma.SortOrder
+  testId?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualProblemCount?: Prisma.SortOrderInput | Prisma.SortOrder
   date?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -213,7 +265,9 @@ export type ClassTestSessionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ClassTestSessionWhereInput[]
   NOT?: Prisma.ClassTestSessionWhereInput | Prisma.ClassTestSessionWhereInput[]
   classroomId?: Prisma.StringFilter<"ClassTestSession"> | string
-  testId?: Prisma.StringFilter<"ClassTestSession"> | string
+  testId?: Prisma.StringNullableFilter<"ClassTestSession"> | string | null
+  manualTitle?: Prisma.StringNullableFilter<"ClassTestSession"> | string | null
+  manualProblemCount?: Prisma.IntNullableFilter<"ClassTestSession"> | number | null
   date?: Prisma.DateTimeFilter<"ClassTestSession"> | Date | string
   createdById?: Prisma.StringFilter<"ClassTestSession"> | string
   createdAt?: Prisma.DateTimeFilter<"ClassTestSession"> | Date | string
@@ -223,14 +277,18 @@ export type ClassTestSessionWhereUniqueInput = Prisma.AtLeast<{
 export type ClassTestSessionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
-  testId?: Prisma.SortOrder
+  testId?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualProblemCount?: Prisma.SortOrderInput | Prisma.SortOrder
   date?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   excludedProblemIds?: Prisma.SortOrder
   _count?: Prisma.ClassTestSessionCountOrderByAggregateInput
+  _avg?: Prisma.ClassTestSessionAvgOrderByAggregateInput
   _max?: Prisma.ClassTestSessionMaxOrderByAggregateInput
   _min?: Prisma.ClassTestSessionMinOrderByAggregateInput
+  _sum?: Prisma.ClassTestSessionSumOrderByAggregateInput
 }
 
 export type ClassTestSessionScalarWhereWithAggregatesInput = {
@@ -239,7 +297,9 @@ export type ClassTestSessionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ClassTestSessionScalarWhereWithAggregatesInput | Prisma.ClassTestSessionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ClassTestSession"> | string
   classroomId?: Prisma.StringWithAggregatesFilter<"ClassTestSession"> | string
-  testId?: Prisma.StringWithAggregatesFilter<"ClassTestSession"> | string
+  testId?: Prisma.StringNullableWithAggregatesFilter<"ClassTestSession"> | string | null
+  manualTitle?: Prisma.StringNullableWithAggregatesFilter<"ClassTestSession"> | string | null
+  manualProblemCount?: Prisma.IntNullableWithAggregatesFilter<"ClassTestSession"> | number | null
   date?: Prisma.DateTimeWithAggregatesFilter<"ClassTestSession"> | Date | string
   createdById?: Prisma.StringWithAggregatesFilter<"ClassTestSession"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ClassTestSession"> | Date | string
@@ -249,7 +309,9 @@ export type ClassTestSessionScalarWhereWithAggregatesInput = {
 export type ClassTestSessionCreateInput = {
   id?: string
   classroomId: string
-  testId: string
+  testId?: string | null
+  manualTitle?: string | null
+  manualProblemCount?: number | null
   date: Date | string
   createdById: string
   createdAt?: Date | string
@@ -259,7 +321,9 @@ export type ClassTestSessionCreateInput = {
 export type ClassTestSessionUncheckedCreateInput = {
   id?: string
   classroomId: string
-  testId: string
+  testId?: string | null
+  manualTitle?: string | null
+  manualProblemCount?: number | null
   date: Date | string
   createdById: string
   createdAt?: Date | string
@@ -269,7 +333,9 @@ export type ClassTestSessionUncheckedCreateInput = {
 export type ClassTestSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
-  testId?: Prisma.StringFieldUpdateOperationsInput | string
+  testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualProblemCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -279,7 +345,9 @@ export type ClassTestSessionUpdateInput = {
 export type ClassTestSessionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
-  testId?: Prisma.StringFieldUpdateOperationsInput | string
+  testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualProblemCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -289,7 +357,9 @@ export type ClassTestSessionUncheckedUpdateInput = {
 export type ClassTestSessionCreateManyInput = {
   id?: string
   classroomId: string
-  testId: string
+  testId?: string | null
+  manualTitle?: string | null
+  manualProblemCount?: number | null
   date: Date | string
   createdById: string
   createdAt?: Date | string
@@ -299,7 +369,9 @@ export type ClassTestSessionCreateManyInput = {
 export type ClassTestSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
-  testId?: Prisma.StringFieldUpdateOperationsInput | string
+  testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualProblemCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -309,7 +381,9 @@ export type ClassTestSessionUpdateManyMutationInput = {
 export type ClassTestSessionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
-  testId?: Prisma.StringFieldUpdateOperationsInput | string
+  testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualProblemCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -326,16 +400,24 @@ export type ClassTestSessionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
   testId?: Prisma.SortOrder
+  manualTitle?: Prisma.SortOrder
+  manualProblemCount?: Prisma.SortOrder
   date?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   excludedProblemIds?: Prisma.SortOrder
 }
 
+export type ClassTestSessionAvgOrderByAggregateInput = {
+  manualProblemCount?: Prisma.SortOrder
+}
+
 export type ClassTestSessionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
   testId?: Prisma.SortOrder
+  manualTitle?: Prisma.SortOrder
+  manualProblemCount?: Prisma.SortOrder
   date?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -345,9 +427,15 @@ export type ClassTestSessionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
   testId?: Prisma.SortOrder
+  manualTitle?: Prisma.SortOrder
+  manualProblemCount?: Prisma.SortOrder
   date?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type ClassTestSessionSumOrderByAggregateInput = {
+  manualProblemCount?: Prisma.SortOrder
 }
 
 export type ClassTestSessionCreateexcludedProblemIdsInput = {
@@ -365,6 +453,8 @@ export type ClassTestSessionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   id?: boolean
   classroomId?: boolean
   testId?: boolean
+  manualTitle?: boolean
+  manualProblemCount?: boolean
   date?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -375,6 +465,8 @@ export type ClassTestSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   classroomId?: boolean
   testId?: boolean
+  manualTitle?: boolean
+  manualProblemCount?: boolean
   date?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -385,6 +477,8 @@ export type ClassTestSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   classroomId?: boolean
   testId?: boolean
+  manualTitle?: boolean
+  manualProblemCount?: boolean
   date?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -395,13 +489,15 @@ export type ClassTestSessionSelectScalar = {
   id?: boolean
   classroomId?: boolean
   testId?: boolean
+  manualTitle?: boolean
+  manualProblemCount?: boolean
   date?: boolean
   createdById?: boolean
   createdAt?: boolean
   excludedProblemIds?: boolean
 }
 
-export type ClassTestSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "testId" | "date" | "createdById" | "createdAt" | "excludedProblemIds", ExtArgs["result"]["classTestSession"]>
+export type ClassTestSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "testId" | "manualTitle" | "manualProblemCount" | "date" | "createdById" | "createdAt" | "excludedProblemIds", ExtArgs["result"]["classTestSession"]>
 
 export type $ClassTestSessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ClassTestSession"
@@ -409,7 +505,9 @@ export type $ClassTestSessionPayload<ExtArgs extends runtime.Types.Extensions.In
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     classroomId: string
-    testId: string
+    testId: string | null
+    manualTitle: string | null
+    manualProblemCount: number | null
     date: Date
     createdById: string
     createdAt: Date
@@ -840,6 +938,8 @@ export interface ClassTestSessionFieldRefs {
   readonly id: Prisma.FieldRef<"ClassTestSession", 'String'>
   readonly classroomId: Prisma.FieldRef<"ClassTestSession", 'String'>
   readonly testId: Prisma.FieldRef<"ClassTestSession", 'String'>
+  readonly manualTitle: Prisma.FieldRef<"ClassTestSession", 'String'>
+  readonly manualProblemCount: Prisma.FieldRef<"ClassTestSession", 'Int'>
   readonly date: Prisma.FieldRef<"ClassTestSession", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"ClassTestSession", 'String'>
   readonly createdAt: Prisma.FieldRef<"ClassTestSession", 'DateTime'>

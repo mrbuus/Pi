@@ -192,6 +192,8 @@ model Attendance {
   date        DateTime         @db.Date
   status      AttendanceStatus
   markedById  String
+  // Сурагч тус бүрийн өдрийн тайлбар (ж: "Өвчтэй", "Гэрээсээ хожуу гарсан")
+  note        String?
 
   @@unique([classroomId, studentId, date])
   @@index([studentId, date])
@@ -869,7 +871,16 @@ model AnnouncementClassroomTarget {
 model ClassTestSession {
   id          String   @id @default(cuid())
   classroomId String
-  testId      String
+  // Бодлогын сангийн тест бол энд testId байна.
+  // ГАРААР бичсэн (гаднын) тест бол testId = null, оронд нь manualTitle.
+  // Учир: сурагчид заримдаа манай санд ОГТ байхгүй бодлого бодох тул багш
+  // зөвхөн НЭРИЙГ нь бичээд бүртгэх боломжтой байх ёстой. Тест үүсгэхгүй.
+  testId      String?
+  // Гараар бичсэн тестийн нэр (testId = null үед л утгатай)
+  manualTitle String?
+  // Гараар бичсэн тестийн бодлогын тоо — сурагчийн оройн тэмдэглэгээнд
+  // 1..N хүртэлх дугаар гаргахад ашиглана.
+  manualProblemCount Int?
   date        DateTime @db.Date
   createdById String
   createdAt   DateTime @default(now())

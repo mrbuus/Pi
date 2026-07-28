@@ -54,6 +54,25 @@ export class AttendanceController {
     );
   }
 
+  // 🎯 Сурагч тус бүрийн ХОЦРОЛТ/ТАСАЛСАН тоо тухайн хугацаанд — давтан
+  // тасалдаг сурагчийг UI дээр өнгөөр ялгахад ашиглана.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/attendance/history')
+  history(
+    @Param('id') classroomId: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.attendance.history(
+      classroomId,
+      from,
+      to,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
   @Roles(Role.STUDENT)
   @Get('attendance/my')
   my(

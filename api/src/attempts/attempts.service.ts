@@ -380,7 +380,8 @@ export class AttemptsService {
 
     const tests = await this.prisma.test.findMany({
       where: {
-        id: { in: sessions.map((s) => s.testId) },
+        // Гараар бичсэн session-д testId = null тул шүүж хасна.
+        id: { in: sessions.flatMap((s) => (s.testId ? [s.testId] : [])) },
         ...(subject ? { chapter: { book: { subject } } } : {}),
       },
       select: {
@@ -392,16 +393,26 @@ export class AttemptsService {
     const testById = new Map(tests.map((t) => [t.id, t]));
     const sessionTasks = sessions
       .map((session) => {
-        const test = testById.get(session.testId);
-        if (!test) return null;
         const excluded = new Set(session.excludedProblemIds);
-        const problemIds = test.problems
-          .map((p) => p.problemId)
-          .filter((id) => !excluded.has(id));
+
+        // Гараар бичсэн тест — синтетик бодлогын id ашиглана (Problem мөр байхгүй).
+        const rawIds = session.testId
+          ? (testById.get(session.testId)?.problems.map((p) => p.problemId) ??
+            null)
+          : Array.from(
+              { length: session.manualProblemCount ?? 0 },
+              (_, i) => `manual:${session.id}:${i + 1}`,
+            );
+        const title = session.testId
+          ? testById.get(session.testId)?.title
+          : (session.manualTitle ?? undefined);
+        if (!rawIds || !title) return null;
+
+        const problemIds = rawIds.filter((id) => !excluded.has(id));
         if (problemIds.length === 0) return null;
         return {
           date: session.date,
-          title: test.title,
+          title,
           problemIds,
         };
       })

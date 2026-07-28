@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -43,11 +44,39 @@ export class AssignmentsController {
     );
   }
 
+  // Хуанлийн навигацид зориулж хугацааны мужаар шүүнэ (from/to optional —
+  // өгөгдөөгүй бол өмнөх шигээ ангийн бүх даалгаврыг буцаана).
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('classrooms/:id/assignments')
-  listForClass(@Param('id') classroomId: string, @Req() req: AuthedRequest) {
+  listForClass(
+    @Param('id') classroomId: string,
+    @Req() req: AuthedRequest,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
     return this.assignments.listForClass(
       classroomId,
+      req.user.userId,
+      req.user.role,
+      from,
+      to,
+    );
+  }
+
+  // 🎯 Сурагч тус бүрийн ХИЙГЭЭГҮЙ (NOT_DONE) болон дутуу/шалгагдаагүй
+  // (SUBMITTED, RETURNED) даалгаврын тоо тухайн хугацаанд.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/assignments/stats')
+  stats(
+    @Param('id') classroomId: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.assignments.stats(
+      classroomId,
+      from,
+      to,
       req.user.userId,
       req.user.role,
     );

@@ -42,7 +42,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/learn", label: "Хичээл үзэх", icon: "book-open" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
-    { href: "/app/tests", label: "Шалгалт", icon: "edit" },
+    { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/goals", label: "Миний зорилго", icon: "target" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
   ],
@@ -50,7 +50,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     HOME.TEACHER,
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
-    { href: "/app/tests", label: "Шалгалт", icon: "edit" },
+    { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
@@ -59,7 +59,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     HOME.TEACHER_PLUS,
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
-    { href: "/app/tests", label: "Шалгалт", icon: "edit" },
+    { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/payments", label: "Төлбөр", icon: "credit-card" },
     { href: "/app/admin/leads", label: "Хүсэлтүүд", icon: "user-plus" },
     { href: "/app/admin/enrollment", label: "Элсэлтийн удирдлага", icon: "clipboard-list" },
@@ -74,7 +74,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/teacher", label: "Багшийн самбар", icon: "teacher" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
-    { href: "/app/tests", label: "Шалгалт", icon: "edit" },
+    { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/admin/leads", label: "Хүсэлтүүд", icon: "user-plus" },
     { href: "/app/admin/enrollment", label: "Элсэлтийн удирдлага", icon: "clipboard-list" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
@@ -113,9 +113,11 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/goals": "personal",
 };
 
-// Өмнө нь header дотор тусад нь харагддаг байсан "Нууц үг солих" холбоос —
-// role бүрт нийтлэг тул автоматаар Хувийн бүлэгт нэмэгдэнэ.
-const PASSWORD_LINK: NavLink = { href: "/app/password", label: "Нууц үг солих", icon: "key" };
+// Өмнө нь "Нууц үг солих" тусдаа, гарцаагүй тод цэсийн зүйл байсан — эзний
+// хүсэлтээр /app/profile дотор нэг хэсэг болгон шилжүүлж, оронд нь энд зөвхөн
+// "Миний мэдээлэл"-руу орох ганц холбоос үлдээв. Role бүрт нийтлэг тул
+// автоматаар Хувийн бүлэгт нэмэгдэнэ.
+const PROFILE_LINK: NavLink = { href: "/app/profile", label: "Миний мэдээлэл", icon: "user" };
 
 export interface NavGroup {
   key: GroupKey;
@@ -146,7 +148,7 @@ export function getRoleNav(role: string | null): RoleNav {
     const group = ITEM_GROUP[item.href] ?? "learn";
     buckets[group].push(item);
   }
-  buckets.personal.push(PASSWORD_LINK);
+  buckets.personal.push(PROFILE_LINK);
 
   const groups = GROUP_ORDER.filter((key) => buckets[key].length > 0).map((key) => ({
     key,

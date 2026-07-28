@@ -11,6 +11,24 @@ import { api } from "@/lib/api";
  * Тест сонгох UI: Ном → (бичиж хайх) Сэдэв → Тест — 3 алхамтай, учир нь
  * бүх тестийг нэг л урт flat select-д хийвэл багш олон зуун сонголтоос
  * гараар хайх шаардлагатай болдог байсан (эзэмшигчийн гомдол).
+ *
+ * А/Б ХУВИЛБАР (эзэмшигчийн гомдол): ангид ЯМАР Ч ҮЕД Б хувилбарыг хийдэггүй —
+ * үргэлж А. Тестийн жагсаалт тестийн `groupKey`-гээр бүлэглэгдэж (Prisma
+ * Test.groupKey/variantLabel, `schema.prisma` мөр ~551), нэг бүлэгт зөвхөн А
+ * хувилбарыг л сонголт болгон харуулна — Б хэзээ ч жагсаалтад гарахгүй.
+ * Хувилбарыг ТЕКСТЭЭР биш (гарчгаас таамаглахгүй) `variantLabel` талбараар
+ * тодорхойлно. Хэрэв бүлэгт А алга бол чимээгүйгээр Б-г үзүүлэхгүй, харин
+ * анхааруулгатайгаар "А алга" гэдгийг тодорхой хэлж, олдсон эхний хувилбарыг
+ * нөөц болгон санал болгоно.
+ *
+ * ГАРААР БИЧИХ (эзэмшигчийн гомдол): сурагчид заримдаа сангийн бус, өөр
+ * газрын бодлого хийдэг. Тестийн нэрийг гараар бичиж, бодлогын тоог зааж
+ * бүртгэх горим. API талд ClassTestSession.testId ОДООГООР заавал (nullable
+ * биш, `class-sessions.service.ts`-ийн recordDidTest нь Test.findUnique
+ * олдохгүй бол NotFoundException шиднэ) тул серверт бодитоор хадгалагдахгүй
+ * байж болзошгүй — доорх record() нь ирээдүйн API-д зориулж бодит payload-аар
+ * дуудна, амжилтгүй бол шалтгааныг тодорхой хэлнэ (backend hack хийхгүй,
+ * жишээ нь /tests руу хуурамч тест үүсгэхгүй).
  * ========================================================================== */
 
 interface BookRow {
@@ -28,8 +46,18 @@ interface TestRow {
   id: string;
   title: string;
   variantLabel?: string | null;
+  groupKey?: string | null;
   chapterId?: string | null;
   _count: { problems: number };
+}
+// А/Б хувилбаруудыг нэг бүлэг болгож, ангид зөвхөн А-г (эсвэл олдоогүй бол
+// тодорхой анхааруулгатай нөөц хувилбарыг) санал болгоно.
+interface TestVariantGroup {
+  key: string;
+  resolved: TestRow;
+  variants: TestRow[];
+  isFamily: boolean; // А/Б бүлэгт харьяалагддаг эсэх (ганц бие тестэд false)
+  hasA: boolean; // бүлэгт variantLabel==="A" олдсон эсэх
 }
 interface SessionProblem {
   index: number;
@@ -42,6 +70,11 @@ interface SessionRow {
   date: string;
   excludedProblemIds: string[];
   test: { id: string; title: string; problems: SessionProblem[] } | null;
+  // Ирээдүйн API талбарууд (backend хараахан дэмжихгүй) — гараар бичсэн
+  // тестийг банкны тестээс ялгаж харуулахад бэлэн байхын тулд урьдчилан
+  // нэмсэн, backend ирвэл шууд ажиллана.
+  manualTitle?: string | null;
+  manualProblemCount?: number | null;
 }
 
 export default function ClassDidTest({ classroomId }: { classroomId: string }) {
@@ -61,6 +94,11 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
 
   // Алхам 3: Тест
   const [pick, setPick] = useState("");
+
+  // Горим: сангаас сонгох (bank) эсвэл гараар бичих (manual)
+  const [mode, setMode] = useState<"bank" | "manual">("bank");
+  const [manualTitle, setManualTitle] = useState("");
+  const [manualProblemCount, setManualProblemCount] = useState("");
 
   const [msg, setMsg] = useState("");
   const [toggleError, setToggleError] = useState("");
@@ -97,6 +135,11 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
     setPick("");
   }, [selectedChapterId]);
 
+  // Горим сэлгэхэд өмнөх сонголт/мессежийг цэвэрлэнэ
+  useEffect(() => {
+    setMsg("");
+  }, [mode]);
+
   // Зөвхөн ядаж 1 тесттэй сэдвүүдийг үзүүлнэ (хоосон сэдэв сонгоод юу ч
   // гарахгүй байх нөхцлөөс сэргийлнэ), бичсэн үгээр цааш шүүнэ
   const topicsWithTests = useMemo(
@@ -116,22 +159,71 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
     [tests, selectedChapterId],
   );
 
+  // Тестүүдийг А/Б хувилбарын бүлгээр нэгтгэнэ (groupKey), учир нь ангид
+  // ЗӨВХӨН А хувилбарыг л хийдэг — Б-г жагсаалтад хэзээ ч харуулахгүй.
+  const testGroupsForChapter = useMemo<TestVariantGroup[]>(() => {
+    const byKey = new Map<string, TestRow[]>();
+    for (const t of testsForChapter) {
+      const key = t.groupKey ?? t.id;
+      const arr = byKey.get(key);
+      if (arr) arr.push(t);
+      else byKey.set(key, [t]);
+    }
+    return [...byKey.entries()].map(([key, variants]) => {
+      const isFamily = variants.length > 1 || variants.some((v) => v.variantLabel);
+      const aVariant = variants.find(
+        (v) => (v.variantLabel ?? "").trim().toUpperCase() === "A",
+      );
+      return {
+        key,
+        variants,
+        resolved: aVariant ?? variants[0],
+        isFamily,
+        hasA: !!aVariant,
+      };
+    });
+  }, [testsForChapter]);
+
   const selectedChapter = chapters.find((c) => c.id === selectedChapterId);
   const selectedTest = tests.find((t) => t.id === pick);
 
   async function record() {
-    if (!pick) return;
+    if (mode === "bank") {
+      if (!pick) return;
+    } else {
+      const count = Number(manualProblemCount);
+      if (!manualTitle.trim() || !Number.isInteger(count) || count < 1) return;
+    }
     setMsg("");
     try {
       await api(`/classrooms/${classroomId}/did-test`, {
         method: "POST",
-        body: { testId: pick },
+        body:
+          mode === "bank"
+            ? { testId: pick }
+            : {
+                manualTitle: manualTitle.trim(),
+                manualProblemCount: Number(manualProblemCount),
+              },
       });
       setMsg("✓ Бүртгэгдлээ — сурагчдын тэмдэглэгээнд гарч ирнэ");
       setSelectedBookId("");
+      setManualTitle("");
+      setManualProblemCount("");
       loadSessions();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Алдаа");
+      if (mode === "manual") {
+        // Backend (ClassTestSession.testId) одоогоор заавал талбар тул энэ
+        // хүсэлт NotFoundException/validation алдаагаар унана — түүнийг
+        // түүхий англи мессежээр биш, тодорхой шалтгаанаар харуулна.
+        setMsg(
+          "⚠ Серверт гараар бичсэн тестийг хадгалах боломж одоогоор алга " +
+            "(API-д тест сангаас testId заавал шаардсан хэвээр байна). " +
+            "Хөгжүүлэгчид мэдэгдээрэй.",
+        );
+      } else {
+        setMsg(e instanceof Error ? e.message : "Алдаа");
+      }
     }
   }
 
@@ -210,31 +302,113 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
         Ангид хийсэн тестээ сонгоход сурагчид цаасаа хараад өөрсдийгөө тэмдэглэнэ
       </p>
 
-      {/* Алхам 1: Ном */}
-      <div className="mb-3">
-        <label
-          htmlFor="did-test-book"
-          className="mb-1 block text-xs font-semibold text-ink-dim"
+      {/* Горим сэлгэгч: сангаас сонгох / гараар бичих */}
+      <div
+        role="tablist"
+        aria-label="Тест бүртгэх горим"
+        className="mb-4 flex flex-wrap gap-2"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "bank"}
+          onClick={() => setMode("bank")}
+          className={`min-h-11 flex-1 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+            mode === "bank"
+              ? "border-brand-bright bg-brand-tint text-brand-soft"
+              : "border-line bg-ink/5 text-ink-dim hover:bg-ink/10"
+          }`}
         >
-          1. Ном сонгох
-        </label>
-        <select
-          id="did-test-book"
-          value={selectedBookId}
-          onChange={(e) => setSelectedBookId(e.target.value)}
-          className="w-full min-h-11 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
+          Сангаас сонгох
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "manual"}
+          onClick={() => setMode("manual")}
+          className={`min-h-11 flex-1 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+            mode === "manual"
+              ? "border-brand-bright bg-brand-tint text-brand-soft"
+              : "border-line bg-ink/5 text-ink-dim hover:bg-ink/10"
+          }`}
         >
-          <option value="">Ном сонгох…</option>
-          {books.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.code} — {b.title}
-            </option>
-          ))}
-        </select>
+          Гараар бичих
+        </button>
       </div>
 
-      {/* Алхам 2: Сэдэв (бичиж хайна) */}
-      {selectedBookId && (
+      {mode === "manual" ? (
+        <div className="mb-3">
+          <p className="mb-2 text-xs text-ink-dim">
+            Сургалтын төвийн санд байхгүй, өөр газрын бодлого хийсэн бол энд
+            гараар бүртгэнэ
+          </p>
+          <div className="mb-3">
+            <label
+              htmlFor="did-test-manual-title"
+              className="mb-1 block text-xs font-semibold text-ink-dim"
+            >
+              Тестийн нэр
+            </label>
+            <input
+              id="did-test-manual-title"
+              type="text"
+              value={manualTitle}
+              onChange={(e) => setManualTitle(e.target.value)}
+              placeholder="Жишээ нь: Гадаад дасгал — Алгебр 3"
+              className="w-full min-h-11 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
+            />
+          </div>
+          <div className="mb-3">
+            <label
+              htmlFor="did-test-manual-count"
+              className="mb-1 block text-xs font-semibold text-ink-dim"
+            >
+              Бодлогын тоо
+            </label>
+            <input
+              id="did-test-manual-count"
+              type="number"
+              min={1}
+              step={1}
+              inputMode="numeric"
+              value={manualProblemCount}
+              onChange={(e) => setManualProblemCount(e.target.value)}
+              placeholder="Жишээ нь: 10"
+              className="w-full min-h-11 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
+            />
+          </div>
+          <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
+            ⚠ Энэ горим бэлэн боловч серверийн шинэчлэлт хүлээж байна — одоохондоо
+            хадгалахад алдаа гарч болно (доор тайлбарлана).
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Алхам 1: Ном */}
+          <div className="mb-3">
+            <label
+              htmlFor="did-test-book"
+              className="mb-1 block text-xs font-semibold text-ink-dim"
+            >
+              1. Ном сонгох
+            </label>
+            <select
+              id="did-test-book"
+              value={selectedBookId}
+              onChange={(e) => setSelectedBookId(e.target.value)}
+              className="w-full min-h-11 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
+            >
+              <option value="">Ном сонгох…</option>
+              {books.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.code} — {b.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Алхам 2: Сэдэв (бичиж хайна) */}
+          {selectedBookId && (
         <div className="mb-3">
           <label
             htmlFor="did-test-topic"
@@ -302,62 +476,86 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
         </div>
       )}
 
-      {/* Алхам 3: Тест */}
-      {selectedChapterId && (
-        <div className="mb-3">
-          <p className="mb-1 block text-xs font-semibold text-ink-dim">
-            3. Тест сонгох
-            {selectedChapter ? ` — ${selectedChapter.title}` : ""}
-          </p>
-          {testsForChapter.length === 0 ? (
-            <p className="text-sm text-ink-dim">Энэ сэдэвт тест олдсонгүй</p>
-          ) : (
-            <div role="listbox" aria-label="Тестийн жагсаалт" className="space-y-1.5">
-              {testsForChapter.map((t) => {
-                const isSelected = t.id === pick;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    onClick={() => setPick(t.id)}
-                    className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm transition ${
-                      isSelected
-                        ? "border-brand-bright bg-brand-tint font-semibold text-brand-soft"
-                        : "border-line bg-ink/5 text-ink hover:bg-ink/10"
-                    }`}
-                  >
-                    <span>
-                      {t.title}
-                      {t.variantLabel ? ` (${t.variantLabel} хувилбар)` : ""}
-                    </span>
-                    <span className="shrink-0 text-xs text-ink-dim">
-                      {t._count.problems} бодлого
-                    </span>
-                  </button>
-                );
-              })}
+          {/* Алхам 3: Тест — А/Б хувилбарын бүлгээр, зөвхөн А-г санал болгоно */}
+          {selectedChapterId && (
+            <div className="mb-3">
+              <p className="mb-1 block text-xs font-semibold text-ink-dim">
+                3. Тест сонгох
+                {selectedChapter ? ` — ${selectedChapter.title}` : ""}
+              </p>
+              {testGroupsForChapter.length === 0 ? (
+                <p className="text-sm text-ink-dim">Энэ сэдэвт тест олдсонгүй</p>
+              ) : (
+                <div role="listbox" aria-label="Тестийн жагсаалт" className="space-y-1.5">
+                  {testGroupsForChapter.map((g) => {
+                    const t = g.resolved;
+                    const isSelected = t.id === pick;
+                    const showsFallbackWarning = g.isFamily && !g.hasA;
+                    return (
+                      <div key={g.key}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => setPick(t.id)}
+                          className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm transition ${
+                            isSelected
+                              ? "border-brand-bright bg-brand-tint font-semibold text-brand-soft"
+                              : "border-line bg-ink/5 text-ink hover:bg-ink/10"
+                          }`}
+                        >
+                          <span>
+                            {t.title}
+                            {g.isFamily && g.hasA ? " (А хувилбар)" : ""}
+                          </span>
+                          <span className="shrink-0 text-xs text-ink-dim">
+                            {t._count.problems} бодлого
+                          </span>
+                        </button>
+                        {showsFallbackWarning && (
+                          <p className="mt-1 px-1 text-xs text-warning">
+                            ⚠ А хувилбар олдсонгүй —{" "}
+                            {t.variantLabel ? `${t.variantLabel} хувилбарыг` : "олдсон хувилбарыг"}{" "}
+                            ашиглаж байна
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        {selectedTest && (
+        {mode === "bank" && selectedTest && (
           <span className="text-sm text-ink-dim">
             Сонгосон: <span className="font-semibold text-ink">{selectedTest.title}</span>
           </span>
         )}
         <button
           onClick={record}
-          disabled={!pick}
+          disabled={
+            mode === "bank"
+              ? !pick
+              : !manualTitle.trim() ||
+                !Number.isInteger(Number(manualProblemCount)) ||
+                Number(manualProblemCount) < 1
+          }
           className="ml-auto min-h-11 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold disabled:opacity-40"
         >
           Бүртгэх
         </button>
       </div>
-      {msg && <p className="mt-2 text-sm text-success">{msg}</p>}
+      {msg && (
+        <p
+          className={`mt-2 text-sm ${msg.startsWith("✓") ? "text-success" : "text-error"}`}
+        >
+          {msg}
+        </p>
+      )}
 
       {toggleError && (
         <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
@@ -376,17 +574,33 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
           {sessions.map((s) => {
             const includedCount =
               s.test?.problems.filter((p) => p.included).length ?? 0;
+            // Банкны тестгүй ч гараар оруулсан гарчигтай мөр — ирээдүйн API-аас
+            // ирэх manualTitle/manualProblemCount (backend хараахан дэмжихгүй)
+            const isManual = !s.test && !!s.manualTitle;
             return (
               <div
                 key={s.id}
                 className="rounded-lg border border-line p-3 text-sm"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-ink-dim">{s.date.slice(0, 10)}</span>
-                  <span className="font-medium">{s.test?.title ?? "—"}</span>
-                  <span className="text-xs text-ink-dim">
-                    {includedCount}/{s.test?.problems.length ?? 0} бодлого орсон
+                  <span className="font-medium">
+                    {s.test?.title ?? s.manualTitle ?? "—"}
                   </span>
+                  {isManual && (
+                    <span className="rounded-full border border-info/30 bg-info/15 px-2 py-0.5 text-[11px] font-semibold text-info">
+                      Гараар бичсэн
+                    </span>
+                  )}
+                  {s.test ? (
+                    <span className="text-xs text-ink-dim">
+                      {includedCount}/{s.test.problems.length} бодлого орсон
+                    </span>
+                  ) : isManual ? (
+                    <span className="text-xs text-ink-dim">
+                      {s.manualProblemCount ?? 0} бодлого
+                    </span>
+                  ) : null}
                   <button
                     onClick={() => remove(s.id)}
                     className="ml-auto text-xs text-error hover:underline"
@@ -394,7 +608,7 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
                     Устгах
                   </button>
                 </div>
-                {/* Бодлого бүрийг орсон/хассан болгож сэлгэнэ */}
+                {/* Бодлого бүрийг орсон/хассан болгож сэлгэнэ (зөвхөн сангийн тест) */}
                 {s.test && s.test.problems.length > 0 && (
                   <div className="mt-2.5">
                     <p className="mb-1.5 text-[11px] text-ink-dim">
