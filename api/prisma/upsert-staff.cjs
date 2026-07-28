@@ -32,6 +32,9 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 });
 const COMMIT = process.argv.includes('--commit');
+// Анхдагчаар БАЙГАА хэрэглэгчийн нэрийг хөнддөггүй (доорх тайлбарыг үз).
+// Жагсаалт дахь нэрсийг ХҮН БИЕЧЛЭН баталсан үед л энэ тугийг өгнө.
+const UPDATE_NAMES = process.argv.includes('--update-names');
 const ROSTER_PATH = join(__dirname, 'reports', 'staff-roster.json');
 
 const VALID_ROLES = new Set(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
@@ -106,14 +109,22 @@ async function main() {
         existing.firstName !== s.firstName || existing.lastName !== s.lastName;
       if (nameDiffers) {
         changes.push(
-          `нэр зөрүүтэй (санд «${existing.lastName} ${existing.firstName}») — ХӨНДӨӨГҮЙ`,
+          UPDATE_NAMES
+            ? `нэр «${existing.lastName} ${existing.firstName}» → «${s.lastName} ${s.firstName}»`
+            : `нэр зөрүүтэй (санд «${existing.lastName} ${existing.firstName}») — ХӨНДӨӨГҮЙ`,
         );
       }
 
       if (changes.length && COMMIT) {
         await prisma.user.update({
           where: { id: existing.id },
-          data: { role: s.role, teacherCode },
+          data: {
+            role: s.role,
+            teacherCode,
+            ...(UPDATE_NAMES && nameDiffers
+              ? { firstName: s.firstName, lastName: s.lastName }
+              : {}),
+          },
         });
       }
       updated.push({ ...s, changes });
