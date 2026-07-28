@@ -26,13 +26,21 @@ services:
     startCommand: npx prisma migrate deploy && npm run start:prod
 
     # Тогтвортой диск — байршуулсан зураг/PDF-ийг redeploy хооронд хадгална.
-    # 🚨 ТӨЛБӨРТЭЙ БАГЦ ШААРДАНА. free дээр disk дэмжигдэхгүй тул багцаа
-    #    сайжруулах хүртэл энэ 4 мөрийг тайлбар (#) болгож болно — гэхдээ
-    #    тэр үед байршуулсан бүх файл redeploy бүрт устсаар байна.
-    disk:
-      name: pimn-uploads
-      mountPath: /var/data/uploads
-      sizeGB: 5
+    #
+    # 🚨 free багц дээр disk ДЭМЖИГДЭХГҮЙ. Render-ийн баримт бичигт free web
+    #    service-ийн хязгаарлалтад "Persistent disks" гэж шууд заасан бөгөөд
+    #    Render API дээр ч disk = null (үүсээгүй) байна.
+    #    → Идэвхтэй үлдээвэл Blueprint sync АЛДААТАЙ дуусна.
+    #
+    # ✅ ДАРААХ 2 АЛХМААР СЭРГЭЭНЭ (багцаа starter+ болгосны дараа):
+    #    1) plan: free → starter (дээрх мөр)
+    #    2) доорх disk болон UPLOAD_DIR-ын тайлбарын тэмдгийг (#) авах
+    #
+    # ⚠️ Диск идэвхжих хүртэл байршуулсан ЗУРАГ/PDF redeploy бүрт УСТАНА.
+    # disk:
+    #   name: pimn-uploads
+    #   mountPath: /var/data/uploads
+    #   sizeGB: 5
 
     envVars:
       # ⚠️ Render-ийн `fromDatabase` connectionString нь query параметргүй
@@ -65,9 +73,14 @@ services:
         value: https://web-one-pi-59.vercel.app
 
       # Байршуулсан файлыг тогтвортой диск рүү чиглүүлнэ.
-      # Диск идэвхжээгүй бол энэ мөрийг устгахад ./uploads руу буцаж унана.
-      - key: UPLOAD_DIR
-        value: /var/data/uploads
+      #
+      # ⚠️ ДЭЭРХ disk-ТЭЙ ХАМТ Л ИДЭВХЖҮҮЛНЭ. Диск mount хийгээгүй байхад энэ
+      #    замыг өгвөл /var/data руу бичих эрх байхгүй тул uploads.controller.ts
+      #    дэх mkdirSync модуль ачаалах үедээ шидэж, Nest БҮХЭЛДЭЭ БОСОХГҮЙ
+      #    болох эрсдэлтэй (одоо тэр код хамгаалагдсан ч зам нь тохирохгүй).
+      #    Тохируулаагүй үед ./uploads руу буцаж унана — түр зуурынх ч ажилладаг.
+      # - key: UPLOAD_DIR
+      #   value: /var/data/uploads
 
       - key: NODE_VERSION
         value: 22.23.1

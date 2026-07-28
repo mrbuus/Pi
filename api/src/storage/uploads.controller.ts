@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Res,
+  ServiceUnavailableException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -14,7 +15,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import {
+  accessSync,
   closeSync,
+  constants,
   existsSync,
   mkdirSync,
   openSync,
@@ -31,11 +34,40 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 // ⚠️ PRODUCTION: Render-ийн container файлын систем нь ТҮР ЗУУРЫН — redeploy
 // эсвэл restart бүрт устдаг. Тиймээс UPLOAD_DIR-ыг орчны хувьсагчаар тогтвортой
 // диск рүү (жишээ нь /var/data/uploads) чиглүүлнэ. render.yaml дотор disk mount
-// хийгээд UPLOAD_DIR-ыг тэр замаар өгсөн байгаа.
-// Тохируулаагүй бол локал хөгжүүлэлтийн үед ./uploads руу буцаж унана.
+// хийгээд UPLOAD_DIR-ыг тэр замаар өгнө (free багц дээр disk дэмжигдэхгүй тул
+// одоогоор тайлбарласан байгаа).
+// Тохируулаагүй бол ./uploads руу буцаж унана.
 export const UPLOAD_DIR =
   process.env.UPLOAD_DIR?.trim() || join(process.cwd(), 'uploads');
-if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true });
+
+// ⚠️ ЭНЭ ХЭСЭГ МОДУЛЬ ИМПОРТЛОГДОХ ҮЕД АЖИЛЛАНА.
+// Өмнө нь энд хамгаалалтгүй `mkdirSync` байсан: UPLOAD_DIR нь бичих эрхгүй
+// эсвэл mount хийгээгүй зам байвал (ж нь диск идэвхгүй үеийн /var/data/uploads)
+// import дундаа шидэж, Nest БҮХЭЛДЭЭ БОСОХГҮЙ болно.
+// Шалгалтын платформ дээр энэ нь ЗӨВХӨН файл байршуулах тохиргооны алдаанаас
+// болж 1000 сурагчийн шалгалтыг бүтнээр нь унагана гэсэн үг — хэт өргөн хохирол.
+//
+// Одоогийн бодлого: API боссоор байна (шалгалт саадгүй үргэлжилнэ), гэхдээ
+// байршуулах маршрут нь ЧИМЭЭГҮЙ буруу газар бичихийн оронд ил 503 буцаана.
+const uploadDirError: string | null = (() => {
+  try {
+    if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true });
+    // mkdir амжаад БИЧИЖ чадахгүй тохиолдол бий (read-only mount) тул тусад нь.
+    accessSync(UPLOAD_DIR, constants.W_OK);
+    return null;
+  } catch (err) {
+    return err instanceof Error ? err.message : String(err);
+  }
+})();
+
+if (uploadDirError) {
+  console.error(
+    `[uploads] ⚠️  UPLOAD_DIR "${UPLOAD_DIR}" ашиглах боломжгүй: ${uploadDirError}\n` +
+      '[uploads]     API ажиллана (шалгалт саадгүй), ГЭХДЭЭ файл байршуулалт 503 буцаана.\n' +
+      '[uploads]     Засах: render.yaml дээр disk mount хийх, эсвэл UPLOAD_DIR-ыг арилгаж\n' +
+      '[uploads]     ./uploads руу унагах. Дэлгэрэнгүйг DEPLOY.md-ээс үзнэ үү.',
+  );
+}
 
 // Зөвшөөрөгдсөн файлын төрөл: зураг + PDF л. HTML/SVG/JS зэргийг хориглосноор
 // serve хийх үед stored-XSS үүсэх замыг хаана.
@@ -176,6 +208,13 @@ export class UploadsController {
     }),
   )
   upload(@UploadedFile() file?: Express.Multer.File) {
+    // Хадгалах сан ажиллахгүй бол ил хэлнэ — multer нь destination байхгүй үед
+    // ойлгомжгүй 500 шиддэг тул шалтгааныг нь тодорхой болгож 503 буцаана.
+    if (uploadDirError) {
+      throw new ServiceUnavailableException(
+        'Файл хадгалах сан тохируулагдаагүй байна. Админд хандана уу.',
+      );
+    }
     if (!file) throw new BadRequestException('Файл ирсэнгүй');
     // Extension/mimetype шүүлтүүр (fileFilter) хуурч болохуйц (client-ийн
     // мэдэгдсэн утга) тул диск дээр аль хэдийн бичигдсэн ЖИНХЭНЭ байтуудыг
