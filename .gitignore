@@ -14,3 +14,5 @@ uploads/
 # Git-т ХЭЗЭЭ Ч оруулахгүй. Бусад reports/*.json (бодлогын импорт) нь
 # хувийн мэдээлэл агуулдаггүй тул хэвээр мөрдөгдөнө.
 api/prisma/reports/student-import.json
+# Туршилтын сурагчийн seed тайлан — утас маскласан ч БОДИТ нэр, сургууль агуулна.
+api/prisma/reports/seed-test-students.json
