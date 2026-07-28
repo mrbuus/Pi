@@ -30,6 +30,14 @@ interface RosterRow {
   student: { id: string; firstName: string; lastName: string };
   status: string | null;
 }
+
+type TabKey = "home" | "attendance" | "homework";
+const TAB_KEYS: TabKey[] = ["home", "attendance", "homework"];
+const TAB_LABELS: Record<TabKey, string> = {
+  home: "Нүүр",
+  attendance: "Ирц",
+  homework: "Даалгавар",
+};
 interface Assignment {
   id: string;
   title: string;
@@ -151,6 +159,22 @@ export default function TeacherDashboardClient() {
   const [rosterLoading, setRosterLoading] = useState(false);
   const [rosterError, setRosterError] = useState<string | null>(null);
   const [marks, setMarks] = useState<Record<string, string>>({});
+  // Сурагч тус бүрийн өдрийн тайлбар — API-д одоогоор талбар байхгүй тул зөвхөн
+  // локал төлөвт хадгалагдана (AttendanceSection.tsx-ийн коммент, followUps-ийг үз)
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  // Sub-tab: ?tab=home|attendance|homework — refresh хийхэд сонгосон tab хадгалагдана
+  const [tab, setTab] = useState<TabKey>("home");
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    if (t && (TAB_KEYS as string[]).includes(t)) setTab(t as TabKey);
+  }, []);
+  const changeTab = useCallback((next: TabKey) => {
+    setTab(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", next);
+    window.history.replaceState({}, "", url);
+  }, []);
 
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
@@ -232,6 +256,13 @@ export default function TeacherDashboardClient() {
         setMarks(
           Object.fromEntries(
             rows.map((r) => [r.student.id, r.status ?? "PRESENT"]),
+          ),
+        );
+        // Хуучин бичсэн тайлбаруудыг хадгална (өдрийн тайлбар зөвхөн локал
+        // төлөвт байдаг тул loadClass() дахин дуудагдахад устахгүй байх ёстой)
+        setNotes((prev) =>
+          Object.fromEntries(
+            rows.map((r) => [r.student.id, prev[r.student.id] ?? ""]),
           ),
         );
       })
@@ -392,19 +423,27 @@ export default function TeacherDashboardClient() {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Header + Classroom Selector */}
+      {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
         <DashboardGreeting />
         <h1 className="text-2xl font-extrabold">Багшийн самбар</h1>
-        <label className="sr-only" htmlFor="classroom-select">
-          Анги сонгох
+      </div>
+
+      {/* Анги сонгох — sub-tab бүрийн хамгийн дээд хэсэгт үргэлж харагдана,
+          учир нь энэ блок tab-уудын АГААС ГАДНА (үргэлж render хийгддэг) байрлана */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3 md:flex-row md:items-center md:gap-4 md:p-4">
+        <label
+          className="text-sm font-semibold text-ink-dim"
+          htmlFor="classroom-select"
+        >
+          Анги
         </label>
         <select
           id="classroom-select"
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
           disabled={classroomsLoading || classrooms.length === 0}
-          className="rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand"
+          className="min-h-11 rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand"
         >
           {classrooms.map((c) => (
             <option key={c.id} value={c.id}>
@@ -448,119 +487,160 @@ export default function TeacherDashboardClient() {
         </p>
       )}
 
-      {/* Ангийн идэвхийн heatmap — сонгосон ангийн нэгдсэн дүр зураг */}
-      {selected && <ClassActivityHeatmap classroomId={selected} />}
-
-      {/* Ирц — багшийн өдөр тутмын гол үйлдэл (хамгийн дээр) */}
-      <section>
-        <SectionStatus
-          loading={rosterLoading}
-          error={rosterError}
-          onRetry={loadClass}
-          empty={!rosterLoading && !rosterError && !!selected && roster.length === 0}
-          emptyText="Энэ ангид сурагч алга байна"
-        />
-        {!rosterLoading && !rosterError && roster.length > 0 && (
-          <AttendanceSection
-            roster={roster}
-            marks={marks}
-            today={today}
-            onMarkChange={(studentId, status) =>
-              setMarks((m) => ({ ...m, [studentId]: status }))
-            }
-            onSave={saveAttendance}
-          />
-        )}
-      </section>
-
-      {/* Өнөөдөр хийсэн тест — сурагчдын оройн тэмдэглэгээг тэжээнэ */}
-      {selected && <ClassDidTest classroomId={selected} />}
-
-      {/* Assignments Section */}
-      <section>
-        <SectionStatus
-          loading={assignmentsLoading}
-          error={assignmentsError}
-          onRetry={loadClass}
-          empty={false}
-          emptyText=""
-        />
-        {!assignmentsLoading && !assignmentsError && (
-          <AssignmentsSection
-            assignments={assignments}
-            submissions={submissions}
-            openAssignmentId={openAssignment}
-            newTitle={newTitle}
-            onNewTitleChange={setNewTitle}
-            onCreate={createAssignment}
-            onOpen={openRoster}
-            onReview={review}
-          />
-        )}
-      </section>
-
-      {/* Summary + Management Sections (Grid) */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Summary Section */}
-        <div className="md:col-span-2 lg:col-span-1">
-          {summaryError ? (
-            <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
-              ⚠ Дүгнэлт ачаалагдсангүй: {summaryError}
-            </section>
-          ) : (
-            <SummarySection summary={summaryLoading ? null : summary} />
-          )}
-        </div>
-
-        <div className="md:col-span-2 lg:col-span-1">
-          {attentionError ? (
-            <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
-              ⚠ Анхаарах жагсаалт ачаалагдсангүй: {attentionError}
-            </section>
-          ) : (
-            <AttentionSection attention={attentionLoading ? null : attention} />
-          )}
-        </div>
-
-        {/* Unassigned Students (Admin Only) */}
-        {canManage && (
-          <div>
-            <SectionStatus
-              loading={unassignedLoading}
-              error={unassignedError}
-              onRetry={loadClass}
-              empty={false}
-              emptyText=""
-            />
-            {!unassignedLoading && !unassignedError && (
-              <UnassignedStudentsSection unassigned={unassigned} onEnroll={enroll} />
-            )}
-          </div>
-        )}
-
-        {/* Parent Requests (Admin Only) */}
-        {canManage && (
-          <div>
-            <SectionStatus
-              loading={parentRequestsLoading}
-              error={parentRequestsError}
-              onRetry={loadClass}
-              empty={false}
-              emptyText=""
-            />
-            {!parentRequestsLoading && !parentRequestsError && (
-              <ParentRequestsSection
-                parentRequests={parentRequests}
-                onVerify={verifyParentLink}
-                onReject={rejectParentLink}
-              />
-            )}
-          </div>
-        )}
+      {/* Sub-tabs: Нүүр / Ирц / Даалгавар */}
+      <div
+        role="tablist"
+        aria-label="Багшийн самбарын хэсгүүд"
+        className="flex gap-2 border-b border-line"
+      >
+        {TAB_KEYS.map((key) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={tab === key}
+            onClick={() => changeTab(key)}
+            className={`min-h-11 rounded-t-lg px-4 text-sm font-bold transition ${
+              tab === key
+                ? "border-b-2 border-brand-bright text-brand-soft"
+                : "text-ink-dim hover:text-ink"
+            }`}
+          >
+            {TAB_LABELS[key]}
+          </button>
+        ))}
       </div>
 
-      {/* Зар тавих — хамгийн доор (хэрэглэгчийн хүсэлтээр) */}
-      <AnnouncementCompose />
+      {/* Нүүр — жижиг хэсгүүд бүгд */}
+      {tab === "home" && (
+        <div className="space-y-6 md:space-y-8">
+          {/* Ангийн идэвхийн heatmap — сонгосон ангийн нэгдсэн дүр зураг */}
+          {selected && <ClassActivityHeatmap classroomId={selected} />}
+
+          {/* Өнөөдөр хийсэн тест — сурагчдын оройн тэмдэглэгээг тэжээнэ */}
+          {selected && <ClassDidTest classroomId={selected} />}
+
+          {/* Summary + Management Sections (Grid) */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Summary Section */}
+            <div className="md:col-span-2 lg:col-span-1">
+              {summaryError ? (
+                <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
+                  ⚠ Дүгнэлт ачаалагдсангүй: {summaryError}
+                </section>
+              ) : (
+                <SummarySection summary={summaryLoading ? null : summary} />
+              )}
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-1">
+              {attentionError ? (
+                <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
+                  ⚠ Анхаарах жагсаалт ачаалагдсангүй: {attentionError}
+                </section>
+              ) : (
+                <AttentionSection attention={attentionLoading ? null : attention} />
+              )}
+            </div>
+
+            {/* Unassigned Students (Admin Only) */}
+            {canManage && (
+              <div>
+                <SectionStatus
+                  loading={unassignedLoading}
+                  error={unassignedError}
+                  onRetry={loadClass}
+                  empty={false}
+                  emptyText=""
+                />
+                {!unassignedLoading && !unassignedError && (
+                  <UnassignedStudentsSection
+                    unassigned={unassigned}
+                    onEnroll={enroll}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Parent Requests (Admin Only) */}
+            {canManage && (
+              <div>
+                <SectionStatus
+                  loading={parentRequestsLoading}
+                  error={parentRequestsError}
+                  onRetry={loadClass}
+                  empty={false}
+                  emptyText=""
+                />
+                {!parentRequestsLoading && !parentRequestsError && (
+                  <ParentRequestsSection
+                    parentRequests={parentRequests}
+                    onVerify={verifyParentLink}
+                    onReject={rejectParentLink}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Зар тавих — хамгийн доор (хэрэглэгчийн хүсэлтээр) */}
+          <AnnouncementCompose />
+        </div>
+      )}
+
+      {/* Ирц — бүтэн өргөнөөр (owner-ийн хүсэлт) */}
+      {tab === "attendance" && (
+        <section>
+          <SectionStatus
+            loading={rosterLoading}
+            error={rosterError}
+            onRetry={loadClass}
+            empty={
+              !rosterLoading && !rosterError && !!selected && roster.length === 0
+            }
+            emptyText="Энэ ангид сурагч алга байна"
+          />
+          {!rosterLoading && !rosterError && roster.length > 0 && (
+            <AttendanceSection
+              roster={roster}
+              marks={marks}
+              notes={notes}
+              today={today}
+              onMarkChange={(studentId, status) =>
+                setMarks((m) => ({ ...m, [studentId]: status }))
+              }
+              onNoteChange={(studentId, note) =>
+                setNotes((n) => ({ ...n, [studentId]: note }))
+              }
+              onSave={saveAttendance}
+            />
+          )}
+        </section>
+      )}
+
+      {/* Даалгавар — бүтэн өргөнөөр (owner-ийн хүсэлт) */}
+      {tab === "homework" && (
+        <section>
+          <SectionStatus
+            loading={assignmentsLoading}
+            error={assignmentsError}
+            onRetry={loadClass}
+            empty={false}
+            emptyText=""
+          />
+          {!assignmentsLoading && !assignmentsError && (
+            <AssignmentsSection
+              assignments={assignments}
+              submissions={submissions}
+              openAssignmentId={openAssignment}
+              newTitle={newTitle}
+              onNewTitleChange={setNewTitle}
+              onCreate={createAssignment}
+              onOpen={openRoster}
+              onReview={review}
+            />
+          )}
+        </section>
+      )}
     </div>
   );
 }

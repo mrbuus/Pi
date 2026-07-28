@@ -1,16 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import LogoMark from "@/components/LogoMark";
-import ThemeToggle from "@/components/ThemeToggle";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import Sidebar from "@/components/nav/Sidebar";
+import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
+import { getPageTitle } from "@/components/nav/nav-data";
 import { api, clearAuth, fileUrl, getRole, getToken } from "@/lib/api";
 
 // Role бүрийн монгол нэр — header identity badge-д ашиглана
@@ -83,66 +77,7 @@ function IdentityBadge() {
   );
 }
 
-const NAV: Record<string, { href: string; label: string }[]> = {
-  STUDENT: [
-    { href: "/app/student", label: "Миний самбар" },
-    { href: "/app/learn", label: "Хичээл үзэх" },
-    { href: "/app/library", label: "Бодлогын сан" },
-    { href: "/app/videos", label: "Онлайн хичээл" },
-    { href: "/app/tests", label: "Шалгалт" },
-    { href: "/app/goals", label: "Миний зорилго" },
-    { href: "/app/schedule", label: "Хуваарь" },
-  ],
-  TEACHER: [
-    { href: "/app/teacher", label: "Багшийн самбар" },
-    { href: "/app/library", label: "Бодлогын сан" },
-    { href: "/app/videos", label: "Онлайн хичээл" },
-    { href: "/app/tests", label: "Шалгалт" },
-    { href: "/app/schedule", label: "Хуваарь" },
-    { href: "/app/planner", label: "Төлөвлөгч" },
-    { href: "/app/admin/theory", label: "Онолын агуулга" },
-  ],
-  TEACHER_PLUS: [
-    { href: "/app/teacher", label: "Багшийн самбар" },
-    { href: "/app/library", label: "Бодлогын сан" },
-    { href: "/app/videos", label: "Онлайн хичээл" },
-    { href: "/app/tests", label: "Шалгалт" },
-    { href: "/app/payments", label: "Төлбөр" },
-    { href: "/app/admin/leads", label: "Хүсэлтүүд" },
-    { href: "/app/admin/enrollment", label: "Элсэлтийн удирдлага" },
-    { href: "/app/schedule", label: "Хуваарь" },
-    { href: "/app/planner", label: "Төлөвлөгч" },
-    { href: "/app/admin/theory", label: "Онолын агуулга" },
-    { href: "/app/admin/students", label: "Сурагчид" },
-    { href: "/app/admin/audit", label: "Аудит" },
-  ],
-  ADMIN: [
-    { href: "/app/admin", label: "Удирдлага" },
-    { href: "/app/teacher", label: "Багшийн самбар" },
-    { href: "/app/library", label: "Бодлогын сан" },
-    { href: "/app/videos", label: "Онлайн хичээл" },
-    { href: "/app/tests", label: "Шалгалт" },
-    { href: "/app/admin/leads", label: "Хүсэлтүүд" },
-    { href: "/app/admin/enrollment", label: "Элсэлтийн удирдлага" },
-    { href: "/app/schedule", label: "Хуваарь" },
-    { href: "/app/planner", label: "Төлөвлөгч" },
-    { href: "/app/admin/theory", label: "Онолын агуулга" },
-    { href: "/app/admin/students", label: "Сурагчид" },
-    { href: "/app/admin/audit", label: "Аудит" },
-  ],
-  BUYER: [
-    { href: "/app/buyer", label: "Миний эрхүүд" },
-    { href: "/app/library", label: "Бодлогын сан" },
-    { href: "/app/videos", label: "Онлайн хичээл" },
-    { href: "/app/schedule", label: "Хуваарь" },
-  ],
-  PARENT: [
-    { href: "/app/parent", label: "Хүүхдийн явц" },
-    { href: "/app/schedule", label: "Хуваарь" },
-  ],
-};
-
-function HamburgerIcon({ open }: { open: boolean }) {
+function MenuIcon({ open }: { open: boolean }) {
   if (open) {
     return (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" className="h-5 w-5">
@@ -154,100 +89,6 @@ function HamburgerIcon({ open }: { open: boolean }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" className="h-5 w-5">
       <path d="M4 7h16M4 12h16M4 17h16" />
     </svg>
-  );
-}
-
-// Дунд болон том дэлгэцэн дэх хэвтээ цэс — item их байвал гүйлгэж болно,
-// хажуугийн бүдгэрэлт + сум товчоор гүйлгэх боломжтойг мэдэгддэг.
-function NavStrip({
-  items,
-  pathname,
-  className = "",
-}: {
-  items: { href: string; label: string }[];
-  pathname: string;
-  className?: string;
-}) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(false);
-
-  const update = useCallback(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 4);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
-
-  useEffect(() => {
-    update();
-    const el = scrollerRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [update, items.length]);
-
-  function scrollByDir(dir: number) {
-    scrollerRef.current?.scrollBy({ left: dir * 168, behavior: "smooth" });
-  }
-
-  return (
-    <div className={`relative min-w-0 flex-1 ${className}`}>
-      {canLeft && (
-        <>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-0 top-0 z-10 h-full w-6 bg-gradient-to-r from-bg to-transparent"
-          />
-          <button
-            type="button"
-            onClick={() => scrollByDir(-1)}
-            aria-label="Цэсийг зүүн тийш гүйлгэх"
-            className="absolute left-0 top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface text-ink-dim shadow-sm transition hover:text-ink"
-          >
-            ‹
-          </button>
-        </>
-      )}
-      <div
-        ref={scrollerRef}
-        className="flex items-center gap-1 overflow-x-auto text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`shrink-0 rounded-lg px-3 py-1.5 transition ${
-              pathname === item.href
-                ? "bg-brand-bright/20 text-brand-soft"
-                : "text-ink-dim hover:text-ink"
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </div>
-      {canRight && (
-        <>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute right-0 top-0 z-10 h-full w-6 bg-gradient-to-l from-bg to-transparent"
-          />
-          <button
-            type="button"
-            onClick={() => scrollByDir(1)}
-            aria-label="Цэсийг баруун тийш гүйлгэх"
-            className="absolute right-0 top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface text-ink-dim shadow-sm transition hover:text-ink"
-          >
-            ›
-          </button>
-        </>
-      )}
-    </div>
   );
 }
 
@@ -263,6 +104,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Шалгалтын fullscreen горимд header-ийг бүхэлд нь нуух ёстой (анти-чит горим
   // document.documentElement.requestFullscreen()-ийг exam хуудас дуудна).
   const [examFullscreen, setExamFullscreen] = useState(false);
+  // Дэд хуудаснууд TopBarSlot-оор дамжуулан удирдлагаа portal хийдэг DOM
+  // зангилаа — @/components/nav/TopBarSlot-ийн гэрээг үзнэ үү.
+  const [topBarSlotEl, setTopBarSlotEl] = useState<HTMLDivElement | null>(null);
   // Хуудас солигдох бүрт mobile drawer-ийг хаах — render үеийн харьцуулалт
   // ("adjust state while rendering" загвар), useEffect дотор setState дуудахгүй.
   const [drawerClosedForPathname, setDrawerClosedForPathname] = useState(pathname);
@@ -288,81 +132,55 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!role) return null;
 
-  const items = NAV[role] ?? [];
+  const pageTitle = getPageTitle(role, pathname);
 
   return (
-    <div className="min-h-screen">
-      {!examFullscreen && (
-        <header className="sticky top-0 z-40 border-b border-line bg-bg/90 backdrop-blur">
-          <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-            <Link href="/" className="flex shrink-0 items-center">
-              <LogoMark variant="full" size={34} />
-            </Link>
-
-            <NavStrip items={items} pathname={pathname} className="hidden sm:flex" />
-
-            <button
-              type="button"
-              onClick={() => setNavOpen((v) => !v)}
-              aria-expanded={navOpen}
-              aria-controls="app-mobile-nav"
-              aria-label={navOpen ? "Цэсийг хаах" : "Цэсийг нээх"}
-              className="flex shrink-0 items-center justify-center rounded-lg border border-line p-2 text-ink-dim transition hover:text-ink sm:hidden"
-            >
-              <HamburgerIcon open={navOpen} />
-            </button>
-
-            <div className="ml-auto flex shrink-0 items-center gap-2">
-              <ThemeToggle className="hidden sm:inline-flex" />
-              <IdentityBadge />
-              <Link
-                href="/app/password"
-                title="Нууц үг солих"
-                className="shrink-0 rounded-lg border border-line px-2.5 py-1.5 text-sm text-ink-dim transition hover:text-ink"
-              >
-                🔑
-              </Link>
-              <button
-                onClick={() => {
-                  clearAuth();
-                  router.push("/login");
-                }}
-                className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-sm text-ink-dim transition hover:text-ink"
-              >
-                Гарах
-              </button>
-            </div>
-          </div>
-
-          {navOpen && (
-            <div
-              id="app-mobile-nav"
-              className="border-t border-line bg-bg px-4 py-3 sm:hidden"
-            >
-              <nav className="flex flex-col gap-1">
-                {items.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setNavOpen(false)}
-                    className={`rounded-lg px-3 py-2 text-sm transition ${
-                      pathname === item.href
-                        ? "bg-brand-bright/20 text-brand-soft"
-                        : "text-ink-dim hover:bg-panel hover:text-ink"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-              <div className="mt-3 border-t border-line pt-3">
-                <ThemeToggle />
+    <TopBarSlotProvider node={topBarSlotEl}>
+      <div className="min-h-screen lg:flex">
+        {!examFullscreen && (
+          <Sidebar
+            role={role}
+            pathname={pathname}
+            mobileOpen={navOpen}
+            onMobileOpenChange={setNavOpen}
+            identity={<IdentityBadge />}
+            onLogout={() => {
+              clearAuth();
+              router.push("/login");
+            }}
+          />
+        )}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {!examFullscreen && (
+            <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur">
+              <div className="flex h-14 items-center gap-3 px-4">
+                <button
+                  type="button"
+                  onClick={() => setNavOpen((v) => !v)}
+                  aria-expanded={navOpen}
+                  aria-controls="app-mobile-nav"
+                  aria-label={navOpen ? "Цэсийг хаах" : "Цэсийг нээх"}
+                  className="flex shrink-0 items-center justify-center rounded-lg border border-line p-2 text-ink-dim transition hover:text-ink lg:hidden"
+                >
+                  <MenuIcon open={navOpen} />
+                </button>
+                {pageTitle && (
+                  <span className="shrink-0 truncate text-sm font-semibold text-ink sm:text-base">
+                    {pageTitle}
+                  </span>
+                )}
+                {/* Хуудас бүр өөрийн удирдлагыг (ж: ангийн сонголт) энд portal-аар
+                    оруулж болно — @/components/nav/TopBarSlot-г үзнэ үү. */}
+                <div
+                  ref={setTopBarSlotEl}
+                  className="ml-2 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                />
               </div>
-            </div>
+            </header>
           )}
-        </header>
-      )}
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-    </div>
+          <main className="mx-auto w-full max-w-6xl px-4 py-8">{children}</main>
+        </div>
+      </div>
+    </TopBarSlotProvider>
   );
 }

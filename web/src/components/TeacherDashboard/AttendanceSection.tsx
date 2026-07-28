@@ -7,7 +7,6 @@ interface StudentAttendance {
   firstName: string;
   lastName: string;
   color?: string;
-  note?: string | null;
 }
 
 interface RosterRow {
@@ -19,6 +18,11 @@ interface AttendanceSectionProps {
   roster: RosterRow[];
   marks: Record<string, string>;
   onMarkChange: (studentId: string, status: string) => void;
+  // Сурагч тус бүрийн өдрийн тэмдэглэл (жишээ нь "толгой өвдсөн тул эрт явсан").
+  // ⚠️ API одоогоор энэ талбарыг хадгалдаггүй тул зөвхөн локал төлөвт хадгалагдана
+  // — хуудас шинэчлэгдвэл алга болно (дэлгэрэнгүйг followUps-оос үзнэ үү).
+  notes: Record<string, string>;
+  onNoteChange: (studentId: string, note: string) => void;
   onSave: () => void;
   today: string;
 }
@@ -55,6 +59,8 @@ export default function AttendanceSection({
   roster,
   marks,
   onMarkChange,
+  notes,
+  onNoteChange,
   onSave,
   today,
 }: AttendanceSectionProps) {
@@ -90,10 +96,10 @@ export default function AttendanceSection({
           roster.map((r) => (
             <div
               key={r.student.id}
-              className="flex flex-col gap-3 rounded-lg border border-line px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4 md:py-2"
+              className="flex flex-col gap-3 rounded-lg border border-line px-3 py-3 md:flex-row md:items-center md:gap-3 md:px-4 md:py-2.5"
             >
               {/* Student Name */}
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium md:w-40 md:shrink-0">
                 {r.student.firstName} {r.student.lastName}
               </span>
 
@@ -105,7 +111,7 @@ export default function AttendanceSection({
                     <button
                       key={opt.value}
                       onClick={() => onMarkChange(r.student.id, opt.value)}
-                      className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
+                      className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-lg px-3 text-xs font-medium transition ${
                         isSelected ? opt.selectedClass : "bg-ink/5 text-ink-dim"
                       }`}
                     >
@@ -114,6 +120,24 @@ export default function AttendanceSection({
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Note — стек mobile дээр, inline desktop дээр (owner-ийн хүсэлт) */}
+              <div className="md:flex-1">
+                <label
+                  htmlFor={`attendance-note-${r.student.id}`}
+                  className="sr-only"
+                >
+                  {r.student.firstName} {r.student.lastName} — тайлбар
+                </label>
+                <input
+                  id={`attendance-note-${r.student.id}`}
+                  type="text"
+                  value={notes[r.student.id] ?? ""}
+                  onChange={(e) => onNoteChange(r.student.id, e.target.value)}
+                  placeholder="Тайлбар (сонголтоор)…"
+                  className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
+                />
               </div>
             </div>
           ))

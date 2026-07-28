@@ -12,6 +12,7 @@
     "import:100x100-v2": "node prisma/import-100x100-v2.cjs",
     "backfill:codes": "node prisma/backfill-codes.cjs",
     "import:students": "node prisma/import-students.cjs",
+    "seed:test-students": "node prisma/seed-test-students.cjs",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

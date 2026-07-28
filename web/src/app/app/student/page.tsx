@@ -1,29 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import EveningMarking from "@/components/EveningMarking";
+import HomeworkList from "@/components/homework/HomeworkList";
 import { api } from "@/lib/api";
 
-const STATE_LABEL: Record<string, { text: string; cls: string }> = {
-  NOT_DONE: { text: "Хийгээгүй", cls: "bg-panel text-ink-dim" },
-  SUBMITTED: { text: "Илгээсэн", cls: "bg-warning/15 text-warning" },
-  DONE_ONLINE: { text: "Хийсэн ✓", cls: "bg-success/15 text-success" },
-  DONE_IN_CLASS: {
-    text: "Ангид шалгуулсан ✓",
-    cls: "bg-success/15 text-success",
-  },
-  RETURNED: { text: "Буцаагдсан — дахин илгээ", cls: "bg-error/15 text-error" },
-};
-
-interface Assignment {
-  id: string;
-  title: string;
-  description?: string;
-  myStatus: string;
-  classroom: { name: string };
-}
 interface Stats {
   totalAttempts: number;
   weakestTags: { tag: string; type: string; attempts: number; successRate: number }[];
@@ -115,34 +98,13 @@ function SectionLoading({ label }: { label: string }) {
 }
 
 export default function StudentDashboard() {
-  const assignmentsQ = useSection<Assignment[]>("/assignments/my");
   const statsQ = useSection<Stats>("/attempts/my-stats");
   const resultsQ = useSection<TestResult[]>("/tests/my-results");
   const attendanceQ = useSection<AttendanceRow[]>("/attendance/my");
   // Зөвхөн танхимын сурагчид төвийн зар буцаана (онлайнд хоосон)
   const announcementsQ = useSection<Announcement[]>("/announcements");
 
-  const [msg, setMsg] = useState("");
-  const [noteByAssignment, setNoteByAssignment] = useState<Record<string, string>>({});
-
-  const reloadAssignments = assignmentsQ.reload;
-  const submitAssignment = useCallback(
-    async (id: string) => {
-      try {
-        await api(`/assignments/${id}/submit`, {
-          method: "POST",
-          body: { note: noteByAssignment[id] ?? "" },
-        });
-        reloadAssignments();
-      } catch (e) {
-        setMsg(e instanceof Error ? e.message : "Алдаа");
-      }
-    },
-    [noteByAssignment, reloadAssignments],
-  );
-
   const announcements = announcementsQ.data ?? [];
-  const assignments = assignmentsQ.data ?? [];
   const results = resultsQ.data ?? [];
   const attendance = attendanceQ.data ?? [];
 
@@ -150,11 +112,6 @@ export default function StudentDashboard() {
     <div className="space-y-8">
       <DashboardGreeting />
       <h1 className="text-2xl font-extrabold">Миний самбар</h1>
-      {msg && (
-        <div className="rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
-          {msg}
-        </div>
-      )}
 
       {/* Идэвхийн heatmap — хадгалуулах (retention) гол шинж чанар тул самбарын дээд хэсэгт */}
       <ActivityHeatmap />
@@ -200,56 +157,7 @@ export default function StudentDashboard() {
         </section>
       )}
 
-      <section className="rounded-2xl border border-line bg-panel p-6">
-        <h2 className="mb-4 font-bold text-brand-soft">Даалгаврууд</h2>
-        {assignmentsQ.status === "loading" && <SectionLoading label="Даалгаврууд" />}
-        {assignmentsQ.status === "error" && (
-          <SectionError message={assignmentsQ.error} onRetry={assignmentsQ.reload} />
-        )}
-        {assignmentsQ.status === "ready" && assignments.length === 0 && (
-          <p className="text-sm text-ink-dim">Одоогоор даалгавар алга</p>
-        )}
-        {assignmentsQ.status === "ready" && assignments.length > 0 && (
-          <div className="space-y-3">
-            {assignments.map((a) => {
-              const st = STATE_LABEL[a.myStatus] ?? STATE_LABEL.NOT_DONE;
-              const canSubmit = a.myStatus === "NOT_DONE" || a.myStatus === "RETURNED";
-              return (
-                <div key={a.id} className="rounded-xl border border-line p-4">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="font-semibold">{a.title}</p>
-                    <span className={`rounded-full px-3 py-0.5 text-xs ${st.cls}`}>
-                      {st.text}
-                    </span>
-                  </div>
-                  {a.description && (
-                    <p className="mt-1 text-sm text-ink-dim">{a.description}</p>
-                  )}
-                  {canSubmit && (
-                    <div className="mt-3 flex gap-2">
-                      <input
-                        placeholder="Тайлбар (заавал биш)"
-                        aria-label="Даалгаврын тайлбар"
-                        value={noteByAssignment[a.id] ?? ""}
-                        onChange={(e) =>
-                          setNoteByAssignment((m) => ({ ...m, [a.id]: e.target.value }))
-                        }
-                        className="flex-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-brand-bright"
-                      />
-                      <button
-                        onClick={() => submitAssignment(a.id)}
-                        className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand"
-                      >
-                        Илгээх
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+      <HomeworkList />
 
       {/* Оройн тэмдэглэгээ — token-гүй, багшийн оруулсан тестээс (EveningMarking) */}
       <EveningMarking />

@@ -1,0 +1,368 @@
+{
+  "meta": {
+    "source": "/Users/mr.buus/Downloads/БҮРТГЭЛ-2027-1.xlsx",
+    "generatedAt": "2026-07-28T02:19:53.018Z",
+    "note": "Бүх утасны дугаар МАСКЛАГДСАН (жинхэнэ утас ЭНД ХАДГАЛАГДААГҮЙ)."
+  },
+  "totals": {
+    "sourceRowsSeen": 362,
+    "sourcePlanned": 359,
+    "sectionsAvailable": 13,
+    "sectionsPicked": 13,
+    "studentsPicked": 26,
+    "perSectionTarget": 2
+  },
+  "sections": [
+    {
+      "section": "10-1",
+      "grade": 9,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Арсланбаатар",
+          "firstName": "Эгшиглэн",
+          "grade": 9,
+          "school": "18-р сургууль",
+          "section": "10-1",
+          "studentPhoneMasked": "9415****",
+          "fatherPhoneMasked": "9990****",
+          "motherPhoneMasked": "8802****"
+        },
+        {
+          "lastName": "Банзрагч",
+          "firstName": "Мөнхсүлд",
+          "grade": 9,
+          "school": "18-р сургууль",
+          "section": "10-1",
+          "studentPhoneMasked": "8699****",
+          "fatherPhoneMasked": "8911****",
+          "motherPhoneMasked": null
+        }
+      ]
+    },
+    {
+      "section": "11-1",
+      "grade": 11,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Самбуудорж",
+          "firstName": "Буяннэмэх",
+          "grade": 11,
+          "school": null,
+          "section": "11-1",
+          "studentPhoneMasked": "8867****",
+          "fatherPhoneMasked": "8801****",
+          "motherPhoneMasked": "8802****"
+        },
+        {
+          "lastName": "Баясгалан",
+          "firstName": "Золбоо",
+          "grade": 11,
+          "school": "93-р сургууль",
+          "section": "11-1",
+          "studentPhoneMasked": null,
+          "fatherPhoneMasked": "9900****",
+          "motherPhoneMasked": "8984****"
+        }
+      ]
+    },
+    {
+      "section": "11-2",
+      "grade": 11,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Баасандорж",
+          "firstName": "Өлзий",
+          "grade": 11,
+          "school": "4-р сургууль",
+          "section": "11-2",
+          "studentPhoneMasked": "8963****",
+          "fatherPhoneMasked": "9010****",
+          "motherPhoneMasked": "9010****"
+        },
+        {
+          "lastName": "Отгонбаатар",
+          "firstName": "Хулан",
+          "grade": 11,
+          "school": "96-р сургууль",
+          "section": "11-2",
+          "studentPhoneMasked": "8874****",
+          "fatherPhoneMasked": "9103****",
+          "motherPhoneMasked": "8802****"
+        }
+      ]
+    },
+    {
+      "section": "11-3",
+      "grade": 11,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Цогтбаатар",
+          "firstName": "Ганзоригт",
+          "grade": 11,
+          "school": "2-р сургууль",
+          "section": "11-3",
+          "studentPhoneMasked": "9994****",
+          "fatherPhoneMasked": "8806****",
+          "motherPhoneMasked": "9992****"
+        },
+        {
+          "lastName": "Мөнхбат",
+          "firstName": "Энэрэл",
+          "grade": 11,
+          "school": "33-р сургууль",
+          "section": "11-3",
+          "studentPhoneMasked": "9591****",
+          "fatherPhoneMasked": "9914****",
+          "motherPhoneMasked": null
+        }
+      ]
+    },
+    {
+      "section": "12-1",
+      "grade": 12,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Дэвшил",
+          "firstName": "Бадмаараг",
+          "grade": 12,
+          "school": "24-р сургууль",
+          "section": "12-1",
+          "studentPhoneMasked": "9520****",
+          "fatherPhoneMasked": "9909****",
+          "motherPhoneMasked": "9929****"
+        },
+        {
+          "lastName": "Галыммурат",
+          "firstName": "Едил",
+          "grade": 12,
+          "school": null,
+          "section": "12-1",
+          "studentPhoneMasked": "8515****",
+          "fatherPhoneMasked": "8800****",
+          "motherPhoneMasked": "9900****"
+        }
+      ]
+    },
+    {
+      "section": "12-2",
+      "grade": 12,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Энхжавхлан",
+          "firstName": "Маргад",
+          "grade": 12,
+          "school": "130-р сургууль",
+          "section": "12-2",
+          "studentPhoneMasked": "8073****",
+          "fatherPhoneMasked": "8007****",
+          "motherPhoneMasked": "8803****"
+        },
+        {
+          "lastName": "Энхтөр",
+          "firstName": "Минжин",
+          "grade": 12,
+          "school": "24-р сургууль",
+          "section": "12-2",
+          "studentPhoneMasked": "9404****",
+          "fatherPhoneMasked": "9908****",
+          "motherPhoneMasked": "9420****"
+        }
+      ]
+    },
+    {
+      "section": "12-3",
+      "grade": 12,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Бямбадорж",
+          "firstName": "Батбилигт",
+          "grade": 12,
+          "school": "28-р сургууль",
+          "section": "12-3",
+          "studentPhoneMasked": "8906****",
+          "fatherPhoneMasked": "8069****",
+          "motherPhoneMasked": "8884****"
+        },
+        {
+          "lastName": "Батчулуун",
+          "firstName": "Дэлгэрдалай",
+          "grade": 12,
+          "school": "62-р сургууль",
+          "section": "12-3",
+          "studentPhoneMasked": "9571****",
+          "fatherPhoneMasked": "8978****",
+          "motherPhoneMasked": "9973****"
+        }
+      ]
+    },
+    {
+      "section": "12-4",
+      "grade": 12,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Баясгалан",
+          "firstName": "Баярцогт",
+          "grade": 12,
+          "school": "18-р сургууль",
+          "section": "12-4",
+          "studentPhoneMasked": "9191****",
+          "fatherPhoneMasked": "8810****",
+          "motherPhoneMasked": "8811****"
+        },
+        {
+          "lastName": "Гантулга",
+          "firstName": "Хүрэлтулга",
+          "grade": 12,
+          "school": "Номч",
+          "section": "12-4",
+          "studentPhoneMasked": "8688****",
+          "fatherPhoneMasked": "8805****",
+          "motherPhoneMasked": "8810****"
+        }
+      ]
+    },
+    {
+      "section": "12-5",
+      "grade": 12,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Сүхбаатар",
+          "firstName": "Гүнжлхам",
+          "grade": 12,
+          "school": "15-р сургууль",
+          "section": "12-5",
+          "studentPhoneMasked": "9953****",
+          "fatherPhoneMasked": null,
+          "motherPhoneMasked": "9905****"
+        },
+        {
+          "lastName": "Содномбаяр",
+          "firstName": "Содномдорж",
+          "grade": 12,
+          "school": "153-р сургууль",
+          "section": "12-5",
+          "studentPhoneMasked": "9979****",
+          "fatherPhoneMasked": "8873****",
+          "motherPhoneMasked": "9979****"
+        }
+      ]
+    },
+    {
+      "section": "13-1",
+      "grade": 12,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Олзод",
+          "firstName": "Намуун",
+          "grade": 12,
+          "school": "84-р сургууль",
+          "section": "13-1",
+          "studentPhoneMasked": "9985****",
+          "fatherPhoneMasked": "9910****",
+          "motherPhoneMasked": null
+        },
+        {
+          "lastName": "Батмөнх",
+          "firstName": "Билигт",
+          "grade": 12,
+          "school": "2-р сургууль",
+          "section": "13-1",
+          "studentPhoneMasked": "9029****",
+          "fatherPhoneMasked": "9929****",
+          "motherPhoneMasked": "9099****"
+        }
+      ]
+    },
+    {
+      "section": "13-3",
+      "grade": 11,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Сод-Эрдэнэ",
+          "firstName": "Болор",
+          "grade": 11,
+          "school": "Монгол косейн",
+          "section": "13-3",
+          "studentPhoneMasked": "9496****",
+          "fatherPhoneMasked": "9989****",
+          "motherPhoneMasked": "9912****"
+        },
+        {
+          "lastName": "Баасанжав",
+          "firstName": "Тэмүүлэн",
+          "grade": 12,
+          "school": "18-р сургууль",
+          "section": "13-3",
+          "studentPhoneMasked": "9926****",
+          "fatherPhoneMasked": "9991****",
+          "motherPhoneMasked": null
+        }
+      ]
+    },
+    {
+      "section": "9-1",
+      "grade": 9,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Цолмон",
+          "firstName": "Сүлд-Очир",
+          "grade": 9,
+          "school": "Монгени",
+          "section": "9-1",
+          "studentPhoneMasked": "9484****",
+          "fatherPhoneMasked": "9191****",
+          "motherPhoneMasked": "9929****"
+        },
+        {
+          "lastName": "Мөнхбаяр",
+          "firstName": "Тэмүүжин",
+          "grade": 9,
+          "school": "6-р сургууль",
+          "section": "9-1",
+          "studentPhoneMasked": "9993****",
+          "fatherPhoneMasked": "8810****",
+          "motherPhoneMasked": "8989****"
+        }
+      ]
+    },
+    {
+      "section": "9-2",
+      "grade": 9,
+      "pickedCount": 2,
+      "students": [
+        {
+          "lastName": "Өлзийбаатар",
+          "firstName": "Баянхангай",
+          "grade": 9,
+          "school": "1-р сургууль",
+          "section": "9-2",
+          "studentPhoneMasked": "9962****",
+          "fatherPhoneMasked": "9923****",
+          "motherPhoneMasked": "9923****"
+        },
+        {
+          "lastName": "Чинбат",
+          "firstName": "Төгсбилэгт",
+          "grade": 10,
+          "school": "2-р сургууль",
+          "section": "9-2",
+          "studentPhoneMasked": "9927****",
+          "fatherPhoneMasked": "9927****",
+          "motherPhoneMasked": null
+        }
+      ]
+    }
+  ]
+}
