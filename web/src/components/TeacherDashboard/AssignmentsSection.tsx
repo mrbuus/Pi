@@ -24,6 +24,14 @@ interface AssignmentsSectionProps {
    * аль хэдийн энэ классын ID-г тодорхойлдог тул энд дахин сонгогч
    * барихгүй, зөвхөн дамжуулагдсан ангиар ажиллана. */
   classroomId: string;
+  /** 🆕 Өгөгдвөл: огноог ЭНЭ prop-оор удирдана (жишээ нь Нүүр таб дээрх
+   * НЭГ ерөнхий огнооны хяналт). Өгөөгүй бол компонент өөрөө дотоод
+   * төлөвтэйгээр огноог удирдана (Даалгавар sub-tab-ын хуучин зан үйл). */
+  selectedDate?: string;
+  /** 🆕 true бол дотоод огнооны толгойг (гарчиг + өмнөх/дараагийн товч)
+   * харуулахгүй — эцэг компонент өөрийн ГАНЦ ерөнхий огнооны хяналттай
+   * үед давхардал үүсгэхгүйн тулд. */
+  hideDateHeader?: boolean;
 }
 
 function errMsg(e: unknown): string {
@@ -47,8 +55,11 @@ function errMsg(e: unknown): string {
  */
 export default function AssignmentsSection({
   classroomId,
+  selectedDate: controlledDate,
+  hideDateHeader = false,
 }: AssignmentsSectionProps) {
-  const [selectedDate, setSelectedDate] = useState(ubToday);
+  const [internalDate, setInternalDate] = useState(ubToday);
+  const selectedDate = controlledDate ?? internalDate;
   const [rows, setRows] = useState<HomeworkMarkRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,9 +69,10 @@ export default function AssignmentsSection({
   const lastSavedRef = useRef<Record<string, HomeworkMarkRow>>({});
 
   // Анги солигдоход өнөөдөр рүү буцна (AttendanceSection-той адил хэв маяг).
+  // Огноог эцэг компонент удирдаж байвал (controlledDate) энд оролцохгүй.
   useEffect(() => {
-    setSelectedDate(ubToday());
-  }, [classroomId]);
+    if (controlledDate === undefined) setInternalDate(ubToday());
+  }, [classroomId, controlledDate]);
 
   const loadDay = useCallback(() => {
     if (!classroomId) return;
@@ -132,40 +144,43 @@ export default function AssignmentsSection({
 
   return (
     <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
-      {/* Огноо шилжүүлэх толгой */}
-      <div className="mb-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
-        <div>
-          <h2 className="font-bold text-brand-soft">Гэрийн даалгавар</h2>
-          <p className="text-sm text-ink-dim">{mnDayOrdinalLabel(selectedDate)}</p>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setSelectedDate((d) => addDaysToDateKey(d, -1))}
-            aria-label="Өмнөх өдөр"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
-          >
-            ‹
-          </button>
-          {!isToday && (
+      {/* Огноо шилжүүлэх толгой — эцэг компонент өөрийн ГАНЦ ерөнхий
+          огнооны хяналттай үед (hideDateHeader) энд харагдахгүй. */}
+      {!hideDateHeader && (
+        <div className="mb-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+          <div>
+            <h2 className="font-bold text-brand-soft">Гэрийн даалгавар</h2>
+            <p className="text-sm text-ink-dim">{mnDayOrdinalLabel(selectedDate)}</p>
+          </div>
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => setSelectedDate(ubToday())}
-              className="min-h-11 rounded-lg border border-line px-3 text-sm font-semibold text-brand-soft transition hover:bg-ink/5"
+              onClick={() => setInternalDate((d) => addDaysToDateKey(d, -1))}
+              aria-label="Өмнөх өдөр"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
             >
-              Өнөөдөр
+              ‹
             </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setSelectedDate((d) => addDaysToDateKey(d, 1))}
-            aria-label="Дараагийн өдөр"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
-          >
-            ›
-          </button>
+            {!isToday && (
+              <button
+                type="button"
+                onClick={() => setInternalDate(ubToday())}
+                className="min-h-11 rounded-lg border border-line px-3 text-sm font-semibold text-brand-soft transition hover:bg-ink/5"
+              >
+                Өнөөдөр
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setInternalDate((d) => addDaysToDateKey(d, 1))}
+              aria-label="Дараагийн өдөр"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
+            >
+              ›
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {error && (
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">

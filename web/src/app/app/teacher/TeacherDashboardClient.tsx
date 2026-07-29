@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AnnouncementCompose from "@/components/AnnouncementCompose";
 import ClassActivityHeatmap from "@/components/activity/ClassActivityHeatmap";
@@ -14,6 +15,10 @@ import AssignmentsSection from "@/components/TeacherDashboard/AssignmentsSection
 import SummarySection from "@/components/TeacherDashboard/SummarySection";
 import UnassignedStudentsSection from "@/components/TeacherDashboard/UnassignedStudentsSection";
 import ParentRequestsSection from "@/components/TeacherDashboard/ParentRequestsSection";
+import {
+  addDaysToDateKey,
+  mnDayOrdinalLabel,
+} from "@/components/homework/homeworkDate";
 import { api, getRole } from "@/lib/api";
 
 // ============================================================================
@@ -187,6 +192,13 @@ export default function TeacherDashboardClient() {
   const [msg, setMsg] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(
     null,
   );
+
+  // Нүүр таб дээрх ирц + даалгаврын НЭГ ерөнхий огнооны хяналт — хоёулаа
+  // энэ нэг төлвөөс огноогоо авна (тусдаа огнооны толгойгүй).
+  const [homeDate, setHomeDate] = useState(today);
+  useEffect(() => {
+    setHomeDate(today);
+  }, [selected, today]);
 
   // ========================================================================
   // Effects
@@ -446,6 +458,90 @@ export default function TeacherDashboardClient() {
       {/* Нүүр — жижиг хэсгүүд бүгд */}
       {tab === "home" && (
         <div className="space-y-6 md:space-y-8">
+          {!selected ? (
+            <p className="rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-dim">
+              Эхлээд анги сонгоно уу
+            </p>
+          ) : (
+            <>
+              {/* Ирц болон даалгаврын хэсгүүдийн НЭГ ерөнхий огнооны хяналт —
+                  доорх хоёр торны аль аль нь энэ сонгосон огноог хэрэглэнэ. */}
+              <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-line bg-surface p-3 md:flex-row md:items-center md:p-4">
+                <div>
+                  <h2 className="font-bold">Ирц ба даалгавар</h2>
+                  <p className="text-sm text-ink-dim">
+                    {mnDayOrdinalLabel(homeDate)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHomeDate((d) => addDaysToDateKey(d, -1))
+                    }
+                    aria-label="Өмнөх өдөр"
+                    className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:bg-ink/5"
+                  >
+                    <ChevronLeft className="h-4 w-4" aria-hidden />
+                  </button>
+                  {homeDate !== today && (
+                    <button
+                      type="button"
+                      onClick={() => setHomeDate(today)}
+                      className="min-h-11 rounded-lg border border-line px-3 text-sm font-semibold text-brand-soft transition hover:bg-ink/5"
+                    >
+                      Өнөөдөр
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHomeDate((d) => addDaysToDateKey(d, 1))
+                    }
+                    aria-label="Дараагийн өдөр"
+                    className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:bg-ink/5"
+                  >
+                    <ChevronRight className="h-4 w-4" aria-hidden />
+                  </button>
+                  <input
+                    type="date"
+                    aria-label="Огноо сонгох"
+                    value={homeDate}
+                    onChange={(e) => {
+                      if (e.target.value) setHomeDate(e.target.value);
+                    }}
+                    className="min-h-11 rounded-lg border border-line bg-surface px-2 text-sm text-ink"
+                  />
+                </div>
+              </div>
+
+              {/* Ирц — Нүүр таб дээр шууд, дэд табгүйгээр тэмдэглэнэ */}
+              <AttendanceSection
+                roster={roster}
+                marks={marks}
+                notes={notes}
+                today={today}
+                onMarkChange={(studentId, status) =>
+                  setMarks((m) => ({ ...m, [studentId]: status }))
+                }
+                onNoteChange={(studentId, note) =>
+                  setNotes((n) => ({ ...n, [studentId]: note }))
+                }
+                onSave={saveAttendance}
+                classroomId={selected}
+                selectedDate={homeDate}
+                hideDateHeader
+              />
+
+              {/* Даалгавар — Нүүр таб дээр шууд, дэд табгүйгээр тэмдэглэнэ */}
+              <AssignmentsSection
+                classroomId={selected}
+                selectedDate={homeDate}
+                hideDateHeader
+              />
+            </>
+          )}
+
           {/* Ангийн идэвхийн heatmap — сонгосон ангийн нэгдсэн дүр зураг */}
           {selected && <ClassActivityHeatmap classroomId={selected} />}
 

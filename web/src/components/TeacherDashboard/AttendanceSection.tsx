@@ -66,6 +66,14 @@ interface AttendanceSectionProps {
    *   <AttendanceSection classroomId={selected} ... />
    */
   classroomId?: string;
+  /** 🆕 Өгөгдвөл: огноог ЭНЭ prop-оор удирдана (жишээ нь Нүүр таб дээрх
+   * НЭГ ерөнхий огнооны хяналт). Өгөөгүй бол `today`-гоос эхэлж дотоод
+   * төлөвтэйгээр удирдана (Ирц sub-tab-ын хуучин зан үйл, хуанлиар өөрчилнө). */
+  selectedDate?: string;
+  /** 🆕 true бол дотоод хуанли болон "· огноо" бичвэрийг нуух — эцэг
+   * компонент өөрийн ГАНЦ ерөнхий огнооны хяналттай үед давхардал
+   * үүсгэхгүйн тулд. */
+  hideDateHeader?: boolean;
 }
 
 function errMsg(e: unknown): string {
@@ -91,14 +99,17 @@ export default function AttendanceSection({
   onSave,
   today,
   classroomId,
+  selectedDate: controlledDate,
+  hideDateHeader = false,
 }: AttendanceSectionProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   // ---- Сонгосон огноо (зөвхөн classroomId үед хуанли идэвхтэй) ----
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [internalDate, setInternalDate] = useState(today);
   useEffect(() => {
-    setSelectedDate(today);
-  }, [today]);
+    if (controlledDate === undefined) setInternalDate(today);
+  }, [today, controlledDate]);
+  const selectedDate = controlledDate ?? internalDate;
   const isToday = selectedDate === today;
 
   // ---- Сонгосон өдрийн жагсаалт: classroomId байвал API-аас өөрөө татна ----
@@ -238,8 +249,14 @@ export default function AttendanceSection({
       {/* Header */}
       <div className="mb-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
         <h2 className="font-bold text-brand-soft">
-          {isToday ? "Өнөөдрийн ирц" : "Ирц"} ·{" "}
-          <span className="text-sm text-ink-dim">{selectedDate}</span>
+          {isToday ? "Өнөөдрийн ирц" : "Ирц"}
+          {!hideDateHeader && (
+            <>
+              {" "}
+              ·{" "}
+              <span className="text-sm text-ink-dim">{selectedDate}</span>
+            </>
+          )}
         </h2>
         <button
           onClick={handleSave}
@@ -250,13 +267,14 @@ export default function AttendanceSection({
         </button>
       </div>
 
-      {/* Хуанли — өмнөх өдрүүдийг харах/засах (зөвхөн classroomId үед) */}
-      {classroomId && (
+      {/* Хуанли — өмнөх өдрүүдийг харах/засах (зөвхөн classroomId үед, мөн
+          эцэг компонент өөрийн ГАНЦ ерөнхий огнооны хяналттай үед нуугдана) */}
+      {classroomId && !hideDateHeader && (
         <div className="mb-4">
           <AttendanceCalendar
             value={selectedDate}
             today={today}
-            onChange={setSelectedDate}
+            onChange={setInternalDate}
           />
         </div>
       )}
