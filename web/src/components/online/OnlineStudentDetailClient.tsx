@@ -1,5 +1,6 @@
 "use client";
 
+import { Eye, Flame, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { api, getRole } from "@/lib/api";
@@ -163,8 +164,9 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
           </div>
           <div>
             <p className="text-xs text-ink-dim">Стрийк</p>
-            <p className="font-semibold text-ink">
-              🔥 {detail.streak.currentStreak} өдөр (дээд тал нь {detail.streak.longestStreak})
+            <p className="inline-flex items-center gap-1 font-semibold text-ink">
+              <Flame className="h-4 w-4 text-accent-teal" aria-hidden />
+              {detail.streak.currentStreak} өдөр (дээд тал нь {detail.streak.longestStreak})
             </p>
           </div>
           <div>
@@ -207,15 +209,16 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
                 setAssignError(null);
                 setAssignOpen(true);
               }}
-              className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition hover:opacity-90"
+              className="inline-flex items-center gap-1 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition hover:opacity-90"
             >
-              ➕ Тест оноох
+              <Plus className="h-4 w-4" aria-hidden /> Тест оноох
             </button>
           </div>
         )}
         {!canEdit && (
-          <p className="mt-4 border-t border-line pt-4 text-sm text-ink-dim">
-            👁️ Та зөвхөн уншиж харах эрхтэй — засах бол Багш+ эсвэл Админаас хүснэ үү.
+          <p className="mt-4 inline-flex items-center gap-1 border-t border-line pt-4 text-sm text-ink-dim">
+            <Eye className="h-4 w-4" aria-hidden />
+            Та зөвхөн уншиж харах эрхтэй — засах бол Багш+ эсвэл Админаас хүснэ үү.
           </p>
         )}
       </section>

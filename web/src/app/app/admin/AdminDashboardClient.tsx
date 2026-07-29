@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import DashboardGreeting from "@/components/DashboardGreeting";
+import RequireRole from "@/components/nav/RequireRole";
 import { api } from "@/lib/api";
 
 interface Payment {
@@ -347,6 +348,7 @@ export default function AdminDashboardClient() {
     "rounded-lg border border-line px-4 py-2 text-sm transition hover:border-brand disabled:opacity-50";
 
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="space-y-8">
       <DashboardGreeting />
       <div className="flex flex-wrap items-center gap-4">
@@ -788,5 +790,6 @@ export default function AdminDashboardClient() {
         </section>
       </div>
     </div>
+    </RequireRole>
   );
 }

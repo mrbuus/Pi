@@ -1,4 +1,5 @@
 import { formatMnt, TUITION, type TuitionTier } from "@/lib/orgInfo";
+import InfoHint from "@/components/ui/InfoHint";
 
 function TierCard({ tier }: { tier: TuitionTier }) {
   const fullYear = tier.plans.find((p) => p.kind === "FULL_YEAR");
@@ -19,14 +20,14 @@ function TierCard({ tier }: { tier: TuitionTier }) {
       <h3 className="text-xl font-extrabold text-ink">{tier.label}</h3>
 
       {fullYear && savings > 0 && (
-        <div className="mt-4 rounded-xl border border-success/30 bg-success/10 p-4">
+        <div className="mt-4 flex items-center gap-1.5 rounded-xl border border-success/30 bg-success/10 p-4">
           <p className="text-sm font-bold text-success">
             {formatMnt(savings)} ({savingsPercent}%) хэмнэнэ
           </p>
-          <p className="mt-1 text-xs text-ink-dim">
+          <InfoHint label="Хэмнэлтийн тухай">
             Бүтэн жилийн төлбөрийг нэг дор төлбөл хуваан төлөхтэй харьцуулахад
-            хэмнэлттэй.
-          </p>
+            {" "}{formatMnt(savings)}-өөр хямд.
+          </InfoHint>
         </div>
       )}
 

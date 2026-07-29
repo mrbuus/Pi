@@ -1,5 +1,6 @@
 "use client";
 
+import { Calendar, Puzzle, Timer } from "lucide-react";
 import { PRIORITY_META, STATUS_META, SUBJECT_LABEL, formatDate, initials } from "./statusMeta";
 import type { SubTask, Task, TaskStatus } from "./types";
 
@@ -67,18 +68,19 @@ export default function TaskCard({
           </span>
         )}
         {(task.startDate || task.dueDate) && (
-          <span className="rounded-full border border-line px-2 py-0.5">
-            📅 {formatDate(task.startDate)} → {formatDate(task.dueDate)}
+          <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5">
+            <Calendar className="h-3 w-3" aria-hidden />
+            {formatDate(task.startDate)} → {formatDate(task.dueDate)}
           </span>
         )}
         {typeof task.estimateHours === "number" && (
-          <span className="rounded-full border border-line px-2 py-0.5">
-            ⏱ {task.estimateHours}ц
+          <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5">
+            <Timer className="h-3 w-3" aria-hidden /> {task.estimateHours}ц
           </span>
         )}
         {!isSubtask && subtaskCount > 0 && (
-          <span className="rounded-full border border-line px-2 py-0.5">
-            🧩 {subtaskCount} дэд даалгавар
+          <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5">
+            <Puzzle className="h-3 w-3" aria-hidden /> {subtaskCount} дэд даалгавар
           </span>
         )}
       </div>
@@ -99,7 +101,7 @@ export default function TaskCard({
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2">
         <label className="flex items-center gap-1.5 text-xs text-ink-dim">
-          <span className={statusMeta.colorClass}>{statusMeta.icon}</span>
+          <statusMeta.icon className={`h-3.5 w-3.5 ${statusMeta.colorClass}`} aria-hidden />
           <span className="sr-only">Төлөв шилжүүлэх — {task.title}</span>
           <select
             aria-label={`Төлөв шилжүүлэх — ${task.title}`}
@@ -110,7 +112,7 @@ export default function TaskCard({
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {STATUS_META[s].icon} {STATUS_META[s].label}
+                {STATUS_META[s].label}
               </option>
             ))}
           </select>

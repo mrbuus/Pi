@@ -1,5 +1,7 @@
 "use client";
 
+import { AlertTriangle, Ban } from "lucide-react";
+
 /* ============================================================================
  * LeaveWarningDialog — горимоос гарсан үеийн факт мэдэгдэл (буруутгасан
  * өнгө аяс биш). Сүүлчийн (auto-submit-ийн өмнөх) сануулга л илүү хатуу
@@ -32,9 +34,11 @@ export default function LeaveWarningDialog({
           finalWarning ? "border-error bg-error/10" : "border-warning bg-warning/10"
         }`}
       >
-        <p className="text-3xl" aria-hidden>
-          {finalWarning ? "⛔" : "⚠️"}
-        </p>
+        {finalWarning ? (
+          <Ban className="mx-auto h-9 w-9 text-error" aria-hidden />
+        ) : (
+          <AlertTriangle className="mx-auto h-9 w-9 text-warning" aria-hidden />
+        )}
         <p className={`mt-2 text-lg font-bold ${finalWarning ? "text-error" : "text-warning"}`}>
           Та шалгалтын дэлгэцээс гарлаа. Бүртгэгдлээ ({leaveCount}/{maxLeaves}).
         </p>

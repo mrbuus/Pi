@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, Moon, MoonStar, Search, Zap, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { EngagementLevel, OnlineStudentListItem, OnlineStudentsResponse, PassFilter } from "./types";
@@ -14,11 +15,11 @@ const PASS_FILTERS: { v: PassFilter | "ALL"; t: string }[] = [
   { v: "EXPIRED", t: "Идэвхтэй эрхгүй" },
 ];
 
-const ACTIVITY_FILTERS: { v: EngagementLevel | "ALL"; t: string }[] = [
+const ACTIVITY_FILTERS: { v: EngagementLevel | "ALL"; t: string; icon?: LucideIcon }[] = [
   { v: "ALL", t: "Бүх идэвх" },
-  { v: "ACTIVE", t: "⚡ Идэвхтэй" },
-  { v: "SLOWING", t: "🌗 Сулраж байна" },
-  { v: "DORMANT", t: "💤 Идэвхгүй" },
+  { v: "ACTIVE", t: "Идэвхтэй", icon: Zap },
+  { v: "SLOWING", t: "Сулраж байна", icon: MoonStar },
+  { v: "DORMANT", t: "Идэвхгүй", icon: Moon },
 ];
 
 // Энэ жагсаалт бол "бүтээгдэхүүн" өөрөө: эрх нь хүчинтэй хэрнээ идэвхгүй
@@ -124,12 +125,13 @@ export default function OnlineRosterClient() {
               type="button"
               onClick={() => setActivity(f.v)}
               aria-pressed={activity === f.v}
-              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
                 activity === f.v
                   ? "border-brand bg-brand-bright/15 text-brand-soft"
                   : "border-line text-ink-dim hover:text-ink"
               }`}
             >
+              {f.icon && <f.icon className="h-3.5 w-3.5" aria-hidden />}
               {f.t}
             </button>
           ))}
@@ -138,9 +140,8 @@ export default function OnlineRosterClient() {
 
       {dormantWithPassCount > 0 && (
         <div className="mb-4 flex items-start gap-2 rounded-xl border border-error/30 bg-error/5 p-3">
-          <span aria-hidden className="text-lg">
-            ⚠️
-          </span>
+          <AlertTriangle className="h-5 w-5 shrink-0 text-error" aria-hidden />
+
           <p className="text-sm text-ink">
             <span className="font-semibold">{dormantWithPassCount} сурагчийн</span>{" "}
             эрх нь хүчинтэй хэрнээ идэвхгүй болсон — эргэж холбогдох
@@ -176,9 +177,7 @@ export default function OnlineRosterClient() {
 
       {!loading && !error && ordered.length === 0 && (
         <div className="rounded-2xl border border-line bg-panel p-8 text-center">
-          <p className="text-2xl" aria-hidden>
-            🔍
-          </p>
+          <Search className="mx-auto h-6 w-6 text-ink-dim" aria-hidden />
           <p className="mt-2 font-semibold text-ink">Тохирох сурагч олдсонгүй</p>
           <p className="mt-1 text-sm text-ink-dim">
             {search || passStatus !== "ALL" || activity !== "ALL"

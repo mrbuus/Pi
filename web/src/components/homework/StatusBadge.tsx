@@ -6,6 +6,8 @@
  * Эдгээрийг шууд ашиглана — шинэ enum утга зохиомжлохгүй.
  * ========================================================================== */
 
+import { Check, CheckCheck, Circle, Hourglass, Undo2, type LucideIcon } from "lucide-react";
+
 export type SubmissionState =
   | "NOT_DONE"
   | "SUBMITTED"
@@ -14,34 +16,34 @@ export type SubmissionState =
   | "RETURNED";
 
 interface StatusMeta {
-  icon: string;
+  icon: LucideIcon;
   label: string;
   cls: string;
 }
 
 export const STATUS_META: Record<SubmissionState, StatusMeta> = {
   NOT_DONE: {
-    icon: "○",
+    icon: Circle,
     label: "Хийгээгүй",
     cls: "border-line bg-panel text-ink-dim",
   },
   SUBMITTED: {
-    icon: "⏳",
+    icon: Hourglass,
     label: "Илгээсэн — шалгуулж байна",
     cls: "border-warning/30 bg-warning/10 text-warning",
   },
   DONE_ONLINE: {
-    icon: "✅",
+    icon: Check,
     label: "Хийсэн — баталгаажсан",
     cls: "border-success/30 bg-success/10 text-success",
   },
   DONE_IN_CLASS: {
-    icon: "☑",
+    icon: CheckCheck,
     label: "Ангид шалгуулсан",
     cls: "border-success/30 bg-success/10 text-success",
   },
   RETURNED: {
-    icon: "↩",
+    icon: Undo2,
     label: "Буцаагдсан — дахин илгээ",
     cls: "border-error/30 bg-error/10 text-error",
   },
@@ -53,7 +55,7 @@ export function StatusBadge({ state }: { state: string }) {
     <span
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 text-sm font-semibold ${meta.cls}`}
     >
-      <span aria-hidden="true">{meta.icon}</span>
+      <meta.icon className="h-3.5 w-3.5" aria-hidden="true" />
       <span>{meta.label}</span>
     </span>
   );

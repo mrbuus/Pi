@@ -1,5 +1,6 @@
 "use client";
 
+import { Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { formatMnt } from "@/lib/orgInfo";
@@ -90,9 +91,9 @@ export default function OutstandingPanel({ month }: { month: string }) {
                   {href ? (
                     <a
                       href={href}
-                      className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-brand"
+                      className="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-brand"
                     >
-                      📞 {r.phone}
+                      <Phone className="h-3 w-3" aria-hidden /> {r.phone}
                     </a>
                   ) : (
                     <span className="text-xs text-ink-dim">Утасгүй</span>

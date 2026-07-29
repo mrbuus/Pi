@@ -30,7 +30,7 @@ export default function HowItWorks() {
           Хэрхэн бүртгүүлэх вэ
         </p>
         <h2 className="reveal mt-3 max-w-2xl text-3xl font-extrabold md:text-4xl">
-          4 алхмаар элсэлтийн бэлтгэлээ эхлүүлнэ
+          4 алхмаар элсэлтийн шалгалтын бэлтгэлээ эхлүүлнэ
         </h2>
         <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (

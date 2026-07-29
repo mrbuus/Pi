@@ -379,7 +379,41 @@ address,
 }
 .bar-fill { animation: barFill 1.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+/* InfoHint popover — жижиг "i" тэмдгийг дарахад гарч ирэх тайлбар карт.
+   Доор/дээр аль тийш эргэснээс хамааран өөр чиглэлээс гарч ирнэ. */
+@keyframes infoHintInBottom {
+  from { opacity: 0; transform: translateY(-4px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes infoHintInTop {
+  from { opacity: 0; transform: translateY(4px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.info-hint-pop-bottom { animation: infoHintInBottom 0.14s ease-out both; }
+.info-hint-pop-top { animation: infoHintInTop 0.14s ease-out both; }
+
+/* Судлагдсан суралцах хэмнэлийн зураглал (CentreInfo) — тест → сул тал →
+   дасгал → шалгалт мөчлөгийг харуулах цэгэн замын анимаци. */
+@keyframes loopSweep {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+@keyframes loopNodePulse {
+  0%, 4% { transform: scale(1); box-shadow: none; }
+  10% { transform: scale(1.22); box-shadow: 0 0 0 6px var(--brand-tint); }
+  26%, 100% { transform: scale(1); box-shadow: none; }
+}
+@keyframes loopLabelPulse {
+  0%, 4% { color: var(--ink-dim); font-weight: 600; }
+  10%, 22% { color: var(--brand); font-weight: 800; }
+  30%, 100% { color: var(--ink-dim); font-weight: 600; }
+}
+.loop-sweep { width: 100%; animation: loopSweep 8s linear infinite; }
+.loop-node { animation: loopNodePulse 8s ease-in-out infinite; }
+.loop-label { color: var(--brand); font-weight: 800; animation: loopLabelPulse 8s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .float-sym, .shimmer-cell, .glow-pulse, .text-shine { animation: none; }
-  .js .reveal { transition: none; opacity: 1; transform: none; }
+  .float-sym, .shimmer-cell, .glow-pulse, .text-shine,
+  .info-hint-pop-bottom, .info-hint-pop-top,
+  .loop-sweep, .loop-node, .loop-label { animation: none; }
 }

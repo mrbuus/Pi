@@ -60,6 +60,7 @@ export const ModelName = {
   Attendance: 'Attendance',
   Assignment: 'Assignment',
   Submission: 'Submission',
+  DailyHomeworkMark: 'DailyHomeworkMark',
   Book: 'Book',
   Chapter: 'Chapter',
   Topic: 'Topic',
@@ -126,6 +127,7 @@ export const UserScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   passwordHash: 'passwordHash',
+  mustChangePassword: 'mustChangePassword',
   role: 'role',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
@@ -209,7 +211,8 @@ export const AttendanceScalarFieldEnum = {
   date: 'date',
   status: 'status',
   markedById: 'markedById',
-  note: 'note'
+  note: 'note',
+  lateRange: 'lateRange'
 } as const
 
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
@@ -245,6 +248,21 @@ export const SubmissionScalarFieldEnum = {
 } as const
 
 export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
+
+
+export const DailyHomeworkMarkScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  studentId: 'studentId',
+  date: 'date',
+  status: 'status',
+  comment: 'comment',
+  markedById: 'markedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyHomeworkMarkScalarFieldEnum = (typeof DailyHomeworkMarkScalarFieldEnum)[keyof typeof DailyHomeworkMarkScalarFieldEnum]
 
 
 export const BookScalarFieldEnum = {

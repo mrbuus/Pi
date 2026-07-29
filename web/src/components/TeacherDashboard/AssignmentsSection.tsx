@@ -1,194 +1,226 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import TeacherHomeworkCalendar, {
-  formatMnDate,
-  ubDateKey,
+import { useCallback, useEffect, useRef, useState } from "react";
+import HomeworkCommentField from "@/components/homework/HomeworkCommentField";
+import HomeworkMarkPills, {
+  type HomeworkMark,
+} from "@/components/homework/HomeworkMarkPills";
+import {
+  addDaysToDateKey,
+  mnDayOrdinalLabel,
   ubToday,
-  ubWeekdayFull,
-} from "@/components/homework/TeacherHomeworkCalendar";
-import TeacherHomeworkFrequencyPanel from "@/components/homework/TeacherHomeworkFrequencyPanel";
-import TeacherHomeworkTestCard from "@/components/homework/TeacherHomeworkTestCard";
+} from "@/components/homework/homeworkDate";
+import { api } from "@/lib/api";
 
-interface Assignment {
-  id: string;
-  title: string;
-  type: string;
-  createdAt: string;
-  // API нь listForClass-д submission тоог хамт буцаадаг (assignments.service.ts),
-  // гэхдээ эцэг компонентын локал төрөл үүнийг зарладаггүй тул сонголттой —
-  // байхгүй үед л карт дээр тоог зүгээр л харуулахгүй.
-  _count?: { submissions: number };
-}
-
-interface SubmissionRow {
+interface HomeworkMarkRow {
   student: { id: string; firstName: string; lastName: string };
-  state: string;
-  note: string | null;
+  status: HomeworkMark | null;
+  comment: string | null;
+  updatedAt: string | null;
 }
 
 interface AssignmentsSectionProps {
-  assignments: Assignment[];
-  submissions: SubmissionRow[];
-  openAssignmentId: string;
-  newTitle: string;
-  onNewTitleChange: (title: string) => void;
-  onCreate: () => void;
-  onOpen: (assignmentId: string) => void;
-  onReview: (studentId: string, action: string) => void;
+  /** Эцэг компонентын дээд талд (sub-tab-уудын гадна) байрлах анги сонгогч
+   * аль хэдийн энэ классын ID-г тодорхойлдог тул энд дахин сонгогч
+   * барихгүй, зөвхөн дамжуулагдсан ангиар ажиллана. */
+  classroomId: string;
+}
+
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : "Алдаа гарлаа";
 }
 
 /**
- * Даалгавартай холбоотой үйлдлүүд (үүсгэх, нээх, шалгах).
- * Багш даалгавар өгж, оюутны илгээлтийг шалгана.
+ * Даалгаврын хурдан өдөр тутмын тэмдэглэгээний тор (owner-ийн #1 хүсэлт).
  *
- * Онцлогууд (owner-ийн хүсэлтээр):
- *  - 📅 Хуанли — сар/өдрөөр сонгож өмнөх хичээлүүдийн даалгаврыг эргэн харна
- *  - 🎯 Шинэ даалгаврын нэрийг өмнөх хичээлээс автоматаар бөглөнө (засварлаж болно)
- *  - 📦 Тест бүр өөрийн жижиг боксд тус тусад нь харагдана
- *  - 🎨 Давтамжийн анхааруулга (3+/5+ хийгээгүй/дутуу, сүүлийн 2 тэмдэглээгүй)
+ * UX:
+ *  1. Анги сонгох — эцэг компонентын дээд талд (энэ хэсгийн гадна) байрлана.
+ *  2. Өнөөдрийн огноо монгол хэлбэрээр автоматаар харагдана, өмнөх/дараагийн
+ *     өдөр рүү шилжих боломжтой.
+ *  3. Ангийн бүх сурагч нэрээр эрэмбэлэгдэж босоогоор жагсаана.
+ *  4. Нэрний баруун талд НЭГ товшилтоор өнгө тэмдэглэнэ: хийсэн (ногоон),
+ *     дутуу (шар), хийгээгүй (улаан), тэмдэглээгүй бол цагаан/хоосон.
+ *  5. Сурагч тус бүрт цэнхэр чөлөөт тайлбарын талбар (debounce-той хадгална).
+ *
+ * Гүйцэтгэл: товшилт бүр ОПТИМИСТ шинэчлэгддэг (сервер хариу хүлээхгүйгээр
+ * шууд UI дээр харагдана), алдаа гарвал өмнөх утга руугаа буцаана.
  */
 export default function AssignmentsSection({
-  assignments,
-  submissions,
-  openAssignmentId,
-  newTitle,
-  onNewTitleChange,
-  onCreate,
-  onOpen,
-  onReview,
+  classroomId,
 }: AssignmentsSectionProps) {
-  const [isCreating, setIsCreating] = useState(false);
   const [selectedDate, setSelectedDate] = useState(ubToday);
+  const [rows, setRows] = useState<HomeworkMarkRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Сурагч тус бүрийн хамгийн сүүлийн амжилттай хадгалсан утга — алдаа
+  // гарвал үүн рүү буцаана (optimistic rollback). ref ашигласан нь async
+  // callback дотор "stale closure" (хуучирсан утга) авахаас сэргийлнэ.
+  const lastSavedRef = useRef<Record<string, HomeworkMarkRow>>({});
 
-  const handleCreate = async () => {
-    setIsCreating(true);
-    await onCreate();
-    setIsCreating(false);
-  };
-
-  // ==========================================================================
-  // 🎯 Автоматаар бөглөх: өмнөх хичээлийн (өнөөдрөөс өмнөх хамгийн сүүлийн
-  // өдрийн) даалгаврын нэрийг эхэнд нь санал болгоно, багш чөлөөтэй засна.
-  // ==========================================================================
-  const todayKey = ubToday();
-  const prevLessonTitle = useMemo(() => {
-    const prev = assignments.find((a) => ubDateKey(a.createdAt) !== todayKey);
-    return prev?.title ?? null;
-  }, [assignments, todayKey]);
-
-  const autoFilledRef = useRef(false);
+  // Анги солигдоход өнөөдөр рүү буцна (AttendanceSection-той адил хэв маяг).
   useEffect(() => {
-    if (autoFilledRef.current) return;
-    if (prevLessonTitle && !newTitle.trim()) {
-      onNewTitleChange(prevLessonTitle);
-      autoFilledRef.current = true;
+    setSelectedDate(ubToday());
+  }, [classroomId]);
+
+  const loadDay = useCallback(() => {
+    if (!classroomId) return;
+    setLoading(true);
+    setError(null);
+    api<HomeworkMarkRow[]>(
+      `/classrooms/${classroomId}/homework-marks?date=${selectedDate}`,
+    )
+      .then((data) => {
+        setRows(data);
+        lastSavedRef.current = Object.fromEntries(
+          data.map((r) => [r.student.id, r]),
+        );
+      })
+      .catch((e) => setError(errMsg(e)))
+      .finally(() => setLoading(false));
+  }, [classroomId, selectedDate]);
+  useEffect(() => {
+    loadDay();
+  }, [loadDay]);
+
+  async function saveMark(
+    studentId: string,
+    patch: { status?: HomeworkMark | null; comment?: string | null },
+  ) {
+    // 1) Оптимист: шууд UI-г шинэчилнэ
+    setRows((prev) =>
+      prev.map((r) => (r.student.id === studentId ? { ...r, ...patch } : r)),
+    );
+    setError(null);
+    try {
+      const res = await api<{
+        status: HomeworkMark | null;
+        comment: string | null;
+        updatedAt: string;
+      }>(`/classrooms/${classroomId}/homework-marks/${studentId}`, {
+        method: "PATCH",
+        body: { date: selectedDate, ...patch },
+      });
+      setRows((prev) =>
+        prev.map((r) =>
+          r.student.id === studentId
+            ? { ...r, status: res.status, comment: res.comment, updatedAt: res.updatedAt }
+            : r,
+        ),
+      );
+      lastSavedRef.current = {
+        ...lastSavedRef.current,
+        [studentId]: {
+          ...(lastSavedRef.current[studentId] ?? {
+            student: { id: studentId, firstName: "", lastName: "" },
+          }),
+          status: res.status,
+          comment: res.comment,
+          updatedAt: res.updatedAt,
+        },
+      };
+    } catch (e) {
+      // 2) Алдаа гарвал сүүлд амжилттай хадгалсан утга руу буцаана
+      const fallback = lastSavedRef.current[studentId];
+      setRows((prev) =>
+        prev.map((r) => (r.student.id === studentId ? (fallback ?? r) : r)),
+      );
+      setError(errMsg(e));
     }
-    // onNewTitleChange нь эцэг компонентын setState-той холбоотой, дахин
-    // үүсдэг тул dependency-д оруулбал давхар/эргэлдэх эффект үүсгэнэ.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prevLessonTitle]);
+  }
 
-  const isPrefilled = !!prevLessonTitle && newTitle === prevLessonTitle;
-
-  // ==========================================================================
-  // 📅 Сонгосон өдрийн тестүүд (хуанлиас сонгосон)
-  // ==========================================================================
-  const dayAssignments = useMemo(
-    () => assignments.filter((a) => ubDateKey(a.createdAt) === selectedDate),
-    [assignments, selectedDate],
-  );
+  const isToday = selectedDate === ubToday();
 
   return (
     <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
-      <h2 className="mb-4 font-bold text-brand-soft">Даалгаврууд</h2>
-
-      {/* Create New Assignment */}
-      <div className="mb-2">
-        {prevLessonTitle && (
-          <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-ink-dim">
-            <span aria-hidden="true">🔁</span>
-            <span>
-              Өмнөх хичээлээс: <span className="font-medium">“{prevLessonTitle}”</span>
-              {isPrefilled && " (автоматаар бөглөгдсөн)"}
-            </span>
-            {!isPrefilled && (
-              <button
-                type="button"
-                onClick={() => onNewTitleChange(prevLessonTitle)}
-                className="min-h-6 rounded-full border border-line px-2 py-0.5 font-semibold text-brand-soft transition hover:bg-brand-tint"
-              >
-                Дахин ашиглах
-              </button>
-            )}
-          </div>
-        )}
-        <div className="flex flex-col gap-2 md:flex-row md:gap-2">
-          <input
-            value={newTitle}
-            onChange={(e) => onNewTitleChange(e.target.value)}
-            placeholder="Шинэ даалгаврын нэр…"
-            className="flex-1 rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
-            disabled={isCreating}
-          />
+      {/* Огноо шилжүүлэх толгой */}
+      <div className="mb-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+        <div>
+          <h2 className="font-bold text-brand-soft">Гэрийн даалгавар</h2>
+          <p className="text-sm text-ink-dim">{mnDayOrdinalLabel(selectedDate)}</p>
+        </div>
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={handleCreate}
-            disabled={isCreating || !newTitle.trim()}
-            className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold transition disabled:opacity-50 md:whitespace-nowrap"
+            type="button"
+            onClick={() => setSelectedDate((d) => addDaysToDateKey(d, -1))}
+            aria-label="Өмнөх өдөр"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
           >
-            {isCreating ? "Үүсгэж байна..." : "Өгөх"}
+            ‹
+          </button>
+          {!isToday && (
+            <button
+              type="button"
+              onClick={() => setSelectedDate(ubToday())}
+              className="min-h-11 rounded-lg border border-line px-3 text-sm font-semibold text-brand-soft transition hover:bg-ink/5"
+            >
+              Өнөөдөр
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setSelectedDate((d) => addDaysToDateKey(d, 1))}
+            aria-label="Дараагийн өдөр"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
+          >
+            ›
           </button>
         </div>
       </div>
 
-      {/* 🎨 Давтамжийн анхааруулга */}
-      <div className="my-4">
-        <TeacherHomeworkFrequencyPanel assignments={assignments} />
-      </div>
-
-      {/* 📅 Хуанли + сонгосон өдрийн тестүүд */}
-      <div className="grid gap-4 md:grid-cols-[minmax(0,280px)_1fr]">
-        <TeacherHomeworkCalendar
-          assignments={assignments}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-        />
-
-        <div>
-          <h3 className="mb-1 text-sm font-bold">
-            {formatMnDate(selectedDate)},{" "}
-            <span className="text-brand-soft">
-              {ubWeekdayFull(selectedDate)}
-            </span>
-          </h3>
-          <p className="mb-3 text-xs text-ink-dim">
-            {dayAssignments.length > 0
-              ? `${dayAssignments.length} тест өгсөн`
-              : "Энэ өдөр тест өгөөгүй байна"}
-          </p>
-
-          {dayAssignments.length > 0 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {dayAssignments.map((assignment) => (
-                <TeacherHomeworkTestCard
-                  key={assignment.id}
-                  assignment={assignment}
-                  isOpen={openAssignmentId === assignment.id}
-                  submissions={
-                    openAssignmentId === assignment.id ? submissions : []
-                  }
-                  // ⚠️ Эцэг компонент (TeacherDashboardClient.tsx) "хаах" төлөвийг
-                  // дэмждэггүй — onOpen(id) нь үргэлж roster татаж НЭЭЛТТЭЙ болгодог,
-                  // хоосон id дамжуулбал API замд алдаа өгнө. Тиймээс энд зөвхөн
-                  // "нээх/дахин ачаалах" боломжтой, анхны AssignmentsSection-тэй ижил.
-                  onToggle={() => onOpen(assignment.id)}
-                  onReview={onReview}
-                />
-              ))}
-            </div>
-          )}
+      {error && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+          <span>⚠ {error}</span>
+          <button
+            onClick={loadDay}
+            className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
+          >
+            Дахин ачаалах
+          </button>
         </div>
-      </div>
+      )}
+
+      {!classroomId ? (
+        <p className="text-sm text-ink-dim">Эхлээд анги сонгоно уу</p>
+      ) : loading ? (
+        <p className="animate-pulse text-sm text-ink-dim" role="status">
+          Ачаалж байна…
+        </p>
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-ink-dim">Энэ ангид сурагч алга байна</p>
+      ) : (
+        <div className="space-y-2">
+          {rows.map((r) => {
+            const label = `${r.student.firstName} ${r.student.lastName}`;
+            return (
+              <div
+                key={r.student.id}
+                className="flex flex-col gap-3 rounded-lg border border-line px-3 py-3 md:flex-row md:items-center md:gap-3 md:px-4 md:py-2.5"
+              >
+                <div className="md:w-44 md:shrink-0">
+                  <span className="text-sm font-medium">{label}</span>
+                </div>
+
+                <HomeworkMarkPills
+                  studentLabel={label}
+                  value={r.status}
+                  onChange={(status) => saveMark(r.student.id, { status })}
+                />
+
+                <div className="md:flex-1">
+                  <HomeworkCommentField
+                    id={`homework-comment-${r.student.id}`}
+                    label={`${label} — тайлбар`}
+                    value={r.comment ?? ""}
+                    onSave={(comment) =>
+                      saveMark(r.student.id, { comment: comment.trim() || null })
+                    }
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

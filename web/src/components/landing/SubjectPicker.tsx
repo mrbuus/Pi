@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleCheckBig, CircleX, Hourglass, Info } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { api } from "@/lib/api";
 
@@ -43,16 +44,16 @@ function fallbackOpenWindows(): EnrollmentWindow[] {
 }
 
 // `enabled=false` үед fetch хийхгүй — SubjectPicker өөрөө windows prop-оор
-// өгөгдөл авсан үед (жишээ нь LeadForm аль хэдийн татаж авсан) давхар
+// өгөгдлөө гаднаас (жишээ нь эцэг компонентоос) аль хэдийн авсан үед давхар
 // сүлжээний хүсэлт явуулахгүйн тулд.
 export function useEnrollmentWindows(enabled = true) {
   const [windows, setWindows] = useState<EnrollmentWindow[] | null>(null);
   const [loading, setLoading] = useState(enabled);
   const [failedOpen, setFailedOpen] = useState(false);
 
-  // Гараар дахин татах (жишээ нь LeadForm-ийн 400 алдааны дараа) — эффект
-  // дотор шууд дуудагдахгүй тул "effect дотор synchronous setState" гэсэн
-  // lint дүрэмд орохгүй.
+  // Гараар дахин татах (жишээ нь маягт илгээхэд серверээс 400 алдаа ирсний
+  // дараа) — эффект дотор шууд дуудагдахгүй тул "effect дотор synchronous
+  // setState" гэсэн lint дүрэмд орохгүй.
   const refetch = useCallback(async (): Promise<EnrollmentWindow[]> => {
     setLoading(true);
     try {
@@ -111,10 +112,12 @@ export function useEnrollmentWindows(enabled = true) {
   return { windows, loading, failedOpen, refetch };
 }
 
-function statusIcon(status: EnrollmentStatus) {
-  if (status === "OPEN") return "✓";
-  if (status === "COMING_SOON") return "⏳";
-  return "✕";
+function StatusIcon({ status }: { status: EnrollmentStatus }) {
+  if (status === "OPEN")
+    return <CircleCheckBig aria-hidden size={14} className="text-success" />;
+  if (status === "COMING_SOON")
+    return <Hourglass aria-hidden size={14} className="text-warning" />;
+  return <CircleX aria-hidden size={14} className="text-ink-dim" />;
 }
 
 function statusText(status: EnrollmentStatus): string {
@@ -165,7 +168,7 @@ interface SubjectPickerProps {
    * (жишээ нь лийдийн маягт) бүх хичээл харуулна, зөвхөн шошгоор мэдээлнэ.
    */
   studentType?: StudentType;
-  /** Гаднаас өгвөл дахин fetch хийхгүй, өгөгдлөө хуваалцана (жишээ нь LeadForm). */
+  /** Гаднаас өгвөл дахин fetch хийхгүй, өгөгдлөө хуваалцана (эцэг компонент удирдана). */
   windows?: EnrollmentWindow[] | null;
   loading?: boolean;
   legend?: string;
@@ -279,7 +282,7 @@ export default function SubjectPicker({
                       )}
                     </span>
                     <span className="mt-0.5 flex items-center gap-1 text-xs text-ink-dim">
-                      <span aria-hidden>{statusIcon(win.status)}</span>
+                      <StatusIcon status={win.status} />
                       {statusText(win.status)}
                     </span>
                   </span>
@@ -291,7 +294,7 @@ export default function SubjectPicker({
                     role="status"
                     className="mt-1.5 flex items-start gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink-dim"
                   >
-                    <span aria-hidden>ⓘ</span>
+                    <Info aria-hidden size={14} className="mt-0.5 shrink-0" />
                     {lockState.reason}
                   </p>
                 )}

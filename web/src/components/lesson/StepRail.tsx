@@ -1,12 +1,13 @@
 "use client";
 
+import { BookOpen, Check, Clapperboard, NotebookPen, PenLine, type LucideIcon } from "lucide-react";
 import type { StepStatus } from "./types";
 
-const STEP_ICON: Record<StepStatus["key"], string> = {
-  theory: "📖",
-  video: "🎬",
-  problems: "✍️",
-  test: "📝",
+const STEP_ICON: Record<StepStatus["key"], LucideIcon> = {
+  theory: BookOpen,
+  video: Clapperboard,
+  problems: PenLine,
+  test: NotebookPen,
 };
 
 /**
@@ -51,6 +52,7 @@ export default function StepRail({
         {steps.map((step, idx) => {
           const active = step.key === activeKey;
           const disabled = !step.hasContent;
+          const Icon = STEP_ICON[step.key];
           return (
             <button
               key={step.key}
@@ -76,7 +78,7 @@ export default function StepRail({
                 }`}
                 aria-hidden
               >
-                {step.done ? "✓" : STEP_ICON[step.key]}
+                {step.done ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
               </span>
               <span className="min-w-0">
                 <span className="block text-[11px] font-bold uppercase tracking-wide opacity-70">

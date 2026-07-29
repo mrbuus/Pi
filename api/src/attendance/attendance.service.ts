@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { AuditService } from '../audit/audit.service';
 import { addDateDays, dateKey, parseDateOnly } from '../common/date';
 import { AttendanceStatus, Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
@@ -21,6 +22,7 @@ export class AttendanceService {
   constructor(
     private prisma: PrismaService,
     private schedule: ScheduleService,
+    private audit: AuditService,
   ) {}
 
   // parseDateOnly plain Error шидвэл HTTP 500 болчихно — энд эргүүлж 400
@@ -80,7 +82,17 @@ export class AttendanceService {
       );
     }
 
-    await this.prisma.$transaction(
+    // Audit-д зориулж өмнөх төлвийг олж авна (before/after харьцуулалт).
+    const beforeRows = await this.prisma.attendance.findMany({
+      where: {
+        classroomId,
+        date,
+        studentId: { in: dto.entries.map((e) => e.studentId) },
+      },
+    });
+    const beforeByStudent = new Map(beforeRows.map((r) => [r.studentId, r]));
+
+    const afterRows = await this.prisma.$transaction(
       dto.entries.map((entry) =>
         this.prisma.attendance.upsert({
           where: {
@@ -97,15 +109,48 @@ export class AttendanceService {
             status: entry.status,
             markedById: userId,
             note: entry.note ?? null,
+            // LATE-аас өөр статусын үед хугацааны интервал утгагүй тул
+            // хэзээ ч хадгалахгүй.
+            lateRange:
+              entry.status === AttendanceStatus.LATE
+                ? (entry.lateRange ?? null)
+                : null,
           },
           update: {
             status: entry.status,
             markedById: userId,
             note: entry.note ?? null,
+            // Статус LATE-ээс өөр болж өөрчлөгдвөл өмнөх хугацааны
+            // интервалыг заавал цэвэрлэнэ (SPEC: "cleared if the status is
+            // later changed away from LATE").
+            lateRange:
+              entry.status === AttendanceStatus.LATE
+                ? (entry.lateRange ?? null)
+                : null,
           },
         }),
       ),
     );
+
+    // Аудит: сурагч тус бүрийн ирцийн CREATE/UPDATE-ийг тэмдэглэнэ. Ирц
+    // тэмдэглэх нь нэг дор олон сурагчид хамаарах тул алдаа бүрд бус,
+    // амжилттай upsert бүрд record()-ийг дуудна (AuditService дотроо алдааг
+    // залгидаг тул энд throw хийхгүй).
+    await Promise.all(
+      afterRows.map((after) => {
+        const before = beforeByStudent.get(after.studentId) ?? null;
+        return this.audit.record({
+          actorId: userId,
+          actorRole: role,
+          action: before ? 'UPDATE' : 'CREATE',
+          entity: 'Attendance',
+          entityId: after.id,
+          before,
+          after,
+        });
+      }),
+    );
+
     return { marked: dto.entries.length, date: dto.date };
   }
 
@@ -223,6 +268,7 @@ export class AttendanceService {
         student: e.student,
         status: record?.status ?? null,
         note: record?.note ?? null,
+        lateRange: record?.lateRange ?? null,
         markedBy: record ? (markerById.get(record.markedById) ?? null) : null,
         // Хэрэв харьцуулах хичээлтэй өдөр олдоогүй бол (шинэ анги) саарал
         // болгохгүй — зөвхөн сүүлийн 2 хичээлтэй өдөр ХОЁУЛАА тэмдэглэгдээгүй

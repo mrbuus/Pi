@@ -1,23 +1,24 @@
+import { Moon, MoonStar, Zap, type LucideIcon } from "lucide-react";
 import { EngagementLevel } from "./types";
 
 // Идэвхийн флаг — ӨНГӨ дангаараа утга илэрхийлдэггүй: дүрс + монгол шошго
 // хоёулаа үргэлж хамт харагдана (өнгөгүй дэлгэц/принтэр дээр ч ялгагдана).
 const META: Record<
   EngagementLevel,
-  { icon: string; label: string; toneClass: string }
+  { icon: LucideIcon; label: string; toneClass: string }
 > = {
   ACTIVE: {
-    icon: "⚡",
+    icon: Zap,
     label: "Идэвхтэй",
     toneClass: "bg-success/10 text-success",
   },
   SLOWING: {
-    icon: "🌗",
+    icon: MoonStar,
     label: "Сулраж байна",
     toneClass: "bg-warning/10 text-warning",
   },
   DORMANT: {
-    icon: "💤",
+    icon: Moon,
     label: "Идэвхгүй",
     toneClass: "bg-error/10 text-error",
   },
@@ -35,7 +36,7 @@ export default function EngagementBadge({
     <span
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-semibold ${m.toneClass} ${className}`}
     >
-      <span aria-hidden>{m.icon}</span>
+      <m.icon className="h-3.5 w-3.5" aria-hidden />
       {m.label}
     </span>
   );

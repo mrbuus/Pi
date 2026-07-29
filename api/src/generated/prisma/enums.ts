@@ -57,6 +57,16 @@ export const AttendanceStatus = {
 export type AttendanceStatus = (typeof AttendanceStatus)[keyof typeof AttendanceStatus]
 
 
+export const LateRange = {
+  FIVE_TO_TEN: 'FIVE_TO_TEN',
+  TEN_TO_THIRTY: 'TEN_TO_THIRTY',
+  THIRTY_TO_SIXTY: 'THIRTY_TO_SIXTY',
+  OVER_ONE_HOUR: 'OVER_ONE_HOUR'
+} as const
+
+export type LateRange = (typeof LateRange)[keyof typeof LateRange]
+
+
 export const AssignmentType = {
   DAILY: 'DAILY',
   EXTRA: 'EXTRA'
@@ -74,6 +84,15 @@ export const SubmissionState = {
 } as const
 
 export type SubmissionState = (typeof SubmissionState)[keyof typeof SubmissionState]
+
+
+export const HomeworkMarkStatus = {
+  DONE: 'DONE',
+  PARTIAL: 'PARTIAL',
+  NOT_DONE: 'NOT_DONE'
+} as const
+
+export type HomeworkMarkStatus = (typeof HomeworkMarkStatus)[keyof typeof HomeworkMarkStatus]
 
 
 export const Subject = {

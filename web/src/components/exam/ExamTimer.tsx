@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, Eye, EyeOff, Hourglass } from "lucide-react";
 import { useState } from "react";
 
 /* ============================================================================
@@ -114,7 +115,7 @@ export default function ExamTimer({
           title={showBar ? "Цагийн тоо руу солих" : "Явцын хэмжүүр рүү солих"}
           className="rounded-lg border border-line px-2 py-2 text-sm leading-none text-ink-dim transition hover:text-ink"
         >
-          {showBar ? "🙈" : "👁"}
+          {showBar ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
         <div
           className={`min-w-[4.75rem] rounded-xl border px-3 py-2 text-center font-mono text-lg font-bold tabular-nums transition-colors ${TIER_BOX[tier]}`}
@@ -133,7 +134,11 @@ export default function ExamTimer({
         <p
           className={`flex items-center gap-1 text-xs font-semibold ${tier === "warn" ? "text-warning" : "text-error"}`}
         >
-          <span aria-hidden>{tier === "warn" ? "⏳" : "⚠"}</span>
+          {tier === "warn" ? (
+            <Hourglass className="h-3.5 w-3.5" aria-hidden />
+          ) : (
+            <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+          )}
           {copy}
         </p>
       )}

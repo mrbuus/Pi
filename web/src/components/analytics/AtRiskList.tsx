@@ -1,12 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import InfoHint from "@/components/ui/InfoHint";
 import type { AtRiskStudent } from "./types";
 
 const REASON_LABEL: Record<string, { label: string; colorClass: string }> = {
   INACTIVE: { label: "Идэвхгүй", colorClass: "bg-error/15 text-error" },
   DECLINING: { label: "Амжилт буурч байна", colorClass: "bg-warning/15 text-warning" },
 };
+
+// api/src/analytics/analytics.service.ts-тэй тохирсон шалгуур — эндээс
+// тайлбарыг гараар бичсэн тул логик өөрчлөгдвөл энд ч засах хэрэгтэй.
+function reasonHint(reason: string, windowDays: number): string {
+  if (reason === "INACTIVE") {
+    return `Сүүлийн ${windowDays} хоногт нэвтэрч, ямар нэгэн үйлдэл хийгээгүй.`;
+  }
+  return "Сүүлийн үеийн амжилтын хувь өмнөх мөн урттай хугацаанаас 15 нэгжээс их буурсан (хоёр хугацаанд тус бүр дор хаяж 5 бодлого бодсон байх шаардлагатай).";
+}
 
 function formatLastActive(iso: string | null): string {
   if (!iso) return "Идэвх бүртгэгдээгүй";
@@ -30,7 +40,13 @@ function studentHref(studentId: string): string {
   return `/app/admin/students/${studentId}`;
 }
 
-export default function AtRiskList({ students }: { students: AtRiskStudent[] }) {
+export default function AtRiskList({
+  students,
+  windowDays,
+}: {
+  students: AtRiskStudent[];
+  windowDays: number;
+}) {
   if (students.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-line px-3 py-4 text-sm text-ink-dim">
@@ -68,9 +84,12 @@ export default function AtRiskList({ students }: { students: AtRiskStudent[] }) 
             {s.reasons.map((r) => (
               <span
                 key={r}
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${REASON_LABEL[r].colorClass}`}
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${REASON_LABEL[r].colorClass}`}
               >
                 {REASON_LABEL[r].label}
+                <InfoHint label={`"${REASON_LABEL[r].label}" гэж юу вэ`}>
+                  {reasonHint(r, windowDays)}
+                </InfoHint>
               </span>
             ))}
           </div>

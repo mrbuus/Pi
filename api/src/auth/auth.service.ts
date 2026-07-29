@@ -159,6 +159,10 @@ export class AuthService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         passwordHash,
+        // Одоогоор ХЭЗЭЭ Ч true болгохгүй (schema-ийн @default(false) хангалттай) —
+        // "нэвтрэхэд заавал нууц үг солиулах" урсгал идэвхжээгүй. Идэвхжүүлэхэд зөвхөн
+        // үүнийг true болгоход л хангалттай.
+        mustChangePassword: false,
         role,
         studentProfile: isStudent
           ? {
@@ -256,6 +260,10 @@ export class AuthService {
         lastName: true,
         role: true,
         avatarUrl: true,
+        // Одоогоор ХААЛТТАЙ (schema.prisma-ийн @default(false)) — фронтэнд
+        // хараад "нууц үг солих" урсгал руу ХҮЧЛЭХГҮЙ. Зөвхөн ирээдүйд
+        // идэвхжүүлэхэд бэлэн байлгах зорилгоор энд гаргаж өгсөн.
+        mustChangePassword: true,
         studentProfile: true,
         teacherProfile: true,
       },

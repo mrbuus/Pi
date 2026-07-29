@@ -1,3 +1,4 @@
+import { Ban, Check, NotebookPen, Play, X, type LucideIcon } from "lucide-react";
 import type { TaskPriority, TaskStatus, TaskSubject } from "./types";
 
 // Төлөв бүрийг ХЭЗЭЭ Ч зөвхөн өнгөөр ялгахгүй — дүрс (icon) + монгол нэрийг
@@ -6,7 +7,7 @@ export const STATUS_META: Record<
   TaskStatus,
   {
     label: string;
-    icon: string;
+    icon: LucideIcon;
     colorClass: string;
     dotClass: string;
     // ХУГАЦАА харагдацын багана — литерал class нэрс (Tailwind JIT-д тодорхой
@@ -17,7 +18,7 @@ export const STATUS_META: Record<
 > = {
   PLANNED: {
     label: "Төлөвлөсөн",
-    icon: "🗒",
+    icon: NotebookPen,
     colorClass: "text-info",
     dotClass: "bg-info",
     barBgClass: "bg-info/15",
@@ -25,7 +26,7 @@ export const STATUS_META: Record<
   },
   IN_PROGRESS: {
     label: "Хийгдэж байгаа",
-    icon: "▶",
+    icon: Play,
     colorClass: "text-brand",
     dotClass: "bg-brand",
     barBgClass: "bg-brand/15",
@@ -33,7 +34,7 @@ export const STATUS_META: Record<
   },
   DONE: {
     label: "Дууссан",
-    icon: "✓",
+    icon: Check,
     colorClass: "text-success",
     dotClass: "bg-success",
     barBgClass: "bg-success/15",
@@ -41,7 +42,7 @@ export const STATUS_META: Record<
   },
   BLOCKED: {
     label: "Хоригдсон",
-    icon: "⛔",
+    icon: Ban,
     colorClass: "text-error",
     dotClass: "bg-error",
     barBgClass: "bg-error/15",
@@ -49,7 +50,7 @@ export const STATUS_META: Record<
   },
   CANCELLED: {
     label: "Цуцалсан",
-    icon: "✕",
+    icon: X,
     colorClass: "text-ink-dim",
     dotClass: "bg-ink-dim",
     barBgClass: "bg-ink-dim/10",

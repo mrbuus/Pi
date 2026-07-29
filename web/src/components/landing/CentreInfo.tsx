@@ -1,3 +1,5 @@
+import StudyRhythmLoop from "./StudyRhythmLoop";
+
 // Сургалтын төвийн тухай тайлбарлах хэсэг — HowItWorks (бүртгүүлэх алхам)
 // болон Branches (хаяг) хоёрын хооронд. Зорилго: сайт зөвхөн холбоос биш,
 // төв яг юу хийдгийг тайлбарлана.
@@ -93,6 +95,8 @@ export default function CentreInfo() {
             </div>
           ))}
         </div>
+
+        <StudyRhythmLoop />
 
         <div className="reveal mt-10 rounded-2xl border border-line bg-panel p-6">
           <p className="text-base font-bold text-ink">

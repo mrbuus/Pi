@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, getRole } from "@/lib/api";
+import { api } from "@/lib/api";
+import RequireRole from "@/components/nav/RequireRole";
 import ConfirmDialog from "./ConfirmDialog";
 import TheoryBlockEditor from "./TheoryBlockEditor";
 import TheoryBlockList from "./TheoryBlockList";
@@ -34,9 +35,6 @@ const inputCls =
   "rounded-lg border border-line bg-bg px-3 py-2 text-sm text-ink outline-none focus:border-brand";
 
 export default function TheoryEditorClient() {
-  const role = typeof window !== "undefined" ? getRole() : null;
-  const allowed = role === "ADMIN" || role === "TEACHER_PLUS" || role === "TEACHER";
-
   const [subject, setSubject] = useState<Subject>("MATH");
 
   const [books, setBooks] = useState<Book[]>([]);
@@ -207,19 +205,8 @@ export default function TheoryEditorClient() {
       : null;
   const editorOpen = selectedId === "__new__" || !!selectedBlock;
 
-  if (!allowed) {
-    return (
-      <div className="rounded-2xl border border-line bg-surface p-6">
-        <h1 className="text-xl font-extrabold text-ink">Онолын агуулга удирдах</h1>
-        <p className="mt-2 text-sm text-ink-dim">
-          Энэ хуудсанд зөвхөн багш эрхтэй (Багш, Багш+, Админ) хэрэглэгч хандах
-          боломжтой.
-        </p>
-      </div>
-    );
-  }
-
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <Link
@@ -451,5 +438,6 @@ export default function TheoryEditorClient() {
         onCancel={() => setPendingNav(null)}
       />
     </div>
+    </RequireRole>
   );
 }

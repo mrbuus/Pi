@@ -7,6 +7,7 @@ import { useHeroSolid } from "./hero3d/catalog";
 import { DimensionLegend } from "./hero3d/DimensionLegend";
 import { Particles } from "./hero3d/primitives";
 import { useThemeColors } from "./hero3d/theme";
+import MathText from "./MathText";
 
 /* ============================================================================
  * Нүүр хуудасны 3D биетийн үзэсгэлэн (Шийдвэр 10) — 10 минут тутам каталогийн
@@ -61,16 +62,11 @@ export default function Hero3D() {
       </div>
       <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-2xl border border-line bg-panel/90 px-4 py-3 text-left shadow-xl shadow-black/20 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-dim">
-              10 минут тутмын 3D жишээ
-            </p>
-            <p className="mt-0.5 truncate text-sm font-bold text-ink">
-              {solid.title}
-            </p>
-          </div>
-          <span className="rounded-full bg-brand/10 px-3 py-1 font-serif text-sm font-bold text-brand">
-            {solid.formula}
+          <p className="min-w-0 truncate text-sm font-bold text-ink">
+            {solid.title}
+          </p>
+          <span className="rounded-full bg-brand/10 px-3 py-1 text-sm font-bold text-brand">
+            <MathText>{solid.formula}</MathText>
           </span>
         </div>
         <DimensionLegend dims={solid.dims} colors={colors} />

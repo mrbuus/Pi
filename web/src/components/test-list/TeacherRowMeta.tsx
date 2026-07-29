@@ -1,3 +1,4 @@
+import { Users } from "lucide-react";
 import Link from "next/link";
 import type { TestRow } from "./types";
 
@@ -21,7 +22,7 @@ export default function TeacherRowMeta({ test }: { test: TestRow }) {
           title="Өгсөн сурагчийн тоо"
           className="hidden items-center gap-1 text-xs text-ink-dim sm:inline-flex"
         >
-          <span aria-hidden="true">👥</span> {takenCount} сурагч
+          <Users className="h-3.5 w-3.5" aria-hidden="true" /> {takenCount} сурагч
         </span>
       )}
       <Link

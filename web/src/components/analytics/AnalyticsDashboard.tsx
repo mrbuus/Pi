@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import RequireRole from "@/components/nav/RequireRole";
 import AtRiskList from "./AtRiskList";
 import ClassroomTable from "./ClassroomTable";
 import DateRangePicker, { defaultRange } from "./DateRangePicker";
@@ -117,6 +118,7 @@ export default function AnalyticsDashboard() {
   const atRisk = useAtRiskQuery(atRiskDays);
 
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="flex flex-col gap-5">
       <div className="rounded-2xl border border-line bg-panel p-4 md:p-6">
         <h1 className="text-lg font-bold text-ink">Аналитик самбар</h1>
@@ -209,9 +211,13 @@ export default function AnalyticsDashboard() {
         {atRisk.loading && <LoadingCard />}
         {atRisk.error && <ErrorCard message={atRisk.error} onRetry={atRisk.retry} />}
         {!atRisk.loading && !atRisk.error && atRisk.data && (
-          <AtRiskList students={atRisk.data.students} />
+          <AtRiskList
+            students={atRisk.data.students}
+            windowDays={atRisk.data.windowDays}
+          />
         )}
       </Section>
     </div>
+    </RequireRole>
   );
 }

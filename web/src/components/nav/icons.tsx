@@ -1,5 +1,6 @@
 import type { SVGProps } from "react";
 import {
+  BarChart3,
   BookOpen,
   CalendarDays,
   ChevronDown,
@@ -53,7 +54,8 @@ export type IconName =
   | "menu"
   | "x"
   | "logout"
-  | "teacher";
+  | "teacher"
+  | "bar-chart";
 
 const ICONS: Record<IconName, LucideIcon> = {
   home: Home,
@@ -79,6 +81,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   x: X,
   logout: LogOut,
   teacher: GraduationCap,
+  "bar-chart": BarChart3,
 };
 
 export function NavIcon({

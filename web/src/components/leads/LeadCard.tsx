@@ -1,3 +1,13 @@
+import {
+  AlarmClock,
+  AlertTriangle,
+  Check,
+  Clock,
+  Phone,
+  UserPlus,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import type { KeyboardEvent } from "react";
 
 // ============ Төрлүүд (API-тай яг тохирсон, api/src/leads/) ============
@@ -29,11 +39,11 @@ export const STATUS_LABEL: Record<LeadStatusV, string> = {
   LOST: "Алдагдсан",
 };
 
-export const STATUS_ICON: Record<LeadStatusV, string> = {
-  NEW: "🆕",
-  CONTACTED: "📞",
-  ENROLLED: "✅",
-  LOST: "✖",
+export const STATUS_ICON: Record<LeadStatusV, LucideIcon> = {
+  NEW: UserPlus,
+  CONTACTED: Phone,
+  ENROLLED: Check,
+  LOST: X,
 };
 
 export const SUBJECT_LABEL: Record<LeadSubject, string> = {
@@ -82,10 +92,10 @@ function urgencyOf(status: LeadStatusV, createdAt: string): Urgency {
   return "normal";
 }
 
-const URGENCY_ICON: Record<Urgency, string> = {
-  normal: "🕐",
-  watch: "⏰",
-  urgent: "⚠",
+const URGENCY_ICON: Record<Urgency, LucideIcon> = {
+  normal: Clock,
+  watch: AlarmClock,
+  urgent: AlertTriangle,
 };
 const URGENCY_CLASS: Record<Urgency, string> = {
   normal: "text-ink",
@@ -110,6 +120,7 @@ export default function LeadCard({
 }: LeadCardProps) {
   const urgency = urgencyOf(lead.status, lead.createdAt);
   const selectId = `lead-status-${lead.id}`;
+  const UrgencyIcon = URGENCY_ICON[urgency];
 
   function handleKeyDown(e: KeyboardEvent<HTMLAnchorElement>) {
     // Жинхэнэ <a href> дээр Enter аль хэдийн ажилладаг, харин Space
@@ -126,7 +137,7 @@ export default function LeadCard({
       <div
         className={`flex items-center gap-1.5 text-sm font-bold ${URGENCY_CLASS[urgency]}`}
       >
-        <span aria-hidden>{URGENCY_ICON[urgency]}</span>
+        <UrgencyIcon className="h-3.5 w-3.5" aria-hidden />
         <span>{formatRelativeTime(lead.createdAt)}</span>
         {urgency === "urgent" && (
           <span className="rounded-full bg-error/15 px-2 py-0.5 text-[11px] font-semibold text-error">
@@ -144,8 +155,7 @@ export default function LeadCard({
         onKeyDown={handleKeyDown}
         className="mt-1 inline-flex items-center gap-1.5 text-sm text-brand underline-offset-2 hover:underline"
       >
-        <span aria-hidden>📞</span>
-        {formatPhone(lead.phone)}
+        <Phone className="h-3.5 w-3.5" aria-hidden /> {formatPhone(lead.phone)}
       </a>
 
       <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
@@ -176,7 +186,7 @@ export default function LeadCard({
         >
           {STATUS_ORDER.map((s) => (
             <option key={s} value={s}>
-              {STATUS_ICON[s]} {STATUS_LABEL[s]}
+              {STATUS_LABEL[s]}
             </option>
           ))}
         </select>

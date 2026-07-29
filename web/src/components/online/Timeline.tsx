@@ -1,5 +1,29 @@
 "use client";
 
+import {
+  BookOpen,
+  Bookmark,
+  Circle,
+  Clapperboard,
+  DoorOpen,
+  Eye,
+  Flag,
+  KeyRound,
+  Lightbulb,
+  Moon,
+  NotebookPen,
+  Paperclip,
+  PenLine,
+  Play,
+  RefreshCcw,
+  Rocket,
+  RotateCw,
+  Search,
+  Target,
+  XCircle,
+  CheckCircle2,
+  type LucideIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import ConfirmDialog from "@/components/theory/ConfirmDialog";
@@ -8,40 +32,40 @@ import { errMsg, formatDateTime } from "./format";
 import { selfStateLabel } from "./selfState";
 import AttemptEditDialog from "./AttemptEditDialog";
 
-const EVENT_META: Record<string, { icon: string; label: string }> = {
-  LOGIN: { icon: "🔑", label: "Нэвтэрсэн" },
-  LOGOUT: { icon: "🚪", label: "Гарсан" },
-  SEARCH: { icon: "🔍", label: "Хайлт хийсэн" },
-  CHAPTER_OPENED: { icon: "📖", label: "Бүлэг нээсэн" },
-  VIDEO_STARTED: { icon: "▶️", label: "Бичлэг эхэлсэн" },
-  VIDEO_COMPLETED: { icon: "🎬", label: "Бичлэг дуусгасан" },
-  PROBLEM_OPENED: { icon: "📝", label: "Бодлого нээсэн" },
-  ANSWER_SUBMITTED: { icon: "✍️", label: "Хариулт илгээсэн" },
-  HINT_USED: { icon: "💡", label: "Тусламж авсан" },
-  RETRY: { icon: "🔄", label: "Дахин оролдсон" },
-  BOOKMARK: { icon: "🔖", label: "Хадгалсан" },
-  TEST_STARTED: { icon: "🚀", label: "Тест эхэлсэн" },
-  TEST_FINISHED: { icon: "🏁", label: "Тест дуусгасан" },
-  EVENING_MARK: { icon: "🌙", label: "Оройн тэмдэглэгээ" },
-  PAGE_VIEW: { icon: "👁️", label: "Хуудас үзсэн" },
+const EVENT_META: Record<string, { icon: LucideIcon; label: string }> = {
+  LOGIN: { icon: KeyRound, label: "Нэвтэрсэн" },
+  LOGOUT: { icon: DoorOpen, label: "Гарсан" },
+  SEARCH: { icon: Search, label: "Хайлт хийсэн" },
+  CHAPTER_OPENED: { icon: BookOpen, label: "Бүлэг нээсэн" },
+  VIDEO_STARTED: { icon: Play, label: "Бичлэг эхэлсэн" },
+  VIDEO_COMPLETED: { icon: Clapperboard, label: "Бичлэг дуусгасан" },
+  PROBLEM_OPENED: { icon: NotebookPen, label: "Бодлого нээсэн" },
+  ANSWER_SUBMITTED: { icon: PenLine, label: "Хариулт илгээсэн" },
+  HINT_USED: { icon: Lightbulb, label: "Тусламж авсан" },
+  RETRY: { icon: RotateCw, label: "Дахин оролдсон" },
+  BOOKMARK: { icon: Bookmark, label: "Хадгалсан" },
+  TEST_STARTED: { icon: Rocket, label: "Тест эхэлсэн" },
+  TEST_FINISHED: { icon: Flag, label: "Тест дуусгасан" },
+  EVENING_MARK: { icon: Moon, label: "Оройн тэмдэглэгээ" },
+  PAGE_VIEW: { icon: Eye, label: "Хуудас үзсэн" },
 };
 
-const SELF_STATE_ICON: Record<string, string> = {
-  SOLVED_CLEAN: "✅",
-  FIXED_AFTER_ERROR: "🔁",
-  FAILED: "❌",
-  GUESSED: "🎯",
+const SELF_STATE_ICON: Record<string, LucideIcon> = {
+  SOLVED_CLEAN: CheckCircle2,
+  FIXED_AFTER_ERROR: RefreshCcw,
+  FAILED: XCircle,
+  GUESSED: Target,
 };
 
-function eventLine(e: TimelineEvent): { icon: string; text: string } {
+function eventLine(e: TimelineEvent): { icon: LucideIcon; text: string } {
   if (e.kind === "ATTEMPT") {
-    const icon = SELF_STATE_ICON[e.selfState ?? ""] ?? "📎";
+    const icon = SELF_STATE_ICON[e.selfState ?? ""] ?? Paperclip;
     return {
       icon,
       text: `${e.problemToken} — ${selfStateLabel(e.selfState)} · ${e.chapterTitle}`,
     };
   }
-  const meta = EVENT_META[e.type] ?? { icon: "•", label: e.type };
+  const meta = EVENT_META[e.type] ?? { icon: Circle, label: e.type };
   const durationText =
     e.durationMs && e.durationMs > 1000
       ? ` · ${Math.round(e.durationMs / 60000) > 0 ? `${Math.round(e.durationMs / 60000)} мин` : `${Math.round(e.durationMs / 1000)} сек`}`
@@ -161,13 +185,14 @@ export default function Timeline({
         {events.map((e, i) => {
           const line = eventLine(e);
           const editable = canEdit && e.kind === "ATTEMPT" && !!e.attemptId;
+          const LineIcon = line.icon;
           return (
             <li
               key={`${e.kind}-${e.at}-${i}`}
               className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-panel"
             >
               <div className="flex min-w-0 items-center gap-2">
-                <span aria-hidden>{line.icon}</span>
+                <LineIcon className="h-4 w-4 shrink-0 text-ink-dim" aria-hidden />
                 <span className="truncate text-sm text-ink">{line.text}</span>
                 <span className="shrink-0 text-xs text-ink-dim">{formatDateTime(e.at)}</span>
               </div>

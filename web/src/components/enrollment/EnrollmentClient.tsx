@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { api, getRole } from "@/lib/api";
+import { api } from "@/lib/api";
+import RequireRole from "@/components/nav/RequireRole";
 import ConfirmCloseDialog from "./ConfirmCloseDialog";
 import SubjectCard, { DraftState } from "./SubjectCard";
 import {
@@ -36,9 +37,6 @@ type ConfirmTarget =
 // hardcode хийхгүй. Багш+/Админ хичээл бүрийг бие даан, эсвэл "бүгдийг
 // нэг дор" нэг товчоор нээж/хааж чадна.
 export default function EnrollmentClient() {
-  const role = getRole();
-  const allowed = role === "ADMIN" || role === "TEACHER_PLUS";
-
   const [windows, setWindows] = useState<EnrollmentWindow[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -238,19 +236,8 @@ export default function EnrollmentClient() {
 
   const busy = confirm?.kind === "bulk" ? bulkBusy : confirm?.kind === "single" ? !!saving[confirm.subject] : false;
 
-  if (!allowed) {
-    return (
-      <div className="rounded-2xl border border-line bg-surface p-8 text-center">
-        <p className="text-lg font-semibold text-ink">Хандах эрхгүй байна</p>
-        <p className="mt-1 text-sm text-ink-dim">
-          Энэ хуудсыг зөвхөн Админ болон Багш+ эрхтэй хэрэглэгч ашиглаж
-          болно.
-        </p>
-      </div>
-    );
-  }
-
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold">Элсэлтийн удирдлага</h1>
@@ -355,5 +342,6 @@ export default function EnrollmentClient() {
         onCancel={() => setConfirm(null)}
       />
     </div>
+    </RequireRole>
   );
 }

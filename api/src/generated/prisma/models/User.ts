@@ -34,6 +34,7 @@ export type UserMinAggregateOutputType = {
   firstName: string | null
   lastName: string | null
   passwordHash: string | null
+  mustChangePassword: boolean | null
   role: $Enums.Role | null
   avatarUrl: string | null
   createdAt: Date | null
@@ -50,6 +51,7 @@ export type UserMaxAggregateOutputType = {
   firstName: string | null
   lastName: string | null
   passwordHash: string | null
+  mustChangePassword: boolean | null
   role: $Enums.Role | null
   avatarUrl: string | null
   createdAt: Date | null
@@ -66,6 +68,7 @@ export type UserCountAggregateOutputType = {
   firstName: number
   lastName: number
   passwordHash: number
+  mustChangePassword: number
   role: number
   avatarUrl: number
   createdAt: number
@@ -84,6 +87,7 @@ export type UserMinAggregateInputType = {
   firstName?: true
   lastName?: true
   passwordHash?: true
+  mustChangePassword?: true
   role?: true
   avatarUrl?: true
   createdAt?: true
@@ -100,6 +104,7 @@ export type UserMaxAggregateInputType = {
   firstName?: true
   lastName?: true
   passwordHash?: true
+  mustChangePassword?: true
   role?: true
   avatarUrl?: true
   createdAt?: true
@@ -116,6 +121,7 @@ export type UserCountAggregateInputType = {
   firstName?: true
   lastName?: true
   passwordHash?: true
+  mustChangePassword?: true
   role?: true
   avatarUrl?: true
   createdAt?: true
@@ -205,6 +211,7 @@ export type UserGroupByOutputType = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword: boolean
   role: $Enums.Role
   avatarUrl: string | null
   createdAt: Date
@@ -242,6 +249,7 @@ export type UserWhereInput = {
   firstName?: Prisma.StringFilter<"User"> | string
   lastName?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringFilter<"User"> | string
+  mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -255,6 +263,7 @@ export type UserWhereInput = {
   attempts?: Prisma.AttemptListRelationFilter
   attendances?: Prisma.AttendanceListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkListRelationFilter
   testResults?: Prisma.TestResultListRelationFilter
   predictions?: Prisma.PredictionListRelationFilter
   colorTags?: Prisma.StudentColorTagListRelationFilter
@@ -280,6 +289,7 @@ export type UserOrderByWithRelationInput = {
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -293,6 +303,7 @@ export type UserOrderByWithRelationInput = {
   attempts?: Prisma.AttemptOrderByRelationAggregateInput
   attendances?: Prisma.AttendanceOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkOrderByRelationAggregateInput
   testResults?: Prisma.TestResultOrderByRelationAggregateInput
   predictions?: Prisma.PredictionOrderByRelationAggregateInput
   colorTags?: Prisma.StudentColorTagOrderByRelationAggregateInput
@@ -321,6 +332,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   firstName?: Prisma.StringFilter<"User"> | string
   lastName?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringFilter<"User"> | string
+  mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -334,6 +346,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   attempts?: Prisma.AttemptListRelationFilter
   attendances?: Prisma.AttendanceListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkListRelationFilter
   testResults?: Prisma.TestResultListRelationFilter
   predictions?: Prisma.PredictionListRelationFilter
   colorTags?: Prisma.StudentColorTagListRelationFilter
@@ -359,6 +372,7 @@ export type UserOrderByWithAggregationInput = {
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -381,6 +395,7 @@ export type UserScalarWhereWithAggregatesInput = {
   firstName?: Prisma.StringWithAggregatesFilter<"User"> | string
   lastName?: Prisma.StringWithAggregatesFilter<"User"> | string
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
+  mustChangePassword?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -397,6 +412,7 @@ export type UserCreateInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -410,6 +426,7 @@ export type UserCreateInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -435,6 +452,7 @@ export type UserUncheckedCreateInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -448,6 +466,7 @@ export type UserUncheckedCreateInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -473,6 +492,7 @@ export type UserUpdateInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -486,6 +506,7 @@ export type UserUpdateInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -511,6 +532,7 @@ export type UserUncheckedUpdateInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -524,6 +546,7 @@ export type UserUncheckedUpdateInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -549,6 +572,7 @@ export type UserCreateManyInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -565,6 +589,7 @@ export type UserUpdateManyMutationInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -581,6 +606,7 @@ export type UserUncheckedUpdateManyInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -597,6 +623,7 @@ export type UserCountOrderByAggregateInput = {
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -613,6 +640,7 @@ export type UserMaxOrderByAggregateInput = {
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -629,6 +657,7 @@ export type UserMinOrderByAggregateInput = {
   firstName?: Prisma.SortOrder
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -651,6 +680,10 @@ export type StringFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type EnumRoleFieldUpdateOperationsInput = {
@@ -773,6 +806,20 @@ export type UserUpdateOneRequiredWithoutSubmissionsNestedInput = {
   upsert?: Prisma.UserUpsertWithoutSubmissionsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.UserUpdateWithoutSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutSubmissionsInput>
+}
+
+export type UserCreateNestedOneWithoutDailyHomeworkMarksInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDailyHomeworkMarksInput, Prisma.UserUncheckedCreateWithoutDailyHomeworkMarksInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDailyHomeworkMarksInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDailyHomeworkMarksNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDailyHomeworkMarksInput, Prisma.UserUncheckedCreateWithoutDailyHomeworkMarksInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDailyHomeworkMarksInput
+  upsert?: Prisma.UserUpsertWithoutDailyHomeworkMarksInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDailyHomeworkMarksInput, Prisma.UserUpdateWithoutDailyHomeworkMarksInput>, Prisma.UserUncheckedUpdateWithoutDailyHomeworkMarksInput>
 }
 
 export type UserCreateNestedOneWithoutAttemptSessionsInput = {
@@ -983,6 +1030,7 @@ export type UserCreateWithoutStudentProfileInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -995,6 +1043,7 @@ export type UserCreateWithoutStudentProfileInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -1020,6 +1069,7 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1032,6 +1082,7 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -1073,6 +1124,7 @@ export type UserUpdateWithoutStudentProfileInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1085,6 +1137,7 @@ export type UserUpdateWithoutStudentProfileInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -1110,6 +1163,7 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1122,6 +1176,7 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -1147,6 +1202,7 @@ export type UserCreateWithoutTeacherProfileInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1159,6 +1215,7 @@ export type UserCreateWithoutTeacherProfileInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -1184,6 +1241,7 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1196,6 +1254,7 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -1237,6 +1296,7 @@ export type UserUpdateWithoutTeacherProfileInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1249,6 +1309,7 @@ export type UserUpdateWithoutTeacherProfileInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -1274,6 +1335,7 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1286,6 +1348,7 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -1311,6 +1374,7 @@ export type UserCreateWithoutParentLinksInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1323,6 +1387,7 @@ export type UserCreateWithoutParentLinksInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -1348,6 +1413,7 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1360,6 +1426,7 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -1390,6 +1457,7 @@ export type UserCreateWithoutChildLinksInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1402,6 +1470,7 @@ export type UserCreateWithoutChildLinksInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -1427,6 +1496,7 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1439,6 +1509,7 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -1480,6 +1551,7 @@ export type UserUpdateWithoutParentLinksInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1492,6 +1564,7 @@ export type UserUpdateWithoutParentLinksInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -1517,6 +1590,7 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1529,6 +1603,7 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -1565,6 +1640,7 @@ export type UserUpdateWithoutChildLinksInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1577,6 +1653,7 @@ export type UserUpdateWithoutChildLinksInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -1602,6 +1679,7 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1614,6 +1692,7 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -1639,6 +1718,7 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1652,6 +1732,7 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -1676,6 +1757,7 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1689,6 +1771,7 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -1729,6 +1812,7 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1742,6 +1826,7 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -1766,6 +1851,7 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1779,6 +1865,7 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -1803,6 +1890,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1816,6 +1904,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -1840,6 +1929,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1853,6 +1943,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -1893,6 +1984,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1906,6 +1998,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -1930,6 +2023,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1943,6 +2037,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -1967,6 +2062,7 @@ export type UserCreateWithoutAttendancesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1979,6 +2075,7 @@ export type UserCreateWithoutAttendancesInput = {
   userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -2004,6 +2101,7 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2016,6 +2114,7 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -2057,6 +2156,7 @@ export type UserUpdateWithoutAttendancesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2069,6 +2169,7 @@ export type UserUpdateWithoutAttendancesInput = {
   userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -2094,6 +2195,7 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2106,6 +2208,7 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -2131,6 +2234,7 @@ export type UserCreateWithoutSubmissionsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2143,6 +2247,7 @@ export type UserCreateWithoutSubmissionsInput = {
   userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -2168,6 +2273,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2180,6 +2286,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -2221,6 +2328,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2233,6 +2341,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -2258,6 +2367,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2270,6 +2380,179 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutDailyHomeworkMarksInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutDailyHomeworkMarksInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDailyHomeworkMarksInput, Prisma.UserUncheckedCreateWithoutDailyHomeworkMarksInput>
+}
+
+export type UserUpsertWithoutDailyHomeworkMarksInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDailyHomeworkMarksInput, Prisma.UserUncheckedUpdateWithoutDailyHomeworkMarksInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDailyHomeworkMarksInput, Prisma.UserUncheckedCreateWithoutDailyHomeworkMarksInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDailyHomeworkMarksInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDailyHomeworkMarksInput, Prisma.UserUncheckedUpdateWithoutDailyHomeworkMarksInput>
+}
+
+export type UserUpdateWithoutDailyHomeworkMarksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -2295,6 +2578,7 @@ export type UserCreateWithoutAttemptSessionsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2308,6 +2592,7 @@ export type UserCreateWithoutAttemptSessionsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -2332,6 +2617,7 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2345,6 +2631,7 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -2385,6 +2672,7 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2398,6 +2686,7 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -2422,6 +2711,7 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2435,6 +2725,7 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -2459,6 +2750,7 @@ export type UserCreateWithoutTestResultsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2472,6 +2764,7 @@ export type UserCreateWithoutTestResultsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -2496,6 +2789,7 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2509,6 +2803,7 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -2549,6 +2844,7 @@ export type UserUpdateWithoutTestResultsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2562,6 +2858,7 @@ export type UserUpdateWithoutTestResultsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -2586,6 +2883,7 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2599,6 +2897,7 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2623,6 +2922,7 @@ export type UserCreateWithoutAttemptsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2635,6 +2935,7 @@ export type UserCreateWithoutAttemptsInput = {
   userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -2660,6 +2961,7 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2672,6 +2974,7 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -2713,6 +3016,7 @@ export type UserUpdateWithoutAttemptsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2725,6 +3029,7 @@ export type UserUpdateWithoutAttemptsInput = {
   userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -2750,6 +3055,7 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2762,6 +3068,7 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -2787,6 +3094,7 @@ export type UserCreateWithoutPredictionsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2800,6 +3108,7 @@ export type UserCreateWithoutPredictionsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -2824,6 +3133,7 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2837,6 +3147,7 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -2877,6 +3188,7 @@ export type UserUpdateWithoutPredictionsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2890,6 +3202,7 @@ export type UserUpdateWithoutPredictionsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -2914,6 +3227,7 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2927,6 +3241,7 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2951,6 +3266,7 @@ export type UserCreateWithoutColorTagsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2964,6 +3280,7 @@ export type UserCreateWithoutColorTagsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -2988,6 +3305,7 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3001,6 +3319,7 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -3041,6 +3360,7 @@ export type UserUpdateWithoutColorTagsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3054,6 +3374,7 @@ export type UserUpdateWithoutColorTagsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -3078,6 +3399,7 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3091,6 +3413,7 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3115,6 +3438,7 @@ export type UserCreateWithoutStudentNotesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3128,6 +3452,7 @@ export type UserCreateWithoutStudentNotesInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -3152,6 +3477,7 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3165,6 +3491,7 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -3205,6 +3532,7 @@ export type UserUpdateWithoutStudentNotesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3218,6 +3546,7 @@ export type UserUpdateWithoutStudentNotesInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -3242,6 +3571,7 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3255,6 +3585,7 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -3279,6 +3610,7 @@ export type UserCreateWithoutUserPassesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3291,6 +3623,7 @@ export type UserCreateWithoutUserPassesInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -3316,6 +3649,7 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3328,6 +3662,7 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -3369,6 +3704,7 @@ export type UserUpdateWithoutUserPassesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3381,6 +3717,7 @@ export type UserUpdateWithoutUserPassesInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -3406,6 +3743,7 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3418,6 +3756,7 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -3443,6 +3782,7 @@ export type UserCreateWithoutPaymentsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3455,6 +3795,7 @@ export type UserCreateWithoutPaymentsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -3480,6 +3821,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3492,6 +3834,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -3533,6 +3876,7 @@ export type UserUpdateWithoutPaymentsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3545,6 +3889,7 @@ export type UserUpdateWithoutPaymentsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -3570,6 +3915,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3582,6 +3928,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -3607,6 +3954,7 @@ export type UserCreateWithoutLearningEventsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3620,6 +3968,7 @@ export type UserCreateWithoutLearningEventsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -3644,6 +3993,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3657,6 +4007,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -3697,6 +4048,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3710,6 +4062,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -3734,6 +4087,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3747,6 +4101,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -3771,6 +4126,7 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3784,6 +4140,7 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -3808,6 +4165,7 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3821,6 +4179,7 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -3861,6 +4220,7 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3874,6 +4234,7 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -3898,6 +4259,7 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3911,6 +4273,7 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -3935,6 +4298,7 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3948,6 +4312,7 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -3972,6 +4337,7 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3985,6 +4351,7 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -4025,6 +4392,7 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4038,6 +4406,7 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -4062,6 +4431,7 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4075,6 +4445,7 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -4099,6 +4470,7 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4112,6 +4484,7 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -4136,6 +4509,7 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4149,6 +4523,7 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -4189,6 +4564,7 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4202,6 +4578,7 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -4226,6 +4603,7 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4239,6 +4617,7 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -4263,6 +4642,7 @@ export type UserCreateWithoutStudentGoalsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4276,6 +4656,7 @@ export type UserCreateWithoutStudentGoalsInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -4300,6 +4681,7 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4313,6 +4695,7 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -4353,6 +4736,7 @@ export type UserUpdateWithoutStudentGoalsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4366,6 +4750,7 @@ export type UserUpdateWithoutStudentGoalsInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -4390,6 +4775,7 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4403,6 +4789,7 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -4427,6 +4814,7 @@ export type UserCreateWithoutStreakFreezesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4440,6 +4828,7 @@ export type UserCreateWithoutStreakFreezesInput = {
   attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
@@ -4464,6 +4853,7 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   firstName: string
   lastName: string
   passwordHash: string
+  mustChangePassword?: boolean
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4477,6 +4867,7 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
@@ -4517,6 +4908,7 @@ export type UserUpdateWithoutStreakFreezesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4530,6 +4922,7 @@ export type UserUpdateWithoutStreakFreezesInput = {
   attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
@@ -4554,6 +4947,7 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4567,6 +4961,7 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -4594,6 +4989,7 @@ export type UserCountOutputType = {
   attempts: number
   attendances: number
   submissions: number
+  dailyHomeworkMarks: number
   testResults: number
   predictions: number
   colorTags: number
@@ -4617,6 +5013,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   attempts?: boolean | UserCountOutputTypeCountAttemptsArgs
   attendances?: boolean | UserCountOutputTypeCountAttendancesArgs
   submissions?: boolean | UserCountOutputTypeCountSubmissionsArgs
+  dailyHomeworkMarks?: boolean | UserCountOutputTypeCountDailyHomeworkMarksArgs
   testResults?: boolean | UserCountOutputTypeCountTestResultsArgs
   predictions?: boolean | UserCountOutputTypeCountPredictionsArgs
   colorTags?: boolean | UserCountOutputTypeCountColorTagsArgs
@@ -4689,6 +5086,13 @@ export type UserCountOutputTypeCountAttendancesArgs<ExtArgs extends runtime.Type
  */
 export type UserCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SubmissionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDailyHomeworkMarksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DailyHomeworkMarkWhereInput
 }
 
 /**
@@ -4793,6 +5197,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   firstName?: boolean
   lastName?: boolean
   passwordHash?: boolean
+  mustChangePassword?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -4806,6 +5211,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   attempts?: boolean | Prisma.User$attemptsArgs<ExtArgs>
   attendances?: boolean | Prisma.User$attendancesArgs<ExtArgs>
   submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
+  dailyHomeworkMarks?: boolean | Prisma.User$dailyHomeworkMarksArgs<ExtArgs>
   testResults?: boolean | Prisma.User$testResultsArgs<ExtArgs>
   predictions?: boolean | Prisma.User$predictionsArgs<ExtArgs>
   colorTags?: boolean | Prisma.User$colorTagsArgs<ExtArgs>
@@ -4832,6 +5238,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   firstName?: boolean
   lastName?: boolean
   passwordHash?: boolean
+  mustChangePassword?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -4848,6 +5255,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   firstName?: boolean
   lastName?: boolean
   passwordHash?: boolean
+  mustChangePassword?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -4864,13 +5272,14 @@ export type UserSelectScalar = {
   firstName?: boolean
   lastName?: boolean
   passwordHash?: boolean
+  mustChangePassword?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "username" | "studentCode" | "teacherCode" | "firstName" | "lastName" | "passwordHash" | "role" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "username" | "studentCode" | "teacherCode" | "firstName" | "lastName" | "passwordHash" | "mustChangePassword" | "role" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   teacherProfile?: boolean | Prisma.User$teacherProfileArgs<ExtArgs>
@@ -4881,6 +5290,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   attempts?: boolean | Prisma.User$attemptsArgs<ExtArgs>
   attendances?: boolean | Prisma.User$attendancesArgs<ExtArgs>
   submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
+  dailyHomeworkMarks?: boolean | Prisma.User$dailyHomeworkMarksArgs<ExtArgs>
   testResults?: boolean | Prisma.User$testResultsArgs<ExtArgs>
   predictions?: boolean | Prisma.User$predictionsArgs<ExtArgs>
   colorTags?: boolean | Prisma.User$colorTagsArgs<ExtArgs>
@@ -4911,6 +5321,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     attempts: Prisma.$AttemptPayload<ExtArgs>[]
     attendances: Prisma.$AttendancePayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
+    dailyHomeworkMarks: Prisma.$DailyHomeworkMarkPayload<ExtArgs>[]
     testResults: Prisma.$TestResultPayload<ExtArgs>[]
     predictions: Prisma.$PredictionPayload<ExtArgs>[]
     colorTags: Prisma.$StudentColorTagPayload<ExtArgs>[]
@@ -4935,6 +5346,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     firstName: string
     lastName: string
     passwordHash: string
+    mustChangePassword: boolean
     role: $Enums.Role
     avatarUrl: string | null
     createdAt: Date
@@ -5342,6 +5754,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   attempts<T extends Prisma.User$attemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attendances<T extends Prisma.User$attendancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.User$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dailyHomeworkMarks<T extends Prisma.User$dailyHomeworkMarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dailyHomeworkMarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyHomeworkMarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   testResults<T extends Prisma.User$testResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$testResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   predictions<T extends Prisma.User$predictionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$predictionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PredictionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   colorTags<T extends Prisma.User$colorTagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$colorTagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentColorTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5393,6 +5806,7 @@ export interface UserFieldRefs {
   readonly firstName: Prisma.FieldRef<"User", 'String'>
   readonly lastName: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
+  readonly mustChangePassword: Prisma.FieldRef<"User", 'Boolean'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -5993,6 +6407,30 @@ export type User$submissionsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.SubmissionScalarFieldEnum | Prisma.SubmissionScalarFieldEnum[]
+}
+
+/**
+ * User.dailyHomeworkMarks
+ */
+export type User$dailyHomeworkMarksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DailyHomeworkMark
+   */
+  select?: Prisma.DailyHomeworkMarkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DailyHomeworkMark
+   */
+  omit?: Prisma.DailyHomeworkMarkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DailyHomeworkMarkInclude<ExtArgs> | null
+  where?: Prisma.DailyHomeworkMarkWhereInput
+  orderBy?: Prisma.DailyHomeworkMarkOrderByWithRelationInput | Prisma.DailyHomeworkMarkOrderByWithRelationInput[]
+  cursor?: Prisma.DailyHomeworkMarkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DailyHomeworkMarkScalarFieldEnum | Prisma.DailyHomeworkMarkScalarFieldEnum[]
 }
 
 /**

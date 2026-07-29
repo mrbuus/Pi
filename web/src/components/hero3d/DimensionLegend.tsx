@@ -2,6 +2,7 @@
 
 import type { Dimension } from "./catalog";
 import type { ThemeColors } from "./theme";
+import MathText from "../MathText";
 
 /* Канвасын хажууд (доод карт дотор) харагдах легенд: биетийн хэмжигдэхүүн
  * бүрийг ЗӨВХӨН өнгөөр биш, өнгөт цэг + НЭР хамтад нь бичиж ялгана —
@@ -22,7 +23,7 @@ export function DimensionLegend({
             className="h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-line"
             style={{ background: colors[d.colorKey] }}
           />
-          {d.label}
+          <MathText>{d.label}</MathText>
         </li>
       ))}
     </ul>

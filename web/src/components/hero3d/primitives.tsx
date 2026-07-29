@@ -34,16 +34,19 @@ export function MeasureLine({
     axis === "y" ? [0, 0, 0] : [0, 0, Math.PI / 2];
   const end = (v: number): [number, number, number] =>
     axis === "y" ? [at[0], v, at[1]] : [v, at[0], at[1]];
+  // Хэмжилтийн шугам ихэвчлэн биетийн ДОТОР (төв тэнхлэгийн дагуу) зурагддаг тул
+  // wireframe/дүүргэлтийн ард нуугдаж болзошгүй. depthTest={false} + renderOrder
+  // ашиглан үргэлж дээр нь харагдуулж, "дотоод шугам" гэдгийг тодорхой илэрхийлнэ.
   return (
-    <group>
+    <group renderOrder={1}>
       <mesh position={pos} rotation={rot}>
         <cylinderGeometry args={[0.022, 0.022, len, 8]} />
-        <meshBasicMaterial color={color} />
+        <meshBasicMaterial color={color} transparent depthTest={false} />
       </mesh>
       {[from, to].map((v) => (
         <mesh key={v} position={end(v)}>
           <sphereGeometry args={[0.055, 12, 12]} />
-          <meshBasicMaterial color={color} />
+          <meshBasicMaterial color={color} transparent depthTest={false} />
         </mesh>
       ))}
     </group>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Pi, Scale } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 
@@ -30,7 +31,7 @@ type SubjectKey = "MATH" | "SOCIAL_STUDIES";
 
 interface SubjectMeta {
   key: SubjectKey;
-  icon: string;
+  icon: typeof Pi;
   title: string;
   description: string;
 }
@@ -40,17 +41,17 @@ interface SubjectMeta {
 const SUBJECTS: SubjectMeta[] = [
   {
     key: "MATH",
-    icon: "π",
+    icon: Pi,
     title: "Математик",
     description:
-      "Алгебр, геометр, тригонометр, магадлал зэрэг ЭЕШ-ийн бүх сэдвийг хамарсан, сэдэв бүрээр дадлагажуулах бодлогын сан.",
+      "Алгебр, геометр, тригонометр, магадлал зэрэг ЭЕШ-ийн бүх сэдвийг хамарсан бодлогын сангаар элсэлтийн шалгалтад бэлддэг. Үүнээс гадна хичээлээсээ хоцорсон сурагчдад зориулсан түвшин ахиулах танхимын анги тусдаа ажилладаг.",
   },
   {
     key: "SOCIAL_STUDIES",
-    icon: "⚖",
+    icon: Scale,
     title: "Нийгмийн ухаан",
     description:
-      "Түүх, эрх зүй, эдийн засаг, философийн үндэс — ЭЕШ-ийн нийгмийн ухааны хөтөлбөрт нийцсэн бэлтгэл, тестээр баталгаажина.",
+      "Түүх, эрх зүй, эдийн засаг, философийн үндэс — ЭЕШ-ийн нийгмийн ухааны хөтөлбөрт нийцсэн, элсэлтийн шалгалтад чиглэсэн танхимын бэлтгэл.",
   },
 ];
 
@@ -103,8 +104,8 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
 
   return (
     <div className="reveal rounded-2xl border border-line bg-panel p-7">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 font-serif text-3xl font-bold text-brand">
-        <span aria-hidden>{meta.icon}</span>
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+        <meta.icon aria-hidden size={28} strokeWidth={2.25} />
       </div>
       <h3 className="mt-5 text-xl font-extrabold text-ink">{meta.title}</h3>
       <p className="mt-2.5 text-sm leading-relaxed text-ink-dim">
@@ -205,8 +206,13 @@ export default function Subjects() {
           Хичээлүүд
         </p>
         <h2 className="reveal mt-3 max-w-2xl text-3xl font-extrabold md:text-4xl">
-          Хоёр хичээл дээр гүнзгий төвлөрнө
+          Элсэлтийн шалгалтын бэлтгэл, мөн түвшин ахиулах сургалт
         </h2>
+        <p className="reveal mt-4 max-w-2xl text-base leading-relaxed text-ink-dim">
+          Математик, нийгмийн ухааны хичээлээр элсэлтийн шалгалтад бэлддэгээс
+          гадна, математикийн хоцрогдол арилгаж түвшин ахиулах танхимын анги
+          тусдаа ажилладаг.
+        </p>
         <div className="mt-12 grid gap-5 md:grid-cols-2">
           {SUBJECTS.map((meta) => (
             <SubjectCard key={meta.key} meta={meta} />

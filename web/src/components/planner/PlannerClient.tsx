@@ -1,5 +1,6 @@
 "use client";
 
+import { BarChart3, CalendarRange, ClipboardList, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api, getRole } from "@/lib/api";
 import BoardView from "./BoardView";
@@ -18,10 +19,10 @@ import type {
 
 type View = "board" | "timeline" | "workload";
 
-const VIEW_TABS: { value: View; label: string; icon: string }[] = [
-  { value: "board", label: "Багана", icon: "📋" },
-  { value: "timeline", label: "Хугацаа", icon: "🗓" },
-  { value: "workload", label: "Ачаалал", icon: "📊" },
+const VIEW_TABS: { value: View; label: string; icon: LucideIcon }[] = [
+  { value: "board", label: "Багана", icon: ClipboardList },
+  { value: "timeline", label: "Хугацаа", icon: CalendarRange },
+  { value: "workload", label: "Ачаалал", icon: BarChart3 },
 ];
 
 interface Me {
@@ -180,7 +181,7 @@ export default function PlannerClient() {
                   : "text-ink-dim hover:text-ink"
               }`}
             >
-              <span aria-hidden>{tab.icon}</span> {tab.label}
+              <tab.icon className="h-3.5 w-3.5" aria-hidden /> {tab.label}
             </button>
           ))}
         </div>

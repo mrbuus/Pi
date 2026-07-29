@@ -120,7 +120,7 @@ export default function TimelineView({
             const meta = STATUS_META[s];
             return (
               <span key={s} className={`flex items-center gap-1 ${meta.colorClass}`}>
-                <span aria-hidden>{meta.icon}</span>
+                <meta.icon className="h-3 w-3" aria-hidden />
                 {meta.label}
               </span>
             );
@@ -227,7 +227,7 @@ function TimelineBar({
       style={{ left: pos.left, width: pos.width }}
       title={`${task.title} — ${meta.label}`}
     >
-      <span aria-hidden className={meta.colorClass}>{meta.icon}</span>
+      <meta.icon className={`h-3 w-3 shrink-0 ${meta.colorClass}`} aria-hidden />
       <span className="truncate">{task.title}</span>
     </div>
   );

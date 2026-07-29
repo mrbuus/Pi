@@ -11,6 +11,7 @@ import VideosPanel from "@/components/content-admin/VideosPanel";
 import TestsPanel from "@/components/content-admin/TestsPanel";
 import { useDeletedLog } from "@/components/content-admin/useDeletedLog";
 import { Book } from "@/components/content-admin/types";
+import RequireRole from "@/components/nav/RequireRole";
 
 type Tab = "content" | "topics" | "videos" | "tests";
 
@@ -38,6 +39,7 @@ export default function ContentAdminClient() {
   const { record, byKind } = useDeletedLog();
 
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <Link href="/app/admin" className="text-sm text-ink-dim hover:text-ink">
@@ -102,5 +104,6 @@ export default function ContentAdminClient() {
         <TestsPanel deletedEntries={byKind("test")} onDeleted={(e) => record(e)} />
       )}
     </div>
+    </RequireRole>
   );
 }

@@ -204,6 +204,30 @@ export class PaymentsService {
       );
     }
 
+    // Эрх олгох гэж буй бол: төлбөрийн дүн тухайн эрхийн үнээс дутахгүй эсэхийг
+    // урьдчилан шалгана — үгүй бол ₮1000 төлөөд өндөр үнэтэй эрх авах боломж
+    // нээгддэг байсан. price null/0 бол чөлөөт/бэлэглэлийн эрх тул шалгалтгүй
+    // (SPEC §12.1 чөлөөт дүнгийн зарчимтай зөрчилдөхгүй).
+    if (dto.passId) {
+      const pass = await this.prisma.pass.findUnique({
+        where: { id: dto.passId },
+        select: { id: true, price: true },
+      });
+      if (!pass) throw new NotFoundException('Эрх олдсонгүй');
+      if (
+        pass.price != null &&
+        pass.price > 0 &&
+        payment.amount < pass.price &&
+        !dto.overrideUnderpay
+      ) {
+        throw new BadRequestException(
+          `Төлбөрийн дүн (${payment.amount}₮) сонгосон эрхийн үнээс ` +
+            `(${pass.price}₮) бага байна. Зөвшөөрөгдсөн тохиолдолд ` +
+            '"overrideUnderpay: true" зааж илгээнэ үү.',
+        );
+      }
+    }
+
     const confirmed = await this.prisma.payment.update({
       where: { id: paymentId },
       data: {
@@ -287,6 +311,20 @@ export class PaymentsService {
       where: { id: paymentId },
     });
     if (!payment) throw new NotFoundException('Төлбөр олдсонгүй');
+
+    // Зөвхөн ШИЙДВЭРЛЭГДЭЭГҮЙ (PENDING) төлбөрийг чөлөөтэй засна. Баталгаажсан/
+    // татгалзсан/буцаасан төлбөрийг энд засварлавал totalPaid аггрегат аль хэдийн
+    // олгогдсон UserPass-тай зөрж, нягтлан бодох бүртгэлийн түүхийг чимээгүй
+    // дахин бичих эрсдэлтэй. Зөв зам: эхлээд reverse(), дараа нь зөв дүнгээр
+    // шинэ төлбөр create() хийх.
+    if (payment.status !== PaymentStatus.PENDING) {
+      throw new BadRequestException(
+        'Зөвхөн хүлээгдэж буй (PENDING) төлбөрийг засварлаж болно. ' +
+          'Баталгаажсан, татгалзсан эсвэл буцаасан төлбөрийг засах шаардлагатай ' +
+          'бол эхлээд "Буцаах" (reverse) хийж, дараа нь зөв дүнгээр шинэ ' +
+          'төлбөр бүртгэнэ үү.',
+      );
+    }
 
     // Мөнгөний зөв байдал: бүхэл MNT, 0-ээс их байх ёстой (float ашиглахгүй)
     if (dto.amount !== undefined && !Number.isInteger(dto.amount)) {

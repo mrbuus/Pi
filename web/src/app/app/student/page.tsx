@@ -1,5 +1,6 @@
 "use client";
 
+import { Pin } from "lucide-react";
 import { useEffect, useState } from "react";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import DashboardGreeting from "@/components/DashboardGreeting";
@@ -142,7 +143,7 @@ export default function StudentDashboard() {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  {a.pinned && <span title="Зангиатай">📌</span>}
+                  {a.pinned && <Pin className="h-3.5 w-3.5 text-warning" aria-label="Зангиатай" />}
                   <p className="font-semibold">{a.title}</p>
                   <span className="ml-auto text-xs text-ink-dim">
                     {a.createdAt.slice(0, 10)}

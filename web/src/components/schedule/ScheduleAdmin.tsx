@@ -1,5 +1,6 @@
 "use client";
 
+import { DoorOpen } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
@@ -398,7 +399,11 @@ export default function ScheduleAdmin({ role }: { role: string }) {
                   ? `${entry.teacher.firstName} ${entry.teacher.lastName}`
                   : "Ангийн үндсэн багш"}
               </span>
-              {entry.room && <span className="text-ink-dim">🚪 {entry.room}</span>}
+              {entry.room && (
+                <span className="inline-flex items-center gap-1 text-ink-dim">
+                  <DoorOpen className="h-3 w-3" aria-hidden /> {entry.room}
+                </span>
+              )}
               {entry.subject && (
                 <span className="text-ink-dim">
                   {SUBJECT_LABEL[entry.subject] ?? entry.subject}

@@ -140,8 +140,58 @@ export class TestsService {
     return { deleted: true };
   }
 
+  // Ангид оноож байгаа (classroomIds ирсэн) тестийг хариуны түлхүүргүй
+  // бодлогоос БҮРЭН бүрдүүлбэл сурагч 0/0 авч будлиантай, шударга бус
+  // үр дүн авна (SPEC Fix 1). hasKnownAnswer()-г grading.ts-ээс шууд
+  // ашиглана — логик хуулбарлахгүй, нэг эх сурвалжтай байлгана.
+  private async checkAnswerCoverage(
+    problems: { problemId: string }[],
+  ): Promise<
+    | { withoutAnswerCount: number; totalProblems: number; message: string }
+    | undefined
+  > {
+    const total = problems.length;
+    if (total === 0) return undefined;
+
+    const rows = await this.prisma.problem.findMany({
+      where: { id: { in: problems.map((p) => p.problemId) } },
+      select: {
+        id: true,
+        format: true,
+        choices: true,
+        correctAnswer: true,
+        choiceOptions: {
+          select: { order: true, text: true, isCorrect: true },
+        },
+      },
+    });
+    // Олдоогүй (устсан/буруу id) бодлогыг ч мөн "хариугүй" гэж тооцно —
+    // ийм бодлогыг ч мөн автоматаар дүгнэх боломжгүй.
+    const knownCount = rows.filter((p) => hasKnownAnswer(p)).length;
+    const withoutAnswerCount = total - knownCount;
+    if (withoutAnswerCount === 0) return undefined;
+
+    if (withoutAnswerCount === total) {
+      throw new BadRequestException(
+        `Энэ тестийн бүх ${total} бодлого хариуны түлхүүргүй тул автоматаар дүгнэх боломжгүй — ийм тестийг ангид оноож болохгүй. Эхлээд наад зах нь нэг бодлогод хариу нэмнэ үү.`,
+      );
+    }
+
+    return {
+      withoutAnswerCount,
+      totalProblems: total,
+      message: `${withoutAnswerCount} бодлого хариуны түлхүүргүй тул дүнд тооцогдохгүй.`,
+    };
+  }
+
   async create(dto: CreateTestDto, userId: string) {
-    return this.prisma.test.create({
+    // Зөвхөн ангид ШУУД оноож байгаа үед л шалгана (TestAccess бичигдэх цорын
+    // ганц зам) — эс тэгвээс ангид оноогдоогүй ноорог тестэд саад болно.
+    const answerWarning = dto.classroomIds?.length
+      ? await this.checkAnswerCoverage(dto.problems ?? [])
+      : undefined;
+
+    const test = await this.prisma.test.create({
       data: {
         title: dto.title,
         type: dto.type,
@@ -173,6 +223,8 @@ export class TestsService {
         access: true,
       },
     });
+
+    return answerWarning ? { ...test, answerWarning } : test;
   }
 
   // Багш бүгдийг, сурагч ангидаа оноогдсон ЭСВЭЛ хүчинтэй эрхийнхээ (pass)

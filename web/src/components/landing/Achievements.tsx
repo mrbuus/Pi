@@ -1,5 +1,3 @@
-import LeadForm from "./LeadForm";
-
 /**
  * Жил бүрийн ЭЕШ-ийн үр дүн — тогтвортой, амьдардаггүй тоо.
  *
@@ -63,35 +61,14 @@ export default function Achievements() {
               </p>
             ))}
           </div>
-          <p className="mt-5 text-xs text-ink-dim">
-            Дээрх тоонуудыг төвөөс баталгаажуулмагц энд нэмэх болно.
-          </p>
         </div>
 
-        {/* Тогтвортой суурь тоо — нам дуугаар, амжилтын жагсаалтын дараа */}
         <div className="reveal mt-6 flex flex-wrap items-center gap-x-8 gap-y-2 text-sm text-ink-dim">
           {STABLE_FACTS.map((f) => (
             <span key={f.label}>
               <span className="font-bold text-ink">{f.value}</span> {f.label}
             </span>
           ))}
-        </div>
-
-        {/* TODO: төвөөс бодит утга авах — нэртэй сурагчийн жишээ (нэр,
-            хичээл, өмнөх→дараах оноо). Зөвшөөрөл авалгүй, зохиомол сурагч
-            зохиож бичихгүй. */}
-        <div className="reveal mt-6 rounded-2xl border border-dashed border-line p-6 text-center">
-          <p className="text-sm font-semibold text-ink-dim">
-            Нэртэй сурагчдын амжилтын түүх (нэр · хичээл · өмнөх→дараах оноо)
-            удахгүй нэмэгдэнэ.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-10 max-w-xl">
-          <LeadForm
-            title="Таны хүүхдийн ээлж"
-            subtitle="Дараагийн амжилтын түүх тань болъё — мэдээллээ үлдээгээрэй."
-          />
         </div>
       </div>
     </section>

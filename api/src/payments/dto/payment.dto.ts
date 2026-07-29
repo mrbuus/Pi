@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsInt,
@@ -38,6 +39,13 @@ export class ConfirmPaymentDto {
   @IsOptional()
   @IsString()
   note?: string;
+
+  // Төлбөрийн дүн сонгосон эрхийн үнээс бага байгааг мэдэж байгаад зориудаар
+  // зөвшөөрөх бол л true өгнө (жишээ нь: хэсэгчилсэн хөнгөлөлт). Анхдагчаар
+  // дутуу төлбөрөөр эрх олгохыг хориглоно.
+  @IsOptional()
+  @IsBoolean()
+  overrideUnderpay?: boolean;
 }
 
 export class RejectPaymentDto {

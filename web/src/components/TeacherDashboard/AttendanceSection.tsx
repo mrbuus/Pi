@@ -1,5 +1,6 @@
 "use client";
 
+import { User } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { addDaysToKey } from "@/components/schedule/types";
@@ -7,6 +8,10 @@ import AttendanceCalendar from "@/components/attendance/AttendanceCalendar";
 import { FrequencyBadge } from "@/components/attendance/FrequencyBadge";
 import { NoteAutocomplete } from "@/components/attendance/NoteAutocomplete";
 import { StatusPills } from "@/components/attendance/StatusPills";
+import {
+  LateRangePicker,
+  type LateRangeValue,
+} from "@/components/attendance/LateRangePicker";
 
 interface StudentAttendance {
   id: string;
@@ -30,6 +35,8 @@ interface RosterRow {
   note?: string | null;
   markedBy?: MarkerLite | null;
   unmarkedLastTwoClassDays?: boolean;
+  /** Зөвхөн status="LATE" үед утгатай. */
+  lateRange?: LateRangeValue | null;
 }
 
 interface HistoryRow {
@@ -146,6 +153,13 @@ export default function AttendanceSection({
   // parent-ийн marks/notes/callback-уудыг ашиглана. ----
   const [localMarks, setLocalMarks] = useState<Record<string, string>>({});
   const [localNotes, setLocalNotes] = useState<Record<string, string>>({});
+  // Хоцролтын хугацаа — зөвхөн status="LATE" үед утгатай. classroomId
+  // байгаа эсэхээс үл хамааран локол state-д хадгална (API руу зөвхөн
+  // classroomId горимд хадгалагдана — доорх handleSave-ийг үз); legacy
+  // (classroomId-гүй) горимд `note`-той адил зөвхөн локал үлдэнэ.
+  const [lateRanges, setLateRanges] = useState<Record<string, LateRangeValue | "">>(
+    {},
+  );
   useEffect(() => {
     if (!classroomId || !dayRows) return;
     setLocalMarks(
@@ -154,18 +168,31 @@ export default function AttendanceSection({
     setLocalNotes(
       Object.fromEntries(dayRows.map((r) => [r.student.id, r.note ?? ""])),
     );
+    setLateRanges(
+      Object.fromEntries(dayRows.map((r) => [r.student.id, r.lateRange ?? ""])),
+    );
   }, [classroomId, dayRows]);
 
   const effMarks = classroomId ? localMarks : marks;
   const effNotes = classroomId ? localNotes : notes;
-  const handleMarkChange = classroomId
-    ? (studentId: string, status: string) =>
-        setLocalMarks((m) => ({ ...m, [studentId]: status }))
-    : onMarkChange;
+  const handleMarkChange = (studentId: string, status: string) => {
+    if (classroomId) {
+      setLocalMarks((m) => ({ ...m, [studentId]: status }));
+    } else {
+      onMarkChange(studentId, status);
+    }
+    // Статус LATE-ээс өөр болвол сонгосон хугацааны интервалыг цэвэрлэнэ —
+    // өмнөх сонголт "хагас нуугдсан" хэвээр үлдэхгүйн тулд.
+    if (status !== "LATE") {
+      setLateRanges((m) => (m[studentId] ? { ...m, [studentId]: "" } : m));
+    }
+  };
   const handleNoteChange = classroomId
     ? (studentId: string, note: string) =>
         setLocalNotes((n) => ({ ...n, [studentId]: note }))
     : onNoteChange;
+  const handleLateRangeChange = (studentId: string, value: LateRangeValue) =>
+    setLateRanges((m) => ({ ...m, [studentId]: value }));
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -179,6 +206,10 @@ export default function AttendanceSection({
               studentId: r.student.id,
               status: effMarks[r.student.id] ?? "PRESENT",
               note: effNotes[r.student.id]?.trim() || undefined,
+              lateRange:
+                effMarks[r.student.id] === "LATE"
+                  ? lateRanges[r.student.id] || undefined
+                  : undefined,
             })),
           },
         });
@@ -253,6 +284,10 @@ export default function AttendanceSection({
         ) : (
           activeRows.map((r) => {
             const h = history[r.student.id];
+            const status = effMarks[r.student.id];
+            const isPresent = status === "PRESENT";
+            const isLate = status === "LATE";
+            const studentLabel = `${r.student.firstName} ${r.student.lastName}`;
             return (
               <div
                 key={r.student.id}
@@ -260,9 +295,7 @@ export default function AttendanceSection({
               >
                 {/* Student Name + meta */}
                 <div className="md:w-44 md:shrink-0">
-                  <span className="text-sm font-medium">
-                    {r.student.firstName} {r.student.lastName}
-                  </span>
+                  <span className="text-sm font-medium">{studentLabel}</span>
                   {classroomId && (
                     <div className="mt-1">
                       <FrequencyBadge
@@ -273,28 +306,44 @@ export default function AttendanceSection({
                     </div>
                   )}
                   {r.markedBy && (
-                    <p className="mt-1 text-xs text-ink-dim">
-                      👤 Тэмдэглэсэн: {r.markedBy.firstName} {r.markedBy.lastName}
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-ink-dim">
+                      <User className="h-3 w-3" aria-hidden />
+                      Тэмдэглэсэн: {r.markedBy.firstName} {r.markedBy.lastName}
                     </p>
                   )}
                 </div>
 
                 {/* Attendance Buttons */}
-                <StatusPills
-                  studentLabel={`${r.student.firstName} ${r.student.lastName}`}
-                  value={effMarks[r.student.id]}
-                  onChange={(status) => handleMarkChange(r.student.id, status)}
-                />
-
-                {/* Note — стек mobile дээр, inline desktop дээр */}
-                <div className="md:flex-1">
-                  <NoteAutocomplete
-                    id={`attendance-note-${r.student.id}`}
-                    label={`${r.student.firstName} ${r.student.lastName} — тайлбар`}
-                    value={effNotes[r.student.id] ?? ""}
-                    onChange={(v) => handleNoteChange(r.student.id, v)}
+                <div className="flex flex-col gap-2">
+                  <StatusPills
+                    studentLabel={studentLabel}
+                    value={status}
+                    onChange={(next) => handleMarkChange(r.student.id, next)}
                   />
+                  {/* Хоцролтын хугацаа — зөвхөн "Хоцорсон" сонгогдоход, нэг
+                      товшилтоор хурдан сонгоно (owner: ангийн өмнө зогсоод
+                      хэрэглэнэ). */}
+                  {isLate && (
+                    <LateRangePicker
+                      studentLabel={studentLabel}
+                      value={lateRanges[r.student.id] || null}
+                      onChange={(v) => handleLateRangeChange(r.student.id, v)}
+                    />
+                  )}
                 </div>
+
+                {/* Тайлбар — "Ирсэн" төлөвт огт харагдахгүй (owner: ирснийг
+                    нэг товшилтоор, тайлбаргүйгээр тэмдэглэх ёстой). */}
+                {!isPresent && (
+                  <div className="md:flex-1">
+                    <NoteAutocomplete
+                      id={`attendance-note-${r.student.id}`}
+                      label={`${studentLabel} — тайлбар`}
+                      value={effNotes[r.student.id] ?? ""}
+                      onChange={(v) => handleNoteChange(r.student.id, v)}
+                    />
+                  </div>
+                )}
               </div>
             );
           })

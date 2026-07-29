@@ -88,7 +88,16 @@ export class ClassroomsController {
 
   @Roles(Role.ADMIN)
   @Delete(':id')
-  archive(@Param('id') id: string, @Query('confirmCode') confirmCode: string) {
-    return this.classrooms.archive(id, confirmCode ?? '');
+  archive(
+    @Param('id') id: string,
+    @Query('confirmCode') confirmCode: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.classrooms.archive(
+      id,
+      confirmCode ?? '',
+      req.user.userId,
+      req.user.role,
+    );
   }
 }

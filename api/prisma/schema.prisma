@@ -25,39 +25,44 @@ enum StudentType {
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id                 String   @id @default(cuid())
   // Нэвтрэх түлхүүрүүд: утас, имэйл (gmail), эсвэл username — аль нэгээр нэвтэрнэ.
   // Утсыг сонголттой болгосон тул зөвхөн имэйлээр ч бүртгүүлж болно.
-  phone        String?  @unique
-  email        String?  @unique
-  username     String?  @unique // нийтэд харагдах нэр (овог нэр эсвэл өөрийн nickname)
-  studentCode  String?  @unique // сурагчийн дотоод код (дугаараас тусдаа)
-  teacherCode  String?  @unique // багшийн дотоод код (дугаараас тусдаа)
-  firstName    String
-  lastName     String
-  passwordHash String
-  role         Role
-  avatarUrl    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  phone              String?  @unique
+  email              String?  @unique
+  username           String?  @unique // нийтэд харагдах нэр (овог нэр эсвэл өөрийн nickname)
+  studentCode        String?  @unique // сурагчийн дотоод код (дугаараас тусдаа)
+  teacherCode        String?  @unique // багшийн дотоод код (дугаараас тусдаа)
+  firstName          String
+  lastName           String
+  passwordHash       String
+  // Дараагийн нэвтрэлтээр нууц үг СОЛИУЛАХ шаардлагатай эсэх. Одоогоор ХААЛТТАЙ
+  // (@default(false)) — эзэн байнга турших тул саад болохгүй. Ирээдүйд идэвхжүүлэхэд
+  // энэ талбарыг create үед true болгоод/эсвэл эндхийн default-ыг true болговол хангалттай.
+  mustChangePassword Boolean  @default(false)
+  role               Role
+  avatarUrl          String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
 
-  parentLinks     ParentLink[]         @relation("ParentSide")
-  childLinks      ParentLink[]         @relation("ChildSide")
-  payments        Payment[]
-  userPasses      UserPass[]
-  attempts        Attempt[]
-  attendances     Attendance[]         @relation("AttendanceStudent")
-  submissions     Submission[]
-  testResults     TestResult[]
-  predictions     Prediction[]
-  colorTags       StudentColorTag[]    @relation("TaggedStudent")
-  ownedClassrooms Classroom[]          @relation("ClassroomTeacher")
-  enrollments     Enrollment[]
-  attemptSessions TestAttemptSession[]
-  learningEvents  LearningEvent[]
+  parentLinks        ParentLink[]         @relation("ParentSide")
+  childLinks         ParentLink[]         @relation("ChildSide")
+  payments           Payment[]
+  userPasses         UserPass[]
+  attempts           Attempt[]
+  attendances        Attendance[]         @relation("AttendanceStudent")
+  submissions        Submission[]
+  dailyHomeworkMarks DailyHomeworkMark[]  @relation("DailyHomeworkMarkStudent")
+  testResults        TestResult[]
+  predictions        Prediction[]
+  colorTags          StudentColorTag[]    @relation("TaggedStudent")
+  ownedClassrooms    Classroom[]          @relation("ClassroomTeacher")
+  enrollments        Enrollment[]
+  attemptSessions    TestAttemptSession[]
+  learningEvents     LearningEvent[]
 
   // Wave 3: ажилтны төлөвлөгч / хуваарь / сурагчийн зорилго / стрийк
   createdStaffTasks    StaffTask[]
@@ -153,6 +158,7 @@ model Classroom {
   testAccess          TestAccess[]
   dailySummaries      DailyClassSummary[]
   announcementTargets AnnouncementClassroomTarget[]
+  dailyHomeworkMarks  DailyHomeworkMark[]
 
   // Wave 3: ажилтны төлөвлөгч / хичээлийн хуваарь
   staffTasks     StaffTask[]
@@ -183,6 +189,15 @@ enum AttendanceStatus {
   EXCUSED
 }
 
+// Хоцролтын хугацааны интервал (зөвхөн status=LATE үед утгатай).
+// Багш ангийн өмнө зогсоод хурдан сонгох тул сонголтууд цөөхөн, тодорхой.
+enum LateRange {
+  FIVE_TO_TEN // 5–10 минут
+  TEN_TO_THIRTY // 10–30 минут
+  THIRTY_TO_SIXTY // 30 минут – 1 цаг
+  OVER_ONE_HOUR // 1 цагаас дээш
+}
+
 model Attendance {
   id          String           @id @default(cuid())
   classroomId String
@@ -194,6 +209,11 @@ model Attendance {
   markedById  String
   // Сурагч тус бүрийн өдрийн тайлбар (ж: "Өвчтэй", "Гэрээсээ хожуу гарсан")
   note        String?
+  // Хэдий хугацаагаар хоцорсон (зөвхөн status=LATE үед; бусад бүх статуст
+  // NULL байх ёстой — mark() service дотор status LATE-ээс өөр болоход
+  // автоматаар цэвэрлэгдэнэ). Чөлөөт тайлбар `note`-оос ялгаатайгаар
+  // queryable, тайлагдах боломжтой бүтэцтэй утга учир тусдаа enum багана.
+  lateRange   LateRange?
 
   @@unique([classroomId, studentId, date])
   @@index([studentId, date])
@@ -251,6 +271,40 @@ model Submission {
 
   @@unique([assignmentId, studentId])
   @@index([studentId])
+}
+
+// ============ Өдөр тутмын гэрийн даалгаврын тэмдэглэгээ (Daily Homework Marking) ============
+// Эзний #1 хүсэлт: багш ангийнхаа гэрийн даалгаврыг өдөр бүр НЭГ ХУРДАН
+// тороор (grid) тэмдэглэдэг байх ёстой — Assignment/Submission-ы "багш
+// даалгавар үүсгээд сурагч илгээх" урсгалаас ЯЛГААТАЙ, "багш л ангиа хурдан
+// нэг өнгөөр дүгнэнэ" гэсэн энгийн урсгал. Тиймээс Submission.state-ийг
+// contort хийхгүй (өөр дэлгэцүүд үүнийг ашигладаг), харин тусдаа энгийн
+// хүснэгт нэмэв: анги+сурагч+өдөр бүрийн НЭГ тэмдэглэгээ (өнгө + чөлөөт
+// тайлбар). Мөр байхгүй бол "тэмдэглээгүй" (цагаан/хоосон, багш хараахан
+// дүгнээгүй) — status null-ийг зөвшөөрнө.
+enum HomeworkMarkStatus {
+  DONE // хийсэн — ногоон
+  PARTIAL // дутуу — шар
+  NOT_DONE // хийгээгүй — улаан
+}
+
+model DailyHomeworkMark {
+  id          String              @id @default(cuid())
+  classroomId String
+  classroom   Classroom           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     User                @relation("DailyHomeworkMarkStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  date        DateTime            @db.Date
+  // null = багш хараахан тэмдэглээгүй (өгөгдмөл, цагаан харагдана)
+  status      HomeworkMarkStatus?
+  comment     String?
+  markedById  String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([classroomId, studentId, date])
+  @@index([classroomId, date])
+  @@index([studentId, date])
 }
 
 // ============ Контент: Ном → Бүлэг сэдэв → Бодлого ============
@@ -869,21 +923,21 @@ model AnnouncementClassroomTarget {
 // Анги тухайн өдөр ямар тест/шалгалт хийснийг багш бүртгэнэ.
 // Сурагч оройн тэмдэглэгээндээ token мэдэхгүйгээр бодлогуудаа эндээс шууд хардаг.
 model ClassTestSession {
-  id          String   @id @default(cuid())
-  classroomId String
+  id                 String   @id @default(cuid())
+  classroomId        String
   // Бодлогын сангийн тест бол энд testId байна.
   // ГАРААР бичсэн (гаднын) тест бол testId = null, оронд нь manualTitle.
   // Учир: сурагчид заримдаа манай санд ОГТ байхгүй бодлого бодох тул багш
   // зөвхөн НЭРИЙГ нь бичээд бүртгэх боломжтой байх ёстой. Тест үүсгэхгүй.
-  testId      String?
+  testId             String?
   // Гараар бичсэн тестийн нэр (testId = null үед л утгатай)
-  manualTitle String?
+  manualTitle        String?
   // Гараар бичсэн тестийн бодлогын тоо — сурагчийн оройн тэмдэглэгээнд
   // 1..N хүртэлх дугаар гаргахад ашиглана.
   manualProblemCount Int?
-  date        DateTime @db.Date
-  createdById String
-  createdAt   DateTime @default(now())
+  date               DateTime @db.Date
+  createdById        String
+  createdAt          DateTime @default(now())
 
   // Тухайн анги уг өдөр ХИЙГЭЭГҮЙ (алгассан) бодлогуудын Problem.id.
   // Хоосон = бүх бодлого орсон. Сурагчийн оройн тэмдэглэгээнд эдгээр харагдахгүй.

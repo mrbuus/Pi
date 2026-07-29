@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import MathText from "@/components/MathText";
 import {
@@ -268,7 +269,9 @@ export default function ProblemPicker({
                     </span>
                   )}
                   {p.imageKey && (
-                    <span className="rounded bg-line/30 px-2 py-0.5 text-ink-dim">🖼 зурагтай</span>
+                    <span className="inline-flex items-center gap-1 rounded bg-line/30 px-2 py-0.5 text-ink-dim">
+                      <ImageIcon className="h-3 w-3" aria-hidden /> зурагтай
+                    </span>
                   )}
                   {!known && (
                     <span className="rounded border border-error/40 bg-error/10 px-2 py-0.5 font-semibold text-error">

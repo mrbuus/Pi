@@ -17,10 +17,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
-function randomTempPassword(): string {
-  return String(Math.floor(10_000_000 + Math.random() * 90_000_000)); // 8 оронтой
-}
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -47,8 +43,11 @@ export class UsersService {
       throw new ConflictException('Энэ имэйл хаяг бүртгэлтэй байна');
     }
 
-    // Анхны нууц үг = утас (SPEC §6.2); утасгүй бол түр нууц үг үүсгээд буцаана
-    const tempPassword = dto.phone ?? randomTempPassword();
+    // Анхны нууц үг ЯМАГТ = утасны дугаар (эзний шийдвэр — "чанартай" санамсаргүй
+    // нууц үг УТ ХЭРЭГГҮЙ). Утасгүй (зөвхөн имэйлээр админ үүсгэсэн) ховор тохиолдолд
+    // санамсаргүй генератор ашиглахгүй, харин имэйлийг л нууц үг болгоно —
+    // энгийн бөгөөд урьдчилан таамаглах боломжтой байлгах үүднээс.
+    const tempPassword = dto.phone ?? dto.email!;
     const passwordHash = await bcrypt.hash(tempPassword, 10);
 
     const username = await resolveUniqueUsername(
@@ -77,6 +76,10 @@ export class UsersService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         passwordHash,
+        // Одоогоор ХЭЗЭЭ Ч true болгохгүй — "нэвтрэхэд заавал нууц үг солиулах"
+        // урсгал идэвхжээгүй (schema-ийн @default(false)-той адил). Идэвхжүүлэхэд
+        // зөвхөн үүнийг true болгоход л хангалттай.
+        mustChangePassword: false,
         role: dto.role,
         studentProfile:
           dto.role === Role.STUDENT

@@ -1,3 +1,4 @@
+import { CheckCircle2, Hourglass } from "lucide-react";
 import { ActivePassInfo } from "./types";
 import { formatDate } from "./format";
 
@@ -33,7 +34,11 @@ export default function PassBadge({
           expiringSoon ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
         }`}
       >
-        <span aria-hidden>{expiringSoon ? "⏳" : "✅"}</span>
+        {expiringSoon ? (
+          <Hourglass className="h-3.5 w-3.5" aria-hidden />
+        ) : (
+          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+        )}
         {expiringSoon ? "Удахгүй дуусна" : "Хүчинтэй"}
       </span>
       <span className="text-xs text-ink-dim">

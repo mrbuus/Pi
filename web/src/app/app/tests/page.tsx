@@ -1,5 +1,6 @@
 "use client";
 
+import { Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, getRole } from "@/lib/api";
@@ -154,12 +155,10 @@ export default function TestsPage() {
             <label htmlFor="test-search" className="sr-only">
               Сэдэв, тестээр хайх
             </label>
-            <span
+            <Search
               aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-dim"
-            >
-              🔍
-            </span>
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim"
+            />
             <input
               id="test-search"
               value={query}

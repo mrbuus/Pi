@@ -1,5 +1,6 @@
 "use client";
 
+import { DoorOpen } from "lucide-react";
 import {
   formatMinutes,
   SUBJECT_LABEL,
@@ -49,8 +50,8 @@ function EntryCard({
       </p>
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
         {entry.room && (
-          <span className="rounded-full border border-line px-2 py-0.5 text-ink-dim">
-            🚪 {entry.room}
+          <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-ink-dim">
+            <DoorOpen className="h-3 w-3" aria-hidden /> {entry.room}
           </span>
         )}
         {entry.subject && (

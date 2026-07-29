@@ -44,7 +44,7 @@ export default function BoardView({
             >
               <div className="flex items-center justify-between gap-2 px-1">
                 <h3 className={`flex items-center gap-1.5 text-sm font-bold ${meta.colorClass}`}>
-                  <span aria-hidden>{meta.icon}</span> {meta.label}
+                  <meta.icon className="h-4 w-4" aria-hidden /> {meta.label}
                 </h3>
                 <span className="rounded-full border border-line bg-surface px-2 py-0.5 text-xs font-semibold text-ink-dim">
                   {columnTasks.length}

@@ -1,3 +1,4 @@
+import { Eye } from "lucide-react";
 import {
   AVAILABILITY_OPTIONS,
   availabilityBtnCls,
@@ -46,6 +47,7 @@ export default function SubjectCard({
   onSave,
   onDiscard,
 }: SubjectCardProps) {
+  const SavedStatusIcon = STATUS_ICON[saved.status];
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5">
       <div className="flex items-center justify-between gap-2">
@@ -54,7 +56,7 @@ export default function SubjectCard({
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_BADGE_CLS[saved.status]}`}
           title="Одоо сайт дээр харагдаж буй төлөв"
         >
-          <span aria-hidden>{STATUS_ICON[saved.status]}</span>
+          <SavedStatusIcon className="h-3 w-3" aria-hidden />
           {STATUS_LABEL[saved.status]}
         </span>
       </div>
@@ -130,8 +132,8 @@ export default function SubjectCard({
       </label>
 
       <div className="rounded-xl border border-dashed border-line bg-panel p-3">
-        <p className="text-xs font-semibold text-ink-dim">
-          👁 Зочин юу харах вэ (ноорог дээр үндэслэв)
+        <p className="inline-flex items-center gap-1 text-xs font-semibold text-ink-dim">
+          <Eye className="h-3.5 w-3.5" aria-hidden /> Зочин юу харах вэ (ноорог дээр үндэслэв)
         </p>
         <div className="mt-2">
           <VisitorPreview

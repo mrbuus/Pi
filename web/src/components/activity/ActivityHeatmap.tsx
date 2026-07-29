@@ -1,5 +1,6 @@
 "use client";
 
+import { Flame, Trophy } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import HeatmapGrid, { HeatmapCell } from "./HeatmapGrid";
@@ -176,18 +177,14 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
       {stats && (
         <div className="mb-5 flex flex-wrap gap-3">
           <div className="flex items-center gap-2 rounded-lg bg-accent-teal/10 px-3 py-2">
-            <span aria-hidden className="text-lg">
-              🔥
-            </span>
+            <Flame className="h-5 w-5 text-accent-teal" aria-hidden />
             <div>
               <p className="text-xs text-ink-dim">Одоогийн стрийк</p>
               <p className="font-bold text-ink">{stats.currentStreak} өдөр</p>
             </div>
           </div>
           <div className="flex items-center gap-2 rounded-lg bg-accent-gold/10 px-3 py-2">
-            <span aria-hidden className="text-lg">
-              🏆
-            </span>
+            <Trophy className="h-5 w-5 text-accent-gold" aria-hidden />
             <div>
               <p className="text-xs text-ink-dim">Хамгийн урт стрийк</p>
               <p className="font-bold text-ink">{stats.longestStreak} өдөр</p>

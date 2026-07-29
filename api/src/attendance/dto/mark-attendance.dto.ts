@@ -10,7 +10,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { AttendanceStatus } from '../../generated/prisma/enums';
+import { AttendanceStatus, LateRange } from '../../generated/prisma/enums';
 
 export class AttendanceEntryDto {
   @IsString()
@@ -25,6 +25,12 @@ export class AttendanceEntryDto {
   @IsString()
   @MaxLength(300, { message: 'Тайлбар 300 тэмдэгтээс ихгүй байх ёстой' })
   note?: string;
+
+  // Хэдий хугацаагаар хоцорсон — зөвхөн status=LATE үед хамааралтай.
+  // Бусад статусын үед service дотор автоматаар NULL болгож цэвэрлэнэ.
+  @IsOptional()
+  @IsEnum(LateRange)
+  lateRange?: LateRange;
 }
 
 export class MarkAttendanceDto {

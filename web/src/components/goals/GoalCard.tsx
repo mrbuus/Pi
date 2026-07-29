@@ -1,5 +1,6 @@
 "use client";
 
+import { Calendar, Check } from "lucide-react";
 import { useState } from "react";
 import { daysUntil, formatDate, STATUS_META, STATUS_OPTIONS, SUBJECT_LABEL } from "./statusMeta";
 import type { Goal, GoalStatus } from "./types";
@@ -91,9 +92,9 @@ export default function GoalCard({
           {goal.title}
         </p>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${meta.badgeClass}`}
+          className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${meta.badgeClass}`}
         >
-          {meta.icon} {meta.label}
+          <meta.icon className="h-3 w-3" aria-hidden /> {meta.label}
         </span>
       </div>
 
@@ -117,7 +118,8 @@ export default function GoalCard({
                   : "border-line"
             }`}
           >
-            📅 {formatDate(goal.targetDate)}
+            <Calendar className="mr-1 inline h-3 w-3 align-[-1px]" aria-hidden />
+            {formatDate(goal.targetDate)}
             {overdue && " — хугацаа хэтэрсэн"}
             {soon && " — тун удахгүй"}
           </span>
@@ -135,7 +137,7 @@ export default function GoalCard({
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {STATUS_META[s].icon} {STATUS_META[s].label}
+                {STATUS_META[s].label}
               </option>
             ))}
           </select>
@@ -146,9 +148,9 @@ export default function GoalCard({
             <button
               type="button"
               onClick={() => onStatusChange("DONE")}
-              className="rounded-lg border border-success/40 px-2 py-1 text-xs font-semibold text-success transition hover:bg-success/10"
+              className="inline-flex items-center gap-1 rounded-lg border border-success/40 px-2 py-1 text-xs font-semibold text-success transition hover:bg-success/10"
             >
-              ✓ Биелсэн гэж тэмдэглэх
+              <Check className="h-3 w-3" aria-hidden /> Биелсэн гэж тэмдэглэх
             </button>
           )}
           <button

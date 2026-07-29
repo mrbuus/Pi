@@ -1,10 +1,16 @@
+import InfoHint from "@/components/ui/InfoHint";
 import { Counter } from "./shared";
 
 // Зөвхөн баталгаажсан бодит тоо (2026-07-26) — зохиомол статистик хэзээ ч
 // ашиглахгүй. Утга өөрчлөгдвөл эндээс засна.
 const STATS = [
   { to: 359, suffix: "+", label: "идэвхтэй сурагч" },
-  { to: 96.8, suffix: "%", label: "тогтоц (371-ээс 12 гарсан)" },
+  {
+    to: 96.8,
+    suffix: "%",
+    label: "тогтоц",
+    hint: "371 сурагчаас 12 нь хичээлээ үргэлжлүүлээгүй — тогтоц гэдэг нь үлдсэн сурагчийн эзлэх хувь.",
+  },
   { to: 16, suffix: "", label: "ажилтан" },
 ] as const;
 
@@ -17,7 +23,10 @@ export default function TrustBar() {
             <p className="text-3xl font-extrabold text-ink sm:text-4xl">
               <Counter to={s.to} suffix={s.suffix} />
             </p>
-            <p className="mt-1.5 text-sm text-ink-dim">{s.label}</p>
+            <p className="mt-1.5 flex items-center justify-center gap-1 text-sm text-ink-dim">
+              {s.label}
+              {"hint" in s && <InfoHint>{s.hint}</InfoHint>}
+            </p>
           </div>
         ))}
       </div>

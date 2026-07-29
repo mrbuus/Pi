@@ -101,7 +101,7 @@ export default function WorkloadView({
                         key={s}
                         className={`flex items-center gap-1 rounded-full border border-line px-2 py-0.5 ${meta.colorClass}`}
                       >
-                        <span aria-hidden>{meta.icon}</span>
+                        <meta.icon className="h-3 w-3" aria-hidden />
                         {meta.label}: {count}
                       </span>
                     );

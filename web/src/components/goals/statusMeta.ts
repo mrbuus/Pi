@@ -1,38 +1,39 @@
+import { Ban, Check, NotebookPen, Play, X, type LucideIcon } from "lucide-react";
 import type { GoalStatus, GoalSubject } from "./types";
 
 // Төлөв бүрийг ХЭЗЭЭ Ч зөвхөн өнгөөр ялгахгүй — дүрс (icon) + монгол нэрийг
 // үргэлж хамт ашиглана (өнгө хараагүй сурагчид ч ялгагдана).
 export const STATUS_META: Record<
   GoalStatus,
-  { label: string; icon: string; colorClass: string; badgeClass: string }
+  { label: string; icon: LucideIcon; colorClass: string; badgeClass: string }
 > = {
   PLANNED: {
     label: "Төлөвлөсөн",
-    icon: "🗒",
+    icon: NotebookPen,
     colorClass: "text-info",
     badgeClass: "bg-info/15 text-info",
   },
   IN_PROGRESS: {
     label: "Хийгдэж байгаа",
-    icon: "▶",
+    icon: Play,
     colorClass: "text-brand",
     badgeClass: "bg-brand/15 text-brand",
   },
   DONE: {
     label: "Биелсэн",
-    icon: "✓",
+    icon: Check,
     colorClass: "text-success",
     badgeClass: "bg-success/15 text-success",
   },
   BLOCKED: {
     label: "Саатсан",
-    icon: "⛔",
+    icon: Ban,
     colorClass: "text-error",
     badgeClass: "bg-error/15 text-error",
   },
   CANCELLED: {
     label: "Цуцалсан",
-    icon: "✕",
+    icon: X,
     colorClass: "text-ink-dim",
     badgeClass: "bg-panel text-ink-dim",
   },

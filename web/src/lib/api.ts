@@ -132,9 +132,18 @@ export async function uploadFile(
 }
 
 // Хадгалсан файлын key-гээс шууд харах URL үүсгэнэ (профайл зураг, imageKey гэх мэт)
+//
+// GET /files/:key одоо JWT шаарддаг (аюулгүй байдлын засвар — өмнө нь
+// хамгаалалтгүй байсан), гэвч энэ URL ихэвчлэн <img src="..."> дотор
+// ашиглагддаг тул Authorization header дамжуулах боломжгүй. Тиймээс аль
+// хэдийн байгаа access token-оо ?token= query параметраар хавсаргана —
+// сервер тал үүнийг Bearer header-тэй яг адилхан баталгаажуулна
+// (api/src/storage/files-auth.guard.ts-ийг үз).
 export function fileUrl(key?: string | null): string | undefined {
   if (!key) return undefined;
-  return `${API_URL}/files/${key}`;
+  const token = getToken();
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+  return `${API_URL}/files/${key}${query}`;
 }
 
 export function homeForRole(role: string): string {

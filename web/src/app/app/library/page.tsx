@@ -120,13 +120,15 @@ const TONE_STYLE: Record<ToneKey, Omit<TopicTone, "symbol">> = {
   },
 };
 
+// Тэмдэг бүрийг LaTeX-ээр бичээд MathText-ээр рендерлэнэ (KaTeX) — бэлэн
+// unicode тэмдэгтийг (π, √ гэх мэт) шууд харуулахгүй.
 const TONE_ORDER: { key: ToneKey; symbol: string }[] = [
-  { key: "brand", symbol: "∑" },
-  { key: "teal", symbol: "√" },
-  { key: "gold", symbol: "π" },
-  { key: "rose", symbol: "|x|" },
-  { key: "violet", symbol: "log" },
-  { key: "sky", symbol: "f" },
+  { key: "brand", symbol: "$\\sum$" },
+  { key: "teal", symbol: "$\\surd$" },
+  { key: "gold", symbol: "$\\pi$" },
+  { key: "rose", symbol: "$|x|$" },
+  { key: "violet", symbol: "$\\log$" },
+  { key: "sky", symbol: "$f$" },
 ];
 
 function toneFor(index: number): TopicTone {
@@ -475,7 +477,7 @@ export default function LibraryPage() {
                     <span
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${group.tone.soft} ${group.tone.text}`}
                     >
-                      {group.tone.symbol}
+                      <MathText>{group.tone.symbol}</MathText>
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-bold">{group.topic}</span>

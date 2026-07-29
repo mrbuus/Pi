@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { api, uploadFile } from "@/lib/api";
+import RequireRole from "@/components/nav/RequireRole";
 import ProblemPicker from "@/components/test-builder/ProblemPicker";
 import ProblemPreviewModal from "@/components/test-builder/ProblemPreviewModal";
 import SelectedProblemsList, {
@@ -82,6 +83,10 @@ export default function NewTestPage() {
   const [submitting, setSubmitting] = useState(false);
   const [createdTest, setCreatedTest] = useState<{ id: string; title: string } | null>(null);
   const [previewProblem, setPreviewProblem] = useState<Problem | null>(null);
+  // Тест амжилттай үүссэний дараа сервер буцаасан хариу-түлхүүрийн
+  // анхааруулга (API-ийн guard-аас, Fix 1a) — үүсгэх алхмын анхааруулгаас
+  // тусдаа, учир нь энэ нь ЖИНХЭНЭ ангид оноогдсоны дараах баталгаа.
+  const [createdAnswerWarning, setCreatedAnswerWarning] = useState("");
 
   useEffect(() => {
     api<Classroom[]>("/classrooms")
@@ -329,9 +334,25 @@ export default function NewTestPage() {
       setFormError(`Дараах талбарууд дутуу байна: ${missing.join(", ")}`);
       return;
     }
+    // Ангид шууд оноож байгаа бөгөөд СОНГОСОН БҮХ бодлого хариугүй бол
+    // сервер рүү явуулахын ч хэрэггүй — тест 0/0 болж сурагчид будлиантай
+    // тул энд шууд зогсооно (API-ийн guard-тай ижил дүрэм, Fix 1).
+    if (
+      selectedClasses.length > 0 &&
+      selectedProblemObjects.length > 0 &&
+      missingAnswerCount === selectedProblemObjects.length
+    ) {
+      setFormError(
+        `Сонгосон бүх ${missingAnswerCount} бодлого хариуны түлхүүргүй тул автоматаар дүгнэх боломжгүй — ангид оноох боломжгүй. Эхлээд наад зах нь нэг бодлогод хариу нэмнэ үү.`,
+      );
+      return;
+    }
     setSubmitting(true);
     try {
-      const created = await api<{ id: string }>("/tests", {
+      const created = await api<{
+        id: string;
+        answerWarning?: { withoutAnswerCount: number; totalProblems: number; message: string };
+      }>("/tests", {
         method: "POST",
         body: {
           title: title.trim(),
@@ -352,6 +373,7 @@ export default function NewTestPage() {
           })),
         },
       });
+      setCreatedAnswerWarning(created.answerWarning?.message ?? "");
       setCreatedTest({ id: created.id, title: title.trim() });
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Алдаа гарлаа");
@@ -377,6 +399,7 @@ export default function NewTestPage() {
     setFormError("");
     setAttemptedSubmit(false);
     setCreatedTest(null);
+    setCreatedAnswerWarning("");
   }
 
   const inputCls =
@@ -384,6 +407,7 @@ export default function NewTestPage() {
 
   if (createdTest) {
     return (
+      <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
       <div className="space-y-6">
         <div className="rounded-2xl border border-success/30 bg-success/10 p-6">
           <p className="text-lg font-bold text-success">
@@ -392,6 +416,14 @@ export default function NewTestPage() {
           <p className="mt-1 text-base text-ink-dim">
             Доор тестээ шууд харах эсвэл жагсаалт руу очиж болно.
           </p>
+          {createdAnswerWarning && (
+            <p
+              role="alert"
+              className="mt-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
+            >
+              ⚠ {createdAnswerWarning}
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href={`/app/tests/${createdTest.id}`}
@@ -415,10 +447,12 @@ export default function NewTestPage() {
           </div>
         </div>
       </div>
+      </RequireRole>
     );
   }
 
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -685,6 +719,20 @@ export default function NewTestPage() {
         className={`rounded-2xl border bg-surface p-6 ${classesMissing ? "border-error/50" : "border-line"}`}
       >
         <StepHeader n={4} title="Хэн үзэх вэ" hint="Тест аль ангид харагдахыг сонгоно." />
+        {missingAnswerCount > 0 && selectedProblemObjects.length > 0 && (
+          <p
+            role="alert"
+            className={`mb-3 rounded-lg border px-3 py-2 text-sm font-semibold ${
+              missingAnswerCount === selectedProblemObjects.length
+                ? "border-error/40 bg-error/10 text-error"
+                : "border-warning/30 bg-warning/10 text-warning"
+            }`}
+          >
+            {missingAnswerCount === selectedProblemObjects.length
+              ? `⚠ Сонгосон бүх ${missingAnswerCount} бодлого хариуны түлхүүргүй тул энэ тестийг ангид оноох боломжгүй.`
+              : `⚠ ${missingAnswerCount} бодлого хариуны түлхүүргүй тул дүнд тооцогдохгүй.`}
+          </p>
+        )}
         {classrooms.length === 0 && !catalogError && (
           <p className="text-base text-ink-dim">Анги үүсгээгүй байна</p>
         )}
@@ -744,5 +792,6 @@ export default function NewTestPage() {
         />
       )}
     </div>
+    </RequireRole>
   );
 }

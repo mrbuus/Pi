@@ -27,6 +27,7 @@ import {
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FilesAuthGuard } from './files-auth.guard';
 
 // Локал диск хадгалалт — production дээр S3 руу шилжихэд энэ controller-ийн
 // дотоод хэрэгжилт л солигдоно, key-н гэрээ хэвээрээ (SPEC §3)
@@ -223,6 +224,10 @@ export class UploadsController {
     return { key: file.filename, size: file.size, mime: file.mimetype };
   }
 
+  // ⚠️ ӨМНӨ НЬ ЭНД ЯМАР Ч ХАМГААЛАЛТГҮЙ БАЙСАН — key-г мэдэх/таах хэн ч
+  // сурагчийн бичиг баримт, профайл зураг, бодлогын зураг, PDF-ийг чөлөөтэй
+  // татаж болдог байв. FilesAuthGuard-аар хамгаална (тайлбарыг тэндээс үз).
+  @UseGuards(FilesAuthGuard)
   @Get('files/:key')
   serve(@Param('key') key: string, @Res() res: Response) {
     if (!/^[\w][\w.-]*$/.test(key)) {

@@ -1,7 +1,9 @@
 "use client";
 
+import { Coins, NotebookPen } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import RequireRole from "@/components/nav/RequireRole";
 import AuditDiff from "./AuditDiff";
 import AuditFilters from "./AuditFilters";
 import { MONEY_ENTITY, GRADE_ENTITY, errMsg } from "./auditHelpers";
@@ -103,6 +105,7 @@ export default function AuditClient() {
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold">Аудит лог</h1>
@@ -163,8 +166,8 @@ export default function AuditClient() {
                     aria-expanded={open}
                   >
                     <span className="flex flex-wrap items-center gap-2 text-sm">
-                      {isMoney && <span aria-hidden>💰</span>}
-                      {isGrade && <span aria-hidden>📝</span>}
+                      {isMoney && <Coins className="h-4 w-4 text-warning" aria-hidden />}
+                      {isGrade && <NotebookPen className="h-4 w-4 text-info" aria-hidden />}
                       <span className="font-bold">{row.action}</span>
                       <span className="text-ink-dim">{row.entity}</span>
                       <span className="rounded-full bg-panel px-2 py-0.5 text-xs text-ink-dim">
@@ -219,5 +222,6 @@ export default function AuditClient() {
         </>
       )}
     </div>
+    </RequireRole>
   );
 }

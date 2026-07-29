@@ -1,5 +1,6 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -140,9 +141,8 @@ export default function LessonChapterPage() {
       <div className="space-y-4">
         <BackLink subject={subject} />
         <div className="rounded-2xl border border-warning/30 bg-warning/10 p-8 text-center">
-          <p className="text-2xl" aria-hidden>
-            🔒
-          </p>
+          <Lock className="mx-auto h-6 w-6 text-warning" aria-hidden />
+
           <p className="mt-2 font-bold text-warning">
             энэ бүлгийг үзэх эрхгүй байна
           </p>

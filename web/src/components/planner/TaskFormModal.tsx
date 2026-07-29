@@ -197,11 +197,11 @@ export default function TaskFormModal({
                 onChange={(e) => set("status", e.target.value as TaskFormValues["status"])}
                 className="w-full rounded-lg border border-line bg-bg px-3 py-2 text-base text-ink"
               >
-                <option value="PLANNED">🗒 Төлөвлөсөн</option>
-                <option value="IN_PROGRESS">▶ Хийгдэж байгаа</option>
-                <option value="BLOCKED">⛔ Хоригдсон</option>
-                <option value="DONE">✓ Дууссан</option>
-                <option value="CANCELLED">✕ Цуцалсан</option>
+                <option value="PLANNED">Төлөвлөсөн</option>
+                <option value="IN_PROGRESS">Хийгдэж байгаа</option>
+                <option value="BLOCKED">Хоригдсон</option>
+                <option value="DONE">Дууссан</option>
+                <option value="CANCELLED">Цуцалсан</option>
               </select>
             </div>
             <div>

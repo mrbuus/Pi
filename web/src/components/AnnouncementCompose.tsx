@@ -1,5 +1,6 @@
 "use client";
 
+import { Pin } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
@@ -165,7 +166,7 @@ export default function AnnouncementCompose() {
               checked={pinned}
               onChange={(e) => setPinned(e.target.checked)}
             />
-            📌 Дээр бэхлэх
+            <Pin className="h-3.5 w-3.5" aria-hidden /> Дээр бэхлэх
           </label>
           <div className="flex items-center gap-3">
             {msg && <span className="text-xs text-success">{msg}</span>}
@@ -186,7 +187,7 @@ export default function AnnouncementCompose() {
               key={a.id}
               className="flex items-center gap-2 rounded-lg border border-line px-3 py-2 text-sm"
             >
-              {a.pinned && <span>📌</span>}
+              {a.pinned && <Pin className="h-3.5 w-3.5 text-warning" aria-hidden />}
               <span className="font-medium">{a.title}</span>
               <span className="shrink-0 rounded bg-ink/5 px-2 py-0.5 text-[11px] text-ink-dim">
                 {audienceLabel(a)}

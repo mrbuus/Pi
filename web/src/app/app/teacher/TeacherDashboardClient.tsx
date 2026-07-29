@@ -9,6 +9,7 @@ import AttentionSection, {
   type AttentionResponse,
 } from "@/components/TeacherDashboard/AttentionSection";
 import AttendanceSection from "@/components/TeacherDashboard/AttendanceSection";
+import { ClassroomSelect } from "@/components/TeacherDashboard/ClassroomSelect";
 import AssignmentsSection from "@/components/TeacherDashboard/AssignmentsSection";
 import SummarySection from "@/components/TeacherDashboard/SummarySection";
 import UnassignedStudentsSection from "@/components/TeacherDashboard/UnassignedStudentsSection";
@@ -38,17 +39,6 @@ const TAB_LABELS: Record<TabKey, string> = {
   attendance: "Ирц",
   homework: "Даалгавар",
 };
-interface Assignment {
-  id: string;
-  title: string;
-  type: string;
-  createdAt: string;
-}
-interface SubmissionRow {
-  student: { id: string; firstName: string; lastName: string };
-  state: string;
-  note: string | null;
-}
 interface Summary {
   stats: {
     studentsTotal: number;
@@ -176,12 +166,6 @@ export default function TeacherDashboardClient() {
     window.history.replaceState({}, "", url);
   }, []);
 
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
-  const [assignmentsError, setAssignmentsError] = useState<string | null>(null);
-  const [openAssignment, setOpenAssignment] = useState<string>("");
-  const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
-
   const [summary, setSummary] = useState<Summary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
@@ -200,7 +184,6 @@ export default function TeacherDashboardClient() {
     null,
   );
 
-  const [newTitle, setNewTitle] = useState("");
   const [msg, setMsg] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(
     null,
   );
@@ -269,14 +252,6 @@ export default function TeacherDashboardClient() {
       .catch((e) => setRosterError(errMsg(e)))
       .finally(() => setRosterLoading(false));
 
-    // Даалгаврыг авах
-    setAssignmentsLoading(true);
-    setAssignmentsError(null);
-    api<Assignment[]>(`/classrooms/${selected}/assignments`)
-      .then(setAssignments)
-      .catch((e) => setAssignmentsError(errMsg(e)))
-      .finally(() => setAssignmentsLoading(false));
-
     // Дүгнэлтийн мэдээлэл авах
     setSummaryLoading(true);
     setSummaryError(null);
@@ -311,64 +286,21 @@ export default function TeacherDashboardClient() {
    */
   async function saveAttendance() {
     try {
-      await api(`/classrooms/${selected}/attendance`, {
-        method: "POST",
-        body: {
-          date: today,
-          entries: roster.map((r) => ({
-            studentId: r.student.id,
-            status: marks[r.student.id],
-          })),
-        },
-      });
+      // ⚠️ AttendanceSection-д `classroomId` дамжуулснаар тэр компонент
+      // ирцийг ӨӨРӨӨ (сонгосон огноо, тайлбар, хоцролтын хугацаатайгаа)
+      // бодитоор API руу хадгалдаг болсон. Энд ДАХИН POST хийвэл: (1)
+      // өнөөдрийн огноогоор бичигдэх тул хуанлиар өмнөх өдөр засаж байсан
+      // бол буруу огноонд бичигдэнэ, (2) note/lateRange алга болно (энэ
+      // parent state-д тэдгээр талбар байхгүй) — өөрөөр хэлбэл сая
+      // хадгалсан өгөгдлийг дарж бичих эрсдэлтэй. Тиймээс энд зөвхөн бусад
+      // dashboard хэсгүүдийг (дүгнэлт/анхаарах жагсаалт) sync хийж,
+      // амжилтын мессеж харуулна.
       setMsg({ kind: "success", text: "✓ Ирц хадгалагдлаа" });
       loadClass();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
-    }
-  }
-
-  /**
-   * Шинэ даалгавар үүсгэх
-   */
-  async function createAssignment() {
-    if (!newTitle.trim()) return;
-    try {
-      await api(`/classrooms/${selected}/assignments`, {
-        method: "POST",
-        body: { title: newTitle, type: "DAILY" },
-      });
-      setNewTitle("");
-      loadClass();
-    } catch (e) {
-      setMsg({ kind: "error", text: errMsg(e) });
-    }
-  }
-
-  /**
-   * Даалгаврын илгээлтүүдийг авах
-   */
-  async function openRoster(assignmentId: string) {
-    setOpenAssignment(assignmentId);
-    try {
-      setSubmissions(await api(`/assignments/${assignmentId}/submissions`));
-    } catch (e) {
-      setMsg({ kind: "error", text: errMsg(e) });
-    }
-  }
-
-  /**
-   * Даалгаврын илгээлтийг үнэлэх
-   */
-  async function review(studentId: string, action: string) {
-    try {
-      await api(`/assignments/${openAssignment}/review`, {
-        method: "POST",
-        body: { studentId, action },
-      });
-      setSubmissions(await api(`/assignments/${openAssignment}/submissions`));
-    } catch (e) {
-      setMsg({ kind: "error", text: errMsg(e) });
+    } finally {
+      setTimeout(() => setMsg(null), 3000);
     }
   }
 
@@ -432,25 +364,26 @@ export default function TeacherDashboardClient() {
       {/* Анги сонгох — sub-tab бүрийн хамгийн дээд хэсэгт үргэлж харагдана,
           учир нь энэ блок tab-уудын АГААС ГАДНА (үргэлж render хийгддэг) байрлана */}
       <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3 md:flex-row md:items-center md:gap-4 md:p-4">
-        <label
+        <span
           className="text-sm font-semibold text-ink-dim"
-          htmlFor="classroom-select"
+          id="classroom-select-label"
         >
           Анги
-        </label>
-        <select
+        </span>
+        <ClassroomSelect
           id="classroom-select"
+          label="Анги"
+          labelledBy="classroom-select-label"
           value={selected}
-          onChange={(e) => setSelected(e.target.value)}
+          onChange={setSelected}
           disabled={classroomsLoading || classrooms.length === 0}
-          className="min-h-11 rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand"
-        >
-          {classrooms.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name} ({c._count.enrollments} сурагч)
-            </option>
-          ))}
-        </select>
+          placeholder="Анги сонгоно уу"
+          options={classrooms.map((c) => ({
+            id: c.id,
+            name: c.name,
+            meta: `${c._count.enrollments} сурагч`,
+          }))}
+        />
 
         {/* Status Message */}
         {msg && (
@@ -612,32 +545,26 @@ export default function TeacherDashboardClient() {
                 setNotes((n) => ({ ...n, [studentId]: note }))
               }
               onSave={saveAttendance}
+              // classroomId дамжуулснаар AttendanceSection "ухаалаг" горимд
+              // орж: хуанли, тайлбарыг бодитоор API руу хадгалах, хэн
+              // тэмдэглэснийг харуулах, хоцролтын хугацаа сонгох зэрэг бүгд
+              // идэвхжинэ (доорх компонентын docstring-ийг үз).
+              classroomId={selected}
             />
           )}
         </section>
       )}
 
-      {/* Даалгавар — бүтэн өргөнөөр (owner-ийн хүсэлт) */}
+      {/* Даалгавар — бүтэн өргөнөөр (owner-ийн хүсэлт): анги сонгогч дээрх
+          толгойд аль хэдийн байгаа тул энд зөвхөн сонгосон ангийг дамжуулна. */}
       {tab === "homework" && (
         <section>
-          <SectionStatus
-            loading={assignmentsLoading}
-            error={assignmentsError}
-            onRetry={loadClass}
-            empty={false}
-            emptyText=""
-          />
-          {!assignmentsLoading && !assignmentsError && (
-            <AssignmentsSection
-              assignments={assignments}
-              submissions={submissions}
-              openAssignmentId={openAssignment}
-              newTitle={newTitle}
-              onNewTitleChange={setNewTitle}
-              onCreate={createAssignment}
-              onOpen={openRoster}
-              onReview={review}
-            />
+          {!selected ? (
+            <p className="rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-dim">
+              Эхлээд анги сонгоно уу
+            </p>
+          ) : (
+            <AssignmentsSection classroomId={selected} />
           )}
         </section>
       )}

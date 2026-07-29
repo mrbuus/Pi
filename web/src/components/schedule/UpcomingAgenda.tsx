@@ -1,5 +1,6 @@
 "use client";
 
+import { DoorOpen, Palmtree } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
@@ -104,7 +105,10 @@ export default function UpcomingAgenda({
             <p className="font-bold">{dayLabel(day.date)}</p>
             {day.holiday && (
               <span className="inline-flex items-center gap-1 rounded-full bg-warning/20 px-2 py-0.5 text-xs font-semibold text-warning">
-                {CALENDAR_TYPE_ICON[day.holiday.type] ?? "🏖️"}{" "}
+                {(() => {
+                  const Icon = CALENDAR_TYPE_ICON[day.holiday.type] ?? Palmtree;
+                  return <Icon className="h-3.5 w-3.5" aria-hidden />;
+                })()}
                 {CALENDAR_TYPE_LABEL[day.holiday.type] ?? day.holiday.type}
               </span>
             )}
@@ -131,7 +135,11 @@ export default function UpcomingAgenda({
                   <span className="text-ink-dim">
                     {c.teacherName ?? "Багш товлогдоогүй"}
                   </span>
-                  {c.room && <span className="text-ink-dim">🚪 {c.room}</span>}
+                  {c.room && (
+                    <span className="inline-flex items-center gap-1 text-ink-dim">
+                      <DoorOpen className="h-3 w-3" aria-hidden /> {c.room}
+                    </span>
+                  )}
                   {c.subject && (
                     <span className="rounded-full bg-brand-bright/15 px-2 py-0.5 text-brand-soft">
                       {SUBJECT_LABEL[c.subject] ?? c.subject}

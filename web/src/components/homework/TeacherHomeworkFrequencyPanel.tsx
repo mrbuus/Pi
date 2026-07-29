@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  AlertTriangle,
+  Ban,
+  Circle,
+  CircleAlert,
+  CircleDashed,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
@@ -43,11 +51,11 @@ const MAX_FETCH = 40;
 type Status = "idle" | "loading" | "ready" | "error";
 
 function Badge({
-  icon,
+  icon: Icon,
   text,
   tone,
 }: {
-  icon: string;
+  icon: LucideIcon;
   text: string;
   tone: "amber" | "red" | "grey";
 }) {
@@ -61,7 +69,7 @@ function Badge({
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${cls}`}
     >
-      <span aria-hidden="true">{icon}</span>
+      <Icon className="h-3 w-3" aria-hidden="true" />
       <span>{text}</span>
     </span>
   );
@@ -212,24 +220,24 @@ export default function TeacherHomeworkFrequencyPanel({
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {r.notDone >= 5 && (
-                  <Badge icon="⛔" text={`${r.notDone}× хийгээгүй`} tone="red" />
+                  <Badge icon={Ban} text={`${r.notDone}× хийгээгүй`} tone="red" />
                 )}
                 {r.notDone >= 3 && r.notDone < 5 && (
                   <Badge
-                    icon="⚠"
+                    icon={AlertTriangle}
                     text={`${r.notDone}× хийгээгүй`}
                     tone="amber"
                   />
                 )}
                 {r.partial >= 5 && (
-                  <Badge icon="❗" text={`${r.partial}× дутуу`} tone="red" />
+                  <Badge icon={CircleAlert} text={`${r.partial}× дутуу`} tone="red" />
                 )}
                 {r.partial >= 3 && r.partial < 5 && (
-                  <Badge icon="◐" text={`${r.partial}× дутуу`} tone="amber" />
+                  <Badge icon={CircleDashed} text={`${r.partial}× дутуу`} tone="amber" />
                 )}
                 {r.lastTwoUnmarked && (
                   <Badge
-                    icon="○"
+                    icon={Circle}
                     text="сүүлийн 2-г тэмдэглээгүй"
                     tone="grey"
                   />

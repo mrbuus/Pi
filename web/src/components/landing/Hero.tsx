@@ -1,17 +1,20 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import LeadForm from "./LeadForm";
+import MathText from "@/components/MathText";
 
 const Hero3D = dynamic(() => import("@/components/Hero3D"), { ssr: false });
 
+// Дэвсгэрт хөвж буй тэмдэглэгээнүүд — бэлэн текст тэмдэгт (жш: "π")
+// ХЭЗЭЭ Ч ашиглахгүй, KaTeX-ээр жинхэнэ математик тэмдэглэгээ болгож
+// рендерлэнэ (MathText).
 const FLOATING = [
-  { sym: "π", top: "12%", left: "6%", size: 38, delay: "0s", rot: "-8deg" },
-  { sym: "∫", top: "30%", left: "92%", size: 44, delay: "1.2s", rot: "6deg" },
-  { sym: "Σ", top: "68%", left: "4%", size: 34, delay: "2.1s", rot: "10deg" },
-  { sym: "√", top: "80%", left: "88%", size: 40, delay: "0.7s", rot: "-12deg" },
-  { sym: "θ", top: "8%", left: "78%", size: 30, delay: "1.8s", rot: "4deg" },
-  { sym: "∞", top: "55%", left: "95%", size: 36, delay: "2.6s", rot: "-5deg" },
+  { tex: "\\pi", top: "12%", left: "6%", size: 38, delay: "0s", rot: "-8deg" },
+  { tex: "\\int", top: "30%", left: "92%", size: 44, delay: "1.2s", rot: "6deg" },
+  { tex: "\\Sigma", top: "68%", left: "4%", size: 34, delay: "2.1s", rot: "10deg" },
+  { tex: "\\surd", top: "80%", left: "88%", size: 40, delay: "0.7s", rot: "-12deg" },
+  { tex: "\\theta", top: "8%", left: "78%", size: 30, delay: "1.8s", rot: "4deg" },
+  { tex: "\\infty", top: "55%", left: "95%", size: 36, delay: "2.6s", rot: "-5deg" },
 ];
 
 export default function Hero() {
@@ -20,9 +23,9 @@ export default function Hero() {
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
       {FLOATING.map((f) => (
         <span
-          key={f.sym + f.top}
+          key={f.tex + f.top}
           aria-hidden
-          className="float-sym pointer-events-none absolute select-none font-serif text-brand-soft/40"
+          className="float-sym pointer-events-none absolute select-none text-brand-soft/40"
           style={{
             top: f.top,
             left: f.left,
@@ -31,7 +34,7 @@ export default function Hero() {
             ["--rot" as string]: f.rot,
           }}
         >
-          {f.sym}
+          <MathText>{`$${f.tex}$`}</MathText>
         </span>
       ))}
 
@@ -47,21 +50,22 @@ export default function Hero() {
             <span className="text-shine">хамгийн үр дүнтэй</span> арга
           </h1>
           <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink-dim">
-            Математик болон Нийгмийн ухаанд төвлөрсөн, дадлагажуулах
-            системтэй бэлтгэл төв.
+            Математик, нийгмийн ухааны элсэлтийн шалгалтад бэлтгэнэ. Мөн
+            математикийн хоцрогдол арилгаж, түвшин ахиулах танхимын анги
+            тусдаа ажилладаг.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
-              href="#hero-lead-form"
+              href="/register"
               className="glow-pulse rounded-full bg-brand-bright px-7 py-3.5 text-center font-bold text-on-brand transition hover:opacity-95"
             >
-              Үнэгүй түвшин тогтоох тест өгөх
+              Одоо бүртгүүлэх
             </a>
             <a
-              href="#branches"
+              href="#subjects"
               className="rounded-full border border-line px-7 py-3.5 font-semibold text-ink transition hover:border-brand"
             >
-              Элсэлтийн мэдээлэл авах
+              Бодлогын сан үзэх
             </a>
           </div>
         </div>
@@ -69,10 +73,6 @@ export default function Hero() {
         <div className="relative min-w-0 h-[340px] md:h-[420px]">
           <Hero3D />
         </div>
-      </div>
-
-      <div className="relative mx-auto mt-14 max-w-xl px-5">
-        <LeadForm id="hero-lead-form" />
       </div>
     </section>
   );

@@ -55,7 +55,7 @@ export function formatDiffValue(key: string, value: unknown): string {
     return MONEY_FIELD.test(key) ? formatMnt(value) : value.toLocaleString("en-US");
   }
   if (typeof value === "string") {
-    if (value === "[REDACTED]") return "🔒 нууцалсан";
+    if (value === "[REDACTED]") return "нууцалсан";
     if (looksIsoDate(value)) {
       const d = new Date(value);
       if (!Number.isNaN(d.getTime())) return d.toLocaleString("en-US");

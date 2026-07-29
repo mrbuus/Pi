@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import RequireRole from "@/components/nav/RequireRole";
 import LeadCard, {
   Lead,
   LeadStatusV,
@@ -175,6 +176,7 @@ export default function LeadInboxClient() {
     }`;
 
   return (
+    <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold">Хүсэлтийн урсгал</h1>
@@ -238,11 +240,11 @@ export default function LeadInboxClient() {
                   onClick={() => setStatusFilter(f.v)}
                   className={pillCls(statusFilter === f.v)}
                 >
-                  {f.v !== "ALL" && (
-                    <span aria-hidden className="mr-1">
-                      {STATUS_ICON[f.v]}
-                    </span>
-                  )}
+                  {f.v !== "ALL" &&
+                    (() => {
+                      const Icon = STATUS_ICON[f.v];
+                      return <Icon aria-hidden className="mr-1 inline h-3.5 w-3.5" />;
+                    })()}
                   {f.t}
                 </button>
               ))}
@@ -272,7 +274,10 @@ export default function LeadInboxClient() {
                 >
                   <div className="flex items-center justify-between px-1">
                     <h2 className="flex items-center gap-1.5 font-bold text-ink">
-                      <span aria-hidden>{STATUS_ICON[col.status]}</span>
+                      {(() => {
+                        const Icon = STATUS_ICON[col.status];
+                        return <Icon className="h-4 w-4" aria-hidden />;
+                      })()}
                       {STATUS_LABEL[col.status]}
                     </h2>
                     <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold text-ink-dim">
@@ -305,5 +310,6 @@ export default function LeadInboxClient() {
         </>
       )}
     </div>
+    </RequireRole>
   );
 }

@@ -393,6 +393,7 @@ export const ModelName = {
   Attendance: 'Attendance',
   Assignment: 'Assignment',
   Submission: 'Submission',
+  DailyHomeworkMark: 'DailyHomeworkMark',
   Book: 'Book',
   Chapter: 'Chapter',
   Topic: 'Topic',
@@ -446,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "studentProfile" | "teacherProfile" | "parentLink" | "classroom" | "enrollment" | "attendance" | "assignment" | "submission" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "payment" | "announcement" | "announcementClassroomTarget" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "academicCalendarDay" | "studentGoal" | "streakFreeze"
+    modelProps: "user" | "studentProfile" | "teacherProfile" | "parentLink" | "classroom" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "payment" | "announcement" | "announcementClassroomTarget" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "academicCalendarDay" | "studentGoal" | "streakFreeze"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1113,6 +1114,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SubmissionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SubmissionCountAggregateOutputType> | number
+        }
+      }
+    }
+    DailyHomeworkMark: {
+      payload: Prisma.$DailyHomeworkMarkPayload<ExtArgs>
+      fields: Prisma.DailyHomeworkMarkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DailyHomeworkMarkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DailyHomeworkMarkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>
+        }
+        findFirst: {
+          args: Prisma.DailyHomeworkMarkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DailyHomeworkMarkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>
+        }
+        findMany: {
+          args: Prisma.DailyHomeworkMarkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>[]
+        }
+        create: {
+          args: Prisma.DailyHomeworkMarkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>
+        }
+        createMany: {
+          args: Prisma.DailyHomeworkMarkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DailyHomeworkMarkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>[]
+        }
+        delete: {
+          args: Prisma.DailyHomeworkMarkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>
+        }
+        update: {
+          args: Prisma.DailyHomeworkMarkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>
+        }
+        deleteMany: {
+          args: Prisma.DailyHomeworkMarkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DailyHomeworkMarkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DailyHomeworkMarkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>[]
+        }
+        upsert: {
+          args: Prisma.DailyHomeworkMarkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyHomeworkMarkPayload>
+        }
+        aggregate: {
+          args: Prisma.DailyHomeworkMarkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDailyHomeworkMark>
+        }
+        groupBy: {
+          args: Prisma.DailyHomeworkMarkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyHomeworkMarkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DailyHomeworkMarkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyHomeworkMarkCountAggregateOutputType> | number
         }
       }
     }
@@ -3977,6 +4052,7 @@ export const UserScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   passwordHash: 'passwordHash',
+  mustChangePassword: 'mustChangePassword',
   role: 'role',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
@@ -4060,7 +4136,8 @@ export const AttendanceScalarFieldEnum = {
   date: 'date',
   status: 'status',
   markedById: 'markedById',
-  note: 'note'
+  note: 'note',
+  lateRange: 'lateRange'
 } as const
 
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
@@ -4096,6 +4173,21 @@ export const SubmissionScalarFieldEnum = {
 } as const
 
 export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
+
+
+export const DailyHomeworkMarkScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  studentId: 'studentId',
+  date: 'date',
+  status: 'status',
+  comment: 'comment',
+  markedById: 'markedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyHomeworkMarkScalarFieldEnum = (typeof DailyHomeworkMarkScalarFieldEnum)[keyof typeof DailyHomeworkMarkScalarFieldEnum]
 
 
 export const BookScalarFieldEnum = {
@@ -4696,6 +4788,13 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Role'
  */
 export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
@@ -4766,13 +4865,6 @@ export type ListEnumTuitionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
  * Reference to a field of type 'ClassroomType'
  */
 export type EnumClassroomTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ClassroomType'>
@@ -4801,6 +4893,20 @@ export type ListEnumAttendanceStatusFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'LateRange'
+ */
+export type EnumLateRangeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LateRange'>
+    
+
+
+/**
+ * Reference to a field of type 'LateRange[]'
+ */
+export type ListEnumLateRangeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LateRange[]'>
+    
+
+
+/**
  * Reference to a field of type 'AssignmentType'
  */
 export type EnumAssignmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentType'>
@@ -4825,6 +4931,20 @@ export type EnumSubmissionStateFieldRefInput<$PrismaModel> = FieldRefInputType<$
  * Reference to a field of type 'SubmissionState[]'
  */
 export type ListEnumSubmissionStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubmissionState[]'>
+    
+
+
+/**
+ * Reference to a field of type 'HomeworkMarkStatus'
+ */
+export type EnumHomeworkMarkStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeworkMarkStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'HomeworkMarkStatus[]'
+ */
+export type ListEnumHomeworkMarkStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeworkMarkStatus[]'>
     
 
 
@@ -5310,6 +5430,7 @@ export type GlobalOmitConfig = {
   attendance?: Prisma.AttendanceOmit
   assignment?: Prisma.AssignmentOmit
   submission?: Prisma.SubmissionOmit
+  dailyHomeworkMark?: Prisma.DailyHomeworkMarkOmit
   book?: Prisma.BookOmit
   chapter?: Prisma.ChapterOmit
   topic?: Prisma.TopicOmit

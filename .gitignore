@@ -19,3 +19,6 @@ api/prisma/reports/seed-test-students.json
 # Ажилтны (багш/админ) жагсаалт — БОДИТ нэр, хувийн утасны дугаар агуулна.
 # upsert-staff.cjs үүнийг уншдаг; скрипт өөрөө хувийн мэдээлэлгүй тул git-д орно.
 api/prisma/reports/staff-roster.json
+# БҮХ хэрэглэгчийн нэвтрэх мэдээлэл (утас = нууц үг) — print-credentials.cjs
+# үүсгэдэг. НАСАНД ХҮРЭЭГҮЙ сурагчдын PII агуулдаг тул git-д ХЭЗЭЭ Ч орохгүй.
+api/prisma/reports/credentials.txt

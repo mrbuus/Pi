@@ -68,6 +68,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
+    { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
   ],
   ADMIN: [
     HOME.ADMIN,
@@ -82,6 +83,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
+    { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
   ],
   BUYER: [
     HOME.BUYER,
@@ -109,6 +111,7 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/admin/theory": "admin",
   "/app/admin/students": "admin",
   "/app/admin/audit": "admin",
+  "/app/admin/analytics": "admin",
   "/app/payments": "admin",
   "/app/goals": "personal",
 };

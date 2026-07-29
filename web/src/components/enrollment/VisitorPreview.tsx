@@ -26,6 +26,7 @@ export default function VisitorPreview({
   note,
 }: VisitorPreviewProps) {
   const trimmedNote = note.trim();
+  const Icon = STATUS_ICON[status];
   return (
     <div className="flex flex-col gap-1.5 rounded-lg bg-surface p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -33,7 +34,7 @@ export default function VisitorPreview({
         <span
           className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${STATUS_BADGE_CLS[status]}`}
         >
-          <span aria-hidden>{STATUS_ICON[status]}</span>
+          <Icon className="h-3 w-3" aria-hidden />
           {STATUS_LABEL[status]}
         </span>
       </div>

@@ -14,9 +14,9 @@
  *   • НУУЦ ҮГИЙГ ХЭЗЭЭ Ч ДАРЖ БИЧИХГҮЙ — дахин ажиллуулахад хүн нэвтэрч
  *     чадахгүй болох эрсдэлгүй. Зөвхөн ШИНЭ хэрэглэгчид нууц үг үүснэ.
  *
- * НУУЦ ҮГ: шинэ бүртгэл бүрт санамсаргүй түр нууц үг үүсгээд НЭГ УДАА хэвлэнэ.
- *   seed.cjs шиг "нууц үг = утасны дугаар" гэсэн хэв маягийг ЗОРИУДААР ашиглаагүй:
- *   утасны дугаар нь олон нийтэд ил тул админ/багшийн бүртгэлд хэтэрхий сул.
+ * НУУЦ ҮГ: эзний шийдвэрээр (2026-07-29) ЯМАГТ = утасны дугаар — seed.cjs-тэй
+ *   адилхан хэв маягтай нэгтгэв. Санамсаргүй/"чанартай" түр нууц үг үүсгэдэггүй
+ *   болсон тул шинэ хэрэглэгч бүртгэгдмэгц утасныхаа дугаараар шууд нэвтэрч чадна.
  */
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
@@ -24,7 +24,6 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { PrismaClient } = require('../dist/src/generated/prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const bcrypt = require('bcryptjs');
-const { randomInt } = require('crypto');
 const { readFileSync } = require('fs');
 const { join } = require('path');
 
@@ -39,15 +38,6 @@ const ROSTER_PATH = join(__dirname, 'reports', 'staff-roster.json');
 
 const VALID_ROLES = new Set(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
 const TEACHER_ROLES = new Set(['TEACHER_PLUS', 'TEACHER']);
-
-// Андуурч уншихад хялбар тэмдэгтүүдийг (0/O, 1/l/I) ЗОРИУД хассан цагаан толгой —
-// түр нууц үгийг утсаар/биечлэн дамжуулахад алдаа гарахаас сэргийлнэ.
-const ALPHABET = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-function tempPassword(len = 12) {
-  let out = '';
-  for (let i = 0; i < len; i += 1) out += ALPHABET[randomInt(ALPHABET.length)];
-  return out;
-}
 
 /** Дараагийн SIE-T-#### дугаарыг сангийн ХАМГИЙН ТОМ утгаас үргэлжлүүлнэ. */
 async function nextTeacherSeq() {
@@ -135,7 +125,8 @@ async function main() {
       continue;
     }
 
-    const password = tempPassword();
+    // Анхны нууц үг ЯМАГТ = утасны дугаар (эзний шийдвэр — доорх файлын толгой хэсгийг үз).
+    const password = s.phone;
     const teacherCode = TEACHER_ROLES.has(s.role)
       ? `SIE-T-${String(seq).padStart(4, '0')}`
       : null;
@@ -151,6 +142,10 @@ async function main() {
           role: s.role,
           passwordHash,
           teacherCode,
+          // Одоогоор ХЭЗЭЭ Ч true болгохгүй — "нэвтрэхэд заавал нууц үг солиулах"
+          // урсгал идэвхжээгүй (schema-ийн @default(false)-той адил). Идэвхжүүлэхэд
+          // зөвхөн үүнийг true болгоход л хангалттай.
+          mustChangePassword: false,
         },
       });
       if (TEACHER_ROLES.has(s.role)) {
@@ -178,13 +173,13 @@ async function main() {
 
   if (created.length) {
     console.log(`\n${'─'.repeat(62)}`);
-    console.log('🔑 ТҮР НУУЦ ҮГ — ЭНЭ НЭГ УДАА Л ХАРАГДАНА (сангаас гаргаж авах боломжгүй)');
+    console.log('🔑 НУУЦ ҮГ = УТАСНЫ ДУГААР (prisma/reports/credentials.txt-д бас бий)');
     console.log(`${'─'.repeat(62)}`);
     for (const c of created) {
       console.log(`   ${c.lastName} ${c.firstName}`.padEnd(28) + `${c.phone}  →  ${c.password}`);
     }
     console.log(`${'─'.repeat(62)}`);
-    console.log('   Эзэнд нь дамжуулаад, эхний нэвтрэлтийн дараа /profile-оос солиулна.');
+    console.log('   Эзэнд нь дамжуулна. /profile-оос хүсвэл өөрчилж болно (одоогоор албадаагүй).');
     if (!COMMIT) console.log('   ⚠️ ХУУРАЙ АЖИЛЛАГАА — эдгээр нууц үг хадгалагдаагүй. --commit-той дахин ажиллуулна.');
   }
 

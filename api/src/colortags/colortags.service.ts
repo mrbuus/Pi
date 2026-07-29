@@ -36,12 +36,10 @@ export class ColorTagsService {
   }
 
   // Нэг сурагчийн бүх багшийн тэмдэглэгээ — зөвхөн багш нар + админ харна
+  // createdById нь User боловч relation тодорхойлоогүй тул нэрийг тусад нь авна
   async tagsForStudent(studentId: string) {
     return this.prisma.studentColorTag.findMany({
       where: { studentId },
-      include: {
-        // createdById нь User боловч relation тодорхойлоогүй тул нэрийг тусад нь авна
-      },
       orderBy: { updatedAt: 'desc' },
     });
   }

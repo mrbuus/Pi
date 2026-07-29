@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, Calendar, Camera } from "lucide-react";
 import { useRef, useState } from "react";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 import { StatusBadge } from "./StatusBadge";
@@ -152,7 +153,11 @@ export default function HomeworkCard({
             due.urgent ? "font-medium text-error" : "text-ink-dim"
           }`}
         >
-          <span aria-hidden="true">{due.urgent ? "⚠" : "📅"}</span>
+          {due.urgent ? (
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Calendar className="h-4 w-4" aria-hidden="true" />
+          )}
           {due.text}
         </p>
       )}
@@ -219,9 +224,13 @@ export default function HomeworkCard({
                 disabled={uploading}
                 className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-line text-ink-dim transition hover:border-brand-bright/50 disabled:opacity-60"
               >
-                <span aria-hidden="true" className="text-lg">
-                  {uploading ? "…" : "📷"}
-                </span>
+                {uploading ? (
+                  <span aria-hidden="true" className="text-lg">
+                    …
+                  </span>
+                ) : (
+                  <Camera className="h-5 w-5" aria-hidden="true" />
+                )}
                 <span className="text-[10px]">
                   {uploading ? "Ачаалж байна" : "Зураг нэмэх"}
                 </span>

@@ -27,7 +27,9 @@ export class PassesService {
       data: {
         name: dto.name,
         durationDays: dto.durationDays,
-        scope: dto.scope as Prisma.InputJsonValue,
+        // dto.scope нь validated PassScopeDto инстанс (class-transformer-ээр
+        // хувиргагдсан) — Prisma Json баганад plain object болгож бичнэ.
+        scope: { ...dto.scope } as Prisma.InputJsonValue,
         price: dto.price,
         active: dto.active ?? true,
       },
@@ -60,7 +62,7 @@ export class PassesService {
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.durationDays !== undefined) data.durationDays = dto.durationDays;
     if (dto.scope !== undefined)
-      data.scope = dto.scope as Prisma.InputJsonValue;
+      data.scope = { ...dto.scope } as Prisma.InputJsonValue;
     if (dto.price !== undefined) data.price = dto.price;
     if (dto.active !== undefined) data.active = dto.active;
 

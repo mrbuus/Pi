@@ -2,6 +2,15 @@
 // орчуулга, туслах функцууд. API-тай нэг эх сурвалж — бэкенд ClassSchedule.weekday
 // коммент харна уу: 0=Ням, 1=Даваа … 6=Бямба (JS Date.getDay()-тэй ижил).
 
+import {
+  Ban,
+  FileText,
+  Palmtree,
+  Leaf,
+  Star,
+  type LucideIcon,
+} from "lucide-react";
+
 export const WEEKDAY_LABELS = [
   "Ням",
   "Даваа",
@@ -27,13 +36,13 @@ export const CALENDAR_TYPE_LABEL: Record<string, string> = {
   NO_CLASS: "Хичээлгүй өдөр",
 };
 
-// Өнгө дангаараа утга агуулахгүй байх зорилгоор төрөл бүрт ялгаатай тэмдэг
-export const CALENDAR_TYPE_ICON: Record<string, string> = {
-  HOLIDAY: "🏖️",
-  BREAK: "🍃",
-  EXAM_DAY: "📝",
-  SPECIAL: "★",
-  NO_CLASS: "🚫",
+// Өнгө дангаараа утга агуулахгүй байх зорилгоор төрөл бүрт ялгаатай дүрс
+export const CALENDAR_TYPE_ICON: Record<string, LucideIcon> = {
+  HOLIDAY: Palmtree,
+  BREAK: Leaf,
+  EXAM_DAY: FileText,
+  SPECIAL: Star,
+  NO_CLASS: Ban,
 };
 
 export const CALENDAR_TYPES = [

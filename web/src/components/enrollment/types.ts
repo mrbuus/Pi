@@ -3,6 +3,8 @@
 // EnrollmentWindow. Энд БҮХ утга ӨГӨГДӨЛ (сервэрээс) — аль хичээл юу авахыг
 // код руу hardcode хийхгүй, зөвхөн шошго/өнгийг тодорхойлно.
 
+import { Check, Hourglass, X, type LucideIcon } from "lucide-react";
+
 export type EnrollmentSubject = "MATH" | "SOCIAL_STUDIES" | "SAT";
 export type EnrollmentStatus = "OPEN" | "CLOSED" | "COMING_SOON";
 export type SubjectAvailability = "CLASSROOM_ONLY" | "ONLINE_ONLY" | "BOTH";
@@ -42,10 +44,10 @@ export const STATUS_LABEL: Record<EnrollmentStatus, string> = {
   COMING_SOON: "Удахгүй",
 };
 
-export const STATUS_ICON: Record<EnrollmentStatus, string> = {
-  OPEN: "✓",
-  CLOSED: "✕",
-  COMING_SOON: "⏳",
+export const STATUS_ICON: Record<EnrollmentStatus, LucideIcon> = {
+  OPEN: Check,
+  CLOSED: X,
+  COMING_SOON: Hourglass,
 };
 
 // Өнгө ганцаараа мэдээлэл дамжуулдаггүй — шошго/дүрс үргэлж хамт байна,

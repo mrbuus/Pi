@@ -116,6 +116,10 @@ import { VideosModule } from './videos/videos.module';
     NotesModule,
     GoalsModule,
     AnalyticsModule,
+    // import хийгдсэн ч энд бүртгэгдээгүйгээс /api/activity/* бүх маршрут
+    // 404 өгч, сурагчийн идэвхийн heatmap болон багшийн "Ангийн идэвхийн
+    // түүх" эвдэрсэн байсныг зассан (2026-07-29).
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

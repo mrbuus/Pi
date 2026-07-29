@@ -181,7 +181,12 @@ export class ClassroomsService {
   }
 
   // Анги шууд устгагдахгүй — өнөөдрийн кодоор баталгаажуулж архивлана (SPEC §15)
-  async archive(classroomId: string, confirmCode: string) {
+  async archive(
+    classroomId: string,
+    confirmCode: string,
+    actorId: string,
+    actorRole: Role,
+  ) {
     if (confirmCode !== todayCodeUB()) {
       throw new BadRequestException('Баталгаажуулах код буруу байна');
     }
@@ -189,9 +194,21 @@ export class ClassroomsService {
       where: { id: classroomId },
     });
     if (!classroom) throw new NotFoundException('Анги олдсонгүй');
-    return this.prisma.classroom.update({
+    const archived = await this.prisma.classroom.update({
       where: { id: classroomId },
       data: { archived: true },
     });
+
+    await this.audit.record({
+      actorId,
+      actorRole,
+      action: 'ARCHIVE',
+      entity: 'Classroom',
+      entityId: classroomId,
+      before: classroom,
+      after: archived,
+    });
+
+    return archived;
   }
 }
