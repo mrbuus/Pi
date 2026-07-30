@@ -233,6 +233,25 @@ export interface ChapterLite {
 // 0=Ням based тул зөвхөн харуулах эрэмбийг л энд зохицуулна).
 export const WORKWEEK_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
 
+/**
+ * Хичээл ЯГ ЭДГЭЭР танхимуудад л явагдана (эзний өгсөн жагсаалт, 2026-07-30).
+ *
+ * Чөлөөт текст биш, тогтмол жагсаалт болгосон шалтгаан: "403" / "403 тоот" /
+ * "4-03" гэж янз бүрээр бичигдвэл танхимаар шүүх, давхцал хайх боломжгүй
+ * болно. Шинэ танхим нэмэгдвэл ЗӨВХӨН энэ жагсаалтыг засна.
+ */
+export const ROOMS = [
+  { value: "403", branch: "Баруун 4" },
+  { value: "404", branch: "Баруун 4" },
+  { value: "405", branch: "Баруун 4" },
+  { value: "501", branch: "Баруун 4" },
+  { value: "502", branch: "Баруун 4" },
+  { value: "503", branch: "Баруун 4" },
+  { value: "301", branch: "Зүүн 4" },
+  { value: "302", branch: "Зүүн 4" },
+  { value: "Онлайн", branch: "Зайнаас" },
+] as const;
+
 export interface WeekdayPreset {
   label: string;
   hint: string;

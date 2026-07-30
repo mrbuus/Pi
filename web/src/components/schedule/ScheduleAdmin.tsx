@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
   formatMinutes,
+  ROOMS,
   SUBJECT_LABEL,
   timeToMinutes,
   todayUBKey,
@@ -26,6 +27,11 @@ const outlineBtn =
   "rounded-lg border border-line px-3 py-1.5 text-xs transition hover:border-brand disabled:opacity-50";
 
 const SUBJECT_OPTIONS = ["MATH", "SOCIAL_STUDIES"] as const;
+
+// ROOMS жагсаалт аль хэдийн САЛБАРААР эрэмбэлэгдсэн тул давхардсан branch-уудыг
+// цуваа дараалалтайгаар нь гаргаж авбал <optgroup>-ийн харагдах эрэмбэ мөн
+// адил (Баруун 4 → Зүүн 4 → Зайнаас) болно.
+const ROOM_BRANCHES = Array.from(new Set(ROOMS.map((r) => r.branch)));
 
 type FormState = {
   classroomId: string;
@@ -281,13 +287,30 @@ export default function ScheduleAdmin({ role }: { role: string }) {
           <label htmlFor="sch-room" className="text-xs text-ink-dim">
             Өрөө (сонголтоор)
           </label>
-          <input
+          <select
             id="sch-room"
             value={form.room}
             onChange={(e) => setForm((f) => ({ ...f, room: e.target.value }))}
-            placeholder="Жишээ: 301"
             className={inputCls}
-          />
+          >
+            {/* Хуучин хуваарийн мөрөнд ROOMS жагсаалтад байхгүй танхим
+                хадгалагдсан байвал (жиш. "301A") утгыг чимээгүй алдахгүйн
+                тулд нэмэлт сонголт болгож эхэнд оруулна — эс бөгөөс энэ
+                мөрийг засаад хадгалахад тухайн танхим устана. */}
+            {form.room && !ROOMS.some((r) => r.value === form.room) && (
+              <option value={form.room}>{form.room} (жагсаалтад алга)</option>
+            )}
+            <option value="">— танхим сонгох —</option>
+            {ROOM_BRANCHES.map((branch) => (
+              <optgroup key={branch} label={branch}>
+                {ROOMS.filter((r) => r.branch === branch).map((r) => (
+                  <option key={r.value} value={r.value}>
+                    {r.value}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="sch-subject" className="text-xs text-ink-dim">

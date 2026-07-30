@@ -20,6 +20,7 @@ import { ClearTopicDto } from './dto/clear-topic.dto';
 import { CreateCalendarDayDto } from './dto/create-calendar-day.dto';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { PutTeacherWorkDaysDto } from './dto/put-teacher-workdays.dto';
+import { SplitSeriesDto } from './dto/split-series.dto';
 import { TeacherWorkDayExceptionDto } from './dto/teacher-workday-exception.dto';
 import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
@@ -74,6 +75,14 @@ export class ScheduleController {
   @Post('schedule/bulk')
   bulkCreate(@Body() dto: BulkCreateScheduleDto) {
     return this.schedule.bulkCreate(dto);
+  }
+
+  // "Энэ ба цаашдын бүх хичээл" — заасан огнооноос эхлэн цаг/өдөр/танхим/багш
+  // өөрчилнө. Өнгөрсөн түүх хэвээр үлдэнэ (цувралыг хоёр хуваана).
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post('schedule/:id/split')
+  splitSeries(@Param('id') id: string, @Body() dto: SplitSeriesDto) {
+    return this.schedule.splitSeries(id, dto);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)

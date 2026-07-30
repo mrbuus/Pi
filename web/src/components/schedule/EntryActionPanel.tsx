@@ -1,17 +1,63 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
-import { AlertTriangle, BookOpen, CalendarClock, Ban, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  BookOpen,
+  CalendarClock,
+  Ban,
+  CalendarRange,
+  Trash2,
+  X,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import {
   formatMinutes,
+  ROOMS,
   SUBJECT_LABEL,
   timeToMinutes,
   WEEKDAY_LABELS,
+  WORKWEEK_ORDER,
   type BookLite,
   type ChapterLite,
+  type TeacherLite,
   type WeekEntry,
 } from "./types";
+
+/**
+ * Танхимын сонголт — чөлөөт текст биш тогтмол жагсаалт (types.ts дахь ROOMS).
+ * Хуучин бичлэгт жагсаалтад байхгүй танхим байвал утга нь чимээгүй алдагдахгүйн
+ * тулд түүнийг нэмэлт сонголт болгож эхэнд оруулна.
+ */
+function RoomSelect({
+  id,
+  value,
+  onChange,
+  className,
+}: {
+  id: string;
+  value: string;
+  onChange: (next: string) => void;
+  className: string;
+}) {
+  const known = ROOMS.some((r) => r.value === value);
+  const branches = [...new Set(ROOMS.map((r) => r.branch))];
+  return (
+    <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={className}>
+      <option value="">— танхим сонгох —</option>
+      {value && !known && <option value={value}>{value} (жагсаалтад алга)</option>}
+      {branches.map((branch) => (
+        <optgroup key={branch} label={branch}>
+          {ROOMS.filter((r) => r.branch === branch).map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.value}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
 
 function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";
@@ -77,6 +123,17 @@ export default function EntryActionPanel({
   const [moveSaving, setMoveSaving] = useState(false);
   const [moveError, setMoveError] = useState<string | null>(null);
 
+  // "Энэ ба цаашдын бүх" — цувралыг энэ огнооноос салгаж өөрчилнө
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [splitWeekday, setSplitWeekday] = useState<number>(1);
+  const [splitStart, setSplitStart] = useState("");
+  const [splitEnd, setSplitEnd] = useState("");
+  const [splitRoom, setSplitRoom] = useState("");
+  const [splitTeacherId, setSplitTeacherId] = useState("");
+  const [splitSaving, setSplitSaving] = useState(false);
+  const [splitError, setSplitError] = useState<string | null>(null);
+  const [teachers, setTeachers] = useState<TeacherLite[]>([]);
+
   const [deleteArmStep, setDeleteArmStep] = useState(0);
   const [deleteSaving, setDeleteSaving] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -102,7 +159,25 @@ export default function EntryActionPanel({
     setMoveError(null);
     setDeleteArmStep(0);
     setDeleteError(null);
+    setSplitOpen(false);
+    setSplitError(null);
+    // Салгах маягтын анхны утга = ОДООГИЙН тохиргоо. Багш ихэвчлэн ганц
+    // талбарыг л (жишээ нь цагийг) солино — бусдыг нь дахин бөглөх шаардлагагүй.
+    setSplitWeekday(new Date(`${date}T00:00:00.000Z`).getUTCDay());
+    setSplitStart(formatMinutes(entry.startMinute));
+    setSplitEnd(formatMinutes(entry.endMinute));
+    setSplitRoom(entry.room ?? "");
+    setSplitTeacherId(entry.teacherId ?? "");
   }, [entry, date]);
+
+  // Багшийн жагсаалтыг зөвхөн салгах маягт нээгдэх үед татна — самбар нээх
+  // бүрд шаардлагагүй хүсэлт явуулахгүй.
+  useEffect(() => {
+    if (!splitOpen || teachers.length) return;
+    api<TeacherLite[]>("/schedule/teachers")
+      .then(setTeachers)
+      .catch(() => setTeachers([]));
+  }, [splitOpen, teachers.length]);
 
   useEffect(() => {
     if (!showChapterPicker) return;
@@ -220,6 +295,42 @@ export default function EntryActionPanel({
     } catch (e) {
       setMoveError(errMsg(e));
       setMoveSaving(false);
+    }
+  }
+
+  /**
+   * Энэ огнооноос эхлэн цувралыг өөрчилнө. Сервер хуучин мөрийг өмнөх өдөр
+   * дуусгаж, шинэ утгатай мөрийг эндээс эхлүүлнэ — өнгөрсөн түүх хэвээр үлдэнэ.
+   */
+  async function splitSeries() {
+    if (!entry) return;
+    const startMinute = timeToMinutes(splitStart);
+    const endMinute = timeToMinutes(splitEnd);
+    if (startMinute >= endMinute) {
+      setSplitError("Дуусах цаг эхлэх цагаас хойш байх ёстой");
+      return;
+    }
+    setSplitSaving(true);
+    setSplitError(null);
+    try {
+      await api(`/schedule/${entry.scheduleId}/split`, {
+        method: "POST",
+        body: {
+          from: originalDate,
+          weekday: splitWeekday,
+          startMinute,
+          endMinute,
+          // Хоосон мөрийг null болгож явуулна — сервер дээр "утга ирээгүй"
+          // (хэвээр үлдээ) болон "цэвэрлэ" хоёрыг ялгах ёстой.
+          room: splitRoom || null,
+          teacherId: splitTeacherId || null,
+        },
+      });
+      onChanged();
+      onClose();
+    } catch (e) {
+      setSplitError(errMsg(e));
+      setSplitSaving(false);
     }
   }
 
@@ -452,12 +563,12 @@ export default function EntryActionPanel({
               </div>
               <div className="flex flex-col gap-1">
                 <label htmlFor="panel-move-room" className="text-xs text-ink-dim">
-                  Шинэ өрөө (заавал биш)
+                  Шинэ танхим (заавал биш)
                 </label>
-                <input
+                <RoomSelect
                   id="panel-move-room"
                   value={moveRoom}
-                  onChange={(e) => setMoveRoom(e.target.value)}
+                  onChange={setMoveRoom}
                   className={inputCls}
                 />
               </div>
@@ -508,6 +619,126 @@ export default function EntryActionPanel({
                   {moveSaving ? "Зөөж байна…" : "Зөөх"}
                 </button>
                 <button type="button" onClick={() => setMoveOpen(false)} className={outlineBtn}>
+                  Болих
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ---- Энэ ба цаашдын бүх (цуврал салгах) ---- */}
+        <section className="mt-3 rounded-xl border border-brand-bright/40 bg-brand-bright/5 p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-brand-soft">
+            <CalendarRange className="h-3.5 w-3.5" aria-hidden />
+            Энэ ба цаашдын бүх
+          </p>
+
+          {!splitOpen ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={() => setSplitOpen(true)} className={outlineBtn}>
+                Цагийг нь бүрмөсөн өөрчлөх
+              </button>
+              <p className="text-xs text-ink-dim">
+                {date}-ээс хойшх бүх долоо хоногт үйлчилнэ
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-ink-dim">
+                <span className="font-semibold text-ink">{date}</span>-ээс эхлэн шинэ
+                тохиргоо үйлчилнэ. Түүнээс өмнөх ирц, даалгавар, сэдвийн бүртгэл
+                хэвээр үлдэнэ.
+              </p>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="panel-split-weekday" className="text-xs text-ink-dim">
+                    Гараг
+                  </label>
+                  <select
+                    id="panel-split-weekday"
+                    value={splitWeekday}
+                    onChange={(e) => setSplitWeekday(Number(e.target.value))}
+                    className={inputCls}
+                  >
+                    {WORKWEEK_ORDER.map((d) => (
+                      <option key={d} value={d}>
+                        {WEEKDAY_LABELS[d]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="panel-split-room" className="text-xs text-ink-dim">
+                    Танхим
+                  </label>
+                  <RoomSelect
+                    id="panel-split-room"
+                    value={splitRoom}
+                    onChange={setSplitRoom}
+                    className={inputCls}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="panel-split-start" className="text-xs text-ink-dim">
+                    Эхлэх цаг
+                  </label>
+                  <input
+                    id="panel-split-start"
+                    type="time"
+                    value={splitStart}
+                    onChange={(e) => setSplitStart(e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="panel-split-end" className="text-xs text-ink-dim">
+                    Дуусах цаг
+                  </label>
+                  <input
+                    id="panel-split-end"
+                    type="time"
+                    value={splitEnd}
+                    onChange={(e) => setSplitEnd(e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+                <div className="flex flex-col gap-1 sm:col-span-2">
+                  <label htmlFor="panel-split-teacher" className="text-xs text-ink-dim">
+                    Багш
+                  </label>
+                  <select
+                    id="panel-split-teacher"
+                    value={splitTeacherId}
+                    onChange={(e) => setSplitTeacherId(e.target.value)}
+                    className={inputCls}
+                  >
+                    <option value="">— ангийн үндсэн багш —</option>
+                    {teachers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.lastName} {t.firstName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {splitError && <p className="text-sm text-error">{splitError}</p>}
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={splitSeries}
+                  disabled={splitSaving}
+                  className={primaryBtn}
+                >
+                  {splitSaving ? "Хадгалж байна…" : "Энэ өдрөөс эхлэн хадгалах"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSplitOpen(false)}
+                  className={outlineBtn}
+                >
                   Болих
                 </button>
               </div>

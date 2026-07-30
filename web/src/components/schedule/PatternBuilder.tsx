@@ -7,6 +7,7 @@ import { getClassroomColor } from "@/lib/classroomColor";
 import InfoHint from "@/components/ui/InfoHint";
 import {
   formatMinutes,
+  ROOMS,
   SUBJECT_LABEL,
   timeToMinutes,
   todayUBKey,
@@ -27,6 +28,11 @@ const primaryBtn =
   "inline-flex items-center gap-2 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50";
 
 const SUBJECT_OPTIONS = ["MATH", "SOCIAL_STUDIES"] as const;
+
+// ROOMS жагсаалт аль хэдийн САЛБАРААР эрэмбэлэгдсэн тул давхардсан branch-уудыг
+// цуваа дараалалтайгаар нь гаргаж авбал <optgroup>-ийн харагдах эрэмбэ мөн
+// адил (Баруун 4 → Зүүн 4 → Зайнаас) болно.
+const ROOM_BRANCHES = Array.from(new Set(ROOMS.map((r) => r.branch)));
 
 /** Хоёр weekday олонлог ЯГ ижил эсэх (дараалалгүйгээр) */
 function sameDays(a: number[], b: readonly number[]): boolean {
@@ -300,13 +306,23 @@ export default function PatternBuilder({
           <label htmlFor="pb-room" className="text-xs text-ink-dim">
             Өрөө
           </label>
-          <input
+          <select
             id="pb-room"
             value={room}
             onChange={(e) => setRoom(e.target.value)}
-            placeholder="301"
             className={inputCls}
-          />
+          >
+            <option value="">— танхим сонгох —</option>
+            {ROOM_BRANCHES.map((branch) => (
+              <optgroup key={branch} label={branch}>
+                {ROOMS.filter((r) => r.branch === branch).map((r) => (
+                  <option key={r.value} value={r.value}>
+                    {r.value}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="pb-subject" className="text-xs text-ink-dim">

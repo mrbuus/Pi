@@ -16,8 +16,10 @@ import { PutTeacherWorkDaysDto } from './dto/put-teacher-workdays.dto';
 import { TeacherWorkDayExceptionDto } from './dto/teacher-workday-exception.dto';
 import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { SplitSeriesDto } from './dto/split-series.dto';
 import { UpsertExceptionDto } from './dto/upsert-exception.dto';
 import { UpsertTopicDto } from './dto/upsert-topic.dto';
+import { SplitOutOfRangeError, SplitPlan, planSplit } from './split-series';
 import {
   resolveTeacherRoster,
   resolveWeek,
@@ -224,6 +226,131 @@ export class ScheduleService {
         effectiveTo,
       },
       include: { classroom: CLASSROOM_SELECT, teacher: TEACHER_SELECT },
+    });
+  }
+
+  /**
+   * "Энэ ба цаашдын бүх хичээл"-ийг өөрчлөх.
+   *
+   * ЯАГААД PATCH-ААР ХИЙЖ БОЛОХГҮЙ ВЭ: `update()` нь мөрийг бүхэлд нь солих
+   * тул өөрчлөлт өнгөрсөн рүү ч үйлчилнэ. Тэгвэл 3 сарын өмнөх ирцийн бүртгэл
+   * гэнэт "өөр цагт болсон" мэт харагдана. Энд цувралыг хоёр хувааж, өнгөрсөн
+   * түүхийг хэвээр үлдээнэ (Google Calendar-ийн "this and following" конвенц).
+   */
+  async splitSeries(id: string, dto: SplitSeriesDto) {
+    const existing = await this.prisma.classSchedule.findUnique({
+      where: { id },
+    });
+    if (!existing) throw new NotFoundException('Хуваарь олдсонгүй');
+
+    const weekday = dto.weekday ?? existing.weekday;
+    const startMinute = dto.startMinute ?? existing.startMinute;
+    const endMinute = dto.endMinute ?? existing.endMinute;
+    if (startMinute >= endMinute) {
+      throw new BadRequestException('Дуусах цаг эхлэх цагаас хойш байх ёстой');
+    }
+    if (dto.teacherId) {
+      const teacher = await this.prisma.user.findUnique({
+        where: { id: dto.teacherId },
+      });
+      if (!teacher) throw new NotFoundException('Багш олдсонгүй');
+    }
+
+    const from = this.parseDate(dto.from);
+    let plan: SplitPlan;
+    try {
+      plan = planSplit(existing, from);
+    } catch (err) {
+      if (err instanceof SplitOutOfRangeError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+
+    // Огноо нь цувралын эхлэл дээр буюу түүнээс өмнө — хуваах утгагүй,
+    // энгийн бүтэн шинэчлэлт болно.
+    if (plan.kind === 'REPLACE_ALL') {
+      const updated = await this.update(id, {
+        weekday: dto.weekday,
+        startMinute: dto.startMinute,
+        endMinute: dto.endMinute,
+        teacherId: dto.teacherId ?? undefined,
+        room: dto.room ?? undefined,
+        subject: dto.subject ?? undefined,
+      } as UpdateScheduleDto);
+      return { mode: 'REPLACED_ALL' as const, schedule: updated };
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // Давхцлын шалгалтыг ГАР АЖИЛЛАГААГААР энд хийнэ: assertNoOverlap нь
+      // this.prisma ашигладаг тул энэ транзакц дотор хаагдаж буй хуучин мөрийг
+      // хуучин хэвээр нь харах бөгөөд өөртэйгөө "давхцаж байна" гэж худал
+      // алдаа өгнө.
+      const siblings = await tx.classSchedule.findMany({
+        where: {
+          classroomId: existing.classroomId,
+          weekday,
+          id: { not: id },
+        },
+      });
+      const newEnd = plan.newEffectiveTo ?? FAR_FUTURE;
+      const conflict = siblings.find((s) => {
+        const timeOverlaps =
+          startMinute < s.endMinute && s.startMinute < endMinute;
+        if (!timeOverlaps) return false;
+        const existingEnd = s.effectiveTo ?? FAR_FUTURE;
+        return plan.newEffectiveFrom <= existingEnd && s.effectiveFrom <= newEnd;
+      });
+      if (conflict) {
+        const toTime = (m: number) =>
+          `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+        throw new BadRequestException(
+          `Энэ ангид ${toTime(conflict.startMinute)}–${toTime(conflict.endMinute)} хугацаанд өөр хуваарь давхцаж байна`,
+        );
+      }
+
+      // 1. Хуучин мөрийг заасан огнооны өмнөх өдөр дуусгана.
+      await tx.classSchedule.update({
+        where: { id },
+        data: { effectiveTo: plan.oldEffectiveTo },
+      });
+
+      // 2. Шинэ утгатай мөрийг заасан огнооноос эхлүүлнэ.
+      const created = await tx.classSchedule.create({
+        data: {
+          classroomId: existing.classroomId,
+          weekday,
+          startMinute,
+          endMinute,
+          teacherId:
+            dto.teacherId === undefined ? existing.teacherId : dto.teacherId,
+          room: dto.room === undefined ? existing.room : dto.room,
+          subject: dto.subject === undefined ? existing.subject : dto.subject,
+          effectiveFrom: plan.newEffectiveFrom,
+          effectiveTo: plan.newEffectiveTo,
+        },
+        include: { classroom: CLASSROOM_SELECT, teacher: TEACHER_SELECT },
+      });
+
+      // 3. Заасан огнооноос ХОЙШХИ сэдэв, онцгой тохиолдлуудыг шинэ мөр рүү
+      //    зөөнө. Эс бөгөөс тэдгээр нь хуучин мөрөнд наалдсан хэвээр үлдэж,
+      //    тэр мөр тэр огноог хамрахаа больсон тул хаана ч харагдахгүй болно.
+      const moved = await tx.lessonTopic.updateMany({
+        where: { scheduleId: id, date: { gte: plan.newEffectiveFrom } },
+        data: { scheduleId: created.id },
+      });
+      const movedExceptions = await tx.scheduleException.updateMany({
+        where: { scheduleId: id, date: { gte: plan.newEffectiveFrom } },
+        data: { scheduleId: created.id },
+      });
+
+      return {
+        mode: 'SPLIT' as const,
+        schedule: created,
+        previousEndsOn: dateKey(plan.oldEffectiveTo),
+        movedTopics: moved.count,
+        movedExceptions: movedExceptions.count,
+      };
     });
   }
 
