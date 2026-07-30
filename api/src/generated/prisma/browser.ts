@@ -243,6 +243,26 @@ export type StaffTaskAssignee = Prisma.StaffTaskAssigneeModel
  */
 export type ClassSchedule = Prisma.ClassScheduleModel
 /**
+ * Model ScheduleException
+ * 
+ */
+export type ScheduleException = Prisma.ScheduleExceptionModel
+/**
+ * Model LessonTopic
+ * 
+ */
+export type LessonTopic = Prisma.LessonTopicModel
+/**
+ * Model TeacherWorkDay
+ * 
+ */
+export type TeacherWorkDay = Prisma.TeacherWorkDayModel
+/**
+ * Model TeacherWorkException
+ * 
+ */
+export type TeacherWorkException = Prisma.TeacherWorkExceptionModel
+/**
  * Model AcademicCalendarDay
  * 
  */

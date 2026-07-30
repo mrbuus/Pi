@@ -429,6 +429,10 @@ export const ModelName = {
   StaffTask: 'StaffTask',
   StaffTaskAssignee: 'StaffTaskAssignee',
   ClassSchedule: 'ClassSchedule',
+  ScheduleException: 'ScheduleException',
+  LessonTopic: 'LessonTopic',
+  TeacherWorkDay: 'TeacherWorkDay',
+  TeacherWorkException: 'TeacherWorkException',
   AcademicCalendarDay: 'AcademicCalendarDay',
   StudentGoal: 'StudentGoal',
   StreakFreeze: 'StreakFreeze'
@@ -447,7 +451,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "studentProfile" | "teacherProfile" | "parentLink" | "classroom" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "payment" | "announcement" | "announcementClassroomTarget" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "academicCalendarDay" | "studentGoal" | "streakFreeze"
+    modelProps: "user" | "studentProfile" | "teacherProfile" | "parentLink" | "classroom" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "payment" | "announcement" | "announcementClassroomTarget" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "teacherWorkDay" | "teacherWorkException" | "academicCalendarDay" | "studentGoal" | "streakFreeze"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3781,6 +3785,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ScheduleException: {
+      payload: Prisma.$ScheduleExceptionPayload<ExtArgs>
+      fields: Prisma.ScheduleExceptionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ScheduleExceptionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ScheduleExceptionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>
+        }
+        findFirst: {
+          args: Prisma.ScheduleExceptionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ScheduleExceptionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>
+        }
+        findMany: {
+          args: Prisma.ScheduleExceptionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>[]
+        }
+        create: {
+          args: Prisma.ScheduleExceptionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>
+        }
+        createMany: {
+          args: Prisma.ScheduleExceptionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ScheduleExceptionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>[]
+        }
+        delete: {
+          args: Prisma.ScheduleExceptionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>
+        }
+        update: {
+          args: Prisma.ScheduleExceptionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ScheduleExceptionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ScheduleExceptionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ScheduleExceptionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ScheduleExceptionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleExceptionPayload>
+        }
+        aggregate: {
+          args: Prisma.ScheduleExceptionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateScheduleException>
+        }
+        groupBy: {
+          args: Prisma.ScheduleExceptionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleExceptionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ScheduleExceptionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleExceptionCountAggregateOutputType> | number
+        }
+      }
+    }
+    LessonTopic: {
+      payload: Prisma.$LessonTopicPayload<ExtArgs>
+      fields: Prisma.LessonTopicFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LessonTopicFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LessonTopicFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>
+        }
+        findFirst: {
+          args: Prisma.LessonTopicFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LessonTopicFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>
+        }
+        findMany: {
+          args: Prisma.LessonTopicFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>[]
+        }
+        create: {
+          args: Prisma.LessonTopicCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>
+        }
+        createMany: {
+          args: Prisma.LessonTopicCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LessonTopicCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>[]
+        }
+        delete: {
+          args: Prisma.LessonTopicDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>
+        }
+        update: {
+          args: Prisma.LessonTopicUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>
+        }
+        deleteMany: {
+          args: Prisma.LessonTopicDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LessonTopicUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LessonTopicUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>[]
+        }
+        upsert: {
+          args: Prisma.LessonTopicUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonTopicPayload>
+        }
+        aggregate: {
+          args: Prisma.LessonTopicAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLessonTopic>
+        }
+        groupBy: {
+          args: Prisma.LessonTopicGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonTopicGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LessonTopicCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonTopicCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeacherWorkDay: {
+      payload: Prisma.$TeacherWorkDayPayload<ExtArgs>
+      fields: Prisma.TeacherWorkDayFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherWorkDayFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherWorkDayFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherWorkDayFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherWorkDayFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>
+        }
+        findMany: {
+          args: Prisma.TeacherWorkDayFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>[]
+        }
+        create: {
+          args: Prisma.TeacherWorkDayCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>
+        }
+        createMany: {
+          args: Prisma.TeacherWorkDayCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherWorkDayCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherWorkDayDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>
+        }
+        update: {
+          args: Prisma.TeacherWorkDayUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherWorkDayDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherWorkDayUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherWorkDayUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherWorkDayUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkDayPayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherWorkDayAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherWorkDay>
+        }
+        groupBy: {
+          args: Prisma.TeacherWorkDayGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkDayGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherWorkDayCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkDayCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeacherWorkException: {
+      payload: Prisma.$TeacherWorkExceptionPayload<ExtArgs>
+      fields: Prisma.TeacherWorkExceptionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherWorkExceptionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherWorkExceptionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherWorkExceptionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherWorkExceptionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>
+        }
+        findMany: {
+          args: Prisma.TeacherWorkExceptionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>[]
+        }
+        create: {
+          args: Prisma.TeacherWorkExceptionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>
+        }
+        createMany: {
+          args: Prisma.TeacherWorkExceptionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherWorkExceptionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherWorkExceptionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>
+        }
+        update: {
+          args: Prisma.TeacherWorkExceptionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherWorkExceptionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherWorkExceptionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherWorkExceptionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherWorkExceptionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkExceptionPayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherWorkExceptionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherWorkException>
+        }
+        groupBy: {
+          args: Prisma.TeacherWorkExceptionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkExceptionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherWorkExceptionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkExceptionCountAggregateOutputType> | number
+        }
+      }
+    }
     AcademicCalendarDay: {
       payload: Prisma.$AcademicCalendarDayPayload<ExtArgs>
       fields: Prisma.AcademicCalendarDayFieldRefs
@@ -4680,6 +4980,56 @@ export const ClassScheduleScalarFieldEnum = {
 export type ClassScheduleScalarFieldEnum = (typeof ClassScheduleScalarFieldEnum)[keyof typeof ClassScheduleScalarFieldEnum]
 
 
+export const ScheduleExceptionScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  date: 'date',
+  kind: 'kind',
+  newDate: 'newDate',
+  newStartMinute: 'newStartMinute',
+  newEndMinute: 'newEndMinute',
+  newRoom: 'newRoom',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduleExceptionScalarFieldEnum = (typeof ScheduleExceptionScalarFieldEnum)[keyof typeof ScheduleExceptionScalarFieldEnum]
+
+
+export const LessonTopicScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  date: 'date',
+  title: 'title',
+  chapterId: 'chapterId',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
+
+
+export const TeacherWorkDayScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  weekday: 'weekday',
+  note: 'note'
+} as const
+
+export type TeacherWorkDayScalarFieldEnum = (typeof TeacherWorkDayScalarFieldEnum)[keyof typeof TeacherWorkDayScalarFieldEnum]
+
+
+export const TeacherWorkExceptionScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  date: 'date',
+  working: 'working',
+  note: 'note'
+} as const
+
+export type TeacherWorkExceptionScalarFieldEnum = (typeof TeacherWorkExceptionScalarFieldEnum)[keyof typeof TeacherWorkExceptionScalarFieldEnum]
+
+
 export const AcademicCalendarDayScalarFieldEnum = {
   id: 'id',
   date: 'date',
@@ -5299,6 +5649,20 @@ export type ListEnumTaskPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'ScheduleExceptionKind'
+ */
+export type EnumScheduleExceptionKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleExceptionKind'>
+    
+
+
+/**
+ * Reference to a field of type 'ScheduleExceptionKind[]'
+ */
+export type ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleExceptionKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'CalendarDayType'
  */
 export type EnumCalendarDayTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalendarDayType'>
@@ -5466,6 +5830,10 @@ export type GlobalOmitConfig = {
   staffTask?: Prisma.StaffTaskOmit
   staffTaskAssignee?: Prisma.StaffTaskAssigneeOmit
   classSchedule?: Prisma.ClassScheduleOmit
+  scheduleException?: Prisma.ScheduleExceptionOmit
+  lessonTopic?: Prisma.LessonTopicOmit
+  teacherWorkDay?: Prisma.TeacherWorkDayOmit
+  teacherWorkException?: Prisma.TeacherWorkExceptionOmit
   academicCalendarDay?: Prisma.AcademicCalendarDayOmit
   studentGoal?: Prisma.StudentGoalOmit
   streakFreeze?: Prisma.StreakFreezeOmit

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TriangleAlert } from "lucide-react";
 import { api, getRole } from "@/lib/api";
-import CalendarAdmin from "./CalendarAdmin";
-import ScheduleAdmin from "./ScheduleAdmin";
+import StaffScheduleBuilder from "./StaffScheduleBuilder";
 import UpcomingAgenda from "./UpcomingAgenda";
 import WeeklyGrid from "./WeeklyGrid";
 import {
@@ -31,8 +31,9 @@ function SectionLoading({ label }: { label: string }) {
 
 function SectionError({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-      ⚠ {message}
+    <div className="flex items-center gap-2 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
+      <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+      {message}
     </div>
   );
 }
@@ -102,6 +103,9 @@ function TeacherSchedule({ role }: { role: string }) {
 
   return (
     <div className="space-y-8">
+      {/* Багш+ -ийн хувьд зохион байгуулах хэсэг нь ӨДӨР ТУТМЫН ажил тул
+          хамгийн дээр байрлана — өөрийн хичээлийн жагсаалт доогуур орно. */}
+      {role === "TEACHER_PLUS" && <StaffScheduleBuilder role={role} />}
       <section>
         <h2 className="mb-3 font-bold text-brand-soft">Миний заадаг хичээлүүд</h2>
         {data && data.entries.length === 0 ? (
@@ -116,9 +120,6 @@ function TeacherSchedule({ role }: { role: string }) {
         <h2 className="mb-3 font-bold text-brand-soft">Ойрын өдрүүд</h2>
         {meId && <UpcomingAgenda teacherId={meId} />}
       </section>
-      {role === "TEACHER_PLUS" && (
-        <ScheduleAdmin role={role} />
-      )}
     </div>
   );
 }
@@ -153,6 +154,7 @@ function AdminSchedule() {
 
   return (
     <div className="space-y-8">
+      <StaffScheduleBuilder role="ADMIN" />
       <section>
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <h2 className="font-bold text-brand-soft">Ангийн долоо хоногийн хуваарь</h2>
@@ -184,8 +186,6 @@ function AdminSchedule() {
         </section>
       )}
 
-      <ScheduleAdmin role="ADMIN" />
-      <CalendarAdmin />
     </div>
   );
 }

@@ -70,6 +70,8 @@ model User {
   taughtSchedules      ClassSchedule[]
   studentGoals         StudentGoal[]
   streakFreezes        StreakFreeze[]
+  teacherWorkDays       TeacherWorkDay[]       @relation("TeacherWorkDayTeacher")
+  teacherWorkExceptions TeacherWorkException[] @relation("TeacherWorkExceptionTeacher")
 
   // Эцсийн долгион: сурагчийн тэмдэглэл
   studentNotes StudentNote[]
@@ -1165,8 +1167,78 @@ model ClassSchedule {
   effectiveTo   DateTime?
   createdAt     DateTime  @default(now())
 
+  exceptions ScheduleException[]
+  topics     LessonTopic[]
+
   @@unique([classroomId, weekday, startMinute, effectiveFrom])
   @@index([classroomId, weekday])
+}
+
+// Тухайн долоо хоногийн НЭГ тохиолдол (occurrence) өөрчлөгдөх нь — цуцлагдах
+// (CANCELLED) эсвэл өөр огноо/цагт шилжих (MOVED). "date" талбар нь ХУУЧИН,
+// анхны тохиолдлын огноо — шинэ огноог newDate-д хадгална.
+enum ScheduleExceptionKind {
+  CANCELLED
+  MOVED
+}
+
+model ScheduleException {
+  id         String                @id @default(cuid())
+  scheduleId String
+  schedule   ClassSchedule         @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  date       DateTime              @db.Date
+  kind       ScheduleExceptionKind
+  newDate       DateTime? @db.Date
+  newStartMinute Int?
+  newEndMinute   Int?
+  newRoom        String?
+  note           String?
+  createdAt      DateTime  @default(now())
+
+  @@unique([scheduleId, date])
+}
+
+// Тухайн тохиолдол дээр багшийн товлосон "өнөөдөр орох сэдэв".
+model LessonTopic {
+  id          String        @id @default(cuid())
+  scheduleId  String
+  schedule    ClassSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  date        DateTime      @db.Date
+  title       String
+  // Plain string — Chapter устсан ч энэ бичлэг найдвартай хэвээр үлдэнэ
+  // (LearningEvent-ийн адилхан конвенц).
+  chapterId   String?
+  createdById String
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([scheduleId, date])
+}
+
+// ============ Багшийн долоо хоногийн ажлын өдрийн бүртгэл ============
+// Багш бүр өөрийн гэсэн ажлын өдрийн хэв маягтай (ж: Даваа/Мягмар ирдэггүй)
+// — энэ нь ClassSchedule-ээс тусдаа, зөвхөн "энэ багш тухайн өдөр
+// төвд ирдэг эсэх"-ийг илэрхийлнэ.
+model TeacherWorkDay {
+  id        String  @id @default(cuid())
+  teacherId String
+  teacher   User    @relation("TeacherWorkDayTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  weekday   Int // 0=Ням … 6=Бямба
+  note      String?
+
+  @@unique([teacherId, weekday])
+}
+
+// Тухайн ганц огноон дээрх давхардлын override — жирийн бол амардаг өдөр
+// нэмэлт ажиллах, эсвэл жирийн ажлын өдөр амрах.
+model TeacherWorkException {
+  id        String   @id @default(cuid())
+  teacherId String
+  teacher   User     @relation("TeacherWorkExceptionTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  working   Boolean // true = нэмэлт ажиллана, false = амарна
+  note      String?
+
+  @@unique([teacherId, date])
 }
 
 // ============ Сургалтын хуанли (Academic Calendar) ============

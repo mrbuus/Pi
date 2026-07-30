@@ -690,6 +690,46 @@ export class TestsService {
     });
   }
 
+  // TEACHER зөвхөн өөрийн ангийн сурагчийг харна; TEACHER_PLUS/ADMIN бүх
+  // сурагчийг харна (activity.service.ts-ийн assertStudentAccess-тэй ижил
+  // хэв маяг — SPEC §13).
+  private async assertStaffStudentAccess(
+    studentId: string,
+    userId: string,
+    role: Role,
+  ) {
+    const student = await this.prisma.user.findUnique({
+      where: { id: studentId },
+    });
+    if (!student || student.role !== Role.STUDENT) {
+      throw new NotFoundException('Сурагч олдсонгүй');
+    }
+    if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return student;
+    if (role === Role.TEACHER) {
+      const enrollment = await this.prisma.enrollment.findFirst({
+        where: {
+          studentId,
+          leftAt: null,
+          classroom: { teacherId: userId },
+        },
+      });
+      if (enrollment) return student;
+    }
+    throw new ForbiddenException('Энэ сурагчийн мэдээлэлд хандах эрхгүй');
+  }
+
+  // Багш/Админ: тухайн сурагчийн шалгалтын бүх дүн — "Бие даасан явц" таб
+  async resultsForStudent(studentId: string, userId: string, role: Role) {
+    await this.assertStaffStudentAccess(studentId, userId, role);
+    return this.prisma.testResult.findMany({
+      where: { studentId },
+      include: {
+        test: { select: { id: true, title: true, type: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   // ============ Дотоод туслахууд ============
 
   private async loadTestWithProblems(testId: string) {

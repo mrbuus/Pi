@@ -327,6 +327,14 @@ export const TaskPriority = {
 export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
 
 
+export const ScheduleExceptionKind = {
+  CANCELLED: 'CANCELLED',
+  MOVED: 'MOVED'
+} as const
+
+export type ScheduleExceptionKind = (typeof ScheduleExceptionKind)[keyof typeof ScheduleExceptionKind]
+
+
 export const CalendarDayType = {
   HOLIDAY: 'HOLIDAY',
   BREAK: 'BREAK',

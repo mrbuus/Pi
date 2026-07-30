@@ -73,6 +73,24 @@ export class AttendanceController {
     );
   }
 
+  // Багш/Админ: тухайн сурагчийн ирцийн бүтэн түүх (сурагчийн явцын хуудас)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('students/:id/attendance')
+  byStudent(
+    @Param('id') studentId: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.attendance.byStudent(
+      studentId,
+      from,
+      to,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
   @Roles(Role.STUDENT)
   @Get('attendance/my')
   my(

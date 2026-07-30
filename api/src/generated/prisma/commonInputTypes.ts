@@ -932,6 +932,23 @@ export type EnumSubjectNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumSubjectNullableFilter<$PrismaModel>
 }
 
+export type EnumScheduleExceptionKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleExceptionKind | Prisma.EnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleExceptionKindFilter<$PrismaModel> | $Enums.ScheduleExceptionKind
+}
+
+export type EnumScheduleExceptionKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleExceptionKind | Prisma.EnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleExceptionKindWithAggregatesFilter<$PrismaModel> | $Enums.ScheduleExceptionKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumScheduleExceptionKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumScheduleExceptionKindFilter<$PrismaModel>
+}
+
 export type EnumCalendarDayTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.CalendarDayType | Prisma.EnumCalendarDayTypeFieldRefInput<$PrismaModel>
   in?: $Enums.CalendarDayType[] | Prisma.ListEnumCalendarDayTypeFieldRefInput<$PrismaModel>
@@ -1802,6 +1819,23 @@ export type NestedEnumSubjectNullableWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSubjectNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSubjectNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumScheduleExceptionKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleExceptionKind | Prisma.EnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleExceptionKindFilter<$PrismaModel> | $Enums.ScheduleExceptionKind
+}
+
+export type NestedEnumScheduleExceptionKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleExceptionKind | Prisma.EnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleExceptionKind[] | Prisma.ListEnumScheduleExceptionKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleExceptionKindWithAggregatesFilter<$PrismaModel> | $Enums.ScheduleExceptionKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumScheduleExceptionKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumScheduleExceptionKindFilter<$PrismaModel>
 }
 
 export type NestedEnumCalendarDayTypeFilter<$PrismaModel = never> = {

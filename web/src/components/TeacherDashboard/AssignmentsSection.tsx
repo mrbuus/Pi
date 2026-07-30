@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import HomeworkCommentField from "@/components/homework/HomeworkCommentField";
 import HomeworkMarkPills, {
@@ -211,8 +213,16 @@ export default function AssignmentsSection({
                 key={r.student.id}
                 className="flex flex-col gap-3 rounded-lg border border-line px-3 py-3 md:flex-row md:items-center md:gap-3 md:px-4 md:py-2.5"
               >
-                <div className="md:w-44 md:shrink-0">
+                <div className="flex items-center gap-1 md:w-44 md:shrink-0">
                   <span className="text-sm font-medium">{label}</span>
+                  <Link
+                    href={`/app/students/${r.student.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`${label} — дэлгэрэнгүй явц харах`}
+                    className="text-ink-dim transition hover:text-brand-soft"
+                  >
+                    <ChevronRight className="h-4 w-4" aria-hidden />
+                  </Link>
                 </div>
 
                 <HomeworkMarkPills

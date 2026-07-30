@@ -347,6 +347,71 @@ export class AttendanceService {
     });
   }
 
+  // TEACHER зөвхөн өөрийн ангийн сурагчийг харна; TEACHER_PLUS/ADMIN бүх
+  // сурагчийг харна (activity.service.ts-ийн assertStudentAccess-тэй ижил
+  // хэв маяг — SPEC §13).
+  private async assertStudentAccess(
+    studentId: string,
+    userId: string,
+    role: Role,
+  ) {
+    const student = await this.prisma.user.findUnique({
+      where: { id: studentId },
+    });
+    if (!student || student.role !== Role.STUDENT) {
+      throw new NotFoundException('Сурагч олдсонгүй');
+    }
+    if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return student;
+    if (role === Role.TEACHER) {
+      const enrollment = await this.prisma.enrollment.findFirst({
+        where: {
+          studentId,
+          leftAt: null,
+          classroom: { teacherId: userId },
+        },
+      });
+      if (enrollment) return student;
+    }
+    throw new ForbiddenException('Энэ сурагчийн мэдээлэлд хандах эрхгүй');
+  }
+
+  // Багш/Админ: тухайн сурагчийн ирцийн бүтэн түүх (бүх анги, огнооны
+  // мужаар) — сурагчийн дэлгэрэнгүй явцын хуудсанд ашиглана.
+  async byStudent(
+    studentId: string,
+    from: string,
+    to: string,
+    userId: string,
+    role: Role,
+  ) {
+    await this.assertStudentAccess(studentId, userId, role);
+    if (!from || !to) {
+      throw new BadRequestException(
+        '"from" болон "to" огноо заавал шаардлагатай',
+      );
+    }
+    const fromDate = this.parseDate(from);
+    const toDate = this.parseDate(to);
+    if (fromDate > toDate) {
+      throw new BadRequestException(
+        '"from" огноо "to" огнооноос өмнө байх ёстой',
+      );
+    }
+
+    const records = await this.prisma.attendance.findMany({
+      where: { studentId, date: { gte: fromDate, lte: toDate } },
+      select: {
+        date: true,
+        status: true,
+        note: true,
+        lateRange: true,
+        classroom: { select: { id: true, name: true } },
+      },
+      orderBy: { date: 'desc' },
+    });
+    return records;
+  }
+
   myAttendance(studentId: string, from?: string, to?: string) {
     return this.prisma.attendance.findMany({
       where: {

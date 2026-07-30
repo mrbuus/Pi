@@ -146,3 +146,106 @@ export interface CalendarDay {
   createdById: string;
   createdAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Staff builder (GET /schedule/week, POST /schedule/bulk, exceptions, topics,
+// teacher work days) — Хичээлийн хуваарь + Багшийн ажлын өдрийн менежер.
+// ---------------------------------------------------------------------------
+
+export interface ResolvedEntryException {
+  kind: "MOVED";
+  note: string | null;
+  /** Энэ тохиолдлын АНХНЫ (давтагддаг хэв маягийн) огноо — exception upsert
+   * хийхэд энэ огноог ашиглана (upsert scheduleId+date-ээр unique). */
+  originalDate: string;
+}
+
+export interface WeekEntry {
+  scheduleId: string;
+  classroomId: string;
+  classroomName: string;
+  teacherId: string | null;
+  teacherName: string | null;
+  startMinute: number;
+  endMinute: number;
+  room: string | null;
+  subject: string | null;
+  topic: string | null;
+  exception: ResolvedEntryException | null;
+}
+
+export interface WeekDay {
+  date: string;
+  weekday: number;
+  isHoliday: boolean;
+  entries: WeekEntry[];
+}
+
+export interface TeacherRosterDay {
+  date: string;
+  weekday: number;
+  teachers: { id: string; name: string }[];
+}
+
+export interface WeekResponse {
+  start: string;
+  days: WeekDay[];
+  teacherRoster: TeacherRosterDay[];
+}
+
+export interface TeacherWorkDayRow {
+  id: string;
+  teacherId: string;
+  weekday: number;
+  note: string | null;
+  teacher: TeacherLite;
+}
+
+export interface TeacherWorkExceptionRow {
+  id: string;
+  teacherId: string;
+  date: string;
+  working: boolean;
+  note: string | null;
+  teacher: TeacherLite;
+}
+
+export interface TeacherWorkDaysResponse {
+  workDays: TeacherWorkDayRow[];
+  exceptions: TeacherWorkExceptionRow[];
+}
+
+export interface BookLite {
+  id: string;
+  code: string;
+  title: string;
+  subject: string;
+}
+
+export interface ChapterLite {
+  id: string;
+  title: string;
+  order: number;
+  grade?: number | null;
+}
+
+// Ажлын долоо хоногийг ХАРУУЛАХ дараалал: Даваа → Ням (API-ийн weekday нь
+// 0=Ням based тул зөвхөн харуулах эрэмбийг л энд зохицуулна).
+export const WORKWEEK_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
+
+export interface WeekdayPreset {
+  label: string;
+  hint: string;
+  weekdays: number[];
+}
+
+// Эзэмшигчийн тодорхойлсон давтамжийн бэлэн загварууд: 12-р ангийн бүлгүүд
+// 1,3,5,6 эсвэл 2,4,6,7 (Монгол тоолол: 1=Даваа…7=Ням), 9-11-р ангийн
+// бүлгүүд 1,3,5 эсвэл 2,4,6 өдрүүдэд явагдана. Тэдгээрийг JS weekday
+// (0=Ням…6=Бямба) руу шууд хөрвүүлсэн утгыг доор бэлдсэн.
+export const WEEKDAY_PRESETS: WeekdayPreset[] = [
+  { label: "1,3,5,6", hint: "Даваа, Лхагва, Баасан, Бямба", weekdays: [1, 3, 5, 6] },
+  { label: "2,4,6,7", hint: "Мягмар, Пүрэв, Бямба, Ням", weekdays: [2, 4, 6, 0] },
+  { label: "1,3,5", hint: "Даваа, Лхагва, Баасан", weekdays: [1, 3, 5] },
+  { label: "2,4,6", hint: "Мягмар, Пүрэв, Бямба", weekdays: [2, 4, 6] },
+];

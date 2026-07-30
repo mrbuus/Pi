@@ -124,3 +124,23 @@ export class TestsController {
     return this.tests.remove(id, req.user.userId, req.user.role);
   }
 }
+
+// TestsController нь 'tests' prefix-тэй тул /students/:id/test-results
+// (attendance/homework-marks-тэй ижил "students/:id/..." хэв маяг) замыг
+// тусад нь, prefix-гүй controller-т нэмнэ.
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller()
+export class StudentTestResultsController {
+  constructor(private tests: TestsService) {}
+
+  // Багш/Админ: тухайн сурагчийн шалгалтын бүх дүн — "Бие даасан явц" таб
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('students/:id/test-results')
+  byStudent(@Param('id') studentId: string, @Req() req: AuthedRequest) {
+    return this.tests.resultsForStudent(
+      studentId,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+}

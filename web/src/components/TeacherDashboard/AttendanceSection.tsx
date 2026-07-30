@@ -1,6 +1,7 @@
 "use client";
 
-import { User } from "lucide-react";
+import { ChevronRight, User } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { addDaysToKey } from "@/components/schedule/types";
@@ -313,7 +314,17 @@ export default function AttendanceSection({
               >
                 {/* Student Name + meta */}
                 <div className="md:w-44 md:shrink-0">
-                  <span className="text-sm font-medium">{studentLabel}</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">{studentLabel}</span>
+                    <Link
+                      href={`/app/students/${r.student.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`${studentLabel} — дэлгэрэнгүй явц харах`}
+                      className="text-ink-dim transition hover:text-brand-soft"
+                    >
+                      <ChevronRight className="h-4 w-4" aria-hidden />
+                    </Link>
+                  </div>
                   {classroomId && (
                     <div className="mt-1">
                       <FrequencyBadge

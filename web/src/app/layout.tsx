@@ -53,7 +53,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="mn" className="h-full antialiased">
+    // suppressHydrationWarning — дээрх THEME_INIT_SCRIPT нь hydration-аас ӨМНӨ
+    // <html>-д "js" класс, data-theme, color-scheme нэмдэг тул сервер болон
+    // клиентийн атрибут санаатайгаар зөрнө. Үүнгүйгээр React консол дээр
+    // хуудас бүр дээр hydration mismatch алдаа хэвлэдэг байв.
+    <html lang="mn" className="h-full antialiased" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>

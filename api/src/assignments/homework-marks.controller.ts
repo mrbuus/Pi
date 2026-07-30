@@ -39,6 +39,24 @@ export class HomeworkMarksController {
     );
   }
 
+  // Багш/Админ: тухайн сурагчийн гэрийн даалгаврын тэмдэглэгээний бүтэн түүх
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('students/:id/homework-marks')
+  byStudent(
+    @Param('id') studentId: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.byStudent(
+      studentId,
+      from,
+      to,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Patch('classrooms/:id/homework-marks/:studentId')
   setMark(

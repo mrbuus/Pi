@@ -1,0 +1,291 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  DoorOpen,
+  Palmtree,
+  TriangleAlert,
+} from "lucide-react";
+import { api } from "@/lib/api";
+import { getClassroomColor } from "@/lib/classroomColor";
+import EntryActionPanel from "./EntryActionPanel";
+import {
+  addDaysToKey,
+  formatMinutes,
+  SUBJECT_LABEL,
+  todayUBKey,
+  WEEKDAY_LABELS,
+  type WeekDay,
+  type WeekEntry,
+  type WeekResponse,
+} from "./types";
+
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : "Алдаа гарлаа";
+}
+
+/** Өгөгдсөн огнооны 7 хоногийн Даваа гарагийн огноог олно. */
+function mondayOf(dateKey: string): string {
+  const d = new Date(`${dateKey}T00:00:00.000Z`);
+  const weekday = d.getUTCDay(); // 0=Ням…6=Бямба
+  const diffToMonday = weekday === 0 ? -6 : 1 - weekday;
+  return addDaysToKey(dateKey, diffToMonday);
+}
+
+function shortDate(dateKey: string): string {
+  const [, month, day] = dateKey.split("-");
+  return `${month}.${day}`;
+}
+
+function EntryCard({
+  entry,
+  faded,
+  onClick,
+}: {
+  entry: WeekEntry;
+  faded: boolean;
+  onClick: () => void;
+}) {
+  const color = getClassroomColor(entry.classroomId);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full rounded-xl border border-line bg-surface p-2.5 text-left text-xs transition hover:border-brand ${
+        faded ? "opacity-60" : ""
+      }`}
+      style={{ borderLeftColor: color, borderLeftWidth: 3 }}
+    >
+      <p className="font-bold text-brand-soft">
+        {formatMinutes(entry.startMinute)}–{formatMinutes(entry.endMinute)}
+      </p>
+      <p className="mt-0.5 flex items-center gap-1.5 font-semibold">
+        <span
+          className="inline-block h-2 w-2 shrink-0 rounded-full"
+          style={{ backgroundColor: color }}
+          aria-hidden
+        />
+        {entry.classroomName}
+      </p>
+      <p className="mt-0.5 truncate text-ink-dim">
+        {entry.teacherName ?? "Багш товлогдоогүй"}
+      </p>
+      <div className="mt-1 flex flex-wrap items-center gap-1">
+        {entry.room && (
+          <span className="inline-flex items-center gap-0.5 rounded-full border border-line px-1.5 py-0.5 text-ink-dim">
+            <DoorOpen className="h-3 w-3" aria-hidden /> {entry.room}
+          </span>
+        )}
+        {entry.subject && (
+          <span className="rounded-full bg-brand-bright/15 px-1.5 py-0.5 text-brand-soft">
+            {SUBJECT_LABEL[entry.subject] ?? entry.subject}
+          </span>
+        )}
+        {entry.exception?.kind === "MOVED" && (
+          <span className="rounded-full bg-warning/15 px-1.5 py-0.5 text-warning">
+            зөөгдсөн
+          </span>
+        )}
+      </div>
+      {entry.topic && (
+        <p className="mt-1 truncate border-t border-line pt-1 text-ink">{entry.topic}</p>
+      )}
+    </button>
+  );
+}
+
+function DayColumn({
+  day,
+  isToday,
+  onEntryClick,
+}: {
+  day: WeekDay;
+  isToday: boolean;
+  onEntryClick: (entry: WeekEntry) => void;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-2 ${
+        day.isHoliday
+          ? "border-warning/40 bg-warning/5"
+          : isToday
+            ? "border-brand-bright bg-brand-bright/5"
+            : "border-line bg-panel"
+      }`}
+    >
+      <div className="mb-2 flex items-center justify-between gap-1 px-1">
+        <div>
+          <p className={`text-sm font-bold ${isToday ? "text-brand-soft" : ""}`}>
+            {WEEKDAY_LABELS[day.weekday]}
+          </p>
+          <p className="text-xs text-ink-dim">{shortDate(day.date)}</p>
+        </div>
+        {isToday && (
+          <span className="rounded-full bg-brand-bright px-1.5 py-0.5 text-[10px] font-bold text-on-brand">
+            ӨНӨӨДӨР
+          </span>
+        )}
+      </div>
+      {day.isHoliday && (
+        <p className="mb-2 flex items-center gap-1 rounded-lg bg-warning/15 px-2 py-1 text-[11px] font-semibold text-warning">
+          <Palmtree className="h-3 w-3 shrink-0" aria-hidden />
+          Амралтын өдөр
+        </p>
+      )}
+      <div className="space-y-2">
+        {day.entries.length === 0 ? (
+          <p className="px-1 text-xs text-ink-dim">Хичээл товлоогдоогүй</p>
+        ) : (
+          day.entries.map((entry) => (
+            <EntryCard
+              key={`${entry.scheduleId}-${entry.startMinute}`}
+              entry={entry}
+              faded={day.isHoliday}
+              onClick={() => onEntryClick(entry)}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Хичээлийн долоо хоногийн бодит хуваарь — GET /schedule/week-ээс ГАНЦ
+ * дуудлагаар авсан 7 өдрийг харуулна (цуцлагдсан хасагдсан, зөөгдсөн
+ * шилжсэн, сэдэвтэй бол хавсарсан). Мөр дээр товшиход тухайн НЭГ
+ * тохиолдлыг өөрчлөх самбар нээгдэнэ.
+ */
+export default function WeekBuilder() {
+  const [weekStart, setWeekStart] = useState(() => mondayOf(todayUBKey()));
+  const [data, setData] = useState<WeekResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  // Сонголтыг ХУУЛБАР болгож хадгалахгүй, зөвхөн ТҮЛХҮҮРИЙГ нь хадгална.
+  // Хуулбар хадгалбал самбар дотор сэдэв хадгалсны дараа хуучин (хоосон
+  // сэдэвтэй) хуулбар руугаа буцаж, өөрчлөлт хийгдээгүй мэт харагдана.
+  const [selectedKey, setSelectedKey] = useState<{
+    scheduleId: string;
+    date: string;
+  } | null>(null);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    api<WeekResponse>(`/schedule/week?start=${weekStart}`)
+      .then(setData)
+      .catch((e) => setError(errMsg(e)))
+      .finally(() => setLoading(false));
+  }, [weekStart]);
+  useEffect(load, [load]);
+
+  // Сүүлд ачаалсан өгөгдлөөс сонгосон тохиолдлыг ШИНЭЭР олно. Цуцлагдсан
+  // тохиолдол долоо хоногоос алга болдог тул энэ нь null болж, самбар
+  // өөрөө хаагдана — яг хүсэж буй зан төлөв.
+  const selectedEntry = useMemo<WeekEntry | null>(() => {
+    if (!selectedKey || !data) return null;
+    const day = data.days.find((d) => d.date === selectedKey.date);
+    return day?.entries.find((e) => e.scheduleId === selectedKey.scheduleId) ?? null;
+  }, [data, selectedKey]);
+
+  const today = todayUBKey();
+  const todayMonday = mondayOf(today);
+
+  return (
+    <section className="rounded-2xl border border-line bg-panel p-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-5 w-5 text-brand-soft" aria-hidden />
+          <h2 className="font-bold text-brand-soft">Хичээлийн хуваарь</h2>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setWeekStart((w) => addDaysToKey(w, -7))}
+            aria-label="Өмнөх долоо хоног"
+            className="rounded-lg border border-line p-1.5 transition hover:border-brand"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            onClick={() => setWeekStart(todayMonday)}
+            disabled={weekStart === todayMonday}
+            className="rounded-lg border border-line px-3 py-1.5 text-sm font-semibold transition hover:border-brand disabled:opacity-50"
+          >
+            Энэ долоо хоног
+          </button>
+          <button
+            type="button"
+            onClick={() => setWeekStart((w) => addDaysToKey(w, 7))}
+            aria-label="Дараагийн долоо хоног"
+            className="rounded-lg border border-line p-1.5 transition hover:border-brand"
+          >
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+      </div>
+
+      {data && (
+        <p className="mb-3 text-sm text-ink-dim">
+          {shortDate(data.days[0].date)} – {shortDate(data.days[6].date)}
+        </p>
+      )}
+
+      {loading && (
+        <p className="animate-pulse text-sm text-ink-dim" role="status">
+          Долоо хоногийн хуваарь ачаалж байна…
+        </p>
+      )}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && data && (
+        <>
+          {/* ---- Desktop: 7 баганатай тор ---- */}
+          <div className="hidden gap-3 sm:grid sm:grid-cols-7">
+            {data.days.map((day) => (
+              <DayColumn
+                key={day.date}
+                day={day}
+                isToday={day.date === today}
+                onEntryClick={(entry) =>
+                  setSelectedKey({ scheduleId: entry.scheduleId, date: day.date })
+                }
+              />
+            ))}
+          </div>
+
+          {/* ---- Mobile: өдөр өдрөөр жагссан жагсаалт ---- */}
+          <div className="space-y-3 sm:hidden">
+            {data.days.map((day) => (
+              <DayColumn
+                key={day.date}
+                day={day}
+                isToday={day.date === today}
+                onEntryClick={(entry) =>
+                  setSelectedKey({ scheduleId: entry.scheduleId, date: day.date })
+                }
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      <EntryActionPanel
+        open={selectedEntry !== null}
+        entry={selectedEntry}
+        date={selectedKey?.date ?? ""}
+        onClose={() => setSelectedKey(null)}
+        onChanged={load}
+      />
+    </section>
+  );
+}

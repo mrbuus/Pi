@@ -96,6 +96,10 @@ export const ModelName = {
   StaffTask: 'StaffTask',
   StaffTaskAssignee: 'StaffTaskAssignee',
   ClassSchedule: 'ClassSchedule',
+  ScheduleException: 'ScheduleException',
+  LessonTopic: 'LessonTopic',
+  TeacherWorkDay: 'TeacherWorkDay',
+  TeacherWorkException: 'TeacherWorkException',
   AcademicCalendarDay: 'AcademicCalendarDay',
   StudentGoal: 'StudentGoal',
   StreakFreeze: 'StreakFreeze'
@@ -753,6 +757,56 @@ export const ClassScheduleScalarFieldEnum = {
 } as const
 
 export type ClassScheduleScalarFieldEnum = (typeof ClassScheduleScalarFieldEnum)[keyof typeof ClassScheduleScalarFieldEnum]
+
+
+export const ScheduleExceptionScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  date: 'date',
+  kind: 'kind',
+  newDate: 'newDate',
+  newStartMinute: 'newStartMinute',
+  newEndMinute: 'newEndMinute',
+  newRoom: 'newRoom',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduleExceptionScalarFieldEnum = (typeof ScheduleExceptionScalarFieldEnum)[keyof typeof ScheduleExceptionScalarFieldEnum]
+
+
+export const LessonTopicScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  date: 'date',
+  title: 'title',
+  chapterId: 'chapterId',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
+
+
+export const TeacherWorkDayScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  weekday: 'weekday',
+  note: 'note'
+} as const
+
+export type TeacherWorkDayScalarFieldEnum = (typeof TeacherWorkDayScalarFieldEnum)[keyof typeof TeacherWorkDayScalarFieldEnum]
+
+
+export const TeacherWorkExceptionScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  date: 'date',
+  working: 'working',
+  note: 'note'
+} as const
+
+export type TeacherWorkExceptionScalarFieldEnum = (typeof TeacherWorkExceptionScalarFieldEnum)[keyof typeof TeacherWorkExceptionScalarFieldEnum]
 
 
 export const AcademicCalendarDayScalarFieldEnum = {
