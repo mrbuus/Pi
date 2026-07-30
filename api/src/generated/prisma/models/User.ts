@@ -35,6 +35,7 @@ export type UserMinAggregateOutputType = {
   lastName: string | null
   passwordHash: string | null
   mustChangePassword: boolean | null
+  passwordChangedAt: Date | null
   role: $Enums.Role | null
   avatarUrl: string | null
   createdAt: Date | null
@@ -52,6 +53,7 @@ export type UserMaxAggregateOutputType = {
   lastName: string | null
   passwordHash: string | null
   mustChangePassword: boolean | null
+  passwordChangedAt: Date | null
   role: $Enums.Role | null
   avatarUrl: string | null
   createdAt: Date | null
@@ -69,6 +71,7 @@ export type UserCountAggregateOutputType = {
   lastName: number
   passwordHash: number
   mustChangePassword: number
+  passwordChangedAt: number
   role: number
   avatarUrl: number
   createdAt: number
@@ -88,6 +91,7 @@ export type UserMinAggregateInputType = {
   lastName?: true
   passwordHash?: true
   mustChangePassword?: true
+  passwordChangedAt?: true
   role?: true
   avatarUrl?: true
   createdAt?: true
@@ -105,6 +109,7 @@ export type UserMaxAggregateInputType = {
   lastName?: true
   passwordHash?: true
   mustChangePassword?: true
+  passwordChangedAt?: true
   role?: true
   avatarUrl?: true
   createdAt?: true
@@ -122,6 +127,7 @@ export type UserCountAggregateInputType = {
   lastName?: true
   passwordHash?: true
   mustChangePassword?: true
+  passwordChangedAt?: true
   role?: true
   avatarUrl?: true
   createdAt?: true
@@ -212,6 +218,7 @@ export type UserGroupByOutputType = {
   lastName: string
   passwordHash: string
   mustChangePassword: boolean
+  passwordChangedAt: Date | null
   role: $Enums.Role
   avatarUrl: string | null
   createdAt: Date
@@ -250,6 +257,7 @@ export type UserWhereInput = {
   lastName?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringFilter<"User"> | string
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
+  passwordChangedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -279,6 +287,7 @@ export type UserWhereInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayListRelationFilter
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionListRelationFilter
   studentNotes?: Prisma.StudentNoteListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -292,6 +301,7 @@ export type UserOrderByWithRelationInput = {
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  passwordChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -321,6 +331,7 @@ export type UserOrderByWithRelationInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayOrderByRelationAggregateInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionOrderByRelationAggregateInput
   studentNotes?: Prisma.StudentNoteOrderByRelationAggregateInput
+  passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -337,6 +348,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   lastName?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringFilter<"User"> | string
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
+  passwordChangedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -366,6 +378,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   teacherWorkDays?: Prisma.TeacherWorkDayListRelationFilter
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionListRelationFilter
   studentNotes?: Prisma.StudentNoteListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }, "id" | "phone" | "email" | "username" | "studentCode" | "teacherCode">
 
 export type UserOrderByWithAggregationInput = {
@@ -379,6 +392,7 @@ export type UserOrderByWithAggregationInput = {
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  passwordChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -402,6 +416,7 @@ export type UserScalarWhereWithAggregatesInput = {
   lastName?: Prisma.StringWithAggregatesFilter<"User"> | string
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
   mustChangePassword?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  passwordChangedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -419,6 +434,7 @@ export type UserCreateInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -448,6 +464,7 @@ export type UserCreateInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -461,6 +478,7 @@ export type UserUncheckedCreateInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -490,6 +508,7 @@ export type UserUncheckedCreateInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -503,6 +522,7 @@ export type UserUpdateInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -532,6 +552,7 @@ export type UserUpdateInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -545,6 +566,7 @@ export type UserUncheckedUpdateInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -574,6 +596,7 @@ export type UserUncheckedUpdateInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -587,6 +610,7 @@ export type UserCreateManyInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -604,6 +628,7 @@ export type UserUpdateManyMutationInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -621,6 +646,7 @@ export type UserUncheckedUpdateManyInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -638,6 +664,7 @@ export type UserCountOrderByAggregateInput = {
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  passwordChangedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -655,6 +682,7 @@ export type UserMaxOrderByAggregateInput = {
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  passwordChangedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -672,6 +700,7 @@ export type UserMinOrderByAggregateInput = {
   lastName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  passwordChangedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -700,12 +729,30 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type EnumRoleFieldUpdateOperationsInput = {
   set?: $Enums.Role
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutPasswordResetTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, Prisma.UserUpdateWithoutPasswordResetTokensInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
 }
 
 export type UserCreateNestedOneWithoutStudentProfileInput = {
@@ -1062,6 +1109,194 @@ export type UserUpdateOneRequiredWithoutStreakFreezesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStreakFreezesInput, Prisma.UserUpdateWithoutStreakFreezesInput>, Prisma.UserUncheckedUpdateWithoutStreakFreezesInput>
 }
 
+export type UserCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpsertWithoutPasswordResetTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+}
+
 export type UserCreateWithoutStudentProfileInput = {
   id?: string
   phone?: string | null
@@ -1073,6 +1308,7 @@ export type UserCreateWithoutStudentProfileInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1101,6 +1337,7 @@ export type UserCreateWithoutStudentProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentProfileInput = {
@@ -1114,6 +1351,7 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1142,6 +1380,7 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentProfileInput = {
@@ -1171,6 +1410,7 @@ export type UserUpdateWithoutStudentProfileInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1199,6 +1439,7 @@ export type UserUpdateWithoutStudentProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentProfileInput = {
@@ -1212,6 +1453,7 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1240,6 +1482,7 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTeacherProfileInput = {
@@ -1253,6 +1496,7 @@ export type UserCreateWithoutTeacherProfileInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1281,6 +1525,7 @@ export type UserCreateWithoutTeacherProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeacherProfileInput = {
@@ -1294,6 +1539,7 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1322,6 +1568,7 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeacherProfileInput = {
@@ -1351,6 +1598,7 @@ export type UserUpdateWithoutTeacherProfileInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1379,6 +1627,7 @@ export type UserUpdateWithoutTeacherProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeacherProfileInput = {
@@ -1392,6 +1641,7 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1420,6 +1670,7 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutParentLinksInput = {
@@ -1433,6 +1684,7 @@ export type UserCreateWithoutParentLinksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1461,6 +1713,7 @@ export type UserCreateWithoutParentLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutParentLinksInput = {
@@ -1474,6 +1727,7 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1502,6 +1756,7 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutParentLinksInput = {
@@ -1520,6 +1775,7 @@ export type UserCreateWithoutChildLinksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1548,6 +1804,7 @@ export type UserCreateWithoutChildLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChildLinksInput = {
@@ -1561,6 +1818,7 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1589,6 +1847,7 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChildLinksInput = {
@@ -1618,6 +1877,7 @@ export type UserUpdateWithoutParentLinksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1646,6 +1906,7 @@ export type UserUpdateWithoutParentLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutParentLinksInput = {
@@ -1659,6 +1920,7 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1687,6 +1949,7 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutChildLinksInput = {
@@ -1711,6 +1974,7 @@ export type UserUpdateWithoutChildLinksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1739,6 +2003,7 @@ export type UserUpdateWithoutChildLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChildLinksInput = {
@@ -1752,6 +2017,7 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1780,6 +2046,7 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedClassroomsInput = {
@@ -1793,6 +2060,7 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1821,6 +2089,7 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
@@ -1834,6 +2103,7 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -1862,6 +2132,7 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedClassroomsInput = {
@@ -1891,6 +2162,7 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1919,6 +2191,7 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
@@ -1932,6 +2205,7 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1960,6 +2234,7 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEnrollmentsInput = {
@@ -1973,6 +2248,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2001,6 +2277,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEnrollmentsInput = {
@@ -2014,6 +2291,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2042,6 +2320,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEnrollmentsInput = {
@@ -2071,6 +2350,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2099,6 +2379,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEnrollmentsInput = {
@@ -2112,6 +2393,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2140,6 +2422,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttendancesInput = {
@@ -2153,6 +2436,7 @@ export type UserCreateWithoutAttendancesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2181,6 +2465,7 @@ export type UserCreateWithoutAttendancesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttendancesInput = {
@@ -2194,6 +2479,7 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2222,6 +2508,7 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttendancesInput = {
@@ -2251,6 +2538,7 @@ export type UserUpdateWithoutAttendancesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2279,6 +2567,7 @@ export type UserUpdateWithoutAttendancesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendancesInput = {
@@ -2292,6 +2581,7 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2320,6 +2610,7 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSubmissionsInput = {
@@ -2333,6 +2624,7 @@ export type UserCreateWithoutSubmissionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2361,6 +2653,7 @@ export type UserCreateWithoutSubmissionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubmissionsInput = {
@@ -2374,6 +2667,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2402,6 +2696,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubmissionsInput = {
@@ -2431,6 +2726,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2459,6 +2755,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmissionsInput = {
@@ -2472,6 +2769,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2500,6 +2798,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDailyHomeworkMarksInput = {
@@ -2513,6 +2812,7 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2541,6 +2841,7 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
@@ -2554,6 +2855,7 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2582,6 +2884,7 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDailyHomeworkMarksInput = {
@@ -2611,6 +2914,7 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2639,6 +2943,7 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
@@ -2652,6 +2957,7 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2680,6 +2986,7 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttemptSessionsInput = {
@@ -2693,6 +3000,7 @@ export type UserCreateWithoutAttemptSessionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2721,6 +3029,7 @@ export type UserCreateWithoutAttemptSessionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttemptSessionsInput = {
@@ -2734,6 +3043,7 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2762,6 +3072,7 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttemptSessionsInput = {
@@ -2791,6 +3102,7 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2819,6 +3131,7 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
@@ -2832,6 +3145,7 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2860,6 +3174,7 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTestResultsInput = {
@@ -2873,6 +3188,7 @@ export type UserCreateWithoutTestResultsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2901,6 +3217,7 @@ export type UserCreateWithoutTestResultsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTestResultsInput = {
@@ -2914,6 +3231,7 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -2942,6 +3260,7 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTestResultsInput = {
@@ -2971,6 +3290,7 @@ export type UserUpdateWithoutTestResultsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2999,6 +3319,7 @@ export type UserUpdateWithoutTestResultsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTestResultsInput = {
@@ -3012,6 +3333,7 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3040,6 +3362,7 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttemptsInput = {
@@ -3053,6 +3376,7 @@ export type UserCreateWithoutAttemptsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3081,6 +3405,7 @@ export type UserCreateWithoutAttemptsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttemptsInput = {
@@ -3094,6 +3419,7 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3122,6 +3448,7 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttemptsInput = {
@@ -3151,6 +3478,7 @@ export type UserUpdateWithoutAttemptsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3179,6 +3507,7 @@ export type UserUpdateWithoutAttemptsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttemptsInput = {
@@ -3192,6 +3521,7 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3220,6 +3550,7 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPredictionsInput = {
@@ -3233,6 +3564,7 @@ export type UserCreateWithoutPredictionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3261,6 +3593,7 @@ export type UserCreateWithoutPredictionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPredictionsInput = {
@@ -3274,6 +3607,7 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3302,6 +3636,7 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPredictionsInput = {
@@ -3331,6 +3666,7 @@ export type UserUpdateWithoutPredictionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3359,6 +3695,7 @@ export type UserUpdateWithoutPredictionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPredictionsInput = {
@@ -3372,6 +3709,7 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3400,6 +3738,7 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutColorTagsInput = {
@@ -3413,6 +3752,7 @@ export type UserCreateWithoutColorTagsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3441,6 +3781,7 @@ export type UserCreateWithoutColorTagsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutColorTagsInput = {
@@ -3454,6 +3795,7 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3482,6 +3824,7 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutColorTagsInput = {
@@ -3511,6 +3854,7 @@ export type UserUpdateWithoutColorTagsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3539,6 +3883,7 @@ export type UserUpdateWithoutColorTagsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutColorTagsInput = {
@@ -3552,6 +3897,7 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3580,6 +3926,7 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStudentNotesInput = {
@@ -3593,6 +3940,7 @@ export type UserCreateWithoutStudentNotesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3621,6 +3969,7 @@ export type UserCreateWithoutStudentNotesInput = {
   streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentNotesInput = {
@@ -3634,6 +3983,7 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3662,6 +4012,7 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentNotesInput = {
@@ -3691,6 +4042,7 @@ export type UserUpdateWithoutStudentNotesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3719,6 +4071,7 @@ export type UserUpdateWithoutStudentNotesInput = {
   streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentNotesInput = {
@@ -3732,6 +4085,7 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3760,6 +4114,7 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserPassesInput = {
@@ -3773,6 +4128,7 @@ export type UserCreateWithoutUserPassesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3801,6 +4157,7 @@ export type UserCreateWithoutUserPassesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserPassesInput = {
@@ -3814,6 +4171,7 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3842,6 +4200,7 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserPassesInput = {
@@ -3871,6 +4230,7 @@ export type UserUpdateWithoutUserPassesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3899,6 +4259,7 @@ export type UserUpdateWithoutUserPassesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserPassesInput = {
@@ -3912,6 +4273,7 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3940,6 +4302,7 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPaymentsInput = {
@@ -3953,6 +4316,7 @@ export type UserCreateWithoutPaymentsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -3981,6 +4345,7 @@ export type UserCreateWithoutPaymentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -3994,6 +4359,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4022,6 +4388,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -4051,6 +4418,7 @@ export type UserUpdateWithoutPaymentsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4079,6 +4447,7 @@ export type UserUpdateWithoutPaymentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -4092,6 +4461,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4120,6 +4490,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLearningEventsInput = {
@@ -4133,6 +4504,7 @@ export type UserCreateWithoutLearningEventsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4161,6 +4533,7 @@ export type UserCreateWithoutLearningEventsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLearningEventsInput = {
@@ -4174,6 +4547,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4202,6 +4576,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLearningEventsInput = {
@@ -4231,6 +4606,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4259,6 +4635,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLearningEventsInput = {
@@ -4272,6 +4649,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4300,6 +4678,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedStaffTasksInput = {
@@ -4313,6 +4692,7 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4341,6 +4721,7 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
@@ -4354,6 +4735,7 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4382,6 +4764,7 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedStaffTasksInput = {
@@ -4411,6 +4794,7 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4439,6 +4823,7 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
@@ -4452,6 +4837,7 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4480,6 +4866,7 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStaffTaskAssignmentsInput = {
@@ -4493,6 +4880,7 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4521,6 +4909,7 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
@@ -4534,6 +4923,7 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4562,6 +4952,7 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStaffTaskAssignmentsInput = {
@@ -4591,6 +4982,7 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4619,6 +5011,7 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
@@ -4632,6 +5025,7 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4660,6 +5054,7 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTaughtSchedulesInput = {
@@ -4673,6 +5068,7 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4701,6 +5097,7 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
@@ -4714,6 +5111,7 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4742,6 +5140,7 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTaughtSchedulesInput = {
@@ -4771,6 +5170,7 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4799,6 +5199,7 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
@@ -4812,6 +5213,7 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4840,6 +5242,7 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTeacherWorkDaysInput = {
@@ -4853,6 +5256,7 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4881,6 +5285,7 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
@@ -4894,6 +5299,7 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -4922,6 +5328,7 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeacherWorkDaysInput = {
@@ -4951,6 +5358,7 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4979,6 +5387,7 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
@@ -4992,6 +5401,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5020,6 +5430,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTeacherWorkExceptionsInput = {
@@ -5033,6 +5444,7 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -5061,6 +5473,7 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
@@ -5074,6 +5487,7 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -5102,6 +5516,7 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeacherWorkExceptionsInput = {
@@ -5131,6 +5546,7 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5159,6 +5575,7 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
@@ -5172,6 +5589,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5200,6 +5618,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStudentGoalsInput = {
@@ -5213,6 +5632,7 @@ export type UserCreateWithoutStudentGoalsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -5241,6 +5661,7 @@ export type UserCreateWithoutStudentGoalsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentGoalsInput = {
@@ -5254,6 +5675,7 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -5282,6 +5704,7 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentGoalsInput = {
@@ -5311,6 +5734,7 @@ export type UserUpdateWithoutStudentGoalsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5339,6 +5763,7 @@ export type UserUpdateWithoutStudentGoalsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentGoalsInput = {
@@ -5352,6 +5777,7 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5380,6 +5806,7 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStreakFreezesInput = {
@@ -5393,6 +5820,7 @@ export type UserCreateWithoutStreakFreezesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -5421,6 +5849,7 @@ export type UserCreateWithoutStreakFreezesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStreakFreezesInput = {
@@ -5434,6 +5863,7 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   lastName: string
   passwordHash: string
   mustChangePassword?: boolean
+  passwordChangedAt?: Date | string | null
   role: $Enums.Role
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -5462,6 +5892,7 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
   studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStreakFreezesInput = {
@@ -5491,6 +5922,7 @@ export type UserUpdateWithoutStreakFreezesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5519,6 +5951,7 @@ export type UserUpdateWithoutStreakFreezesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStreakFreezesInput = {
@@ -5532,6 +5965,7 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -5560,6 +5994,7 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
   teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
   studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -5591,6 +6026,7 @@ export type UserCountOutputType = {
   teacherWorkDays: number
   teacherWorkExceptions: number
   studentNotes: number
+  passwordResetTokens: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5617,6 +6053,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   teacherWorkDays?: boolean | UserCountOutputTypeCountTeacherWorkDaysArgs
   teacherWorkExceptions?: boolean | UserCountOutputTypeCountTeacherWorkExceptionsArgs
   studentNotes?: boolean | UserCountOutputTypeCountStudentNotesArgs
+  passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
 }
 
 /**
@@ -5790,6 +6227,13 @@ export type UserCountOutputTypeCountStudentNotesArgs<ExtArgs extends runtime.Typ
   where?: Prisma.StudentNoteWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetTokenWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -5802,6 +6246,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   lastName?: boolean
   passwordHash?: boolean
   mustChangePassword?: boolean
+  passwordChangedAt?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -5831,6 +6276,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   teacherWorkDays?: boolean | Prisma.User$teacherWorkDaysArgs<ExtArgs>
   teacherWorkExceptions?: boolean | Prisma.User$teacherWorkExceptionsArgs<ExtArgs>
   studentNotes?: boolean | Prisma.User$studentNotesArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -5845,6 +6291,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   lastName?: boolean
   passwordHash?: boolean
   mustChangePassword?: boolean
+  passwordChangedAt?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -5862,6 +6309,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   lastName?: boolean
   passwordHash?: boolean
   mustChangePassword?: boolean
+  passwordChangedAt?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -5879,13 +6327,14 @@ export type UserSelectScalar = {
   lastName?: boolean
   passwordHash?: boolean
   mustChangePassword?: boolean
+  passwordChangedAt?: boolean
   role?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "username" | "studentCode" | "teacherCode" | "firstName" | "lastName" | "passwordHash" | "mustChangePassword" | "role" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "username" | "studentCode" | "teacherCode" | "firstName" | "lastName" | "passwordHash" | "mustChangePassword" | "passwordChangedAt" | "role" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   teacherProfile?: boolean | Prisma.User$teacherProfileArgs<ExtArgs>
@@ -5912,6 +6361,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   teacherWorkDays?: boolean | Prisma.User$teacherWorkDaysArgs<ExtArgs>
   teacherWorkExceptions?: boolean | Prisma.User$teacherWorkExceptionsArgs<ExtArgs>
   studentNotes?: boolean | Prisma.User$studentNotesArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -5945,6 +6395,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     teacherWorkDays: Prisma.$TeacherWorkDayPayload<ExtArgs>[]
     teacherWorkExceptions: Prisma.$TeacherWorkExceptionPayload<ExtArgs>[]
     studentNotes: Prisma.$StudentNotePayload<ExtArgs>[]
+    passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5957,6 +6408,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     lastName: string
     passwordHash: string
     mustChangePassword: boolean
+    passwordChangedAt: Date | null
     role: $Enums.Role
     avatarUrl: string | null
     createdAt: Date
@@ -6380,6 +6832,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   teacherWorkDays<T extends Prisma.User$teacherWorkDaysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teacherWorkDaysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeacherWorkDayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teacherWorkExceptions<T extends Prisma.User$teacherWorkExceptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teacherWorkExceptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeacherWorkExceptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studentNotes<T extends Prisma.User$studentNotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentNotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6419,6 +6872,7 @@ export interface UserFieldRefs {
   readonly lastName: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly mustChangePassword: Prisma.FieldRef<"User", 'Boolean'>
+  readonly passwordChangedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -7403,6 +7857,30 @@ export type User$studentNotesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.StudentNoteScalarFieldEnum | Prisma.StudentNoteScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetTokens
+ */
+export type User$passwordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetToken
+   */
+  select?: Prisma.PasswordResetTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetToken
+   */
+  omit?: Prisma.PasswordResetTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetTokenInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetTokenWhereInput
+  orderBy?: Prisma.PasswordResetTokenOrderByWithRelationInput | Prisma.PasswordResetTokenOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetTokenScalarFieldEnum | Prisma.PasswordResetTokenScalarFieldEnum[]
 }
 
 /**

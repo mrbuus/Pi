@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api, getRole } from "@/lib/api";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
+import SendPasswordResetButton from "./SendPasswordResetButton";
 import StudentNotesPanel from "./StudentNotesPanel";
 import {
   StudentDetailData,
@@ -313,12 +314,21 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
             </p>
           </div>
           {canEdit && !editing && (
-            <button
-              onClick={startEdit}
-              className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-brand-soft"
-            >
-              ✎ Мэдээлэл засах
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              <button
+                onClick={startEdit}
+                className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-brand-soft"
+              >
+                ✎ Мэдээлэл засах
+              </button>
+              {/* Нууц үгээ мартсан сурагчийг багш ГАЗАР ДЭЭР НЬ шийдэж чадах
+                  ёстой — эс бөгөөс эзэн нь терминалаас скрипт ажиллуулах
+                  болно. Код зөвхөн сурагчийн утас руу очно, багш харахгүй. */}
+              <SendPasswordResetButton
+                studentId={studentId}
+                studentName={fullName(detail)}
+              />
+            </div>
           )}
           {editing && (
             <div className="flex gap-2">

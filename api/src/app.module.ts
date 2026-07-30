@@ -16,6 +16,7 @@ import { ClassificationModule } from './classification/classification.module';
 import { AttemptsModule } from './attempts/attempts.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuthModule } from './auth/auth.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { requireJwtSecret } from './auth/jwt.strategy';
 import { ClassroomsModule } from './classrooms/classrooms.module';
 import { ColorTagsModule } from './colortags/colortags.module';
@@ -87,6 +88,9 @@ import { VideosModule } from './videos/videos.module';
     }),
     ScheduleModule.forRoot(),
     PrismaModule,
+    // @Global — SMS илгээх үйлчилгээг бүх модульд нээж өгнө (нууц үг сэргээх,
+    // ирээдүйд ирц/төлбөрийн мэдэгдэл гэх мэт).
+    NotificationsModule,
     AuthModule,
     ClassroomsModule,
     AttendanceModule,

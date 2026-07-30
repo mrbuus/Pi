@@ -40,6 +40,11 @@ model User {
   // (@default(false)) — эзэн байнга турших тул саад болохгүй. Ирээдүйд идэвхжүүлэхэд
   // энэ талбарыг create үед true болгоод/эсвэл эндхийн default-ыг true болговол хангалттай.
   mustChangePassword Boolean  @default(false)
+  // Нууц үг ХАМГИЙН СҮҮЛД солигдсон мөч. JwtStrategy энэ мөчийг токены `iat`-тай
+  // харьцуулж, түүнээс ӨМНӨ олгогдсон бүх токеныг хүчингүйд тооцно. Ингэснээр
+  // нууц үгээ сэргээхэд хулгайлагдсан сесс автоматаар тасарна — сэргээлтийн
+  // гол утга учир нь энэ (эс бөгөөс халдагч хуучин токеноороо орсоор байна).
+  passwordChangedAt  DateTime?
   role               Role
   avatarUrl          String?
   createdAt          DateTime @default(now())
@@ -75,6 +80,48 @@ model User {
 
   // Эцсийн долгион: сурагчийн тэмдэглэл
   studentNotes StudentNote[]
+
+  passwordResetTokens PasswordResetToken[]
+}
+
+// ============ Нууц үг сэргээлт ============
+
+enum NotifyChannel {
+  SMS
+  EMAIL
+}
+
+/**
+ * Нэг удаагийн нууц үг сэргээх код.
+ *
+ * ЯАГААД КОДЫГ ЭНД ХАДГАЛААГҮЙ ВЭ: `codeHash` нь серверийн нууц түлхүүрээр
+ * (RESET_TOKEN_SECRET) хийсэн HMAC-SHA256. Ингэснээр өгөгдлийн сан бүхэлдээ
+ * алдагдсан ч тэр түлхүүргүйгээр 6 оронтой кодыг сэргээж БОЛОХГҮЙ. Энгийн
+ * SHA-256 бол 6 оронтой код дээр сая хүрэхгүй хувилбартай тул шууд эвдэгдэнэ.
+ *
+ * `attempts` нь буруу оролдлогыг тоолж, тодорхой тооноос хэтэрвэл кодыг үхүүлнэ
+ * (брутфорсоос хамгаална). `consumedAt` нь нэг удаагийн байдлыг баталгаажуулна.
+ */
+model PasswordResetToken {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  channel   NotifyChannel @default(SMS)
+  /// Хаана илгээснийг харуулах МАСКЛАСАН хаяг (жишээ нь "8033****"). Бүтэн
+  /// дугаарыг энд давхардуулж хадгалахгүй — User дээр аль хэдийн байгаа.
+  sentToMasked String
+  expiresAt DateTime
+  consumedAt DateTime?
+  attempts  Int      @default(0)
+  /// Хүсэлт ирсэн IP — хэт олон хүсэлтийг мөрдөх, аудитад ашиглана.
+  requestIp String?
+  createdAt DateTime @default(now())
+
+  // Хэрэглэгчийн хамгийн сүүлийн идэвхтэй кодыг олох, мөн цонхон доторх
+  // хүсэлтийн тоог тоолоход хоёуланд нь энэ индекс ажиллана.
+  @@index([userId, createdAt])
+  @@index([expiresAt])
 }
 
 // Жилийн төлбөрийн багц: Excel-ийн бүртгэлд байдаг төлбөрийн нөхцөл.

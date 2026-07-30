@@ -141,7 +141,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-ink-dim">
+        <p className="mt-4 text-center text-sm">
+          <Link href="/forgot-password" className="text-brand hover:underline">
+            Нууц үгээ мартсан уу?
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center text-sm text-ink-dim">
           Шинэ хэрэглэгч үү?{" "}
           <Link href="/register" className="text-brand hover:underline">
             Бүртгүүлэх

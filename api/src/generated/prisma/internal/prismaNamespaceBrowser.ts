@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  PasswordResetToken: 'PasswordResetToken',
   StudentProfile: 'StudentProfile',
   TeacherProfile: 'TeacherProfile',
   ParentLink: 'ParentLink',
@@ -132,6 +133,7 @@ export const UserScalarFieldEnum = {
   lastName: 'lastName',
   passwordHash: 'passwordHash',
   mustChangePassword: 'mustChangePassword',
+  passwordChangedAt: 'passwordChangedAt',
   role: 'role',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
@@ -139,6 +141,22 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  codeHash: 'codeHash',
+  channel: 'channel',
+  sentToMasked: 'sentToMasked',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  attempts: 'attempts',
+  requestIp: 'requestIp',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const StudentProfileScalarFieldEnum = {

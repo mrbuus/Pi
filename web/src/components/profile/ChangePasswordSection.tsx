@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { NavIcon } from "@/components/nav/icons";
-import { api } from "@/lib/api";
+import { api, setAuth } from "@/lib/api";
 
 const MIN_LENGTH = 6;
 
@@ -47,10 +47,17 @@ export default function ChangePasswordSection() {
     }
     setLoading(true);
     try {
-      await api("/auth/change-password", {
-        method: "POST",
-        body: { currentPassword: current, newPassword: next },
-      });
+      // Сервер нууц үг солигдсоны дараа ӨМНӨХ бүх токеныг хүчингүй болгодог
+      // (бусад төхөөрөмж дээрх сесс тасарна). Тиймээс шинэ токеныг заавал
+      // хадгална — эс бөгөөс энэ таб өөрөө шууд гарчихна.
+      const res = await api<{ accessToken?: string; role?: string }>(
+        "/auth/change-password",
+        {
+          method: "POST",
+          body: { currentPassword: current, newPassword: next },
+        },
+      );
+      if (res.accessToken && res.role) setAuth(res.accessToken, res.role);
       setOk(true);
       setCurrent("");
       setNext("");

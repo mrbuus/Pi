@@ -56,6 +56,38 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
+      # 🔑 Нууц үг сэргээх кодыг HMAC-аар хэшлэх нууц түлхүүр.
+      # Тусад нь байснаар JWT_SECRET-ийг эргүүлэхэд идэвхтэй сэргээх кодууд
+      # эвдрэхгүй, мөн эсрэгээр. Тохируулаагүй бол JWT_SECRET рүү буцаж унана.
+      - key: RESET_TOKEN_SECRET
+        generateValue: true
+
+      # 📱 SMS нийлүүлэгч — нууц үг сэргээх код ЭНЭ сувгаар явна.
+      #
+      # ⚠️ ТОХИРУУЛААГҮЙ БОЛ: продакшнд /auth/forgot-password нь 503 буцааж,
+      #    "SMS үйлчилгээ тохируулагдаагүй" гэж ИЛЭН ДАЛАНГҮЙ хэлнэ. Дуугүй
+      #    "илгээлээ" гэж хуурахгүй — сурагч хүлээсээр хоцрохоос сэргийлнэ.
+      #
+      # Сонголт А — Twilio (+976 дэмждэг, картаар шууд бүртгүүлнэ):
+      # - key: SMS_PROVIDER
+      #   value: twilio
+      # - key: TWILIO_ACCOUNT_SID
+      #   sync: false            # Render UI-аас гараар оруулна (нууц)
+      # - key: TWILIO_AUTH_TOKEN
+      #   sync: false
+      # - key: TWILIO_FROM
+      #   sync: false            # ж: +1XXXXXXXXXX эсвэл зөвшөөрөгдсөн Sender ID
+      #
+      # Сонголт Б — дотоодын агрегатор (Mobicom/Unitel/Skytel-тэй шууд):
+      # - key: SMS_PROVIDER
+      #   value: http
+      # - key: SMS_HTTP_URL
+      #   sync: false            # ж: https://api.жишээ.mn/sms?to={to}&text={text}
+      # - key: SMS_HTTP_METHOD
+      #   value: GET
+      # - key: SMS_HTTP_HEADERS
+      #   sync: false            # ж: {"Authorization":"Bearer ..."}
+
       # 🔌 pg pool sizing (src/prisma/prisma.service.ts-ийн тайлбарыг үз) —
       # НЭГ instance-д зориулсан утга. Хэрэв instance-ийн тоог нэмбэл (horizontal
       # scale) энэ тоог instance тоогоор хувааж бууруулах ёстой — эс тэгвээс

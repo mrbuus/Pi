@@ -23,6 +23,20 @@ export * from './enums.js';
  */
 export type User = Prisma.UserModel
 /**
+ * Model PasswordResetToken
+ * *
+ *  * Нэг удаагийн нууц үг сэргээх код.
+ *  *
+ *  * ЯАГААД КОДЫГ ЭНД ХАДГАЛААГҮЙ ВЭ: `codeHash` нь серверийн нууц түлхүүрээр
+ *  * (RESET_TOKEN_SECRET) хийсэн HMAC-SHA256. Ингэснээр өгөгдлийн сан бүхэлдээ
+ *  * алдагдсан ч тэр түлхүүргүйгээр 6 оронтой кодыг сэргээж БОЛОХГҮЙ. Энгийн
+ *  * SHA-256 бол 6 оронтой код дээр сая хүрэхгүй хувилбартай тул шууд эвдэгдэнэ.
+ *  *
+ *  * `attempts` нь буруу оролдлогыг тоолж, тодорхой тооноос хэтэрвэл кодыг үхүүлнэ
+ *  * (брутфорсоос хамгаална). `consumedAt` нь нэг удаагийн байдлыг баталгаажуулна.
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
  * Model StudentProfile
  * 
  */

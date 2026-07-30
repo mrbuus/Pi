@@ -232,9 +232,14 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({
       where: { id: userId },
-      data: { passwordHash },
+      // passwordChangedAt — энэ мөчөөс өмнөх БҮХ токеныг хүчингүй болгоно.
+      // Нууц үгээ сольсны гол шалтгаан нь ихэвчлэн "хэн нэгэн мэдчихсэн байх"
+      // тул тэр хүний нээлттэй сесс мөн таслагдах ёстой.
+      data: { passwordHash, passwordChangedAt: new Date() },
     });
-    return { changed: true };
+    // ...гэхдээ ӨӨРИЙНХӨӨ сессийг таслахгүй: шинэ токен буцаана. Эс бөгөөс
+    // хэрэглэгч нууц үгээ сольмогцоо гэнэт гарч, юу болсныг ойлгохгүй.
+    return { changed: true, ...this.issueToken(user.id, user.role) };
   }
 
   // Профайл зураг — /uploads-аар өмнө нь хадгалсан файлын key-г холбоно

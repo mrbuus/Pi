@@ -17,6 +17,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { PasswordResetService } from '../auth/password-reset.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
@@ -52,7 +53,10 @@ interface AuthedRequest {
 @Roles(Role.ADMIN)
 @Controller('users')
 export class UsersController {
-  constructor(private users: UsersService) {}
+  constructor(
+    private users: UsersService,
+    private passwordReset: PasswordResetService,
+  ) {}
 
   @Get()
   listUsers() {
@@ -95,6 +99,28 @@ export class UsersController {
     @Req() req: AuthedRequest,
   ) {
     return this.users.updateProfile(id, dto, req.user.userId, req.user.role);
+  }
+
+  /**
+   * Ажилтан сурагчийн өмнөөс нууц үг сэргээх код илгээх.
+   *
+   * Яагаад хэрэгтэй вэ: сурагч өөрөө /forgot-password-оор код авч чадна.
+   * Гэхдээ бодит амьдралд "утсаа сольсон / SMS ирэхгүй байна / тайлбарлаж
+   * чадахгүй байна" гэсэн тохиолдол гарна — тэгэхэд багш хажууд нь зогсоод
+   * шууд шийдэж чаддаг байх ёстой, эс бөгөөс эргээд эзэн нь терминал нээх
+   * болно.
+   *
+   * ADMIN болон TEACHER_PLUS хоёрт нээлттэй — эдгээр нь сурагчийн бүртгэлийг
+   * аль хэдийн засах эрхтэй (`:id/profile`) тул эрхийн шинэ түвшин нэмэхгүй.
+   * Багш бүрт нээвэл дурын багш дурын сурагчийн бүртгэлийг булаах эрсдэлтэй.
+   */
+  @Post(':id/send-password-reset')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  sendPasswordReset(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.passwordReset.sendForUser(id, {
+      userId: req.user.userId,
+      role: req.user.role,
+    });
   }
 
   @Post('promote-teacher')

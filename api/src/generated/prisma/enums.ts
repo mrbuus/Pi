@@ -29,6 +29,14 @@ export const StudentType = {
 export type StudentType = (typeof StudentType)[keyof typeof StudentType]
 
 
+export const NotifyChannel = {
+  SMS: 'SMS',
+  EMAIL: 'EMAIL'
+} as const
+
+export type NotifyChannel = (typeof NotifyChannel)[keyof typeof NotifyChannel]
+
+
 export const TuitionPlan = {
   FULL_YEAR: 'FULL_YEAR',
   INSTALLMENT: 'INSTALLMENT',
