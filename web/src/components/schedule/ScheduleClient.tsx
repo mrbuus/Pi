@@ -81,19 +81,12 @@ function StudentSchedule() {
 
 function TeacherSchedule({ role }: { role: string }) {
   const [data, setData] = useState<ScheduleMeResponse | null>(null);
-  const [meId, setMeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      api<ScheduleMeResponse>("/schedule/me"),
-      api<{ id: string }>("/auth/me"),
-    ])
-      .then(([sched, me]) => {
-        setData(sched);
-        setMeId(me.id);
-      })
+    api<ScheduleMeResponse>("/schedule/me")
+      .then(setData)
       .catch((e) => setError(errMsg(e)))
       .finally(() => setLoading(false));
   }, []);
@@ -115,10 +108,6 @@ function TeacherSchedule({ role }: { role: string }) {
         ) : (
           <WeeklyGrid entries={data?.entries ?? []} todayWeekday={todayWeekday()} />
         )}
-      </section>
-      <section>
-        <h2 className="mb-3 font-bold text-brand-soft">Ойрын өдрүүд</h2>
-        {meId && <UpcomingAgenda teacherId={meId} />}
       </section>
     </div>
   );
@@ -178,14 +167,6 @@ function AdminSchedule() {
         {!error && loading && <SectionLoading label="Хуваарь" />}
         {!error && !loading && <WeeklyGrid entries={entries} todayWeekday={todayWeekday()} />}
       </section>
-
-      {selected && (
-        <section>
-          <h2 className="mb-3 font-bold text-brand-soft">Ойрын өдрүүд</h2>
-          <UpcomingAgenda classroomId={selected} />
-        </section>
-      )}
-
     </div>
   );
 }

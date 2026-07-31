@@ -234,23 +234,51 @@ export interface ChapterLite {
 export const WORKWEEK_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
 
 /**
- * Хичээл ЯГ ЭДГЭЭР танхимуудад л явагдана (эзний өгсөн жагсаалт, 2026-07-30).
+ * Хичээл ЯГ ЭДГЭЭР танхимуудад л явагдана (эзний өгсөн жагсаалт, 2026-07-31).
  *
  * Чөлөөт текст биш, тогтмол жагсаалт болгосон шалтгаан: "403" / "403 тоот" /
  * "4-03" гэж янз бүрээр бичигдвэл танхимаар шүүх, давхцал хайх боломжгүй
  * болно. Шинэ танхим нэмэгдвэл ЗӨВХӨН энэ жагсаалтыг засна.
+ *
+ * `shape` — танхим бүрийн ХААЛГАН ДЭЭРХ бодит дүрс (эзний тэмдэглэгээ).
+ * Дугаараас илүү хурдан танигддаг тул UI дээр дугаарын хамт үргэлж дүрсийг
+ * харуулна (schedule/RoomShape.tsx).
+ *
+ * Эрэмбэ нь UI-д харагдах эрэмбэ мөн: 405 нь хамгийн жижиг танхим тул
+ * Баруун 4-ийн жагсаалтын СҮҮЛД байрлана (эзний шийдвэр).
  */
-export const ROOMS = [
-  { value: "403", branch: "Баруун 4" },
-  { value: "404", branch: "Баруун 4" },
-  { value: "405", branch: "Баруун 4" },
-  { value: "501", branch: "Баруун 4" },
-  { value: "502", branch: "Баруун 4" },
-  { value: "503", branch: "Баруун 4" },
-  { value: "301", branch: "Зүүн 4" },
-  { value: "302", branch: "Зүүн 4" },
-  { value: "Онлайн", branch: "Зайнаас" },
+export type RoomShapeKind =
+  | "circle"
+  | "triangle"
+  | "trapezoid"
+  | "square"
+  | "rect"
+  | "pentagon"
+  | "diamond"
+  | "online";
+
+export const ROOMS: readonly {
+  value: string;
+  branch: string;
+  shape: RoomShapeKind | null;
+}[] = [
+  { value: "501", branch: "Баруун 4", shape: "circle" },
+  { value: "502", branch: "Баруун 4", shape: "triangle" },
+  { value: "503", branch: "Баруун 4", shape: "trapezoid" },
+  { value: "504", branch: "Баруун 4", shape: "square" },
+  { value: "404", branch: "Баруун 4", shape: "pentagon" },
+  { value: "403", branch: "Баруун 4", shape: "diamond" },
+  { value: "405", branch: "Баруун 4", shape: "rect" },
+  { value: "301", branch: "Зүүн 4", shape: null },
+  { value: "302", branch: "Зүүн 4", shape: null },
+  { value: "Онлайн", branch: "Зайнаас", shape: "online" },
 ] as const;
+
+/** Танхимын дүрсийг олох — жагсаалтад байхгүй танхимд null */
+export function roomShapeOf(room: string | null | undefined): RoomShapeKind | null {
+  if (!room) return null;
+  return ROOMS.find((r) => r.value === room)?.shape ?? null;
+}
 
 export interface WeekdayPreset {
   label: string;

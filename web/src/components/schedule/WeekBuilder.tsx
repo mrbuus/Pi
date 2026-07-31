@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
+import RoomShape from "./RoomShape";
 import EntryActionPanel from "./EntryActionPanel";
 import {
   addDaysToKey,
@@ -40,7 +41,7 @@ function shortDate(dateKey: string): string {
   return `${month}.${day}`;
 }
 
-function EntryCard({
+function EntryRow({
   entry,
   faded,
   onClick,
@@ -50,49 +51,48 @@ function EntryCard({
   onClick: () => void;
 }) {
   const color = getClassroomColor(entry.classroomId);
+  // Ангийн нэрээс " (Баруун 4)" / " (Зүүн 4)" салбарыг хасаж харуул
+  const displayName = entry.classroomName.replace(/\s*\([^)]*\)$/, "");
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-xl border border-line bg-surface p-2.5 text-left text-xs transition hover:border-brand ${
+      className={`flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-left text-xs transition hover:border-brand ${
         faded ? "opacity-60" : ""
       }`}
       style={{ borderLeftColor: color, borderLeftWidth: 3 }}
+      title={entry.classroomName}
     >
-      <p className="font-bold text-brand-soft">
+      {/* цаг */}
+      <span className="shrink-0 font-bold text-brand-soft min-w-[50px]">
         {formatMinutes(entry.startMinute)}–{formatMinutes(entry.endMinute)}
-      </p>
-      <p className="mt-0.5 flex items-center gap-1.5 font-semibold">
-        <span
-          className="inline-block h-2 w-2 shrink-0 rounded-full"
-          style={{ backgroundColor: color }}
-          aria-hidden
-        />
-        {entry.classroomName}
-      </p>
-      <p className="mt-0.5 truncate text-ink-dim">
-        {entry.teacherName ?? "Багш товлогдоогүй"}
-      </p>
-      <div className="mt-1 flex flex-wrap items-center gap-1">
-        {entry.room && (
-          <span className="inline-flex items-center gap-0.5 rounded-full border border-line px-1.5 py-0.5 text-ink-dim">
-            <DoorOpen className="h-3 w-3" aria-hidden /> {entry.room}
-          </span>
+      </span>
+
+      {/* RoomShape дүрс — танхимын өнгөөр */}
+      {entry.room && (
+        <div className="shrink-0">
+          <RoomShape room={entry.room} size={16} color={color} className="" />
+        </div>
+      )}
+
+      {/* танхимын дугаар жижгээр */}
+      {entry.room && (
+        <span className="shrink-0 text-ink-dim font-medium">{entry.room}</span>
+      )}
+
+      {/* ангийн нэр (салбарын нэр нь ХАСАГДСАН) */}
+      <span className="truncate font-semibold text-ink">{displayName}</span>
+
+      {/* зөөгдсөн / сэдэвтэй байвал жижиг тэмдэг */}
+      <div className="ml-auto flex shrink-0 items-center gap-1">
+        {entry.exception?.kind === "MOVED" && (
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" aria-hidden title="Зөөгдсөн" />
         )}
         {entry.subject && (
-          <span className="rounded-full bg-brand-bright/15 px-1.5 py-0.5 text-brand-soft">
-            {SUBJECT_LABEL[entry.subject] ?? entry.subject}
-          </span>
-        )}
-        {entry.exception?.kind === "MOVED" && (
-          <span className="rounded-full bg-warning/15 px-1.5 py-0.5 text-warning">
-            зөөгдсөн
-          </span>
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-soft" aria-hidden title="Сэдэвтэй" />
         )}
       </div>
-      {entry.topic && (
-        <p className="mt-1 truncate border-t border-line pt-1 text-ink">{entry.topic}</p>
-      )}
     </button>
   );
 }
@@ -108,7 +108,7 @@ function DayColumn({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-2 ${
+      className={`flex min-w-[230px] shrink-0 snap-start flex-col rounded-2xl border p-2 ${
         day.isHoliday
           ? "border-warning/40 bg-warning/5"
           : isToday
@@ -116,6 +116,7 @@ function DayColumn({
             : "border-line bg-panel"
       }`}
     >
+      {/* Байрлалын хэргэлэл. Өдрийн нэр, огноо, өнөөдрийн тэмдэг */}
       <div className="mb-2 flex items-center justify-between gap-1 px-1">
         <div>
           <p className={`text-sm font-bold ${isToday ? "text-brand-soft" : ""}`}>
@@ -129,18 +130,22 @@ function DayColumn({
           </span>
         )}
       </div>
+
+      {/* Амралтын өдөр тэмдэглэл */}
       {day.isHoliday && (
         <p className="mb-2 flex items-center gap-1 rounded-lg bg-warning/15 px-2 py-1 text-[11px] font-semibold text-warning">
           <Palmtree className="h-3 w-3 shrink-0" aria-hidden />
           Амралтын өдөр
         </p>
       )}
-      <div className="space-y-2">
+
+      {/* Хичээлийн мөрүүд */}
+      <div className="flex flex-col gap-1">
         {day.entries.length === 0 ? (
-          <p className="px-1 text-xs text-ink-dim">Хичээл товлоогдоогүй</p>
+          <p className="px-1 py-1 text-xs text-ink-dim">Хичээл товлоогдоогүй</p>
         ) : (
           day.entries.map((entry) => (
-            <EntryCard
+            <EntryRow
               key={`${entry.scheduleId}-${entry.startMinute}`}
               entry={entry}
               faded={day.isHoliday}
@@ -248,9 +253,8 @@ export default function WeekBuilder() {
       )}
 
       {!loading && !error && data && (
-        <>
-          {/* ---- Desktop: 7 баганатай тор ---- */}
-          <div className="hidden gap-3 sm:grid sm:grid-cols-7">
+        <div className="overflow-x-auto">
+          <div className="flex gap-3 snap-x snap-mandatory">
             {data.days.map((day) => (
               <DayColumn
                 key={day.date}
@@ -262,27 +266,14 @@ export default function WeekBuilder() {
               />
             ))}
           </div>
-
-          {/* ---- Mobile: өдөр өдрөөр жагссан жагсаалт ---- */}
-          <div className="space-y-3 sm:hidden">
-            {data.days.map((day) => (
-              <DayColumn
-                key={day.date}
-                day={day}
-                isToday={day.date === today}
-                onEntryClick={(entry) =>
-                  setSelectedKey({ scheduleId: entry.scheduleId, date: day.date })
-                }
-              />
-            ))}
-          </div>
-        </>
+        </div>
       )}
 
       <EntryActionPanel
         open={selectedEntry !== null}
         entry={selectedEntry}
         date={selectedKey?.date ?? ""}
+        dayEntries={selectedKey?.date ? data?.days.find((d) => d.date === selectedKey.date)?.entries ?? [] : []}
         onClose={() => setSelectedKey(null)}
         onChanged={load}
       />

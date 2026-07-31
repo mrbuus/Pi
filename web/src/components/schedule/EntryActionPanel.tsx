@@ -7,13 +7,17 @@ import {
   CalendarClock,
   Ban,
   CalendarRange,
+  Settings2,
   Trash2,
   X,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { getClassroomColor } from "@/lib/classroomColor";
+import RoomShape from "./RoomShape";
 import {
   formatMinutes,
   ROOMS,
+  roomShapeOf,
   SUBJECT_LABEL,
   timeToMinutes,
   WEEKDAY_LABELS,
@@ -63,6 +67,30 @@ function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";
 }
 
+/**
+ * Тухайн цагт ЗЭРЭГ хичээллэх бусад ангиуд аль танхимд байгааг нэг мөрөөр
+ * харуулна — танхим сонгохдоо давхцал гаргахаас сэргийлэх гол мэдээлэл.
+ */
+function SameTimeHint({ entries }: { entries: WeekEntry[] }) {
+  if (!entries.length) return null;
+  return (
+    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-ink-dim">
+      Энэ цагт:
+      {entries.map((e) => (
+        <span key={e.scheduleId} className="inline-flex items-center gap-1">
+          <RoomShape
+            room={e.room}
+            size={11}
+            color={getClassroomColor(e.classroomId)}
+          />
+          {e.room ? `${e.room}·` : ""}
+          {e.classroomName.replace(/\s*\([^)]*\)$/, "")}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 const inputCls =
   "w-full rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand";
 const primaryBtn =
@@ -82,6 +110,7 @@ export default function EntryActionPanel({
   open,
   entry,
   date,
+  dayEntries,
   onClose,
   onChanged,
 }: {
@@ -89,6 +118,8 @@ export default function EntryActionPanel({
   entry: WeekEntry | null;
   /** Энэ тохиолдол харагдаж буй долоо хоногийн торон дахь огноо */
   date: string;
+  /** Тухайн өдрийн бүх бичлэгүүд — танхимын давхцлыг харахад */
+  dayEntries: WeekEntry[];
   onClose: () => void;
   onChanged: () => void;
 }) {
@@ -97,6 +128,8 @@ export default function EntryActionPanel({
   // Exception upsert/topic upsert бүгд АНХНЫ (натурал) тохиолдлын огноог
   // түлхүүр болгодог тул зөвхөн зөвлөгдсөн энд тооцоолно.
   const originalDate = entry?.exception ? entry.exception.originalDate : date;
+
+  const [showSettings, setShowSettings] = useState(false);
 
   const [topicTitle, setTopicTitle] = useState("");
   const [topicOpen, setTopicOpen] = useState(false);
@@ -140,6 +173,7 @@ export default function EntryActionPanel({
 
   useEffect(() => {
     if (!entry) return;
+    setShowSettings(false);
     setTopicTitle(entry.topic ?? "");
     setTopicOpen(false);
     setShowChapterPicker(false);
@@ -200,6 +234,21 @@ export default function EntryActionPanel({
   const weekdayLabel = useMemo(
     () => WEEKDAY_LABELS[new Date(`${date}T00:00:00.000Z`).getUTCDay()],
     [date],
+  );
+
+  // Энэ бичлэгтэй ЦАГ ДАВХЦАЖ буй тухайн өдрийн бусад ангиуд — танхим
+  // сонгох маягтуудад "аль танхим эзэлттэй вэ" гэдгийг харуулна.
+  const sameTime = useMemo<WeekEntry[]>(
+    () =>
+      entry
+        ? dayEntries.filter(
+            (e) =>
+              e.scheduleId !== entry.scheduleId &&
+              e.startMinute < entry.endMinute &&
+              entry.startMinute < e.endMinute,
+          )
+        : [],
+    [dayEntries, entry],
   );
 
   if (!open || !entry) return null;
@@ -349,206 +398,183 @@ export default function EntryActionPanel({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/15 p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto rounded-2xl border border-line bg-surface p-5"
+        className="flex max-h-[80vh] w-full max-w-sm flex-col overflow-y-auto rounded-2xl border border-line bg-surface p-4"
       >
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 id={titleId} className="text-base font-bold text-ink">
-              {entry.classroomName}
-            </h2>
-            <p className="mt-0.5 text-sm text-ink-dim">
-              {weekdayLabel}, {date} · {formatMinutes(entry.startMinute)}–
-              {formatMinutes(entry.endMinute)}
-              {entry.room ? ` · ${entry.room} тоот` : ""}
+        {/* ---- Толгой: ангийн нэр, огноо, цаг, RoomShape, танхим, багш ---- */}
+        <div className="mb-3 pb-3 border-b border-line">
+          <h2 id={titleId} className="text-sm font-bold text-ink">
+            {entry.classroomName.replace(/\s*\([^)]*\)$/, "")}
+          </h2>
+          <p className="mt-0.5 text-xs text-ink-dim">
+            {weekdayLabel}, {date} · {formatMinutes(entry.startMinute)}–
+            {formatMinutes(entry.endMinute)}
+          </p>
+          {entry.room && (
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-dim">
+              <RoomShape
+                room={entry.room}
+                size={14}
+                color={getClassroomColor(entry.classroomId)}
+                className=""
+              />
+              {entry.room} тоот
             </p>
-            {entry.exception?.kind === "MOVED" && (
-              <p className="mt-1 text-xs text-warning">
-                Энэ тохиолдол {entry.exception.originalDate}-с зөөгдсөн
-                {entry.exception.note ? ` — ${entry.exception.note}` : ""}
-              </p>
-            )}
-            <p className="mt-1 text-xs text-ink-dim">
-              {entry.teacherName ?? "Багш товлогдоогүй"}
-              {entry.subject ? ` · ${SUBJECT_LABEL[entry.subject] ?? entry.subject}` : ""}
+          )}
+          {entry.exception?.kind === "MOVED" && (
+            <p className="mt-1 text-xs text-warning">
+              Зөөгдсөн ({entry.exception.originalDate})
+              {entry.exception.note ? ` — ${entry.exception.note}` : ""}
             </p>
-          </div>
+          )}
+          <p className="mt-1 text-xs text-ink-dim">
+            {entry.teacherName ?? "Багш товлогдоогүй"}
+            {entry.subject ? ` · ${SUBJECT_LABEL[entry.subject] ?? entry.subject}` : ""}
+          </p>
+        </div>
+
+        {/* ---- Гурван үйлдлийн товч (Сэдэв, Зөөх, Цуцлах) + Settings icon ---- */}
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setTopicOpen((v) => !v)}
+            className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-brand"
+          >
+            <BookOpen className="mr-1 inline h-3 w-3" aria-hidden />
+            Сэдэв
+          </button>
+          <button
+            type="button"
+            onClick={() => setMoveOpen((v) => !v)}
+            className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-brand"
+          >
+            <CalendarClock className="mr-1 inline h-3 w-3" aria-hidden />
+            Зөөх
+          </button>
+          <button
+            type="button"
+            onClick={() => setCancelArmed((v) => !v)}
+            className="rounded-lg border border-warning/40 px-2.5 py-1.5 text-xs font-semibold text-warning transition hover:bg-warning/10"
+          >
+            <Ban className="mr-1 inline h-3 w-3" aria-hidden />
+            Цуцлах
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowSettings((v) => !v)}
+            aria-label="Тохиргоо"
+            className="ml-auto rounded-lg border border-line p-1.5 text-ink-dim transition hover:border-brand hover:text-ink"
+          >
+            <Settings2 className="h-4 w-4" aria-hidden />
+          </button>
           <button
             type="button"
             onClick={onClose}
             aria-label="Хаах"
-            className="rounded-lg p-1.5 text-ink-dim transition hover:bg-panel hover:text-ink"
+            className="rounded-lg border border-line p-1.5 text-ink-dim transition hover:border-brand hover:text-ink"
           >
-            <X className="h-5 w-5" aria-hidden />
+            <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
 
-        {/* ---- Сэдэв ---- */}
-        <section className="mt-4 rounded-xl border border-line bg-panel p-3">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-brand-soft" aria-hidden />
-            <h3 className="text-sm font-bold">Өнөөдөр орох сэдэв</h3>
-          </div>
-          {!topicOpen ? (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <p className="flex-1 text-sm text-ink">
-                {entry.topic ?? <span className="text-ink-dim">Сэдэв тохируулаагүй</span>}
-              </p>
-              <button type="button" onClick={() => setTopicOpen(true)} className={outlineBtn}>
-                {entry.topic ? "Засах" : "Сэдэв оруулах"}
-              </button>
-              {entry.topic && (
-                <button
-                  type="button"
-                  onClick={clearTopic}
-                  disabled={topicSaving}
-                  className="rounded-lg border border-error/40 px-3 py-1.5 text-sm text-error transition hover:bg-error/10 disabled:opacity-50"
-                >
-                  Хасах
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="mt-2 space-y-2">
-              <label htmlFor="panel-topic-title" className="sr-only">
-                Сэдвийн нэр
-              </label>
-              <input
-                id="panel-topic-title"
-                value={topicTitle}
-                onChange={(e) => setTopicTitle(e.target.value)}
-                placeholder="Жишээ: Квадрат тэгшитгэл"
-                className={inputCls}
-                autoFocus
-              />
-              {!showChapterPicker ? (
-                <button
-                  type="button"
-                  onClick={() => setShowChapterPicker(true)}
-                  className="text-xs font-semibold text-brand-soft hover:underline"
-                >
-                  Ном/бүлэгтэй холбох (заавал биш)
-                </button>
-              ) : (
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <select
-                    value={subject}
-                    onChange={(e) => {
-                      setSubject(e.target.value);
-                      setBookId("");
-                      setChapterId("");
-                    }}
-                    className={inputCls}
-                  >
-                    <option value="">Бүх хичээл</option>
-                    <option value="MATH">Математик</option>
-                    <option value="SOCIAL_STUDIES">Нийгмийн ухаан</option>
-                    <option value="SAT">SAT</option>
-                  </select>
-                  <select
-                    value={bookId}
-                    onChange={(e) => {
-                      setBookId(e.target.value);
-                      setChapterId("");
-                    }}
-                    className={inputCls}
-                  >
-                    <option value="">— ном —</option>
-                    {books.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.title}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={chapterId}
-                    onChange={(e) => setChapterId(e.target.value)}
-                    disabled={!bookId}
-                    className={inputCls}
-                  >
-                    <option value="">— бүлэг —</option>
-                    {chapters.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {topicError && <p className="text-sm text-error">{topicError}</p>}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={saveTopic}
-                  disabled={topicSaving}
-                  className={primaryBtn}
-                >
-                  {topicSaving ? "Хадгалж байна…" : "Хадгалах"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTopicOpen(false);
-                    setTopicTitle(entry.topic ?? "");
-                    setTopicError(null);
-                  }}
-                  className={outlineBtn}
-                >
-                  Болих
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* ---- Энэ тохиолдол (occurrence-only) ---- */}
-        <section className="mt-3 rounded-xl border border-line bg-panel p-3">
-          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-dim">
-            Зөвхөн энэ өдөр
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setMoveOpen((v) => !v)}
-              className={outlineBtn}
-            >
-              <CalendarClock className="mr-1.5 inline h-4 w-4" aria-hidden />
-              Энэ өдрийг зөөх
-            </button>
-            {!cancelArmed ? (
+        {/* ---- Сэдэв маягт (товч дарахад задарна) ---- */}
+        {topicOpen && (
+          <div className="mb-3 space-y-2 rounded-lg border border-line bg-panel p-3">
+            <label htmlFor="panel-topic-title" className="sr-only">
+              Сэдвийн нэр
+            </label>
+            <input
+              id="panel-topic-title"
+              value={topicTitle}
+              onChange={(e) => setTopicTitle(e.target.value)}
+              placeholder="Жишээ: Квадрат тэгшитгэл"
+              className={inputCls}
+              autoFocus
+            />
+            {!showChapterPicker ? (
               <button
                 type="button"
-                onClick={() => setCancelArmed(true)}
-                className="rounded-lg border border-warning/40 px-3 py-1.5 text-sm font-semibold text-warning transition hover:bg-warning/10"
+                onClick={() => setShowChapterPicker(true)}
+                className="text-xs font-semibold text-brand-soft hover:underline"
               >
-                <Ban className="mr-1.5 inline h-4 w-4" aria-hidden />
-                Энэ өдрийг цуцлах
+                Ном/бүлэгтэй холбох (заавал биш)
               </button>
             ) : (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-warning">Энэ өдрийг цуцлах уу?</span>
-                <button
-                  type="button"
-                  onClick={cancelOccurrence}
-                  disabled={cancelSaving}
-                  className="rounded-lg bg-warning px-3 py-1.5 text-sm font-bold text-on-warning transition hover:opacity-90 disabled:opacity-50"
+              <div className="grid gap-2 grid-cols-3">
+                <select
+                  value={subject}
+                  onChange={(e) => {
+                    setSubject(e.target.value);
+                    setBookId("");
+                    setChapterId("");
+                  }}
+                  className={inputCls}
                 >
-                  {cancelSaving ? "…" : "Тийм, цуцлах"}
-                </button>
-                <button type="button" onClick={() => setCancelArmed(false)} className={outlineBtn}>
-                  Үгүй
-                </button>
+                  <option value="">Бүх хичээл</option>
+                  <option value="MATH">Математик</option>
+                  <option value="SOCIAL_STUDIES">Нийгмийн ухаан</option>
+                  <option value="SAT">SAT</option>
+                </select>
+                <select
+                  value={bookId}
+                  onChange={(e) => {
+                    setBookId(e.target.value);
+                    setChapterId("");
+                  }}
+                  className={inputCls}
+                >
+                  <option value="">— ном —</option>
+                  {books.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.title}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={chapterId}
+                  onChange={(e) => setChapterId(e.target.value)}
+                  disabled={!bookId}
+                  className={inputCls}
+                >
+                  <option value="">— бүлэг —</option>
+                  {chapters.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
+            {topicError && <p className="text-xs text-error">{topicError}</p>}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={saveTopic}
+                disabled={topicSaving}
+                className={primaryBtn}
+              >
+                {topicSaving ? "…" : "Хадгалах"}
+              </button>
+              <button
+                type="button"
+                onClick={clearTopic}
+                disabled={topicSaving || !entry.topic}
+                className="rounded-lg border border-error/40 px-2.5 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10 disabled:opacity-50"
+              >
+                Хасах
+              </button>
+            </div>
           </div>
-          {cancelError && <p className="mt-2 text-sm text-error">{cancelError}</p>}
+        )}
 
-          {moveOpen && (
-            <div className="mt-3 grid gap-2 border-t border-line pt-3 sm:grid-cols-2">
+        {/* ---- Зөөх маягт (товч дарахад задарна) ---- */}
+        {moveOpen && (
+          <div className="mb-3 space-y-2 rounded-lg border border-line bg-panel p-3">
+            <div className="grid gap-2">
               <div className="flex flex-col gap-1">
                 <label htmlFor="panel-move-date" className="text-xs text-ink-dim">
                   Шинэ огноо
@@ -565,12 +591,25 @@ export default function EntryActionPanel({
                 <label htmlFor="panel-move-room" className="text-xs text-ink-dim">
                   Шинэ танхим (заавал биш)
                 </label>
-                <RoomSelect
-                  id="panel-move-room"
-                  value={moveRoom}
-                  onChange={setMoveRoom}
-                  className={inputCls}
-                />
+                <div className="flex items-center gap-2">
+                  <RoomSelect
+                    id="panel-move-room"
+                    value={moveRoom}
+                    onChange={setMoveRoom}
+                    className={`${inputCls} flex-1`}
+                  />
+                  {moveRoom && (
+                    // Өнгө = АНГИ, дүрс = танхим — тул энд тухайн ангийн
+                    // өнгөөр будна (танхимын нэрээр биш).
+                    <RoomShape
+                      room={moveRoom}
+                      size={16}
+                      color={getClassroomColor(entry.classroomId)}
+                      className="shrink-0"
+                    />
+                  )}
+                </div>
+                <SameTimeHint entries={sameTime} />
               </div>
               <div className="flex flex-col gap-1">
                 <label htmlFor="panel-move-start" className="text-xs text-ink-dim">
@@ -596,7 +635,7 @@ export default function EntryActionPanel({
                   className={inputCls}
                 />
               </div>
-              <div className="flex flex-col gap-1 sm:col-span-2">
+              <div className="flex flex-col gap-1">
                 <label htmlFor="panel-move-note" className="text-xs text-ink-dim">
                   Тэмдэглэл (заавал биш)
                 </label>
@@ -608,183 +647,219 @@ export default function EntryActionPanel({
                   className={inputCls}
                 />
               </div>
-              {moveError && <p className="text-sm text-error sm:col-span-2">{moveError}</p>}
-              <div className="flex gap-2 sm:col-span-2">
-                <button
-                  type="button"
-                  onClick={moveOccurrence}
-                  disabled={moveSaving}
-                  className={primaryBtn}
-                >
-                  {moveSaving ? "Зөөж байна…" : "Зөөх"}
-                </button>
-                <button type="button" onClick={() => setMoveOpen(false)} className={outlineBtn}>
-                  Болих
-                </button>
-              </div>
             </div>
-          )}
-        </section>
-
-        {/* ---- Энэ ба цаашдын бүх (цуврал салгах) ---- */}
-        <section className="mt-3 rounded-xl border border-brand-bright/40 bg-brand-bright/5 p-3">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-brand-soft">
-            <CalendarRange className="h-3.5 w-3.5" aria-hidden />
-            Энэ ба цаашдын бүх
-          </p>
-
-          {!splitOpen ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <button type="button" onClick={() => setSplitOpen(true)} className={outlineBtn}>
-                Цагийг нь бүрмөсөн өөрчлөх
+            {moveError && <p className="text-xs text-error">{moveError}</p>}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={moveOccurrence}
+                disabled={moveSaving}
+                className={primaryBtn}
+              >
+                {moveSaving ? "…" : "Зөөх"}
               </button>
-              <p className="text-xs text-ink-dim">
-                {date}-ээс хойшх бүх долоо хоногт үйлчилнэ
-              </p>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-ink-dim">
-                <span className="font-semibold text-ink">{date}</span>-ээс эхлэн шинэ
-                тохиргоо үйлчилнэ. Түүнээс өмнөх ирц, даалгавар, сэдвийн бүртгэл
-                хэвээр үлдэнэ.
+          </div>
+        )}
+
+        {/* ---- Цуцлах баталгаа (товч дарахад задарна) ---- */}
+        {cancelArmed && (
+          <div className="mb-3 space-y-2 rounded-lg border border-warning/40 bg-warning/5 p-3">
+            <p className="text-xs text-warning">Энэ өдрийг цуцлах уу?</p>
+            {cancelError && <p className="text-xs text-error">{cancelError}</p>}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={cancelOccurrence}
+                disabled={cancelSaving}
+                className="flex-1 rounded-lg bg-warning px-2.5 py-1.5 text-xs font-bold text-on-warning transition hover:opacity-90 disabled:opacity-50"
+              >
+                {cancelSaving ? "…" : "Тийм"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCancelArmed(false)}
+                className="flex-1 rounded-lg border border-line px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-brand"
+              >
+                Үгүй
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ---- Settings: Энэ ба цаашдын бүх + Бүх давтамж (Settings icon нээх) ---- */}
+        {showSettings && (
+          <div className="space-y-3">
+            {/* ---- Энэ ба цаашдын бүх (цуврал салгах) ---- */}
+            <section className="rounded-lg border border-brand-bright/40 bg-brand-bright/5 p-3">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-brand-soft">
+                <CalendarRange className="h-3.5 w-3.5" aria-hidden />
+                Энэ ба цаашдын бүх
               </p>
 
-              <div className="grid gap-2 sm:grid-cols-2">
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="panel-split-weekday" className="text-xs text-ink-dim">
-                    Гараг
-                  </label>
-                  <select
-                    id="panel-split-weekday"
-                    value={splitWeekday}
-                    onChange={(e) => setSplitWeekday(Number(e.target.value))}
-                    className={inputCls}
-                  >
-                    {WORKWEEK_ORDER.map((d) => (
-                      <option key={d} value={d}>
-                        {WEEKDAY_LABELS[d]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="panel-split-room" className="text-xs text-ink-dim">
-                    Танхим
-                  </label>
-                  <RoomSelect
-                    id="panel-split-room"
-                    value={splitRoom}
-                    onChange={setSplitRoom}
-                    className={inputCls}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="panel-split-start" className="text-xs text-ink-dim">
-                    Эхлэх цаг
-                  </label>
-                  <input
-                    id="panel-split-start"
-                    type="time"
-                    value={splitStart}
-                    onChange={(e) => setSplitStart(e.target.value)}
-                    className={inputCls}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="panel-split-end" className="text-xs text-ink-dim">
-                    Дуусах цаг
-                  </label>
-                  <input
-                    id="panel-split-end"
-                    type="time"
-                    value={splitEnd}
-                    onChange={(e) => setSplitEnd(e.target.value)}
-                    className={inputCls}
-                  />
-                </div>
-                <div className="flex flex-col gap-1 sm:col-span-2">
-                  <label htmlFor="panel-split-teacher" className="text-xs text-ink-dim">
-                    Багш
-                  </label>
-                  <select
-                    id="panel-split-teacher"
-                    value={splitTeacherId}
-                    onChange={(e) => setSplitTeacherId(e.target.value)}
-                    className={inputCls}
-                  >
-                    <option value="">— ангийн үндсэн багш —</option>
-                    {teachers.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.lastName} {t.firstName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              {!splitOpen ? (
+                <p className="text-xs text-ink-dim">{date}-ээс хойшх бүх долоо хоногт үйлчилнэ</p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-ink-dim">
+                    <span className="font-semibold text-ink">{date}</span>-ээс эхлэн шинэ
+                    тохиргоо үйлчилнэ.
+                  </p>
 
-              {splitError && <p className="text-sm text-error">{splitError}</p>}
+                  <div className="grid gap-2">
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="panel-split-weekday" className="text-xs text-ink-dim">
+                        Гараг
+                      </label>
+                      <select
+                        id="panel-split-weekday"
+                        value={splitWeekday}
+                        onChange={(e) => setSplitWeekday(Number(e.target.value))}
+                        className={inputCls}
+                      >
+                        {WORKWEEK_ORDER.map((d) => (
+                          <option key={d} value={d}>
+                            {WEEKDAY_LABELS[d]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="panel-split-room" className="text-xs text-ink-dim">
+                        Танхим
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <RoomSelect
+                          id="panel-split-room"
+                          value={splitRoom}
+                          onChange={setSplitRoom}
+                          className={`${inputCls} flex-1`}
+                        />
+                        {splitRoom && (
+                          <RoomShape
+                            room={splitRoom}
+                            size={14}
+                            color={getClassroomColor(entry.classroomId)}
+                            className="shrink-0"
+                          />
+                        )}
+                      </div>
+                      <SameTimeHint entries={sameTime} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="panel-split-start" className="text-xs text-ink-dim">
+                        Эхлэх цаг
+                      </label>
+                      <input
+                        id="panel-split-start"
+                        type="time"
+                        value={splitStart}
+                        onChange={(e) => setSplitStart(e.target.value)}
+                        className={inputCls}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="panel-split-end" className="text-xs text-ink-dim">
+                        Дуусах цаг
+                      </label>
+                      <input
+                        id="panel-split-end"
+                        type="time"
+                        value={splitEnd}
+                        onChange={(e) => setSplitEnd(e.target.value)}
+                        className={inputCls}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="panel-split-teacher" className="text-xs text-ink-dim">
+                        Багш
+                      </label>
+                      <select
+                        id="panel-split-teacher"
+                        value={splitTeacherId}
+                        onChange={(e) => setSplitTeacherId(e.target.value)}
+                        className={inputCls}
+                      >
+                        <option value="">— ангийн үндсэн багш —</option>
+                        {teachers.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.lastName} {t.firstName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
 
-              <div className="flex gap-2">
+                  {splitError && <p className="text-xs text-error">{splitError}</p>}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={splitSeries}
+                      disabled={splitSaving}
+                      className={primaryBtn}
+                    >
+                      {splitSaving ? "…" : "Хадгалах"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSplitOpen(false)}
+                      className={outlineBtn}
+                    >
+                      Болих
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!splitOpen && (
+                <button type="button" onClick={() => setSplitOpen(true)} className={outlineBtn}>
+                  Өөрчлөх
+                </button>
+              )}
+            </section>
+
+            {/* ---- Бүх давтамж (destructive/global) ---- */}
+            <section className="rounded-lg border border-error/30 bg-error/5 p-3">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-error">
+                <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+                Бүх давтамжид нөлөөлнө
+              </p>
+              {deleteArmStep === 0 ? (
                 <button
                   type="button"
-                  onClick={splitSeries}
-                  disabled={splitSaving}
-                  className={primaryBtn}
+                  onClick={() => setDeleteArmStep(1)}
+                  className="rounded-lg border border-error/40 px-2.5 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10"
                 >
-                  {splitSaving ? "Хадгалж байна…" : "Энэ өдрөөс эхлэн хадгалах"}
+                  <Trash2 className="mr-1 inline h-3 w-3" aria-hidden />
+                  Устгах
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setSplitOpen(false)}
-                  className={outlineBtn}
-                >
-                  Болих
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* ---- Бүх давтамж (destructive/global) ---- */}
-        <section className="mt-3 rounded-xl border border-error/30 bg-error/5 p-3">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-error">
-            <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
-            Бүх давтамжид нөлөөлнө
-          </p>
-          {deleteArmStep === 0 ? (
-            <button
-              type="button"
-              onClick={() => setDeleteArmStep(1)}
-              className="rounded-lg border border-error/40 px-3 py-1.5 text-sm font-semibold text-error transition hover:bg-error/10"
-            >
-              <Trash2 className="mr-1.5 inline h-4 w-4" aria-hidden />
-              Бүх давтамжийг устгах
-            </button>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-error">
-                Энэ хуваарийн БҮХ долоо хоногийн тохиолдол (өнгөрсөн, ирээдүйн аль ч
-                өдөр) устана. Зөвхөн нэг өдрийг өөрчлөх бол дээрх &ldquo;Зөвхөн энэ
-                өдөр&rdquo; хэсгийг ашиглана уу.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={deleteSeries}
-                  disabled={deleteSaving}
-                  className="rounded-lg bg-error px-3 py-1.5 text-sm font-bold text-on-error transition hover:opacity-90 disabled:opacity-50"
-                >
-                  {deleteSaving ? "Устгаж байна…" : "Тийм, бүгдийг устга"}
-                </button>
-                <button type="button" onClick={() => setDeleteArmStep(0)} className={outlineBtn}>
-                  Үгүй, болих
-                </button>
-              </div>
-              {deleteError && <p className="text-sm text-error">{deleteError}</p>}
-            </div>
-          )}
-        </section>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-error">БҮХ долоо хоногийн тохиолдол устана.</p>
+                  {deleteError && <p className="text-xs text-error">{deleteError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={deleteSeries}
+                      disabled={deleteSaving}
+                      className="flex-1 rounded-lg bg-error px-2.5 py-1.5 text-xs font-bold text-on-error transition hover:opacity-90 disabled:opacity-50"
+                    >
+                      {deleteSaving ? "…" : "Тийм"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteArmStep(0)}
+                      className="flex-1 rounded-lg border border-line px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-brand"
+                    >
+                      Үгүй
+                    </button>
+                  </div>
+                </div>
+              )}
+            </section>
+          </div>
+        )}
       </div>
     </div>
   );

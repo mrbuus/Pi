@@ -12,6 +12,7 @@ import AttentionSection, {
 import AttendanceSection from "@/components/TeacherDashboard/AttendanceSection";
 import { ClassroomSelect } from "@/components/TeacherDashboard/ClassroomSelect";
 import AssignmentsSection from "@/components/TeacherDashboard/AssignmentsSection";
+import MonitoringSection from "@/components/TeacherDashboard/MonitoringSection";
 import SummarySection from "@/components/TeacherDashboard/SummarySection";
 import UnassignedStudentsSection from "@/components/TeacherDashboard/UnassignedStudentsSection";
 import ParentRequestsSection from "@/components/TeacherDashboard/ParentRequestsSection";
@@ -515,29 +516,10 @@ export default function TeacherDashboardClient() {
                 </div>
               </div>
 
-              {/* Ирц — Нүүр таб дээр шууд, дэд табгүйгээр тэмдэглэнэ */}
-              <AttendanceSection
-                roster={roster}
-                marks={marks}
-                notes={notes}
-                today={today}
-                onMarkChange={(studentId, status) =>
-                  setMarks((m) => ({ ...m, [studentId]: status }))
-                }
-                onNoteChange={(studentId, note) =>
-                  setNotes((n) => ({ ...n, [studentId]: note }))
-                }
-                onSave={saveAttendance}
+              {/* Ирц + Даалгаврын хяналт — НЭГ компонентод зөвхөн харах зорилготой */}
+              <MonitoringSection
                 classroomId={selected}
-                selectedDate={homeDate}
-                hideDateHeader
-              />
-
-              {/* Даалгавар — Нүүр таб дээр шууд, дэд табгүйгээр тэмдэглэнэ */}
-              <AssignmentsSection
-                classroomId={selected}
-                selectedDate={homeDate}
-                hideDateHeader
+                date={homeDate}
               />
             </>
           )}
