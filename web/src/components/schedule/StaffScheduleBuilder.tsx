@@ -1,17 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, CalendarRange, Repeat, UserCheck } from "lucide-react";
+import {
+  CalendarDays,
+  CalendarRange,
+  LayoutGrid,
+  Repeat,
+  UserCheck,
+} from "lucide-react";
 import CalendarAdmin from "./CalendarAdmin";
 import PatternBuilder from "./PatternBuilder";
+import PatternOverview from "./PatternOverview";
 import ScheduleAdmin from "./ScheduleAdmin";
 import TeacherWorkDays from "./TeacherWorkDays";
 import WeekBuilder from "./WeekBuilder";
 
-type TabKey = "week" | "pattern" | "teachers" | "calendar";
+type TabKey = "overview" | "week" | "pattern" | "teachers" | "calendar";
 
 const TABS: { key: TabKey; label: string; icon: typeof CalendarDays }[] = [
-  { key: "week", label: "Долоо хоног", icon: CalendarDays },
+  // "Ерөнхий" нэгдүгээрт — бүтэн жилийн давтамжийг нэг дэлгэцэд харуулдаг
+  // үндсэн харагдац (эзний загвар). "Долоо хоног" нь огноот төлөвлөгөө:
+  // тухайн 7 хоногт сэдэв зоох, зөөх, цуцлах.
+  { key: "overview", label: "Ерөнхий хуваарь", icon: LayoutGrid },
+  { key: "week", label: "Долоо хоногийн төлөвлөгөө", icon: CalendarDays },
   { key: "pattern", label: "Хуваарь зохиох", icon: Repeat },
   { key: "teachers", label: "Багшийн ажлын өдөр", icon: UserCheck },
   { key: "calendar", label: "Сургалтын хуанли", icon: CalendarRange },
@@ -20,13 +31,13 @@ const TABS: { key: TabKey; label: string; icon: typeof CalendarDays }[] = [
 /**
  * ADMIN / TEACHER_PLUS-ын хуваарийн ажлын талбар.
  *
- * Дөрвөн таб нь ХИЙХ АЖЛААР нь тусгаарлагдсан: өдөр тутам хардаг долоо
- * хоногийн тор, ховор хийдэг хуваарь зохиох, багшийн ажлын өдөр, амралтын
- * өдрийн хуанли. Идэвхгүй табыг DOM-д огт үлдээхгүй (нөхцөлт render) тул
- * буцаж ирэхэд өгөгдөл нь өөрөө шинэчлэгддэг.
+ * Табууд нь ХИЙХ АЖЛААР нь тусгаарлагдсан: байнга хардаг ерөнхий давтамж,
+ * долоо хоногийн сэдэв төлөвлөлт, ховор хийдэг хуваарь зохиох, багшийн
+ * ажлын өдөр, амралтын өдрийн хуанли. Идэвхгүй табыг DOM-д огт үлдээхгүй
+ * (нөхцөлт render) тул буцаж ирэхэд өгөгдөл нь өөрөө шинэчлэгддэг.
  */
 export default function StaffScheduleBuilder({ role }: { role: string }) {
-  const [tab, setTab] = useState<TabKey>("week");
+  const [tab, setTab] = useState<TabKey>("overview");
   // PatternBuilder хуваарь үүсгэсний дараа доорх жагсаалт хуучирдаггүй байх
   // энгийн арга: түлхүүрийг нь сольж дахин mount хийлгэнэ.
   const [version, setVersion] = useState(0);
@@ -59,6 +70,8 @@ export default function StaffScheduleBuilder({ role }: { role: string }) {
           );
         })}
       </div>
+
+      {tab === "overview" && <PatternOverview />}
 
       {tab === "week" && <WeekBuilder />}
 

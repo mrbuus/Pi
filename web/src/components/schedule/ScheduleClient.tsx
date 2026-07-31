@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import { api, getRole } from "@/lib/api";
+import PatternOverview from "./PatternOverview";
 import StaffScheduleBuilder from "./StaffScheduleBuilder";
 import UpcomingAgenda from "./UpcomingAgenda";
 import WeeklyGrid from "./WeeklyGrid";
@@ -99,6 +100,14 @@ function TeacherSchedule({ role }: { role: string }) {
       {/* Багш+ -ийн хувьд зохион байгуулах хэсэг нь ӨДӨР ТУТМЫН ажил тул
           хамгийн дээр байрлана — өөрийн хичээлийн жагсаалт доогуур орно. */}
       {role === "TEACHER_PLUS" && <StaffScheduleBuilder role={role} />}
+      {/* Энгийн багшид ерөнхий давтамжийг ХАРУУЛНА (засахгүй) — "бүх багш
+          ерөнхийг нь харж болно" гэсэн эзний дүрэм. */}
+      {role === "TEACHER" && (
+        <section>
+          <h2 className="mb-3 font-bold text-brand-soft">Ерөнхий хуваарь</h2>
+          <PatternOverview readOnly />
+        </section>
+      )}
       <section>
         <h2 className="mb-3 font-bold text-brand-soft">Миний заадаг хичээлүүд</h2>
         {data && data.entries.length === 0 ? (

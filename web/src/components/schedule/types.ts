@@ -266,8 +266,8 @@ export const ROOMS: readonly {
   { value: "502", branch: "Баруун 4", shape: "triangle" },
   { value: "503", branch: "Баруун 4", shape: "trapezoid" },
   { value: "504", branch: "Баруун 4", shape: "square" },
-  { value: "404", branch: "Баруун 4", shape: "pentagon" },
   { value: "403", branch: "Баруун 4", shape: "diamond" },
+  { value: "404", branch: "Баруун 4", shape: "pentagon" },
   { value: "405", branch: "Баруун 4", shape: "rect" },
   { value: "301", branch: "Зүүн 4", shape: null },
   { value: "302", branch: "Зүүн 4", shape: null },
@@ -278,6 +278,17 @@ export const ROOMS: readonly {
 export function roomShapeOf(room: string | null | undefined): RoomShapeKind | null {
   if (!room) return null;
   return ROOMS.find((r) => r.value === room)?.shape ?? null;
+}
+
+/**
+ * Танхимын ТОГТМОЛ эрэмбэ (501,502,503,504,403,404,405 дараа нь 301,302 —
+ * эзний заасан дараалал). Хуваарийн жагсаалт бүр энэ эрэмбээр гарна:
+ * танхим байр сольж хөдөлдөггүй учир нүд дасаад шууд олдог болно.
+ */
+export function roomOrderOf(room: string | null | undefined): number {
+  if (!room) return ROOMS.length + 1;
+  const i = ROOMS.findIndex((r) => r.value === room);
+  return i === -1 ? ROOMS.length : i;
 }
 
 export interface WeekdayPreset {
