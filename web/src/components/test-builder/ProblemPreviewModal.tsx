@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import ProblemStudentPreview from "@/components/ProblemStudentPreview";
 import { FORMAT_LABEL, hasKnownAnswer, type Problem } from "./types";
@@ -7,7 +8,7 @@ import { FORMAT_LABEL, hasKnownAnswer, type Problem } from "./types";
 /**
  * "Сонгосон бодлого зөв мөн үү?" — багш дэлгэцээс гарахгүйгээр бүрэн
  * харах жижиг цонх (modal). ProblemStudentPreview-г дахин ашиглаж сурагчид
- * харагдах яг ижил хэлбэрээр (зөв хариу ✓ зөвхөн багшид) харуулна.
+ * харагдах яг ижил хэлбэрээр (зөв хариу багшид л) харуулна.
  */
 export default function ProblemPreviewModal({
   problem,
@@ -60,28 +61,32 @@ export default function ProblemPreviewModal({
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="min-h-11 shrink-0 rounded-lg border border-line px-4 py-2 text-base transition hover:border-brand"
+            className="min-h-11 shrink-0 rounded-lg border border-line px-4 py-2 text-base transition hover:border-brand inline-flex items-center gap-2"
+            aria-label="Харах цонхыг хаах"
           >
-            Хаах ✕
+            Хаах
+            <X size={18} aria-hidden />
           </button>
         </div>
 
         {!known && (
           <p
             role="alert"
-            className="mb-3 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-base text-error"
+            className="mb-3 flex items-start gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-base text-error"
           >
-            ⚠ Энэ бодлого хариугүй импортлогдсон — тестэд орвол ХЭНД Ч оноо
-            өгөхгүй (сурагчийг &ldquo;буруу&rdquo; гэж дүгнэхгүй, гэхдээ оноо ч авахгүй).
+            <AlertTriangle size={20} className="shrink-0 mt-0.5" aria-hidden />
+            <span>Энэ бодлого хариугүй импортлогдсон — тестэд орвол ХЭНД Ч оноо
+            өгөхгүй (сурагчийг &ldquo;буруу&rdquo; гэж дүгнэхгүй, гэхдээ оноо ч авахгүй).</span>
           </p>
         )}
         {reviewNeeded && (
           <p
             role="status"
-            className="mb-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
+            className="mb-3 flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
           >
-            ⚠ Хариу шалгах шаардлагатай гэж тэмдэглэгдсэн — эх сурвалжтай
-            баталгаажаагүй байж болно.
+            <AlertTriangle size={20} className="shrink-0 mt-0.5" aria-hidden />
+            <span>Хариу шалгах шаардлагатай гэж тэмдэглэгдсэн — эх сурвалжтай
+            баталгаажаагүй байж болно.</span>
           </p>
         )}
 

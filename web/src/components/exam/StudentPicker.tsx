@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 
@@ -109,7 +110,7 @@ export default function StudentPicker({
           aria-label="Сурагчийн сонголтыг цэвэрлэх"
           className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-dim transition hover:text-ink"
         >
-          ✕
+          <X size={18} aria-hidden />
         </button>
       )}
       {open && !selected && (

@@ -1,8 +1,10 @@
 "use client";
 
+import { Check, Loader } from "lucide-react";
+
 /* ============================================================================
  * AutosaveChip — толгой хэсгийн жижиг индикатор (toast биш).
- * "Хадгалж байна…" ⇄ "Бүгд хадгалагдсан ✓". Холболт тасрахад OfflineBanner
+ * "Хадгалж байна…" ⇄ "Бүгд хадгалагдсан". Холболт тасрахад OfflineBanner
  * (тогтмол, хаах боломжгүй) энэ chip-ийг орлож дэлгэц дээр гарч ирнэ.
  * ========================================================================== */
 
@@ -17,12 +19,12 @@ export default function AutosaveChip({ status }: { status: SaveStatus }) {
     >
       {status === "saving" ? (
         <>
-          <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-info" aria-hidden />
+          <Loader size={12} className="shrink-0 animate-spin text-info" aria-hidden />
           Хадгалж байна…
         </>
       ) : (
         <>
-          <span className="text-success" aria-hidden>✓</span>
+          <Check size={14} className="shrink-0 text-success" aria-hidden />
           Бүгд хадгалагдсан
         </>
       )}

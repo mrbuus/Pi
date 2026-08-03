@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import { formatRemaining } from "./ExamTimer";
 
 /* ============================================================================
@@ -64,7 +65,10 @@ export default function PreSubmitReview({
           Хариулаагүй бодлого{unanswered.length > 0 ? ` (${unanswered.length})` : ""}
         </h2>
         {unanswered.length === 0 ? (
-          <p className="text-sm text-success">✓ Бүх бодлогыг хариулсан байна.</p>
+          <p className="flex items-center gap-1.5 text-sm text-success">
+            <Check size={16} aria-hidden />
+            Бүх бодлогыг хариулсан байна.
+          </p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {unanswered.map((c) => (
@@ -109,7 +113,7 @@ export default function PreSubmitReview({
           onClick={onBack}
           className="rounded-xl border border-line px-5 py-3 font-semibold text-ink transition hover:border-brand"
         >
-          ← Буцаж бодох
+          Буцаж бодох
         </button>
         <button
           type="button"

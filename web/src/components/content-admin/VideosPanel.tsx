@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
@@ -87,7 +88,7 @@ export default function VideosPanel({
           chapterId: editForm.chapterId,
         },
       });
-      setMsg({ kind: "success", text: "✓ Бичлэг шинэчлэгдлээ" });
+      setMsg({ kind: "success", text: "Бичлэг шинэчлэгдлээ" });
       setEditId(null);
       loadChapters();
       loadVideos();
@@ -108,7 +109,7 @@ export default function VideosPanel({
         kind: "video",
         label: deleteTarget.title,
       });
-      setMsg({ kind: "success", text: "✓ Бичлэг устгагдлаа" });
+      setMsg({ kind: "success", text: "Бичлэг устгагдлаа" });
       setDeleteTarget(null);
       loadChapters();
       loadVideos();
@@ -126,13 +127,17 @@ export default function VideosPanel({
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-2 py-1 text-xs ${
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" ? (
+              <AlertTriangle size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
             {msg.text}
           </span>
         )}

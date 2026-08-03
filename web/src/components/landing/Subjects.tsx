@@ -1,6 +1,6 @@
 "use client";
 
-import { Pi, Scale } from "lucide-react";
+import { Pi, Scale, ChevronUp, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 
@@ -118,7 +118,15 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
         aria-expanded={open}
         className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition hover:underline"
       >
-        {open ? "Нуух ↑" : "Бодлогын сан харах →"}
+        {open ? (
+          <>
+            Нуух <ChevronUp className="h-4 w-4" aria-hidden />
+          </>
+        ) : (
+          <>
+            Бодлогын сан харах <ChevronRight className="h-4 w-4" aria-hidden />
+          </>
+        )}
       </button>
 
       {open && (

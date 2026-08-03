@@ -33,7 +33,7 @@ export default function ProgressSummary({ goals }: { goals: Goal[] }) {
         <span className="text-ink-dim">{percent}% гүйцэтгэсэн</span>
         {overdue > 0 && (
           <span className="flex items-center gap-1 rounded-full bg-error/15 px-2.5 py-0.5 text-xs font-semibold text-error">
-            ⚠ {overdue} зорилтот хугацаа хэтэрсэн
+            {overdue} зорилтот хугацаа хэтэрсэн
           </span>
         )}
       </div>

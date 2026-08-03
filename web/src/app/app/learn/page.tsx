@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import LessonChapterCard, {
   chapterPercent,
 } from "@/components/lesson/LessonChapterCard";
@@ -135,7 +136,7 @@ export default function LearnIndexPage() {
       <div>
         <h1 className="text-2xl font-extrabold">Хичээл үзэх</h1>
         <p className="mt-1 text-sm text-ink-dim">
-          Онол → видео → дасгал → шалгалт дарааллаар үзээд ахицаа хянана.
+          Онол <ArrowRight className="inline h-4 w-4" aria-hidden /> видео <ArrowRight className="inline h-4 w-4" aria-hidden /> дасгал <ArrowRight className="inline h-4 w-4" aria-hidden /> шалгалт дарааллаар үзээд ахицаа хянана.
         </p>
       </div>
 
@@ -199,8 +200,8 @@ export default function LearnIndexPage() {
             хичээлд &ldquo;{crossSubjectHint.title}&rdquo;-ийг үргэлжлүүлж
             болно
           </span>
-          <span className="shrink-0 font-semibold text-brand-soft">
-            Сэлгэх →
+          <span className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-brand-soft">
+            Сэлгэх <ArrowRight className="h-4 w-4" aria-hidden />
           </span>
         </button>
       )}
@@ -273,9 +274,9 @@ function ContinueHero({
         )}
         <Link
           href={`/app/learn/${chapter.id}?subject=${subject}`}
-          className="ml-auto shrink-0 rounded-xl bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:opacity-90"
+          className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:opacity-90"
         >
-          {label} →
+          {label} <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </div>
     </section>

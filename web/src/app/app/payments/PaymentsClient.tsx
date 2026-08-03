@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AlertTriangle, Check, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatMnt, TUITION } from "@/lib/orgInfo";
 import OutstandingPanel from "@/components/payments/OutstandingPanel";
@@ -43,7 +44,8 @@ function SectionStatus({
   if (error) {
     return (
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-        <span>⚠ {error}</span>
+        <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span>{error}</span>
         <button
           onClick={onRetry}
           className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -140,7 +142,7 @@ export default function PaymentsClient() {
       });
       setPassPick((m) => ({ ...m, [id]: "" }));
       setNotes((m) => ({ ...m, [id]: "" }));
-      setMsg({ kind: "success", text: "✓ Төлбөр баталгаажлаа" });
+      setMsg({ kind: "success", text: "Төлбөр баталгаажлаа" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -159,12 +161,12 @@ export default function PaymentsClient() {
   }
 
   function handleEdited() {
-    setMsg({ kind: "success", text: "✓ Төлбөр засагдлаа" });
+    setMsg({ kind: "success", text: "Төлбөр засагдлаа" });
     load();
   }
 
   function handleReversed() {
-    setMsg({ kind: "success", text: "✓ Төлбөр буцаагдаж, эрх цуцлагдлаа" });
+    setMsg({ kind: "success", text: "Төлбөр буцаагдаж, эрх цуцлагдлаа" });
     load();
   }
 
@@ -186,13 +188,17 @@ export default function PaymentsClient() {
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-3 py-2 text-sm ${
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" ? (
+              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+            ) : (
+              <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
+            )}
             {msg.text}
           </span>
         )}
@@ -259,8 +265,9 @@ export default function PaymentsClient() {
           emptyText="Хүлээгдэж буй төлбөр алга"
         />
         {passesError && (
-          <p className="mb-2 text-xs text-error">
-            ⚠ Эрхийн жагсаалт ачаалагдсангүй: {passesError}
+          <p className="mb-2 flex items-center gap-1.5 text-xs text-error">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            Эрхийн жагсаалт ачаалагдсангүй: {passesError}
           </p>
         )}
         {!pendingLoading && !pendingError && pending.length > 0 && (
@@ -379,8 +386,18 @@ export default function PaymentsClient() {
                     {r.classroom.name} · {r.student.phone}
                   </span>
                 </span>
-                <span className={r.paid ? "text-success" : "font-bold text-error"}>
-                  {r.paid ? "✓ Төлсөн" : "✕ Төлөөгүй"}
+                <span className={`inline-flex items-center gap-1 ${r.paid ? "text-success" : "font-bold text-error"}`}>
+                  {r.paid ? (
+                    <>
+                      <Check className="h-4 w-4" aria-hidden="true" />
+                      Төлсөн
+                    </>
+                  ) : (
+                    <>
+                      <X className="h-4 w-4" aria-hidden="true" />
+                      Төлөөгүй
+                    </>
+                  )}
                 </span>
               </div>
             ))}

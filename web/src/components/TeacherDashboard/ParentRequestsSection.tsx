@@ -17,6 +17,8 @@ interface ParentRequestsSectionProps {
   onReject: (id: string) => void;
 }
 
+import { Check, X } from "lucide-react";
+
 /**
  * Эцэг эхийн холболтын хүсэлтүүдийг батлах эсвэл цуцлах.
  * Зөвхөн ADMIN/TEACHER_PLUS эрхтэй хэрэглэгч үйлдэл хийж болно.
@@ -67,15 +69,17 @@ export default function ParentRequestsSection({
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => onVerify(request.id)}
-                    className="rounded bg-success/20 px-4 py-2 text-xs font-bold text-success transition hover:bg-success/30"
+                    className="inline-flex items-center gap-1 rounded bg-success/20 px-4 py-2 text-xs font-bold text-success transition hover:bg-success/30"
                   >
-                    ✓ Батлах
+                    <Check className="h-3 w-3" aria-hidden />
+                    Батлах
                   </button>
                   <button
                     onClick={() => onReject(request.id)}
-                    className="rounded bg-error/20 px-4 py-2 text-xs font-bold text-error transition hover:bg-error/30"
+                    className="inline-flex items-center gap-1 rounded bg-error/20 px-4 py-2 text-xs font-bold text-error transition hover:bg-error/30"
                   >
-                    ✕ Цуцлах
+                    <X className="h-3 w-3" aria-hidden />
+                    Цуцлах
                   </button>
                 </div>
               </div>

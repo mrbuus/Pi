@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone } from "lucide-react";
+import { Phone, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { formatMnt } from "@/lib/orgInfo";
@@ -53,8 +53,9 @@ export default function OutstandingPanel({ month }: { month: string }) {
         </p>
       )}
       {error && (
-        <div className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          ⚠ {error}
+        <div className="flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+          <span>{error}</span>
         </div>
       )}
       {!loading && !error && rows.length === 0 && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageIcon } from "lucide-react";
+import { AlertTriangle, ImageIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import MathText from "@/components/MathText";
 import {
@@ -152,7 +152,7 @@ export default function ProblemPicker({
           >
             <option value="">Бүгд</option>
             <option value="known">Зөвхөн хариутай</option>
-            <option value="missing">⚠ Зөвхөн хариугүй</option>
+            <option value="missing">Зөвхөн хариугүй</option>
           </select>
         </div>
         <div>
@@ -175,10 +175,11 @@ export default function ProblemPicker({
       {missingInView > 0 && (
         <p
           role="status"
-          className="mb-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
+          className="mb-3 flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
         >
-          ⚠ Харагдаж буй {filtered.length}-ийн {missingInView} нь хариугүй —
-          сонговол онооны нийлбэрт орохгүй.
+          <AlertTriangle size={20} className="shrink-0 mt-0.5" aria-hidden />
+          <span>Харагдаж буй {filtered.length}-ийн {missingInView} нь хариугүй —
+          сонговол онооны нийлбэрт орохгүй.</span>
         </p>
       )}
 
@@ -274,13 +275,15 @@ export default function ProblemPicker({
                     </span>
                   )}
                   {!known && (
-                    <span className="rounded border border-error/40 bg-error/10 px-2 py-0.5 font-semibold text-error">
-                      ⚠ хариугүй
+                    <span className="flex items-center gap-1 rounded border border-error/40 bg-error/10 px-2 py-0.5 font-semibold text-error">
+                      <AlertTriangle size={14} aria-hidden />
+                      <span>хариугүй</span>
                     </span>
                   )}
                   {known && p.analysis?.answerKeyStatus === "REVIEW_REQUIRED" && (
-                    <span className="rounded border border-warning/40 bg-warning/10 px-2 py-0.5 text-warning">
-                      ⚠ шалгах шаардлагатай
+                    <span className="flex items-center gap-1 rounded border border-warning/40 bg-warning/10 px-2 py-0.5 text-warning">
+                      <AlertTriangle size={14} aria-hidden />
+                      <span>шалгах шаардлагатай</span>
                     </span>
                   )}
                 </span>

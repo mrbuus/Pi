@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Clock, Check, X, Pencil, ArrowLeft, TriangleAlert, Undo2 } from "lucide-react";
 import { api, getRole } from "@/lib/api";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import SendPasswordResetButton from "./SendPasswordResetButton";
@@ -23,11 +24,11 @@ const METHOD_LABEL: Record<string, string> = {
   BANK_TRANSFER: "Данс",
   CASH: "Бэлэн",
 };
-const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
-  PENDING: { text: "⏳ Хүлээгдэж буй", cls: "bg-warning/15 text-warning" },
-  CONFIRMED: { text: "✓ Баталгаажсан", cls: "bg-success/15 text-success" },
-  REJECTED: { text: "✕ Цуцалсан", cls: "bg-error/15 text-error" },
-  REVERSED: { text: "↺ Буцаасан", cls: "bg-ink/10 text-ink-dim" },
+const STATUS_LABEL: Record<string, { icon?: any; text: string; cls: string }> = {
+  PENDING: { icon: Clock, text: "Хүлээгдэж буй", cls: "bg-warning/15 text-warning" },
+  CONFIRMED: { icon: Check, text: "Баталгаажсан", cls: "bg-success/15 text-success" },
+  REJECTED: { icon: X, text: "Цуцалсан", cls: "bg-error/15 text-error" },
+  REVERSED: { icon: Undo2, text: "Буцаасан", cls: "bg-ink/10 text-ink-dim" },
 };
 
 interface FormState {
@@ -254,7 +255,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
 
     try {
       await api(`/users/${studentId}/profile`, { method: "PATCH", body });
-      setMsg({ kind: "success", text: "✓ Хадгалагдлаа" });
+      setMsg({ kind: "success", text: "Хадгалагдлаа" });
       setEditing(false);
       load(); // серверийн бодит утгаар дахин баталгаажуулна
     } catch (e) {
@@ -299,9 +300,10 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
     <div className="space-y-6">
       <Link
         href="/app/admin/students"
-        className="text-sm text-ink-dim transition hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-dim transition hover:text-ink"
       >
-        ← Сурагчийн жагсаалт руу буцах
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        Сурагчийн жагсаалт руу буцах
       </Link>
 
       {/* ---- Танилцуулга / Identity ---- */}
@@ -317,9 +319,10 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
             <div className="flex flex-col items-end gap-2">
               <button
                 onClick={startEdit}
-                className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-brand-soft"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-brand-soft"
               >
-                ✎ Мэдээлэл засах
+                <Pencil className="h-4 w-4" aria-hidden />
+                Мэдээлэл засах
               </button>
               {/* Нууц үгээ мартсан сурагчийг багш ГАЗАР ДЭЭР НЬ шийдэж чадах
                   ёстой — эс бөгөөс эзэн нь терминалаас скрипт ажиллуулах
@@ -352,11 +355,15 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
         {msg && (
           <p
             role="status"
-            className={`mt-3 rounded-lg px-3 py-2 text-sm ${
+            className={`mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm ${
               msg.kind === "error" ? "bg-error/10 text-error" : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : "✓ "}
+            {msg.kind === "error" ? (
+              <TriangleAlert className="h-4 w-4" aria-hidden />
+            ) : (
+              <Check className="h-4 w-4" aria-hidden />
+            )}
             {msg.text}
           </p>
         )}
@@ -694,7 +701,10 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
             Төлбөрийн түүх, үлдэгдэл зөвхөн Багш+/Админ эрхтэй хэрэглэгчид харагдана.
           </p>
         ) : paymentsError ? (
-          <p className="mt-4 text-sm text-error">⚠ {paymentsError}</p>
+          <p className="mt-4 inline-flex items-center gap-1.5 text-sm text-error">
+            <TriangleAlert className="h-4 w-4" aria-hidden />
+            {paymentsError}
+          </p>
         ) : payments ? (
           <>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -737,7 +747,8 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
                           {pay.forMonth ? ` · ${pay.forMonth}` : ""}
                         </span>
                       </span>
-                      <span className={`rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}>
+                        {st.icon && <st.icon className="h-3 w-3" aria-hidden />}
                         {st.text}
                       </span>
                     </div>

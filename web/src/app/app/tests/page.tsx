@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, Check, Clock, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, getRole } from "@/lib/api";
@@ -238,12 +238,12 @@ export default function TestsPage() {
             >
               {a.date.slice(5, 10)}{" "}
               {a.status === "PRESENT"
-                ? "✓ ирсэн"
+                ? <><Check className="h-4 w-4" aria-hidden /> ирсэн</>
                 : a.status === "LATE"
-                  ? "⏱ хоцорсон"
+                  ? <><Clock className="h-4 w-4" aria-hidden /> хоцорсон</>
                   : a.status === "EXCUSED"
                     ? "чөлөөтэй"
-                    : "✗ тасалсан"}
+                    : <><X className="h-4 w-4" aria-hidden /> тасалсан</>}
             </span>
           ))}
         </div>

@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import Sidebar from "@/components/nav/Sidebar";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
+import { NavIcon } from "@/components/nav/icons";
 import { api, clearAuth, fileUrl, getRole, getToken } from "@/lib/api";
 
 // Role бүрийн монгол нэр — header identity badge-д ашиглана
@@ -77,20 +78,6 @@ function IdentityBadge() {
   );
 }
 
-function MenuIcon({ open }: { open: boolean }) {
-  if (open) {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" className="h-5 w-5">
-        <path d="M6 6l12 12M18 6L6 18" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" className="h-5 w-5">
-      <path d="M4 7h16M4 12h16M4 17h16" />
-    </svg>
-  );
-}
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -162,7 +149,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   aria-label={navOpen ? "Цэсийг хаах" : "Цэсийг нээх"}
                   className="flex shrink-0 items-center justify-center rounded-lg border border-line p-2 text-ink-dim transition hover:text-ink lg:hidden"
                 >
-                  <MenuIcon open={navOpen} />
+                  <NavIcon name={navOpen ? "x" : "menu"} className="h-5 w-5" />
                 </button>
                 {pageTitle && (
                   <span className="shrink-0 truncate text-sm font-semibold text-ink sm:text-base">

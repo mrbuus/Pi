@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
@@ -54,7 +55,7 @@ export default function TestsPanel({ deletedEntries, onDeleted }: TestsPanelProp
             ? `${deleteTarget._count.results} сурагчийн дүн хадгалагдсаар байна`
             : undefined,
       });
-      setMsg({ kind: "success", text: "✓ Тест устгагдлаа" });
+      setMsg({ kind: "success", text: "Тест устгагдлаа" });
       setDeleteTarget(null);
       load();
     } catch (e) {
@@ -71,13 +72,17 @@ export default function TestsPanel({ deletedEntries, onDeleted }: TestsPanelProp
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-2 py-1 text-xs ${
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" ? (
+              <AlertTriangle size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
             {msg.text}
           </span>
         )}
@@ -115,7 +120,8 @@ export default function TestsPanel({ deletedEntries, onDeleted }: TestsPanelProp
       )}
       {error && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
+          <span>{error}</span>
           <button
             onClick={load}
             className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -184,10 +190,11 @@ export default function TestsPanel({ deletedEntries, onDeleted }: TestsPanelProp
                 байна ({deleteTarget._count.problems} бодлоготой).
               </p>
               {deleteTarget._count.results > 0 && (
-                <p className="text-xs text-warning">
-                  ⚠ {deleteTarget._count.results} сурагч энэ тестээр дүн
+                <p className="flex gap-2 text-xs text-warning">
+                  <AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
+                  <span>{deleteTarget._count.results} сурагч энэ тестээр дүн
                   авсан байна — дүнгүүд устахгүй хадгалагдана, харин тест
-                  цаашид жагсаалтад харагдахгүй болно.
+                  цаашид жагсаалтад харагдахгүй болно.</span>
                 </p>
               )}
             </div>

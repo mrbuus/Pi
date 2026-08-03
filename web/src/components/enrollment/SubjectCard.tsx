@@ -151,7 +151,7 @@ export default function SubjectCard({
             <span className="text-warning">Хадгалаагүй өөрчлөлт бий</span>
           )}
           {saveError && (
-            <span className="text-error">⚠ {saveError}</span>
+            <span className="text-error">{saveError}</span>
           )}
         </div>
         <div className="flex shrink-0 gap-2">

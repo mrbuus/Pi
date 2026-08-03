@@ -1,6 +1,6 @@
 "use client";
 
-import { Flame, Trophy } from "lucide-react";
+import { Flame, Trophy, ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import HeatmapGrid, { HeatmapCell } from "./HeatmapGrid";
@@ -150,19 +150,19 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
         <div className="flex items-center gap-2 text-sm">
           <button
             onClick={() => setActiveYear((y) => y - 1)}
-            className="rounded-lg border border-line px-2 py-1 text-ink-dim transition hover:text-ink"
+            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink"
             aria-label="Өмнөх жил харах"
           >
-            ←
+            <ArrowLeft className="h-4 w-4" aria-hidden />
           </button>
           <span className="font-semibold text-ink">{activeYear}</span>
           <button
             onClick={() => setActiveYear((y) => y + 1)}
             disabled={activeYear >= currentYear}
-            className="rounded-lg border border-line px-2 py-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
+            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
             aria-label="Дараагийн жил харах"
           >
-            →
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </button>
         </div>
       </div>

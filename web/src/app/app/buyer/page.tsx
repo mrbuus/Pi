@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
 import { api } from "@/lib/api";
 import { getBookMeta } from "@/lib/bookMeta";
 import {
@@ -146,8 +147,8 @@ export default function BuyerDashboard() {
       });
       setMsg(
         method === "QPAY"
-          ? "✓ QPay нэхэмжлэх үүсгэгдлээ — төлбөр хиймэгц эрх тань автоматаар нээгдэнэ"
-          : "✓ Төлбөрийн мэдэгдэл илгээгдлээ — баталгаажмагц эрх тань нээгдэнэ",
+          ? "QPay нэхэмжлэх үүсгэгдлээ — төлбөр хиймэгц эрх тань автоматаар нээгдэнэ"
+          : "Төлбөрийн мэдэгдэл илгээгдлээ — баталгаажмагц эрх тань нээгдэнэ",
       );
       setAmount("");
       setDesc("");
@@ -397,9 +398,9 @@ export default function BuyerDashboard() {
                   </span>
                   <button
                     onClick={copyAccount}
-                    className="rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink"
+                    className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink"
                   >
-                    {copied ? "Хууллаа ✓" : "Хуулах"}
+                    {copied ? <><Check className="h-3 w-3" aria-hidden /> Хууллаа</> : "Хуулах"}
                   </button>
                 </div>
               </div>
@@ -472,8 +473,8 @@ export default function BuyerDashboard() {
         </button>
 
         {msg && (
-          <p className="mt-3 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
-            {msg}
+          <p className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
+            <Check className="h-4 w-4" aria-hidden /> {msg}
           </p>
         )}
       </section>

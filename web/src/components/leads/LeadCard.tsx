@@ -197,7 +197,7 @@ export default function LeadCard({
         )}
         {error && (
           <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-2.5 py-1.5 text-xs text-error">
-            <span>⚠ {error}</span>
+            <span>{error}</span>
             <button
               type="button"
               onClick={() => onRetry(lead.id)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, TriangleAlert, Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AnnouncementCompose from "@/components/AnnouncementCompose";
 import ClassActivityHeatmap from "@/components/activity/ClassActivityHeatmap";
@@ -107,7 +107,8 @@ function SectionStatus({
   if (error) {
     return (
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-        <span>⚠ {error}</span>
+        <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+        <span>{error}</span>
         <button
           onClick={onRetry}
           className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -308,7 +309,7 @@ export default function TeacherDashboardClient() {
       // хадгалсан өгөгдлийг дарж бичих эрсдэлтэй. Тиймээс энд зөвхөн бусад
       // dashboard хэсгүүдийг (дүгнэлт/анхаарах жагсаалт) sync хийж,
       // амжилтын мессеж харуулна.
-      setMsg({ kind: "success", text: "✓ Ирц хадгалагдлаа" });
+      setMsg({ kind: "success", text: "Ирц хадгалагдлаа" });
       loadClass();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -338,7 +339,7 @@ export default function TeacherDashboardClient() {
   async function verifyParentLink(id: string) {
     try {
       await api(`/parent/links/${id}/verify`, { method: "POST" });
-      setMsg({ kind: "success", text: "✓ Эцэг эхийн холболт баталгаажлаа" });
+      setMsg({ kind: "success", text: "Эцэг эхийн холболт баталгаажлаа" });
       loadClass();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -369,9 +370,8 @@ export default function TeacherDashboardClient() {
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
         <DashboardGreeting />
-        <h1 className="text-2xl font-extrabold">Багшийн самбар</h1>
       </div>
 
       {/* Анги сонгох — sub-tab бүрийн хамгийн дээд хэсэгт үргэлж харагдана,
@@ -402,7 +402,7 @@ export default function TeacherDashboardClient() {
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-3 py-2 text-sm ${
+            className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : msg.kind === "success"
@@ -410,7 +410,8 @@ export default function TeacherDashboardClient() {
                   : "bg-info/10 text-info"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" && <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />}
+            {msg.kind === "success" && <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />}
             {msg.text}
           </span>
         )}
@@ -418,7 +419,8 @@ export default function TeacherDashboardClient() {
 
       {classroomsError && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
-          <span>⚠ Ангийн жагсаалт ачаалагдсангүй: {classroomsError}</span>
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+          <span>Ангийн жагсаалт ачаалагдсангүй: {classroomsError}</span>
           <button
             onClick={() => window.location.reload()}
             className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -536,7 +538,7 @@ export default function TeacherDashboardClient() {
             <div className="md:col-span-2 lg:col-span-1">
               {summaryError ? (
                 <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
-                  ⚠ Дүгнэлт ачаалагдсангүй: {summaryError}
+                  <div className="inline-flex items-center gap-1.5"><TriangleAlert className="h-4 w-4" aria-hidden /> Дүгнэлт ачаалагдсангүй: {summaryError}</div>
                 </section>
               ) : (
                 <SummarySection summary={summaryLoading ? null : summary} />
@@ -546,7 +548,7 @@ export default function TeacherDashboardClient() {
             <div className="md:col-span-2 lg:col-span-1">
               {attentionError ? (
                 <section className="rounded-2xl border border-error/30 bg-error/10 p-4 text-sm text-error md:p-6">
-                  ⚠ Анхаарах жагсаалт ачаалагдсангүй: {attentionError}
+                  <div className="inline-flex items-center gap-1.5"><TriangleAlert className="h-4 w-4" aria-hidden /> Анхаарах жагсаалт ачаалагдсангүй: {attentionError}</div>
                 </section>
               ) : (
                 <AttentionSection attention={attentionLoading ? null : attention} />

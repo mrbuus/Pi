@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check } from "lucide-react";
 import { NavIcon } from "@/components/nav/icons";
 import { api, setAuth } from "@/lib/api";
 
@@ -164,7 +165,10 @@ export default function ChangePasswordSection() {
           ) : (
             confirm &&
             confirm === next && (
-              <p className="mt-1.5 text-sm text-success">✓ Таарч байна</p>
+              <p className="mt-1.5 inline-flex items-center gap-1 text-sm text-success">
+                <Check className="h-3 w-3" aria-hidden />
+                Таарч байна
+              </p>
             )
           )}
         </div>
@@ -175,8 +179,9 @@ export default function ChangePasswordSection() {
           </p>
         )}
         {ok && (
-          <p role="status" className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success">
-            ✓ Нууц үг амжилттай солигдлоо
+          <p role="status" className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 inline-flex items-center gap-1.5 text-sm text-success">
+            <Check className="h-4 w-4" aria-hidden />
+            Нууц үг амжилттай солигдлоо
           </p>
         )}
 

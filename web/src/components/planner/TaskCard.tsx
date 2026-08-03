@@ -70,7 +70,7 @@ export default function TaskCard({
         {(task.startDate || task.dueDate) && (
           <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5">
             <Calendar className="h-3 w-3" aria-hidden />
-            {formatDate(task.startDate)} → {formatDate(task.dueDate)}
+            {formatDate(task.startDate)} - {formatDate(task.dueDate)}
           </span>
         )}
         {typeof task.estimateHours === "number" && (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AlertTriangle, X } from "lucide-react";
 import { fileUrl } from "@/lib/api";
 
 /**
@@ -83,7 +84,7 @@ export default function ProblemFigure({
 
         {isStaffView && !hasAlt && (
           <p className="mt-2 flex items-center gap-1.5 rounded-lg border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
-            <span aria-hidden="true">⚠</span>
+            <AlertTriangle size={14} className="shrink-0" aria-hidden="true" />
             Alt текст оруулаагүй байна — дэлгэцний уншигчид энэ зураг тайлбаргүй харагдана
           </p>
         )}
@@ -212,9 +213,9 @@ function FigureLightbox({
           type="button"
           onClick={onClose}
           aria-label="Хаах"
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-panel/90 text-lg font-bold text-ink shadow focus-visible:outline-none"
+          className="flex h-10 w-10 items-center justify-center rounded-lg bg-panel/90 text-ink shadow focus-visible:outline-none"
         >
-          ✕
+          <X className="h-5 w-5" aria-hidden />
         </button>
       </div>
 

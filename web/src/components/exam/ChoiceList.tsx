@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import MathText from "@/components/MathText";
 
 /* ============================================================================
@@ -46,12 +47,11 @@ export default function ChoiceList({
             >
               {letter}
               {sel && (
-                <span
+                <Check
+                  size={16}
                   aria-hidden
-                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-bright text-[11px] text-on-brand"
-                >
-                  ✓
-                </span>
+                  className="absolute -right-1.5 -top-1.5 rounded-full bg-brand-bright text-on-brand"
+                />
               )}
             </button>
           );
@@ -80,7 +80,7 @@ export default function ChoiceList({
               }`}
               aria-hidden
             >
-              {sel ? "✓" : ci + 1}
+              {sel ? <Check size={16} /> : ci + 1}
             </span>
             <span className="flex-1">
               <MathText>{c}</MathText>

@@ -417,3 +417,161 @@ address,
   .info-hint-pop-bottom, .info-hint-pop-top,
   .loop-sweep, .loop-node, .loop-label { animation: none; }
 }
+
+/* ============================================================
+   ДИЗАЙНЫ СУУРЬ v2 — гүн, хөдөлгөөн, нягтрал, фокус
+   (2026-08-01, эзний "10 дахин сайжруул" даалгавар)
+
+   ГОЛ ХЯЗГААРЛАЛТ: интернэт удаан байхад UI МУУДАХ ЁСГҮЙ.
+   Тиймээс энд бичсэн БҮХ эффект нь:
+     • сүлжээнээс 0 байт нэмдэггүй (зураг, видео, WebGL, гадаад фонт БАЙХГҮЙ)
+     • зөвхөн compositor-т ажилладаг шинж чанар (transform/opacity) хэрэглэдэг
+     • JS ачаалагдаагүй ч харагдана (цэвэр CSS)
+     • prefers-reduced-motion үед бүрэн унтардаг
+   ============================================================ */
+
+:root {
+  /* --- Хөдөлгөөний токен: бүх компонент ИЖИЛ хэмнэлтэй байх --- */
+  --dur-micro: 120ms;   /* hover, товчлуурын даралт */
+  --dur-base: 180ms;    /* энгийн шилжилт */
+  --dur-enter: 260ms;   /* самбар/цонх нээгдэх */
+  /* Material 3-ийн "emphasized decelerate" — эхэндээ хурдан, төгсгөлд зөөлөн.
+     Шугаман easing нь механик мэдрэмж өгдөг тул хэрэглэхгүй. */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* --- Гүний шат: давхарласан сүүдэр (Linear/Vercel-ийн арга).
+     Нэг том бүдэг сүүдэр биш, хоёр давхар — ойрын нарийн ирмэг +
+     холын зөөлөн тархалт. Ингэснээр "цаасан" биш "шилэн" мэдрэмж өгнө. --- */
+  --elev-1: 0 1px 2px -1px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.04);
+  --elev-2: 0 2px 4px -2px rgb(0 0 0 / 0.10), 0 4px 12px -2px rgb(0 0 0 / 0.06);
+  --elev-3: 0 8px 16px -6px rgb(0 0 0 / 0.14), 0 16px 40px -12px rgb(0 0 0 / 0.10);
+
+  /* --- Нягтралын шат: хүснэгт/жагсаалтын мөрийн өндөр.
+     Linear ба Notion Calendar хоёулаа 28-32px барьдаг; 40px нь нэг дэлгэцэд
+     багтах мөрийн тоог ~30% бууруулдаг. --- */
+  --row-compact: 28px;
+  --row-base: 32px;
+  --row-roomy: 38px;
+}
+
+:root[data-theme="dark"],
+:root:not([data-theme="light"]) {
+  /* Харанхуй дэвсгэр дээр хар сүүдэр үл үзэгдэнэ — гүнийг ГЭРЭЛТЭЙ ирмэгээр
+     илэрхийлнэ (Apple/Vercel-ийн харанхуй горимын арга). */
+  --elev-1: 0 1px 2px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --elev-2: 0 4px 12px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --elev-3: 0 16px 40px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* --- Гүний туслах анги --- */
+.elev-1 { box-shadow: var(--elev-1); }
+.elev-2 { box-shadow: var(--elev-2); }
+.elev-3 { box-shadow: var(--elev-3); }
+
+/* --- Интерактив гадаргуу: hover-т нэг пиксель дээшилж, сүүдэр нэмэгдэнэ.
+   translateY нь layout-ыг дахин тооцоолуулдаггүй (зөвхөн compositor) тул
+   жагсаалтад 100 мөр байсан ч гацахгүй. --- */
+.surface-interactive {
+  transition:
+    transform var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out);
+}
+.surface-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--elev-2);
+}
+.surface-interactive:active { transform: translateY(0); }
+
+/* --- Мөрийн hover: жагсаалтад сүүдэр биш, зөвхөн дэвсгэр (тайван) --- */
+.row-interactive {
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+
+/* --- Фокусын цагираг: гарын хэрэглэгчид БҮХ газар ижил.
+   :focus-visible ашигласнаар хулганаар дарахад гарахгүй, зөвхөн Tab-аар. --- */
+.focus-ring:focus-visible,
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--brand-bright);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* --- Хуудасны АМБИЕНТ дэвсгэр — цэвэр CSS градиент, 0 байт.
+   fixed тул гүйлгэхэд дахин будагдахгүй; pointer-events алга тул дарахад
+   саад болохгүй. Маш бүдэг (0.05 alpha) — "байгаа нь мэдэгдэхгүй ч
+   байхгүй бол хоосон санагдах" түвшин. --- */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 12% -10%, color-mix(in oklab, var(--brand-bright) 7%, transparent), transparent 60%),
+    radial-gradient(50rem 36rem at 92% 8%, color-mix(in oklab, var(--teal, var(--brand)) 5%, transparent), transparent 62%);
+}
+
+/* --- Скелетон: агуулга ирэхийг хүлээх үеийн "амьд" төлөв.
+   Удаан сүлжээнд ХАМГИЙН чухал элемент — хоосон цагаан дэлгэцийн оронд
+   бүтэц харагдвал хэрэглэгч "гацсан" гэж бодохгүй. --- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--ink) 7%, transparent);
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--surface) 60%, transparent),
+    transparent
+  );
+  animation: skeletonSweep 1.4s ease-in-out infinite;
+}
+@keyframes skeletonSweep {
+  100% { transform: translateX(100%); }
+}
+
+/* --- Агуулга гарч ирэх зөөлөн шилжилт (JS-гүй, зөвхөн CSS) --- */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.enter-fade { animation: fadeUp var(--dur-enter) var(--ease-out) both; }
+
+/* --- Popover/самбар нээгдэх: бага зэрэг "спринг" --- */
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.97) translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.enter-pop { animation: popIn var(--dur-enter) var(--ease-spring) both; }
+
+/* --- Тоон утга солигдоход анзаарагдах богино цохилт --- */
+@keyframes valueBump {
+  50% { transform: scale(1.08); }
+}
+.value-bump { animation: valueBump var(--dur-base) var(--ease-out); }
+
+/* Хөдөлгөөн багасгах горимд ДЭЭРХ БҮГД унтарна — вестибуляр эмгэгтэй
+   хэрэглэгчид болон хуучин төхөөрөмжид. */
+@media (prefers-reduced-motion: reduce) {
+  .surface-interactive,
+  .row-interactive { transition: none; }
+  .surface-interactive:hover { transform: none; }
+  .skeleton::after,
+  .enter-fade,
+  .enter-pop,
+  .value-bump { animation: none; }
+}

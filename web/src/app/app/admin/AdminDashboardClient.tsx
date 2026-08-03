@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { TriangleAlert, Check, X } from "lucide-react";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import RequireRole from "@/components/nav/RequireRole";
 import { api } from "@/lib/api";
@@ -100,7 +101,7 @@ function SectionStatus({
   if (error) {
     return (
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-        <span>⚠ {error}</span>
+        <span className="inline-flex items-center gap-1.5"><TriangleAlert className="h-4 w-4" aria-hidden /> {error}</span>
         <button
           onClick={onRetry}
           className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -200,7 +201,7 @@ export default function AdminDashboardClient() {
   async function setUserRole(id: string, role: string) {
     try {
       await api(`/users/${id}/role`, { method: "PATCH", body: { role } });
-      setMsg({ kind: "success", text: "✓ Үүрэг солигдлоо" });
+      setMsg({ kind: "success", text: "Үүрэг солигдлоо" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -244,11 +245,11 @@ export default function AdminDashboardClient() {
       );
       if (res.tempPassword) {
         setTempReveal({ password: res.tempPassword, visible: false });
-        setMsg({ kind: "success", text: "✓ Хэрэглэгч үүслээ" });
+        setMsg({ kind: "success", text: "Хэрэглэгч үүслээ" });
       } else {
         setMsg({
           kind: "success",
-          text: "✓ Хэрэглэгч үүслээ — анхны нууц үг нь утасны дугаар",
+          text: "Хэрэглэгч үүслээ — анхны нууц үг нь утасны дугаар",
         });
       }
       setNewUser({ firstName: "", lastName: "", phone: "", role: "STUDENT" });
@@ -264,7 +265,7 @@ export default function AdminDashboardClient() {
     if (!tempReveal) return;
     try {
       await navigator.clipboard.writeText(tempReveal.password);
-      setMsg({ kind: "success", text: "✓ Нууц үг санах ойд хуулагдлаа" });
+      setMsg({ kind: "success", text: "Нууц үг санах ойд хуулагдлаа" });
     } catch {
       setMsg({ kind: "error", text: "Хуулж чадсангүй — гараар хуулна уу" });
     }
@@ -278,7 +279,7 @@ export default function AdminDashboardClient() {
         body: { phone: promotePhone },
       });
       setPromotePhone("");
-      setMsg({ kind: "success", text: "✓ Багш боллоо" });
+      setMsg({ kind: "success", text: "Багш боллоо" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -291,7 +292,7 @@ export default function AdminDashboardClient() {
         method: "POST",
         body: passPick[id] ? { passId: passPick[id] } : {},
       });
-      setMsg({ kind: "success", text: "✓ Баталгаажлаа" });
+      setMsg({ kind: "success", text: "Баталгаажлаа" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -307,7 +308,7 @@ export default function AdminDashboardClient() {
         body: { name: newClass, type: "IN_PERSON" },
       });
       setNewClass("");
-      setMsg({ kind: "success", text: "✓ Анги үүслээ" });
+      setMsg({ kind: "success", text: "Анги үүслээ" });
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
     } finally {
@@ -329,7 +330,7 @@ export default function AdminDashboardClient() {
         },
       });
       setNewPass({ name: "", days: 30, price: 0 });
-      setMsg({ kind: "success", text: "✓ Эрх үүслээ" });
+      setMsg({ kind: "success", text: "Эрх үүслээ" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -368,7 +369,7 @@ export default function AdminDashboardClient() {
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠" : "✓"} {msg.text}
+            {msg.kind === "error" ? <TriangleAlert className="h-4 w-4" aria-hidden /> : <Check className="h-4 w-4" aria-hidden />} {msg.text}
           </span>
         )}
       </div>
@@ -436,8 +437,8 @@ export default function AdminDashboardClient() {
         {/* Түр нууц үг — reveal-once: анхандаа далдлагдсан, дахин ачаалахад алга болно */}
         {tempReveal && (
           <div className="mt-4 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm">
-            <p className="mb-2 font-semibold text-warning">
-              ⚠ Энэ түр нууц үгийг ЗӨВХӨН ОДОО, НЭГ Л УДАА харуулж байна — хаавал
+            <p className="mb-2 inline-flex items-center gap-1.5 font-semibold text-warning">
+              <TriangleAlert className="h-4 w-4" aria-hidden /> Энэ түр нууц үгийг ЗӨВХӨН ОДОО, НЭГ Л УДАА харуулж байна — хаавал
               дахин сэргээх боломжгүй тул шууд хуулж, хэрэглэгчид дамжуулна уу.
             </p>
             <div className="flex flex-wrap items-center gap-2">
@@ -671,8 +672,8 @@ export default function AdminDashboardClient() {
           </div>
         )}
         {passesError && (
-          <p className="mt-2 text-xs text-error">
-            ⚠ Эрхийн жагсаалт ачаалагдсангүй: {passesError}
+          <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-error">
+            <TriangleAlert className="h-4 w-4" aria-hidden /> Эрхийн жагсаалт ачаалагдсангүй: {passesError}
           </p>
         )}
       </section>
@@ -700,13 +701,13 @@ export default function AdminDashboardClient() {
                   <span className="text-ink-dim">{r.classroom.name}</span>
                 </span>
                 <span
-                  className={
+                  className={`${
                     r.paid
                       ? "text-success"
                       : "font-bold text-error"
-                  }
+                  } inline-flex items-center gap-1.5`}
                 >
-                  {r.paid ? "✓ Төлсөн" : "✕ Төлөөгүй"}
+                  {r.paid ? <><Check className="h-4 w-4" aria-hidden /> Төлсөн</> : <><X className="h-4 w-4" aria-hidden /> Төлөөгүй</>}
                 </span>
               </div>
             ))}

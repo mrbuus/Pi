@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { computeDiff, fieldLabel, formatDiffValue } from "./auditHelpers";
 
 /**
@@ -42,8 +43,8 @@ export default function AuditDiff({
           >
             {formatDiffValue(f.key, f.before)}
           </span>
-          <span aria-hidden className="hidden text-ink-dim sm:inline">
-            →
+          <span className="hidden justify-center sm:flex">
+            <ArrowRight className="h-4 w-4 text-ink-dim" aria-hidden />
           </span>
           <span
             className={

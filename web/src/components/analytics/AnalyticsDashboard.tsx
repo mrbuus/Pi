@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Database } from "lucide-react";
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import AtRiskList from "./AtRiskList";
 import ClassroomTable from "./ClassroomTable";
 import DateRangePicker, { defaultRange } from "./DateRangePicker";
 import EngagementChart from "./EngagementChart";
 import KpiTiles from "./KpiTiles";
-import { EmptyCard, ErrorCard, LoadingCard } from "./StateCard";
 import TopicWeaknessList from "./TopicWeaknessList";
 import type {
   AtRiskResponse,
@@ -130,8 +131,8 @@ export default function AnalyticsDashboard() {
       </div>
 
       <Section title="Гол үзүүлэлт">
-        {overview.loading && <LoadingCard />}
-        {overview.error && <ErrorCard message={overview.error} onRetry={overview.retry} />}
+        {overview.loading && <LoadingState rows={3} />}
+        {overview.error && <ErrorState message={overview.error} onRetry={overview.retry} />}
         {!overview.loading && !overview.error && overview.data && (
           <KpiTiles data={overview.data} />
         )}
@@ -141,9 +142,9 @@ export default function AnalyticsDashboard() {
         title="Өдөр тутмын идэвх"
         subtitle="Тухайн өдөр дор хаяж нэг үйлдэл (нэвтрэх, бодлого, видео гэх мэт) хийсэн сурагчийн тоо"
       >
-        {engagement.loading && <LoadingCard />}
+        {engagement.loading && <LoadingState rows={5} />}
         {engagement.error && (
-          <ErrorCard message={engagement.error} onRetry={engagement.retry} />
+          <ErrorState message={engagement.error} onRetry={engagement.retry} />
         )}
         {!engagement.loading && !engagement.error && engagement.data && (
           <EngagementChart
@@ -158,13 +159,13 @@ export default function AnalyticsDashboard() {
         title="Ангиудын харьцуулалт"
         subtitle="Хамгийн бага оролцоотой анги эхэндээ ирнэ — аль анги хоцорч байгааг шууд харна"
       >
-        {classrooms.loading && <LoadingCard />}
+        {classrooms.loading && <LoadingState rows={4} />}
         {classrooms.error && (
-          <ErrorCard message={classrooms.error} onRetry={classrooms.retry} />
+          <ErrorState message={classrooms.error} onRetry={classrooms.retry} />
         )}
         {!classrooms.loading && !classrooms.error && classrooms.data && (
           classrooms.data.classrooms.length === 0 ? (
-            <EmptyCard message="Идэвхтэй анги алга." />
+            <EmptyState title="Идэвхтэй анги алга" hint="Сонгосон хугацаанд сурагч бүртгэгдээгүй байна" />
           ) : (
             <ClassroomTable rows={classrooms.data.classrooms} />
           )
@@ -175,11 +176,11 @@ export default function AnalyticsDashboard() {
         title="Хамгийн сул сэдвүүд"
         subtitle="Амжилтын хувиар сул сэдэв эхэндээ ирнэ — сургалтын хөтөлбөрт хаана анхаарах хэрэгтэйг харуулна"
       >
-        {topics.loading && <LoadingCard />}
-        {topics.error && <ErrorCard message={topics.error} onRetry={topics.retry} />}
+        {topics.loading && <LoadingState rows={4} />}
+        {topics.error && <ErrorState message={topics.error} onRetry={topics.retry} />}
         {!topics.loading && !topics.error && topics.data && (
           topics.data.topics.length === 0 ? (
-            <EmptyCard message="Сонгосон хугацаанд үнэлэгдэх оролдлого алга." />
+            <EmptyState title="Үнэлэгдэх оролдлого алга" hint="Сонгосон хугацаанд сурагчид бодлого бодоогүй байна" />
           ) : (
             <TopicWeaknessList
               topics={topics.data.topics}
@@ -208,13 +209,17 @@ export default function AnalyticsDashboard() {
             </button>
           ))}
         </div>
-        {atRisk.loading && <LoadingCard />}
-        {atRisk.error && <ErrorCard message={atRisk.error} onRetry={atRisk.retry} />}
+        {atRisk.loading && <LoadingState rows={5} />}
+        {atRisk.error && <ErrorState message={atRisk.error} onRetry={atRisk.retry} />}
         {!atRisk.loading && !atRisk.error && atRisk.data && (
-          <AtRiskList
-            students={atRisk.data.students}
-            windowDays={atRisk.data.windowDays}
-          />
+          atRisk.data.students.length === 0 ? (
+            <EmptyState title="Эрсдэлтэй сурагч алга" hint="Сайн явж байна!" />
+          ) : (
+            <AtRiskList
+              students={atRisk.data.students}
+              windowDays={atRisk.data.windowDays}
+            />
+          )
         )}
       </Section>
     </div>

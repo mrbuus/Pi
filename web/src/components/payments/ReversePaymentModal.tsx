@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatMnt } from "@/lib/orgInfo";
 import { METHOD_LABEL, errMsg } from "./paymentHelpers";
@@ -73,9 +74,12 @@ export default function ReversePaymentModal({
           {payment.forMonth && ` · ${payment.forMonth}`}
         </p>
 
-        <div className="mt-4 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          ⚠ Буцаавал энэ төлбөрөөр олгосон ЭРХ (pass) автоматаар ЦУЦЛАГДАНА.
-          Энэ үйлдлийг дараа нь буцаах боломжгүй.
+        <div className="mt-4 flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+          <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <span>
+            Буцаавал энэ төлбөрөөр олгосон ЭРХ (pass) автоматаар ЦУЦЛАГДАНА.
+            Энэ үйлдлийг дараа нь буцаах боломжгүй.
+          </span>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
@@ -99,9 +103,10 @@ export default function ReversePaymentModal({
           {error && (
             <div
               role="alert"
-              className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
+              className="flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
             >
-              ⚠ {error}
+              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{error}</span>
             </div>
           )}
           <div className="flex justify-end gap-2 pt-1">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Check, CheckCircle2, ChevronRight } from "lucide-react";
 import type { LessonChapterSummary } from "./types";
 
 export function chapterPercent(chapter: LessonChapterSummary): number {
@@ -37,8 +38,8 @@ export default function LessonChapterCard({
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-bold">{chapter.title}</p>
           {chapter.freePreview && (
-            <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
-              ✓ Үнэгүй
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
+              <Check className="h-3 w-3" aria-hidden="true" /> Үнэгүй
             </span>
           )}
         </div>
@@ -51,12 +52,17 @@ export default function LessonChapterCard({
           />
         </div>
       </div>
-      <span className="shrink-0 text-xs font-semibold text-ink-dim">
-        {percent >= 100 ? "Дууссан ✓" : `${percent}%`}
+      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-ink-dim">
+        {percent >= 100 ? (
+          <>
+            <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
+            <span className="text-success">Дууссан</span>
+          </>
+        ) : (
+          `${percent}%`
+        )}
       </span>
-      <span className="shrink-0 text-ink-dim" aria-hidden>
-        →
-      </span>
+      <ChevronRight className="h-4 w-4 shrink-0 text-ink-dim" aria-hidden />
     </Link>
   );
 }

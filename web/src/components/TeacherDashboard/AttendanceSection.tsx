@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, User } from "lucide-react";
+import { ChevronRight, User, TriangleAlert, RotateCw } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -13,6 +13,8 @@ import {
   LateRangePicker,
   type LateRangeValue,
 } from "@/components/attendance/LateRangePicker";
+import { ErrorState } from "@/components/ui/StateBlock";
+import { Card, SectionHeader } from "@/components/ui/Surface";
 
 interface StudentAttendance {
   id: string;
@@ -246,27 +248,24 @@ export default function AttendanceSection({
   const listLoading = classroomId ? dayLoading && dayRows === null : false;
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
-      {/* Header */}
-      <div className="mb-4 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
-        <h2 className="font-bold text-brand-soft">
-          {isToday ? "Өнөөдрийн ирц" : "Ирц"}
-          {!hideDateHeader && (
-            <>
-              {" "}
-              ·{" "}
-              <span className="text-sm text-ink-dim">{selectedDate}</span>
-            </>
-          )}
-        </h2>
-        <button
-          onClick={handleSave}
-          disabled={isSaving || dayLoading}
-          className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition disabled:opacity-50"
-        >
-          {isSaving ? "Хадгалаж байна..." : "Хадгалах"}
-        </button>
-      </div>
+    <Card>
+      <SectionHeader
+        title={isToday ? "Өнөөдрийн ирц" : "Ирц"}
+        hint={
+          !hideDateHeader && (
+            <span className="text-sm text-ink-dim">· {selectedDate}</span>
+          )
+        }
+        actions={
+          <button
+            onClick={handleSave}
+            disabled={isSaving || dayLoading}
+            className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition disabled:opacity-50"
+          >
+            {isSaving ? "Хадгалаж байна..." : "Хадгалах"}
+          </button>
+        }
+      />
 
       {/* Хуанли — өмнөх өдрүүдийг харах/засах (зөвхөн classroomId үед, мөн
           эцэг компонент өөрийн ГАНЦ ерөнхий огнооны хяналттай үед нуугдана) */}
@@ -280,27 +279,18 @@ export default function AttendanceSection({
         </div>
       )}
 
-      {dayError && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {dayError}</span>
-          <button
-            onClick={loadDay}
-            className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
-          >
-            Дахин ачаалах
-          </button>
-        </div>
-      )}
+      {dayError && <ErrorState message={dayError} onRetry={loadDay} />}
 
       {/* Attendance List */}
-      <div className="space-y-2">
-        {listLoading ? (
-          <p className="animate-pulse text-sm text-ink-dim" role="status">
-            Ачаалж байна…
-          </p>
-        ) : activeRows.length === 0 ? (
-          <p className="text-sm text-ink-dim">Сурагч байхгүй</p>
-        ) : (
+      {dayError || (
+        <div className="space-y-2">
+          {listLoading ? (
+            <p className="animate-pulse text-sm text-ink-dim" role="status">
+              Ачаалж байна…
+            </p>
+          ) : activeRows.length === 0 ? (
+            <p className="text-sm text-ink-dim">Сурагч байхгүй</p>
+          ) : (
           activeRows.map((r) => {
             const h = history[r.student.id];
             const status = effMarks[r.student.id];
@@ -376,8 +366,9 @@ export default function AttendanceSection({
               </div>
             );
           })
-        )}
-      </div>
-    </section>
+          )}
+        </div>
+      )}
+    </Card>
   );
 }

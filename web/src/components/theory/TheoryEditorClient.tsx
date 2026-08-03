@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AlertTriangle, Check, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import ConfirmDialog from "./ConfirmDialog";
@@ -183,7 +184,7 @@ export default function TheoryEditorClient() {
   async function handleDelete(block: TheoryBlock) {
     try {
       await api(`/lessons/theory/${block.id}`, { method: "DELETE" });
-      setToast({ kind: "success", text: `✓ "${block.title}" устгагдлаа` });
+      setToast({ kind: "success", text: `"${block.title}" устгагдлаа` });
       setDeleteTarget(null);
       if (selectedId === block.id) setSelectedId(null);
       loadBlocks();
@@ -194,7 +195,7 @@ export default function TheoryEditorClient() {
 
   function handleSaved() {
     setDirty(false);
-    setToast({ kind: "success", text: "✓ Хадгалагдлаа" });
+    setToast({ kind: "success", text: "Хадгалагдлаа" });
     setSelectedId(null);
     loadBlocks();
   }
@@ -219,19 +220,24 @@ export default function TheoryEditorClient() {
               });
             }
           }}
-          className="text-sm text-ink-dim hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-sm text-ink-dim hover:text-ink"
         >
-          ← Удирдлага
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Удирдлага
         </Link>
         <h1 className="text-2xl font-extrabold">Онолын агуулга удирдах</h1>
         {toast && (
           <span
             role="status"
-            className={`rounded-lg px-3 py-1.5 text-sm ${
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm ${
               toast.kind === "error" ? "bg-error/10 text-error" : "bg-success/10 text-success"
             }`}
           >
-            {toast.kind === "error" ? "⚠ " : ""}
+            {toast.kind === "error" ? (
+              <AlertTriangle size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
             {toast.text}
           </span>
         )}
@@ -300,7 +306,8 @@ export default function TheoryEditorClient() {
         )}
         {booksError && (
           <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-            <span>⚠ {booksError}</span>
+            <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
+            <span>{booksError}</span>
             <button
               onClick={loadBooks}
               className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -325,7 +332,8 @@ export default function TheoryEditorClient() {
         )}
         {chaptersError && (
           <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-            <span>⚠ {chaptersError}</span>
+            <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
+            <span>{chaptersError}</span>
             <button
               onClick={loadChapters}
               className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -348,7 +356,8 @@ export default function TheoryEditorClient() {
           )}
           {blocksError && (
             <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-              <span>⚠ {blocksError}</span>
+              <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
+              <span>{blocksError}</span>
               <button
                 onClick={loadBlocks}
                 className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"

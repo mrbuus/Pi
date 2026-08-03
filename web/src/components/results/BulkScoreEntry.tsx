@@ -12,6 +12,7 @@
  * ========================================================================== */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { Check, TriangleAlert, X } from "lucide-react";
 import { api } from "@/lib/api";
 import type { ClassroomOption, ResultRow, RosterStudent } from "./types";
 import { fullName, sourceLabel } from "./types";
@@ -229,7 +230,7 @@ export default function BulkScoreEntry({
         text: `${failed.length} мөр хадгалагдсангүй — доор улаанаар тэмдэглэсэн бөгөөд утга нь хэвээр байна. Дахин "Хадгалах"-ыг дарж үзнэ үү.`,
       });
     } else {
-      setBanner({ tone: "ok", text: `✓ ${outcomes.length} сурагчийн дүн хадгалагдлаа` });
+      setBanner({ tone: "ok", text: `${outcomes.length} сурагчийн дүн хадгалагдлаа` });
     }
     onSaved();
   }
@@ -391,24 +392,30 @@ export default function BulkScoreEntry({
                     />
                     <span className="text-sm text-ink-dim">/ {maxScoreValid ? maxScoreNum : "—"}</span>
                     {error && (
-                      <span id={`score-err-${s.id}`} className="text-sm font-medium text-error">
-                        ⚠ {error}
+                      <span id={`score-err-${s.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-error">
+                        <TriangleAlert className="h-3 w-3" aria-hidden />
+                        {error}
                       </span>
                     )}
                     {!error && suspicious && (
-                      <span className="text-sm font-medium text-warning">
-                        ⚠ Өмнө нь {existing!.totalScore}/{existing!.maxScore} дүнтэй байсан, шалгана уу
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-warning">
+                        <TriangleAlert className="h-3 w-3" aria-hidden />
+                        Өмнө нь {existing!.totalScore}/{existing!.maxScore} дүнтэй байсан, шалгана уу
                       </span>
                     )}
                     {entry.saveState === "saving" && (
                       <span className="text-sm text-ink-dim">Хадгалж байна…</span>
                     )}
                     {entry.saveState === "saved" && (
-                      <span className="text-sm font-medium text-success">✓ Хадгалагдсан</span>
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-success">
+                        <Check className="h-3 w-3" aria-hidden />
+                        Хадгалагдсан
+                      </span>
                     )}
                     {entry.saveState === "error" && (
-                      <span className="text-sm font-medium text-error">
-                        ✕ {entry.saveError ?? "Алдаа гарлаа"}
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-error">
+                        <X className="h-3 w-3" aria-hidden />
+                        {entry.saveError ?? "Алдаа гарлаа"}
                       </span>
                     )}
                   </div>

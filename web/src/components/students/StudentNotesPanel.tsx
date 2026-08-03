@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { TriangleAlert, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import { StudentNote, StudentNoteType, errMsg } from "./types";
 
@@ -170,7 +171,8 @@ export default function StudentNotesPanel({
       )}
       {error && (
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <TriangleAlert className="h-4 w-4" aria-hidden />
+          <span>{error}</span>
           <button
             onClick={load}
             className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -207,9 +209,13 @@ export default function StudentNotesPanel({
               <div className="mt-2 flex items-center justify-between gap-2">
                 {msg && (
                   <span
-                    className={`text-xs ${msg.kind === "error" ? "text-error" : "text-success"}`}
+                    className={`inline-flex items-center gap-1.5 text-xs ${msg.kind === "error" ? "text-error" : "text-success"}`}
                   >
-                    {msg.kind === "error" ? "⚠ " : "✓ "}
+                    {msg.kind === "error" ? (
+                      <TriangleAlert className="h-3 w-3" aria-hidden />
+                    ) : (
+                      <Check className="h-3 w-3" aria-hidden />
+                    )}
                     {msg.text}
                   </span>
                 )}
@@ -266,8 +272,9 @@ export default function StudentNotesPanel({
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-ink-dim">
                         <span>{formatDateTime(n.createdAt)}</span>
                         {n.resolvedAt && (
-                          <span className="rounded-full bg-success/10 px-2 py-0.5 font-semibold text-success">
-                            ✓ Шийдэгдсэн
+                          <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 font-semibold text-success">
+                            <Check className="h-3 w-3" aria-hidden />
+                            Шийдэгдсэн
                           </span>
                         )}
                         <button

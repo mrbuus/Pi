@@ -1,6 +1,6 @@
 "use client";
 
-import { DoorOpen } from "lucide-react";
+import { DoorOpen, Pencil, X } from "lucide-react";
 import {
   formatMinutes,
   SUBJECT_LABEL,
@@ -66,18 +66,20 @@ function EntryCard({
             <button
               type="button"
               onClick={() => onEdit(entry)}
-              className="rounded-lg border border-line px-2 py-1 text-xs transition hover:border-brand"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2 py-1 text-xs transition hover:border-brand"
             >
-              ✎ Засах
+              <Pencil className="h-3 w-3" aria-hidden />
+              Засах
             </button>
           )}
           {onDelete && (
             <button
               type="button"
               onClick={() => onDelete(entry)}
-              className="rounded-lg border border-error/40 px-2 py-1 text-xs text-error transition hover:bg-error/10"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-error/40 px-2 py-1 text-xs text-error transition hover:bg-error/10"
             >
-              ✕ Устгах
+              <X className="h-3 w-3" aria-hidden />
+              Устгах
             </button>
           )}
         </div>

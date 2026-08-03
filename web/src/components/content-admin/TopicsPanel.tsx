@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
@@ -51,7 +52,7 @@ export default function TopicsPanel({
     try {
       await api("/topics", { method: "POST", body: newTopic });
       setNewTopic({ name: "", order: topics.length });
-      setMsg({ kind: "success", text: "✓ БҮТ-ийн муж үүслээ" });
+      setMsg({ kind: "success", text: "БҮТ-ийн муж үүслээ" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -67,7 +68,7 @@ export default function TopicsPanel({
     setEditBusy(true);
     try {
       await api(`/topics/${t.id}`, { method: "PATCH", body: editForm });
-      setMsg({ kind: "success", text: "✓ Муж шинэчлэгдлээ" });
+      setMsg({ kind: "success", text: "Муж шинэчлэгдлээ" });
       setEditId(null);
       load();
     } catch (e) {
@@ -101,7 +102,7 @@ export default function TopicsPanel({
             ? `${res.unlinkedChapters} бүлэг сэдвээс салгасан`
             : undefined,
       });
-      setMsg({ kind: "success", text: "✓ Муж устгагдлаа" });
+      setMsg({ kind: "success", text: "Муж устгагдлаа" });
       setDeleteTarget(null);
       load();
     } catch (e) {
@@ -126,13 +127,17 @@ export default function TopicsPanel({
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-2 py-1 text-xs ${
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" ? (
+              <AlertTriangle size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
             {msg.text}
           </span>
         )}
@@ -189,7 +194,8 @@ export default function TopicsPanel({
       )}
       {error && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
+          <span>{error}</span>
           <button
             onClick={load}
             className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -304,9 +310,10 @@ export default function TopicsPanel({
                 </span>
               </label>
               {conflictHint && !force && (
-                <p className="text-xs text-error">
-                  ⚠ Сервер: идэвхтэй бүлэг сэдэв холбоотой тул дээрх сонголтыг
-                  идэвхжүүлж дахин оролдоно уу.
+                <p className="flex gap-2 text-xs text-error">
+                  <AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
+                  <span>Сервер: идэвхтэй бүлэг сэдэв холбоотой тул дээрх сонголтыг
+                  идэвхжүүлж дахин оролдоно уу.</span>
                 </p>
               )}
             </div>

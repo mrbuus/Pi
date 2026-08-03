@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
@@ -113,7 +114,7 @@ export default function ProblemsPanel({
       });
       setChoiceTexts(["", "", "", "", ""]);
       setCorrectIdx(0);
-      setMsg({ kind: "success", text: "✓ Бодлого үүслээ" });
+      setMsg({ kind: "success", text: "Бодлого үүслээ" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -130,7 +131,7 @@ export default function ProblemsPanel({
         kind: "problem",
         label: deleteTarget.token,
       });
-      setMsg({ kind: "success", text: "✓ Бодлого устгагдлаа" });
+      setMsg({ kind: "success", text: "Бодлого устгагдлаа" });
       setDeleteTarget(null);
       load();
     } catch (e) {
@@ -147,13 +148,17 @@ export default function ProblemsPanel({
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-2 py-1 text-xs ${
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" ? (
+              <AlertTriangle size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
             {msg.text}
           </span>
         )}

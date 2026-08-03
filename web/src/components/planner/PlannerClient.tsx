@@ -262,7 +262,7 @@ export default function PlannerClient() {
           )}
           {error && (
             <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-              <span>⚠ {error}</span>
+              <span>error</span>
               <button
                 onClick={loadTasks}
                 className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -312,7 +312,7 @@ export default function PlannerClient() {
           )}
           {workloadError && (
             <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-              <span>⚠ {workloadError}</span>
+              <span>workloadError</span>
               <button
                 onClick={loadWorkload}
                 className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"

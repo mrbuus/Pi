@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock } from "lucide-react";
+import { Lock, Check, ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -230,8 +230,8 @@ export default function LessonChapterPage() {
             {chapter.book?.code ?? "Хичээл"}
           </p>
           {chapter.freePreview && (
-            <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
-              ✓ Үнэгүй
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
+              <Check className="h-3 w-3" aria-hidden /> Үнэгүй
             </span>
           )}
         </div>
@@ -279,9 +279,9 @@ function BackLink({ subject }: { subject: string }) {
   return (
     <Link
       href={`/app/learn?subject=${subject}`}
-      className="inline-flex items-center gap-1 text-sm text-ink-dim transition hover:text-ink"
+      className="inline-flex items-center gap-1.5 text-sm text-ink-dim transition hover:text-ink"
     >
-      ← Хичээлийн жагсаалт руу
+      <ArrowLeft className="h-4 w-4" aria-hidden /> Хичээлийн жагсаалт руу
     </Link>
   );
 }
@@ -322,8 +322,8 @@ function TheoryStep({
             <div className="flex flex-wrap items-start justify-between gap-3">
               <h2 className="text-lg font-extrabold">{theory.title}</h2>
               {viewed && (
-                <span className="shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
-                  ✓ Уншсан
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
+                  <Check className="h-3 w-3" aria-hidden /> Уншсан
                 </span>
               )}
             </div>
@@ -370,7 +370,7 @@ function VideoStep({
             onComplete={() => onComplete(v.id)}
           />
           {completedIds.includes(v.id) && (
-            <p className="text-xs font-semibold text-success">✓ Үзсэн</p>
+            <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-success"><Check className="h-4 w-4" aria-hidden /> Үзсэн</p>
           )}
         </div>
       ))}
@@ -406,13 +406,13 @@ function ProblemsStep({
       <Link
         href={libraryHref}
         onClick={onOpen}
-        className="mt-4 inline-block rounded-lg bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:opacity-90"
+        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:opacity-90"
       >
-        Бодлогын сан руу очих →
+        Бодлогын сан руу очих <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>
       {opened && (
-        <p className="mt-2 text-xs font-semibold text-success">
-          ✓ Дор хаяж нэг удаа орсон
+        <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-success">
+          <Check className="h-4 w-4" aria-hidden /> Дор хаяж нэг удаа орсон
         </p>
       )}
       <p className="mt-3 text-xs text-ink-dim">
@@ -453,7 +453,7 @@ function TestStep({ tests }: { tests: LessonDetail["tests"] }) {
             </p>
           </div>
           <span className="shrink-0 text-ink-dim" aria-hidden>
-            →
+            <ArrowRight className="h-4 w-4" />
           </span>
         </Link>
       ))}

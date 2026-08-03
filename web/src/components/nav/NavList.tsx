@@ -31,7 +31,7 @@ function ItemRow({
         onClick={onNavigate}
         title={collapsedRail ? item.label : undefined}
         aria-current={active ? "page" : undefined}
-        className={`flex items-center gap-3 rounded-lg py-2 transition-colors ${
+        className={`row-interactive flex items-center gap-3 rounded-lg py-1.5 transition-colors ${
           collapsedRail ? "justify-center px-2" : "px-3"
         } ${
           active

@@ -1,5 +1,7 @@
 "use client";
 
+import { Check, Circle, X, type LucideIcon } from "lucide-react";
+
 // Гэрийн даалгаврын өдрийн тэмдэг: 4 төлөв (эзний тодорхойлсон яг өнгөнүүд).
 // "Тэмдэглээгүй" нь өгөгдмөл, ямар ч товч дараагүй цагаан/хоосон төлөв —
 // сонгосон товчоо дахин дарвал (toggle) тэмдгийг арилгаж буцаана.
@@ -8,7 +10,7 @@ export type HomeworkMark = "DONE" | "PARTIAL" | "NOT_DONE";
 export interface HomeworkMarkOption {
   value: HomeworkMark;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   selectedClass: string;
 }
 
@@ -16,19 +18,19 @@ export const HOMEWORK_MARK_OPTIONS: readonly HomeworkMarkOption[] = [
   {
     value: "DONE",
     label: "Хийсэн",
-    icon: "✓",
+    icon: Check,
     selectedClass: "bg-success text-on-success",
   },
   {
     value: "PARTIAL",
     label: "Дутуу",
-    icon: "◐",
+    icon: Circle,
     selectedClass: "bg-warning text-on-warning",
   },
   {
     value: "NOT_DONE",
     label: "Хийгээгүй",
-    icon: "✕",
+    icon: X,
     selectedClass: "bg-error text-on-error",
   },
 ] as const;
@@ -58,6 +60,7 @@ export default function HomeworkMarkPills({
     >
       {HOMEWORK_MARK_OPTIONS.map((opt) => {
         const isSelected = value === opt.value;
+        const Icon = opt.icon;
         return (
           <button
             key={opt.value}
@@ -71,7 +74,7 @@ export default function HomeworkMarkPills({
                 : "border-line bg-ink/5 text-ink-dim hover:bg-ink/10"
             }`}
           >
-            <span aria-hidden>{opt.icon} </span>
+            <Icon className="h-4 w-4 mr-1" aria-hidden />
             {opt.label}
           </button>
         );

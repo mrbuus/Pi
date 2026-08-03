@@ -1,6 +1,6 @@
 "use client";
 
-import { DoorOpen } from "lucide-react";
+import { DoorOpen, AlertTriangle, Pencil, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
@@ -154,10 +154,10 @@ export default function ScheduleAdmin({ role }: { role: string }) {
       };
       if (editingId) {
         await api(`/schedule/${editingId}`, { method: "PATCH", body });
-        setMsg({ kind: "success", text: "✓ Хуваарь шинэчлэгдлээ" });
+        setMsg({ kind: "success", text: "Хуваарь шинэчлэгдлээ" });
       } else {
         await api("/schedule", { method: "POST", body });
-        setMsg({ kind: "success", text: "✓ Хуваарь нэмэгдлээ" });
+        setMsg({ kind: "success", text: "Хуваарь нэмэгдлээ" });
       }
       cancelEdit();
       loadEntries();
@@ -189,13 +189,17 @@ export default function ScheduleAdmin({ role }: { role: string }) {
       {msg && (
         <div
           role="status"
-          className={`mb-4 rounded-lg px-3 py-2 text-sm ${
+          className={`mb-4 flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
             msg.kind === "error"
               ? "bg-error/10 text-error"
               : "bg-success/10 text-success"
           }`}
         >
-          {msg.kind === "error" ? "⚠ " : "✓ "}
+          {msg.kind === "error" ? (
+            <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+          ) : (
+            <div className="h-4 w-4 shrink-0 rounded-full border-2 border-success bg-success/20" aria-hidden />
+          )}
           {msg.text}
         </div>
       )}
@@ -396,8 +400,9 @@ export default function ScheduleAdmin({ role }: { role: string }) {
         </p>
       )}
       {error && (
-        <div className="rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
-          ⚠ {error}
+        <div className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+          {error}
         </div>
       )}
       {!loading && !error && entries.length === 0 && (
@@ -438,7 +443,8 @@ export default function ScheduleAdmin({ role }: { role: string }) {
               </span>
               <div className="ml-auto flex gap-2">
                 <button onClick={() => startEdit(entry)} className={outlineBtn}>
-                  ✎ Засах
+                  <Pencil className="h-3.5 w-3.5" aria-hidden />
+                  Засах
                 </button>
                 {armedDelete === entry.id ? (
                   <>
@@ -459,9 +465,10 @@ export default function ScheduleAdmin({ role }: { role: string }) {
                 ) : (
                   <button
                     onClick={() => setArmedDelete(entry.id)}
-                    className="rounded-lg border border-error/40 px-3 py-1.5 text-xs text-error transition hover:bg-error/10"
+                    className="rounded-lg border border-error/40 px-3 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10"
                   >
-                    ✕ Устгах
+                    <X className="h-3.5 w-3.5" aria-hidden />
+                    Устгах
                   </button>
                 )}
               </div>

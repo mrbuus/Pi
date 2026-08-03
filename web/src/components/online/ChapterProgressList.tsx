@@ -1,4 +1,4 @@
-import { Clapperboard } from "lucide-react";
+import { Clapperboard, Check } from "lucide-react";
 import { ChapterProgressRow } from "./types";
 
 function barTone(rate: number): string {
@@ -62,7 +62,16 @@ export default function ChapterProgressList({
               )}
             </div>
             <p className="mt-1 inline-flex flex-wrap items-center gap-1 text-xs text-ink-dim">
-              <span>{c.theoryRead ? "✓ Онол үзсэн" : "— Онол үзээгүй"}</span>
+              <span className="inline-flex items-center gap-1">
+                {c.theoryRead ? (
+                  <>
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    Онол үзсэн
+                  </>
+                ) : (
+                  "— Онол үзээгүй"
+                )}
+              </span>
               <span>·</span>
               <Clapperboard className="h-3 w-3" aria-hidden />
               <span>

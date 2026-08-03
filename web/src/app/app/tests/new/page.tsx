@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Check, TriangleAlert } from "lucide-react";
 import { api, uploadFile } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import ProblemPicker from "@/components/test-builder/ProblemPicker";
@@ -410,8 +411,8 @@ export default function NewTestPage() {
       <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
       <div className="space-y-6">
         <div className="rounded-2xl border border-success/30 bg-success/10 p-6">
-          <p className="text-lg font-bold text-success">
-            ✓ «{createdTest.title}» тест амжилттай үүслээ
+          <p className="inline-flex items-center gap-1.5 text-lg font-bold text-success">
+            <Check className="h-5 w-5" aria-hidden /> «{createdTest.title}» тест амжилттай үүслээ
           </p>
           <p className="mt-1 text-base text-ink-dim">
             Доор тестээ шууд харах эсвэл жагсаалт руу очиж болно.
@@ -419,9 +420,9 @@ export default function NewTestPage() {
           {createdAnswerWarning && (
             <p
               role="alert"
-              className="mt-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
             >
-              ⚠ {createdAnswerWarning}
+              <TriangleAlert className="h-5 w-5" aria-hidden /> {createdAnswerWarning}
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
@@ -729,8 +730,8 @@ export default function NewTestPage() {
             }`}
           >
             {missingAnswerCount === selectedProblemObjects.length
-              ? `⚠ Сонгосон бүх ${missingAnswerCount} бодлого хариуны түлхүүргүй тул энэ тестийг ангид оноох боломжгүй.`
-              : `⚠ ${missingAnswerCount} бодлого хариуны түлхүүргүй тул дүнд тооцогдохгүй.`}
+              ? <><TriangleAlert className="h-4 w-4 inline" aria-hidden /> Сонгосон бүх {missingAnswerCount} бодлого хариуны түлхүүргүй тул энэ тестийг ангид оноох боломжгүй.</>
+              : <><TriangleAlert className="h-4 w-4 inline" aria-hidden /> {missingAnswerCount} бодлого хариуны түлхүүргүй тул дүнд тооцогдохгүй.</>}
           </p>
         )}
         {classrooms.length === 0 && !catalogError && (

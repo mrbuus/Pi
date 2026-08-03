@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
@@ -69,7 +70,7 @@ export default function BooksPanel({
     try {
       await api("/books", { method: "POST", body: newBook });
       setNewBook({ code: "", title: "", subject: newBook.subject });
-      setMsg({ kind: "success", text: "✓ Ном үүслээ" });
+      setMsg({ kind: "success", text: "Ном үүслээ" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -85,7 +86,7 @@ export default function BooksPanel({
     setEditBusy(true);
     try {
       await api(`/books/${b.id}`, { method: "PATCH", body: editForm });
-      setMsg({ kind: "success", text: "✓ Ном шинэчлэгдлээ" });
+      setMsg({ kind: "success", text: "Ном шинэчлэгдлээ" });
       setEditId(null);
       load();
     } catch (e) {
@@ -113,7 +114,7 @@ export default function BooksPanel({
             ? `${res.cascadedChapters} бүлэг сэдэв хамт устгагдсан`
             : undefined,
       });
-      setMsg({ kind: "success", text: "✓ Ном устгагдлаа" });
+      setMsg({ kind: "success", text: "Ном устгагдлаа" });
       if (selectedId === deleteTarget.id) onSelect("", null);
       setDeleteTarget(null);
       load();
@@ -134,13 +135,17 @@ export default function BooksPanel({
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-2 py-1 text-xs ${
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" ? (
+              <AlertTriangle size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
             {msg.text}
           </span>
         )}
@@ -221,7 +226,8 @@ export default function BooksPanel({
       )}
       {error && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
+          <span>{error}</span>
           <button
             onClick={load}
             className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -295,10 +301,11 @@ export default function BooksPanel({
                   Архивлах (жагсаалт болон каталогоос нуугдана)
                 </label>
                 {editForm.archived && (
-                  <p className="text-xs text-warning">
-                    ⚠ Архивласны дараа энэ ном энэ жагсаалтаас ч нуугдана —
+                  <p className="flex gap-2 text-xs text-warning">
+                    <AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
+                    <span>Архивласны дараа энэ ном энэ жагсаалтаас ч нуугдана —
                     буцаан идэвхжүүлэхийн тулд энд дахин олж «Устгагдсан»
-                    хэсгээс биш, шууд датагаас хайх шаардлагатай болно.
+                    хэсгээс биш, шууд датагаас хайх шаардлагатай болно.</span>
                   </p>
                 )}
                 <div className="flex gap-2">
@@ -405,9 +412,10 @@ export default function BooksPanel({
                 </p>
               )}
               {chapterCount > 0 && !cascade && (
-                <p className="text-xs text-error">
-                  ⚠ Дээрх сонголтыг идэвхжүүлэлгүйгээр устгах товч дарвал
-                  сервер алдаа буцаана.
+                <p className="flex gap-2 text-xs text-error">
+                  <AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
+                  <span>Дээрх сонголтыг идэвхжүүлэлгүйгээр устгах товч дарвал
+                  сервер алдаа буцаана.</span>
                 </p>
               )}
             </div>

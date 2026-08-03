@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
+import ConnectionStatus from "@/components/ui/ConnectionStatus";
 
 export const metadata: Metadata = {
   title: "Шинэ Ирээдүйн Эзэд — ЭЕШ-ийн математик, нийгэм судлалын бэлтгэл",
@@ -62,7 +63,14 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <div aria-hidden className="ambient-bg" />
+        <div className="relative z-10">
+          <ThemeProvider>{children}</ThemeProvider>
+        </div>
+        {/* Сүлжээ тасарсныг шууд хэлнэ — эс бөгөөс хэрэглэгч "вэб эвдэрсэн"
+            гэж дүгнэдэг. Браузерын online/offline эвентээс л хамаарна,
+            нэмэлт сүлжээний шалгалт явуулахгүй. */}
+        <ConnectionStatus />
       </body>
     </html>
   );

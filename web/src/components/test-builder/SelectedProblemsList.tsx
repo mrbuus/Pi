@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, X, ChevronUp, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { FORMAT_LABEL, hasKnownAnswer, type Problem } from "./types";
 
@@ -96,8 +97,9 @@ export default function SelectedProblemsList({
                     {FORMAT_LABEL[p.format] ?? p.format}
                   </span>
                   {!known && (
-                    <span className="rounded border border-error/40 bg-error/10 px-2 py-0.5 font-semibold text-error">
-                      ⚠ хариугүй — оноонд орохгүй
+                    <span className="flex items-center gap-1 rounded border border-error/40 bg-error/10 px-2 py-0.5 font-semibold text-error">
+                      <AlertTriangle size={14} aria-hidden />
+                      <span>хариугүй — оноонд орохгүй</span>
                     </span>
                   )}
                 </p>
@@ -127,7 +129,7 @@ export default function SelectedProblemsList({
                   aria-label={`${p.token}-г дээш зөөх`}
                   className="min-h-11 min-w-11 rounded-lg border border-line px-2 text-base transition hover:border-brand disabled:opacity-30"
                 >
-                  ↑
+                  <ChevronUp size={18} aria-hidden />
                 </button>
                 <button
                   type="button"
@@ -136,7 +138,7 @@ export default function SelectedProblemsList({
                   aria-label={`${p.token}-г доош зөөх`}
                   className="min-h-11 min-w-11 rounded-lg border border-line px-2 text-base transition hover:border-brand disabled:opacity-30"
                 >
-                  ↓
+                  <ChevronDown size={18} aria-hidden />
                 </button>
                 <button
                   type="button"
@@ -152,7 +154,7 @@ export default function SelectedProblemsList({
                   aria-label={`${p.token}-г тестээс хасах`}
                   className="min-h-11 min-w-11 rounded-lg border border-error/40 px-2 text-base text-error transition hover:bg-error/10"
                 >
-                  ✕
+                  <X size={18} aria-hidden />
                 </button>
               </div>
             </li>

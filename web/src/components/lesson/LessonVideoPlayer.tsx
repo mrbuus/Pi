@@ -1,5 +1,7 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
+
 /**
  * Хичээлийн алхам 2 (ВИДЕО)-д зориулсан аюулгүй видео embed.
  *
@@ -97,9 +99,7 @@ export default function LessonVideoPlayer({
           />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 px-4 text-center text-brand-soft">
-            <span className="text-2xl" aria-hidden>
-              ⚠
-            </span>
+            <AlertTriangle className="h-8 w-8" aria-hidden="true" />
             <p className="text-sm font-semibold">Дэмжигдэхгүй холбоос</p>
             <p className="text-xs text-brand-soft/80">
               Энэ бичлэгийн эх сурвалж танигдаагүй тул аюулгүй байдлын үүднээс

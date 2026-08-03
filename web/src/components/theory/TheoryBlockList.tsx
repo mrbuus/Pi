@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronUp, ChevronDown } from "lucide-react";
 import type { TheoryBlock } from "./types";
 
 /**
@@ -70,18 +71,20 @@ export default function TheoryBlockList({
                     onClick={() => onMove(b.id, "up")}
                     disabled={i === 0 || reordering}
                     aria-label={`"${b.title}"-ийг дээш зөөх`}
-                    className="rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
+                    className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
                   >
-                    ↑ дээш
+                    <ChevronUp className="h-3 w-3" aria-hidden />
+                    дээш
                   </button>
                   <button
                     type="button"
                     onClick={() => onMove(b.id, "down")}
                     disabled={i === blocks.length - 1 || reordering}
                     aria-label={`"${b.title}"-ийг доош зөөх`}
-                    className="rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
+                    className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
                   >
-                    ↓ доош
+                    <ChevronDown className="h-3 w-3" aria-hidden />
+                    доош
                   </button>
                 </div>
                 <button

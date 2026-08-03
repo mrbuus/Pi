@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 import MarkdownCheatsheet from "./MarkdownCheatsheet";
 import TheoryContent, {
@@ -212,7 +213,7 @@ export default function TheoryBlockEditor({
                 {imgUploading ? "Байршуулж байна…" : "+ Нэмэх"}
               </button>
             </div>
-            {imgError && <p className="mt-2 text-sm text-error">⚠ {imgError}</p>}
+            {imgError && <p className="mt-2 flex gap-2 text-sm text-error"><AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" /><span>{imgError}</span></p>}
 
             {imageKeys.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-3">
@@ -262,8 +263,9 @@ export default function TheoryBlockEditor({
       </div>
 
       {error && (
-        <p role="alert" className="text-sm text-error">
-          ⚠ {error}
+        <p role="alert" className="flex gap-2 text-sm text-error">
+          <AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
+          <span>{error}</span>
         </p>
       )}
 

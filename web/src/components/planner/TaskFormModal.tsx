@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { X } from "lucide-react";
 import { api } from "@/lib/api";
 import { fullName } from "./statusMeta";
 import type {
@@ -153,7 +154,7 @@ export default function TaskFormModal({
             aria-label="Хаах"
             className="rounded-lg border border-line px-2 py-1 text-sm text-ink-dim transition hover:text-ink"
           >
-            ✕
+            <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
 
@@ -332,7 +333,7 @@ export default function TaskFormModal({
               role="alert"
               className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
             >
-              ⚠ {error}
+              error
             </div>
           )}
 

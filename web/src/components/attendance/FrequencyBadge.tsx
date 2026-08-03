@@ -1,5 +1,7 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
+
 export interface FrequencyBadgeProps {
   lateCount: number;
   absentCount: number;
@@ -37,7 +39,8 @@ export function FrequencyBadge({
   if (total >= 5) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-error/20 px-2 py-0.5 text-xs font-bold text-error">
-        <span aria-hidden>⚠</span> 30 хоногт {lateCount} хоцорсон · {absentCount}{" "}
+        <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        30 хоногт {lateCount} хоцорсон · {absentCount}{" "}
         тасалсан
       </span>
     );

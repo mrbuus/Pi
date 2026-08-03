@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CalendarPlus, CircleAlert, CircleCheck, Repeat } from "lucide-react";
+import { CalendarPlus, CircleAlert, Repeat } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import InfoHint from "@/components/ui/InfoHint";
@@ -390,7 +390,7 @@ export default function PatternBuilder({
           {msg.kind === "error" ? (
             <CircleAlert className="h-4 w-4 shrink-0" aria-hidden />
           ) : (
-            <CircleCheck className="h-4 w-4 shrink-0" aria-hidden />
+            <div className="h-4 w-4 shrink-0 rounded-full border-2 border-success bg-success/20" aria-hidden />
           )}
           {msg.text}
         </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { TriangleAlert } from "lucide-react";
+
 /* ============================================================================
  * ExamIntro — шалгалт эхлэхийн өмнөх дэлгэц: мэдээлэл, дүрэм, "Эхлэх"
  * товч, эхлэхийн өмнөх сануулга (confirmStart).
@@ -88,7 +90,10 @@ export default function ExamIntro({
       {confirmStart && (
         <div className="mt-4 flex min-h-[200px] items-center justify-center rounded-2xl border border-warning/40 bg-warning/10 p-6">
           <div className="text-center">
-            <p className="text-lg font-bold text-warning">⏱ Анхаар!</p>
+            <p className="inline-flex items-center gap-1.5 text-lg font-bold text-warning">
+              <TriangleAlert className="h-5 w-5" aria-hidden />
+              Анхаар!
+            </p>
             <p className="mt-2 text-sm text-ink-dim">
               {minutes > 0 ? (
                 <>

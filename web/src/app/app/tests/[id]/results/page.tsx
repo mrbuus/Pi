@@ -91,7 +91,7 @@ export default function TestResultsPage() {
         },
       });
       setMsgTone("ok");
-      setMsg(`✓ ${student.firstName} ${student.lastName} — дүн орлоо`);
+      setMsg(`${student.firstName} ${student.lastName} — дүн орлоо`);
       setStudent(null);
       setTotal("");
       loadResults();

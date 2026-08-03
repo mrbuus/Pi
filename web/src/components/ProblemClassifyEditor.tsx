@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, X, Pencil, AlertTriangle, Circle } from "lucide-react";
 import MathText from "@/components/MathText";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 
@@ -22,7 +23,7 @@ import { api, fileUrl, uploadFile } from "@/lib/api";
 // NONE нь зөв хариултынх тул энд оруулахгүй.
 const MISTAKE_TYPES: { value: string; label: string; hint: string }[] = [
   { value: "INCOMPLETE_STEP", label: "Үйлдэл дутуу", hint: "хагас хийж зогссон" },
-  { value: "CALC_ERROR_NEAR", label: "Ойролцоо хариу", hint: "энгийн тооцооллын алдаа → ойролцоо дугуйлсан" },
+  { value: "CALC_ERROR_NEAR", label: "Ойролцоо хариу", hint: "энгийн тооцооллын алдаа, ойролцоо дугуйлсан" },
   { value: "SIGN_ERROR", label: "Тэмдэг (+/−)", hint: "тэмдэг сольж алдсан" },
   { value: "CONCEPT_GAP", label: "Ухагдахуун", hint: "арга/ойлголт дутуугаас" },
   { value: "UNRELATED_GUESS", label: "Буудсан", hint: "огт хамааралгүй хариу" },
@@ -149,13 +150,13 @@ function ChoiceListEditor<T extends EditableChoiceBase>({
                 type="button"
                 onClick={() => onMarkCorrect(i)}
                 title="Зөв хариу болгох"
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs transition ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition ${
                   c.isCorrect
                     ? "border-success bg-success text-bg"
                     : "border-line text-transparent hover:border-success/60"
                 }`}
               >
-                ✓
+                {c.isCorrect && <Check className="h-4 w-4" aria-hidden />}
               </button>
               {showLabelInput && (
                 <input
@@ -197,7 +198,7 @@ function ChoiceListEditor<T extends EditableChoiceBase>({
       >
         + Сонголт нэмэх
       </button>
-      {error && <p className="mt-2 text-xs text-warning">⚠ {error}</p>}
+      {error && <p className="mt-2 flex gap-2 text-xs text-warning"><AlertTriangle size={12} className="shrink-0 mt-0.5" aria-hidden="true" /><span>{error}</span></p>}
     </>
   );
 }
@@ -400,7 +401,7 @@ export default function ProblemClassifyEditor({
         method: "PUT",
         body: { tagIds: [...selectedTags] },
       });
-      setMsg("✓ Хадгалагдлаа");
+      setMsg("success: Хадгалагдлаа");
       onSaved?.();
       setTimeout(onClose, 700);
     } catch (e) {
@@ -534,7 +535,7 @@ export default function ProblemClassifyEditor({
           updated.choiceOptions.map((c) => ({ text: c.text, isCorrect: c.isCorrect })),
         ),
       };
-      setContentMsg("✓ Хадгалагдлаа");
+      setContentMsg("success: Хадгалагдлаа");
       onSaved?.();
       setTimeout(onClose, 700);
     } catch (e) {
@@ -565,7 +566,7 @@ export default function ProblemClassifyEditor({
             className="rounded-lg px-2 py-1 text-ink-dim transition hover:bg-ink/10 hover:text-ink"
             aria-label="Хаах"
           >
-            ✕
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 
@@ -627,7 +628,7 @@ export default function ProblemClassifyEditor({
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="font-bold text-brand-soft">Сонголт ба хариулт</h3>
                   <span className="text-xs text-ink-dim">
-                    ● зөвийг сонго, буруу бүрд шалтгаан
+                    <Circle className="inline h-3 w-3" aria-hidden /> зөвийг сонго, буруу бүрд шалтгаан
                   </span>
                 </div>
                 <ChoiceListEditor
@@ -720,8 +721,8 @@ export default function ProblemClassifyEditor({
                           : "border-line text-ink-dim hover:border-brand-bright/40"
                       }`}
                     >
-                      <button type="button" onClick={() => toggleTag(cat.id)}>
-                        {on ? "✓ " : ""}
+                      <button type="button" onClick={() => toggleTag(cat.id)} className="flex items-center gap-1">
+                        {on && <Check size={14} aria-hidden="true" />}
                         {cat.name}
                         {typeof cat._count?.problems === "number" && (
                           <span className="ml-1 opacity-60">
@@ -737,8 +738,9 @@ export default function ProblemClassifyEditor({
                           setRenameVal(cat.name);
                         }}
                         className="opacity-0 transition group-hover:opacity-100"
+                        aria-label="Засах"
                       >
-                        ✎
+                        <Pencil size={14} aria-hidden="true" />
                       </button>
                     </span>
                   );
@@ -768,7 +770,7 @@ export default function ProblemClassifyEditor({
                 </button>
               </div>
               <p className="mt-1.5 text-[11px] text-ink-dim">
-                Нэрийг ✎-ээр сольвол тухайн ангилалтай холбоотой бүх бодлогод
+                Нэрийг харандааны тэмдгээр сольвол тухайн ангилалтай холбоотой бүх бодлогод
                 автоматаар шинэчлэгдэнэ.
               </p>
             </section>
@@ -776,10 +778,15 @@ export default function ProblemClassifyEditor({
             {/* Хадгалах */}
             <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
               <span
-                className={`text-sm ${
-                  msg.startsWith("✓") ? "text-success" : "text-warning"
+                className={`flex items-center gap-1.5 text-sm ${
+                  msg.startsWith("success:") ? "text-success" : "text-warning"
                 }`}
               >
+                {msg.startsWith("success:") ? (
+                  <Check size={14} aria-hidden="true" />
+                ) : (
+                  <AlertTriangle size={14} aria-hidden="true" />
+                )}
                 {msg}
               </span>
               <div className="flex gap-2">
@@ -885,7 +892,7 @@ export default function ProblemClassifyEditor({
               <section>
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="font-bold text-brand-soft">Сонголт</h3>
-                  <span className="text-xs text-ink-dim">● зөв хариуг сонго</span>
+                  <span className="inline-flex items-center gap-1 text-xs text-ink-dim"><Circle className="h-3 w-3" aria-hidden /> зөв хариуг сонго</span>
                 </div>
                 <ChoiceListEditor
                   choices={cChoices}
@@ -901,10 +908,15 @@ export default function ProblemClassifyEditor({
             {/* Хадгалах */}
             <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
               <span
-                className={`text-sm ${
-                  contentMsg.startsWith("✓") ? "text-success" : "text-warning"
+                className={`flex items-center gap-1.5 text-sm ${
+                  contentMsg.startsWith("success:") ? "text-success" : "text-warning"
                 }`}
               >
+                {contentMsg.startsWith("success:") ? (
+                  <Check size={14} aria-hidden="true" />
+                ) : (
+                  <AlertTriangle size={14} aria-hidden="true" />
+                )}
                 {contentMsg}
               </span>
               <div className="flex gap-2">

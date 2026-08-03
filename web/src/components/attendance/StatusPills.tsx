@@ -1,5 +1,7 @@
 "use client";
 
+import { Check, X } from "lucide-react";
+
 /**
  * Ирцийн 4 төлөв: Ирсэн / Хоцорсон / Тасалсан / Чөлөөтэй.
  * `AttendanceStatus.EXCUSED` нь Prisma enum-д аль хэдийн байсан ч UI дээр
@@ -17,7 +19,7 @@ export const ATTENDANCE_OPTIONS: readonly AttendanceOption[] = [
   {
     value: "PRESENT",
     label: "Ирсэн",
-    icon: "✓",
+    icon: "check",
     selectedClass: "bg-success/25 text-success",
   },
   {
@@ -29,7 +31,7 @@ export const ATTENDANCE_OPTIONS: readonly AttendanceOption[] = [
   {
     value: "ABSENT",
     label: "Тасалсан",
-    icon: "✕",
+    icon: "x",
     selectedClass: "bg-error/25 text-error",
   },
   {
@@ -39,6 +41,12 @@ export const ATTENDANCE_OPTIONS: readonly AttendanceOption[] = [
     selectedClass: "bg-info/25 text-info",
   },
 ] as const;
+
+function getStatusIcon(icon: string) {
+  if (icon === "check") return <Check className="h-4 w-4" aria-hidden />;
+  if (icon === "x") return <X className="h-4 w-4" aria-hidden />;
+  return <span aria-hidden>{icon}</span>;
+}
 
 interface StatusPillsProps {
   /** Дэлгэрэнгүй унших техник (screen reader) хэрэглэгчдэд зориулсан нэр */
@@ -62,11 +70,11 @@ export function StatusPills({ studentLabel, value, onChange }: StatusPillsProps)
             type="button"
             onClick={() => onChange(opt.value)}
             aria-pressed={isSelected}
-            className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-lg px-3 text-xs font-medium transition ${
+            className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs font-medium transition ${
               isSelected ? opt.selectedClass : "bg-ink/5 text-ink-dim"
             }`}
           >
-            {isSelected && <span aria-hidden>{opt.icon} </span>}
+            {isSelected && getStatusIcon(opt.icon)}
             {opt.label}
           </button>
         );

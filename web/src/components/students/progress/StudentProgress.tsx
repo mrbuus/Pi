@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import RequireRole from "@/components/nav/RequireRole";
 import { api } from "@/lib/api";
 import { fullName, type StudentDetailData } from "../types";
@@ -61,9 +62,10 @@ export default function StudentProgress({ studentId }: { studentId: string }) {
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="text-sm text-ink-dim transition hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-sm text-ink-dim transition hover:text-ink"
         >
-          ← Буцах
+          <ArrowLeft size={16} aria-hidden />
+          Буцах
         </button>
 
         {loading && (
@@ -72,7 +74,10 @@ export default function StudentProgress({ studentId }: { studentId: string }) {
 
         {!loading && error && (
           <div className="rounded-2xl border border-error/30 bg-error/5 p-6 text-center">
-            <p className="font-semibold text-error">⚠ {error}</p>
+            <div className="inline-flex items-center justify-center gap-2 text-error">
+              <AlertCircle size={20} aria-hidden />
+              <p className="font-semibold">{error}</p>
+            </div>
             <button
               onClick={load}
               className="mt-3 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition hover:opacity-90"
@@ -100,7 +105,7 @@ export default function StudentProgress({ studentId }: { studentId: string }) {
         <div
           role="tablist"
           aria-label="Сурагчийн явцын хэсгүүд"
-          className="flex gap-2 border-b border-line"
+          className="flex gap-0 border-b border-line"
         >
           {TAB_KEYS.map((key) => (
             <button
@@ -108,9 +113,9 @@ export default function StudentProgress({ studentId }: { studentId: string }) {
               role="tab"
               aria-selected={tab === key}
               onClick={() => changeTab(key)}
-              className={`min-h-11 rounded-t-lg px-4 text-sm font-bold transition ${
+              className={`px-4 py-3 text-sm font-semibold transition ${
                 tab === key
-                  ? "border-b-2 border-brand-bright text-brand-soft"
+                  ? "border-b-2 border-brand-bright text-brand"
                   : "text-ink-dim hover:text-ink"
               }`}
             >

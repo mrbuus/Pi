@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AlertCircle, ArrowLeft, ArrowRight, TriangleAlert } from "lucide-react";
 import { api, getRole } from "@/lib/api";
 import {
   StudentListItem,
@@ -267,13 +268,14 @@ export default function StudentsDirectory() {
             type="button"
             onClick={() => setUnassignedOnly((v) => !v)}
             aria-pressed={unassignedOnly}
-            className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
               unassignedOnly
                 ? "border-warning bg-warning/15 text-warning"
                 : "border-line text-ink-dim hover:text-ink"
             }`}
           >
-            ⚠ Зөвхөн хуваарилагдаагүй
+            <AlertCircle size={16} aria-hidden />
+            Зөвхөн хуваарилагдаагүй
           </button>
 
           {(search ||
@@ -300,7 +302,8 @@ export default function StudentsDirectory() {
       )}
       {error && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <TriangleAlert className="h-4 w-4" aria-hidden />
+          <span>{error}</span>
           <button
             onClick={load}
             className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
@@ -320,24 +323,24 @@ export default function StudentsDirectory() {
             <div className="overflow-x-auto rounded-2xl border border-line">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-line bg-panel text-xs text-ink-dim">
-                    <th scope="col" className="px-4 py-3 font-semibold">
+                  <tr className="border-b border-line bg-panel text-xs text-ink-dim" style={{ height: 28 }}>
+                    <th scope="col" className="px-3 py-2 font-semibold">
                       Код
                     </th>
-                    <th scope="col" className="px-4 py-3 font-semibold">
+                    <th scope="col" className="px-3 py-2 font-semibold">
                       Нэр
                     </th>
-                    <th scope="col" className="px-4 py-3 font-semibold">
+                    <th scope="col" className="px-3 py-2 font-semibold">
                       Анги
                     </th>
-                    <th scope="col" className="px-4 py-3 font-semibold">
+                    <th scope="col" className="px-3 py-2 font-semibold">
                       Секц
                     </th>
-                    <th scope="col" className="px-4 py-3 font-semibold">
+                    <th scope="col" className="px-3 py-2 font-semibold">
                       Салбар
                     </th>
                     {canSeeMoney && (
-                      <th scope="col" className="px-4 py-3 font-semibold">
+                      <th scope="col" className="px-3 py-2 font-semibold">
                         Төлбөрийн төлөв
                       </th>
                     )}
@@ -350,38 +353,40 @@ export default function StudentsDirectory() {
                     return (
                       <tr
                         key={s.id}
-                        className={`border-b border-line last:border-0 ${
+                        className={`row-interactive border-b border-line last:border-0 transition ${
                           isUnassigned ? "bg-warning/[0.06]" : ""
                         }`}
+                        style={{ height: 28 }}
                       >
-                        <td className="px-4 py-3 font-mono text-xs text-ink-dim">
+                        <td className="px-3 py-2 font-mono text-xs text-ink-dim">
                           {s.studentCode ?? "—"}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2">
                           <Link
                             href={`/app/admin/students/${s.id}`}
-                            className="font-semibold text-ink hover:text-brand-soft hover:underline"
+                            className="font-semibold text-brand transition hover:text-brand-soft hover:underline"
                           >
                             {fullName(s)}
                           </Link>
                           {isUnassigned && (
-                            <span className="ml-2 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-bold text-warning">
-                              ⚠ Хуваарилаагүй
+                            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-bold text-warning">
+                              <AlertCircle size={10} aria-hidden />
+                              Хуваарилаагүй
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-ink-dim">
+                        <td className="px-3 py-2 text-ink-dim">
                           {s.currentClassroom?.name ??
                             (s.studentProfile?.grade ? `${s.studentProfile.grade}-р анги` : "—")}
                         </td>
-                        <td className="px-4 py-3 text-ink-dim">
+                        <td className="px-3 py-2 text-ink-dim">
                           {s.studentProfile?.section ?? "—"}
                         </td>
-                        <td className="px-4 py-3 text-ink-dim">
+                        <td className="px-3 py-2 text-ink-dim">
                           {s.studentProfile?.branch ?? "—"}
                         </td>
                         {canSeeMoney && (
-                          <td className="px-4 py-3">
+                          <td className="px-3 py-2">
                             {status ? (
                               <span
                                 className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.cls}`}
@@ -430,9 +435,10 @@ export default function StudentsDirectory() {
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
               >
-                ← Өмнөх
+                <ArrowLeft className="h-4 w-4" aria-hidden />
+                Өмнөх
               </button>
               <span>
                 {page + 1} / {totalPages}
@@ -440,9 +446,10 @@ export default function StudentsDirectory() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
               >
-                Дараах →
+                Дараах
+                <ArrowRight className="h-4 w-4" aria-hidden />
               </button>
             </div>
           </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Delete, X } from "lucide-react";
+
 /* ============================================================================
  * NumericKeypad — ЭЕШ-ийн "тоо нөхөх" (FILL_NUMBER) бодлогын хариу оруулагч.
  *
@@ -9,7 +11,7 @@
  *
  * Зарчим:
  *   - Сонгосон тэмдэгтийг хариуны төгсгөлд залгана.
- *   - Устгах (⌫) ба бүгдийг арилгах (Цэвэрлэх) товчтой.
+ *   - Устгах ба бүгдийг арилгах (Цэвэрлэх) товчтой.
  *   - Хариуг тухайн бодлогын string утга болгож хадгална.
  *   - Гарын товчлуурын далд оролтод найдахгүй — 11 товч нь үндсэн арга.
  * ========================================================================== */
@@ -82,17 +84,21 @@ export default function NumericKeypad({
           type="button"
           onClick={() => onChange((prev) => prev.slice(0, -1))}
           disabled={!value}
-          className={`h-11 rounded-xl border text-sm font-semibold transition disabled:opacity-30 ${keyBase}`}
+          className={`flex items-center justify-center gap-1.5 h-11 rounded-xl border text-sm font-semibold transition disabled:opacity-30 ${keyBase}`}
+          aria-label="Сүүлийн цифрийг устгах"
         >
-          ⌫ Устгах
+          <Delete size={16} aria-hidden />
+          <span className="hidden sm:inline">Устгах</span>
         </button>
         <button
           type="button"
           onClick={() => onChange(() => "")}
           disabled={!value}
-          className={`h-11 rounded-xl border text-sm font-semibold transition disabled:opacity-30 ${keyBase}`}
+          className={`flex items-center justify-center gap-1.5 h-11 rounded-xl border text-sm font-semibold transition disabled:opacity-30 ${keyBase}`}
+          aria-label="Бүх хариуг устгах"
         >
-          Цэвэрлэх
+          <X size={16} aria-hidden />
+          <span className="hidden sm:inline">Цэвэрлэх</span>
         </button>
       </div>
     </div>

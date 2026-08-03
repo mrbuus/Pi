@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { AlertTriangle, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { METHOD_LABEL, errMsg } from "./paymentHelpers";
 import type { Payment } from "./types";
@@ -118,15 +119,18 @@ export default function PaymentEditModal({
             type="button"
             onClick={onClose}
             aria-label="Хаах"
-            className="rounded-lg border border-line px-2 py-1 text-sm text-ink-dim transition hover:text-ink"
+            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink"
           >
-            ✕
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="mb-4 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
-          ⚠ Мөнгөтэй холбоотой засвар — өөрчлөлт бүр хуучин/шинэ утгын хамт
-          аудит лог-д хадгалагдана.
+        <div className="mb-4 flex gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
+          <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <span>
+            Мөнгөтэй холбоотой засвар — өөрчлөлт бүр хуучин/шинэ утгын хамт
+            аудит лог-д хадгалагдана.
+          </span>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -241,9 +245,10 @@ export default function PaymentEditModal({
           {error && (
             <div
               role="alert"
-              className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
+              className="flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
             >
-              ⚠ {error}
+              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{error}</span>
             </div>
           )}
 

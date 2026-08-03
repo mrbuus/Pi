@@ -1,5 +1,7 @@
 "use client";
 
+import { Flag } from "lucide-react";
+
 /* ============================================================================
  * QuestionFooterNav — доод навигацийн мөр: Өмнөх / Тэмдэглэх / Дараах-Тойм.
  * ========================================================================== */
@@ -29,7 +31,7 @@ export default function QuestionFooterNav({
         disabled={!canGoPrev}
         className="rounded-xl border border-line px-4 py-3 font-semibold text-ink transition disabled:opacity-30 sm:px-5"
       >
-        ← Өмнөх
+        Өмнөх
       </button>
       <button
         type="button"
@@ -39,7 +41,7 @@ export default function QuestionFooterNav({
           flagged ? "border-warning bg-warning/10 text-warning" : "border-line text-ink-dim hover:text-ink"
         }`}
       >
-        <span aria-hidden>⚑</span>
+        <Flag size={16} aria-hidden />
         <span className="hidden sm:inline">{flagged ? "Тэмдэглэсэн" : "Дараа эргэж харах"}</span>
       </button>
       {!isLast ? (
@@ -48,7 +50,7 @@ export default function QuestionFooterNav({
           onClick={onNext}
           className="flex-1 rounded-xl bg-brand-bright py-3 font-bold text-on-brand"
         >
-          Дараах →
+          Дараах
         </button>
       ) : (
         <button

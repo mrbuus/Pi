@@ -1,6 +1,6 @@
 "use client";
 
-import { Pin } from "lucide-react";
+import { Pin, Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
@@ -90,7 +90,7 @@ export default function AnnouncementCompose() {
       setAudience("ALL_CLASSROOM");
       setSelectedClassrooms([]);
       setPinned(false);
-      setMsg("✓ Зар тавигдлаа");
+      setMsg("success: Зар тавигдлаа");
       load();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Алдаа");

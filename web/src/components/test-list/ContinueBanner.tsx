@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import Link from "next/link";
 import type { TestRow } from "./types";
 
@@ -20,9 +21,7 @@ export default function ContinueBanner({ tests }: { tests: TestRow[] }) {
       className="flex flex-col gap-3 rounded-2xl border-2 border-warning/50 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex items-center gap-3">
-        <span aria-hidden="true" className="text-2xl">
-          ⏳
-        </span>
+        <Clock size={28} className="shrink-0 text-warning" aria-hidden />
         <div>
           <p className="text-sm font-extrabold text-ink">
             {inProgress.length === 1

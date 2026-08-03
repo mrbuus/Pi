@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import HeatmapGrid, { HeatmapCell } from "./HeatmapGrid";
 import {
@@ -99,19 +100,19 @@ export default function ClassActivityHeatmap({
         <div className="flex items-center gap-2 text-sm">
           <button
             onClick={() => setActiveYear((y) => y - 1)}
-            className="rounded-lg border border-line px-2 py-1 text-ink-dim transition hover:text-ink"
+            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink"
             aria-label="Өмнөх жил харах"
           >
-            ←
+            <ArrowLeft className="h-4 w-4" aria-hidden />
           </button>
           <span className="font-semibold text-ink">{activeYear}</span>
           <button
             onClick={() => setActiveYear((y) => y + 1)}
             disabled={activeYear >= currentYear}
-            className="rounded-lg border border-line px-2 py-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
+            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
             aria-label="Дараагийн жил харах"
           >
-            →
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </button>
         </div>
       </div>
@@ -149,7 +150,7 @@ export default function ClassActivityHeatmap({
       </div>
 
       <p className="mt-3 text-xs text-ink-dim">
-        ⚠️ Энэ бол ангийн нэгдсэн дүр зураг — сурагч тус бүрийн жагсаалт,
+        Энэ бол ангийн нэгдсэн дүр зураг — сурагч тус бүрийн жагсаалт,
         харьцуулалт биш.
       </p>
     </section>

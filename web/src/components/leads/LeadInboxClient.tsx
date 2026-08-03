@@ -200,7 +200,7 @@ export default function LeadInboxClient() {
 
       {error && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <span>error</span>
           <button
             type="button"
             onClick={load}

@@ -1,3 +1,4 @@
+import { ChevronRight } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import { BRANCHES, ORG, PHONES } from "@/lib/orgInfo";
 
@@ -26,17 +27,17 @@ export default function Footer() {
               href={ORG.facebook}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-white/90 hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-white/90 hover:underline"
             >
-              Facebook хуудас →
+              Facebook хуудас <ChevronRight className="h-4 w-4" aria-hidden />
             </a>
             <a
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-white/90 hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-white/90 hover:underline"
             >
-              Instagram хуудас →
+              Instagram хуудас <ChevronRight className="h-4 w-4" aria-hidden />
             </a>
           </div>
         </div>

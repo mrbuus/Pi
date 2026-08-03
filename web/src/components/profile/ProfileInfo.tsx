@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Mail, Phone } from "lucide-react";
+import { Copy, Mail, Phone, Check } from "lucide-react";
 import { useState } from "react";
 
 export interface ProfileInfoMe {
@@ -44,7 +44,14 @@ function CodeRow({ code, label }: { code: string; label: string }) {
         className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-sm font-semibold text-ink-dim transition hover:text-ink"
       >
         <Copy className="h-4 w-4" aria-hidden="true" strokeWidth={1.7} />
-        {copied ? "Хууллаа ✓" : "Хуулах"}
+        {copied ? (
+          <>
+            <span>Хууллаа</span>
+            <Check className="h-3 w-3" aria-hidden />
+          </>
+        ) : (
+          "Хуулах"
+        )}
       </button>
     </div>
   );

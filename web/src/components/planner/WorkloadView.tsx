@@ -71,7 +71,7 @@ export default function WorkloadView({
                     </span>
                     {overloaded && (
                       <span className="flex items-center gap-1 rounded-full border border-warning/40 bg-warning/10 px-2 py-0.5 text-xs font-semibold text-warning">
-                        ⚠ Ачаалал ихтэй
+                        Ачаалал ихтэй
                       </span>
                     )}
                   </div>

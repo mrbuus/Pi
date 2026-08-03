@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TriangleAlert } from "lucide-react";
 import { api, getRole } from "@/lib/api";
+import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import PatternOverview from "./PatternOverview";
 import StaffScheduleBuilder from "./StaffScheduleBuilder";
 import UpcomingAgenda from "./UpcomingAgenda";
@@ -22,23 +22,6 @@ function todayWeekday(): number {
   return new Date(`${todayUBKey()}T00:00:00.000Z`).getUTCDay();
 }
 
-function SectionLoading({ label }: { label: string }) {
-  return (
-    <p className="animate-pulse text-sm text-ink-dim" role="status">
-      {label} ачаалж байна…
-    </p>
-  );
-}
-
-function SectionError({ message }: { message: string }) {
-  return (
-    <div className="flex items-center gap-2 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-      <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
-      {message}
-    </div>
-  );
-}
-
 // ---------------------------------------------------------------------------
 
 function StudentSchedule() {
@@ -53,8 +36,8 @@ function StudentSchedule() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <SectionLoading label="Миний хуваарь" />;
-  if (error) return <SectionError message={error} />;
+  if (loading) return <LoadingState rows={3} />;
+  if (error) return <ErrorState message={error} />;
   if (!data?.classroomId) {
     return (
       <div className="rounded-xl border border-line bg-panel p-6 text-sm text-ink-dim">
@@ -92,8 +75,8 @@ function TeacherSchedule({ role }: { role: string }) {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <SectionLoading label="Миний хуваарь" />;
-  if (error) return <SectionError message={error} />;
+  if (loading) return <LoadingState rows={3} />;
+  if (error) return <ErrorState message={error} />;
 
   return (
     <div className="space-y-8">
@@ -172,8 +155,8 @@ function AdminSchedule() {
             ))}
           </select>
         </div>
-        {error && <SectionError message={error} />}
-        {!error && loading && <SectionLoading label="Хуваарь" />}
+        {error && <ErrorState message={error} />}
+        {!error && loading && <LoadingState rows={5} />}
         {!error && !loading && <WeeklyGrid entries={entries} todayWeekday={todayWeekday()} />}
       </section>
     </div>

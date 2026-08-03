@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, Check } from "lucide-react";
 import {
   EESH_CHOICE_COUNT,
   EESH_FILL_COUNT,
@@ -73,8 +74,10 @@ export default function SummaryRail({
                 : "border-line text-ink-dim"
             }`}
           >
-            {i + 1}. {s.label}
-            {s.done ? " ✓" : ""}
+            <span className="flex items-center gap-1">
+              <span>{i + 1}. {s.label}</span>
+              {s.done && <Check size={14} aria-hidden />}
+            </span>
           </span>
         ))}
       </div>
@@ -88,26 +91,29 @@ export default function SummaryRail({
       {deviations.length > 0 && (
         <p
           role="status"
-          className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning"
+          className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning"
         >
-          ⚠ {deviations.join(" · ")}
+          <AlertTriangle size={16} className="shrink-0 mt-0.5" aria-hidden />
+          <span>{deviations.join(" · ")}</span>
         </p>
       )}
 
       {missingAnswerCount > 0 && (
         <p
           role="alert"
-          className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm font-semibold text-error"
+          className="flex items-start gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm font-semibold text-error"
         >
-          ⚠ {missingAnswerCount} бодлого хариугүй — эдгээр онооны нийлбэрт орохгүй
+          <AlertTriangle size={16} className="shrink-0 mt-0.5" aria-hidden />
+          <span>{missingAnswerCount} бодлого хариугүй — эдгээр онооны нийлбэрт орохгүй</span>
         </p>
       )}
       {reviewNeededCount > 0 && (
         <p
           role="status"
-          className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning"
+          className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning"
         >
-          ⚠ {reviewNeededCount} бодлогын хариу шалгах шаардлагатай гэж тэмдэглэгдсэн
+          <AlertTriangle size={16} className="shrink-0 mt-0.5" aria-hidden />
+          <span>{reviewNeededCount} бодлогын хариу шалгах шаардлагатай гэж тэмдэглэгдсэн</span>
         </p>
       )}
     </div>

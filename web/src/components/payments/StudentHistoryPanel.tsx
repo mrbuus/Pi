@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatMnt, TUITION } from "@/lib/orgInfo";
 import {
@@ -102,7 +103,12 @@ export default function StudentHistoryPanel({
         </button>
       </form>
 
-      {searchError && <p className="mb-3 text-sm text-error">⚠ {searchError}</p>}
+      {searchError && (
+        <p className="mb-3 flex items-center gap-1.5 text-sm text-error">
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          {searchError}
+        </p>
+      )}
 
       {results.length > 0 && !selected && (
         <div className="mb-4 flex flex-wrap gap-2">
@@ -150,8 +156,9 @@ export default function StudentHistoryPanel({
             </p>
           )}
           {historyError && (
-            <div className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-              ⚠ {historyError}
+            <div className="flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{historyError}</span>
             </div>
           )}
 

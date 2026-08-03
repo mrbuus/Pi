@@ -361,10 +361,10 @@ export default function TeacherWorkDays() {
         </div>
 
         {exError && (
-          <p className="mt-2 flex items-center gap-2 text-sm text-error">
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
             <CircleAlert className="h-4 w-4 shrink-0" aria-hidden />
             {exError}
-          </p>
+          </div>
         )}
 
         {exceptions.length > 0 && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Coins, NotebookPen } from "lucide-react";
+import { ChevronDown, ChevronUp, Coins, NotebookPen } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
@@ -130,7 +130,7 @@ export default function AuditClient() {
       )}
       {error && (
         <div className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          ⚠ {error}
+          error
         </div>
       )}
 
@@ -176,7 +176,12 @@ export default function AuditClient() {
                       </span>
                     </span>
                     <span className="text-xs text-ink-dim">
-                      {new Date(row.at).toLocaleString("en-US")} {open ? "▲" : "▼"}
+                      {new Date(row.at).toLocaleString("en-US")}{" "}
+                      {open ? (
+                        <ChevronUp className="inline h-3 w-3" aria-hidden />
+                      ) : (
+                        <ChevronDown className="inline h-3 w-3" aria-hidden />
+                      )}
                     </span>
                   </button>
 

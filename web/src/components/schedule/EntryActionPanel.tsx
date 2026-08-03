@@ -403,7 +403,7 @@ export default function EntryActionPanel({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[80vh] w-full max-w-sm flex-col overflow-y-auto rounded-2xl border border-line bg-surface p-4"
+        className="enter-pop elev-3 flex max-h-[80vh] w-full max-w-sm flex-col overflow-y-auto rounded-2xl border border-line bg-surface p-4"
       >
         {/* ---- Толгой: ангийн нэр, огноо, цаг, RoomShape, танхим, багш ---- */}
         <div className="mb-3 pb-3 border-b border-line">
@@ -549,7 +549,12 @@ export default function EntryActionPanel({
                 </select>
               </div>
             )}
-            {topicError && <p className="text-xs text-error">{topicError}</p>}
+            {topicError && (
+              <div className="flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
+                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                {topicError}
+              </div>
+            )}
             <div className="flex gap-2">
               <button
                 type="button"
@@ -648,7 +653,12 @@ export default function EntryActionPanel({
                 />
               </div>
             </div>
-            {moveError && <p className="text-xs text-error">{moveError}</p>}
+            {moveError && (
+              <div className="flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
+                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                {moveError}
+              </div>
+            )}
             <div className="flex gap-2">
               <button
                 type="button"
@@ -666,7 +676,12 @@ export default function EntryActionPanel({
         {cancelArmed && (
           <div className="mb-3 space-y-2 rounded-lg border border-warning/40 bg-warning/5 p-3">
             <p className="text-xs text-warning">Энэ өдрийг цуцлах уу?</p>
-            {cancelError && <p className="text-xs text-error">{cancelError}</p>}
+            {cancelError && (
+              <div className="flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
+                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                {cancelError}
+              </div>
+            )}
             <div className="flex gap-2">
               <button
                 type="button"
@@ -790,7 +805,12 @@ export default function EntryActionPanel({
                     </div>
                   </div>
 
-                  {splitError && <p className="text-xs text-error">{splitError}</p>}
+                  {splitError && (
+                    <div className="flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
+                      <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                      {splitError}
+                    </div>
+                  )}
 
                   <div className="flex gap-2">
                     <button
@@ -837,7 +857,12 @@ export default function EntryActionPanel({
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-error">БҮХ долоо хоногийн тохиолдол устана.</p>
-                  {deleteError && <p className="text-xs text-error">{deleteError}</p>}
+                  {deleteError && (
+                    <div className="flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
+                      <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                      {deleteError}
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <button
                       type="button"

@@ -145,7 +145,7 @@ export default function Sidebar({
             type="button"
             onClick={onLogout}
             title="Гарах"
-            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink ${
+            className={`row-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink ${
               railCollapsed ? "justify-center px-2" : ""
             }`}
           >
@@ -157,7 +157,7 @@ export default function Sidebar({
             onClick={toggleRail}
             aria-pressed={railCollapsed}
             title={railCollapsed ? "Самбарыг дэлгэх" : "Самбарыг хумих"}
-            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink ${
+            className={`row-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink ${
               railCollapsed ? "justify-center px-2" : ""
             }`}
           >

@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { DeletedEntry, formatDeletedAt } from "./useDeletedLog";
 
 interface DeletedListProps {
@@ -25,12 +26,13 @@ export default function DeletedList({ entries, emptyText }: DeletedListProps) {
           {entries.map((e, i) => (
             <li
               key={`${e.id}-${e.deletedAt}-${i}`}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 py-[6px] text-sm h-[var(--row-compact)]"
             >
-              <span>
-                <span className="text-error">✗</span> {e.label}
+              <span className="flex items-center gap-2">
+                <X size={14} className="text-error shrink-0" aria-hidden="true" />
+                <span>{e.label}</span>
                 {e.detail && (
-                  <span className="ml-1 text-xs text-ink-dim">
+                  <span className="text-xs text-ink-dim">
                     — {e.detail}
                   </span>
                 )}

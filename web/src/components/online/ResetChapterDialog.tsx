@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { TriangleAlert } from "lucide-react";
 import { ChapterProgressRow } from "./types";
 
 export default function ResetChapterDialog({
@@ -33,9 +34,10 @@ export default function ResetChapterDialog({
         <h2 id={titleId} className="text-base font-bold text-ink">
           «{chapter.title}» бүлгийн явцыг дахин эхлүүлэх үү?
         </h2>
-        <p className="mt-2 rounded-lg bg-warning/10 p-3 text-sm text-ink">
-          ⚠️ Энэ үйлдэл явцын тэмдэглэгээг (дэвшил) цэвэрлэнэ, ГЭХДЭЭ бодлого
-          бодсон түүх (оролдлогууд) устахгүй, хадгалагдана.
+        <p className="mt-2 inline-flex items-center gap-2 rounded-lg bg-warning/10 p-3 text-sm text-ink">
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+          <span>Энэ үйлдэл явцын тэмдэглэгээг (дэвшил) цэвэрлэнэ, ГЭХДЭЭ бодлого
+          бодсон түүх (оролдлогууд) устахгүй, хадгалагдана.</span>
         </p>
         <label className="mt-3 block text-sm font-semibold text-ink" htmlFor="reset-reason">
           Шалтгаан (заавал)

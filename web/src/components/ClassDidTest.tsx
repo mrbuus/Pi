@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 
 /* ============================================================================
@@ -206,7 +207,7 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
                 manualProblemCount: Number(manualProblemCount),
               },
       });
-      setMsg("✓ Бүртгэгдлээ — сурагчдын тэмдэглэгээнд гарч ирнэ");
+      setMsg("success: Бүртгэгдлээ — сурагчдын тэмдэглэгээнд гарч ирнэ");
       setSelectedBookId("");
       setManualTitle("");
       setManualProblemCount("");
@@ -217,7 +218,7 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
         // хүсэлт NotFoundException/validation алдаагаар унана — түүнийг
         // түүхий англи мессежээр биш, тодорхой шалтгаанаар харуулна.
         setMsg(
-          "⚠ Серверт гараар бичсэн тестийг хадгалах боломж одоогоор алга " +
+          "error: Серверт гараар бичсэн тестийг хадгалах боломж одоогоор алга " +
             "(API-д тест сангаас testId заавал шаардсан хэвээр байна). " +
             "Хөгжүүлэгчид мэдэгдээрэй.",
         );
@@ -377,8 +378,9 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
               className="w-full min-h-11 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
             />
           </div>
-          <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
-            ⚠ Энэ горим бэлэн боловч серверийн шинэчлэлт хүлээж байна — одоохондоо
+          <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning inline-flex items-center gap-1.5">
+            <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+            Энэ горим бэлэн боловч серверийн шинэчлэлт хүлээж байна — одоохондоо
             хадгалахад алдаа гарч болно (доор тайлбарлана).
           </p>
         </div>
@@ -513,8 +515,9 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
                           </span>
                         </button>
                         {showsFallbackWarning && (
-                          <p className="mt-1 px-1 text-xs text-warning">
-                            ⚠ А хувилбар олдсонгүй —{" "}
+                          <p className="mt-1 px-1 text-xs text-warning inline-flex items-center gap-1.5">
+                            <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />
+                            А хувилбар олдсонгүй —{" "}
                             {t.variantLabel ? `${t.variantLabel} хувилбарыг` : "олдсон хувилбарыг"}{" "}
                             ашиглаж байна
                           </p>
@@ -551,15 +554,26 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
       </div>
       {msg && (
         <p
-          className={`mt-2 text-sm ${msg.startsWith("✓") ? "text-success" : "text-error"}`}
+          className={`mt-2 text-sm inline-flex items-center gap-1.5 ${msg.startsWith("success:") ? "text-success" : "text-error"}`}
         >
-          {msg}
+          {msg.startsWith("success:") ? (
+            <>
+              <Check className="h-4 w-4" aria-hidden />
+              {msg.substring(9)}
+            </>
+          ) : (
+            <>
+              <AlertTriangle className="h-4 w-4" aria-hidden />
+              {msg.substring(2)}
+            </>
+          )}
         </p>
       )}
 
       {toggleError && (
         <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {toggleError}</span>
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+          <span>{toggleError}</span>
           <button
             onClick={() => setToggleError("")}
             className="ml-auto rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"

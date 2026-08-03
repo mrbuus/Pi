@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Check } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import { api, homeForRole, setAuth } from "@/lib/api";
 import SubjectPicker, { type Subject } from "@/components/landing/SubjectPicker";
@@ -169,8 +170,11 @@ export default function RegisterPage() {
     return (
       <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
         <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-        <div className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
-          <p className="text-sm font-semibold text-success">✓ Бүртгэл амжилттай үүслээ</p>
+        <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
+          <div className="flex items-center justify-center gap-1.5">
+            <Check className="h-4 w-4 text-success" aria-hidden />
+            <p className="text-sm font-semibold text-success">Бүртгэл амжилттай үүслээ</p>
+          </div>
           <h1 className="mt-3 text-lg font-bold text-ink">Таны сурагчийн код</h1>
           <p className="mt-1 text-sm text-ink-dim">
             Энэ бол таны сургалтын төв дэх байнгын танигдах код. Шалгалт, дэвтэр,
@@ -186,9 +190,17 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={copyCode}
-            className="mt-3 w-full rounded-xl border border-line bg-bg py-2.5 text-sm font-semibold text-ink transition hover:border-brand"
+            className="mt-3 w-full rounded-xl border border-line bg-bg py-2.5 text-sm font-semibold text-ink transition hover:border-brand disabled:opacity-75"
+            disabled={copied}
           >
-            {copied ? "✓ Хуулагдлаа" : "Кодыг хуулах"}
+            {copied ? (
+              <span className="flex items-center justify-center gap-1.5">
+                <Check className="h-4 w-4" aria-hidden />
+                Хуулагдлаа
+              </span>
+            ) : (
+              "Кодыг хуулах"
+            )}
           </button>
 
           <button
@@ -206,7 +218,7 @@ export default function RegisterPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-8 shadow-sm">
+      <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
         <div className="mb-6">
           <Link
             href="/"

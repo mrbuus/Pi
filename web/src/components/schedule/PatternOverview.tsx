@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
+import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { getClassroomColor } from "@/lib/classroomColor";
 import EntryActionPanel from "./EntryActionPanel";
 import RoomShape from "./RoomShape";
@@ -177,19 +177,10 @@ export default function PatternOverview({ readOnly = false }: { readOnly?: boole
   }
 
   if (loading) {
-    return (
-      <p className="animate-pulse text-sm text-ink-dim" role="status">
-        Ерөнхий хуваарь ачаалж байна…
-      </p>
-    );
+    return <LoadingState rows={6} />;
   }
   if (error) {
-    return (
-      <div className="flex items-center gap-2 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-        <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
-        {error}
-      </div>
-    );
+    return <ErrorState message={error} onRetry={load} />;
   }
 
   return (

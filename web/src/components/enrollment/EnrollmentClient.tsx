@@ -257,7 +257,7 @@ export default function EnrollmentClient() {
 
       {error && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <span>error</span>
           <button
             type="button"
             onClick={load}
@@ -297,7 +297,7 @@ export default function EnrollmentClient() {
             )}
             {bulkError && (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-error">
-                <span>⚠ {bulkError}</span>
+                <span>bulkError</span>
                 <button
                   type="button"
                   onClick={() => lastBulkTarget && requestBulk(lastBulkTarget)}

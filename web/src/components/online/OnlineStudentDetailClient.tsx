@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Flame, Plus } from "lucide-react";
+import { Eye, Flame, Plus, ArrowLeft, ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { api, getRole } from "@/lib/api";
@@ -138,8 +138,9 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
 
   return (
     <div className="space-y-6">
-      <Link href="/app/online" className="text-sm text-ink-dim transition hover:text-ink">
-        ← Онлайн сурагчдын жагсаалт руу буцах
+      <Link href="/app/online" className="inline-flex items-center gap-1.5 text-sm text-ink-dim transition hover:text-ink">
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        Онлайн сурагчдын жагсаалт руу буцах
       </Link>
 
       <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
@@ -189,7 +190,9 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
             <ul className="mt-2 space-y-1 text-sm text-ink-dim">
               {detail.passHistory.map((p, i) => (
                 <li key={i}>
-                  {p.name}: {formatDate(p.startsAt)} → {formatDate(p.expiresAt)}
+                  {p.name}: {formatDate(p.startsAt)}{" "}
+                  <ArrowRight className="h-3 w-3 inline" aria-hidden />{" "}
+                  {formatDate(p.expiresAt)}
                 </li>
               ))}
             </ul>

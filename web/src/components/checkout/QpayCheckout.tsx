@@ -1,7 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SVGProps } from "react";
+import {
+  Loader2,
+  Hourglass,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Undo,
+  Copy,
+  Check,
+  ArrowLeft,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import type {
   CreatePaymentResponse,
@@ -25,74 +35,6 @@ type CheckoutState =
   | "error" // нэхэмжлэх үүсгэхэд/шалгахад алдаа гарсан
   | "rejected" // ажилтан татгалзсан
   | "reversed"; // төлбөрийг эргүүлж буцаасан
-
-/* ============================================================
-   ДҮРСҮҮД (inline SVG — сангийн бусад компонентуудтай ижил хэвшил)
-   ============================================================ */
-
-function SpinnerIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="animate-spin" {...props}>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={2.2} strokeOpacity={0.25} />
-      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function HourglassIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M6 3h12M6 21h12" />
-      <path d="M7 3v3.2c0 2 2 3.4 5 5.8 3-2.4 5-3.8 5-5.8V3" />
-      <path d="M7 21v-3.2c0-2 2-3.4 5-5.8 3 2.4 5 3.8 5 5.8V21" />
-    </svg>
-  );
-}
-
-function CheckCircleIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="m8 12.5 2.7 2.7L16 9.5" />
-    </svg>
-  );
-}
-
-function ClockXIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="m9.5 9.5 5 5m0-5-5 5" />
-    </svg>
-  );
-}
-
-function AlertIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 3.5 21.5 20h-19L12 3.5Z" />
-      <path d="M12 9.5v4.2M12 17v0" />
-    </svg>
-  );
-}
-
-function UndoIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M7 8H4V5" />
-      <path d="M4 8a8 8 0 1 1-1.8 6.4" />
-    </svg>
-  );
-}
-
-function CopyIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="8.5" y="8.5" width="11" height="11" rx="1.6" />
-      <path d="M5.5 15.5h-1a1.6 1.6 0 0 1-1.6-1.6V5.6A1.6 1.6 0 0 1 4.5 4h8.3a1.6 1.6 0 0 1 1.6 1.6v1" />
-    </svg>
-  );
-}
 
 /* ============================================================
    ТУСЛАХ ФУНКЦУУД
@@ -351,15 +293,16 @@ export default function QpayCheckout({
         <button
           type="button"
           onClick={onCancel}
-          className="mb-3 text-xs font-semibold text-ink-dim underline-offset-2 hover:text-ink hover:underline"
+          className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ink-dim underline-offset-2 hover:text-ink hover:underline"
         >
-          ← Буцах / өөр арга сонгох
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+          Буцах / өөр арга сонгох
         </button>
       )}
 
       {state === "creating" && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <SpinnerIcon className="h-9 w-9 text-brand" aria-hidden="true" />
+          <Loader2 className="h-9 w-9 animate-spin text-brand" aria-hidden="true" />
           <p className="font-bold">Нэхэмжлэх үүсгэж байна…</p>
           <p className="text-sm text-ink-dim">{formatMnt(amount)} — {description}</p>
         </div>
@@ -369,7 +312,7 @@ export default function QpayCheckout({
         <div className="space-y-5">
           <div className="flex flex-col items-center gap-1.5 text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1 text-xs font-bold text-warning">
-              <HourglassIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <Hourglass className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               Төлбөрийг хүлээж байна
             </span>
             <p className="text-lg font-extrabold">{formatMnt(amount)}</p>
@@ -443,9 +386,9 @@ export default function QpayCheckout({
                       aria-label="Хуулах"
                     >
                       {copied ? (
-                        <CheckCircleIcon className="h-4 w-4 text-success" aria-hidden="true" />
+                        <Check className="h-4 w-4 text-success" aria-hidden="true" />
                       ) : (
-                        <CopyIcon className="h-4 w-4" aria-hidden="true" />
+                        <Copy className="h-4 w-4" aria-hidden="true" />
                       )}
                     </button>
                   </div>
@@ -467,7 +410,7 @@ export default function QpayCheckout({
               successMounted ? "scale-100 opacity-100" : "scale-50 opacity-0"
             }`}
           >
-            <CheckCircleIcon className="h-9 w-9 text-success" aria-hidden="true" />
+            <CheckCircle className="h-9 w-9 text-success" aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold text-success">Төлбөр амжилттай!</p>
           <p className="text-sm text-ink-dim">
@@ -482,7 +425,7 @@ export default function QpayCheckout({
 
       {state === "expired" && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <ClockXIcon className="h-9 w-9 text-warning" aria-hidden="true" />
+          <Clock className="h-9 w-9 text-warning" aria-hidden="true" />
           <p className="font-bold">Хугацаа дууслаа</p>
           <p className="max-w-xs text-sm text-ink-dim">
             10 минутын дотор төлбөр баталгаажсангүй. Хэрэв төлсөн бол доор
@@ -507,7 +450,7 @@ export default function QpayCheckout({
 
       {state === "error" && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <AlertIcon className="h-9 w-9 text-error" aria-hidden="true" />
+          <AlertTriangle className="h-9 w-9 text-error" aria-hidden="true" />
           <p className="font-bold">Алдаа гарлаа</p>
           <p className="max-w-xs text-sm text-ink-dim">{errorMsg}</p>
           <button
@@ -522,7 +465,7 @@ export default function QpayCheckout({
 
       {state === "rejected" && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <AlertIcon className="h-9 w-9 text-error" aria-hidden="true" />
+          <AlertTriangle className="h-9 w-9 text-error" aria-hidden="true" />
           <p className="font-bold">Төлбөр татгалзагдсан</p>
           <p className="max-w-xs text-sm text-ink-dim">
             Ажилтан таны төлбөрийг баталгаажуулаагүй байна. Дэлгэрэнгүй
@@ -533,7 +476,7 @@ export default function QpayCheckout({
 
       {state === "reversed" && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <UndoIcon className="h-9 w-9 text-warning" aria-hidden="true" />
+          <Undo className="h-9 w-9 text-warning" aria-hidden="true" />
           <p className="font-bold">Төлбөр буцаагдсан</p>
           <p className="max-w-xs text-sm text-ink-dim">
             Энэ төлбөрийг сүүлд буцаасан байна. Дэлгэрэнгүй мэдээлэл авахыг

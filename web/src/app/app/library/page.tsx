@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { ChevronUp, ChevronDown, Check, Pencil } from "lucide-react";
 import MathText from "@/components/MathText";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
 import { api, getRole, getToken } from "@/lib/api";
@@ -522,8 +523,8 @@ export default function LibraryPage() {
                     {activeGroup.problems} бодлого
                   </span>
                   {activeGroup.free > 0 && (
-                    <span className="rounded-full bg-success/15 px-3 py-1 font-semibold text-success">
-                      ✓ {activeGroup.free} үнэгүй
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-3 py-1 font-semibold text-success">
+                      <Check className="h-3.5 w-3.5" aria-hidden /> {activeGroup.free} үнэгүй
                     </span>
                   )}
                 </div>
@@ -559,8 +560,8 @@ export default function LibraryPage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-bold">{label}</p>
                           {ch.freePreview && (
-                            <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
-                              ✓ Үнэгүй
+                            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">
+                              <Check className="h-3 w-3" aria-hidden /> Үнэгүй
                             </span>
                           )}
                         </div>
@@ -570,7 +571,13 @@ export default function LibraryPage() {
                           {ch._count.theories > 0 && ` · ${ch._count.theories} онол`}
                         </p>
                       </div>
-                      <span className="text-ink-dim">{isOpen ? "▲" : "▼"}</span>
+                      <span className="text-ink-dim">
+                        {isOpen ? (
+                          <ChevronUp className="h-5 w-5" aria-hidden />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" aria-hidden />
+                        )}
+                      </span>
                     </button>
 
                     {isOpen && (
@@ -688,8 +695,8 @@ function ProblemList({
                       <MathText>{o.text}</MathText>
                     </span>
                     {canEdit && o.isCorrect && (
-                      <span className="shrink-0 rounded bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
-                        ✓ Зөв
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
+                        <Check className="h-3 w-3" aria-hidden /> Зөв
                       </span>
                     )}
                   </li>
@@ -715,9 +722,9 @@ function ProblemList({
               {canEdit && (
                 <button
                   onClick={() => onEdit?.(p.id)}
-                  className="rounded bg-brand-bright/15 px-2 py-0.5 text-brand-soft transition hover:bg-brand-bright/25"
+                  className="inline-flex items-center gap-1.5 rounded bg-brand-bright/15 px-2 py-0.5 text-brand-soft transition hover:bg-brand-bright/25"
                 >
-                  ✎ Ангилал засах
+                  <Pencil className="h-3 w-3" aria-hidden /> Ангилал засах
                 </button>
               )}
             </div>

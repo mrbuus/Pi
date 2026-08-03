@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import BooksPanel from "@/components/content-admin/BooksPanel";
 import ChaptersPanel from "@/components/content-admin/ChaptersPanel";
@@ -42,8 +43,8 @@ export default function ContentAdminClient() {
     <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Link href="/app/admin" className="text-sm text-ink-dim hover:text-ink">
-          ← Удирдлага
+        <Link href="/app/admin" className="inline-flex items-center gap-1.5 text-sm text-ink-dim hover:text-ink">
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Удирдлага
         </Link>
         <h1 className="text-2xl font-extrabold">Контент удирдах</h1>
       </div>

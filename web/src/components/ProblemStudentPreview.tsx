@@ -2,6 +2,7 @@
 
 import MathText from "@/components/MathText";
 import ProblemFigure from "@/components/ProblemFigure";
+import { Check } from "lucide-react";
 
 /**
  * "Сурагчид ингэж харагдана" — багш бодлого оруулж байх үеийн шууд preview.
@@ -56,8 +57,9 @@ export default function ProblemStudentPreview({
           Сурагчид ингэж харагдана
         </p>
         {isChoice && (
-          <p className="text-[11px] text-ink-dim">
-            Дараалал сурагч бүрд холилдоно · ✓ зөвхөн танд
+          <p className="text-[11px] text-ink-dim inline-flex items-center gap-1.5">
+            Дараалал сурагч бүрд холилдоно ·{" "}
+            <Check className="h-4 w-4" aria-hidden /> зөвхөн танд
           </p>
         )}
       </div>
@@ -105,8 +107,8 @@ export default function ProblemStudentPreview({
                   <MathText>{c.text}</MathText>
                 </span>
                 {c.isCorrect && (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success/20 text-xs font-bold text-success">
-                    ✓
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success/20">
+                    <Check className="h-4 w-4 text-success" aria-label="Зөв хариу" />
                   </span>
                 )}
               </div>

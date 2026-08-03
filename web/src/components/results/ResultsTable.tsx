@@ -7,6 +7,7 @@
  * ========================================================================== */
 
 import { useMemo, useState } from "react";
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, TriangleAlert, X } from "lucide-react";
 import type { ResultRow } from "./types";
 import { scorePercent, sourceLabel } from "./types";
 
@@ -114,7 +115,15 @@ export default function ResultsTable({
       >
         {label}
         <span aria-hidden className={active ? "text-brand" : "text-ink-dim/40"}>
-          {active ? (sortDir === "asc" ? "▲" : "▼") : "▲▼"}
+          {active ? (
+            sortDir === "asc" ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )
+          ) : (
+            <ChevronsUpDown className="h-3 w-3" />
+          )}
         </span>
       </button>
     );
@@ -138,14 +147,16 @@ export default function ResultsTable({
       {stats && (
         <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-line bg-panel px-4 py-3">
           <p className="text-base font-semibold text-ink">Ангийн дундаж: {stats.avgPct}%</p>
-          <span className="flex items-center gap-1 text-sm text-success">
-            ✓ 80%+: {stats.good}
+          <span className="inline-flex items-center gap-1 text-sm text-success">
+            <Check className="h-4 w-4" aria-hidden />
+            80%+: {stats.good}
           </span>
           <span className="flex items-center gap-1 text-sm text-warning">
-            ▲ 50–79%: {stats.mid}
+            <TriangleAlert className="h-3.5 w-3.5" aria-hidden /> 50–79%: {stats.mid}
           </span>
-          <span className="flex items-center gap-1 text-sm text-error">
-            ✕ 50%-с доош: {stats.low}
+          <span className="inline-flex items-center gap-1 text-sm text-error">
+            <X className="h-4 w-4" aria-hidden />
+            50%-с доош: {stats.low}
           </span>
         </div>
       )}
@@ -203,9 +214,10 @@ export default function ResultsTable({
                     tabIndex={0}
                     aria-label={`Шалгалтын горимоос ${r.leaveCount} удаа гарсан — анти-чит дохио. Тасалбар (таб) эсвэл апп-аас гарсан тоог харуулна; өндөр тоо хуулах гэж оролдсоныг илтгэж болно.`}
                     title="Шалгалтын горимоос (таб/апп) хэдэн удаа гарснаа — өндөр тоо магадгүй хуулах гэж оролдсоныг илтгэнэ"
-                    className="cursor-help rounded-lg bg-warning/15 px-2 py-1 text-sm font-bold text-warning"
+                    className="inline-flex items-center gap-1 cursor-help rounded-lg bg-warning/15 px-2 py-1 text-sm font-bold text-warning"
                   >
-                    ⚠ {r.leaveCount}
+                    <TriangleAlert className="h-4 w-4" aria-hidden />
+                    {r.leaveCount}
                   </button>
                 )}
                 <span className="w-28 text-right font-bold text-ink">

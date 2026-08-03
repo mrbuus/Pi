@@ -1,5 +1,7 @@
 "use client";
 
+import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
+
 /* ============================================================================
  * 📦 Тест/даалгавар бүрийг ЖИЖИГ БОКСОД тус тусад нь харуулна (owner-ийн
  * хүсэлт) — багш хэдэн тест өгснөө нэг харцаар харах боломжтой.
@@ -53,7 +55,11 @@ export default function TeacherHomeworkTestCard({
             {assignment.title}
           </span>
           <span aria-hidden="true" className="shrink-0 text-ink-dim">
-            {isOpen ? "▲" : "▼"}
+            {isOpen ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 text-xs text-ink-dim">
@@ -90,16 +96,18 @@ export default function TeacherHomeworkTestCard({
                   <button
                     type="button"
                     onClick={() => onReview(submission.student.id, "APPROVE")}
-                    className="min-h-9 rounded bg-success/20 px-2.5 text-xs font-bold text-success transition hover:bg-success/30"
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded bg-success/20 px-2.5 text-xs font-bold text-success transition hover:bg-success/30"
                   >
-                    ✓ Батлах
+                    <Check className="h-4 w-4" aria-hidden />
+                    Батлах
                   </button>
                   <button
                     type="button"
                     onClick={() => onReview(submission.student.id, "RETURN")}
-                    className="min-h-9 rounded bg-error/20 px-2.5 text-xs font-bold text-error transition hover:bg-error/30"
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded bg-error/20 px-2.5 text-xs font-bold text-error transition hover:bg-error/30"
                   >
-                    ✕ Буцаах
+                    <X className="h-4 w-4" aria-hidden />
+                    Буцаах
                   </button>
                   <button
                     type="button"

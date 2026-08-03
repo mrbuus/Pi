@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import HomeworkCommentField from "@/components/homework/HomeworkCommentField";
@@ -186,7 +186,8 @@ export default function AssignmentsSection({
 
       {error && (
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>⚠ {error}</span>
+          <TriangleAlert className="h-4 w-4" aria-hidden />
+          <span>{error}</span>
           <button
             onClick={loadDay}
             className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"

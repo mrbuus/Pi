@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle, Check } from "lucide-react";
 import { api, getRole } from "@/lib/api";
 
 /* ============================================================================
@@ -100,9 +101,7 @@ function VideoPlayer({ video }: { video: Video }) {
           <video controls src={video.s3Key} className="h-full w-full" />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 px-4 text-center text-brand-soft">
-            <span className="text-2xl" aria-hidden>
-              ⚠
-            </span>
+            <AlertTriangle className="h-8 w-8" aria-hidden="true" />
             <p className="text-sm font-semibold">Дэмжигдэхгүй холбоос</p>
             <p className="text-xs text-brand-soft/80">
               Энэ бичлэгийн эх сурвалж танигдаагүй тул аюулгүй байдлын үүднээс
@@ -180,7 +179,7 @@ export default function VideosPage() {
     }
     try {
       await api("/videos", { method: "POST", body: form });
-      setMsg("✓ Бичлэг нэмэгдлээ");
+      setMsg("Бичлэг нэмэгдлээ");
       setForm({ chapterId: form.chapterId, title: "", url: "" });
       loadChaptersWithVideos();
       if (form.chapterId === activeChapter) {
@@ -241,7 +240,11 @@ export default function VideosPage() {
             зөвшөөрөгдсөн видео сервертэй тохирвол тоглуулна — эс бол
             &ldquo;дэмжигдэхгүй холбоос&rdquo; гэж харагдана.
           </p>
-          {msg && <p className="mt-2 text-sm text-success">{msg}</p>}
+          {msg && (
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-success">
+              <Check className="h-4 w-4" aria-hidden /> {msg}
+            </p>
+          )}
         </section>
       )}
 

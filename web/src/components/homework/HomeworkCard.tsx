@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Calendar, Camera } from "lucide-react";
+import { AlertTriangle, Calendar, Camera, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 import { StatusBadge } from "./StatusBadge";
@@ -212,9 +212,9 @@ export default function HomeworkCard({
                     type="button"
                     onClick={() => removePhoto(key)}
                     aria-label="Зураг устгах"
-                    className="absolute right-0.5 top-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-error text-xs font-bold text-on-error"
+                    className="absolute right-0.5 top-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-error text-on-error"
                   >
-                    ✕
+                    <X className="h-3.5 w-3.5" aria-hidden />
                   </button>
                 </div>
               ))}

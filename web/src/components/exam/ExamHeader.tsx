@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
 import AutosaveChip, { type SaveStatus } from "./AutosaveChip";
 import ExamTimer from "./ExamTimer";
 
@@ -38,8 +39,9 @@ export default function ExamHeader({
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           <AutosaveChip status={saveStatus} />
           {leaveCount > 0 && (
-            <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-bold text-warning">
-              ⚠ {leaveCount}/{maxLeaves}
+            <span className="flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-bold text-warning">
+              <AlertTriangle size={12} aria-hidden />
+              <span>{leaveCount}/{maxLeaves}</span>
             </span>
           )}
         </div>

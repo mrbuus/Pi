@@ -1,6 +1,6 @@
 "use client";
 
-import { Palmtree } from "lucide-react";
+import { Palmtree, AlertTriangle, Pencil, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
@@ -98,10 +98,10 @@ export default function CalendarAdmin() {
       };
       if (editingId) {
         await api(`/calendar/${editingId}`, { method: "PATCH", body });
-        setMsg({ kind: "success", text: "✓ Хуанлийн бичлэг шинэчлэгдлээ" });
+        setMsg({ kind: "success", text: "Хуанлийн бичлэг шинэчлэгдлээ" });
       } else {
         await api("/calendar", { method: "POST", body });
-        setMsg({ kind: "success", text: "✓ Хуанлийн бичлэг нэмэгдлээ" });
+        setMsg({ kind: "success", text: "Хуанлийн бичлэг нэмэгдлээ" });
       }
       cancelEdit();
       load();
@@ -137,13 +137,17 @@ export default function CalendarAdmin() {
       {msg && (
         <div
           role="status"
-          className={`mb-4 rounded-lg px-3 py-2 text-sm ${
+          className={`mb-4 flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
             msg.kind === "error"
               ? "bg-error/10 text-error"
               : "bg-success/10 text-success"
           }`}
         >
-          {msg.kind === "error" ? "⚠ " : "✓ "}
+          {msg.kind === "error" ? (
+            <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+          ) : (
+            <div className="h-4 w-4 shrink-0 rounded-full border-2 border-success bg-success/20" aria-hidden />
+          )}
           {msg.text}
         </div>
       )}
@@ -219,8 +223,9 @@ export default function CalendarAdmin() {
         </p>
       )}
       {error && (
-        <div className="rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
-          ⚠ {error}
+        <div className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+          {error}
         </div>
       )}
       {!loading && !error && days.length === 0 && (
@@ -304,7 +309,8 @@ function CalendarRow({
       {day.note && <span className="text-ink-dim">— {day.note}</span>}
       <div className="ml-auto flex gap-2">
         <button onClick={onEdit} className={outlineBtn}>
-          ✎ Засах
+          <Pencil className="h-3.5 w-3.5" aria-hidden />
+          Засах
         </button>
         {armed ? (
           <>
@@ -322,9 +328,10 @@ function CalendarRow({
         ) : (
           <button
             onClick={onArm}
-            className="rounded-lg border border-error/40 px-3 py-1.5 text-xs text-error transition hover:bg-error/10"
+            className="rounded-lg border border-error/40 px-3 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10"
           >
-            ✕ Устгах
+            <X className="h-3.5 w-3.5" aria-hidden />
+            Устгах
           </button>
         )}
       </div>

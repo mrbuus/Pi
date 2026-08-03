@@ -7,9 +7,9 @@ import {
   ChevronRight,
   DoorOpen,
   Palmtree,
-  TriangleAlert,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { getClassroomColor } from "@/lib/classroomColor";
 import RoomShape from "./RoomShape";
 import EntryActionPanel from "./EntryActionPanel";
@@ -240,17 +240,8 @@ export default function WeekBuilder() {
         </p>
       )}
 
-      {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Долоо хоногийн хуваарь ачаалж байна…
-        </p>
-      )}
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
-          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
-          {error}
-        </div>
-      )}
+      {loading && <LoadingState rows={7} />}
+      {error && <ErrorState message={error} onRetry={load} />}
 
       {!loading && !error && data && (
         <div className="overflow-x-auto">

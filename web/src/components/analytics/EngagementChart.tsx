@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
+import { TriangleAlert } from "lucide-react";
 import type { EngagementDay } from "./types";
 
 const WIDTH = 640;
@@ -61,10 +62,13 @@ export default function EngagementChart({
   return (
     <div>
       {lowConfidence && (
-        <p className="mb-2 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
-          ⚠ Идэвхийн лог зөвхөн {eventStreamAgeDays} өдрийн турш хөтлөгдсөн байна
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+          <p>
+          Идэвхийн лог зөвхөн {eventStreamAgeDays} өдрийн турш хөтлөгдсөн байна
           — чиг хандлагыг найдвартай гэж дүгнэхэд дата хараахан хангалтгүй.
         </p>
+        </div>
       )}
       <div className="relative overflow-x-auto">
         <svg

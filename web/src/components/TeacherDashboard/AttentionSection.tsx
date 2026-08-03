@@ -1,5 +1,7 @@
 "use client";
 
+import { CircleAlert, TriangleAlert, type LucideIcon } from "lucide-react";
+
 type AttentionSeverity = "danger" | "warning";
 
 interface AttentionFlag {
@@ -37,10 +39,11 @@ const SEVERITY_CLASS: Record<AttentionSeverity, string> = {
   danger: "border-error/40 bg-error/10 text-error",
   warning: "border-warning/40 bg-warning/10 text-warning",
 };
-// Өнгө дангаараа утга илэрхийлэхгүй байхын тулд ноцтой байдал бүрд тэмдэг нэмнэ
-const SEVERITY_ICON: Record<AttentionSeverity, string> = {
-  danger: "●",
-  warning: "▲",
+// Өнгө дангаараа утга илэрхийлэхгүй байхын тулд ноцтой байдал бүрд ДҮРС нэмнэ
+// (өнгө ялгадаггүй хэрэглэгчид өнгө нь юу ч хэлэхгүй — DESIGN.md §6).
+const SEVERITY_ICON: Record<AttentionSeverity, LucideIcon> = {
+  danger: CircleAlert,
+  warning: TriangleAlert,
 };
 
 export type { AttentionResponse };
@@ -87,7 +90,10 @@ export default function AttentionSection({ attention }: AttentionSectionProps) {
                     className={`rounded-lg border px-2.5 py-1 text-xs ${SEVERITY_CLASS[flag.severity]}`}
                     title={flag.detail}
                   >
-                    <span aria-hidden>{SEVERITY_ICON[flag.severity]} </span>
+                    {(() => {
+                      const Icon = SEVERITY_ICON[flag.severity];
+                      return <Icon className="mr-1 inline h-3 w-3" aria-hidden />;
+                    })()}
                     {flag.title}
                   </span>
                 ))}

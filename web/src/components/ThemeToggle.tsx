@@ -48,7 +48,7 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
     <div
       role="group"
       aria-label="Загварын горим сонгох"
-      className={`inline-flex items-center gap-1 rounded-lg border border-line bg-panel p-1 ${className}`}
+      className={`inline-flex items-center gap-0.5 rounded-lg border border-line bg-surface p-1.5 ${className}`}
     >
       {OPTIONS.map(({ value, label, Icon }) => {
         const active = theme === value;
@@ -58,10 +58,10 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
             type="button"
             aria-pressed={active}
             onClick={() => setTheme(value)}
-            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-150 ${
               active
-                ? "bg-brand text-bg"
-                : "text-ink-dim hover:bg-bg hover:text-ink"
+                ? "bg-brand text-on-brand shadow-sm"
+                : "text-ink-dim hover:text-ink"
             }`}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />

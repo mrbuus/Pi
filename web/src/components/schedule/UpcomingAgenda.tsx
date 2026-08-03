@@ -1,6 +1,6 @@
 "use client";
 
-import { DoorOpen, Palmtree } from "lucide-react";
+import { DoorOpen, Palmtree, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
@@ -81,8 +81,9 @@ export default function UpcomingAgenda({
   }
   if (error) {
     return (
-      <div className="rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-        ⚠ {error}
+      <div className="flex items-center gap-2 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
+        <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+        {error}
       </div>
     );
   }

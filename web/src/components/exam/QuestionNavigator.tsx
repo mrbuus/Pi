@@ -1,5 +1,6 @@
 "use client";
 
+import { Flag } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 /* ============================================================================
@@ -82,7 +83,9 @@ export default function QuestionNavigator({
             <p className="font-bold text-ink">Бодлогын навигатор</p>
             <p className="text-xs text-ink-dim">
               {answeredCount}/{cells.length} хариулсан
-              {flaggedCount > 0 && <span> · {flaggedCount} тэмдэглэсэн</span>}
+              {flaggedCount > 0 && (
+                <span> · <Flag size={12} className="inline mr-0.5" aria-hidden /> {flaggedCount} тэмдэглэсэн</span>
+              )}
             </p>
           </div>
           <button
@@ -105,7 +108,8 @@ export default function QuestionNavigator({
             <span className="h-4 w-4 rounded border border-brand bg-brand/20" /> Хариулсан
           </span>
           <span className="flex items-center gap-1.5">
-            <span aria-hidden>⚑</span> Тэмдэглэсэн
+            <Flag size={16} aria-hidden />
+            Тэмдэглэсэн
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-4 w-4 rounded border-[3px] border-ink" /> Одоогийн
@@ -186,12 +190,11 @@ function NavigatorGrid({
               >
                 {globalIndex + 1}
                 {c.flagged && (
-                  <span
+                  <Flag
+                    size={14}
                     aria-hidden
-                    className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-warning text-[9px] leading-none text-on-warning"
-                  >
-                    ⚑
-                  </span>
+                    className="absolute -right-1.5 -top-1.5 rounded-full bg-warning text-on-warning"
+                  />
                 )}
               </button>
             );

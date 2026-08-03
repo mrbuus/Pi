@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { api } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
@@ -83,7 +84,7 @@ export default function ChaptersPanel({
         grade: 12,
         freePreview: false,
       });
-      setMsg({ kind: "success", text: "✓ Бүлэг сэдэв үүслээ" });
+      setMsg({ kind: "success", text: "Бүлэг сэдэв үүслээ" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -116,7 +117,7 @@ export default function ChaptersPanel({
           topicId: editForm.topicId || null,
         },
       });
-      setMsg({ kind: "success", text: "✓ Бүлэг сэдэв шинэчлэгдлээ" });
+      setMsg({ kind: "success", text: "Бүлэг сэдэв шинэчлэгдлээ" });
       setEditId(null);
       load();
     } catch (e) {
@@ -140,7 +141,7 @@ export default function ChaptersPanel({
         method: "PATCH",
         body: { ids: next.map((c) => c.id) },
       });
-      setMsg({ kind: "success", text: "✓ Дараалал шинэчлэгдлээ" });
+      setMsg({ kind: "success", text: "Дараалал шинэчлэгдлээ" });
       load();
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -161,7 +162,7 @@ export default function ChaptersPanel({
         label: deleteTarget.title,
         detail: `${deleteTarget._count.problems} бодлого`,
       });
-      setMsg({ kind: "success", text: "✓ Бүлэг сэдэв устгагдлаа" });
+      setMsg({ kind: "success", text: "Бүлэг сэдэв устгагдлаа" });
       if (selectedId === deleteTarget.id) onSelect("", null);
       setDeleteTarget(null);
       load();
@@ -179,13 +180,17 @@ export default function ChaptersPanel({
         {msg && (
           <span
             role="status"
-            className={`rounded-lg px-2 py-1 text-xs ${
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs ${
               msg.kind === "error"
                 ? "bg-error/10 text-error"
                 : "bg-success/10 text-success"
             }`}
           >
-            {msg.kind === "error" ? "⚠ " : ""}
+            {msg.kind === "error" ? (
+              <AlertTriangle size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
             {msg.text}
           </span>
         )}
@@ -408,7 +413,7 @@ export default function ChaptersPanel({
                         aria-label="Дээш зөөх"
                         className="flex h-5 w-5 items-center justify-center rounded border border-line text-[10px] text-ink-dim transition hover:border-brand disabled:opacity-30"
                       >
-                        ▲
+                        <ChevronUp className="h-3 w-3" aria-hidden />
                       </button>
                       <button
                         onClick={() => move(i, 1)}
@@ -416,7 +421,7 @@ export default function ChaptersPanel({
                         aria-label="Доош зөөх"
                         className="flex h-5 w-5 items-center justify-center rounded border border-line text-[10px] text-ink-dim transition hover:border-brand disabled:opacity-30"
                       >
-                        ▼
+                        <ChevronDown className="h-3 w-3" aria-hidden />
                       </button>
                     </div>
                     <button

@@ -1,5 +1,6 @@
 "use client";
 
+import { TriangleAlert } from "lucide-react";
 import type { OverviewResponse } from "./types";
 
 function formatDuration(ms: number): string {
@@ -34,11 +35,14 @@ export default function KpiTiles({ data }: { data: OverviewResponse }) {
   return (
     <div>
       {data.lowConfidence && (
-        <p className="mb-3 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
-          ⚠ Идэвхийн лог (LearningEvent) зөвхөн {data.eventStreamAgeDays} өдрийн
-          турш хөтлөгдсөн тул DAU/WAU/MAU болон дундаж session-ийн тоонууд
-          хараахан тогтворжоогүй байж болзошгүй.
-        </p>
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+          <p>
+            Идэвхийн лог (LearningEvent) зөвхөн {data.eventStreamAgeDays} өдрийн
+            турш хөтлөгдсөн тул DAU/WAU/MAU болон дундаж session-ийн тоонууд
+            햶аахан тогтворжоогүй байж болзошгүй.
+          </p>
+        </div>
       )}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <Tile label="DAU (өдрийн идэвхтэй)" value={String(data.dau)} />
