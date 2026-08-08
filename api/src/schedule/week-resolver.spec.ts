@@ -170,3 +170,58 @@ describe('resolveTeacherRoster', () => {
     expect(tuesday.teachers.map((t) => t.id)).toEqual(['t1']);
   });
 });
+
+describe('MOVED exception — newDate ХООСОН (ижил өдөртөө танхим/цаг солих)', () => {
+  // Регрессийн тест: өмнө нь newDate-гүй MOVED нь хичээлийг долоо хоногоос
+  // бүрмөсөн алга болгодог байсан («Танхим солих» функцээр илэрсэн).
+  it('танхим нь сольсон хичээл эх өдөртөө шинэ танхимтайгаа үлдэнэ', () => {
+    const days = resolveWeek({
+      weekStart: WEEK_START,
+      schedules: [schedule({ room: '502' })],
+      exceptions: [
+        {
+          scheduleId: 's1',
+          date: '2026-08-03',
+          kind: 'MOVED',
+          newDate: null,
+          newStartMinute: null,
+          newEndMinute: null,
+          newRoom: '403',
+          note: 'Танхим сольсон',
+        },
+      ],
+      topics: [],
+      holidays: [],
+    });
+    const monday = days.find((d) => d.date === '2026-08-03')!;
+    expect(monday.entries).toHaveLength(1);
+    expect(monday.entries[0].room).toBe('403');
+    expect(monday.entries[0].exception).toEqual(
+      expect.objectContaining({ kind: 'MOVED', originalDate: '2026-08-03' }),
+    );
+  });
+
+  it('зөвхөн цагаа сольсон хичээл эх өдөртөө шинэ цагтайгаа үлдэнэ', () => {
+    const days = resolveWeek({
+      weekStart: WEEK_START,
+      schedules: [schedule({ startMinute: 900, endMinute: 1020 })],
+      exceptions: [
+        {
+          scheduleId: 's1',
+          date: '2026-08-03',
+          kind: 'MOVED',
+          newDate: null,
+          newStartMinute: 1050,
+          newEndMinute: 1170,
+          newRoom: null,
+          note: null,
+        },
+      ],
+      topics: [],
+      holidays: [],
+    });
+    const monday = days.find((d) => d.date === '2026-08-03')!;
+    expect(monday.entries).toHaveLength(1);
+    expect(monday.entries[0].startMinute).toBe(1050);
+  });
+});

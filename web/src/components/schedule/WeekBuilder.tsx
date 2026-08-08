@@ -44,10 +44,13 @@ function shortDate(dateKey: string): string {
 function EntryRow({
   entry,
   faded,
+  dayDate,
   onClick,
 }: {
   entry: WeekEntry;
   faded: boolean;
+  /** Энэ мөр харагдаж буй өдрийн огноо — «Зөөгдсөн»/«Өөрчилсөн» ялгахад */
+  dayDate: string;
   onClick: () => void;
 }) {
   const color = getClassroomColor(entry.classroomId);
@@ -86,12 +89,19 @@ function EntryRow({
           </span>
         )}
         <span className="truncate font-semibold text-ink">{displayName}</span>
+        {/* Огноо нь солигдсон бол «Зөөгдсөн», ижил өдөртөө танхим/цаг нь л
+            өөрчлөгдсөн бол «Өөрчилсөн» — хоёр өөр ойлголтыг нэг шошгоор
+            хэлбэл багш андуурна. */}
         {entry.exception?.kind === "MOVED" && (
           <span
             className="ml-auto shrink-0 rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-bold text-warning"
-            title="Өөр өдрөөс зөөгдсөн"
+            title={
+              entry.exception.originalDate !== dayDate
+                ? "Өөр өдрөөс зөөгдсөн"
+                : "Танхим эсвэл цаг нь өөрчлөгдсөн"
+            }
           >
-            Зөөгдсөн
+            {entry.exception.originalDate !== dayDate ? "Зөөгдсөн" : "Өөрчилсөн"}
           </span>
         )}
       </span>
@@ -162,6 +172,7 @@ function DayColumn({
               key={`${entry.scheduleId}-${entry.startMinute}`}
               entry={entry}
               faded={day.isHoliday}
+              dayDate={day.date}
               onClick={() => onEntryClick(entry)}
             />
           ))

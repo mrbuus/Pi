@@ -170,18 +170,27 @@ export function resolveWeek(params: {
       if (exc.kind === 'CANCELLED') {
         continue; // энэ тохиолдол алга болно
       }
-      // MOVED — шинэ огноо/цаг руу зөөнө. Хэрэв шинэ огноо энэ 7 хоногт
-      // байвал доор нэмнэ; эх өдөр дээр ЮУ Ч гарахгүй.
-      if (exc.newDate && daySet.has(exc.newDate)) {
-        pushEntry(exc.newDate, s, {
-          startMinute: exc.newStartMinute ?? s.startMinute,
-          endMinute: exc.newEndMinute ?? s.endMinute,
-          room: exc.newRoom ?? s.room,
-          exception: { kind: 'MOVED', note: exc.note, originalDate: exc.date },
-          topicDate: exc.date,
-        });
+      // MOVED — шинэ огноо/цаг/танхим руу зөөнө.
+      //
+      // ⚠️ newDate ХООСОН байж болно (2026-08-09-нд зассан): зөвхөн цаг эсвэл
+      // танхимыг нь ИЖИЛ өдөрт нь сольсон MOVED exception-д newDate ирдэггүй.
+      // Өмнө нь `if (exc.newDate && ...)` байснаас ийм тохиолдол ХОЁР салбарын
+      // алинд ч орохгүй, хичээл долоо хоногоос БҮРМӨСӨН алга болдог байв —
+      // «Танхим солих» болон «Зөөх»-өөр зөвхөн цаг солиход хоёуланд нь илэрсэн.
+      // Үр дүнтэй огноо = newDate байвал тэр, үгүй бол эх огноо нь.
+      {
+        const effectiveDate = exc.newDate ?? exc.date;
+        if (daySet.has(effectiveDate)) {
+          pushEntry(effectiveDate, s, {
+            startMinute: exc.newStartMinute ?? s.startMinute,
+            endMinute: exc.newEndMinute ?? s.endMinute,
+            room: exc.newRoom ?? s.room,
+            exception: { kind: 'MOVED', note: exc.note, originalDate: exc.date },
+            topicDate: exc.date,
+          });
+        }
+        // Үр дүнтэй огноо 7 хоногийн гадна бол энэ цонход юу ч харагдахгүй.
       }
-      // Хэрэв шинэ огноо 7 хоногийн гадна бол энэ цонход юу ч харагдахгүй.
     }
 
     // 2) Өөр долоо хоногоос ЭНЭ 7 хоног руу MOVED орж ирсэн тохиолдлууд —

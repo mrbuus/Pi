@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   BookOpen,
   CalendarClock,
+  DoorOpen,
   Ban,
   CalendarRange,
   Settings2,
@@ -179,6 +180,14 @@ export default function EntryActionPanel({
   const [deleteSaving, setDeleteSaving] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Танхим солих — эзний хүсэлт (2026-08-09): «Зөөх»-өөс тусдаа, огноо/цаг
+  // хөндөхгүйгээр зөвхөн танхимыг л сольдог хялбар урсгал.
+  const [roomOpen, setRoomOpen] = useState(false);
+  const [roomValue, setRoomValue] = useState("");
+  const [roomScope, setRoomScope] = useState<"once" | "always">("once");
+  const [roomSaving, setRoomSaving] = useState(false);
+  const [roomError, setRoomError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!entry) return;
     setShowSettings(false);
@@ -210,6 +219,10 @@ export default function EntryActionPanel({
     setSplitEnd(formatMinutes(entry.endMinute));
     setSplitRoom(entry.room ?? "");
     setSplitTeacherId(entry.teacherId ?? "");
+    setRoomOpen(false);
+    setRoomValue(entry.room ?? "");
+    setRoomScope("once");
+    setRoomError(null);
   }, [entry, date]);
 
   // Багшийн жагсаалтыг зөвхөн салгах маягт нээгдэх үед татна — самбар нээх
@@ -356,6 +369,61 @@ export default function EntryActionPanel({
   }
 
   /**
+   * Танхим солино. Хоёр хамрах хүрээтэй:
+   *   «Зөвхөн энэ өдөр» — MOVED exception, огноо/цаг ХЭВЭЭРЭЭ, зөвхөн
+   *     newRoom өөрчлөгдөнө (серверийн валидаци цаг шаарддаг тул одоогийн
+   *     цагийг нь дамжуулна).
+   *   «Энэ өдрөөс хойш байнга» — split ашиглана: хуучин мөр өмнөх өдрөөр
+   *     хаагдаж шинэ танхимтай мөр эхэлнэ. PATCH хийвэл ӨНГӨРСӨН түүх ч
+   *     шинэ танхимаар харагдах байсан тул санаатайгаар split сонгосон.
+   */
+  async function changeRoom() {
+    if (!entry) return;
+    if (!roomValue.trim()) {
+      setRoomError("Шинэ танхимаа сонгоно уу");
+      return;
+    }
+    if (roomValue === entry.room) {
+      setRoomError("Одоогийн танхимтай ижил байна — өөр танхим сонгоно уу");
+      return;
+    }
+    setRoomSaving(true);
+    setRoomError(null);
+    try {
+      if (roomScope === "once") {
+        await api(`/schedule/${entry.scheduleId}/exceptions`, {
+          method: "POST",
+          body: {
+            date: originalDate,
+            kind: "MOVED",
+            newStartMinute: entry.startMinute,
+            newEndMinute: entry.endMinute,
+            newRoom: roomValue,
+            note: "Танхим сольсон",
+          },
+        });
+      } else {
+        await api(`/schedule/${entry.scheduleId}/split`, {
+          method: "POST",
+          body: {
+            from: originalDate,
+            weekday: new Date(`${originalDate}T00:00:00.000Z`).getUTCDay(),
+            startMinute: entry.startMinute,
+            endMinute: entry.endMinute,
+            room: roomValue,
+            teacherId: entry.teacherId ?? null,
+          },
+        });
+      }
+      onChanged();
+      onClose();
+    } catch (e) {
+      setRoomError(errMsg(e));
+      setRoomSaving(false);
+    }
+  }
+
+  /**
    * Энэ огнооноос эхлэн цувралыг өөрчилнө. Сервер хуучин мөрийг өмнөх өдөр
    * дуусгаж, шинэ утгатай мөрийг эндээс эхлүүлнэ — өнгөрсөн түүх хэвээр үлдэнэ.
    */
@@ -461,6 +529,14 @@ export default function EntryActionPanel({
           >
             <CalendarClock className="mr-1 inline h-3 w-3" aria-hidden />
             Зөөх
+          </button>
+          <button
+            type="button"
+            onClick={() => setRoomOpen((v) => !v)}
+            className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-brand"
+          >
+            <DoorOpen className="mr-1 inline h-3 w-3" aria-hidden />
+            Танхим солих
           </button>
           <button
             type="button"
@@ -578,6 +654,61 @@ export default function EntryActionPanel({
                 className="rounded-lg border border-error/40 px-2.5 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10 disabled:opacity-50"
               >
                 Хасах
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ---- Танхим солих маягт (товч дарахад задарна) ---- */}
+        {roomOpen && entry && (
+          <div className="mb-3 space-y-2 rounded-lg border border-line bg-panel p-3">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="panel-room-value" className="text-xs text-ink-dim">
+                Шинэ танхим (одоо: {entry.room ?? "тодорхойгүй"})
+              </label>
+              <div className="flex items-center gap-2">
+                <RoomSelect
+                  id="panel-room-value"
+                  value={roomValue}
+                  onChange={setRoomValue}
+                  className={`${inputCls} flex-1`}
+                />
+                {roomValue && (
+                  <RoomShape room={roomValue} size={16} className="shrink-0 text-ink" />
+                )}
+              </div>
+              <SameTimeHint entries={sameTime} />
+            </div>
+            <fieldset className="flex flex-col gap-1.5">
+              <legend className="sr-only">Хамрах хүрээ</legend>
+              <label className="flex items-center gap-2 text-xs text-ink">
+                <input
+                  type="radio"
+                  name="panel-room-scope"
+                  checked={roomScope === "once"}
+                  onChange={() => setRoomScope("once")}
+                />
+                Зөвхөн энэ өдөр ({date})
+              </label>
+              <label className="flex items-center gap-2 text-xs text-ink">
+                <input
+                  type="radio"
+                  name="panel-room-scope"
+                  checked={roomScope === "always"}
+                  onChange={() => setRoomScope("always")}
+                />
+                Энэ өдрөөс хойш байнга (өнгөрсөн түүх хэвээр үлдэнэ)
+              </label>
+            </fieldset>
+            {roomError && <p className="text-xs text-error">{roomError}</p>}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={changeRoom}
+                disabled={roomSaving}
+                className="rounded-lg bg-brand-bright px-4 py-1.5 text-xs font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              >
+                {roomSaving ? "…" : "Танхим солих"}
               </button>
             </div>
           </div>
