@@ -6,6 +6,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import compression from 'compression';
 import { AppModule } from './app.module';
+import { PrismaExceptionFilter } from './common/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -45,6 +46,10 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // Prisma-гийн алдааг зөв HTTP код руу буулгана (500 → 400/404/409/503).
+  // Дэлгэрэнгүй шалтгааныг prisma-exception.filter.ts-ийн толгойгоос үз.
+  app.useGlobalFilters(new PrismaExceptionFilter());
   app.enableCors({ origin: process.env.WEB_ORIGIN ?? 'http://localhost:3001' });
 
   // ── Аюулгүй унтралт ──────────────────────────────────────────────────

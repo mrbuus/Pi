@@ -22,8 +22,9 @@
 ## Шалгалт
 
 ```bash
-cd api && npx tsc --noEmit && npx jest        # 226/226
+cd api && npx tsc --noEmit && npx jest        # 235/235
 cd web && npx tsc --noEmit && npm run build   # build ЗААВАЛ
+cd api && npm run smoke                       # бүх endpoint бодит HTTP-ээр (:3000 асаалттай үед)
 ```
 
 **`tsc` цэвэр байх нь ХАНГАЛТГҮЙ.** Гурван төрлийн алдаа зөвхөн build эсвэл

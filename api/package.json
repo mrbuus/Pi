@@ -24,7 +24,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "loadtest:exam": "node test/load/index.js"
+    "loadtest:exam": "node test/load/index.js",
+    "smoke:routes": "npm run build && node test/smoke/dump-routes.cjs > test/smoke/routes.txt && wc -l < test/smoke/routes.txt",
+    "smoke": "npm run smoke:routes && node test/smoke/endpoints.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

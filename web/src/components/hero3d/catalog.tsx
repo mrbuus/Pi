@@ -111,13 +111,22 @@ export function solidOfSlot(date = new Date()): Solid {
   return CATALOG[slotIndex(date, CATALOG.length)];
 }
 
+/** Слотын дугаар — geometry.ts дахь MESHES-ийн ИЖИЛ индекстэй холбогдоно */
+export function indexOfSlot(date = new Date()): number {
+  return slotIndex(date, CATALOG.length);
+}
+
 // 10 минут тутам дараагийн биетээ автоматаар харуулна — reload хийх
 // шаардлагагүй, зөвхөн клиент талын timer, сервер дуудлагагүй.
-export function useHeroSolid(): Solid {
-  const [solid, setSolid] = useState<Solid>(() => solidOfSlot());
+//
+// Индексийг ХАМТ буцаана: гарчиг (Куб) болон зурагдах биет ЗААВАЛ таарах ёстой.
+// Өмнө нь зөвхөн Solid буцаадаг байсан тул зурагт ямар ч биетийн оронд нэг л
+// тойрог гардаг, «Куб» гэж бичээд бөмбөлөг харуулдаг алдаа үүсэж байв.
+export function useHeroSlot(): { solid: Solid; index: number } {
+  const [index, setIndex] = useState<number>(() => indexOfSlot());
 
   useEffect(() => {
-    const update = () => setSolid(solidOfSlot());
+    const update = () => setIndex(indexOfSlot());
     update();
     // 30 секунд тутам шалгах нь хямд бөгөөд 10 минутын цонх солигдмогц
     // хэдхэн секундэд шинэчлэгдэхэд хангалттай.
@@ -125,5 +134,5 @@ export function useHeroSolid(): Solid {
     return () => clearInterval(id);
   }, []);
 
-  return solid;
+  return { solid: CATALOG[index], index };
 }

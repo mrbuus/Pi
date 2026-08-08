@@ -3,6 +3,22 @@ import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TrackEventsDto } from './dto/track-events.dto';
 
+/**
+ * Одоо цаг — UTC-гээр, НАЙВ timestamp хэлбэрээр.
+ *
+ * ⚠️ ЯАГААД `now()` ШУУД АШИГЛАЖ БОЛОХГҮЙ ВЭ (2026-08-08-нд зассан):
+ * `LearningEvent."occurredAt"` нь `timestamp WITHOUT time zone` бөгөөд Prisma
+ * түүнд UTC утга бичдэг. Харин Postgres-ийн `now()` нь `timestamptz` буцаадаг
+ * тул найв timestamp-тай харьцуулахдаа СЕССИЙН цагийн бүс рүү хөрвүүлэгдэнэ.
+ * Улаанбаатар (+08) дээр ажиллуулбал хил нь 8 цагаар урагшилж, DAU/WAU/MAU
+ * ЧИМЭЭГҮЙ буруу гарна. Render нь UTC тул прод дээр санамсаргүй зөв
+ * ажиллаж байсан — өөр бүсэд нүүмэгц эвдрэх байсан.
+ *
+ * `Prisma.sql` ашигласнаар түүхий SQL болж ордог (bind параметр БИШ) тул
+ * `$1 - interval …` гэсэн төрөл таах асуудал ч үүсэхгүй.
+ */
+const UTC_NOW = Prisma.sql`(now() AT TIME ZONE 'UTC')`;
+
 @Injectable()
 export class EventsService {
   private readonly logger = new Logger(EventsService.name);
@@ -69,9 +85,9 @@ export class EventsService {
       { dau: bigint; wau: bigint; mau: bigint }[]
     >`
       SELECT
-        COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= now() - interval '1 day') AS dau,
-        COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= now() - interval '7 days') AS wau,
-        COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= now() - interval '30 days') AS mau
+        COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= ${UTC_NOW} - interval '1 day') AS dau,
+        COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= ${UTC_NOW} - interval '7 days') AS wau,
+        COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= ${UTC_NOW} - interval '30 days') AS mau
       FROM "LearningEvent"
     `;
 
@@ -83,7 +99,7 @@ export class EventsService {
         SELECT
           EXTRACT(EPOCH FROM (MAX("occurredAt") - MIN("occurredAt"))) * 1000 AS duration_ms
         FROM "LearningEvent"
-        WHERE "sessionId" IS NOT NULL AND "occurredAt" >= now() - interval '30 days'
+        WHERE "sessionId" IS NOT NULL AND "occurredAt" >= ${UTC_NOW} - interval '30 days'
         GROUP BY "sessionId"
       ) sessions
     `;

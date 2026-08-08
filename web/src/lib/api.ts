@@ -162,15 +162,24 @@ export async function api<T = unknown>(
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   };
 
-  // In-flight dedupe: GET хүсэлтийн боломж (POST/PUT/DELETE үл oруулах)
+  // In-flight dedupe: ижил GET зэрэг хийгдвэл нэг л хүсэлт явна.
+  //
+  // ⚠️ ЗАССАН (2026-08-08): өмнө нь dedupe нь ЗАДЛААГҮЙ Response обьектын
+  // promise-ийг хадгалдаг байв. Хоёр дахь дуудагч JSON-ий оронд Response
+  // авч, `.map`/`.filter`/`for..of` бүгд шууд унадаг байсан. React-ийн dev
+  // горим effect бүрийг ХОЁР удаа ажиллуулдаг тул бараг ХУУДАС БҮР унаж
+  // байв (leads.filter is not a function, chaptersWithVideos is not
+  // iterable…). Прод дээр ч нэг endpoint-ийг хоёр компонент зэрэг дуудвал
+  // мөн адил унана. Одоо dedupe нь ЭЦСИЙН задалсан өгөгдлийн promise-ийг
+  // хадгална — хэн ч авсан ижил, зөв үр дүн.
   if (method === "GET" && inflight.has(path)) {
     return (await inflight.get(path)) as T;
   }
 
-  let res: Response;
-  const fetchPromise = (async () => {
+  const resultPromise = (async () => {
+    let res: Response;
     try {
-      return await fetchWithWakeRetry(`${API_URL}${path}`, init);
+      res = await fetchWithWakeRetry(`${API_URL}${path}`, init);
     } catch (e) {
       // fetch эсэргүүцвэл (сүлжээгүй, сервер унтарсан гэх мэт)
       // монгол, ойлгомжтой мессежээр хариу өг
@@ -180,33 +189,31 @@ export async function api<T = unknown>(
           : "Сүлжээний алдаа — интернэт холболтоо шалгаад дахин оролдоно уу.",
       );
     }
+
+    const data = (await res.json().catch(() => null)) as T & {
+      message?: string | string[];
+    };
+    if (!res.ok) {
+      const msg = Array.isArray(data?.message)
+        ? data.message.join(", ")
+        : data?.message;
+      const formatted = formatErrorMessage(res.status, msg ?? null);
+      throw new Error(formatted);
+    }
+    return data;
   })();
 
-  // GET нь in-flight dedupe-д оруул
   if (method === "GET") {
-    inflight.set(path, fetchPromise);
+    inflight.set(path, resultPromise);
+    // Дуусмагц (амжилт/алдаа аль аль нь) dedupe-ээс хасна. `.catch(() => {})`
+    // нь энэ ТУСЛАХ гинжийг unhandled rejection болгохоос сэргийлнэ —
+    // жинхэнэ алдаа нь доорх return-ээр дуудагч бүрт хэвээр очно.
+    resultPromise
+      .finally(() => inflight.delete(path))
+      .catch(() => {});
   }
 
-  try {
-    res = await fetchPromise;
-  } finally {
-    // Promise дуусмагц dedupe-ээс хас
-    if (method === "GET") {
-      inflight.delete(path);
-    }
-  }
-
-  const data = (await res.json().catch(() => null)) as T & {
-    message?: string | string[];
-  };
-  if (!res.ok) {
-    const msg = Array.isArray(data?.message)
-      ? data.message.join(", ")
-      : data?.message;
-    const formatted = formatErrorMessage(res.status, msg ?? null);
-    throw new Error(formatted);
-  }
-  return data;
+  return resultPromise;
 }
 
 /**

@@ -82,17 +82,35 @@ export class AnalyticsService {
     const range = resolveRange(from, to);
     const endBoundary = addDateDays(range.end, 1); // occurredAt < endBoundary (тухайн өдрийг багтаана)
 
+    /*
+     * ⚠️ ХИЛИЙГ SQL ДОТОР БИШ, ЭНД БОДНО (2026-08-08-нд зассан).
+     *
+     * Өмнө нь `${range.end} - interval '1 day'` гэж бичсэн байв. Prisma-гийн
+     * tagged template нь `${…}`-ыг bind параметр ($1) болгодог тул Postgres-т
+     * `$1 - interval '1 day'` гэж очно. Постгрес $1-ийн төрлийг МЭДЭХГҮЙ тул
+     * `interval - interval` гэж таамаглаад бүхэл илэрхийллийг interval болгоно
+     * → `operator does not exist: timestamp without time zone >= interval`
+     * → «Аналитик самбар» хуудас БҮХЭЛДЭЭ 500 өгч байв.
+     *
+     * Мөн цонхнууд нэг өдрөөр урт байсныг зассан: `>= end − 7 хоног` ба
+     * `< end + 1 хоног` нь 8 ХОНОГ хамардаг. WAU нь 7 хоног байх ёстой тул
+     * `end − 6`-аас эхэлнэ (DAU = зөвхөн end өдөр, MAU = 30 хоног).
+     */
+    const dauStart = range.end; // зөвхөн эцсийн өдөр
+    const wauStart = addDateDays(range.end, -6); // 7 хоног (end-ийг оруулаад)
+    const mauStart = addDateDays(range.end, -29); // 30 хоног
+
     const [[activity], [session], [attempts], eventStreamAgeDays] = await Promise.all([
       this.prisma.$queryRaw<{ dau: number; wau: number; mau: number }[]>`
         SELECT
           COUNT(DISTINCT le."userId") FILTER (
-            WHERE le."occurredAt" >= ${range.end} - interval '1 day' AND le."occurredAt" < ${endBoundary}
+            WHERE le."occurredAt" >= ${dauStart} AND le."occurredAt" < ${endBoundary}
           )::int AS dau,
           COUNT(DISTINCT le."userId") FILTER (
-            WHERE le."occurredAt" >= ${range.end} - interval '7 days' AND le."occurredAt" < ${endBoundary}
+            WHERE le."occurredAt" >= ${wauStart} AND le."occurredAt" < ${endBoundary}
           )::int AS wau,
           COUNT(DISTINCT le."userId") FILTER (
-            WHERE le."occurredAt" >= ${range.end} - interval '30 days' AND le."occurredAt" < ${endBoundary}
+            WHERE le."occurredAt" >= ${mauStart} AND le."occurredAt" < ${endBoundary}
           )::int AS mau
         FROM "LearningEvent" le
         JOIN "User" u ON u.id = le."userId" AND u.role = 'STUDENT'

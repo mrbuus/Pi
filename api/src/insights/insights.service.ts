@@ -74,30 +74,60 @@ export class InsightsService {
     problemIds?: string[],
     limit: number = 100,
   ): Promise<DistractorAnalysis[]> {
-    // SQL-аар бодлого бүрийн буруу сонголт статистик бодно
+    /*
+     * ⚠️ ГУРВАН АЛДААГ ЗАССАН (2026-08-08, smoke test-ээр илэрсэн):
+     *
+     * 1. `a."deletedAt" IS NULL` — Attempt хүснэгтэд ТИЙМ БАГАНА БАЙХГҮЙ
+     *    (зөвхөн Problem/Chapter/Topic-д soft delete бий). Query бүхэлдээ
+     *    `column a.deletedAt does not exist` алдаагаар унаж байв.
+     *
+     * 2. Сонголтыг `LIKE '%label%'` -ээр тааруулж байсан нь БУРУУ ТОО өгдөг:
+     *    "A" гэсэн шошго нь "Абсолют утга" гэсэн ямар ч хариунд таарна.
+     *    givenAnswer нь сонголтын ЖИНХЭНЭ ТЕКСТ-ийг хадгалдаг (schema.prisma
+     *    дахь тайлбарыг үз) тул `#>> '{}'` -ээр задалж ЯГ тэнцүүг шалгана.
+     *
+     * 3. `LIMIT` нь мөрөнд (бодлого × сонголт) хэрэглэгддэг байсан тул
+     *    limit=100 өгөхөд ердөө ~20 бодлого буцдаг байв. Одоо БОДЛОГЫГ
+     *    дэд query дотор хязгаарлана.
+     *
+     * COUNT(*) нь Postgres дээр bigint буцаадаг — JSON.stringify түүнийг
+     * цувуулж чаддаггүй ("Do not know how to serialize a BigInt"). Иймд
+     * SQL дотор ::int болгож хөрвүүлнэ.
+     */
     const query = `
+      WITH target AS (
+        SELECT p.id, p.token
+        FROM "Problem" p
+        WHERE p."deletedAt" IS NULL
+          AND ($1::text[] IS NULL OR p.id = ANY($1::text[]))
+        ORDER BY p.id
+        LIMIT $2
+      ),
+      totals AS (
+        SELECT a."problemId", COUNT(*)::int AS total
+        FROM "Attempt" a
+        JOIN target t ON t.id = a."problemId"
+        GROUP BY a."problemId"
+      )
       SELECT
-        p.id AS "problemId",
-        p.token AS "problemToken",
-        COUNT(DISTINCT a.id) AS "totalAttempts",
+        t.id AS "problemId",
+        t.token AS "problemToken",
+        COALESCE(tot.total, 0) AS "totalAttempts",
         pc.label AS "choiceLabel",
         pc.text AS "choiceText",
-        COUNT(DISTINCT CASE
-          WHEN
-            CAST(a."givenAnswer" AS TEXT) LIKE CONCAT('%', pc.label, '%') OR
-            (a."givenAnswer"::text LIKE CONCAT('%', pc.text, '%') AND p.format = 'CHOICE')
-          THEN a.id
-        END) AS "selectionCount",
+        COALESCE(sel.cnt, 0) AS "selectionCount",
         pc."mistakeType" AS "mistakeType",
         pc."mistakeNote" AS "mistakeNote"
-      FROM "Problem" p
-      LEFT JOIN "Attempt" a ON p.id = a."problemId"
-      LEFT JOIN "ProblemChoice" pc ON p.id = pc."problemId"
-      WHERE p."deletedAt" IS NULL
-        ${problemIds ? `AND p.id = ANY($1)` : ''}
-      GROUP BY p.id, p.token, pc.id, pc.label, pc.text, pc."mistakeType", pc."mistakeNote"
-      ORDER BY p.id, "totalAttempts" DESC
-      LIMIT $${problemIds ? '2' : '1'}
+      FROM target t
+      JOIN "ProblemChoice" pc ON pc."problemId" = t.id
+      LEFT JOIN totals tot ON tot."problemId" = t.id
+      LEFT JOIN LATERAL (
+        SELECT COUNT(*)::int AS cnt
+        FROM "Attempt" a
+        WHERE a."problemId" = t.id
+          AND a."givenAnswer" #>> '{}' = pc.text
+      ) sel ON TRUE
+      ORDER BY t.id, pc."order"
     `;
 
     const result = await this.prisma.$queryRawUnsafe<
@@ -111,7 +141,7 @@ export class InsightsService {
         mistakeType?: string;
         mistakeNote?: string;
       }>
-    >(query, ...(problemIds ? [problemIds] : []), limit);
+    >(query, problemIds ?? null, limit);
 
     // Үр дүнг бүтэцийн дагуу байрлуулна
     const grouped = new Map<string, DistractorAnalysis>();
@@ -150,64 +180,75 @@ export class InsightsService {
    * @returns Бодлогын чанарын үзүүлэлтүүд
    */
   async getProblemQuality(limit: number = 100): Promise<ProblemQuality[]> {
+    /*
+     * ⚠️ ХОЁР АЛДААГ ЗАССАН (2026-08-08, smoke test-ээр илэрсэн):
+     *   1. `CAST(SUM(...))` — `AS <төрөл>` дутуу тул Postgres
+     *      `syntax error at or near ")"` гэж унагааж байв.
+     *   2. `a."deletedAt"` — Attempt-д байхгүй багана.
+     *
+     * ЗАРЧМЫН ЗАСВАР: дискриминацийг ЖИНХЭНЭ point-biserial-аар бодно.
+     * Өмнөх томьёо (mean_correct − mean_ALL) / sd нь ТУУШТАЙ ЭЕРЭГ талдаа
+     * хазайдаг: зөв бодсон сурагчдын дундаж нь бүх сурагчийн дунджаас
+     * бараг үргэлж их байдаг тул «эвдэрсэн бодлого» (сөрөг дискриминаци)
+     * бараг хэзээ ч илрэхгүй — өөрөөр хэлбэл шалгуур нь ажиллахгүй байв.
+     *
+     *   r_pb = (M₁ − M₀) / S · √(p·q)
+     *     M₁ — зөв бодсон сурагчдын НИЙТ онооны дундаж
+     *     M₀ — буруу бодсон сурагчдын НИЙТ онооны дундаж
+     *     S  — нийт онооны стандарт хазайлт (популяци)
+     *     p  — зөв бодсоны эзлэх хувь, q = 1 − p
+     *
+     * Бүх COUNT/SUM-ыг ::int / ::float болгож хөрвүүлэв — bigint нь
+     * JSON.stringify-д цувихгүй.
+     */
     const query = `
-      WITH attempt_scores AS (
+      WITH scored AS (
+        -- Нэг сурагч × нэг бодлого = нэг оноо (дахин оролдлогыг нэгтгэнэ)
         SELECT
           a."studentId",
           a."problemId",
-          MAX(CASE WHEN a."autoCorrect" = true THEN 1 ELSE 0 END) AS problem_score
+          MAX(CASE WHEN a."autoCorrect" THEN 1 ELSE 0 END) AS score
         FROM "Attempt" a
-        WHERE a."deletedAt" IS NULL
+        WHERE a."autoCorrect" IS NOT NULL
         GROUP BY a."studentId", a."problemId"
       ),
-      student_totals AS (
-        SELECT
-          a."studentId",
-          COUNT(DISTINCT a."problemId") AS attempt_count,
-          SUM(CASE WHEN a."autoCorrect" = true THEN 1 ELSE 0 END) AS correct_count
-        FROM "Attempt" a
-        WHERE a."deletedAt" IS NULL
-        GROUP BY a."studentId"
+      student_total AS (
+        SELECT "studentId", SUM(score)::float AS total
+        FROM scored
+        GROUP BY "studentId"
       ),
-      problem_stats AS (
+      overall AS (
+        SELECT STDDEV_POP(total) AS sd_total FROM student_total
+      ),
+      item AS (
         SELECT
-          p.id AS "problemId",
-          p.token AS "problemToken",
-          COUNT(DISTINCT a."studentId") AS attempt_count,
-          SUM(CASE WHEN a."autoCorrect" = true THEN 1 ELSE 0 END) AS correct_count,
-          CAST(SUM(CASE WHEN a."autoCorrect" = true THEN 1 ELSE 0 END))
-            / NULLIF(COUNT(DISTINCT a."studentId"), 0) AS p_value
-        FROM "Problem" p
-        LEFT JOIN "Attempt" a ON p.id = a."problemId" AND a."deletedAt" IS NULL
-        WHERE p."deletedAt" IS NULL
-        GROUP BY p.id, p.token
+          s."problemId",
+          COUNT(*)::int AS attempt_count,
+          SUM(s.score)::int AS correct_count,
+          AVG(s.score::float) AS p_value,
+          AVG(CASE WHEN s.score = 1 THEN st.total END) AS mean_right,
+          AVG(CASE WHEN s.score = 0 THEN st.total END) AS mean_wrong
+        FROM scored s
+        JOIN student_total st ON st."studentId" = s."studentId"
+        GROUP BY s."problemId"
       )
       SELECT
-        ps."problemId",
-        ps."problemToken",
-        ps.p_value AS difficulty,
-        -- Point-biserial correlation ≈ (mean_correct - mean_all) / std_all
-        -- Энгийн хэмжүүлэлт: байхгүй бол 0
-        COALESCE(
-          (
-            SELECT AVG(st.correct_count)
-            FROM attempt_scores a_sc
-            JOIN student_totals st ON a_sc."studentId" = st."studentId"
-            WHERE a_sc."problemId" = ps."problemId" AND a_sc.problem_score = 1
-          ) -
-          (
-            SELECT AVG(st.correct_count)
-            FROM student_totals st
-          )
-        ) / NULLIF(
-          (SELECT STDDEV_POP(st.correct_count) FROM student_totals st),
-          0
-        ) AS discrimination,
-        ps.attempt_count,
-        ps.correct_count
-      FROM problem_stats ps
-      WHERE ps.attempt_count > 0
-      ORDER BY ps.attempt_count DESC
+        p.id AS "problemId",
+        p.token AS "problemToken",
+        i.p_value AS difficulty,
+        CASE
+          WHEN o.sd_total IS NULL OR o.sd_total = 0 THEN 0
+          WHEN i.p_value <= 0 OR i.p_value >= 1 THEN 0
+          ELSE ((i.mean_right - i.mean_wrong) / o.sd_total)
+               * sqrt(i.p_value * (1 - i.p_value))
+        END AS discrimination,
+        i.attempt_count,
+        i.correct_count
+      FROM item i
+      JOIN "Problem" p ON p.id = i."problemId" AND p."deletedAt" IS NULL
+      CROSS JOIN overall o
+      WHERE i.attempt_count > 0
+      ORDER BY i.attempt_count DESC
       LIMIT $1
     `;
 
@@ -243,41 +284,55 @@ export class InsightsService {
     classroomId?: string,
     limit: number = 50,
   ): Promise<TopicMastery[]> {
+    /*
+     * ⚠️ ЗАССАН (2026-08-08): `a."deletedAt"` байхгүй багана байв.
+     *
+     * Мөн `LIMIT` нь МӨРӨНД (сурагч × сэдэв) үйлчилдэг байсан тул limit=50
+     * өгөхөд ердөө 6-8 сурагч буцдаг, үлдсэн сурагчдын мөр дундуур тасардаг
+     * байв. Одоо СУРАГЧИЙГ дэд query дотор хязгаарлана — эцсийн үр дүн яг
+     * `limit` сурагчийн БҮРЭН мөрүүд болно.
+     *
+     * COUNT/SUM → ::int (bigint нь JSON-д цувихгүй).
+     */
     const query = `
-      WITH student_topic_stats AS (
+      WITH base AS (
         SELECT
           u.id AS "studentId",
           CONCAT(u."firstName", ' ', u."lastName") AS "studentName",
           t.id AS "topicId",
           t.name AS "topicName",
-          COUNT(DISTINCT p.id) AS problem_count,
-          SUM(CASE WHEN a."autoCorrect" = true THEN 1 ELSE 0 END) AS correct_count
+          p.id AS "problemId",
+          a."autoCorrect" AS correct
         FROM "User" u
-        JOIN "StudentProfile" sp ON u.id = sp."userId"
         JOIN "Enrollment" e ON u.id = e."studentId" AND e."leftAt" IS NULL
         JOIN "Classroom" c ON e."classroomId" = c.id
         JOIN "Attempt" a ON u.id = a."studentId"
-        JOIN "Problem" p ON a."problemId" = p.id
+        JOIN "Problem" p ON a."problemId" = p.id AND p."deletedAt" IS NULL
         JOIN "Chapter" ch ON p."chapterId" = ch.id
-        LEFT JOIN "Topic" t ON ch."topicId" = t.id
+        JOIN "Topic" t ON ch."topicId" = t.id AND t."deletedAt" IS NULL
         WHERE u.role = 'STUDENT'
-          AND p."deletedAt" IS NULL
-          AND a."deletedAt" IS NULL
-          ${classroomId ? `AND c.id = $1` : ''}
-        GROUP BY u.id, u."firstName", u."lastName", t.id, t.name
+          AND ($1::text IS NULL OR c.id = $1::text)
+      ),
+      students AS (
+        SELECT "studentId"
+        FROM base
+        GROUP BY "studentId"
+        ORDER BY COUNT(*) DESC
+        LIMIT $2
       )
       SELECT
-        "studentId",
-        "studentName",
-        "topicId",
-        "topicName",
-        problem_count,
-        correct_count,
-        CAST(correct_count AS FLOAT) / NULLIF(problem_count, 0) AS mastery_rate
-      FROM student_topic_stats
-      WHERE problem_count > 0
-      ORDER BY "studentId", mastery_rate DESC
-      LIMIT $${classroomId ? '2' : '1'}
+        b."studentId",
+        b."studentName",
+        b."topicId",
+        b."topicName",
+        COUNT(DISTINCT b."problemId")::int AS problem_count,
+        COUNT(DISTINCT b."problemId") FILTER (WHERE b.correct)::int AS correct_count,
+        COUNT(DISTINCT b."problemId") FILTER (WHERE b.correct)::float
+          / NULLIF(COUNT(DISTINCT b."problemId"), 0) AS mastery_rate
+      FROM base b
+      JOIN students s ON s."studentId" = b."studentId"
+      GROUP BY b."studentId", b."studentName", b."topicId", b."topicName"
+      ORDER BY b."studentId", mastery_rate DESC
     `;
 
     const result = await this.prisma.$queryRawUnsafe<
@@ -290,7 +345,7 @@ export class InsightsService {
         correct_count: number;
         mastery_rate: number;
       }>
-    >(query, ...(classroomId ? [classroomId] : []), limit);
+    >(query, classroomId ?? null, limit);
 
     const grouped = new Map<string, TopicMastery>();
     for (const row of result) {
@@ -351,7 +406,7 @@ export class InsightsService {
       FROM "Attempt" a
       JOIN "Problem" p ON a."problemId" = p.id
       JOIN "Chapter" ch ON p."chapterId" = ch.id
-      WHERE a."deletedAt" IS NULL AND p."deletedAt" IS NULL
+      WHERE p."deletedAt" IS NULL
       ORDER BY a."createdAt" ASC
       OFFSET $1
       LIMIT $2
@@ -395,33 +450,47 @@ export class InsightsService {
    * @returns Нийт Attempt мөрүүдийн тоо (хуучин биш)
    */
   async getMLExportCount(): Promise<number> {
+    // ::int ЗААВАЛ — COUNT(*) нь bigint буцаадаг бөгөөд Nest түүнийг JSON
+    // болгох гэж оролдоод "Do not know how to serialize a BigInt" гэж унана.
+    // Attempt-д soft delete байхгүй тул `deletedAt` шүүлт ч хассан.
     const result = await this.prisma.$queryRawUnsafe<Array<{ count: number }>>(
-      `SELECT COUNT(*) as count FROM "Attempt" WHERE "deletedAt" IS NULL`,
+      `SELECT COUNT(*)::int AS count FROM "Attempt"`,
     );
-    return result[0]?.count || 0;
+    return result[0]?.count ?? 0;
   }
 
   /**
-   * ЦЭВЭР функц: эвдэрсэн бодлогын дискриминациог бодно
-   * Unit тестээр шалгагдаж болно
+   * ЦЭВЭР функц: бодлогын дискриминаци (point-biserial корреляц).
+   *
+   * `getProblemQuality`-ийн SQL-тэй ЯГ ИЖИЛ томьёо — SQL-ийг ӨС-гүйгээр
+   * тестлэх боломжгүй тул логикийн зөвийг энд бэхжүүлнэ (insights.spec.ts).
+   *
+   *   r_pb = (M₁ − M₀) / S · √(p·q)
+   *
+   * @param rightTotals зөв бодсон сурагчдын НИЙТ оноо
+   * @param wrongTotals буруу бодсон сурагчдын НИЙТ оноо
+   * @returns −1..1 хооронд. Сөрөг = ЭВДЭРСЭН бодлого (сайн сурагч буруу
+   *          бодож, сул сурагч зөв бодож байна → томьёолол/түлхүүр эргэлзээтэй)
    */
   calculateDiscrimination(
-    correctScores: number[],
-    allScores: number[],
+    rightTotals: number[],
+    wrongTotals: number[],
   ): number {
-    if (correctScores.length === 0 || allScores.length === 0) return 0;
+    const n = rightTotals.length + wrongTotals.length;
+    // Бүгд зөв (эсвэл бүгд буруу) бол ялгах чадвар ХЭМЖИГДЭХГҮЙ — 0 нь
+    // «муу бодлого» гэсэн үг биш, «мэдээлэл хүрэлцэхгүй» гэсэн үг.
+    if (rightTotals.length === 0 || wrongTotals.length === 0) return 0;
 
-    const meanCorrect =
-      correctScores.reduce((a, b) => a + b, 0) / correctScores.length;
-    const meanAll = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+    const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+    const all = [...rightTotals, ...wrongTotals];
+    const meanAll = mean(all);
 
-    // Standard deviation
     const variance =
-      allScores.reduce((sum, x) => sum + Math.pow(x - meanAll, 2), 0) /
-      allScores.length;
-    const stdDev = Math.sqrt(variance);
+      all.reduce((sum, x) => sum + (x - meanAll) ** 2, 0) / all.length;
+    const sd = Math.sqrt(variance);
+    if (sd === 0) return 0;
 
-    if (stdDev === 0) return 0;
-    return (meanCorrect - meanAll) / stdDev;
+    const p = rightTotals.length / n;
+    return ((mean(rightTotals) - mean(wrongTotals)) / sd) * Math.sqrt(p * (1 - p));
   }
 }

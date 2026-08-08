@@ -1,113 +1,129 @@
 "use client";
 
-import { useHeroSolid } from "./hero3d/catalog";
+import { useEffect, useRef } from "react";
+import { useHeroSlot } from "./hero3d/catalog";
 import { DimensionLegend } from "./hero3d/DimensionLegend";
+import { BODY_KEY, buildPaths, meshOfIndex } from "./hero3d/geometry";
 import { useThemeColors } from "./hero3d/theme";
 import MathText from "./MathText";
-import { useMemo } from "react";
 
 /* ============================================================================
- * Нүүр хуудасны 3D биетийн үзэсгэлэн — CSS 3D perspective + transform ашигла.
+ * Нүүр хуудасны биетийн үзэсгэлэн — 10 минут тутам сургалтын хөтөлбөрийн
+ * дараагийн биет эргэлдэнэ (куб, конус, цилиндр, бөмбөрцөг…).
  *
- * Сүлжээнээс нэмэлт датаа татахгүй, WebGL хориотой. Эффект бүр цэвэр CSS.
+ * Геометр нь geometry.ts дотор — оройг эргүүлж перспективээр проекцлодог
+ * ЦЭВЭР функцууд (тесттэй). Энэ файл нь зөвхөн зурах ажилтай.
+ *
+ * ГҮЙЦЭТГЭЛ: кадр бүрт React дахин рендерлэвэл 60fps-д хэдэн зуун шинэчлэлт
+ * болно. Иймд өнцгийг ref-д хадгалж, зөвхөн <path> элементийн `d`-г шууд
+ * бичнэ — кадр бүрт 10-хан DOM бичилт.
  * ========================================================================== */
 
+/** Ирмэгийн бүлгүүд — biеийн ирмэг + хэмжигдэхүүн 1..4 */
+const KEYS = [BODY_KEY, "m1", "m2", "m3", "m4"] as const;
+type Key = (typeof KEYS)[number];
+
+/** Бүтэн эргэлт ойролцоогоор 14 секунд — анзаарагдах ч анхаарал сарниулахгүй */
+const RADIANS_PER_MS = (Math.PI * 2) / 14_000;
+
 export default function Hero3D() {
-  const solid = useHeroSolid();
+  const { solid, index } = useHeroSlot();
   const colors = useThemeColors();
 
-  // Хөдөлгөөн багасгах тохиргоотой хэрэглэгчид анимацгүй статик харагдац
-  const reducedMotion = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
+  // Бүлэг бүрт урд/хойд гэсэн 2 зам — нийт 10 элемент
+  const frontRefs = useRef<Partial<Record<Key, SVGPathElement | null>>>({});
+  const backRefs = useRef<Partial<Record<Key, SVGPathElement | null>>>({});
+
+  useEffect(() => {
+    const mesh = meshOfIndex(index);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Хөдөлгөөн багасгах тохиргоотой хэрэглэгчид: эргэлдэхгүй, гэхдээ хоосон
+    // биш — биетийг таниулах өнцөгт нэг удаа зурна.
+    const draw = (angle: number) => {
+      const { back, front } = buildPaths(mesh, angle);
+      for (const key of KEYS) {
+        // Хоосон бүлгийг "" болгож цэвэрлэнэ — өмнөх кадрын үлдэгдэл үлдэхгүй
+        backRefs.current[key]?.setAttribute("d", back.get(key) ?? "");
+        frontRefs.current[key]?.setAttribute("d", front.get(key) ?? "");
+      }
+    };
+
+    if (reduced) {
+      draw(0.7);
+      return;
+    }
+
+    let raf = 0;
+    let angle = 0.7;
+    let last = performance.now();
+
+    const tick = (now: number) => {
+      // Таб нуугдаад буцаж ирэхэд том үсрэлт гаргахгүйн тулд алхмыг хязгаарлана
+      const dt = Math.min(now - last, 64);
+      last = now;
+      angle += dt * RADIANS_PER_MS;
+      draw(angle);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    // Нуугдсан таб дээр зурах нь батерей дэмий иддэг
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+      } else {
+        last = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [index]);
+
+  const colorOf = (key: Key) =>
+    key === BODY_KEY ? colors.body : colors[key as "m1" | "m2" | "m3" | "m4"];
 
   return (
     <>
-      {/* CSS 3D дүрсжүүлэлт: perspective + rotateY анимац */}
-      <div
-        className="absolute inset-0 flex items-center justify-center"
-        style={{
-          perspective: "1200px",
-        }}
-      >
-        <div
-          className="animate-spin-slow"
-          style={{
-            width: "280px",
-            height: "280px",
-            transformStyle: "preserve-3d",
-            animation: reducedMotion ? "none" : "spin-y 8s linear infinite",
-          } as React.CSSProperties}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <svg
+          viewBox="0 0 200 200"
+          className="h-full w-full max-h-[300px] max-w-[300px]"
+          aria-hidden
         >
-          {/* CSS дүрсжүүлэлтийн биет — SVG эсвэл div shapes */}
-          <svg
-            viewBox="0 0 100 100"
-            className="w-full h-full"
-            style={{
-              filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.1))",
-            }}
-          >
-            {/* Геометрийн дүрс — хүрээлэлтээр сүүдэр */}
-            <defs>
-              <linearGradient
-                id="grad1"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <stop offset="0%" style={{ stopColor: colors.body, stopOpacity: 0.8 }} />
-                <stop offset="100%" style={{ stopColor: colors.m1, stopOpacity: 0.6 }} />
-              </linearGradient>
-            </defs>
-            {/* Сфер эсвэл куб дүрсжүүлэлт */}
-            <circle
-              cx="50"
-              cy="50"
-              r="35"
-              fill="url(#grad1)"
-              opacity="0.7"
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r="28"
-              fill="none"
-              stroke={colors.body}
-              strokeWidth="1.5"
-              opacity="0.5"
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r="20"
-              fill="none"
-              stroke={colors.m1}
-              strokeWidth="1"
-              opacity="0.4"
-            />
-          </svg>
-        </div>
-
-        {/* CSS анимацийн тодорхойлолт */}
-        <style>{`
-          @keyframes spin-y {
-            from {
-              transform: rotateY(0deg) rotateX(15deg);
-            }
-            to {
-              transform: rotateY(360deg) rotateX(15deg);
-            }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .animate-spin-slow {
-              animation: none !important;
-            }
-          }
-        `}</style>
+          {/* Хойд ирмэгүүд — бүдэг. Гүний мэдрэмж ҮҮНЭЭС гарна: бүгдийг ижил
+              тодоор зурвал дүрс «утсан бөмбөг» болж, ямар талаараа эргэж
+              байгаа нь уншигдахгүй. */}
+          <g strokeLinecap="round" strokeLinejoin="round" fill="none">
+            {KEYS.map((key) => (
+              <path
+                key={`back-${key}`}
+                ref={(el) => {
+                  backRefs.current[key] = el;
+                }}
+                stroke={colorOf(key)}
+                strokeWidth={key === BODY_KEY ? 1 : 1.6}
+                opacity={0.22}
+              />
+            ))}
+            {KEYS.map((key) => (
+              <path
+                key={`front-${key}`}
+                ref={(el) => {
+                  frontRefs.current[key] = el;
+                }}
+                stroke={colorOf(key)}
+                strokeWidth={key === BODY_KEY ? 1.3 : 2.4}
+                opacity={key === BODY_KEY ? 0.75 : 1}
+              />
+            ))}
+          </g>
+        </svg>
       </div>
 
       {/* Доод тайлбарын легенд */}
