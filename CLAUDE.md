@@ -24,4 +24,11 @@ cd api && npx tsc --noEmit && npx jest      # 226/226
 cd web && npx tsc --noEmit && npm run build  # ⚠️ tsc ХАНГАЛТГҮЙ — build ЗААВАЛ
                                              #    (use client дутуу байвал
                                              #     зөвхөн build барьдаг)
+
+# ⚠️ DEPLOY ХИЙХЭЭС ӨМНӨ ЗААВАЛ — апп БООЖ байгааг шалга.
+# NestJS-ийн хамаарал зөвхөн АЖИЛЛАХ ҮЕД шийдэгддэг тул tsc ба jest
+# хоёулаа модуль экспортлоогүйг БАРЬДАГГҮЙ. 2026-08-08-нд ScheduleModule
+# нь ScheduleService-ээ экспортлоогүйгээс прод deploy чимээгүй унасан.
+cd api && npm run build && node -e "setTimeout(()=>process.exit(0),15000); require('./dist/src/main')" 2>&1 | grep -c "Nest can'''t resolve"
+# → 0 байх ЁСТОЙ
 ```
