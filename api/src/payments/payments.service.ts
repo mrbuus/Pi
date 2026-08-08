@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
+import { generateStudentCode } from '../common/codes';
 import { QpayService } from '../gateways/qpay.service';
 import { Prisma } from '../generated/prisma/client';
 import {
@@ -285,6 +286,18 @@ export class PaymentsService {
       }
     }
 
+    // Сөүлийн профайлын мэдээлэл авна (код үүсгэлтийн хүлээлтийг шалгах)
+    const user = await this.prisma.user.findUnique({
+      where: { id: payment.userId },
+      select: {
+        id: true,
+        studentCode: true,
+        studentProfile: {
+          select: { approvalPending: true, grade: true },
+        },
+      },
+    });
+
     const confirmed = await this.prisma.payment.update({
       where: { id: paymentId },
       data: {
@@ -300,6 +313,27 @@ export class PaymentsService {
           : {}),
       },
     });
+
+    // 🎯 Онлайнаар CLASSROOM-р бүртгүүлсэн сурагчийн кодыг үүсгэ:
+    // - STUDENT төрлийн, studentCode==null, approvalPending=false
+    // 🎯 approvalPending=false үед админ баталгаа өгсөн гэсэн үг, эс бөгөөс кодын
+    //   үүсгэлт дараа ирнэ.
+    if (
+      user &&
+      user.studentCode === null &&
+      user.studentProfile &&
+      !user.studentProfile.approvalPending
+    ) {
+      const newCode = await generateStudentCode(this.prisma, {
+        branch: null, // салаа эзэмшилийн дараа тогтоно
+        grade: user.studentProfile.grade ?? 12,
+        registeredAt: new Date(),
+      });
+      await this.prisma.user.update({
+        where: { id: payment.userId },
+        data: { studentCode: newCode },
+      });
+    }
 
     // Эрх олгох бол: төлбөр → UserPass холбогдоно
     let grantedPass: Awaited<ReturnType<PassesService['grant']>> | null = null;

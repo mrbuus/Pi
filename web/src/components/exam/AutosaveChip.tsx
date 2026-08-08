@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, Loader } from "lucide-react";
+// Loader (туяат нар) БИШ, Loader2 (нум) — туяат хувилбар нь Anthropic-ийн
+// логотой ижил харагддаг тул эзэн хориглосон (2026-08-08).
+import { Check, Loader2 } from "lucide-react";
 
 /* ============================================================================
  * AutosaveChip — толгой хэсгийн жижиг индикатор (toast биш).
@@ -19,7 +21,7 @@ export default function AutosaveChip({ status }: { status: SaveStatus }) {
     >
       {status === "saving" ? (
         <>
-          <Loader size={12} className="shrink-0 animate-spin text-info" aria-hidden />
+          <Loader2 size={12} className="shrink-0 animate-spin text-info" aria-hidden />
           Хадгалж байна…
         </>
       ) : (

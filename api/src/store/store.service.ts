@@ -15,6 +15,7 @@ export interface ProductItemWithRefData {
   refId: string;
   price: number;
   active: boolean;
+  includesVideo: boolean;
   title?: string;
   // Нүүр хуудасны сум/тайлбарын хувьд нэмэлт мета
   description?: string;
@@ -62,6 +63,7 @@ export class StoreService {
         refId: item.refId,
         price: item.price,
         active: item.active,
+        includesVideo: item.includesVideo,
       };
 
       if (item.kind === ProductKind.TEST) {
@@ -175,6 +177,12 @@ export class StoreService {
       },
     });
 
+    // Видео эрх энд ОЛГОГДОХГҮЙ — canAccessChapter (common/access.ts) нь
+    // «grantedAt бөглөгдсөн Purchase → ProductItem(includesVideo, refId=bookId)»
+    // гинжийг хандалт БҮРД шалгадаг тул тусдаа эрхийн бичлэг хэрэггүй.
+    // Давуу тал: төлбөр REVERSED болоход Purchase.grantedAt цуцлагдмагц
+    // видео эрх нь автоматаар хаагдана (тусдаа бичлэг байсан бол мартагдана).
+
     return { purchase };
   }
 
@@ -229,6 +237,7 @@ export class StoreService {
 
   /**
    * Админ: бүтээгдэхүүн үүсгэх (үнэ, эрхлэлт).
+   * @param includesVideo — BOOK-д л зөвшөөрнө. TEST/PASS-д 400 ошибка.
    */
   async createProduct(
     kind: ProductKind,
@@ -236,12 +245,18 @@ export class StoreService {
     price: number,
     userId: string,
     role: Role,
+    includesVideo: boolean = false,
   ) {
     if (!TEACHER_ROLES.includes(role)) {
       throw new ForbiddenException('Зөвхөн админ бүтээгдэхүүн үүсгэнэ');
     }
     if (price < 0) {
       throw new BadRequestException('Үнэ сөрөг байж болохгүй');
+    }
+
+    // BOOK-д л видео сонголт зөвшөөрнө
+    if (includesVideo && kind !== ProductKind.BOOK) {
+      throw new BadRequestException('Видео сонголт зөвхөн ном дээр л боломжтой');
     }
 
     // refId нь байгаа объект эсэхийг шалгана
@@ -253,16 +268,17 @@ export class StoreService {
       if (!book) throw new NotFoundException('Ном олдсонгүй');
     }
 
-    // Давхардаа үүсгэхгүй
+    // Давхардал үүсгэхгүй — нэг ном одоо 2 хувилбартай (ном / ном+видео)
+    // тул түлхүүрт includesVideo орсон.
     const existing = await this.prisma.productItem.findUnique({
-      where: { kind_refId: { kind, refId } },
+      where: { kind_refId_includesVideo: { kind, refId, includesVideo } },
     });
     if (existing) {
       throw new ConflictException('Энэ бүтээгдэхүүн аль хэдийн байгаа');
     }
 
     return this.prisma.productItem.create({
-      data: { kind, refId, price, active: true },
+      data: { kind, refId, price, active: true, includesVideo },
     });
   }
 
@@ -355,6 +371,7 @@ export class StoreService {
         refId: item.refId,
         price: item.price,
         active: item.active,
+        includesVideo: item.includesVideo,
         purchaseCount: purchaseCountMap.get(item.id) || 0,
       };
 

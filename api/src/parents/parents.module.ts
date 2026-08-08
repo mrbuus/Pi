@@ -7,5 +7,6 @@ import { ParentsService } from './parents.service';
   imports: [PrismaModule],
   controllers: [ParentsController],
   providers: [ParentsService],
+  exports: [ParentsService],
 })
 export class ParentsModule {}

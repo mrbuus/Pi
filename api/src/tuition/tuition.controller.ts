@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Request as NestRequest,
+  ForbiddenException,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -158,5 +159,61 @@ export class TuitionController {
       Math.min(limit, 100),
       offset,
     );
+  }
+
+  /**
+   * ӨӨРИЙН төлбөр дуусах огноо (STUDENT)
+   * GET /tuition/paid-until/my
+   */
+  @Get('paid-until/my')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.STUDENT)
+  async getMyPaidUntil(@NestRequest() req: Request) {
+    const userId = (req.user as any).id;
+    const paidUntil = await this.tuitionService.getPaidUntil(userId);
+    return { paidUntil };
+  }
+
+  /**
+   * СУРАГЧИЙН төлбөр дуусах огноо (ADMIN/TEACHER_PLUS/TEACHER, эцэг эх өөрийн хүүхдэд)
+   * GET /tuition/paid-until/:studentId
+   */
+  @Get('paid-until/:studentId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  async getPaidUntil(
+    @Param('studentId') studentId: string,
+    @NestRequest() req: Request,
+  ) {
+    const userId = (req.user as any).id;
+    const userRole = (req.user as any).role;
+
+    // TEACHER → өөрийн ангийн сурагчид л
+    if (userRole === Role.TEACHER) {
+      const enrollments = await this.tuitionService['prisma'].enrollment.findMany({
+        where: { studentId, leftAt: null },
+        include: { classroom: true },
+      });
+      const hasAccess = enrollments.some((e) => e.classroom.teacherId === userId);
+      if (!hasAccess) {
+        throw new ForbiddenException(
+          'Та энэ сурагчийн багш биш байна',
+        );
+      }
+    }
+    // PARENT -> өөрийн хүүхдэд
+    if (userRole === Role.PARENT) {
+      const parentLink = await this.tuitionService['prisma'].parentLink.findFirst({
+        where: { parentId: userId, studentId: studentId },
+      });
+      if (!parentLink) {
+        throw new ForbiddenException(
+          'Та энэ хүүхдийн эцэг эх биш байна',
+        );
+      }
+    }
+
+    const paidUntil = await this.tuitionService.getPaidUntil(studentId);
+    return { paidUntil };
   }
 }

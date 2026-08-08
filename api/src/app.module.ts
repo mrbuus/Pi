@@ -45,6 +45,7 @@ import { TestsModule } from './tests/tests.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
+import { ReconcileModule } from './reconcile/reconcile.module';
 
 @Module({
   imports: [
@@ -136,6 +137,7 @@ import { TuitionModule } from './tuition/tuition.module';
     TeacherGroupsModule,
     RecommendModule,
     TuitionModule,
+    ReconcileModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -57,8 +57,10 @@ export class ClassroomsService {
   }
 
   // Идэвхжсэн ч ангид ороогүй танхимын сурагчид (SPEC §6.3)
-  unassignedStudents() {
-    return this.prisma.user.findMany({
+  // Эрэмбэлэлт: хамгийн удаан ангигүй байгаа нь эхэндээ.
+  // Өөрөөр хэлбэл, сүүлийн enrollment-ийн leftAt огноо (байхгүй бол User.createdAt)
+  async unassignedStudents() {
+    const users = await this.prisma.user.findMany({
       where: {
         role: Role.STUDENT,
         studentProfile: {
@@ -73,10 +75,32 @@ export class ClassroomsService {
         lastName: true,
         phone: true,
         avatarUrl: true,
+        createdAt: true,
         studentProfile: { select: { grade: true, school: true } },
+        enrollments: {
+          select: { leftAt: true },
+          orderBy: { leftAt: 'desc' as const },
+          take: 1,
+        },
       },
-      orderBy: { createdAt: 'asc' },
     });
+
+    // Эрэмбэлээ: хүлээлтийн огноо (сүүлийн enrollment.leftAt, байхгүй бол createdAt)
+    const sorted = users.sort((a, b) => {
+      const aWaitSince = a.enrollments[0]?.leftAt ?? a.createdAt;
+      const bWaitSince = b.enrollments[0]?.leftAt ?? b.createdAt;
+      return aWaitSince.getTime() - bWaitSince.getTime();
+    });
+
+    return sorted.map((u) => ({
+      id: u.id,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      phone: u.phone,
+      avatarUrl: u.avatarUrl,
+      studentProfile: u.studentProfile,
+      waitingSince: u.enrollments[0]?.leftAt ?? u.createdAt,
+    }));
   }
 
   async enroll(
@@ -210,5 +234,45 @@ export class ClassroomsService {
     });
 
     return archived;
+  }
+
+  // Анги тараах — идэвхтэй бүх сурагчийг ангиас гаргана
+  // Шаардлага: ангийн удирдлагын дэлгэцээс "анги тараах" үйлдэлээр дуудагдана
+  async disband(
+    classroomId: string,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id: classroomId },
+    });
+    if (!classroom) throw new NotFoundException('Анги олдсонгүй');
+
+    const today = new Date();
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Идэвхтэй бүх enrollment-ийн leftAt=өнөөдөр болгоно
+      const updatedCount = await tx.enrollment.updateMany({
+        where: { classroomId, leftAt: null },
+        data: { leftAt: today, movedById: actorId },
+      });
+
+      return {
+        disbanded: true,
+        affectedStudentCount: updatedCount.count,
+      };
+    });
+
+    // Аудитыг бүртгэнэ
+    await this.audit.record({
+      actorId,
+      actorRole,
+      action: 'DISBAND',
+      entity: 'Classroom',
+      entityId: classroomId,
+      before: classroom,
+      after: { ...classroom, disbanded: true },
+    });
+
+    return result;
   }
 }

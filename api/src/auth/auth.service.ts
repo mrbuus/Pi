@@ -10,7 +10,6 @@ import {
   generateStudentCode,
   generateTeacherCode,
   resolveUniqueUsername,
-  StudentCodeSubject,
 } from '../common/codes';
 import {
   Role,
@@ -128,25 +127,24 @@ export class AuthService {
       dto.username,
     );
 
-    // Танигдах код: сурагч бол SIE-<жил>-<хичээл>-<дараалал>, багш бол SIE-T-<дараалал>
-    // (public register-ээр өнөөдөр багш үүсгэдэггүй ч бүрэн байлгах үүднээс энд ч тооцов)
-    // Wave 1-ийн дутагдал: dto.subject байхгүй байснаас код бүр 'B' үсэгтэй гардаг
-    // асуудлыг эндээс засав — RegisterDto.subject-ийг codes.ts-ийн үсэг рүү буулгана.
-    const subjectLetterMap: Record<string, StudentCodeSubject> = {
-      MATH: 'M',
-      SOCIAL_STUDIES: 'N',
-      BOTH: 'B',
-    };
-    const studentCode = isStudent
+    // Шинэ кодын формат [Branch][YY][Grade][Seq]
+    // Онлайн TANХИМЫН сурагч: код дараа (зөвшөөрөл + төлбөр урсгалаар үүснэ)
+    // Үлдэх сурагч (ONLINE эсвэл CLASSROOM гараар бүртгүүлэн): код шууд
+    const shouldDeferCode =
+      isStudent && dto.studentType === StudentType.CLASSROOM;
+    const studentCode = isStudent && !shouldDeferCode
       ? await generateStudentCode(this.prisma, {
-          subject: dto.subject ? subjectLetterMap[dto.subject] : undefined,
+          branch: null, // Салаа мэдэгдэхгүй (дараагийн агент өөрчилнө)
+          grade: dto.grade ?? 12,
+          registeredAt: new Date(), // UB цагаар одоо
         })
       : undefined;
-    // (role нь энэ функцэд боломжит 3 утгаар л шахагдсан тул array.includes-ээр
-    // шалгаж, TS-ийн "давхцалгүй literal" алдааг зөв зохистойгоор тойрч гарав)
+
     const teacherRoles: Role[] = [Role.TEACHER, Role.TEACHER_PLUS];
     const teacherCode = teacherRoles.includes(role)
-      ? await generateTeacherCode(this.prisma)
+      ? await generateTeacherCode(this.prisma, {
+          registeredAt: new Date(), // UB цагаар одоо
+        })
       : undefined;
 
     const user = await this.prisma.user.create({
@@ -173,6 +171,9 @@ export class AuthService {
                 activatedAt:
                   dto.studentType === StudentType.CLASSROOM ? new Date() : null,
                 activationCode: dto.activationCode,
+                // Онлайнаар CLASSROOM-р бүртгүүлбэл зөвшөөрөл хүлээнэ
+                // Эзэн баталгаа + эхний сарын төлбөр CONFIRMED үед л код үүснэ
+                approvalPending: shouldDeferCode,
               },
             }
           : undefined,

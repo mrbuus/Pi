@@ -246,6 +246,7 @@ export type TestResultWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  acknowledgements?: Prisma.ResultAcknowledgementListRelationFilter
 }
 
 export type TestResultOrderByWithRelationInput = {
@@ -259,6 +260,7 @@ export type TestResultOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   test?: Prisma.TestOrderByWithRelationInput
   student?: Prisma.UserOrderByWithRelationInput
+  acknowledgements?: Prisma.ResultAcknowledgementOrderByRelationAggregateInput
 }
 
 export type TestResultWhereUniqueInput = Prisma.AtLeast<{
@@ -276,6 +278,7 @@ export type TestResultWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  acknowledgements?: Prisma.ResultAcknowledgementListRelationFilter
 }, "id" | "testId_studentId">
 
 export type TestResultOrderByWithAggregationInput = {
@@ -317,6 +320,7 @@ export type TestResultCreateInput = {
   createdAt?: Date | string
   test: Prisma.TestCreateNestedOneWithoutResultsInput
   student: Prisma.UserCreateNestedOneWithoutTestResultsInput
+  acknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutTestResultInput
 }
 
 export type TestResultUncheckedCreateInput = {
@@ -328,6 +332,7 @@ export type TestResultUncheckedCreateInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  acknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutTestResultInput
 }
 
 export type TestResultUpdateInput = {
@@ -339,6 +344,7 @@ export type TestResultUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   test?: Prisma.TestUpdateOneRequiredWithoutResultsNestedInput
   student?: Prisma.UserUpdateOneRequiredWithoutTestResultsNestedInput
+  acknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutTestResultNestedInput
 }
 
 export type TestResultUncheckedUpdateInput = {
@@ -350,6 +356,7 @@ export type TestResultUncheckedUpdateInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutTestResultNestedInput
 }
 
 export type TestResultCreateManyInput = {
@@ -441,6 +448,11 @@ export type TestResultSumOrderByAggregateInput = {
   maxScore?: Prisma.SortOrder
 }
 
+export type TestResultScalarRelationFilter = {
+  is?: Prisma.TestResultWhereInput
+  isNot?: Prisma.TestResultWhereInput
+}
+
 export type TestResultCreateNestedManyWithoutStudentInput = {
   create?: Prisma.XOR<Prisma.TestResultCreateWithoutStudentInput, Prisma.TestResultUncheckedCreateWithoutStudentInput> | Prisma.TestResultCreateWithoutStudentInput[] | Prisma.TestResultUncheckedCreateWithoutStudentInput[]
   connectOrCreate?: Prisma.TestResultCreateOrConnectWithoutStudentInput | Prisma.TestResultCreateOrConnectWithoutStudentInput[]
@@ -529,6 +541,20 @@ export type EnumAttemptSourceFieldUpdateOperationsInput = {
   set?: $Enums.AttemptSource
 }
 
+export type TestResultCreateNestedOneWithoutAcknowledgementsInput = {
+  create?: Prisma.XOR<Prisma.TestResultCreateWithoutAcknowledgementsInput, Prisma.TestResultUncheckedCreateWithoutAcknowledgementsInput>
+  connectOrCreate?: Prisma.TestResultCreateOrConnectWithoutAcknowledgementsInput
+  connect?: Prisma.TestResultWhereUniqueInput
+}
+
+export type TestResultUpdateOneRequiredWithoutAcknowledgementsNestedInput = {
+  create?: Prisma.XOR<Prisma.TestResultCreateWithoutAcknowledgementsInput, Prisma.TestResultUncheckedCreateWithoutAcknowledgementsInput>
+  connectOrCreate?: Prisma.TestResultCreateOrConnectWithoutAcknowledgementsInput
+  upsert?: Prisma.TestResultUpsertWithoutAcknowledgementsInput
+  connect?: Prisma.TestResultWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TestResultUpdateToOneWithWhereWithoutAcknowledgementsInput, Prisma.TestResultUpdateWithoutAcknowledgementsInput>, Prisma.TestResultUncheckedUpdateWithoutAcknowledgementsInput>
+}
+
 export type TestResultCreateWithoutStudentInput = {
   id?: string
   totalScore: number
@@ -537,6 +563,7 @@ export type TestResultCreateWithoutStudentInput = {
   source: $Enums.AttemptSource
   createdAt?: Date | string
   test: Prisma.TestCreateNestedOneWithoutResultsInput
+  acknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutTestResultInput
 }
 
 export type TestResultUncheckedCreateWithoutStudentInput = {
@@ -547,6 +574,7 @@ export type TestResultUncheckedCreateWithoutStudentInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  acknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutTestResultInput
 }
 
 export type TestResultCreateOrConnectWithoutStudentInput = {
@@ -597,6 +625,7 @@ export type TestResultCreateWithoutTestInput = {
   source: $Enums.AttemptSource
   createdAt?: Date | string
   student: Prisma.UserCreateNestedOneWithoutTestResultsInput
+  acknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutTestResultInput
 }
 
 export type TestResultUncheckedCreateWithoutTestInput = {
@@ -607,6 +636,7 @@ export type TestResultUncheckedCreateWithoutTestInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  acknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutTestResultInput
 }
 
 export type TestResultCreateOrConnectWithoutTestInput = {
@@ -635,6 +665,66 @@ export type TestResultUpdateManyWithWhereWithoutTestInput = {
   data: Prisma.XOR<Prisma.TestResultUpdateManyMutationInput, Prisma.TestResultUncheckedUpdateManyWithoutTestInput>
 }
 
+export type TestResultCreateWithoutAcknowledgementsInput = {
+  id?: string
+  totalScore: number
+  maxScore: number
+  enteredById?: string | null
+  source: $Enums.AttemptSource
+  createdAt?: Date | string
+  test: Prisma.TestCreateNestedOneWithoutResultsInput
+  student: Prisma.UserCreateNestedOneWithoutTestResultsInput
+}
+
+export type TestResultUncheckedCreateWithoutAcknowledgementsInput = {
+  id?: string
+  testId: string
+  studentId: string
+  totalScore: number
+  maxScore: number
+  enteredById?: string | null
+  source: $Enums.AttemptSource
+  createdAt?: Date | string
+}
+
+export type TestResultCreateOrConnectWithoutAcknowledgementsInput = {
+  where: Prisma.TestResultWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestResultCreateWithoutAcknowledgementsInput, Prisma.TestResultUncheckedCreateWithoutAcknowledgementsInput>
+}
+
+export type TestResultUpsertWithoutAcknowledgementsInput = {
+  update: Prisma.XOR<Prisma.TestResultUpdateWithoutAcknowledgementsInput, Prisma.TestResultUncheckedUpdateWithoutAcknowledgementsInput>
+  create: Prisma.XOR<Prisma.TestResultCreateWithoutAcknowledgementsInput, Prisma.TestResultUncheckedCreateWithoutAcknowledgementsInput>
+  where?: Prisma.TestResultWhereInput
+}
+
+export type TestResultUpdateToOneWithWhereWithoutAcknowledgementsInput = {
+  where?: Prisma.TestResultWhereInput
+  data: Prisma.XOR<Prisma.TestResultUpdateWithoutAcknowledgementsInput, Prisma.TestResultUncheckedUpdateWithoutAcknowledgementsInput>
+}
+
+export type TestResultUpdateWithoutAcknowledgementsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  test?: Prisma.TestUpdateOneRequiredWithoutResultsNestedInput
+  student?: Prisma.UserUpdateOneRequiredWithoutTestResultsNestedInput
+}
+
+export type TestResultUncheckedUpdateWithoutAcknowledgementsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  testId?: Prisma.StringFieldUpdateOperationsInput | string
+  studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type TestResultCreateManyStudentInput = {
   id?: string
   testId: string
@@ -653,6 +743,7 @@ export type TestResultUpdateWithoutStudentInput = {
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   test?: Prisma.TestUpdateOneRequiredWithoutResultsNestedInput
+  acknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutTestResultNestedInput
 }
 
 export type TestResultUncheckedUpdateWithoutStudentInput = {
@@ -663,6 +754,7 @@ export type TestResultUncheckedUpdateWithoutStudentInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutTestResultNestedInput
 }
 
 export type TestResultUncheckedUpdateManyWithoutStudentInput = {
@@ -693,6 +785,7 @@ export type TestResultUpdateWithoutTestInput = {
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.UserUpdateOneRequiredWithoutTestResultsNestedInput
+  acknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutTestResultNestedInput
 }
 
 export type TestResultUncheckedUpdateWithoutTestInput = {
@@ -703,6 +796,7 @@ export type TestResultUncheckedUpdateWithoutTestInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutTestResultNestedInput
 }
 
 export type TestResultUncheckedUpdateManyWithoutTestInput = {
@@ -716,6 +810,35 @@ export type TestResultUncheckedUpdateManyWithoutTestInput = {
 }
 
 
+/**
+ * Count Type TestResultCountOutputType
+ */
+
+export type TestResultCountOutputType = {
+  acknowledgements: number
+}
+
+export type TestResultCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  acknowledgements?: boolean | TestResultCountOutputTypeCountAcknowledgementsArgs
+}
+
+/**
+ * TestResultCountOutputType without action
+ */
+export type TestResultCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TestResultCountOutputType
+   */
+  select?: Prisma.TestResultCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TestResultCountOutputType without action
+ */
+export type TestResultCountOutputTypeCountAcknowledgementsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ResultAcknowledgementWhereInput
+}
+
 
 export type TestResultSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -728,6 +851,8 @@ export type TestResultSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   createdAt?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  acknowledgements?: boolean | Prisma.TestResult$acknowledgementsArgs<ExtArgs>
+  _count?: boolean | Prisma.TestResultCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testResult"]>
 
 export type TestResultSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -771,6 +896,8 @@ export type TestResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type TestResultInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  acknowledgements?: boolean | Prisma.TestResult$acknowledgementsArgs<ExtArgs>
+  _count?: boolean | Prisma.TestResultCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TestResultIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
@@ -786,6 +913,7 @@ export type $TestResultPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     test: Prisma.$TestPayload<ExtArgs>
     student: Prisma.$UserPayload<ExtArgs>
+    acknowledgements: Prisma.$ResultAcknowledgementPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1192,6 +1320,7 @@ export interface Prisma__TestResultClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   test<T extends Prisma.TestDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestDefaultArgs<ExtArgs>>): Prisma.Prisma__TestClient<runtime.Types.Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   student<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  acknowledgements<T extends Prisma.TestResult$acknowledgementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestResult$acknowledgementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResultAcknowledgementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1627,6 +1756,30 @@ export type TestResultDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many TestResults to delete.
    */
   limit?: number
+}
+
+/**
+ * TestResult.acknowledgements
+ */
+export type TestResult$acknowledgementsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ResultAcknowledgement
+   */
+  select?: Prisma.ResultAcknowledgementSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ResultAcknowledgement
+   */
+  omit?: Prisma.ResultAcknowledgementOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ResultAcknowledgementInclude<ExtArgs> | null
+  where?: Prisma.ResultAcknowledgementWhereInput
+  orderBy?: Prisma.ResultAcknowledgementOrderByWithRelationInput | Prisma.ResultAcknowledgementOrderByWithRelationInput[]
+  cursor?: Prisma.ResultAcknowledgementWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ResultAcknowledgementScalarFieldEnum | Prisma.ResultAcknowledgementScalarFieldEnum[]
 }
 
 /**

@@ -65,6 +65,7 @@ export class StoreController {
       dto.price,
       req.user.id,
       req.user.role,
+      dto.includesVideo ?? false,
     );
   }
 

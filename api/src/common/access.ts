@@ -121,7 +121,8 @@ export interface ChapterAccessTarget {
 
 // Хандалтын дүрэм (SPEC §11), бодлого/бичлэг/тест гурван газар ижил:
 // багш нар бүгдийг; нээлттэй бүлгийг хэн ч; танхимын идэвхтэй сурагч бүгдийг;
-// бусад нь хүчинтэй эрхийнхээ (pass) хамрах хүрээгээр.
+// бусад нь хүчинтэй эрхийнхээ (pass) хамрах хүрээгээр. ТҮҮНЭЭС ГАДНА: худалдан авалт
+// дээр тухайн номын видеотай бүтээгдэхүүн худалдаж авсан (Purchase→ProductItem→Book→Chapter).
 export async function canAccessChapter(
   prisma: PrismaService,
   userId: string,
@@ -131,8 +132,32 @@ export async function canAccessChapter(
   if (TEACHER_ROLES.includes(role)) return true;
   if (chapter.freePreview) return true;
   if (await hasActiveClassroomEnrollment(prisma, userId, role)) return true;
-  return hasCoveringPass(prisma, userId, {
-    chapterId: chapter.id,
-    bookId: chapter.bookId,
-  });
+
+  // Pass эрхийг шалгана
+  if (
+    await hasCoveringPass(prisma, userId, {
+      chapterId: chapter.id,
+      bookId: chapter.bookId,
+    })
+  ) {
+    return true;
+  }
+
+  // Purchase гинж: тухайн номын (chapter.bookId) видеотай бүтээгдэхүүн худалдаж авсан уу
+  if (chapter.bookId) {
+    const purchase = await prisma.purchase.findFirst({
+      where: {
+        userId,
+        grantedAt: { not: null }, // төлбөр баталгаажсан
+        productItem: {
+          kind: 'BOOK',
+          includesVideo: true,
+          refId: chapter.bookId,
+        },
+      },
+    });
+    if (purchase) return true;
+  }
+
+  return false;
 }

@@ -8,6 +8,7 @@ import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import { prorateTuition, explainProration, type ProrationInput, type ProrationResult, type DateKey } from './proration';
+import { computePaidUntil } from './paid-until';
 import { todayUB } from '../common/date';
 
 @Injectable()
@@ -314,5 +315,85 @@ export class TuitionService {
     });
 
     return { refunds, total };
+  }
+
+  /**
+   * ТАНХИМЫН сурагчийн төлбөр дуусах огноо
+   * Сүүлийн CONFIRMED төлбөрүүдээс эхлэл огноо+сар тоолж,
+   * AcademicCalendarDay-ийн амралтаар сунгана.
+   * Төлбөргүй -> null
+   */
+  async getPaidUntil(studentId: string, classroomId?: string): Promise<Date | null> {
+    // Сурагч байгаа эсэх
+    const student = await this.prisma.user.findUnique({
+      where: { id: studentId },
+      include: { enrollments: { where: { leftAt: null } } },
+    });
+    if (!student) {
+      throw new NotFoundException('Сурагч олдсонгүй');
+    }
+
+    // classroomId заагдавал ТАНХИМЫН төлбөр, үгүй бол сүүлийн төлбөр
+    let classroom: { id: string } | null = null;
+    if (classroomId) {
+      classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
+      if (!classroom) throw new NotFoundException('Анги олдсонгүй');
+    } else if (student.enrollments.length > 0) {
+      // ТАНХИМЫН сурагч → сүүлийн идэвхтэй ангийг авна
+      const enrollment = student.enrollments[0];
+      classroom = { id: enrollment.classroomId };
+    }
+
+    // Төлбөр нь САРЫН дүнтэй төлбөр, forMonth = "2026-09" гэх мэт
+    // ДАРААЛСАН гинж хайна
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        userId: studentId,
+        status: 'CONFIRMED',
+      },
+      orderBy: { forMonth: 'asc' },
+    });
+
+    if (payments.length === 0 || !payments[0].forMonth) {
+      return null;
+    }
+
+    // Төлбөр эхлэл сарын огноо
+    const startMonth = payments[0].forMonth;
+    const fromDate = new Date(`${startMonth}-01T00:00:00Z`);
+
+    // Төлсөн сарын тоо (дараалсан гинж шалгана)
+    let monthsPaid = 0;
+    let expectedMonth = startMonth;
+    for (const p of payments) {
+      if (p.forMonth === expectedMonth) {
+        monthsPaid++;
+        // Дараагийн сар авна
+        const [y, m] = expectedMonth.split('-').map(Number);
+        const next = new Date(y, m, 1);
+        expectedMonth = `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, '0')}`;
+      } else {
+        // Гинж эвдэрсэн → эхний дараалсан хэсгийг авна
+        break;
+      }
+    }
+
+    // Schedule модулаас амралтын өдрүүдийг авна
+    const calendars = await this.prisma.academicCalendarDay.findMany({
+      where: {
+        type: 'HOLIDAY',
+        // Төлбөр хугацаанд
+        date: { gte: fromDate },
+      },
+    });
+
+    // computePaidUntil-ийг дуудна
+    const paidUntil = computePaidUntil({
+      fromDate,
+      monthsPaid,
+      holidayDates: calendars.map((c) => c.date),
+    });
+
+    return paidUntil;
   }
 }

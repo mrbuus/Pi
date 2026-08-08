@@ -20,6 +20,7 @@ import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
 import { SaveSessionDto, SubmitTestDto } from './dto/submit-test.dto';
 import { TestsService } from './tests.service';
+import { ParentsService } from '../parents/parents.service';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -28,7 +29,10 @@ interface AuthedRequest {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tests')
 export class TestsController {
-  constructor(private tests: TestsService) {}
+  constructor(
+    private tests: TestsService,
+    private parents: ParentsService,
+  ) {}
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Post()
@@ -135,6 +139,12 @@ export class TestsController {
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.remove(id, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get(':id/acknowledgements')
+  acknowledgements(@Param('id') id: string) {
+    return this.parents.getAcknowledgementStatus(id);
   }
 }
 

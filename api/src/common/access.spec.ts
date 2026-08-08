@@ -83,6 +83,8 @@ function makeAccessPrisma(opts: {
   studentProfile?: FakeStudentProfile | null;
   hasActiveEnrollment?: boolean;
   userPasses?: FakeUserPass[];
+  /** Видеотой ном худалдаж авсан (grantedAt бөглөгдсөн) эсэх */
+  hasVideoPurchase?: boolean;
 }) {
   return {
     studentProfile: {
@@ -100,6 +102,11 @@ function makeAccessPrisma(opts: {
           .filter((p) => p.expiresAt > now)
           .map((p) => ({ pass: { scope: p.scope } }));
       },
+    },
+    // canAccessChapter-ийн Purchase гинж (ном+видео худалдан авалт) —
+    // анхдагчаар юу ч аваагүй гэж үзнэ
+    purchase: {
+      findFirst: async () => (opts.hasVideoPurchase ? { id: 'pu1' } : null),
     },
   } as any;
 }
@@ -235,6 +242,15 @@ describe('canAccessChapter — SPEC §11 хандалтын дүрэм', () => {
     );
   });
 
+  it('ном+видео худалдаж авсан (grantedAt бөглөгдсөн) сурагчид ALLOW', async () => {
+    // Дэлгүүрийн «ном + видео тайлбартай» хувилбар — pass/enrollment-гүй ч
+    // тухайн номын бүлгүүдэд хандана (эзний шийдвэр 2026-08-08)
+    const prisma = makeAccessPrisma({ hasVideoPurchase: true });
+    expect(await canAccessChapter(prisma, 's1', Role.STUDENT, chapter)).toBe(
+      true,
+    );
+  });
+
   it('танхимын идэвхтэй сурагч бүх бүлгийг ALLOW', async () => {
     const prisma = makeAccessPrisma({
       studentProfile: { type: StudentType.CLASSROOM, activatedAt: new Date() },
@@ -312,6 +328,35 @@ describe('canAccessChapter — SPEC §11 хандалтын дүрэм', () => {
     const prisma = makeAccessPrisma({
       userPasses: [{ expiresAt: FUTURE, scope: {} }],
     });
+    expect(await canAccessChapter(prisma, 's1', Role.STUDENT, chapter)).toBe(
+      false,
+    );
+  });
+
+  it('Purchase гинж: BOOK + includesVideo=true худалдан авалтаас видео эрх ALLOW', async () => {
+    // Purchase эрхийн гинж: тухайн номын (chapter.bookId) видеотай бүтээгдэхүүнийг
+    // худалдаж авсан бол видео бүлгийг үзэх эрх өгнө
+    const prisma = makeAccessPrisma({});
+    // Purchase.findFirst() stub эвлүүлэх
+    (prisma.purchase as any) = {
+      findFirst: async () => ({
+        id: 'p1',
+        userId: 's1',
+        productItemId: 'prod1',
+        grantedAt: new Date(),
+      }),
+    };
+    expect(await canAccessChapter(prisma, 's1', Role.STUDENT, chapter)).toBe(
+      true,
+    );
+  });
+
+  it('Purchase гинж: DENY бол purchase эрх DENY хэвээр', async () => {
+    // Purchase байхгүй бол video эрх DENY
+    const prisma = makeAccessPrisma({});
+    (prisma.purchase as any) = {
+      findFirst: async () => null, // Purchase олдсонгүй
+    };
     expect(await canAccessChapter(prisma, 's1', Role.STUDENT, chapter)).toBe(
       false,
     );

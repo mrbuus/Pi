@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
+import { AcknowledgeResultDialog } from "@/components/parent/AcknowledgeResultDialog";
+import { Check } from "lucide-react";
 
 interface ParentLink {
   id: string;
@@ -32,6 +34,7 @@ interface ParentLink {
       };
     }[];
     testResults?: {
+      id: string;
       totalScore: number;
       maxScore: number;
       source: string;
@@ -66,11 +69,15 @@ function pct(total: number, max: number) {
   return max > 0 ? Math.round((total / max) * 100) : 0;
 }
 
-function ChildPanel({ link }: { link: ParentLink }) {
+function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => void }) {
   const attendance = link.student.attendances ?? [];
   const results = link.student.testResults ?? [];
   const submissions = link.student.submissions ?? [];
   const payments = link.student.payments ?? [];
+  const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<any>(null);
+
   const attendanceSummary = attendance.reduce<Record<string, number>>((acc, row) => {
     acc[row.status] = (acc[row.status] ?? 0) + 1;
     return acc;
@@ -141,28 +148,47 @@ function ChildPanel({ link }: { link: ParentLink }) {
           <div className="space-y-2">
             {results.map((r, i) => {
               const scorePct = pct(r.totalScore, r.maxScore);
+              const isAcknowledged = acknowledgedIds.has(r.id);
               return (
-                <div
-                  key={`${r.test.title}-${i}`}
-                  className="rounded-xl border border-line px-4 py-3 text-sm"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium">{r.test.title}</span>
-                    <span className="font-bold">
-                      {r.totalScore}/{r.maxScore}
-                    </span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel">
-                    <div
-                      className={`h-full rounded-full ${
-                        scorePct >= 80
-                          ? "bg-success"
-                          : scorePct >= 50
-                            ? "bg-warning"
-                            : "bg-error"
-                      }`}
-                      style={{ width: `${Math.max(scorePct, 4)}%` }}
-                    />
+                <div key={r.id} className="rounded-xl border border-line px-4 py-3 text-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{r.test.title}</span>
+                        {isAcknowledged && (
+                          <span className="flex items-center gap-1 text-xs text-success">
+                            <Check size={14} />
+                            Танилцлаа
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel">
+                        <div
+                          className={`h-full rounded-full ${
+                            scorePct >= 80
+                              ? "bg-success"
+                              : scorePct >= 50
+                                ? "bg-warning"
+                                : "bg-error"
+                          }`}
+                          style={{ width: `${Math.max(scorePct, 4)}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-xs text-ink-dim">
+                        {r.totalScore}/{r.maxScore} оноо
+                      </p>
+                    </div>
+                    {!isAcknowledged && (
+                      <button
+                        onClick={() => {
+                          setSelectedResult(r);
+                          setDialogOpen(true);
+                        }}
+                        className="shrink-0 rounded-lg border border-brand-bright/50 px-2.5 py-1 text-xs font-semibold text-brand-soft transition hover:bg-brand-bright/10"
+                      >
+                        Танилцлаа
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -247,6 +273,24 @@ function ChildPanel({ link }: { link: ParentLink }) {
           })}
         </div>
       </div>
+
+      {selectedResult && (
+        <AcknowledgeResultDialog
+          testResultId={selectedResult.id}
+          testTitle={selectedResult.test.title}
+          isOpen={dialogOpen}
+          onClose={() => {
+            setDialogOpen(false);
+            setSelectedResult(null);
+          }}
+          onSuccess={() => {
+            if (selectedResult) {
+              setAcknowledgedIds((prev) => new Set([...prev, selectedResult.id]));
+            }
+            onRefresh();
+          }}
+        />
+      )}
     </section>
   );
 }
@@ -372,7 +416,7 @@ export default function ParentPage() {
       {loadState === "ready" && links.length > 0 && (
         <div className="space-y-5">
           {links.map((link) => (
-            <ChildPanel key={link.id} link={link} />
+            <ChildPanel key={link.id} link={link} onRefresh={reload} />
           ))}
         </div>
       )}

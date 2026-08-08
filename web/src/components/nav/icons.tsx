@@ -2,6 +2,7 @@ import type { SVGProps } from "react";
 import {
   BarChart3,
   BookOpen,
+  Building,
   CalendarDays,
   ChevronDown,
   ClipboardCheck,
@@ -35,6 +36,7 @@ import {
 export type IconName =
   | "home"
   | "book-open"
+  | "building"
   | "layers"
   | "play-circle"
   | "clipboard-check"
@@ -63,6 +65,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   "message-square": MessageSquare,
   home: Home,
   "book-open": BookOpen,
+  building: Building,
   layers: Library,
   "play-circle": PlayCircle,
   "clipboard-check": ClipboardCheck,

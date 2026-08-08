@@ -101,6 +101,12 @@ model User {
   smsMessagesAsCreator   SmsMessage[]      @relation("SmsMessageCreatedBy")
   smsBatches             SmsBatch[]        @relation("SmsBatchCreatedBy")
   smsTemplates           SmsTemplate[]     @relation("SmsTemplateCreatedBy")
+
+  // Банкны гүйлгээ тулгалт + эцэг эхийн танилцуулга + имэйл OTP (2026-08-08)
+  bankTransactionsMatched  BankTransaction[]       @relation("BankTxMatchedUser")
+  bankTransactionsImported BankTransaction[]       @relation("BankTxImportedBy")
+  resultAcknowledgements   ResultAcknowledgement[]
+  emailOtps                EmailOtp[]
 }
 
 // ============ Нууц үг сэргээлт ============
@@ -287,8 +293,17 @@ model StudentProfile {
   joinedOn      DateTime?    @db.Date
   leftOn        DateTime?    @db.Date
 
+  // Онлайнаар ТАНХИМЫН ангид бүртгүүлсэн сурагчийн зөвшөөрлийн урсгал
+  // (эзний дүрэм 2026-08-08): багш зөвшөөрөх + эхний сарын төлбөр CONFIRMED
+  // («суудал баталгаажуулалт») хоёул биелмэгц сурагчийн код үүснэ.
+  // Багш гараар бүртгэсэн бол энэ урсгал алгасагдана (approvalPending=false).
+  approvalPending Boolean   @default(false)
+  approvedAt      DateTime?
+  approvedById    String?
+
   @@index([branch])
   @@index([section])
+  @@index([approvalPending])
 }
 
 model TeacherProfile {
@@ -910,8 +925,48 @@ model TestResult {
   source      AttemptSource
   createdAt   DateTime      @default(now())
 
+  acknowledgements ResultAcknowledgement[]
+
   @@unique([testId, studentId])
   @@index([studentId])
+}
+
+// ============================================================================
+// Эцэг эх шалгалтын дүнтэй ТАНИЛЦСАН баримт — цаасан гарын үсгийг орлоно.
+// Имэйл OTP-оор баталгаажина (эзний шийдвэр 2026-08-08: SMS түр хойшилсон).
+// Хэзээ, хаанаас, ямар сувгаар танилцсаныг хадгалснаар маргаан гарахад
+// цаасан гарын үсгээс дутахгүй мөрдлөг болно.
+// ============================================================================
+model ResultAcknowledgement {
+  id           String     @id @default(cuid())
+  testResultId String
+  testResult   TestResult @relation(fields: [testResultId], references: [id], onDelete: Cascade)
+  parentId     String
+  parent       User       @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  channel      String // "EMAIL_OTP" — ирээдүйд "SMS_OTP", "DAN" нэмэгдэж болно
+  verifiedAt   DateTime   @default(now())
+  ip           String?
+
+  // Нэг дүнг нэг эцэг эх нэг л удаа танилцана (давтан дарахад алдаа биш,
+  // байгаа бичлэгээ буцаана — service түвшинд upsert)
+  @@unique([testResultId, parentId])
+  @@index([parentId])
+}
+
+// Имэйлээр илгээх нэг удаагийн код — SMS-ийн PasswordResetToken-ий ижил
+// зарчим (хэшлэж хадгална, оролдлого тоолно), гэхдээ зориулалт олон төрөл.
+model EmailOtp {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose    String // "RESULT_ACK" | ирээдүйд бусад
+  codeHash   String // HMAC-SHA256 (RESET_TOKEN_SECRET-ээр) — ил хадгалахгүй
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, purpose, createdAt])
 }
 
 // ============ Оролдлого — аналитикийн цөм (SPEC §9) ============
@@ -1104,6 +1159,53 @@ enum PaymentStatus {
   REVERSED // Багш+/Админ баталгаажсан төлбөрийг буцаасан — эрх автоматаар цуцлагдана
 }
 
+// ============================================================================
+// Хаан банкны хуулгын мөр — шууд шилжүүлгийг сурагчтай тулгах түүхий өгөгдөл.
+// Гүйлгээний утгаас утасны дугаар олдвол сурагчтай АВТОМАТААР тулгана, гэхдээ
+// Payment CONFIRMED болгох нь ХАТУУ болзолтой: утас яг 1 сурагчид таарсан БА
+// дүн хүлээгдэж буй төлбөртэй тэнцүү үед л. Бусад бүх мөр админд гараар.
+// ============================================================================
+enum BankMatchStatus {
+  UNMATCHED // тулгаагүй — админы жагсаалтад
+  AUTO_MATCHED // утас + дүн хоёул таарч автоматаар баталгаажсан
+  MANUAL_MATCHED // админ гараар сурагчтай холбосон
+  IGNORED // төлбөр биш гүйлгээ (цалин, түрээс…) — админ нуусан
+}
+
+model BankTransaction {
+  id      String @id @default(cuid())
+  // Банкны журналын дугаар — ИДЕМПОТЕНТ байдлын түлхүүр: ижил хуулгыг дахин
+  // импортлоход @unique нь давхар мөр үүсэхийг ӨС түвшинд зогсооно.
+  bankRef String @unique
+
+  bookedAt     DateTime // гүйлгээ хийгдсэн огноо (хуулгаас)
+  amount       Int // ₮, зөвхөн ОРЛОГО (кредит) импортлоно
+  description  String // гүйлгээний утга — утасны дугаар эндээс хайна
+  accountNo    String? // хүлээн авсан данс
+  counterparty String? // шилжүүлэгчийн нэр/данс (хуулгад байвал)
+
+  matchStatus   BankMatchStatus @default(UNMATCHED)
+  matchedUserId String?
+  matchedUser   User?           @relation("BankTxMatchedUser", fields: [matchedUserId], references: [id])
+  // Тулгалтаас үүссэн/холбогдсон төлбөр — нэг гүйлгээ нэг л төлбөр үүсгэнэ
+  paymentId     String?         @unique
+
+  importedById String
+  importedBy   User     @relation("BankTxImportedBy", fields: [importedById], references: [id])
+  importedAt   DateTime @default(now())
+  // Хуулгын эх мөр — маргаан гарвал эх өгөгдөл рүү буцаж харна
+  rawRow       Json
+
+  @@index([matchStatus, bookedAt])
+  @@index([matchedUserId])
+}
+
+// Хуучин SIE- кодын архив — шинэ формат руу шилжүүлэхэд эх кодыг хадгална
+model StudentCodeLegacy {
+  userId  String @id
+  oldCode String
+}
+
 model Payment {
   id                String        @id @default(cuid())
   userId            String
@@ -1143,9 +1245,17 @@ model ProductItem {
   price  Int // ₮, БҮХЭЛ (Float ХЭРЭГЛЭХГҮЙ)
   active Boolean     @default(true)
 
+  // Номын 2 хувилбар (эзний шийдвэр 2026-08-08): нэг ном «зөвхөн ном» ба
+  // «ном + видео тайлбар» гэсэн 2 бүтээгдэхүүнээр зарагдана. true үед
+  // худалдан авалт баталгаажихад тухайн номын бүлгүүдийн видео эрх давхар
+  // олгогдоно (store.service → videos эрхийн шалгалт).
+  includesVideo Boolean @default(false)
+
   purchases Purchase[]
 
-  @@unique([kind, refId])
+  // Хуучин @@unique([kind, refId]) байсан — нэг ном 2 хувилбартай болохоор
+  // includesVideo талбар түлхүүрт нэмэгдэв.
+  @@unique([kind, refId, includesVideo])
   @@index([active])
 }
 

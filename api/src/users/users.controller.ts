@@ -145,4 +145,21 @@ export class UsersController {
   ) {
     return this.users.setUserRole(id, dto.role, req.user.userId);
   }
+
+  // Онлайнаар CLASSROOM-р бүртгүүлсэн сурагчдын зөвшөөрөл хүлээгч жагсаалт
+  @Get('students/pending-approval')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  getPendingApprovalStudents() {
+    return this.users.getPendingApprovalStudents();
+  }
+
+  // Сурагчийг зөвшөөрнө
+  @Post('students/:id/approve')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  approveStudent(
+    @Param('id') id: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.approveStudent(id, req.user.userId);
+  }
 }

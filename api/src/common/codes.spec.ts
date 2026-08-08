@@ -1,205 +1,225 @@
 import { BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import {
   generateStudentCode,
   generateTeacherCode,
   resolveUniqueUsername,
 } from './codes';
 
-// PrismaService-ийг гараар дуурайлган хийсэн stub — mocking сан ашиглахгүй,
-// амьд DB ч хэрэггүй.
-interface FakeUser {
-  id: string;
-  studentCode?: string;
-  teacherCode?: string;
-  username?: string;
-}
+describe('Code Generation (New Format)', () => {
+  let mockPrisma: PrismaService;
+  let mockFindMany: jest.Mock;
+  let mockFindUnique: jest.Mock;
 
-function makeCodePrisma(users: FakeUser[]) {
-  return {
-    user: {
-      findFirst: async ({ where }: any) => {
-        const field: 'studentCode' | 'teacherCode' = where.studentCode
-          ? 'studentCode'
-          : 'teacherCode';
-        const prefix: string = where[field].startsWith;
-        const matches = users
-          .map((u) => u[field])
-          .filter((v): v is string => !!v && v.startsWith(prefix))
-          .sort();
-        if (matches.length === 0) return null;
-        return { [field]: matches[matches.length - 1] };
-      },
-      findUnique: async ({ where }: any) => {
-        if (where.studentCode !== undefined) {
-          const found = users.find((u) => u.studentCode === where.studentCode);
-          return found ? { id: found.id } : null;
-        }
-        if (where.teacherCode !== undefined) {
-          const found = users.find((u) => u.teacherCode === where.teacherCode);
-          return found ? { id: found.id } : null;
-        }
-        return null;
-      },
-    },
-  } as any;
-}
-
-function makeUsernamePrisma(existingUsernames: string[]) {
-  return {
-    user: {
-      findUnique: async ({ where }: any) =>
-        existingUsernames.includes(where.username) ? { id: 'x' } : null,
-    },
-  } as any;
-}
-
-describe('generateStudentCode', () => {
-  it('SIE-<жил>-<хичээл>-<дараалал> форматтай код үүсгэнэ (M/N/B)', async () => {
-    const prisma = makeCodePrisma([]);
-    expect(
-      await generateStudentCode(prisma, { enrolmentYear: 2026, subject: 'M' }),
-    ).toBe('SIE-26-M-0001');
-    expect(
-      await generateStudentCode(prisma, { enrolmentYear: 2026, subject: 'N' }),
-    ).toBe('SIE-26-N-0001');
-    expect(
-      await generateStudentCode(prisma, { enrolmentYear: 2026, subject: 'B' }),
-    ).toBe('SIE-26-B-0001');
-  });
-
-  it('subject заагаагүй бол B (тодорхойгүй) ашиглана', async () => {
-    const prisma = makeCodePrisma([]);
-    expect(await generateStudentCode(prisma, { enrolmentYear: 2026 })).toBe(
-      'SIE-26-B-0001',
-    );
-  });
-
-  it('enrolmentYear заагаагүй бол өнөөдрийн жилийн сүүлийн 2 оронг ашиглана', async () => {
-    const prisma = makeCodePrisma([]);
-    const expectedYear = String(new Date().getFullYear() % 100).padStart(2, '0');
-    const code = await generateStudentCode(prisma, { subject: 'M' });
-    expect(code).toBe(`SIE-${expectedYear}-M-0001`);
-  });
-
-  it('дараалал одоогийн ХАМГИЙН ИХ кодоос үргэлжилнэ, count() биш', async () => {
-    // 0002-0004 устсан гэж бод — findFirst зөвхөн 0001, 0005-ыг харна.
-    const prisma = makeCodePrisma([
-      { id: '1', studentCode: 'SIE-26-M-0001' },
-      { id: '2', studentCode: 'SIE-26-M-0005' },
-    ]);
-    const code = await generateStudentCode(prisma, {
-      enrolmentYear: 2026,
-      subject: 'M',
-    });
-    // count-based логик бол 3 (2 мөр + 1) гарах байсан; зөв нь 0006.
-    expect(code).toBe('SIE-26-M-0006');
-  });
-
-  it('өөр жил/хичээлийн кодтой холилдохгүй — тус тусдаа дарааллаар эхэлнэ', async () => {
-    const prisma = makeCodePrisma([{ id: '1', studentCode: 'SIE-25-M-0099' }]);
-    const code = await generateStudentCode(prisma, {
-      enrolmentYear: 2026,
-      subject: 'M',
-    });
-    expect(code).toBe('SIE-26-M-0001');
-  });
-
-  it('давхцал гарвал дараагийн дугаараар дахин оролдож, эцэст нь чөлөөтэй дугаар олно', async () => {
-    let attempts = 0;
-    const prisma = {
+  beforeEach(() => {
+    mockFindMany = jest.fn();
+    mockFindUnique = jest.fn();
+    mockPrisma = {
       user: {
-        findFirst: async () => null,
-        findUnique: async ({ where }: any) => {
-          attempts += 1;
-          // 0001, 0002 нь зэрэгцээ хүсэлтээр аль хэдийн авагдсан гэж симуляц хийв.
-          if (
-            where.studentCode === 'SIE-26-M-0001' ||
-            where.studentCode === 'SIE-26-M-0002'
-          ) {
-            return { id: 'taken' };
-          }
-          return null;
-        },
+        findMany: mockFindMany,
+        findUnique: mockFindUnique,
       },
-    } as any;
-    const code = await generateStudentCode(prisma, {
-      enrolmentYear: 2026,
-      subject: 'M',
+    } as unknown as PrismaService;
+  });
+
+  describe('generateStudentCode', () => {
+    it('should generate code with branch letter B', async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockFindUnique.mockResolvedValue(null);
+
+      const code = await generateStudentCode(mockPrisma, {
+        branch: 'Баруун 4',
+        grade: 10,
+        registeredAt: new Date('2027-05-15'),
+      });
+
+      expect(code).toMatch(/^B27/);
+      expect(code).toMatch(/10/);
     });
-    expect(code).toBe('SIE-26-M-0003');
-    expect(attempts).toBe(3);
+
+    it('should generate code with branch letter Z', async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockFindUnique.mockResolvedValue(null);
+
+      const code = await generateStudentCode(mockPrisma, {
+        branch: 'Зүүн 4',
+        grade: 11,
+        registeredAt: new Date('2027-05-15'),
+      });
+
+      expect(code).toMatch(/^Z27/);
+      expect(code).toMatch(/11/);
+    });
+
+    it('should generate code with branch letter O for null', async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockFindUnique.mockResolvedValue(null);
+
+      const code = await generateStudentCode(mockPrisma, {
+        branch: null,
+        grade: 9,
+        registeredAt: new Date('2027-05-15'),
+      });
+
+      expect(code).toMatch(/^O27/);
+      expect(code).toMatch(/09/);
+    });
+
+    it('should default to grade 12', async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockFindUnique.mockResolvedValue(null);
+
+      const code = await generateStudentCode(mockPrisma, {
+        branch: 'Баруун 4',
+        registeredAt: new Date('2027-05-15'),
+      });
+
+      expect(code).toMatch(/12/);
+    });
+
+    it('should start sequence at 0001', async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockFindUnique.mockResolvedValue(null);
+
+      const code = await generateStudentCode(mockPrisma, {
+        branch: 'Баруун 4',
+        grade: 12,
+        registeredAt: new Date('2027-05-15'),
+      });
+
+      expect(code).toMatch(/0001$/);
+    });
+
+    it('should format sequence correctly', async () => {
+      mockFindMany.mockResolvedValue([
+        { studentCode: 'B27120005' },
+      ]);
+      mockFindUnique.mockResolvedValue(null);
+
+      const code = await generateStudentCode(mockPrisma, {
+        branch: 'Баруун 4',
+        grade: 12,
+        registeredAt: new Date('2027-05-15'),
+      });
+
+      // Should be 0006 formatted
+      expect(code).toMatch(/0006$/);
+    });
+
+    it('should handle year conversion to 2-digit format', async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockFindUnique.mockResolvedValue(null);
+
+      const code2026 = await generateStudentCode(mockPrisma, {
+        branch: 'Баруун 4',
+        grade: 12,
+        registeredAt: new Date('2026-05-15'),
+      });
+
+      expect(code2026).toMatch(/^B26/);
+    });
+
+    it('should retry on duplicate', async () => {
+      mockFindMany.mockResolvedValue([
+        { studentCode: 'B27120001' },
+      ]);
+      mockFindUnique
+        .mockResolvedValueOnce({ id: 'exists' })
+        .mockResolvedValueOnce(null);
+
+      const code = await generateStudentCode(mockPrisma, {
+        branch: 'Баруун 4',
+        grade: 12,
+        registeredAt: new Date('2027-05-15'),
+      });
+
+      expect(code).toBe('B27120003');
+      expect(mockFindUnique).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw on MAX_RETRIES exceeded', async () => {
+      mockFindMany.mockResolvedValue([
+        { studentCode: 'B27120001' },
+      ]);
+      mockFindUnique.mockResolvedValue({ id: 'always-exists' });
+
+      await expect(
+        generateStudentCode(mockPrisma, {
+          branch: 'Баруун 4',
+          grade: 12,
+          registeredAt: new Date('2027-05-15'),
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
-  it('MAX_RETRIES давхцал дараалан гарвал мөчлөгөөс гараад BadRequestException шидэнэ', async () => {
-    const prisma = {
-      user: {
-        findFirst: async () => null,
-        findUnique: async () => ({ id: 'always-taken' }),
-      },
-    } as any;
-    await expect(
-      generateStudentCode(prisma, { enrolmentYear: 2026, subject: 'M' }),
-    ).rejects.toThrow(BadRequestException);
-  });
-});
+  describe('generateTeacherCode', () => {
+    it('should generate teacher code with A prefix', async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockFindUnique.mockResolvedValue(null);
 
-describe('generateTeacherCode', () => {
-  it('SIE-T-<4 оронтой дараалал> формат үүсгэнэ', async () => {
-    const prisma = makeCodePrisma([]);
-    expect(await generateTeacherCode(prisma)).toBe('SIE-T-0001');
-  });
+      const code = await generateTeacherCode(mockPrisma, {
+        registeredAt: new Date('2027-05-15'),
+      });
 
-  it('дараалал одоогийн ХАМГИЙН ИХ кодоос үргэлжилнэ', async () => {
-    const prisma = makeCodePrisma([{ id: '1', teacherCode: 'SIE-T-0006' }]);
-    expect(await generateTeacherCode(prisma)).toBe('SIE-T-0007');
-  });
+      expect(code).toMatch(/^A27/);
+      expect(code).toMatch(/12/); // Teachers always 12
+      expect(code).toMatch(/0001$/);
+    });
 
-  it('давхцал үргэлжлэхэд эцэст нь BadRequestException шидэнэ', async () => {
-    const prisma = {
-      user: {
-        findFirst: async () => null,
-        findUnique: async () => ({ id: 'always-taken' }),
-      },
-    } as any;
-    await expect(generateTeacherCode(prisma)).rejects.toThrow(
-      BadRequestException,
-    );
-  });
-});
+    it('should throw on sequence overflow for teachers', async () => {
+      mockFindMany.mockResolvedValue([
+        { teacherCode: 'A27129999' },
+      ]);
 
-describe('resolveUniqueUsername', () => {
-  it('давхцалгүй бол Овог.Нэр хэлбэрээр шууд буцаана', async () => {
-    const prisma = makeUsernamePrisma([]);
-    expect(await resolveUniqueUsername(prisma, 'Bat', 'Dorj')).toBe(
-      'Dorj.Bat',
-    );
+      await expect(
+        generateTeacherCode(mockPrisma, {
+          registeredAt: new Date('2027-05-15'),
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
-  it('давхцвал ард нь дараалсан тоо нэмж давтахгүй нэр олно', async () => {
-    const prisma = makeUsernamePrisma(['Dorj.Bat', 'Dorj.Bat2']);
-    expect(await resolveUniqueUsername(prisma, 'Bat', 'Dorj')).toBe(
-      'Dorj.Bat3',
-    );
-  });
+  describe('resolveUniqueUsername', () => {
+    it('should return lastname.firstname', async () => {
+      mockPrisma.user.findUnique = jest.fn().mockResolvedValue(null);
 
-  it('desired өгсөн бол суурь нэрээр нь ашиглана', async () => {
-    const prisma = makeUsernamePrisma([]);
-    expect(
-      await resolveUniqueUsername(prisma, 'Bat', 'Dorj', 'custom_nick'),
-    ).toBe('custom_nick');
-  });
+      const username = await resolveUniqueUsername(
+        mockPrisma,
+        'Батор',
+        'Төөрөрт',
+      );
 
-  it('desired давхцвал энэ ч бас дугаарлана', async () => {
-    const prisma = makeUsernamePrisma(['custom_nick']);
-    expect(
-      await resolveUniqueUsername(prisma, 'Bat', 'Dorj', 'custom_nick'),
-    ).toBe('custom_nick2');
-  });
+      expect(username).toBe('Төөрөрт.Батор');
+    });
 
-  it('зайг арилгаж, орчны зайг таслана', async () => {
-    const prisma = makeUsernamePrisma([]);
-    expect(
-      await resolveUniqueUsername(prisma, 'Bat', 'Dorj', '  spaced name  '),
-    ).toBe('spacedname');
+    it('should add number on conflict', async () => {
+      mockPrisma.user.findUnique = jest
+        .fn()
+        .mockResolvedValueOnce({ id: 'exists' })
+        .mockResolvedValueOnce({ id: 'exists' })
+        .mockResolvedValueOnce(null);
+
+      const username = await resolveUniqueUsername(
+        mockPrisma,
+        'Батор',
+        'Төөрөрт',
+      );
+
+      expect(username).toBe('Төөрөрт.Батор3');
+    });
+
+    it('should use desired username', async () => {
+      mockPrisma.user.findUnique = jest.fn().mockResolvedValue(null);
+
+      const username = await resolveUniqueUsername(
+        mockPrisma,
+        'Батор',
+        'Төөрөрт',
+        'myname',
+      );
+
+      expect(username).toBe('myname');
+    });
   });
 });

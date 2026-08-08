@@ -6,6 +6,7 @@ import { Meta } from "@/components/ui/Meta";
 import RequireRole from "@/components/nav/RequireRole";
 import ConfirmCloseDialog from "./ConfirmCloseDialog";
 import SubjectCard, { DraftState } from "./SubjectCard";
+import UnassignedStudents from "./UnassignedStudents";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import {
   EnrollmentStatus,
@@ -330,6 +331,8 @@ export default function EnrollmentClient() {
               );
             })}
           </div>
+
+          <UnassignedStudents />
         </>
       )}
 

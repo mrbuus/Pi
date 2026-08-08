@@ -227,6 +227,16 @@ export type TestAttemptSession = Prisma.TestAttemptSessionModel
  */
 export type TestResult = Prisma.TestResultModel
 /**
+ * Model ResultAcknowledgement
+ * 
+ */
+export type ResultAcknowledgement = Prisma.ResultAcknowledgementModel
+/**
+ * Model EmailOtp
+ * 
+ */
+export type EmailOtp = Prisma.EmailOtpModel
+/**
  * Model Attempt
  * 
  */
@@ -266,6 +276,16 @@ export type Pass = Prisma.PassModel
  * 
  */
 export type UserPass = Prisma.UserPassModel
+/**
+ * Model BankTransaction
+ * 
+ */
+export type BankTransaction = Prisma.BankTransactionModel
+/**
+ * Model StudentCodeLegacy
+ * 
+ */
+export type StudentCodeLegacy = Prisma.StudentCodeLegacyModel
 /**
  * Model Payment
  * 

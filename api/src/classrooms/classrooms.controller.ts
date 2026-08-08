@@ -100,4 +100,17 @@ export class ClassroomsController {
       req.user.role,
     );
   }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post(':id/disband')
+  disband(
+    @Param('id') id: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.classrooms.disband(
+      id,
+      req.user.userId,
+      req.user.role,
+    );
+  }
 }

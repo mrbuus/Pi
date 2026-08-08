@@ -53,6 +53,9 @@ export type StudentProfileMinAggregateOutputType = {
   tuitionNote: string | null
   joinedOn: Date | null
   leftOn: Date | null
+  approvalPending: boolean | null
+  approvedAt: Date | null
+  approvedById: string | null
 }
 
 export type StudentProfileMaxAggregateOutputType = {
@@ -72,6 +75,9 @@ export type StudentProfileMaxAggregateOutputType = {
   tuitionNote: string | null
   joinedOn: Date | null
   leftOn: Date | null
+  approvalPending: boolean | null
+  approvedAt: Date | null
+  approvedById: string | null
 }
 
 export type StudentProfileCountAggregateOutputType = {
@@ -91,6 +97,9 @@ export type StudentProfileCountAggregateOutputType = {
   tuitionNote: number
   joinedOn: number
   leftOn: number
+  approvalPending: number
+  approvedAt: number
+  approvedById: number
   _all: number
 }
 
@@ -122,6 +131,9 @@ export type StudentProfileMinAggregateInputType = {
   tuitionNote?: true
   joinedOn?: true
   leftOn?: true
+  approvalPending?: true
+  approvedAt?: true
+  approvedById?: true
 }
 
 export type StudentProfileMaxAggregateInputType = {
@@ -141,6 +153,9 @@ export type StudentProfileMaxAggregateInputType = {
   tuitionNote?: true
   joinedOn?: true
   leftOn?: true
+  approvalPending?: true
+  approvedAt?: true
+  approvedById?: true
 }
 
 export type StudentProfileCountAggregateInputType = {
@@ -160,6 +175,9 @@ export type StudentProfileCountAggregateInputType = {
   tuitionNote?: true
   joinedOn?: true
   leftOn?: true
+  approvalPending?: true
+  approvedAt?: true
+  approvedById?: true
   _all?: true
 }
 
@@ -266,6 +284,9 @@ export type StudentProfileGroupByOutputType = {
   tuitionNote: string | null
   joinedOn: Date | null
   leftOn: Date | null
+  approvalPending: boolean
+  approvedAt: Date | null
+  approvedById: string | null
   _count: StudentProfileCountAggregateOutputType | null
   _avg: StudentProfileAvgAggregateOutputType | null
   _sum: StudentProfileSumAggregateOutputType | null
@@ -308,6 +329,9 @@ export type StudentProfileWhereInput = {
   tuitionNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   joinedOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
   leftOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
+  approvalPending?: Prisma.BoolFilter<"StudentProfile"> | boolean
+  approvedAt?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
+  approvedById?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -328,6 +352,9 @@ export type StudentProfileOrderByWithRelationInput = {
   tuitionNote?: Prisma.SortOrderInput | Prisma.SortOrder
   joinedOn?: Prisma.SortOrderInput | Prisma.SortOrder
   leftOn?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalPending?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -351,6 +378,9 @@ export type StudentProfileWhereUniqueInput = Prisma.AtLeast<{
   tuitionNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   joinedOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
   leftOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
+  approvalPending?: Prisma.BoolFilter<"StudentProfile"> | boolean
+  approvedAt?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
+  approvedById?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "userId">
 
@@ -371,6 +401,9 @@ export type StudentProfileOrderByWithAggregationInput = {
   tuitionNote?: Prisma.SortOrderInput | Prisma.SortOrder
   joinedOn?: Prisma.SortOrderInput | Prisma.SortOrder
   leftOn?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalPending?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StudentProfileCountOrderByAggregateInput
   _avg?: Prisma.StudentProfileAvgOrderByAggregateInput
   _max?: Prisma.StudentProfileMaxOrderByAggregateInput
@@ -398,6 +431,9 @@ export type StudentProfileScalarWhereWithAggregatesInput = {
   tuitionNote?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
   joinedOn?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentProfile"> | Date | string | null
   leftOn?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentProfile"> | Date | string | null
+  approvalPending?: Prisma.BoolWithAggregatesFilter<"StudentProfile"> | boolean
+  approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentProfile"> | Date | string | null
+  approvedById?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
 }
 
 export type StudentProfileCreateInput = {
@@ -416,6 +452,9 @@ export type StudentProfileCreateInput = {
   tuitionNote?: string | null
   joinedOn?: Date | string | null
   leftOn?: Date | string | null
+  approvalPending?: boolean
+  approvedAt?: Date | string | null
+  approvedById?: string | null
   user: Prisma.UserCreateNestedOneWithoutStudentProfileInput
 }
 
@@ -436,6 +475,9 @@ export type StudentProfileUncheckedCreateInput = {
   tuitionNote?: string | null
   joinedOn?: Date | string | null
   leftOn?: Date | string | null
+  approvalPending?: boolean
+  approvedAt?: Date | string | null
+  approvedById?: string | null
 }
 
 export type StudentProfileUpdateInput = {
@@ -454,6 +496,9 @@ export type StudentProfileUpdateInput = {
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutStudentProfileNestedInput
 }
 
@@ -474,6 +519,9 @@ export type StudentProfileUncheckedUpdateInput = {
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentProfileCreateManyInput = {
@@ -493,6 +541,9 @@ export type StudentProfileCreateManyInput = {
   tuitionNote?: string | null
   joinedOn?: Date | string | null
   leftOn?: Date | string | null
+  approvalPending?: boolean
+  approvedAt?: Date | string | null
+  approvedById?: string | null
 }
 
 export type StudentProfileUpdateManyMutationInput = {
@@ -511,6 +562,9 @@ export type StudentProfileUpdateManyMutationInput = {
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentProfileUncheckedUpdateManyInput = {
@@ -530,6 +584,9 @@ export type StudentProfileUncheckedUpdateManyInput = {
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentProfileNullableScalarRelationFilter = {
@@ -554,6 +611,9 @@ export type StudentProfileCountOrderByAggregateInput = {
   tuitionNote?: Prisma.SortOrder
   joinedOn?: Prisma.SortOrder
   leftOn?: Prisma.SortOrder
+  approvalPending?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
+  approvedById?: Prisma.SortOrder
 }
 
 export type StudentProfileAvgOrderByAggregateInput = {
@@ -578,6 +638,9 @@ export type StudentProfileMaxOrderByAggregateInput = {
   tuitionNote?: Prisma.SortOrder
   joinedOn?: Prisma.SortOrder
   leftOn?: Prisma.SortOrder
+  approvalPending?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
+  approvedById?: Prisma.SortOrder
 }
 
 export type StudentProfileMinOrderByAggregateInput = {
@@ -597,6 +660,9 @@ export type StudentProfileMinOrderByAggregateInput = {
   tuitionNote?: Prisma.SortOrder
   joinedOn?: Prisma.SortOrder
   leftOn?: Prisma.SortOrder
+  approvalPending?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
+  approvedById?: Prisma.SortOrder
 }
 
 export type StudentProfileSumOrderByAggregateInput = {
@@ -668,6 +734,9 @@ export type StudentProfileCreateWithoutUserInput = {
   tuitionNote?: string | null
   joinedOn?: Date | string | null
   leftOn?: Date | string | null
+  approvalPending?: boolean
+  approvedAt?: Date | string | null
+  approvedById?: string | null
 }
 
 export type StudentProfileUncheckedCreateWithoutUserInput = {
@@ -686,6 +755,9 @@ export type StudentProfileUncheckedCreateWithoutUserInput = {
   tuitionNote?: string | null
   joinedOn?: Date | string | null
   leftOn?: Date | string | null
+  approvalPending?: boolean
+  approvedAt?: Date | string | null
+  approvedById?: string | null
 }
 
 export type StudentProfileCreateOrConnectWithoutUserInput = {
@@ -720,6 +792,9 @@ export type StudentProfileUpdateWithoutUserInput = {
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentProfileUncheckedUpdateWithoutUserInput = {
@@ -738,6 +813,9 @@ export type StudentProfileUncheckedUpdateWithoutUserInput = {
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leftOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -759,6 +837,9 @@ export type StudentProfileSelect<ExtArgs extends runtime.Types.Extensions.Intern
   tuitionNote?: boolean
   joinedOn?: boolean
   leftOn?: boolean
+  approvalPending?: boolean
+  approvedAt?: boolean
+  approvedById?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentProfile"]>
 
@@ -779,6 +860,9 @@ export type StudentProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   tuitionNote?: boolean
   joinedOn?: boolean
   leftOn?: boolean
+  approvalPending?: boolean
+  approvedAt?: boolean
+  approvedById?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentProfile"]>
 
@@ -799,6 +883,9 @@ export type StudentProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   tuitionNote?: boolean
   joinedOn?: boolean
   leftOn?: boolean
+  approvalPending?: boolean
+  approvedAt?: boolean
+  approvedById?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentProfile"]>
 
@@ -819,9 +906,12 @@ export type StudentProfileSelectScalar = {
   tuitionNote?: boolean
   joinedOn?: boolean
   leftOn?: boolean
+  approvalPending?: boolean
+  approvedAt?: boolean
+  approvedById?: boolean
 }
 
-export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "type" | "grade" | "school" | "activatedAt" | "activationCode" | "fatherPhone" | "motherPhone" | "guardianNote" | "branch" | "section" | "tuitionAmount" | "tuitionPlan" | "tuitionNote" | "joinedOn" | "leftOn", ExtArgs["result"]["studentProfile"]>
+export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "type" | "grade" | "school" | "activatedAt" | "activationCode" | "fatherPhone" | "motherPhone" | "guardianNote" | "branch" | "section" | "tuitionAmount" | "tuitionPlan" | "tuitionNote" | "joinedOn" | "leftOn" | "approvalPending" | "approvedAt" | "approvedById", ExtArgs["result"]["studentProfile"]>
 export type StudentProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -854,6 +944,9 @@ export type $StudentProfilePayload<ExtArgs extends runtime.Types.Extensions.Inte
     tuitionNote: string | null
     joinedOn: Date | null
     leftOn: Date | null
+    approvalPending: boolean
+    approvedAt: Date | null
+    approvedById: string | null
   }, ExtArgs["result"]["studentProfile"]>
   composites: {}
 }
@@ -1294,6 +1387,9 @@ export interface StudentProfileFieldRefs {
   readonly tuitionNote: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly joinedOn: Prisma.FieldRef<"StudentProfile", 'DateTime'>
   readonly leftOn: Prisma.FieldRef<"StudentProfile", 'DateTime'>
+  readonly approvalPending: Prisma.FieldRef<"StudentProfile", 'Boolean'>
+  readonly approvedAt: Prisma.FieldRef<"StudentProfile", 'DateTime'>
+  readonly approvedById: Prisma.FieldRef<"StudentProfile", 'String'>
 }
     
 

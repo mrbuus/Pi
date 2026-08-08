@@ -12,7 +12,7 @@ import {
   generateTeacherCode,
   resolveUniqueUsername,
 } from '../common/codes';
-import { Role, StudentType } from '../generated/prisma/enums';
+import { Role, StudentType, PaymentStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
@@ -56,14 +56,20 @@ export class UsersService {
       dto.lastName,
     );
 
-    // Танигдах код: сурагч бол SIE-<жил>-<хичээл>-<дараалал>, багш бол SIE-T-<дараалал>
+    // Шинэ кодын формат [Branch][YY][Grade][Seq]
     const studentCode =
       dto.role === Role.STUDENT
-        ? await generateStudentCode(this.prisma)
+        ? await generateStudentCode(this.prisma, {
+            branch: null, // Админ үүсгэхэд салаа мэдэгдэхгүй → онлайн
+            grade: dto.grade ?? 12,
+            registeredAt: new Date(),
+          })
         : undefined;
     const teacherCode =
       dto.role === Role.TEACHER || dto.role === Role.TEACHER_PLUS
-        ? await generateTeacherCode(this.prisma)
+        ? await generateTeacherCode(this.prisma, {
+            registeredAt: new Date(),
+          })
         : undefined;
 
     const user = await this.prisma.user.create({
@@ -83,7 +89,14 @@ export class UsersService {
         role: dto.role,
         studentProfile:
           dto.role === Role.STUDENT
-            ? { create: { type: StudentType.ONLINE, grade: dto.grade } }
+            ? {
+                create: {
+                  type: StudentType.ONLINE,
+                  grade: dto.grade,
+                  // Админ гараар бүртгэсэн: зөвшөөрөл/төлбөрийн урсгалыг алгасна
+                  approvalPending: false,
+                },
+              }
             : undefined,
         teacherProfile:
           dto.role === Role.TEACHER || dto.role === Role.TEACHER_PLUS
@@ -550,5 +563,141 @@ export class UsersService {
         attempts,
       },
     };
+  }
+
+  /**
+   * Онлайнаар CLASSROOM-р бүртгүүлсэн сурагчдын зөвшөөрөл хүлээгч жагсаалт.
+   * Багш зөвшөөр + эхний сарын төлбөр CONFIRMED үед л код үүснэ.
+   *
+   * Эзэн шаардлагагаа үг: "нэр, утас, анги, бүртгүүлсэн огноо, эхний сарын төлбөр CONFIRMED эсэх"
+   */
+  async getPendingApprovalStudents() {
+    const now = new Date();
+    // forMonth: "2026-09" (YYYY-MM) формат
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const students = await this.prisma.user.findMany({
+      where: {
+        role: Role.STUDENT,
+        studentProfile: {
+          approvalPending: true,
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        createdAt: true,
+        studentProfile: {
+          select: {
+            grade: true,
+          },
+        },
+        payments: {
+          where: {
+            forMonth: currentMonthStr,
+          },
+          select: {
+            status: true,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return students.map((s) => ({
+      id: s.id,
+      firstName: s.firstName,
+      lastName: s.lastName,
+      phone: s.phone,
+      grade: s.studentProfile?.grade ?? 12,
+      registeredAt: s.createdAt,
+      hasConfirmedPayment: s.payments.some(
+        (p) => p.status === PaymentStatus.CONFIRMED || p.status === PaymentStatus.REVERSED,
+      ),
+    }));
+  }
+
+  /**
+   * Багш+/Админ: сурагчийг зөвшөөрнө.
+   * - approvalPending=false болгоно
+   * - approvedAt/approvedById бөглөнө
+   * - studentCode==null бөгөөд approvalPending=false бол код олгоно
+   * - Аудит лог бүртгэнэ
+   */
+  async approveStudent(studentId: string, approverId: string) {
+    const student = await this.prisma.studentProfile.findUnique({
+      where: { userId: studentId },
+      select: {
+        userId: true,
+        approvalPending: true,
+        grade: true,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Сурагчийн профайл байхгүй');
+    }
+
+    if (!student.approvalPending) {
+      throw new BadRequestException('Энэ сурагч аль хэдийн баталгаажсан');
+    }
+
+    // Сурагчийн код авна
+    const user = await this.prisma.user.findUnique({
+      where: { id: studentId },
+      select: { studentCode: true },
+    });
+
+    // Кодгүй байвал үүсгэнэ
+    let newCode: string | null = null;
+    if (user?.studentCode === null) {
+      newCode = await generateStudentCode(this.prisma, {
+        branch: null,
+        grade: student.grade ?? 12,
+        registeredAt: new Date(),
+      });
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: studentId },
+      data: {
+        studentCode: newCode ?? undefined,
+        studentProfile: {
+          update: {
+            approvalPending: false,
+            approvedAt: new Date(),
+            approvedById: approverId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        studentCode: true,
+        createdAt: true,
+      },
+    });
+
+    // Аудит лог
+    await this.audit.record({
+      actorId: approverId,
+      actorRole: 'ADMIN/TEACHER_PLUS',
+      action: 'APPROVE_STUDENT',
+      entity: 'StudentProfile',
+      entityId: studentId,
+      after: {
+        approvalPending: false,
+        approvedAt: new Date(),
+        approvedById: approverId,
+        studentCode: newCode,
+      },
+    });
+
+    return updated;
   }
 }

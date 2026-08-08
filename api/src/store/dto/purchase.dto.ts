@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsIn } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsIn, IsBoolean } from 'class-validator';
 
 export class PurchaseDto {
   @IsString()
@@ -18,6 +18,10 @@ export class CreateProductDto {
 
   @IsNumber()
   price: number;
+
+  @IsOptional()
+  @IsBoolean()
+  includesVideo?: boolean;
 }
 
 export class UpdatePriceDto {

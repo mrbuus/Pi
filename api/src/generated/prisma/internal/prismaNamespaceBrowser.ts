@@ -85,6 +85,8 @@ export const ModelName = {
   TestAccess: 'TestAccess',
   TestAttemptSession: 'TestAttemptSession',
   TestResult: 'TestResult',
+  ResultAcknowledgement: 'ResultAcknowledgement',
+  EmailOtp: 'EmailOtp',
   Attempt: 'Attempt',
   DailyClassSummary: 'DailyClassSummary',
   Prediction: 'Prediction',
@@ -93,6 +95,8 @@ export const ModelName = {
   AuditLog: 'AuditLog',
   Pass: 'Pass',
   UserPass: 'UserPass',
+  BankTransaction: 'BankTransaction',
+  StudentCodeLegacy: 'StudentCodeLegacy',
   Payment: 'Payment',
   ProductItem: 'ProductItem',
   Purchase: 'Purchase',
@@ -236,7 +240,10 @@ export const StudentProfileScalarFieldEnum = {
   tuitionPlan: 'tuitionPlan',
   tuitionNote: 'tuitionNote',
   joinedOn: 'joinedOn',
-  leftOn: 'leftOn'
+  leftOn: 'leftOn',
+  approvalPending: 'approvalPending',
+  approvedAt: 'approvedAt',
+  approvedById: 'approvedById'
 } as const
 
 export type StudentProfileScalarFieldEnum = (typeof StudentProfileScalarFieldEnum)[keyof typeof StudentProfileScalarFieldEnum]
@@ -616,6 +623,32 @@ export const TestResultScalarFieldEnum = {
 export type TestResultScalarFieldEnum = (typeof TestResultScalarFieldEnum)[keyof typeof TestResultScalarFieldEnum]
 
 
+export const ResultAcknowledgementScalarFieldEnum = {
+  id: 'id',
+  testResultId: 'testResultId',
+  parentId: 'parentId',
+  channel: 'channel',
+  verifiedAt: 'verifiedAt',
+  ip: 'ip'
+} as const
+
+export type ResultAcknowledgementScalarFieldEnum = (typeof ResultAcknowledgementScalarFieldEnum)[keyof typeof ResultAcknowledgementScalarFieldEnum]
+
+
+export const EmailOtpScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  purpose: 'purpose',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  attempts: 'attempts',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailOtpScalarFieldEnum = (typeof EmailOtpScalarFieldEnum)[keyof typeof EmailOtpScalarFieldEnum]
+
+
 export const AttemptScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
@@ -725,6 +758,33 @@ export const UserPassScalarFieldEnum = {
 export type UserPassScalarFieldEnum = (typeof UserPassScalarFieldEnum)[keyof typeof UserPassScalarFieldEnum]
 
 
+export const BankTransactionScalarFieldEnum = {
+  id: 'id',
+  bankRef: 'bankRef',
+  bookedAt: 'bookedAt',
+  amount: 'amount',
+  description: 'description',
+  accountNo: 'accountNo',
+  counterparty: 'counterparty',
+  matchStatus: 'matchStatus',
+  matchedUserId: 'matchedUserId',
+  paymentId: 'paymentId',
+  importedById: 'importedById',
+  importedAt: 'importedAt',
+  rawRow: 'rawRow'
+} as const
+
+export type BankTransactionScalarFieldEnum = (typeof BankTransactionScalarFieldEnum)[keyof typeof BankTransactionScalarFieldEnum]
+
+
+export const StudentCodeLegacyScalarFieldEnum = {
+  userId: 'userId',
+  oldCode: 'oldCode'
+} as const
+
+export type StudentCodeLegacyScalarFieldEnum = (typeof StudentCodeLegacyScalarFieldEnum)[keyof typeof StudentCodeLegacyScalarFieldEnum]
+
+
 export const PaymentScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -748,7 +808,8 @@ export const ProductItemScalarFieldEnum = {
   kind: 'kind',
   refId: 'refId',
   price: 'price',
-  active: 'active'
+  active: 'active',
+  includesVideo: 'includesVideo'
 } as const
 
 export type ProductItemScalarFieldEnum = (typeof ProductItemScalarFieldEnum)[keyof typeof ProductItemScalarFieldEnum]

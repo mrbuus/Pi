@@ -40,6 +40,7 @@ export type ProductItemMinAggregateOutputType = {
   refId: string | null
   price: number | null
   active: boolean | null
+  includesVideo: boolean | null
 }
 
 export type ProductItemMaxAggregateOutputType = {
@@ -48,6 +49,7 @@ export type ProductItemMaxAggregateOutputType = {
   refId: string | null
   price: number | null
   active: boolean | null
+  includesVideo: boolean | null
 }
 
 export type ProductItemCountAggregateOutputType = {
@@ -56,6 +58,7 @@ export type ProductItemCountAggregateOutputType = {
   refId: number
   price: number
   active: number
+  includesVideo: number
   _all: number
 }
 
@@ -74,6 +77,7 @@ export type ProductItemMinAggregateInputType = {
   refId?: true
   price?: true
   active?: true
+  includesVideo?: true
 }
 
 export type ProductItemMaxAggregateInputType = {
@@ -82,6 +86,7 @@ export type ProductItemMaxAggregateInputType = {
   refId?: true
   price?: true
   active?: true
+  includesVideo?: true
 }
 
 export type ProductItemCountAggregateInputType = {
@@ -90,6 +95,7 @@ export type ProductItemCountAggregateInputType = {
   refId?: true
   price?: true
   active?: true
+  includesVideo?: true
   _all?: true
 }
 
@@ -185,6 +191,7 @@ export type ProductItemGroupByOutputType = {
   refId: string
   price: number
   active: boolean
+  includesVideo: boolean
   _count: ProductItemCountAggregateOutputType | null
   _avg: ProductItemAvgAggregateOutputType | null
   _sum: ProductItemSumAggregateOutputType | null
@@ -216,6 +223,7 @@ export type ProductItemWhereInput = {
   refId?: Prisma.StringFilter<"ProductItem"> | string
   price?: Prisma.IntFilter<"ProductItem"> | number
   active?: Prisma.BoolFilter<"ProductItem"> | boolean
+  includesVideo?: Prisma.BoolFilter<"ProductItem"> | boolean
   purchases?: Prisma.PurchaseListRelationFilter
 }
 
@@ -225,12 +233,13 @@ export type ProductItemOrderByWithRelationInput = {
   refId?: Prisma.SortOrder
   price?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  includesVideo?: Prisma.SortOrder
   purchases?: Prisma.PurchaseOrderByRelationAggregateInput
 }
 
 export type ProductItemWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  kind_refId?: Prisma.ProductItemKindRefIdCompoundUniqueInput
+  kind_refId_includesVideo?: Prisma.ProductItemKindRefIdIncludesVideoCompoundUniqueInput
   AND?: Prisma.ProductItemWhereInput | Prisma.ProductItemWhereInput[]
   OR?: Prisma.ProductItemWhereInput[]
   NOT?: Prisma.ProductItemWhereInput | Prisma.ProductItemWhereInput[]
@@ -238,8 +247,9 @@ export type ProductItemWhereUniqueInput = Prisma.AtLeast<{
   refId?: Prisma.StringFilter<"ProductItem"> | string
   price?: Prisma.IntFilter<"ProductItem"> | number
   active?: Prisma.BoolFilter<"ProductItem"> | boolean
+  includesVideo?: Prisma.BoolFilter<"ProductItem"> | boolean
   purchases?: Prisma.PurchaseListRelationFilter
-}, "id" | "kind_refId">
+}, "id" | "kind_refId_includesVideo">
 
 export type ProductItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -247,6 +257,7 @@ export type ProductItemOrderByWithAggregationInput = {
   refId?: Prisma.SortOrder
   price?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  includesVideo?: Prisma.SortOrder
   _count?: Prisma.ProductItemCountOrderByAggregateInput
   _avg?: Prisma.ProductItemAvgOrderByAggregateInput
   _max?: Prisma.ProductItemMaxOrderByAggregateInput
@@ -263,6 +274,7 @@ export type ProductItemScalarWhereWithAggregatesInput = {
   refId?: Prisma.StringWithAggregatesFilter<"ProductItem"> | string
   price?: Prisma.IntWithAggregatesFilter<"ProductItem"> | number
   active?: Prisma.BoolWithAggregatesFilter<"ProductItem"> | boolean
+  includesVideo?: Prisma.BoolWithAggregatesFilter<"ProductItem"> | boolean
 }
 
 export type ProductItemCreateInput = {
@@ -271,6 +283,7 @@ export type ProductItemCreateInput = {
   refId: string
   price: number
   active?: boolean
+  includesVideo?: boolean
   purchases?: Prisma.PurchaseCreateNestedManyWithoutProductItemInput
 }
 
@@ -280,6 +293,7 @@ export type ProductItemUncheckedCreateInput = {
   refId: string
   price: number
   active?: boolean
+  includesVideo?: boolean
   purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutProductItemInput
 }
 
@@ -289,6 +303,7 @@ export type ProductItemUpdateInput = {
   refId?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includesVideo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   purchases?: Prisma.PurchaseUpdateManyWithoutProductItemNestedInput
 }
 
@@ -298,6 +313,7 @@ export type ProductItemUncheckedUpdateInput = {
   refId?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includesVideo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutProductItemNestedInput
 }
 
@@ -307,6 +323,7 @@ export type ProductItemCreateManyInput = {
   refId: string
   price: number
   active?: boolean
+  includesVideo?: boolean
 }
 
 export type ProductItemUpdateManyMutationInput = {
@@ -315,6 +332,7 @@ export type ProductItemUpdateManyMutationInput = {
   refId?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includesVideo?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductItemUncheckedUpdateManyInput = {
@@ -323,11 +341,13 @@ export type ProductItemUncheckedUpdateManyInput = {
   refId?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includesVideo?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
-export type ProductItemKindRefIdCompoundUniqueInput = {
+export type ProductItemKindRefIdIncludesVideoCompoundUniqueInput = {
   kind: $Enums.ProductKind
   refId: string
+  includesVideo: boolean
 }
 
 export type ProductItemCountOrderByAggregateInput = {
@@ -336,6 +356,7 @@ export type ProductItemCountOrderByAggregateInput = {
   refId?: Prisma.SortOrder
   price?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  includesVideo?: Prisma.SortOrder
 }
 
 export type ProductItemAvgOrderByAggregateInput = {
@@ -348,6 +369,7 @@ export type ProductItemMaxOrderByAggregateInput = {
   refId?: Prisma.SortOrder
   price?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  includesVideo?: Prisma.SortOrder
 }
 
 export type ProductItemMinOrderByAggregateInput = {
@@ -356,6 +378,7 @@ export type ProductItemMinOrderByAggregateInput = {
   refId?: Prisma.SortOrder
   price?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  includesVideo?: Prisma.SortOrder
 }
 
 export type ProductItemSumOrderByAggregateInput = {
@@ -391,6 +414,7 @@ export type ProductItemCreateWithoutPurchasesInput = {
   refId: string
   price: number
   active?: boolean
+  includesVideo?: boolean
 }
 
 export type ProductItemUncheckedCreateWithoutPurchasesInput = {
@@ -399,6 +423,7 @@ export type ProductItemUncheckedCreateWithoutPurchasesInput = {
   refId: string
   price: number
   active?: boolean
+  includesVideo?: boolean
 }
 
 export type ProductItemCreateOrConnectWithoutPurchasesInput = {
@@ -423,6 +448,7 @@ export type ProductItemUpdateWithoutPurchasesInput = {
   refId?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includesVideo?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductItemUncheckedUpdateWithoutPurchasesInput = {
@@ -431,6 +457,7 @@ export type ProductItemUncheckedUpdateWithoutPurchasesInput = {
   refId?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includesVideo?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -470,6 +497,7 @@ export type ProductItemSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   refId?: boolean
   price?: boolean
   active?: boolean
+  includesVideo?: boolean
   purchases?: boolean | Prisma.ProductItem$purchasesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productItem"]>
@@ -480,6 +508,7 @@ export type ProductItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   refId?: boolean
   price?: boolean
   active?: boolean
+  includesVideo?: boolean
 }, ExtArgs["result"]["productItem"]>
 
 export type ProductItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -488,6 +517,7 @@ export type ProductItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   refId?: boolean
   price?: boolean
   active?: boolean
+  includesVideo?: boolean
 }, ExtArgs["result"]["productItem"]>
 
 export type ProductItemSelectScalar = {
@@ -496,9 +526,10 @@ export type ProductItemSelectScalar = {
   refId?: boolean
   price?: boolean
   active?: boolean
+  includesVideo?: boolean
 }
 
-export type ProductItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "kind" | "refId" | "price" | "active", ExtArgs["result"]["productItem"]>
+export type ProductItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "kind" | "refId" | "price" | "active" | "includesVideo", ExtArgs["result"]["productItem"]>
 export type ProductItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchases?: boolean | Prisma.ProductItem$purchasesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductItemCountOutputTypeDefaultArgs<ExtArgs>
@@ -517,6 +548,7 @@ export type $ProductItemPayload<ExtArgs extends runtime.Types.Extensions.Interna
     refId: string
     price: number
     active: boolean
+    includesVideo: boolean
   }, ExtArgs["result"]["productItem"]>
   composites: {}
 }
@@ -946,6 +978,7 @@ export interface ProductItemFieldRefs {
   readonly refId: Prisma.FieldRef<"ProductItem", 'String'>
   readonly price: Prisma.FieldRef<"ProductItem", 'Int'>
   readonly active: Prisma.FieldRef<"ProductItem", 'Boolean'>
+  readonly includesVideo: Prisma.FieldRef<"ProductItem", 'Boolean'>
 }
     
 

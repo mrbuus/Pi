@@ -13,6 +13,7 @@ import {
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { SmsBulkDto } from './dto/sms-bulk.dto';
 import { Role } from '../generated/prisma/enums';
 import { SmsManagementService } from './sms-management.service';
 
@@ -58,7 +59,7 @@ export class SmsController {
    */
   @Roles(Role.ADMIN)
   @Post('bulk/estimate')
-  estimate(@Body() body: { phones: string[]; text: string; kind?: string }) {
+  estimate(@Body() body: SmsBulkDto) {
     return this.sms.estimateBulkSms(body);
   }
 
@@ -66,7 +67,7 @@ export class SmsController {
   @Roles(Role.ADMIN)
   @Post('bulk')
   createBulk(
-    @Body() body: { phones: string[]; text: string; kind?: string; title?: string },
+    @Body() body: SmsBulkDto,
     @Req() req: { user: { userId: string } },
   ) {
     return this.sms.createBulkSmsDraft(body, req.user.userId);

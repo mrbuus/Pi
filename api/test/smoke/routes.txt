@@ -97,6 +97,7 @@ GET /api/progress/online-students
 GET /api/progress/student/:id
 GET /api/progress/student/:id/timeline
 GET /api/recommend/next
+GET /api/reconcile/transactions
 GET /api/schedule
 GET /api/schedule/:id
 GET /api/schedule/classroom/:id
@@ -129,16 +130,20 @@ GET /api/teacher-groups/my-groups
 GET /api/teacher-groups/unverified
 GET /api/tests
 GET /api/tests/:id
+GET /api/tests/:id/acknowledgements
 GET /api/tests/:id/results
 GET /api/tests/:id/review
 GET /api/tests/my-results
 GET /api/topics
+GET /api/tuition/paid-until/:studentId
+GET /api/tuition/paid-until/my
 GET /api/tuition/refund/:id
 GET /api/tuition/refund/preview
 GET /api/tuition/refunds
 GET /api/users
 GET /api/users/:id
 GET /api/users/search
+GET /api/users/students/pending-approval
 GET /api/users/teachers
 GET /api/videos
 GET /api/videos/chapters
@@ -191,6 +196,7 @@ POST /api/classrooms
 POST /api/classrooms/:id/assignments
 POST /api/classrooms/:id/attendance
 POST /api/classrooms/:id/did-test
+POST /api/classrooms/:id/disband
 POST /api/classrooms/:id/enroll
 POST /api/classrooms/:id/remove-student
 POST /api/events
@@ -203,6 +209,8 @@ POST /api/lessons/:chapterId/theory
 POST /api/parent/links
 POST /api/parent/links/:id/reject
 POST /api/parent/links/:id/verify
+POST /api/parent/results/:testResultId/ack/request
+POST /api/parent/results/:testResultId/ack/verify
 POST /api/passes
 POST /api/passes/:id/grant
 POST /api/payments
@@ -213,6 +221,9 @@ POST /api/problems
 POST /api/progress/student/:id/assign-test
 POST /api/progress/student/:id/reset-chapter
 POST /api/recommend/attempt
+POST /api/reconcile/:id/ignore
+POST /api/reconcile/:id/match
+POST /api/reconcile/import
 POST /api/schedule
 POST /api/schedule/:id/exceptions
 POST /api/schedule/:id/split
@@ -250,6 +261,7 @@ POST /api/uploads
 POST /api/users
 POST /api/users/:id/send-password-reset
 POST /api/users/promote-teacher
+POST /api/users/students/:id/approve
 POST /api/videos
 PUT /api/classification/problems/:id/choices
 PUT /api/classification/problems/:id/tags

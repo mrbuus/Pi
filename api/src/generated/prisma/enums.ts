@@ -278,6 +278,16 @@ export const PaymentStatus = {
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 
+export const BankMatchStatus = {
+  UNMATCHED: 'UNMATCHED',
+  AUTO_MATCHED: 'AUTO_MATCHED',
+  MANUAL_MATCHED: 'MANUAL_MATCHED',
+  IGNORED: 'IGNORED'
+} as const
+
+export type BankMatchStatus = (typeof BankMatchStatus)[keyof typeof BankMatchStatus]
+
+
 export const ProductKind = {
   TEST: 'TEST',
   BOOK: 'BOOK',
