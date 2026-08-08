@@ -1,5 +1,15 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Энэ бол чиний мэдэх Next.js БИШ
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+Энэ хувилбарт эвдрэлтэй өөрчлөлт бий — API, конвенц, файлын бүтэц бүгд
+чиний сургалтын өгөгдлөөс ялгаатай байж болно. Код бичихээсээ өмнө
+`node_modules/next/dist/docs/` доторх холбогдох гарын авлагыг унш.
+Хуучирсан гэсэн анхааруулгыг анхаар.
+
+# Дизайны гэрээ
+
+UI бичихээсээ өмнө `../STATUS.md` §6 (Дизайны гэрээ)-ыг УНШ.
+Тэнд өнгөний токен, бэлэн компонент, кирилл бичвэрийн онцлог,
+хүртээмжийн шаардлага бүгд бий.
+
+Өмнө нь `web/DESIGN.md` байсныг `STATUS.md`-д нэгтгэсэн
+(хуучин хувилбар: `docs/archive/DESIGN-2026-08-03.md`).

@@ -51,8 +51,8 @@ export default function StoreProducts() {
       setLoading(true);
       setError("");
       const [productsRes, purchasesRes] = await Promise.all([
-        api<Product[]>('/api/store/products'),
-        user ? api<MyPurchase[]>('/api/store/my-purchases') : Promise.resolve([]),
+        api<Product[]>('/store/products'),
+        user ? api<MyPurchase[]>('/store/my-purchases') : Promise.resolve([]),
       ]);
 
       if (Array.isArray(productsRes)) {
@@ -81,14 +81,14 @@ export default function StoreProducts() {
     setPurchasing(productId);
     setPurchaseError(null);
     try {
-      const result = await api('/api/store/purchase', {
+      const result = await api('/store/purchase', {
         method: 'POST',
         body: { productItemId: productId },
       });
 
       if (result) {
         // Миний худалдан авалтуудыг сэргээнэ
-        const purchasesRes = await api('/api/store/my-purchases');
+        const purchasesRes = await api('/store/my-purchases');
         if (Array.isArray(purchasesRes)) {
           const purchaseMap = new Map(
             purchasesRes.map((p: MyPurchase) => [p.productItemId, p]),

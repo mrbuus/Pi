@@ -1,7 +1,7 @@
 # Pi.mn — Шинэ ирээдүйн эзэд
 
 Сургалтын төвийн удирдлага + онлайн сургалт + адаптив ЭЕШ бэлтгэлийн платформ.
-Бүрэн шаардлага: [SPEC.md](SPEC.md)
+Бүрэн шаардлага: [docs/archive/SPEC.md](docs/archive/SPEC.md)
 
 ## Бүтэц
 
@@ -11,7 +11,7 @@ Pi.mn/
 ├── api/   — NestJS backend (Prisma, PostgreSQL)
 │   └── prisma/schema.prisma — өгөгдлийн сангийн схем
 ├── docker-compose.yml — локал PostgreSQL + MinIO (S3 орлуулагч)
-└── SPEC.md — бүрэн техникийн даалгавар
+└── docs/archive/SPEC.md — бүрэн техникийн даалгавар
 ```
 
 ## Локал хөгжүүлэлт эхлүүлэх
@@ -30,4 +30,4 @@ Pi.mn/
 
 ## Production (AWS — данс нээгдсэний дараа)
 
-EC2 (Docker, Nginx) + RDS PostgreSQL + S3/CloudFront. Дэлгэрэнгүй: SPEC.md §3
+EC2 (Docker, Nginx) + RDS PostgreSQL + S3/CloudFront. Дэлгэрэнгүй: docs/archive/SPEC.md §3

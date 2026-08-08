@@ -73,11 +73,11 @@ export default function StoreAdminClient() {
       setLoading(true);
       setError(null);
       const [productsRes, purchasesRes, revenueRes, testsRes, booksRes] = await Promise.all([
-        api<Product[]>('/api/store/admin/products'),
-        api<Purchase[]>('/api/store/admin/purchases'),
-        api<RevenueSummary>('/api/store/admin/revenue'),
-        api<Test[]>('/api/tests'),
-        api<Book[]>('/api/content/books'),
+        api<Product[]>('/store/admin/products'),
+        api<Purchase[]>('/store/admin/purchases'),
+        api<RevenueSummary>('/store/admin/revenue'),
+        api<Test[]>('/tests'),
+        api<Book[]>('/books'),
       ]);
 
       if (Array.isArray(productsRes)) setProducts(productsRes);

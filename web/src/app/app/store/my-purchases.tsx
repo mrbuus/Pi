@@ -35,7 +35,7 @@ export default function MyPurchases() {
     try {
       setLoading(true);
       setError("");
-      const result = await api('/api/store/my-purchases');
+      const result = await api('/store/my-purchases');
       if (Array.isArray(result)) {
         setPurchases(result);
       }

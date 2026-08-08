@@ -26,7 +26,7 @@ export default function GroupsPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Алдааг зөвхөн console руу бичих нь хэрэглэгчийн хувьд «мөнхөд ачаалж
-  // байна» гэсэн үр дүн өгнө (DESIGN.md §4 — алдаа гарвал монголоор мессеж
+  // байна» гэсэн үр дүн өгнө (STATUS.md §6 §4 — алдаа гарвал монголоор мессеж
   // + «Дахин оролдох» товч ЗААВАЛ байх ёстой).
   const fetchUserAndGroups = useCallback(async () => {
     setIsLoading(true);

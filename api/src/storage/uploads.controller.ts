@@ -66,7 +66,7 @@ if (uploadDirError) {
     `[uploads] ⚠️  UPLOAD_DIR "${UPLOAD_DIR}" ашиглах боломжгүй: ${uploadDirError}\n` +
       '[uploads]     API ажиллана (шалгалт саадгүй), ГЭХДЭЭ файл байршуулалт 503 буцаана.\n' +
       '[uploads]     Засах: render.yaml дээр disk mount хийх, эсвэл UPLOAD_DIR-ыг арилгаж\n' +
-      '[uploads]     ./uploads руу унагах. Дэлгэрэнгүйг DEPLOY.md-ээс үзнэ үү.',
+      '[uploads]     ./uploads руу унагах. Дэлгэрэнгүйг STATUS.md §4-ээс үзнэ үү.',
   );
 }
 

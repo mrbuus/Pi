@@ -74,7 +74,7 @@ export default function ProductsManager({
         return;
       }
 
-      await api('/api/store/admin/products', {
+      await api('/store/admin/products', {
         method: 'POST',
         body: {
           kind: newKind,
@@ -101,7 +101,7 @@ export default function ProductsManager({
 
     setSavingPrices((prev) => ({ ...prev, [productId]: true }));
     try {
-      await api(`/api/store/admin/products/${productId}/price`, {
+      await api(`/store/admin/products/${productId}/price`, {
         method: 'POST',
         body: { price: newPrice },
       });
@@ -124,7 +124,7 @@ export default function ProductsManager({
 
     setDeletingProducts((prev) => ({ ...prev, [productId]: true }));
     try {
-      await api(`/api/store/admin/products/${productId}/deactivate`, {
+      await api(`/store/admin/products/${productId}/deactivate`, {
         method: 'POST',
         body: {},
       });

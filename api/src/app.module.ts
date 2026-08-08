@@ -54,7 +54,7 @@ import { TuitionModule } from './tuition/tuition.module';
     // сургуулийн WiFi/NAT-аар дамжуулж ГАДНААС НЭГ IP шиг харагддаг тул зөвхөн
     // IP-ээр limit тавивал бүтэн ангийг (эсвэл Render-ийн ард trust proxy
     // тохируулаагүй бол БҮХ сургуулийг) шалгалтын дундуур зэрэг блоклох
-    // "self-inflicted outage" эрсдэлтэй (PERF-AUDIT.md §5.1).
+    // "self-inflicted outage" эрсдэлтэй (docs/archive/PERF-AUDIT.md §5.1).
     //
     // ThrottlerGuard нь APP_GUARD тул controller-ийн JwtAuthGuard-аас ӨМНӨ
     // ажилладаг (req.user хараахан байхгүй) — иймд getTracker дотор

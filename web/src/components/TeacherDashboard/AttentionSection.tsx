@@ -40,7 +40,7 @@ const SEVERITY_CLASS: Record<AttentionSeverity, string> = {
   warning: "border-warning/40 bg-warning/10 text-warning",
 };
 // Өнгө дангаараа утга илэрхийлэхгүй байхын тулд ноцтой байдал бүрд ДҮРС нэмнэ
-// (өнгө ялгадаггүй хэрэглэгчид өнгө нь юу ч хэлэхгүй — DESIGN.md §6).
+// (өнгө ялгадаггүй хэрэглэгчид өнгө нь юу ч хэлэхгүй — STATUS.md §6 §6).
 const SEVERITY_ICON: Record<AttentionSeverity, LucideIcon> = {
   danger: CircleAlert,
   warning: TriangleAlert,
