@@ -54,46 +54,58 @@ function EntryRow({
   // Ангийн нэрээс " (Баруун 4)" / " (Зүүн 4)" салбарыг хасаж харуул
   const displayName = entry.classroomName.replace(/\s*\([^)]*\)$/, "");
 
+  /*
+   * СЭДЭВ ТЭРГҮҮНД. Энэ таб нь «Ерөнхий хуваарь»-ийн давталт биш, тухайн
+   * 7 хоногийн СЭДЭВ ТӨЛӨВЛӨГЧ. Өмнө нь цаг/танхим/анги л харагдаад сэдэв
+   * нь 1.5px цэг байсан тул хоёр таб ялгаагүй харагдаж байв (эзний гомдол
+   * 2026-08-08). Мөн тэр цэг нь entry.subject (хичээлийн ТӨРӨЛ — бараг
+   * үргэлж утгатай) талбарыг шалгадаг алдаатай байсан — жинхэнэ талбар нь
+   * entry.topic.
+   */
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-left text-xs transition hover:border-brand ${
+      className={`flex flex-col gap-1 rounded-lg border border-line bg-surface px-3 py-2 text-left text-xs transition hover:border-brand ${
         faded ? "opacity-60" : ""
       }`}
       style={{ borderLeftColor: color, borderLeftWidth: 3 }}
       title={entry.classroomName}
     >
-      {/* цаг */}
-      <span className="shrink-0 font-bold text-brand-soft min-w-[50px]">
-        {formatMinutes(entry.startMinute)}–{formatMinutes(entry.endMinute)}
+      {/* Дээд мөр: цаг, танхим, анги — туслах мэдээлэл, жижгээр */}
+      <span className="flex w-full items-center gap-2">
+        <span className="shrink-0 font-mono font-bold text-brand-soft">
+          {formatMinutes(entry.startMinute)}–{formatMinutes(entry.endMinute)}
+        </span>
+        {/* Танхимын дүрс — БУДАЛТГҮЙ, ink өнгөөр (эзний дүрэм). Ангийн өнгө
+            нь зүүн зурвас (borderLeftColor) дээр аль хэдийн байгаа. */}
+        {entry.room && (
+          <span className="flex shrink-0 items-center gap-1 text-ink">
+            <RoomShape room={entry.room} size={14} />
+            <span className="font-medium text-ink-dim">{entry.room}</span>
+          </span>
+        )}
+        <span className="truncate font-semibold text-ink">{displayName}</span>
+        {entry.exception?.kind === "MOVED" && (
+          <span
+            className="ml-auto shrink-0 rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-bold text-warning"
+            title="Өөр өдрөөс зөөгдсөн"
+          >
+            Зөөгдсөн
+          </span>
+        )}
       </span>
 
-      {/* Танхимын дүрс — БУДАЛТГҮЙ, ink өнгөөр (эзний дүрэм). Ангийн өнгө нь
-          дээрх зүүн зурвас (borderLeftColor) дээр аль хэдийн байгаа. */}
-      {entry.room && (
-        <div className="shrink-0 text-ink">
-          <RoomShape room={entry.room} size={16} />
-        </div>
+      {/* Гол мөр: СЭДЭВ — төлөвлөгчийн жинхэнэ агуулга */}
+      {entry.topic ? (
+        <span className="w-full truncate text-[13px] font-medium leading-snug text-ink">
+          {entry.topic}
+        </span>
+      ) : (
+        <span className="w-full text-[12px] italic text-ink-dim">
+          Сэдэв зоогоогүй — дарж зооно
+        </span>
       )}
-
-      {/* танхимын дугаар жижгээр */}
-      {entry.room && (
-        <span className="shrink-0 text-ink-dim font-medium">{entry.room}</span>
-      )}
-
-      {/* ангийн нэр (салбарын нэр нь ХАСАГДСАН) */}
-      <span className="truncate font-semibold text-ink">{displayName}</span>
-
-      {/* зөөгдсөн / сэдэвтэй байвал жижиг тэмдэг */}
-      <div className="ml-auto flex shrink-0 items-center gap-1">
-        {entry.exception?.kind === "MOVED" && (
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" aria-hidden title="Зөөгдсөн" />
-        )}
-        {entry.subject && (
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-soft" aria-hidden title="Сэдэвтэй" />
-        )}
-      </div>
     </button>
   );
 }
@@ -200,12 +212,45 @@ export default function WeekBuilder() {
   const today = todayUBKey();
   const todayMonday = mondayOf(today);
 
+  // Сэдвийн явц: амралтын бус өдрүүдийн хичээлээс хэд нь сэдэвтэй вэ.
+  // Энэ тоо л «энэ 7 хоногийн төлөвлөлт дууссан уу» гэдгийг шууд хэлнэ.
+  const topicProgress = useMemo(() => {
+    if (!data) return null;
+    let total = 0;
+    let withTopic = 0;
+    for (const day of data.days) {
+      if (day.isHoliday) continue;
+      for (const e of day.entries) {
+        total += 1;
+        if (e.topic) withTopic += 1;
+      }
+    }
+    return { total, withTopic };
+  }, [data]);
+
   return (
     <section className="rounded-2xl border border-line bg-panel p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-brand-soft" aria-hidden />
-          <h2 className="font-bold text-brand-soft">Хичээлийн хуваарь</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-brand-soft" aria-hidden />
+            {/* «Хичээлийн хуваарь» гэдэг нэр хуудасны h1-тэй давхцаж, 1-р
+                табтай ижил сэтгэгдэл төрүүлдэг байсан — зорилгоор нь нэрлэв */}
+            <h2 className="font-bold text-brand-soft">
+              Долоо хоногийн сэдэв төлөвлөлт
+            </h2>
+          </div>
+          {topicProgress && topicProgress.total > 0 && (
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-bold ${
+                topicProgress.withTopic === topicProgress.total
+                  ? "bg-success/15 text-success"
+                  : "bg-warning/15 text-warning"
+              }`}
+            >
+              Сэдэвтэй {topicProgress.withTopic}/{topicProgress.total}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
           <button
