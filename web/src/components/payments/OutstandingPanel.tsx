@@ -1,6 +1,8 @@
 "use client";
 
 import { Phone, AlertTriangle } from "lucide-react";
+import { Meta } from "@/components/ui/Meta";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { formatMnt } from "@/lib/orgInfo";
@@ -48,9 +50,7 @@ export default function OutstandingPanel({ month }: { month: string }) {
       </div>
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       )}
       {error && (
         <div className="flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
@@ -75,11 +75,17 @@ export default function OutstandingPanel({ month }: { month: string }) {
                     {r.firstName} {r.lastName}
                   </p>
                   <p className="text-xs text-ink-dim">
-                    {r.classroomName}
-                    {r.tuitionPlan &&
-                      ` · ${TUITION_PLAN_LABEL[r.tuitionPlan] ?? r.tuitionPlan}`}
-                    {r.tuitionAmount != null &&
-                      ` · Ёстой ${formatMnt(r.tuitionAmount)}`}
+                    <Meta
+                      items={[
+                        r.classroomName,
+                        r.tuitionPlan
+                          ? TUITION_PLAN_LABEL[r.tuitionPlan] ?? r.tuitionPlan
+                          : null,
+                        r.tuitionAmount != null
+                          ? `Ёстой ${formatMnt(r.tuitionAmount)}`
+                          : null,
+                      ]}
+                    />
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

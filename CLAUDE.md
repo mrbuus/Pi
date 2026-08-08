@@ -20,6 +20,8 @@ UI код бичих бол нэмээд `web/DESIGN.md`.
 ## Шалгалт
 
 ```bash
-cd api && npx tsc --noEmit && npx jest      # 144/144
-cd web && npx tsc --noEmit && npm run build
+cd api && npx tsc --noEmit && npx jest      # 226/226
+cd web && npx tsc --noEmit && npm run build  # ⚠️ tsc ХАНГАЛТГҮЙ — build ЗААВАЛ
+                                             #    (use client дутуу байвал
+                                             #     зөвхөн build барьдаг)
 ```

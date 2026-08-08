@@ -1,5 +1,5 @@
 /**
- * "1000 бодлого · Сорил 1-A" — эвдэрсэн статементыг цэвэр LaTeX болгож,
+ * "1000 бодлого — Сорил 1-A" — эвдэрсэн статементыг цэвэр LaTeX болгож,
  * үсэг-placeholder сонголтыг бүтэцтэй ProblemChoice (TEXT горим) болгоно.
  *
  * Эх PDF хоёр баганатай байснаас текст хольдож, зарим бодлогын сонголт
@@ -192,7 +192,7 @@ async function main() {
     fillN++;
   }
 
-  console.log(`\nДҮН: сонголттой ${choiceN} · нөхөх ${fillN}${COMMIT ? '' : '  (ХУУРАЙ — --commit-той дахин ажиллуулна)'}`);
+  console.log(`\nДҮН: сонголттой ${choiceN}, нөхөх ${fillN}${COMMIT ? '' : '  (ХУУРАЙ — --commit-той дахин ажиллуулна)'}`);
   await prisma.$disconnect();
 }
 main().catch((e) => { console.error(e); process.exit(1); });

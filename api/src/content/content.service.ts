@@ -793,4 +793,29 @@ export class ContentService {
     ]);
     return { ...chapterView, locked: false, theories, problems };
   }
+
+  /**
+   * Нэг бодлогыг унших (Practice маршрутаас сурагч дуудна).
+   * Сурагчид statementText, correctAnswer-г л өгнө (hintAnswer биш).
+   */
+  async getProblem(problemId: string) {
+    const problem = await this.prisma.problem.findUnique({
+      where: { id: problemId },
+      select: {
+        id: true,
+        token: true,
+        format: true,
+        statementText: true,
+        choices: true,
+        correctAnswer: true,
+        imageKey: true,
+      },
+    });
+
+    if (!problem || problem.imageKey === null) {
+      throw new NotFoundException('Бодлого олдсонгүй');
+    }
+
+    return problem;
+  }
 }

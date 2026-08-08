@@ -121,7 +121,7 @@ async function main() {
     for (const g of PLAN) {
       const times = g.slots
         .map((s) => `${s.days.join(',')}-р өдөр ${s.start}`)
-        .join(' · ');
+        .join(' — ');
       console.log(`  ${g.classes.join(', ')}\n    ${times}`);
     }
     console.log('\n--commit-той дахин ажиллуулна.\n');

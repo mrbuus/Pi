@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { api, getRole } from "@/lib/api";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
+import { Meta } from "@/components/ui/Meta";
 import { ChapterProgressRow, OnlineStudentDetail } from "./types";
 import { deriveEngagement, deriveLastActiveDate } from "./engagement";
 import { errMsg, formatDate, formatRelative } from "./format";
@@ -122,12 +123,10 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
 
   if (!detail) return null;
 
-  const classLabel = [
+  const classLabelItems = [
     detail.student.grade ? `${detail.student.grade}-р анги` : null,
     detail.student.school,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  ].filter(Boolean);
 
   const lastActiveDate = deriveLastActiveDate(detail.dailyActivity);
   const engagement = deriveEngagement(lastActiveDate);
@@ -148,8 +147,12 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
           <div>
             <h1 className="text-xl font-bold text-ink">{detail.student.name}</h1>
             <p className="text-sm text-ink-dim">
-              {detail.student.studentCode ?? "Код тодорхойгүй"}
-              {classLabel ? ` · ${classLabel}` : ""}
+              <Meta
+                items={[
+                  detail.student.studentCode ?? "Код тодорхойгүй",
+                  ...classLabelItems,
+                ]}
+              />
             </p>
           </div>
           <EngagementBadge level={engagement} />

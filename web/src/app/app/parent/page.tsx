@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 
 interface ParentLink {
@@ -37,6 +38,12 @@ interface ParentLink {
       createdAt: string;
       test: { title: string; type: string };
     }[];
+    payments?: {
+      id: string;
+      status: string;
+      amount: number;
+      createdAt: string;
+    }[];
   };
 }
 
@@ -63,10 +70,14 @@ function ChildPanel({ link }: { link: ParentLink }) {
   const attendance = link.student.attendances ?? [];
   const results = link.student.testResults ?? [];
   const submissions = link.student.submissions ?? [];
+  const payments = link.student.payments ?? [];
   const attendanceSummary = attendance.reduce<Record<string, number>>((acc, row) => {
     acc[row.status] = (acc[row.status] ?? 0) + 1;
     return acc;
   }, {});
+
+  const confirmedPayments = payments.filter((p) => p.status === "CONFIRMED");
+  const totalPaid = confirmedPayments.reduce((sum, p) => sum + p.amount, 0);
 
   if (!link.verified) {
     return (
@@ -94,13 +105,11 @@ function ChildPanel({ link }: { link: ParentLink }) {
             {link.student.firstName} {link.student.lastName}
           </h2>
           <p className="mt-1 text-sm text-ink-dim">
-            {link.student.studentProfile?.grade
-              ? `${link.student.studentProfile.grade}-р анги`
-              : "Анги тодорхойгүй"}
-            {link.student.classroom ? ` · ${link.student.classroom.name}` : ""}
-            {link.student.studentProfile?.school
-              ? ` · ${link.student.studentProfile.school}`
-              : ""}
+            <Meta items={[
+              link.student.studentProfile?.grade ? `${link.student.studentProfile.grade}-р анги` : "Анги тодорхойгүй",
+              link.student.classroom ? link.student.classroom.name : "",
+              link.student.studentProfile?.school ?? ""
+            ]} />
           </p>
         </div>
         <span className="rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success">
@@ -108,7 +117,7 @@ function ChildPanel({ link }: { link: ParentLink }) {
         </span>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      <div className="mt-5 grid gap-3 sm:grid-cols-4">
         {(["PRESENT", "LATE", "ABSENT"] as const).map((status) => (
           <div key={status} className="rounded-xl border border-line p-4">
             <p className="text-2xl font-extrabold">
@@ -117,13 +126,17 @@ function ChildPanel({ link }: { link: ParentLink }) {
             <p className="mt-1 text-xs text-ink-dim">{ATT_LABEL[status].text}</p>
           </div>
         ))}
+        <div className="rounded-xl border border-line p-4">
+          <p className="text-2xl font-extrabold text-success">{confirmedPayments.length}</p>
+          <p className="mt-1 text-xs text-ink-dim">Төлөл</p>
+        </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div>
           <h3 className="mb-3 font-bold text-brand-soft">Сүүлийн шалгалтууд</h3>
           {results.length === 0 && (
-            <p className="text-sm text-ink-dim">Дүн хараахан алга байна</p>
+            <p className="text-sm text-ink-dim">Дүн алга байна</p>
           )}
           <div className="space-y-2">
             {results.map((r, i) => {
@@ -177,9 +190,40 @@ function ChildPanel({ link }: { link: ParentLink }) {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-ink-dim">
-                    {s.assignment.classroom.name}
-                    {s.checkedAt ? ` · ${s.checkedAt.slice(0, 10)}` : ""}
+                    <Meta items={[s.assignment.classroom.name, s.checkedAt ? s.checkedAt.slice(0, 10) : ""]} />
                   </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-3 font-bold text-brand-soft">Төлбөрийн төлөв</h3>
+          {payments.length === 0 && (
+            <p className="text-sm text-ink-dim">Төлбөрийн мэдээлэл алга байна</p>
+          )}
+          <div className="space-y-2">
+            {payments.slice(0, 5).map((p, i) => {
+              const isPending = p.status === "PENDING";
+              const isConfirmed = p.status === "CONFIRMED";
+              return (
+                <div
+                  key={`${p.id}-${i}`}
+                  className={`rounded-xl border px-4 py-3 text-sm ${
+                    isConfirmed
+                      ? "border-success/30 bg-success/5"
+                      : isPending
+                        ? "border-warning/30 bg-warning/5"
+                        : "border-line"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-ink-dim">{p.createdAt.slice(0, 10)}</span>
+                    <span className={`font-bold ${isConfirmed ? "text-success" : isPending ? "text-warning" : ""}`}>
+                      ₮{(p.amount / 1000).toFixed(0)}k
+                    </span>
+                  </div>
                 </div>
               );
             })}
@@ -197,7 +241,7 @@ function ChildPanel({ link }: { link: ParentLink }) {
             const st = ATT_LABEL[a.status] ?? ATT_LABEL.ABSENT;
             return (
               <span key={`${a.date}-${i}`} className={`rounded-lg px-3 py-1 text-xs ${st.cls}`}>
-                {a.date.slice(0, 10)} · {st.text}
+                <Meta items={[a.date.slice(0, 10), st.text]} />
               </span>
             );
           })}

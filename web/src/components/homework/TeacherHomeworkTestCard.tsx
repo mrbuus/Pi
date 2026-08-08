@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Meta } from "@/components/ui/Meta";
 
 /* ============================================================================
  * 📦 Тест/даалгавар бүрийг ЖИЖИГ БОКСОД тус тусад нь харуулна (owner-ийн
@@ -87,8 +88,10 @@ export default function TeacherHomeworkTestCard({
                     {submission.student.firstName} {submission.student.lastName}
                   </p>
                   <p className="text-xs text-ink-dim">
-                    {submission.state}
-                    {submission.note && ` · ${submission.note}`}
+                    <Meta items={[
+                      submission.state,
+                      submission.note
+                    ]} />
                   </p>
                 </div>
 

@@ -270,11 +270,25 @@ export class QpayService implements PaymentGateway {
       body: JSON.stringify({ invoice_id: providerInvoiceId }),
     });
 
-    const rows = data.rows ?? [];
-    const paidRow = rows.find((r) => r.payment_status === 'PAID');
-    const paid = !!paidRow || (data.count ?? 0) > 0;
-    const paidAmountRaw = data.paid_amount ?? paidRow?.payment_amount ?? 0;
-    const paidAmount = Number(paidAmountRaw);
+    // 🛡️ ХАМГААЛАЛТТАЙ ЗАДЛАЛТ: Талбар байхгүй үед унахгүй байхаар
+    // optional chaining + өгөгдмөл утга ашигла
+    const rows = Array.isArray(data?.rows) ? data.rows : [];
+    const paidRow = rows.find((r) => r?.payment_status === 'PAID');
+    const paid = !!paidRow || (Number(data?.count) ?? 0) > 0;
+
+    // Дүн: нэг нь гарж ирмэгц эхнийхийг ашигла (гүйлгээ → опция, гүйлгээ байхгүй → нийт)
+    let paidAmount = 0;
+    if (typeof data?.paid_amount === 'string' || typeof data?.paid_amount === 'number') {
+      const amt = Number(data.paid_amount);
+      paidAmount = Number.isFinite(amt) ? amt : 0;
+    } else if (paidRow?.payment_amount != null) {
+      const amt = Number(paidRow.payment_amount);
+      paidAmount = Number.isFinite(amt) ? amt : 0;
+    }
+
+    // провайдер гүйлгээний ID (нийгүүлэгч тодорхойгүй бол undefined)
+    const providerPaymentId =
+      typeof paidRow?.payment_id === 'string' ? paidRow.payment_id.trim() || undefined : undefined;
 
     this.logger.log(
       `QPay: төлбөр шалгалаа (invoice_id=${providerInvoiceId}, paid=${paid})`,
@@ -282,8 +296,8 @@ export class QpayService implements PaymentGateway {
 
     return {
       paid,
-      paidAmount: Number.isFinite(paidAmount) ? paidAmount : 0,
-      providerPaymentId: paidRow?.payment_id,
+      paidAmount,
+      providerPaymentId,
       raw: data,
     };
   }

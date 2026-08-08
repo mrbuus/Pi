@@ -11,6 +11,8 @@ import {
   Copy,
   Check,
   ArrowLeft,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import type {
@@ -18,20 +20,22 @@ import type {
   PaymentDetails,
   QpayInvoiceInfo,
 } from "./types";
+import { getBankColor, getBankInitials } from "./lib";
 
 /* ============================================================
    ТОГТМОЛУУД — poll-той холбоотой хугацаанууд
    ============================================================ */
-const FAST_INTERVAL_MS = 3_000; // эхний 1 минутад 3 секунд тутам
+const FAST_INTERVAL_MS = 5_000; // эхний 1 минутад 5 секунд тутам
 const FAST_WINDOW_MS = 60_000; // "эхний 1 минут"-ын хэмжээ
-const SLOW_INTERVAL_MS = 10_000; // үүний дараа 10 секунд тутам
-const MAX_POLL_MS = 10 * 60_000; // нийт 10 минутын дараа зогсооно
+const SLOW_INTERVAL_MS = 5_000; // үүний дараа ч 5 секунд тутам
+const MAX_POLL_MS = 5 * 60_000; // нийт 5 минутын дараа зогсооно
 
 type CheckoutState =
   | "creating" // нэхэмжлэх үүсгэж байна
   | "pending" // хэрэглэгчийн төлбөрийг хүлээж байна (QR/deeplink харагдана)
+  | "pending-offline" // сүлжээ таслагдсан, холболтыг сэргээх хүлээж байна
   | "success" // баталгаажлаа
-  | "expired" // 10 минут өнгөрсөн ч хариу ирээгүй
+  | "expired" // 5 минут өнгөрсөн ч хариу ирээгүй
   | "error" // нэхэмжлэх үүсгэхэд/шалгахад алдаа гарсан
   | "rejected" // ажилтан татгалзсан
   | "reversed"; // төлбөрийг эргүүлж буцаасан
@@ -96,6 +100,7 @@ export default function QpayCheckout({
   const [copied, setCopied] = useState(false);
   const [nonce, setNonce] = useState(0); // "Дахин оролдох" дарахад нэмэгдэж, дахин эхэлнэ
   const [successMounted, setSuccessMounted] = useState(false); // амжилтын дүрсний жижиг "pop" анимэйшнд
+  const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" && navigator.onLine);
 
   // Онгойлгосон эсэхийг хадгалж, unmount дараа setState дуудахаас сэргийлнэ
   const aliveRef = useRef(true);
@@ -103,6 +108,38 @@ export default function QpayCheckout({
     aliveRef.current = true;
     return () => {
       aliveRef.current = false;
+    };
+  }, []);
+
+  // Холболтын статусыг сонсох
+  useEffect(() => {
+    function handleOnline() {
+      if (aliveRef.current) {
+        setIsOnline(true);
+      }
+    }
+    function handleOffline() {
+      if (aliveRef.current) {
+        setIsOnline(false);
+      }
+    }
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Хуудас нуугдсан үед polling зогсоох, буцах үед үргэлжлүүлэх
+  const isHiddenRef = useRef(false);
+  useEffect(() => {
+    function handleVisibilityChange() {
+      isHiddenRef.current = document.hidden;
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
@@ -174,7 +211,7 @@ export default function QpayCheckout({
     return res;
   }, [paymentId, auth]);
 
-  /* ---------- 3) Poll — 3с × 1мин, дараа нь 10с, нийт 10 минутын дараа зогсоно ---------- */
+  /* ---------- 3) Poll — 5с × 5мин, хуудас нуугдсан үед зогсоно ---------- */
   useEffect(() => {
     if (state !== "pending" || !paymentId) return;
     let stopped = false;
@@ -182,6 +219,10 @@ export default function QpayCheckout({
 
     function scheduleNext(elapsedMs: number) {
       if (stopped) return;
+      if (isHiddenRef.current) {
+        // Хуудас нуугдсан — timer-ыг зогсоож хуу, алин нь өнцөглөнө дараа нь
+        return;
+      }
       if (elapsedMs >= MAX_POLL_MS) {
         setState("expired");
         return;
@@ -191,10 +232,10 @@ export default function QpayCheckout({
     }
 
     async function tick(elapsedMs: number) {
-      if (stopped) return;
+      if (stopped || isHiddenRef.current) return;
       try {
         const res = await checkOnce();
-        if (stopped) return;
+        if (stopped || isHiddenRef.current) return;
         setLastCheckedAt(new Date());
         if (!res) return;
         if (res.status === "CONFIRMED") {
@@ -212,8 +253,17 @@ export default function QpayCheckout({
           return;
         }
         // PENDING хэвээр байна — үргэлжлүүлнэ
+        if (isOnline) {
+          // Холболтын асуудлууд засагдсан
+          if (state === "pending-offline") {
+            setState("pending");
+          }
+        }
       } catch {
-        // Сүлжээний нэг товч тасалдал — чимээгүй үргэлжлүүлнэ, төлөв алдагдахгүй
+        // Сүлжээний алдаа — pending-offline төлөв рүү шилжих
+        if (isOnline && state === "pending") {
+          setState("pending-offline");
+        }
       }
       scheduleNext(elapsedMs);
     }
@@ -224,7 +274,7 @@ export default function QpayCheckout({
       stopped = true;
       if (timer) clearTimeout(timer);
     };
-  }, [state, paymentId, checkOnce]);
+  }, [state, paymentId, checkOnce, isOnline]);
 
   /* ---------- Гар аргаар шалгах ("шалгах" товч, 10 минутын дараа) ---------- */
   async function handleManualCheck() {
@@ -275,8 +325,9 @@ export default function QpayCheckout({
   const statusLine: Record<CheckoutState, string> = {
     creating: "Нэхэмжлэх үүсгэж байна…",
     pending: "Төлбөрийг хүлээж байна…",
+    "pending-offline": "Холболтыг сэргээх хүлээж байна…",
     success: "Төлбөр амжилттай баталгаажлаа",
-    expired: "Хугацаа дууссан — төлбөр хараахан баталгаажаагүй байна",
+    expired: "Хугацаа дууссан — төлбөр харахан баталгаажаагүй байна",
     error: "Алдаа гарлаа",
     rejected: "Төлбөр татгалзагдсан",
     reversed: "Төлбөр буцаагдсан",
@@ -335,17 +386,16 @@ export default function QpayCheckout({
                       key={d.name + d.link}
                       href={d.link}
                       className="flex flex-col items-center gap-1.5 rounded-xl border border-line bg-surface p-2.5 text-center transition hover:border-brand/50 hover:bg-brand-tint/30"
+                      title={d.name}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={d.logo}
-                        alt=""
+                      {/* Өнгөлөг дугуй товчлол — гадаад лого ХОРИОТОЙ */}
+                      <div
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md font-bold text-white text-sm"
+                        style={{ backgroundColor: getBankColor(d.name) }}
                         aria-hidden="true"
-                        className="h-8 w-8 rounded-md object-contain"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.visibility = "hidden";
-                        }}
-                      />
+                      >
+                        {getBankInitials(d.name)}
+                      </div>
                       <span className="text-[11px] font-medium leading-tight text-ink">
                         {d.description || d.name}
                       </span>
@@ -356,6 +406,103 @@ export default function QpayCheckout({
             )}
 
             {/* QR код — КОМПЬЮТЕРИЙН ГОЛ ХЭРЭГЛЭЭ, утсанд туслах хувилбар */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-ink-dim">
+                Эсвэл QR код уншуулах
+              </p>
+              {invoice.qrImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={qrImageSrc(invoice.qrImage)}
+                  alt="QPay төлбөрийн QR код"
+                  width={260}
+                  height={260}
+                  className="h-[260px] w-[260px] rounded-xl border border-line bg-white p-2"
+                />
+              ) : (
+                <div className="w-full max-w-[320px] space-y-2 rounded-xl border border-line bg-surface p-3">
+                  <p className="text-center text-xs text-ink-dim">
+                    QR зураг ачаалагдсангүй — доорх кодыг банкныхаа аппад
+                    гараар оруулна уу
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 truncate rounded-lg bg-panel px-2.5 py-2 text-xs">
+                      {invoice.qrText}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={copyQrText}
+                      className="shrink-0 rounded-lg border border-line px-2.5 py-2 text-ink-dim transition hover:text-ink"
+                      aria-label="Хуулах"
+                    >
+                      {copied ? (
+                        <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                      ) : (
+                        <Copy className="h-4 w-4" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <p className="text-center text-[11px] text-ink-dim">
+            Нэхэмжлэлийн дугаар: {invoice.invoiceId}
+          </p>
+        </div>
+      )}
+
+      {state === "pending-offline" && invoice && (
+        <div className="space-y-5">
+          <div className="flex flex-col items-center gap-1.5 text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-error/15 px-3 py-1 text-xs font-bold text-error">
+              <WifiOff className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              Холболтын асуудал
+            </span>
+            <p className="text-lg font-extrabold">{formatMnt(amount)}</p>
+            <p className="text-sm text-ink-dim">{description}</p>
+          </div>
+
+          <div className="rounded-lg bg-error/10 p-4">
+            <p className="text-center text-sm text-ink">
+              Интернетийн холболт сүтэрлээ. Аппаасаа төлбөр хийлээ гэдэгт итгээрэй — холболт сэргэхэд автоматаар баталгаажуулна. Сүлжээ сэргэхүүрийг шалгаж, дахин оролдоно уу.
+            </p>
+          </div>
+
+          {/* Утасны дэлгэц дээр эхэнд Banks (deeplink), компьютер дээр эхэнд QR */}
+          <div className="flex flex-col gap-5 md:flex-col-reverse">
+            {/* Банкны апп руу шууд орох товчнууд */}
+            {invoice.deeplinks.length > 0 && (
+              <div>
+                <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wider text-ink-dim">
+                  Банкны аппаар төлөх
+                </p>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {invoice.deeplinks.map((d) => (
+                    <a
+                      key={d.name + d.link}
+                      href={d.link}
+                      className="flex flex-col items-center gap-1.5 rounded-xl border border-line bg-surface p-2.5 text-center transition hover:border-brand/50 hover:bg-brand-tint/30"
+                      title={d.name}
+                    >
+                      <div
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md font-bold text-white text-sm"
+                        style={{ backgroundColor: getBankColor(d.name) }}
+                        aria-hidden="true"
+                      >
+                        {getBankInitials(d.name)}
+                      </div>
+                      <span className="text-[11px] font-medium leading-tight text-ink">
+                        {d.description || d.name}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* QR код */}
             <div className="flex flex-col items-center gap-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-dim">
                 Эсвэл QR код уншуулах
@@ -428,7 +575,7 @@ export default function QpayCheckout({
           <Clock className="h-9 w-9 text-warning" aria-hidden="true" />
           <p className="font-bold">Хугацаа дууслаа</p>
           <p className="max-w-xs text-sm text-ink-dim">
-            10 минутын дотор төлбөр баталгаажсангүй. Хэрэв төлсөн бол доор
+            5 минутын дотор төлбөр баталгаажсангүй. Хэрэв төлсөн бол доор
             дарж шалгаарай.
           </p>
           <button

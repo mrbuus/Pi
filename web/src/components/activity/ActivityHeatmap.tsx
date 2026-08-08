@@ -1,6 +1,7 @@
 "use client";
 
 import { Flame, Trophy, ArrowLeft, ArrowRight } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import HeatmapGrid, { HeatmapCell } from "./HeatmapGrid";
@@ -125,7 +126,7 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
     return (
       <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
         <h2 className="mb-2 font-bold text-brand-soft">Идэвхийн түүх</h2>
-        <p className="text-sm text-ink-dim">Ачаалж байна…</p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       </section>
     );
   }

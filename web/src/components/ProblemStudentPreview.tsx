@@ -3,6 +3,7 @@
 import MathText from "@/components/MathText";
 import ProblemFigure from "@/components/ProblemFigure";
 import { Check } from "lucide-react";
+import { Dot } from "@/components/ui/Meta";
 
 /**
  * "Сурагчид ингэж харагдана" — багш бодлого оруулж байх үеийн шууд preview.
@@ -58,7 +59,7 @@ export default function ProblemStudentPreview({
         </p>
         {isChoice && (
           <p className="text-[11px] text-ink-dim inline-flex items-center gap-1.5">
-            Дараалал сурагч бүрд холилдоно ·{" "}
+            Дараалал сурагч бүрд холилдоно <Dot />{" "}
             <Check className="h-4 w-4" aria-hidden /> зөвхөн танд
           </p>
         )}
@@ -79,7 +80,7 @@ export default function ProblemStudentPreview({
         <ProblemFigure imageKey={imageKey} isCurrent isStaffView>
           <div className="text-lg leading-relaxed">
             {statementText?.trim() ? (
-              <MathText>{statementText}</MathText>
+              <MathText showErrorInTeacherView>{statementText}</MathText>
             ) : (
               <span className="text-sm text-ink-dim">Бодлогын текст энд гарна…</span>
             )}
@@ -104,7 +105,7 @@ export default function ProblemStudentPreview({
                   }`}
                 />
                 <span className="flex-1">
-                  <MathText>{c.text}</MathText>
+                  <MathText showErrorInTeacherView>{c.text}</MathText>
                 </span>
                 {c.isCorrect && (
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success/20">

@@ -35,16 +35,34 @@ export function tokensMatch(correct: unknown, given: unknown): boolean {
   return a === b;
 }
 
+// Хоосон хариу — null, undefined, эсвэл зөвхөн зайнаас бүрдсэн мөр.
+// answersEqual болон hasKnownAnswer ХОЁУЛАА үүнийг ашиглана: хоёулаа ижил
+// ойлголттой байх ёстой, эс бөгөөс "хариутай гэж тооцогдсон атлаа хэзээ ч
+// зөв болж чадахгүй" бодлого үүсч, сурагч авах боломжгүй оноо алдана.
+export function isBlankAnswer(value: unknown): boolean {
+  if (value === null || value === undefined) return true;
+  return typeof value === 'string' && value.trim() === '';
+}
+
 export function answersEqual(correct: unknown, given: unknown): boolean {
   // Хариу түлхүүр байхгүй бол авто оноо өгөхгүй (хуурамч хариу зохиохгүй).
-  if (correct === null || correct === undefined || correct === '') return false;
-  if (given === null || given === undefined || given === '') return false;
+  if (isBlankAnswer(correct)) return false;
+  if (isBlankAnswer(given)) return false;
   if (typeof correct === 'object' && typeof given === 'object') {
     const c = correct as Record<string, unknown>;
     const g = given as Record<string, unknown>;
     const keys = Object.keys(c);
     if (keys.length === 0) return false;
-    return keys.every((k) => tokensMatch(c[k], g[k]));
+    return keys.every((k) => {
+      // НҮХ БҮРД дээрх зарчмыг давтана. Өмнө нь зөвхөн БҮХЭЛ утгыг шалгаж
+      // байсан тул { a: '' } гэсэн объект хамгаалалтыг давж, дараа нь
+      // tokensMatch('', '') → үнэн буцааж, ХАРИУГҮЙ нүх автоматаар "зөв"
+      // гэж тоологдож байв (2026-08-08-нд илэрсэн).
+      if (isBlankAnswer(c[k])) return false;
+      // Сурагч тэр нүхийг огт бөглөөгүй бол буруу.
+      if (!(k in g) || isBlankAnswer(g[k])) return false;
+      return tokensMatch(c[k], g[k]);
+    });
   }
   return tokensMatch(correct, given);
 }
@@ -194,9 +212,19 @@ export function hasKnownAnswer(p: GradableProblem): boolean {
     return (p.choiceOptions ?? []).some((o) => o.isCorrect);
   }
   const c = p.correctAnswer;
-  if (c === null || c === undefined || c === '') return false;
+  if (isBlankAnswer(c)) return false;
   if (typeof c === 'object' && (c as Record<string, unknown>).manualReview) {
     return false;
+  }
+  // Олон нүхтэй (FILL_NUMBER) бодлого: нүхнүүдийн АЛЬ НЭГ нь хоосон бол хариуны
+  // түлхүүр дутуу гэсэн үг. answersEqual тэр бодлогыг ХЭЗЭЭ Ч зөв гэж
+  // дүгнэхгүй тул энд "хариутай" гэж хэлбэл сурагч авах БОЛОМЖГҮЙ оноо алдана —
+  // яг дээрх тайлбарт анхааруулсан шударга бус байдал. Хоёр функц нэг зарчмыг
+  // хуваалцах ЁСТОЙ.
+  if (typeof c === 'object' && !Array.isArray(c)) {
+    const slots = Object.values(c as Record<string, unknown>);
+    if (slots.length === 0) return false;
+    if (slots.some(isBlankAnswer)) return false;
   }
   return true;
 }

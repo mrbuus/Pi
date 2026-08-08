@@ -1,3 +1,4 @@
+import { Dot, Meta } from "@/components/ui/Meta";
 import StudentRowAction from "./StudentRowAction";
 import TeacherRowMeta from "./TeacherRowMeta";
 import type { TestRow } from "./types";
@@ -14,7 +15,7 @@ export default function TestRowItem({
   return (
     <div className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-bright/10 text-sm font-bold text-brand-soft">
-        {num ?? "·"}
+        {num ?? <Dot />}
       </span>
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-1.5 truncate text-sm font-semibold text-ink">
@@ -28,8 +29,12 @@ export default function TestRowItem({
           )}
         </p>
         <p className="text-xs text-ink-dim">
-          {test._count.problems} бодлого
-          {test.timeLimitMin ? ` · ${test.timeLimitMin} мин` : ""}
+          <Meta
+            items={[
+              `${test._count.problems} бодлого`,
+              test.timeLimitMin ? `${test.timeLimitMin} мин` : null,
+            ]}
+          />
         </p>
       </div>
       {isTeacher ? <TeacherRowMeta test={test} /> : <StudentRowAction test={test} />}

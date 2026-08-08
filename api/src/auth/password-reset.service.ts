@@ -149,10 +149,21 @@ export class PasswordResetService {
     ]);
 
     const minutes = Math.round(CODE_TTL_MS / 60000);
+
+    // SMS илгээх мессеж — КОДЫГ ХЭРЭЭНЭЭ ХАДГАЛАХГҮЙ. Зөвхөн "код илгээсэн"
+    // гэсэн мэдэгдэл. Нууцлалын улмаас өгөгдлийн сан ялгарсан ч кодыг дахин
+    // сэргээж сая хүрэхгүй.
+    const message = `Шинэ Ирээдүйн Эзэд: нууц үг сэргээх код хүлээлгэе. ${minutes} мин дотор ашиглана уу. Зөвхөн өөрийнхөө утас!`;
+
     try {
-      await this.sms.send(
+      // НУУЦЛАЛ: password-reset мессеж бол кодгүй илгээнэ (sendAndLog нь body-д кодыг орохгүй)
+      await this.sms.sendAndLog(
         phone,
-        `Шинэ Ирээдүйн Эзэд: нууц үг сэргээх код ${code}. ${minutes} минутын дотор ашиглана уу. Хэн нэгэнд бүү дамжуул.`,
+        message,
+        userId, // createdByUserId: өөрөө хүсэлт үнэ болсон хэрэглэгч
+        'PASSWORD_RESET',
+        undefined,
+        userId, // userId: сэргээх хүсэлт ирсэн хэрэглэгч
       );
       return 'SENT';
     } catch (err) {

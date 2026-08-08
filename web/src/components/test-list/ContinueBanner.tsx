@@ -1,5 +1,6 @@
 import { Clock } from "lucide-react";
 import Link from "next/link";
+import { Meta } from "@/components/ui/Meta";
 import type { TestRow } from "./types";
 
 /* ============================================================================
@@ -29,10 +30,11 @@ export default function ContinueBanner({ tests }: { tests: TestRow[] }) {
               : `${inProgress.length} дуусаагүй шалгалт байна`}
           </p>
           <p className="truncate text-xs text-ink-dim">
-            {inProgress
-              .map((t) => t.title)
-              .slice(0, 3)
-              .join(" · ")}
+            <Meta
+              items={inProgress
+                .map((t) => t.title)
+                .slice(0, 3)}
+            />
             {inProgress.length > 3 ? "…" : ""} — таны хариултууд хадгалагдсан, үргэлжлүүлж болно
           </p>
         </div>

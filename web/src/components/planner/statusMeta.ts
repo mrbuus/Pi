@@ -70,9 +70,9 @@ export const PRIORITY_META: Record<
   TaskPriority,
   { label: string; icon: string; colorClass: string }
 > = {
-  LOW: { label: "Бага", icon: "▽", colorClass: "text-ink-dim" },
+  LOW: { label: "Бага", icon: "", colorClass: "text-ink-dim" },
   NORMAL: { label: "Энгийн", icon: "–", colorClass: "text-ink-dim" },
-  HIGH: { label: "Өндөр", icon: "△", colorClass: "text-warning" },
+  HIGH: { label: "Өндөр", icon: "", colorClass: "text-warning" },
   URGENT: { label: "Яаралтай", icon: "‼", colorClass: "text-error" },
 };
 

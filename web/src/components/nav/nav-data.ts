@@ -45,6 +45,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/goals", label: "Миний зорилго", icon: "target" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
+    { href: "/app/student/payments", label: "Миний төлбөр", icon: "credit-card" },
   ],
   TEACHER: [
     HOME.TEACHER,
@@ -69,6 +70,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
+    { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
   ],
   ADMIN: [
     HOME.ADMIN,
@@ -84,6 +86,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
+    { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
   ],
   BUYER: [
     HOME.BUYER,
@@ -113,7 +116,9 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/admin/audit": "admin",
   "/app/admin/analytics": "admin",
   "/app/payments": "admin",
+  "/app/sms": "admin",
   "/app/goals": "personal",
+  "/app/student/payments": "personal",
 };
 
 // Өмнө нь "Нууц үг солих" тусдаа, гарцаагүй тод цэсийн зүйл байсан — эзний

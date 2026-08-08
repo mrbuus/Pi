@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { WEEKDAY_LABELS, WEEKDAY_SHORT } from "@/components/schedule/types";
+import { Dot } from "@/components/ui/Meta";
 
 interface AttendanceCalendarProps {
   /** Сонгосон огноо "YYYY-MM-DD" */
@@ -137,7 +138,7 @@ export default function AttendanceCalendar({
       {/* Сонгосон өдрийн бүтэн гарагийн нэр — жижиг тоонуудаас гадна тод
           унших боломжтой давхар илэрхийлэл */}
       <p className="mt-2 text-center text-base font-bold text-brand-soft">
-        {WEEKDAY_LABELS[weekdayOf(value)]} гараг · {value}
+        {WEEKDAY_LABELS[weekdayOf(value)]} гараг <Dot /> {value}
       </p>
     </div>
   );

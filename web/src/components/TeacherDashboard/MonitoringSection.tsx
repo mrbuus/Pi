@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { Card, SectionHeader } from "@/components/ui/Surface";
+import { Dot } from "@/components/ui/Meta";
 
 /**
  * Ирцийн өгөгдөл — AttendanceSection-ийн RosterRow адил
@@ -186,7 +187,7 @@ export default function MonitoringSection({
           </span>
           /{attendanceRows.length}
         </span>
-        {" · "}
+        <Dot />
         <span className="font-semibold text-ink">
           Даалгавар хийсэн{" "}
           <span className="value-bump inline-block" key={`hw-${homeworkStats.done}`}>

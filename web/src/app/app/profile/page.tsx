@@ -5,6 +5,7 @@ import ChangePasswordSection from "@/components/profile/ChangePasswordSection";
 import ProfileInfo from "@/components/profile/ProfileInfo";
 import ProfilePhoto from "@/components/profile/ProfilePhoto";
 import { api } from "@/lib/api";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 
 interface Me {
   firstName: string;
@@ -28,22 +29,27 @@ export default function ProfilePage() {
   useEffect(() => {
     api<Me>("/auth/me")
       .then(setMe)
-      .catch((err) => setError(err instanceof Error ? err.message : "Алдаа гарлаа"));
+      .catch((err) => setError(err instanceof Error ? err.message : "Профайл ачаалахад алдаа гарлаа"));
   }, []);
 
   if (error) {
     return (
-      <p role="alert" className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-        {error}
-      </p>
+      <ErrorState
+        message={error}
+        onRetry={() => {
+          setError("");
+          setMe(null);
+          api<Me>("/auth/me")
+            .then(setMe)
+            .catch((err) => setError(err instanceof Error ? err.message : "Профайл ачаалахад алдаа гарлаа"));
+        }}
+      />
     );
   }
 
   if (!me) {
     return (
-      <p className="animate-pulse text-sm text-ink-dim" role="status">
-        Ачаалж байна…
-      </p>
+      <LoadingState rows={3} label="Ачаалж байна" />
     );
   }
 

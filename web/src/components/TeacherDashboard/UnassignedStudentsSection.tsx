@@ -42,7 +42,7 @@ export default function UnassignedStudentsSection({
                 <p className="text-xs text-ink-dim">
                   {student.phone}
                   {student.studentProfile?.grade &&
-                    ` · ${student.studentProfile.grade}-р анги`}
+                    ` — ${student.studentProfile.grade}-р анги`}
                 </p>
               </div>
 

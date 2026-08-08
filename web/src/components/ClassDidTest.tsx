@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, AlertTriangle } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 
 /* ============================================================================
@@ -428,7 +429,7 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
           />
 
           {chaptersLoading && (
-            <p className="mt-2 text-sm text-ink-dim">Ачаалж байна…</p>
+            <LoadingState rows={3} label="Ачаалж байна" />
           )}
 
           {!chaptersLoading && topicsWithTests.length === 0 && (

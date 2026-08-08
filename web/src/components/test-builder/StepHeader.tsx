@@ -1,3 +1,5 @@
+import { Meta } from "@/components/ui/Meta";
+
 export default function StepHeader({
   n,
   title,
@@ -14,7 +16,7 @@ export default function StepHeader({
       </span>
       <div>
         <h2 className="font-bold text-brand-soft">
-          Алхам {n} · {title}
+          <Meta items={[`Алхам ${n}`, title]} />
         </h2>
         {hint && <p className="text-sm text-ink-dim">{hint}</p>}
       </div>

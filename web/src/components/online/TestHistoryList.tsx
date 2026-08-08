@@ -1,3 +1,4 @@
+import { Meta } from "@/components/ui/Meta";
 import { TestHistoryRow } from "./types";
 import { formatDate } from "./format";
 import { testTypeLabel } from "./selfState";
@@ -18,7 +19,7 @@ export default function TestHistoryList({ tests }: { tests: TestHistoryRow[] }) 
             <div className="min-w-0">
               <p className="truncate font-semibold text-ink">{t.title}</p>
               <p className="text-xs text-ink-dim">
-                {testTypeLabel(t.type)} · {formatDate(t.createdAt)}
+                <Meta items={[testTypeLabel(t.type), formatDate(t.createdAt)]} />
               </p>
             </div>
             <p className="shrink-0 font-bold text-ink">

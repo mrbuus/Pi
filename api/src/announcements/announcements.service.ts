@@ -103,6 +103,50 @@ export class AnnouncementsService {
     });
   }
 
+  // Эцэг эхийн хүүхдүүдийн ангийн зарууд
+  async forParentChildren(parentId: string) {
+    const children = await this.prisma.parentLink.findMany({
+      where: { parentId, verifiedAt: { not: null } },
+      select: { studentId: true },
+    });
+
+    if (children.length === 0) return [];
+
+    const classroomIds = await this.prisma.enrollment.findMany({
+      where: {
+        studentId: { in: children.map((c) => c.studentId) },
+        leftAt: null,
+      },
+      select: { classroomId: true },
+      distinct: ['classroomId'],
+    });
+
+    const classroomIdSet = new Set(classroomIds.map((e) => e.classroomId));
+
+    return this.prisma.announcement.findMany({
+      where: {
+        deletedAt: null,
+        OR: [
+          { audience: AnnouncementAudience.ALL_STUDENTS },
+          { audience: AnnouncementAudience.ALL_CLASSROOM },
+          { classroomId: { in: Array.from(classroomIdSet) } },
+          {
+            classroomTargets: {
+              some: { classroomId: { in: Array.from(classroomIdSet) } },
+            },
+          },
+        ],
+      },
+      include: {
+        classroomTargets: {
+          include: { classroom: { select: { id: true, name: true } } },
+        },
+      },
+      orderBy: [{ pinned: 'desc' }, { createdAt: 'desc' }],
+      take: 20,
+    });
+  }
+
   // Багш/админ удирдлагад — бүх зар
   manageList() {
     return this.prisma.announcement.findMany({

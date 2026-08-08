@@ -53,10 +53,16 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   PasswordResetToken: 'PasswordResetToken',
+  SmsMessage: 'SmsMessage',
+  SmsBatch: 'SmsBatch',
+  SmsTemplate: 'SmsTemplate',
   StudentProfile: 'StudentProfile',
   TeacherProfile: 'TeacherProfile',
+  ExternalTeacherProfile: 'ExternalTeacherProfile',
   ParentLink: 'ParentLink',
   Classroom: 'Classroom',
+  TeacherGroup: 'TeacherGroup',
+  TeacherGroupMember: 'TeacherGroupMember',
   Enrollment: 'Enrollment',
   Attendance: 'Attendance',
   Assignment: 'Assignment',
@@ -88,6 +94,10 @@ export const ModelName = {
   Pass: 'Pass',
   UserPass: 'UserPass',
   Payment: 'Payment',
+  ProductItem: 'ProductItem',
+  Purchase: 'Purchase',
+  ExpenseRecord: 'ExpenseRecord',
+  TuitionRefund: 'TuitionRefund',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
   ClassTestSession: 'ClassTestSession',
@@ -159,6 +169,57 @@ export const PasswordResetTokenScalarFieldEnum = {
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
+export const SmsMessageScalarFieldEnum = {
+  id: 'id',
+  toPhone: 'toPhone',
+  body: 'body',
+  status: 'status',
+  kind: 'kind',
+  userId: 'userId',
+  batchId: 'batchId',
+  templateId: 'templateId',
+  provider: 'provider',
+  providerRef: 'providerRef',
+  error: 'error',
+  segments: 'segments',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  sentAt: 'sentAt'
+} as const
+
+export type SmsMessageScalarFieldEnum = (typeof SmsMessageScalarFieldEnum)[keyof typeof SmsMessageScalarFieldEnum]
+
+
+export const SmsBatchScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  kind: 'kind',
+  total: 'total',
+  sent: 'sent',
+  failed: 'failed',
+  status: 'status',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type SmsBatchScalarFieldEnum = (typeof SmsBatchScalarFieldEnum)[keyof typeof SmsBatchScalarFieldEnum]
+
+
+export const SmsTemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  kind: 'kind',
+  body: 'body',
+  active: 'active',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SmsTemplateScalarFieldEnum = (typeof SmsTemplateScalarFieldEnum)[keyof typeof SmsTemplateScalarFieldEnum]
+
+
 export const StudentProfileScalarFieldEnum = {
   userId: 'userId',
   type: 'type',
@@ -189,6 +250,17 @@ export const TeacherProfileScalarFieldEnum = {
 export type TeacherProfileScalarFieldEnum = (typeof TeacherProfileScalarFieldEnum)[keyof typeof TeacherProfileScalarFieldEnum]
 
 
+export const ExternalTeacherProfileScalarFieldEnum = {
+  userId: 'userId',
+  organization: 'organization',
+  verifiedAt: 'verifiedAt',
+  verifiedById: 'verifiedById',
+  note: 'note'
+} as const
+
+export type ExternalTeacherProfileScalarFieldEnum = (typeof ExternalTeacherProfileScalarFieldEnum)[keyof typeof ExternalTeacherProfileScalarFieldEnum]
+
+
 export const ParentLinkScalarFieldEnum = {
   id: 'id',
   parentId: 'parentId',
@@ -212,6 +284,29 @@ export const ClassroomScalarFieldEnum = {
 } as const
 
 export type ClassroomScalarFieldEnum = (typeof ClassroomScalarFieldEnum)[keyof typeof ClassroomScalarFieldEnum]
+
+
+export const TeacherGroupScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  name: 'name',
+  joinCode: 'joinCode',
+  archived: 'archived',
+  createdAt: 'createdAt'
+} as const
+
+export type TeacherGroupScalarFieldEnum = (typeof TeacherGroupScalarFieldEnum)[keyof typeof TeacherGroupScalarFieldEnum]
+
+
+export const TeacherGroupMemberScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  studentId: 'studentId',
+  joinedAt: 'joinedAt',
+  leftAt: 'leftAt'
+} as const
+
+export type TeacherGroupMemberScalarFieldEnum = (typeof TeacherGroupMemberScalarFieldEnum)[keyof typeof TeacherGroupMemberScalarFieldEnum]
 
 
 export const EnrollmentScalarFieldEnum = {
@@ -530,6 +625,7 @@ export const AttemptScalarFieldEnum = {
   autoCorrect: 'autoCorrect',
   selfState: 'selfState',
   timeSpentSec: 'timeSpentSec',
+  givenAnswer: 'givenAnswer',
   testId: 'testId',
   classroomId: 'classroomId',
   createdAt: 'createdAt'
@@ -640,10 +736,80 @@ export const PaymentScalarFieldEnum = {
   paidAt: 'paidAt',
   confirmedById: 'confirmedById',
   qpayInvoiceId: 'qpayInvoiceId',
+  providerPaymentId: 'providerPaymentId',
   createdAt: 'createdAt'
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const ProductItemScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  refId: 'refId',
+  price: 'price',
+  active: 'active'
+} as const
+
+export type ProductItemScalarFieldEnum = (typeof ProductItemScalarFieldEnum)[keyof typeof ProductItemScalarFieldEnum]
+
+
+export const PurchaseScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productItemId: 'productItemId',
+  paymentId: 'paymentId',
+  price: 'price',
+  grantedAt: 'grantedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PurchaseScalarFieldEnum = (typeof PurchaseScalarFieldEnum)[keyof typeof PurchaseScalarFieldEnum]
+
+
+export const ExpenseRecordScalarFieldEnum = {
+  id: 'id',
+  amount: 'amount',
+  category: 'category',
+  description: 'description',
+  occurredOn: 'occurredOn',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type ExpenseRecordScalarFieldEnum = (typeof ExpenseRecordScalarFieldEnum)[keyof typeof ExpenseRecordScalarFieldEnum]
+
+
+export const TuitionRefundScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  leftOn: 'leftOn',
+  totalLessonDays: 'totalLessonDays',
+  attendedLessonDays: 'attendedLessonDays',
+  dailyRate: 'dailyRate',
+  totalPaid: 'totalPaid',
+  owed: 'owed',
+  refundAmount: 'refundAmount',
+  shortfall: 'shortfall',
+  status: 'status',
+  warnings: 'warnings',
+  note: 'note',
+  paymentMethod: 'paymentMethod',
+  createdById: 'createdById',
+  approvedById: 'approvedById',
+  approvedAt: 'approvedAt',
+  paidById: 'paidById',
+  paidAt: 'paidAt',
+  cancelledById: 'cancelledById',
+  cancelledAt: 'cancelledAt',
+  cancelReason: 'cancelReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TuitionRefundScalarFieldEnum = (typeof TuitionRefundScalarFieldEnum)[keyof typeof TuitionRefundScalarFieldEnum]
 
 
 export const AnnouncementScalarFieldEnum = {

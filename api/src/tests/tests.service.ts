@@ -51,6 +51,7 @@ type TestProblemRow = {
     correctRate: number | null;
     choiceOptions: { order: number; text: string; isCorrect: boolean }[];
     analysis?: { status: string; solutionOutline: string | null } | null;
+    chapter: { id: string; title: string };
   };
 };
 
@@ -460,6 +461,54 @@ export class TestsService {
     };
   }
 
+  // Heartbeat: сурагч "амьд байна" тэмдэглээлдээ (хэрэглэгчийн үйл явдал бүртгэлээд).
+  // Бичих үйлдэл хийхгүй, зөвхөн амьдралт статус. Хугацаа хэтэрсэн бол SUBMITTED буцаана.
+  async heartbeat(testId: string, userId: string, event?: string) {
+    const session = (await this.prisma.testAttemptSession.findUnique({
+      where: { testId_studentId: { testId, studentId: userId } },
+    })) as SessionRow | null;
+    if (!session) throw new NotFoundException('Шалгалт эхлээгүй байна');
+
+    if (session.status === AttemptSessionStatus.SUBMITTED) {
+      const result = await this.prisma.testResult.findUnique({
+        where: { testId_studentId: { testId, studentId: userId } },
+        select: { totalScore: true, maxScore: true },
+      });
+      return { status: session.status, result, remainingSec: null };
+    }
+
+    // Хугацаа хэтэрсэн бол эцсийн дүгнэлт хийнэ (өөрөөс үүдэлтэй)
+    if (this.isExpired(session)) {
+      const test = await this.loadTestWithProblems(testId);
+      const { result } = await this.finalize(test, session, userId);
+      return {
+        status: AttemptSessionStatus.SUBMITTED,
+        result: { totalScore: result.totalScore, maxScore: result.maxScore },
+        remainingSec: null,
+      };
+    }
+
+    // Үйл явдал log, session өөрчилл БҮҮ (зөвхөн амьдралт)
+    if (event) {
+      const events = Array.isArray(session.events)
+        ? [...(session.events as unknown[])]
+        : [];
+      events.push({ t: new Date().toISOString(), type: event });
+      if (events.length > MAX_EVENTS) events.splice(0, events.length - MAX_EVENTS);
+
+      await this.prisma.testAttemptSession.update({
+        where: { id: session.id },
+        data: { events: events as Prisma.InputJsonValue },
+      });
+    }
+
+    return {
+      status: session.status,
+      leaveCount: session.leaveCount,
+      remainingSec: this.remainingSec(session.deadlineAt),
+    };
+  }
+
   // Autosave: хариулт/тэмдэглэгээ/хугацааг нэгтгэж хадгална, үйл явдал бүртгэнэ.
   // Хугацаа дууссан байвал шууд дүгнэж SUBMITTED буцаана (клиент үр дүн рүү шилжинэ).
   /**
@@ -595,6 +644,8 @@ export class TestsService {
       return {
         n: i + 1,
         points: tp.points,
+        chapterId: tp.problem.chapter.id,
+        chapterTitle: tp.problem.chapter.title,
         statementText: tp.problem.statementText,
         imageKey: tp.problem.imageKey,
         answered,
@@ -756,6 +807,10 @@ export class TestsService {
                 analysis: {
                   select: { status: true, solutionOutline: true },
                 },
+                // Сэдвийн задаргаа харуулахын тулд chapter-ийг оруулнэ
+                chapter: {
+                  select: { id: true, title: true },
+                },
               },
             },
           },
@@ -768,7 +823,8 @@ export class TestsService {
   }
 
   // Ангийн (Enrollment + TestAccess) ЭСВЭЛ хүчинтэй эрхийн (UserPass.scope,
-  // Bug 2 fix) аль нэгээр нэвтэрсэн байхыг шаардана.
+  // Bug 2 fix) ЭСВЭЛ нэг удаагийн худалдан авалт (Purchase) аль нэгээр
+  // нэвтэрсэн байхыг шаардана.
   private async assertStudentAccess(
     test: {
       id: string;
@@ -800,9 +856,25 @@ export class TestsService {
       chapterId: test.chapterId,
       bookId,
     });
-    if (!viaPass) {
-      throw new ForbiddenException('Энэ тест танай ангид оноогдоогүй байна');
+    if (viaPass) {
+      return;
     }
+
+    // Нэг удаагийн худалдан авалт: Purchase.kind=TEST, refId=test.id
+    const purchase = await this.prisma.purchase.findFirst({
+      where: {
+        userId,
+        productItem: {
+          kind: 'TEST',
+          refId: test.id,
+        },
+      },
+    });
+    if (purchase && purchase.grantedAt) {
+      return;
+    }
+
+    throw new ForbiddenException('Энэ тестийг худалдаж авууд эсвэл танай ангид оноогдоон байна');
   }
 
   private isExpired(session: SessionRow): boolean {
@@ -909,8 +981,17 @@ export class TestsService {
     return { answers, states, times, leaveCount, events };
   }
 
-  // Эцсийн дүгнэлт: оноо бодох + TestResult + Attempt бичилтүүд + бодлогын
-  // статистик + session хөлдөөх — бүгд нэг transaction-д.
+  // Эцсийн дүгнэлт: оноо бодох + TestResult + Attempt бичилтүүд + session хөлдөөх.
+  //
+  // ⚠️ ХОЁР ХЭСЭГТ САНААТАЙГААР ХУВААСАН (2026-08-08, 2000 зэрэг хэрэглэгчийн зорилт):
+  //   1. АТОМИК — TestResult + Attempt.createMany + Session нэг $transaction([...])-д.
+  //      Массив хэлбэр (interactive callback БИШ) тул Prisma нэг багцаар илгээж,
+  //      холболтыг богино хугацаанд барина.
+  //   2. ТУСДАА — Problem-ийн статистик нэг bulk UPDATE-ээр, transaction-оос ГАДНА.
+  //      Өмнө нь 40+ бодлого × Problem.update() нь transaction-ыг 1-2 секунд барьж,
+  //      зэрэг илгээх үед бусад сурагчийн бичилт дараалалд ордог байв.
+  //      Статистик хоцорсон ч сурагчийн ДҮН зөв байх нь чухал тул алдааг зөвхөн
+  //      log-д бичээд илгээлтийг унагаахгүй.
   private async finalize(
     test: Awaited<ReturnType<TestsService['loadTestWithProblems']>>,
     session: SessionRow,
@@ -958,7 +1039,14 @@ export class TestsService {
 
       const gradable = toGradable(tp);
       const known = hasKnownAnswer(gradable);
-      const { correct } = gradeAnswer(gradable, raw, choiceOrder[pid]);
+      // canonicalAnswer — сурагчийн сонгосон ЖИНХЭНЭ утга (сонголтын текст
+      // эсвэл тоон хариу). Холилтын дараалалаас ҮЛ ХАМААРНА тул дараа нь
+      // сессийн choiceOrder байхгүй ч тайлагдана.
+      const { correct, canonicalAnswer } = gradeAnswer(
+        gradable,
+        raw,
+        choiceOrder[pid],
+      );
       if (answered && correct && known) totalScore += tp.points;
       graded.push({
         problemId: pid,
@@ -974,6 +1062,11 @@ export class TestsService {
           source: AttemptSource.ONLINE_TEST,
           occurredOn,
           autoCorrect: answered && known ? correct : null,
+          // Хариулаагүй бол JsonNull — Prisma-д `undefined` нь «талбарыг
+          // алгас» гэсэн утгатай тул тэднийг ялгах ЁСТОЙ (STATUS.md §7 урхи).
+          givenAnswer: answered
+            ? ((canonicalAnswer ?? Prisma.JsonNull) as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
           selfState: selfState ?? null,
           timeSpentSec: typeof m.times[pid] === 'number' ? m.times[pid] : null,
           testId: test.id,
@@ -985,9 +1078,9 @@ export class TestsService {
       if (answered && known) statUpdates.push({ id: pid, correct });
     }
 
-    const byId = new Map(test.problems.map((tp) => [tp.problemId, tp.problem]));
     const now = new Date();
 
+    // АТОМИК хэсэг: TestResult, Attempt, Session нэг transaction-д
     const [result] = await this.prisma.$transaction([
       this.prisma.testResult.upsert({
         where: {
@@ -1016,48 +1109,50 @@ export class TestsService {
           events: m.events as Prisma.InputJsonValue,
         },
       }),
-      // Бодлогын статистик: attemptCount + correctRate (SPEC §9.3).
-      //
-      // ⚡ ГҮЙЦЭТГЭЛ: өмнө нь бодлого тутамд ТУСДАА UPDATE явуулдаг байв.
-      // 1000 сурагч × ~30 бодлого = ~30,000 statement, тэгээд шалгалтын
-      // эцсийн хугацаа нийтлэг тул бүгд НЭГ мөчид бөөгнөрдөг. Одоо нэг
-      // bulk UPDATE ... FROM (VALUES ...) болов.
-      //
-      // 🔒 ЗӨВ БАЙДАЛ: өмнөх хувилбар correctRate-г JS дотор finalize
-      // эхлэхэд уншсан ХУУЧИРСАН attemptCount/correctRate-аас бодож байсан.
-      // Хоёр сурагч зэрэг илгээвэл хоёулаа ижил хуучин утга уншиж,
-      // сүүлчийнх нь өмнөхийг дарж бичдэг (read-modify-write race).
-      // Одоо мөрийн ОДООГИЙН утга дээр SQL дотор атомаар тооцно.
-      ...(statUpdates.length
-        ? [
-            this.prisma.$executeRaw`
-              UPDATE "Problem" AS p
-              SET "attemptCount" = p."attemptCount" + 1,
-                  -- correctRate нь double precision тул ROUND(x, n)-д шууд
-                  -- өгч болохгүй (тэр функц зөвхөн numeric-д байдаг) —
-                  -- numeric руу cast хийж бөөрөнхийлөөд буцааж хөрвүүлнэ.
-                  "correctRate" = ROUND(
-                    (
-                      (
-                        (COALESCE(p."correctRate", 0) * p."attemptCount")
-                        + v.correct
-                      ) / (p."attemptCount" + 1)
-                    )::numeric,
-                    3
-                  )::double precision
-              FROM (
-                VALUES ${Prisma.join(
-                  statUpdates.map(
-                    ({ id, correct }) =>
-                      Prisma.sql`(${id}, ${correct ? 1 : 0}::numeric)`,
-                  ),
-                )}
-              ) AS v(id, correct)
-              WHERE p.id = v.id
-            `,
-          ]
-        : []),
     ]);
+
+    // ТУСДАА: Problem статистик (дүгнэлт хадгалагдсаны дараа).
+    // Алдаа гарвал сурагчийн илгээлтийг унагаахгүй, зөвхөн log.
+    if (statUpdates.length > 0) {
+      try {
+        await this.prisma.$executeRaw`
+          UPDATE "Problem" AS p
+          SET "attemptCount" = p."attemptCount" + 1,
+              -- correctRate нь double precision тул ROUND(x, n)-д шууд
+              -- өгч болохгүй (тэр функц зөвхөн numeric-д байдаг) —
+              -- numeric руу cast хийж бөөрөнхийлөөд буцааж хөрвүүлнэ.
+              "correctRate" = ROUND(
+                (
+                  (
+                    (COALESCE(p."correctRate", 0) * p."attemptCount")
+                    + v.correct
+                  ) / (p."attemptCount" + 1)
+                )::numeric,
+                3
+              )::double precision
+          FROM (
+            VALUES ${Prisma.join(
+              statUpdates.map(
+                ({ id, correct }) =>
+                  Prisma.sql`(${id}, ${correct ? 1 : 0}::numeric)`,
+              ),
+            )}
+          ) AS v(id, correct)
+          WHERE p.id = v.id
+        `;
+      } catch (error) {
+        // Log маш урвалгүй — статистик хадгалагдаагүй ч сурагчийн дүн хэвээр байна
+        console.error(
+          '[Problem Stats Update Failed]',
+          'testId:',
+          test.id,
+          'studentId:',
+          studentId,
+          'error:',
+          error instanceof Error ? error.message : String(error),
+        );
+      }
+    }
 
     return { result, graded };
   }

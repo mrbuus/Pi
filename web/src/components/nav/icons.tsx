@@ -15,14 +15,15 @@ import {
   ListChecks,
   LogOut,
   Menu,
+  MessageSquare,
   PanelLeft,
   PlayCircle,
   Shield,
   ShieldCheck,
   Target,
   User,
-  Users,
   UserPlus,
+  Users,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -55,9 +56,11 @@ export type IconName =
   | "x"
   | "logout"
   | "teacher"
-  | "bar-chart";
+  | "bar-chart"
+  | "message-square";
 
 const ICONS: Record<IconName, LucideIcon> = {
+  "message-square": MessageSquare,
   home: Home,
   "book-open": BookOpen,
   layers: Library,

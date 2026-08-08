@@ -70,11 +70,11 @@ export default function AtRiskList({
               {s.name}
             </Link>
             <p className="text-xs text-ink-dim">
-              {s.classroomName} · {formatLastActive(s.lastActiveAt)}
+              {s.classroomName} — {formatLastActive(s.lastActiveAt)}
               {s.recentSuccessRate !== null && (
                 <>
                   {" "}
-                  · Амжилт: {pct(s.recentSuccessRate)}
+                  — Амжилт: {pct(s.recentSuccessRate)}
                   {s.priorSuccessRate !== null && ` (өмнө нь ${pct(s.priorSuccessRate)})`}
                 </>
               )}

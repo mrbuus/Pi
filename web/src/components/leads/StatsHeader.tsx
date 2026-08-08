@@ -21,7 +21,7 @@ export default function StatsHeader({
     {
       label: "Хөрвүүлэлт",
       value: conversionRate === null ? "—" : `${conversionRate}%`,
-      sub: "элссэн ÷ нийт хүсэлт",
+      sub: "элссэн / нийт хүсэлт",
     },
   ];
 

@@ -96,6 +96,16 @@ export class ParentsService {
               orderBy: { createdAt: 'desc' },
               take: 8,
             },
+            payments: {
+              select: {
+                id: true,
+                status: true,
+                amount: true,
+                createdAt: true,
+              },
+              orderBy: { createdAt: 'desc' },
+              take: 12,
+            },
           },
         },
       },

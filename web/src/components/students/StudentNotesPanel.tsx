@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TriangleAlert, Check } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { StudentNote, StudentNoteType, errMsg } from "./types";
 
@@ -165,9 +166,7 @@ export default function StudentNotesPanel({
       </div>
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       )}
       {error && (
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">

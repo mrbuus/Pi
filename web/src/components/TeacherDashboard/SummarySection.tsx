@@ -1,5 +1,7 @@
 "use client";
 
+import { Dot } from "@/components/ui/Meta";
+
 interface SummaryStats {
   studentsTotal: number;
   studentsMarked: number;
@@ -43,7 +45,7 @@ export default function SummarySection({ summary }: SummarySectionProps) {
         <div className="rounded-lg bg-ink/5 px-3 py-2">
           <p>
             Тэмдэглэсэн: <span className="font-semibold">{stats.studentsMarked}</span>/
-            <span className="font-semibold">{stats.studentsTotal}</span> сурагч ·{" "}
+            <span className="font-semibold">{stats.studentsTotal}</span> сурагч <Dot />{" "}
             <span className="text-ink-dim">нийт {stats.totalAttempts} бодлого</span>
           </p>
         </div>

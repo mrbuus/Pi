@@ -2,6 +2,7 @@
 
 import { STATUS_META, STATUS_ORDER, fullName, initials } from "./statusMeta";
 import type { WorkloadRow } from "./types";
+import { Dot } from "@/components/ui/Meta";
 
 // Хэт ачаалалтай гэж үзэх босго (нээлттэй — PLANNED+IN_PROGRESS+BLOCKED тоо)
 const OVERLOAD_THRESHOLD = 5;
@@ -76,7 +77,7 @@ export default function WorkloadView({
                     )}
                   </div>
                   <span className="text-sm font-bold text-ink">
-                    {row.totalEstimateHours} ц · {row.openCount} нээлттэй
+                    {row.totalEstimateHours} ц <Dot /> {row.openCount} нээлттэй
                   </span>
                 </div>
 

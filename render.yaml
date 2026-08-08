@@ -88,12 +88,62 @@ services:
       # - key: SMS_HTTP_HEADERS
       #   sync: false            # ж: {"Authorization":"Bearer ..."}
 
+      # 💳 QPay merchant холболт — сургалтын төлбөрийг банкны аппаар авна.
+      #
+      # ⚠️ ТОХИРУУЛААГҮЙ БОЛ: QpayService.isConfigured() худал буцаана
+      #    (qpay.service.ts:85-97 эдгээр 5 хувьсагчийг шалгадаг) тул QPay
+      #    сонгосон төлбөр 400 алдаа өгнө. Бэлэн/данс шилжүүлэг ажиллана.
+      #
+      # ⚠️ ЭНЭ БОЛ ЭЗНИЙ АЖИЛ. Merchant гэрээ байгуулж, client_id/secret-ийг
+      #    QPay-ээс авах нь данс нээх, төлбөр төлөх үйлдэл — Claude хийхгүй.
+      #    Гэрээ хийсний дараа доорх мөрүүдийн тайлбарыг авч, нууц утгуудыг
+      #    Render UI-аас гараар оруулна (sync: false тул git-д ОРОХГҮЙ).
+      #
+      # Эхлээд SANDBOX дээр туршина:
+      #   QPAY_BASE_URL = https://merchant-sandbox.qpay.mn
+      # Продакшнд шилжихдээ зөвхөн энэ мөрийг сольно:
+      #   QPAY_BASE_URL = https://merchant.qpay.mn
+      #
+      # - key: QPAY_BASE_URL
+      #   value: https://merchant-sandbox.qpay.mn
+      # - key: QPAY_CLIENT_ID
+      #   sync: false            # QPay-ээс өгнө (нууц)
+      # - key: QPAY_CLIENT_SECRET
+      #   sync: false            # QPay-ээс өгнө (нууц)
+      # - key: QPAY_INVOICE_CODE
+      #   sync: false            # ж: PIMN_INVOICE — merchant дээр бүртгүүлсэн код
+      # - key: QPAY_CALLBACK_URL
+      #   value: https://pimn-api.onrender.com/api/payments/qpay/callback
+      #                          # ⚠️ Бодит зам нь payments.controller.ts-тэй
+      #                          #    ТААРАХ ёстой. Өөрчилвөл QPay merchant
+      #                          #    самбар дээр ч мөн шинэчилнэ.
+      # - key: QPAY_TOKEN_TTL_FALLBACK_SECONDS
+      #   value: "3600"          # QPay expires_in буцаахгүй бол хэрэглэнэ
+
       # 🔌 pg pool sizing (src/prisma/prisma.service.ts-ийн тайлбарыг үз) —
       # НЭГ instance-д зориулсан утга. Хэрэв instance-ийн тоог нэмбэл (horizontal
       # scale) энэ тоог instance тоогоор хувааж бууруулах ёстой — эс тэгвээс
       # нийт холболтын тоо Render Postgres-ийн max_connections-ийг давж болзошгүй.
+      #
+      # 📐 ТООЦОО (2026-08-08, 2000 зэрэг шалгалтын зорилтод):
+      #   2000 сурагч × (1 autosave / 1.2с)          ≈ 1667 бичих/сек
+      #   1667 × 15мс дундаж хугацаа                  ≈ 25 зэрэг холболт
+      #   Тиймээс 15 нь ХАНГАЛТГҮЙ — pool дүүрч, хүсэлт дараалалд ороод
+      #   DB_POOL_CONNECT_TIMEOUT_MS (5с) дараа алдаа өгнө.
+      #   25 болгож нэмэв: нөөцтэй, Render Postgres-ийн max_connections
+      #   (үнэгүй багц ≈ 97, бусад үйлчилгээтэй хуваалцана) дотор аюулгүй.
+      #
+      # ⚠️ ГЭХДЭЭ POOL НЬ ЖИНХЭНЭ ШИЙДЭЛ БИШ. 1667 бичих/сек нь жижиг
+      #    Postgres-д хэт их. Холболт нэмбэл саад зөвхөн ӨС рүү шилжинэ.
+      #    Жинхэнэ шийдэл нь БИЧИХ ДАВТАМЖИЙГ бууруулах (autosave-ийн
+      #    debounce уртасгах, зөвхөн өөрчлөгдсөнийг илгээх, багцлах).
+      #    2000 зэрэг хэрэглэгчид НЭМЖ шаардагдах зүйл (эзний шийдвэр):
+      #      • Render-ийн төлбөртэй Postgres багц (max_connections өндөр)
+      #      • API-г 2-3 instance болгох + энэ тоог instance тоонд хуваах
+      #      • Эсвэл PgBouncer/Supavisor (transaction pooling) — тэр үед
+      #        DATABASE_URL-д ?pgbouncer=true&connection_limit=.. нэмнэ
       - key: DB_POOL_MAX
-        value: "15"
+        value: "25"
       - key: DB_POOL_CONNECT_TIMEOUT_MS
         value: "5000"
       - key: DB_STATEMENT_TIMEOUT_MS

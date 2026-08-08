@@ -49,6 +49,27 @@ export class PaymentsService {
   ) {}
 
   async create(dto: CreatePaymentDto, userId: string, actorRole: string) {
+    // АЮУЛГҮЙЛАЛТ: сурагч өөрийн төлбөр үүсгэхдээ дүнгийн хязгаарлалт
+    // (ажилтан биш үед). Ажилтан (ADMIN, TEACHER_PLUS) дүнгээ чөлөөтэй оруулч болно.
+    if (actorRole === 'STUDENT') {
+      const student = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { studentProfile: { select: { tuitionAmount: true } } },
+      });
+      const maxAllowed = student?.studentProfile?.tuitionAmount ?? 0;
+      if (maxAllowed <= 0) {
+        throw new BadRequestException(
+          'Таны төлбөрийн хэмжээ тогтоогдоогүй байна. Администратораас үзүүлэлт авна уу.',
+        );
+      }
+      // Сурагч хүлээгдэж буй дүнгээ хэтрүүлж чадахгүй болгоно
+      if (dto.amount > maxAllowed) {
+        throw new BadRequestException(
+          `Төлбөрийн дүн ${maxAllowed}₮-аас их болохгүй байна`,
+        );
+      }
+    }
+
     const payment = await this.prisma.payment.create({
       data: {
         userId,
@@ -112,6 +133,10 @@ export class PaymentsService {
    * баталгаажсан үр дүнг энд дамжуулна. Тиймээс хуурамч callback илгээх
    * халдлага үр дүнгүй болно.
    *
+   * 🎯 ИДЕМПОТЕНТ: providerPaymentId @unique индекс ӨС дээр баттай (race
+   * condition авирах). Callback/polling хоёулаа нэг гүйлгээг барихад давхар
+   * боловсруулалтгүй, "аль хэдийн баталгаажсан" гэж хариулна.
+   *
    * Мөн дүнг дахин шалгана — дутуу төлөлт эрх нээхгүй.
    */
   async confirmQpayPayment(params: {
@@ -119,6 +144,18 @@ export class PaymentsService {
     paidAmount: number;
     providerPaymentId?: string;
   }) {
+    // ИДЕМПОТЕНТ: providerPaymentId аль хэдийн уусон уу?
+    // Энэ бол хоёр дахь дуудлага (callback давтан + polling, эсвэл callback хоёр удаа).
+    if (params.providerPaymentId) {
+      const existing = await this.prisma.payment.findFirst({
+        where: { providerPaymentId: params.providerPaymentId },
+      });
+      if (existing) {
+        // Аль хэдийн боловсруулагдсан, чимээгүй амжилттай буцаа
+        return { handled: true, paymentId: existing.id };
+      }
+    }
+
     const payment = await this.prisma.payment.findFirst({
       where: {
         qpayInvoiceId: params.qpayInvoiceId,
@@ -142,24 +179,44 @@ export class PaymentsService {
       return { handled: false, reason: 'UNDERPAID' };
     }
 
-    const updated = await this.prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: PaymentStatus.CONFIRMED, paidAt: new Date() },
-    });
-    await this.audit.record({
-      actorId: 'SYSTEM_QPAY',
-      actorRole: 'SYSTEM',
-      action: 'CONFIRM',
-      entity: 'Payment',
-      entityId: payment.id,
-      before: { status: payment.status },
-      after: {
-        status: updated.status,
-        providerPaymentId: params.providerPaymentId,
-      },
-      reason: 'QPay /v2/payment/check-ээр баталгаажсан',
-    });
-    return { handled: true, paymentId: payment.id };
+    try {
+      const updated = await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: PaymentStatus.CONFIRMED,
+          paidAt: new Date(),
+          // providerPaymentId @unique, race condition ӨС түвшинд хамгаалагдана
+          providerPaymentId: params.providerPaymentId || undefined,
+        },
+      });
+      await this.audit.record({
+        actorId: 'SYSTEM_QPAY',
+        actorRole: 'SYSTEM',
+        action: 'CONFIRM',
+        entity: 'Payment',
+        entityId: payment.id,
+        before: { status: payment.status },
+        after: {
+          status: updated.status,
+          providerPaymentId: params.providerPaymentId,
+        },
+        reason: 'QPay /v2/payment/check-ээр баталгаажсан',
+      });
+      return { handled: true, paymentId: payment.id };
+    } catch (err: unknown) {
+      // P2002 = Unique constraint violation (race condition)
+      if ((err as any)?.code === 'P2002') {
+        // Өөр процесс түүнийг аль хэдийн баталгаажуулсан
+        const alreadyConfirmed = await this.prisma.payment.findFirst({
+          where: { providerPaymentId: params.providerPaymentId },
+        });
+        if (alreadyConfirmed) {
+          // Чимээгүй хариулна
+          return { handled: true, paymentId: alreadyConfirmed.id };
+        }
+      }
+      throw err;
+    }
   }
 
   my(userId: string) {

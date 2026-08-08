@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import NumericKeypad from "@/components/NumericKeypad";
+import { Dot } from "@/components/ui/Meta";
 import { parseFillSlots, slotsTotalLength, type FillSlotGroup } from "./fillSlots";
 
 /* ============================================================================
@@ -225,8 +226,8 @@ function SlotFill({
                 );
               })}
               {gi < groups.length - 1 && (
-                <span aria-hidden className="mb-4 text-lg text-ink-dim">
-                  ·
+                <span aria-hidden className="mb-4 flex items-center text-lg text-ink-dim">
+                  <Dot />
                 </span>
               )}
             </div>

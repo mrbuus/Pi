@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight, User, TriangleAlert, RotateCw } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -13,8 +14,8 @@ import {
   LateRangePicker,
   type LateRangeValue,
 } from "@/components/attendance/LateRangePicker";
-import { ErrorState } from "@/components/ui/StateBlock";
 import { Card, SectionHeader } from "@/components/ui/Surface";
+import { Dot } from "@/components/ui/Meta";
 
 interface StudentAttendance {
   id: string;
@@ -253,7 +254,9 @@ export default function AttendanceSection({
         title={isToday ? "Өнөөдрийн ирц" : "Ирц"}
         hint={
           !hideDateHeader && (
-            <span className="text-sm text-ink-dim">· {selectedDate}</span>
+            <span className="text-sm text-ink-dim">
+              <Dot /> {selectedDate}
+            </span>
           )
         }
         actions={
@@ -285,9 +288,7 @@ export default function AttendanceSection({
       {dayError || (
         <div className="space-y-2">
           {listLoading ? (
-            <p className="animate-pulse text-sm text-ink-dim" role="status">
-              Ачаалж байна…
-            </p>
+            <LoadingState rows={3} label="Ачаалж байна" />
           ) : activeRows.length === 0 ? (
             <p className="text-sm text-ink-dim">Сурагч байхгүй</p>
           ) : (

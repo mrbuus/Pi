@@ -1,6 +1,8 @@
 "use client";
 
 import { Lock, Check, ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { Meta } from "@/components/ui/Meta";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -129,9 +131,7 @@ export default function LessonChapterPage() {
     return (
       <div className="space-y-4">
         <BackLink subject={subject} />
-        <div className="rounded-2xl border border-line bg-panel p-10 text-center text-sm text-ink-dim">
-          Ачаалж байна…
-        </div>
+        <LoadingState rows={5} label="Бүлгийг ачааллаж байна" />
       </div>
     );
   }
@@ -444,12 +444,10 @@ function TestStep({ tests }: { tests: LessonDetail["tests"] }) {
         >
           <div className="min-w-0 flex-1">
             <p className="font-bold">
-              {t.title}
-              {t.variantLabel ? ` · ${t.variantLabel}` : ""}
+              <Meta items={[t.title, t.variantLabel ?? ""]} />
             </p>
             <p className="mt-0.5 text-xs text-ink-dim">
-              {TEST_TYPE_LABEL[t.type] ?? t.type}
-              {t.timeLimitMin ? ` · ${t.timeLimitMin} мин` : ""}
+              <Meta items={[TEST_TYPE_LABEL[t.type] ?? t.type, t.timeLimitMin ? `${t.timeLimitMin} мин` : ""]} />
             </p>
           </div>
           <span className="shrink-0 text-ink-dim" aria-hidden>

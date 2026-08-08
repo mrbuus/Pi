@@ -1,5 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { toE164Mn } from './phone';
+import { calculateSmsSegments } from './sms-segments';
 
 /**
  * SMS илгээх давхарга — НИЙЛҮҮЛЭГЧЭЭС ХАРААТ БУС.
@@ -32,6 +34,8 @@ export type SmsProviderKind = 'console' | 'twilio' | 'http';
 export class SmsService {
   private readonly logger = new Logger(SmsService.name);
 
+  constructor(private prisma: PrismaService) {}
+
   private get provider(): SmsProviderKind | null {
     const raw = process.env.SMS_PROVIDER?.trim().toLowerCase();
     if (raw === 'twilio' || raw === 'http' || raw === 'console') return raw;
@@ -60,7 +64,29 @@ export class SmsService {
    * SMS илгээнэ. Амжилтгүй бол throw хийнэ — дуудагч нь ерөнхий мессеж рүү
    * хөрвүүлэх үүрэгтэй (хэрэглэгч байгаа эсэхийг илчлэхгүйн тулд).
    */
-  async send(toRaw: string, text: string): Promise<void> {
+
+
+
+
+
+
+
+
+
+
+  /**
+   * Орлуулагчийг нээх
+   */
+  private extractVariables(text: string): string[] {
+    const regex = /\{\{(\w+)\}\}/g;
+    const matches = [...text.matchAll(regex)];
+    return [...new Set(matches.map((m) => m[1]))];
+  }
+
+  /**
+   * Нэг SMS явуулах (приват)
+   */
+  private async sendSingle(toRaw: string, text: string): Promise<void> {
     const to = toE164Mn(toRaw);
     if (!to) throw new Error(`Утасны дугаар танигдсангүй: ${toRaw}`);
 
@@ -77,6 +103,113 @@ export class SmsService {
       case 'http':
         return this.sendViaHttp(to, text);
     }
+  }
+
+  /**
+   * SMS илгээж, үндсэнд нь SmsMessage мөр үүсгэнэ. Эгүүлэх урсгалд
+   * (нууц үг сэргээх, явуулалт гэх мэт) ашигладаг.
+   *
+   * НУУЦЛАЛ (PASSWORD_RESET): Мессежийн body-д кодыг ХАДГАЛАХГҮЙ.
+   * Зөвхөн "код илгээсэн" гэсэн үйл явдлыг бүртгэнэ.
+   *
+   * @param toPhone Үндэсний дугаар ("99112233") эсвэл E.164 ("+97699112233")
+   * @param text SMS мессеж (кодгүй!)
+   * @param createdByUserId Илгээгч ажилтны ID (админ/багш+)
+   * @param kind SmsKind (PASSWORD_RESET, ANNOUNCEMENT гэх мэт)
+   * @param templateId Хэрэглэсэн template-ы ID (сонгогдох)
+   *
+   * @throws Error уг нийлүүлэгчийн алдаа
+   *
+   * @returns SmsMessage-ын ID + metadata
+   */
+  async sendAndLog(
+    toPhone: string,
+    text: string,
+    createdByUserId: string,
+    kind: 'PASSWORD_RESET' | 'ANNOUNCEMENT' | 'PAYMENT_REMINDER' | 'ATTENDANCE' | 'EXAM' | 'MANUAL' | 'OTHER' = 'MANUAL',
+    templateId?: string,
+    userId?: string, // сурагч эсвэл хүлээн авагчийн ID (сонгогдох)
+  ): Promise<{
+    messageId: string;
+    phone: string;
+    segments: number;
+    status: 'QUEUED' | 'SENT' | 'FAILED';
+  }> {
+    const national = toE164Mn(toPhone);
+    if (!national) throw new Error(`Утасны дугаар танигдсангүй: ${toPhone}`);
+
+    const segments = calculateSmsSegments(text);
+
+    // Мөрийг үүсгэнэ, статус QUEUED эхэлнэ
+    const message = await this.prisma.smsMessage.create({
+      data: {
+        toPhone: national,
+        body: text,
+        status: 'QUEUED',
+        kind,
+        segments,
+        userId: userId ?? null,
+        templateId: templateId ?? null,
+        createdById: createdByUserId,
+      },
+    });
+
+    // Нийлүүлэгчээр илгээхийг оролддог
+    let sendStatus: 'SENT' | 'FAILED' = 'FAILED';
+    let errorMsg: string | null = null;
+
+    try {
+      // Нийлүүлэгчийн API-г шууд дуудаж (send() дуудахгүй)
+      const kind = this.provider;
+      if (kind === null) throw new Error('SMS_PROVIDER тохируулаагүй байна');
+
+      switch (kind) {
+        case 'console':
+          this.logger.warn(`[SMS:console] ${national} ← ${text}`);
+          break;
+        case 'twilio':
+          await this.sendViaTwilio(national, text);
+          break;
+        case 'http':
+          await this.sendViaHttp(national, text);
+          break;
+      }
+
+      sendStatus = 'SENT';
+
+      // SmsMessage-г SENT руу өөрчилнө
+      await this.prisma.smsMessage.update({
+        where: { id: message.id },
+        data: {
+          status: 'SENT',
+          sentAt: new Date(),
+        },
+      });
+
+      this.logger.log(`SMS ilgeegdsen: id=${message.id} to=${national}`);
+    } catch (err) {
+      sendStatus = 'FAILED';
+      errorMsg = err instanceof Error ? err.message : String(err);
+
+      // FAILED-т оруулна + алдаа бичнэ
+      await this.prisma.smsMessage.update({
+        where: { id: message.id },
+        data: {
+          status: 'FAILED',
+          error: errorMsg.slice(0, 500),
+        },
+      });
+
+      this.logger.error(`SMS aldaa: id=${message.id} to=${national} — ${errorMsg}`);
+      throw err;
+    }
+
+    return {
+      messageId: message.id,
+      phone: national,
+      segments,
+      status: sendStatus,
+    };
   }
 
   private async sendViaTwilio(to: string, text: string): Promise<void> {

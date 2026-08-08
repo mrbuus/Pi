@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
+import { Meta, Dot } from "@/components/ui/Meta";
 import RoomShape from "./RoomShape";
 import {
   formatMinutes,
@@ -78,13 +79,20 @@ function SameTimeHint({ entries }: { entries: WeekEntry[] }) {
       Энэ цагт:
       {entries.map((e) => (
         <span key={e.scheduleId} className="inline-flex items-center gap-1">
-          <RoomShape
-            room={e.room}
-            size={11}
-            color={getClassroomColor(e.classroomId)}
+          {/* Ангийн өнгө = жижиг цэг, дүрс = танхим (будалтгүй). Ангийн нэр
+              хажууд нь бичигдсэн тул өнгө дангаараа мэдээлэл дамжуулахгүй. */}
+          <span
+            className="inline-block h-2 w-2 shrink-0 rounded-full"
+            style={{ backgroundColor: getClassroomColor(e.classroomId) }}
+            aria-hidden
           />
-          {e.room ? `${e.room}·` : ""}
-          {e.classroomName.replace(/\s*\([^)]*\)$/, "")}
+          <Meta items={[
+            e.room && <>
+              <RoomShape room={e.room} size={11} />
+              {e.room}
+            </>,
+            e.classroomName.replace(/\s*\([^)]*\)$/, "")
+          ]} />
         </span>
       ))}
     </p>
@@ -411,17 +419,14 @@ export default function EntryActionPanel({
             {entry.classroomName.replace(/\s*\([^)]*\)$/, "")}
           </h2>
           <p className="mt-0.5 text-xs text-ink-dim">
-            {weekdayLabel}, {date} · {formatMinutes(entry.startMinute)}–
-            {formatMinutes(entry.endMinute)}
+            <Meta items={[
+              `${weekdayLabel}, ${date}`,
+              `${formatMinutes(entry.startMinute)}–${formatMinutes(entry.endMinute)}`
+            ]} />
           </p>
           {entry.room && (
             <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-dim">
-              <RoomShape
-                room={entry.room}
-                size={14}
-                color={getClassroomColor(entry.classroomId)}
-                className=""
-              />
+              <RoomShape room={entry.room} size={14} className="text-ink" />
               {entry.room} тоот
             </p>
           )}
@@ -432,8 +437,10 @@ export default function EntryActionPanel({
             </p>
           )}
           <p className="mt-1 text-xs text-ink-dim">
-            {entry.teacherName ?? "Багш товлогдоогүй"}
-            {entry.subject ? ` · ${SUBJECT_LABEL[entry.subject] ?? entry.subject}` : ""}
+            <Meta items={[
+              entry.teacherName ?? "Багш товлогдоогүй",
+              entry.subject && (SUBJECT_LABEL[entry.subject] ?? entry.subject)
+            ]} />
           </p>
         </div>
 
@@ -604,14 +611,9 @@ export default function EntryActionPanel({
                     className={`${inputCls} flex-1`}
                   />
                   {moveRoom && (
-                    // Өнгө = АНГИ, дүрс = танхим — тул энд тухайн ангийн
-                    // өнгөөр будна (танхимын нэрээр биш).
-                    <RoomShape
-                      room={moveRoom}
-                      size={16}
-                      color={getClassroomColor(entry.classroomId)}
-                      className="shrink-0"
-                    />
+                    // Дүрс = танхим, будалтгүй ink. Анги нь самбарын толгойд
+                    // нэрээрээ бичигдсэн тул энд өнгө давхардуулах шаардлагагүй.
+                    <RoomShape room={moveRoom} size={16} className="shrink-0 text-ink" />
                   )}
                 </div>
                 <SameTimeHint entries={sameTime} />
@@ -751,12 +753,7 @@ export default function EntryActionPanel({
                           className={`${inputCls} flex-1`}
                         />
                         {splitRoom && (
-                          <RoomShape
-                            room={splitRoom}
-                            size={14}
-                            color={getClassroomColor(entry.classroomId)}
-                            className="shrink-0"
-                          />
+                          <RoomShape room={splitRoom} size={14} className="shrink-0 text-ink" />
                         )}
                       </div>
                       <SameTimeHint entries={sameTime} />

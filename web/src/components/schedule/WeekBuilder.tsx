@@ -69,10 +69,11 @@ function EntryRow({
         {formatMinutes(entry.startMinute)}–{formatMinutes(entry.endMinute)}
       </span>
 
-      {/* RoomShape дүрс — танхимын өнгөөр */}
+      {/* Танхимын дүрс — БУДАЛТГҮЙ, ink өнгөөр (эзний дүрэм). Ангийн өнгө нь
+          дээрх зүүн зурвас (borderLeftColor) дээр аль хэдийн байгаа. */}
       {entry.room && (
-        <div className="shrink-0">
-          <RoomShape room={entry.room} size={16} color={color} className="" />
+        <div className="shrink-0 text-ink">
+          <RoomShape room={entry.room} size={16} />
         </div>
       )}
 

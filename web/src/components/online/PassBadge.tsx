@@ -1,4 +1,5 @@
 import { CheckCircle2, Hourglass } from "lucide-react";
+import { Meta } from "@/components/ui/Meta";
 import { ActivePassInfo } from "./types";
 import { formatDate } from "./format";
 
@@ -42,7 +43,7 @@ export default function PassBadge({
         {expiringSoon ? "Удахгүй дуусна" : "Хүчинтэй"}
       </span>
       <span className="text-xs text-ink-dim">
-        {activePass.name} · Дуусах: {formatDate(activePass.expiresAt)}
+        <Meta items={[activePass.name, `Дуусах: ${formatDate(activePass.expiresAt)}`]} />
       </span>
     </div>
   );

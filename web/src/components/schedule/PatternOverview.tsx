@@ -37,8 +37,8 @@ function errMsg(e: unknown): string {
  */
 
 const COLUMNS: readonly { key: string; title: string; days: readonly number[] }[] = [
-  { key: "odd", title: "Даваа · Лхагва · Баасан", days: [1, 3, 5] },
-  { key: "even", title: "Мягмар · Пүрэв", days: [2, 4] },
+  { key: "odd", title: "Даваа — Лхагва — Баасан", days: [1, 3, 5] },
+  { key: "even", title: "Мягмар — Пүрэв", days: [2, 4] },
   { key: "sat", title: "Бямба", days: [6] },
   { key: "sun", title: "Ням", days: [0] },
 ];
@@ -231,24 +231,29 @@ export default function PatternOverview({ readOnly = false }: { readOnly?: boole
                                 <span className="h-px flex-1 bg-line/70" aria-hidden />
                               </p>
                             )}
+                            {/* Ангийн өнгө = ЗҮҮН ЗУРВАС + (hover үед) зөөлөн
+                                дэвсгэр. Текст болон дүрс дээр өнгө ОРОХГҮЙ —
+                                эзний дүрэм, мөн ангийн палитр текстэд
+                                хангалтгүй контрасттай (globals.css .class-row
+                                тайлбар харна уу).
+                                rounded-r-lg: зүүн талыг мурийлгавал зурвас
+                                тасарч харагдана. */}
                             <RowTag
                               {...(readOnly
                                 ? {}
                                 : { type: "button" as const, onClick: () => openGroup(g, col.days) })}
-                              className={`flex w-full items-center gap-2 rounded-lg px-1.5 py-1 text-left ${
-                                readOnly ? "" : "transition hover:bg-bg"
+                              style={{ "--cls": color } as React.CSSProperties}
+                              className={`class-row flex w-full items-center gap-2 rounded-r-lg py-1 pr-1.5 pl-2 text-left ${
+                                readOnly ? "" : "class-row-interactive"
                               }`}
                             >
-                              <span className="flex w-13 shrink-0 items-center gap-1.5">
-                                <RoomShape room={g.room} size={16} color={color} />
+                              <span className="flex w-13 shrink-0 items-center gap-1.5 text-ink">
+                                <RoomShape room={g.room} size={16} />
                                 <span className="font-mono text-xs text-ink-dim">
                                   {g.room ?? "—"}
                                 </span>
                               </span>
-                              <span
-                                className="truncate text-sm font-semibold"
-                                style={{ color }}
-                              >
+                              <span className="truncate text-sm font-semibold text-ink">
                                 {g.classLabel}
                               </span>
                               {partial && (

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { api, fileUrl, uploadFile } from "@/lib/api";
+import { api, fileUrl, getRole, uploadFile } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 
 /* ============================================================================
  * Хэрэглэгчийн мэндчилгээ — бүх дотоод хуудсанд ижил хэлбэрээр ашиглана
@@ -72,9 +74,13 @@ export default function DashboardGreeting() {
   if (!me) return null;
 
   const verifiedChildren = children.filter((c) => c.verified);
+  const role = typeof window !== "undefined" ? getRole() : null;
+  const isStudent = role === "STUDENT";
 
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-4">
+    <div className="mb-6 space-y-4">
+      {/* Нэвтэрсэн хүний профайл */}
+      <div className="flex flex-wrap items-center gap-4">
       <button
         onClick={() => fileRef.current?.click()}
         disabled={uploading}
@@ -112,24 +118,50 @@ export default function DashboardGreeting() {
           Сайн байна уу, {me.firstName}!
         </p>
         <p className="text-sm text-ink-dim">
-          {ROLE_LABEL[me.role] ?? me.role}
-          {verifiedChildren.length > 0 && (
-            <>
-              {" · "}
-              <span className="font-semibold text-brand-soft">
-                {verifiedChildren
-                  .map((c) => `${c.student.firstName} ${c.student.lastName}`)
-                  .join(", ")}
-              </span>
-            </>
-          )}
+          <Meta
+            items={[
+              ROLE_LABEL[me.role] ?? me.role,
+              verifiedChildren.length > 0 ? (
+                <span className="font-semibold text-brand-soft">
+                  {verifiedChildren
+                    .map((c) => `${c.student.firstName} ${c.student.lastName}`)
+                    .join(", ")}
+                </span>
+              ) : null,
+            ]}
+          />
         </p>
+      </div>
       </div>
 
       {error && (
         <p className="w-full rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
           {error}
         </p>
+      )}
+
+      {/* Сурагчид үйл явцын товчийг харуулна */}
+      {isStudent && (
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/app/tests"
+            className="inline-flex items-center justify-center rounded-lg border border-brand-bright bg-brand-bright/15 px-4 py-2.5 text-sm font-semibold text-brand-soft transition hover:bg-brand-bright/25"
+          >
+            Шалгалт хай
+          </Link>
+          <Link
+            href="/app/homework"
+            className="inline-flex items-center justify-center rounded-lg border border-line px-4 py-2.5 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
+          >
+            Даалгавар
+          </Link>
+          <Link
+            href="/app/student/payments"
+            className="inline-flex items-center justify-center rounded-lg border border-line px-4 py-2.5 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
+          >
+            Төлбөр
+          </Link>
+        </div>
       )}
     </div>
   );

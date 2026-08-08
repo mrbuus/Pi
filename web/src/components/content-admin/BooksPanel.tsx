@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Check } from "lucide-react";
 import { api } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
 import { Book, errMsg, Msg, SUBJECT_LABEL, SUBJECTS, Subject } from "./types";
@@ -338,9 +339,10 @@ export default function BooksPanel({
                     </span>
                   </span>
                   <span className="block text-xs text-ink-dim">
-                    {b._count.chapters} бүлэг
-                    {typeof b.problemCount === "number" &&
-                      ` · ${b.problemCount} бодлого`}
+                    <Meta items={[
+                      `${b._count.chapters} бүлэг`,
+                      typeof b.problemCount === "number" && `${b.problemCount} бодлого`
+                    ]} />
                   </span>
                 </button>
                 <div className="flex shrink-0 gap-1">

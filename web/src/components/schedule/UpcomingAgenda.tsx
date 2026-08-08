@@ -3,6 +3,7 @@
 import { DoorOpen, Palmtree, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 import {
   addDaysToKey,
   CALENDAR_TYPE_ICON,
@@ -116,9 +117,13 @@ export default function UpcomingAgenda({
           </div>
           {day.holiday ? (
             <p className="mt-1 text-ink-dim">
-              {day.holiday.title}
-              {day.holiday.note ? ` — ${day.holiday.note}` : ""} · энэ өдөр
-              хичээл ЯВАГДАХГҮЙ
+              <Meta items={[
+                <>
+                  {day.holiday.title}
+                  {day.holiday.note && ` — ${day.holiday.note}`}
+                </>,
+                "энэ өдөр хичээл ЯВАГДАХГҮЙ"
+              ]} />
             </p>
           ) : day.classes.length === 0 ? (
             <p className="mt-1 text-ink-dim">Энэ өдөр хуваарьт хичээл алга</p>

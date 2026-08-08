@@ -61,7 +61,7 @@ export default function ParentRequestsSection({
                   <p className="text-xs text-ink-dim">
                     {request.student.phone}
                     {request.student.studentProfile?.grade &&
-                      ` · ${request.student.studentProfile.grade}-р анги`}
+                      ` — ${request.student.studentProfile.grade}-р анги`}
                   </p>
                 </div>
 

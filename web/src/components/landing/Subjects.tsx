@@ -3,6 +3,7 @@
 import { Pi, Scale, ChevronUp, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 
 interface Book {
   id: string;
@@ -44,14 +45,14 @@ const SUBJECTS: SubjectMeta[] = [
     icon: Pi,
     title: "Математик",
     description:
-      "Алгебр, геометр, тригонометр, магадлал зэрэг ЭЕШ-ийн бүх сэдвийг хамарсан бодлогын сангаар элсэлтийн шалгалтад бэлддэг. Үүнээс гадна хичээлээсээ хоцорсон сурагчдад зориулсан түвшин ахиулах танхимын анги тусдаа ажилладаг.",
+      "Алгебр, геометр, тригонометр, магадлал — ЭЕШ-ийн бүх сэдвийг бодлогын сангаар бэлддэг. Танхим болон онлайн, түвшин ахиулах ангиуд тусдаа.",
   },
   {
     key: "SOCIAL_STUDIES",
     icon: Scale,
     title: "Нийгмийн ухаан",
     description:
-      "Түүх, эрх зүй, эдийн засаг, философийн үндэс — ЭЕШ-ийн нийгмийн ухааны хөтөлбөрт нийцсэн, элсэлтийн шалгалтад чиглэсэн танхимын бэлтгэл.",
+      "Түүх, эрх зүй, эдийн засаг, философи — ЭЕШ-ийн нийгмийн ухааны хөтөлбөрт нийцсэн танхимын сургалт.",
   },
 ];
 
@@ -153,7 +154,7 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
                 >
                   <span className="block font-bold text-ink">{b.code}</span>
                   <span className="mt-0.5 block truncate text-xs text-ink-dim">
-                    {b.title} · {b._count.chapters} бүлэг
+                    <Meta items={[b.title, `${b._count.chapters} бүлэг`]} />
                   </span>
                 </button>
               ))}
@@ -169,7 +170,7 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
           {selectedBook && (
             <div className="mt-4 border-t border-line pt-4">
               <p className="text-xs font-bold uppercase tracking-wider text-brand">
-                {selectedBook.code} · бүлэг сэдэв
+                <Meta items={[selectedBook.code, "бүлэг сэдэв"]} />
               </p>
               {chaptersLoading ? (
                 <p className="mt-2 text-sm text-ink-dim">
@@ -185,9 +186,12 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
                           {i + 1}
                         </span>
                         <span className="min-w-0 truncate text-ink-dim">
-                          <span className="text-ink">{label}</span> · {topic} ·{" "}
-                          {c._count.problems} бодлого
-                          {c.freePreview ? " · үнэгүй" : ""}
+                          <Meta items={[
+                            <span className="text-ink">{label}</span>,
+                            topic,
+                            `${c._count.problems} бодлого`,
+                            c.freePreview && "үнэгүй"
+                          ]} />
                         </span>
                       </li>
                     );

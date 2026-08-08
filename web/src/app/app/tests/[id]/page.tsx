@@ -73,6 +73,8 @@ interface StartResp {
 interface ReviewItem {
   n: number;
   points: number;
+  chapterId?: string;
+  chapterTitle?: string;
   statementText?: string | null;
   answered: boolean;
   correct: boolean;
@@ -88,7 +90,13 @@ interface ReviewResp {
   leaveCount: number;
 }
 
-const MAX_LEAVES = 3; // энэ тооны дараа шалгалт автоматаар дуусна
+/* Шалгалтаас гарах хязгаар — эзний шийдвэр (2026-08-08):
+   «эхнийх дээр анхааруулга өгөөд, дараагийнх дээр шууд шалгалтыг
+   автоматаар дуусгадаг байхаар».
+   1 дэх гаралт → анхааруулга · 2 дахь гаралт → автоматаар илгээнэ.
+   ⚠️ ExamIntro дээр УРЬДЧИЛАН хэлнэ — гэнэтийн шийтгэл шударга бус. */
+const LEAVE_WARN = 1;
+const LEAVE_MAX = 2;
 const SAVE_DEBOUNCE_MS = 1200;
 const HEARTBEAT_MS = 20_000;
 // ±20% jitter — 1000 сурагч ойролцоо мөчид шалгалт эхэлбэл heartbeat-ууд нь
@@ -452,7 +460,7 @@ export default function TakeTestPage() {
       const next = leaveCountRef.current + 1;
       setLeaveCount(next);
       void flushSave(kind);
-      if (next >= MAX_LEAVES) void finish("LEAVES");
+      if (next >= LEAVE_MAX) void finish("LEAVES");
       else setLeaveWarnOpen(true);
     }
 
@@ -621,7 +629,8 @@ export default function TakeTestPage() {
         minutes={minutes}
         totalPoints={meta.totalPoints}
         manualGrading={manualGrading}
-        maxLeaves={MAX_LEAVES}
+        leaveWarn={LEAVE_WARN}
+        leaveMax={LEAVE_MAX}
         resume={resume}
         starting={starting}
         confirmStart={confirmStart}
@@ -667,7 +676,7 @@ export default function TakeTestPage() {
         title={meta.title}
         saveStatus={saveStatus}
         leaveCount={leaveCount}
-        maxLeaves={MAX_LEAVES}
+        maxLeaves={LEAVE_MAX}
         answeredCount={answeredCount}
         totalCount={problems.length}
         onOpenNavigator={() => setNavigatorOpen(true)}
@@ -742,7 +751,7 @@ export default function TakeTestPage() {
       <LeaveWarningDialog
         open={leaveWarnOpen}
         leaveCount={leaveCount}
-        maxLeaves={MAX_LEAVES}
+        maxLeaves={LEAVE_MAX}
         onAcknowledge={() => {
           setLeaveWarnOpen(false);
           void document.documentElement.requestFullscreen?.().catch(() => {});

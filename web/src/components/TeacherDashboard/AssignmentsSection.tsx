@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight, TriangleAlert } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import HomeworkCommentField from "@/components/homework/HomeworkCommentField";
@@ -200,9 +201,7 @@ export default function AssignmentsSection({
       {!classroomId ? (
         <p className="text-sm text-ink-dim">Эхлээд анги сонгоно уу</p>
       ) : loading ? (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       ) : rows.length === 0 ? (
         <p className="text-sm text-ink-dim">Энэ ангид сурагч алга байна</p>
       ) : (

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
+import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, setAuth } from "@/lib/api";
 import SubjectPicker, { type Subject } from "@/components/landing/SubjectPicker";
 
@@ -332,28 +333,31 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="phone" className="sr-only">
-                Утасны дугаар
-              </label>
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <label htmlFor="phone" className="block text-sm font-medium text-ink">
+                  Утасны дугаар
+                </label>
+                <InfoHint label="Нууц үг чинь юу вэ">
+                  Эхний нууц үг тань энэ утасны дугаар (8 орон) байна. Нэвтэрсний
+                  дараа «Миний мэдээлэл» хуудаснаас өөрчилж болно.
+                </InfoHint>
+              </div>
               <input
                 id="phone"
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
-                inputMode="numeric"
-                placeholder="Утасны дугаар (8 орон)"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="99112233"
                 aria-invalid={!!fieldErrors.phone}
                 aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
                 className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
                   fieldErrors.phone ? "border-error" : "border-line"
                 }`}
               />
-              {fieldErrors.phone ? (
+              {fieldErrors.phone && (
                 <p id="phone-error" role="alert" className="mt-1 text-xs text-error">
                   {fieldErrors.phone}
-                </p>
-              ) : (
-                <p className="mt-1 text-xs text-ink-dim">
-                  Эхний нууц үг тань энэ дугаар байна
                 </p>
               )}
             </div>

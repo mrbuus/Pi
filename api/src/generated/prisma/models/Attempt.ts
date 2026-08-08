@@ -71,6 +71,7 @@ export type AttemptCountAggregateOutputType = {
   autoCorrect: number
   selfState: number
   timeSpentSec: number
+  givenAnswer: number
   testId: number
   classroomId: number
   createdAt: number
@@ -123,6 +124,7 @@ export type AttemptCountAggregateInputType = {
   autoCorrect?: true
   selfState?: true
   timeSpentSec?: true
+  givenAnswer?: true
   testId?: true
   classroomId?: true
   createdAt?: true
@@ -224,6 +226,7 @@ export type AttemptGroupByOutputType = {
   autoCorrect: boolean | null
   selfState: $Enums.SelfState | null
   timeSpentSec: number | null
+  givenAnswer: runtime.JsonValue | null
   testId: string | null
   classroomId: string | null
   createdAt: Date
@@ -261,6 +264,7 @@ export type AttemptWhereInput = {
   autoCorrect?: Prisma.BoolNullableFilter<"Attempt"> | boolean | null
   selfState?: Prisma.EnumSelfStateNullableFilter<"Attempt"> | $Enums.SelfState | null
   timeSpentSec?: Prisma.IntNullableFilter<"Attempt"> | number | null
+  givenAnswer?: Prisma.JsonNullableFilter<"Attempt">
   testId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Attempt"> | Date | string
@@ -277,6 +281,7 @@ export type AttemptOrderByWithRelationInput = {
   autoCorrect?: Prisma.SortOrderInput | Prisma.SortOrder
   selfState?: Prisma.SortOrderInput | Prisma.SortOrder
   timeSpentSec?: Prisma.SortOrderInput | Prisma.SortOrder
+  givenAnswer?: Prisma.SortOrderInput | Prisma.SortOrder
   testId?: Prisma.SortOrderInput | Prisma.SortOrder
   classroomId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -296,6 +301,7 @@ export type AttemptWhereUniqueInput = Prisma.AtLeast<{
   autoCorrect?: Prisma.BoolNullableFilter<"Attempt"> | boolean | null
   selfState?: Prisma.EnumSelfStateNullableFilter<"Attempt"> | $Enums.SelfState | null
   timeSpentSec?: Prisma.IntNullableFilter<"Attempt"> | number | null
+  givenAnswer?: Prisma.JsonNullableFilter<"Attempt">
   testId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Attempt"> | Date | string
@@ -312,6 +318,7 @@ export type AttemptOrderByWithAggregationInput = {
   autoCorrect?: Prisma.SortOrderInput | Prisma.SortOrder
   selfState?: Prisma.SortOrderInput | Prisma.SortOrder
   timeSpentSec?: Prisma.SortOrderInput | Prisma.SortOrder
+  givenAnswer?: Prisma.SortOrderInput | Prisma.SortOrder
   testId?: Prisma.SortOrderInput | Prisma.SortOrder
   classroomId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -334,6 +341,7 @@ export type AttemptScalarWhereWithAggregatesInput = {
   autoCorrect?: Prisma.BoolNullableWithAggregatesFilter<"Attempt"> | boolean | null
   selfState?: Prisma.EnumSelfStateNullableWithAggregatesFilter<"Attempt"> | $Enums.SelfState | null
   timeSpentSec?: Prisma.IntNullableWithAggregatesFilter<"Attempt"> | number | null
+  givenAnswer?: Prisma.JsonNullableWithAggregatesFilter<"Attempt">
   testId?: Prisma.StringNullableWithAggregatesFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableWithAggregatesFilter<"Attempt"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Attempt"> | Date | string
@@ -346,6 +354,7 @@ export type AttemptCreateInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -362,6 +371,7 @@ export type AttemptUncheckedCreateInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -374,6 +384,7 @@ export type AttemptUpdateInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -390,6 +401,7 @@ export type AttemptUncheckedUpdateInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -404,6 +416,7 @@ export type AttemptCreateManyInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -416,6 +429,7 @@ export type AttemptUpdateManyMutationInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -430,6 +444,7 @@ export type AttemptUncheckedUpdateManyInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,6 +469,7 @@ export type AttemptCountOrderByAggregateInput = {
   autoCorrect?: Prisma.SortOrder
   selfState?: Prisma.SortOrder
   timeSpentSec?: Prisma.SortOrder
+  givenAnswer?: Prisma.SortOrder
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -594,6 +610,7 @@ export type AttemptCreateWithoutStudentInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -608,6 +625,7 @@ export type AttemptUncheckedCreateWithoutStudentInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -651,6 +669,7 @@ export type AttemptScalarWhereInput = {
   autoCorrect?: Prisma.BoolNullableFilter<"Attempt"> | boolean | null
   selfState?: Prisma.EnumSelfStateNullableFilter<"Attempt"> | $Enums.SelfState | null
   timeSpentSec?: Prisma.IntNullableFilter<"Attempt"> | number | null
+  givenAnswer?: Prisma.JsonNullableFilter<"Attempt">
   testId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Attempt"> | Date | string
@@ -663,6 +682,7 @@ export type AttemptCreateWithoutProblemInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -677,6 +697,7 @@ export type AttemptUncheckedCreateWithoutProblemInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -716,6 +737,7 @@ export type AttemptCreateManyStudentInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -728,6 +750,7 @@ export type AttemptUpdateWithoutStudentInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -742,6 +765,7 @@ export type AttemptUncheckedUpdateWithoutStudentInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -755,6 +779,7 @@ export type AttemptUncheckedUpdateManyWithoutStudentInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -768,6 +793,7 @@ export type AttemptCreateManyProblemInput = {
   autoCorrect?: boolean | null
   selfState?: $Enums.SelfState | null
   timeSpentSec?: number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
   createdAt?: Date | string
@@ -780,6 +806,7 @@ export type AttemptUpdateWithoutProblemInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -794,6 +821,7 @@ export type AttemptUncheckedUpdateWithoutProblemInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -807,6 +835,7 @@ export type AttemptUncheckedUpdateManyWithoutProblemInput = {
   autoCorrect?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   selfState?: Prisma.NullableEnumSelfStateFieldUpdateOperationsInput | $Enums.SelfState | null
   timeSpentSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -823,6 +852,7 @@ export type AttemptSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   autoCorrect?: boolean
   selfState?: boolean
   timeSpentSec?: boolean
+  givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
   createdAt?: boolean
@@ -839,6 +869,7 @@ export type AttemptSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   autoCorrect?: boolean
   selfState?: boolean
   timeSpentSec?: boolean
+  givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
   createdAt?: boolean
@@ -855,6 +886,7 @@ export type AttemptSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   autoCorrect?: boolean
   selfState?: boolean
   timeSpentSec?: boolean
+  givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
   createdAt?: boolean
@@ -871,12 +903,13 @@ export type AttemptSelectScalar = {
   autoCorrect?: boolean
   selfState?: boolean
   timeSpentSec?: boolean
+  givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
   createdAt?: boolean
 }
 
-export type AttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "problemId" | "source" | "occurredOn" | "autoCorrect" | "selfState" | "timeSpentSec" | "testId" | "classroomId" | "createdAt", ExtArgs["result"]["attempt"]>
+export type AttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "problemId" | "source" | "occurredOn" | "autoCorrect" | "selfState" | "timeSpentSec" | "givenAnswer" | "testId" | "classroomId" | "createdAt", ExtArgs["result"]["attempt"]>
 export type AttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -905,6 +938,24 @@ export type $AttemptPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     autoCorrect: boolean | null
     selfState: $Enums.SelfState | null
     timeSpentSec: number | null
+    /**
+     * *
+     *    * Сурагчийн ЯГ ЮУ хариулсан — гүйцэтгэлийн үнэлгээ БИШ, агуулга.
+     *    * ⚠️ ЯАГААД ЭНЭ ХЭРЭГТЭЙ ВЭ (2026-08-08-нд нэмсэн):
+     *    * Өмнө нь зөвхөн `autoCorrect` (үнэн/худал) хадгалагддаг байсан. Тэр нь
+     *    * «буруу» гэдгийг л хэлнэ, «ЯАГААД буруу» гэдгийг хэлэхгүй. Улмаас:
+     *    * • distractor analysis (аль буруу сонголтыг хэн сонгов) БОЛОМЖГҮЙ
+     *    * • алдааны ангилал / misconception илрүүлэлт БОЛОМЖГҮЙ
+     *    * • ирээдүйд загвар сургахад хамгийн үнэ цэнэтэй дохио ДУТУУ
+     *    * Хариулт нь `TestAttemptSession.draftAnswers`-т үлддэг ч тэр нь зөвхөн
+     *    * онлайн сесстэй холбоотой, цаасан/OMR эх сурвалжийг хамрахгүй.
+     *    * ХАДГАЛАХ УТГА: `gradeAnswer()`-ийн буцаадаг `canonicalAnswer` —
+     *    * сонголтын ЖИНХЭНЭ ТЕКСТ (эсвэл тоон хариу), холилтын дараалалаас ҮЛ
+     *    * ХАМААРНА. Түүхий индекс хадгалбал тухайн сессийн `choiceOrder` байхгүй
+     *    * бол дараа нь тайлагдахгүй болно.
+     *    * Хоосон (null) байж болно: хариулаагүй, эсвэл хариу тодорхойгүй бодлого.
+     */
+    givenAnswer: runtime.JsonValue | null
     testId: string | null
     classroomId: string | null
     createdAt: Date
@@ -1341,6 +1392,7 @@ export interface AttemptFieldRefs {
   readonly autoCorrect: Prisma.FieldRef<"Attempt", 'Boolean'>
   readonly selfState: Prisma.FieldRef<"Attempt", 'SelfState'>
   readonly timeSpentSec: Prisma.FieldRef<"Attempt", 'Int'>
+  readonly givenAnswer: Prisma.FieldRef<"Attempt", 'Json'>
   readonly testId: Prisma.FieldRef<"Attempt", 'String'>
   readonly classroomId: Prisma.FieldRef<"Attempt", 'String'>
   readonly createdAt: Prisma.FieldRef<"Attempt", 'DateTime'>

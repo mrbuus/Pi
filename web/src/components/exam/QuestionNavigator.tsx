@@ -2,6 +2,7 @@
 
 import { Flag } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { Meta } from "@/components/ui/Meta";
 
 /* ============================================================================
  * QuestionNavigator — толгойн товчноос нээгддэг 8×5 (=40) торон навигатор.
@@ -84,7 +85,11 @@ export default function QuestionNavigator({
             <p className="text-xs text-ink-dim">
               {answeredCount}/{cells.length} хариулсан
               {flaggedCount > 0 && (
-                <span> · <Flag size={12} className="inline mr-0.5" aria-hidden /> {flaggedCount} тэмдэглэсэн</span>
+                <Meta items={[
+                  <>
+                    <Flag size={12} className="inline mr-0.5" aria-hidden /> {flaggedCount} тэмдэглэсэн
+                  </>
+                ]} />
               )}
             </p>
           </div>

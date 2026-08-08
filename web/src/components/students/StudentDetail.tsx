@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Clock, Check, X, Pencil, ArrowLeft, TriangleAlert, Undo2 } from "lucide-react";
+import { Check, Pencil, ArrowLeft, TriangleAlert } from "lucide-react";
+import { Meta } from "@/components/ui/Meta";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+// Төлбөрийн төлөв/аргын нэрс НЭГ эх сурвалжаас — өмнө нь энд, PaymentsClient-д,
+// student/payments-д гурав давхардаж, тус бүр өөр үгтэй байв.
+import { METHOD_LABEL, STATUS_LABEL } from "@/components/payments/paymentHelpers";
 import { api, getRole } from "@/lib/api";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import SendPasswordResetButton from "./SendPasswordResetButton";
@@ -18,18 +23,6 @@ import {
   fullName,
   money,
 } from "./types";
-
-const METHOD_LABEL: Record<string, string> = {
-  QPAY: "QPay",
-  BANK_TRANSFER: "Данс",
-  CASH: "Бэлэн",
-};
-const STATUS_LABEL: Record<string, { icon?: any; text: string; cls: string }> = {
-  PENDING: { icon: Clock, text: "Хүлээгдэж буй", cls: "bg-warning/15 text-warning" },
-  CONFIRMED: { icon: Check, text: "Баталгаажсан", cls: "bg-success/15 text-success" },
-  REJECTED: { icon: X, text: "Цуцалсан", cls: "bg-error/15 text-error" },
-  REVERSED: { icon: Undo2, text: "Буцаасан", cls: "bg-ink/10 text-ink-dim" },
-};
 
 interface FormState {
   firstName: string;
@@ -274,7 +267,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
       <div className="space-y-4" aria-busy="true" aria-live="polite">
         <div className="h-24 animate-pulse rounded-2xl border border-line bg-panel" />
         <div className="h-40 animate-pulse rounded-2xl border border-line bg-panel" />
-        <p className="sr-only">Ачаалж байна…</p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       </div>
     );
   }
@@ -741,14 +734,21 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
                       className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-3 py-2 text-sm"
                     >
                       <span>
-                        {money(pay.amount)} ·{" "}
-                        <span className="text-ink-dim">
-                          {METHOD_LABEL[pay.method] ?? pay.method}
-                          {pay.forMonth ? ` · ${pay.forMonth}` : ""}
-                        </span>
+                        <Meta
+                          items={[
+                            money(pay.amount),
+                            <span
+                              key="method-forMonth"
+                              className="text-ink-dim"
+                            >
+                              {METHOD_LABEL[pay.method] ?? pay.method}
+                            </span>,
+                            pay.forMonth,
+                          ]}
+                        />
                       </span>
                       <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}>
-                        {st.icon && <st.icon className="h-3 w-3" aria-hidden />}
+                        <st.icon className="h-3 w-3 shrink-0" aria-hidden />
                         {st.text}
                       </span>
                     </div>

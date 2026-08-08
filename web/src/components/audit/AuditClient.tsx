@@ -1,12 +1,14 @@
 "use client";
 
 import { ChevronDown, ChevronUp, Coins, NotebookPen } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import AuditDiff from "./AuditDiff";
 import AuditFilters from "./AuditFilters";
 import { MONEY_ENTITY, GRADE_ENTITY, errMsg } from "./auditHelpers";
+import { Dot } from "@/components/ui/Meta";
 import type {
   AuditFilterValues,
   AuditListResponse,
@@ -124,9 +126,7 @@ export default function AuditClient() {
       />
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       )}
       {error && (
         <div className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
@@ -137,7 +137,7 @@ export default function AuditClient() {
       {!loading && !error && data && (
         <>
           <p className="text-xs text-ink-dim">
-            Нийт {data.total} бичлэг · хуудас {data.page}/{totalPages}
+            Нийт {data.total} бичлэг <Dot /> хуудас {data.page}/{totalPages}
           </p>
 
           <div className="space-y-2">
@@ -171,7 +171,7 @@ export default function AuditClient() {
                       <span className="font-bold">{row.action}</span>
                       <span className="text-ink-dim">{row.entity}</span>
                       <span className="rounded-full bg-panel px-2 py-0.5 text-xs text-ink-dim">
-                        {actorName(row.actorId)} ·{" "}
+                        {actorName(row.actorId)} <Dot />{" "}
                         {ROLE_LABEL[row.actorRole] ?? row.actorRole}
                       </span>
                     </span>

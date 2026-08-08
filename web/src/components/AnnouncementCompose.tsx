@@ -3,6 +3,7 @@
 import { Pin, Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { Meta, Dot } from "@/components/ui/Meta";
 
 interface Announcement {
   id: string;
@@ -150,9 +151,13 @@ export default function AnnouncementCompose() {
                 >
                   <span className="block font-semibold">{c.name}</span>
                   <span>
-                    {c.type === "ONLINE" ? "Онлайн" : "Танхим"}
-                    {c.grade ? ` · ${c.grade}-р анги` : ""} ·{" "}
-                    {c._count.enrollments} сурагч
+                    <Meta
+                      items={[
+                        c.type === "ONLINE" ? "Онлайн" : "Танхим",
+                        c.grade ? `${c.grade}-р анги` : null,
+                        `${c._count.enrollments} сурагч`,
+                      ]}
+                    />
                   </span>
                 </button>
               );

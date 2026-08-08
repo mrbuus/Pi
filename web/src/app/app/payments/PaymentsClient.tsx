@@ -4,10 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Check, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatMnt, TUITION } from "@/lib/orgInfo";
+import { Meta } from "@/components/ui/Meta";
 import OutstandingPanel from "@/components/payments/OutstandingPanel";
 import PaymentEditModal from "@/components/payments/PaymentEditModal";
 import ReversePaymentModal from "@/components/payments/ReversePaymentModal";
 import StudentHistoryPanel from "@/components/payments/StudentHistoryPanel";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import {
   METHOD_LABEL,
   STATUS_LABEL,
@@ -35,28 +37,13 @@ function SectionStatus({
   emptyText: string;
 }) {
   if (loading) {
-    return (
-      <p className="animate-pulse text-sm text-ink-dim" role="status">
-        Ачаалж байна…
-      </p>
-    );
+    return <LoadingState rows={3} label={emptyText} />;
   }
   if (error) {
-    return (
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-        <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>{error}</span>
-        <button
-          onClick={onRetry}
-          className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
-        >
-          Дахин ачаалах
-        </button>
-      </div>
-    );
+    return <ErrorState message={error} onRetry={onRetry} />;
   }
   if (empty) {
-    return <p className="text-sm text-ink-dim">{emptyText}</p>;
+    return <EmptyState title={emptyText} />;
   }
   return null;
 }
@@ -247,8 +234,7 @@ export default function PaymentsClient() {
                 ))}
               </div>
               <p className="mt-2 text-xs text-ink-dim">
-                Хуваан төлөх: эхний {formatMnt(tier.installment.firstPayment)} ·
-                үлдэгдлийг {tier.installment.deadline}-ны дотор барагдуулна
+                Хуваан төлөх: <Meta items={[`эхний ${formatMnt(tier.installment.firstPayment)}`, `үлдэгдлийг ${tier.installment.deadline}-ны дотор барагдуулна`]} />
               </p>
             </div>
           ))}
@@ -282,7 +268,7 @@ export default function PaymentsClient() {
                     </span>
                     <span className="text-ink-dim">{p.user?.phone}</span>
                     <span className="rounded-full bg-warning/15 px-3 py-0.5 text-xs font-bold text-warning">
-                      {formatMnt(p.amount)} · {METHOD_LABEL[p.method] ?? p.method}
+                      <Meta items={[formatMnt(p.amount), METHOD_LABEL[p.method] ?? p.method]} />
                     </span>
                     {p.forMonth && <span className="text-ink-dim">{p.forMonth}</span>}
                     <button
@@ -294,9 +280,11 @@ export default function PaymentsClient() {
                     </button>
                   </div>
                   <p className="mt-2 text-xs text-ink-dim">
-                    {match
-                      ? `Тохирч байна: ${match.tier.label} · ${match.plan.label}`
-                      : "Мэдэгдэж буй ямар ч сургалтын төлбөрийн багцтай тохирохгүй байна — шалгана уу"}
+                    {match ? (
+                      <>Тохирч байна: <Meta items={[match.tier.label, match.plan.label]} /></>
+                    ) : (
+                      "Мэдэгдэж буй ямар ч сургалтын төлбөрийн багцтай тохирохгүй байна — шалгана уу"
+                    )}
                   </p>
                   {p.description && (
                     <p className="mt-2 text-sm text-ink-dim">{p.description}</p>
@@ -316,7 +304,7 @@ export default function PaymentsClient() {
                       <option value="">Эрх олгохгүй</option>
                       {passes.map((pass) => (
                         <option key={pass.id} value={pass.id}>
-                          {pass.name} · {pass.durationDays} хоног
+                          {pass.name} — {pass.durationDays} хоног
                         </option>
                       ))}
                     </select>
@@ -381,10 +369,7 @@ export default function PaymentsClient() {
                 className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-4 py-2.5 text-sm"
               >
                 <span>
-                  {r.student.firstName} {r.student.lastName} ·{" "}
-                  <span className="text-ink-dim">
-                    {r.classroom.name} · {r.student.phone}
-                  </span>
+                  <Meta items={[`${r.student.firstName} ${r.student.lastName}`, r.classroom.name, r.student.phone]} />
                 </span>
                 <span className={`inline-flex items-center gap-1 ${r.paid ? "text-success" : "font-bold text-error"}`}>
                   {r.paid ? (
@@ -434,13 +419,13 @@ export default function PaymentsClient() {
                   className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-4 py-2.5 text-sm"
                 >
                   <span>
-                    {p.user?.firstName} {p.user?.lastName} ·{" "}
-                    <span className="text-ink-dim">
-                      {formatMnt(p.amount)} · {METHOD_LABEL[p.method] ?? p.method}
-                    </span>
+                    <Meta items={[`${p.user?.firstName} ${p.user?.lastName}`, formatMnt(p.amount), METHOD_LABEL[p.method] ?? p.method]} />
                   </span>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}
+                    >
+                      <st.icon className="h-3 w-3 shrink-0" aria-hidden />
                       {st.text}
                     </span>
                     <button

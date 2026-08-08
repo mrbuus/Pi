@@ -3,10 +3,9 @@
 import Link from "next/link";
 import ChangePasswordSection from "@/components/profile/ChangePasswordSection";
 
-/* Нууц үг солих — SPEC §6.2-ийн дагуу энэ урсгал заавал хэрэгтэй (анхны
-   нууц үг = утасны дугаар). Хуудас өөрөө одоо /app/profile-ийн нэг хэсэг
-   болсон ч хуучин холбоос/bookmark 404 болохгүйн тулд ЭНД ажиллаж байгаа
-   хэвээр үлдэв — доторх маягт ChangePasswordSection-той яг ижил. */
+/* Нууц үг солих — заавал хэрэгтэй урсгал. Хуудас өөрөө одоо «Миний мэдээлэл»
+   хуудасны нэг хэсэг болсон ч хуучин холбоос/bookmark 404 болохгүйн тулд
+   энд ажиллаж байгаа хэвээр үлдэв. */
 export default function ChangePasswordPage() {
   return (
     <div className="mx-auto max-w-sm">

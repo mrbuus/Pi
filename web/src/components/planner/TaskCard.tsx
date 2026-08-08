@@ -45,7 +45,7 @@ export default function TaskCard({
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-semibold text-ink">{task.title}</p>
         <span
-          className={`shrink-0 whitespace-nowrap text-xs font-semibold ${priorityMeta.colorClass}`}
+          className={`shrink-0 text-xs font-semibold ${priorityMeta.colorClass}`}
           title={`Чухал зэрэг: ${priorityMeta.label}`}
         >
           {priorityMeta.icon} {priorityMeta.label}

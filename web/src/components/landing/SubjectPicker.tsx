@@ -1,8 +1,9 @@
 "use client";
 
 import { CircleCheckBig, CircleX, Hourglass, Info } from "lucide-react";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
 import { api } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 
 // ============ Төрлүүд (сервертэй яг тохирсон байх ёстой) ============
 //
@@ -120,10 +121,15 @@ function StatusIcon({ status }: { status: EnrollmentStatus }) {
   return <CircleX aria-hidden size={14} className="text-ink-dim" />;
 }
 
-function statusText(status: EnrollmentStatus): string {
+function statusText(status: EnrollmentStatus): ReactNode {
   if (status === "OPEN") return "сонгох боломжтой";
-  if (status === "COMING_SOON") return "идэвхгүй · Удахгүй";
-  return "идэвхгүй · Элсэлт одоогоор дууссан";
+  if (status === "COMING_SOON")
+    return (
+      <Meta items={["идэвхгүй", "Удахгүй"]} />
+    );
+  return (
+    <Meta items={["идэвхгүй", "Элсэлт одоогоор дууссан"]} />
+  );
 }
 
 interface LockInfo {

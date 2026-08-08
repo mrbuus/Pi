@@ -30,7 +30,8 @@ interface AuthedRequest {
 export class PaymentsController {
   constructor(private payments: PaymentsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.STUDENT)
   @Post('payments')
   create(@Body() dto: CreatePaymentDto, @Req() req: AuthedRequest) {
     return this.payments.create(dto, req.user.userId, req.user.role);

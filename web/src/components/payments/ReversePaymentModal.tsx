@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { formatMnt } from "@/lib/orgInfo";
 import { METHOD_LABEL, errMsg } from "./paymentHelpers";
@@ -69,9 +70,16 @@ export default function ReversePaymentModal({
           Баталгаажсан төлбөр буцаах
         </h2>
         <p className="mt-2 text-sm text-ink-dim">
-          {payment.user && `${payment.user.firstName} ${payment.user.lastName} · `}
-          {formatMnt(payment.amount)} · {METHOD_LABEL[payment.method] ?? payment.method}
-          {payment.forMonth && ` · ${payment.forMonth}`}
+          <Meta
+            items={[
+              payment.user
+                ? `${payment.user.firstName} ${payment.user.lastName}`
+                : null,
+              formatMnt(payment.amount),
+              METHOD_LABEL[payment.method] ?? payment.method,
+              payment.forMonth,
+            ]}
+          />
         </p>
 
         <div className="mt-4 flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">

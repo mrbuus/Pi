@@ -1,23 +1,9 @@
 /**
- * Жил бүрийн ЭЕШ-ийн үр дүн — тогтвортой, амьдардаггүй тоо.
+ * Жил бүрийн ЭЕШ-ийн үр дүн — эзэн энэ ажлын хамрах хүрээнээс гадуур.
  *
- * ⚠️ Эзэн (2026-07-27) эдгээр тоог ОДООГООР МЭДЭХГҮЙ гэдгээ тодорхой хэлсэн.
- * Зохиомол он, тоо ХЭЗЭЭ Ч бичихгүй — хоосон "" утгатай мөрүүд үлдээж,
- * доор автоматаар "20__" / "__" гэж харуулна. Бодит тоо гарч ирвэл энэ
- * массивт нэг мөр нэмэх/засахад л хангалттай.
+ * ⚠️ Эзэн (2026-07-27) эдгээр тоог одоогоор мэдэхгүй. Зохиомол утга
+ * ХЭЗЭЭ Ч бичихгүй. Бодит тоо гарч ирвэл энэ файлыг шинэчилнэ.
  */
-interface YearlyExamResult {
-  /** жишээ нь "2025" — "20" гэсэн угтвар автоматаар нэмэгддэг тул сүүлийн 2 оронг л бич */
-  yearSuffix: string;
-  scored700Plus: string;
-  scored600Plus: string;
-}
-
-const YEARLY_EXAM_RESULTS: YearlyExamResult[] = [
-  { yearSuffix: "", scored700Plus: "", scored600Plus: "" }, // TODO: төвөөс бодит тоо авах
-  { yearSuffix: "", scored700Plus: "", scored600Plus: "" }, // TODO: төвөөс бодит тоо авах
-  { yearSuffix: "", scored700Plus: "", scored600Plus: "" }, // TODO: төвөөс бодит тоо авах
-];
 
 /** Баталгаажсан, тогтвортой суурь тоо (2026-07-26) — амжилтын жагсаалтын дараа нам дуугаар. */
 const STABLE_FACTS = [
@@ -42,25 +28,10 @@ export default function Achievements() {
         </p>
 
         <div className="reveal mt-8 rounded-2xl border border-line bg-panel p-6">
-          <div className="grid gap-4">
-            {YEARLY_EXAM_RESULTS.map((row, i) => (
-              <p
-                key={i}
-                className="border-b border-line pb-4 text-base leading-relaxed text-ink last:border-0 last:pb-0"
-              >
-                <span className="font-bold">20{row.yearSuffix || "__"}</span>{" "}
-                онд{" "}
-                <span className="font-bold text-brand">
-                  {row.scored700Plus || "__"}
-                </span>{" "}
-                сурагч ЭЕШ-д <span className="font-bold">700+</span> оноо,{" "}
-                <span className="font-bold text-brand">
-                  {row.scored600Plus || "__"}
-                </span>{" "}
-                сурагч <span className="font-bold">600+</span> оноо авсан.
-              </p>
-            ))}
-          </div>
+          <p className="text-base leading-relaxed text-ink-dim">
+            Жил бүрийн ЭЕШ-ийн үр дүнгийн тоо төвөөс баталгаажсаны дараа
+            энд нэмэгдэнэ. Сургалтын төвөөс асуу.
+          </p>
         </div>
 
         <div className="reveal mt-6 flex flex-wrap items-center gap-x-8 gap-y-2 text-sm text-ink-dim">

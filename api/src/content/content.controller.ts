@@ -178,6 +178,14 @@ export class ContentController {
     );
   }
 
+  // Нэг бодлогыг уншина (сурагчид зөвшөөрнө)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.STUDENT, Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('problems/:problemId')
+  getProblem(@Param('problemId') problemId: string) {
+    return this.content.getProblem(problemId);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('chapters/:id/problems')
   listProblems(

@@ -1,5 +1,6 @@
 import { Check, Hourglass, NotebookPen, Play } from "lucide-react";
 import Link from "next/link";
+import { Meta } from "@/components/ui/Meta";
 import type { TestRow } from "./types";
 
 /* ============================================================================
@@ -16,8 +17,13 @@ export default function StudentRowAction({ test }: { test: TestRow }) {
         href={`/app/tests/${test.id}`}
         className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-success/15 px-3 py-1.5 text-xs font-bold text-success"
       >
-        <Check className="h-3.5 w-3.5" aria-hidden="true" /> Өгсөн · {test.results![0].totalScore}/
-        {test.results![0].maxScore}
+        <Check className="h-3.5 w-3.5" aria-hidden="true" />
+        <Meta
+          items={[
+            "Өгсөн",
+            `${test.results![0].totalScore}/${test.results![0].maxScore}`,
+          ]}
+        />
       </Link>
     );
   }

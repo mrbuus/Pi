@@ -94,11 +94,17 @@ export class AnnouncementsController {
     return this.announcements.create(dto, req.user.userId);
   }
 
-  // Танхимын сурагч өөрийн зарыг харна
-  @Roles(Role.STUDENT)
+  // Танхимын сурагч/эцэг эх сурагчийн зарыг харна
+  // Сурагч: өөрийн ангийн зар
+  // Эцэг эх: өөрийн хүүхдүүдийн ангийн зар
   @Get()
-  forStudent(@Req() req: AuthedRequest) {
-    return this.announcements.forStudent(req.user.userId);
+  myAnnouncements(@Req() req: AuthedRequest) {
+    if (req.user.role === Role.STUDENT) {
+      return this.announcements.forStudent(req.user.userId);
+    } else if (req.user.role === Role.PARENT) {
+      return this.announcements.forParentChildren(req.user.userId);
+    }
+    return [];
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)

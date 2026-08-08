@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, ArrowLeft, ArrowRight, TriangleAlert } from "lucide-react";
+import { Dot, MetaTitle } from "@/components/ui/Meta";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
 import {
   StudentListItem,
@@ -33,7 +35,7 @@ function paymentStatusOf(
 ): { text: string; cls: string } | null {
   const shortfall = outstandingMap.get(student.id);
   if (shortfall !== undefined) {
-    return { text: `Дутуу · ${money(shortfall)}`, cls: "bg-error/10 text-error" };
+    return { text: `Дутуу — ${money(shortfall)}`, cls: "bg-error/10 text-error" };
   }
   if (student.studentProfile?.tuitionPlan) {
     return { text: "Хэвийн", cls: "bg-success/10 text-success" };
@@ -169,7 +171,7 @@ export default function StudentsDirectory() {
           {students ? `Нийт ${students.length} сурагч` : "Ачаалж байна…"}
           {unassignedIds.size > 0 && (
             <>
-              {" · "}
+              <Dot />
               <button
                 type="button"
                 onClick={() => setUnassignedOnly(true)}
@@ -296,9 +298,7 @@ export default function StudentsDirectory() {
       </div>
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       )}
       {error && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
@@ -391,7 +391,7 @@ export default function StudentsDirectory() {
                               <span
                                 className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.cls}`}
                               >
-                                {status.text}
+                                <MetaTitle>{status.text}</MetaTitle>
                               </span>
                             ) : (
                               <span className="text-ink-dim">—</span>

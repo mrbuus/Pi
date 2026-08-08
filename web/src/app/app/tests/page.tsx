@@ -94,6 +94,8 @@ export default function TestsPage() {
   // Шүүлт/хайлт өөрчлөгдөхөд хуудаслалтыг эхнээс нь эхлүүлнэ
   useEffect(() => {
     setShownCount(PAGE_SIZE);
+    // Үндсэн ачаалалт эсвэл хайлт цэвэрлэхэд эхний сэдвийг автоматаар задлана
+    setOpen(new Set());
   }, [tab, query, subject, topicFilter]);
 
   const q = query.trim().toLowerCase();
@@ -254,7 +256,7 @@ export default function TestsPage() {
         {(
           [
             { key: "TEST", label: "Тест", count: testCount, hint: "сэдвийн дасгал" },
-            { key: "EXAM", label: "Шалгалт", count: examCount, hint: "сэдвийн шалгалт · сорил" },
+            { key: "EXAM", label: "Шалгалт", count: examCount, hint: "сэдвийн шалгалт, сорил" },
           ] as const
         ).map((tb) => (
           <button
@@ -327,13 +329,13 @@ export default function TestsPage() {
       {/* Сэдвийн бүлгүүд */}
       {!loading && !error && groups.length > 0 && (
         <div className="space-y-3">
-          {visibleGroups.map(([topic, rows]) => (
+          {visibleGroups.map(([topic, rows], idx) => (
             <TopicGroup
               key={topic}
               topic={topic}
               rows={rows}
               isTeacher={isTeacher}
-              expanded={q !== "" || open.has(topic)}
+              expanded={q !== "" || open.has(topic) || (idx === 0 && q === "")}
               onToggle={() => toggle(topic)}
             />
           ))}
@@ -344,7 +346,7 @@ export default function TestsPage() {
               className="min-h-11 w-full rounded-xl border border-line py-3 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
             >
               Дараагийн {Math.min(PAGE_SIZE, groups.length - shownCount)} сэдвийг харах
-              {" · "}
+              {" — "}
               {groups.length - shownCount} үлдсэн
             </button>
           )}

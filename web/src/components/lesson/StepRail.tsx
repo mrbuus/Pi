@@ -1,6 +1,7 @@
 "use client";
 
 import { BookOpen, Check, Clapperboard, NotebookPen, PenLine, type LucideIcon } from "lucide-react";
+import { Dot } from "@/components/ui/Meta";
 import type { StepStatus } from "./types";
 
 const STEP_ICON: Record<StepStatus["key"], LucideIcon> = {
@@ -85,8 +86,15 @@ export default function StepRail({
                   Алхам {idx + 1}
                 </span>
                 <span className="block truncate text-sm font-semibold">
-                  {step.label}
-                  {disabled && " · алга"}
+                  {disabled ? (
+                    <>
+                      {step.label}
+                      <Dot />
+                      алга
+                    </>
+                  ) : (
+                    step.label
+                  )}
                 </span>
               </span>
             </button>

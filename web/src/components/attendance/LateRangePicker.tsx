@@ -49,7 +49,7 @@ export function LateRangePicker({
             type="button"
             onClick={() => onChange(opt.value)}
             aria-pressed={isSelected}
-            className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-lg border px-2.5 text-xs font-medium transition ${
+            className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-2.5 py-2 text-xs font-medium transition ${
               isSelected
                 ? "border-warning bg-warning/20 text-warning"
                 : "border-line bg-ink/5 text-ink-dim"

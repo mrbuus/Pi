@@ -67,6 +67,19 @@ export class TestsController {
     return this.tests.start(id, req.user.userId);
   }
 
+  // Heartbeat: сурагч "амьд байна" гэдгийг 20с-т давж дуудана. Бичих үйлдэл БҮҮ.
+  // Асуудалтай хүсэлтийг (180/мин) автосейв-ийн lимит-д оруулна.
+  @Roles(Role.STUDENT)
+  @Throttle({ default: { limit: 180, ttl: 60_000 } })
+  @Post(':id/heartbeat')
+  heartbeat(
+    @Param('id') id: string,
+    @Body() dto: { event?: string } | undefined,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.tests.heartbeat(id, req.user.userId, dto?.event);
+  }
+
   // Autosave + анти-чит үйл явдал — HOT PATH. Бодит дээд хурд/сурагч ≈
   // debounce (1/1.2с ≈ 50/мин) + heartbeat (20с тутамд) ≈ 53/мин. 180/мин
   // (userId-аар) нь үүнээс 3+ дахин их тул тогтмол ажиллагаанд огт

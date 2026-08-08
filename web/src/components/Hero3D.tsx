@@ -1,30 +1,22 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { useMemo } from "react";
 import { useHeroSolid } from "./hero3d/catalog";
 import { DimensionLegend } from "./hero3d/DimensionLegend";
-import { Particles } from "./hero3d/primitives";
 import { useThemeColors } from "./hero3d/theme";
 import MathText from "./MathText";
+import { useMemo } from "react";
 
 /* ============================================================================
- * Нүүр хуудасны 3D биетийн үзэсгэлэн (Шийдвэр 10) — 10 минут тутам каталогийн
- * дараагийн биетийг детерминистикаар харуулна (хэрэглэгч бүрт ижил, сервер
- * дуудлагагүй). Биет тус бүрийн гол хэмжигдэхүүнүүд (r, h, a...) өөр өөр
- * өнгөөр тодруулагдаж, доод картанд нэр + томьёотойгоор тайлбарлагдана.
+ * Нүүр хуудасны 3D биетийн үзэсгэлэн — CSS 3D perspective + transform ашигла.
  *
- * Задаргаа: hero3d/theme.ts (өнгө), hero3d/primitives.tsx (хэмжилтийн шугам,
- * материал, тоос), hero3d/catalog.tsx (биетүүд + цагийн слот сонголт),
- * hero3d/DimensionLegend.tsx (доод легенд).
+ * Сүлжээнээс нэмэлт датаа татахгүй, WebGL хориотой. Эффект бүр цэвэр CSS.
  * ========================================================================== */
 
 export default function Hero3D() {
   const solid = useHeroSolid();
   const colors = useThemeColors();
-  // Хөдөлгөөн багасгах тохиргоотой хэрэглэгчид авто эргэлтгүй, зөвхөн
-  // өөрөө эргүүлэх үед рендерлэнэ (сул төхөөрөмжид ч хөнгөн)
+
+  // Хөдөлгөөн багасгах тохиргоотой хэрэглэгчид анимацгүй статик харагдац
   const reducedMotion = useMemo(
     () =>
       typeof window !== "undefined" &&
@@ -34,32 +26,91 @@ export default function Hero3D() {
 
   return (
     <>
-      {/* Canvas-ыг absolute давхаргад хийнэ: canvas инлайн px өргөнөө layout-д
-          тулгаж grid баганыг томруулдаг (агшихад түгждэг) асуудлыг таслана —
-          хэмжээ нь зөвхөн эцэг wrapper-ийн CSS-ээс тодорно */}
-      <div className="absolute inset-0">
-        <Canvas
-          camera={{ position: [0, 0.4, 3.9], fov: 50 }}
-          gl={{ antialias: true, alpha: true }}
-          dpr={[1, 2]}
-          frameloop={reducedMotion ? "demand" : "always"}
+      {/* CSS 3D дүрсжүүлэлт: perspective + rotateY анимац */}
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          perspective: "1200px",
+        }}
+      >
+        <div
+          className="animate-spin-slow"
+          style={{
+            width: "280px",
+            height: "280px",
+            transformStyle: "preserve-3d",
+            animation: reducedMotion ? "none" : "spin-y 8s linear infinite",
+          } as React.CSSProperties}
         >
-          <ambientLight intensity={0.5} />
-          <pointLight position={[5, 5, 5]} intensity={80} color={colors.body} />
-          <pointLight position={[-5, -3, 2]} intensity={40} color={colors.m1} />
-          {/* Биетийг багасгаж дээшлүүлнэ — доод тайлбарын карт халхлахгүй (Ё) */}
-          <group scale={0.72} position={[0, 0.55, 0]}>
-            {solid.render(colors)}
-          </group>
-          {!reducedMotion && <Particles color={colors.soft} />}
-          <OrbitControls
-            enableZoom={false}
-            enablePan={false}
-            autoRotate={!reducedMotion}
-            autoRotateSpeed={1.1}
-          />
-        </Canvas>
+          {/* CSS дүрсжүүлэлтийн биет — SVG эсвэл div shapes */}
+          <svg
+            viewBox="0 0 100 100"
+            className="w-full h-full"
+            style={{
+              filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.1))",
+            }}
+          >
+            {/* Геометрийн дүрс — хүрээлэлтээр сүүдэр */}
+            <defs>
+              <linearGradient
+                id="grad1"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" style={{ stopColor: colors.body, stopOpacity: 0.8 }} />
+                <stop offset="100%" style={{ stopColor: colors.m1, stopOpacity: 0.6 }} />
+              </linearGradient>
+            </defs>
+            {/* Сфер эсвэл куб дүрсжүүлэлт */}
+            <circle
+              cx="50"
+              cy="50"
+              r="35"
+              fill="url(#grad1)"
+              opacity="0.7"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="28"
+              fill="none"
+              stroke={colors.body}
+              strokeWidth="1.5"
+              opacity="0.5"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="20"
+              fill="none"
+              stroke={colors.m1}
+              strokeWidth="1"
+              opacity="0.4"
+            />
+          </svg>
+        </div>
+
+        {/* CSS анимацийн тодорхойлолт */}
+        <style>{`
+          @keyframes spin-y {
+            from {
+              transform: rotateY(0deg) rotateX(15deg);
+            }
+            to {
+              transform: rotateY(360deg) rotateX(15deg);
+            }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .animate-spin-slow {
+              animation: none !important;
+            }
+          }
+        `}</style>
       </div>
+
+      {/* Доод тайлбарын легенд */}
       <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-2xl border border-line bg-panel/90 px-4 py-3 text-left shadow-xl shadow-black/20 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="min-w-0 truncate text-sm font-bold text-ink">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Meta } from "@/components/ui/Meta";
 import { OnlineStudentListItem } from "./types";
 import { formatRelative } from "./format";
 import EngagementBadge from "./EngagementBadge";
@@ -24,8 +25,12 @@ export default function StudentRosterCard({
         <div className="min-w-0">
           <p className="truncate font-bold text-ink">{student.name}</p>
           <p className="text-sm text-ink-dim">
-            {student.studentCode ?? "Код тодорхойгүй"}
-            {student.grade ? ` · ${student.grade}-р анги` : ""}
+            <Meta
+              items={[
+                student.studentCode ?? "Код тодорхойгүй",
+                student.grade ? `${student.grade}-р анги` : null,
+              ]}
+            />
           </p>
         </div>
         <EngagementBadge level={student.engagement} />

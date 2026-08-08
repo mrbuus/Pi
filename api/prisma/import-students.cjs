@@ -838,7 +838,7 @@ function printSummary(report) {
   }
   console.log('Ангийн бүлгүүд (Classroom):', report.classrooms.length);
   for (const c of report.classrooms) {
-    console.log(`  ${c.grade}-р анги · ${c.displayName}: ${c.studentCount} сурагч`);
+    console.log(`  ${c.grade}-р анги — ${c.displayName}: ${c.studentCount} сурагч`);
   }
   console.log(
     '\n⚠️  PII анхааруулга: report файлд аав/ээж/сурагчийн БҮРЭН утасны дугаар орсон байж болно ' +

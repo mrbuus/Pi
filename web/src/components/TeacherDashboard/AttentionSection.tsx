@@ -99,7 +99,7 @@ export default function AttentionSection({ attention }: AttentionSectionProps) {
                 ))}
               </div>
               <p className="mt-1.5 text-xs text-ink-dim">
-                {row.flags.map((flag) => flag.detail).join(" · ")}
+                {row.flags.map((flag) => flag.detail).join(" — ")}
               </p>
             </div>
           ))}

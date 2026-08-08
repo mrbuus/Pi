@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { api } from "@/lib/api";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { getBookMeta } from "@/lib/bookMeta";
+import { Meta } from "@/components/ui/Meta";
 import {
   BANK,
   TUITION,
@@ -54,7 +56,7 @@ function useSection<T>(
       })
       .catch((e) => {
         if (!alive) return;
-        setError(e instanceof Error ? e.message : "Алдаа гарлаа");
+        setError(e instanceof Error ? e.message : "Өгөгдөл ачаалахад алдаа гарлаа");
         setStatus("error");
       });
     return () => {
@@ -73,19 +75,6 @@ function useSection<T>(
   return { data, status, error, reload };
 }
 
-function SectionError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-      <span>{message}</span>
-      <button
-        onClick={onRetry}
-        className="shrink-0 rounded-lg border border-error/40 px-3 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10"
-      >
-        Дахин оролдох
-      </button>
-    </div>
-  );
-}
 
 function formatAmount(raw: string): string {
   const digits = raw.replace(/\D/g, "");
@@ -155,7 +144,7 @@ export default function BuyerDashboard() {
       setSelected(null);
       passesQ.reload();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Алдаа гарлаа");
+      setMsg(e instanceof Error ? e.message : "Төлбөрийг илгээхэд алдаа гарлаа");
     } finally {
       setPaying(false);
     }
@@ -169,17 +158,16 @@ export default function BuyerDashboard() {
       <section className="rounded-2xl border border-line bg-panel p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Идэвхтэй эрхүүд</h2>
         {passesQ.status === "loading" && (
-          <p className="animate-pulse text-sm text-ink-dim" role="status">
-            Эрхүүд ачаалж байна…
-          </p>
+          <LoadingState rows={2} label="Эрхүүдийг ачааллаж байна" />
         )}
         {passesQ.status === "error" && (
-          <SectionError message={passesQ.error} onRetry={passesQ.reload} />
+          <ErrorState message={passesQ.error} onRetry={passesQ.reload} />
         )}
         {passesQ.status === "ready" && myPasses.length === 0 && (
-          <p className="text-sm text-ink-dim">
-            Одоогоор эрх байхгүй. Доорх дэлгүүрээс багц сонгоод нээлгээрэй.
-          </p>
+          <EmptyState
+            title="Эрх байхгүй"
+            hint="Одоогоор идэвхтэй эрхээ байхгүй. Доорх дэлгүүрээс багц сонгоод худалдаж авна уу."
+          />
         )}
         {passesQ.status === "ready" && myPasses.length > 0 && (
           <div className="space-y-2">
@@ -198,7 +186,7 @@ export default function BuyerDashboard() {
                         : "bg-error/15 text-error"
                     }`}
                   >
-                    {active ? "Хүчинтэй" : "Дууссан"} · {up.expiresAt.slice(0, 10)}
+                    <Meta items={[active ? "Хүчинтэй" : "Дууссан", up.expiresAt.slice(0, 10)]} />
                   </span>
                 </div>
               );
@@ -214,15 +202,16 @@ export default function BuyerDashboard() {
           Тун удахгүй ном тус бүрээр нь эрх худалдаж авах боломжтой болно
         </p>
         {booksQ.status === "loading" && (
-          <p className="animate-pulse text-sm text-ink-dim" role="status">
-            Ном ачаалж байна…
-          </p>
+          <LoadingState rows={2} label="Номуудыг ачааллаж байна" />
         )}
         {booksQ.status === "error" && (
-          <SectionError message={booksQ.error} onRetry={booksQ.reload} />
+          <ErrorState message={booksQ.error} onRetry={booksQ.reload} />
         )}
         {booksQ.status === "ready" && books.length === 0 && (
-          <p className="text-sm text-ink-dim">Одоогоор ном бүртгэгдээгүй байна</p>
+          <EmptyState
+            title="Ном байхгүй"
+            hint="Одоогоор системд ном бүртгэгдээгүй байна."
+          />
         )}
         {booksQ.status === "ready" && books.length > 0 && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -254,15 +243,16 @@ export default function BuyerDashboard() {
           Багцаа сонгоход төлбөрийн мэдээлэл автоматаар бөглөгдөнө
         </p>
         {shopQ.status === "loading" && (
-          <p className="animate-pulse text-sm text-ink-dim" role="status">
-            Багцууд ачаалж байна…
-          </p>
+          <LoadingState rows={3} label="Дэлгүүрийн багцыг ачааллаж байна" />
         )}
         {shopQ.status === "error" && (
-          <SectionError message={shopQ.error} onRetry={shopQ.reload} />
+          <ErrorState message={shopQ.error} onRetry={shopQ.reload} />
         )}
         {shopQ.status === "ready" && shop.length === 0 && (
-          <p className="text-sm text-ink-dim">Идэвхтэй багц алга байна</p>
+          <EmptyState
+            title="Багц байхгүй"
+            hint="Одоогоор худалдаж авах боломжтой идэвхтэй багц байхгүй байна."
+          />
         )}
         {shopQ.status === "ready" && shop.length > 0 && (
           <div className="grid gap-3 sm:grid-cols-2">
@@ -350,8 +340,7 @@ export default function BuyerDashboard() {
 
               <p className="mt-3 rounded-lg bg-panel px-3 py-2 text-xs leading-relaxed text-ink-dim">
                 <span className="font-semibold text-ink">Хуваан төлөх нөхцөл:</span>{" "}
-                эхний төлөлт {formatMnt(tier.installment.firstPayment)}, үлдэгдлийг{" "}
-                {tier.installment.deadline}-ноос өмнө барагдуулна.
+                <Meta items={[`эхний төлөлт ${formatMnt(tier.installment.firstPayment)}`, `үлдэгдлийг ${tier.installment.deadline}-ноос өмнө барагдуулна`]} />
               </p>
             </div>
           ))}

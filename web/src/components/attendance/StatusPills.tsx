@@ -37,7 +37,7 @@ export const ATTENDANCE_OPTIONS: readonly AttendanceOption[] = [
   {
     value: "EXCUSED",
     label: "Чөлөөтэй",
-    icon: "◇",
+    icon: "",
     selectedClass: "bg-info/25 text-info",
   },
 ] as const;
@@ -70,7 +70,7 @@ export function StatusPills({ studentLabel, value, onChange }: StatusPillsProps)
             type="button"
             onClick={() => onChange(opt.value)}
             aria-pressed={isSelected}
-            className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs font-medium transition ${
+            className={`inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition ${
               isSelected ? opt.selectedClass : "bg-ink/5 text-ink-dim"
             }`}
           >

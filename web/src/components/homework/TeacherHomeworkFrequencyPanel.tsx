@@ -221,20 +221,20 @@ export default function TeacherHomeworkFrequencyPanel({
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {r.notDone >= 5 && (
-                  <Badge icon={Ban} text={`${r.notDone}× хийгээгүй`} tone="red" />
+                  <Badge icon={Ban} text={`${r.notDone} удаа хийгээгүй`} tone="red" />
                 )}
                 {r.notDone >= 3 && r.notDone < 5 && (
                   <Badge
                     icon={AlertTriangle}
-                    text={`${r.notDone}× хийгээгүй`}
+                    text={`${r.notDone} удаа хийгээгүй`}
                     tone="amber"
                   />
                 )}
                 {r.partial >= 5 && (
-                  <Badge icon={CircleAlert} text={`${r.partial}× дутуу`} tone="red" />
+                  <Badge icon={CircleAlert} text={`${r.partial} удаа дутуу`} tone="red" />
                 )}
                 {r.partial >= 3 && r.partial < 5 && (
-                  <Badge icon={CircleDashed} text={`${r.partial}× дутуу`} tone="amber" />
+                  <Badge icon={CircleDashed} text={`${r.partial} удаа дутуу`} tone="amber" />
                 )}
                 {r.lastTwoUnmarked && (
                   <Badge

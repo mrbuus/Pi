@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Check } from "lucide-react";
+import { AlertTriangle, Check, Video as VideoIcon } from "lucide-react";
 import { api, getRole } from "@/lib/api";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 
 /* ============================================================================
  * Онлайн хичээл — бичлэг үзэх хуудас (Videos MVP).
@@ -249,15 +250,18 @@ export default function VideosPage() {
       )}
 
       {error && (
-        <p className="rounded-xl border border-error/20 bg-error/5 p-4 text-sm text-error">
-          {error}
-        </p>
+        <ErrorState
+          message={error}
+          onRetry={loadChaptersWithVideos}
+        />
       )}
 
       {chaptersWithVideos.length === 0 && !error && (
-        <p className="rounded-2xl border border-line bg-panel p-6 text-center text-sm text-ink-dim">
-          Одоогоор бичлэг оруулаагүй байна.
-        </p>
+        <EmptyState
+          icon={VideoIcon}
+          title="Бичлэг оруулаагүй"
+          hint="Багш сургалтын видео оруулмагц энд гарч ирнэ."
+        />
       )}
 
       {chaptersWithVideos.length > 0 && (
@@ -292,7 +296,11 @@ export default function VideosPage() {
 
           <section className="grid gap-4 sm:grid-cols-2">
             {videos.length === 0 && (
-              <p className="text-sm text-ink-dim">Энэ сэдэвт бичлэг алга</p>
+              <EmptyState
+                icon={VideoIcon}
+                title="Бичлэг алга"
+                hint="Энэ сэдэвт одоогоор онлайн хичээлийн бичлэг байхгүй байна."
+              />
             )}
             {videos.map((v) => (
               <VideoPlayer key={v.id} video={v} />

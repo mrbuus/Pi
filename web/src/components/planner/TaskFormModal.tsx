@@ -215,9 +215,9 @@ export default function TaskFormModal({
                 onChange={(e) => set("priority", e.target.value as TaskFormValues["priority"])}
                 className="w-full rounded-lg border border-line bg-bg px-3 py-2 text-base text-ink"
               >
-                <option value="LOW">▽ Бага</option>
+                <option value="LOW">Бага</option>
                 <option value="NORMAL">– Энгийн</option>
-                <option value="HIGH">△ Өндөр</option>
+                <option value="HIGH">Өндөр</option>
                 <option value="URGENT">‼ Яаралтай</option>
               </select>
             </div>

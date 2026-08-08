@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from "react";
 import { TriangleAlert, Check, X } from "lucide-react";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import RequireRole from "@/components/nav/RequireRole";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 
 interface Payment {
@@ -92,27 +94,13 @@ function SectionStatus({
   emptyText: string;
 }) {
   if (loading) {
-    return (
-      <p className="animate-pulse text-sm text-ink-dim" role="status">
-        Ачаалж байна…
-      </p>
-    );
+    return <LoadingState rows={3} label={emptyText} />;
   }
   if (error) {
-    return (
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-        <span className="inline-flex items-center gap-1.5"><TriangleAlert className="h-4 w-4" aria-hidden /> {error}</span>
-        <button
-          onClick={onRetry}
-          className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
-        >
-          Дахин ачаалах
-        </button>
-      </div>
-    );
+    return <ErrorState message={error} onRetry={onRetry} />;
   }
   if (empty) {
-    return <p className="text-sm text-ink-dim">{emptyText}</p>;
+    return <EmptyState title={emptyText} />;
   }
   return null;
 }
@@ -502,18 +490,18 @@ export default function AdminDashboardClient() {
                   </div>
                   <p className="mt-1 truncate text-xs text-ink-dim">
                     {[u.phone, u.email, u.username ? `@${u.username}` : ""]
-                      .filter(Boolean)
-                      .join(" · ") || "Холбоо барих мэдээлэлгүй"}
+                      .filter(Boolean).length > 0 ? (
+                      <Meta items={[u.phone, u.email, u.username ? `@${u.username}` : ""].filter(Boolean)} />
+                    ) : (
+                      "Холбоо барих мэдээлэлгүй"
+                    )}
                   </p>
                   {(u.studentProfile?.grade || u.ownedClassrooms.length > 0) && (
                     <p className="mt-1 text-xs text-ink-dim">
-                      {u.studentProfile?.grade
-                        ? `${u.studentProfile.grade}-р анги`
-                        : ""}
-                      {u.studentProfile?.grade && u.ownedClassrooms.length > 0
-                        ? " · "
-                        : ""}
-                      {u.ownedClassrooms.map((c) => c.name).join(", ")}
+                      <Meta items={[
+                        u.studentProfile?.grade ? `${u.studentProfile.grade}-р анги` : "",
+                        u.ownedClassrooms.map((c) => c.name).join(", ")
+                      ]} />
                     </p>
                   )}
                 </div>
@@ -579,7 +567,7 @@ export default function AdminDashboardClient() {
                     <span className="ml-2 text-ink-dim">{t.phone}</span>
                     {t.ownedClassrooms.length > 0 && (
                       <span className="ml-2 text-xs text-ink-dim">
-                        · {t.ownedClassrooms.map((c) => c.name).join(", ")}
+                        <Meta items={[t.ownedClassrooms.map((c) => c.name).join(", ")]} />
                       </span>
                     )}
                   </div>
@@ -637,7 +625,7 @@ export default function AdminDashboardClient() {
                   </span>
                   <span className="text-ink-dim">{p.user.phone}</span>
                   <span className="rounded-full bg-warning/15 px-3 py-0.5 text-xs text-warning">
-                    {p.amount.toLocaleString()}₮ · {p.method}
+                    <Meta items={[`${p.amount.toLocaleString()}₮`, p.method]} />
                   </span>
                   {p.forMonth && <span className="text-ink-dim">{p.forMonth}</span>}
                 </div>
@@ -697,8 +685,7 @@ export default function AdminDashboardClient() {
                 className="flex justify-between rounded-lg border border-line px-4 py-2 text-sm"
               >
                 <span>
-                  {r.student.firstName} {r.student.lastName} ·{" "}
-                  <span className="text-ink-dim">{r.classroom.name}</span>
+                  <Meta items={[`${r.student.firstName} ${r.student.lastName}`, r.classroom.name]} />
                 </span>
                 <span
                   className={`${

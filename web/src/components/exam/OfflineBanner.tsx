@@ -15,7 +15,10 @@ export default function OfflineBanner() {
       className="flex items-center justify-center gap-2 border-b border-error/50 bg-error/10 px-4 py-2 text-center text-sm font-semibold text-error"
     >
       <AlertTriangle size={18} aria-hidden />
-      <span>Холболт тасарлаа — хариултууд хадгалагдахгүй байна</span>
+      <div className="text-left">
+        <p>Холболт тасарлаа</p>
+        <p className="text-xs text-error/80">Хариултууд компьютер рүү хадгалагдсан — холбогдоход илгээгдэнэ</p>
+      </div>
     </div>
   );
 }

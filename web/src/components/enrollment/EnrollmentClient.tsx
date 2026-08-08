@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 import RequireRole from "@/components/nav/RequireRole";
 import ConfirmCloseDialog from "./ConfirmCloseDialog";
 import SubjectCard, { DraftState } from "./SubjectCard";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import {
   EnrollmentStatus,
   EnrollmentSubject,
@@ -242,7 +244,7 @@ export default function EnrollmentClient() {
       <div>
         <h1 className="text-2xl font-extrabold">Элсэлтийн удирдлага</h1>
         <p className="mt-1 text-sm text-ink-dim">
-          Хичээл тус бүр (Математик · Нийгэм судлал · SAT) бие даан дүүрч,
+          Хичээл тус бүр (<Meta items={["Математик", "Нийгэм судлал", "SAT"]} />) бие даан дүүрч,
           нээлттэй/хаалттай байх ёстой. Энд тохиргоог өөрчлөхөд нүүр
           хуудсанд шууд нөлөөлнө — хадгалахаасаа өмнө зочин юу харахыг
           доор урьдчилан харна уу.
@@ -250,9 +252,7 @@ export default function EnrollmentClient() {
       </div>
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       )}
 
       {error && (

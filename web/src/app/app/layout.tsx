@@ -6,6 +6,7 @@ import Sidebar from "@/components/nav/Sidebar";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
 import { NavIcon } from "@/components/nav/icons";
+import { Meta } from "@/components/ui/Meta";
 import { api, clearAuth, fileUrl, getRole, getToken } from "@/lib/api";
 
 // Role бүрийн монгол нэр — header identity badge-д ашиглана
@@ -70,8 +71,7 @@ function IdentityBadge() {
       <span className="hidden text-sm leading-tight sm:block">
         <span className="block font-semibold">{me.firstName}</span>
         <span className="block text-[11px] text-ink-dim">
-          {ROLE_LABEL[me.role] ?? me.role}
-          {verifiedChild && ` · ${verifiedChild.firstName}`}
+          <Meta items={[ROLE_LABEL[me.role] ?? me.role, verifiedChild ? verifiedChild.firstName : ""]} />
         </span>
       </span>
     </div>
@@ -123,6 +123,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <TopBarSlotProvider node={topBarSlotEl}>
+      <a
+        href="#main-content"
+        className="absolute -top-full left-0 z-[9999] rounded-b-lg border-b-2 border-brand-bright bg-brand-bright/10 px-4 py-2 text-sm font-semibold text-brand-soft focus:top-0"
+      >
+        Агуулга руу шилжих
+      </a>
       <div className="min-h-screen lg:flex">
         {!examFullscreen && (
           <Sidebar
@@ -147,7 +153,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   aria-expanded={navOpen}
                   aria-controls="app-mobile-nav"
                   aria-label={navOpen ? "Цэсийг хаах" : "Цэсийг нээх"}
-                  className="flex shrink-0 items-center justify-center rounded-lg border border-line p-2 text-ink-dim transition hover:text-ink lg:hidden"
+                  className="flex shrink-0 items-center justify-center rounded-lg border border-line p-3 text-ink-dim transition hover:text-ink lg:hidden"
                 >
                   <NavIcon name={navOpen ? "x" : "menu"} className="h-5 w-5" />
                 </button>
@@ -165,7 +171,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </header>
           )}
-          <main className="mx-auto w-full max-w-6xl px-4 py-8">{children}</main>
+          <main id="main-content" className="mx-auto w-full max-w-6xl px-4 py-8">{children}</main>
         </div>
       </div>
     </TopBarSlotProvider>

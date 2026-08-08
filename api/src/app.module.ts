@@ -10,6 +10,7 @@ import { AnnouncementsModule } from './announcements/announcements.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { TeacherGroupsModule } from './teacher-groups/teacher-groups.module';
 import { AuditModule } from './audit/audit.module';
 import { ClassSessionsModule } from './class-sessions/class-sessions.module';
 import { ClassificationModule } from './classification/classification.module';
@@ -23,22 +24,27 @@ import { ColorTagsModule } from './colortags/colortags.module';
 import { ContentModule } from './content/content.module';
 import { EnrollmentWindowsModule } from './enrollment-windows/enrollment-windows.module';
 import { EventsModule } from './events/events.module';
+import { FinanceModule } from './finance/finance.module';
 import { GoalsModule } from './goals/goals.module';
+import { InsightsModule } from './insights/insights.module';
 import { LeadsModule } from './leads/leads.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { NotesModule } from './notes/notes.module';
 import { ProgressModule } from './progress/progress.module';
 import { ParentsModule } from './parents/parents.module';
+import { RecommendModule } from './recommend/recommend.module';
 import { PassesModule } from './passes/passes.module';
 import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { StoreModule } from './store/store.module';
 import { ScheduleModule as ClassScheduleModule } from './schedule/schedule.module';
 import { StorageModule } from './storage/storage.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TestsModule } from './tests/tests.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
+import { TuitionModule } from './tuition/tuition.module';
 
 @Module({
   imports: [
@@ -101,6 +107,7 @@ import { VideosModule } from './videos/videos.module';
     StorageModule,
     PassesModule,
     PaymentsModule,
+    StoreModule,
     ParentsModule,
     ColorTagsModule,
     UsersModule,
@@ -109,6 +116,7 @@ import { VideosModule } from './videos/videos.module';
     ClassificationModule,
     VideosModule,
     EventsModule,
+    FinanceModule,
     EnrollmentWindowsModule,
     LeadsModule,
     LessonsModule,
@@ -119,11 +127,15 @@ import { VideosModule } from './videos/videos.module';
     AuditModule,
     NotesModule,
     GoalsModule,
+    InsightsModule,
     AnalyticsModule,
     // import хийгдсэн ч энд бүртгэгдээгүйгээс /api/activity/* бүх маршрут
     // 404 өгч, сурагчийн идэвхийн heatmap болон багшийн "Ангийн идэвхийн
     // түүх" эвдэрсэн байсныг зассан (2026-07-29).
     ActivityModule,
+    TeacherGroupsModule,
+    RecommendModule,
+    TuitionModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

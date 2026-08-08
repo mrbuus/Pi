@@ -50,9 +50,8 @@ export default function Hero() {
             <span className="text-shine">хамгийн үр дүнтэй</span> арга
           </h1>
           <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink-dim">
-            Математик, нийгмийн ухааны элсэлтийн шалгалтад бэлтгэнэ. Мөн
-            математикийн хоцрогдол арилгаж, түвшин ахиулах танхимын анги
-            тусдаа ажилладаг.
+            Элсэлтийн шалгалтад бэлдэх + математикийн хоцрогдол арилгах
+            танхимын сургалт. Мөн онлайнаар суралцах боломжтой.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a

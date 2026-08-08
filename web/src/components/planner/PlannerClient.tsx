@@ -1,6 +1,7 @@
 "use client";
 
 import { BarChart3, CalendarRange, ClipboardList, type LucideIcon } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { useCallback, useEffect, useState } from "react";
 import { api, getRole } from "@/lib/api";
 import BoardView from "./BoardView";
@@ -256,9 +257,7 @@ export default function PlannerClient() {
       {view === "board" && (
         <>
           {loading && (
-            <p className="animate-pulse text-sm text-ink-dim" role="status">
-              Ачаалж байна…
-            </p>
+            <LoadingState rows={3} label="Ачаалж байна" />
           )}
           {error && (
             <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
@@ -295,9 +294,7 @@ export default function PlannerClient() {
       {view === "timeline" && (
         <>
           {loading && (
-            <p className="animate-pulse text-sm text-ink-dim" role="status">
-              Ачаалж байна…
-            </p>
+            <LoadingState rows={3} label="Ачаалж байна" />
           )}
           {!loading && <TimelineView tasks={tasks} year={year} onYearChange={setYear} />}
         </>
@@ -306,9 +303,7 @@ export default function PlannerClient() {
       {view === "workload" && (
         <>
           {workloadLoading && (
-            <p className="animate-pulse text-sm text-ink-dim" role="status">
-              Ачаалж байна…
-            </p>
+            <LoadingState rows={3} label="Ачаалж байна" />
           )}
           {workloadError && (
             <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">

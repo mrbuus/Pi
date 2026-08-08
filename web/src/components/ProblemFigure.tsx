@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, ImageOff, X } from "lucide-react";
 import { fileUrl } from "@/lib/api";
 
 /**
@@ -47,6 +47,7 @@ export default function ProblemFigure({
   children: React.ReactNode;
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const url = fileUrl(imageKey);
   const hasAlt = !!alt && alt.trim() !== "";
   const effectiveAlt = hasAlt ? alt! : "Бодлогын зураг";
@@ -61,25 +62,36 @@ export default function ProblemFigure({
       <div className="order-1 md:order-none md:w-[42%] md:shrink-0">
         <button
           type="button"
-          onClick={() => setLightboxOpen(true)}
+          onClick={() => !imageError && setLightboxOpen(true)}
           className="group relative flex w-full items-center justify-center overflow-hidden rounded-xl border border-line bg-surface p-2 focus-visible:outline-none"
           aria-label={`${effectiveAlt} — томруулж харах`}
+          disabled={imageError}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={url}
-            alt={effectiveAlt}
-            // 🚨 ЗААВАЛ: одоогийн асуултын зураг eager+high, бусад нь lazy.
-            // Шалгалтын үеэр асуултын зураг хоцорч ачаалах нь сурагчийн
-            // цагийг зэрлэгээр иддэг тул энэ логикийг бүү өөрчил.
-            loading={isCurrent ? "eager" : "lazy"}
-            fetchPriority={isCurrent ? "high" : "auto"}
-            className="max-h-72 w-auto max-w-full rounded-lg transition group-hover:opacity-90"
-            style={CONTAIN_STYLE}
-          />
-          <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-panel/90 px-2 py-1 text-[11px] font-medium text-ink-dim shadow-sm">
-            Томруулах ⤢
-          </span>
+          {imageError ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+              <ImageOff size={32} className="text-ink-dim" aria-hidden />
+              <span className="text-sm text-ink-dim">Зураг ачаалагдахгүй байна</span>
+            </div>
+          ) : (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={effectiveAlt}
+                // 🚨 ЗААВАЛ: одоогийн асуултын зураг eager+high, бусад нь lazy.
+                // Шалгалтын үеэр асуултын зураг хоцорч ачаалах нь сурагчийн
+                // цагийг зэрлэгээр иддэг тул энэ логикийг бүү өөрчил.
+                loading={isCurrent ? "eager" : "lazy"}
+                fetchPriority={isCurrent ? "high" : "auto"}
+                className="max-h-72 w-auto max-w-full rounded-lg transition group-hover:opacity-90"
+                style={CONTAIN_STYLE}
+                onError={() => setImageError(true)}
+              />
+              <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-panel/90 px-2 py-1 text-[11px] font-medium text-ink-dim shadow-sm">
+                Томруулах ⤢
+              </span>
+            </>
+          )}
         </button>
 
         {isStaffView && !hasAlt && (

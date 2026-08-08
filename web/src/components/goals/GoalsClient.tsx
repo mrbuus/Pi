@@ -7,6 +7,7 @@ import GoalForm from "./GoalForm";
 import ProgressSummary from "./ProgressSummary";
 import { STATUS_ORDER_FOR_SORT } from "./statusMeta";
 import type { Goal, GoalFormValues, GoalStatus } from "./types";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 
 function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";
@@ -104,9 +105,13 @@ export default function GoalsClient() {
       </p>
 
       {error && (
-        <div className="rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
-          {error}
-        </div>
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            setError("");
+            load();
+          }}
+        />
       )}
 
       <ProgressSummary goals={goals} />
@@ -116,14 +121,13 @@ export default function GoalsClient() {
       <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Бүх зорилго</h2>
         {loading && (
-          <p className="animate-pulse text-sm text-ink-dim" role="status">
-            Ачаалж байна…
-          </p>
+          <LoadingState rows={3} label="Ачаалж байна" />
         )}
         {!loading && sorted.length === 0 && (
-          <p className="text-sm text-ink-dim">
-            Одоогоор зорилго алга байна — дээрх маягтаар эхнийхээ нэмнэ үү.
-          </p>
+          <EmptyState
+            title="Зорилго байхгүй"
+            hint="Одоогоор сурлагын зорилго байхгүй. Дээрх маягтаар эхнийхээ нэмнэ үү."
+          />
         )}
         {!loading && sorted.length > 0 && (
           <div className="space-y-3">

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Check } from "lucide-react";
 import { api } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
 import { errMsg, Msg, SUBJECT_LABEL, SUBJECTS, Subject, TestItem } from "./types";
@@ -155,9 +156,11 @@ export default function TestsPanel({ deletedEntries, onDeleted }: TestsPanelProp
                   <span className={`ml-2 ${badgeCls}`}>{t.variantLabel}</span>
                 )}
                 <span className="block text-xs text-ink-dim">
-                  {t._count.problems} бодлого · дүн{" "}
-                  {GRADING_LABEL[t.gradingMode] ?? t.gradingMode} ·{" "}
-                  {t._count.results} сурагч өгсөн
+                  <Meta items={[
+                    `${t._count.problems} бодлого`,
+                    `дүн ${GRADING_LABEL[t.gradingMode] ?? t.gradingMode}`,
+                    `${t._count.results} сурагч өгсөн`
+                  ]} />
                 </span>
               </span>
               <button

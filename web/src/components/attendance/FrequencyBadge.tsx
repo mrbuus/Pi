@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, CircleHelp, TriangleAlert } from "lucide-react";
 
 export interface FrequencyBadgeProps {
   lateCount: number;
@@ -30,7 +30,8 @@ export function FrequencyBadge({
   if (unmarkedLastTwoClassDays) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-ink/10 px-2 py-0.5 text-xs font-semibold text-ink-dim">
-        <span aria-hidden>❓</span> 2 хичээлээр тэмдэглээгүй
+        <CircleHelp className="h-3.5 w-3.5 shrink-0" aria-hidden />2 хичээлээр
+        тэмдэглээгүй
       </span>
     );
   }
@@ -40,7 +41,7 @@ export function FrequencyBadge({
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-error/20 px-2 py-0.5 text-xs font-bold text-error">
         <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        30 хоногт {lateCount} хоцорсон · {absentCount}{" "}
+        30 хоногт {lateCount} хоцорсон — {absentCount}{" "}
         тасалсан
       </span>
     );
@@ -48,8 +49,8 @@ export function FrequencyBadge({
   if (total >= 3) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-warning/20 px-2 py-0.5 text-xs font-semibold text-warning">
-        <span aria-hidden>△</span> 30 хоногт {lateCount} хоцорсон · {absentCount}{" "}
-        тасалсан
+        <TriangleAlert className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        30 хоногт {lateCount} хоцорсон — {absentCount} тасалсан
       </span>
     );
   }

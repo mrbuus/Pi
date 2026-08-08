@@ -182,17 +182,24 @@ export class AttemptsService {
 
   // «Миний сул талууд» — шошго бүрээр амжилтын хувь (адаптив профайлын 1-р үе, SPEC §9.3)
   async myStats(studentId: string) {
-    const attempts = await this.prisma.attempt.findMany({
-      where: { studentId },
-      include: {
-        problem: {
-          select: {
-            chapter: { select: { id: true, title: true } },
-            tags: { include: { tag: true } },
+    // Нийт оролдлогын тоо (take-д ор орилцуулсан мөрүүдийн үнэн тоог авах)
+    // + сүүлийн 5000 оролдлого (санах ойн ачаалал сөргүүлэх, хэрэглэгчид харагдах үзүүлэлт чанар сайхан)
+    const [totalAttemptCount, attempts] = await Promise.all([
+      this.prisma.attempt.count({ where: { studentId } }),
+      this.prisma.attempt.findMany({
+        where: { studentId },
+        include: {
+          problem: {
+            select: {
+              chapter: { select: { id: true, title: true } },
+              tags: { include: { tag: true } },
+            },
           },
         },
-      },
-    });
+        take: 5000,
+        orderBy: { id: 'desc' },
+      }),
+    ]);
 
     type Bucket = { attempts: number; success: number };
     const byTag = new Map<string, Bucket & { type: string }>();
@@ -224,7 +231,7 @@ export class AttemptsService {
 
     const round = (x: number) => Math.round(x * 100);
     return {
-      totalAttempts: attempts.length,
+      totalAttempts: totalAttemptCount,
       // Сул талаас нь эхэлж эрэмбэлнэ — бэлтгэх дараалал нь энэ
       weakestTags: [...byTag.entries()]
         .map(([name, b]) => ({
@@ -252,17 +259,34 @@ export class AttemptsService {
       },
     });
 
+    // N+1 асуудал сөргүүлэх: бүх ангийн attempts-ийг НЭГ query-аар авч, дараа санах ойд classroomId-аар бүлэглэ
+    const classroomIds = classrooms.map((c) => c.id);
+    const allAttempts = await this.prisma.attempt.findMany({
+      where: {
+        classroomId: { in: classroomIds },
+        occurredOn: date,
+      },
+      include: {
+        problem: { select: { chapter: { select: { title: true } } } },
+      },
+    });
+
+    // Санах ойд classroomId-аар бүлэглэ
+    const attemptsByClassroom = new Map<string, typeof allAttempts>();
+    for (const attempt of allAttempts) {
+      if (!attempt.classroomId) continue;
+      if (!attemptsByClassroom.has(attempt.classroomId)) {
+        attemptsByClassroom.set(attempt.classroomId, []);
+      }
+      attemptsByClassroom.get(attempt.classroomId)!.push(attempt);
+    }
+
     let built = 0;
     for (const c of classrooms) {
       const studentIds = c.enrollments.map((e) => e.studentId);
       if (studentIds.length === 0) continue;
 
-      const attempts = await this.prisma.attempt.findMany({
-        where: { classroomId: c.id, occurredOn: date },
-        include: {
-          problem: { select: { chapter: { select: { title: true } } } },
-        },
-      });
+      const attempts = attemptsByClassroom.get(c.id) ?? [];
 
       const marked = new Set(attempts.map((a) => a.studentId));
       const byState: Record<string, number> = {};

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
+import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { METHOD_LABEL, errMsg } from "./paymentHelpers";
 import type { Payment } from "./types";
@@ -110,8 +111,12 @@ export default function PaymentEditModal({
             </h2>
             {payment.user && (
               <p className="mt-0.5 text-sm text-ink-dim">
-                {payment.user.firstName} {payment.user.lastName} ·{" "}
-                {payment.user.phone}
+                <Meta
+                  items={[
+                    `${payment.user.firstName} ${payment.user.lastName}`,
+                    payment.user.phone,
+                  ]}
+                />
               </p>
             )}
           </div>

@@ -250,6 +250,7 @@ export type ClassroomWhereInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkListRelationFilter
   staffTasks?: Prisma.StaffTaskListRelationFilter
   classSchedules?: Prisma.ClassScheduleListRelationFilter
+  tuitionRefunds?: Prisma.TuitionRefundListRelationFilter
 }
 
 export type ClassroomOrderByWithRelationInput = {
@@ -271,6 +272,7 @@ export type ClassroomOrderByWithRelationInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkOrderByRelationAggregateInput
   staffTasks?: Prisma.StaffTaskOrderByRelationAggregateInput
   classSchedules?: Prisma.ClassScheduleOrderByRelationAggregateInput
+  tuitionRefunds?: Prisma.TuitionRefundOrderByRelationAggregateInput
 }
 
 export type ClassroomWhereUniqueInput = Prisma.AtLeast<{
@@ -295,6 +297,7 @@ export type ClassroomWhereUniqueInput = Prisma.AtLeast<{
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkListRelationFilter
   staffTasks?: Prisma.StaffTaskListRelationFilter
   classSchedules?: Prisma.ClassScheduleListRelationFilter
+  tuitionRefunds?: Prisma.TuitionRefundListRelationFilter
 }, "id">
 
 export type ClassroomOrderByWithAggregationInput = {
@@ -345,6 +348,7 @@ export type ClassroomCreateInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateInput = {
@@ -365,6 +369,7 @@ export type ClassroomUncheckedCreateInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUpdateInput = {
@@ -385,6 +390,7 @@ export type ClassroomUpdateInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateInput = {
@@ -405,6 +411,7 @@ export type ClassroomUncheckedUpdateInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateManyInput = {
@@ -630,6 +637,20 @@ export type ClassroomUpdateOneRequiredWithoutDailySummariesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClassroomUpdateToOneWithWhereWithoutDailySummariesInput, Prisma.ClassroomUpdateWithoutDailySummariesInput>, Prisma.ClassroomUncheckedUpdateWithoutDailySummariesInput>
 }
 
+export type ClassroomCreateNestedOneWithoutTuitionRefundsInput = {
+  create?: Prisma.XOR<Prisma.ClassroomCreateWithoutTuitionRefundsInput, Prisma.ClassroomUncheckedCreateWithoutTuitionRefundsInput>
+  connectOrCreate?: Prisma.ClassroomCreateOrConnectWithoutTuitionRefundsInput
+  connect?: Prisma.ClassroomWhereUniqueInput
+}
+
+export type ClassroomUpdateOneRequiredWithoutTuitionRefundsNestedInput = {
+  create?: Prisma.XOR<Prisma.ClassroomCreateWithoutTuitionRefundsInput, Prisma.ClassroomUncheckedCreateWithoutTuitionRefundsInput>
+  connectOrCreate?: Prisma.ClassroomCreateOrConnectWithoutTuitionRefundsInput
+  upsert?: Prisma.ClassroomUpsertWithoutTuitionRefundsInput
+  connect?: Prisma.ClassroomWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClassroomUpdateToOneWithWhereWithoutTuitionRefundsInput, Prisma.ClassroomUpdateWithoutTuitionRefundsInput>, Prisma.ClassroomUncheckedUpdateWithoutTuitionRefundsInput>
+}
+
 export type ClassroomCreateNestedOneWithoutAnnouncementTargetsInput = {
   create?: Prisma.XOR<Prisma.ClassroomCreateWithoutAnnouncementTargetsInput, Prisma.ClassroomUncheckedCreateWithoutAnnouncementTargetsInput>
   connectOrCreate?: Prisma.ClassroomCreateOrConnectWithoutAnnouncementTargetsInput
@@ -691,6 +712,7 @@ export type ClassroomCreateWithoutTeacherInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutTeacherInput = {
@@ -710,6 +732,7 @@ export type ClassroomUncheckedCreateWithoutTeacherInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutTeacherInput = {
@@ -769,6 +792,7 @@ export type ClassroomCreateWithoutEnrollmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutEnrollmentsInput = {
@@ -788,6 +812,7 @@ export type ClassroomUncheckedCreateWithoutEnrollmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutEnrollmentsInput = {
@@ -823,6 +848,7 @@ export type ClassroomUpdateWithoutEnrollmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutEnrollmentsInput = {
@@ -842,6 +868,7 @@ export type ClassroomUncheckedUpdateWithoutEnrollmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutAttendancesInput = {
@@ -861,6 +888,7 @@ export type ClassroomCreateWithoutAttendancesInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutAttendancesInput = {
@@ -880,6 +908,7 @@ export type ClassroomUncheckedCreateWithoutAttendancesInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutAttendancesInput = {
@@ -915,6 +944,7 @@ export type ClassroomUpdateWithoutAttendancesInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutAttendancesInput = {
@@ -934,6 +964,7 @@ export type ClassroomUncheckedUpdateWithoutAttendancesInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutAssignmentsInput = {
@@ -953,6 +984,7 @@ export type ClassroomCreateWithoutAssignmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutAssignmentsInput = {
@@ -972,6 +1004,7 @@ export type ClassroomUncheckedCreateWithoutAssignmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutAssignmentsInput = {
@@ -1007,6 +1040,7 @@ export type ClassroomUpdateWithoutAssignmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutAssignmentsInput = {
@@ -1026,6 +1060,7 @@ export type ClassroomUncheckedUpdateWithoutAssignmentsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutDailyHomeworkMarksInput = {
@@ -1045,6 +1080,7 @@ export type ClassroomCreateWithoutDailyHomeworkMarksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutDailyHomeworkMarksInput = {
@@ -1064,6 +1100,7 @@ export type ClassroomUncheckedCreateWithoutDailyHomeworkMarksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutDailyHomeworkMarksInput = {
@@ -1099,6 +1136,7 @@ export type ClassroomUpdateWithoutDailyHomeworkMarksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutDailyHomeworkMarksInput = {
@@ -1118,6 +1156,7 @@ export type ClassroomUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutTestAccessInput = {
@@ -1137,6 +1176,7 @@ export type ClassroomCreateWithoutTestAccessInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutTestAccessInput = {
@@ -1156,6 +1196,7 @@ export type ClassroomUncheckedCreateWithoutTestAccessInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutTestAccessInput = {
@@ -1191,6 +1232,7 @@ export type ClassroomUpdateWithoutTestAccessInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutTestAccessInput = {
@@ -1210,6 +1252,7 @@ export type ClassroomUncheckedUpdateWithoutTestAccessInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutDailySummariesInput = {
@@ -1229,6 +1272,7 @@ export type ClassroomCreateWithoutDailySummariesInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutDailySummariesInput = {
@@ -1248,6 +1292,7 @@ export type ClassroomUncheckedCreateWithoutDailySummariesInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutDailySummariesInput = {
@@ -1283,6 +1328,7 @@ export type ClassroomUpdateWithoutDailySummariesInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutDailySummariesInput = {
@@ -1298,6 +1344,103 @@ export type ClassroomUncheckedUpdateWithoutDailySummariesInput = {
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutClassroomNestedInput
   assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutClassroomNestedInput
   testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
+}
+
+export type ClassroomCreateWithoutTuitionRefundsInput = {
+  id?: string
+  name: string
+  type: $Enums.ClassroomType
+  grade?: number | null
+  archived?: boolean
+  createdAt?: Date | string
+  progressChapterId?: string | null
+  teacher?: Prisma.UserCreateNestedOneWithoutOwnedClassroomsInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutClassroomInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutClassroomInput
+  assignments?: Prisma.AssignmentCreateNestedManyWithoutClassroomInput
+  testAccess?: Prisma.TestAccessCreateNestedManyWithoutClassroomInput
+  dailySummaries?: Prisma.DailyClassSummaryCreateNestedManyWithoutClassroomInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+}
+
+export type ClassroomUncheckedCreateWithoutTuitionRefundsInput = {
+  id?: string
+  name: string
+  type: $Enums.ClassroomType
+  grade?: number | null
+  teacherId?: string | null
+  archived?: boolean
+  createdAt?: Date | string
+  progressChapterId?: string | null
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutClassroomInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutClassroomInput
+  assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutClassroomInput
+  testAccess?: Prisma.TestAccessUncheckedCreateNestedManyWithoutClassroomInput
+  dailySummaries?: Prisma.DailyClassSummaryUncheckedCreateNestedManyWithoutClassroomInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
+  staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+}
+
+export type ClassroomCreateOrConnectWithoutTuitionRefundsInput = {
+  where: Prisma.ClassroomWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClassroomCreateWithoutTuitionRefundsInput, Prisma.ClassroomUncheckedCreateWithoutTuitionRefundsInput>
+}
+
+export type ClassroomUpsertWithoutTuitionRefundsInput = {
+  update: Prisma.XOR<Prisma.ClassroomUpdateWithoutTuitionRefundsInput, Prisma.ClassroomUncheckedUpdateWithoutTuitionRefundsInput>
+  create: Prisma.XOR<Prisma.ClassroomCreateWithoutTuitionRefundsInput, Prisma.ClassroomUncheckedCreateWithoutTuitionRefundsInput>
+  where?: Prisma.ClassroomWhereInput
+}
+
+export type ClassroomUpdateToOneWithWhereWithoutTuitionRefundsInput = {
+  where?: Prisma.ClassroomWhereInput
+  data: Prisma.XOR<Prisma.ClassroomUpdateWithoutTuitionRefundsInput, Prisma.ClassroomUncheckedUpdateWithoutTuitionRefundsInput>
+}
+
+export type ClassroomUpdateWithoutTuitionRefundsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumClassroomTypeFieldUpdateOperationsInput | $Enums.ClassroomType
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progressChapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacher?: Prisma.UserUpdateOneWithoutOwnedClassroomsNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutClassroomNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutClassroomNestedInput
+  assignments?: Prisma.AssignmentUpdateManyWithoutClassroomNestedInput
+  testAccess?: Prisma.TestAccessUpdateManyWithoutClassroomNestedInput
+  dailySummaries?: Prisma.DailyClassSummaryUpdateManyWithoutClassroomNestedInput
+  announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
+  staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+}
+
+export type ClassroomUncheckedUpdateWithoutTuitionRefundsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumClassroomTypeFieldUpdateOperationsInput | $Enums.ClassroomType
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progressChapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutClassroomNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutClassroomNestedInput
+  assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutClassroomNestedInput
+  testAccess?: Prisma.TestAccessUncheckedUpdateManyWithoutClassroomNestedInput
+  dailySummaries?: Prisma.DailyClassSummaryUncheckedUpdateManyWithoutClassroomNestedInput
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
@@ -1321,6 +1464,7 @@ export type ClassroomCreateWithoutAnnouncementTargetsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutAnnouncementTargetsInput = {
@@ -1340,6 +1484,7 @@ export type ClassroomUncheckedCreateWithoutAnnouncementTargetsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutAnnouncementTargetsInput = {
@@ -1375,6 +1520,7 @@ export type ClassroomUpdateWithoutAnnouncementTargetsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutAnnouncementTargetsInput = {
@@ -1394,6 +1540,7 @@ export type ClassroomUncheckedUpdateWithoutAnnouncementTargetsInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutStaffTasksInput = {
@@ -1413,6 +1560,7 @@ export type ClassroomCreateWithoutStaffTasksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutStaffTasksInput = {
@@ -1432,6 +1580,7 @@ export type ClassroomUncheckedCreateWithoutStaffTasksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   classSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutStaffTasksInput = {
@@ -1467,6 +1616,7 @@ export type ClassroomUpdateWithoutStaffTasksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutStaffTasksInput = {
@@ -1486,6 +1636,7 @@ export type ClassroomUncheckedUpdateWithoutStaffTasksInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateWithoutClassSchedulesInput = {
@@ -1505,6 +1656,7 @@ export type ClassroomCreateWithoutClassSchedulesInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetCreateNestedManyWithoutClassroomInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomUncheckedCreateWithoutClassSchedulesInput = {
@@ -1524,6 +1676,7 @@ export type ClassroomUncheckedCreateWithoutClassSchedulesInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedCreateNestedManyWithoutClassroomInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutClassroomInput
   staffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutClassroomInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutClassroomInput
 }
 
 export type ClassroomCreateOrConnectWithoutClassSchedulesInput = {
@@ -1559,6 +1712,7 @@ export type ClassroomUpdateWithoutClassSchedulesInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUpdateManyWithoutClassroomNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutClassSchedulesInput = {
@@ -1578,6 +1732,7 @@ export type ClassroomUncheckedUpdateWithoutClassSchedulesInput = {
   announcementTargets?: Prisma.AnnouncementClassroomTargetUncheckedUpdateManyWithoutClassroomNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomCreateManyTeacherInput = {
@@ -1607,6 +1762,7 @@ export type ClassroomUpdateWithoutTeacherInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateWithoutTeacherInput = {
@@ -1626,6 +1782,7 @@ export type ClassroomUncheckedUpdateWithoutTeacherInput = {
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutClassroomNestedInput
   staffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutClassroomNestedInput
   classSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutClassroomNestedInput
+  tuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutClassroomNestedInput
 }
 
 export type ClassroomUncheckedUpdateManyWithoutTeacherInput = {
@@ -1653,6 +1810,7 @@ export type ClassroomCountOutputType = {
   dailyHomeworkMarks: number
   staffTasks: number
   classSchedules: number
+  tuitionRefunds: number
 }
 
 export type ClassroomCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1665,6 +1823,7 @@ export type ClassroomCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   dailyHomeworkMarks?: boolean | ClassroomCountOutputTypeCountDailyHomeworkMarksArgs
   staffTasks?: boolean | ClassroomCountOutputTypeCountStaffTasksArgs
   classSchedules?: boolean | ClassroomCountOutputTypeCountClassSchedulesArgs
+  tuitionRefunds?: boolean | ClassroomCountOutputTypeCountTuitionRefundsArgs
 }
 
 /**
@@ -1740,6 +1899,13 @@ export type ClassroomCountOutputTypeCountClassSchedulesArgs<ExtArgs extends runt
   where?: Prisma.ClassScheduleWhereInput
 }
 
+/**
+ * ClassroomCountOutputType without action
+ */
+export type ClassroomCountOutputTypeCountTuitionRefundsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TuitionRefundWhereInput
+}
+
 
 export type ClassroomSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1760,6 +1926,7 @@ export type ClassroomSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   dailyHomeworkMarks?: boolean | Prisma.Classroom$dailyHomeworkMarksArgs<ExtArgs>
   staffTasks?: boolean | Prisma.Classroom$staffTasksArgs<ExtArgs>
   classSchedules?: boolean | Prisma.Classroom$classSchedulesArgs<ExtArgs>
+  tuitionRefunds?: boolean | Prisma.Classroom$tuitionRefundsArgs<ExtArgs>
   _count?: boolean | Prisma.ClassroomCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["classroom"]>
 
@@ -1810,6 +1977,7 @@ export type ClassroomInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   dailyHomeworkMarks?: boolean | Prisma.Classroom$dailyHomeworkMarksArgs<ExtArgs>
   staffTasks?: boolean | Prisma.Classroom$staffTasksArgs<ExtArgs>
   classSchedules?: boolean | Prisma.Classroom$classSchedulesArgs<ExtArgs>
+  tuitionRefunds?: boolean | Prisma.Classroom$tuitionRefundsArgs<ExtArgs>
   _count?: boolean | Prisma.ClassroomCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClassroomIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1832,6 +2000,7 @@ export type $ClassroomPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     dailyHomeworkMarks: Prisma.$DailyHomeworkMarkPayload<ExtArgs>[]
     staffTasks: Prisma.$StaffTaskPayload<ExtArgs>[]
     classSchedules: Prisma.$ClassSchedulePayload<ExtArgs>[]
+    tuitionRefunds: Prisma.$TuitionRefundPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2246,6 +2415,7 @@ export interface Prisma__ClassroomClient<T, Null = never, ExtArgs extends runtim
   dailyHomeworkMarks<T extends Prisma.Classroom$dailyHomeworkMarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$dailyHomeworkMarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyHomeworkMarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   staffTasks<T extends Prisma.Classroom$staffTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$staffTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   classSchedules<T extends Prisma.Classroom$classSchedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$classSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tuitionRefunds<T extends Prisma.Classroom$tuitionRefundsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Classroom$tuitionRefundsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TuitionRefundPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2916,6 +3086,30 @@ export type Classroom$classSchedulesArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.ClassScheduleScalarFieldEnum | Prisma.ClassScheduleScalarFieldEnum[]
+}
+
+/**
+ * Classroom.tuitionRefunds
+ */
+export type Classroom$tuitionRefundsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TuitionRefund
+   */
+  select?: Prisma.TuitionRefundSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TuitionRefund
+   */
+  omit?: Prisma.TuitionRefundOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TuitionRefundInclude<ExtArgs> | null
+  where?: Prisma.TuitionRefundWhereInput
+  orderBy?: Prisma.TuitionRefundOrderByWithRelationInput | Prisma.TuitionRefundOrderByWithRelationInput[]
+  cursor?: Prisma.TuitionRefundWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TuitionRefundScalarFieldEnum | Prisma.TuitionRefundScalarFieldEnum[]
 }
 
 /**

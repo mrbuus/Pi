@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarPlus, CircleAlert, Repeat } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
+import { Meta } from "@/components/ui/Meta";
 import InfoHint from "@/components/ui/InfoHint";
 import {
   formatMinutes,
@@ -366,13 +367,13 @@ export default function PatternBuilder({
         </button>
         {!problem && classroom && (
           <p className="text-sm text-ink-dim">
-            <span className="font-semibold text-ink">{classroom.name}</span>
-            {" · "}
-            {WORKWEEK_ORDER.filter((d) => weekdays.includes(d))
-              .map((d) => WEEKDAY_LABELS[d])
-              .join(", ")}
-            {" · "}
-            {formatMinutes(startMinute)}–{formatMinutes(endMinute)}
+            <Meta items={[
+              <span className="font-semibold text-ink">{classroom.name}</span>,
+              WORKWEEK_ORDER.filter((d) => weekdays.includes(d))
+                .map((d) => WEEKDAY_LABELS[d])
+                .join(", "),
+              `${formatMinutes(startMinute)}–${formatMinutes(endMinute)}`
+            ]} />
           </p>
         )}
         {problem && <p className="text-sm text-ink-dim">{problem}</p>}

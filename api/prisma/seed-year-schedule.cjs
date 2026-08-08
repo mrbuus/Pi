@@ -246,7 +246,7 @@ async function main() {
   for (const group of PLAN) {
     const times = group.slots
       .map((s) => `${s.days.map((d) => MN_DAY_NAME[d]).join('/')} ${s.start}`)
-      .join(' · ');
+      .join(' — ');
     const count = group.slots.reduce((n, s) => n + s.days.length, 0);
     console.log(`  ${group.classes.join(', ')}`);
     console.log(`    ${times}  →  ${count} удаа/долоо хоног  (${group.note})`);

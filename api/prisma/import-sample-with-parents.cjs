@@ -107,7 +107,7 @@ async function main() {
       .sort((a, b) => b.withParent - a.withParent);
     for (const r of rows) {
       console.log(
-        `  ${r.section.padEnd(8)} нийт ${String(r.total).padStart(3)} · эцэг эхийн утастай ${String(r.withParent).padStart(3)}`,
+        `  ${r.section.padEnd(8)} нийт ${String(r.total).padStart(3)}, эцэг эхийн утастай ${String(r.withParent).padStart(3)}`,
       );
     }
     console.log('\nЖишээ:  node prisma/import-sample-with-parents.cjs --classes=12-2,11-2,10-1\n');
@@ -160,7 +160,7 @@ async function main() {
   const shared = parents.filter((p) => p.children.length > 1);
 
   console.log(`\n${COMMIT ? '🟢 БОДИТ БИЧИЛТ' : '🔍 ХУУРАЙ АЖИЛЛАГАА (юу ч бичихгүй)'}`);
-  console.log(`   сурагч ${picked.length} · эцэг эх ${parents.length} · нийт ${picked.length + parents.length} хэрэглэгч`);
+  console.log(`   сурагч ${picked.length}, эцэг эх ${parents.length}, нийт ${picked.length + parents.length} хэрэглэгч`);
   console.log(`   ангийн бүлэг: ${filteredPlan.classroomsPlan.map((c) => c.displayName).join(', ')}`);
   if (shared.length) {
     console.log(`   ℹ️ ${shared.length} эцэг эх олон хүүхэдтэй (ах дүү) — тиймээс эцэг эхийн тоо сурагчийнхаас цөөн:`);
@@ -236,7 +236,7 @@ async function main() {
 
     console.log('─'.repeat(64));
     console.log('\n=== Эцэг эх ===');
-    console.log(`  шинэ ${createdParents.length} · аль хэдийн байсан ${parentsReused} · холбоос ${linksCreated}`);
+    console.log(`  шинэ ${createdParents.length}, аль хэдийн байсан ${parentsReused}, холбоос ${linksCreated}`);
     if (parentsReused) {
       console.log(
         `  ℹ️ ${parentsReused} эцэг эх аль хэдийн байсан тул нууц үг нь ДАХИН харагдахгүй\n` +

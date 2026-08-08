@@ -48,16 +48,39 @@ export type User = Prisma.UserModel
  * Model PasswordResetToken
  * *
  *  * Нэг удаагийн нууц үг сэргээх код.
- *  *
  *  * ЯАГААД КОДЫГ ЭНД ХАДГАЛААГҮЙ ВЭ: `codeHash` нь серверийн нууц түлхүүрээр
  *  * (RESET_TOKEN_SECRET) хийсэн HMAC-SHA256. Ингэснээр өгөгдлийн сан бүхэлдээ
  *  * алдагдсан ч тэр түлхүүргүйгээр 6 оронтой кодыг сэргээж БОЛОХГҮЙ. Энгийн
  *  * SHA-256 бол 6 оронтой код дээр сая хүрэхгүй хувилбартай тул шууд эвдэгдэнэ.
- *  *
  *  * `attempts` нь буруу оролдлогыг тоолж, тодорхой тооноос хэтэрвэл кодыг үхүүлнэ
  *  * (брутфорсоос хамгаална). `consumedAt` нь нэг удаагийн байдлыг баталгаажуулна.
  */
 export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
+ * Model SmsMessage
+ * *
+ *  * SMS мессежийн бүртгэл — илгээсэн бүр мессеж бүртгэлийн ленте ходолдна.
+ *  * НУУЦЛАЛ: PASSWORD_RESET төрлийн мессежийн body дээр код БАЙХГҮЙ.
+ *  * Зөвхөн "код илгээсэн" гэсэн үйл явдлыг бүртгэнэ, кодыг хадгалахгүй.
+ *  * Ингэснээр нууцлалын эрсдэл бага байна — өгөгдлийн сан ялгарсан ч
+ *  * хүмүүсийн нууц үгийн код яг сүүлийн үеийн байхгүй болно.
+ */
+export type SmsMessage = Prisma.SmsMessageModel
+/**
+ * Model SmsBatch
+ * *
+ *  * Бөөн SMS илгээлт — админ эсвэл багш+ дурын ангийн сурагчдад нэгэлгээр
+ *  * мессеж илгээхдээ "батч" үүсгэнэ.
+ */
+export type SmsBatch = Prisma.SmsBatchModel
+/**
+ * Model SmsTemplate
+ * *
+ *  * SMS загвар — {{name}}, {{amount}} зэрэг орлуулагчтай дахин ашиглах
+ *  * мессежүүд. Админ/Багш+ нь сэтгэл ханамжтай загвар үүсгээд
+ *  * мөн мөн иллүүлэхэд ашигладаг.
+ */
+export type SmsTemplate = Prisma.SmsTemplateModel
 /**
  * Model StudentProfile
  * 
@@ -69,6 +92,11 @@ export type StudentProfile = Prisma.StudentProfileModel
  */
 export type TeacherProfile = Prisma.TeacherProfileModel
 /**
+ * Model ExternalTeacherProfile
+ * 
+ */
+export type ExternalTeacherProfile = Prisma.ExternalTeacherProfileModel
+/**
  * Model ParentLink
  * 
  */
@@ -78,6 +106,16 @@ export type ParentLink = Prisma.ParentLinkModel
  * 
  */
 export type Classroom = Prisma.ClassroomModel
+/**
+ * Model TeacherGroup
+ * 
+ */
+export type TeacherGroup = Prisma.TeacherGroupModel
+/**
+ * Model TeacherGroupMember
+ * 
+ */
+export type TeacherGroupMember = Prisma.TeacherGroupMemberModel
 /**
  * Model Enrollment
  * 
@@ -233,6 +271,26 @@ export type UserPass = Prisma.UserPassModel
  * 
  */
 export type Payment = Prisma.PaymentModel
+/**
+ * Model ProductItem
+ * 
+ */
+export type ProductItem = Prisma.ProductItemModel
+/**
+ * Model Purchase
+ * 
+ */
+export type Purchase = Prisma.PurchaseModel
+/**
+ * Model ExpenseRecord
+ * 
+ */
+export type ExpenseRecord = Prisma.ExpenseRecordModel
+/**
+ * Model TuitionRefund
+ * 
+ */
+export type TuitionRefund = Prisma.TuitionRefundModel
 /**
  * Model Announcement
  * 

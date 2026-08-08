@@ -359,7 +359,7 @@ function choicePointsFor1000(number) {
 async function seedFutureContent({ adminId, classroomIds }) {
   const book1000 = await upsertBook({
     code: '1000',
-    title: '1000 бодлого · ЭЕШ сорил',
+    title: '1000 бодлого — ЭЕШ сорил',
   });
   const book200 = await upsertBook({
     code: '200V2',
@@ -368,21 +368,21 @@ async function seedFutureContent({ adminId, classroomIds }) {
 
   const ch1000 = await upsertChapter({
     bookId: book1000.id,
-    title: '1000 бодлого · Сорил 1-A',
+    title: '1000 бодлого — Сорил 1-A',
     order: 1,
     grade: 12,
     freePreview: true,
   });
   const chIntegral = await upsertChapter({
     bookId: book200.id,
-    title: 'Интеграл · Тест 1-A',
+    title: 'Интеграл — Тест 1-A',
     order: 1,
     grade: 12,
     freePreview: true,
   });
   const chTrig = await upsertChapter({
     bookId: book200.id,
-    title: 'Тригонометр тэгшитгэл · Тест 1-A',
+    title: 'Тригонометр тэгшитгэл — Тест 1-A',
     order: 2,
     grade: 12,
     freePreview: false,
@@ -533,7 +533,7 @@ async function seedFutureContent({ adminId, classroomIds }) {
   }
 
   await upsertTest({
-    title: '200x200 V2 · Интеграл 1-A',
+    title: '200x200 V2 — Интеграл 1-A',
     type: 'CHAPTER_EXAM',
     gradingMode: 'AUTO',
     chapterId: chIntegral.id,
@@ -547,7 +547,7 @@ async function seedFutureContent({ adminId, classroomIds }) {
   });
 
   await upsertTest({
-    title: '200x200 V2 · Тригонометр тэгшитгэл 1-A',
+    title: '200x200 V2 — Тригонометр тэгшитгэл 1-A',
     type: 'CHAPTER_EXAM',
     gradingMode: 'AUTO',
     chapterId: chTrig.id,
@@ -561,7 +561,7 @@ async function seedFutureContent({ adminId, classroomIds }) {
   });
 
   await upsertTest({
-    title: '1000 бодлого · Сорил 1-A',
+    title: '1000 бодлого — Сорил 1-A',
     type: 'EESH_MOCK',
     gradingMode: 'MANUAL',
     chapterId: ch1000.id,

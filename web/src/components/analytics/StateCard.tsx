@@ -1,5 +1,6 @@
 "use client";
 import { TriangleAlert } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 
 // Ачаалж байгаа/алдаа/хоосон төлвүүдийг нэг стандарт харагдацтай болгоно —
 // "алдаа" ба "дата байхгүй" ХОЁРЫГ ХАРИЛЦАН ЯЛГАГДАХУЙЦ харуулна (спекийн

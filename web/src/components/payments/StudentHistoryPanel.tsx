@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { Dot, Meta } from "@/components/ui/Meta";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { formatMnt, TUITION } from "@/lib/orgInfo";
 import {
@@ -124,7 +126,10 @@ export default function StudentHistoryPanel({
             >
               {r.firstName} {r.lastName}
               {r.studentCode && (
-                <span className="ml-1 text-ink-dim">· {r.studentCode}</span>
+                <>
+                  <Dot />
+                  <span className="text-ink-dim">{r.studentCode}</span>
+                </>
               )}
             </button>
           ))}
@@ -151,9 +156,7 @@ export default function StudentHistoryPanel({
           </div>
 
           {historyLoading && (
-            <p className="animate-pulse text-sm text-ink-dim" role="status">
-              Ачаалж байна…
-            </p>
+            <LoadingState rows={3} label="Ачаалж байна" />
           )}
           {historyError && (
             <div className="flex gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
@@ -241,14 +244,19 @@ export default function StudentHistoryPanel({
                         className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-4 py-2.5 text-sm"
                       >
                         <span>
-                          {formatMnt(p.amount)} ·{" "}
-                          {METHOD_LABEL[p.method] ?? p.method}
-                          {p.forMonth && ` · ${p.forMonth}`}
+                          <Meta
+                            items={[
+                              formatMnt(p.amount),
+                              METHOD_LABEL[p.method] ?? p.method,
+                              p.forMonth,
+                            ]}
+                          />
                         </span>
                         <div className="flex flex-wrap items-center gap-2">
                           <span
-                            className={`rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}
                           >
+                            <st.icon className="h-3 w-3 shrink-0" aria-hidden />
                             {st.text}
                           </span>
                           <button

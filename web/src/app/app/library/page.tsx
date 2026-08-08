@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronUp, ChevronDown, Check, Pencil } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import MathText from "@/components/MathText";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
 import { api, getRole, getToken } from "@/lib/api";
@@ -412,7 +413,7 @@ export default function LibraryPage() {
                 : "border-line text-ink-dim hover:border-brand-bright/40"
             }`}
           >
-            <span className="font-mono">{b.code}</span> · {b.testCount ?? 0} тест
+            <span className="font-mono">{b.code}</span> — {b.testCount ?? 0} тест
           </button>
         ))}
       </div>
@@ -483,7 +484,7 @@ export default function LibraryPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-bold">{group.topic}</span>
                       <span className="mt-0.5 block text-xs text-ink-dim">
-                        {group.tests} тест · {group.problems} бодлого
+                        {group.tests} тест — {group.problems} бодлого
                       </span>
                     </span>
                   </div>
@@ -566,9 +567,9 @@ export default function LibraryPage() {
                           )}
                         </div>
                         <p className="mt-0.5 text-sm text-ink-dim">
-                          {ch.book?.code} ном · {ch._count.tests} тест ·{" "}
+                          {ch.book?.code} ном — {ch._count.tests} тест — {" "}
                           {ch._count.problems} бодлого
-                          {ch._count.theories > 0 && ` · ${ch._count.theories} онол`}
+                          {ch._count.theories > 0 && ` — ${ch._count.theories} онол`}
                         </p>
                       </div>
                       <span className="text-ink-dim">
@@ -599,15 +600,10 @@ export default function LibraryPage() {
                           </div>
                         )}
                         {!loadingProblems && !locked && problemsError && (
-                          <div className="rounded-xl border border-error/30 bg-error/10 p-4 text-center text-sm text-error">
-                            <p>{problemsError}</p>
-                            <button
-                              onClick={() => loadProblemsFor(ch)}
-                              className="mt-3 rounded-lg border border-error/40 px-4 py-1.5 text-sm font-semibold text-error transition hover:bg-error/10"
-                            >
-                              Дахин оролдох
-                            </button>
-                          </div>
+                          <ErrorState
+                            message={problemsError}
+                            onRetry={() => loadProblemsFor(ch)}
+                          />
                         )}
                         {!loadingProblems && !locked && !problemsError && (
                           <ProblemList
@@ -660,7 +656,12 @@ function ProblemList({
   onEdit?: (id: string) => void;
 }) {
   if (problems.length === 0) {
-    return <p className="text-sm text-ink-dim">Бодлого алга</p>;
+    return (
+      <EmptyState
+        title="Бодлого алга"
+        hint="Энэ сэдэвт дадлагын бодлого байхгүй байна."
+      />
+    );
   }
 
   return (
@@ -685,7 +686,7 @@ function ProblemList({
                 Зөв хариуны тэмдэг зөвхөн багш ролид (canEdit) ба backend-ээс
                 isCorrect ирсэн үед л гарна. */}
             {p.format === "CHOICE" && p.choiceOptions && p.choiceOptions.length > 0 && (
-              <ul className="mt-2 space-y-1">
+              <ul className="list-disc pl-5 mt-2 space-y-1">
                 {p.choiceOptions.map((o) => (
                   <li key={o.label} className="flex items-start gap-2 text-sm">
                     <span className="shrink-0 font-mono font-bold text-ink-dim">
@@ -747,7 +748,7 @@ function ProblemAnalysisDetails({ analysis }: { analysis: NonNullable<Problem["a
   return (
     <details className="mt-3 rounded-xl border border-line bg-ink/[0.03] p-3 text-xs text-ink-dim">
       <summary className="cursor-pointer font-bold text-ink">
-        Шинжилгээ · {analysis.subtopic || analysis.topic} · {analysis.answerKeyStatus}
+        Шинжилгээ — {analysis.subtopic || analysis.topic} — {analysis.answerKeyStatus}
       </summary>
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         {analysis.formulas.length > 0 && (
@@ -777,9 +778,9 @@ function AnalysisBlock({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
       <p className="font-bold text-ink">{title}</p>
-      <ul className="mt-1 space-y-1">
+      <ul className="list-disc pl-5 mt-1 space-y-1">
         {items.slice(0, 4).map((item) => (
-          <li key={item}>• {item}</li>
+          <li key={item}>{item}</li>
         ))}
       </ul>
     </div>

@@ -20,6 +20,7 @@ import {
   addDaysToDateKey,
   mnDayOrdinalLabel,
 } from "@/components/homework/homeworkDate";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
 
 // ============================================================================
@@ -98,28 +99,13 @@ function SectionStatus({
   emptyText: string;
 }) {
   if (loading) {
-    return (
-      <p className="animate-pulse text-sm text-ink-dim" role="status">
-        Ачаалж байна…
-      </p>
-    );
+    return <LoadingState rows={3} label={emptyText} />;
   }
   if (error) {
-    return (
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-        <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
-        <span>{error}</span>
-        <button
-          onClick={onRetry}
-          className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
-        >
-          Дахин ачаалах
-        </button>
-      </div>
-    );
+    return <ErrorState message={error} onRetry={onRetry} />;
   }
   if (empty) {
-    return <p className="text-sm text-ink-dim">{emptyText}</p>;
+    return <EmptyState title={emptyText} />;
   }
   return null;
 }
@@ -150,7 +136,10 @@ export default function TeacherDashboardClient() {
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [classroomsLoading, setClassroomsLoading] = useState(true);
   const [classroomsError, setClassroomsError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<string>(() => {
+    // Анх ачаалахаа байхад localStorage дээрээс сүүлийнх сонгосон класс авна
+    return typeof window !== "undefined" ? localStorage.getItem("teacher_selected_classroom") || "" : "";
+  });
 
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [rosterLoading, setRosterLoading] = useState(false);
@@ -202,6 +191,13 @@ export default function TeacherDashboardClient() {
     setHomeDate(today);
   }, [selected, today]);
 
+  // Сонгосон класс өөрчлөгдөхөд localStorage-д хадгалаа
+  useEffect(() => {
+    if (selected && typeof window !== "undefined") {
+      localStorage.setItem("teacher_selected_classroom", selected);
+    }
+  }, [selected]);
+
   // ========================================================================
   // Effects
   // ========================================================================
@@ -215,7 +211,10 @@ export default function TeacherDashboardClient() {
     api<Classroom[]>("/classrooms")
       .then((cs) => {
         setClassrooms(cs);
-        if (cs.length > 0) setSelected((s) => s || cs[0].id);
+        // localStorage дээрээс сүүлийнх сонгосон класс авах, байхгүй бол эхний класс сонгоно
+        const saved = typeof window !== "undefined" ? localStorage.getItem("teacher_selected_classroom") : null;
+        const toSelect = saved && cs.some((c) => c.id === saved) ? saved : (cs.length > 0 ? cs[0].id : "");
+        setSelected((s) => s || toSelect);
       })
       .catch((e) => setClassroomsError(errMsg(e)))
       .finally(() => setClassroomsLoading(false));
@@ -430,9 +429,10 @@ export default function TeacherDashboardClient() {
         </div>
       )}
       {!classroomsLoading && !classroomsError && classrooms.length === 0 && (
-        <p className="rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-dim">
-          Танд оноогдсон анги алга байна
-        </p>
+        <EmptyState
+          title="Анги оноогдаагүй"
+          hint="Та одоогоор ямар нэгэн ангид оноогдоогүй байна. Эзэнтэй холбоо барина уу."
+        />
       )}
 
       {/* Sub-tabs: Нүүр / Ирц / Даалгавар */}
@@ -462,9 +462,10 @@ export default function TeacherDashboardClient() {
       {tab === "home" && (
         <div className="space-y-6 md:space-y-8">
           {!selected ? (
-            <p className="rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-dim">
-              Эхлээд анги сонгоно уу
-            </p>
+            <EmptyState
+              title="Анги сонгоогүй"
+              hint="Хяналтын жагсаалтыг үзэхийн тулд дээрээс анги сонгоно уу."
+            />
           ) : (
             <>
               {/* Ирц болон даалгаврын хэсгүүдийн НЭГ ерөнхий огнооны хяналт —

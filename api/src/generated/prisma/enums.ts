@@ -37,6 +37,39 @@ export const NotifyChannel = {
 export type NotifyChannel = (typeof NotifyChannel)[keyof typeof NotifyChannel]
 
 
+export const SmsStatus = {
+  QUEUED: 'QUEUED',
+  SENT: 'SENT',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type SmsStatus = (typeof SmsStatus)[keyof typeof SmsStatus]
+
+
+export const SmsKind = {
+  PASSWORD_RESET: 'PASSWORD_RESET',
+  ANNOUNCEMENT: 'ANNOUNCEMENT',
+  PAYMENT_REMINDER: 'PAYMENT_REMINDER',
+  ATTENDANCE: 'ATTENDANCE',
+  EXAM: 'EXAM',
+  MANUAL: 'MANUAL',
+  OTHER: 'OTHER'
+} as const
+
+export type SmsKind = (typeof SmsKind)[keyof typeof SmsKind]
+
+
+export const SmsBatchStatus = {
+  DRAFT: 'DRAFT',
+  SENDING: 'SENDING',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type SmsBatchStatus = (typeof SmsBatchStatus)[keyof typeof SmsBatchStatus]
+
+
 export const TuitionPlan = {
   FULL_YEAR: 'FULL_YEAR',
   INSTALLMENT: 'INSTALLMENT',
@@ -243,6 +276,39 @@ export const PaymentStatus = {
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const ProductKind = {
+  TEST: 'TEST',
+  BOOK: 'BOOK',
+  PASS: 'PASS'
+} as const
+
+export type ProductKind = (typeof ProductKind)[keyof typeof ProductKind]
+
+
+export const ExpenseCategory = {
+  SALARY: 'SALARY',
+  RENT: 'RENT',
+  UTILITIES: 'UTILITIES',
+  MARKETING: 'MARKETING',
+  MATERIALS: 'MATERIALS',
+  EQUIPMENT: 'EQUIPMENT',
+  OTHER: 'OTHER'
+} as const
+
+export type ExpenseCategory = (typeof ExpenseCategory)[keyof typeof ExpenseCategory]
+
+
+export const RefundStatus = {
+  DRAFT: 'DRAFT',
+  PENDING_APPROVAL: 'PENDING_APPROVAL',
+  APPROVED: 'APPROVED',
+  PAID: 'PAID',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type RefundStatus = (typeof RefundStatus)[keyof typeof RefundStatus]
 
 
 export const AnnouncementAudience = {

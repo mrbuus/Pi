@@ -1,3 +1,4 @@
+import { Check, Clock, Undo2, X, type LucideIcon } from "lucide-react";
 import { TUITION, type TuitionPlan, type TuitionTier } from "@/lib/orgInfo";
 
 export const METHOD_LABEL: Record<string, string> = {
@@ -6,11 +7,30 @@ export const METHOD_LABEL: Record<string, string> = {
   CASH: "Бэлэн",
 };
 
-export const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
-  PENDING: { text: "⏳ Хүлээгдэж буй", cls: "bg-warning/15 text-warning" },
-  CONFIRMED: { text: "✓ Баталгаажсан", cls: "bg-success/15 text-success" },
-  REJECTED: { text: "✕ Цуцалсан", cls: "bg-error/15 text-error" },
-  REVERSED: { text: "↺ Буцаасан", cls: "bg-error/15 text-error" },
+export interface PaymentStatusLabel {
+  icon: LucideIcon;
+  text: string;
+  cls: string;
+}
+
+/**
+ * Төлбөрийн төлөв — НЭГ эх сурвалж.
+ *
+ * Өмнө нь энэ жагсаалт ГУРВАН газар давхардаж (энд, StudentDetail.tsx,
+ * student/payments/StudentPaymentsClient.tsx), тус бүр өөр өөр үг, өөр өөр
+ * төлөвийн багцтай байв — REVERSED зарим газарт огт байхгүй. Нэг төлбөр
+ * хаанаас харснаас хамаараад өөр нэртэй харагдах эрсдэлтэй байсан.
+ *
+ * Мөн энд өмнө нь текст дотор глиф бичигдсэн байсан (⏳ ✓ ✕ ↺) — эзний
+ * 2-р дүрмийн зөрчил. Одоо lucide дүрс болсон: дүрс нь `icon` талбарт,
+ * текст нь цэвэр үг. Ингэснээр дэлгэц уншигч глифийг «чагт» гэж дуудахаа
+ * болино, дүрсний хэмжээ/өнгө нь бусад UI-тай нийцнэ.
+ */
+export const STATUS_LABEL: Record<string, PaymentStatusLabel> = {
+  PENDING: { icon: Clock, text: "Хүлээгдэж буй", cls: "bg-warning/15 text-warning" },
+  CONFIRMED: { icon: Check, text: "Баталгаажсан", cls: "bg-success/15 text-success" },
+  REJECTED: { icon: X, text: "Цуцалсан", cls: "bg-error/15 text-error" },
+  REVERSED: { icon: Undo2, text: "Буцаасан", cls: "bg-ink/10 text-ink-dim" },
 };
 
 // Prisma-гийн TuitionPlan enum-тэй тааруулж харуулах монгол нэр

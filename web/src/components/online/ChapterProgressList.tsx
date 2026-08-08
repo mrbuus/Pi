@@ -1,4 +1,5 @@
 import { Clapperboard, Check } from "lucide-react";
+import { Dot, Meta } from "@/components/ui/Meta";
 import { ChapterProgressRow } from "./types";
 
 function barTone(rate: number): string {
@@ -32,8 +33,12 @@ export default function ChapterProgressList({
               <p className="font-semibold text-ink">{c.title}</p>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-ink-dim">
-                  {c.successRate === null ? "—" : `${c.successRate}%`} ·{" "}
-                  {c.problemsAttempted} бодлого
+                  <Meta
+                    items={[
+                      c.successRate === null ? "—" : `${c.successRate}%`,
+                      `${c.problemsAttempted} бодлого`,
+                    ]}
+                  />
                 </span>
                 {canEdit && onReset && (
                   <button
@@ -72,7 +77,7 @@ export default function ChapterProgressList({
                   "— Онол үзээгүй"
                 )}
               </span>
-              <span>·</span>
+              <Dot />
               <Clapperboard className="h-3 w-3" aria-hidden />
               <span>
                 {c.videosWatched > 0 ? `${c.videosWatched} бичлэг үзсэн` : "Бичлэг үзээгүй"}

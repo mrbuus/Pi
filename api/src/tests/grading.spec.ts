@@ -46,6 +46,67 @@ describe('answersEqual — тоон каноник харьцуулалт', () =
     expect(answersEqual({ a: '2', b: '-3' }, { a: '2.0', b: '-3' })).toBe(true);
     expect(answersEqual({ a: '2', b: '-3' }, { a: '2', b: '3' })).toBe(false);
   });
+
+  // ── 2026-08-08-нд илэрсэн алдааны хамгаалалт ──────────────────────────
+  // Дээд талын "хоосон бол дүгнэхгүй" хамгаалалт зөвхөн БҮХЭЛ утгыг шалгаж
+  // байсан тул { a: '' } гэсэн объект түүнийг давж, доор нь
+  // tokensMatch('', '') → үнэн буцааж, ХАРИУГҮЙ нүх автоматаар "зөв" гэж
+  // тоологдож байв. Энэ нь шалгалтын дүнг шууд гажуудуулна.
+  it('нүхний ЗӨВ хариу хоосон бол тэр бодлого зөв болохгүй', () => {
+    expect(answersEqual({ a: '' }, { a: '' })).toBe(false);
+    expect(answersEqual({ a: '' }, { a: '4' })).toBe(false);
+    expect(answersEqual({ a: '4', b: '' }, { a: '4', b: '' })).toBe(false);
+    // зөвхөн зай бичсэн ч хоосонтой ижил
+    expect(answersEqual({ a: '  ' }, { a: '  ' })).toBe(false);
+  });
+
+  it('сурагч нүхийг огт бөглөөгүй бол буруу', () => {
+    expect(answersEqual({ a: '4' }, {})).toBe(false);
+    expect(answersEqual({ a: '4', b: '9' }, { a: '4' })).toBe(false);
+    expect(answersEqual({ a: '4' }, { a: '' })).toBe(false);
+    expect(answersEqual({ a: '4' }, { a: null })).toBe(false);
+  });
+
+  it('нүх бүр зөв бөглөгдсөн үед зөв гэж тоолно', () => {
+    expect(answersEqual({ a: '4', b: '9' }, { a: '4.0', b: '9' })).toBe(true);
+    // сурагч нэмэлт нүх бичсэн нь зөв хариуг үгүйсгэхгүй (одоогийн зан төлөв)
+    expect(answersEqual({ a: '4' }, { a: '4', b: '9' })).toBe(true);
+  });
+});
+
+describe('hasKnownAnswer — answersEqual-тай нийцтэй байх', () => {
+  // Хоёр функц зөрвөл: бодлого maxScore-д ордог атлаа answersEqual хэзээ ч
+  // үнэн буцаахгүй тул сурагч авах БОЛОМЖГҮЙ оноо алдана.
+  it('нүхний хариу хоосон бол "хариутай" гэж тооцохгүй', () => {
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: { a: '' } }))).toBe(false);
+    expect(
+      hasKnownAnswer(p({ format: FILL, correctAnswer: { a: '4', b: '' } })),
+    ).toBe(false);
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: {} }))).toBe(false);
+  });
+
+  it('нүх бүр утгатай бол "хариутай"', () => {
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: { a: '4' } }))).toBe(true);
+    expect(
+      hasKnownAnswer(p({ format: FILL, correctAnswer: { a: '4', b: '9' } })),
+    ).toBe(true);
+  });
+
+  it('энгийн хоосон болон manualReview-г урьдын адил хасна', () => {
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: null }))).toBe(false);
+    expect(hasKnownAnswer(p({ format: FILL, correctAnswer: '' }))).toBe(false);
+    expect(
+      hasKnownAnswer(p({ format: FILL, correctAnswer: { manualReview: true } })),
+    ).toBe(false);
+  });
+
+  // ЯГ ТЭР ХОСЛОЛ: hasKnownAnswer үнэн бол answersEqual зөв хариунд үнэн
+  // буцаах ЁСТОЙ. Энэ нь хоёр функцийн гэрээ.
+  it('хариутай гэж үзсэн бодлого зөв хариунд оноо ӨГӨХ ёстой', () => {
+    const prob = p({ format: FILL, correctAnswer: { a: '4', b: '9' } });
+    expect(hasKnownAnswer(prob)).toBe(true);
+    expect(answersEqual(prob.correctAnswer, { a: '4', b: '9' })).toBe(true);
+  });
 });
 
 describe('placeholder илрүүлэлт ба горим', () => {

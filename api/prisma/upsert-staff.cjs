@@ -70,7 +70,7 @@ async function main() {
   }
 
   console.log(`\n${COMMIT ? '🟢 БОДИТ БИЧИЛТ' : '🔍 ХУУРАЙ АЖИЛЛАГАА (юу ч бичихгүй)'}`);
-  console.log(`   жагсаалт: ${staff.length} мөр · эрхтэй: ${ready.length} · хүлээгдэж буй: ${pending.length}\n`);
+  console.log(`   жагсаалт: ${staff.length} мөр, эрхтэй: ${ready.length}, хүлээгдэж буй: ${pending.length}\n`);
 
   let seq = await nextTeacherSeq();
   const created = [];
@@ -120,7 +120,7 @@ async function main() {
       updated.push({ ...s, changes });
       console.log(
         `  ↻ №${String(s.n).padStart(2)} ${s.lastName} ${s.firstName} — байна` +
-          (changes.length ? ` · ${changes.join(', ')}` : ' · өөрчлөлтгүй'),
+          (changes.length ? ` — ${changes.join(', ')}` : ' — өөрчлөлтгүй'),
       );
       continue;
     }
@@ -159,8 +159,8 @@ async function main() {
     }
     created.push({ ...s, password, teacherCode });
     console.log(
-      `  + №${String(s.n).padStart(2)} ${s.lastName} ${s.firstName} — ШИНЭ · ${s.role}` +
-        (teacherCode ? ` · ${teacherCode}` : ''),
+      `  + №${String(s.n).padStart(2)} ${s.lastName} ${s.firstName} — ШИНЭ — ${s.role}` +
+        (teacherCode ? ` — ${teacherCode}` : ''),
     );
   }
 
@@ -183,7 +183,7 @@ async function main() {
     if (!COMMIT) console.log('   ⚠️ ХУУРАЙ АЖИЛЛАГАА — эдгээр нууц үг хадгалагдаагүй. --commit-той дахин ажиллуулна.');
   }
 
-  console.log(`\nДҮН: шинэ ${created.length} · шинэчилсэн ${updated.length} · алгассан ${pending.length}`);
+  console.log(`\nДҮН: шинэ ${created.length}, шинэчилсэн ${updated.length}, алгассан ${pending.length}`);
   if (!COMMIT) console.log('Бодитоор бичих:  node prisma/upsert-staff.cjs --commit\n');
 }
 

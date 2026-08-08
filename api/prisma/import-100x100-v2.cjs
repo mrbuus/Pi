@@ -343,7 +343,7 @@ function analyzeProblem({ topic, question, answerKeyStatus, auditNotes }) {
     commonMistakes.push('Бодолтын [a], [ab] зэрэг нүдний орны тоог буруу унших.');
   }
   if (hasGraph) {
-    subtopic = `${topic.title} · график унших`;
+    subtopic = `${topic.title} — график унших`;
     addQuestionForm(tags, skills, 'График унших');
     methods.push('графикаас тэмдэг унших', 'огтлолцол ба тэг болох утгаар завсар ялгах');
     addFormula(formulas, 'Функцийн тэмдгийн завсар', 'f(x)\\gtrless0', 'График x-тэнхлэгийн дээр/доор байгаа завсруудыг уншина.');
@@ -511,7 +511,7 @@ function analyzeProblem({ topic, question, answerKeyStatus, auditNotes }) {
     addFormula(formulas, 'Модулийн тодорхойлолт', '|A|=\\begin{cases}A,&A\\ge0\\\\-A,&A<0\\end{cases}', 'Модультай илэрхийллийг тэмдгийн мужаар задлана.');
   }
   if (hasVariableBaseLog) {
-    subtopic = `${topic.title} · хувьсах суурьтай логарифм`;
+    subtopic = `${topic.title} — хувьсах суурьтай логарифм`;
     domainNotes.push('Логарифмын суурь өөрөө x-ээс хамаарвал сууриас муж авна: base(x) > 0 ба base(x) ≠ 1.');
     commonMistakes.push('Хувьсах суурьтай log дээр аргументаас муж аваад сууриас муж авахаа орхих.');
   }
@@ -676,9 +676,9 @@ function build100x100V2Plan({ sourceDir = DEFAULT_SOURCE_DIR } = {}) {
         topic: matched.topic,
         testNumber: matched.testNumber,
         variant,
-        title: `100x100 V2 · ${matched.topic.title} ${matched.testNumber}-${variant}`,
+        title: `100x100 V2 — ${matched.topic.title} ${matched.testNumber}-${variant}`,
         groupKey: `100x100 V2 · ${matched.topic.title} ${matched.testNumber}`,
-        chapterTitle: `${matched.topic.title} · Тест ${matched.testNumber}`,
+        chapterTitle: `${matched.topic.title} — Тест ${matched.testNumber}`,
         chapterOrder: matched.topic.order * 100 + matched.testNumber,
         timeLimitMin: matched.topic.baseTimeLimitMin,
         pdfKey: `future:${sourcePath}`,

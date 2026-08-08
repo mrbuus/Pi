@@ -12,6 +12,7 @@ import LeadCard, {
   STATUS_ORDER,
 } from "./LeadCard";
 import StatsHeader from "./StatsHeader";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 
 /** API алдааг хэрэглэгчид харуулах эвтэй мессеж болгоно (утасны дугаар
  * агуулаагүй эсэхийг анхаарна — алдааны мессежид хэзээ ч хувийн мэдээлэл
@@ -193,22 +194,14 @@ export default function LeadInboxClient() {
       />
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} label="Ачаалж байна" />
       )}
 
       {error && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <span>error</span>
-          <button
-            type="button"
-            onClick={load}
-            className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
-          >
-            Дахин ачаалах
-          </button>
-        </div>
+        <ErrorState
+          message={error}
+          onRetry={load}
+        />
       )}
 
       {!loading && !error && (

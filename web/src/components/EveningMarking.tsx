@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import MathText from "@/components/MathText";
 import { api } from "@/lib/api";
+import { Meta } from "@/components/ui/Meta";
 
 /* ============================================================================
  * Оройн тэмдэглэгээ — token-гүй, тест дээр суурилсан хувилбар.
@@ -139,11 +140,16 @@ export default function EveningMarking() {
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{s.test.title}</p>
                   <p className="text-xs text-ink-dim">
-                    {s.date.slice(0, 10)} · хаагдах {s.markingClosesOn}
+                    <Meta items={[s.date.slice(0, 10), `хаагдах ${s.markingClosesOn}`]} />
                   </p>
                 </div>
                 <span className="shrink-0 rounded-lg bg-ink/5 px-2.5 py-1 text-xs text-ink-dim">
-                  {done}/{s.problems.length} · {s.daysLeft + 1} өдөр үлдсэн
+                  <Meta
+                    items={[
+                      `${done}/${s.problems.length}`,
+                      `${s.daysLeft + 1} өдөр үлдсэн`,
+                    ]}
+                  />
                 </span>
               </div>
               <div className="space-y-2.5">

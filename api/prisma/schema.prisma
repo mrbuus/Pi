@@ -25,21 +25,21 @@ enum StudentType {
 }
 
 model User {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   // Нэвтрэх түлхүүрүүд: утас, имэйл (gmail), эсвэл username — аль нэгээр нэвтэрнэ.
   // Утсыг сонголттой болгосон тул зөвхөн имэйлээр ч бүртгүүлж болно.
-  phone              String?  @unique
-  email              String?  @unique
-  username           String?  @unique // нийтэд харагдах нэр (овог нэр эсвэл өөрийн nickname)
-  studentCode        String?  @unique // сурагчийн дотоод код (дугаараас тусдаа)
-  teacherCode        String?  @unique // багшийн дотоод код (дугаараас тусдаа)
+  phone              String?   @unique
+  email              String?   @unique
+  username           String?   @unique // нийтэд харагдах нэр (овог нэр эсвэл өөрийн nickname)
+  studentCode        String?   @unique // сурагчийн дотоод код (дугаараас тусдаа)
+  teacherCode        String?   @unique // багшийн дотоод код (дугаараас тусдаа)
   firstName          String
   lastName           String
   passwordHash       String
   // Дараагийн нэвтрэлтээр нууц үг СОЛИУЛАХ шаардлагатай эсэх. Одоогоор ХААЛТТАЙ
   // (@default(false)) — эзэн байнга турших тул саад болохгүй. Ирээдүйд идэвхжүүлэхэд
   // энэ талбарыг create үед true болгоод/эсвэл эндхийн default-ыг true болговол хангалттай.
-  mustChangePassword Boolean  @default(false)
+  mustChangePassword Boolean   @default(false)
   // Нууц үг ХАМГИЙН СҮҮЛД солигдсон мөч. JwtStrategy энэ мөчийг токены `iat`-тай
   // харьцуулж, түүнээс ӨМНӨ олгогдсон бүх токеныг хүчингүйд тооцно. Ингэснээр
   // нууц үгээ сэргээхэд хулгайлагдсан сесс автоматаар тасарна — сэргээлтийн
@@ -47,41 +47,60 @@ model User {
   passwordChangedAt  DateTime?
   role               Role
   avatarUrl          String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  studentProfile StudentProfile?
-  teacherProfile TeacherProfile?
+  studentProfile         StudentProfile?
+  teacherProfile         TeacherProfile?
+  externalTeacherProfile ExternalTeacherProfile?
 
-  parentLinks        ParentLink[]         @relation("ParentSide")
-  childLinks         ParentLink[]         @relation("ChildSide")
-  payments           Payment[]
-  userPasses         UserPass[]
-  attempts           Attempt[]
-  attendances        Attendance[]         @relation("AttendanceStudent")
-  submissions        Submission[]
-  dailyHomeworkMarks DailyHomeworkMark[]  @relation("DailyHomeworkMarkStudent")
-  testResults        TestResult[]
-  predictions        Prediction[]
-  colorTags          StudentColorTag[]    @relation("TaggedStudent")
-  ownedClassrooms    Classroom[]          @relation("ClassroomTeacher")
-  enrollments        Enrollment[]
-  attemptSessions    TestAttemptSession[]
-  learningEvents     LearningEvent[]
+  parentLinks             ParentLink[]         @relation("ParentSide")
+  childLinks              ParentLink[]         @relation("ChildSide")
+  teacherGroups           TeacherGroup[]       @relation("TeacherGroupOwner")
+  teacherGroupMemberships TeacherGroupMember[]
+  payments                Payment[]
+  userPasses              UserPass[]
+  attempts                Attempt[]
+  attendances             Attendance[]         @relation("AttendanceStudent")
+  submissions             Submission[]
+  dailyHomeworkMarks      DailyHomeworkMark[]  @relation("DailyHomeworkMarkStudent")
+  testResults             TestResult[]
+  predictions             Prediction[]
+  colorTags               StudentColorTag[]    @relation("TaggedStudent")
+  ownedClassrooms         Classroom[]          @relation("ClassroomTeacher")
+  enrollments             Enrollment[]
+  attemptSessions         TestAttemptSession[]
+  learningEvents          LearningEvent[]
 
   // Wave 3: ажилтны төлөвлөгч / хуваарь / сурагчийн зорилго / стрийк
-  createdStaffTasks    StaffTask[]
-  staffTaskAssignments StaffTaskAssignee[]
-  taughtSchedules      ClassSchedule[]
-  studentGoals         StudentGoal[]
-  streakFreezes        StreakFreeze[]
+  createdStaffTasks     StaffTask[]
+  staffTaskAssignments  StaffTaskAssignee[]
+  taughtSchedules       ClassSchedule[]
+  studentGoals          StudentGoal[]
+  streakFreezes         StreakFreeze[]
   teacherWorkDays       TeacherWorkDay[]       @relation("TeacherWorkDayTeacher")
   teacherWorkExceptions TeacherWorkException[] @relation("TeacherWorkExceptionTeacher")
 
   // Эцсийн долгион: сурагчийн тэмдэглэл
   studentNotes StudentNote[]
 
+  // Төлбөрийн буцаалт — эзэмшлийн гурван шуу: сурагч + үүсгэгч + баталгаажуулагч
+  tuitionRefundsAsStudent TuitionRefund[] @relation("StudentTuitionRefunds")
+  createdTuitionRefunds   TuitionRefund[] @relation("TuitionRefundCreatedBy")
+  approvedTuitionRefunds  TuitionRefund[] @relation("TuitionRefundApprovedBy")
+  paidTuitionRefunds      TuitionRefund[] @relation("TuitionRefundPaidBy")
+  cancelledTuitionRefunds TuitionRefund[] @relation("TuitionRefundCancelledBy")
+
+  // Худалдан авалтууд
+  purchases Purchase[]
+
   passwordResetTokens PasswordResetToken[]
+
+  // SMS: бүртгэл, загвар, батч
+  smsMessagesAsRecipient SmsMessage[]      @relation("SmsMessageRecipient")
+  smsMessagesAsCreator   SmsMessage[]      @relation("SmsMessageCreatedBy")
+  smsBatches             SmsBatch[]        @relation("SmsBatchCreatedBy")
+  smsTemplates           SmsTemplate[]     @relation("SmsTemplateCreatedBy")
 }
 
 // ============ Нууц үг сэргээлт ============
@@ -91,37 +110,148 @@ enum NotifyChannel {
   EMAIL
 }
 
+// ============ SMS Бүртгэл & Шалгалт (SMS Logging & Audit) ============
+
+/**
+ * SMS илгээлтийн статус — хүсэлтийг системэд хүлээлгэе (QUEUED), илгээлээ (SENT),
+ * алдаа байлаа (FAILED), эсвэл цуцалсан (CANCELLED).
+ */
+enum SmsStatus {
+  QUEUED
+  SENT
+  FAILED
+  CANCELLED
+}
+
+/**
+ * SMS мессежийн төрөл — юугаар илгээснийг ангилна, ингэснээр:
+ * • Ирээдүйд загвар (SmsTemplate)-аар дахин ашиглах
+ * • Сурагч/эзэн өөр өөр төрлийг дахиулах давтамжаа сонгох
+ * • Аналитик: "нууц үг сэргээлтийн SMS хэдий хэмжээний хариу авсан"
+ */
+enum SmsKind {
+  PASSWORD_RESET
+  ANNOUNCEMENT
+  PAYMENT_REMINDER
+  ATTENDANCE
+  EXAM
+  MANUAL
+  OTHER
+}
+
+/**
+ * Бөөн SMS илгээлтийн статус — DRAFT үед сурагчдыг сонгож байж болно,
+ * SENDING үед горим идэвхтэй (цуцлах боломжтой), DONE үед дууссан.
+ */
+enum SmsBatchStatus {
+  DRAFT
+  SENDING
+  DONE
+  CANCELLED
+}
+
 /**
  * Нэг удаагийн нууц үг сэргээх код.
- *
  * ЯАГААД КОДЫГ ЭНД ХАДГАЛААГҮЙ ВЭ: `codeHash` нь серверийн нууц түлхүүрээр
  * (RESET_TOKEN_SECRET) хийсэн HMAC-SHA256. Ингэснээр өгөгдлийн сан бүхэлдээ
  * алдагдсан ч тэр түлхүүргүйгээр 6 оронтой кодыг сэргээж БОЛОХГҮЙ. Энгийн
  * SHA-256 бол 6 оронтой код дээр сая хүрэхгүй хувилбартай тул шууд эвдэгдэнэ.
- *
  * `attempts` нь буруу оролдлогыг тоолж, тодорхой тооноос хэтэрвэл кодыг үхүүлнэ
  * (брутфорсоос хамгаална). `consumedAt` нь нэг удаагийн байдлыг баталгаажуулна.
  */
 model PasswordResetToken {
-  id        String        @id @default(cuid())
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  codeHash  String
-  channel   NotifyChannel @default(SMS)
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash     String
+  channel      NotifyChannel @default(SMS)
   /// Хаана илгээснийг харуулах МАСКЛАСАН хаяг (жишээ нь "8033****"). Бүтэн
   /// дугаарыг энд давхардуулж хадгалахгүй — User дээр аль хэдийн байгаа.
   sentToMasked String
-  expiresAt DateTime
-  consumedAt DateTime?
-  attempts  Int      @default(0)
+  expiresAt    DateTime
+  consumedAt   DateTime?
+  attempts     Int           @default(0)
   /// Хүсэлт ирсэн IP — хэт олон хүсэлтийг мөрдөх, аудитад ашиглана.
-  requestIp String?
-  createdAt DateTime @default(now())
+  requestIp    String?
+  createdAt    DateTime      @default(now())
 
   // Хэрэглэгчийн хамгийн сүүлийн идэвхтэй кодыг олох, мөн цонхон доторх
   // хүсэлтийн тоог тоолоход хоёуланд нь энэ индекс ажиллана.
   @@index([userId, createdAt])
   @@index([expiresAt])
+}
+
+/**
+ * SMS мессежийн бүртгэл — илгээсэн бүр мессеж бүртгэлийн ленте ходолдна.
+ * НУУЦЛАЛ: PASSWORD_RESET төрлийн мессежийн body дээр код БАЙХГҮЙ.
+ * Зөвхөн "код илгээсэн" гэсэн үйл явдлыг бүртгэнэ, кодыг хадгалахгүй.
+ * Ингэснээр нууцлалын эрсдэл бага байна — өгөгдлийн сан ялгарсан ч
+ * хүмүүсийн нууц үгийн код яг сүүлийн үеийн байхгүй болно.
+ */
+model SmsMessage {
+  id          String        @id @default(cuid())
+  toPhone     String
+  body        String
+  status      SmsStatus
+  kind        SmsKind
+  userId      String?
+  user        User?         @relation("SmsMessageRecipient", fields: [userId], references: [id], onDelete: SetNull)
+  batchId     String?
+  batch       SmsBatch?     @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  templateId  String?
+  template    SmsTemplate?  @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  provider    String? // console | twilio | http
+  providerRef String? // нийлүүлэгчийн месседжийн ID
+  error       String? // амжилтгүй болсон шалтгаан
+  segments    Int     @default(1) // SMS хэсгийн тоо (1 SMS = 160 символ)
+  createdById String
+  createdBy   User    @relation("SmsMessageCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  sentAt      DateTime?
+
+  @@index([toPhone])
+  @@index([status])
+  @@index([batchId])
+  @@index([createdAt])
+}
+
+/**
+ * Бөөн SMS илгээлт — админ эсвэл багш+ дурын ангийн сурагчдад нэгэлгээр
+ * мессеж илгээхдээ "батч" үүсгэнэ.
+ */
+model SmsBatch {
+  id          String         @id @default(cuid())
+  title       String
+  kind        SmsKind
+  total       Int // хэдэн хүнийг сонгосон
+  sent        Int            @default(0)
+  failed      Int            @default(0)
+  status      SmsBatchStatus
+  createdById String
+  createdBy   User           @relation("SmsBatchCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime       @default(now())
+  finishedAt  DateTime?
+
+  messages    SmsMessage[]
+}
+
+/**
+ * SMS загвар — {{name}}, {{amount}} зэрэг орлуулагчтай дахин ашиглах
+ * мессежүүд. Админ/Багш+ нь сэтгэл ханамжтай загвар үүсгээд
+ * мөн мөн иллүүлэхэд ашигладаг.
+ */
+model SmsTemplate {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  kind        SmsKind
+  body        String // {{name}}, {{amount}} гэх мэт орлуулагчтай байж болно
+  active      Boolean   @default(true)
+  createdById String
+  createdBy   User      @relation("SmsTemplateCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  messages    SmsMessage[]
 }
 
 // Жилийн төлбөрийн багц: Excel-ийн бүртгэлд байдаг төлбөрийн нөхцөл.
@@ -168,6 +298,18 @@ model TeacherProfile {
   canManageStudents Boolean @default(false)
 }
 
+// Гадны багш (манай төвийн бус). Баталгаажаагүй багш сурагчийн мэдээлэл ХАРАХГҮЙ.
+model ExternalTeacherProfile {
+  userId       String    @id
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization String? // ажилладаг сургууль/төв
+  verifiedAt   DateTime? // админ баталгаажуулсан эсэх
+  verifiedById String? // ADMIN эсвэл TEACHER_PLUS-ийн ID
+  note         String? // админ тайлбар
+
+  @@index([verifiedAt])
+}
+
 model ParentLink {
   id           String    @id @default(cuid())
   parentId     String
@@ -212,6 +354,38 @@ model Classroom {
   // Wave 3: ажилтны төлөвлөгч / хичээлийн хуваарь
   staffTasks     StaffTask[]
   classSchedules ClassSchedule[]
+
+  // Түнш хөрөнгө — ТӨВИЙН ангийн буцаалт
+  tuitionRefunds TuitionRefund[]
+}
+
+// ============ Гадны багшийн анги ============
+
+model TeacherGroup {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation("TeacherGroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  name      String
+  joinCode  String   @unique // сурагч кодоор нэгдэнэ
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  members TeacherGroupMember[]
+
+  @@index([ownerId, archived])
+}
+
+model TeacherGroupMember {
+  id        String       @id @default(cuid())
+  groupId   String
+  group     TeacherGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime     @default(now())
+  leftAt    DateTime?
+
+  @@unique([groupId, studentId])
+  @@index([studentId])
 }
 
 model Enrollment {
@@ -768,9 +942,27 @@ model Attempt {
   autoCorrect  Boolean? // системийн авто үр дүн (онлайн тест, OMR)
   selfState    SelfState? // өөрийн тэмдэглэгээ
   timeSpentSec Int?
-  testId       String?
-  classroomId  String?
-  createdAt    DateTime      @default(now())
+
+  /**
+   * Сурагчийн ЯГ ЮУ хариулсан — гүйцэтгэлийн үнэлгээ БИШ, агуулга.
+   * ⚠️ ЯАГААД ЭНЭ ХЭРЭГТЭЙ ВЭ (2026-08-08-нд нэмсэн):
+   * Өмнө нь зөвхөн `autoCorrect` (үнэн/худал) хадгалагддаг байсан. Тэр нь
+   * «буруу» гэдгийг л хэлнэ, «ЯАГААД буруу» гэдгийг хэлэхгүй. Улмаас:
+   * • distractor analysis (аль буруу сонголтыг хэн сонгов) БОЛОМЖГҮЙ
+   * • алдааны ангилал / misconception илрүүлэлт БОЛОМЖГҮЙ
+   * • ирээдүйд загвар сургахад хамгийн үнэ цэнэтэй дохио ДУТУУ
+   * Хариулт нь `TestAttemptSession.draftAnswers`-т үлддэг ч тэр нь зөвхөн
+   * онлайн сесстэй холбоотой, цаасан/OMR эх сурвалжийг хамрахгүй.
+   * ХАДГАЛАХ УТГА: `gradeAnswer()`-ийн буцаадаг `canonicalAnswer` —
+   * сонголтын ЖИНХЭНЭ ТЕКСТ (эсвэл тоон хариу), холилтын дараалалаас ҮЛ
+   * ХАМААРНА. Түүхий индекс хадгалбал тухайн сессийн `choiceOrder` байхгүй
+   * бол дараа нь тайлагдахгүй болно.
+   * Хоосон (null) байж болно: хариулаагүй, эсвэл хариу тодорхойгүй бодлого.
+   */
+  givenAnswer Json?
+  testId      String?
+  classroomId String?
+  createdAt   DateTime @default(now())
 
   @@index([studentId, occurredOn])
   @@index([problemId])
@@ -913,21 +1105,142 @@ enum PaymentStatus {
 }
 
 model Payment {
-  id            String        @id @default(cuid())
-  userId        String
-  user          User          @relation(fields: [userId], references: [id])
-  amount        Int // хэрэглэгчийн өөрөө бичсэн дүн (₮)
-  method        PaymentMethod
-  status        PaymentStatus @default(PENDING)
-  description   String? // төлсөн зам, тайлбар
-  forMonth      String? // "2026-09" — аль сарын төлбөр
-  paidAt        DateTime?
-  confirmedById String? // данс/бэлэн үед Багш+/Админ гараар баталгаажуулна
-  qpayInvoiceId String?
-  createdAt     DateTime      @default(now())
+  id                String        @id @default(cuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id])
+  amount            Int // хэрэглэгчийн өөрөө бичсэн дүн (₮)
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  description       String? // төлсөн зам, тайлбар
+  forMonth          String? // "2026-09" — аль сарын төлбөр
+  paidAt            DateTime?
+  confirmedById     String? // данс/бэлэн үед Багш+/Админ гараар баталгаажуулна
+  qpayInvoiceId     String?
+  // QPay-ийн ГҮЙЛГЭЭНИЙ дугаар (invoice биш). Callback хоёр удаа ирэх, эсвэл
+  // callback болон polling хоёулаа нэг гүйлгээг барих нь ХЭВИЙН тохиолдол —
+  // @unique нь тэр үед хоёр дахь бичилтийг ӨС түвшинд зогсооно. Кодын түвшний
+  // шалгалт race condition-д алдаж болох тул баталгаа нь ЭНД байх ёстой.
+  providerPaymentId String?       @unique
+  createdAt         DateTime      @default(now())
 
   @@index([userId, forMonth])
   @@index([status])
+}
+
+
+// ============ Нэг удаагийн худалдан авалт (тест, ном, эрх) ============
+
+enum ProductKind {
+  TEST // сургалтын шалгалт
+  BOOK // нууцлалт хэрэглэгдэх хичээл ном
+  PASS // ХУГАЦААТ эрх (одоогийн Pass模型 орнот)
+}
+
+model ProductItem {
+  id     String      @id @default(cuid())
+  kind   ProductKind
+  refId  String // Test.id эсвэл Book.id
+  price  Int // ₮, БҮХЭЛ (Float ХЭРЭГЛЭХГҮЙ)
+  active Boolean     @default(true)
+
+  purchases Purchase[]
+
+  @@unique([kind, refId])
+  @@index([active])
+}
+
+model Purchase {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productItemId String
+  productItem   ProductItem @relation(fields: [productItemId], references: [id], onDelete: Cascade)
+  paymentId     String? // тав Payment-тэй холбоогүй худалдан авалт ч байж болно (эзний шийдвэр)
+  price         Int // ₮, худалдан авах үеийн үнэ (шалтгаанаас хамаарна шинээр өөрчлөгдсөн бодвол)
+  grantedAt     DateTime? // эрх эхлэсэн цаг
+  expiresAt     DateTime? // эрх дуусах цаг (ном нь null, тест = гэрээний үргэлжлэх хугацаа)
+  createdAt     DateTime    @default(now())
+
+  @@index([userId, productItemId])
+  @@index([userId, expiresAt])
+}
+
+// ============ Орлого/зарлага ============
+
+enum ExpenseCategory {
+  SALARY // цалин
+  RENT // ааш
+  UTILITIES // коммунал
+  MARKETING // сурталчилга
+  MATERIALS // материал
+  EQUIPMENT // тоног төхөөрөмж
+  OTHER // бусад
+}
+
+model ExpenseRecord {
+  id          String          @id @default(cuid())
+  amount      Int // ₮
+  category    ExpenseCategory
+  description String?
+  occurredOn  DateTime        @db.Date
+  createdById String
+  createdAt   DateTime        @default(now())
+
+  @@index([occurredOn])
+  @@index([category])
+  @@index([createdAt])
+}
+
+// ============ Төлбөрийн буцаалт ============
+
+enum RefundStatus {
+  DRAFT // ноорог (ТООЦОО хийгдсэн, баталгаажаагүй)
+  PENDING_APPROVAL // админд явуулсан (баталгаажахыг хүлээж байна)
+  APPROVED // админ баталгаажуулсан
+  PAID // төлөгдсөн
+  CANCELLED // цуцалсан
+}
+
+model TuitionRefund {
+  id                 String       @id @default(cuid())
+  studentId          String
+  student            User         @relation(fields: [studentId], references: [id], onDelete: Cascade, name: "StudentTuitionRefunds")
+  classroomId        String
+  classroom          Classroom    @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  leftOn             DateTime     @db.Date // ангиас гарсан огноо
+  totalLessonDays    Int // гэрээний нийт хичээлийн өдөр
+  attendedLessonDays Int // суусан хичээлийн өдөр
+  dailyRate          Int // ₮/өдөр (бүхэл, дугуйруулсан)
+  totalPaid          Int // ₮, нийт төлсөн
+  owed               Int // ₮, барагдуулсан хэмжээ
+  refundAmount       Int // ₮, буцаалтын хэмжээ (owed - totalPaid нь сөрөг байвал 0)
+  shortfall          Int // ₮, дутуу төлсөн дүн (сөрөг байж болохгүй)
+  status             RefundStatus @default(DRAFT)
+  warnings           String? // Анхааруулга (JSON массив)
+  note               String? // админ, багш+ тайлбар
+  paymentMethod      String? // "BANK_TRANSFER", "CASH", "QPAY" гэх мэт
+
+  createdById        String
+  createdBy          User         @relation("TuitionRefundCreatedBy", fields: [createdById], references: [id])
+  approvedById       String?
+  approvedBy         User?        @relation("TuitionRefundApprovedBy", fields: [approvedById], references: [id])
+  approvedAt         DateTime?
+
+  paidById           String?
+  paidBy             User?        @relation("TuitionRefundPaidBy", fields: [paidById], references: [id], onDelete: SetNull)
+  paidAt             DateTime? // төлөгдсөн цаг
+
+  cancelledById      String?
+  cancelledBy        User?        @relation("TuitionRefundCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  cancelledAt        DateTime?
+  cancelReason       String?
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([classroomId, leftOn])
 }
 
 // Төвийн зарлал — танхимын сурагчдын нийтийн самбарт харагдана
@@ -1230,17 +1543,17 @@ enum ScheduleExceptionKind {
 }
 
 model ScheduleException {
-  id         String                @id @default(cuid())
-  scheduleId String
-  schedule   ClassSchedule         @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  date       DateTime              @db.Date
-  kind       ScheduleExceptionKind
-  newDate       DateTime? @db.Date
+  id             String                @id @default(cuid())
+  scheduleId     String
+  schedule       ClassSchedule         @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  date           DateTime              @db.Date
+  kind           ScheduleExceptionKind
+  newDate        DateTime?             @db.Date
   newStartMinute Int?
   newEndMinute   Int?
   newRoom        String?
   note           String?
-  createdAt      DateTime  @default(now())
+  createdAt      DateTime              @default(now())
 
   @@unique([scheduleId, date])
 }

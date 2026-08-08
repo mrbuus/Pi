@@ -2,12 +2,13 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import { MetaTitle } from "@/components/ui/Meta";
 import { TestPickerRow } from "./types";
 import { errMsg } from "./format";
 
 function testLabel(t: TestPickerRow): string {
   const topic = t.chapter?.topic?.name ?? t.chapter?.title;
-  return topic ? `${t.title} · ${topic}` : t.title;
+  return topic ? `${t.title} — ${topic}` : t.title;
 }
 
 export default function AssignTestDialog({
@@ -95,7 +96,7 @@ export default function AssignTestDialog({
                   : "text-ink hover:bg-panel"
               }`}
             >
-              {testLabel(t)}
+              <MetaTitle>{testLabel(t)}</MetaTitle>
             </button>
           ))}
         </div>

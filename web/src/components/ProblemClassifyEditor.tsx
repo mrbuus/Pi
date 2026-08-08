@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, X, Pencil, AlertTriangle, Circle } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import MathText from "@/components/MathText";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 
@@ -570,7 +571,7 @@ export default function ProblemClassifyEditor({
           </button>
         </div>
 
-        {loading && <p className="text-sm text-ink-dim">Ачаалж байна…</p>}
+        {loading && <LoadingState rows={3} label="Ачаалж байна" />}
         {loadError && (
           <div className="rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
             {loadError}

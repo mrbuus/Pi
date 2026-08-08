@@ -7,6 +7,7 @@ import LessonChapterCard, {
   chapterPercent,
 } from "@/components/lesson/LessonChapterCard";
 import { readLastLesson } from "@/components/lesson/continueStore";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import type { LessonChapterSummary } from "@/components/lesson/types";
 import { api } from "@/lib/api";
 
@@ -156,28 +157,12 @@ export default function LearnIndexPage() {
         ))}
       </div>
 
-      {state === "loading" && (
-        <div className="rounded-2xl border border-line bg-panel p-8 text-center text-sm text-ink-dim">
-          Ачаалж байна…
-        </div>
-      )}
+      {state === "loading" && <LoadingState rows={5} label="Бүлгүүдийг ачааллаж байна" />}
 
-      {state === "error" && (
-        <div className="rounded-xl border border-error/30 bg-error/10 p-5 text-center text-sm text-error">
-          <p>{error}</p>
-          <button
-            onClick={retry}
-            className="mt-3 rounded-lg border border-error/40 px-4 py-1.5 text-sm font-semibold text-error transition hover:bg-error/10"
-          >
-            Дахин оролдох
-          </button>
-        </div>
-      )}
+      {state === "error" && <ErrorState message={error} onRetry={retry} />}
 
       {state === "ready" && chapters.length === 0 && (
-        <p className="rounded-2xl border border-line bg-panel p-6 text-center text-sm text-ink-dim">
-          Энэ хичээлээр агуулгатай бүлэг хараахан алга.
-        </p>
+        <EmptyState title="Агуулгатай бүлэг алга" hint="Энэ хичээлээр сургагдахаар зориулсан материал одоо боловсруулагдаж байна." />
       )}
 
       {state === "ready" && continueCandidate && (

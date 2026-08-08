@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, TriangleAlert } from "lucide-react";
 import { api, uploadFile } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
+import { Meta } from "@/components/ui/Meta";
 import ProblemPicker from "@/components/test-builder/ProblemPicker";
 import ProblemPreviewModal from "@/components/test-builder/ProblemPreviewModal";
 import SelectedProblemsList, {
@@ -605,9 +606,9 @@ export default function NewTestPage() {
               <option value="">Бүлэг сэдэв сонгохгүй</option>
               {chapters.map((chapter) => (
                 <option key={chapter.id} value={chapter.id}>
-                  {chapter.book?.code ? `${chapter.book.code} · ` : ""}
+                  {chapter.book?.code ? `${chapter.book.code} — ` : ""}
                   {chapter.title}
-                  {chapter.grade ? ` · ${chapter.grade}-р анги` : ""}
+                  {chapter.grade ? ` — ${chapter.grade}-р анги` : ""}
                 </option>
               ))}
             </select>
@@ -754,8 +755,7 @@ export default function NewTestPage() {
               >
                 <p className="font-semibold text-ink">{c.name}</p>
                 <p className="mt-1 text-sm text-ink-dim">
-                  {c._count.enrollments} сурагч
-                  {c.grade ? ` · ${c.grade}-р анги` : ""}
+                  <Meta items={[`${c._count.enrollments} сурагч`, c.grade ? `${c.grade}-р анги` : ""]} />
                 </p>
               </button>
             );

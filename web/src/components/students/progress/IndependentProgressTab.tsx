@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Meta } from "@/components/ui/Meta";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import { SectionEmpty, SectionError, SectionLoading } from "./ProgressSectionStatus";
 import { useSection } from "./useSection";
@@ -93,7 +94,12 @@ export default function IndependentProgressTab({ studentId }: { studentId: strin
                   <div>
                     <p className="font-medium text-ink">{r.test.title}</p>
                     <p className="text-xs text-ink-dim">
-                      {TEST_TYPE_LABEL[r.test.type] ?? r.test.type} · {r.createdAt.slice(0, 10)}
+                      <Meta
+                        items={[
+                          TEST_TYPE_LABEL[r.test.type] ?? r.test.type,
+                          r.createdAt.slice(0, 10),
+                        ]}
+                      />
                     </p>
                   </div>
                   <span className={`font-bold ${percentColorClass(pct)}`}>

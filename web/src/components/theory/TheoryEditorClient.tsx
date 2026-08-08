@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertTriangle, Check, ArrowLeft } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import ConfirmDialog from "./ConfirmDialog";
@@ -293,7 +294,7 @@ export default function TheoryEditorClient() {
               <option key={c.id} value={c.id}>
                 {c.title}
                 {c._count?.theories !== undefined ? ` (${c._count.theories})` : ""}
-                {c.freePreview ? " · үнэгүй" : ""}
+                {c.freePreview ? " — үнэгүй" : ""}
               </option>
             ))}
           </select>
@@ -350,9 +351,7 @@ export default function TheoryEditorClient() {
           <h2 className="mb-3 font-bold text-brand-soft">2. Онолын блокууд</h2>
 
           {blocksLoading && (
-            <p className="animate-pulse text-sm text-ink-dim" role="status">
-              Ачаалж байна…
-            </p>
+            <LoadingState rows={3} label="Ачаалж байна" />
           )}
           {blocksError && (
             <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">

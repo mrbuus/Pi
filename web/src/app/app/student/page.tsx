@@ -6,6 +6,9 @@ import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import EveningMarking from "@/components/EveningMarking";
 import HomeworkList from "@/components/homework/HomeworkList";
+import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
+import { SkeletonLine } from "@/components/ui/Skeleton";
+import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 
 interface Stats {
@@ -76,28 +79,6 @@ function useSection<T>(path: string): {
   return { data, status, error, reload };
 }
 
-function SectionError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-      <span>{message}</span>
-      <button
-        onClick={onRetry}
-        className="shrink-0 rounded-lg border border-error/40 px-3 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10"
-      >
-        Дахин оролдох
-      </button>
-    </div>
-  );
-}
-
-function SectionLoading({ label }: { label: string }) {
-  return (
-    <p className="animate-pulse text-sm text-ink-dim" role="status">
-      {label} ачаалж байна…
-    </p>
-  );
-}
-
 export default function StudentDashboard() {
   const statsQ = useSection<Stats>("/attempts/my-stats");
   const resultsQ = useSection<TestResult[]>("/tests/my-results");
@@ -120,42 +101,14 @@ export default function StudentDashboard() {
       {/* Төвийн самбар — зөвхөн танхимын сурагчид */}
       {announcementsQ.status === "loading" && (
         <section className="rounded-2xl border border-line bg-panel p-6">
-          <SectionLoading label="Төвийн самбар" />
+          <LoadingState rows={3} label="Төвийн самбар" />
         </section>
       )}
       {announcementsQ.status === "error" && (
-        <SectionError message={announcementsQ.error} onRetry={announcementsQ.reload} />
+        <ErrorState message={announcementsQ.error} onRetry={announcementsQ.reload} />
       )}
       {announcementsQ.status === "ready" && announcements.length > 0 && (
-        <section className="rounded-2xl border border-brand-bright/30 bg-brand-bright/5 p-6">
-          <h2 className="mb-4 flex items-center gap-2 font-bold text-brand-soft">
-            <span className="inline-block h-2 w-2 rounded-full bg-accent-teal" />
-            Төвийн самбар
-          </h2>
-          <div className="space-y-3">
-            {announcements.map((a) => (
-              <div
-                key={a.id}
-                className={`rounded-xl border p-4 ${
-                  a.pinned
-                    ? "border-warning/30 bg-warning/5"
-                    : "border-line bg-surface"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  {a.pinned && <Pin className="h-3.5 w-3.5 text-warning" aria-label="Зангиатай" />}
-                  <p className="font-semibold">{a.title}</p>
-                  <span className="ml-auto text-xs text-ink-dim">
-                    {a.createdAt.slice(0, 10)}
-                  </span>
-                </div>
-                <p className="mt-1.5 whitespace-pre-line text-sm text-ink-dim">
-                  {a.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <AnnouncementsSection announcements={announcements} />
       )}
 
       <HomeworkList />
@@ -166,70 +119,35 @@ export default function StudentDashboard() {
       <div className="grid gap-6 md:grid-cols-2">
         <section className="rounded-2xl border border-line bg-panel p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Миний сул талууд</h2>
-          {statsQ.status === "loading" && <SectionLoading label="Сул талууд" />}
+          {statsQ.status === "loading" && <LoadingState rows={4} label="Сул талууд" />}
           {statsQ.status === "error" && (
-            <SectionError message={statsQ.error} onRetry={statsQ.reload} />
+            <ErrorState message={statsQ.error} onRetry={statsQ.reload} />
           )}
           {statsQ.status === "ready" && !statsQ.data?.weakestTags.length && (
             <p className="text-sm text-ink-dim">Дата хуримтлагдаагүй байна</p>
           )}
           {statsQ.status === "ready" && (
-            <div className="space-y-3">
-              {statsQ.data?.weakestTags.map((t) => (
-                <div key={t.tag}>
-                  <div className="flex justify-between text-sm">
-                    <span>{t.tag}</span>
-                    <span className="text-ink-dim">
-                      {t.successRate}% · {t.attempts} оролдлого
-                    </span>
-                  </div>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-panel">
-                    <div
-                      className={`h-full rounded-full ${
-                        t.successRate < 50
-                          ? "bg-error"
-                          : t.successRate < 80
-                            ? "bg-warning"
-                            : "bg-success"
-                      }`}
-                      style={{ width: `${Math.max(t.successRate, 4)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <WeakestTagsPanel weakestTags={statsQ.data?.weakestTags ?? []} />
           )}
         </section>
 
         <section className="rounded-2xl border border-line bg-panel p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шалгалтын дүн</h2>
-          {resultsQ.status === "loading" && <SectionLoading label="Шалгалтын дүн" />}
+          {resultsQ.status === "loading" && <LoadingState rows={3} label="Шалгалтын дүн" />}
           {resultsQ.status === "error" && (
-            <SectionError message={resultsQ.error} onRetry={resultsQ.reload} />
+            <ErrorState message={resultsQ.error} onRetry={resultsQ.reload} />
           )}
           {resultsQ.status === "ready" && results.length === 0 && (
             <p className="text-sm text-ink-dim">Дүн алга байна</p>
           )}
           {resultsQ.status === "ready" && results.length > 0 && (
-            <div className="space-y-2">
-              {results.map((r, i) => (
-                <div
-                  key={i}
-                  className="flex justify-between rounded-lg border border-line px-4 py-2.5 text-sm"
-                >
-                  <span>{r.test.title}</span>
-                  <span className="font-bold">
-                    {r.totalScore}/{r.maxScore}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <TestResultsPanel results={results} />
           )}
 
           <h2 className="mt-6 mb-3 font-bold text-brand-soft">Сүүлийн ирц</h2>
-          {attendanceQ.status === "loading" && <SectionLoading label="Ирц" />}
+          {attendanceQ.status === "loading" && <LoadingState rows={2} label="Ирц" />}
           {attendanceQ.status === "error" && (
-            <SectionError message={attendanceQ.error} onRetry={attendanceQ.reload} />
+            <ErrorState message={attendanceQ.error} onRetry={attendanceQ.reload} />
           )}
           {attendanceQ.status === "ready" && attendance.length === 0 && (
             <p className="text-sm text-ink-dim">Ирцийн мэдээлэл алга байна</p>
@@ -247,14 +165,146 @@ export default function StudentDashboard() {
                         : "bg-error/15 text-error"
                   }`}
                 >
-                  {a.date.slice(0, 10)} ·{" "}
-                  {a.status === "PRESENT" ? "Ирсэн" : a.status === "LATE" ? "Хоцорсон" : "Тасалсан"}
+                  <Meta items={[a.date.slice(0, 10), a.status === "PRESENT" ? "Ирсэн" : a.status === "LATE" ? "Хоцорсон" : "Тасалсан"]} />
                 </span>
               ))}
             </div>
           )}
         </section>
       </div>
+    </div>
+  );
+}
+
+function AnnouncementsSection({ announcements }: { announcements: Announcement[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const maxVisible = 3;
+  const visibleAnnouncements = expanded ? announcements : announcements.slice(0, maxVisible);
+  const hasMore = announcements.length > maxVisible;
+
+  return (
+    <section className="rounded-2xl border border-brand-bright/30 bg-brand-bright/5 p-6">
+      <h2 className="mb-4 flex items-center gap-2 font-bold text-brand-soft">
+        <span className="inline-block h-2 w-2 rounded-full bg-accent-teal" />
+        Төвийн самбар
+      </h2>
+      <div className="space-y-3">
+        {visibleAnnouncements.map((a) => (
+          <div
+            key={a.id}
+            className={`rounded-xl border p-4 ${
+              a.pinned
+                ? "border-warning/30 bg-warning/5"
+                : "border-line bg-surface"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {a.pinned && <Pin className="h-3.5 w-3.5 text-warning" aria-label="Зангиатай" />}
+              <p className="font-semibold">{a.title}</p>
+              <span className="ml-auto text-xs text-ink-dim">
+                {a.createdAt.slice(0, 10)}
+              </span>
+            </div>
+            <p className="mt-1.5 whitespace-pre-line text-sm text-ink-dim">
+              {a.body}
+            </p>
+          </div>
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          className="mt-3 w-full rounded-lg border border-line py-2 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
+        >
+          {expanded
+            ? `Бага харуулах — ${announcements.length - maxVisible} нуугдсан`
+            : `Бүгдийг харах — ${announcements.length}/${announcements.length}`}
+        </button>
+      )}
+    </section>
+  );
+}
+
+function WeakestTagsPanel({ weakestTags }: { weakestTags: Array<{ tag: string; type: string; attempts: number; successRate: number }> }) {
+  const [expanded, setExpanded] = useState(false);
+  const maxVisible = 5;
+  const visibleTags = expanded ? weakestTags : weakestTags.slice(0, maxVisible);
+  const hasMore = weakestTags.length > maxVisible;
+
+  if (weakestTags.length === 0) {
+    return <p className="text-sm text-ink-dim">Дата хуримтлагдаагүй байна</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {visibleTags.map((t) => (
+        <div key={t.tag}>
+          <div className="flex justify-between text-sm">
+            <span>{t.tag}</span>
+            <span className="text-ink-dim">
+              {t.successRate}% — {t.attempts} оролдлого
+            </span>
+          </div>
+          <div className="mt-1 h-2 overflow-hidden rounded-full bg-panel">
+            <div
+              className={`h-full rounded-full ${
+                t.successRate < 50
+                  ? "bg-error"
+                  : t.successRate < 80
+                    ? "bg-warning"
+                    : "bg-success"
+              }`}
+              style={{ width: `${Math.max(t.successRate, 4)}%` }}
+            />
+          </div>
+        </div>
+      ))}
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          className="mt-2 w-full rounded-lg border border-line py-2 text-xs font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
+        >
+          {expanded
+            ? `Бага харуулах — ${weakestTags.length - maxVisible} нуугдсан`
+            : `${weakestTags.length} / ${weakestTags.length} харуулах`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function TestResultsPanel({ results }: { results: TestResult[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const maxVisible = 4;
+  const visibleResults = expanded ? results : results.slice(0, maxVisible);
+  const hasMore = results.length > maxVisible;
+
+  return (
+    <div className="space-y-2">
+      {visibleResults.map((r, i) => (
+        <div
+          key={i}
+          className="flex justify-between rounded-lg border border-line px-4 py-2.5 text-sm"
+        >
+          <span>{r.test.title}</span>
+          <span className="font-bold">
+            {r.totalScore}/{r.maxScore}
+          </span>
+        </div>
+      ))}
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          className="mt-2 w-full rounded-lg border border-line py-2 text-xs font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
+        >
+          {expanded
+            ? `Бага харуулах — ${results.length - maxVisible} нуугдсан`
+            : `Бүгдийг харах — ${results.length}/${results.length}`}
+        </button>
+      )}
     </div>
   );
 }

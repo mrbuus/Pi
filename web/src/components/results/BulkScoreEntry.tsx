@@ -16,6 +16,7 @@ import { Check, TriangleAlert, X } from "lucide-react";
 import { api } from "@/lib/api";
 import type { ClassroomOption, ResultRow, RosterStudent } from "./types";
 import { fullName, sourceLabel } from "./types";
+import { Dot } from "@/components/ui/Meta";
 
 function todayUBKey(): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -353,7 +354,7 @@ export default function BulkScoreEntry({
                   <>
                     <span className="text-sm text-ink-dim">
                       Одоо: <span className="font-semibold text-ink">{existing.totalScore}/{existing.maxScore}</span>{" "}
-                      · {sourceLabel(existing.source)}
+                      <Dot /> {sourceLabel(existing.source)}
                     </span>
                     <button
                       type="button"

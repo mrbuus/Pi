@@ -20,7 +20,8 @@ export default function LeaveWarningDialog({
   onAcknowledge: () => void;
 }) {
   if (!open) return null;
-  const finalWarning = leaveCount === maxLeaves - 1;
+  // finalWarning: хэрэв дараагийн гаралт нь auto-submit үүсгэнэ
+  const finalWarning = leaveCount >= maxLeaves - 1;
 
   return (
     // bg-black/60: модаль цонхны хараанцар — themed фон биш тул text-white хамаарахгүй
@@ -40,12 +41,27 @@ export default function LeaveWarningDialog({
           <AlertTriangle className="mx-auto h-9 w-9 text-warning" aria-hidden />
         )}
         <p className={`mt-2 text-lg font-bold ${finalWarning ? "text-error" : "text-warning"}`}>
-          Та шалгалтын дэлгэцээс гарлаа. Бүртгэгдлээ ({leaveCount}/{maxLeaves}).
+          Та шалгалтын дэлгэцээс гарлаа.
         </p>
-        <p className="mt-2 text-sm text-ink-dim">Үргэлжлүүлэхийн тулд бүтэн дэлгэц рүү буцна уу.</p>
+        <p className="mt-3 text-sm text-ink-dim">
+          Үргэлжлүүлэхийн тулд бүтэн дэлгэц рүү буцна уу.
+        </p>
+        <div className="mt-3 flex justify-center gap-1">
+          {Array.from({ length: maxLeaves }, (_, i) => (
+            <span
+              key={i}
+              className={`h-2 w-2 rounded-full ${
+                i < leaveCount ? "bg-error/60" : finalWarning && i === leaveCount ? "bg-error" : "bg-line"
+              }`}
+            />
+          ))}
+        </div>
+        <p className={`mt-2 text-xs font-semibold ${finalWarning ? "text-error" : "text-warning"}`}>
+          {maxLeaves - leaveCount} {maxLeaves - leaveCount === 1 ? "удаа" : "удаа"} үлдсэн
+        </p>
         {finalWarning && (
-          <p className="mt-2 text-sm font-semibold text-error">
-            Анхаар: дахин гарвал шалгалт автоматаар илгээгдэнэ.
+          <p className="mt-3 text-sm font-semibold text-error">
+            Сүүлийн сунуулга! Дахин гарвал шалгалт автоматаар илгээгдэнэ.
           </p>
         )}
         <button

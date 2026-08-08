@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { MetaTitle } from "@/components/ui/Meta";
 import ConfirmDialog from "@/components/theory/ConfirmDialog";
 import { TimelineEvent, TimelineResponse } from "./types";
 import { errMsg, formatDateTime } from "./format";
@@ -62,13 +63,13 @@ function eventLine(e: TimelineEvent): { icon: LucideIcon; text: string } {
     const icon = SELF_STATE_ICON[e.selfState ?? ""] ?? Paperclip;
     return {
       icon,
-      text: `${e.problemToken} — ${selfStateLabel(e.selfState)} · ${e.chapterTitle}`,
+      text: `${e.problemToken} — ${selfStateLabel(e.selfState)} — ${e.chapterTitle}`,
     };
   }
   const meta = EVENT_META[e.type] ?? { icon: Circle, label: e.type };
   const durationText =
     e.durationMs && e.durationMs > 1000
-      ? ` · ${Math.round(e.durationMs / 60000) > 0 ? `${Math.round(e.durationMs / 60000)} мин` : `${Math.round(e.durationMs / 1000)} сек`}`
+      ? ` — ${Math.round(e.durationMs / 60000) > 0 ? `${Math.round(e.durationMs / 60000)} мин` : `${Math.round(e.durationMs / 1000)} сек`}`
       : "";
   return { icon: meta.icon, text: `${meta.label}${durationText}` };
 }
@@ -193,7 +194,9 @@ export default function Timeline({
             >
               <div className="flex min-w-0 items-center gap-2">
                 <LineIcon className="h-4 w-4 shrink-0 text-ink-dim" aria-hidden />
-                <span className="truncate text-sm text-ink">{line.text}</span>
+                <span className="truncate text-sm text-ink">
+                  <MetaTitle>{line.text}</MetaTitle>
+                </span>
                 <span className="shrink-0 text-xs text-ink-dim">{formatDateTime(e.at)}</span>
               </div>
               {editable && (

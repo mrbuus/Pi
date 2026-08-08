@@ -1,10 +1,14 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Inject,
   Logger,
+  NotFoundException,
+  Param,
   Post,
+  Req,
   UseGuards,
   forwardRef,
 } from '@nestjs/common';
@@ -62,6 +66,87 @@ export class GatewaysController {
       qpay: this.qpay.isConfigured(),
       digipay: this.digipay.isConfigured(),
     };
+  }
+
+  // Төлбөрийн төлөв polling-оор шалгах endpoint.
+  // Клиент callback ирэхүүлэхээс гадна энэ endpoint-ээр төлбөрийн төлөвийг
+  // олоход л хяналт хийж болно (сүлжээ алдагдлыг эсвэл callback хоцорсны эсрэгүү).
+  @UseGuards(JwtAuthGuard)
+  @Get('qpay/payments/:paymentId/status')
+  async checkQpayStatus(
+    @Param('paymentId') paymentId: string,
+    @Req() req: any,
+  ) {
+    // Зөвхөн төлбөрийн эзэмшигч эсвэл ажилтан хандана
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+        qpayInvoiceId: true,
+        amount: true,
+      },
+    });
+    if (!payment) {
+      throw new NotFoundException('Төлбөр олдсонгүй');
+    }
+
+    const isOwner = payment.userId === req.user.userId;
+    const isStaff =
+      req.user.role === 'ADMIN' || req.user.role === 'TEACHER_PLUS';
+    if (!isOwner && !isStaff) {
+      throw new ForbiddenException('Энэ төлбөрийг авах эрх байхгүй');
+    }
+
+    // Хэрэв аль хэдийн баталгаажсан бол шууд буцаа (яаж ч баталгаажсан)
+    if (payment.status === 'CONFIRMED') {
+      return { status: 'CONFIRMED', paymentId: payment.id };
+    }
+
+    // PENDING + QPay invoice байвал QPay-ээс шалга
+    if (payment.status === 'PENDING' && payment.qpayInvoiceId) {
+      if (!this.qpay.isConfigured()) {
+        return {
+          status: 'PENDING',
+          paymentId: payment.id,
+          message: 'QPay тохиргоо хийгдээгүй, төлөвийг шалгах боломжгүй',
+        };
+      }
+
+      try {
+        const confirmed = await this.qpay.checkPayment(payment.qpayInvoiceId);
+        if (confirmed.paid) {
+          // QPay баталгаажуулсан → бүртгэл сэргээ
+          const applied = await this.payments.confirmQpayPayment({
+            qpayInvoiceId: payment.qpayInvoiceId,
+            paidAmount: confirmed.paidAmount,
+            providerPaymentId: confirmed.providerPaymentId,
+          });
+          return {
+            status: 'CONFIRMED',
+            paymentId: payment.id,
+            source: 'polling',
+            applied,
+          };
+        }
+        return {
+          status: 'PENDING',
+          paymentId: payment.id,
+          message: 'QPay төлбөр хэнүүлээгүй',
+        };
+      } catch (err) {
+        this.logger.error(`QPay polling алдаа: ${(err as Error).message}`);
+        return {
+          status: 'PENDING',
+          paymentId: payment.id,
+          error: 'Төлөвийг шалгахад алдаа гарлаа',
+        };
+      }
+    }
+
+    // Бусад төлөвүүд (REJECTED, REVERSED)
+    return { status: payment.status, paymentId: payment.id };
   }
 
   // QPay сервэрээс дуудагдах endpoint тул нэвтрэлтгүй байх ЗАЙЛШГҮЙ

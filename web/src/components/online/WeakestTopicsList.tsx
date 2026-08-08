@@ -1,3 +1,4 @@
+import { Dot } from "@/components/ui/Meta";
 import { WeakTagRow } from "./types";
 
 export default function WeakestTopicsList({ tags }: { tags: WeakTagRow[] }) {
@@ -13,8 +14,9 @@ export default function WeakestTopicsList({ tags }: { tags: WeakTagRow[] }) {
           className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm"
           title={`${t.attempts} бодлого`}
         >
-          <span className="font-semibold text-ink">{t.tag}</span>{" "}
-          <span className="text-ink-dim">· {t.successRate}%</span>
+          <span className="font-semibold text-ink">{t.tag}</span>
+          <Dot />
+          <span className="text-ink-dim">{t.successRate}%</span>
         </li>
       ))}
     </ul>

@@ -610,7 +610,7 @@ function buildPlan() {
     const answerTopicUpper =
       TOPIC_ALIAS[meta.topicUpper] ?? answerTopicByNorm.get(normKey) ?? meta.topicUpper;
 
-    const chapterTitle = `${meta.topicDisplay} · Тест ${meta.testNumber}`;
+    const chapterTitle = `${meta.topicDisplay} — Тест ${meta.testNumber}`;
     const problems = [];
     const variantMeta = [];
 
