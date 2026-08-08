@@ -14,7 +14,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FinanceService } from './finance.service';
 import { CreateExpenseDto, UpdateExpenseDto } from './dto/finance.dto';
 
-@Controller('api/finance')
+// main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
+// зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
+@Controller('finance')
 @UseGuards(JwtAuthGuard)
 export class FinanceController {
   constructor(private finance: FinanceService) {}

@@ -18,7 +18,9 @@ import { JoinGroupDto } from './dto/join-group.dto';
 import { RegisterExternalTeacherDto } from './dto/register-external-teacher.dto';
 import { VerifyExternalTeacherDto } from './dto/verify-external-teacher.dto';
 
-@Controller('api/teacher-groups')
+// main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
+// зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
+@Controller('teacher-groups')
 export class TeacherGroupsController {
   constructor(private readonly service: TeacherGroupsService) {}
 

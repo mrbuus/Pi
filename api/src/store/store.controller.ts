@@ -14,7 +14,9 @@ import { Role } from '../generated/prisma/client';
 import type { RequestWithUser } from '../auth/request.interface';
 import type { PurchaseDto, CreateProductDto, UpdatePriceDto } from './dto/purchase.dto';
 
-@Controller('api/store')
+// main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
+// зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
+@Controller('store')
 export class StoreController {
   constructor(private storeService: StoreService) {}
 
