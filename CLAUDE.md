@@ -22,7 +22,7 @@
 ## Шалгалт
 
 ```bash
-cd api && npx tsc --noEmit && npx jest        # 235/235
+cd api && npx tsc --noEmit && npx jest        # 349/349
 cd web && npx tsc --noEmit && npm run build   # build ЗААВАЛ
 cd api && npm run smoke                       # бүх endpoint бодит HTTP-ээр (:3000 асаалттай үед)
 ```
