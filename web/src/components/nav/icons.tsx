@@ -1,6 +1,7 @@
 import type { SVGProps } from "react";
 import {
   BarChart3,
+  School, Wallet, Store, ChartNoAxesCombined, Undo2, Dumbbell,
   BookOpen,
   Building,
   CalendarDays,
@@ -34,6 +35,7 @@ import {
 // `currentColor` ашигладаг тул идэвхтэй/идэвхгүй өнгө нь эцэг элементийн
 // text-* классаас автоматаар удамшина — тусад нь fill өгөх шаардлагагүй.
 export type IconName =
+  | "school" | "wallet" | "store" | "chart" | "refund" | "practice"
   | "home"
   | "book-open"
   | "building"
@@ -62,6 +64,7 @@ export type IconName =
   | "message-square";
 
 const ICONS: Record<IconName, LucideIcon> = {
+  school: School, wallet: Wallet, store: Store, chart: ChartNoAxesCombined, refund: Undo2, practice: Dumbbell,
   "message-square": MessageSquare,
   home: Home,
   "book-open": BookOpen,

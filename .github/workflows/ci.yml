@@ -82,6 +82,9 @@ jobs:
       - name: Type-check (tsc --noEmit)
         run: npx tsc --noEmit
 
+      - name: Дотоод холбоос шалгах
+        run: node scripts/check-links.mjs
+
       # ⚠️ Lint (eslint) алхмыг санаатайгаар оруулаагүй: `npx eslint` нь энэ
       # repo дээр 150 гаруй алдаа (ихэнх нь react-hooks/set-state-in-effect)
       # буцаадаг тул нэн даруй асаавал CI эхний push дээрээ л унана. Энэ CI

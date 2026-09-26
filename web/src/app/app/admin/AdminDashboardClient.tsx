@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { NavIcon, type IconName } from "@/components/nav/icons";
 import { useCallback, useEffect, useState } from "react";
 import { TriangleAlert, Check, X } from "lucide-react";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import RequireRole from "@/components/nav/RequireRole";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
-import { api } from "@/lib/api";
+import { api, getRole } from "@/lib/api";
 
 interface Payment {
   id: string;
@@ -348,6 +349,12 @@ export default function AdminDashboardClient() {
         >
           Контент удирдах (ном/бодлого)
         </Link>
+        <section aria-labelledby="management-title" className="my-5 w-full">
+          <h2 id="management-title" className="mb-3 font-semibold">Удирдлагын хэсгүүд</h2>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {[["/app/admin/classrooms", "Ангиуд", "school"], ["/app/admin/finance", "Санхүү", "wallet"], ["/app/admin/store", "Дэлгүүрийн удирдлага", "store"], ["/app/tuition", "Төлбөрийн буцаалт", "refund"], ["/app/insights", "Дүн шинжилгээ", "chart"], ["/app/admin/students", "Сурагчид", "users"], ["/app/admin/enrollment", "Элсэлт", "clipboard-list"], ["/app/sms", "Мессеж", "message-square"]].filter(([href]) => href !== "/app/admin/finance" || getRole() === "ADMIN").map(([href, label, icon]) => <Link key={href} href={href} className="flex min-h-11 items-center gap-3 rounded-xl border border-line bg-panel px-3 py-3 text-ink transition hover:bg-brand-soft"><NavIcon name={icon as IconName} /><span>{label}</span></Link>)}
+          </div>
+        </section>
         {msg && (
           <span
             role="status"
