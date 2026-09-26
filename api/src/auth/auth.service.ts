@@ -23,6 +23,11 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { loginAttempts } from './login-attempts';
+import {
+  PASSWORD_SAME_AS_PHONE_MESSAGE,
+  isSameAsPhone,
+  validatePasswordStrength,
+} from './password-policy';
 import { RegisterDto } from './dto/register.dto';
 
 // Идэвхжүүлэх код = тухайн өдрийн огноо УБ-ийн цагаар, ЖЖЖЖССӨӨ (SPEC §6.3)
@@ -249,6 +254,12 @@ export class AuthService {
     const ok = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!ok) {
       throw new BadRequestException('Одоогийн нууц үг буруу байна');
+    }
+    // DTO аль хэдийн шалгасан ч сервисийг өөр газраас дуудвал бодлого алгасагдахгүй
+    const weak = validatePasswordStrength(newPassword);
+    if (weak) throw new BadRequestException(weak);
+    if (isSameAsPhone(newPassword, user.phone)) {
+      throw new BadRequestException(PASSWORD_SAME_AS_PHONE_MESSAGE);
     }
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({
