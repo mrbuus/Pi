@@ -83,13 +83,13 @@ function loadContract(contract: NightContract) {
     if (name === 'constructor') continue;
     const handler = controller.prototype[name];
     const method = RequestMethod[Reflect.getMetadata(METHOD_METADATA, handler)];
-    const path =
-      '/api/' +
-      [prefix, Reflect.getMetadata(PATH_METADATA, handler) ?? '']
+    const rawPaths = Reflect.getMetadata(PATH_METADATA, handler) ?? '';
+    const paths = (Array.isArray(rawPaths) ? rawPaths : [rawPaths]).map((route) =>
+      '/api/' + [prefix, route]
         .map((p) => String(p).replace(/^\/+|\/+$/g, ''))
-        .filter(Boolean)
-        .join('/');
-    if (method === contract.method && path === contract.path)
+        .filter(Boolean).join('/'),
+    );
+    if (method === contract.method && paths.includes(contract.path))
       return { controller, handler };
   }
   return null;
