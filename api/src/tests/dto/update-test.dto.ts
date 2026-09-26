@@ -77,6 +77,7 @@ export class UpdateTestDto {
 
   @ValidateIf((_object, value) => value !== undefined)
   @IsArray()
+  @ArrayUnique()
   @IsString({ each: true })
   classroomIds?: string[];
 }

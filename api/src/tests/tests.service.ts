@@ -280,7 +280,9 @@ export class TestsService {
       }
 
       const problemIds = dto.problems ?? test.problems;
-      const answerWarning = dto.classroomIds?.length
+      const resultingClassroomIds =
+        dto.classroomIds ?? test.access.map((access) => access.classroomId);
+      const answerWarning = resultingClassroomIds.length > 0
         ? await this.checkAnswerCoverage(problemIds, tx)
         : undefined;
       if (dto.problems !== undefined) {
