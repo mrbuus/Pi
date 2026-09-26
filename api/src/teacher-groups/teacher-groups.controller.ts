@@ -60,7 +60,7 @@ export class TeacherGroupsController {
   ) {
     return this.service.verifyExternalTeacher(
       userId,
-      req.user.sub,
+      req.user.userId,
       dto,
     );
   }
@@ -75,7 +75,7 @@ export class TeacherGroupsController {
     @Body() dto: CreateTeacherGroupDto,
     @Request() req: any,
   ) {
-    return this.service.createGroup(req.user.sub, dto);
+    return this.service.createGroup(req.user.userId, dto);
   }
 
   /**
@@ -85,7 +85,7 @@ export class TeacherGroupsController {
   @UseGuards(JwtAuthGuard)
   @Get('my-groups')
   async getMyGroups(@Request() req: any) {
-    return this.service.getMyGroups(req.user.sub);
+    return this.service.getMyGroups(req.user.userId);
   }
 
   /**
@@ -98,7 +98,7 @@ export class TeacherGroupsController {
     @Param('groupId') groupId: string,
     @Request() req: any,
   ) {
-    return this.service.getGroupDetails(groupId, req.user.sub);
+    return this.service.getGroupDetails(groupId, req.user.userId);
   }
 
   /**
@@ -111,7 +111,7 @@ export class TeacherGroupsController {
     @Body() dto: JoinGroupDto,
     @Request() req: any,
   ) {
-    return this.service.joinGroup(req.user.sub, dto);
+    return this.service.joinGroup(req.user.userId, dto);
   }
 
   /**
@@ -124,7 +124,7 @@ export class TeacherGroupsController {
     @Param('groupId') groupId: string,
     @Request() req: any,
   ) {
-    return this.service.archiveGroup(groupId, req.user.sub);
+    return this.service.archiveGroup(groupId, req.user.userId);
   }
 
   /**
@@ -141,7 +141,7 @@ export class TeacherGroupsController {
     return this.service.removeStudentFromGroup(
       groupId,
       studentId,
-      req.user.sub,
+      req.user.userId,
     );
   }
 }

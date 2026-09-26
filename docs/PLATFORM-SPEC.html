@@ -868,7 +868,7 @@ const MODULES = [
   ],
   gaps: [
     "Модуль бүхэлдээ ажиллахгүй: түүхий fetch, байхгүй хуудас руу шилжилт, дагах UI алга",
-    "АЮУЛГҮЙ БАЙДАЛ: GET /tuition/refunds ба GET /tuition/refund/:id зөвхөн нэвтрэлт шалгадаг — сурагч бүх буцаалтыг (нэр, дүн) харж чадна",
+    "ЗАСАГДСАН (G03): GET /tuition/refunds ба GET /tuition/refund/:id одоо зөвхөн Админ, Багш+-т",
   ],
   accept: ["Буцаалтын тооцооны алхам бүр харагдана", "Зөвхөн Админ зөвшөөрч, төлсөн гэж тэмдэглэнэ"],
 },
@@ -884,7 +884,7 @@ const MODULES = [
     ]},
   ],
   gaps: [
-    "АЮУЛГҮЙ БАЙДАЛ (P0): GET /finance/report ба GET /finance/expenses-д эрхийн шалгалт байхгүй — нэвтэрсэн сурагч цалин, орлогыг харж чадна",
+    "ЗАСАГДСАН (G02): GET /finance/report ба GET /finance/expenses одоо зөвхөн Админд",
     "«Түрээс» ангилал «Ааш» гэж буруу бичигдсэн",
     "Гараар бичсэн өнгө (bg-orange-600 гэх мэт) — дизайны гэрээ §6.1.3 зөрчил",
     "Цуглуулалтын хувь тооцоогүй (TODO)",
@@ -1085,7 +1085,7 @@ const NFR = [
     ["Сервер унтдаггүй (cold start < 1с)", "bug", "Render үнэгүй багц 15 минутын дараа унтдаг, эхний хүсэлт ~60с"],
   ]},
   { area: "Аюулгүй байдал", std: "OWASP ASVS 4.0 — L2, OWASP Top 10", items: [
-    ["Endpoint бүр эрхээ шалгана (A01 Broken Access Control)", "bug", "/finance/report, /finance/expenses, /tuition/refunds, /tuition/refund/:id эрх шалгадаггүй. Ownership шалгалтыг бүх «JWT-only» маршрутад аудит хийх"],
+    ["Endpoint бүр эрхээ шалгана (A01 Broken Access Control)", "part", "G02–G04, G41 засагдсан (2026-09-26). Smoke тест одоо сурагчид ажилтны маршрут нээгдвэл унана — прод ӨС-тэй ажиллуулж батлах"],
     ["Аюулгүй HTTP толгой (CSP, HSTS, X-Frame-Options) — helmet", "none", "helmet суугаагүй"],
     ["Нэвтрэлт, OTP-д тусгай rate limit, түр түгжих", "part", "Зөвхөн глобал 300/мин"],
     ["Токен хадгалалт — XSS-ээс хамгаалах", "part", "localStorage, 7 хоног. httpOnly cookie эсвэл богино токен"],
@@ -1142,9 +1142,10 @@ const NFR = [
 */
 const GAPS = [
   ["G01", "P0", "Дэд бүтэц", "Өгөгдлийн сан үнэгүй багцтай — 359 сурагчийн бүртгэл устах эрсдэл", "render.yaml (pimn-db plan: free), STATUS §9.1", "Render Dashboard дээр ӨС амьд эсэх, багцыг ЯГ ОДОО шалгах. Төлбөртэй багц + өдөр тутмын нөөцлөл + сэргээлтийн туршилт", "v1"],
-  ["G02", "P0", "Аюулгүй байдал", "Санхүүгийн тайлан, зарлагыг нэвтэрсэн хэн ч харна", "api/src/finance/finance.controller.ts — GET report, GET expenses", "@Roles(ADMIN) + RolesGuard нэмэх, smoke тестэд «сурагч → 403» шалгалт нэмэх", "v1"],
-  ["G03", "P0", "Аюулгүй байдал", "Буцаалтын жагсаалт, дэлгэрэнгүйг нэвтэрсэн хэн ч харна", "api/src/tuition/tuition.controller.ts — GET refunds, GET refund/:id", "@Roles(ADMIN, TEACHER_PLUS) нэмэх", "v1"],
-  ["G04", "P0", "Аюулгүй байдал", "«JWT-only» маршрутуудын эрхийн аудит", "API-ийн @Roles-гүй бүх маршрут (энэ баримтын API каталогоос шүүж харна)", "Маршрут бүрт эрх эсвэл ownership шалгалт; smoke-д 4 дүрийн хүлээгдэх код", "v1"],
+  ["G02", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — Санхүүгийн тайлан, зарлагыг нэвтэрсэн хэн ч харна", "api/src/finance/finance.controller.ts — GET report, GET expenses", "Хийсэн: класс түвшинд RolesGuard + @Roles(ADMIN); access-control.spec.ts; smoke-д сурагчийн задрал шалгагч", "v1"],
+  ["G03", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — Буцаалтын жагсаалт, дэлгэрэнгүйг нэвтэрсэн хэн ч харна", "api/src/tuition/tuition.controller.ts — GET refunds, GET refund/:id", "Хийсэн: @Roles(ADMIN, TEACHER_PLUS) + RolesGuard; буцаалтын БҮХ маршрут @Roles-тэй эсэхийг тест шалгана", "v1"],
+  ["G04", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — «JWT-only» маршрутуудын эрхийн аудит", "API-ийн @Roles-гүй бүх маршрут (энэ баримтын API каталогоос шүүж харна)", "Хийсэн: 58 маршрутыг шалгав. Бусад нь үйлчилгээн дотор эрх/эзэмшил шалгадаг эсвэл зориудаар нийтэд нээлттэй (хуваарь, каталог, QPay callback — серверээс баталгаажуулдаг). Дараагийн алхам: прод ӨС-тэй smoke ажиллуулах", "v1"],
+  ["G41", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — req.user талбарын нэр зөрсөн: JWT {userId, role} өгдөг атал store/finance/tuition `id`, teacher-groups `sub` уншдаг байв", "store, finance, tuition, teacher-groups controller; auth/request.interface.ts", "Хийсэн: бүгдийг userId болгов, RequestWithUser төрлийг JwtStrategy-тэй тааруулав. Үр дагавар нь: гадны багшийн модуль бүхэлдээ ажилладаггүй байсан; дэлгүүрийн «Миний худалдан авалт» шүүлтүүргүй query болох эрсдэлтэй байсан; буцаалт/зарлагын үйлдэл хэн хийснийг бичдэггүй байв", "v1"],
   ["G05", "P0", "Дэд бүтэц", "Байршуулсан зураг redeploy бүрт устдаг", "render.yaml disk, storage модуль", "S3-тэй нийцтэй хадгалалт (Cloudflare R2 гэх мэт) эсвэл starter багц + disk", "v1"],
   ["G06", "P0", "Эвдэрхий", "Буцаалтын модуль прод дээр ажиллахгүй", "web/src/components/tuition/RefundCalculator.tsx (түүхий fetch), /app/tuition/refund/[id] байхгүй", "api() ашиглах, дэлгэрэнгүй хуудас + зөвшөөрөх/төлсөн/цуцлах UI, цэсэнд нэмэх", "v1"],
   ["G07", "P1", "Эвдэрхий", "Шинжилгээ хуудас зохиомол өгөгдөл харуулна", "web/src/components/insights/InsightsDashboard.tsx (MOCK_INSIGHTS)", "Бодит /insights/* endpoint-д холбох, цэсэнд нэмэх", "v1"],
@@ -1285,7 +1286,7 @@ section("rbac", "2", "Эрхийн матриц", `
   <div class="tablewrap"><table><tr><th>Чадвар</th>${ROLES.map((r) => `<th>${r}</th>`).join("")}</tr>
   ${MATRIX.map(([cap, row]) => `<tr><td>${esc(cap)}</td>${row.split(" ").map((c) => `<td>${c === "-" ? '<span class="muted">—</span>' : `<b>${MARK[c]}</b>`}</td>`).join("")}</tr>`).join("")}
   </table></div>
-  <div class="callout red">Зөрчил: матрицад «Санхүүгийн тайлан — зөвхөн А» гэж байхад API нэвтэрсэн бүх хүнд нээлттэй (G02). Буцаалтын жагсаалт мөн адил (G03).</div>
+  <div class="callout blue">2026-09-26: матриц ба API зөрсөн байсан (санхүү, буцаалт нэвтэрсэн бүх хүнд нээлттэй) — G02–G03-аар засагдсан.</div>
 `, () => ["## 2. Эрхийн матриц", "", "| Чадвар | " + ROLES.join(" | ") + " |", "|---|" + ROLES.map(() => "---").join("|") + "|",
   ...MATRIX.map(([c, r]) => `| ${c} | ${r.split(" ").map((x) => MARK[x] || "—").join(" | ")} |`)].join("\n"), "Эхлэл");
 

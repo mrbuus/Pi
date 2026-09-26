@@ -11,13 +11,19 @@ import {
   Request,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../generated/prisma/enums';
 import { FinanceService } from './finance.service';
 import { CreateExpenseDto, UpdateExpenseDto } from './dto/finance.dto';
 
 // main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
 // зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
+// Цалин, орлого, зарлага — зөвхөн эзэн (ADMIN). Өмнө нь зөвхөн JwtAuthGuard
+// байсан тул нэвтэрсэн сурагч ч сарын тайланг уншиж чаддаг байв (G02).
 @Controller('finance')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 export class FinanceController {
   constructor(private finance: FinanceService) {}
 
@@ -46,7 +52,7 @@ export class FinanceController {
   @Post('expenses')
   async createExpense(@Request() req: any, @Body() dto: CreateExpenseDto) {
     return this.finance.createExpense(
-      { id: req.user.id, role: req.user.role },
+      { id: req.user.userId, role: req.user.role },
       {
         amount: dto.amount,
         category: dto.category,
@@ -67,7 +73,7 @@ export class FinanceController {
     @Body() dto: UpdateExpenseDto,
   ) {
     return this.finance.updateExpense(
-      { id: req.user.id, role: req.user.role },
+      { id: req.user.userId, role: req.user.role },
       id,
       {
         amount: dto.amount,
@@ -85,7 +91,7 @@ export class FinanceController {
   @Delete('expenses/:id')
   async deleteExpense(@Request() req: any, @Param('id') id: string) {
     return this.finance.deleteExpense(
-      { id: req.user.id, role: req.user.role },
+      { id: req.user.userId, role: req.user.role },
       id,
     );
   }
