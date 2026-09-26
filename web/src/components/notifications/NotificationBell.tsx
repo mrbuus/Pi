@@ -127,10 +127,10 @@ export function NotificationBell() {
         aria-expanded={open}
         aria-controls="notification-recent-panel"
         onClick={toggle}
-        className="relative min-h-11 min-w-11 justify-center px-3"
+        title="Мэдэгдэл"
+        className="relative h-11 w-11 shrink-0 justify-center whitespace-nowrap !px-0"
       >
-        <Bell className="h-4 w-4" aria-hidden />
-        <span className="hidden sm:inline">Мэдэгдэл</span>
+        <Bell className="h-5 w-5" aria-hidden />
         {unreadCount > 0 && (
           <span className="absolute -right-1 -top-1 rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold leading-none text-on-error" aria-hidden="true">
             {unreadCount > 99 ? "99+" : unreadCount}

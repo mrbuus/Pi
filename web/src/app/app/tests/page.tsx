@@ -222,7 +222,7 @@ export default function TestsPage() {
 
       {/* Ирц — зөвхөн танхимын сурагчид (Шийдвэр Г) */}
       {attendance && attendance.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 chunky px-4 py-3">
           <span className="text-xs font-bold text-ink-dim">Миний ирц:</span>
           {attendance.map((a, i) => (
             <span
@@ -289,7 +289,7 @@ export default function TestsPage() {
             <div
               key={i}
               aria-hidden="true"
-              className="h-16 animate-pulse rounded-2xl border border-line bg-surface"
+              className="h-16 animate-pulse chunky"
             />
           ))}
           <p role="status" className="sr-only">
@@ -317,7 +317,7 @@ export default function TestsPage() {
 
       {/* Хоосон төлөв — зөвхөн алдаагүй үед; хайлт vs бодит хоосон ялгана */}
       {!loading && !error && groups.length === 0 && (
-        <p className="rounded-2xl border border-line bg-surface p-6 text-center text-sm text-ink-dim">
+        <p className="chunky p-6 text-center text-sm text-ink-dim">
           {q || topicFilter
             ? `«${query || topicFilter}» гэсэн шүүлтэд таарах зүйл алга`
             : tests.length === 0
