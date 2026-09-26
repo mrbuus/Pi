@@ -34,8 +34,7 @@ export const HOME: Record<string, NavLink> = {
   PARENT: { href: "/app/parent", label: "Хүүхдийн явц", icon: "home" },
 };
 
-// Role бүрийн бүрэн цэс — өмнөх хэвтээ цэстэй ЯГ ижил маршрут, зөвхөн
-// бүлэглэж, самбарт зориулж дахин зохион байгуулав. Шинэ маршрут ОРУУЛААГҮЙ.
+// Бодит маршрутуудыг эрх, чиг үүргээр бүлэглэсэн бүрэн цэс.
 const NAV_BY_ROLE: Record<string, NavLink[]> = {
   STUDENT: [
     HOME.STUDENT,
@@ -46,6 +45,8 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/goals", label: "Миний зорилго", icon: "target" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/student/payments", label: "Миний төлбөр", icon: "credit-card" },
+    { href: "/app/practice", label: "Дасгал", icon: "practice" },
+    { href: "/app/store", label: "Дэлгүүр", icon: "store" },
   ],
   TEACHER: [
     HOME.TEACHER,
@@ -55,6 +56,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
+    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   TEACHER_PLUS: [
     HOME.TEACHER_PLUS,
@@ -72,6 +74,10 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
+    { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
+    { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
+    { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
+    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   ADMIN: [
     HOME.ADMIN,
@@ -89,12 +95,18 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
+    { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
+    { href: "/app/admin/finance", label: "Санхүү", icon: "wallet" },
+    { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
+    { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
+    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   BUYER: [
     HOME.BUYER,
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
+    { href: "/app/store", label: "Дэлгүүр", icon: "store" },
   ],
   PARENT: [
     HOME.PARENT,
@@ -104,6 +116,14 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 
 // Маршрут бүрийг аль бүлэгт харьяалагдахыг тодорхойлно (нүүр хуудсуудаас бусад).
 const ITEM_GROUP: Record<string, GroupKey> = {
+  "/app/admin/classrooms": "admin",
+  "/app/admin/finance": "admin",
+  "/app/admin/store": "admin",
+  "/app/tuition": "admin",
+  "/app/insights": "class",
+  "/app/practice": "learn",
+  "/app/store": "personal",
+
   "/app/learn": "learn",
   "/app/library": "learn",
   "/app/videos": "learn",

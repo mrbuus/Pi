@@ -74,7 +74,7 @@ export default function StoreProducts() {
 
   async function handlePurchase(productId: string) {
     if (!user) {
-      router.push('/auth/login');
+      router.push('/login');
       return;
     }
 
