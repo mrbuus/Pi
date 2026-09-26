@@ -398,7 +398,7 @@
     "file": "tests/tests.controller",
     "controller": "TestsController",
     "method": "GET",
-    "path": "/api/tests/drafts/:draftId",
+    "path": "/api/tests/drafts/:id",
     "roles": [
       "ADMIN",
       "TEACHER"
@@ -409,7 +409,7 @@
     "file": "tests/tests.controller",
     "controller": "TestsController",
     "method": "PATCH",
-    "path": "/api/tests/drafts/:draftId",
+    "path": "/api/tests/drafts/:id",
     "roles": [
       "ADMIN",
       "TEACHER"
@@ -469,6 +469,83 @@
       "STUDENT",
       "PARENT",
       "BUYER"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "GET",
+    "path": "/api/store/admin/products",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "GET",
+    "path": "/api/store/admin/purchases",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "GET",
+    "path": "/api/store/admin/revenue",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "POST",
+    "path": "/api/store/admin/products",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "POST",
+    "path": "/api/store/admin/products/:id/deactivate",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "POST",
+    "path": "/api/store/admin/products/:id/price",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G36",
+    "file": "tests/tests.controller",
+    "controller": "TestsController",
+    "method": "DELETE",
+    "path": "/api/tests/drafts/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER"
     ]
   }
 ]

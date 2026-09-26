@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/client';
 import type { RequestWithUser } from '../auth/request.interface';
@@ -52,7 +53,7 @@ export class StoreController {
   /**
    * POST /api/store/admin/products — бүтээгдэхүүн үүсгэх (админ)
    */
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('admin/products')
   createProduct(
@@ -72,7 +73,7 @@ export class StoreController {
   /**
    * POST /api/store/admin/products/:id/deactivate — идэвхгүй болгох
    */
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('admin/products/:id/deactivate')
   deactivateProduct(
@@ -89,7 +90,7 @@ export class StoreController {
   /**
    * POST /api/store/admin/products/:id/price — үнэ солих
    */
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('admin/products/:id/price')
   updatePrice(
@@ -108,7 +109,7 @@ export class StoreController {
   /**
    * GET /api/store/admin/products — админ: бүх бүтээгдэхүүнийг авах
    */
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('admin/products')
   adminGetAllProducts(@Request() req: RequestWithUser) {
@@ -118,7 +119,7 @@ export class StoreController {
   /**
    * GET /api/store/admin/purchases — админ: бүх худалдан авалтуудыг авах
    */
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('admin/purchases')
   adminGetAllPurchases(@Request() req: RequestWithUser) {
@@ -128,7 +129,7 @@ export class StoreController {
   /**
    * GET /api/store/admin/revenue — админ: орлогын хураангуй
    */
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('admin/revenue')
   adminGetRevenueSummary(@Request() req: RequestWithUser) {

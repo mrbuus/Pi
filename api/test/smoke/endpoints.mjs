@@ -12,6 +12,9 @@ export const intentionallyPublic = new Set([
   'GET /api/catalog/passes',
   'GET /api/enrollment-windows',
   'GET /api/store/products',
+  // Existing public catalog metadata/statement previews; no learner records.
+  'GET /api/catalog/grades/:grade/chapters',
+  'GET /api/catalog/chapters/:id/preview',
   ...contracts
     .filter((c) => !c.roles.length && !c.auth)
     .map((c) => `${c.method} ${c.path}`),
