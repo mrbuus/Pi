@@ -1,3 +1,5 @@
+import { ConsentController } from './consent.controller';
+import { ConsentService } from './consent.service';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -20,8 +22,8 @@ import { PasswordResetService } from './password-reset.service';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PasswordResetService],
+  controllers: [AuthController, ConsentController],
+  providers: [AuthService, JwtStrategy, PasswordResetService, ConsentService],
   // PasswordResetService-ийг UsersModule мөн ашиглана (ажилтан сурагчийн
   // өмнөөс код илгээх).
   exports: [AuthService, PasswordResetService],

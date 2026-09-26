@@ -1,3 +1,4 @@
+import { consentData } from './consent.service';
 import {
   BadRequestException,
   ConflictException,
@@ -41,6 +42,7 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    const consent = consentData(dto);
     // Утас эсвэл имэйл аль нэг нь заавал хэрэгтэй
     if (!dto.phone && !dto.email) {
       throw new BadRequestException('Утас эсвэл имэйл хаяг шаардлагатай');
@@ -152,6 +154,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
+        ...consent,
         phone: dto.phone ?? null,
         email: dto.email ?? null,
         username,
