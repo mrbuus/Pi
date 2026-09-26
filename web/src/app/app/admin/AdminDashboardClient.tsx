@@ -73,6 +73,25 @@ const ROLE_LABEL: Record<string, string> = {
 type Msg = { kind: "success" | "error"; text: string } | null;
 
 /** API алдааг хэрэглэгчид харуулах эвтэй мессеж болгоно. */
+const ADMIN_TILES: {
+  href: string;
+  label: string;
+  icon: IconName;
+  tone: string;
+  adminOnly?: boolean;
+  featured?: boolean;
+}[] = [
+  { href: "/app/admin/content", label: "Контент (ном, бодлого)", icon: "layers", tone: "bg-brand-bright/15 text-brand-soft", featured: true },
+  { href: "/app/admin/students", label: "Сурагчид", icon: "users", tone: "bg-accent-teal/15 text-accent-teal" },
+  { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school", tone: "bg-accent-violet/15 text-accent-violet" },
+  { href: "/app/admin/enrollment", label: "Элсэлт", icon: "clipboard-list", tone: "bg-accent-sky/15 text-accent-sky" },
+  { href: "/app/admin/finance", label: "Санхүү", icon: "wallet", tone: "bg-accent-gold/15 text-accent-gold", adminOnly: true },
+  { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund", tone: "bg-accent-rose/15 text-accent-rose" },
+  { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart", tone: "bg-accent-fuchsia/15 text-accent-fuchsia" },
+  { href: "/app/admin/store", label: "Дэлгүүр", icon: "store", tone: "bg-accent-teal/15 text-accent-teal" },
+  { href: "/app/sms", label: "Мессеж", icon: "message-square", tone: "bg-accent-sky/15 text-accent-sky" },
+];
+
 function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";
 }
@@ -342,17 +361,28 @@ export default function AdminDashboardClient() {
     <div className="space-y-8">
       <DashboardGreeting />
       <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-2xl font-extrabold">Удирдлага</h1>
-        <Link
-          href="/app/admin/content"
-          className={primaryBtn}
-        >
-          Контент удирдах (ном/бодлого)
-        </Link>
-        <section aria-labelledby="management-title" className="my-5 w-full">
-          <h2 id="management-title" className="mb-3 font-semibold">Удирдлагын хэсгүүд</h2>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {[["/app/admin/classrooms", "Ангиуд", "school"], ["/app/admin/finance", "Санхүү", "wallet"], ["/app/admin/store", "Дэлгүүрийн удирдлага", "store"], ["/app/tuition", "Төлбөрийн буцаалт", "refund"], ["/app/insights", "Дүн шинжилгээ", "chart"], ["/app/admin/students", "Сурагчид", "users"], ["/app/admin/enrollment", "Элсэлт", "clipboard-list"], ["/app/sms", "Мессеж", "message-square"]].filter(([href]) => href !== "/app/admin/finance" || getRole() === "ADMIN").map(([href, label, icon]) => <Link key={href} href={href} className="flex min-h-11 items-center gap-3 rounded-xl border border-line bg-panel px-3 py-3 text-ink transition hover:bg-brand-soft"><NavIcon name={icon as IconName} /><span>{label}</span></Link>)}
+        <h1 className="sr-only">Удирдлага</h1>
+        {/* Удирдлагын хэсгүүд — өнгөт хавтан (шинэ дизайн, 2026-09-26).
+            Өмнө нь hover:bg-brand-soft (бараан) дээр ink бичвэр уншигдахгүй болдог байв. */}
+        <section aria-labelledby="management-title" className="w-full">
+          <h2 id="management-title" className="mb-3 font-bold text-ink">Удирдлагын хэсгүүд</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {ADMIN_TILES.filter((t) => !t.adminOnly || getRole() === "ADMIN").map((t) => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className={`group flex min-h-24 flex-col justify-between gap-3 rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
+                  t.featured
+                    ? "col-span-2 border-brand-bright/40 bg-brand-bright/10 sm:col-span-1"
+                    : "border-line bg-panel hover:border-brand-bright/40"
+                }`}
+              >
+                <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.tone}`}>
+                  <NavIcon name={t.icon} className="h-5 w-5" />
+                </span>
+                <span className="font-bold leading-tight text-ink">{t.label}</span>
+              </Link>
+            ))}
           </div>
         </section>
         {msg && (
