@@ -102,7 +102,7 @@ function serializeEntry(entry: EntryWithProblem) {
     ...(revealAnswer
       ? { correctAnswer: publicCorrectAnswer(problem) }
       : {}),
-    ...(entry.retryCount > 0 && entry.problem.analysis?.status === 'VERIFIED'
+    ...(revealAnswer && entry.problem.analysis?.status === 'VERIFIED'
       ? { solutionOutline: entry.problem.analysis.solutionOutline }
       : {}),
   };

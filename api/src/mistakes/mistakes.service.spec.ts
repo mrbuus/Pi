@@ -47,7 +47,7 @@ describe('MistakesService authorization', () => {
       createdAt: new Date(), nextRetryAt: null,
       problem: { id: 'p', statementText: 'Q', choices: ['A', 'B'], format: ProblemFormat.CHOICE,
         imageKey: null, correctAnswer: 'B', chapter: { topic: { name: 'Алгебр' } },
-        choiceOptions: [], formulas: [], analysis: null },
+        choiceOptions: [], formulas: [], analysis: { status: 'VERIFIED', solutionOutline: 'hidden prior solution' } },
     };
     const prisma = {
       ...mockOpenContentAccess(),
@@ -55,7 +55,9 @@ describe('MistakesService authorization', () => {
       mistakeEntry: { groupBy: jest.fn().mockResolvedValue([]), findMany: jest.fn().mockResolvedValue([entry]) },
     };
     const service = new MistakesService(prisma as any);
-    expect((await service.list('learner-a', {})).items[0]).not.toHaveProperty('correctAnswer');
+    const result = (await service.list('learner-a', {})).items[0];
+    expect(result).not.toHaveProperty('correctAnswer');
+    expect(result).not.toHaveProperty('solutionOutline');
   });
 
   it('returns a stable cursor after a bounded page and keeps aggregate counts global', async () => {
