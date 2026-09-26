@@ -34,7 +34,10 @@ async function main() {
   const { AppModule } = require('../../dist/src/app.module');
 
   // Логийг бүрэн унтраана — гаралт нь ЗӨВХӨН маршрутын жагсаалт байх ёстой.
-  const app = await NestFactory.create(AppModule, { logger: false });
+  const app = await NestFactory.create(AppModule, {
+    logger: false,
+    abortOnError: false,
+  });
   app.setGlobalPrefix('api');
   await app.init();
 
