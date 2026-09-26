@@ -428,3 +428,11 @@ export const CalendarDayType = {
 } as const
 
 export type CalendarDayType = (typeof CalendarDayType)[keyof typeof CalendarDayType]
+
+
+export const GoogleOAuthPurpose = {
+  LOGIN: 'LOGIN',
+  LINK: 'LINK'
+} as const
+
+export type GoogleOAuthPurpose = (typeof GoogleOAuthPurpose)[keyof typeof GoogleOAuthPurpose]

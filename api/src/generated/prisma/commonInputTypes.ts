@@ -1102,6 +1102,23 @@ export type EnumCalendarDayTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumCalendarDayTypeFilter<$PrismaModel>
 }
 
+export type EnumGoogleOAuthPurposeFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleOAuthPurpose | Prisma.EnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleOAuthPurposeFilter<$PrismaModel> | $Enums.GoogleOAuthPurpose
+}
+
+export type EnumGoogleOAuthPurposeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleOAuthPurpose | Prisma.EnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleOAuthPurposeWithAggregatesFilter<$PrismaModel> | $Enums.GoogleOAuthPurpose
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleOAuthPurposeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleOAuthPurposeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -2125,6 +2142,23 @@ export type NestedEnumCalendarDayTypeWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCalendarDayTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCalendarDayTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumGoogleOAuthPurposeFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleOAuthPurpose | Prisma.EnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleOAuthPurposeFilter<$PrismaModel> | $Enums.GoogleOAuthPurpose
+}
+
+export type NestedEnumGoogleOAuthPurposeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleOAuthPurpose | Prisma.EnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleOAuthPurpose[] | Prisma.ListEnumGoogleOAuthPurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleOAuthPurposeWithAggregatesFilter<$PrismaModel> | $Enums.GoogleOAuthPurpose
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleOAuthPurposeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleOAuthPurposeFilter<$PrismaModel>
 }
 
 

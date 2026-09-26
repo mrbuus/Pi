@@ -391,3 +391,18 @@ export type StudentGoal = Prisma.StudentGoalModel
  * 
  */
 export type StreakFreeze = Prisma.StreakFreezeModel
+/**
+ * Model GoogleIdentity
+ * 
+ */
+export type GoogleIdentity = Prisma.GoogleIdentityModel
+/**
+ * Model GoogleOAuthState
+ * 
+ */
+export type GoogleOAuthState = Prisma.GoogleOAuthStateModel
+/**
+ * Model GoogleLoginExchange
+ * 
+ */
+export type GoogleLoginExchange = Prisma.GoogleLoginExchangeModel
