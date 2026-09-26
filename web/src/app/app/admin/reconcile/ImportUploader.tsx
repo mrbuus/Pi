@@ -68,7 +68,8 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
         fileInputRef.current.value = '';
       }
       onSuccess?.(response);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       const message =
         err?.message ||
         'Файл импортлоход алдаа гарлаа. Дахин оролдоно уу';

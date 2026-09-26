@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { JoinGroupCard } from '../../../../components/groups/JoinGroupCard';
-import { GroupMembersCard } from '../../../../components/groups/GroupMembersCard';
+import { GroupMembersCard, type GroupMember } from '../../../../components/groups/GroupMembersCard';
 
 import { LoadingState, ErrorState } from '../../../../components/ui/StateBlock';
 import { api } from '@/lib/api';
@@ -17,7 +17,7 @@ interface GroupDetails {
     firstName: string;
     lastName: string;
   };
-  members: any[];
+  members: GroupMember[];
   createdAt: string;
 }
 
@@ -37,8 +37,9 @@ export default function GroupDetailPage() {
     try {
       const data = await api<GroupDetails>(`/teacher-groups/${groupId}`);
       setGroup(data);
-    } catch (err: any) {
-      setError(err.message || 'Бүлэгийн мэдээлэл авахад алдаа гарлаа');
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
+      setError(err?.message || 'Бүлэгийн мэдээлэл авахад алдаа гарлаа');
     } finally {
       setIsLoading(false);
     }

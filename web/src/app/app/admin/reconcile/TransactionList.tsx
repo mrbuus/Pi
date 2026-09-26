@@ -50,7 +50,8 @@ export function TransactionList() {
 
       setTransactions(response.items);
       setTotal(response.total);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       setError(err?.message || 'Гүйлгээ дүүргээ амжилтгүй');
     } finally {
       setLoading(false);
@@ -78,7 +79,8 @@ export function TransactionList() {
       setTransactions(transactions.filter((t) => t.id !== transaction.id));
       setTotal(Math.max(0, total - 1));
       setSelectedUser(null);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       setError(err?.message || 'Гүйлгээ холбоход амжилтгүй');
     } finally {
       setMatchingId(null);
@@ -94,7 +96,8 @@ export function TransactionList() {
 
       setTransactions(transactions.filter((t) => t.id !== transaction.id));
       setTotal(Math.max(0, total - 1));
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       setError(err?.message || 'Гүйлгээ үл хэлэлцэхэд амжилтгүй');
     } finally {
       setMatchingId(null);

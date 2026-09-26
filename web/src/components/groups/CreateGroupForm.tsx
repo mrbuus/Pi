@@ -29,8 +29,9 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
       setGroupName('');
       setIsOpen(false);
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Ангийн бүлэг үүсгэх үед алдаа гарлаа');
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
+      setError(err?.message || 'Ангийн бүлэг үүсгэх үед алдаа гарлаа');
     } finally {
       setIsLoading(false);
     }

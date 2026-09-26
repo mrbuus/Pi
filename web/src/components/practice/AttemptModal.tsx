@@ -36,7 +36,7 @@ interface Problem {
   id: string;
   token: string;
   statementText?: string;
-  correctAnswer: any;
+  correctAnswer: unknown;
   format: string;
 }
 

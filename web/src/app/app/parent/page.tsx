@@ -100,7 +100,7 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
   const payments = link.student.payments ?? [];
   const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [selectedResult, setSelectedResult] = useState<{ id: string; test: { title: string } } | null>(null);
 
   const attendanceSummary = attendance.reduce<Record<string, number>>((acc, row) => {
     acc[row.status] = (acc[row.status] ?? 0) + 1;

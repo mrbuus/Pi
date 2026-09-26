@@ -74,7 +74,7 @@ export default function ExamIntro({
   const checkBattery = useCallback(async () => {
     try {
       if ("getBattery" in navigator) {
-        const battery = await (navigator as any).getBattery();
+        const battery = await (navigator as Navigator & { getBattery: () => Promise<{ level: number }> }).getBattery();
         setBatteryPercent(Math.round(battery.level * 100));
       }
     } catch {

@@ -31,7 +31,7 @@ export default function PendingApprovalList() {
     loadStudents();
   }, []);
 
-  const loadStudents = async () => {
+  async function loadStudents() {
     try {
       setLoading(true);
       setError(null);
@@ -43,7 +43,7 @@ export default function PendingApprovalList() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleApprove = async (studentId: string) => {
     try {

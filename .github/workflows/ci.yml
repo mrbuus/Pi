@@ -80,12 +80,10 @@ jobs:
       - name: Дотоод холбоос шалгах
         run: node scripts/check-links.mjs
 
-      # ⚠️ Lint (eslint) алхмыг санаатайгаар оруулаагүй: `npx eslint` нь энэ
-      # repo дээр 150 гаруй алдаа (ихэнх нь react-hooks/set-state-in-effect)
-      # буцаадаг тул нэн даруй асаавал CI эхний push дээрээ л унана. Энэ CI
-      # cleanup-той шууд холбоогүй, олон component-д тархсан хуучин tech
-      # debt тул засаагүй. Lint debt-г цэвэрлэсний дараа энэ алхмыг буцааж
-      # нэмнэ.
+      # 2026-09-27: алдаа 0 болсон (set-state-in-effect түр анхааруулга —
+      # eslint.config.mjs). Шинэ алдаа нэмэгдвэл CI унана.
+      - name: Lint (eslint, алдаа 0)
+        run: npx eslint src
 
       - name: Next.js build
         run: npx next build

@@ -43,7 +43,8 @@ export function ReconcilePageClient() {
         unmatched: unmatched.total,
       });
       setError(null);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       setError(err?.message || 'Хураангуйг ачаалж чадсангүй');
     }
   };
