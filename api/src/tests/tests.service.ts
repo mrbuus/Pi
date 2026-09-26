@@ -144,7 +144,7 @@ export class TestsService {
     const draft = await this.prisma.testDraft.findUnique({
       where: { id: draftId },
     });
-    if (!draft || (actorRole === Role.TEACHER && draft.ownerId !== actorId)) {
+    if (!draft || (actorRole !== Role.ADMIN && draft.ownerId !== actorId)) {
       throw new NotFoundException('Ноорог олдсонгүй');
     }
     return draft;
@@ -177,7 +177,7 @@ export class TestsService {
     await this.findDraftForActor(draftId, actorId, actorRole);
     const state = this.draftState(dto);
     const where =
-      actorRole === Role.TEACHER
+      actorRole !== Role.ADMIN
         ? { id: draftId, ownerId: actorId, revision: dto.expectedRevision }
         : { id: draftId, revision: dto.expectedRevision };
     // The UPDATE holds the row lock until the matching snapshot is read.
@@ -204,7 +204,7 @@ export class TestsService {
   async deleteTestDraft(draftId: string, actorId: string, actorRole: Role) {
     await this.findDraftForActor(draftId, actorId, actorRole);
     const where =
-      actorRole === Role.TEACHER
+      actorRole !== Role.ADMIN
         ? { id: draftId, ownerId: actorId }
         : { id: draftId };
     await this.prisma.testDraft.deleteMany({ where });
@@ -212,19 +212,25 @@ export class TestsService {
   }
 
   async duplicateTest(testId: string, actorId: string, actorRole: Role) {
-    this.assertDraftRole(actorRole);
+    if (
+      actorRole !== Role.ADMIN &&
+      actorRole !== Role.TEACHER_PLUS &&
+      actorRole !== Role.TEACHER
+    ) {
+      throw new ForbiddenException('Тест хуулах эрхгүй байна');
+    }
     const source = await this.findEditableTest(testId, actorId, actorRole);
+    // Access, learner results and attempt sessions are intentionally not copied.
+    // A copy remains a private draft until its owner edits and assigns it.
     const duplicate = await this.prisma.test.create({
       data: {
-        title: `${source.title} (хуулбар)`,
+        title: `${source.title} (хуулбар)`.slice(0, 200),
         type: source.type,
         gradingMode: source.gradingMode,
         timeLimitMin: source.timeLimitMin,
         chapterId: source.chapterId,
-        groupKey: source.groupKey,
-        variantLabel: source.variantLabel,
         pdfKey: source.pdfKey,
-        price: source.price,
+        price: actorRole === Role.ADMIN ? source.price : null,
         createdById: actorId,
         isDraft: true,
         problems: {
@@ -246,7 +252,7 @@ export class TestsService {
       null,
       duplicate,
     );
-    return duplicate;
+    return { ...duplicate, problems: source.problems.length };
   }
 
   // TODO(followUp): api/src/audit/audit.service.ts бэлэн болмогц энэ

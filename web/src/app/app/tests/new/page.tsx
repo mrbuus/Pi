@@ -155,13 +155,13 @@ export default function NewTestPage() {
   useEffect(() => {
     let cancelled = false;
     const role = getRole();
-    if (role !== "ADMIN" && role !== "TEACHER") {
+    if (role !== "ADMIN" && role !== "TEACHER_PLUS" && role !== "TEACHER") {
       return;
     }
-    setRestoreError("");
     api<{ id: string }>("/auth/me")
       .then(async (me) => {
         if (cancelled) return;
+        setRestoreError("");
         setDraftOwnerId(me.id);
         let storedId: string | null = null;
         try {
@@ -982,14 +982,9 @@ export default function NewTestPage() {
             </div>
           </section>
         )}
-        {(getRole() === "ADMIN" || getRole() === "TEACHER") && draftReady && draftActive && draftStatus && (
+        {["ADMIN", "TEACHER_PLUS", "TEACHER"].includes(getRole() ?? "") && draftReady && draftActive && draftStatus && (
           <p role="status" className="text-sm text-ink-dim">
             {draftStatus}
-          </p>
-        )}
-        {getRole() === "TEACHER_PLUS" && (
-          <p role="status" className="text-sm text-ink-dim">
-            Энэ эрхээр серверийн ноорог хадгалах боломжгүй; тест үүсгэх үйлдэл хэвээр ажиллана.
           </p>
         )}
         {draftError && (
