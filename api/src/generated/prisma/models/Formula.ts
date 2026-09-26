@@ -20,8 +20,20 @@ export type FormulaModel = runtime.Types.Result.DefaultSelection<Prisma.$Formula
 
 export type AggregateFormula = {
   _count: FormulaCountAggregateOutputType | null
+  _avg: FormulaAvgAggregateOutputType | null
+  _sum: FormulaSumAggregateOutputType | null
   _min: FormulaMinAggregateOutputType | null
   _max: FormulaMaxAggregateOutputType | null
+}
+
+export type FormulaAvgAggregateOutputType = {
+  order: number | null
+  grade: number | null
+}
+
+export type FormulaSumAggregateOutputType = {
+  order: number | null
+  grade: number | null
 }
 
 export type FormulaMinAggregateOutputType = {
@@ -29,6 +41,18 @@ export type FormulaMinAggregateOutputType = {
   name: string | null
   latex: string | null
   description: string | null
+  slug: string | null
+  sectionSlug: string | null
+  order: number | null
+  level: string | null
+  grade: number | null
+  general: string | null
+  explanation: string | null
+  mnemonic: string | null
+  eeshTip: string | null
+  widget: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type FormulaMaxAggregateOutputType = {
@@ -36,6 +60,18 @@ export type FormulaMaxAggregateOutputType = {
   name: string | null
   latex: string | null
   description: string | null
+  slug: string | null
+  sectionSlug: string | null
+  order: number | null
+  level: string | null
+  grade: number | null
+  general: string | null
+  explanation: string | null
+  mnemonic: string | null
+  eeshTip: string | null
+  widget: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type FormulaCountAggregateOutputType = {
@@ -43,15 +79,58 @@ export type FormulaCountAggregateOutputType = {
   name: number
   latex: number
   description: number
+  slug: number
+  sectionSlug: number
+  order: number
+  level: number
+  grade: number
+  topicSlugs: number
+  general: number
+  variants: number
+  conditions: number
+  explanation: number
+  derivation: number
+  mnemonic: number
+  examples: number
+  commonMistakes: number
+  eeshTip: number
+  relatedSlugs: number
+  keywords: number
+  widget: number
+  quiz: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
+
+export type FormulaAvgAggregateInputType = {
+  order?: true
+  grade?: true
+}
+
+export type FormulaSumAggregateInputType = {
+  order?: true
+  grade?: true
+}
 
 export type FormulaMinAggregateInputType = {
   id?: true
   name?: true
   latex?: true
   description?: true
+  slug?: true
+  sectionSlug?: true
+  order?: true
+  level?: true
+  grade?: true
+  general?: true
+  explanation?: true
+  mnemonic?: true
+  eeshTip?: true
+  widget?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type FormulaMaxAggregateInputType = {
@@ -59,6 +138,18 @@ export type FormulaMaxAggregateInputType = {
   name?: true
   latex?: true
   description?: true
+  slug?: true
+  sectionSlug?: true
+  order?: true
+  level?: true
+  grade?: true
+  general?: true
+  explanation?: true
+  mnemonic?: true
+  eeshTip?: true
+  widget?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type FormulaCountAggregateInputType = {
@@ -66,6 +157,27 @@ export type FormulaCountAggregateInputType = {
   name?: true
   latex?: true
   description?: true
+  slug?: true
+  sectionSlug?: true
+  order?: true
+  level?: true
+  grade?: true
+  topicSlugs?: true
+  general?: true
+  variants?: true
+  conditions?: true
+  explanation?: true
+  derivation?: true
+  mnemonic?: true
+  examples?: true
+  commonMistakes?: true
+  eeshTip?: true
+  relatedSlugs?: true
+  keywords?: true
+  widget?: true
+  quiz?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -107,6 +219,18 @@ export type FormulaAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: FormulaAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: FormulaSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: FormulaMinAggregateInputType
@@ -137,6 +261,8 @@ export type FormulaGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: FormulaCountAggregateInputType | true
+  _avg?: FormulaAvgAggregateInputType
+  _sum?: FormulaSumAggregateInputType
   _min?: FormulaMinAggregateInputType
   _max?: FormulaMaxAggregateInputType
 }
@@ -146,7 +272,30 @@ export type FormulaGroupByOutputType = {
   name: string
   latex: string | null
   description: string | null
+  slug: string | null
+  sectionSlug: string | null
+  order: number
+  level: string
+  grade: number | null
+  topicSlugs: string[]
+  general: string | null
+  variants: runtime.JsonValue | null
+  conditions: runtime.JsonValue | null
+  explanation: string | null
+  derivation: runtime.JsonValue | null
+  mnemonic: string | null
+  examples: runtime.JsonValue | null
+  commonMistakes: runtime.JsonValue | null
+  eeshTip: string | null
+  relatedSlugs: string[]
+  keywords: string[]
+  widget: string | null
+  quiz: runtime.JsonValue | null
+  createdAt: Date
+  updatedAt: Date
   _count: FormulaCountAggregateOutputType | null
+  _avg: FormulaAvgAggregateOutputType | null
+  _sum: FormulaSumAggregateOutputType | null
   _min: FormulaMinAggregateOutputType | null
   _max: FormulaMaxAggregateOutputType | null
 }
@@ -174,6 +323,28 @@ export type FormulaWhereInput = {
   name?: Prisma.StringFilter<"Formula"> | string
   latex?: Prisma.StringNullableFilter<"Formula"> | string | null
   description?: Prisma.StringNullableFilter<"Formula"> | string | null
+  slug?: Prisma.StringNullableFilter<"Formula"> | string | null
+  sectionSlug?: Prisma.StringNullableFilter<"Formula"> | string | null
+  order?: Prisma.IntFilter<"Formula"> | number
+  level?: Prisma.StringFilter<"Formula"> | string
+  grade?: Prisma.IntNullableFilter<"Formula"> | number | null
+  topicSlugs?: Prisma.StringNullableListFilter<"Formula">
+  general?: Prisma.StringNullableFilter<"Formula"> | string | null
+  variants?: Prisma.JsonNullableFilter<"Formula">
+  conditions?: Prisma.JsonNullableFilter<"Formula">
+  explanation?: Prisma.StringNullableFilter<"Formula"> | string | null
+  derivation?: Prisma.JsonNullableFilter<"Formula">
+  mnemonic?: Prisma.StringNullableFilter<"Formula"> | string | null
+  examples?: Prisma.JsonNullableFilter<"Formula">
+  commonMistakes?: Prisma.JsonNullableFilter<"Formula">
+  eeshTip?: Prisma.StringNullableFilter<"Formula"> | string | null
+  relatedSlugs?: Prisma.StringNullableListFilter<"Formula">
+  keywords?: Prisma.StringNullableListFilter<"Formula">
+  widget?: Prisma.StringNullableFilter<"Formula"> | string | null
+  quiz?: Prisma.JsonNullableFilter<"Formula">
+  createdAt?: Prisma.DateTimeFilter<"Formula"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Formula"> | Date | string
+  section?: Prisma.XOR<Prisma.FormulaSectionNullableScalarRelationFilter, Prisma.FormulaSectionWhereInput> | null
   problems?: Prisma.ProblemFormulaListRelationFilter
 }
 
@@ -182,28 +353,95 @@ export type FormulaOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   latex?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  slug?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionSlug?: Prisma.SortOrderInput | Prisma.SortOrder
+  order?: Prisma.SortOrder
+  level?: Prisma.SortOrder
+  grade?: Prisma.SortOrderInput | Prisma.SortOrder
+  topicSlugs?: Prisma.SortOrder
+  general?: Prisma.SortOrderInput | Prisma.SortOrder
+  variants?: Prisma.SortOrderInput | Prisma.SortOrder
+  conditions?: Prisma.SortOrderInput | Prisma.SortOrder
+  explanation?: Prisma.SortOrderInput | Prisma.SortOrder
+  derivation?: Prisma.SortOrderInput | Prisma.SortOrder
+  mnemonic?: Prisma.SortOrderInput | Prisma.SortOrder
+  examples?: Prisma.SortOrderInput | Prisma.SortOrder
+  commonMistakes?: Prisma.SortOrderInput | Prisma.SortOrder
+  eeshTip?: Prisma.SortOrderInput | Prisma.SortOrder
+  relatedSlugs?: Prisma.SortOrder
+  keywords?: Prisma.SortOrder
+  widget?: Prisma.SortOrderInput | Prisma.SortOrder
+  quiz?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  section?: Prisma.FormulaSectionOrderByWithRelationInput
   problems?: Prisma.ProblemFormulaOrderByRelationAggregateInput
 }
 
 export type FormulaWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   name?: string
+  slug?: string
   AND?: Prisma.FormulaWhereInput | Prisma.FormulaWhereInput[]
   OR?: Prisma.FormulaWhereInput[]
   NOT?: Prisma.FormulaWhereInput | Prisma.FormulaWhereInput[]
   latex?: Prisma.StringNullableFilter<"Formula"> | string | null
   description?: Prisma.StringNullableFilter<"Formula"> | string | null
+  sectionSlug?: Prisma.StringNullableFilter<"Formula"> | string | null
+  order?: Prisma.IntFilter<"Formula"> | number
+  level?: Prisma.StringFilter<"Formula"> | string
+  grade?: Prisma.IntNullableFilter<"Formula"> | number | null
+  topicSlugs?: Prisma.StringNullableListFilter<"Formula">
+  general?: Prisma.StringNullableFilter<"Formula"> | string | null
+  variants?: Prisma.JsonNullableFilter<"Formula">
+  conditions?: Prisma.JsonNullableFilter<"Formula">
+  explanation?: Prisma.StringNullableFilter<"Formula"> | string | null
+  derivation?: Prisma.JsonNullableFilter<"Formula">
+  mnemonic?: Prisma.StringNullableFilter<"Formula"> | string | null
+  examples?: Prisma.JsonNullableFilter<"Formula">
+  commonMistakes?: Prisma.JsonNullableFilter<"Formula">
+  eeshTip?: Prisma.StringNullableFilter<"Formula"> | string | null
+  relatedSlugs?: Prisma.StringNullableListFilter<"Formula">
+  keywords?: Prisma.StringNullableListFilter<"Formula">
+  widget?: Prisma.StringNullableFilter<"Formula"> | string | null
+  quiz?: Prisma.JsonNullableFilter<"Formula">
+  createdAt?: Prisma.DateTimeFilter<"Formula"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Formula"> | Date | string
+  section?: Prisma.XOR<Prisma.FormulaSectionNullableScalarRelationFilter, Prisma.FormulaSectionWhereInput> | null
   problems?: Prisma.ProblemFormulaListRelationFilter
-}, "id" | "name">
+}, "id" | "name" | "slug">
 
 export type FormulaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   latex?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  slug?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionSlug?: Prisma.SortOrderInput | Prisma.SortOrder
+  order?: Prisma.SortOrder
+  level?: Prisma.SortOrder
+  grade?: Prisma.SortOrderInput | Prisma.SortOrder
+  topicSlugs?: Prisma.SortOrder
+  general?: Prisma.SortOrderInput | Prisma.SortOrder
+  variants?: Prisma.SortOrderInput | Prisma.SortOrder
+  conditions?: Prisma.SortOrderInput | Prisma.SortOrder
+  explanation?: Prisma.SortOrderInput | Prisma.SortOrder
+  derivation?: Prisma.SortOrderInput | Prisma.SortOrder
+  mnemonic?: Prisma.SortOrderInput | Prisma.SortOrder
+  examples?: Prisma.SortOrderInput | Prisma.SortOrder
+  commonMistakes?: Prisma.SortOrderInput | Prisma.SortOrder
+  eeshTip?: Prisma.SortOrderInput | Prisma.SortOrder
+  relatedSlugs?: Prisma.SortOrder
+  keywords?: Prisma.SortOrder
+  widget?: Prisma.SortOrderInput | Prisma.SortOrder
+  quiz?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.FormulaCountOrderByAggregateInput
+  _avg?: Prisma.FormulaAvgOrderByAggregateInput
   _max?: Prisma.FormulaMaxOrderByAggregateInput
   _min?: Prisma.FormulaMinOrderByAggregateInput
+  _sum?: Prisma.FormulaSumOrderByAggregateInput
 }
 
 export type FormulaScalarWhereWithAggregatesInput = {
@@ -214,6 +452,27 @@ export type FormulaScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Formula"> | string
   latex?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  slug?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  sectionSlug?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  order?: Prisma.IntWithAggregatesFilter<"Formula"> | number
+  level?: Prisma.StringWithAggregatesFilter<"Formula"> | string
+  grade?: Prisma.IntNullableWithAggregatesFilter<"Formula"> | number | null
+  topicSlugs?: Prisma.StringNullableListFilter<"Formula">
+  general?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  variants?: Prisma.JsonNullableWithAggregatesFilter<"Formula">
+  conditions?: Prisma.JsonNullableWithAggregatesFilter<"Formula">
+  explanation?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  derivation?: Prisma.JsonNullableWithAggregatesFilter<"Formula">
+  mnemonic?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  examples?: Prisma.JsonNullableWithAggregatesFilter<"Formula">
+  commonMistakes?: Prisma.JsonNullableWithAggregatesFilter<"Formula">
+  eeshTip?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  relatedSlugs?: Prisma.StringNullableListFilter<"Formula">
+  keywords?: Prisma.StringNullableListFilter<"Formula">
+  widget?: Prisma.StringNullableWithAggregatesFilter<"Formula"> | string | null
+  quiz?: Prisma.JsonNullableWithAggregatesFilter<"Formula">
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Formula"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Formula"> | Date | string
 }
 
 export type FormulaCreateInput = {
@@ -221,6 +480,27 @@ export type FormulaCreateInput = {
   name: string
   latex?: string | null
   description?: string | null
+  slug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  section?: Prisma.FormulaSectionCreateNestedOneWithoutFormulasInput
   problems?: Prisma.ProblemFormulaCreateNestedManyWithoutFormulaInput
 }
 
@@ -229,6 +509,27 @@ export type FormulaUncheckedCreateInput = {
   name: string
   latex?: string | null
   description?: string | null
+  slug?: string | null
+  sectionSlug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
   problems?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutFormulaInput
 }
 
@@ -237,6 +538,27 @@ export type FormulaUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  section?: Prisma.FormulaSectionUpdateOneWithoutFormulasNestedInput
   problems?: Prisma.ProblemFormulaUpdateManyWithoutFormulaNestedInput
 }
 
@@ -245,6 +567,27 @@ export type FormulaUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionSlug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   problems?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutFormulaNestedInput
 }
 
@@ -253,6 +596,27 @@ export type FormulaCreateManyInput = {
   name: string
   latex?: string | null
   description?: string | null
+  slug?: string | null
+  sectionSlug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type FormulaUpdateManyMutationInput = {
@@ -260,6 +624,26 @@ export type FormulaUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type FormulaUncheckedUpdateManyInput = {
@@ -267,6 +651,27 @@ export type FormulaUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionSlug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type FormulaCountOrderByAggregateInput = {
@@ -274,6 +679,32 @@ export type FormulaCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   latex?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
+  sectionSlug?: Prisma.SortOrder
+  order?: Prisma.SortOrder
+  level?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
+  topicSlugs?: Prisma.SortOrder
+  general?: Prisma.SortOrder
+  variants?: Prisma.SortOrder
+  conditions?: Prisma.SortOrder
+  explanation?: Prisma.SortOrder
+  derivation?: Prisma.SortOrder
+  mnemonic?: Prisma.SortOrder
+  examples?: Prisma.SortOrder
+  commonMistakes?: Prisma.SortOrder
+  eeshTip?: Prisma.SortOrder
+  relatedSlugs?: Prisma.SortOrder
+  keywords?: Prisma.SortOrder
+  widget?: Prisma.SortOrder
+  quiz?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+}
+
+export type FormulaAvgOrderByAggregateInput = {
+  order?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
 }
 
 export type FormulaMaxOrderByAggregateInput = {
@@ -281,6 +712,18 @@ export type FormulaMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   latex?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
+  sectionSlug?: Prisma.SortOrder
+  order?: Prisma.SortOrder
+  level?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
+  general?: Prisma.SortOrder
+  explanation?: Prisma.SortOrder
+  mnemonic?: Prisma.SortOrder
+  eeshTip?: Prisma.SortOrder
+  widget?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type FormulaMinOrderByAggregateInput = {
@@ -288,11 +731,107 @@ export type FormulaMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   latex?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
+  sectionSlug?: Prisma.SortOrder
+  order?: Prisma.SortOrder
+  level?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
+  general?: Prisma.SortOrder
+  explanation?: Prisma.SortOrder
+  mnemonic?: Prisma.SortOrder
+  eeshTip?: Prisma.SortOrder
+  widget?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+}
+
+export type FormulaSumOrderByAggregateInput = {
+  order?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
+}
+
+export type FormulaListRelationFilter = {
+  every?: Prisma.FormulaWhereInput
+  some?: Prisma.FormulaWhereInput
+  none?: Prisma.FormulaWhereInput
+}
+
+export type FormulaOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type FormulaScalarRelationFilter = {
   is?: Prisma.FormulaWhereInput
   isNot?: Prisma.FormulaWhereInput
+}
+
+export type FormulaCreatetopicSlugsInput = {
+  set: string[]
+}
+
+export type FormulaCreaterelatedSlugsInput = {
+  set: string[]
+}
+
+export type FormulaCreatekeywordsInput = {
+  set: string[]
+}
+
+export type FormulaUpdatetopicSlugsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type FormulaUpdaterelatedSlugsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type FormulaUpdatekeywordsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type FormulaCreateNestedManyWithoutSectionInput = {
+  create?: Prisma.XOR<Prisma.FormulaCreateWithoutSectionInput, Prisma.FormulaUncheckedCreateWithoutSectionInput> | Prisma.FormulaCreateWithoutSectionInput[] | Prisma.FormulaUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.FormulaCreateOrConnectWithoutSectionInput | Prisma.FormulaCreateOrConnectWithoutSectionInput[]
+  createMany?: Prisma.FormulaCreateManySectionInputEnvelope
+  connect?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+}
+
+export type FormulaUncheckedCreateNestedManyWithoutSectionInput = {
+  create?: Prisma.XOR<Prisma.FormulaCreateWithoutSectionInput, Prisma.FormulaUncheckedCreateWithoutSectionInput> | Prisma.FormulaCreateWithoutSectionInput[] | Prisma.FormulaUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.FormulaCreateOrConnectWithoutSectionInput | Prisma.FormulaCreateOrConnectWithoutSectionInput[]
+  createMany?: Prisma.FormulaCreateManySectionInputEnvelope
+  connect?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+}
+
+export type FormulaUpdateManyWithoutSectionNestedInput = {
+  create?: Prisma.XOR<Prisma.FormulaCreateWithoutSectionInput, Prisma.FormulaUncheckedCreateWithoutSectionInput> | Prisma.FormulaCreateWithoutSectionInput[] | Prisma.FormulaUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.FormulaCreateOrConnectWithoutSectionInput | Prisma.FormulaCreateOrConnectWithoutSectionInput[]
+  upsert?: Prisma.FormulaUpsertWithWhereUniqueWithoutSectionInput | Prisma.FormulaUpsertWithWhereUniqueWithoutSectionInput[]
+  createMany?: Prisma.FormulaCreateManySectionInputEnvelope
+  set?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  disconnect?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  delete?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  connect?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  update?: Prisma.FormulaUpdateWithWhereUniqueWithoutSectionInput | Prisma.FormulaUpdateWithWhereUniqueWithoutSectionInput[]
+  updateMany?: Prisma.FormulaUpdateManyWithWhereWithoutSectionInput | Prisma.FormulaUpdateManyWithWhereWithoutSectionInput[]
+  deleteMany?: Prisma.FormulaScalarWhereInput | Prisma.FormulaScalarWhereInput[]
+}
+
+export type FormulaUncheckedUpdateManyWithoutSectionNestedInput = {
+  create?: Prisma.XOR<Prisma.FormulaCreateWithoutSectionInput, Prisma.FormulaUncheckedCreateWithoutSectionInput> | Prisma.FormulaCreateWithoutSectionInput[] | Prisma.FormulaUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.FormulaCreateOrConnectWithoutSectionInput | Prisma.FormulaCreateOrConnectWithoutSectionInput[]
+  upsert?: Prisma.FormulaUpsertWithWhereUniqueWithoutSectionInput | Prisma.FormulaUpsertWithWhereUniqueWithoutSectionInput[]
+  createMany?: Prisma.FormulaCreateManySectionInputEnvelope
+  set?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  disconnect?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  delete?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  connect?: Prisma.FormulaWhereUniqueInput | Prisma.FormulaWhereUniqueInput[]
+  update?: Prisma.FormulaUpdateWithWhereUniqueWithoutSectionInput | Prisma.FormulaUpdateWithWhereUniqueWithoutSectionInput[]
+  updateMany?: Prisma.FormulaUpdateManyWithWhereWithoutSectionInput | Prisma.FormulaUpdateManyWithWhereWithoutSectionInput[]
+  deleteMany?: Prisma.FormulaScalarWhereInput | Prisma.FormulaScalarWhereInput[]
 }
 
 export type FormulaCreateNestedOneWithoutProblemsInput = {
@@ -309,11 +848,145 @@ export type FormulaUpdateOneRequiredWithoutProblemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FormulaUpdateToOneWithWhereWithoutProblemsInput, Prisma.FormulaUpdateWithoutProblemsInput>, Prisma.FormulaUncheckedUpdateWithoutProblemsInput>
 }
 
+export type FormulaCreateWithoutSectionInput = {
+  id?: string
+  name: string
+  latex?: string | null
+  description?: string | null
+  slug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  problems?: Prisma.ProblemFormulaCreateNestedManyWithoutFormulaInput
+}
+
+export type FormulaUncheckedCreateWithoutSectionInput = {
+  id?: string
+  name: string
+  latex?: string | null
+  description?: string | null
+  slug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  problems?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutFormulaInput
+}
+
+export type FormulaCreateOrConnectWithoutSectionInput = {
+  where: Prisma.FormulaWhereUniqueInput
+  create: Prisma.XOR<Prisma.FormulaCreateWithoutSectionInput, Prisma.FormulaUncheckedCreateWithoutSectionInput>
+}
+
+export type FormulaCreateManySectionInputEnvelope = {
+  data: Prisma.FormulaCreateManySectionInput | Prisma.FormulaCreateManySectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type FormulaUpsertWithWhereUniqueWithoutSectionInput = {
+  where: Prisma.FormulaWhereUniqueInput
+  update: Prisma.XOR<Prisma.FormulaUpdateWithoutSectionInput, Prisma.FormulaUncheckedUpdateWithoutSectionInput>
+  create: Prisma.XOR<Prisma.FormulaCreateWithoutSectionInput, Prisma.FormulaUncheckedCreateWithoutSectionInput>
+}
+
+export type FormulaUpdateWithWhereUniqueWithoutSectionInput = {
+  where: Prisma.FormulaWhereUniqueInput
+  data: Prisma.XOR<Prisma.FormulaUpdateWithoutSectionInput, Prisma.FormulaUncheckedUpdateWithoutSectionInput>
+}
+
+export type FormulaUpdateManyWithWhereWithoutSectionInput = {
+  where: Prisma.FormulaScalarWhereInput
+  data: Prisma.XOR<Prisma.FormulaUpdateManyMutationInput, Prisma.FormulaUncheckedUpdateManyWithoutSectionInput>
+}
+
+export type FormulaScalarWhereInput = {
+  AND?: Prisma.FormulaScalarWhereInput | Prisma.FormulaScalarWhereInput[]
+  OR?: Prisma.FormulaScalarWhereInput[]
+  NOT?: Prisma.FormulaScalarWhereInput | Prisma.FormulaScalarWhereInput[]
+  id?: Prisma.StringFilter<"Formula"> | string
+  name?: Prisma.StringFilter<"Formula"> | string
+  latex?: Prisma.StringNullableFilter<"Formula"> | string | null
+  description?: Prisma.StringNullableFilter<"Formula"> | string | null
+  slug?: Prisma.StringNullableFilter<"Formula"> | string | null
+  sectionSlug?: Prisma.StringNullableFilter<"Formula"> | string | null
+  order?: Prisma.IntFilter<"Formula"> | number
+  level?: Prisma.StringFilter<"Formula"> | string
+  grade?: Prisma.IntNullableFilter<"Formula"> | number | null
+  topicSlugs?: Prisma.StringNullableListFilter<"Formula">
+  general?: Prisma.StringNullableFilter<"Formula"> | string | null
+  variants?: Prisma.JsonNullableFilter<"Formula">
+  conditions?: Prisma.JsonNullableFilter<"Formula">
+  explanation?: Prisma.StringNullableFilter<"Formula"> | string | null
+  derivation?: Prisma.JsonNullableFilter<"Formula">
+  mnemonic?: Prisma.StringNullableFilter<"Formula"> | string | null
+  examples?: Prisma.JsonNullableFilter<"Formula">
+  commonMistakes?: Prisma.JsonNullableFilter<"Formula">
+  eeshTip?: Prisma.StringNullableFilter<"Formula"> | string | null
+  relatedSlugs?: Prisma.StringNullableListFilter<"Formula">
+  keywords?: Prisma.StringNullableListFilter<"Formula">
+  widget?: Prisma.StringNullableFilter<"Formula"> | string | null
+  quiz?: Prisma.JsonNullableFilter<"Formula">
+  createdAt?: Prisma.DateTimeFilter<"Formula"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Formula"> | Date | string
+}
+
 export type FormulaCreateWithoutProblemsInput = {
   id?: string
   name: string
   latex?: string | null
   description?: string | null
+  slug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  section?: Prisma.FormulaSectionCreateNestedOneWithoutFormulasInput
 }
 
 export type FormulaUncheckedCreateWithoutProblemsInput = {
@@ -321,6 +994,27 @@ export type FormulaUncheckedCreateWithoutProblemsInput = {
   name: string
   latex?: string | null
   description?: string | null
+  slug?: string | null
+  sectionSlug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type FormulaCreateOrConnectWithoutProblemsInput = {
@@ -344,6 +1038,27 @@ export type FormulaUpdateWithoutProblemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  section?: Prisma.FormulaSectionUpdateOneWithoutFormulasNestedInput
 }
 
 export type FormulaUncheckedUpdateWithoutProblemsInput = {
@@ -351,6 +1066,137 @@ export type FormulaUncheckedUpdateWithoutProblemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionSlug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type FormulaCreateManySectionInput = {
+  id?: string
+  name: string
+  latex?: string | null
+  description?: string | null
+  slug?: string | null
+  order?: number
+  level?: string
+  grade?: number | null
+  topicSlugs?: Prisma.FormulaCreatetopicSlugsInput | string[]
+  general?: string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: string | null
+  relatedSlugs?: Prisma.FormulaCreaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaCreatekeywordsInput | string[]
+  widget?: string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type FormulaUpdateWithoutSectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  problems?: Prisma.ProblemFormulaUpdateManyWithoutFormulaNestedInput
+}
+
+export type FormulaUncheckedUpdateWithoutSectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  problems?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutFormulaNestedInput
+}
+
+export type FormulaUncheckedUpdateManyWithoutSectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  latex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  topicSlugs?: Prisma.FormulaUpdatetopicSlugsInput | string[]
+  general?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  conditions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  derivation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mnemonic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  examples?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  commonMistakes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  eeshTip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatedSlugs?: Prisma.FormulaUpdaterelatedSlugsInput | string[]
+  keywords?: Prisma.FormulaUpdatekeywordsInput | string[]
+  widget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quiz?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -389,6 +1235,28 @@ export type FormulaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name?: boolean
   latex?: boolean
   description?: boolean
+  slug?: boolean
+  sectionSlug?: boolean
+  order?: boolean
+  level?: boolean
+  grade?: boolean
+  topicSlugs?: boolean
+  general?: boolean
+  variants?: boolean
+  conditions?: boolean
+  explanation?: boolean
+  derivation?: boolean
+  mnemonic?: boolean
+  examples?: boolean
+  commonMistakes?: boolean
+  eeshTip?: boolean
+  relatedSlugs?: boolean
+  keywords?: boolean
+  widget?: boolean
+  quiz?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  section?: boolean | Prisma.Formula$sectionArgs<ExtArgs>
   problems?: boolean | Prisma.Formula$problemsArgs<ExtArgs>
   _count?: boolean | Prisma.FormulaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["formula"]>
@@ -398,6 +1266,28 @@ export type FormulaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   latex?: boolean
   description?: boolean
+  slug?: boolean
+  sectionSlug?: boolean
+  order?: boolean
+  level?: boolean
+  grade?: boolean
+  topicSlugs?: boolean
+  general?: boolean
+  variants?: boolean
+  conditions?: boolean
+  explanation?: boolean
+  derivation?: boolean
+  mnemonic?: boolean
+  examples?: boolean
+  commonMistakes?: boolean
+  eeshTip?: boolean
+  relatedSlugs?: boolean
+  keywords?: boolean
+  widget?: boolean
+  quiz?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  section?: boolean | Prisma.Formula$sectionArgs<ExtArgs>
 }, ExtArgs["result"]["formula"]>
 
 export type FormulaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -405,6 +1295,28 @@ export type FormulaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   latex?: boolean
   description?: boolean
+  slug?: boolean
+  sectionSlug?: boolean
+  order?: boolean
+  level?: boolean
+  grade?: boolean
+  topicSlugs?: boolean
+  general?: boolean
+  variants?: boolean
+  conditions?: boolean
+  explanation?: boolean
+  derivation?: boolean
+  mnemonic?: boolean
+  examples?: boolean
+  commonMistakes?: boolean
+  eeshTip?: boolean
+  relatedSlugs?: boolean
+  keywords?: boolean
+  widget?: boolean
+  quiz?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  section?: boolean | Prisma.Formula$sectionArgs<ExtArgs>
 }, ExtArgs["result"]["formula"]>
 
 export type FormulaSelectScalar = {
@@ -412,19 +1324,46 @@ export type FormulaSelectScalar = {
   name?: boolean
   latex?: boolean
   description?: boolean
+  slug?: boolean
+  sectionSlug?: boolean
+  order?: boolean
+  level?: boolean
+  grade?: boolean
+  topicSlugs?: boolean
+  general?: boolean
+  variants?: boolean
+  conditions?: boolean
+  explanation?: boolean
+  derivation?: boolean
+  mnemonic?: boolean
+  examples?: boolean
+  commonMistakes?: boolean
+  eeshTip?: boolean
+  relatedSlugs?: boolean
+  keywords?: boolean
+  widget?: boolean
+  quiz?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type FormulaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "latex" | "description", ExtArgs["result"]["formula"]>
+export type FormulaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "latex" | "description" | "slug" | "sectionSlug" | "order" | "level" | "grade" | "topicSlugs" | "general" | "variants" | "conditions" | "explanation" | "derivation" | "mnemonic" | "examples" | "commonMistakes" | "eeshTip" | "relatedSlugs" | "keywords" | "widget" | "quiz" | "createdAt" | "updatedAt", ExtArgs["result"]["formula"]>
 export type FormulaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  section?: boolean | Prisma.Formula$sectionArgs<ExtArgs>
   problems?: boolean | Prisma.Formula$problemsArgs<ExtArgs>
   _count?: boolean | Prisma.FormulaCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type FormulaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type FormulaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type FormulaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  section?: boolean | Prisma.Formula$sectionArgs<ExtArgs>
+}
+export type FormulaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  section?: boolean | Prisma.Formula$sectionArgs<ExtArgs>
+}
 
 export type $FormulaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Formula"
   objects: {
+    section: Prisma.$FormulaSectionPayload<ExtArgs> | null
     problems: Prisma.$ProblemFormulaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -432,6 +1371,27 @@ export type $FormulaPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     name: string
     latex: string | null
     description: string | null
+    slug: string | null
+    sectionSlug: string | null
+    order: number
+    level: string
+    grade: number | null
+    topicSlugs: string[]
+    general: string | null
+    variants: runtime.JsonValue | null
+    conditions: runtime.JsonValue | null
+    explanation: string | null
+    derivation: runtime.JsonValue | null
+    mnemonic: string | null
+    examples: runtime.JsonValue | null
+    commonMistakes: runtime.JsonValue | null
+    eeshTip: string | null
+    relatedSlugs: string[]
+    keywords: string[]
+    widget: string | null
+    quiz: runtime.JsonValue | null
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["formula"]>
   composites: {}
 }
@@ -826,6 +1786,7 @@ readonly fields: FormulaFieldRefs;
  */
 export interface Prisma__FormulaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  section<T extends Prisma.Formula$sectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Formula$sectionArgs<ExtArgs>>): Prisma.Prisma__FormulaSectionClient<runtime.Types.Result.GetResult<Prisma.$FormulaSectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   problems<T extends Prisma.Formula$problemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Formula$problemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProblemFormulaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -860,6 +1821,27 @@ export interface FormulaFieldRefs {
   readonly name: Prisma.FieldRef<"Formula", 'String'>
   readonly latex: Prisma.FieldRef<"Formula", 'String'>
   readonly description: Prisma.FieldRef<"Formula", 'String'>
+  readonly slug: Prisma.FieldRef<"Formula", 'String'>
+  readonly sectionSlug: Prisma.FieldRef<"Formula", 'String'>
+  readonly order: Prisma.FieldRef<"Formula", 'Int'>
+  readonly level: Prisma.FieldRef<"Formula", 'String'>
+  readonly grade: Prisma.FieldRef<"Formula", 'Int'>
+  readonly topicSlugs: Prisma.FieldRef<"Formula", 'String[]'>
+  readonly general: Prisma.FieldRef<"Formula", 'String'>
+  readonly variants: Prisma.FieldRef<"Formula", 'Json'>
+  readonly conditions: Prisma.FieldRef<"Formula", 'Json'>
+  readonly explanation: Prisma.FieldRef<"Formula", 'String'>
+  readonly derivation: Prisma.FieldRef<"Formula", 'Json'>
+  readonly mnemonic: Prisma.FieldRef<"Formula", 'String'>
+  readonly examples: Prisma.FieldRef<"Formula", 'Json'>
+  readonly commonMistakes: Prisma.FieldRef<"Formula", 'Json'>
+  readonly eeshTip: Prisma.FieldRef<"Formula", 'String'>
+  readonly relatedSlugs: Prisma.FieldRef<"Formula", 'String[]'>
+  readonly keywords: Prisma.FieldRef<"Formula", 'String[]'>
+  readonly widget: Prisma.FieldRef<"Formula", 'String'>
+  readonly quiz: Prisma.FieldRef<"Formula", 'Json'>
+  readonly createdAt: Prisma.FieldRef<"Formula", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Formula", 'DateTime'>
 }
     
 
@@ -1114,6 +2096,10 @@ export type FormulaCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    */
   data: Prisma.FormulaCreateManyInput | Prisma.FormulaCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FormulaIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1184,6 +2170,10 @@ export type FormulaUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many Formulas to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FormulaIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1250,6 +2240,25 @@ export type FormulaDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many Formulas to delete.
    */
   limit?: number
+}
+
+/**
+ * Formula.section
+ */
+export type Formula$sectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FormulaSection
+   */
+  select?: Prisma.FormulaSectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FormulaSection
+   */
+  omit?: Prisma.FormulaSectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FormulaSectionInclude<ExtArgs> | null
+  where?: Prisma.FormulaSectionWhereInput
 }
 
 /**

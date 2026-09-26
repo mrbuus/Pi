@@ -170,6 +170,11 @@ export type ProblemTag = Prisma.ProblemTagModel
  */
 export type Formula = Prisma.FormulaModel
 /**
+ * Model FormulaSection
+ * 
+ */
+export type FormulaSection = Prisma.FormulaSectionModel
+/**
  * Model ProblemFormula
  * 
  */

@@ -210,10 +210,7 @@ export class ContentController {
     return this.content.listTags(type);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
-  @Get('formulas')
-  listFormulas() {
-    return this.content.listFormulas();
-  }
+  // GET /formulas-ийг FormulasModule (T01) эзэмшинэ. Энд байсан ижил зам нь
+  // түрүүлж бүртгэгддэг тул шинэ томьёоны сангийн endpoint-ийг бүрэн дардаг
+  // байв. Хуучин хариуны id/name/description талбарууд шинэ хариунд бий.
 }
