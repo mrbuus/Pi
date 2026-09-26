@@ -39,10 +39,10 @@ export default function ChoiceList({
               type="button"
               aria-pressed={sel}
               onClick={() => onSelect(letter)}
-              className={`relative flex h-14 w-14 items-center justify-center rounded-xl border-2 text-lg font-bold transition ${
+              className={`relative flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-b-4 text-lg font-bold transition active:translate-y-0.5 active:border-b-2 motion-reduce:active:translate-y-0 ${
                 sel
-                  ? "border-brand-bright bg-brand-bright text-on-brand"
-                  : "border-line hover:border-brand-bright/50"
+                  ? "border-brand bg-brand-bright text-on-brand"
+                  : "border-line bg-surface hover:border-brand-bright/50"
               }`}
             >
               {letter}
@@ -70,8 +70,8 @@ export default function ChoiceList({
             type="button"
             aria-pressed={sel}
             onClick={() => onSelect(ci)}
-            className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-4 text-left text-base leading-relaxed transition ${
-              sel ? "border-brand-bright bg-brand-bright/15" : "border-line hover:border-brand-bright/50"
+            className={`flex w-full items-center gap-3 rounded-2xl border-2 border-b-4 px-4 py-4 text-left text-base leading-relaxed transition active:translate-y-0.5 active:border-b-2 motion-reduce:active:translate-y-0 ${
+              sel ? "border-brand-bright bg-brand-bright/15" : "border-line bg-surface hover:border-brand-bright/50"
             }`}
           >
             <span
