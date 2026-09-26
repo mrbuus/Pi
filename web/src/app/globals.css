@@ -94,8 +94,8 @@
   --leading-math: 1.35;
   --measure: 68ch;
 
-  /* Onest (next/font, өөрсдөө үйлчилнэ) → байхгүй бол системийн фонт */
-  --font-manrope: var(--font-onest, ui-sans-serif), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Onest (fonts.css, репод) → ачаалагдаагүй бол системийн фонт */
+  --font-manrope: "Onest", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Систем DARK-тай үед, хэрэглэгч тодорхой LIGHT сонгоогүй л бол */
@@ -222,7 +222,7 @@
   --color-accent-rose: var(--rose);
   --font-sans: var(--font-manrope);
   /* Том тоо, хуудасны гол гарчиг (Unbounded). Бие бичвэрт ХЭРЭГЛЭХГҮЙ. */
-  --font-display: var(--font-unbounded, ui-sans-serif), var(--font-manrope);
+  --font-display: "Unbounded", var(--font-manrope);
 }
 
 html {

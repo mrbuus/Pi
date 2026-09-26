@@ -1,28 +1,15 @@
 import RegisterSW from '@/components/pwa/RegisterSW';
 import type { Metadata, Viewport } from "next";
-import { Onest, Unbounded } from "next/font/google";
+import "./fonts.css";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import ConnectionStatus from "@/components/ui/ConnectionStatus";
 import { Toaster } from "@/components/ui/kit/toaster";
 
-// Фонт (шинэ дизайн, 2026-09-26): Onest — кирилл үсэгт зориулж бүтээсэн,
-// орчин үеийн бүтээгдэхүүний фонт; Unbounded — том тоо, гарчигт (font-display).
-// next/font нь файлыг BUILD үед татаж манай домэйноос өөрөө үйлчилдэг —
-// хэрэглэгчийн браузер Google руу ХАНДАХГҮЙ (STATUS §3.8-ийн «гадаад фонт»
-// дүрмийн зорилго — удаан интернэтэд гацахгүй — хадгалагдана). display: swap
-// тул фонт ирэхээс өмнө системийн фонтоор шууд харагдана.
-const onest = Onest({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-onest",
-  display: "swap",
-});
-const unbounded = Unbounded({
-  subsets: ["latin", "cyrillic"],
-  weight: ["600", "700"],
-  variable: "--font-unbounded",
-  display: "swap",
-});
+// Фонт (шинэ дизайн, 2026-09-26): Onest (бие) + Unbounded (том тоо, гарчиг).
+// Файлууд репод (public/fonts, fonts.css) — next/font/google нь BUILD үед
+// Google-ээс татдаг байсан тул сүлжээ тасрахад build унадаг байв (CI e2e,
+// 2026-09-27). Одоо build ч, хэрэглэгч ч гадны сервер рүү хандахгүй.
 
 export const metadata: Metadata = {
   title: "Шинэ Ирээдүйн Эзэд — ЭЕШ-ийн математик, нийгэм судлалын бэлтгэл",
@@ -83,7 +70,7 @@ export default function RootLayout({
     // хуудас бүр дээр hydration mismatch алдаа хэвлэдэг байв.
     <html
       lang="mn"
-      className={`${onest.variable} ${unbounded.variable} h-full antialiased`}
+      className="h-full antialiased"
       suppressHydrationWarning
     >
       <head>
