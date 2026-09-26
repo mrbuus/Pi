@@ -20,6 +20,7 @@ import { todayUB } from '../common/date';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
+import { UpdateTestDto } from './dto/update-test.dto';
 import { SaveSessionDto } from './dto/submit-test.dto';
 import {
   answerToken,
@@ -70,6 +71,10 @@ type SessionRow = {
   deadlineAt: Date | null;
   submittedAt: Date | null;
 };
+
+type EditableTest = Prisma.TestGetPayload<{
+  include: { problems: { select: { problemId: true } } };
+}>;
 
 function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === 'object' && !Array.isArray(v)
@@ -139,6 +144,151 @@ export class TestsService {
       updated,
     );
     return { deleted: true };
+  }
+
+  private async hasBeenTaken(testId: string): Promise<boolean> {
+    const [resultCount, sessionCount] = await Promise.all([
+      this.prisma.testResult.count({ where: { testId } }),
+      this.prisma.testAttemptSession.count({ where: { testId } }),
+    ]);
+    return resultCount > 0 || sessionCount > 0;
+  }
+
+  private async findEditableTest(
+    testId: string,
+    actorId: string,
+    actorRole: Role,
+  ): Promise<EditableTest> {
+    const test = await this.prisma.test.findUnique({
+      where: { id: testId },
+      include: { problems: { select: { problemId: true } } },
+    });
+    if (!test || test.deletedAt) throw new NotFoundException('Тест олдсонгүй');
+    if (actorRole === Role.TEACHER && test.createdById !== actorId) {
+      throw new ForbiddenException(
+        'Та зөвхөн өөрийн үүсгэсэн тестийг засах боломжтой',
+      );
+    }
+    return test;
+  }
+
+  async editInfo(testId: string, actorId: string, actorRole: Role) {
+    await this.findEditableTest(testId, actorId, actorRole);
+    const taken = await this.hasBeenTaken(testId);
+    return {
+      mode: taken ? 'LIMITED' : 'FULL',
+      reason: taken
+        ? 'Сурагч энэ тестийг эхлүүлсэн эсвэл дүнгээ илгээсэн тул зөвхөн нэр, хугацааг өөрчилнө.'
+        : 'Сурагч хараахан эхлүүлээгүй тул тестийн бүх хэсгийг засах боломжтой.',
+    } as const;
+  }
+
+  async updateTest(
+    testId: string,
+    dto: UpdateTestDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    const test = await this.findEditableTest(testId, actorId, actorRole);
+    const changedFields = Object.keys(dto).filter(
+      (field) => dto[field as keyof UpdateTestDto] !== undefined,
+    );
+    if (changedFields.length === 0) {
+      throw new BadRequestException('Өөрчлөх мэдээллээ оруулна уу');
+    }
+
+    const taken = await this.hasBeenTaken(testId);
+    if (
+      taken &&
+      changedFields.some(
+        (field) => field !== 'title' && field !== 'timeLimitMin',
+      )
+    ) {
+      throw new ConflictException(
+        'Энэ тестийг сурагчид өгсөн тул зөвхөн нэр, хугацааг засах боломжтой',
+      );
+    }
+
+    const shortensTime =
+      dto.timeLimitMin !== undefined &&
+      dto.timeLimitMin !== null &&
+      (test.timeLimitMin === null || dto.timeLimitMin < test.timeLimitMin);
+    if (shortensTime) {
+      const activeSessionCount = await this.prisma.testAttemptSession.count({
+        where: { testId, status: AttemptSessionStatus.IN_PROGRESS },
+      });
+      if (activeSessionCount > 0) {
+        throw new ConflictException(
+          'Сурагч шалгалт өгч байгаа тул дуусахаас өмнө хугацааг богиносгох боломжгүй',
+        );
+      }
+    }
+
+    const problemIds = dto.problems ?? test.problems;
+    const answerWarning = dto.classroomIds?.length
+      ? await this.checkAnswerCoverage(problemIds)
+      : undefined;
+
+    if (dto.price !== undefined && actorRole !== Role.ADMIN) {
+      throw new ForbiddenException('Тестийн төлбөрийг зөвхөн админ өөрчилнө');
+    }
+
+    const data: Prisma.TestUncheckedUpdateInput = {};
+    if (dto.title !== undefined) data.title = dto.title;
+    if (dto.type !== undefined) data.type = dto.type;
+    if (dto.gradingMode !== undefined) data.gradingMode = dto.gradingMode;
+    if (dto.chapterId !== undefined) data.chapterId = dto.chapterId;
+    if (dto.timeLimitMin !== undefined) data.timeLimitMin = dto.timeLimitMin;
+    if (dto.pdfKey !== undefined) data.pdfKey = dto.pdfKey;
+    if (dto.groupKey !== undefined) data.groupKey = dto.groupKey;
+    if (dto.variantLabel !== undefined) data.variantLabel = dto.variantLabel;
+    if (dto.price !== undefined) data.price = dto.price;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      if (dto.problems !== undefined) {
+        await tx.testProblem.deleteMany({ where: { testId } });
+        if (dto.problems.length > 0) {
+          await tx.testProblem.createMany({
+            data: dto.problems.map((problem) => ({
+              testId,
+              problemId: problem.problemId,
+              order: problem.order,
+              points: problem.points ?? 1,
+            })),
+          });
+        }
+      }
+      if (dto.classroomIds !== undefined) {
+        await tx.testAccess.deleteMany({ where: { testId } });
+        if (dto.classroomIds.length > 0) {
+          await tx.testAccess.createMany({
+            data: dto.classroomIds.map((classroomId) => ({
+              testId,
+              classroomId,
+            })),
+          });
+        }
+      }
+      return tx.test.update({
+        where: { id: testId },
+        data,
+        include: {
+          problems: { orderBy: { order: 'asc' } },
+          access: true,
+        },
+      });
+    });
+
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'UPDATE',
+      'Test',
+      testId,
+      test,
+      updated,
+    );
+    return answerWarning ? { ...updated, answerWarning } : updated;
   }
 
   // Ангид оноож байгаа (classroomIds ирсэн) тестийг хариуны түлхүүргүй
@@ -308,6 +458,7 @@ export class TestsService {
       const test = await this.prisma.test.findUnique({
         where: { id: testId },
         include: {
+          chapter: { select: { book: { select: { subject: true } } } },
           problems: {
             orderBy: { order: 'asc' },
             include: {
@@ -319,6 +470,19 @@ export class TestsService {
                   statementText: true,
                   imageKey: true,
                   choices: true,
+                  correctAnswer: true,
+                  choiceOptions: {
+                    orderBy: { order: 'asc' },
+                    select: { order: true, text: true, isCorrect: true },
+                  },
+                  tags: { include: { tag: true } },
+                  analysis: {
+                    select: {
+                      answerKeyStatus: true,
+                      topic: true,
+                      subtopic: true,
+                    },
+                  },
                 },
               },
             },
@@ -512,14 +676,14 @@ export class TestsService {
   // Autosave: хариулт/тэмдэглэгээ/хугацааг нэгтгэж хадгална, үйл явдал бүртгэнэ.
   // Хугацаа дууссан байвал шууд дүгнэж SUBMITTED буцаана (клиент үр дүн рүү шилжинэ).
   /**
-   * ⚡ ГҮЙЦЭТГЭЛИЙН ГОЛ ЗАМ. Автосэйв нь сурагч тутамд ~1.2 секунд тутам,
+   * ГҮЙЦЭТГЭЛИЙН ГОЛ ЗАМ. Автосэйв нь сурагч тутамд ~1.2 секунд тутам,
    * 100 минутын шалгалтад ~300 удаа дуудагдана. 1000 сурагч зэрэг шалгалт
    * өгвөл энэ нь тогтмол ~50 хүсэлт/сек.
    *
    * Өмнө нь энд loadTestWithProblems() дуудагдаж, ДУУДАЛТ БҮРТ 40 бодлогын
    * бүтэн текст, choices, correctAnswer, бүх choiceOptions, analysis.
    * solutionOutline-ыг DB-ээс татдаг байв — гэтэл үүнийг ЗӨВХӨН бодлогын
-   * id-нуудыг шалгахад ашигладаг (mergeDrafts → validIds).
+   * id-нуудыг шалгахад ашигладаг (mergeDrafts-ээс validIds).
    *
    * Одоо хөнгөн query-гээр зөвхөн problemId-г татна. Бүтэн тест зөвхөн
    * хугацаа дуусаж finalize хийх үед л (сурагч тутамд ХАМГИЙН ИХДЭЭ 1 удаа)
@@ -603,7 +767,7 @@ export class TestsService {
     return this.finalize(test, session, userId, merged);
   }
 
-  // Дууссан шалгалтын эргэн харах дэлгэц: бодлого бүрд ✓/✗ + өөрийн хариулт.
+  // Дууссан шалгалтын эргэн харах дэлгэц: бодлого бүрийн зөв/буруу төлөв + өөрийн хариулт.
   // Зөв хариуг задлахгүй (тест дахин ашиглагдана) — зөвхөн юуг алдсанаа харна.
   async review(testId: string, userId: string) {
     const test = await this.loadTestWithProblems(testId);
@@ -983,7 +1147,7 @@ export class TestsService {
 
   // Эцсийн дүгнэлт: оноо бодох + TestResult + Attempt бичилтүүд + session хөлдөөх.
   //
-  // ⚠️ ХОЁР ХЭСЭГТ САНААТАЙГААР ХУВААСАН (2026-08-08, 2000 зэрэг хэрэглэгчийн зорилт):
+  // АНХААР: ХОЁР ХЭСЭГТ САНААТАЙГААР ХУВААСАН (2026-08-08, 2000 зэрэг хэрэглэгчийн зорилт):
   //   1. АТОМИК — TestResult + Attempt.createMany + Session нэг $transaction([...])-д.
   //      Массив хэлбэр (interactive callback БИШ) тул Prisma нэг багцаар илгээж,
   //      холболтыг богино хугацаанд барина.

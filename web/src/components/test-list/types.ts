@@ -6,6 +6,7 @@
 export interface TestRow {
   id: string;
   title: string;
+  createdById?: string;
   type: string;
   gradingMode?: string;
   timeLimitMin?: number;
@@ -61,7 +62,7 @@ export function isExamType(type: string) {
 // шаардлагагүй болно — доорх мөр яг тэр л heuristic хэсэг.
 export function splitTopic(t: TestRow): { topic: string; num: number | null } {
   const key = (t.groupKey ?? t.chapter?.topic?.name ?? t.chapter?.title ?? t.title).trim();
-  // heuristic fallback: "Илтгэгч тэгшитгэл 1" → { topic: "Илтгэгч тэгшитгэл", num: 1 }
+  // heuristic fallback: "Илтгэгч тэгшитгэл 1" нь сэдэв болон дугаарт задарна
   const m = key.match(/^(.*?)\s+(\d+)$/);
   if (m) return { topic: m[1], num: Number(m[2]) };
   return { topic: "Бусад", num: null };
