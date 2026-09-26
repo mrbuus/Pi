@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -27,41 +28,50 @@ import { MistakeType, Role, TagType } from '../generated/prisma/enums';
 import { ClassificationService } from './classification.service';
 
 class CategoryDto {
+  @ApiProperty({ enum: TagType })
   @IsEnum(TagType)
   type: TagType;
 
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   name: string;
 }
 
 class RenameDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   name: string;
 }
 
 class ChoiceDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   label: string;
 
+  @ApiProperty({ type: String })
   @IsString()
   text: string;
 
+  @ApiProperty({ type: Boolean })
   @IsBoolean()
   isCorrect: boolean;
 
+  @ApiPropertyOptional({ enum: MistakeType })
   @IsOptional()
   @IsEnum(MistakeType)
   mistakeType?: MistakeType;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   mistakeNote?: string;
 }
 
 class SetChoicesDto {
+  @ApiProperty({ type: () => [ChoiceDto] })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ChoiceDto)
@@ -69,6 +79,7 @@ class SetChoicesDto {
 }
 
 class SetTagsDto {
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsString({ each: true })
   tagIds: string[];

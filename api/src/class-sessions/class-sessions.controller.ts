@@ -1,3 +1,4 @@
+import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -27,30 +28,35 @@ import { ClassSessionsService } from './class-sessions.service';
 class DidTestDto {
   // Бодлогын сангийн тест сонгосон бол testId. Гараар бичсэн бол хоосон
   // үлдээгээд manualTitle-ыг бөглөнө. Хоёулаа хоосон бол сервис 400 өгнө.
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   testId?: string;
 
   // Гаднын (манай санд байхгүй) тестийн НЭР. Зөвхөн нэр — тест үүсгэхгүй.
+  @ApiPropertyOptional({ type: String, maxLength: 200 })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   manualTitle?: string;
 
   // Гараар бичсэн тестийн бодлогын тоо — сурагчид 1..N дугаараар тэмдэглэнэ.
+  @ApiPropertyOptional({ type: Number, minimum: 1, maximum: 100 })
   @IsOptional()
   @IsInt()
   @Min(1)
   @Max(100)
   manualProblemCount?: number;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   date?: string;
 }
 
 class SetExcludedDto {
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsString({ each: true })
   excludedProblemIds: string[];
