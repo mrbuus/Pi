@@ -23,7 +23,13 @@ export class LoginAttempts {
   }
   isLocked(identifier: string): boolean {
     const now = this.now();
-    return (this.current(this.key(identifier), now)?.lockedUntil ?? 0) > now;
+    const entry = this.current(this.key(identifier), now);
+    if (entry) return entry.lockedUntil > now;
+    if (this.entries.size < this.maxEntries) return false;
+    for (const key of this.entries.keys()) this.current(key, now);
+    // Preserve live locks. If all slots are locked, temporarily reject new identifiers.
+    return this.entries.size >= this.maxEntries &&
+      [...this.entries.values()].every((value) => value.lockedUntil > now);
   }
   failure(identifier: string): void {
     const now = this.now(), key = this.key(identifier);
@@ -33,7 +39,11 @@ export class LoginAttempts {
       if (this.entries.size >= this.maxEntries) {
         for (const oldKey of this.entries.keys()) this.current(oldKey, now);
         // Bounded memory even during attacks with many distinct identifiers.
-        if (this.entries.size >= this.maxEntries) this.entries.delete(this.entries.keys().next().value!);
+        if (this.entries.size >= this.maxEntries) {
+          const replaceable = [...this.entries].find(([, value]) => value.lockedUntil <= now);
+          if (!replaceable) return;
+          this.entries.delete(replaceable[0]);
+        }
       }
       entry = { failures: [], lockedUntil: 0 };
       this.entries.set(key, entry);

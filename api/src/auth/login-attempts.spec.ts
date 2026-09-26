@@ -21,6 +21,26 @@ describe('LoginAttempts', () => {
     for (let n = 0; n < 7; n++) attempts.failure('test');
     attempts.success(' TEST '); attempts.failure('test'); expect(attempts.isLocked('test')).toBe(false);
   });
+  it('keeps active locks when distinct identifiers fill the bounded store', () => {
+    attempts = new LoginAttempts(() => now, 2);
+    for (let n = 0; n < 8; n++) attempts.failure('locked');
+    for (let n = 0; n < 100; n++) attempts.failure(String(n));
+    expect(attempts.size).toBe(2);
+    expect(attempts.isLocked('locked')).toBe(true);
+    expect(attempts.isLocked('new')).toBe(false);
+  });
+  it('rejects new identifiers while all slots are locked and recovers after expiry', () => {
+    attempts = new LoginAttempts(() => now, 1);
+    for (let n = 0; n < 8; n++) attempts.failure('locked');
+    expect(attempts.isLocked('new')).toBe(true);
+    attempts.failure('new');
+    expect(attempts.isLocked('locked')).toBe(true);
+    expect(attempts.size).toBe(1);
+    now += 15 * 60_000;
+    expect(attempts.isLocked('new')).toBe(false);
+    attempts.failure('new');
+    expect(attempts.size).toBe(1);
+  });
   it('bounds memory and clears expired entries at capacity', () => {
     for (let n = 0; n < 100; n++) attempts.failure(String(n));
     expect(attempts.size).toBe(10);
