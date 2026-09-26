@@ -16,6 +16,16 @@ describe('SMS Segments', () => {
       expect(calculateSmsSegments(msg)).toBe(2);
     });
 
+    it('GSM-7 multipart 153 нэгжээр тооцно', () => {
+      expect(calculateSmsSegments('A'.repeat(306))).toBe(2);
+      expect(calculateSmsSegments('A'.repeat(307))).toBe(3);
+    });
+
+    it('GSM-7 extended тэмдэгт хоёр нэгж эзэлнэ', () => {
+      expect(calculateSmsSegments('^'.repeat(80))).toBe(1);
+      expect(calculateSmsSegments('^'.repeat(81))).toBe(2);
+    });
+
     it('Монгол кирилл 70 тэмдэгт 1 хэсэг', () => {
       const msg = 'А'.repeat(70);
       expect(calculateSmsSegments(msg)).toBe(1);
@@ -24,6 +34,16 @@ describe('SMS Segments', () => {
     it('Монгол кирилл 71 тэмдэгт 2 хэсэг', () => {
       const msg = 'А'.repeat(71);
       expect(calculateSmsSegments(msg)).toBe(2);
+    });
+
+    it('UCS-2 multipart 67 нэгжээр тооцно', () => {
+      expect(calculateSmsSegments('А'.repeat(134))).toBe(2);
+      expect(calculateSmsSegments('А'.repeat(135))).toBe(3);
+    });
+
+    it('UCS-2 emoji-г UTF-16 хоёр нэгжээр тооцно', () => {
+      expect(calculateSmsSegments('😀'.repeat(35))).toBe(1);
+      expect(calculateSmsSegments('😀'.repeat(36))).toBe(2);
     });
 
     it('Холимог кирилл + латин → кирилл сонго (70 т/х)', () => {
@@ -57,8 +77,8 @@ describe('SMS Segments', () => {
     it('Урт монгол мессеж', () => {
       // 140 кирилл тэмдэгт
       const msg = 'А'.repeat(140);
-      // 140 / 70 = 2 хэсэг
-      expect(calculateSmsSegments(msg)).toBe(2);
+      // Холбоостой 140 / 67 = 3 хэсэг
+      expect(calculateSmsSegments(msg)).toBe(3);
     });
   });
 
