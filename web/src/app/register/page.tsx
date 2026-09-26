@@ -175,7 +175,7 @@ export default function RegisterPage() {
     return (
       <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
         <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-        <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
+        <div className="relative w-full max-w-sm chunky p-6 text-center sm:p-8">
           <div className="flex items-center justify-center gap-1.5">
             <Check className="h-4 w-4 text-success" aria-hidden />
             <p className="text-sm font-semibold text-success">Бүртгэл амжилттай үүслээ</p>
@@ -211,7 +211,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => router.push(homeForRole(result.role))}
-            className="mt-3 w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90"
+            className="mt-3 btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105"
           >
             Үргэлжлүүлэх
           </button>
@@ -223,7 +223,7 @@ export default function RegisterPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
+      <div className="relative w-full max-w-sm chunky p-6 sm:p-8">
         <div className="mb-6">
           <Link
             href="/"
@@ -303,7 +303,7 @@ export default function RegisterPage() {
                   placeholder="Овог"
                   aria-invalid={!!fieldErrors.lastName}
                   aria-describedby={fieldErrors.lastName ? "lastName-error" : undefined}
-                  className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                  className={`w-full rounded-2xl border-2 bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
                     fieldErrors.lastName ? "border-error" : "border-line"
                   }`}
                 />
@@ -324,7 +324,7 @@ export default function RegisterPage() {
                   placeholder="Нэр"
                   aria-invalid={!!fieldErrors.firstName}
                   aria-describedby={fieldErrors.firstName ? "firstName-error" : undefined}
-                  className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                  className={`w-full rounded-2xl border-2 bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
                     fieldErrors.firstName ? "border-error" : "border-line"
                   }`}
                 />
@@ -355,7 +355,7 @@ export default function RegisterPage() {
                 placeholder="99112233"
                 aria-invalid={!!fieldErrors.phone}
                 aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
-                className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                className={`w-full rounded-2xl border-2 bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
                   fieldErrors.phone ? "border-error" : "border-line"
                 }`}
               />
@@ -464,7 +464,7 @@ export default function RegisterPage() {
               type="submit"
               disabled={loading || !consentReady(consent)}
               aria-busy={loading}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
               {loading ? "Бүртгэж байна…" : "Бүртгүүлэх"}
             </button>

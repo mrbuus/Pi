@@ -66,7 +66,7 @@ export default function GoogleSignInButton({ label = "Google-ээр нэвтрэ
         onClick={start}
         disabled={busy}
         aria-busy={busy}
-        className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-line bg-surface font-semibold text-ink transition hover:border-ink/30 hover:bg-bg disabled:opacity-60"
+        className="chunky chunky-press flex min-h-12 w-full items-center justify-center gap-3 font-semibold text-ink hover:bg-bg disabled:opacity-60"
       >
         <GoogleMark />
         {busy ? "Google руу шилжиж байна…" : label}

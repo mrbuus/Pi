@@ -180,7 +180,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
+      <div className="relative w-full max-w-sm chunky p-6 sm:p-8">
         <Link
           href="/"
           aria-label="Pi.mn үндсэн нүүр"
@@ -251,7 +251,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
               {loading ? "Илгээж байна…" : "Код илгээх"}
             </button>
@@ -423,7 +423,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
               {loading ? "Хадгалж байна…" : "Нууц үг солих"}
             </button>
@@ -448,7 +448,7 @@ export default function ForgotPasswordPage() {
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105"
             >
               Нэвтрэх
             </button>
