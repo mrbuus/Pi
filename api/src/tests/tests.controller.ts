@@ -19,6 +19,7 @@ import { Role } from '../generated/prisma/enums';
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
+import { CreateTestDraftDto, UpdateTestDraftDto } from './dto/test-draft.dto';
 import { SaveSessionDto, SubmitTestDto } from './dto/submit-test.dto';
 import { TestsService } from './tests.service';
 import { ParentsService } from '../parents/parents.service';
@@ -39,6 +40,34 @@ export class TestsController {
   @Post()
   create(@Body() dto: CreateTestDto, @Req() req: AuthedRequest) {
     return this.tests.create(dto, req.user.userId);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @Post('drafts')
+  createDraft(@Body() dto: CreateTestDraftDto, @Req() req: AuthedRequest) {
+    return this.tests.createTestDraft(dto, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @Get('drafts/:id')
+  getDraft(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.getTestDraft(id, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @Patch('drafts/:id')
+  updateDraft(
+    @Param('id') id: string,
+    @Body() dto: UpdateTestDraftDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.tests.updateTestDraft(id, dto, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @Delete('drafts/:id')
+  deleteDraft(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.deleteTestDraft(id, req.user.userId, req.user.role);
   }
 
   @Get()
@@ -70,6 +99,12 @@ export class TestsController {
     @Req() req: AuthedRequest,
   ) {
     return this.tests.updateTest(id, dto, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @Post(':id/duplicate')
+  duplicate(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.duplicateTest(id, req.user.userId, req.user.role);
   }
 
   @Get(':id')

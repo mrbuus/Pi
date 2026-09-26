@@ -65,6 +65,7 @@ model User {
   submissions             Submission[]
   dailyHomeworkMarks      DailyHomeworkMark[]  @relation("DailyHomeworkMarkStudent")
   testResults             TestResult[]
+  testDrafts              TestDraft[]
   predictions             Prediction[]
   colorTags               StudentColorTag[]    @relation("TaggedStudent")
   ownedClassrooms         Classroom[]          @relation("ClassroomTeacher")
@@ -849,6 +850,8 @@ model Test {
   // Зөөлөн устгал: hard DELETE хийвэл TestResult/Attempt зэрэг түүхэн
   // бичлэгүүд орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
   deletedAt DateTime?
+  // Нийтэд харагдахгүй түр хуулбар. Ангиудад оноосон үед засварын замаар ил тод нийтэлнэ.
+  isDraft Boolean @default(false)
 
   problems        TestProblem[]
   access          TestAccess[]
@@ -856,6 +859,19 @@ model Test {
   attemptSessions TestAttemptSession[]
 
   @@index([deletedAt])
+  @@index([isDraft, deletedAt])
+}
+
+model TestDraft {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  state     Json     @db.JsonB
+  revision  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId, updatedAt])
 }
 
 model TestProblem {

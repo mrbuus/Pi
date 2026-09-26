@@ -12,6 +12,7 @@ import SelectedProblemsList, {
 } from "@/components/test-builder/SelectedProblemsList";
 import StepHeader from "@/components/test-builder/StepHeader";
 import SummaryRail from "@/components/test-builder/SummaryRail";
+import DuplicateTestButton from "@/components/test-builder/DuplicateTestButton";
 import { hasKnownAnswer, type Problem } from "@/components/test-builder/types";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 
@@ -421,6 +422,7 @@ export default function EditTestPage({
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-extrabold text-ink">Тест засах</h1>
+            <DuplicateTestButton testId={id} />
             <p className="mt-1 text-base text-ink-dim">{test.title}</p>
           </div>
           <Link
