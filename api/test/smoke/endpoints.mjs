@@ -1,51 +1,30 @@
-/* ============================================================================
- * Endpoint smoke test — БҮХ бүртгэгдсэн маршрутыг эрхийн түвшин бүрээр дуудаж
- * ГЭНЭТИЙН алдаа (500, унасан холболт) байгаа эсэхийг олно.
- *
- * ЯАГААД ХЭРЭГТЭЙ ВЭ:
- * Unit тест нь функцийг тусад нь шалгадаг ч «модуль бүртгэгдээгүй», «guard
- * буруу», «DTO байхгүй тул body задлахад унана», «Prisma-гийн харьцаа буруу»
- * гэх мэт алдаа зөвхөн БОДИТ HTTP дуудлагад л илэрдэг. Энэ файл яг түүнийг
- * барина.
- *
- * ЮУГ АЛДАА ГЭЖ ҮЗЭХ ВЭ:
- *   • 5xx           — үргэлж алдаа (серверийн дотоод унал)
- *   • нэвтрээгүй үед 200 — хамгаалалтгүй үлдсэн маршрут (АЮУЛГҮЙ БАЙДЛЫН цоорхой)
- * Хүлээгдэх хариу: 200/201 (эрхтэй), 400 (валидаци), 401/403 (эрх), 404 (алга).
- *
- * Ажиллуулах:  npm run smoke          (build + маршрут шинэчлэх + шалгах)
- *              node test/smoke/endpoints.mjs [--base http://localhost:3000]
- * Урьдчилсан нөхцөл: API асаалттай, ӨС-д тест хэрэглэгчид байгаа.
- * ========================================================================== */
-
-/**
- * ЗОРИУДААР нээлттэй маршрутууд — нэвтрээгүй хүнд 200 буцаах нь ЗӨВ.
- *
- * Шинэ маршрут энэ жагсаалтад ОРОХГҮЙГЭЭР нээлттэй болвол шалгалт анхааруулна.
- * Жагсаалтад нэмэхийн өмнө «яагаад нээлттэй байх ёстой вэ» гэдгээ бод.
- */
-const INTENTIONALLY_PUBLIC = new Map([
-  ['GET /api', 'үндсэн health/танилцуулга'],
-  ['GET /api/books', 'нүүр хуудсанд номын жагсаалт харуулна'],
-  ['GET /api/chapters', 'үнэгүй урьдчилан үзэх бүлгүүд'],
-  ['GET /api/catalog/passes', 'үнийн санал — бүртгүүлэхээс өмнө харна'],
-  ['GET /api/enrollment-windows', 'элсэлтийн хугацаа — нийтэд ил'],
-  ['GET /api/store/products', 'дэлгүүрийн бараа — бүртгүүлэхээс өмнө харна'],
-  [
-    'POST /api/gateways/qpay/callback',
-    'QPay сервер дуудна (JWT явуулахгүй). Body-д итгэдэггүй — invoice id-гаар ' +
-      'QPay руу буцаж /v2/payment/check дуудаж баталгаажуулдаг тул хуурамч ' +
-      'callback ашиггүй (gateways.controller.ts-ийн тайлбарыг үз).',
-  ],
+/** Local synthetic HTTP smoke: no provider calls, no authorised writes, no real account defaults. */
+import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { assertConfig } = require('./safety.cjs');
+const contracts = require('./night1-contracts.json');
+export const intentionallyPublic = new Set([
+  'GET /api',
+  'GET /api/books',
+  'GET /api/chapters',
+  'GET /api/catalog/passes',
+  'GET /api/enrollment-windows',
+  'GET /api/store/products',
+  ...contracts
+    .filter((c) => !c.roles.length && !c.auth)
+    .map((c) => `${c.method} ${c.path}`),
 ]);
-
-/**
- * Сурагч ХЭЗЭЭ Ч амжилттай хариу авах ёсгүй маршрутууд (мөнгө, хувийн
- * мэдээлэл, удирдлага). Анонимыг шалгах нь хангалтгүй — 2026-09-26-нд
- * /finance/report, /tuition/refunds нэвтэрсэн сурагчид нээлттэй байсныг
- * зөвхөн кодыг уншиж олсон (G02–G03). Энэ жагсаалт тэрийг дахин барина.
- */
-const STAFF_ONLY_PREFIXES = [
+const roles = [
+  'STUDENT',
+  'TEACHER',
+  'TEACHER_PLUS',
+  'ADMIN',
+  'PARENT',
+  'BUYER',
+];
+const staffPrefixes = [
   '/api/finance',
   '/api/tuition/refund',
   '/api/tuition/refunds',
@@ -59,173 +38,172 @@ const STAFF_ONLY_PREFIXES = [
   '/api/payments/months',
   '/api/payments/student',
 ];
-const STAFF_ONLY_EXACT = new Set(['GET /api/payments', 'GET /api/users']);
-
-function isStaffOnly(method, path) {
+export function forbiddenRole(method, path, role) {
+  const contract = contracts.find(
+    (c) => c.method === method && c.path === path,
+  );
+  if (contract)
+    return contract.roles.length > 0 && !contract.roles.includes(role);
   return (
-    STAFF_ONLY_EXACT.has(`${method} ${path}`) ||
-    STAFF_ONLY_PREFIXES.some((p) => path === p || path.startsWith(p + '/'))
+    ['STUDENT', 'PARENT', 'BUYER'].includes(role) &&
+    (['GET /api/payments', 'GET /api/users'].includes(`${method} ${path}`) ||
+      staffPrefixes.some((p) => path === p || path.startsWith(p + '/')))
   );
 }
-
-const args = process.argv.slice(2);
-const BASE = valueOf("--base") ?? "http://localhost:3000";
-const ONLY = valueOf("--only"); // жишээ: --only /api/sms
-const VERBOSE = args.includes("--verbose");
-
-function valueOf(flag) {
-  const i = args.indexOf(flag);
-  return i >= 0 ? args[i + 1] : undefined;
+export function failureReason(method, path, actor, status) {
+  if (status === 0 || status >= 500) return 'server-or-network';
+  if (status >= 300 && status < 400) return 'unexpected-redirect';
+  if (status === 429) return 'rate-limit-invalidates-smoke';
+  const key = `${method} ${path}`;
+  // The calendar credential is an opaque query token, never the session JWT.
+  if (path === '/api/schedule/my.ics')
+    return status === 404 ? null : 'calendar-token-boundary';
+  if (
+    actor === 'ANON' &&
+    !intentionallyPublic.has(key) &&
+    status !== 401 &&
+    status !== 403
+  )
+    return 'anonymous-access-boundary';
+  if (actor !== 'ANON' && forbiddenRole(method, path, actor) && status !== 403)
+    return 'role-boundary';
+  if (actor !== 'ANON' && status === 401) return 'invalid-synthetic-session';
+  if (intentionallyPublic.has(key) && ![200, 400, 404].includes(status))
+    return 'public-contract';
+  return null;
 }
-
-/** Замын параметрт тавих ойлгомжтой ХУУРАМЧ утга — жинхэнэ мөр устгахгүй */
-const FAKE_ID = "smoketest0000000000000000";
-
-/**
- * Бичих үйлдлийг ХООСОН биетэй дуудна: зорилго нь өгөгдөл үүсгэх биш,
- * «валидацигүй тул унана уу?» гэдгийг шалгах. Хоосон биеттэй бүх бичих
- * маршрут 400 (эсвэл 401/403) буцаах ёстой — 500 бол алдаа.
- */
-const WRITE_BODY = {};
-
-async function login(identifier, password) {
-  const res = await fetch(`${BASE}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ identifier, password }),
-  });
-  if (!res.ok) throw new Error(`login ${identifier} → ${res.status}`);
-  const json = await res.json();
-  return json.accessToken;
-}
-
-function fillParams(path) {
-  return path.replace(/:[A-Za-z0-9_]+/g, FAKE_ID);
-}
-
-async function call(method, path, token) {
-  const url = BASE + fillParams(path);
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const init = { method, headers };
-  if (method !== "GET" && method !== "DELETE") {
-    init.body = JSON.stringify(WRITE_BODY);
-  }
-
-  const started = Date.now();
-  try {
-    const res = await fetch(url, init, { signal: AbortSignal.timeout(20_000) });
-    let snippet = "";
-    if (res.status >= 500 || VERBOSE) {
-      snippet = (await res.text()).slice(0, 300);
-    }
-    return { status: res.status, ms: Date.now() - started, snippet };
-  } catch (err) {
-    return { status: 0, ms: Date.now() - started, snippet: String(err) };
-  }
-}
-
-async function main() {
-  const routesRaw = await import("node:fs").then((fs) =>
-    fs.readFileSync(new URL("./routes.txt", import.meta.url), "utf8"),
-  );
-  let routes = routesRaw
-    .trim()
-    .split("\n")
-    .map((line) => {
-      const [method, ...rest] = line.trim().split(/\s+/);
-      return { method, path: rest.join(" ") };
-    })
-    .filter((r) => r.method && r.path);
-
-  if (ONLY) routes = routes.filter((r) => r.path.startsWith(ONLY));
-
-  // Нэвтрэлтийн маршрутыг алгасна — эдгээрийг дуудвал rate limit-д цохиулж,
-  // үлдсэн бүх шалгалт 429 болж хуурамч «алдаа» болно.
-  const SKIP = new Set([
-    "POST /api/auth/login",
-    "POST /api/auth/register",
-    "POST /api/auth/forgot-password",
-    "POST /api/auth/reset-password",
-  ]);
-  routes = routes.filter((r) => !SKIP.has(`${r.method} ${r.path}`));
-
-  console.log(`Суурь: ${BASE}`);
-  console.log(`Маршрут: ${routes.length}\n`);
-
-  const actors = {
-    anon: null,
-    student: await login(process.env.SMOKE_STUDENT ?? "80601209", process.env.SMOKE_STUDENT ?? "80601209"),
-    teacher: await login(process.env.SMOKE_TEACHER ?? "95655938", process.env.SMOKE_TEACHER ?? "95655938"),
-    admin: await login(process.env.SMOKE_ADMIN ?? "99294266", process.env.SMOKE_ADMIN ?? "99294266"),
+export async function call(base, method, path, token, fetcher = fetch) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  console.log("Нэвтрэлт: student, teacher, admin — бэлэн\n");
-
-  const serverErrors = [];
-  const unprotected = [];
-  const studentLeaks = [];
-  const slow = [];
-  let checked = 0;
-
+  try {
+    const response = await fetcher(
+      base + path.replace(/:[A-Za-z0-9_]+/g, 'synthetic_missing_id'),
+      {
+        method,
+        headers,
+        redirect: 'manual',
+        signal: AbortSignal.timeout(20_000),
+        ...(!['GET', 'HEAD', 'DELETE'].includes(method) ? { body: '{}' } : {}),
+      },
+    );
+    // Do not log response bodies: smoke reports must never contain PII or credentials.
+    await response.body?.cancel();
+    return response.status;
+  } catch {
+    return 0;
+  }
+}
+export async function run({
+  base,
+  routes,
+  tokens,
+  strict = false,
+  fetcher = fetch,
+  log = console.log,
+}) {
+  const keys = new Set(routes.map((r) => `${r.method} ${r.path}`));
+  const missing = contracts
+    .filter((c) => !keys.has(`${c.method} ${c.path}`))
+    .map((c) => `${c.gap}: ${c.method} ${c.path}`);
+  if (missing.length)
+    log(
+      `Unmerged/missing Night-1 contracts (${missing.length}):\n${missing.join('\n')}`,
+    );
+  if (strict && missing.length)
+    return {
+      checked: 0,
+      omittedWrites: 0,
+      missing,
+      failures: ['missing-required-routes'],
+    };
+  const failures = [];
+  let checked = 0,
+    omittedWrites = 0;
   for (const route of routes) {
-    for (const [actor, token] of Object.entries(actors)) {
-      const r = await call(route.method, route.path, token);
+    // Arbitrary writes may trigger emails/payments even with an empty body. Test only
+    // the explicitly enumerated denied-role writes; business success is unit/integration coverage.
+    const write = !['GET', 'HEAD'].includes(route.method);
+    const contract = contracts.find(
+      (c) => c.method === route.method && c.path === route.path,
+    );
+    if (write && (!contract || !contract.roles.length)) {
+      omittedWrites++;
+      continue;
+    }
+    if (route.path.startsWith('/api/auth/')) continue;
+    for (const actor of ['ANON', ...roles]) {
+      if (
+        write &&
+        actor !== 'ANON' &&
+        !forbiddenRole(route.method, route.path, actor)
+      ) {
+        omittedWrites++;
+        continue;
+      }
+      const status = await call(
+        base,
+        route.method,
+        route.path,
+        tokens[actor],
+        fetcher,
+      );
       checked++;
-
-      if (r.status >= 500 || r.status === 0) {
-        serverErrors.push({ ...route, actor, ...r });
-      }
-      // Нэвтрээгүй хүн амжилттай хариу авбал маршрут хамгаалалтгүй —
-      // зориудаар нээлттэй гэж бүртгэгдээгүй бол л анхааруулна.
-      const key = `${route.method} ${route.path}`;
-      if (
-        actor === "anon" &&
-        (r.status === 200 || r.status === 201) &&
-        !INTENTIONALLY_PUBLIC.has(key)
-      ) {
-        unprotected.push({ ...route, status: r.status });
-      }
-      if (
-        actor === "student" &&
-        (r.status === 200 || r.status === 201) &&
-        isStaffOnly(route.method, route.path)
-      ) {
-        studentLeaks.push({ ...route, status: r.status });
-      }
-      if (r.ms > 3000) slow.push({ ...route, actor, ms: r.ms });
+      const reason = failureReason(route.method, route.path, actor, status);
+      if (reason)
+        failures.push({
+          method: route.method,
+          path: route.path,
+          actor,
+          status,
+          reason,
+        });
     }
   }
-
-  console.log(`Шалгасан дуудлага: ${checked}\n`);
-
-  report("🔴 СЕРВЕРИЙН АЛДАА (5xx / холболт тасарсан)", serverErrors, (e) =>
-    `${e.method} ${e.path}  [${e.actor}] → ${e.status}\n     ${e.snippet.replace(/\n/g, " ").slice(0, 200)}`,
-  );
-  report(
-    "🟠 ХАМГААЛАЛТГҮЙ (нэвтрээгүй хүнд 200 буцаав — жагсаалтад бүртгэгдээгүй)",
-    unprotected,
-    (e) => `${e.method} ${e.path} → ${e.status}`,
-  );
-  report(
-    "🔴 СУРАГЧИД НЭЭЛТТЭЙ (зөвхөн ажилтны маршрут сурагчид 2xx буцаав)",
-    studentLeaks,
-    (e) => `${e.method} ${e.path} → ${e.status}`,
-  );
-  report("🟡 УДААН (>3с)", slow, (e) => `${e.method} ${e.path} [${e.actor}] ${e.ms}ms`);
-
-  const failed = serverErrors.length > 0 || studentLeaks.length > 0;
-  console.log(failed ? "\nҮР ДҮН: АЛДААТАЙ" : "\nҮР ДҮН: серверийн алдаагүй, эрхийн задралгүй");
-  process.exit(failed ? 1 : 0);
+  return { checked, omittedWrites, missing, failures };
 }
-
-function report(title, items, format) {
-  console.log(`${title}: ${items.length}`);
-  for (const item of items) console.log(`   ${format(item)}`);
-  console.log("");
+export async function main(args = process.argv.slice(2), env = process.env) {
+  const value = (flag) => {
+    const i = args.indexOf(flag);
+    return i < 0 ? undefined : args[i + 1];
+  };
+  const base = assertConfig(value('--base') || 'http://127.0.0.1:3000', env);
+  const tokens = {};
+  for (const role of roles) {
+    const token = env[`SMOKE_${role}_TOKEN`];
+    if (!token) throw Error(`Missing synthetic SMOKE_${role}_TOKEN`);
+    tokens[role] = token;
+  }
+  const raw = fs.readFileSync(new URL('./routes.txt', import.meta.url), 'utf8');
+  const routes = raw
+    .trim()
+    .split('\n')
+    .map((line) => {
+      const [method, path] = line.trim().split(/\s+/);
+      return { method, path };
+    })
+    .filter(
+      (r) =>
+        r.method &&
+        r.path &&
+        (!value('--only') || r.path.startsWith(value('--only'))),
+    );
+  const result = await run({
+    base,
+    routes,
+    tokens,
+    strict: args.includes('--night1-complete'),
+  });
+  console.log(JSON.stringify(result, null, 2));
+  return result.failures.length ? 1 : 0;
 }
-
-main().catch((err) => {
-  console.error("Smoke test өөрөө унав:", err);
-  process.exit(2);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
+  main()
+    .then((code) => {
+      process.exitCode = code;
+    })
+    .catch((error) => {
+      console.error(error.message);
+      process.exitCode = 2;
+    });
