@@ -1,3 +1,4 @@
+import RegisterSW from '@/components/pwa/RegisterSW';
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "light dark",
+  // Same light --brand token as manifest.ts.
+  themeColor: "#1D4ED8",
 };
 
 // Эхний зурагт "буруу" горим гялсхийж харагдахаас сэргийлэх blocking script.
@@ -71,6 +74,7 @@ export default function RootLayout({
             гэж дүгнэдэг. Браузерын online/offline эвентээс л хамаарна,
             нэмэлт сүлжээний шалгалт явуулахгүй. */}
         <ConnectionStatus />
+        <RegisterSW />
       </body>
     </html>
   );

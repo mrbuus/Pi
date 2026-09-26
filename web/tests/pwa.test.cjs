@@ -1,0 +1,17 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const path=require('node:path');
+function worker(){
+ const handlers={},calls=[],store=new Map();let online=true;
+ const cache={add:async url=>{calls.push(['add',url]);store.set('http://localhost'+url,new Response('offline'));},put:async(req,res)=>{calls.push(['put',req.url]);store.set(req.url,res);},keys:async()=>[...store.keys()].map(url=>({url})),delete:async key=>{store.delete(key.url);}};
+ const caches={open:async name=>{calls.push(['open',name]);return cache;},keys:async()=>['pi-public-static-v0','pi-public-static-v1','other-app-cache'],delete:async key=>{calls.push(['delete',key]);},match:async req=>store.get(typeof req==='string'?'http://localhost'+req:req.url)};
+ const self={location:{origin:'http://localhost'},addEventListener:(name,fn)=>{handlers[name]=fn;}};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../public/sw.js'),'utf8'),{self,caches,URL,Response,fetch:async req=>{calls.push(['fetch',req.url]);if(!online)throw Error('offline');return {ok:true,type:'basic',redirected:false,clone:()=>new Response('asset')};}});
+ async function dispatch(type,request){const pending=[];let response;handlers[type]({request,waitUntil:p=>pending.push(p),respondWith:p=>{response=p;}});const result=await response;await Promise.all(pending);return result;}
+ return {calls,store,dispatch,offline:()=>{online=false;}};
+}
+const req=(url,mode='cors',method='GET')=>({url:'http://localhost'+url,mode,method});
+test('installs only generic fallback and deletes only its older cache namespace',async()=>{const w=worker();await w.dispatch('install');await w.dispatch('activate');assert.deepEqual(w.calls.filter(c=>c[0]==='add'),[['add','/offline.html']]);assert.deepEqual(w.calls.filter(c=>c[0]==='delete'),[['delete','pi-public-static-v0']]);});
+test('API, exam data, POST and cross-origin requests are never intercepted',async()=>{const w=worker();for(const r of [req('/api/attempts'),req('/api'),req('/app/exam?_rsc=x'),req('/uploads/private.png'),req('/_next/static/x.js','cors','POST'),{url:'https://api.example.com/api/me',mode:'cors',method:'GET'}])assert.equal(await w.dispatch('fetch',r),undefined);assert.deepEqual(w.calls,[]);});
+test('static assets are cache-first and repeated requests avoid network',async()=>{const w=worker();await w.dispatch('fetch',req('/_next/static/abc.js'));await w.dispatch('fetch',req('/_next/static/abc.js'));assert.equal(w.calls.filter(c=>c[0]==='fetch').length,1);assert.equal(w.calls.filter(c=>c[0]==='put').length,1);});
+test('HTML navigation never writes a cache, including exams and account screens',async()=>{const w=worker();for(const url of ['/app/tests/demo','/app/profile','/'])await w.dispatch('fetch',req(url,'navigate'));assert.equal(w.calls.filter(c=>c[0]==='fetch').length,3);assert.equal(w.calls.filter(c=>c[0]==='put').length,0);});
+test('offline exam navigation returns generic fallback without private state',async()=>{const w=worker();await w.dispatch('install');w.offline();const res=await w.dispatch('fetch',req('/app/tests/private','navigate'));assert.equal(await res.text(),'offline');assert.equal(w.calls.filter(c=>c[0]==='put').length,0);});
+test('static asset cache has a finite bound while preserving fallback',async()=>{const w=worker();await w.dispatch('install');for(let i=0;i<104;i++)await w.dispatch('fetch',req(`/_next/static/${i}.js`));assert.equal(w.store.size,101);assert(w.store.has('http://localhost/offline.html'));});
