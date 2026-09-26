@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayUnique,
   IsArray,
   IsEnum,
   IsInt,
@@ -68,6 +69,8 @@ export class UpdateTestDto {
 
   @ValidateIf((_object, value) => value !== undefined)
   @IsArray()
+  @ArrayUnique((problem: UpdateTestProblemDto) => problem.problemId)
+  @ArrayUnique((problem: UpdateTestProblemDto) => problem.order)
   @ValidateNested({ each: true })
   @Type(() => UpdateTestProblemDto)
   problems?: UpdateTestProblemDto[];

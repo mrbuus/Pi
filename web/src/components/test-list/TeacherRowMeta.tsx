@@ -6,6 +6,8 @@ import Link from "next/link";
 import { api, getRole } from "@/lib/api";
 import type { TestRow } from "./types";
 
+type TestRowWithCreator = TestRow & { createdById?: string };
+
 /* ============================================================================
  * Багшийн харагдацад нэг тестийн мөрөнд харуулах нэмэлт мэдээлэл: хэдэн
  * сурагч өгсөн (TestResult нь testId+studentId дээр @@unique тул
@@ -17,7 +19,7 @@ import type { TestRow } from "./types";
  * үүсгэж гүйцэтгэлд сөрөг нөлөөтэй тул орхив. Backend дунджийг шууд буцаах
  * болвол энд харуулж болно.
  * ========================================================================== */
-export default function TeacherRowMeta({ test }: { test: TestRow }) {
+export default function TeacherRowMeta({ test }: { test: TestRowWithCreator }) {
   const takenCount = test._count.results;
   const role = getRole();
   const [userId, setUserId] = useState<string | null>(null);

@@ -3,8 +3,11 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateTestDto } from './dto/update-test.dto';
 import { TestsService } from './tests.service';
 
 function setup(
@@ -17,6 +20,8 @@ function setup(
     timeLimitMin?: number | null;
   } = {},
 ) {
+  const events: string[] = [];
+  let storedSession: Record<string, unknown> | null = null;
   const test = {
     id: 'test-1',
     title: 'Эхний тест',
@@ -30,15 +35,78 @@ function setup(
     price: null,
     createdById: options.owner ?? 'teacher-1',
     deletedAt: options.deletedAt ?? null,
-    problems: [{ problemId: 'problem-1' }],
+    problems: [{
+      problemId: 'problem-1',
+      order: 1,
+      points: 1,
+      problem: {
+        id: 'problem-1',
+        format: 'OPEN',
+        statementText: 'Нэг бодлого',
+        imageKey: null,
+        choices: null,
+        correctAnswer: '5',
+        attemptCount: 0,
+        correctRate: null,
+        choiceOptions: [],
+        analysis: null,
+        chapter: { id: 'chapter-1', title: 'Бүлэг' },
+      },
+    }],
     access: [{ classroomId: 'class-1' }],
   };
   const updated = { ...test };
   const tx = {
+    $queryRaw: jest.fn((query: { sql?: string }) => {
+      events.push(`lock:${query.sql ?? ''}`);
+      return [];
+    }),
     test: {
+      findUnique: jest.fn(() => {
+        events.push('test-read');
+        return test;
+      }),
       update: jest.fn(({ data }: { data: Record<string, unknown> }) =>
         Object.assign(updated, data),
       ),
+    },
+    enrollment: {
+      findFirst: jest.fn(() => ({ classroomId: 'class-1' })),
+    },
+    testResult: {
+      count: jest.fn(() => {
+        events.push('result-count');
+        return options.resultCount ?? 0;
+      }),
+      findUnique: jest.fn(() => null),
+    },
+    testAttemptSession: {
+      count: jest.fn((args?: { where?: { status?: string } }) =>
+        args?.where?.status
+          ? (options.activeSessionCount ?? 0)
+          : (options.sessionCount ?? 0),
+      ),
+      findUnique: jest.fn(() => {
+        events.push('session-read-tx');
+        return storedSession;
+      }),
+      createMany: jest.fn(({ data }: { data: Array<Record<string, unknown>> }) => {
+        events.push('session-create');
+        const row = data[0];
+        storedSession = {
+          ...row,
+          id: 'session-1',
+          status: 'IN_PROGRESS',
+          startedAt: new Date(),
+          submittedAt: null,
+          draftAnswers: {},
+          draftStates: {},
+          problemTimes: {},
+          leaveCount: 0,
+          events: [],
+        };
+        return { count: data.length };
+      }),
     },
     testProblem: {
       deleteMany: jest.fn(() => ({ count: 1 })),
@@ -48,11 +116,19 @@ function setup(
       deleteMany: jest.fn(() => ({ count: 1 })),
       createMany: jest.fn(() => ({ count: 1 })),
     },
+    auditLog: {
+      create: jest.fn((args: { data: Record<string, unknown> }) => {
+        events.push('audit');
+        return args.data;
+      }),
+    },
   };
   const prisma = {
-    test: { findUnique: jest.fn(() => test) },
+    test: { findUnique: jest.fn(() => { events.push('test-read-root'); return test; }) },
+    enrollment: { findFirst: jest.fn(() => ({ classroomId: 'class-1' })) },
     testResult: { count: jest.fn(() => options.resultCount ?? 0) },
     testAttemptSession: {
+      findUnique: jest.fn(() => { events.push('session-read-root'); return null; }),
       count: jest.fn((args?: { where?: { status?: string } }) =>
         args?.where?.status
           ? (options.activeSessionCount ?? 0)
@@ -77,21 +153,23 @@ function setup(
         }) => args.data,
       ),
     },
-    $transaction: jest.fn((callback: (client: typeof tx) => unknown) =>
-      Promise.resolve(callback(tx)),
-    ),
+    $transaction: jest.fn((callback: (client: typeof tx) => unknown) => {
+      events.push('transaction-start');
+      return Promise.resolve(callback(tx)).finally(() => events.push('transaction-end'));
+    }),
   };
   return {
     service: new TestsService(prisma as unknown as PrismaService),
     prisma,
     tx,
     test,
+    events,
   };
 }
 
 describe('TestsService.updateTest', () => {
   it('өгөөгүй тестийн мэдээлэл, бодлого, ангийг нэг гүйлгээнд бүрэн шинэчилнэ', async () => {
-    const { service, prisma, tx } = setup();
+    const { service, tx, events } = setup();
     const result = await service.updateTest(
       'test-1',
       {
@@ -116,14 +194,22 @@ describe('TestsService.updateTest', () => {
     expect(tx.testAccess.createMany).toHaveBeenCalledWith({
       data: [{ testId: 'test-1', classroomId: 'class-2' }],
     });
-    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
-    expect(prisma.auditLog.create).toHaveBeenCalledTimes(1);
-    const audit = prisma.auditLog.create.mock.calls[0][0].data;
+    expect(tx.auditLog.create).toHaveBeenCalledTimes(1);
+    const audit = tx.auditLog.create.mock.calls[0][0].data;
     expect(audit).toMatchObject({
       action: 'UPDATE',
       entity: 'Test',
       entityId: 'test-1',
     });
+    expect(audit.before).toMatchObject({
+      access: [{ classroomId: 'class-1' }],
+    });
+    const updateLock = events.find((event) => event.startsWith('lock:'));
+    expect(updateLock).toContain('FOR UPDATE');
+    expect(events.indexOf(updateLock!)).toBeLessThan(events.indexOf('test-read'));
+    expect(events.indexOf('test-read')).toBeLessThan(events.indexOf('result-count'));
+    expect(events.indexOf('audit')).toBeGreaterThan(events.indexOf('result-count'));
+    expect(events.indexOf('audit')).toBeLessThan(events.indexOf('transaction-end'));
   });
 
   it('өгсөн тестийн бодлогыг өөрчлөхөд 409 буцаана', async () => {
@@ -181,5 +267,40 @@ describe('TestsService.updateTest', () => {
     const info = await service.editInfo('test-1', 'teacher-1', Role.TEACHER);
     expect(info.mode).toBe('LIMITED');
     expect(info.reason).toContain('зөвхөн нэр, хугацаа');
+  });
+
+  it('сурагч анх эхлүүлэхэд тестийн мөрийг түгжээд дараа нь бодлого, сессийг хадгална', async () => {
+    const { service, events } = setup();
+    await service.start('test-1', 'student-1');
+
+    const lockIndex = events.findIndex((event) => event.startsWith('lock:'));
+    const lockedTestIndex = events.indexOf('test-read');
+    const sessionCreateIndex = events.indexOf('session-create');
+    expect(lockIndex).toBeGreaterThan(-1);
+    expect(lockIndex).toBeLessThan(lockedTestIndex);
+    expect(lockedTestIndex).toBeLessThan(sessionCreateIndex);
+    expect(events.at(-1)).toBe('transaction-end');
+    expect(events[lockIndex]).toContain('FOR SHARE');
+  });
+
+  it.each([
+    {
+      problems: [
+        { problemId: 'p1', order: 1 },
+        { problemId: 'p1', order: 2 },
+      ],
+      label: 'бодлогын дугаар',
+    },
+    {
+      problems: [
+        { problemId: 'p1', order: 1 },
+        { problemId: 'p2', order: 1 },
+      ],
+      label: 'дарааллын дугаар',
+    },
+  ])('асуултын $label давхардвал DTO-г хүчингүй болгоно', async ({ problems }) => {
+    const dto = plainToInstance(UpdateTestDto, { problems });
+    const errors = await validate(dto);
+    expect(errors.some((error) => error.property === 'problems')).toBe(true);
   });
 });
