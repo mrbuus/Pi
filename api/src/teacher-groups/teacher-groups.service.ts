@@ -9,6 +9,9 @@ import { CreateTeacherGroupDto } from './dto/create-teacher-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { RegisterExternalTeacherDto } from './dto/register-external-teacher.dto';
 import { VerifyExternalTeacherDto } from './dto/verify-external-teacher.dto';
+import { RejectExternalTeacherDto } from './dto/reject-external-teacher.dto';
+
+const REJECTION_REASON_PREFIX = 'ТАТГАЛЗСАН ШАЛТГААН: ';
 
 /**
  * Join code үүсгэх функц: 6-8 тэмдэгт, үл ойлгомжтой тэмдэгтүүд хэрэглэхгүй
@@ -135,7 +138,80 @@ export class TeacherGroupsService {
       lastName: t.lastName,
       organization: t.externalTeacherProfile?.organization,
       createdAt: t.createdAt,
+      rejectionReason: t.externalTeacherProfile?.note?.startsWith(
+        REJECTION_REASON_PREFIX,
+      )
+        ? t.externalTeacherProfile.note.slice(REJECTION_REASON_PREFIX.length)
+        : null,
     }));
+  }
+
+  async rejectExternalTeacher(
+    userId: string,
+    dto: RejectExternalTeacherDto,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { externalTeacherProfile: true },
+    });
+
+    if (!user?.externalTeacherProfile) {
+      throw new NotFoundException('Гадны багш олдсонгүй');
+    }
+    if (user.externalTeacherProfile.verifiedAt) {
+      throw new BadRequestException(
+        'Баталгаажсан багшийг хүсэлтээс татгалзаж болохгүй',
+      );
+    }
+    if (user.externalTeacherProfile.note?.startsWith(REJECTION_REASON_PREFIX)) {
+      throw new BadRequestException('Энэ хүсэлт аль хэдийн татгалзсан');
+    }
+
+    const reason = dto.reason.trim();
+    if (!reason) {
+      throw new BadRequestException('Татгалзах шалтгааныг бичнэ үү');
+    }
+
+    const updated = await this.prisma.externalTeacherProfile.update({
+      where: { userId },
+      data: { note: `${REJECTION_REASON_PREFIX}${reason}` },
+      select: { userId: true, note: true, verifiedAt: true },
+    });
+
+    return {
+      userId: updated.userId,
+      rejected: true,
+      rejectionReason: updated.note?.slice(REJECTION_REASON_PREFIX.length) ?? reason,
+      verifiedAt: updated.verifiedAt,
+    };
+  }
+
+  async reconsiderExternalTeacher(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        externalTeacherProfile: { select: { note: true, verifiedAt: true } },
+      },
+    });
+
+    if (!user?.externalTeacherProfile) {
+      throw new NotFoundException('Гадны багш олдсонгүй');
+    }
+    if (
+      user.externalTeacherProfile.verifiedAt ||
+      !user.externalTeacherProfile.note?.startsWith(REJECTION_REASON_PREFIX)
+    ) {
+      throw new BadRequestException('Татгалзсан хүсэлт олдсонгүй');
+    }
+
+    const updated = await this.prisma.externalTeacherProfile.update({
+      where: { userId },
+      data: { note: null },
+      select: { userId: true, note: true, verifiedAt: true },
+    });
+
+    return { userId: updated.userId, rejectionReason: null, verifiedAt: null };
   }
 
   /**

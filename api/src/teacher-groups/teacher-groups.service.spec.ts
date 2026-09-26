@@ -115,4 +115,98 @@ describe('TeacherGroupsService external teacher verification lists', () => {
       service.unverifyExternalTeacher('synthetic-teacher-1'),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  it('stores an explicit rejection reason on a pending profile', async () => {
+    const findUnique = jest.fn().mockResolvedValue({
+      id: 'synthetic-teacher-2',
+      externalTeacherProfile: { verifiedAt: null, note: null },
+    });
+    const update = jest.fn().mockResolvedValue({
+      userId: 'synthetic-teacher-2',
+      verifiedAt: null,
+      note: 'ТАТГАЛЗСАН ШАЛТГААН: Байгууллага баталгаажаагүй.',
+    });
+    const service = new TeacherGroupsService({
+      user: { findUnique },
+      externalTeacherProfile: { update },
+    } as never);
+
+    await expect(
+      service.rejectExternalTeacher('synthetic-teacher-2', {
+        reason: ' Байгууллага баталгаажаагүй. ',
+      }),
+    ).resolves.toEqual({
+      userId: 'synthetic-teacher-2',
+      rejected: true,
+      rejectionReason: 'Байгууллага баталгаажаагүй.',
+      verifiedAt: null,
+    });
+    expect(update).toHaveBeenCalledWith({
+      where: { userId: 'synthetic-teacher-2' },
+      data: { note: 'ТАТГАЛЗСАН ШАЛТГААН: Байгууллага баталгаажаагүй.' },
+      select: { userId: true, note: true, verifiedAt: true },
+    });
+  });
+
+  it('rejects attempts to reject verified profiles or blank reasons', async () => {
+    const verifiedService = new TeacherGroupsService({
+      user: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'synthetic-teacher-1',
+          externalTeacherProfile: { verifiedAt: profile.verifiedAt, note: null },
+        }),
+      },
+    } as never);
+    await expect(
+      verifiedService.rejectExternalTeacher('synthetic-teacher-1', {
+        reason: 'Already reviewed',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    const pendingService = new TeacherGroupsService({
+      user: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'synthetic-teacher-2',
+          externalTeacherProfile: { verifiedAt: null, note: null },
+        }),
+      },
+    } as never);
+    await expect(
+      pendingService.rejectExternalTeacher('synthetic-teacher-2', {
+        reason: '   ',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('moves a rejected teacher back to the pending list by clearing the marker', async () => {
+    const findUnique = jest.fn().mockResolvedValue({
+      id: 'synthetic-teacher-2',
+      externalTeacherProfile: {
+        note: 'ТАТГАЛЗСАН ШАЛТГААН: Байгууллага баталгаажаагүй.',
+        verifiedAt: null,
+      },
+    });
+    const update = jest.fn().mockResolvedValue({
+      userId: 'synthetic-teacher-2',
+      note: null,
+      verifiedAt: null,
+    });
+    const service = new TeacherGroupsService({
+      user: { findUnique },
+      externalTeacherProfile: { update },
+    } as never);
+
+    await expect(
+      service.reconsiderExternalTeacher('synthetic-teacher-2'),
+    ).resolves.toEqual({
+      userId: 'synthetic-teacher-2',
+      rejectionReason: null,
+      verifiedAt: null,
+    });
+    expect(update).toHaveBeenCalledWith({
+      where: { userId: 'synthetic-teacher-2' },
+      data: { note: null },
+      select: { userId: true, note: true, verifiedAt: true },
+    });
+  });
 });

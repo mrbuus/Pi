@@ -26,6 +26,12 @@ describe('TeacherGroupsController verification routes', () => {
     expect(methodNames.indexOf('getVerifiedTeachers')).toBeLessThan(
       methodNames.indexOf('getGroupDetails'),
     );
+    expect(methodNames.indexOf('rejectExternalTeacher')).toBeLessThan(
+      methodNames.indexOf('getGroupDetails'),
+    );
+    expect(methodNames.indexOf('reconsiderExternalTeacher')).toBeLessThan(
+      methodNames.indexOf('getGroupDetails'),
+    );
     expect(details).toBeDefined();
   });
 
@@ -54,5 +60,26 @@ describe('TeacherGroupsController verification routes', () => {
       JwtAuthGuard,
       RolesGuard,
     ]);
+  });
+
+  it('requires ADMIN or TEACHER_PLUS to reject and reconsider', () => {
+    for (const [methodName, path] of [
+      ['rejectExternalTeacher', 'reject/:userId'],
+      ['reconsiderExternalTeacher', 'reconsider/:userId'],
+    ]) {
+      const handler = route(methodName);
+      expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(path);
+      expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
+        RequestMethod.PUT,
+      );
+      expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual([
+        'ADMIN',
+        'TEACHER_PLUS',
+      ]);
+      expect(Reflect.getMetadata(GUARDS_METADATA, handler)).toEqual([
+        JwtAuthGuard,
+        RolesGuard,
+      ]);
+    }
   });
 });

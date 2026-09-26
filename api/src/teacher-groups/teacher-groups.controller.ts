@@ -17,6 +17,7 @@ import { CreateTeacherGroupDto } from './dto/create-teacher-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { RegisterExternalTeacherDto } from './dto/register-external-teacher.dto';
 import { VerifyExternalTeacherDto } from './dto/verify-external-teacher.dto';
+import { RejectExternalTeacherDto } from './dto/reject-external-teacher.dto';
 
 // main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
 // зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
@@ -79,6 +80,28 @@ export class TeacherGroupsController {
   @Put('unverify/:userId')
   async unverifyExternalTeacher(@Param('userId') userId: string) {
     return this.service.unverifyExternalTeacher(userId);
+  }
+
+  /**
+   * PUT /api/teacher-groups/reject/:userId
+   * Хүсэлтийг шалтгаантай татгалзаж, дахин шалгах боломжтойгоор тэмдэглэнэ.
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'TEACHER_PLUS')
+  @Put('reject/:userId')
+  async rejectExternalTeacher(
+    @Param('userId') userId: string,
+    @Body() dto: RejectExternalTeacherDto,
+  ) {
+    return this.service.rejectExternalTeacher(userId, dto);
+  }
+
+  /** Татгалзсан хүсэлтийг дахин хүлээгдэж буй жагсаалтад оруулна. */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'TEACHER_PLUS')
+  @Put('reconsider/:userId')
+  async reconsiderExternalTeacher(@Param('userId') userId: string) {
+    return this.service.reconsiderExternalTeacher(userId);
   }
 
   /**
