@@ -10,6 +10,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import type { Request } from 'express';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -18,17 +26,32 @@ import { TuitionService } from './tuition.service';
 
 // ============ DTOs ============
 
-class CreateRefundDto {
+// ⚠️ Глобал ValidationPipe `whitelist: true` тул декораторгүй талбар бүр
+// ЧИМЭЭГҮЙ хасагддаг — өмнө нь эдгээр DTO декораторгүй байсан тул буцаалт
+// үүсгэх, олгох, цуцлах бүх хүсэлт хоосон биетэй сервис рүү очдог байв.
+export class CreateRefundDto {
+  @IsString()
+  @IsNotEmpty()
   studentId!: string;
+
+  @IsString()
+  @IsNotEmpty()
   classroomId!: string;
+
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна' })
   leftOn!: string;
 }
 
-class MarkAsPaidDto {
+export class MarkAsPaidDto {
+  @IsOptional()
+  @IsIn(['CASH', 'BANK_TRANSFER', 'QPAY'])
   paymentMethod?: string;
 }
 
-class CancelRefundDto {
+export class CancelRefundDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
   cancelReason?: string;
 }
 

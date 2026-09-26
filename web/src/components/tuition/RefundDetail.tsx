@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Banknote, Check, Clock3, XCircle } from 'lucide-react';
-import { api, getRole } from '@/lib/api';
+import { api, ApiError, getRole } from '@/lib/api';
 import { ErrorState, LoadingState } from '@/components/ui/StateBlock';
 import { formatDate, formatDateTime, formatMoney } from './format';
 import RefundStatusBadge from './RefundStatusBadge';
@@ -108,8 +108,8 @@ export default function RefundDetail({ refundId }: { refundId: string }) {
       setActionMessage('Төлөв шинэчлэгдлээ.');
       setRefreshing(true);
       await load(false);
-    } catch {
-      setDialogError('Өөрчлөлт хадгалж чадсангүй. Мэдээллээ шалгаад дахин оролдоно уу.');
+    } catch (err) {
+      setDialogError(err instanceof ApiError ? err.message : 'Өөрчлөлт хадгалж чадсангүй. Мэдээллээ шалгаад дахин оролдоно уу.');
     } finally {
       setActionBusy(false);
       setRefreshing(false);

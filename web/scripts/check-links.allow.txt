@@ -1,3 +1,1 @@
 # Route followed by the reason it is temporarily allowed.
-/app/tuition/refund/[id] G06 adds the refund detail route in wave one.
-/app/tuition/refunds G06 adds the refund list route in wave one.

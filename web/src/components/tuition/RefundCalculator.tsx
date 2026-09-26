@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AlertCircle, CheckCircle2, Info, Search, UserRound, X } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { ErrorState, LoadingState } from '@/components/ui/StateBlock';
 import { formatMoney } from './format';
 import { REFUND_WARNING_TEXT, type RefundPreview } from './types';
@@ -166,8 +166,9 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
     setError('');
     try {
       await onSubmit(selectedStudent.id, classroom.id, leftOn);
-    } catch {
-      setError('Буцаалт үүсгэж чадсангүй. Мэдээллээ шалгаад дахин оролдоно уу.');
+    } catch (err) {
+      // Серверийн монгол тайлбарыг (жишээ нь давхардсан буцаалт) нуухгүй.
+      setError(err instanceof ApiError ? err.message : 'Буцаалт үүсгэж чадсангүй. Мэдээллээ шалгаад дахин оролдоно уу.');
     }
   }
 
