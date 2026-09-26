@@ -1,23 +1,21 @@
 "use client";
 
-"use client";
-
 import { useEffect, useState } from "react";
 import { RotateCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, SectionHeader } from "@/components/ui/Surface";
-import { api } from "@/lib/api";
+import { api, getRole } from "@/lib/api";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { Button } from "@/components/ui/Button";
-import InfoHint from "@/components/ui/InfoHint";
 
 interface SmsMessage {
   id: string;
-  to: string;
-  text: string;
-  status: "sent" | "failed" | "pending";
-  sentAt: string;
-  errorReason?: string;
+  toPhone: string;
+  body: string;
+  status: "SENT" | "FAILED" | "QUEUED" | "CANCELLED";
+  createdAt: string;
+  error?: string | null;
+  segments: number;
 }
 
 export function SmsHistory() {
@@ -27,6 +25,7 @@ export function SmsHistory() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [statusFilter, setStatusFilter] = useState<"all" | "sent" | "failed">("all");
+  const canRetry = getRole() === "ADMIN";
 
   const pageSize = 20;
   const totalPages = Math.ceil(total / pageSize);
@@ -42,10 +41,10 @@ export function SmsHistory() {
         take: String(pageSize),
         ...(statusFilter !== "all" && { status: statusFilter.toUpperCase() }),
       });
-      const data = await api<{ items: SmsMessage[]; total: number }>(
+      const data = await api<{ messages: SmsMessage[]; total: number }>(
         `/sms/messages?${params}`,
       );
-      setMessages(data.items);
+      setMessages(data.messages);
       setTotal(data.total);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Алдаа гарлаа");
@@ -55,7 +54,22 @@ export function SmsHistory() {
   };
 
   useEffect(() => {
-    fetchMessages();
+    let active = true;
+    const params = new URLSearchParams({
+      skip: String((page - 1) * pageSize),
+      take: String(pageSize),
+      ...(statusFilter !== "all" && { status: statusFilter.toUpperCase() }),
+    });
+    api<{ messages: SmsMessage[]; total: number }>(`/sms/messages?${params}`)
+      .then((data) => {
+        if (!active) return;
+        setMessages(data.messages);
+        setTotal(data.total);
+        setError(null);
+      })
+      .catch((err) => { if (active) setError(err instanceof Error ? err.message : "Алдаа гарлаа"); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [page, statusFilter]);
 
   const handleRetry = async (messageId: string) => {
@@ -72,15 +86,17 @@ export function SmsHistory() {
   if (error) return <ErrorState message={error} onRetry={fetchMessages} />;
 
   const statusColors: Record<string, string> = {
-    sent: "bg-success/10 text-success",
-    failed: "bg-error/10 text-error",
-    pending: "bg-warning/10 text-warning",
+    SENT: "bg-success/10 text-success",
+    FAILED: "bg-error/10 text-error",
+    QUEUED: "bg-warning/10 text-warning",
+    CANCELLED: "bg-panel text-ink-dim",
   };
 
   const statusLabels: Record<string, string> = {
-    sent: "Явсан",
-    failed: "Амжилтгүй",
-    pending: "Хүлээгдэж байна",
+    SENT: "Явсан",
+    FAILED: "Амжилтгүй",
+    QUEUED: "Хүлээгдэж байна",
+    CANCELLED: "Цуцалсан",
   };
 
   return (
@@ -91,8 +107,11 @@ export function SmsHistory() {
         <div className="flex flex-wrap gap-2">
           {(["all", "sent", "failed"] as const).map((s) => (
             <button
+              type="button"
               key={s}
               onClick={() => {
+                if (statusFilter === s && page === 1) return;
+                setLoading(true);
                 setStatusFilter(s);
                 setPage(1);
               }}
@@ -120,23 +139,24 @@ export function SmsHistory() {
             <Card key={msg.id} className="flex items-start justify-between gap-4 p-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${statusColors[msg.status]}`}>
-                    {statusLabels[msg.status]}
-                  </span>
-                  <Meta
-                    items={[
-                      <span className="font-mono text-sm">{msg.to}</span>,
-                      new Date(msg.sentAt).toLocaleString("mn-MN"),
-                    ]}
-                    className="text-xs text-ink-dim"
-                  />
-                </div>
-                <p className="mt-2 text-sm text-ink break-words">{msg.text}</p>
-                {msg.errorReason && (
-                  <p className="mt-1 text-xs text-error">Алдаа: {msg.errorReason}</p>
-                )}
+                <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${statusColors[msg.status] ?? "bg-panel text-ink-dim"}`}>
+                  {statusLabels[msg.status]}
+                </span>
+                <Meta
+                  items={[
+                    <span key="phone" className="font-mono text-sm">{msg.toPhone}</span>,
+                    new Date(msg.createdAt).toLocaleString("mn-MN"),
+                    `${msg.segments} хэсэг`,
+                  ]}
+                  className="text-xs text-ink-dim"
+                />
               </div>
-              {msg.status === "failed" && (
+              <p className="mt-2 text-sm text-ink break-words">{msg.body}</p>
+              {msg.error && (
+                <p className="mt-1 text-xs text-error">Алдаа: {msg.error}</p>
+              )}
+            </div>
+            {canRetry && msg.status === "FAILED" && (
                 <Button
                   variant="secondary"
                   size="sm"
@@ -156,7 +176,7 @@ export function SmsHistory() {
                 variant="secondary"
                 size="sm"
                 disabled={page === 1}
-                onClick={() => setPage(page - 1)}
+                onClick={() => { setLoading(true); setPage(page - 1); }}
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden />
               </Button>
@@ -167,7 +187,7 @@ export function SmsHistory() {
                 variant="secondary"
                 size="sm"
                 disabled={page === totalPages}
-                onClick={() => setPage(page + 1)}
+                onClick={() => { setLoading(true); setPage(page + 1); }}
               >
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>

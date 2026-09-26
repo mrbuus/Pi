@@ -1,211 +1,188 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Trash2, Edit2, Plus } from "lucide-react";
-import { Card, SectionHeader } from "@/components/ui/Surface";
-import { api } from "@/lib/api";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { useCallback, useEffect, useState } from "react";
+import { Edit2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import InfoHint from "@/components/ui/InfoHint";
+import { Card, SectionHeader } from "@/components/ui/Surface";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { api, getRole } from "@/lib/api";
 
+type SmsKind = "PASSWORD_RESET" | "ANNOUNCEMENT" | "PAYMENT_REMINDER" | "ATTENDANCE" | "EXAM" | "MANUAL" | "OTHER";
 interface SmsTemplate {
   id: string;
   name: string;
-  text: string;
+  body: string;
+  kind: SmsKind;
   createdAt: string;
-  variables: string[];
 }
+
+const KIND_LABEL: Record<SmsKind, string> = {
+  PASSWORD_RESET: "Нууц үг сэргээх",
+  ANNOUNCEMENT: "Мэдэгдэл",
+  PAYMENT_REMINDER: "Төлбөрийн сануулга",
+  ATTENDANCE: "Ирц",
+  EXAM: "Шалгалт",
+  MANUAL: "Гараар илгээх",
+  OTHER: "Бусад",
+};
 
 export function SmsTemplates() {
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [newTemplate, setNewTemplate] = useState(false);
-  const [formData, setFormData] = useState({ name: "", text: "" });
+  const [form, setForm] = useState({ name: "", body: "", kind: "MANUAL" as SmsKind });
+  const canManage = getRole() === "ADMIN";
 
-  const fetchTemplates = async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const data = await api<SmsTemplate[]>("/sms/templates");
-      setTemplates(data);
+      setTemplates(await api<SmsTemplate[]>("/sms/templates"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Алдаа гарлаа");
+      setError(err instanceof Error ? err.message : "Загвар ачаалж чадсангүй.");
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchTemplates();
   }, []);
 
-  const handleSave = async () => {
-    if (!formData.name || !formData.text) {
-      alert("Нэр болон текст оруулна уу");
+  useEffect(() => {
+    let active = true;
+    api<SmsTemplate[]>("/sms/templates")
+      .then((rows) => { if (active) setTemplates(rows); })
+      .catch((err) => { if (active) setError(err instanceof Error ? err.message : "Загвар ачаалж чадсангүй."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
+
+  function startCreate() {
+    setEditingId(null);
+    setForm({ name: "", body: "", kind: "MANUAL" });
+    setFormError(null);
+    setFormOpen(true);
+  }
+
+  function startEdit(item: SmsTemplate) {
+    if (item.kind === "PASSWORD_RESET") return;
+    setEditingId(item.id);
+    setForm({ name: item.name, body: item.body, kind: item.kind });
+    setFormError(null);
+    setFormOpen(true);
+  }
+
+  async function save(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = form.name.trim();
+    const body = form.body.trim();
+    if (!name || !body) {
+      setFormError("Загварын нэр болон мессежийн агуулгыг бөглөнө үү.");
       return;
     }
-
+    if (/нууц\s*үг.{0,24}(код|code)\s*[:=]\s*\d{4,}/i.test(body)) {
+      setFormError("Нууц үг сэргээх бодит кодыг загварт хадгалах боломжгүй.");
+      return;
+    }
+    setSaving(true);
+    setFormError(null);
     try {
-      // ⚠️ Талбарын нэр СЕРВЭРТЭЙ таарах ЁСТОЙ: схемд `body` (`text` БИШ).
-      // Мөн шинэчлэх нь PATCH (PUT БИШ) — controller-той таарууллаа.
-      await api(
-        editingId ? `/sms/templates/${editingId}` : "/sms/templates",
-        {
-          method: editingId ? "PATCH" : "POST",
-          body: editingId
-            ? { name: formData.name, body: formData.text }
-            : { name: formData.name, body: formData.text, kind: "MANUAL" },
-        },
-      );
-
-      setFormData({ name: "", text: "" });
+      await api(editingId ? `/sms/templates/${editingId}` : "/sms/templates", {
+        method: editingId ? "PATCH" : "POST",
+        body: editingId ? { name, body } : { name, body, kind: form.kind },
+      });
+      setFormOpen(false);
       setEditingId(null);
-      setNewTemplate(false);
-      await fetchTemplates();
+      await load();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Алдаа");
+      setFormError(err instanceof Error ? err.message : "Загварыг хадгалж чадсангүй.");
+    } finally {
+      setSaving(false);
     }
-  };
+  }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Энэ загварыг үнэхээр устгах уу?")) return;
-
+  async function remove(item: SmsTemplate) {
+    if (!window.confirm(`“${item.name}” загварыг устгах уу?`)) return;
+    setError(null);
     try {
-      await api(`/sms/templates/${id}`, { method: "DELETE" });
-      await fetchTemplates();
+      await api(`/sms/templates/${item.id}`, { method: "DELETE" });
+      await load();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Алдаа");
+      setError(err instanceof Error ? err.message : "Загварыг устгаж чадсангүй.");
     }
-  };
+  }
 
-  if (loading) return <LoadingState rows={4} label="Загварыг ачаалж байна" />;
-  if (error) return <ErrorState message={error} onRetry={fetchTemplates} />;
+  if (loading) return <LoadingState rows={4} label="SMS загварыг ачаалж байна" />;
+  if (error && templates.length === 0) return <ErrorState message={error} onRetry={() => void load()} />;
 
   return (
     <div className="space-y-4">
-      {/* Шинэ загвар үүсгэх форм */}
-      {newTemplate || editingId ? (
-        <Card>
-          <SectionHeader
-            title={editingId ? "Загварыг засах" : "Шинэ загвар"}
-          />
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-semibold text-ink">Загварын нэр</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Жишээ: Нэвтрэхийн хүсэлт"
-                className="mt-2 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-ink">
-                Мессежийн текст
-                <InfoHint className="ml-1">
-                  {"{"}name{"}"}, {"{"}phone{"}"}, {"{"}code{"}"} гэх мэт орлуулагчийг ашиглана уу.
-                </InfoHint>
-              </label>
-              <textarea
-                value={formData.text}
-                onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-                placeholder="Сайн байна уу {{name}}, таны нэвтрэхийн код: {{code}}"
-                className="mt-2 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-                rows={5}
-              />
-              <p className="mt-1 text-xs text-ink-dim">
-                Урт: {formData.text.length} тэмдэгт
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="default" size="sm" onClick={handleSave}>
-                {editingId ? "Засах" : "Үүсгэх"}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setNewTemplate(false);
-                  setEditingId(null);
-                  setFormData({ name: "", text: "" });
-                }}
-              >
-                Болих
-              </Button>
-            </div>
+      {error && <ErrorState message={error} onRetry={() => void load()} />}
+      <Card>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <SectionHeader title="Мессежийн загвар" />
+            <p className="text-sm text-ink-dim">Загварыг илгээх хэсэгт сонгож, агуулгыг нь ашиглана.</p>
           </div>
-        </Card>
-      ) : (
+          {canManage && !formOpen && <Button type="button" onClick={startCreate}><Plus className="h-4 w-4" aria-hidden />Загвар нэмэх</Button>}
+        </div>
+        {!canManage && <p className="mt-3 rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink-dim">Загвар харах эрхтэй. Өөрчлөлтийг администратор хийнэ.</p>}
+      </Card>
+
+      {formOpen && canManage && (
         <Card>
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-ink">Загвар сан</h3>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => setNewTemplate(true)}
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              Үүсгэх
-            </Button>
-          </div>
+          <SectionHeader title={editingId ? "Загвар засах" : "Шинэ загвар"} />
+          <form className="space-y-4" onSubmit={save}>
+            <div>
+              <label htmlFor="sms-template-name" className="block text-sm font-semibold text-ink">Загварын нэр</label>
+              <input id="sms-template-name" required maxLength={100} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="mt-1 min-h-11 w-full rounded-lg border border-line bg-surface px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" />
+            </div>
+            {!editingId && (
+              <div>
+                <label htmlFor="sms-template-kind" className="block text-sm font-semibold text-ink">Загварын төрөл</label>
+                <select id="sms-template-kind" value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value as SmsKind })} className="mt-1 min-h-11 w-full rounded-lg border border-line bg-surface px-3 text-sm">
+                  {(["MANUAL", "ANNOUNCEMENT", "PAYMENT_REMINDER", "ATTENDANCE", "EXAM", "OTHER"] as SmsKind[]).map((kind) => <option key={kind} value={kind}>{KIND_LABEL[kind]}</option>)}
+                </select>
+                <p className="mt-1 text-xs text-ink-dim">Нууц үг сэргээх код агуулсан загвар энд үүсгэхгүй.</p>
+              </div>
+            )}
+            <div>
+              <label htmlFor="sms-template-body" className="block text-sm font-semibold text-ink">Мессежийн агуулга</label>
+              <textarea id="sms-template-body" required maxLength={1000} rows={5} value={form.body} onChange={(event) => setForm({ ...form, body: event.target.value })} className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" />
+              <p className="mt-1 text-xs text-ink-dim">{form.body.length} тэмдэгт. Загварын текст яг хэвээрээ хадгалагдана.</p>
+            </div>
+            {formError && <p role="alert" className="text-sm text-error">{formError}</p>}
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" loading={saving}>{saving ? "Хадгалж байна" : editingId ? "Өөрчлөлт хадгалах" : "Загвар үүсгэх"}</Button>
+              <Button type="button" variant="secondary" disabled={saving} onClick={() => { setFormOpen(false); setEditingId(null); setFormError(null); }}>Болих</Button>
+            </div>
+          </form>
         </Card>
       )}
 
-      {/* Загварын жагсаалт */}
-      {templates.length === 0 && !newTemplate && !editingId ? (
-        <EmptyState
-          title="Загвар байхгүй"
-          hint="SMS явуулах загвар үүсгээрэй."
-          action={
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => setNewTemplate(true)}
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              Үүсгэх
-            </Button>
-          }
-        />
+      {templates.length === 0 ? (
+        <EmptyState title="Загвар алга" hint={canManage ? "Шинэ загвар нэмээд илгээх хэсэгт ашиглаарай." : "Администратор загвар нэмсний дараа энд харагдана."} />
       ) : (
         <div className="space-y-3">
-          {templates.map((template) => (
-            <Card key={template.id} className="p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h4 className="font-bold text-ink">{template.name}</h4>
-                  <p className="mt-1 text-sm text-ink-dim">{template.text}</p>
-                  {template.variables.length > 0 && (
-                    <p className="mt-2 text-xs text-brand-soft">
-                      Орлуулагч: {template.variables.join(", ")}
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs text-ink-dim">
-                    Үүсгэгдсэн: {new Date(template.createdAt).toLocaleString("mn-MN")}
-                  </p>
+          {templates.map((item) => (
+            <Card key={item.id}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold text-ink">{item.name}</h3>
+                    <span className="rounded-full border border-line px-2 py-0.5 text-xs text-ink-dim">{KIND_LABEL[item.kind] ?? item.kind}</span>
+                  </div>
+                  <p className="mt-2 whitespace-pre-wrap break-words text-sm text-ink">{item.body}</p>
+                  <p className="mt-2 text-xs text-ink-dim">{item.body.length} тэмдэгт</p>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      setEditingId(template.id);
-                      setFormData({ name: template.name, text: template.text });
-                    }}
-                  >
-                    <Edit2 className="h-4 w-4" aria-hidden />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleDelete(template.id)}
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden />
-                  </Button>
-                </div>
+                {canManage && item.kind !== "PASSWORD_RESET" && (
+                  <div className="flex gap-2">
+                    <Button type="button" variant="secondary" aria-label={`${item.name} загварыг засах`} onClick={() => startEdit(item)}><Edit2 className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Засах</span></Button>
+                    <Button type="button" variant="secondary" aria-label={`${item.name} загварыг устгах`} onClick={() => void remove(item)}><Trash2 className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Устгах</span></Button>
+                  </div>
+                )}
+                {item.kind === "PASSWORD_RESET" && <span className="text-xs text-ink-dim">Сэргээх кодын загварыг энд өөрчлөх боломжгүй.</span>}
               </div>
             </Card>
           ))}

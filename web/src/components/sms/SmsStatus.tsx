@@ -5,15 +5,13 @@ import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Card, SectionHeader } from "@/components/ui/Surface";
 import { api } from "@/lib/api";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
-import { Meta } from "@/components/ui/Meta";
 import InfoHint from "@/components/ui/InfoHint";
-import { Button } from "@/components/ui/Button";
 
 interface SmsStatus {
   configured: boolean;
   provider: string | null;
-  messagesSentThisMonth: number;
-  estimatedCostTug: number;
+  thisMonthCount: number;
+  thisMonthSegments: number;
 }
 
 export function SmsStatus() {
@@ -36,7 +34,12 @@ export function SmsStatus() {
   };
 
   useEffect(() => {
-    fetchStatus();
+    let active = true;
+    api<SmsStatus>("/sms/status")
+      .then((value) => { if (active) setStatus(value); })
+      .catch((err) => { if (active) setError(err instanceof Error ? err.message : "Алдаа гарлаа"); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
   if (loading) return <LoadingState rows={3} label="Төлөвийг ачаалж байна" />;
@@ -75,28 +78,26 @@ export function SmsStatus() {
         </div>
       </Card>
 
-      {/* Сард явсан мессеж */}
+      {/* Энэ сард бүртгэгдсэн илгээлт */}
       {status.configured && (
         <Card>
           <SectionHeader
-            title="Энэ сард явсан мессеж"
+            title="Энэ сарын хэрэглээ"
             hint={
               <InfoHint>
-                Сағалгүй сарын эхнээс өнөөний өнгөрөө явсан бүх SMS-ийн тоо ба ойролцоо
-                хөлс нүүлгэлтийн үнэ. SMS нь өртөгтэй, буцаах боломжгүй — анхаарал сүүлийнхээр.
+                Серверийн бүртгэлд энэ сард үүссэн SMS мессеж болон амжилттай илгээсэн хэсгийн тоо.
+                Өртгийн тооцоог бөөн илгээлт бүрийн өмнө серверээс авна.
               </InfoHint>
             }
           />
           <div className="space-y-3">
             <div className="flex items-baseline justify-between">
-              <span className="text-ink-dim">Мессежийн тоо:</span>
-              <span className="font-bold text-2xl">{status.messagesSentThisMonth.toLocaleString("mn-MN")}</span>
+              <span className="text-ink-dim">Бүртгэгдсэн мессеж:</span>
+              <span className="font-bold text-2xl">{status.thisMonthCount.toLocaleString("mn-MN")}</span>
             </div>
             <div className="flex items-baseline justify-between border-t border-line pt-3">
-              <span className="text-ink-dim">Ойролцоо зардал:</span>
-              <span className="font-bold text-xl">
-                ₮{status.estimatedCostTug.toLocaleString("mn-MN")}
-              </span>
+              <span className="text-ink-dim">Амжилттай илгээсэн хэсэг:</span>
+              <span className="font-bold text-xl">{status.thisMonthSegments.toLocaleString("mn-MN")}</span>
             </div>
           </div>
         </Card>
