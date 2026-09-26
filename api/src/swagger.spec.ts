@@ -92,6 +92,9 @@ describe('OpenAPI opt-in and production boundary', () => {
       lastName: 'Synthetic',
       phone: '99000000',
       grade: 12,
+      acceptTerms: true,
+      privacyVersion: '2026-09-26-draft',
+      isMinor: false,
     });
     expect(await validate(valid)).toHaveLength(0);
   });
