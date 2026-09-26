@@ -1474,7 +1474,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "5^{x+2}=5^7\\quad\\Longrightarrow\\quad x=\\square",
+          "prompt": "5^{x+2}=5^7\\quad\\iff x=\\square",
           "answer": "5",
           "distractors": [
             "9",
@@ -1546,7 +1546,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "(1/2)^x<1/8\\quad\\Longrightarrow\\quad\\square",
+          "prompt": "(1/2)^x<1/8\\quad\\iff\\square",
           "answer": "x>3",
           "distractors": [
             "x<3",
@@ -1620,7 +1620,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "8^{x}=4^{x+1}\\quad\\Longrightarrow\\quad x=\\square",
+          "prompt": "8^{x}=4^{x+1}\\quad\\iff x=\\square",
           "answer": "2",
           "distractors": [
             "1",
@@ -1692,7 +1692,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "4^x-3\\cdot2^x+2=0\\quad\\Longrightarrow\\quad S=\\square",
+          "prompt": "4^x-3\\cdot2^x+2=0\\quad:\\quad\\text{шийдийн олонлог }S=\\square",
           "answer": "\\{0,1\\}",
           "distractors": [
             "\\{1,2\\}",
@@ -2504,7 +2504,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "\\log_3(x+1)=2\\quad\\Longrightarrow\\quad x=\\square",
+          "prompt": "\\log_3(x+1)=2\\quad\\iff x=\\square",
           "answer": "8",
           "distractors": [
             "9",
@@ -2576,7 +2576,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "\\log_3 x\\le1\\quad\\Longrightarrow\\quad S=\\square",
+          "prompt": "\\log_3 x\\le1\\quad:\\quad\\text{шийдийн олонлог }S=\\square",
           "answer": "(0,3]",
           "distractors": [
             "[0,3]",

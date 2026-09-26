@@ -134,3 +134,31 @@ for(let i=0;i<200;i++){
  identity('natural-inverse',Math.exp(Math.log(b)),b);
 }
 console.log(`${covered.size}/80 worked examples; ${identityAssertions} seeded checks across ${identityNames.size} logarithm identities; ${assertions} total numerical assertions.`);
+// Quiz audit: numeric choices are independently evaluated. Symbolic solution
+// quizzes use truth sets, not string inequality, so weaker necessary conditions
+// cannot count as unique answers. Prose true/false claims remain manually reviewed.
+let quizChecks=0;
+function numeric(s){if(!/^-?\d+(?:\/\d+)?$/.test(s))throw new Error(`unsupported numeric choice: ${s}`);const [a,b]=s.split('/').map(Number);return b===undefined?a:a/b;}
+function unique(slug, isCorrect){const q=formulas.get(`fn-${slug}`).quiz[0];const options=[q.answer,...q.distractors];const accepted=options.filter(isCorrect);assert.deepEqual(accepted,[q.answer],`nonunique or incorrect quiz: ${slug}`);quizChecks++;}
+for(const [slug,expected] of [
+ ['even',(-3)**2+1],['odd',(-2)**3],['vertical-scale',-4*-3],['absolute-output',Math.abs(1-3)],['absolute-input',2*Math.abs(-2)+1],
+ ['inverse',(8-2)/3],['composition',2*3**2+1],['linear',(7-1)/(2-0)],['reciprocal',12/4],['exp-equation',7-2],['same-base',2],
+ ['log-definition',log(5,1)],['log-product',log(2,2)+log(2,8)],['log-quotient',log(3,81)-log(3,9)],['log-power',log(2,8**2)],
+ ['log-root',log(5,Math.sqrt(625))],['change-base',log(8,4)],['log-reciprocal',log(8,2)],['base-power',log(25,125)],
+ ['exchange-powers',9**log(3,2)],['lg-ln',Math.log(1)],['log-equation',3**2-1],['e-number',Math.log(Math.E)]
+]) unique(slug,s=>near(numeric(s),expected));
+function relationChoice(s,x){const m=/^x(>|<|\\ge|\\le)(-?\d+(?:\/\d+)?)$/.exec(s);assert.ok(m,`unsupported relation ${s}`);const y=numeric(m[2]);return m[1]==='>'?x>y:m[1]==='<'?x<y:m[1]==='\\ge'?x>=y:x<=y;}
+const probe=grid([-3,0,1,3,5]);
+function implicationOrEquivalence(prompt, actual, candidate){return probe.every(x=>prompt.includes('\\iff')?actual(x)===candidate(x):!actual(x)||candidate(x));}
+const expQuiz=formulas.get('fn-exp-inequality').quiz[0];
+assert.ok(expQuiz.prompt.includes('\\iff'),'a complete solution requires equivalence');
+unique('exp-inequality',s=>implicationOrEquivalence(expQuiz.prompt,x=>.5**x<1/8,x=>relationChoice(s,x)));
+const regressed=expQuiz.prompt.replace('\\iff','\\Longrightarrow');
+assert.equal([expQuiz.answer,...expQuiz.distractors].filter(s=>implicationOrEquivalence(regressed,x=>.5**x<1/8,x=>relationChoice(s,x))).length,3,'regression must expose three necessary conditions');
+for(const f of data.formulas){const q=f.quiz[0];assert.ok(!/\\(?:Longrightarrow|Rightarrow)/.test(q.prompt),`one-way solution blank: ${f.slug}`);}
+unique('periodic',s=>grid([.1,.2,.3]).every(x=>near(Math.sin(2*Math.PI*(x+numeric(s))),Math.sin(2*Math.PI*x))));
+const subset={
+ '(0,3]':x=>x>0&&x<=3,'[0,3]':x=>x>=0&&x<=3,'[3,\\infty)':x=>x>=3,'(-\\infty,3]':x=>x<=3,
+};
+unique('log-inequality',s=>probe.every(x=>Boolean(x>0&&log(3,x)<=1)===subset[s](x)));
+console.log(`${quizChecks} blank quizzes numerically/semantically checked; implication regression confirms the old arrow would admit three choices. Remaining symbolic blanks and all true/false quizzes require the documented manual semantic review.`);
