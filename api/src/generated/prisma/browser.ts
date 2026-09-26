@@ -384,3 +384,8 @@ export type GoogleOAuthState = Prisma.GoogleOAuthStateModel
  * 
  */
 export type GoogleLoginExchange = Prisma.GoogleLoginExchangeModel
+/**
+ * Model StoredFile
+ * 
+ */
+export type StoredFile = Prisma.StoredFileModel

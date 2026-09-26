@@ -120,7 +120,8 @@ export const ModelName = {
   StreakFreeze: 'StreakFreeze',
   GoogleIdentity: 'GoogleIdentity',
   GoogleOAuthState: 'GoogleOAuthState',
-  GoogleLoginExchange: 'GoogleLoginExchange'
+  GoogleLoginExchange: 'GoogleLoginExchange',
+  StoredFile: 'StoredFile'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1135,6 +1136,17 @@ export const GoogleLoginExchangeScalarFieldEnum = {
 } as const
 
 export type GoogleLoginExchangeScalarFieldEnum = (typeof GoogleLoginExchangeScalarFieldEnum)[keyof typeof GoogleLoginExchangeScalarFieldEnum]
+
+
+export const StoredFileScalarFieldEnum = {
+  key: 'key',
+  mime: 'mime',
+  size: 'size',
+  bytes: 'bytes',
+  createdAt: 'createdAt'
+} as const
+
+export type StoredFileScalarFieldEnum = (typeof StoredFileScalarFieldEnum)[keyof typeof StoredFileScalarFieldEnum]
 
 
 export const SortOrder = {
