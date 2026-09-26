@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 
@@ -283,7 +289,24 @@ export class InsightsService {
   async getTopicMastery(
     classroomId?: string,
     limit: number = 50,
+    actor?: { userId: string; role: Role },
   ): Promise<TopicMastery[]> {
+    // G07: энгийн БАГШ зөвхөн өөрийн ангийн сурагчдын нэр, эзэмшлийг харна.
+    // classroomId-гүй хүсэлт бүх сургуулийн сурагчдыг буцаадаг тул багшид
+    // заавал анги сонгуулна. TEACHER_PLUS / ADMIN — бүх анги.
+    if (actor?.role === Role.TEACHER) {
+      if (!classroomId) {
+        throw new BadRequestException('Ангиа сонгоно уу');
+      }
+      const classroom = await this.prisma.classroom.findUnique({
+        where: { id: classroomId },
+        select: { teacherId: true },
+      });
+      if (!classroom) throw new NotFoundException('Анги олдсонгүй');
+      if (classroom.teacherId !== actor.userId) {
+        throw new ForbiddenException('Зөвхөн өөрийн ангийн дүнг харах боломжтой');
+      }
+    }
     /*
      * ⚠️ ЗАССАН (2026-08-08): `a."deletedAt"` байхгүй багана байв.
      *
