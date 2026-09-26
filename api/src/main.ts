@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import compression from 'compression';
+import { securityHeaders } from './common/security-headers';
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/prisma-exception.filter';
 
@@ -24,6 +25,8 @@ async function bootstrap() {
   // gzip/brotli шахалт сүлжээгээр дамжих хэмжээг эрс багасгана (§4.3,
   // docs/archive/PERF-AUDIT.md — 20-40KB/сурагч, 1000 сурагч зэрэг эхлэхэд).
   app.use(compression());
+  app.use(securityHeaders());
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
 
   // Body-гийн дээд хэмжээ: бодлогын текст, шалгалтын багц урт байдаг тул
   // Nest-ийн анхдагч 100KB хангалтгүй.
