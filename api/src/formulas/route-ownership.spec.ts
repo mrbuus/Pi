@@ -8,7 +8,7 @@ describe('GET /formulas route ownership', () => {
     const proto = ContentController.prototype as unknown as Record<string, unknown>;
     const paths = Object.getOwnPropertyNames(proto)
       .filter((name) => name !== 'constructor' && typeof proto[name] === 'function')
-      .map((name) => Reflect.getMetadata(PATH_METADATA, proto[name]) as string | undefined);
+      .map((name) => Reflect.getMetadata(PATH_METADATA, proto[name] as object) as string | undefined);
     expect(paths).not.toContain('formulas');
   });
 });
