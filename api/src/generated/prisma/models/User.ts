@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  calendarTokenVersion: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  calendarTokenVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -43,6 +53,8 @@ export type UserMinAggregateOutputType = {
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  calendarTokenHash: string | null
+  calendarTokenVersion: number | null
   archivedAt: Date | null
   archivedById: string | null
   archiveReason: string | null
@@ -67,6 +79,8 @@ export type UserMaxAggregateOutputType = {
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  calendarTokenHash: string | null
+  calendarTokenVersion: number | null
   archivedAt: Date | null
   archivedById: string | null
   archiveReason: string | null
@@ -91,12 +105,22 @@ export type UserCountAggregateOutputType = {
   avatarUrl: number
   createdAt: number
   updatedAt: number
+  calendarTokenHash: number
+  calendarTokenVersion: number
   archivedAt: number
   archivedById: number
   archiveReason: number
   _all: number
 }
 
+
+export type UserAvgAggregateInputType = {
+  calendarTokenVersion?: true
+}
+
+export type UserSumAggregateInputType = {
+  calendarTokenVersion?: true
+}
 
 export type UserMinAggregateInputType = {
   id?: true
@@ -117,6 +141,8 @@ export type UserMinAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  calendarTokenHash?: true
+  calendarTokenVersion?: true
   archivedAt?: true
   archivedById?: true
   archiveReason?: true
@@ -141,6 +167,8 @@ export type UserMaxAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  calendarTokenHash?: true
+  calendarTokenVersion?: true
   archivedAt?: true
   archivedById?: true
   archiveReason?: true
@@ -165,6 +193,8 @@ export type UserCountAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  calendarTokenHash?: true
+  calendarTokenVersion?: true
   archivedAt?: true
   archivedById?: true
   archiveReason?: true
@@ -209,6 +239,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -239,6 +281,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -262,10 +306,14 @@ export type UserGroupByOutputType = {
   avatarUrl: string | null
   createdAt: Date
   updatedAt: Date
+  calendarTokenHash: string | null
+  calendarTokenVersion: number | null
   archivedAt: Date | null
   archivedById: string | null
   archiveReason: string | null
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -307,6 +355,8 @@ export type UserWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  calendarTokenHash?: Prisma.StringNullableFilter<"User"> | string | null
+  calendarTokenVersion?: Prisma.IntNullableFilter<"User"> | number | null
   archivedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   archivedById?: Prisma.StringNullableFilter<"User"> | string | null
   archiveReason?: Prisma.StringNullableFilter<"User"> | string | null
@@ -348,6 +398,7 @@ export type UserWhereInput = {
   googleIdentity?: Prisma.XOR<Prisma.GoogleIdentityNullableScalarRelationFilter, Prisma.GoogleIdentityWhereInput> | null
   googleOAuthStates?: Prisma.GoogleOAuthStateListRelationFilter
   googleLoginExchanges?: Prisma.GoogleLoginExchangeListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
   smsMessagesAsRecipient?: Prisma.SmsMessageListRelationFilter
   smsMessagesAsCreator?: Prisma.SmsMessageListRelationFilter
   smsBatches?: Prisma.SmsBatchListRelationFilter
@@ -377,6 +428,8 @@ export type UserOrderByWithRelationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  calendarTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  calendarTokenVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedById?: Prisma.SortOrderInput | Prisma.SortOrder
   archiveReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -418,6 +471,7 @@ export type UserOrderByWithRelationInput = {
   googleIdentity?: Prisma.GoogleIdentityOrderByWithRelationInput
   googleOAuthStates?: Prisma.GoogleOAuthStateOrderByRelationAggregateInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
   smsMessagesAsRecipient?: Prisma.SmsMessageOrderByRelationAggregateInput
   smsMessagesAsCreator?: Prisma.SmsMessageOrderByRelationAggregateInput
   smsBatches?: Prisma.SmsBatchOrderByRelationAggregateInput
@@ -435,6 +489,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   username?: string
   studentCode?: string
   teacherCode?: string
+  calendarTokenHash?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
@@ -450,6 +505,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  calendarTokenVersion?: Prisma.IntNullableFilter<"User"> | number | null
   archivedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   archivedById?: Prisma.StringNullableFilter<"User"> | string | null
   archiveReason?: Prisma.StringNullableFilter<"User"> | string | null
@@ -491,6 +547,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   googleIdentity?: Prisma.XOR<Prisma.GoogleIdentityNullableScalarRelationFilter, Prisma.GoogleIdentityWhereInput> | null
   googleOAuthStates?: Prisma.GoogleOAuthStateListRelationFilter
   googleLoginExchanges?: Prisma.GoogleLoginExchangeListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
   smsMessagesAsRecipient?: Prisma.SmsMessageListRelationFilter
   smsMessagesAsCreator?: Prisma.SmsMessageListRelationFilter
   smsBatches?: Prisma.SmsBatchListRelationFilter
@@ -499,7 +556,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   bankTransactionsImported?: Prisma.BankTransactionListRelationFilter
   resultAcknowledgements?: Prisma.ResultAcknowledgementListRelationFilter
   emailOtps?: Prisma.EmailOtpListRelationFilter
-}, "id" | "phone" | "email" | "username" | "studentCode" | "teacherCode">
+}, "id" | "phone" | "email" | "username" | "studentCode" | "teacherCode" | "calendarTokenHash">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -520,12 +577,16 @@ export type UserOrderByWithAggregationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  calendarTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  calendarTokenVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedById?: Prisma.SortOrderInput | Prisma.SortOrder
   archiveReason?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -550,6 +611,8 @@ export type UserScalarWhereWithAggregatesInput = {
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  calendarTokenHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  calendarTokenVersion?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   archivedById?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   archiveReason?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -574,6 +637,8 @@ export type UserCreateInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -615,6 +680,7 @@ export type UserCreateInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -644,6 +710,8 @@ export type UserUncheckedCreateInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -685,6 +753,7 @@ export type UserUncheckedCreateInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -714,6 +783,8 @@ export type UserUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -755,6 +826,7 @@ export type UserUpdateInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -784,6 +856,8 @@ export type UserUncheckedUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -825,6 +899,7 @@ export type UserUncheckedUpdateInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -854,6 +929,8 @@ export type UserCreateManyInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -878,6 +955,8 @@ export type UserUpdateManyMutationInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -902,6 +981,8 @@ export type UserUncheckedUpdateManyInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -926,9 +1007,15 @@ export type UserCountOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  calendarTokenHash?: Prisma.SortOrder
+  calendarTokenVersion?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   archivedById?: Prisma.SortOrder
   archiveReason?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  calendarTokenVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -950,6 +1037,8 @@ export type UserMaxOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  calendarTokenHash?: Prisma.SortOrder
+  calendarTokenVersion?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   archivedById?: Prisma.SortOrder
   archiveReason?: Prisma.SortOrder
@@ -974,9 +1063,15 @@ export type UserMinOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  calendarTokenHash?: Prisma.SortOrder
+  calendarTokenVersion?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   archivedById?: Prisma.SortOrder
   archiveReason?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  calendarTokenVersion?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -1011,6 +1106,14 @@ export type EnumRoleFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type UserCreateNestedOneWithoutPasswordResetTokensInput = {
@@ -1515,6 +1618,20 @@ export type UserUpdateOneWithoutCancelledTuitionRefundsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCancelledTuitionRefundsInput, Prisma.UserUpdateWithoutCancelledTuitionRefundsInput>, Prisma.UserUncheckedUpdateWithoutCancelledTuitionRefundsInput>
 }
 
+export type UserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
 export type UserCreateNestedOneWithoutLearningEventsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutLearningEventsInput, Prisma.UserUncheckedCreateWithoutLearningEventsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutLearningEventsInput
@@ -1692,6 +1809,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -1732,6 +1851,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -1761,6 +1881,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -1801,6 +1923,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1846,6 +1969,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1886,6 +2011,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -1915,6 +2041,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1955,6 +2083,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1984,6 +2113,8 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2025,6 +2156,7 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
   smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
@@ -2053,6 +2185,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2094,6 +2228,7 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
   smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2127,6 +2262,8 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2168,6 +2305,7 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
   smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
@@ -2196,6 +2334,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2237,6 +2377,7 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
   smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2281,6 +2422,8 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2322,6 +2465,7 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
   smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
@@ -2350,6 +2494,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2391,6 +2537,7 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
   smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2430,6 +2577,8 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2471,6 +2620,7 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
   smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
@@ -2499,6 +2649,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2540,6 +2692,7 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
   smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2568,6 +2721,8 @@ export type UserCreateWithoutSmsBatchesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2609,6 +2764,7 @@ export type UserCreateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
@@ -2637,6 +2793,8 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2678,6 +2836,7 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2722,6 +2881,8 @@ export type UserUpdateWithoutSmsBatchesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2763,6 +2924,7 @@ export type UserUpdateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
@@ -2791,6 +2953,8 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2832,6 +2996,7 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2860,6 +3025,8 @@ export type UserCreateWithoutSmsTemplatesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2901,6 +3068,7 @@ export type UserCreateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -2929,6 +3097,8 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -2970,6 +3140,7 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -3014,6 +3185,8 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3055,6 +3228,7 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -3083,6 +3257,8 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3124,6 +3300,7 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -3152,6 +3329,8 @@ export type UserCreateWithoutStudentProfileInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -3192,6 +3371,7 @@ export type UserCreateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -3221,6 +3401,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -3261,6 +3443,7 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -3306,6 +3489,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3346,6 +3531,7 @@ export type UserUpdateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -3375,6 +3561,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3415,6 +3603,7 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -3444,6 +3633,8 @@ export type UserCreateWithoutTeacherProfileInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -3484,6 +3675,7 @@ export type UserCreateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -3513,6 +3705,8 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -3553,6 +3747,7 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -3598,6 +3793,8 @@ export type UserUpdateWithoutTeacherProfileInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3638,6 +3835,7 @@ export type UserUpdateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -3667,6 +3865,8 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3707,6 +3907,7 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -3736,6 +3937,8 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -3776,6 +3979,7 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -3805,6 +4009,8 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -3845,6 +4051,7 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -3890,6 +4097,8 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3930,6 +4139,7 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -3959,6 +4169,8 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3999,6 +4211,7 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -4028,6 +4241,8 @@ export type UserCreateWithoutParentLinksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -4068,6 +4283,7 @@ export type UserCreateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -4097,6 +4313,8 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -4137,6 +4355,7 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -4171,6 +4390,8 @@ export type UserCreateWithoutChildLinksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -4211,6 +4432,7 @@ export type UserCreateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -4240,6 +4462,8 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -4280,6 +4504,7 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -4325,6 +4550,8 @@ export type UserUpdateWithoutParentLinksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4365,6 +4592,7 @@ export type UserUpdateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -4394,6 +4622,8 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4434,6 +4664,7 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -4474,6 +4705,8 @@ export type UserUpdateWithoutChildLinksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4514,6 +4747,7 @@ export type UserUpdateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -4543,6 +4777,8 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4583,6 +4819,7 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -4612,6 +4849,8 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -4652,6 +4891,7 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -4681,6 +4921,8 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -4721,6 +4963,7 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -4766,6 +5009,8 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4806,6 +5051,7 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -4835,6 +5081,8 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4875,6 +5123,7 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -4904,6 +5153,8 @@ export type UserCreateWithoutTeacherGroupsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -4944,6 +5195,7 @@ export type UserCreateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -4973,6 +5225,8 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -5013,6 +5267,7 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -5058,6 +5313,8 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5098,6 +5355,7 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -5127,6 +5385,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5167,6 +5427,7 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -5196,6 +5457,8 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -5236,6 +5499,7 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -5265,6 +5529,8 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -5305,6 +5571,7 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -5350,6 +5617,8 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5390,6 +5659,7 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -5419,6 +5689,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5459,6 +5731,7 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -5488,6 +5761,8 @@ export type UserCreateWithoutEnrollmentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -5528,6 +5803,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -5557,6 +5833,8 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -5597,6 +5875,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -5642,6 +5921,8 @@ export type UserUpdateWithoutEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5682,6 +5963,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -5711,6 +5993,8 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5751,6 +6035,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -5780,6 +6065,8 @@ export type UserCreateWithoutAttendancesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -5820,6 +6107,7 @@ export type UserCreateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -5849,6 +6137,8 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -5889,6 +6179,7 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -5934,6 +6225,8 @@ export type UserUpdateWithoutAttendancesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5974,6 +6267,7 @@ export type UserUpdateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -6003,6 +6297,8 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6043,6 +6339,7 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -6072,6 +6369,8 @@ export type UserCreateWithoutSubmissionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -6112,6 +6411,7 @@ export type UserCreateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -6141,6 +6441,8 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -6181,6 +6483,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -6226,6 +6529,8 @@ export type UserUpdateWithoutSubmissionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6266,6 +6571,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -6295,6 +6601,8 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6335,6 +6643,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -6364,6 +6673,8 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -6404,6 +6715,7 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -6433,6 +6745,8 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -6473,6 +6787,7 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -6518,6 +6833,8 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6558,6 +6875,7 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -6587,6 +6905,8 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6627,6 +6947,7 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -6656,6 +6977,8 @@ export type UserCreateWithoutAttemptSessionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -6696,6 +7019,7 @@ export type UserCreateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -6725,6 +7049,8 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -6765,6 +7091,7 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -6810,6 +7137,8 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6850,6 +7179,7 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -6879,6 +7209,8 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6919,6 +7251,7 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -6948,6 +7281,8 @@ export type UserCreateWithoutTestResultsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -6988,6 +7323,7 @@ export type UserCreateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -7017,6 +7353,8 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -7057,6 +7395,7 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -7102,6 +7441,8 @@ export type UserUpdateWithoutTestResultsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7142,6 +7483,7 @@ export type UserUpdateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -7171,6 +7513,8 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7211,6 +7555,7 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -7240,6 +7585,8 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -7281,6 +7628,7 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -7309,6 +7657,8 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -7350,6 +7700,7 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -7394,6 +7745,8 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7435,6 +7788,7 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -7463,6 +7817,8 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7504,6 +7860,7 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -7532,6 +7889,8 @@ export type UserCreateWithoutEmailOtpsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -7573,6 +7932,7 @@ export type UserCreateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -7601,6 +7961,8 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -7642,6 +8004,7 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -7686,6 +8049,8 @@ export type UserUpdateWithoutEmailOtpsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7727,6 +8092,7 @@ export type UserUpdateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -7755,6 +8121,8 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7796,6 +8164,7 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -7824,6 +8193,8 @@ export type UserCreateWithoutAttemptsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -7864,6 +8235,7 @@ export type UserCreateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -7893,6 +8265,8 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -7933,6 +8307,7 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -7978,6 +8353,8 @@ export type UserUpdateWithoutAttemptsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8018,6 +8395,7 @@ export type UserUpdateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -8047,6 +8425,8 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8087,6 +8467,7 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -8116,6 +8497,8 @@ export type UserCreateWithoutPredictionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -8156,6 +8539,7 @@ export type UserCreateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -8185,6 +8569,8 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -8225,6 +8611,7 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -8270,6 +8657,8 @@ export type UserUpdateWithoutPredictionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8310,6 +8699,7 @@ export type UserUpdateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -8339,6 +8729,8 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8379,6 +8771,7 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -8408,6 +8801,8 @@ export type UserCreateWithoutColorTagsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -8448,6 +8843,7 @@ export type UserCreateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -8477,6 +8873,8 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -8517,6 +8915,7 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -8562,6 +8961,8 @@ export type UserUpdateWithoutColorTagsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8602,6 +9003,7 @@ export type UserUpdateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -8631,6 +9033,8 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8671,6 +9075,7 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -8700,6 +9105,8 @@ export type UserCreateWithoutStudentNotesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -8740,6 +9147,7 @@ export type UserCreateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -8769,6 +9177,8 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -8809,6 +9219,7 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -8854,6 +9265,8 @@ export type UserUpdateWithoutStudentNotesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8894,6 +9307,7 @@ export type UserUpdateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -8923,6 +9337,8 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8963,6 +9379,7 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -8992,6 +9409,8 @@ export type UserCreateWithoutUserPassesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9032,6 +9451,7 @@ export type UserCreateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -9061,6 +9481,8 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9101,6 +9523,7 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -9146,6 +9569,8 @@ export type UserUpdateWithoutUserPassesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9186,6 +9611,7 @@ export type UserUpdateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -9215,6 +9641,8 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9255,6 +9683,7 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -9284,6 +9713,8 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9325,6 +9756,7 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -9353,6 +9785,8 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9394,6 +9828,7 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -9427,6 +9862,8 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9468,6 +9905,7 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -9496,6 +9934,8 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9537,6 +9977,7 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -9581,6 +10022,8 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9622,6 +10065,7 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -9650,6 +10094,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9691,6 +10137,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -9730,6 +10177,8 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9771,6 +10220,7 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -9799,6 +10249,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9840,6 +10292,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -9868,6 +10321,8 @@ export type UserCreateWithoutPaymentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9908,6 +10363,7 @@ export type UserCreateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -9937,6 +10393,8 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -9977,6 +10435,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -10022,6 +10481,8 @@ export type UserUpdateWithoutPaymentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10062,6 +10523,7 @@ export type UserUpdateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -10091,6 +10553,8 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10131,6 +10595,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -10160,6 +10625,8 @@ export type UserCreateWithoutPurchasesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10200,6 +10667,7 @@ export type UserCreateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -10229,6 +10697,8 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10269,6 +10739,7 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -10314,6 +10785,8 @@ export type UserUpdateWithoutPurchasesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10354,6 +10827,7 @@ export type UserUpdateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -10383,6 +10857,8 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10423,6 +10899,7 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -10452,6 +10929,8 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10492,6 +10971,7 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -10521,6 +11001,8 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10561,6 +11043,7 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -10595,6 +11078,8 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10635,6 +11120,7 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -10664,6 +11150,8 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10704,6 +11192,7 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -10738,6 +11227,8 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10778,6 +11269,7 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -10807,6 +11299,8 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10847,6 +11341,7 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -10881,6 +11376,8 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10921,6 +11418,7 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -10950,6 +11448,8 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -10990,6 +11490,7 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -11024,6 +11525,8 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -11064,6 +11567,7 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -11093,6 +11597,8 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -11133,6 +11639,7 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -11178,6 +11685,8 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11218,6 +11727,7 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -11247,6 +11757,8 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11287,6 +11799,7 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -11327,6 +11840,8 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11367,6 +11882,7 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -11396,6 +11912,8 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11436,6 +11954,7 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -11476,6 +11995,8 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11516,6 +12037,7 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -11545,6 +12067,8 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11585,6 +12109,7 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -11625,6 +12150,8 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11665,6 +12192,7 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -11694,6 +12222,8 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11734,6 +12264,7 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -11774,6 +12305,8 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11814,6 +12347,7 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -11843,6 +12377,8 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11883,6 +12419,311 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutNotificationsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -11912,6 +12753,8 @@ export type UserCreateWithoutLearningEventsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -11952,6 +12795,7 @@ export type UserCreateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -11981,6 +12825,8 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -12021,6 +12867,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -12066,6 +12913,8 @@ export type UserUpdateWithoutLearningEventsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12106,6 +12955,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -12135,6 +12985,8 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12175,6 +13027,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -12204,6 +13057,8 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -12244,6 +13099,7 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -12273,6 +13129,8 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -12313,6 +13171,7 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -12358,6 +13217,8 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12398,6 +13259,7 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -12427,6 +13289,8 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12467,6 +13331,7 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -12496,6 +13361,8 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -12536,6 +13403,7 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -12565,6 +13433,8 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -12605,6 +13475,7 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -12650,6 +13521,8 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12690,6 +13563,7 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -12719,6 +13593,8 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12759,6 +13635,7 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -12788,6 +13665,8 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -12828,6 +13707,7 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -12857,6 +13737,8 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -12897,6 +13779,7 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -12942,6 +13825,8 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12982,6 +13867,7 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -13011,6 +13897,8 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -13051,6 +13939,7 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -13080,6 +13969,8 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -13120,6 +14011,7 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -13149,6 +14041,8 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -13189,6 +14083,7 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -13234,6 +14129,8 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -13274,6 +14171,7 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -13303,6 +14201,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -13343,6 +14243,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -13372,6 +14273,8 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -13412,6 +14315,7 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -13441,6 +14345,8 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -13481,6 +14387,7 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -13526,6 +14433,8 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -13566,6 +14475,7 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -13595,6 +14505,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -13635,6 +14547,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -13664,6 +14577,8 @@ export type UserCreateWithoutStudentGoalsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -13704,6 +14619,7 @@ export type UserCreateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -13733,6 +14649,8 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -13773,6 +14691,7 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -13818,6 +14737,8 @@ export type UserUpdateWithoutStudentGoalsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -13858,6 +14779,7 @@ export type UserUpdateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -13887,6 +14809,8 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -13927,6 +14851,7 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -13956,6 +14881,8 @@ export type UserCreateWithoutStreakFreezesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -13996,6 +14923,7 @@ export type UserCreateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -14025,6 +14953,8 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -14065,6 +14995,7 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -14110,6 +15041,8 @@ export type UserUpdateWithoutStreakFreezesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -14150,6 +15083,7 @@ export type UserUpdateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -14179,6 +15113,8 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -14219,6 +15155,7 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -14248,6 +15185,8 @@ export type UserCreateWithoutGoogleIdentityInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -14288,6 +15227,7 @@ export type UserCreateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -14317,6 +15257,8 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -14357,6 +15299,7 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -14402,6 +15345,8 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -14442,6 +15387,7 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -14471,6 +15417,8 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -14511,6 +15459,7 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -14540,6 +15489,8 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -14580,6 +15531,7 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -14609,6 +15561,8 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -14649,6 +15603,7 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -14694,6 +15649,8 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -14734,6 +15691,7 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -14763,6 +15721,8 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -14803,6 +15763,7 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -14832,6 +15793,8 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -14872,6 +15835,7 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
@@ -14901,6 +15865,8 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
   archivedAt?: Date | string | null
   archivedById?: string | null
   archiveReason?: string | null
@@ -14941,6 +15907,7 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
   smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
@@ -14986,6 +15953,8 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -15026,6 +15995,7 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
@@ -15055,6 +16025,8 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -15095,6 +16067,7 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
   smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -15145,6 +16118,7 @@ export type UserCountOutputType = {
   passwordResetTokens: number
   googleOAuthStates: number
   googleLoginExchanges: number
+  notifications: number
   smsMessagesAsRecipient: number
   smsMessagesAsCreator: number
   smsBatches: number
@@ -15190,6 +16164,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   googleOAuthStates?: boolean | UserCountOutputTypeCountGoogleOAuthStatesArgs
   googleLoginExchanges?: boolean | UserCountOutputTypeCountGoogleLoginExchangesArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   smsMessagesAsRecipient?: boolean | UserCountOutputTypeCountSmsMessagesAsRecipientArgs
   smsMessagesAsCreator?: boolean | UserCountOutputTypeCountSmsMessagesAsCreatorArgs
   smsBatches?: boolean | UserCountOutputTypeCountSmsBatchesArgs
@@ -15451,6 +16426,13 @@ export type UserCountOutputTypeCountGoogleLoginExchangesArgs<ExtArgs extends run
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountSmsMessagesAsRecipientArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SmsMessageWhereInput
 }
@@ -15524,6 +16506,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  calendarTokenHash?: boolean
+  calendarTokenVersion?: boolean
   archivedAt?: boolean
   archivedById?: boolean
   archiveReason?: boolean
@@ -15565,6 +16549,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   googleIdentity?: boolean | Prisma.User$googleIdentityArgs<ExtArgs>
   googleOAuthStates?: boolean | Prisma.User$googleOAuthStatesArgs<ExtArgs>
   googleLoginExchanges?: boolean | Prisma.User$googleLoginExchangesArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   smsMessagesAsRecipient?: boolean | Prisma.User$smsMessagesAsRecipientArgs<ExtArgs>
   smsMessagesAsCreator?: boolean | Prisma.User$smsMessagesAsCreatorArgs<ExtArgs>
   smsBatches?: boolean | Prisma.User$smsBatchesArgs<ExtArgs>
@@ -15595,6 +16580,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  calendarTokenHash?: boolean
+  calendarTokenVersion?: boolean
   archivedAt?: boolean
   archivedById?: boolean
   archiveReason?: boolean
@@ -15619,6 +16606,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  calendarTokenHash?: boolean
+  calendarTokenVersion?: boolean
   archivedAt?: boolean
   archivedById?: boolean
   archiveReason?: boolean
@@ -15643,12 +16632,14 @@ export type UserSelectScalar = {
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  calendarTokenHash?: boolean
+  calendarTokenVersion?: boolean
   archivedAt?: boolean
   archivedById?: boolean
   archiveReason?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "username" | "studentCode" | "teacherCode" | "firstName" | "lastName" | "passwordHash" | "mustChangePassword" | "termsAcceptedAt" | "privacyVersion" | "guardianConsentAt" | "passwordChangedAt" | "role" | "avatarUrl" | "createdAt" | "updatedAt" | "archivedAt" | "archivedById" | "archiveReason", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "username" | "studentCode" | "teacherCode" | "firstName" | "lastName" | "passwordHash" | "mustChangePassword" | "termsAcceptedAt" | "privacyVersion" | "guardianConsentAt" | "passwordChangedAt" | "role" | "avatarUrl" | "createdAt" | "updatedAt" | "calendarTokenHash" | "calendarTokenVersion" | "archivedAt" | "archivedById" | "archiveReason", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   teacherProfile?: boolean | Prisma.User$teacherProfileArgs<ExtArgs>
@@ -15688,6 +16679,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   googleIdentity?: boolean | Prisma.User$googleIdentityArgs<ExtArgs>
   googleOAuthStates?: boolean | Prisma.User$googleOAuthStatesArgs<ExtArgs>
   googleLoginExchanges?: boolean | Prisma.User$googleLoginExchangesArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   smsMessagesAsRecipient?: boolean | Prisma.User$smsMessagesAsRecipientArgs<ExtArgs>
   smsMessagesAsCreator?: boolean | Prisma.User$smsMessagesAsCreatorArgs<ExtArgs>
   smsBatches?: boolean | Prisma.User$smsBatchesArgs<ExtArgs>
@@ -15742,6 +16734,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     googleIdentity: Prisma.$GoogleIdentityPayload<ExtArgs> | null
     googleOAuthStates: Prisma.$GoogleOAuthStatePayload<ExtArgs>[]
     googleLoginExchanges: Prisma.$GoogleLoginExchangePayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
     smsMessagesAsRecipient: Prisma.$SmsMessagePayload<ExtArgs>[]
     smsMessagesAsCreator: Prisma.$SmsMessagePayload<ExtArgs>[]
     smsBatches: Prisma.$SmsBatchPayload<ExtArgs>[]
@@ -15770,6 +16763,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     avatarUrl: string | null
     createdAt: Date
     updatedAt: Date
+    calendarTokenHash: string | null
+    calendarTokenVersion: number | null
     archivedAt: Date | null
     archivedById: string | null
     archiveReason: string | null
@@ -16205,6 +17200,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   googleIdentity<T extends Prisma.User$googleIdentityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleIdentityArgs<ExtArgs>>): Prisma.Prisma__GoogleIdentityClient<runtime.Types.Result.GetResult<Prisma.$GoogleIdentityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   googleOAuthStates<T extends Prisma.User$googleOAuthStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleOAuthStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleOAuthStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleLoginExchanges<T extends Prisma.User$googleLoginExchangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleLoginExchangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleLoginExchangePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   smsMessagesAsRecipient<T extends Prisma.User$smsMessagesAsRecipientArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$smsMessagesAsRecipientArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   smsMessagesAsCreator<T extends Prisma.User$smsMessagesAsCreatorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$smsMessagesAsCreatorArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   smsBatches<T extends Prisma.User$smsBatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$smsBatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SmsBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -16260,6 +17256,8 @@ export interface UserFieldRefs {
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly calendarTokenHash: Prisma.FieldRef<"User", 'String'>
+  readonly calendarTokenVersion: Prisma.FieldRef<"User", 'Int'>
   readonly archivedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly archivedById: Prisma.FieldRef<"User", 'String'>
   readonly archiveReason: Prisma.FieldRef<"User", 'String'>
@@ -17545,6 +18543,30 @@ export type User$googleLoginExchangesArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.GoogleLoginExchangeScalarFieldEnum | Prisma.GoogleLoginExchangeScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
 }
 
 /**

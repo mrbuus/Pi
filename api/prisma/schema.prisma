@@ -105,6 +105,11 @@ model User {
   googleOAuthStates    GoogleOAuthState[]
   googleLoginExchanges GoogleLoginExchange[]
 
+  // Secure schedule calendar feed tokens (G39). Only a one-way token hash is stored.
+  calendarTokenHash    String?         @unique
+  calendarTokenVersion Int?
+  notifications        Notification[]
+
   // SMS: бүртгэл, загвар, батч
   smsMessagesAsRecipient SmsMessage[]      @relation("SmsMessageRecipient")
   smsMessagesAsCreator   SmsMessage[]      @relation("SmsMessageCreatedBy")
@@ -1406,6 +1411,30 @@ model AnnouncementClassroomTarget {
 
   @@id([announcementId, classroomId])
   @@index([classroomId])
+}
+
+// In-app inbox entries. Each row belongs to exactly one recipient.
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+enum NotificationKind {
+  PAYMENT_DUE
+  HOMEWORK
+  SCHEDULE_CHANGE
+  ANNOUNCEMENT
+  SYSTEM
 }
 
 // Анги тухайн өдөр ямар тест/шалгалт хийснийг багш бүртгэнэ.

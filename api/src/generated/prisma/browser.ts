@@ -300,6 +300,11 @@ export type Announcement = Prisma.AnnouncementModel
  */
 export type AnnouncementClassroomTarget = Prisma.AnnouncementClassroomTargetModel
 /**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
  * Model ClassTestSession
  * 
  */

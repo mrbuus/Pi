@@ -332,6 +332,17 @@ export const AnnouncementAudience = {
 export type AnnouncementAudience = (typeof AnnouncementAudience)[keyof typeof AnnouncementAudience]
 
 
+export const NotificationKind = {
+  PAYMENT_DUE: 'PAYMENT_DUE',
+  HOMEWORK: 'HOMEWORK',
+  SCHEDULE_CHANGE: 'SCHEDULE_CHANGE',
+  ANNOUNCEMENT: 'ANNOUNCEMENT',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type NotificationKind = (typeof NotificationKind)[keyof typeof NotificationKind]
+
+
 export const LearningEventType = {
   LOGIN: 'LOGIN',
   LOGOUT: 'LOGOUT',

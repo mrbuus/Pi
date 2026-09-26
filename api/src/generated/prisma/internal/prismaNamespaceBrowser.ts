@@ -104,6 +104,7 @@ export const ModelName = {
   TuitionRefund: 'TuitionRefund',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
+  Notification: 'Notification',
   ClassTestSession: 'ClassTestSession',
   LearningEvent: 'LearningEvent',
   EnrollmentWindow: 'EnrollmentWindow',
@@ -159,6 +160,8 @@ export const UserScalarFieldEnum = {
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  calendarTokenHash: 'calendarTokenHash',
+  calendarTokenVersion: 'calendarTokenVersion',
   archivedAt: 'archivedAt',
   archivedById: 'archivedById',
   archiveReason: 'archiveReason'
@@ -904,6 +907,20 @@ export const AnnouncementClassroomTargetScalarFieldEnum = {
 } as const
 
 export type AnnouncementClassroomTargetScalarFieldEnum = (typeof AnnouncementClassroomTargetScalarFieldEnum)[keyof typeof AnnouncementClassroomTargetScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  kind: 'kind',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const ClassTestSessionScalarFieldEnum = {
