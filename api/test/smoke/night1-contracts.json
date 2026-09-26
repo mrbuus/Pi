@@ -391,7 +391,8 @@
     "path": "/api/tests/drafts",
     "roles": [
       "ADMIN",
-      "TEACHER"
+      "TEACHER",
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -402,7 +403,8 @@
     "path": "/api/tests/drafts/:id",
     "roles": [
       "ADMIN",
-      "TEACHER"
+      "TEACHER",
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -413,7 +415,8 @@
     "path": "/api/tests/drafts/:id",
     "roles": [
       "ADMIN",
-      "TEACHER"
+      "TEACHER",
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -546,7 +549,8 @@
     "path": "/api/tests/drafts/:id",
     "roles": [
       "ADMIN",
-      "TEACHER"
+      "TEACHER",
+      "TEACHER_PLUS"
     ]
   }
 ]
