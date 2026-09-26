@@ -1,10 +1,19 @@
 import { Module } from '@nestjs/common';
+import { CalendarIcsAuthController } from './calendar-ics-auth.controller';
+import { CalendarIcsFeedController } from './calendar-ics.controller';
+import { CalendarIcsService } from './calendar-ics.service';
 import { ScheduleController } from './schedule.controller';
 import { ScheduleService } from './schedule.service';
 
 @Module({
-  controllers: [ScheduleController],
-  providers: [ScheduleService],
+  // Public static /schedule/my.ics is registered before ScheduleController's
+  // GET /schedule/:id so Express does not treat "my.ics" as an id.
+  controllers: [
+    CalendarIcsFeedController,
+    CalendarIcsAuthController,
+    ScheduleController,
+  ],
+  providers: [ScheduleService, CalendarIcsService],
   // TuitionModule нь төлбөрийн буцаалтыг ХИЧЭЭЛИЙН ӨДРӨӨР тооцохдоо
   // ScheduleService.expandDays()-ыг ашигладаг тул экспортлох ЁСТОЙ.
   //
