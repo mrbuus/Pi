@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, SectionHeader } from "@/components/ui/Surface";
-import type { ProblemStats } from "./types";
+import type { ProblemStats } from "./legacy-types";
 import { AlertTriangle } from "lucide-react";
 import InfoHint from "@/components/ui/InfoHint";
 
