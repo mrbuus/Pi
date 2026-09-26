@@ -56,6 +56,13 @@ export class TestsController {
     return this.tests.myResults(req.user.userId);
   }
 
+  /** Тест хуулах (G36) — эзэмшигч багш эсвэл TEACHER_PLUS/ADMIN. */
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Post(':id/duplicate')
+  duplicate(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.duplicate(id, req.user.userId, req.user.role);
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get(':id/edit-info')
   editInfo(@Param('id') id: string, @Req() req: AuthedRequest) {

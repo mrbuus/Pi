@@ -202,6 +202,40 @@ export class TestsService {
     }
   }
 
+  /**
+   * Тест хуулах (G36). Хуулбар нь ямар ч ангид харагдахгүй (TestAccess
+   * хуулахгүй) — багш засаад анги сонгосны дараа л сурагчид харна. Үр дүн,
+   * оролдлого хуулагдахгүй. Үнийг зөвхөн ADMIN хуулна (үнэ тогтоох эрх ADMIN-д).
+   */
+  async duplicate(testId: string, actorId: string, actorRole: Role) {
+    const src = await this.findEditableTest(testId, actorId, actorRole);
+    return this.prisma.$transaction(async (tx) => {
+      const copy = await tx.test.create({
+        data: {
+          title: `${src.title} (хуулбар)`.slice(0, 200),
+          type: src.type,
+          gradingMode: src.gradingMode,
+          chapterId: src.chapterId,
+          timeLimitMin: src.timeLimitMin,
+          pdfKey: src.pdfKey,
+          price: actorRole === Role.ADMIN ? src.price : null,
+          createdById: actorId,
+        },
+      });
+      if (src.problems.length) {
+        await tx.testProblem.createMany({
+          data: src.problems.map((p) => ({
+            testId: copy.id,
+            problemId: p.problemId,
+            order: p.order,
+            points: p.points,
+          })),
+        });
+      }
+      return { id: copy.id, title: copy.title, problems: src.problems.length };
+    });
+  }
+
   async editInfo(testId: string, actorId: string, actorRole: Role) {
     await this.findEditableTest(testId, actorId, actorRole);
     const taken = await this.hasBeenTaken(testId);
