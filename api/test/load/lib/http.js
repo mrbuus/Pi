@@ -63,7 +63,7 @@ function request(method, urlStr, { token, body, timeoutMs = 20000 } = {}) {
           } catch {
             json = undefined;
           }
-          finish({ ok: res.statusCode < 400, status: res.statusCode, ms, json });
+          finish({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, ms, json });
         });
       },
     );
