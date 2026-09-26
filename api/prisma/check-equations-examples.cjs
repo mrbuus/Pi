@@ -128,4 +128,82 @@ v('unique',0,'$m\\in\\{1,2\\}$',()=>{sets(m=>quadratic(m-1,2,1)?.length===1,m=>m
 v('unique',1,'$m\\in\\{0,1\\}$',()=>{sets(m=>quadratic(1,-2*m,m)?.length===1,m=>m===0||m===1,[0,1]);roots([1,0,0],[0]);roots([1,-2,1],[1]);});
 assert.equal(covered.size,88);
 for(const f of data.formulas) f.examples.forEach((_,i)=>assert.ok(covered.has(`${f.slug}:${i}`),`unaudited example ${f.slug}:${i}`));
-console.log(`${covered.size}/88 worked examples checked; ${assertions} numerical assertions (substitution, identities, systems, sampled sets and parameter boundaries).`);
+const exampleAssertions = assertions;
+
+// A condition weaker than the solution is a valid implication but an invalid
+// equivalent answer. Read every choice from the JSON, then compare truth sets
+// against the original inequality (not against a copied expected answer).
+function conditionPredicate(latex) {
+  const source = latex.replace(/\\le/g, '<=').replace(/\\ge/g, '>=').replace(/\s/g, '');
+  const atom = '(x|-?\\d+(?:/\\d+)?)';
+  const match = source.match(new RegExp(`^${atom}(<=|>=|<|>|=)${atom}(?:(<=|>=|<|>|=)${atom})?$`));
+  assert.ok(match, `Unsupported quiz condition: ${latex}`);
+  const value = (token, x) => token === 'x' ? x : token.split('/').map(Number).reduce((a,b) => a/b);
+  const compare = (a, operator, b) => ({ '<':a<b, '>':a>b, '<=':a<=b, '>=':a>=b, '=':a===b })[operator];
+  return x => compare(value(match[1],x), match[2], value(match[3],x)) &&
+    (!match[4] || compare(value(match[3],x), match[4], value(match[5],x)));
+}
+const quizFixtures = [
+  ['inequality-add', String.raw`x-8>1`, x => x-8>1, [-7,9]],
+  ['inequality-scale', String.raw`-4x\ge8`, x => -4*x>=8, [-2,2]],
+  ['abs-compare', String.raw`|x|<|x-2|`, x => Math.abs(x)<Math.abs(x-2), [1,2]],
+  ['radical-greater', String.raw`\sqrt{x}>1`, x => x>=0 && Math.sqrt(x)>1, [0,1]],
+];
+for (const [slug, premise, original, boundaries] of quizFixtures) {
+  const quiz = bySlug.get(`eq-${slug}`).quiz[0];
+  const prompt = quiz.prompt.match(/^(.*?)\\quad\\(iff|Longrightarrow)\\quad\\square$/);
+  assert.ok(prompt, `Unsupported quiz prompt: ${slug}`);
+  assert.equal(prompt[1], premise, `Review the changed quiz input: ${slug}`);
+  const choices = [quiz.answer, ...quiz.distractors];
+  const correct = choices.map(choice => {
+    const candidate = conditionPredicate(choice);
+    return points(boundaries).every(x => prompt[2] === 'iff'
+      ? original(x) === candidate(x) : !original(x) || candidate(x));
+  });
+  ok(correct[0], `The answer does not satisfy the prompt: ${slug}`);
+  ok(correct.slice(1).every(x => !x), `Another choice satisfies the prompt: ${slug}`);
+}
+const radicalQuiz = bySlug.get('eq-radical-equation').quiz[1];
+const radicalPrompt = radicalQuiz.prompt.replace(/\\quad|\s/g, '').match(/^\\sqrt\{x\}=(-?\d+)\\(iff|Longrightarrow)x=(-?\d+)$/);
+assert.ok(radicalPrompt, 'Unsupported radical quiz prompt');
+const [,rhs,relation,target] = radicalPrompt;
+const radicalTruth = points([0,Number(target),Number(rhs)**2]).every(x => {
+  const left = x>=0 && Math.sqrt(x)===Number(rhs), right = x===Number(target);
+  return relation === 'iff' ? left===right : !left || right;
+});
+ok(radicalQuiz.answer === String(radicalTruth), 'Radical quiz confuses implication with equivalence');
+
+// Bind each numerical criterion to the authored formula. Independently solve
+// coefficient grids, including negative leading coefficients, D=0 and empty
+// real root sets. Sampling supports the manual proof review; it is not a proof.
+function rule(slug, latex) {
+  const formula = bySlug.get(`eq-${slug}`);
+  assert.equal(formula.latex, latex, `Review changed rule: ${slug}`);
+  assert.equal(formula.general, latex, `Review changed general rule: ${slug}`);
+}
+rule('positive-roots', String.raw`x_1>0,\ x_2>0\iff D\ge0,\quad -\frac ba>0,\quad\frac ca>0`);
+rule('roots-above', String.raw`x_1>k,\ x_2>k\iff D\ge0,\quad S-2k>0,\quad P-kS+k^2>0`);
+rule('interval-roots', String.raw`x_1,x_2\in[\ell,u]\iff D\ge0,\quad\ell\le v\le u,\quad\frac{f(\ell)}a\ge0,\quad\frac{f(u)}a\ge0`);
+let parameterCases = 0;
+for (const a of [-2,-1,1,2]) for (let b=-4;b<=4;b++) for (let c=-4;c<=4;c++) {
+  const r=quadratic(a,b,c), d=b*b-4*a*c, s=-b/a, p=c/a, vertex=-b/(2*a);
+  const all = predicate => r.length>0 && r.every(predicate);
+  ok(all(x=>x>0) === (d>=0 && s>0 && p>0), `positive roots: ${a},${b},${c}`);
+  for (const k of [-1,0,1]) {
+    ok(all(x=>x>k) === (d>=0 && s-2*k>0 && p-k*s+k*k>0), `roots above ${k}: ${a},${b},${c}`);
+  }
+  for (const [lo,hi] of [[-2,2],[0,1],[-3,-1]]) {
+    ok(all(x=>x>=lo && x<=hi) === (d>=0 && lo<=vertex && vertex<=hi && poly([a,b,c],lo)/a>=0 && poly([a,b,c],hi)/a>=0), `interval ${lo},${hi}: ${a},${b},${c}`);
+  }
+  parameterCases++;
+}
+rule('unique', String.raw`ax^2+bx+c=0\text{ ганц бодит шийдтэй}\iff(a\ne0\land D=0)\lor(a=0\land b\ne0)`);
+let degreeCases = 0;
+for (let a=-2;a<=2;a++) for (let b=-3;b<=3;b++) for (let c=-3;c<=3;c++) {
+  const r=quadratic(a,b,c);
+  ok((r!==null && r.length===1) === ((a!==0 && b*b-4*a*c===0) || (a===0 && b!==0)), `unique solution: ${a},${b},${c}`);
+  degreeCases++;
+}
+
+console.log(`${covered.size}/88 worked examples checked; ${exampleAssertions} numerical assertions (substitution, identities, systems, sampled sets and parameter boundaries).`);
+console.log(`Focused review: ${quizFixtures.length} blank quizzes / 16 choices, 1 true-false regression; ${parameterCases} quadratic coefficient cases / 7 root-location checks each; ${degreeCases} degree/unique-solution cases; ${assertions-exampleAssertions} additional assertions.`);
