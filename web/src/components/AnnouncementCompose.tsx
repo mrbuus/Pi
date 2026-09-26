@@ -1,9 +1,9 @@
 "use client";
 
-import { Pin, Check } from "lucide-react";
+import { Pin } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Meta, Dot } from "@/components/ui/Meta";
+import { Meta } from "@/components/ui/Meta";
 
 interface Announcement {
   id: string;

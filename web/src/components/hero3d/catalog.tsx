@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ThemeColors } from "./theme";
+
 
 /* ============================================================================
  * 3D биетийн каталог (Шийдвэр 10) — нүүр хуудасны 3D элемент 10 минут тутам

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Send, AlertTriangle } from "lucide-react";
 import { Card, SectionHeader } from "@/components/ui/Surface";
 import { api } from "@/lib/api";
-import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { ErrorState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import InfoHint from "@/components/ui/InfoHint";
 import { Button } from "@/components/ui/Button";
@@ -12,18 +12,9 @@ import { Button } from "@/components/ui/Button";
 const CYRILLIC_CHARS_PER_PART = 70;
 const LATIN_CHARS_PER_PART = 160;
 
-interface SendRequest {
-  to: string[];
-  text: string;
-  templateId?: string;
-}
-
 export function SmsSend() {
-  const [tab, setTab] = useState<"manual" | "bulk">("manual");
   const [recipients, setRecipients] = useState<string>("");
   const [text, setText] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [templates, setTemplates] = useState<Array<{ id: string; name: string }>>([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +63,6 @@ export function SmsSend() {
       // Амжилттай
       setText("");
       setRecipients("");
-      setSelectedTemplate("");
       setShowConfirm(false);
       alert("SMS амжилттай илгээлээ!");
     } catch (err) {

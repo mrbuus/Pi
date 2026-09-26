@@ -3,12 +3,12 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Card, PageHeader, SectionHeader } from "@/components/ui/Surface";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
-import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
-import InfoHint from "@/components/ui/InfoHint";
-import { Meta } from "@/components/ui/Meta";
+
+import { Card } from "@/components/ui/Surface";
+import { ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { SkeletonCard } from "@/components/ui/Skeleton";
+
+
 
 import { api } from "@/lib/api";
 interface FinanceReport {
@@ -93,7 +93,6 @@ function getNextMonth(yearMonth: string): string {
 }
 
 export default function FinanceDashboardClient() {
-  const router = useRouter();
   const [currentMonth, setCurrentMonth] = useState("");
   const [report, setReport] = useState<FinanceReport | null>(null);
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);

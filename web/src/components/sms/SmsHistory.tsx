@@ -2,14 +2,14 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RotateCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, SectionHeader } from "@/components/ui/Surface";
 import { api } from "@/lib/api";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { Button } from "@/components/ui/Button";
-import InfoHint from "@/components/ui/InfoHint";
+
 
 interface SmsMessage {
   id: string;
@@ -31,7 +31,7 @@ export function SmsHistory() {
   const pageSize = 20;
   const totalPages = Math.ceil(total / pageSize);
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -52,11 +52,11 @@ export function SmsHistory() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter]);
 
   useEffect(() => {
     fetchMessages();
-  }, [page, statusFilter]);
+  }, [fetchMessages]);
 
   const handleRetry = async (messageId: string) => {
     try {
@@ -125,7 +125,7 @@ export function SmsHistory() {
                   </span>
                   <Meta
                     items={[
-                      <span className="font-mono text-sm">{msg.to}</span>,
+                      <span key="recipient" className="font-mono text-sm">{msg.to}</span>,
                       new Date(msg.sentAt).toLocaleString("mn-MN"),
                     ]}
                     className="text-xs text-ink-dim"

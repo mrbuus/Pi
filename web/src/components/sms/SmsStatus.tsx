@@ -5,9 +5,9 @@ import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Card, SectionHeader } from "@/components/ui/Surface";
 import { api } from "@/lib/api";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
-import { Meta } from "@/components/ui/Meta";
+
 import InfoHint from "@/components/ui/InfoHint";
-import { Button } from "@/components/ui/Button";
+
 
 interface SmsStatus {
   configured: boolean;

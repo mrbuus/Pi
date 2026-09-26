@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Dot, Meta } from "@/components/ui/Meta";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { formatMnt, TUITION } from "@/lib/orgInfo";
 import {

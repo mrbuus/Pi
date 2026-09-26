@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import { ImportResult, ReconcileSummary } from './types';
+import { ReconcileSummary } from './types';
 import { ImportUploader } from './ImportUploader';
 import { TransactionList } from './TransactionList';
 import { SummaryCards } from './SummaryCards';
@@ -52,7 +52,7 @@ export function ReconcilePageClient() {
     loadSummary();
   }, [refreshKey]);
 
-  const handleImportSuccess = (result: ImportResult) => {
+  const handleImportSuccess = () => {
     // Импорт амжилттай болсны дараа хураангуй болон жагсаалтыг шинэчил
     setRefreshKey((k) => k + 1);
   };
@@ -73,7 +73,7 @@ export function ReconcilePageClient() {
       <ImportUploader onSuccess={handleImportSuccess} />
 
       {/* Гүйлгээний жагсаалт */}
-      <TransactionList refreshKey={refreshKey} />
+      <TransactionList key={refreshKey} />
     </div>
   );
 }

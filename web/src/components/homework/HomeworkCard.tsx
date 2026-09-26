@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Calendar, Camera, X } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+
 import { useRef, useState } from "react";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 import { StatusBadge } from "./StatusBadge";

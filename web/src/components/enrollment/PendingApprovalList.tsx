@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Card, PageHeader, SectionHeader } from '@/components/ui/Surface';
+import { Card, SectionHeader } from '@/components/ui/Surface';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StateBlock';
 import { Meta } from '@/components/ui/Meta';
 

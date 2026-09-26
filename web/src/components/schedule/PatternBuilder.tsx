@@ -368,7 +368,7 @@ export default function PatternBuilder({
         {!problem && classroom && (
           <p className="text-sm text-ink-dim">
             <Meta items={[
-              <span className="font-semibold text-ink">{classroom.name}</span>,
+              <span key="classroom" className="font-semibold text-ink">{classroom.name}</span>,
               WORKWEEK_ORDER.filter((d) => weekdays.includes(d))
                 .map((d) => WEEKDAY_LABELS[d])
                 .join(", "),

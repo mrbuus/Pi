@@ -1,19 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Loader2,
-  Hourglass,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Undo,
-  Copy,
-  Check,
-  ArrowLeft,
-  Wifi,
-  WifiOff,
-} from "lucide-react";
+import { Loader2, Hourglass, CheckCircle, Clock, AlertTriangle, Undo, Copy, Check, ArrowLeft, WifiOff } from "lucide-react";
 import { api } from "@/lib/api";
 import type {
   CreatePaymentResponse,

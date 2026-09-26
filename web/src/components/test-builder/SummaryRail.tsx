@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Check } from "lucide-react";
-import { Dot, Meta } from "@/components/ui/Meta";
+import { Meta } from "@/components/ui/Meta";
 import {
   EESH_CHOICE_COUNT,
   EESH_FILL_COUNT,

@@ -70,7 +70,7 @@ async function fetchWithWakeRetry(
       ...init,
       signal: AbortSignal.timeout(FIRST_TRY_TIMEOUT_MS),
     });
-  } catch (error) {
+  } catch {
     // Сүлжээний алдаа/timeout — сервер унтсан байж болзошгүй тул
     // житер-ээр саатаатаж дахин оролдоно.
     await new Promise((resolve) => {

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
-import { SkeletonCard as Skeleton } from '@/components/ui/Skeleton';
+
 import { Card as Surface } from '@/components/ui/Surface';
 import { ShoppingBag } from 'lucide-react';
 

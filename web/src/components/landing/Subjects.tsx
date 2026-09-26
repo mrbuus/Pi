@@ -187,7 +187,7 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
                         </span>
                         <span className="min-w-0 truncate text-ink-dim">
                           <Meta items={[
-                            <span className="text-ink">{label}</span>,
+                            <span key="label" className="text-ink">{label}</span>,
                             topic,
                             `${c._count.problems} бодлого`,
                             c.freePreview && "үнэгүй"

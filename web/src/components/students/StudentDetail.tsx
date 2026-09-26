@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Check, Pencil, ArrowLeft, TriangleAlert } from "lucide-react";
 import { Meta } from "@/components/ui/Meta";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 // Төлбөрийн төлөв/аргын нэрс НЭГ эх сурвалжаас — өмнө нь энд, PaymentsClient-д,
 // student/payments-д гурав давхардаж, тус бүр өөр үгтэй байв.
 import { METHOD_LABEL, STATUS_LABEL } from "@/components/payments/paymentHelpers";

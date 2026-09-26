@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Settings, TriangleAlert, Wifi, WifiOff, AlertCircle, CheckCircle2, Circle } from "lucide-react";
+import { Settings, TriangleAlert, Wifi, WifiOff } from "lucide-react";
 
 import { pingApi } from "@/lib/api";
 /* ============================================================================
