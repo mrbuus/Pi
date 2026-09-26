@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ClipboardCheck,
   ClipboardList,
+  Clock,
   CreditCard,
   FileText,
   GraduationCap,
@@ -63,7 +64,8 @@ export type IconName =
   | "teacher"
   | "bar-chart"
   | "message-square"
-  | "grid";
+  | "grid"
+  | "clock";
 
 const ICONS: Record<IconName, LucideIcon> = {
   school: School, wallet: Wallet, store: Store, chart: ChartNoAxesCombined, refund: Undo2, practice: Dumbbell,
@@ -94,6 +96,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   teacher: GraduationCap,
   "bar-chart": BarChart3,
   grid: LayoutGrid,
+  clock: Clock,
 };
 
 export function NavIcon({

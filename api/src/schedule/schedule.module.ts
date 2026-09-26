@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ScheduleController } from './schedule.controller';
 import { ScheduleService } from './schedule.service';
+import { TeacherHoursController } from './teacher-hours.controller';
+import { TeacherHoursService } from './teacher-hours.service';
 
 @Module({
-  controllers: [ScheduleController],
-  providers: [ScheduleService],
+  controllers: [ScheduleController, TeacherHoursController],
+  providers: [ScheduleService, TeacherHoursService],
   // TuitionModule нь төлбөрийн буцаалтыг ХИЧЭЭЛИЙН ӨДРӨӨР тооцохдоо
   // ScheduleService.expandDays()-ыг ашигладаг тул экспортлох ЁСТОЙ.
   //
