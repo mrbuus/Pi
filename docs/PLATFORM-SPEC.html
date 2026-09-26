@@ -37,7 +37,7 @@
   }
   a { color: var(--brand); }
   header.top {
-    position: sticky; top: 0; z-index: 20; background: var(--bg);
+    position: sticky; /* ctrls.open-д зориулж */ top: 0; z-index: 20; background: var(--bg);
     border-bottom: 1px solid var(--line); padding: 12px 16px 10px;
   }
   .top h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
@@ -113,32 +113,98 @@
   mark { background: #fde047; color: #1e293b; border-radius: 3px; }
   .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
   .toast.show { opacity: 1; }
+  /* толгой ба удирдлага */
+  .top-row { display: flex; align-items: center; gap: 8px; }
+  .top h1 .muted { font-weight: 600; }
+  .ctrls { display: contents; }
+  .only-m { display: none; }
+  /* тойм самбар */
+  .dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 10px 0; }
+  .dash .card { display: flex; flex-direction: column; gap: 6px; }
+  .meter { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; display: flex; }
+  .meter span { display: block; height: 100%; }
+  .meter .m-ok { background: var(--ok); } .meter .m-part { background: var(--part); } .meter .m-bug { background: var(--bug); } .meter .m-none { background: var(--none); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; color: var(--dim); }
+  .modgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin: 8px 0 14px; }
+  .modgrid a { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; color: var(--ink); background: var(--panel); min-height: 44px; }
+  .modgrid a:hover { border-color: var(--brand); }
+  .done-row td { opacity: 0.6; }
+  .done-row td:first-child, .done-row td:last-child { opacity: 1; }
+  details.apimod { border: 1px solid var(--line); border-radius: 10px; margin: 6px 0; }
+  details.apimod > summary { cursor: pointer; padding: 8px 12px; font-weight: 700; min-height: 40px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  details.apimod > .tablewrap { padding: 0 10px 8px; }
+  table.matrix td:first-child, table.matrix th:first-child { position: sticky; left: 0; background: var(--panel); min-width: 180px; }
+  table.matrix td:not(:first-child), table.matrix th:not(:first-child) { text-align: center; }
+
+  /* ---- гар утас ---- */
+  @media (max-width: 700px) {
+    body { font-size: 14px; }
+    header.top { padding: 8px 12px; }
+    .top h1 { font-size: 15px; flex: 1; }
+    .top h1 .muted { display: none; }
+    .hide-m { display: none; }
+    .only-m { display: inline-block; }
+    .bar { margin-top: 6px; flex-wrap: nowrap; }
+    .bar input[type=search] { flex: 1 1 auto; min-width: 0; max-width: none; }
+    .ctrls { display: none; }
+    .ctrls.open { display: flex; flex-wrap: wrap; gap: 6px; position: absolute; left: 0; right: 0; top: 100%; background: var(--bg); padding: 8px 12px 12px; border-bottom: 1px solid var(--line); }
+    .ctrls.open > * { flex: 1 1 45%; }
+    html { scroll-padding-top: 100px; }
+    nav.toc { display: none; }
+    nav.toc.open { display: block; position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; background: var(--bg); padding: 60px 16px 24px; max-height: none; overflow: auto; font-size: 15px; }
+    nav.toc.open a { padding: 10px 8px; border-bottom: 1px solid var(--line); border-radius: 0; }
+    .toc-close { display: block !important; position: fixed; top: 10px; right: 12px; z-index: 41; }
+    section.sec { padding: 14px 12px; border-radius: 12px; }
+    section.sec > h2 { font-size: 17px; }
+    .sec-actions { float: none; margin-bottom: 6px; }
+    .kv { grid-template-columns: 1fr; gap: 0; }
+    .kv dd { margin-bottom: 6px; }
+    .mod > summary { padding: 10px 12px; }
+    .mod .body { padding: 0 10px 12px; }
+    /* хүснэгт → карт */
+    table.rsp, table.rsp tbody, table.rsp tr, table.rsp td { display: block; width: 100%; }
+    table.rsp tr:first-child { display: none; }
+    table.rsp tr { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin: 8px 0; background: var(--panel); }
+    table.rsp td { border: 0; padding: 2px 0; }
+    table.rsp td[data-label]:not(:first-child)::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 700; color: var(--dim); margin-top: 4px; }
+    table.rsp code { white-space: normal; word-break: break-word; }
+    .tablewrap { overflow: visible; }
+    table.matrix { font-size: 12px; }
+    .matrix-wrap { overflow-x: auto; }
+  }
+  .toc-close { display: none; }
   @media print { header.top, nav.toc, .sec-actions { display: none; } .layout { display: block; } .mod { break-inside: avoid; } details.mod { display: block; } }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 <header class="top">
-  <h1>Pi.mn — Платформын бүрэн тодорхойлолт (v1 суурь)</h1>
-  <div class="sub">Шинэ Ирээдүйн Эзэд — бүтээгдэхүүний шаардлага (PRD), системийн тодорхойлолт, цоорхойн бүртгэл. Кодын бодит байдлаас 2026-09-26-нд түүсэн.</div>
+  <div class="top-row">
+    <button class="btn only-m" id="tocBtn" type="button" aria-expanded="false" aria-controls="toc">Агуулга</button>
+    <h1>Pi.mn — Платформын тодорхойлолт <span class="muted">v1 суурь</span></h1>
+  </div>
+  <div class="sub hide-m">Шинэ Ирээдүйн Эзэд — бүтээгдэхүүний шаардлага, системийн тодорхойлолт, цоорхойн бүртгэл. Кодын бодит байдлаас түүсэн, сүүлд шинэчилсэн 2026-09-26.</div>
   <div class="bar">
-    <input id="q" type="search" placeholder="Хайх — жишээ нь: ирц, буцаалт, QPay, /payments ..." aria-label="Хайх">
-    <select id="fStatus" aria-label="Төлвөөр шүүх">
-      <option value="">Бүх төлөв</option>
-      <option value="ok">Бэлэн</option>
-      <option value="part">Хагас</option>
-      <option value="bug">Эвдэрхий</option>
-      <option value="none">Байхгүй</option>
-    </select>
-    <select id="fVer" aria-label="Хувилбараар шүүх">
-      <option value="">Бүх хувилбар</option>
-      <option value="v1">v1.0</option>
-      <option value="v1.1">v1.1</option>
-      <option value="v2">v2</option>
-    </select>
-    <button class="btn" id="expandAll" type="button">Бүгдийг дэлгэх</button>
-    <button class="btn" id="collapseAll" type="button">Бүгдийг хаах</button>
-    <button class="btn primary" id="copyAll" type="button" title="Бүх баримтыг Markdown болгож хуулна — ChatGPT руу шууд буулгана">Бүгдийг Markdown-оор хуулах</button>
+    <input id="q" type="search" placeholder="Хайх: ирц, буцаалт, QPay ..." aria-label="Хайх">
+    <button class="btn only-m" id="ctrlBtn" type="button" aria-expanded="false" aria-controls="ctrls">Шүүлтүүр</button>
+    <div class="ctrls" id="ctrls">
+      <select id="fStatus" aria-label="Төлвөөр шүүх">
+        <option value="">Бүх төлөв</option>
+        <option value="ok">Бэлэн</option>
+        <option value="part">Хагас</option>
+        <option value="bug">Эвдэрхий</option>
+        <option value="none">Байхгүй</option>
+      </select>
+      <select id="fVer" aria-label="Хувилбараар шүүх">
+        <option value="">Бүх хувилбар</option>
+        <option value="v1">v1.0</option>
+        <option value="v1.1">v1.1</option>
+        <option value="v2">v2</option>
+      </select>
+      <button class="btn" id="expandAll" type="button">Бүгдийг дэлгэх</button>
+      <button class="btn" id="collapseAll" type="button">Бүгдийг хаах</button>
+      <button class="btn primary" id="copyAll" type="button" title="Бүх баримтыг Markdown болгож хуулна — ChatGPT руу шууд буулгана">Бүгдийг хуулах (ChatGPT)</button>
+    </div>
   </div>
 </header>
 <div class="layout">
@@ -599,26 +665,36 @@ const MODULES = [
   accept: ["30 сурагчтай ангийн ирцийг 60 секундэд бүртгэнэ", "Хадгалах товч шаардлагагүй — товшмогц хадгална"],
 },
 {
-  id: "homework", grp: "Багш", t: "Гэрийн даалгавар — хоёр загварын зөрчил", st: "bug", ver: "v1",
-  routes: ["/app/student", "/app/teacher"], roles: ["С", "Б", "Б+", "А"],
-  purpose: "SPEC §10: Хийгээгүй → Илгээсэн → Хийсэн (онлайн эсвэл ангид шалгасан) / Буцаасан. Одоо кодод хоёр зэрэгцээ загвар байна.",
+  id: "homework", grp: "Багш", t: "Гэрийн даалгавар — 2 загвар (шийдвэр гарсан)", st: "part", ver: "v1",
+  routes: ["/app/student", "/app/teacher", "/app/parent"], roles: ["С", "ЭЭ", "Б", "Б+", "А"],
+  purpose: "ЭЗНИЙ ШИЙДВЭР (2026-09-26): хоёр загвараар хуваана. ТАНХИМЫН сурагч — багш ангид дэвтрийг шалгаад Хийсэн / Дутуу / Хийгээгүй гэж тэмдэглэнэ (DailyHomeworkMark). ОНЛАЙН сурагч — багш даалгавар өгч, сурагч зураг/хариугаа илгээж, багш Батлах / Буцаана (Assignment + Submission).",
   screens: [
-    { t: "Загвар А — Assignment + Submission (онлайн илгээлт)", actions: [
-      ["Багш даалгавар үүсгэх", "UI БАЙХГҮЙ", "POST /classrooms/:id/assignments", "Б Б+ А", "none"],
-      ["Сурагч жагсаалт харах, зураг илгээх", "HomeworkList, HomeworkCard", "GET /assignments/my, POST /assignments/:id/submit", "С", "part"],
-      ["Багш шалгах: Батлах / Буцаах / Ангид шалгасан", "Компонент бэлэн, хуудсанд холбоогүй", "POST /assignments/:id/review", "Б Б+ А", "none"],
-      ["Засах, устгах, статистик", "UI байхгүй", "PATCH/DELETE /assignments/:id, GET .../stats", "Б Б+ А", "none"],
+    { t: "Танхимын сурагч — багшийн өдрийн тэмдэглэгээ (DailyHomeworkMark)", actions: [
+      ["Багшийн самбар: Хийсэн / Дутуу / Хийгээгүй", "Анги өмнө нэг товшилтоор", "PATCH /classrooms/:id/homework-marks/:studentId", "Б Б+ А", "ok"],
+      ["Сурагчийн явцад харагдах", "ClassProgressTab", "GET /classrooms/:id/homework-marks, GET /students/:id/homework-marks", "Б Б+ А", "ok"],
+      ["Сурагч өөрийн тэмдэглэгээг харах", "UI БАЙХГҮЙ — сурагчийн самбарт «Миний даалгавар» (сүүлийн 14 хоног)", "шинэ: GET /homework-marks/my", "С", "none"],
+      ["Эцэг эх хүүхдийнхээ тэмдэглэгээг харах", "UI БАЙХГҮЙ — одоо эцэг эх зөвхөн онлайн загварыг хардаг тул танхимын хүүхдийнх хоосон", "GET /parent/children-д нэмэх", "ЭЭ", "none"],
     ]},
-    { t: "Загвар Б — DailyHomeworkMark (багшийн өдрийн тэмдэглэгээ)", actions: [
-      ["Хийсэн / Дутуу / Хийгээгүй", "Багшийн самбар дээр ажилладаг", "PATCH /classrooms/:id/homework-marks/:studentId", "Б Б+ А", "ok"],
-      ["Сурагчийн явцад харагдах", "ClassProgressTab", "GET /classrooms/:id/homework-marks", "Б Б+ А", "ok"],
+    { t: "Онлайн сурагч — даалгавар илгээх (Assignment + Submission)", actions: [
+      ["Багш даалгавар үүсгэх (гарчиг, тайлбар, хугацаа, зураг)", "UI БАЙХГҮЙ", "POST /classrooms/:id/assignments", "Б Б+ А", "none"],
+      ["Сурагч жагсаалт харах, зураг хавсаргаж илгээх", "HomeworkList, HomeworkCard — бэлэн", "GET /assignments/my, POST /assignments/:id/submit, POST /uploads", "С", "ok"],
+      ["Багш шалгах: Батлах / Буцаах (тайлбартай)", "Компонент бэлэн (TeacherHomeworkCalendar, TeacherHomeworkTestCard, TeacherHomeworkFrequencyPanel), хуудсанд холбоогүй", "GET /assignments/:id/submissions, POST /assignments/:id/review", "Б Б+ А", "none"],
+      ["Даалгавар засах, устгах, статистик", "UI байхгүй", "PATCH|DELETE /assignments/:id, GET /classrooms/:id/assignments/stats", "Б Б+ А", "none"],
+      ["Эцэг эх харах", "Ажилладаг", "GET /parent/children", "ЭЭ", "ok"],
     ]},
   ],
   gaps: [
-    "ШИЙДВЭР: танхимын сурагчид Б загвар, онлайн сурагчид А загвар гэж хуваах уу, эсвэл нэгтгэх үү. Санал: Б загварыг үндсэн болгож, А загварыг «зураг илгээх» нэмэлт болгон Б-тэй холбох",
-    "Эцэг эх даалгаврыг аль загвараас харж байгааг шалгах",
+    "Ангийн төрлөөр (IN_PERSON / ONLINE) аль загварыг харуулахыг сонгоно: танхимын ангид DailyHomeworkMark, онлайн ангид Assignment",
+    "Сурагчийн самбарын HomeworkList-ийг зөвхөн онлайн сурагчид харуулах; танхимын сурагчид «Миний даалгавар» (багшийн тэмдэглэгээ) карт",
+    "Онлайн ангийн багшид «Даалгавар» хуудас: үүсгэх + бэлэн байгаа TeacherHomework* компонентуудыг холбох",
+    "Эцэг эхийн самбарт танхимын хүүхдийн тэмдэглэгээг нэмэх",
+    "DashboardGreeting-ийн /app/homework холбоосыг зөв газар руу заах (G08)",
   ],
-  accept: [],
+  accept: [
+    "Танхимын багш 30 сурагчийн даалгаврыг 60 секундэд тэмдэглэнэ",
+    "Онлайн сурагч утсаараа зураг авч 3 товшилтоор илгээнэ",
+    "Эцэг эх аль ч төрлийн хүүхдийнхээ даалгаврыг харна",
+  ],
 },
 {
   id: "schedule", grp: "Анги", t: "Хуваарь ба хуанли", st: "ok", ver: "v1",
@@ -1141,47 +1217,47 @@ const NFR = [
    [id, эрэмбэ, ангилал, гарчиг, хаана, яах вэ, хувилбар]
 */
 const GAPS = [
-  ["G01", "P0", "Дэд бүтэц", "Өгөгдлийн сан үнэгүй багцтай — 359 сурагчийн бүртгэл устах эрсдэл", "render.yaml (pimn-db plan: free), STATUS §9.1", "Render Dashboard дээр ӨС амьд эсэх, багцыг ЯГ ОДОО шалгах. Төлбөртэй багц + өдөр тутмын нөөцлөл + сэргээлтийн туршилт", "v1"],
-  ["G02", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — Санхүүгийн тайлан, зарлагыг нэвтэрсэн хэн ч харна", "api/src/finance/finance.controller.ts — GET report, GET expenses", "Хийсэн: класс түвшинд RolesGuard + @Roles(ADMIN); access-control.spec.ts; smoke-д сурагчийн задрал шалгагч", "v1"],
-  ["G03", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — Буцаалтын жагсаалт, дэлгэрэнгүйг нэвтэрсэн хэн ч харна", "api/src/tuition/tuition.controller.ts — GET refunds, GET refund/:id", "Хийсэн: @Roles(ADMIN, TEACHER_PLUS) + RolesGuard; буцаалтын БҮХ маршрут @Roles-тэй эсэхийг тест шалгана", "v1"],
-  ["G04", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — «JWT-only» маршрутуудын эрхийн аудит", "API-ийн @Roles-гүй бүх маршрут (энэ баримтын API каталогоос шүүж харна)", "Хийсэн: 58 маршрутыг шалгав. Бусад нь үйлчилгээн дотор эрх/эзэмшил шалгадаг эсвэл зориудаар нийтэд нээлттэй (хуваарь, каталог, QPay callback — серверээс баталгаажуулдаг). Дараагийн алхам: прод ӨС-тэй smoke ажиллуулах", "v1"],
-  ["G41", "P0", "Аюулгүй байдал", "ЗАСАГДСАН 2026-09-26 — req.user талбарын нэр зөрсөн: JWT {userId, role} өгдөг атал store/finance/tuition `id`, teacher-groups `sub` уншдаг байв", "store, finance, tuition, teacher-groups controller; auth/request.interface.ts", "Хийсэн: бүгдийг userId болгов, RequestWithUser төрлийг JwtStrategy-тэй тааруулав. Үр дагавар нь: гадны багшийн модуль бүхэлдээ ажилладаггүй байсан; дэлгүүрийн «Миний худалдан авалт» шүүлтүүргүй query болох эрсдэлтэй байсан; буцаалт/зарлагын үйлдэл хэн хийснийг бичдэггүй байв", "v1"],
-  ["G05", "P0", "Дэд бүтэц", "Байршуулсан зураг redeploy бүрт устдаг", "render.yaml disk, storage модуль", "S3-тэй нийцтэй хадгалалт (Cloudflare R2 гэх мэт) эсвэл starter багц + disk", "v1"],
-  ["G06", "P0", "Эвдэрхий", "Буцаалтын модуль прод дээр ажиллахгүй", "web/src/components/tuition/RefundCalculator.tsx (түүхий fetch), /app/tuition/refund/[id] байхгүй", "api() ашиглах, дэлгэрэнгүй хуудас + зөвшөөрөх/төлсөн/цуцлах UI, цэсэнд нэмэх", "v1"],
-  ["G07", "P1", "Эвдэрхий", "Шинжилгээ хуудас зохиомол өгөгдөл харуулна", "web/src/components/insights/InsightsDashboard.tsx (MOCK_INSIGHTS)", "Бодит /insights/* endpoint-д холбох, цэсэнд нэмэх", "v1"],
-  ["G08", "P1", "Эвдэрхий", "Эвдэрсэн холбоос: /app/homework, /auth/login", "DashboardGreeting.tsx:153, app/app/store/store-products.tsx:77", "Зөв хаяг руу засах; CI-д дотоод холбоос шалгагч нэмэх", "v1"],
-  ["G09", "P1", "Навигаци", "Цэсгүй 8 хуудас", "admin/classrooms, admin/finance, admin/store, insights, practice, store, tuition, password", "Цэсэнд оруулах эсвэл устгах шийдвэр; /app/password-ийг /app/profile руу чиглүүлэх", "v1"],
-  ["G10", "P1", "Функц", "Гэрийн даалгаврын хоёр зэрэгцээ загвар", "Assignment/Submission ба DailyHomeworkMark", "Эзний шийдвэр → нэг урсгал; бэлэн байгаа TeacherHomework* компонентуудыг холбох эсвэл устгах", "v1"],
-  ["G11", "P1", "Функц", "Тест засах боломжгүй", "api/src/tests — PATCH байхгүй", "PATCH /tests/:id (өгөөгүй бол бүрэн, өгсөн бол зөвхөн нэр/хугацаа)", "v1"],
-  ["G12", "P1", "Функц", "Гадны багшийг баталгаажуулах UI байхгүй", "teacher-groups unverified/verify", "Элсэлтийн удирдлагад «Гадны багш» таб", "v1.1"],
-  ["G13", "P1", "Интеграц", "Имэйл (SMTP) тохируулаагүй", "Render env EMAIL_SMTP_*", "Gmail App Password эсвэл транзакцын имэйлийн үйлчилгээ", "v1"],
-  ["G14", "P1", "Интеграц", "QPay merchant түлхүүр байхгүй", "api/src/gateways", "Гэрээ хийж түлхүүр оруулах, sandbox-оор турших", "v1"],
-  ["G15", "P1", "Өгөгдөл", "Прод дээр сурагчийн шинэ кодын backfill хийгдээгүй", "prisma/backfill-new-codes.cjs", "Dry-run → apply, нөөцлөлтийн дараа", "v1"],
-  ["G16", "P1", "Функц", "Анги засах, архивлах, сурагч хасах/шилжүүлэх UI", "classrooms endpoint-ууд", "Ангийн дэлгэрэнгүй хуудас", "v1"],
-  ["G17", "P1", "Хууль", "Нууцлалын бодлого, үйлчилгээний нөхцөл, эцэг эхийн зөвшөөрөл", "Нийтийн хэсэг, бүртгэл", "Хуудас + бүртгэлд зөвшөөрлийн checkbox + хадгалах огноо", "v1"],
-  ["G18", "P1", "Дэд бүтэц", "API унтдаг (үнэгүй багц)", "Render pimn-api plan: free", "Starter багц; шалгалтын өмнө унтахгүй байх", "v1"],
-  ["G19", "P1", "Хяналт", "Алдааны мөрдөлт, uptime монитор байхгүй", "api + web", "Sentry (эсвэл адил) + uptime сэрэмжлүүлэг", "v1"],
-  ["G20", "P1", "Аюулгүй байдал", "helmet, нэвтрэлтийн тусгай rate limit", "api/src/main.ts, auth", "helmet + /auth/login, /auth/forgot-password-д хязгаар, түгжих", "v1"],
-  ["G21", "P2", "UI", "404, алдааны хуудас", "web/src/app/not-found.tsx, error.tsx", "Монгол, брэндтэй хуудас", "v1"],
-  ["G22", "P2", "Функц", "Эрх (pass) засах, устгах, гараар олгох", "passes endpoint-ууд", "Удирдлагад эрхийн хүснэгт", "v1"],
-  ["G23", "P2", "Функц", "Зарлага засах, устгах; «Ааш» → «Түрээс»", "FinanceDashboardClient", "UI нэмэх, шошго засах, гараар бичсэн өнгийг токен болгох", "v1"],
-  ["G24", "P2", "Функц", "SMS загвар үүсгэх, засах; серверийн өртгийн тооцоо", "components/sms", "POST/PATCH /sms/templates, POST /sms/bulk/estimate ашиглах", "v1.1"],
-  ["G25", "P2", "Функц", "Сурагчийг бөөнөөр импортлох, архивлах, экспорт", "students", "Excel импорт (урьдчилан харах + алдаа), archived талбар, CSV", "v1.1"],
-  ["G26", "P2", "Функц", "«Хэдий хүртэл төлсөн» сурагч, эцэг эхэд", "GET /tuition/paid-until/*", "Самбарт карт", "v1"],
-  ["G27", "P2", "Функц", "Мэдэгдлийн төв + сануулга (төлбөр, даалгавар, хуваарь)", "шинэ модуль", "Notification загвар + апп доторх хонх + имэйл/SMS суваг", "v1.1"],
-  ["G28", "P2", "Код", "api()-г тойрсон түүхий fetch", "lesson/api.ts:28, library/page.tsx:224", "api() руу шилжүүлэх", "v1"],
-  ["G29", "P2", "Дизайн", "Дизайны дүрэм зөрчил: «⬇» глиф, bg-blue-600, bg-orange-600", "ResultsTable, groups, finance", "lucide дүрс, өнгөний токен", "v1"],
-  ["G30", "P2", "Чанар", "E2E тест, вэб тест, lint CI-д", "web", "Playwright-оор 8 гол аялал; lint анхааруулгыг 0 болгох", "v1.1"],
-  ["G31", "P2", "Чанар", "Ачааллын тест (2000 зэрэг)", "шалгалтын hot path", "k6 скрипт + үр дүнг STATUS-т", "v1"],
-  ["G32", "P2", "Баримт", "API баримт (OpenAPI)", "api", "@nestjs/swagger — зөвхөн дотоод орчинд", "v1.1"],
-  ["G33", "P2", "Функц", "Үнэгүй урьдчилан харах (freemium)", "/catalog/* endpoint-ууд", "Нүүр хуудсанд бүлэг бүрийн эхний хэсэг", "v1.1"],
-  ["G34", "P2", "Мөнгө", "Е-баримт интеграци", "payments", "Нягтлан бодогчтой шалгаж шаардлагатай бол PosAPI", "v1.1"],
-  ["G35", "P3", "Контент", "1913 бодлого placeholder сонголттой, 13 REVIEW, 8 сэргээгдээгүй", "problems", "Контентын засварын ажлын дараалал", "v1.1"],
-  ["G36", "P3", "Функц", "Тест: ноорог, хуулах, PDF импорт", "tests/new", "UX аудит №4", "v1.1"],
-  ["G37", "P3", "Апп", "PWA + push мэдэгдэл", "web", "manifest, service worker, дүрс", "v1.1"],
-  ["G38", "P3", "Баримт", "STATUS.md хуучирсан, SYSTEM-DESIGN.html репод байхгүй", "STATUS.md, docs/", "Энэ баримтыг репод байлгаж, STATUS-ыг шинэчлэх", "v1"],
-  ["G39", "P3", "Функц", "Хичээл цуцлагдахад мэдэгдэх, ICS экспорт", "schedule", "G27-той хамт", "v1.1"],
-  ["G40", "P3", "Функц", "Дэлгүүр ба эрх (pass) — хоёр худалдааны систем", "store, passes", "Нэг каталог болгох шийдвэр", "v1.1"],
+  ["G01", "P0", "Дэд бүтэц", "Өгөгдлийн сан үнэгүй багцтай — 359 сурагчийн бүртгэл устах эрсдэл", "render.yaml (pimn-db plan: free), STATUS §9.1", "Render Dashboard дээр ӨС амьд эсэх, багцыг ЯГ ОДОО шалгах. Төлбөртэй багц + өдөр тутмын нөөцлөл + сэргээлтийн туршилт", "v1", "open"],
+  ["G02", "P0", "Аюулгүй байдал", "Санхүүгийн тайлан, зарлагыг нэвтэрсэн хэн ч харна", "api/src/finance/finance.controller.ts — GET report, GET expenses", "Хийсэн: класс түвшинд RolesGuard + @Roles(ADMIN); access-control.spec.ts; smoke-д сурагчийн задрал шалгагч", "v1", "done"],
+  ["G03", "P0", "Аюулгүй байдал", "Буцаалтын жагсаалт, дэлгэрэнгүйг нэвтэрсэн хэн ч харна", "api/src/tuition/tuition.controller.ts — GET refunds, GET refund/:id", "Хийсэн: @Roles(ADMIN, TEACHER_PLUS) + RolesGuard; буцаалтын БҮХ маршрут @Roles-тэй эсэхийг тест шалгана", "v1", "done"],
+  ["G04", "P0", "Аюулгүй байдал", "«JWT-only» маршрутуудын эрхийн аудит", "API-ийн @Roles-гүй бүх маршрут (энэ баримтын API каталогоос шүүж харна)", "Хийсэн: 58 маршрутыг шалгав. Бусад нь үйлчилгээн дотор эрх/эзэмшил шалгадаг эсвэл зориудаар нийтэд нээлттэй (хуваарь, каталог, QPay callback — серверээс баталгаажуулдаг). Дараагийн алхам: прод ӨС-тэй smoke ажиллуулах", "v1", "done"],
+  ["G41", "P0", "Аюулгүй байдал", "req.user талбарын нэр зөрсөн: JWT {userId, role} өгдөг атал store/finance/tuition `id`, teacher-groups `sub` уншдаг байв", "store, finance, tuition, teacher-groups controller; auth/request.interface.ts", "Хийсэн: бүгдийг userId болгов, RequestWithUser төрлийг JwtStrategy-тэй тааруулав. Үр дагавар нь: гадны багшийн модуль бүхэлдээ ажилладаггүй байсан; дэлгүүрийн «Миний худалдан авалт» шүүлтүүргүй query болох эрсдэлтэй байсан; буцаалт/зарлагын үйлдэл хэн хийснийг бичдэггүй байв", "v1", "done"],
+  ["G05", "P0", "Дэд бүтэц", "Байршуулсан зураг redeploy бүрт устдаг", "render.yaml disk, storage модуль", "S3-тэй нийцтэй хадгалалт (Cloudflare R2 гэх мэт) эсвэл starter багц + disk", "v1", "open"],
+  ["G06", "P0", "Эвдэрхий", "Буцаалтын модуль прод дээр ажиллахгүй", "web/src/components/tuition/RefundCalculator.tsx (түүхий fetch), /app/tuition/refund/[id] байхгүй", "api() ашиглах, дэлгэрэнгүй хуудас + зөвшөөрөх/төлсөн/цуцлах UI, цэсэнд нэмэх", "v1", "open"],
+  ["G07", "P1", "Эвдэрхий", "Шинжилгээ хуудас зохиомол өгөгдөл харуулна", "web/src/components/insights/InsightsDashboard.tsx (MOCK_INSIGHTS)", "Бодит /insights/* endpoint-д холбох, цэсэнд нэмэх", "v1", "open"],
+  ["G08", "P1", "Эвдэрхий", "Эвдэрсэн холбоос: /app/homework, /auth/login", "DashboardGreeting.tsx:153, app/app/store/store-products.tsx:77", "Зөв хаяг руу засах; CI-д дотоод холбоос шалгагч нэмэх", "v1", "open"],
+  ["G09", "P1", "Навигаци", "Цэсгүй 8 хуудас", "admin/classrooms, admin/finance, admin/store, insights, practice, store, tuition, password", "Цэсэнд оруулах эсвэл устгах шийдвэр; /app/password-ийг /app/profile руу чиглүүлэх", "v1", "open"],
+  ["G10", "P1", "Функц", "Гэрийн даалгавар: 2 загварыг ангийн төрлөөр холбох (шийдвэр гарсан 2026-09-26)", "Assignment/Submission (онлайн), DailyHomeworkMark (танхим)", "Танхим → багшийн тэмдэглэгээ + сурагч/эцэг эхэд харуулах; онлайн → багшийн үүсгэх/шалгах UI (бэлэн TeacherHomework* компонент)", "v1", "open"],
+  ["G11", "P1", "Функц", "Тест засах боломжгүй", "api/src/tests — PATCH байхгүй", "PATCH /tests/:id (өгөөгүй бол бүрэн, өгсөн бол зөвхөн нэр/хугацаа)", "v1", "open"],
+  ["G12", "P1", "Функц", "Гадны багшийг баталгаажуулах UI байхгүй", "teacher-groups unverified/verify", "Элсэлтийн удирдлагад «Гадны багш» таб", "v1.1", "open"],
+  ["G13", "P1", "Интеграц", "Имэйл (SMTP) тохируулаагүй", "Render env EMAIL_SMTP_*", "Gmail App Password эсвэл транзакцын имэйлийн үйлчилгээ", "v1", "open"],
+  ["G14", "P1", "Интеграц", "QPay merchant түлхүүр байхгүй", "api/src/gateways", "Гэрээ хийж түлхүүр оруулах, sandbox-оор турших", "v1", "open"],
+  ["G15", "P1", "Өгөгдөл", "Прод дээр сурагчийн шинэ кодын backfill хийгдээгүй", "prisma/backfill-new-codes.cjs", "Dry-run → apply, нөөцлөлтийн дараа", "v1", "open"],
+  ["G16", "P1", "Функц", "Анги засах, архивлах, сурагч хасах/шилжүүлэх UI", "classrooms endpoint-ууд", "Ангийн дэлгэрэнгүй хуудас", "v1", "open"],
+  ["G17", "P1", "Хууль", "Нууцлалын бодлого, үйлчилгээний нөхцөл, эцэг эхийн зөвшөөрөл", "Нийтийн хэсэг, бүртгэл", "Хуудас + бүртгэлд зөвшөөрлийн checkbox + хадгалах огноо", "v1", "open"],
+  ["G18", "P1", "Дэд бүтэц", "API унтдаг (үнэгүй багц)", "Render pimn-api plan: free", "Starter багц; шалгалтын өмнө унтахгүй байх", "v1", "open"],
+  ["G19", "P1", "Хяналт", "Алдааны мөрдөлт, uptime монитор байхгүй", "api + web", "Sentry (эсвэл адил) + uptime сэрэмжлүүлэг", "v1", "open"],
+  ["G20", "P1", "Аюулгүй байдал", "helmet, нэвтрэлтийн тусгай rate limit", "api/src/main.ts, auth", "helmet + /auth/login, /auth/forgot-password-д хязгаар, түгжих", "v1", "open"],
+  ["G21", "P2", "UI", "404, алдааны хуудас", "web/src/app/not-found.tsx, error.tsx", "Монгол, брэндтэй хуудас", "v1", "open"],
+  ["G22", "P2", "Функц", "Эрх (pass) засах, устгах, гараар олгох", "passes endpoint-ууд", "Удирдлагад эрхийн хүснэгт", "v1", "open"],
+  ["G23", "P2", "Функц", "Зарлага засах, устгах; «Ааш» → «Түрээс»", "FinanceDashboardClient", "UI нэмэх, шошго засах, гараар бичсэн өнгийг токен болгох", "v1", "open"],
+  ["G24", "P2", "Функц", "SMS загвар үүсгэх, засах; серверийн өртгийн тооцоо", "components/sms", "POST/PATCH /sms/templates, POST /sms/bulk/estimate ашиглах", "v1.1", "open"],
+  ["G25", "P2", "Функц", "Сурагчийг бөөнөөр импортлох, архивлах, экспорт", "students", "Excel импорт (урьдчилан харах + алдаа), archived талбар, CSV", "v1.1", "open"],
+  ["G26", "P2", "Функц", "«Хэдий хүртэл төлсөн» сурагч, эцэг эхэд", "GET /tuition/paid-until/*", "Самбарт карт", "v1", "open"],
+  ["G27", "P2", "Функц", "Мэдэгдлийн төв + сануулга (төлбөр, даалгавар, хуваарь)", "шинэ модуль", "Notification загвар + апп доторх хонх + имэйл/SMS суваг", "v1.1", "open"],
+  ["G28", "P2", "Код", "api()-г тойрсон түүхий fetch", "lesson/api.ts:28, library/page.tsx:224", "api() руу шилжүүлэх", "v1", "open"],
+  ["G29", "P2", "Дизайн", "Дизайны дүрэм зөрчил: «⬇» глиф, bg-blue-600, bg-orange-600", "ResultsTable, groups, finance", "lucide дүрс, өнгөний токен", "v1", "open"],
+  ["G30", "P2", "Чанар", "E2E тест, вэб тест, lint CI-д", "web", "Playwright-оор 8 гол аялал; lint анхааруулгыг 0 болгох", "v1.1", "open"],
+  ["G31", "P2", "Чанар", "Ачааллын тест (2000 зэрэг)", "шалгалтын hot path", "k6 скрипт + үр дүнг STATUS-т", "v1", "open"],
+  ["G32", "P2", "Баримт", "API баримт (OpenAPI)", "api", "@nestjs/swagger — зөвхөн дотоод орчинд", "v1.1", "open"],
+  ["G33", "P2", "Функц", "Үнэгүй урьдчилан харах (freemium)", "/catalog/* endpoint-ууд", "Нүүр хуудсанд бүлэг бүрийн эхний хэсэг", "v1.1", "open"],
+  ["G34", "P2", "Мөнгө", "Е-баримт интеграци", "payments", "Нягтлан бодогчтой шалгаж шаардлагатай бол PosAPI", "v1.1", "open"],
+  ["G35", "P3", "Контент", "1913 бодлого placeholder сонголттой, 13 REVIEW, 8 сэргээгдээгүй", "problems", "Контентын засварын ажлын дараалал", "v1.1", "open"],
+  ["G36", "P3", "Функц", "Тест: ноорог, хуулах, PDF импорт", "tests/new", "UX аудит №4", "v1.1", "open"],
+  ["G37", "P3", "Апп", "PWA + push мэдэгдэл", "web", "manifest, service worker, дүрс", "v1.1", "open"],
+  ["G38", "P3", "Баримт", "STATUS.md хуучирсан, SYSTEM-DESIGN.html репод байхгүй", "STATUS.md, docs/", "Энэ баримтыг репод байлгаж, STATUS-ыг шинэчлэх", "v1", "open"],
+  ["G39", "P3", "Функц", "Хичээл цуцлагдахад мэдэгдэх, ICS экспорт", "schedule", "G27-той хамт", "v1.1", "open"],
+  ["G40", "P3", "Функц", "Дэлгүүр ба эрх (pass) — хоёр худалдааны систем", "store, passes", "Нэг каталог болгох шийдвэр", "v1.1", "open"],
 ];
 
 /* ---------- 8. Хувилбарын төлөвлөгөө ---------- */
@@ -1189,7 +1265,7 @@ const ROADMAP = [
   { v: "v1.0 — Тогтвортой суурь", goal: "Одоо байгаа бүх зүйл найдвартай, аюулгүй, бүрэн ажилладаг. Шинэ том функц нэмэхгүй.", items: [
     "7 хоног 1: G01 (ӨС), G02–G04 (эрхийн цоорхой), G05 (файл), G18 (унтдаг сервер) — хамгийн түрүүнд",
     "7 хоног 2: G06 (буцаалт), G07 (шинжилгээ), G08–G09 (холбоос, цэс), G28–G29 (түүхий fetch, дизайн)",
-    "7 хоног 3: G10 (даалгаврын загварын шийдвэр), G11 (тест засах), G16 (анги), G22–G23, G26",
+    "7 хоног 3: G10 (даалгаврын 2 загварыг холбох), G11 (тест засах), G16 (анги), G22–G23, G26",
     "7 хоног 4: G13–G15 (имэйл, QPay, код), G17 (хууль), G19–G21 (монитор, helmet, 404), G31 (ачаалал), G38 (баримт)",
     "Гарах шалгуур: P0/P1 бүгд хаагдсан, smoke 4 дүр × бүх маршрут ногоон, k6 2000 зэрэг амжилттай, нөөцлөлтөөс сэргээлт туршсан",
   ]},
@@ -1205,8 +1281,7 @@ const ROADMAP = [
 
 /* ---------- 9. Эзний шийдвэр хүлээж буй асуултууд ---------- */
 const QUESTIONS = [
-  "Render дээрх өгөгдлийн сан одоо ямар багцтай, амьд байна уу? Сүүлийн нөөцлөл хэзээ хийгдсэн бэ?",
-  "Гэрийн даалгавар: танхимд «Хийсэн/Дутуу/Хийгээгүй» тэмдэглэгээ, онлайнд «зураг илгээх» гэж хуваах уу, эсвэл нэг урсгал болгох уу?",
+  "Серверийн төлбөр (Render): эзэн техникийн талыг мэдэхгүй тул Claude шалгах заавар өгнө — dashboard.render.com-д нэвтэрч «pimn-db»-ийн дэлгэцийн зургийг явуулахад хангалттай. Шалгахгүй бол 359 сурагчийн бүртгэл устах эрсдэлтэй",
   "Дэлгүүр ба эрх (pass): нэг каталог болгох уу?",
   "Цэсгүй 8 хуудас бүрийн хувьд: цэсэнд оруулах уу, устгах уу?",
   "Имэйл: Gmail App Password хангалттай юу, эсвэл транзакцын имэйлийн үйлчилгээ ашиглах уу?",
@@ -1240,6 +1315,8 @@ function section(id, num, title, html, md, grp) {
 /* 0 — Хэрхэн ашиглах */
 section("howto", "0", "Энэ баримтыг хэрхэн ашиглах", `
   <p class="lead">Энэ бол Pi.mn-ийн v1-ийн <b>суурь тодорхойлолт</b>: юу байх ёстой, одоо юу байгаа, юу дутуу, ямар дарааллаар хийх вэ. Кодыг бичихээс өмнө энд тохиролцоно.</p>
+  <h3>Одоогийн байдал</h3><div class="dash" id="dash"></div>
+  <h3>Хэмжээ</h3>
   <div class="grid2">${META.counts.map(([n, l]) => `<div class="card"><span class="stat">${esc(n)}</span><div class="muted">${esc(l)}</div></div>`).join("")}</div>
   <h3>Тэмдэглэгээ</h3>
   <p>${st("ok")} ажилладаг, ${st("part")} ажилладаг ч дутуу, ${st("bug")} эвдэрхий, ${st("none")} хийгдээгүй. Хувилбар: <span class="ver">v1</span> нээлтэд заавал, <span class="ver">v1.1</span> удахгүй, <span class="ver">v2</span> дараагийн шат. Эрэмбэ: <span class="pri P0">P0</span> яаралтай, <span class="pri P1">P1</span> v1-д заавал, <span class="pri P2">P2</span> чухал, <span class="pri P3">P3</span> сайжруулалт.</p>
@@ -1283,7 +1360,7 @@ section("product", "1", "Бүтээгдэхүүний тодорхойлолт",
 const MARK = { Y: "Тийм", O: "Өөрийн", V: "Харах", "-": "" };
 section("rbac", "2", "Эрхийн матриц", `
   <p class="lead">Хэн юу хийж чадах вэ — API-ийн <code>@Roles</code> болон эзний шийдвэрээс (2026-07-27: контент Багш+-т, мөнгө/SMS/эрх солих зөвхөн Админд).</p>
-  <div class="tablewrap"><table><tr><th>Чадвар</th>${ROLES.map((r) => `<th>${r}</th>`).join("")}</tr>
+  <div class="tablewrap matrix-wrap"><table class="matrix"><tr><th>Чадвар</th>${ROLES.map((r) => `<th>${r}</th>`).join("")}</tr>
   ${MATRIX.map(([cap, row]) => `<tr><td>${esc(cap)}</td>${row.split(" ").map((c) => `<td>${c === "-" ? '<span class="muted">—</span>' : `<b>${MARK[c]}</b>`}</td>`).join("")}</tr>`).join("")}
   </table></div>
   <div class="callout blue">2026-09-26: матриц ба API зөрсөн байсан (санхүү, буцаалт нэвтэрсэн бүх хүнд нээлттэй) — G02–G03-аар засагдсан.</div>
@@ -1320,6 +1397,7 @@ const modCounts = MODULES.reduce((a, m) => (a[m.st] = (a[m.st] || 0) + 1, a), {}
 section("modules", "3", "Модулиуд — дэлгэц, товч бүрийн үйлдэл", `
   <p class="lead">${MODULES.length} модуль. Модуль дээр дарж дэлгэнэ. Мөр бүр: товч эсвэл үйлдэл, юу болох, ямар API дуудах, хэн хийж чадах, одоогийн төлөв.</p>
   <p>${Object.entries(modCounts).map(([k, v]) => `${st(k)} ${v}`).join(" &nbsp; ")}</p>
+  <div class="modgrid">${MODULES.map((m) => `<a href="#m-${m.id}"><span>${esc(m.t)}</span>${st(m.st)}</a>`).join("")}</div>
   ${grpOrder.map((g) => `<h3>${esc(g)}</h3>` + MODULES.filter((m) => m.grp === g).map(moduleHtml).join("")).join("")}
 `, () => "## 3. Модулиуд\n\n" + grpOrder.map((g) => `## ${g}\n\n` + MODULES.filter((m) => m.grp === g).map(moduleMd).join("\n")).join("\n"), "Функц");
 
@@ -1345,12 +1423,13 @@ section("nfr", "6", "Функциональ бус шаардлага — оло
 
 /* 7 — Цоорхой */
 section("gaps", "7", "Цоорхойн бүртгэл — юу дутуу, юу эвдэрсэн", `
-  <p class="lead">${GAPS.length} цоорхой. Энэ зун хийсэн ажлаас дутуу үлдсэн, холбогдоогүй, эвдэрсэн бүх зүйл нэг дор. ID-г commit мессежид ашигла.</p>
-  <p>${["P0", "P1", "P2", "P3"].map((p) => `<span class="pri ${p}">${p}</span> ${GAPS.filter((g) => g[1] === p).length}`).join(" &nbsp; ")}</p>
-  <div class="tablewrap"><table><tr><th>ID</th><th>Эрэмбэ</th><th>Ангилал</th><th>Юу</th><th>Хаана</th><th>Яах вэ</th><th>Хувилбар</th></tr>
-  ${GAPS.map(([id, p, c, t, w, f, v]) => `<tr data-ver="${v}"><td><b>${id}</b></td><td><span class="pri ${p}">${p}</span></td><td>${esc(c)}</td><td><b>${esc(t)}</b></td><td><code>${esc(w)}</code></td><td>${esc(f)}</td><td><span class="ver">${v}</span></td></tr>`).join("")}
+  <p class="lead">${GAPS.length} цоорхой: ${GAPS.filter((g) => g[7] === "done").length} засагдсан, ${GAPS.filter((g) => g[7] !== "done").length} нээлттэй. ID-г commit мессежид ашигла.</p>
+  <div class="dash">${["P0", "P1", "P2", "P3"].map((p) => { const all = GAPS.filter((g) => g[1] === p), d = all.filter((g) => g[7] === "done").length; return `<div class="card"><b><span class="pri ${p}">${p}</span> ${d}/${all.length} засагдсан</b><div class="meter"><span class="m-ok" style="width:${all.length ? (d / all.length) * 100 : 0}%"></span></div></div>`; }).join("")}</div>
+  <p><label><input type="checkbox" id="gapOpenOnly"> Зөвхөн нээлттэйг харуулах</label></p>
+  <div class="tablewrap"><table class="rsp" id="gapTable"><tr><th>ID</th><th>Эрэмбэ</th><th>Төлөв</th><th>Юу</th><th>Хаана</th><th>Яах вэ</th><th>Хувилбар</th></tr>
+  ${GAPS.map(([id, p, c, t, w, f, v, d]) => `<tr data-ver="${v}" data-gap="${d}" class="${d === "done" ? "done-row" : ""}"><td><b>${id}</b> <span class="pri ${p}">${p}</span></td><td><span class="pri ${p}">${p}</span> <span class="muted">${esc(c)}</span></td><td>${d === "done" ? '<span class="st ok">Засагдсан</span>' : '<span class="st part">Нээлттэй</span>'}</td><td><b>${esc(t)}</b></td><td><code>${esc(w)}</code></td><td>${esc(f)}</td><td><span class="ver">${v}</span></td></tr>`).join("")}
   </table></div>
-`, () => "## 7. Цоорхойн бүртгэл\n\n| ID | Эрэмбэ | Ангилал | Юу | Хаана | Яах вэ | Хувилбар |\n|---|---|---|---|---|---|---|\n" + GAPS.map((r) => `| ${r.join(" | ")} |`).join("\n"), "Төлөвлөгөө");
+`, () => "## 7. Цоорхойн бүртгэл\n\n| ID | Эрэмбэ | Ангилал | Юу | Хаана | Яах вэ | Хувилбар | Төлөв |\n|---|---|---|---|---|---|---|---|\n" + GAPS.map((r) => `| ${r.slice(0, 7).join(" | ")} | ${r[7] === "done" ? "Засагдсан" : "Нээлттэй"} |`).join("\n"), "Төлөвлөгөө");
 
 /* 8 — Roadmap */
 section("roadmap", "8", "Хувилбарын төлөвлөгөө", `
@@ -1375,7 +1454,10 @@ section("questions", "9", "Эзний шийдвэр хүлээж буй асу�
 function apiTable(filterNoUi) {
   const rows = ENDPOINTS.filter((e) => !filterNoUi || !e.ui);
   const mods = [...new Set(rows.map((e) => e.mod))].sort();
-  return mods.map((mod) => `<h4>${esc(mod)}</h4><div class="tablewrap"><table><tr><th>Арга</th><th>Зам</th><th>Эрх</th><th>Вэбэд ашиглагдсан</th></tr>${rows.filter((e) => e.mod === mod).map((e) => `<tr><td><code>${e.m}</code></td><td><code>/api${esc(e.p)}</code></td><td>${e.roles.map((r) => `<span class="role">${esc(ROLE_NAME[r] || r)}</span>`).join("")}</td><td>${e.ui ? st("ok") : st("none")}</td></tr>`).join("")}</table></div>`).join("");
+  return mods.map((mod) => {
+    const r = rows.filter((e) => e.mod === mod), noUi = r.filter((e) => !e.ui).length;
+    return `<details class="apimod"><summary>${esc(mod)} <span class="muted">${r.length} маршрут</span>${noUi ? ` <span class="st none">${noUi} UI-гүй</span>` : ""}</summary><div class="tablewrap"><table class="rsp"><tr><th>Маршрут</th><th>Эрх</th><th>Вэбэд</th></tr>${r.map((e) => `<tr><td><code>${e.m} /api${esc(e.p)}</code></td><td>${e.roles.map((x) => `<span class="role">${esc(ROLE_NAME[x] || x)}</span>`).join("")}</td><td>${e.ui ? st("ok") : st("none")}</td></tr>`).join("")}</table></div></details>`;
+  }).join("");
 }
 section("api", "10", "API каталог (кодоос автоматаар)", `
   <p class="lead">${ENDPOINTS.length} маршрут, үүнээс ${ENDPOINTS.filter((e) => !e.ui).length} нь вэбээс дуудагддаггүй (backend бэлэн, UI дутуу — эсвэл илүүдэл). «нэвтэрсэн бүгд» гэсэн маршрутуудыг G04-ийн дагуу эрхийн аудит хийнэ. Динамик замаар дуудагддаг цөөн маршрут «ашиглагдаагүй» гэж андуурагдсан байж болно.</p>
@@ -1396,6 +1478,30 @@ for (const s of SECTIONS) {
   if (s.id === "modules") MODULES.forEach((m) => toc.insertAdjacentHTML("beforeend", `<a href="#m-${m.id}" style="padding-left:36px;font-size:12.5px">${esc(m.t)}</a>`));
 }
 
+/* ---------- Хүснэгтийг гар утсанд карт болгох ---------- */
+function labelTables(root = document) {
+  root.querySelectorAll("table:not(.matrix)").forEach((t) => {
+    t.classList.add("rsp");
+    const heads = [...t.querySelectorAll("tr:first-child th")].map((th) => th.textContent.trim());
+    t.querySelectorAll("tr").forEach((tr) => [...tr.children].forEach((td, i) => { if (td.tagName === "TD" && heads[i]) td.dataset.label = heads[i]; }));
+  });
+}
+labelTables();
+
+/* ---------- Тойм самбар (§0) ---------- */
+(function dashboard() {
+  const box = document.getElementById("dash"); if (!box) return;
+  const cnt = (arr, k) => arr.filter((x) => x === k).length;
+  const bar = (arr) => { const n = arr.length || 1; return `<div class="meter">${["ok", "part", "bug", "none"].map((k) => `<span class="m-${k}" style="width:${(cnt(arr, k) / n) * 100}%"></span>`).join("")}</div><div class="legend">${["ok", "part", "bug", "none"].map((k) => `<span>${ST_LABEL[k]} ${cnt(arr, k)}</span>`).join("")}</div>`; };
+  const mods = MODULES.map((m) => m.st), acts = MODULES.flatMap((m) => m.screens.flatMap((s) => s.actions.map((a) => a[4]))), nfr = NFR.flatMap((a) => a.items.map((i) => i[1]));
+  const gOpen = GAPS.filter((g) => g[7] !== "done"), p0 = gOpen.filter((g) => g[1] === "P0").length;
+  box.innerHTML = `
+    <div class="card"><b>Модуль (${mods.length})</b>${bar(mods)}</div>
+    <div class="card"><b>Товч, үйлдэл (${acts.length})</b>${bar(acts)}</div>
+    <div class="card"><b>Олон улсын стандарт (${nfr.length})</b>${bar(nfr)}</div>
+    <div class="card"><b>Цоорхой: ${gOpen.length} нээлттэй / ${GAPS.length}</b><div class="legend"><span>Яаралтай P0 нээлттэй: <b style="color:var(--bug)">${p0}</b></span></div><a href="#gaps">Цоорхойн бүртгэл рүү</a></div>`;
+})();
+
 /* ---------- Хуулах ---------- */
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
 async function copy(text) {
@@ -1409,7 +1515,16 @@ document.addEventListener("click", (e) => {
 $("#copyAll").onclick = () => copy(SECTIONS.map((s) => s.md()).join("\n\n---\n\n"));
 $("#expandAll").onclick = () => document.querySelectorAll("details.mod").forEach((d) => (d.open = true));
 $("#collapseAll").onclick = () => document.querySelectorAll("details.mod").forEach((d) => (d.open = false));
-$("#apiNoUi").onchange = (e) => { $("#apiBox").innerHTML = apiTable(e.target.checked); };
+$("#apiNoUi").onchange = (e) => { $("#apiBox").innerHTML = apiTable(e.target.checked); labelTables($("#apiBox")); if (e.target.checked) $("#apiBox").querySelectorAll("details").forEach((d) => (d.open = true)); };
+$("#gapOpenOnly").onchange = (e) => document.querySelectorAll("#gapTable tr[data-gap=done]").forEach((tr) => tr.classList.toggle("hidden", e.target.checked));
+const tocEl = $("#toc"), tocBtn = $("#tocBtn");
+tocEl.insertAdjacentHTML("afterbegin", '<button class="btn toc-close" type="button" id="tocClose">Хаах</button>');
+function setToc(open) { tocEl.classList.toggle("open", open); tocBtn.setAttribute("aria-expanded", String(open)); document.body.style.overflow = open ? "hidden" : ""; }
+tocBtn.onclick = () => setToc(!tocEl.classList.contains("open"));
+$("#tocClose").onclick = () => setToc(false);
+tocEl.addEventListener("click", (e) => { if (e.target.closest("a")) setToc(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") setToc(false); });
+$("#ctrlBtn").onclick = () => { const c = $("#ctrls"), o = !c.classList.contains("open"); c.classList.toggle("open", o); $("#ctrlBtn").setAttribute("aria-expanded", String(o)); };
 
 /* ---------- Шүүлтүүр ба хайлт ---------- */
 function applyFilters() {
