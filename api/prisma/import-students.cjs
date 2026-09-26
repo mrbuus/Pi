@@ -1,7 +1,19 @@
 #!/usr/bin/env node
 /**
- * Сурагчийн бодит бүртгэлийг Excel-ээс (БҮРТГЭЛ-2027-1.xlsx) уншиж платформ руу
- * оруулах скрипт.
+ * Сурагчийн бодит бүртгэлийг Excel-ээс (БҮРТГЭЛ-2027-1 (2).xlsx) уншиж платформ
+ * руу оруулах скрипт.
+ *
+ * ФАЙЛЫН БҮТЭЦ (2026-09-26, ~700 сурагч):
+ *  - Импортлох хуудас: «12-р анги», «11-р анги», «9,10-р анги» (LAYOUT_MAIN) ба
+ *    «Нийгэм» (LAYOUT_SOCIAL — с.т анги баганагүй). Header-ийг assertLayout шалгана.
+ *  - «Код» хуудас: 12-р ангийн сурагчийн 7 оронтой код (2027001…2027486).
+ *  - Нэг утас хоёр хуудсанд (математик + нийгэм), нэр ижил → нэг сурагч, 2 хичээл.
+ *
+ * ЭЗНИЙ ШИЙДВЭР (2026-09-26): Excel-ийн 7 оронтой кодыг ХАДГАЛНА — системийн
+ *  B27… формат руу ШИЛЖҮҮЛЭХГҮЙ (backfill-new-codes.cjs-ийг прод дээр бүү ажиллуул).
+ *  Код: «Код» хуудаснаас утсаар → нэрээр → үлдсэнд 2027487-оос үргэлжлүүлнэ.
+ *  --commit үед байгаа сурагчийн кодыг Excel-ийнхээр СОЛИНО; DB-д өөр хүнд
+ *  эзэмшигдсэн Excel код → codeConflicts (дарж бичихгүй).
  *
  * ЗААВАЛ УНШИХ:
  *  - Анхдагчаар ЗӨВХӨН --dry-run горимд ажиллана (DATA ХАДГАЛАХГҮЙ). --commit
@@ -59,70 +71,56 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const DEFAULT_SOURCE = '/Users/mr.buus/Downloads/БҮРТГЭЛ-2027-1.xlsx';
+const DEFAULT_SOURCE = '/Users/mr.buus/Downloads/БҮРТГЭЛ-2027-1 (2).xlsx';
 const DEFAULT_REPORT = path.join(__dirname, 'reports', 'student-import.json');
 
-// Тухайн 3 хуудас л энэ скриптийн хамрах хүрээ (359 идэвхтэй сурагчтай таарна).
-// "зуны анги"/"ГАРСАН"/"Sheet1"/"Цалингийн хүснэгт" хуудсуудыг ЗОРИУДААР
-// оруулаагүй (доор sheetsSkippedEntirely-д тодорхой тэмдэглэнэ).
+// ---------- Хуудас ба баганын бүтэц ----------
+// 2026-09-26: эзний шинэ бүртгэл (БҮРТГЭЛ-2027-1 (2).xlsx) — өмнөхөөс ялгаа:
+//  - Үндсэн 3 хуудасны баганууд НЭГ байрлал ЗҮҮН тийш шилжсэн (хуучин 9-р
+//    «утга тодорхойгүй» багана алга болсон). Хуучин индексээр уншвал төлбөрийг
+//    огноо, салбарыг «Шинэ/Хуучин» гэж андуурна → header-ийг ЗААВАЛ шалгана.
+//  - 13-р баганад багшийн үнэлгээ «муу / дунд / сайн» нэмэгдсэн.
+//  - «Нийгэм» хуудас нэмэгдсэн (с.т анги багана байхгүй → бүх багана дахин 1 зүүн).
+//  - «Код» хуудас: сурагч бүрийн 7 оронтой код (2027001…). ЭЗНИЙ ШИЙДВЭР:
+//    Excel-ийн кодыг ХАДГАЛНА (системийн B27… форматаар солихгүй).
+const LAYOUT_MAIN = {
+  NO: 0, LAST: 1, FIRST: 2, ANGI: 3, STUDENT_PHONE: 4, FATHER_PHONE: 5, MOTHER_PHONE: 6,
+  SCHOOL: 7, SECTION: 8, JOINED_RAW: 9, TUITION: 10, STATUS: 11, BRANCH: 12, LEVEL: 13,
+  headerCheck: { 10: /^төлбөр$/i, 12: /нэмэлт тайлбар/i },
+};
+const LAYOUT_SOCIAL = {
+  NO: 0, LAST: 1, FIRST: 2, ANGI: 3, STUDENT_PHONE: 4, FATHER_PHONE: 5, MOTHER_PHONE: 6,
+  SCHOOL: 7, SECTION: null, JOINED_RAW: 8, TUITION: 9, STATUS: 10, BRANCH: 11, LEVEL: null,
+  headerCheck: { 9: /^төлбөр$/i, 11: /нэмэлт тайлбар/i },
+};
 const SHEET_CONFIGS = [
-  { name: '12-р анги', expectedGrades: [12] },
-  { name: '11-р анги', expectedGrades: [11] },
-  { name: '9,10-р анги', expectedGrades: [9, 10] },
+  { name: '12-р анги', expectedGrades: [12], layout: LAYOUT_MAIN, subject: 'Математик' },
+  { name: '11-р анги', expectedGrades: [11], layout: LAYOUT_MAIN, subject: 'Математик' },
+  { name: '9,10-р анги', expectedGrades: [9, 10], layout: LAYOUT_MAIN, subject: 'Математик' },
+  { name: 'Нийгэм', expectedGrades: [12], layout: LAYOUT_SOCIAL, subject: 'Нийгэм' },
 ];
+// Кодын хуудас: сурагч импортлохгүй, зөвхөн утас/нэрээр код хайх лавлах.
+const CODE_SHEET = { name: 'Код', LAST: 1, FIRST: 2, STUDENT_PHONE: 4, CODE: 13, headerCheck: { 13: /^код$/i } };
+const CODE_RE = /^\d{7}$/;
 const OUT_OF_SCOPE_SHEETS = [
-  {
-    name: 'зуны анги',
-    reason:
-      'Зуны ангийн сурагчид (57) энэ импортын зорилтот бүлэг биш — тусад нь шийдвэрлэнэ.',
-  },
+  { name: 'Код', reason: 'Сурагчийн 7 оронтой кодын лавлах — импортлохгүй, код хайхад ашиглана.' },
   {
     name: 'ГАРСАН',
-    reason: 'Аль хэдийн гарсан сурагчид (12) — идэвхтэй бүртгэлд орохгүй.',
+    reason:
+      'Гарсан сурагчид — идэвхтэй бүртгэлд орохгүй. Ирсэн/гарсан огноо, буцаах төлбөр, данс ' +
+      'агуулдаг тул дараа нь буцаалтын модульд (G06) ашиглаж болно.',
   },
-  { name: 'Sheet1', reason: 'Ирцийн хуудас, сурагчийн бүртгэл биш.' },
+  { name: 'Sheet2', reason: 'Хичээлийн хуваарь (цаг, анги, онол, багш), сурагчийн бүртгэл биш.' },
   {
     name: 'Цалингийн хүснэгт',
     reason: 'Ажилтны цалингийн хүснэгт, сурагчийн бүртгэлтэй хамааралгүй.',
   },
 ];
-
-// Багана индекс (0-based), header мөр (row 1) баталгаажуулсан бүтэц дээр үндэслэв.
-// АНХААРАХ: 3 хуудасны бодит эх файлыг openpyxl-ээр шууд шалгаж баталгаажуулав
-// (header мөр 9,10,12 индекст headerless боловч ДАТА агуулдаг):
-//   9  (COL9_UNKNOWN)   : '1'..'5'/'өд'/'өг' гэх мэт богино кодууд — утга
-//                         тодорхойгүй (гэр бүлийн хүүхдийн дугаар? ээлж?),
-//                         ямар ч DB баганад ТААМАГЛАЖ ХОЛБОХГҮЙ.
-//   10 (JOINED_RAW)     : "6/8"/"07/20" маягийн САР/ӨДӨР (жилгүй) — энэ бол
-//                         сурагч элссэн огноо тул StudentProfile.joinedOn-д
-//                         холбоно (доор parseJoinedOn харна уу).
-//   12 (STATUS)         : "Шинэ"/"Хуучин" — сурагч шинэ элссэн үү, үргэлжилж
-//                         байгаа хуучин сурагч уу. Үүнд зориулсан тусгай багана
-//                         schema-д байхгүй тул guardianNote-д тодорхой
-//                         шошготойгоор хадгална (доор normalizeEnrollmentStatusNote).
-//   13 (NOTE_OR_BRANCH) : header нь "нэмэлт тайлбар" ("Баруун 4"/"Зүүн 4" эсвэл
-//                         төлбөртэй холбоотой чөлөөт тэмдэглэл хоёул холилдож
-//                         бичигдсэн багана) — доор normalizeNoteOrBranch хоёр
-//                         замд ялгана.
-const COL = {
-  NO: 0, // №
-  LAST: 1, // Овог
-  FIRST: 2, // нэр
-  ANGI: 3, // анги (сурагчийн БОДИТ анги — сурагчийн жагсаалт баталгаажуулна)
-  STUDENT_PHONE: 4, // өөр
-  FATHER_PHONE: 5, // аав
-  MOTHER_PHONE: 6, // ээж
-  SCHOOL: 7, // сургууль
-  SECTION: 8, // с.т анги (ж: 12-1)
-  COL9_UNKNOWN: 9, // утга тодорхойгүй — таамаглахгүй, DB-д холбохгүй
-  JOINED_RAW: 10, // элссэн огноо (сар/өдөр, жилгүй)
-  TUITION: 11, // төлбөр
-  STATUS: 12, // "Шинэ" / "Хуучин"
-  BRANCH: 13, // нэрлэгдээгүй толгойтой боловч "Баруун 4"/"Зүүн 4" утга ЭСВЭЛ чөлөөт тайлбар агуулдаг багана
-};
+const LEVEL_RE = /^(муу|дунд|сайн)$/i;
 
 const VALID_SECTION_RE = /^(9|10|11|12|13)-\d+$/;
-const ANGI_RE = /^(\d{1,2})-р\s*анги$/u;
+// «12-р анни» гэх мэт бичгийн алдааг зөвшөөрнө (ан… гэж эхэлбэл анги)
+const ANGI_RE = /^(\d{1,2})-р\s*ан/u;
 const BRANCH_RE = /баруун|зүүн/i;
 const PHONE_RE = /^\d{8}$/;
 const NUMERIC_TEXT_RE = /^[\d.,\s]+$/;
@@ -153,7 +151,7 @@ for name in sheet_names:
         continue
     ws = wb[name]
     rows = []
-    for row in ws.iter_rows(min_row=1, max_col=14):
+    for row in ws.iter_rows(min_row=1, max_col=16):
         cells = []
         for cell in row:
             value = getattr(cell, "value", None)
@@ -328,11 +326,68 @@ function cellPair(row, idx) {
   return row[idx] ?? [null, null];
 }
 
+// Header мөрийг хүлээгдэж буй бүтэцтэй тулгана — багана шилжсэн бол ЗОГСОНО.
+function assertLayout(sheetName, headerRow, headerCheck) {
+  for (const [idx, re] of Object.entries(headerCheck)) {
+    const text = normText(headerRow?.[Number(idx)]?.[0]);
+    if (!re.test(text)) {
+      throw new Error(
+        `«${sheetName}» хуудасны ${Number(idx) + 1}-р баганын гарчиг «${text}» байна, ` +
+          `хүлээгдэж буй: ${re}. Excel-ийн баганын бүтэц өөрчлөгдсөн байж магадгүй — ` +
+          'LAYOUT_* тохиргоог шалгаж засна уу (таамаглаж уншихгүй).',
+      );
+    }
+  }
+}
+
+// «Код» хуудаснаас утас → код, овог|нэр → код лавлах үүсгэнэ.
+function buildCodeLookup(rows, report) {
+  const byPhone = new Map();
+  const byName = new Map();
+  const nameCount = new Map();
+  let maxCode = 0;
+  if (!rows) {
+    report.codeSheet = { found: false };
+    return { byPhone, byName, maxCode };
+  }
+  assertLayout(CODE_SHEET.name, rows[0], CODE_SHEET.headerCheck);
+  let total = 0;
+  let invalid = 0;
+  let duplicatePhones = 0;
+  for (let i = 1; i < rows.length; i += 1) {
+    const row = rows[i];
+    const last = normText(cellValue(row, CODE_SHEET.LAST));
+    const first = normText(cellValue(row, CODE_SHEET.FIRST));
+    if (!last && !first) continue;
+    const code = normText(cellValue(row, CODE_SHEET.CODE));
+    if (!CODE_RE.test(code)) {
+      invalid += 1;
+      continue;
+    }
+    total += 1;
+    maxCode = Math.max(maxCode, Number(code));
+    const phone = normalizePhone(cellValue(row, CODE_SHEET.STUDENT_PHONE)).value;
+    // Нэг утас хэд хэдэн мөрөнд (давхар мөр эсвэл ах дүү) — бүгдийг хадгална.
+    if (phone) {
+      if (!byPhone.has(phone)) byPhone.set(phone, []);
+      else duplicatePhones += 1;
+      byPhone.get(phone).push({ code, first: normKey(first) });
+    }
+    const nk = `${normKey(last)}|${normKey(first)}`;
+    nameCount.set(nk, (nameCount.get(nk) ?? 0) + 1);
+    byName.set(nk, code);
+  }
+  // Ижил нэртэй хоёр сурагч бол нэрээр тааруулахгүй (буруу хүнд код өгөхгүй).
+  for (const [nk, n] of nameCount) if (n > 1) byName.delete(nk);
+  report.codeSheet = { found: true, codes: total, invalidRows: invalid, duplicatePhones, maxCode };
+  return { byPhone, byName, maxCode };
+}
+
 // ---------- Мөр бүрийг шалгаж, "planned" эсвэл "skipped" болгох ----------
 
 function buildImportPlan(sourcePath) {
   const sheetNames = SHEET_CONFIGS.map((s) => s.name);
-  const workbook = readWorkbookViaPython(sourcePath, sheetNames);
+  const workbook = readWorkbookViaPython(sourcePath, [...sheetNames, CODE_SHEET.name]);
 
   const report = {
     meta: {
@@ -352,7 +407,10 @@ function buildImportPlan(sourcePath) {
       joinedOnParsed: 0,
       joinedOnUnparseable: 0,
       duplicateInSource: 0,
+      mergedAcrossSheets: 0,
       phoneConflicts: 0,
+      level: { муу: 0, дунд: 0, сайн: 0 },
+      codes: { fromExcelByPhone: 0, fromExcelByName: 0, generated: 0 },
     },
     sectionCapacityWarnings: [],
     skippedRows: [],
@@ -363,6 +421,10 @@ function buildImportPlan(sourcePath) {
   const seenKeys = new Map(); // key -> plannedStudent (давхардал илрүүлэхэд)
   const phoneOwner = new Map(); // studentPhone -> key (зөрчил илрүүлэхэд)
   const classroomGroups = new Map(); // "grade|section" -> { grade, section, students:[], branchVotes:Map }
+  const plannedByPhone = new Map(); // studentPhone -> planned (хуудас хоорондын нэгтгэлд)
+  const codeLookup = buildCodeLookup(workbook[CODE_SHEET.name], report);
+  const usedCodes = new Set();
+  const codeCandidates = []; // { planned, phone } — Excel-ийн (зөрчилтэй ч) утсаар код хайна
 
   for (const config of SHEET_CONFIGS) {
     const rows = workbook[config.name];
@@ -375,7 +437,8 @@ function buildImportPlan(sourcePath) {
       continue;
     }
 
-    // row index 0 = header (validate биш, зөвхөн алгасана)
+    const COL = config.layout;
+    assertLayout(config.name, rows[0], COL.headerCheck);
     for (let i = 1; i < rows.length; i += 1) {
       const row = rows[i];
       const rowNum = i + 1; // 1-based Excel мөрийн дугаар
@@ -407,8 +470,13 @@ function buildImportPlan(sourcePath) {
       const angiRaw = cellValue(row, COL.ANGI);
       const angiText = normText(angiRaw);
       const angiMatch = angiText.match(ANGI_RE);
-      const angiGrade = angiMatch ? Number(angiMatch[1]) : null;
-      if (!angiGrade) {
+      let angiGrade = angiMatch ? Number(angiMatch[1]) : null;
+      if (!angiGrade && /^төгссөн$/i.test(angiText) && config.expectedGrades.length === 1) {
+        // ЗАЛРУУЛГА: сургуулиа төгссөн ч ЭЕШ-д дахин бэлдэж буй сурагч — хуудасны
+        // ганц анги (12) руу оруулна (контентын эрх 12-р ангийнхтай ижил).
+        angiGrade = config.expectedGrades[0];
+        fixes.push(`GRADUATE(анги='${angiText}' → ${angiGrade}-р анги, хуудас=${config.name})`);
+      } else if (!angiGrade) {
         // Анги огт уншигдахгүй бол сурагчийг ямар ангид оруулахаа мэдэхгүй
         // — энэ бол жинхэнэ хатуу зөрчил.
         reasons.push('GRADE_COLUMN_UNPARSEABLE');
@@ -422,7 +490,7 @@ function buildImportPlan(sourcePath) {
         );
       }
 
-      const sectionRaw = cellValue(row, COL.SECTION);
+      const sectionRaw = COL.SECTION === null ? null : cellValue(row, COL.SECTION);
       const sectionText = normText(sectionRaw);
       const sectionValid = VALID_SECTION_RE.test(sectionText);
       if (!sectionValid) {
@@ -431,7 +499,11 @@ function buildImportPlan(sourcePath) {
         // Платформд "хуваарилагдаагүй сурагч" гэсэн ойлголт байдаг
         // (TeacherDashboard/UnassignedStudentsSection.tsx) — тийш нь оруулна.
         // Enrollment үүсгэхгүй, багш дараа нь ангид хуваарилна.
-        fixes.push(`UNASSIGNED(с.т анги='${sectionText || '(хоосон)'}')`);
+        fixes.push(
+          COL.SECTION === null
+            ? `UNASSIGNED(${config.name} хуудсанд с.т анги багана байхгүй)`
+            : `UNASSIGNED(с.т анги='${sectionText || '(хоосон)'}')`,
+        );
       }
 
       const studentPhoneNorm = normalizePhone(cellValue(row, COL.STUDENT_PHONE));
@@ -454,6 +526,23 @@ function buildImportPlan(sourcePath) {
       }
       if (branchNormalized) report.totals.branch.valid += 1;
       else report.totals.branch.missingOrGarbage += 1;
+
+      // Нэг сурагч хоёр хуудсанд (ж: математик + нийгэм) → нэг хүн, хичээлийг нэмнэ.
+      // Статистик (төлбөр/үнэлгээ/огноо) тоологдохоос ӨМНӨ шалгана — давхар тоолохгүй.
+      // Хатуу зөрчлөөс (ж: анги хоосон) ӨМНӨ — хүн нь өөр хуудсанд аль хэдийн бүрэн бичигдсэн.
+      const samePhonePlanned = studentPhoneNorm.value ? plannedByPhone.get(studentPhoneNorm.value) : null;
+      if (
+        samePhonePlanned &&
+        samePhonePlanned.sheet !== config.name &&
+        normKey(samePhonePlanned.firstName) === normKey(firstName)
+      ) {
+        report.totals.mergedAcrossSheets += 1;
+        if (!samePhonePlanned.subjects.includes(config.subject)) {
+          samePhonePlanned.subjects.push(config.subject);
+          samePhonePlanned.guardianNote = `${samePhonePlanned.guardianNote ?? ''} | Нэмэлт хичээл: ${config.subject}`.replace(/^ \| /, '');
+        }
+        continue;
+      }
 
       // ХАТУУ дүрэм зөрчсөн бол (нэр/анги/анги-хуудас тохирол/section) —
       // ТААМАГЛАЛГҮЙгээр АЛГАСНА (guess хийхгүй).
@@ -489,7 +578,17 @@ function buildImportPlan(sourcePath) {
       if (extraNote) tuitionNoteParts.push(extraNote);
       const tuitionNote = tuitionNoteParts.length ? tuitionNoteParts.join(' | ') : null;
 
-      const guardianNote = normalizeEnrollmentStatusNote(cellValue(row, COL.STATUS));
+      const levelText = COL.LEVEL === null ? '' : normText(cellValue(row, COL.LEVEL)).toLowerCase();
+      const level = LEVEL_RE.test(levelText) ? levelText : null;
+      if (level) report.totals.level[level] += 1;
+      const guardianNote =
+        [
+          normalizeEnrollmentStatusNote(cellValue(row, COL.STATUS)),
+          `Хичээл (эх бүртгэлээс): ${config.subject}`,
+          level ? `Багшийн үнэлгээ (эх бүртгэлээс): ${level}` : null,
+        ]
+          .filter(Boolean)
+          .join(' | ') || null;
       const joinedOnParsed = parseJoinedOn(cellValue(row, COL.JOINED_RAW));
 
       report.totals.tuitionPlan[tuitionPlan] = (report.totals.tuitionPlan[tuitionPlan] ?? 0) + 1;
@@ -530,6 +629,10 @@ function buildImportPlan(sourcePath) {
 
       const planned = {
         sheet: config.name,
+        subjects: [config.subject],
+        studentCode: null,
+        codeSource: null,
+        level,
         row: rowNum,
         key,
         lastName,
@@ -565,6 +668,8 @@ function buildImportPlan(sourcePath) {
 
       report.totals.planned += 1;
       report.plannedStudents.push(planned);
+      codeCandidates.push({ planned, phone: studentPhoneNorm.value });
+      if (effectivePhone) plannedByPhone.set(effectivePhone, planned);
 
       // Хуваарилагдаагүй сурагчид ангийн бүлэг үүсгэхгүй — User + StudentProfile
       // л үүснэ, Enrollment үүсэхгүй. Багш "хуваарилагдаагүй сурагчид"
@@ -588,6 +693,48 @@ function buildImportPlan(sourcePath) {
         }
       }
     }
+  }
+
+  // Код олгох — 3 ДАМЖЛАГА (эзний шийдвэр: Excel-ийн код хүчинтэй):
+  //  1) «Код» хуудастай УТСААР (нэг утсанд хэд хэдэн код бол нэр таарсныг, эс
+  //     бөгөөс эхнийхийг), 2) овог|нэрээр (зөвхөн давхардалгүй нэр), 3) үлдсэнд
+  //  Excel-ийн дарааллыг үргэлжлүүлж шинэ код (2027486 → 2027487…).
+  // Дамжлагаар хийх нь нэрээр таарсан мөр жинхэнэ эзний (утсаар) кодыг
+  // «булааж» авахаас сэргийлнэ. --commit үед DB-д давхцвал resolveStudentCodeCjs шийднэ.
+  // 1a) утас + нэр хоёул таарсан; 1b) утсанд ганц код байгаа бол нэр зөрсөн ч (нэрийн бичилт).
+  for (const requireName of [true, false]) {
+    for (const { planned: p, phone } of codeCandidates) {
+      const entries = !p.studentCode && phone ? codeLookup.byPhone.get(phone) : null;
+      if (!entries) continue;
+      const free = entries.filter((e) => !usedCodes.has(e.code));
+      const pick = requireName
+        ? free.find((e) => e.first === normKey(p.firstName))
+        : entries.length === 1 ? free[0] : null;
+      if (!pick) continue;
+      p.studentCode = pick.code;
+      p.codeSource = 'EXCEL_PHONE';
+      usedCodes.add(pick.code);
+      report.totals.codes.fromExcelByPhone += 1;
+    }
+  }
+  for (const { planned: p } of codeCandidates) {
+    if (p.studentCode) continue;
+    const code = codeLookup.byName.get(`${normKey(p.lastName)}|${normKey(p.firstName)}`);
+    if (!code || usedCodes.has(code)) continue;
+    p.studentCode = code;
+    p.codeSource = 'EXCEL_NAME';
+    usedCodes.add(code);
+    report.totals.codes.fromExcelByName += 1;
+  }
+  let nextCode = Math.max(codeLookup.maxCode, 2027000) + 1;
+  for (const p of report.plannedStudents) {
+    if (p.studentCode) continue;
+    while (usedCodes.has(String(nextCode))) nextCode += 1;
+    p.studentCode = String(nextCode);
+    p.codeSource = 'GENERATED';
+    usedCodes.add(p.studentCode);
+    report.totals.codes.generated += 1;
+    nextCode += 1;
   }
 
   // Ангийн бүлэг бүрийн нэрэнд (боломжтой бол) давамгайлсан салбарыг хавсаргана.
@@ -632,27 +779,22 @@ const KNOWN_SECTION_CAPACITY = {
   '9-1': 32,
 };
 
-// ---------- studentCode/username: src/common/codes.ts-ийн логикийг дахин ашиглав ----------
-// (CJS скрипт TS-ийг шууд require хийж чадахгүй тул алгоритмыг ЯГ ХУУЛСАН.
-//  Эх сурвалж: api/src/common/codes.ts — generateStudentCode, resolveUniqueUsername.
-//  Хэрэв codes.ts өөрчлөгдвөл ЭНД Ч мөн адил шинэчлэх ёстой.)
-async function generateStudentCodeCjs(prisma, { enrolmentYear, subject = 'B' } = {}) {
-  const year = (enrolmentYear ?? new Date().getFullYear()) % 100;
-  const yearStr = String(year).padStart(2, '0');
-  const prefix = `SIE-${yearStr}-${subject}-`;
-  const last = await prisma.user.findFirst({
-    where: { studentCode: { startsWith: prefix } },
-    orderBy: { studentCode: 'desc' },
-    select: { studentCode: true },
-  });
-  let seq = last?.studentCode ? parseInt(last.studentCode.slice(prefix.length), 10) + 1 : 1;
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    const candidate = `${prefix}${String(seq).padStart(4, '0')}`;
-    const exists = await prisma.user.findUnique({ where: { studentCode: candidate }, select: { id: true } });
-    if (!exists) return candidate;
-    seq += 1;
+// ---------- studentCode: Excel-ийн 7 оронтой код (эзний шийдвэр 2026-09-26) ----------
+// Төлөвлөгөөнд өгсөн код DB-д ӨӨР хүнд эзэмшигдсэн бол дараагийн чөлөөт 7
+// оронтой кодыг авна (урьдчилсан кодын хувьд). Excel-ээс ирсэн кодыг хэзээ ч
+// дураараа өөрчлөхгүй — зөрчилтэйг тайланд гаргаж, ажилтан шийднэ.
+async function resolveStudentCodeCjs(prisma, planned, ownerUserId) {
+  const taken = async (code) => {
+    const u = await prisma.user.findUnique({ where: { studentCode: code }, select: { id: true } });
+    return u && u.id !== ownerUserId;
+  };
+  if (!(await taken(planned.studentCode))) return { code: planned.studentCode, conflict: false };
+  if (planned.codeSource !== 'GENERATED') return { code: null, conflict: true };
+  let n = Number(planned.studentCode) + 1;
+  for (let attempt = 0; attempt < 500; attempt += 1, n += 1) {
+    if (!(await taken(String(n)))) return { code: String(n), conflict: false };
   }
-  throw new Error('Сурагчийн код үүсгэх боломжгүй байна — дахин оролдоно уу');
+  throw new Error('Чөлөөт сурагчийн код олдсонгүй');
 }
 
 async function resolveUniqueUsernameCjs(prisma, firstName, lastName) {
@@ -676,6 +818,8 @@ async function commitImportPlan({ prisma, plan, createdById }) {
     usersSkippedExisting: 0,
     enrollmentsCreated: 0,
     profilesEnriched: 0, // одоо байгаа сурагчийн StudentProfile-д шинэ талбарууд (утас/салбар/төлбөр/...) бичигдсэн тоо
+    codesSet: 0, // Excel-ийн код тавьсан/шинэчилсэн
+    codeConflicts: [], // Excel-ийн код DB-д өөр хүнд байгаа — гараар шийдэх
   };
   const classroomIdByKey = new Map();
 
@@ -727,6 +871,18 @@ async function commitImportPlan({ prisma, plan, createdById }) {
 
     if (existing) {
       stats.usersSkippedExisting += 1;
+      // Урьдчилсан (GENERATED) код нь аль хэдийн 7 оронтой кодтой сурагчийнхыг
+      // дарахгүй — дахин ажиллуулахад код «гүйхээс» сэргийлнэ.
+      const keepExisting = s.codeSource === 'GENERATED' && CODE_RE.test(existing.studentCode ?? '');
+      if (!keepExisting && existing.studentCode !== s.studentCode) {
+        const { code, conflict } = await resolveStudentCodeCjs(prisma, s, existing.id);
+        if (conflict) {
+          stats.codeConflicts.push({ sheet: s.sheet, row: s.row, code: s.studentCode });
+        } else if (code && code !== existing.studentCode) {
+          await prisma.user.update({ where: { id: existing.id }, data: { studentCode: code } });
+          stats.codesSet += 1;
+        }
+      }
       // ИДЭМПОТЕНТ БАЙДАЛ: energyprofile.update — ижил эх мөрөөр дахин
       // ажиллуулахад яг ижил утгыг дахин бичнэ (давхардал/хуримтлал үүсэхгүй),
       // Prisma upsert ашиглан хэрэв (ямар нэг шалтгаанаар) StudentProfile
@@ -760,7 +916,10 @@ async function commitImportPlan({ prisma, plan, createdById }) {
     }
 
     const username = await resolveUniqueUsernameCjs(prisma, s.firstName, s.lastName);
-    const studentCode = await generateStudentCodeCjs(prisma, {});
+    const resolved = await resolveStudentCodeCjs(prisma, s, null);
+    if (resolved.conflict) stats.codeConflicts.push({ sheet: s.sheet, row: s.row, code: s.studentCode });
+    const studentCode = resolved.code; // зөрчилтэй бол null — ажилтан дараа тавина
+    if (studentCode) stats.codesSet += 1;
 
     // Нууц үг: утастай бол auth.service.ts-ийн register()-ийн анхны нууц
     // үгтэй ижил зарчмаар утсыг өөрийг нь ашиглана (dto.password ?? dto.phone —
@@ -825,6 +984,9 @@ function printSummary(report) {
   console.log('Алгассан (skipped):', report.totals.skipped, JSON.stringify(report.totals.skippedByReason));
   console.log('Давхцал (эх файл дотор):', report.totals.duplicateInSource);
   console.log('Утасны зөрчил (phone conflicts):', report.totals.phoneConflicts);
+  console.log('Хуудас хооронд нэгтгэсэн (нэг хүн, 2 хичээл):', report.totals.mergedAcrossSheets);
+  console.log('Код:', JSON.stringify(report.totals.codes), 'Кодын хуудас:', JSON.stringify(report.codeSheet));
+  console.log('Багшийн үнэлгээ:', JSON.stringify(report.totals.level));
   console.log('Төлбөр (эх баганы төрөл):', JSON.stringify(report.totals.tuition));
   console.log('Төлбөрийн төлөвлөгөө (tuitionPlan):', JSON.stringify(report.totals.tuitionPlan));
   console.log('Салбар (branch):', JSON.stringify(report.totals.branch));
