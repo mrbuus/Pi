@@ -50,16 +50,11 @@ jobs:
       # Lint debt-г цэвэрлэсний дараа (жишээ нь `npx eslint --fix` бүх
       # repo дээр ажиллуулж, гараар үлдсэнийг засаад) энэ алхмыг буцааж нэмнэ.
 
-      # 🚨 Зөвхөн src/tests/grading.spec.ts-г ажиллуулж байгаа нь санамсаргүй
-      # биш: энэ файл цэвэр функцүүд (grading.ts)-ийг шалгадаг тул DB огт
-      # хэрэггүй. api/test/app.e2e-spec.ts (e2e) болон бусад .spec.ts файл нь
-      # Nest DI/AppModule бүхэлдээ ачаалдаг тул бодит Postgres шаардаж болзошгүй.
-      # CI-д Postgres service container нэмэх нь удаашрал/тогтворгүй байдал
-      # авчрах эрсдэлтэй тул одоохондоо зөвхөн итгэлтэй, цэвэр unit test-ийг
-      # энд ажиллуулна. DB шаардсан тестүүд нэмэгдвэл тусад нь service
-      # container-той job үүсгэнэ.
-      - name: Unit tests (зөвхөн DB хэрэггүй, цэвэр tests)
-        run: npx jest src/tests/grading.spec.ts
+      # 2026-09-27: өмнө нь зөвхөн grading.spec.ts ажилладаг байв («DB шаардаж
+      # болзошгүй» гэсэн болгоомжлолоор). Бүх 30+ spec DB-гүй (mock) ажилладгийг
+      # шалгасан (DATABASE_URL нь зөвхөн syntactically valid) — бүгдийг ажиллуулна.
+      - name: Unit tests (бүгд, DB-гүй)
+        run: npx jest
 
   web:
     name: web — typecheck, build
@@ -94,3 +89,39 @@ jobs:
 
       - name: Next.js build
         run: npx next build
+
+  # E2E (G30): Playwright-оор 8 гол аялал × 2 өргөн (375 / 1280). API-г
+  # page.route-оор mock хийдэг тул бодит сервер/ӨС шаардахгүй.
+  e2e:
+    name: e2e — 8 гол аялал (375 + 1280)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            e2e/package-lock.json
+
+      - name: Web install + build
+        working-directory: web
+        run: npm ci && npx next build
+
+      - name: E2E install
+        working-directory: e2e
+        run: npm ci && npx playwright install --with-deps chromium
+
+      - name: Playwright
+        working-directory: e2e
+        run: npx playwright test
+
+      - name: Тайлан (алдаа гарвал)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          retention-days: 7
