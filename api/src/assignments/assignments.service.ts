@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Logger,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { addDateDays, parseDateOnly } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { Role, SubmissionState } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationCenterService } from '../notification-center/notification-center.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { ReviewAction, ReviewDto } from './dto/review.dto';
 import { SubmitDto } from './dto/submit.dto';
@@ -16,9 +18,12 @@ import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 
 @Injectable()
 export class AssignmentsService {
+  private readonly logger = new Logger(AssignmentsService.name);
+
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private notifications: NotificationCenterService,
   ) {}
 
   // parseDateOnly plain Error шидвэл HTTP 500 болчихно — энд эргүүлж 400
@@ -27,9 +32,7 @@ export class AssignmentsService {
     try {
       return parseDateOnly(value);
     } catch {
-      throw new BadRequestException(
-        'Огнооны формат буруу байна (YYYY-MM-DD)',
-      );
+      throw new BadRequestException('Огнооны формат буруу байна (YYYY-MM-DD)');
     }
   }
 
@@ -58,7 +61,7 @@ export class AssignmentsService {
     role: Role,
   ) {
     await this.assertClassAccess(classroomId, userId, role);
-    return this.prisma.assignment.create({
+    const assignment = await this.prisma.assignment.create({
       data: {
         classroomId,
         title: dto.title,
@@ -69,6 +72,32 @@ export class AssignmentsService {
         createdById: userId,
       },
     });
+
+    try {
+      const enrollments = await this.prisma.enrollment.findMany({
+        where: {
+          classroomId,
+          leftAt: null,
+          joinedAt: { lte: assignment.createdAt },
+        },
+        select: { studentId: true },
+      });
+      await this.notifications.notify(
+        enrollments.map((enrollment) => enrollment.studentId),
+        {
+          kind: 'ASSIGNMENT_CREATED',
+          title: 'Шинэ гэрийн даалгавар',
+          body: assignment.title,
+          link: '/app/student',
+        },
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Даалгаврын мэдэгдэл үүсгэж чадсангүй: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+    }
+
+    return assignment;
   }
 
   // Хуанлийн навигацид зориулж [from, to] (өдрөөр) мужаар шүүх боломжтой —
@@ -325,7 +354,7 @@ export class AssignmentsService {
       );
     }
 
-    return this.prisma.submission.upsert({
+    const submission = await this.prisma.submission.upsert({
       where: {
         assignmentId_studentId: { assignmentId, studentId },
       },
@@ -344,6 +373,8 @@ export class AssignmentsService {
         submittedAt: new Date(),
       },
     });
+
+    return submission;
   }
 
   // Багшийн шалгалт: онлайн батлах / буцаах / танхимд биетээр шалгасан
@@ -382,7 +413,7 @@ export class AssignmentsService {
       throw new BadRequestException('Сурагч хараахан юу ч илгээгээгүй байна');
     }
 
-    return this.prisma.submission.upsert({
+    const submission = await this.prisma.submission.upsert({
       where: {
         assignmentId_studentId: { assignmentId, studentId: dto.studentId },
       },
@@ -401,6 +432,26 @@ export class AssignmentsService {
         checkedAt: new Date(),
       },
     });
+
+    if (
+      dto.action === ReviewAction.APPROVE ||
+      dto.action === ReviewAction.RETURN
+    ) {
+      await this.notifications.notify([dto.studentId], {
+        kind:
+          dto.action === ReviewAction.APPROVE
+            ? 'ASSIGNMENT_APPROVED'
+            : 'ASSIGNMENT_RETURNED',
+        title:
+          dto.action === ReviewAction.APPROVE
+            ? 'Даалгавар шалгагдлаа'
+            : 'Даалгавар засварлах шаардлагатай',
+        body: dto.note ? `${assignment.title}: ${dto.note}` : assignment.title,
+        link: '/app/student',
+      });
+    }
+
+    return submission;
   }
 
   // Багшид: ангийн бүх сурагчийн төлөв (илгээгээгүй нь NOT_DONE-оор харагдана)

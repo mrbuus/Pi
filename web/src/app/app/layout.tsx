@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import BottomTabs from "@/components/nav/BottomTabs";
 import Sidebar from "@/components/nav/Sidebar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
 import { Meta } from "@/components/ui/Meta";
@@ -158,6 +159,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   ref={setTopBarSlotEl}
                   className="ml-2 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 />
+                <NotificationBell />
               </div>
             </header>
           )}
