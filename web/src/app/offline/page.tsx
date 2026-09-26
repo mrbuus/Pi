@@ -54,7 +54,7 @@ export default function OfflinePage() {
   const filtered = items.filter(item => (item.title + " " + item.explanation).toLocaleLowerCase("mn").includes(query.toLocaleLowerCase("mn")));
   return <main className="mx-auto max-w-3xl space-y-6 p-4 pb-16 text-ink sm:p-8">
     <header className="space-y-3"><WifiOff className="size-8 text-brand" aria-hidden /><h1 className="text-2xl font-bold">Хадгалсан томьёо</h1><p className="text-ink-dim">Интернэттэй үед нээсэн томьёонууд энд хадгалагдана. Энэ төхөөрөмж дээрх хуулбар хуучирсан байж болно. Дүн, сурагчийн түүх, дадлагын бодлого хадгалахгүй.</p>
-      <div className="flex flex-wrap gap-3"><Button asChild variant="outline" className="min-h-11"><a href="/app/formulas">{online ? "Томьёоны санг нээх" : "Холболтоо дахин шалгах"}</a></Button><Button onClick={load} variant="outline" className="min-h-11">Жагсаалтыг сэргээх</Button></div>
+      <div className="flex flex-wrap gap-3"><Button asChild variant="outline" className="min-h-11"><a href="/app/library">{online ? "Бодлогын санг нээх" : "Холболтоо дахин шалгах"}</a></Button><Button onClick={load} variant="outline" className="min-h-11">Жагсаалтыг сэргээх</Button></div>
     </header>
     <InstallPrompt />
     <label className="block space-y-2"><span className="font-semibold">Томьёо хайх</span><input value={query} onChange={event => setQuery(event.target.value)} className="min-h-11 w-full rounded-xl border-2 border-line bg-surface px-3" placeholder="Томьёоны нэр" /></label>
