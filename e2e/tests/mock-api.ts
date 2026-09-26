@@ -1,7 +1,15 @@
 import { expect, type Page } from '@playwright/test';
 export const student = { id: 'synthetic-student', firstName: 'Туршилт', lastName: 'Зохиомол', phone: '99000000' };
 export const classroom = { id: 'synthetic-class', name: 'Туршилтын анги', type: 'CLASSROOM', grade: 12, _count: { enrollments: 1 } };
-export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
+export const mistakeFixture = {
+  id: 'mistake-1', problem: { id: 'problem-1', statementText: '$2+2$ хэд вэ?', choices: ['3', '4'], format: 'CHOICE', choiceMode: 'TEXT', imageKey: null },
+  givenAnswer: '3', status: 'NEW', reason: null as string | null, note: null as string | null, testTitle: 'Туршилтын тест', formulas: [],
+};
+export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mistakes: { emptyToday?: boolean; failPatch?: boolean; failRetryOnce?: boolean; structured?: boolean; paginated?: boolean } = {}) {
+  const mistake = structuredClone(mistakeFixture);
+  let retryFailed = false;
+  const projectMistake = () => mistakes.structured ? { ...mistake, problem: { ...mistake.problem, format: 'FILL_NUMBER', choices: null, choiceMode: null, answerFields: ['a', 'bc'] } } : mistake;
+
   const calls: { path: string; method: string; body: Record<string, unknown> }[] = [];
   const unexpected: string[] = [], errors: string[] = [];
   let attendance: string | null = null, homework: string | null = null;
@@ -56,10 +64,24 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     if (path === '/tests/synthetic-exam/session' && method === 'PATCH') return reply({ status: 'IN_PROGRESS', remainingSec: 3550, leaveCount: 0 });
     if (path === '/tests/synthetic-exam/submit') return reply({ result: { totalScore: 1, maxScore: 1 } });
     if (path === '/tests/synthetic-exam/review') return reply({ result: { totalScore: 1, maxScore: 1 }, leaveCount: 0, items: [{ n: 1, points: 1, chapterTitle: 'Тоо', statementText: '$1+1$', answered: true, correct: true, myAnswer: 'A' }] });
-    if (path === '/mistakes/my') return reply({ counts: { NEW: 1, RETRYING: 0, MASTERED: 0 }, byTopic: [{ topic: 'Тоо', count: 1 }], items: [{ id: 'mistake-1', problem: { id: 'problem-1', statementText: '$2+2$ хэд вэ?', choices: ['3', '4'], format: 'CHOICE', choiceMode: 'TEXT', imageKey: null }, givenAnswer: '3', status: 'NEW', reason: null, note: null, testTitle: 'Туршилтын тест', formulas: [] }] });
-    if (path === '/mistakes/mistake-1' && method === 'PATCH') return reply({ id: 'mistake-1', reason: body.reason ?? null, note: body.note ?? null });
-    if (path === '/mistakes/mistake-1/retry' && method === 'POST') return reply({ correct: body.answer === 1, correctAnswer: '4', status: 'RETRYING', nextRetryAt: null, solutionOutline: null });
-    if (path === '/mistakes/today') return reply([{ id: 'mistake-1' }]);
+    if (path === '/mistakes/my') {
+      if (mistakes.paginated && url.searchParams.has('cursor')) return reply({ counts: { NEW: 2, RETRYING: 0, MASTERED: 0 }, byTopic: [{ topic: 'Тоо', count: 2 }], items: [{ ...projectMistake(), id: 'mistake-2' }], nextCursor: null });
+      const matches = !url.searchParams.has('status') || url.searchParams.get('status') === mistake.status;
+      return reply({ counts: { NEW: mistake.status === 'NEW' ? 1 : 0, RETRYING: mistake.status === 'RETRYING' ? 1 : 0, MASTERED: 0 }, byTopic: [{ topic: 'Тоо', count: 1 }], items: matches ? [projectMistake()] : [], nextCursor: mistakes.paginated ? mistake.id : null });
+    }
+    if (path === '/mistakes/mistake-1' && method === 'PATCH') {
+      if (mistakes.failPatch) return reply({ message: 'Хадгалж чадсангүй' }, 400);
+      if ('reason' in body) mistake.reason = body.reason;
+      if ('note' in body) mistake.note = body.note;
+      return reply({ id: mistake.id, reason: mistake.reason, note: mistake.note });
+    }
+    if (path === '/mistakes/mistake-1/retry' && method === 'POST') {
+      if (mistakes.failRetryOnce && !retryFailed) { retryFailed = true; return reply({ message: 'Дахин оролдоно уу' }, 409); }
+      mistake.status = 'RETRYING';
+      const correct = mistakes.structured ? body.answer?.a === '3' && body.answer?.bc === '24' : body.answer === 1;
+      return reply({ correct, correctAnswer: mistakes.structured ? { a: '3', bc: '24' } : '4', status: 'RETRYING', nextRetryAt: '2026-09-29T16:00:00Z', solutionOutline: correct ? null : '$2+2=4$' });
+    }
+    if (path === '/mistakes/today') return reply(mistakes.emptyToday ? [] : [projectMistake()]);
     if (path === '/users') { if (method === 'POST') { const user = { id: 'synthetic-new-user', ...body, studentProfile: null, teacherProfile: null, ownedClassrooms: [], email: null, username: null }; users = [user]; return reply({ user }); } return reply(users); }
     if (path === '/parent/children') return reply([{ id: 'synthetic-link', verified: true, student: { ...student, studentProfile: { grade: 12, school: 'Туршилтын сургууль' }, classroom, attendances: [{ date: '2026-09-26', status: 'PRESENT', classroom }], dailyHomeworkMarks: [{ date: '2026-09-26', status: 'DONE', classroom }], testResults: [{ id: 'synthetic-result', totalScore: 8, maxScore: 10, source: 'ONLINE', createdAt: '2026-09-26', test: { title: 'Туршилтын дүн', type: 'EXAM' } }], payments: [], submissions: [] } }]);
     const emptyPaths = ['/announcements/manage', '/tests', '/books', '/classrooms/synthetic-class/test-sessions', '/tests/my-results', '/attendance/my', '/announcements', '/homework-marks/my', '/me/todo-marking', '/parent/links/pending', '/classrooms/unassigned-students', '/catalog/passes', '/payments', '/users/teachers', '/classrooms/synthetic-class/attendance/history'];

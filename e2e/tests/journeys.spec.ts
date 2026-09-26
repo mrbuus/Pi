@@ -104,7 +104,8 @@ test('09 админ самбар 375px-т хэвтээ гүйлгэхгүй', as
 test('алдааны дэвтэрт шалтгаан сонгоод дахин бодож хадгалах', async ({ page }, info) => {
   const mock = await mockApi(page); await page.goto('/app/mistakes');
   await expect(page.getByRole('heading', { name: 'Алдааны дэвтэр' })).toBeVisible();
-  await page.getByLabel('Алдааны шалтгаан').selectOption('FORMULA');
+  await page.getByRole('button', { name: 'Томьёо мартсан', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Томьёо мартсан', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: '4', exact: true }).click();
   await page.getByRole('button', { name: 'Дахин бодох' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Зөв.' })).toBeVisible();
