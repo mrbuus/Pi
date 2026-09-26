@@ -6,7 +6,7 @@ import GoogleLinkSection from "@/components/profile/GoogleLinkSection";
 import ProfileInfo from "@/components/profile/ProfileInfo";
 import ProfilePhoto from "@/components/profile/ProfilePhoto";
 import { api } from "@/lib/api";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 
 interface Me {
   firstName: string;

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TriangleAlert, Check } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { StudentNote, StudentNoteType, errMsg } from "./types";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart3, CalendarRange, ClipboardList, type LucideIcon } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { useCallback, useEffect, useState } from "react";
 import { api, getRole } from "@/lib/api";
 import BoardView from "./BoardView";

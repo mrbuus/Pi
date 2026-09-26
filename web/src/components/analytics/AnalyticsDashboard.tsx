@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Database } from "lucide-react";
+
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";

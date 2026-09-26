@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import { Meta } from '@/components/ui/Meta';
-import { api, uploadFile } from '@/lib/api';
+import { api } from '@/lib/api';
 import { ImportConfig, ImportResult } from './types';
 import { SectionHeader } from '@/components/ui/Surface';
 

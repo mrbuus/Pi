@@ -40,7 +40,7 @@ function percentColorClass(pct: number): string {
  */
 export default function IndependentProgressTab({ studentId }: { studentId: string }) {
   const resultsQ = useSection<TestResultRow[]>(`/students/${studentId}/test-results`);
-  const results = resultsQ.data ?? [];
+  const results = useMemo(() => resultsQ.data ?? [], [resultsQ.data]);
 
   const stats = useMemo(() => {
     if (results.length === 0) return null;

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, X, Pencil, AlertTriangle, Circle } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import MathText from "@/components/MathText";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 

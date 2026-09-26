@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Check, Upload, X } from "lucide-react";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 import MathText from "../MathText";
@@ -88,8 +88,8 @@ export default function ProblemsPanel({
   }, [chapterId, newProblem, choiceTexts, correctIdx, fillNumberAnswers]);
 
   // debounce-тай draft сохранить (бодлогын текст өөрчлөгдөхөд)
-  const saveDraftDebounced = useCallback(
-    debounce(() => {
+  const saveDraftDebounced = useMemo(
+    () => debounce(() => {
       saveDraft();
       setHasUnsavedChanges(false);
     }, 250),
@@ -104,7 +104,7 @@ export default function ProblemsPanel({
     if (saved) {
       try {
         const draft = JSON.parse(saved);
-        setNewProblem(draft.newProblem || newProblem);
+        setNewProblem((previous) => draft.newProblem || previous);
         setChoiceTexts(draft.choiceTexts || ["", "", "", "", ""]);
         setCorrectIdx(draft.correctIdx || 0);
         setFillNumberAnswers(draft.fillNumberAnswers || {});
@@ -194,10 +194,6 @@ export default function ProblemsPanel({
     }
 
     try {
-      const choiceLabel =
-        isChoice && choiceTexts[correctIdx]
-          ? `(${choiceTexts[correctIdx].trim()})`
-          : "";
       await api("/problems", {
         method: "POST",
         body: {

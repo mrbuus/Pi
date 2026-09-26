@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/StateBlock';
 import { api } from '@/lib/api';
 import { Meta, Dot } from '@/components/ui/Meta';
-import { Trash2, Plus, Save, ChevronDown } from 'lucide-react';
+import { Trash2, Plus, Save } from 'lucide-react';
 
 interface Product {
   id: string;

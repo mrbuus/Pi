@@ -5,13 +5,9 @@ import { api } from '@/lib/api';
 import { BankTransaction, BankMatchStatus } from './types';
 import { SectionHeader, Card } from '@/components/ui/Surface';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StateBlock';
+import { ErrorState, EmptyState } from '@/components/ui/StateBlock';
 import { UserSearch } from './UserSearch';
-import { Loader2, X, Check, AlertCircle } from 'lucide-react';
-
-interface TransactionListProps {
-  refreshKey?: number;
-}
+import { Loader2, X, Check } from 'lucide-react';
 
 const STATUS_LABEL: Record<BankMatchStatus, string> = {
   UNMATCHED: 'Тулгаагүй',
@@ -27,7 +23,7 @@ const STATUS_COLOR: Record<BankMatchStatus, string> = {
   IGNORED: 'bg-error/10 text-error border-error',
 };
 
-export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
+export function TransactionList() {
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);

@@ -1,28 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  DoorOpen,
-  Palmtree,
-} from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Palmtree } from "lucide-react";
 import { api } from "@/lib/api";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { getClassroomColor } from "@/lib/classroomColor";
 import RoomShape from "./RoomShape";
 import EntryActionPanel from "./EntryActionPanel";
-import {
-  addDaysToKey,
-  formatMinutes,
-  SUBJECT_LABEL,
-  todayUBKey,
-  WEEKDAY_LABELS,
-  type WeekDay,
-  type WeekEntry,
-  type WeekResponse,
-} from "./types";
+import { addDaysToKey, formatMinutes, todayUBKey, WEEKDAY_LABELS, type WeekDay, type WeekEntry, type WeekResponse } from "./types";
 
 function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";

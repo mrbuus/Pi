@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import { Card } from '@/components/ui/Surface';
+
 import { api } from '@/lib/api';
 import ProductsManager from './ProductsManager';
 import PurchaseHistory from './PurchaseHistory';
