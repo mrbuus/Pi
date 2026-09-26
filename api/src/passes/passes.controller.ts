@@ -32,6 +32,20 @@ export class PassesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @Get('passes')
+  listAll() {
+    return this.passes.listAll();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('passes/:id/holders')
+  holders(@Param('id') id: string) {
+    return this.passes.holders(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Post('passes')
   create(@Body() dto: CreatePassDto, @Req() req: AuthedRequest) {
     return this.passes.create(dto, {
@@ -74,10 +88,13 @@ export class PassesController {
     @Body() dto: GrantPassDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.passes.grant(id, dto.userId, undefined, {
-      id: req.user.userId,
-      role: req.user.role,
-    });
+    return this.passes.grant(
+      id,
+      dto.userId,
+      undefined,
+      { id: req.user.userId, role: req.user.role },
+      true,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

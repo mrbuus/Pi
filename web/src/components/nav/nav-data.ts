@@ -108,6 +108,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
     { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/finance", label: "Санхүү", icon: "wallet" },
+    { href: "/app/admin/passes", label: "Эрхүүд", icon: "key" },
     { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
     { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
     { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
@@ -129,6 +130,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/admin/classrooms": "admin",
   "/app/admin/finance": "admin",
+  "/app/admin/passes": "admin",
   "/app/admin/store": "admin",
   "/app/tuition": "admin",
   "/app/insights": "class",
