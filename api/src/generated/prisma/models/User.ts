@@ -374,6 +374,7 @@ export type UserWhereInput = {
   submissions?: Prisma.SubmissionListRelationFilter
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkListRelationFilter
   testResults?: Prisma.TestResultListRelationFilter
+  testDrafts?: Prisma.TestDraftListRelationFilter
   predictions?: Prisma.PredictionListRelationFilter
   colorTags?: Prisma.StudentColorTagListRelationFilter
   ownedClassrooms?: Prisma.ClassroomListRelationFilter
@@ -447,6 +448,7 @@ export type UserOrderByWithRelationInput = {
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkOrderByRelationAggregateInput
   testResults?: Prisma.TestResultOrderByRelationAggregateInput
+  testDrafts?: Prisma.TestDraftOrderByRelationAggregateInput
   predictions?: Prisma.PredictionOrderByRelationAggregateInput
   colorTags?: Prisma.StudentColorTagOrderByRelationAggregateInput
   ownedClassrooms?: Prisma.ClassroomOrderByRelationAggregateInput
@@ -523,6 +525,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   submissions?: Prisma.SubmissionListRelationFilter
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkListRelationFilter
   testResults?: Prisma.TestResultListRelationFilter
+  testDrafts?: Prisma.TestDraftListRelationFilter
   predictions?: Prisma.PredictionListRelationFilter
   colorTags?: Prisma.StudentColorTagListRelationFilter
   ownedClassrooms?: Prisma.ClassroomListRelationFilter
@@ -656,6 +659,7 @@ export type UserCreateInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -729,6 +733,7 @@ export type UserUncheckedCreateInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -802,6 +807,7 @@ export type UserUpdateInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -875,6 +881,7 @@ export type UserUncheckedUpdateInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -1358,6 +1365,20 @@ export type UserUpdateOneRequiredWithoutDailyHomeworkMarksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDailyHomeworkMarksInput, Prisma.UserUpdateWithoutDailyHomeworkMarksInput>, Prisma.UserUncheckedUpdateWithoutDailyHomeworkMarksInput>
 }
 
+export type UserCreateNestedOneWithoutTestDraftsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTestDraftsInput, Prisma.UserUncheckedCreateWithoutTestDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTestDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTestDraftsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTestDraftsInput, Prisma.UserUncheckedCreateWithoutTestDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTestDraftsInput
+  upsert?: Prisma.UserUpsertWithoutTestDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTestDraftsInput, Prisma.UserUpdateWithoutTestDraftsInput>, Prisma.UserUncheckedUpdateWithoutTestDraftsInput>
+}
+
 export type UserCreateNestedOneWithoutAttemptSessionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAttemptSessionsInput, Prisma.UserUncheckedCreateWithoutAttemptSessionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAttemptSessionsInput
@@ -1828,6 +1849,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -1900,6 +1922,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -1988,6 +2011,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -2060,6 +2084,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2132,6 +2157,7 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -2204,6 +2230,7 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -2281,6 +2308,7 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -2353,6 +2381,7 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -2441,6 +2470,7 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -2513,6 +2543,7 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2596,6 +2627,7 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -2668,6 +2700,7 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2740,6 +2773,7 @@ export type UserCreateWithoutSmsBatchesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -2812,6 +2846,7 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -2900,6 +2935,7 @@ export type UserUpdateWithoutSmsBatchesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -2972,6 +3008,7 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3044,6 +3081,7 @@ export type UserCreateWithoutSmsTemplatesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -3116,6 +3154,7 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -3204,6 +3243,7 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -3276,6 +3316,7 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3347,6 +3388,7 @@ export type UserCreateWithoutStudentProfileInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -3419,6 +3461,7 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -3507,6 +3550,7 @@ export type UserUpdateWithoutStudentProfileInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -3579,6 +3623,7 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3651,6 +3696,7 @@ export type UserCreateWithoutTeacherProfileInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -3723,6 +3769,7 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -3811,6 +3858,7 @@ export type UserUpdateWithoutTeacherProfileInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -3883,6 +3931,7 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3955,6 +4004,7 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -4027,6 +4077,7 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -4115,6 +4166,7 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -4187,6 +4239,7 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -4259,6 +4312,7 @@ export type UserCreateWithoutParentLinksInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -4331,6 +4385,7 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -4408,6 +4463,7 @@ export type UserCreateWithoutChildLinksInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -4480,6 +4536,7 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -4568,6 +4625,7 @@ export type UserUpdateWithoutParentLinksInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -4640,6 +4698,7 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -4723,6 +4782,7 @@ export type UserUpdateWithoutChildLinksInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -4795,6 +4855,7 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -4868,6 +4929,7 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
@@ -4940,6 +5002,7 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
@@ -5028,6 +5091,7 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
@@ -5100,6 +5164,7 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -5171,6 +5236,7 @@ export type UserCreateWithoutTeacherGroupsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -5243,6 +5309,7 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -5331,6 +5398,7 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -5403,6 +5471,7 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -5475,6 +5544,7 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -5547,6 +5617,7 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -5635,6 +5706,7 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -5707,6 +5779,7 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -5780,6 +5853,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -5852,6 +5926,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -5940,6 +6015,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -6012,6 +6088,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -6083,6 +6160,7 @@ export type UserCreateWithoutAttendancesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -6155,6 +6233,7 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -6243,6 +6322,7 @@ export type UserUpdateWithoutAttendancesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -6315,6 +6395,7 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -6387,6 +6468,7 @@ export type UserCreateWithoutSubmissionsInput = {
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -6459,6 +6541,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -6547,6 +6630,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -6619,6 +6703,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -6691,6 +6776,7 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -6763,6 +6849,7 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -6851,6 +6938,7 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -6922,6 +7010,315 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutTestDraftsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutTestDraftsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutTestDraftsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTestDraftsInput, Prisma.UserUncheckedCreateWithoutTestDraftsInput>
+}
+
+export type UserUpsertWithoutTestDraftsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTestDraftsInput, Prisma.UserUncheckedUpdateWithoutTestDraftsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTestDraftsInput, Prisma.UserUncheckedCreateWithoutTestDraftsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTestDraftsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTestDraftsInput, Prisma.UserUncheckedUpdateWithoutTestDraftsInput>
+}
+
+export type UserUpdateWithoutTestDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTestDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
@@ -6996,6 +7393,7 @@ export type UserCreateWithoutAttemptSessionsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -7068,6 +7466,7 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -7156,6 +7555,7 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -7228,6 +7628,7 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -7299,6 +7700,7 @@ export type UserCreateWithoutTestResultsInput = {
   attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -7371,6 +7773,7 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -7459,6 +7862,7 @@ export type UserUpdateWithoutTestResultsInput = {
   attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -7531,6 +7935,7 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -7604,6 +8009,7 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -7676,6 +8082,7 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -7764,6 +8171,7 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -7836,6 +8244,7 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -7908,6 +8317,7 @@ export type UserCreateWithoutEmailOtpsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -7980,6 +8390,7 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -8068,6 +8479,7 @@ export type UserUpdateWithoutEmailOtpsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -8140,6 +8552,7 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -8211,6 +8624,7 @@ export type UserCreateWithoutAttemptsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -8283,6 +8697,7 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -8371,6 +8786,7 @@ export type UserUpdateWithoutAttemptsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -8443,6 +8859,7 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -8516,6 +8933,7 @@ export type UserCreateWithoutPredictionsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
@@ -8588,6 +9006,7 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
@@ -8676,6 +9095,7 @@ export type UserUpdateWithoutPredictionsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
@@ -8748,6 +9168,7 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -8820,6 +9241,7 @@ export type UserCreateWithoutColorTagsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
@@ -8892,6 +9314,7 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
@@ -8980,6 +9403,7 @@ export type UserUpdateWithoutColorTagsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
@@ -9052,6 +9476,7 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -9124,6 +9549,7 @@ export type UserCreateWithoutStudentNotesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -9196,6 +9622,7 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -9284,6 +9711,7 @@ export type UserUpdateWithoutStudentNotesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -9356,6 +9784,7 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -9427,6 +9856,7 @@ export type UserCreateWithoutUserPassesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -9499,6 +9929,7 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -9587,6 +10018,7 @@ export type UserUpdateWithoutUserPassesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -9659,6 +10091,7 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -9732,6 +10165,7 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -9804,6 +10238,7 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -9881,6 +10316,7 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -9953,6 +10389,7 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -10041,6 +10478,7 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -10113,6 +10551,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -10196,6 +10635,7 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -10268,6 +10708,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -10339,6 +10780,7 @@ export type UserCreateWithoutPaymentsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -10411,6 +10853,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -10499,6 +10942,7 @@ export type UserUpdateWithoutPaymentsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -10571,6 +11015,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -10644,6 +11089,7 @@ export type UserCreateWithoutPurchasesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -10716,6 +11162,7 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -10804,6 +11251,7 @@ export type UserUpdateWithoutPurchasesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -10876,6 +11324,7 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -10948,6 +11397,7 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -11020,6 +11470,7 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -11097,6 +11548,7 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -11169,6 +11621,7 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -11246,6 +11699,7 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -11318,6 +11772,7 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -11395,6 +11850,7 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -11467,6 +11923,7 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -11544,6 +12001,7 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -11616,6 +12074,7 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -11704,6 +12163,7 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -11776,6 +12236,7 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -11859,6 +12320,7 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -11931,6 +12393,7 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -12014,6 +12477,7 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -12086,6 +12550,7 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -12169,6 +12634,7 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -12241,6 +12707,7 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -12324,6 +12791,7 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -12396,6 +12864,7 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -12468,6 +12937,7 @@ export type UserCreateWithoutNotificationsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -12540,6 +13010,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -12628,6 +13099,7 @@ export type UserUpdateWithoutNotificationsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -12700,6 +13172,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -12772,6 +13245,7 @@ export type UserCreateWithoutLearningEventsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -12844,6 +13318,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -12932,6 +13407,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -13004,6 +13480,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -13076,6 +13553,7 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -13148,6 +13626,7 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -13236,6 +13715,7 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -13308,6 +13788,7 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -13380,6 +13861,7 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -13452,6 +13934,7 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -13540,6 +14023,7 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -13612,6 +14096,7 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -13684,6 +14169,7 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -13756,6 +14242,7 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -13844,6 +14331,7 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -13916,6 +14404,7 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -13988,6 +14477,7 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -14060,6 +14550,7 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -14148,6 +14639,7 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -14220,6 +14712,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -14292,6 +14785,7 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -14364,6 +14858,7 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -14452,6 +14947,7 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -14524,6 +15020,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -14596,6 +15093,7 @@ export type UserCreateWithoutStudentGoalsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -14668,6 +15166,7 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -14756,6 +15255,7 @@ export type UserUpdateWithoutStudentGoalsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -14828,6 +15328,7 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -14900,6 +15401,7 @@ export type UserCreateWithoutStreakFreezesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -14972,6 +15474,7 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -15060,6 +15563,7 @@ export type UserUpdateWithoutStreakFreezesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -15132,6 +15636,7 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -15204,6 +15709,7 @@ export type UserCreateWithoutGoogleIdentityInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -15276,6 +15782,7 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -15364,6 +15871,7 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -15436,6 +15944,7 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -15508,6 +16017,7 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -15580,6 +16090,7 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -15668,6 +16179,7 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -15740,6 +16252,7 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -15812,6 +16325,7 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
@@ -15884,6 +16398,7 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
   testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
   predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
   colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
@@ -15972,6 +16487,7 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
@@ -16044,6 +16560,7 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
   dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
   testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
   predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
   colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
@@ -16095,6 +16612,7 @@ export type UserCountOutputType = {
   submissions: number
   dailyHomeworkMarks: number
   testResults: number
+  testDrafts: number
   predictions: number
   colorTags: number
   ownedClassrooms: number
@@ -16141,6 +16659,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   submissions?: boolean | UserCountOutputTypeCountSubmissionsArgs
   dailyHomeworkMarks?: boolean | UserCountOutputTypeCountDailyHomeworkMarksArgs
   testResults?: boolean | UserCountOutputTypeCountTestResultsArgs
+  testDrafts?: boolean | UserCountOutputTypeCountTestDraftsArgs
   predictions?: boolean | UserCountOutputTypeCountPredictionsArgs
   colorTags?: boolean | UserCountOutputTypeCountColorTagsArgs
   ownedClassrooms?: boolean | UserCountOutputTypeCountOwnedClassroomsArgs
@@ -16260,6 +16779,13 @@ export type UserCountOutputTypeCountDailyHomeworkMarksArgs<ExtArgs extends runti
  */
 export type UserCountOutputTypeCountTestResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TestResultWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTestDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TestDraftWhereInput
 }
 
 /**
@@ -16525,6 +17051,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
   dailyHomeworkMarks?: boolean | Prisma.User$dailyHomeworkMarksArgs<ExtArgs>
   testResults?: boolean | Prisma.User$testResultsArgs<ExtArgs>
+  testDrafts?: boolean | Prisma.User$testDraftsArgs<ExtArgs>
   predictions?: boolean | Prisma.User$predictionsArgs<ExtArgs>
   colorTags?: boolean | Prisma.User$colorTagsArgs<ExtArgs>
   ownedClassrooms?: boolean | Prisma.User$ownedClassroomsArgs<ExtArgs>
@@ -16655,6 +17182,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
   dailyHomeworkMarks?: boolean | Prisma.User$dailyHomeworkMarksArgs<ExtArgs>
   testResults?: boolean | Prisma.User$testResultsArgs<ExtArgs>
+  testDrafts?: boolean | Prisma.User$testDraftsArgs<ExtArgs>
   predictions?: boolean | Prisma.User$predictionsArgs<ExtArgs>
   colorTags?: boolean | Prisma.User$colorTagsArgs<ExtArgs>
   ownedClassrooms?: boolean | Prisma.User$ownedClassroomsArgs<ExtArgs>
@@ -16710,6 +17238,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     dailyHomeworkMarks: Prisma.$DailyHomeworkMarkPayload<ExtArgs>[]
     testResults: Prisma.$TestResultPayload<ExtArgs>[]
+    testDrafts: Prisma.$TestDraftPayload<ExtArgs>[]
     predictions: Prisma.$PredictionPayload<ExtArgs>[]
     colorTags: Prisma.$StudentColorTagPayload<ExtArgs>[]
     ownedClassrooms: Prisma.$ClassroomPayload<ExtArgs>[]
@@ -17176,6 +17705,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   submissions<T extends Prisma.User$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dailyHomeworkMarks<T extends Prisma.User$dailyHomeworkMarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dailyHomeworkMarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyHomeworkMarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   testResults<T extends Prisma.User$testResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$testResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  testDrafts<T extends Prisma.User$testDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$testDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   predictions<T extends Prisma.User$predictionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$predictionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PredictionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   colorTags<T extends Prisma.User$colorTagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$colorTagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentColorTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ownedClassrooms<T extends Prisma.User$ownedClassroomsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedClassroomsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassroomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -17972,6 +18502,30 @@ export type User$testResultsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.TestResultScalarFieldEnum | Prisma.TestResultScalarFieldEnum[]
+}
+
+/**
+ * User.testDrafts
+ */
+export type User$testDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TestDraft
+   */
+  select?: Prisma.TestDraftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TestDraft
+   */
+  omit?: Prisma.TestDraftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TestDraftInclude<ExtArgs> | null
+  where?: Prisma.TestDraftWhereInput
+  orderBy?: Prisma.TestDraftOrderByWithRelationInput | Prisma.TestDraftOrderByWithRelationInput[]
+  cursor?: Prisma.TestDraftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TestDraftScalarFieldEnum | Prisma.TestDraftScalarFieldEnum[]
 }
 
 /**

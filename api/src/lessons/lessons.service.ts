@@ -67,7 +67,7 @@ export class LessonsService {
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.test.findMany({
-        where: { chapterId },
+        where: { chapterId, isDraft: false, deletedAt: null },
         select: {
           id: true,
           title: true,

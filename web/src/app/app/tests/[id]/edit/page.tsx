@@ -100,7 +100,7 @@ export default function EditTestPage({
     setDuplicating(true);
     try {
       const copy = await api<{ id: string; title: string }>(`/tests/${id}/duplicate`, { method: "POST" });
-      toast.success(`«${copy.title}» үүслээ. Анги сонгож нийтэлнэ үү.`);
+      toast.success(`«${copy.title}» ноорог болж үүслээ. Анги сонгож хадгалахад нийтлэгдэнэ.`);
       router.push(`/app/tests/${copy.id}/edit`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Хуулж чадсангүй");

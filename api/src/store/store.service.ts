@@ -262,7 +262,7 @@ export class StoreService {
     // refId нь байгаа объект эсэхийг шалгана
     if (kind === ProductKind.TEST) {
       const test = await this.prisma.test.findUnique({ where: { id: refId } });
-      if (!test) throw new NotFoundException('Тест олдсонгүй');
+      if (!test || test.deletedAt || test.isDraft) throw new NotFoundException('Нийтлэгдсэн тест олдсонгүй');
     } else if (kind === ProductKind.BOOK) {
       const book = await this.prisma.book.findUnique({ where: { id: refId } });
       if (!book) throw new NotFoundException('Ном олдсонгүй');
