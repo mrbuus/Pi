@@ -28,6 +28,13 @@ type Preview = {
   ownerId: string;
   expiresAt: number;
   rows: ImportRow[];
+  completed: Map<
+    string,
+    {
+      imported: number;
+      rows: Array<{ rowNumber: number; action: 'NEW' | 'UPDATE'; id: string }>;
+    }
+  >;
 };
 
 const previewId = 'ad13e5a8-8dd3-4efb-a5cf-a7b4df8b0414';
@@ -82,6 +89,7 @@ function setup(initialRow = row()) {
     ownerId,
     expiresAt: Date.now() + 60_000,
     rows: [initialRow],
+    completed: new Map(),
   });
   return {
     service,
@@ -111,6 +119,33 @@ describe('student import service', () => {
         reason: 'Асран хамгаалагчийн утасны дугаарыг шалгана уу.',
       }),
     );
+  });
+
+  it('normalizes country prefixes before one batched identity lookup', async () => {
+    const { service, prisma } = setup();
+    const findMany = jest.fn().mockResolvedValue([{ id: 'existing', phone: '99112233', role: Role.STUDENT, archivedAt: null }]);
+    prisma.user.findMany = findMany;
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Synthetic');
+    sheet.addRow(['Овог', 'Нэр', 'Утас', 'Эцэг эхийн утас', 'Анги/Түвшин']);
+    sheet.addRow(['Тест', 'Жишээ', '+97699112233', '+97688112233', '12-2']);
+    const preview = await service.previewStudentImport(Buffer.from(await workbook.xlsx.writeBuffer()), ownerId);
+    expect(findMany).toHaveBeenCalledTimes(1);
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { phone: { in: ['99112233'] } } }));
+    expect(preview.rows[0]).toMatchObject({ phone: '99112233', guardianPhone: '88112233', status: 'UPDATE', targetUserId: 'existing' });
+  });
+
+  it('limits each import commit to 100 rows', async () => {
+    const { service, transaction } = setup();
+    await expect(
+      service.commitStudentImport(
+        previewId,
+        Array.from({ length: 101 }, (_, index) => index + 1),
+        ownerId,
+        Role.ADMIN,
+      ),
+    ).rejects.toThrow('100 хүртэл мөр');
+    expect(transaction).not.toHaveBeenCalled();
   });
 
   it('rejects other owners and expired previews before opening a transaction', async () => {
@@ -167,6 +202,36 @@ describe('student import service', () => {
     } finally {
       hashMock.mockClear();
     }
+  });
+
+  it('deduplicates concurrent and completed retries of the same selected batch', async () => {
+    const { service, transaction, tx } = setup();
+    tx.user.findUnique.mockResolvedValue(null);
+    const first = service.commitStudentImport(
+      previewId,
+      [2],
+      ownerId,
+      Role.ADMIN,
+    );
+    const retry = service.commitStudentImport(
+      previewId,
+      [2],
+      ownerId,
+      Role.ADMIN,
+    );
+    await expect(Promise.all([first, retry])).resolves.toEqual([
+      {
+        imported: 1,
+        rows: [{ rowNumber: 2, action: 'NEW', id: 'new-student' }],
+      },
+      {
+        imported: 1,
+        rows: [{ rowNumber: 2, action: 'NEW', id: 'new-student' }],
+      },
+    ]);
+    await service.commitStudentImport(previewId, [2], ownerId, Role.ADMIN);
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(tx.auditLog.create).toHaveBeenCalledTimes(1);
   });
 
   it('updates only supplied profile fields and leaves the existing student code untouched', async () => {
