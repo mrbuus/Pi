@@ -92,7 +92,7 @@ export function GroupMembersCard({
             {onRemoveStudent && (
               <button
                 onClick={() => onRemoveStudent(member.student.id)}
-                className="text-xs px-2 py-1 text-error hover:bg-red-50 rounded transition"
+                className="text-xs px-2 py-1 text-error hover:bg-error/10 rounded transition"
               >
                 Хасах
               </button>

@@ -7,7 +7,7 @@ import { SectionHeader, Card } from '@/components/ui/Surface';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StateBlock';
 import { UserSearch } from './UserSearch';
-import { X, Check, AlertCircle } from 'lucide-react';
+import { Loader2, X, Check, AlertCircle } from 'lucide-react';
 
 interface TransactionListProps {
   refreshKey?: number;
@@ -216,7 +216,7 @@ export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
                   >
                     {matchingId === transaction.id ? (
                       <>
-                        <span className="animate-spin">⏳</span>
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                         Холбож байна…
                       </>
                     ) : (
@@ -233,7 +233,7 @@ export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
                   >
                     {matchingId === transaction.id ? (
                       <>
-                        <span className="animate-spin">⏳</span>
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                       </>
                     ) : (
                       <>

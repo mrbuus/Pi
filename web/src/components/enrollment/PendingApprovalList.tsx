@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Card, PageHeader, SectionHeader } from '@/components/ui/Surface';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StateBlock';
@@ -114,8 +115,8 @@ export default function PendingApprovalList() {
                     `${student.grade}-р анги`,
                     `Бүртгүүлсэн: ${registeredDate}`,
                     student.hasConfirmedPayment
-                      ? '✅ Төлбөр CONFIRMED'
-                      : '⚠️ Төлбөргүй',
+                      ? <span className="inline-flex items-center gap-1"><CheckCircle2 size={14} aria-hidden />Төлбөр баталгаажсан</span>
+                      : <span className="inline-flex items-center gap-1"><AlertTriangle size={14} aria-hidden />Төлбөргүй</span>,
                   ]}
                 />
               </div>

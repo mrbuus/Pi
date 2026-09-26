@@ -146,7 +146,7 @@ export function RegisterExternalTeacher() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="w-full py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90 disabled:opacity-50"
         >
           {isLoading ? 'Бүртгүүлж байна...' : 'Бүртгүүлэх'}
         </button>

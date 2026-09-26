@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { TriangleAlert, Wifi, WifiOff, AlertCircle, CheckCircle2, Circle } from "lucide-react";
+import { Settings, TriangleAlert, Wifi, WifiOff, AlertCircle, CheckCircle2, Circle } from "lucide-react";
 
 import { pingApi } from "@/lib/api";
 /* ============================================================================
@@ -250,7 +250,7 @@ export default function ExamIntro({
 
           {/* Түүхий лог */}
           <div className="mt-4 rounded-xl border border-line bg-panel p-4">
-            <p className="text-xs font-semibold text-ink-dim uppercase">⚙ Техникийн тайлбар</p>
+            <p className="text-xs font-semibold text-ink-dim uppercase"><Settings className="inline h-4 w-4" aria-hidden /> Техникийн тайлбар</p>
             <ul className="list-disc pl-5 mt-2 space-y-1 text-xs text-ink-dim">
               <li>Вэб сайт wifi асаах/унтраахыг хянаж чаддаггүй — самбайн хяналтаас хамаарна</li>
               <li>Батерейны API-г ихэнх хөтөч үл дэмжинэ (HTTPS + хязгаартай)</li>

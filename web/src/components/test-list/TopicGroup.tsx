@@ -1,3 +1,4 @@
+import { ChevronRight } from "lucide-react";
 import TestRowItem from "./TestRowItem";
 import { bookColor, type GroupRow } from "./types";
 
@@ -32,7 +33,7 @@ export default function TopicGroup({
           aria-hidden="true"
           className={`text-xs text-ink-dim transition-transform ${expanded ? "rotate-90" : ""}`}
         >
-          ▶
+          <ChevronRight className="h-4 w-4" aria-hidden />
         </span>
         <span className="min-w-0 flex-1 truncate font-bold text-ink">{topic}</span>
         {book && (

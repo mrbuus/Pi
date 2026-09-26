@@ -351,7 +351,7 @@ export default function ProductsManager({
                       {product.title || 'Бүтээгдэхүүн'}
                     </h3>
                     <p className="text-xs text-ink-dim mt-0.5">
-                      Идэвхигүй · {product.purchaseCount} худалдан авалт
+                      <Meta items={['Идэвхгүй', `${product.purchaseCount} худалдан авалт`]} />
                     </p>
                   </div>
                   <span className="text-sm font-medium">

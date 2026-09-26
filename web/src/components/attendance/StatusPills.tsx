@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X } from "lucide-react";
+import { Check, X, Clock } from "lucide-react";
 
 /**
  * Ирцийн 4 төлөв: Ирсэн / Хоцорсон / Тасалсан / Чөлөөтэй.
@@ -25,7 +25,7 @@ export const ATTENDANCE_OPTIONS: readonly AttendanceOption[] = [
   {
     value: "LATE",
     label: "Хоцорсон",
-    icon: "◐",
+    icon: "clock",
     selectedClass: "bg-warning/25 text-warning",
   },
   {
@@ -45,6 +45,7 @@ export const ATTENDANCE_OPTIONS: readonly AttendanceOption[] = [
 function getStatusIcon(icon: string) {
   if (icon === "check") return <Check className="h-4 w-4" aria-hidden />;
   if (icon === "x") return <X className="h-4 w-4" aria-hidden />;
+  if (icon === "clock") return <Clock className="h-4 w-4" aria-hidden />;
   return <span aria-hidden>{icon}</span>;
 }
 

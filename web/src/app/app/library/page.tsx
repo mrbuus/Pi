@@ -6,7 +6,7 @@ import { ChevronUp, ChevronDown, Check, Pencil } from "lucide-react";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import MathText from "@/components/MathText";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
-import { api, getRole, getToken } from "@/lib/api";
+import { api, getRole, ApiError } from "@/lib/api";
 
 interface Chapter {
   id: string;
@@ -207,45 +207,18 @@ function groupChapters(chapters: Chapter[]): TopicGroup[] {
   }));
 }
 
-// ---- Бүлэг сэдвийн бодлого татах — 403 (жинхэнэ түгжээтэй) ба бусад алдааг
-// (сүлжээ/сервер) ялгаж таниулна. api()-ийн энгийн throw new Error(msg) нь
-// HTTP статус кодыг дамжуулдаггүй тул энд шууд fetch хийж res.status шалгана.
+// Only an explicit 403 shows the access-purchase state; other failures remain retryable.
 class ChapterAccessDeniedError extends Error {}
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
-
 async function fetchChapterProblems(chapterId: string): Promise<Problem[]> {
-  const headers: Record<string, string> = {};
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  let res: Response;
   try {
-    res = await fetch(`${API_URL}/chapters/${chapterId}/problems`, { headers });
-  } catch {
-    throw new Error("Сүлжээний алдаа — интернэт холболтоо шалгаад дахин оролдоно уу.");
+    return (await api<Problem[]>("/chapters/" + encodeURIComponent(chapterId) + "/problems")) ?? [];
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      throw new ChapterAccessDeniedError("Энэ бүлгийг үзэх эрхгүй байна — эрх худалдаж авах эсвэл ангид элсэх шаардлагатай");
+    }
+    throw error;
   }
-
-  if (res.status === 403) {
-    throw new ChapterAccessDeniedError(
-      "Энэ бүлгийг үзэх эрхгүй байна — эрх худалдаж авах эсвэл ангид элсэх шаардлагатай",
-    );
-  }
-
-  const data = (await res.json().catch(() => null)) as
-    | Problem[]
-    | { message?: string | string[] }
-    | null;
-
-  if (!res.ok) {
-    const message =
-      data && !Array.isArray(data)
-        ? (Array.isArray(data.message) ? data.message.join(", ") : data.message)
-        : undefined;
-    throw new Error(message ?? `Алдаа ${res.status}`);
-  }
-
-  return (data as Problem[]) ?? [];
 }
 
 export default function LibraryPage() {
