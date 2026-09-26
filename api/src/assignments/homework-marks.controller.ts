@@ -39,6 +39,13 @@ export class HomeworkMarksController {
     );
   }
 
+  // Сурагч: өөрийн сүүлийн 14 хоногийн тэмдэглэгээ (танхимын анги)
+  @Roles(Role.STUDENT)
+  @Get('homework-marks/my')
+  mine(@Req() req: AuthedRequest) {
+    return this.homeworkMarks.mine(req.user.userId);
+  }
+
   // Багш/Админ: тухайн сурагчийн гэрийн даалгаврын тэмдэглэгээний бүтэн түүх
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('students/:id/homework-marks')

@@ -6,6 +6,7 @@ import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import EveningMarking from "@/components/EveningMarking";
 import HomeworkList from "@/components/homework/HomeworkList";
+import MyHomeworkMarks from "@/components/homework/MyHomeworkMarks";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonLine } from "@/components/ui/Skeleton";
 import { Meta } from "@/components/ui/Meta";
@@ -24,6 +25,9 @@ interface AttendanceRow {
   date: string;
   status: string;
   classroom: { name: string };
+}
+interface Me {
+  studentProfile?: { type?: "CLASSROOM" | "ONLINE" } | null;
 }
 interface Announcement {
   id: string;
@@ -85,6 +89,10 @@ export default function StudentDashboard() {
   const attendanceQ = useSection<AttendanceRow[]>("/attendance/my");
   // Зөвхөн танхимын сурагчид төвийн зар буцаана (онлайнд хоосон)
   const announcementsQ = useSection<Announcement[]>("/announcements");
+  // Гэрийн даалгавар 2 загвартай (эзний шийдвэр 2026-09-26): онлайн сурагч
+  // зураг илгээнэ, танхимын сурагч багшийн тэмдэглэгээг харна.
+  const meQ = useSection<Me>("/auth/me");
+  const isOnline = meQ.data?.studentProfile?.type === "ONLINE";
 
   const announcements = announcementsQ.data ?? [];
   const results = resultsQ.data ?? [];
@@ -111,7 +119,15 @@ export default function StudentDashboard() {
         <AnnouncementsSection announcements={announcements} />
       )}
 
-      <HomeworkList />
+      <div id="homework" className="scroll-mt-24">
+        {meQ.status === "loading" && (
+          <section className="rounded-2xl border border-line bg-panel p-6">
+            <LoadingState rows={3} label="Гэрийн даалгавар" />
+          </section>
+        )}
+        {meQ.status === "error" && <ErrorState message={meQ.error} onRetry={meQ.reload} />}
+        {meQ.status === "ready" && (isOnline ? <HomeworkList /> : <MyHomeworkMarks />)}
+      </div>
 
       {/* Оройн тэмдэглэгээ — token-гүй, багшийн оруулсан тестээс (EveningMarking) */}
       <EveningMarking />

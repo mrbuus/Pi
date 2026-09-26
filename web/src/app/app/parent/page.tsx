@@ -5,6 +5,10 @@ import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { AcknowledgeResultDialog } from "@/components/parent/AcknowledgeResultDialog";
 import { Check } from "lucide-react";
+import {
+  HOMEWORK_MARK_OPTIONS,
+  type HomeworkMark,
+} from "@/components/homework/HomeworkMarkPills";
 
 interface ParentLink {
   id: string;
@@ -22,6 +26,14 @@ interface ParentLink {
       status: string;
       classroom: { name: string };
     }[];
+    // Танхимын анги: багшийн өдрийн тэмдэглэгээ (Хийсэн / Дутуу / Хийгээгүй)
+    dailyHomeworkMarks?: {
+      date: string;
+      status: HomeworkMark;
+      comment?: string | null;
+      classroom: { name: string };
+    }[];
+    // Онлайн анги: зураг илгээлт + багшийн баталгаа
     submissions?: {
       state: string;
       note?: string | null;
@@ -73,6 +85,7 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
   const attendance = link.student.attendances ?? [];
   const results = link.student.testResults ?? [];
   const submissions = link.student.submissions ?? [];
+  const homeworkMarks = link.student.dailyHomeworkMarks ?? [];
   const payments = link.student.payments ?? [];
   const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -198,30 +211,62 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
 
         <div>
           <h3 className="mb-3 font-bold text-brand-soft">Сүүлийн даалгаврууд</h3>
-          {submissions.length === 0 && (
+          {submissions.length === 0 && homeworkMarks.length === 0 && (
             <p className="text-sm text-ink-dim">Даалгаврын төлөв алга байна</p>
           )}
-          <div className="space-y-2">
-            {submissions.map((s, i) => {
-              const st = SUB_LABEL[s.state] ?? SUB_LABEL.NOT_DONE;
-              return (
-                <div
-                  key={`${s.assignment.title}-${i}`}
-                  className="rounded-xl border border-line px-4 py-3 text-sm"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-medium">{s.assignment.title}</span>
-                    <span className={`rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}>
-                      {st.text}
-                    </span>
+          {/* Эзний шийдвэр (2026-09-26): танхимын хүүхдэд багшийн тэмдэглэгээ,
+              онлайн хүүхдэд илгээлтийн төлөв. */}
+          {homeworkMarks.length > 0 && (
+            <ul className="space-y-2">
+              {homeworkMarks.map((m) => {
+                const opt = HOMEWORK_MARK_OPTIONS.find((o) => o.value === m.status);
+                if (!opt) return null;
+                const Icon = opt.icon;
+                return (
+                  <li
+                    key={`${m.classroom.name}-${m.date}`}
+                    className="rounded-xl border border-line px-4 py-3 text-sm"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs text-ink-dim">
+                        <Meta items={[m.date.slice(0, 10), m.classroom.name]} />
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${opt.selectedClass}`}
+                      >
+                        <Icon className="h-3 w-3" aria-hidden />
+                        {opt.label}
+                      </span>
+                    </div>
+                    {m.comment && <p className="mt-1 text-xs text-ink-dim">{m.comment}</p>}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {homeworkMarks.length === 0 && submissions.length > 0 && (
+            <div className="space-y-2">
+              {submissions.map((s, i) => {
+                const st = SUB_LABEL[s.state] ?? SUB_LABEL.NOT_DONE;
+                return (
+                  <div
+                    key={`${s.assignment.title}-${i}`}
+                    className="rounded-xl border border-line px-4 py-3 text-sm"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-medium">{s.assignment.title}</span>
+                      <span className={`rounded-full px-2.5 py-0.5 text-[11px] ${st.cls}`}>
+                        {st.text}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-ink-dim">
+                      <Meta items={[s.assignment.classroom.name, s.checkedAt ? s.checkedAt.slice(0, 10) : ""]} />
+                    </p>
                   </div>
-                  <p className="mt-1 text-xs text-ink-dim">
-                    <Meta items={[s.assignment.classroom.name, s.checkedAt ? s.checkedAt.slice(0, 10) : ""]} />
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div>

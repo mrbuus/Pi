@@ -9,10 +9,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 
 /* ============================================================================
- * 🎨 ДАВТАМЖИЙН АНХААРУУЛГА (owner-ийн спек):
+ * ДАВТАМЖИЙН АНХААРУУЛГА (owner-ийн спек):
  *   - Сүүлийн 30 хоногт 3+ удаа ХИЙГЭЭГҮЙ (NOT_DONE)         → амбар
  *   - Сүүлийн 30 хоногт 3+ удаа ДУТУУ (SUBMITTED/RETURNED)    → шар өнгөтэй ойролцоо
  *     боловч ICON-оор ялгагдана (өнгөөр дангаараа биш — иймд ХИЙГЭЭГҮЙ/ДУТУУ хоёулаа
@@ -83,6 +84,7 @@ export default function TeacherHomeworkFrequencyPanel({
   const [rows, setRows] = useState<StudentFreq[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -176,7 +178,7 @@ export default function TeacherHomeworkFrequencyPanel({
     return () => {
       alive = false;
     };
-  }, [assignments]);
+  }, [assignments, tick]);
 
   if (status === "idle") return null;
 
@@ -190,17 +192,10 @@ export default function TeacherHomeworkFrequencyPanel({
         тэмдэглэгдээгүй сурагчид.
       </p>
 
-      {status === "loading" && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Тооцоолж байна…
-        </p>
-      )}
+      {status === "loading" && <LoadingState rows={2} label="Давтамж" />}
 
       {status === "error" && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
-          <span>{error}</span>
-        </div>
+        <ErrorState message={error} onRetry={() => setTick((t) => t + 1)} />
       )}
 
       {status === "ready" && rows.length === 0 && (

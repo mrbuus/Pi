@@ -72,6 +72,19 @@ export class ParentsService {
               orderBy: { date: 'desc' },
               take: 12,
             },
+            // Танхимын анги: багш ангид шалгаад тэмдэглэдэг (DailyHomeworkMark).
+            // Онлайн анги: доорх submissions. Эзний шийдвэр 2026-09-26.
+            dailyHomeworkMarks: {
+              where: { status: { not: null } },
+              select: {
+                date: true,
+                status: true,
+                comment: true,
+                classroom: { select: { name: true } },
+              },
+              orderBy: { date: 'desc' },
+              take: 14,
+            },
             submissions: {
               select: {
                 state: true,

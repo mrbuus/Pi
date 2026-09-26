@@ -14,6 +14,9 @@ import { SetHomeworkMarkDto } from './dto/set-homework-mark.dto';
 // тороор (grid) тэмдэглэдэг байх ёстой. Assignment/Submission-ы "багш
 // даалгавар үүсгээд сурагч илгээх" урсгалаас ялгаатай — DailyHomeworkMark
 // бол зөвхөн "анги + сурагч + өдөр" мөр бүрд НЭГ өнгө + чөлөөт тайлбар.
+/** Сурагчийн самбарт харуулах өгөгдмөл хоног. */
+export const MY_MARKS_DAYS = 14;
+
 @Injectable()
 export class HomeworkMarksService {
   constructor(
@@ -156,6 +159,28 @@ export class HomeworkMarksService {
       orderBy: { date: 'desc' },
     });
     return marks;
+  }
+
+  // Сурагч: ӨӨРИЙН сүүлийн N хоногийн тэмдэглэгээ (танхимын анги).
+  // Эзний шийдвэр (2026-09-26): танхимд багш дэвтрийг ангид шалгаж энэ
+  // загвараар тэмдэглэдэг, онлайнд Assignment/Submission. Өмнө нь сурагч энэ
+  // тэмдэглэгээг огт хардаггүй байв. studentId нь JWT-ээс ирдэг тул эрхийн
+  // нэмэлт шалгалт хэрэггүй — өөр хүний мөр рүү хүрэх зам байхгүй.
+  async mine(studentId: string, days = MY_MARKS_DAYS, now = new Date()) {
+    const span = Math.min(Math.max(Math.trunc(days) || MY_MARKS_DAYS, 1), 60);
+    const from = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (span - 1)),
+    );
+    return this.prisma.dailyHomeworkMark.findMany({
+      where: { studentId, date: { gte: from }, status: { not: null } },
+      select: {
+        date: true,
+        status: true,
+        comment: true,
+        classroom: { select: { id: true, name: true } },
+      },
+      orderBy: { date: 'desc' },
+    });
   }
 
   // PATCH — нэг сурагчийн нэг өдрийн тэмдэглэгээг upsert хийнэ. status болон

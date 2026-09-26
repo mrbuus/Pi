@@ -150,7 +150,7 @@ export default function DashboardGreeting() {
             Шалгалт хай
           </Link>
           <Link
-            href="/app/homework"
+            href="/app/student#homework"
             className="inline-flex items-center justify-center rounded-lg border border-line px-4 py-2.5 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
           >
             Даалгавар

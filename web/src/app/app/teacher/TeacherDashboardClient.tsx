@@ -12,6 +12,7 @@ import AttentionSection, {
 import AttendanceSection from "@/components/TeacherDashboard/AttendanceSection";
 import { ClassroomSelect } from "@/components/TeacherDashboard/ClassroomSelect";
 import AssignmentsSection from "@/components/TeacherDashboard/AssignmentsSection";
+import OnlineHomeworkSection from "@/components/homework/OnlineHomeworkSection";
 import MonitoringSection from "@/components/TeacherDashboard/MonitoringSection";
 import SummarySection from "@/components/TeacherDashboard/SummarySection";
 import UnassignedStudentsSection from "@/components/TeacherDashboard/UnassignedStudentsSection";
@@ -644,6 +645,10 @@ export default function TeacherDashboardClient() {
             <p className="rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-dim">
               Эхлээд анги сонгоно уу
             </p>
+          ) : classrooms.find((c) => c.id === selected)?.type === "ONLINE" ? (
+            // Эзний шийдвэр (2026-09-26): онлайн анги — даалгавар өгөх, зураг
+            // илгээлтийг Батлах / Буцаах. Танхим — Хийсэн / Дутуу / Хийгээгүй.
+            <OnlineHomeworkSection key={selected} classroomId={selected} />
           ) : (
             <AssignmentsSection classroomId={selected} />
           )}

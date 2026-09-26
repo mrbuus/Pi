@@ -4,7 +4,7 @@ import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
 import { Meta } from "@/components/ui/Meta";
 
 /* ============================================================================
- * 📦 Тест/даалгавар бүрийг ЖИЖИГ БОКСОД тус тусад нь харуулна (owner-ийн
+ * Тест/даалгавар бүрийг ЖИЖИГ БОКСОД тус тусад нь харуулна (owner-ийн
  * хүсэлт) — багш хэдэн тест өгснөө нэг харцаар харах боломжтой.
  * Дарахад тухайн даалгаврын сурагч бүрийн илгээлт (roster) доор нь нээгдэнэ.
  * ========================================================================== */
@@ -34,6 +34,15 @@ interface TeacherHomeworkTestCardProps {
 const TYPE_LABEL: Record<string, string> = {
   DAILY: "Өдөр тутмын",
   EXTRA: "Нэмэлт",
+};
+
+// SubmissionState → монгол шошго (ӨС-ийн англи нэрийг багшид харуулахгүй, §6.10)
+const STATE_LABEL: Record<string, string> = {
+  NOT_DONE: "Хийгээгүй",
+  SUBMITTED: "Илгээсэн",
+  DONE_ONLINE: "Баталгаажсан",
+  DONE_IN_CLASS: "Ангид шалгасан",
+  RETURNED: "Буцаасан",
 };
 
 export default function TeacherHomeworkTestCard({
@@ -89,7 +98,7 @@ export default function TeacherHomeworkTestCard({
                   </p>
                   <p className="text-xs text-ink-dim">
                     <Meta items={[
-                      submission.state,
+                      STATE_LABEL[submission.state] ?? submission.state,
                       submission.note
                     ]} />
                   </p>
