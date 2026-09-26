@@ -22,6 +22,7 @@ import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
 import { SaveSessionDto } from './dto/submit-test.dto';
+import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import {
   answerToken,
   buildChoiceOrder,
@@ -99,7 +100,7 @@ function toGradable(row: TestProblemRow): GradableProblem {
 
 @Injectable()
 export class TestsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private mistakes: MistakeCollector) {}
 
   // TODO(followUp): api/src/audit/audit.service.ts бэлэн болмогц энэ
   // helper-ийг хасаад тэрхүү нэгдсэн AuditService-ийг DI-аар ашиглах.
@@ -1345,6 +1346,7 @@ export class TestsService {
           timeSpentSec: typeof m.times[pid] === 'number' ? m.times[pid] : null,
           testId: test.id,
           classroomId: enrollment?.classroomId ?? null,
+          mistakeCollectedAt: (answered && known && !correct) || selfState === SelfState.FAILED || selfState === SelfState.FIXED_AFTER_ERROR ? null : new Date(),
         });
       }
       // Хариу тодорхойгүй бодлогыг Problem.correctRate/attemptCount
@@ -1384,6 +1386,10 @@ export class TestsService {
         },
       }),
     ]);
+
+    // This work happens after the score is committed. A failed collection leaves
+    // the attempt pending for the scheduled collector and never blocks submission.
+    try { await this.mistakes.retryPending(); } catch { /* leave durable pending rows for the next pass */ }
 
     // ТУСДАА: Problem статистик (дүгнэлт хадгалагдсаны дараа).
     // Алдаа гарвал сурагчийн илгээлтийг унагаахгүй, зөвхөн log.

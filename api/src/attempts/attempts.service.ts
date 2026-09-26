@@ -21,6 +21,7 @@ import {
 import { EVENING_MARKING_WINDOW_DAYS } from '../common/marking';
 import { PrismaService } from '../prisma/prisma.service';
 import { EveningReportDto } from './dto/evening-report.dto';
+import { MistakeCollector } from '../mistakes/mistake-collector.service';
 
 // Амжилт = алдаагүй бодсон эсвэл алдаад зассан; буудсан/алдсан = сул тал
 function isSuccess(selfState: SelfState | null, autoCorrect: boolean | null) {
@@ -48,7 +49,7 @@ function fullName(user: { firstName: string; lastName: string }) {
 
 @Injectable()
 export class AttemptsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private mistakes: MistakeCollector) {}
 
   private parseApiDate(value: string): Date {
     try {
@@ -133,6 +134,7 @@ export class AttemptsService {
         selfState: e.selfState,
         timeSpentSec: e.timeSpentSec,
         classroomId: enrollment.classroomId,
+        mistakeCollectedAt: e.selfState === SelfState.FAILED || e.selfState === SelfState.FIXED_AFTER_ERROR ? null : new Date(),
       };
     });
     const rows = [
@@ -151,6 +153,8 @@ export class AttemptsService {
       });
       await tx.attempt.createMany({ data: rows });
     });
+    // Self-report is best-effort; the durable null marker lets the collector retry.
+    try { await this.mistakes.retryPending(); } catch { /* grading/recording must remain available */ }
     return { recorded: rows.length, date: occurredOn };
   }
 

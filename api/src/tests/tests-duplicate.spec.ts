@@ -15,7 +15,7 @@ function setup(src: Record<string, unknown> | null) {
     test: { findUnique: jest.fn(async () => src) },
     $transaction: jest.fn(async (fn: (t: typeof tx) => unknown) => fn(tx)),
   };
-  return { svc: new TestsService(prisma as any), created, createdProblems, tx };
+  return { svc: new TestsService(prisma as any, { retryPending: jest.fn() } as any), created, createdProblems, tx };
 }
 
 const source = {

@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import {
   recommend,
   buildTopicStates,
@@ -10,7 +11,7 @@ import {
 
 @Injectable()
 export class RecommendService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private mistakes: MistakeCollector) {}
 
   /**
    * Сурагчийн ДАРААГИЙН бодлогуудыг санал болгоно.
@@ -166,7 +167,7 @@ export class RecommendService {
     if (!enrollment) throw new NotFoundException('Та идэвхтэй ангид бүртгэлгүй');
 
     // Attempt үүсгэнэ (source = ONLINE_TEST — вэб дээр оролдсон)
-    await this.prisma.attempt.create({
+    const attempt = await this.prisma.attempt.create({
       data: {
         studentId,
         problemId,
@@ -176,8 +177,15 @@ export class RecommendService {
         selfState: selfState as any,
         givenAnswer,
         classroomId: enrollment.classroomId,
+        mistakeCollectedAt: autoCorrect === false || selfState === 'FAILED' || selfState === 'FIXED_AFTER_ERROR' ? null : new Date(),
       },
     });
+    if (autoCorrect === false || selfState === 'FAILED' || selfState === 'FIXED_AFTER_ERROR') {
+      try {
+        const ok = await this.mistakes.collect({ userId: studentId, problemId, source: 'PRACTICE', sourceRefId: attempt.id, givenAnswer });
+        if (ok) await this.prisma.attempt.updateMany({ where: { id: attempt.id, mistakeCollectedAt: null }, data: { mistakeCollectedAt: new Date() } });
+      } catch { /* the submitted practice attempt remains saved and collector can retry */ }
+    }
   }
 
   /** Бодлого амжилттай эсэх (нэгдүүлэлт) */
