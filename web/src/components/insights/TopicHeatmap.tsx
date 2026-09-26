@@ -1,89 +1,41 @@
 "use client";
 
 import { Card, SectionHeader } from "@/components/ui/Surface";
-import type { StudentTopicStats } from "./types";
-import InfoHint from "@/components/ui/InfoHint";
+import { Meta } from "@/components/ui/Meta";
+import type { TopicMastery } from "./types";
 
-interface TopicHeatmapProps {
-  studentTopics: StudentTopicStats[];
-}
-
-export default function TopicHeatmap({ studentTopics }: TopicHeatmapProps) {
-  if (!studentTopics.length) {
-    return (
-      <Card>
-        <SectionHeader title="Сэдвийн ялгаа" />
-        <div className="text-sm text-ink-dim">Өгөгдөл байхгүй</div>
-      </Card>
-    );
-  }
-
-  // Бүх сэдвүүдийн жагсаалтыг цуглуулна
-  const allTopics = Array.from(
-    new Set(
-      studentTopics.flatMap((st) =>
-        st.topicStats.map((t) => t.topicName)
-      )
-    )
-  ).sort();
+export default function TopicHeatmap({ rows }: { rows: TopicMastery[] }) {
+  const topics = Array.from(
+    new Map(rows.flatMap((row) => row.topicMasteries.map((topic) => [topic.topicId, topic.topicName] as const))).entries(),
+  ).sort((a, b) => a[1].localeCompare(b[1], "mn"));
 
   return (
-    <Card>
-      <SectionHeader
-        title="Сэдвийн ялгаа (оноо %)"
-        hint={<InfoHint>Сурагч бүрийн сэдвийн өнгөрүүлэх хувь — өнгөлөх байдлаар харагдана</InfoHint>}
-      />
-
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+    <Card padding="none" className="overflow-hidden">
+      <div className="p-4 sm:p-5">
+        <SectionHeader title="Сурагчийн сэдвийн эзэмшил" hint={<span className="text-sm font-normal text-ink-dim">Хувь болон оролдлогын тоо</span>} />
+      </div>
+      <div className="overflow-x-auto" role="region" aria-label="Сэдвийн эзэмшлийн хүснэгт" tabIndex={0}>
+        <table className="min-w-[640px] w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b border-line">
-              <th className="text-left py-2 px-3 text-ink-dim font-medium sticky left-0 bg-panel z-10 w-40">
-                Сурагч
-              </th>
-              {allTopics.map((topic) => (
-                <th
-                  key={topic}
-                  className="text-center py-2 px-2 text-ink-dim font-medium whitespace-nowrap min-w-20"
-                >
-                  <div className="transform -rotate-45 origin-center whitespace-normal h-24 flex items-end justify-center">
-                    <span className="text-xs">{topic}</span>
-                  </div>
-                </th>
-              ))}
+            <tr className="border-y border-line bg-surface">
+              <th scope="col" className="sticky left-0 z-10 min-w-36 bg-surface px-3 py-3 text-left font-semibold text-ink">Сурагч</th>
+              {topics.map(([id, name]) => <th key={id} scope="col" className="min-w-28 px-3 py-3 text-left font-semibold text-ink">{name}</th>)}
             </tr>
           </thead>
           <tbody>
-            {studentTopics.map((student) => (
-              <tr key={student.studentId} className="border-b border-line hover:bg-panel">
-                <td className="py-3 px-3 font-medium text-ink sticky left-0 bg-surface z-10 w-40 truncate">
-                  {student.studentName}
-                </td>
-                {allTopics.map((topicName) => {
-                  const topicStat = student.topicStats.find(
-                    (t) => t.topicName === topicName
-                  );
-                  const rate = topicStat?.successRate ?? 0;
-                  const percentage = Math.round(rate * 100);
-
-                  // Өнгөний масштаб: 0%=улаан, 100%=ногоон
-                  const hue = (rate * 120).toFixed(0); // 0=улаан, 120=ногоон
-                  const bgColor = `hsl(${hue}, 70%, 75%)`;
-
+            {rows.map((student) => (
+              <tr key={student.studentId} className="border-b border-line last:border-0">
+                <th scope="row" className="sticky left-0 z-10 max-w-40 truncate bg-panel px-3 py-3 text-left font-medium text-ink">{student.studentName}</th>
+                {topics.map(([topicId, topicName]) => {
+                  const item = student.topicMasteries.find((topic) => topic.topicId === topicId);
+                  if (!item) return <td key={topicId} className="px-3 py-3 text-ink-dim">—</td>;
+                  const rate = Math.max(0, Math.min(1, item.masteryRate));
+                  const tone = rate < 0.4 ? "bg-error/15" : rate < 0.7 ? "bg-warning/15" : "bg-success/15";
                   return (
-                    <td
-                      key={`${student.studentId}-${topicName}`}
-                      className="text-center py-3 px-2 relative group"
-                      style={{
-                        backgroundColor: bgColor,
-                      }}
-                    >
-                      <span className="text-xs font-semibold text-ink">
-                        {percentage}%
-                      </span>
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-ink text-on-brand text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-20">
-                        {topicName}: {percentage}%
-                      </div>
+                    <td key={topicId} className={`px-3 py-3 ${tone}`}>
+                      <span className="font-semibold text-ink">{Math.round(rate * 100)}%</span>
+                      <span className="mt-1 block text-xs text-ink-dim">{item.correctCount} зөв, {item.problemCount} бодлого</span>
+                      <span className="sr-only">{student.studentName} — {topicName}</span>
                     </td>
                   );
                 })}
@@ -92,30 +44,7 @@ export default function TopicHeatmap({ studentTopics }: TopicHeatmapProps) {
           </tbody>
         </table>
       </div>
-
-      <div className="mt-4 flex gap-4 text-xs">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-6 h-6 rounded"
-            style={{ backgroundColor: "hsl(0, 70%, 75%)" }}
-          />
-          <span className="text-ink-dim">0% (сөргүү)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div
-            className="w-6 h-6 rounded"
-            style={{ backgroundColor: "hsl(60, 70%, 75%)" }}
-          />
-          <span className="text-ink-dim">50% (дунд)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div
-            className="w-6 h-6 rounded"
-            style={{ backgroundColor: "hsl(120, 70%, 75%)" }}
-          />
-          <span className="text-ink-dim">100% (сайн)</span>
-        </div>
-      </div>
+      <div className="p-4 text-xs text-ink-dim"><Meta items={["Хувь нь хэмжсэн бодлогуудын зөв хариултыг харуулна", "Өнгө нь нэмэлт дохио"]} /></div>
     </Card>
   );
 }

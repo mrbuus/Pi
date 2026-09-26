@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, SectionHeader } from "@/components/ui/Surface";
-import { Meta, Dot } from "@/components/ui/Meta";
-import type { ProblemStats } from "./types";
+import { Meta } from "@/components/ui/Meta";
+import type { ProblemStats } from "./legacy-types";
 
 interface ProblematicProblemsProps {
   problems: ProblemStats[];

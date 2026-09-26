@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, SectionHeader } from "@/components/ui/Surface";
-import { Dot, Meta } from "@/components/ui/Meta";
-import type { TestStats } from "./types";
+import { Meta } from "@/components/ui/Meta";
+import type { TestStats } from "./legacy-types";
 
 interface TestReportCardProps {
   stats: TestStats;

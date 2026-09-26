@@ -2,7 +2,7 @@
 
 import { Card, SectionHeader } from "@/components/ui/Surface";
 import { Meta } from "@/components/ui/Meta";
-import type { ProblemStats } from "./types";
+import type { ProblemStats } from "./legacy-types";
 import InfoHint from "@/components/ui/InfoHint";
 
 interface TopMistakesProps {
