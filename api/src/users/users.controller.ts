@@ -91,6 +91,7 @@ export class UsersController {
       dto.previewId,
       dto.rowNumbers,
       req.user.userId,
+      req.user.role,
     );
   }
 
@@ -100,7 +101,12 @@ export class UsersController {
     @Body() dto: ArchiveStudentDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.users.archiveStudent(id, req.user.userId, dto.reason);
+    return this.users.archiveStudent(
+      id,
+      req.user.userId,
+      dto.reason,
+      req.user.role,
+    );
   }
 
   @Post(':id/unarchive')
@@ -110,7 +116,13 @@ export class UsersController {
     @Body() dto: ArchiveStudentDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.users.archiveStudent(id, req.user.userId, dto.reason, true);
+    return this.users.archiveStudent(
+      id,
+      req.user.userId,
+      dto.reason,
+      req.user.role,
+      true,
+    );
   }
 
   // Шинэ хэрэглэгчийг эрхийг нь шууд сонгож нэг дороос үүсгэнэ

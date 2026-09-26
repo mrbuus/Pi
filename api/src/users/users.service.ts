@@ -167,6 +167,7 @@ export class UsersService {
           reason: string | null;
           grade: number | null;
           section: string | null;
+          targetUserId: string | null;
         }
       >;
     }
@@ -176,6 +177,7 @@ export class UsersService {
     id: string,
     actorId: string,
     reason: string,
+    actorRole: Role,
     restore = false,
   ) {
     const user = await this.prisma.user.findUnique({
@@ -203,7 +205,7 @@ export class UsersService {
     });
     await this.audit.record({
       actorId,
-      actorRole: Role.ADMIN,
+      actorRole,
       action: restore ? 'RESTORE' : 'ARCHIVE',
       entity: 'User',
       entityId: id,
@@ -223,14 +225,18 @@ export class UsersService {
         reason: string | null;
         grade: number | null;
         section: string | null;
+        targetUserId: string | null;
       }
     >;
     for (const row of input) {
       const phone = row.phone.replace(/[\s()-]/g, '');
+      const guardianPhone = (row.guardianPhone ?? '').replace(/[\s()-]/g, '');
       let reason: string | null =
         !row.lastName || !row.firstName || !/^\+?[0-9]{8,15}$/.test(phone)
           ? 'Овог, нэр болон зөв утасны дугаар шаардлагатай.'
-          : null;
+          : guardianPhone && !/^\+?[0-9]{8,15}$/.test(guardianPhone)
+            ? 'Асран хамгаалагчийн утасны дугаарыг шалгана уу.'
+            : null;
       if (!reason && seen.has(phone))
         reason = 'Файл дотор ижил утас давхар байна.';
       seen.add(phone);
@@ -244,7 +250,7 @@ export class UsersService {
       const match = phone
         ? await this.prisma.user.findUnique({
             where: { phone },
-            select: { role: true, archivedAt: true },
+            select: { id: true, role: true, archivedAt: true },
           })
         : null;
       if (!reason && match && match.role !== Role.STUDENT)
@@ -254,8 +260,10 @@ export class UsersService {
       rows.push({
         ...row,
         phone,
+        guardianPhone,
         status: reason ? 'ERROR' : match ? 'UPDATE' : 'NEW',
         reason,
+        targetUserId: match?.id ?? null,
         grade,
         section,
       });
@@ -285,6 +293,7 @@ export class UsersService {
     previewId: string,
     rowNumbers: number[],
     actorId: string,
+    actorRole: Role,
   ) {
     const preview = this.importPreviews.get(previewId);
     if (
@@ -302,104 +311,128 @@ export class UsersService {
     );
     if (chosen.some((r) => !r || r.status === 'ERROR'))
       throw new BadRequestException('Алдаатай мөрийг импортлох боломжгүй.');
-    const saved = await this.prisma.$transaction(async (tx) => {
-      const existingCodes = (
-        await tx.user.findMany({
-          where: { role: Role.STUDENT },
-          select: { studentCode: true },
-        })
-      ).map((r) => r.studentCode);
-      const result: Array<{
-        rowNumber: number;
-        action: 'NEW' | 'UPDATE';
-        id: string;
-      }> = [];
-      for (const row of chosen as Array<NonNullable<(typeof chosen)[number]>>) {
-        const prior = await tx.user.findUnique({
-          where: { phone: row.phone },
-          select: { id: true, role: true, archivedAt: true },
-        });
-        if (prior && (prior.role !== Role.STUDENT || prior.archivedAt))
-          throw new ConflictException(
-            'Бүртгэл өөрчлөгдсөн байна. Урьдчилан харахыг дахин хийнэ үү.',
-          );
-        if (prior) {
-          await tx.user.update({
-            where: { id: prior.id },
-            data: { firstName: row.firstName, lastName: row.lastName },
+    const selectedNewRows = chosen.filter(
+      (row): row is NonNullable<(typeof chosen)[number]> =>
+        !!row && row.status === 'NEW',
+    );
+    // Keep bcrypt work outside the database transaction for large imports.
+    const hashes = new Map<number, string>();
+    for (const row of selectedNewRows)
+      hashes.set(row.rowNumber, await bcrypt.hash(row.phone, 10));
+    const saved = await this.prisma.$transaction(
+      async (tx) => {
+        const existingCodes = (
+          await tx.user.findMany({
+            where: { role: Role.STUDENT },
+            select: { studentCode: true },
+          })
+        ).map((r) => r.studentCode);
+        const result: Array<{
+          rowNumber: number;
+          action: 'NEW' | 'UPDATE';
+          id: string;
+        }> = [];
+        for (const row of chosen as Array<
+          NonNullable<(typeof chosen)[number]>
+        >) {
+          const prior = await tx.user.findUnique({
+            where: { phone: row.phone },
+            select: { id: true, role: true, archivedAt: true },
           });
-          await tx.studentProfile.upsert({
-            where: { userId: prior.id },
-            create: {
-              userId: prior.id,
-              type: StudentType.CLASSROOM,
-              grade: row.grade,
-              section: row.section,
-              fatherPhone: row.guardianPhone || null,
-            },
-            update: {
-              grade: row.grade,
-              section: row.section,
-              fatherPhone: row.guardianPhone || null,
-            },
-          });
-          result.push({
-            rowNumber: row.rowNumber,
-            action: 'UPDATE',
-            id: prior.id,
-          });
-        } else {
-          const code = nextSevenDigitStudentCode(existingCodes);
-          const base = `${row.lastName}.${row.firstName}`
-            .trim()
-            .replace(/\s+/g, '');
-          let username = base;
-          let suffix = 1;
-          while (await tx.user.findUnique({ where: { username } })) {
-            suffix += 1;
-            username = `${base}${suffix}`;
-          }
-          const user = await tx.user.create({
-            data: {
-              role: Role.STUDENT,
-              phone: row.phone,
-              username,
-              firstName: row.firstName,
-              lastName: row.lastName,
-              passwordHash: await bcrypt.hash(row.phone, 10),
-              studentCode: code,
-              studentProfile: {
-                create: {
-                  type: StudentType.CLASSROOM,
-                  grade: row.grade,
-                  section: row.section,
-                  fatherPhone: row.guardianPhone || null,
-                  approvalPending: false,
+          if (
+            (row.status === 'NEW' && prior) ||
+            (row.status === 'UPDATE' &&
+              (!prior || prior.id !== row.targetUserId)) ||
+            (prior && (prior.role !== Role.STUDENT || prior.archivedAt))
+          )
+            throw new ConflictException(
+              'Бүртгэл өөрчлөгдсөн байна. Урьдчилан харахыг дахин хийнэ үү.',
+            );
+          if (prior) {
+            await tx.user.update({
+              where: { id: prior.id },
+              data: { firstName: row.firstName, lastName: row.lastName },
+            });
+            await tx.studentProfile.upsert({
+              where: { userId: prior.id },
+              create: {
+                userId: prior.id,
+                type: StudentType.CLASSROOM,
+                grade: row.grade,
+                section: row.section,
+                fatherPhone: row.guardianPhone || null,
+              },
+              update: {
+                ...(row.grade !== null ? { grade: row.grade } : {}),
+                ...(row.section !== null ? { section: row.section } : {}),
+                ...(row.guardianPhone
+                  ? { fatherPhone: row.guardianPhone }
+                  : {}),
+              },
+            });
+            result.push({
+              rowNumber: row.rowNumber,
+              action: 'UPDATE',
+              id: prior.id,
+            });
+          } else {
+            const code = nextSevenDigitStudentCode(existingCodes);
+            const base = `${row.lastName}.${row.firstName}`
+              .trim()
+              .replace(/\s+/g, '');
+            let username = base;
+            let suffix = 1;
+            while (await tx.user.findUnique({ where: { username } })) {
+              suffix += 1;
+              username = `${base}${suffix}`;
+            }
+            const user = await tx.user.create({
+              data: {
+                role: Role.STUDENT,
+                phone: row.phone,
+                username,
+                firstName: row.firstName,
+                lastName: row.lastName,
+                passwordHash: hashes.get(row.rowNumber)!,
+                studentCode: code,
+                studentProfile: {
+                  create: {
+                    type: StudentType.CLASSROOM,
+                    grade: row.grade,
+                    section: row.section,
+                    fatherPhone: row.guardianPhone || null,
+                    approvalPending: false,
+                  },
                 },
               },
-            },
-            select: { id: true },
-          });
-          existingCodes.push(code);
-          result.push({ rowNumber: row.rowNumber, action: 'NEW', id: user.id });
+              select: { id: true },
+            });
+            existingCodes.push(code);
+            result.push({
+              rowNumber: row.rowNumber,
+              action: 'NEW',
+              id: user.id,
+            });
+          }
         }
-      }
-      await tx.auditLog.create({
-        data: {
-          actorId,
-          actorRole: Role.ADMIN,
-          action: 'IMPORT',
-          entity: 'User',
-          entityId: `student-import:${previewId}`,
-          after: {
-            rowCount: result.length,
-            created: result.filter((r) => r.action === 'NEW').length,
-            updated: result.filter((r) => r.action === 'UPDATE').length,
+        await tx.auditLog.create({
+          data: {
+            actorId,
+            actorRole,
+            action: 'IMPORT',
+            entity: 'User',
+            entityId: `student-import:${previewId}`,
+            after: {
+              rowCount: result.length,
+              created: result.filter((r) => r.action === 'NEW').length,
+              updated: result.filter((r) => r.action === 'UPDATE').length,
+            },
           },
-        },
-      });
-      return result;
-    });
+        });
+        return result;
+      },
+      { maxWait: 10000, timeout: 120000 },
+    );
     this.importPreviews.delete(previewId);
     return { imported: saved.length, rows: saved };
   }
