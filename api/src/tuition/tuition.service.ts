@@ -323,6 +323,17 @@ export class TuitionService {
    * AcademicCalendarDay-ийн амралтаар сунгана.
    * Төлбөргүй -> null
    */
+  async hasVerifiedParentLink(
+    parentId: string,
+    studentId: string,
+  ): Promise<boolean> {
+    const link = await this.prisma.parentLink.findFirst({
+      where: { parentId, studentId, verifiedAt: { not: null } },
+      select: { id: true },
+    });
+    return link !== null;
+  }
+
   async getPaidUntil(studentId: string, classroomId?: string): Promise<Date | null> {
     // Сурагч байгаа эсэх
     const student = await this.prisma.user.findUnique({

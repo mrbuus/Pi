@@ -205,7 +205,7 @@ export class TuitionController {
    */
   @Get('paid-until/:studentId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER, Role.PARENT)
   async getPaidUntil(
     @Param('studentId') studentId: string,
     @NestRequest() req: Request,
@@ -228,12 +228,13 @@ export class TuitionController {
     }
     // PARENT -> өөрийн хүүхдэд
     if (userRole === Role.PARENT) {
-      const parentLink = await this.tuitionService['prisma'].parentLink.findFirst({
-        where: { parentId: userId, studentId: studentId },
-      });
-      if (!parentLink) {
+      const verifiedLink = await this.tuitionService.hasVerifiedParentLink(
+        userId,
+        studentId,
+      );
+      if (!verifiedLink) {
         throw new ForbiddenException(
-          'Та энэ хүүхдийн эцэг эх биш байна',
+          'Эцэг эхийн холбоос баталгаажаагүй байна',
         );
       }
     }
