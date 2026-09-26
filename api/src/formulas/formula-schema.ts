@@ -21,6 +21,8 @@ export const FORMULA_SECTIONS = [
 const SECTIONS = new Set<string>(FORMULA_SECTIONS);
 const MATH_GLYPHS = /[π²³·×÷≤≥≠√∞∈αβ]/u;
 type AnyRecord = Record<string, any>;
+export const RESERVED_FORMULA_SLUGS = new Set(['my', 'sections', 'review', 'stats', 'due', 'offline']);
+export const FORMULA_SLUG_PATTERN = /^(?!my$|sections$|review$|stats$|due$|offline$)[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function extractDelimitedMath(text: string): { expressions: string[]; errors: string[] } {
   const expressions: string[] = [];
@@ -58,7 +60,7 @@ export function validateFormulaFile(json: unknown, knownSlugs: Set<string> = new
     if (!formula || typeof formula !== 'object') { errors.push(`${at} must be an object`); continue; }
     if (typeof formula.slug !== 'string') errors.push(`${at}.slug must match [a-z0-9-]`);
     else {
-      if (!/^[a-z0-9-]+$/.test(formula.slug)) errors.push(`${at}.slug must match [a-z0-9-]`);
+      if (!FORMULA_SLUG_PATTERN.test(formula.slug)) errors.push(`${at}.slug must be a non-reserved hyphenated slug`);
       if (slugs.has(formula.slug)) errors.push(`Duplicate formula slug: ${formula.slug}`);
       slugs.add(formula.slug);
     }
@@ -83,11 +85,13 @@ export function validateFormulaFile(json: unknown, knownSlugs: Set<string> = new
     for (const [quizIndex, quiz] of (formula.quiz ?? []).entries()) {
       if (!quiz || !['blank', 'truefalse'].includes(quiz.type) || typeof quiz.prompt !== 'string' || typeof quiz.answer !== 'string') errors.push(`${at}.quiz[${quizIndex}] has an invalid type, prompt, or answer`);
       else if (quiz.type === 'blank' && (!stringArray(quiz.distractors) || quiz.distractors.length < 2 || quiz.distractors.length > 10 || quiz.distractors.some((value: string) => value.length < 1 || value.length > 500))) errors.push(`${at}.quiz[${quizIndex}] blank requires bounded distractors`);
+      else if (quiz.type === 'blank' && new Set(quiz.distractors).size !== quiz.distractors.length) errors.push(`${at}.quiz[${quizIndex}] distractors must be distinct`);
+      else if (quiz.type === 'blank' && quiz.distractors.includes(quiz.answer)) errors.push(`${at}.quiz[${quizIndex}] distractors must not include the answer`);
       else if (quiz.type === 'truefalse' && (typeof quiz.why !== 'string' || !['true', 'false'].includes(quiz.answer))) errors.push(`${at}.quiz[${quizIndex}] truefalse requires a boolean answer and why`);
     }
     if (formula.widget != null && (typeof formula.widget !== 'string' || !FORMULA_WIDGETS.has(formula.widget))) errors.push(`${at}.widget is unknown`);
     if (MATH_GLYPHS.test(JSON.stringify(formula))) errors.push(`${at} contains a prohibited Unicode math glyph`);
-    if (!stringArray(formula.related) || formula.related.length < 1 || formula.related.length > 30 || formula.related.some((value: string) => !/^[a-z0-9-]{1,120}$/.test(value))) errors.push(`${at}.related must contain bounded formula slugs`);
+    if (!stringArray(formula.related) || formula.related.length < 1 || formula.related.length > 30 || formula.related.some((value: string) => !FORMULA_SLUG_PATTERN.test(value))) errors.push(`${at}.related must contain valid, non-reserved formula slugs`);
     if (!stringArray(formula.keywords) || formula.keywords.length < 1 || formula.keywords.length > 50 || formula.keywords.some((value: string) => value.length < 1 || value.length > 120)) errors.push(`${at}.keywords must be a bounded string array`);
     for (const key of ['explanation', 'mnemonic', 'eeshTip']) if (typeof formula[key] !== 'string' || formula[key].length < 1 || formula[key].length > (key === 'explanation' ? 3000 : 1000)) errors.push(`${at}.${key} must be a bounded nonempty string`);
     if (!Object.hasOwn(formula, 'widget') || (formula.widget !== null && (typeof formula.widget !== 'string' || !FORMULA_WIDGETS.has(formula.widget)))) errors.push(`${at}.widget must be null or a known widget`);

@@ -46,3 +46,63 @@ describe('FormulasService.my', () => {
     expect(prisma.enrollment.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { studentId: 'other', leftAt: null, classroom: { teacherId: 'teacher' } } }));
   });
 });
+
+const validWritePayload = {
+  slug: 'sample-formula', title: 'Sample formula', section: 'trigonometry', order: 1,
+  level: 'CORE', grade: 10, topicSlugs: ['TRIG'], latex: '\\sin x', general: '\\sin x',
+  variants: [], conditions: [], explanation: 'Explanation', derivation: ['Step 1', 'Step 2'],
+  mnemonic: 'Mnemonic', examples: [
+    { problem: 'Find $\\sin x$', steps: ['Use the identity'], answer: '$1$' },
+    { problem: 'Find cosine', steps: ['Use identity'], answer: '$0$' },
+  ], commonMistakes: [], eeshTip: 'Tip', related: ['related-formula'], keywords: ['sine'], widget: null,
+  quiz: [
+    { type: 'blank', prompt: '\\sin x = \\square', answer: '1', distractors: ['0', '2'] },
+    { type: 'truefalse', prompt: '\\sin 0 = 0', answer: 'true', why: 'By definition' },
+  ],
+};
+
+function writeSetup() {
+  const prisma: any = {
+    formula: {
+      findMany: jest.fn().mockResolvedValue([{ slug: 'related-formula' }]),
+      findUnique: jest.fn().mockResolvedValue(null),
+      create: jest.fn().mockResolvedValue({ id: 'new-id' }),
+      update: jest.fn().mockResolvedValue({ id: 'existing-id' }),
+    },
+    formulaSection: { findUnique: jest.fn().mockResolvedValue({ slug: 'trigonometry' }) },
+  };
+  return { prisma, service: new FormulasService(prisma) };
+}
+
+describe('FormulasService formula writes', () => {
+  it('validates KaTeX and quiz payloads before create', async () => {
+    const { service, prisma } = writeSetup();
+    await expect(service.create({ ...validWritePayload, latex: '\\notARealCommand{' } as any)).rejects.toMatchObject({ status: 400 });
+    await expect(service.create({ ...validWritePayload, quiz: [{ type: 'truefalse', prompt: 'q', answer: 'abc', why: 'why' }, validWritePayload.quiz[0]] } as any)).rejects.toMatchObject({ status: 400 });
+    expect(prisma.formula.create).not.toHaveBeenCalled();
+  });
+
+  it('returns clean reference and unique-conflict errors', async () => {
+    const { service, prisma } = writeSetup();
+    await expect(service.create({ ...validWritePayload, related: ['missing-formula'] } as any)).rejects.toMatchObject({ status: 400 });
+    prisma.formula.create.mockRejectedValue({ code: 'P2002' });
+    await expect(service.create(validWritePayload as any)).rejects.toMatchObject({ status: 409 });
+  });
+
+  it('returns 404 for a missing section and rejects null patch fields', async () => {
+    const { service, prisma } = writeSetup();
+    prisma.formulaSection.findUnique.mockResolvedValue(null);
+    await expect(service.create(validWritePayload as any)).rejects.toMatchObject({ status: 404 });
+    await expect(service.update('sample-formula', { title: null } as any)).rejects.toMatchObject({ status: 400 });
+    prisma.formula.findUnique.mockResolvedValue(null);
+    await expect(service.update('missing-formula', { title: 'New name' } as any)).rejects.toMatchObject({ status: 404 });
+    expect(prisma.formula.update).not.toHaveBeenCalled();
+  });
+
+  it('validates the merged full formula on patch and preserves the old row when invalid', async () => {
+    const { service, prisma } = writeSetup();
+    prisma.formula.findUnique.mockResolvedValue({ ...validWritePayload, name: validWritePayload.title, sectionSlug: 'trigonometry', relatedSlugs: validWritePayload.related });
+    await expect(service.update('sample-formula', { latex: '\\invalidCommand{' } as any)).rejects.toMatchObject({ status: 400 });
+    expect(prisma.formula.update).not.toHaveBeenCalled();
+  });
+});

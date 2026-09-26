@@ -65,7 +65,7 @@ async function main() {
         if (existing) await tx.formula.update({ where: { id: existing.id }, data });
         else await tx.formula.create({ data });
       }
-    });
+    }, { maxWait: 10_000, timeout: 60_000 });
     console.log(`Upserted ${sections.size} section(s), ${formulas.length} formula(s).`);
   } finally { await prisma.$disconnect(); }
 }

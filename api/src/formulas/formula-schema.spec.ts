@@ -12,7 +12,7 @@ describe('validateFormulaFile', () => {
   it('rejects duplicate and malformed slugs, missing examples and quizzes', () => {
     const result = validateFormulaFile({ ...valid, formulas: [valid.formulas[0], { ...valid.formulas[0] }, { ...valid.formulas[0], slug: 'bad slug', examples: [], quiz: [] }] });
     expect(result.errors.join(' ')).toMatch(/Duplicate formula slug/);
-    expect(result.errors.join(' ')).toMatch(/slug must match/);
+    expect(result.errors.join(' ')).toMatch(/slug must/);
     expect(result.errors.join(' ')).toMatch(/examples requires/);
     expect(result.errors.join(' ')).toMatch(/quiz requires/);
   });
@@ -22,6 +22,13 @@ describe('validateFormulaFile', () => {
     expect(result.errors.join(' ')).toMatch(/widget is unknown/);
     expect(result.errors.join(' ')).toMatch(/prohibited Unicode/);
     expect(result.errors.join(' ')).toMatch(/references missing/);
+  });
+  it('rejects reserved route slugs, invalid truefalse answers, and non-distinct answer distractors', () => {
+    const formula = valid.formulas[0];
+    const result = validateFormulaFile({ ...valid, formulas: [{ ...formula, slug: 'my', quiz: [{ type: 'truefalse', prompt: 'Q', answer: 'abc', why: 'because' }, { type: 'blank', prompt: 'Q', answer: 'x', distractors: ['x', 'x'] }] }] });
+    expect(result.errors.join(' ')).toMatch(/non-reserved hyphenated slug/);
+    expect(result.errors.join(' ')).toMatch(/boolean answer/);
+    expect(result.errors.join(' ')).toMatch(/distractors must be distinct/);
   });
 });
 

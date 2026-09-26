@@ -2,9 +2,10 @@ import 'reflect-metadata';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize, ArrayMinSize, IsArray, IsDefined, IsIn, IsInt, IsString,
-  Length, Matches, Max, Min, ValidateIf, ValidateNested,
+  Length, Matches, Max, Min, Validate, ValidateIf, ValidateNested,
+  ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface,
 } from 'class-validator';
-import { FORMULA_SECTIONS, FORMULA_TOPICS, FORMULA_WIDGETS } from '../formula-schema';
+import { FORMULA_SECTIONS, FORMULA_SLUG_PATTERN, FORMULA_TOPICS, FORMULA_WIDGETS } from '../formula-schema';
 
 export class FormulaVariantDto {
   @IsString() @Length(1, 120) label!: string;
@@ -17,8 +18,31 @@ export class FormulaExampleDto {
   @IsString() @Length(1, 1000) answer!: string;
 }
 
+@ValidatorConstraint({ name: 'formulaQuizShape', async: false })
+class FormulaQuizShapeConstraint implements ValidatorConstraintInterface {
+  validate(_type: unknown, args: ValidationArguments) {
+    const quiz = args.object as { type?: string; answer?: string; why?: string; distractors?: string[] };
+    if (quiz.type === 'blank') {
+      return Array.isArray(quiz.distractors)
+        && new Set(quiz.distractors).size === quiz.distractors.length
+        && !quiz.distractors.includes(quiz.answer ?? '')
+        && quiz.why === undefined;
+    }
+    if (quiz.type === 'truefalse') {
+      return ['true', 'false'].includes(quiz.answer ?? '')
+        && typeof quiz.why === 'string' && quiz.why.length > 0
+        && quiz.distractors === undefined;
+    }
+    return false;
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    return `${args.property} has an invalid quiz discriminator payload`;
+  }
+}
+
 export class FormulaQuizDto {
-  @IsIn(['blank', 'truefalse']) type!: 'blank' | 'truefalse';
+  @IsIn(['blank', 'truefalse']) @Validate(FormulaQuizShapeConstraint) type!: 'blank' | 'truefalse';
   @IsString() @Length(1, 1000) prompt!: string;
   @IsString() @Length(1, 1000) answer!: string;
   @ValidateIf((value: FormulaQuizDto) => value.type === 'blank')
@@ -28,7 +52,7 @@ export class FormulaQuizDto {
 }
 
 export class FormulaDto {
-  @IsString() @Length(1, 120) @Matches(/^[a-z0-9-]+$/) slug!: string;
+  @IsString() @Length(1, 120) @Matches(FORMULA_SLUG_PATTERN) slug!: string;
   @IsString() @Length(1, 200) title!: string;
   @IsString() @IsIn([...FORMULA_SECTIONS]) section!: string;
   @IsInt() @Min(0) @Max(10000) order!: number;
@@ -45,7 +69,7 @@ export class FormulaDto {
   @IsArray() @ArrayMinSize(2) @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => FormulaExampleDto) examples!: FormulaExampleDto[];
   @IsArray() @ArrayMaxSize(30) @IsString({ each: true }) @Length(1, 500, { each: true }) commonMistakes!: string[];
   @IsString() @Length(1, 1000) eeshTip!: string;
-  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(30) @IsString({ each: true }) @Matches(/^[a-z0-9-]+$/, { each: true }) related!: string[];
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(30) @IsString({ each: true }) @Matches(FORMULA_SLUG_PATTERN, { each: true }) related!: string[];
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(50) @IsString({ each: true }) @Length(1, 120, { each: true }) keywords!: string[];
   @ValidateIf((value: FormulaDto) => value.widget !== null)
   @IsIn([...FORMULA_WIDGETS]) widget!: string | null;

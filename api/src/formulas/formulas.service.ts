@@ -1,8 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Role } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { FormulaDto } from './dto/formula.dto';
 import { FormulaQueryDto } from './dto/formula-query.dto';
+import { validateFormulaPayload } from './formula-validator';
 
 @Injectable()
 export class FormulasService {
@@ -118,12 +119,68 @@ export class FormulasService {
   }
 
   async create(dto: FormulaDto) {
-    const { title, section, related, ...data } = dto;
-    return this.prisma.formula.create({ data: { ...data, name: title, section: { connect: { slug: section } }, relatedSlugs: related, variants: data.variants as unknown as Prisma.InputJsonValue | undefined, conditions: data.conditions as unknown as Prisma.InputJsonValue | undefined, derivation: data.derivation as unknown as Prisma.InputJsonValue | undefined, examples: data.examples as unknown as Prisma.InputJsonValue, commonMistakes: data.commonMistakes as unknown as Prisma.InputJsonValue | undefined, quiz: data.quiz as unknown as Prisma.InputJsonValue } });
+    const knownSlugs = await this.existingSlugs();
+    this.assertValidPayload(dto, knownSlugs);
+    await this.assertReferences(dto.section, dto.related);
+    try {
+      const { title, section, related, ...data } = dto;
+      return await this.prisma.formula.create({ data: { ...data, name: title, section: { connect: { slug: section } }, relatedSlugs: related, variants: data.variants as unknown as Prisma.InputJsonValue, conditions: data.conditions as unknown as Prisma.InputJsonValue, derivation: data.derivation as unknown as Prisma.InputJsonValue, examples: data.examples as unknown as Prisma.InputJsonValue, commonMistakes: data.commonMistakes as unknown as Prisma.InputJsonValue, quiz: data.quiz as unknown as Prisma.InputJsonValue } });
+    } catch (error) { this.rethrowWriteError(error); }
   }
 
   async update(slug: string, dto: Partial<FormulaDto>) {
-    const { title, section, related, variants, conditions, derivation, examples, commonMistakes, quiz, ...data } = dto;
-    return this.prisma.formula.update({ where: { slug }, data: { ...data, ...(title ? { name: title } : {}), ...(related ? { relatedSlugs: related } : {}), ...(section ? { section: { connect: { slug: section } } } : {}), ...(variants ? { variants: variants as unknown as Prisma.InputJsonValue } : {}), ...(conditions ? { conditions: conditions as unknown as Prisma.InputJsonValue } : {}), ...(derivation ? { derivation: derivation as unknown as Prisma.InputJsonValue } : {}), ...(examples ? { examples: examples as unknown as Prisma.InputJsonValue } : {}), ...(commonMistakes ? { commonMistakes: commonMistakes as unknown as Prisma.InputJsonValue } : {}), ...(quiz ? { quiz: quiz as unknown as Prisma.InputJsonValue } : {}) } });
+    if (Object.keys(dto).length === 0) throw new BadRequestException('Patch body must include at least one field');
+    if (Object.entries(dto).some(([key, value]) => value === null && key !== 'widget')) throw new BadRequestException('Null cannot clear required formula fields');
+    const existing = await this.prisma.formula.findUnique({ where: { slug } });
+    if (!existing) throw new NotFoundException('Томьёо олдсонгүй');
+    const payload = {
+      slug: existing.slug, title: dto.title ?? existing.name, section: dto.section ?? existing.sectionSlug,
+      order: dto.order ?? existing.order, level: dto.level ?? existing.level, grade: dto.grade ?? existing.grade,
+      topicSlugs: dto.topicSlugs ?? existing.topicSlugs, latex: dto.latex ?? existing.latex, general: dto.general ?? existing.general,
+      variants: dto.variants ?? existing.variants, conditions: dto.conditions ?? existing.conditions,
+      explanation: dto.explanation ?? existing.explanation, derivation: dto.derivation ?? existing.derivation,
+      mnemonic: dto.mnemonic ?? existing.mnemonic, examples: dto.examples ?? existing.examples,
+      commonMistakes: dto.commonMistakes ?? existing.commonMistakes, eeshTip: dto.eeshTip ?? existing.eeshTip,
+      related: dto.related ?? existing.relatedSlugs, keywords: dto.keywords ?? existing.keywords,
+      widget: Object.hasOwn(dto, 'widget') ? dto.widget : existing.widget, quiz: dto.quiz ?? existing.quiz,
+    };
+    const knownSlugs = await this.existingSlugs();
+    this.assertValidPayload(payload, knownSlugs);
+    await this.assertReferences(payload.section, payload.related);
+    const { title, section, related, variants, conditions, derivation, examples, commonMistakes, quiz, widget, ...data } = payload;
+    if (typeof section !== 'string') throw new BadRequestException('Formula section is required');
+    try {
+      return await this.prisma.formula.update({ where: { slug }, data: { ...data, name: title, relatedSlugs: related, section: { connect: { slug: section } }, variants: variants as Prisma.InputJsonValue, conditions: conditions as Prisma.InputJsonValue, derivation: derivation as Prisma.InputJsonValue, examples: examples as Prisma.InputJsonValue, commonMistakes: commonMistakes as Prisma.InputJsonValue, quiz: quiz as Prisma.InputJsonValue, widget } });
+    } catch (error) { this.rethrowWriteError(error); }
+  }
+
+  private existingSlugs() {
+    return this.prisma.formula.findMany({ where: { slug: { not: null } }, select: { slug: true } })
+      .then((rows) => new Set(rows.map(({ slug }) => slug).filter((value): value is string => typeof value === 'string')));
+  }
+
+  private assertValidPayload(payload: object, knownSlugs: Set<string>) {
+    const errors = validateFormulaPayload(payload as Record<string, unknown>, knownSlugs);
+    if (errors.length) throw new BadRequestException({ message: 'Formula payload failed validation', errors });
+  }
+
+  private async assertReferences(sectionSlug: unknown, relatedSlugs: unknown) {
+    if (typeof sectionSlug !== 'string') throw new BadRequestException('Formula section is required');
+    if (!Array.isArray(relatedSlugs) || relatedSlugs.some((slug) => typeof slug !== 'string')) throw new BadRequestException('Related formulas must be a slug array');
+    const section = await this.prisma.formulaSection.findUnique({ where: { slug: sectionSlug }, select: { slug: true } });
+    if (!section) throw new NotFoundException(`Formula section not found: ${sectionSlug}`);
+    const existing = await this.prisma.formula.findMany({ where: { slug: { in: relatedSlugs } }, select: { slug: true } });
+    const found = new Set(existing.map(({ slug }) => slug));
+    const missing = [...new Set(relatedSlugs)].filter((value) => !found.has(value));
+    if (missing.length) throw new BadRequestException({ message: 'Related formulas do not exist', missing });
+  }
+
+  private rethrowWriteError(error: unknown): never {
+    if (error instanceof Error && 'getStatus' in error) throw error;
+    const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : undefined;
+    if (code === 'P2002') throw new ConflictException('Formula title or slug already exists');
+    if (code === 'P2025') throw new NotFoundException('Formula or section reference not found');
+    if (code === 'P2003') throw new BadRequestException('Formula section reference is invalid');
+    throw error;
   }
 }

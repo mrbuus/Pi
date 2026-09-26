@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { ValidationPipe } from '@nestjs/common';
 import { FormulaDto } from './dto/formula.dto';
 import { FormulaQueryDto, FormulaStudentQueryDto } from './dto/formula-query.dto';
 
@@ -31,6 +32,8 @@ describe('formula DTO validation', () => {
   });
   it('accepts a complete, nested formula payload', async () => {
     expect(await validate(plainToInstance(FormulaDto, payload))).toHaveLength(0);
+    const pipe = new ValidationPipe({ whitelist: true, transform: true });
+    await expect(pipe.transform(payload, { type: 'body', metatype: FormulaDto })).resolves.toMatchObject({ slug: 'trig-example' });
   });
   it('rejects absent full-contract fields and invalid nested examples or quiz discriminators', async () => {
     const missing = await validate(plainToInstance(FormulaDto, {}));
@@ -42,5 +45,9 @@ describe('formula DTO validation', () => {
     const badTrueFalse = await validate(plainToInstance(FormulaDto, { ...payload, quiz: [payload.quiz[0], { type: 'truefalse', prompt: 'x', answer: 'true' }] }));
     expect(JSON.stringify(badBlank)).toMatch(/defined|distractors/i);
     expect(JSON.stringify(badTrueFalse)).toMatch(/defined|why/i);
+    const badShape = await validate(plainToInstance(FormulaDto, { ...payload, slug: 'my', quiz: [{ type: 'blank', prompt: 'x', answer: 'x', distractors: ['x', 'x'] }, payload.quiz[1]] }));
+    expect(JSON.stringify(badShape)).toMatch(/non-reserved|formulaQuizShape/i);
+    const pipe = new ValidationPipe({ whitelist: true, transform: true });
+    await expect(pipe.transform({ ...payload, slug: 'sections' }, { type: 'body', metatype: FormulaDto })).rejects.toThrow();
   });
 });
