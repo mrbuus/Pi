@@ -19,7 +19,7 @@ Codex 5 зэрэг агент ажиллуулж 17 ажил хийнэ. Урс�
 - Унш: STATUS.md (бүхэлд нь, ялангуяа §2 шалгалт, §3 эзний дүрэм, §6 дизайны гэрээ, §8 урхи), CLAUDE.md, web/AGENTS.md, docs/PLATFORM-SPEC.html (GAPS хэсэг), docs/CHATGPT-PROMPTS.html (2–4-р долгион — энэ даалгаврын эх).
 - Next.js 16.2 — сургалтын өгөгдлөөс ЯЛГААТАЙ. Web код бичихээсээ өмнө web/node_modules/next/dist/docs/-оос холбогдох хэсгийг унш.
 - Prisma 7.8 + @prisma/adapter-pg + pg 8. NestJS. Tailwind v4.
-- Суурь шалгалт одоо: api jest 395/395, web build амжилттай, node web/scripts/check-links.mjs → 0 broken. Үүнийг бууруулах ёсгүй.
+- Суурь шалгалт одоо: api jest 411/411, web build амжилттай, node web/scripts/check-links.mjs → 0 broken. Үүнийг бууруулах ёсгүй.
 
 ═══════════════════════════════════════════
 1. ХАТУУ ДҮРЭМ (зөрчвөл PR буцаагдана)
@@ -27,7 +27,8 @@ Codex 5 зэрэг агент ажиллуулж 17 ажил хийнэ. Урс�
 1. main руу push/merge ХОРИОТОЙ. Force-push хориотой. PR бүрийн base = claude/100-dollar-credit-usage-ksqjev. Нэг ажил = нэг салбар = нэг PR (салбарын нэр: codex/night1-<GID>-<богино-нэр>).
 2. Математик бичвэр ҮРГЭЛЖ LaTeX (MathText компонент). π, ², ·, ≤ гэх мэт unicode математик тэмдэгт хориотой.
 3. Emoji, unicode глиф (✓ ✗ → • ★ гэх мэт) хориотой — зөвхөн lucide-react дүрс. Тусгаарлагч цэгийг components/ui/Meta.tsx-ээр.
-4. Өнгө зөвхөн токеноор (bg-brand, text-ink-dim, bg-accent-teal/15, text-success, border-line …). bg-blue-600, #hex, text-green-500 гэх мэт хориотой. Гадны CDN, фонт, зураг хориотой.
+4. Өнгө зөвхөн токеноор (bg-brand, text-ink-dim, bg-accent-teal/15, text-success, border-line …). bg-blue-600, #hex, text-green-500 гэх мэт хориотой. Гадны CDN, зураг хориотой. Фонт аль хэдийн тохирсон (Onest + Unbounded, next/font) — шинэ фонт нэмэхгүй.
+4b. UI-г ЗААВАЛ web/src/components/ui/kit/-ээс (shadcn/ui загвар: Button, Card, Badge, Progress, Tabs, Drawer, Toaster) эхэлж бүтээ — kit/README.md-г унш. Мэдэгдэлд `toast` (sonner). Хуучин components/ui/Button.tsx-ийг ХЭРЭГЛЭХГҮЙ (байхгүй токен ашигладаг). kit-д байхгүй компонент хэрэгтэй бол shadcn/ui-ийн албан эх кодыг загвар болгон kit/ дотор нэм (Radix-ийн шаардлагатай багцыг npm-ээр), зөвхөн манай токеноор.
 5. Web-ээс API дуудахдаа ЗӨВХӨН web/src/lib/api.ts-ийн api() / uploadFile(). Түүхий fetch("/api/…") хориотой (прод дээр вэб Vercel, API Render дээр тул 404 болно).
 6. Mobile-first: 375px өргөнд хэвтээ гүйлгэлтгүй, товч ≥44px. Дэлгэц бүрт loading / empty / error төлөв (components/ui/StateBlock.tsx: LoadingState, EmptyState, ErrorState).
 7. Гараг: эзэн 1=Даваа…7=Ням, ӨС нь JS 0=Ням…6=Бямба. Хөрвүүлэлтийг одоо байгаа туслах функцээр.
@@ -92,8 +93,8 @@ C1. G25 — Архивлах, Excel импорт, экспорт (миграци
   Импорт: /app/admin/students дээр .xlsx оруулах → сервер парсалж УРЬДЧИЛАН ХАРАХ (мөр бүр: шинэ/шинэчлэх/алдаа + шалтгаан) → баталгаажуулахад транзакцаар бичнэ. Багана: Овог, Нэр, Утас, Эцэг эхийн утас, Анги/Түвшин. Сурагчийн код 7 оронтой (2027NNN) — байгаа код хадгалагдана, шинэд одоо байгаа кодын генераторыг ашигла. Нууц үг = утас. api/prisma/import-students.cjs-д ХҮРЭХГҮЙ (эзний 1 удаагийн скрипт) — логикийг хуулж бус, аль болох туслах функцийг нь дахин ашигла эсвэл тусад нь бич.
   Экспорт: GET /students/export.csv (UTF-8 BOM, Excel-д кирилл зөв харагдана). ADMIN, TEACHER_PLUS.
   Хэрэгтэй бол xlsx сан одоо package.json-д байгаа эсэхийг шалга; шинээр нэмэх бол SheetJS-ийн npm хувилбар.
-C2. G26 — «Хэдий хүртэл төлсөн» карт
-  GET /tuition/paid-until/my ба /tuition/paid-until/:studentId бий. Бие даасан компонент web/src/components/payments/PaidUntilCard.tsx: огноо, үлдсэн хоног, 7-оос бага бол анхааруулах өнгө (токен), төлөөгүй бол «Төлбөр хийх» холбоос (/app/student/payments). Эцэг эхэд хүүхэд бүрээр. Самбарт ХОЛБОХГҮЙ (§3) — PR-д бич. Хоосон/алдаа төлөв.
+C2. G26 — «Хэдий хүртэл төлсөн» — ЭЦЭГ ЭХИЙН хэсэг
+  Сурагчийн хэсэг Claude хийсэн (web/src/app/app/student/payments/StudentPaymentsClient.tsx-ийн PaidUntilHero — харж загвар болго). Одоо /tuition/paid-until/:studentId нь PARENT role-д нээлттэй биш: PARENT зөвхөн ӨӨРИЙН БАТАЛГААЖСАН хүүхдийнхийг авах эрхийг backend-д нэм (ParentLink.verified шалгана, тест: өөр хүүхэд → 403). Web: бие даасан компонент web/src/components/payments/PaidUntilCard.tsx (studentId prop), эцэг эхийн самбарт ХОЛБОХГҮЙ — PR-д бич.
 C3. Прод өгөгдлийн LaTeX аудит (ЗӨВХӨН УНШИХ скрипт)
   api/prisma/audit-latex.cjs — DATABASE_URL-ээс Problem бүрийн LaTeX-ийг KaTeX-ээр (web-д ашиглаж буй хувилбар) render хийж алдаатайг JSON/CSV тайлан болгон stdout/файлд гаргана. ӨС-д ЮУ Ч БИЧИХГҮЙ (санамсаргүй бичихээс хамгаалж transaction READ ONLY ашигла). Мэдэгдэж буй алдааны 8 хэлбэрийг ангилж тоол: (a) \{ \} хаалт гэж тоологдсон, (b) \right. цэг устсан, (c) \left/\right хос сонголтуудын хооронд тасарсан, (d) \leqx гэх мэт наалдсан тушаал, (e) төгсгөлийн ганц \, (f) «Амжилт хүсье!» бичвэрт наалдсан, (g) ⤇ тэмдэгт, (h) "- 3" гэж хуваагдсан сөрөг тоо. Засах скрипт БИЧИХГҮЙ — зөвхөн тайлан. Unit тест зохиомол жишээгээр. Ажиллуулах заавар PR-д.
 
