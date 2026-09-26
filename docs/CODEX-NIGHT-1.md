@@ -15,7 +15,7 @@ Codex 5 зэрэг агент ажиллуулж 17 ажил хийнэ. Урс�
 ═══════════════════════════════════════════
 0. ЭХЛЭХИЙН ӨМНӨ (заавал, агент бүр)
 ═══════════════════════════════════════════
-- Repo: mrbuus/Pi. Суурь салбар: claude/100-dollar-credit-usage-ksqjev (хамгийн сүүлийн commit-оос эхэл; одоо 17a8a4a ба түүнээс хойш).
+- Repo: mrbuus/Pi. Суурь салбар: claude/100-dollar-credit-usage-ksqjev (хамгийн сүүлийн commit-оос эхэл; одоо d68cd3a ба түүнээс хойш). Google-ээр нэвтрэх аль хэдийн хийгдсэн (api/src/auth/google) — хүрэхгүй.
 - Унш: STATUS.md (бүхэлд нь, ялангуяа §2 шалгалт, §3 эзний дүрэм, §6 дизайны гэрээ, §8 урхи), CLAUDE.md, web/AGENTS.md, docs/PLATFORM-SPEC.html (GAPS хэсэг), docs/CHATGPT-PROMPTS.html (2–4-р долгион — энэ даалгаврын эх).
 - Next.js 16.2 — сургалтын өгөгдлөөс ЯЛГААТАЙ. Web код бичихээсээ өмнө web/node_modules/next/dist/docs/-оос холбогдох хэсгийг унш.
 - Prisma 7.8 + @prisma/adapter-pg + pg 8. NestJS. Tailwind v4.
