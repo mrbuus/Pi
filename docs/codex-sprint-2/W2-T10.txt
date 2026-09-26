@@ -272,7 +272,7 @@ GET  /formulas/review/stats → { mastered, learning, new, reviewedToday, streak
 # ЧИНИЙ ДААЛГАВАР
 
 ## T10: Томьёо цээжлэх горим: зайтай давталт + тоглоом
-**Долгион 2** (T01-ийн салбараас). **Салбар:** `codex/s2-T10-formula-review`. **Миграци:** `20260928_02_formula_review`.
+**Долгион 2** (суурь салбараас. T01 аль хэдийн нэгтгэгдсэн, 167299f). **Салбар:** `codex/s2-T10-formula-review`. **Миграци:** `20260928_02_formula_review`.
 
 **Судалгааны үндэслэл (PR-д товч бич):** зайтай давталт (spacing effect),
 санаанаас гаргах дасгал (retrieval practice / testing effect), холимог
