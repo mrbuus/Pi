@@ -94,7 +94,6 @@ export class FormulasService {
       if (row.autoCorrect === true) entry.correct += row._count._all;
       if (row._min.occurredOn && (!entry.first || row._min.occurredOn < entry.first)) entry.first = row._min.occurredOn;
       if (row._max.occurredOn && (!entry.last || row._max.occurredOn > entry.last)) entry.last = row._max.occurredOn;
-      if (row._max.occurredOn && (!entry.first || row._max.occurredOn < entry.first)) entry.first = row._max.occurredOn;
       attemptsByProblem.set(row.problemId, entry);
     }
     const sessionTitles = new Map<string, { title: string; submittedAt: Date | null }>();
@@ -120,11 +119,11 @@ export class FormulasService {
 
   async create(dto: FormulaDto) {
     const { title, section, related, ...data } = dto;
-    return this.prisma.formula.create({ data: { ...data, name: title, section: { connect: { slug: section } }, relatedSlugs: related, variants: data.variants as Prisma.InputJsonValue | undefined, conditions: data.conditions as Prisma.InputJsonValue | undefined, derivation: data.derivation as Prisma.InputJsonValue | undefined, examples: data.examples as Prisma.InputJsonValue, commonMistakes: data.commonMistakes as Prisma.InputJsonValue | undefined, quiz: data.quiz as Prisma.InputJsonValue } });
+    return this.prisma.formula.create({ data: { ...data, name: title, section: { connect: { slug: section } }, relatedSlugs: related, variants: data.variants as unknown as Prisma.InputJsonValue | undefined, conditions: data.conditions as unknown as Prisma.InputJsonValue | undefined, derivation: data.derivation as unknown as Prisma.InputJsonValue | undefined, examples: data.examples as unknown as Prisma.InputJsonValue, commonMistakes: data.commonMistakes as unknown as Prisma.InputJsonValue | undefined, quiz: data.quiz as unknown as Prisma.InputJsonValue } });
   }
 
   async update(slug: string, dto: Partial<FormulaDto>) {
     const { title, section, related, variants, conditions, derivation, examples, commonMistakes, quiz, ...data } = dto;
-    return this.prisma.formula.update({ where: { slug }, data: { ...data, ...(title ? { name: title } : {}), ...(related ? { relatedSlugs: related } : {}), ...(section ? { section: { connect: { slug: section } } } : {}), ...(variants ? { variants: variants as Prisma.InputJsonValue } : {}), ...(conditions ? { conditions: conditions as Prisma.InputJsonValue } : {}), ...(derivation ? { derivation: derivation as Prisma.InputJsonValue } : {}), ...(examples ? { examples: examples as Prisma.InputJsonValue } : {}), ...(commonMistakes ? { commonMistakes: commonMistakes as Prisma.InputJsonValue } : {}), ...(quiz ? { quiz: quiz as Prisma.InputJsonValue } : {}) } });
+    return this.prisma.formula.update({ where: { slug }, data: { ...data, ...(title ? { name: title } : {}), ...(related ? { relatedSlugs: related } : {}), ...(section ? { section: { connect: { slug: section } } } : {}), ...(variants ? { variants: variants as unknown as Prisma.InputJsonValue } : {}), ...(conditions ? { conditions: conditions as unknown as Prisma.InputJsonValue } : {}), ...(derivation ? { derivation: derivation as unknown as Prisma.InputJsonValue } : {}), ...(examples ? { examples: examples as unknown as Prisma.InputJsonValue } : {}), ...(commonMistakes ? { commonMistakes: commonMistakes as unknown as Prisma.InputJsonValue } : {}), ...(quiz ? { quiz: quiz as unknown as Prisma.InputJsonValue } : {}) } });
   }
 }
