@@ -108,6 +108,17 @@ function setup(
         return { count: data.length };
       }),
     },
+    problem: {
+      findMany: jest.fn((args: { where: { id: { in: string[] } } }) =>
+        args.where.id.in.map((id) => ({
+          id,
+          format: 'CHOICE',
+          choices: ['A', 'B'],
+          correctAnswer: 'A',
+          choiceOptions: [],
+        })),
+      ),
+    },
     testProblem: {
       deleteMany: jest.fn(() => ({ count: 1 })),
       createMany: jest.fn(() => ({ count: 1 })),
@@ -169,7 +180,7 @@ function setup(
 
 describe('TestsService.updateTest', () => {
   it('өгөөгүй тестийн мэдээлэл, бодлого, ангийг нэг гүйлгээнд бүрэн шинэчилнэ', async () => {
-    const { service, tx, events } = setup();
+    const { service, prisma, tx, events } = setup();
     const result = await service.updateTest(
       'test-1',
       {
@@ -203,7 +214,12 @@ describe('TestsService.updateTest', () => {
     });
     expect(audit.before).toMatchObject({
       access: [{ classroomId: 'class-1' }],
+      problems: [{ problemId: 'problem-1', order: 1, points: 1 }],
     });
+    expect(tx.problem.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: { in: ['problem-2'] } } }),
+    );
+    expect(prisma.problem.findMany).not.toHaveBeenCalled();
     const updateLock = events.find((event) => event.startsWith('lock:'));
     expect(updateLock).toContain('FOR UPDATE');
     expect(events.indexOf(updateLock!)).toBeLessThan(events.indexOf('test-read'));

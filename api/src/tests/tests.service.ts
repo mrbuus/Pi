@@ -74,7 +74,7 @@ type SessionRow = {
 
 type EditableTest = Prisma.TestGetPayload<{
   include: {
-    problems: { select: { problemId: true } };
+    problems: { select: { problemId: true; order: true; points: true } };
     access: true;
   };
 }>;
@@ -172,7 +172,7 @@ export class TestsService {
     const test = await db.test.findUnique({
       where: { id: testId },
       include: {
-        problems: { select: { problemId: true } },
+        problems: { select: { problemId: true, order: true, points: true } },
         access: true,
       },
     });
@@ -249,7 +249,7 @@ export class TestsService {
     if (dto.variantLabel !== undefined) data.variantLabel = dto.variantLabel;
     if (dto.price !== undefined) data.price = dto.price;
 
-    const { updated, test, answerWarning } = await this.prisma.$transaction(async (tx) => {
+    const { updated, answerWarning } = await this.prisma.$transaction(async (tx) => {
       await this.lockTestRow(tx, testId);
       const test = await this.findEditableTest(testId, actorId, actorRole, tx);
       const taken = await this.hasBeenTaken(testId, tx);
@@ -281,7 +281,7 @@ export class TestsService {
 
       const problemIds = dto.problems ?? test.problems;
       const answerWarning = dto.classroomIds?.length
-        ? await this.checkAnswerCoverage(problemIds)
+        ? await this.checkAnswerCoverage(problemIds, tx)
         : undefined;
       if (dto.problems !== undefined) {
         await tx.testProblem.deleteMany({ where: { testId } });
@@ -325,7 +325,7 @@ export class TestsService {
         updated,
         tx,
       );
-      return { updated, test, answerWarning };
+      return { updated, answerWarning };
     });
     return answerWarning ? { ...updated, answerWarning } : updated;
   }
@@ -336,6 +336,7 @@ export class TestsService {
   // ашиглана — логик хуулбарлахгүй, нэг эх сурвалжтай байлгана.
   private async checkAnswerCoverage(
     problems: { problemId: string }[],
+    db: TestDatabase = this.prisma,
   ): Promise<
     | { withoutAnswerCount: number; totalProblems: number; message: string }
     | undefined
@@ -343,7 +344,7 @@ export class TestsService {
     const total = problems.length;
     if (total === 0) return undefined;
 
-    const rows = await this.prisma.problem.findMany({
+    const rows = await db.problem.findMany({
       where: { id: { in: problems.map((p) => p.problemId) } },
       select: {
         id: true,
