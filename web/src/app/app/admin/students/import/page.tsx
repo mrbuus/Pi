@@ -119,7 +119,7 @@ export default function StudentImportPage() {
         </p>
       </header>
 
-      <section className="space-y-3 rounded-2xl border border-line bg-panel p-4">
+      <section className="space-y-3 chunky p-4">
         <label className="flex min-h-14 items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
           <span className="flex-1 text-sm">
             {file?.name ?? ".xlsx файл сонгох (5 MB хүртэл)"}
