@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertCircle, ArrowLeft, ArrowRight, TriangleAlert } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, TriangleAlert, Archive, RotateCcw, Download } from "lucide-react";
 import { Dot, MetaTitle } from "@/components/ui/Meta";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
 import {
   StudentListItem,
@@ -47,6 +47,7 @@ export default function StudentsDirectory() {
   const role = getRole();
   const canSeeMoney = role === "ADMIN" || role === "TEACHER_PLUS";
 
+  const [showArchived, setShowArchived] = useState(false);
   const [students, setStudents] = useState<StudentListItem[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +70,7 @@ export default function StudentsDirectory() {
     // Backend GET /users?role=STUDENT-г найдаж хайх боловч, аюулгүйн нэмэлт
     // хамгаалалт болгож client талд дахин role шүүнэ (жагсаалт огт хоосон биш
     // хэрнээ ADMIN/багш зэрэг холилдсон мөр орж ирвэл дэлгэц эвдэрхгүй байх).
-    api<StudentListItem[]>("/users?role=STUDENT")
+    api<StudentListItem[]>(`/users?role=STUDENT${showArchived ? "&archived=true" : ""}`)
       .then((rows) => setStudents(rows.filter((r) => r.role === "STUDENT")))
       .catch((e) => setError(errMsg(e)))
       .finally(() => setLoading(false));
@@ -90,9 +91,11 @@ export default function StudentsDirectory() {
           /* заавал биш — төлбөрийн төлөв багана "—" хэвээр үлдэнэ */
         });
     }
-  }, [canSeeMoney]);
+  }, [canSeeMoney, showArchived]);
 
-  useEffect(load, [load]);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
 
   // ---- Шүүлтүүрийн сонголтуудыг АЧААЛСАН ДАТААС ГАРГАНА — тусдаа endpoint-оос
   // хамааралгүй, backend-ийн select ямар ч байсан ажиллана.
@@ -169,7 +172,9 @@ export default function StudentsDirectory() {
         <h1 className="text-2xl font-extrabold text-ink">Сурагчийн жагсаалт</h1>
         <p className="mt-1 text-sm text-ink-dim">
           {students ? `Нийт ${students.length} сурагч` : "Ачаалж байна…"}
-          {unassignedIds.size > 0 && (
+          {role === "ADMIN" && <span className="ml-2 inline-flex flex-wrap gap-2"><button type="button" onClick={() => setShowArchived(v => !v)} className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold">{showArchived ? "Идэвхтэй" : "Архив"}</button><Link href="/app/admin/students/import" className="inline-flex min-h-10 items-center rounded-lg border border-line px-3 text-sm font-semibold">Excel импорт</Link></span>}
+          {canSeeMoney && <button type="button" onClick={async () => { try { const csv = await api<string>("/students/export.csv", { responseType: "text" }); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); const a = document.createElement("a"); a.href = url; a.download = "students.csv"; a.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); } catch (e) { setError(errMsg(e)); } }} className="ml-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold"><Download size={15} aria-hidden/>CSV татах</button>}
+          {unassignedIds.size > 0 && !showArchived && (
             <>
               <Dot />
               <button
@@ -339,11 +344,8 @@ export default function StudentsDirectory() {
                     <th scope="col" className="px-3 py-2 font-semibold">
                       Салбар
                     </th>
-                    {canSeeMoney && (
-                      <th scope="col" className="px-3 py-2 font-semibold">
-                        Төлбөрийн төлөв
-                      </th>
-                    )}
+                    {canSeeMoney && <th scope="col" className="px-3 py-2 font-semibold">Төлбөрийн төлөв</th>}
+                    {role === "ADMIN" && <th scope="col" className="px-3 py-2 font-semibold">Үйлдэл</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -398,6 +400,7 @@ export default function StudentsDirectory() {
                             )}
                           </td>
                         )}
+                        {role === "ADMIN" && <td className="px-3 py-2"><button type="button" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-line px-2 text-xs font-semibold" onClick={async () => { const reason = window.prompt(s.archivedAt ? "Сэргээх шалтгаан" : "Архивлах шалтгаан"); if (reason === null || !reason.trim()) return; try { await api(`/users/${s.id}/${s.archivedAt ? "unarchive" : "archive"}`, { method: "POST", body: { reason } }); load(); } catch (e) { setError(errMsg(e)); } }}>{s.archivedAt ? <><RotateCcw size={14}/>Сэргээх</> : <><Archive size={14}/>Архивлах</>}</button></td>}
                       </tr>
                     );
                   })}
