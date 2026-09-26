@@ -8,12 +8,10 @@
 #   • Диск байхгүй тул байршуулсан файл redeploy бүрт АЛГА БОЛДОГ
 #   • Идэвхгүй үед сервис унтардаг (эхний хүсэлт удаан ирдэг)
 
-databases:
-  - name: pimn-db
-    databaseName: pimn
-    user: pimn
-    # ⚠️ 30 хоногийн дараа устана → basic-256mb буюу дээш рүү сайжруулна
-    plan: free
+# Прод өгөгдлийн сан Render дээр БИШ — Supabase (үнэгүй, хугацаагүй) дээр
+# (2026-09-26). Render-ийн үнэгүй Postgres 30 хоногийн дараа устдаг бөгөөд
+# өмнөх `pimn-db` яг ингэж устсан. DATABASE_URL-ийг Render dashboard-оос
+# гараар тохируулна (доор sync: false). Дэлгэрэнгүй: STATUS.md §4.
 
 services:
   - type: web
@@ -49,10 +47,13 @@ services:
       #    env-ээр удирддаг (доор). Гадаад PgBouncer/Supavisor ашиглах шаардлага
       #    гарвал л DATABASE_URL-д `?pgbouncer=true&connection_limit=..` нэмнэ —
       #    api/.env.example-д дэлгэрэнгүй тайлбарласан.
+      # Supabase Session pooler (Render free = IPv4 → Direct холболт ажиллахгүй):
+      #   postgresql://postgres.<ref>:<нууц>@aws-0-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require&uselibpqcompat=true
+      # `uselibpqcompat=true` ЗААВАЛ: pg 8.x нь sslmode=require-ийг verify-full гэж
+      # ойлгодог, Supabase-ийн гэрчилгээ Node-ийн итгэмжлэлд байхгүй тул холболт
+      # чимээгүй унаж бүх endpoint 500 болно (STATUS §8.5).
       - key: DATABASE_URL
-        fromDatabase:
-          name: pimn-db
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
 

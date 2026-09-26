@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 /* ============================================================================
@@ -90,7 +91,7 @@ interface TeacherHomeworkCalendarProps {
 }
 
 /**
- * 📅 Багшийн даалгаврын хуанли — сар/өдрөөр сонгож, өмнөх хичээлүүдийн
+ * Багшийн даалгаврын хуанли — сар/өдрөөр сонгож, өмнөх хичээлүүдийн
  * даалгаврыг эргэн харах боломжтой. Долоо хоногийн өдөр ТОДОРХОЙ харагдана.
  */
 export default function TeacherHomeworkCalendar({
@@ -165,9 +166,9 @@ export default function TeacherHomeworkCalendar({
           type="button"
           onClick={goPrevMonth}
           aria-label="Өмнөх сар"
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:bg-ink/5"
         >
-          ‹
+          <ChevronLeft className="h-4 w-4" aria-hidden />
         </button>
         <span className="text-sm font-bold text-brand-soft">
           {monthLabel(viewYear, viewMonth)}
@@ -176,9 +177,9 @@ export default function TeacherHomeworkCalendar({
           type="button"
           onClick={goNextMonth}
           aria-label="Дараагийн сар"
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-lg transition hover:bg-ink/5"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:bg-ink/5"
         >
-          ›
+          <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
 

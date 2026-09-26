@@ -37,7 +37,7 @@ export class StoreController {
     @Request() req: RequestWithUser,
     @Body() dto: PurchaseDto,
   ) {
-    return this.storeService.purchase(req.user.id, dto.productItemId, dto.paymentId);
+    return this.storeService.purchase(req.user.userId, dto.productItemId, dto.paymentId);
   }
 
   /**
@@ -46,7 +46,7 @@ export class StoreController {
   @UseGuards(JwtAuthGuard)
   @Get('my-purchases')
   myPurchases(@Request() req: RequestWithUser) {
-    return this.storeService.myPurchases(req.user.id);
+    return this.storeService.myPurchases(req.user.userId);
   }
 
   /**
@@ -63,7 +63,7 @@ export class StoreController {
       dto.kind as any, // ProductKind enum
       dto.refId,
       dto.price,
-      req.user.id,
+      req.user.userId,
       req.user.role,
       dto.includesVideo ?? false,
     );
@@ -81,7 +81,7 @@ export class StoreController {
   ) {
     return this.storeService.deactivateProduct(
       productItemId,
-      req.user.id,
+      req.user.userId,
       req.user.role,
     );
   }
@@ -100,7 +100,7 @@ export class StoreController {
     return this.storeService.updatePrice(
       productItemId,
       dto.price,
-      req.user.id,
+      req.user.userId,
       req.user.role,
     );
   }

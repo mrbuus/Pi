@@ -62,7 +62,7 @@ export class TuitionController {
     @Body() dto: CreateRefundDto,
     @NestRequest() req: Request,
   ) {
-    const userId = (req.user as any).id;
+    const userId = (req.user as any).userId;
     return this.tuitionService.createRefund(
       dto.studentId,
       dto.classroomId,
@@ -93,7 +93,7 @@ export class TuitionController {
     @Param('id') refundId: string,
     @NestRequest() req: Request,
   ) {
-    const userId = (req.user as any).id;
+    const userId = (req.user as any).userId;
     return this.tuitionService.approveRefund(refundId, userId);
   }
 
@@ -109,7 +109,7 @@ export class TuitionController {
     @Body() dto: MarkAsPaidDto,
     @NestRequest() req: Request,
   ) {
-    const userId = (req.user as any).id;
+    const userId = (req.user as any).userId;
     return this.tuitionService.markAsPaid(refundId, userId, dto.paymentMethod);
   }
 
@@ -125,7 +125,7 @@ export class TuitionController {
     @Body() dto: CancelRefundDto,
     @NestRequest() req: Request,
   ) {
-    const userId = (req.user as any).id;
+    const userId = (req.user as any).userId;
     return this.tuitionService.cancelRefund(refundId, userId, dto.cancelReason);
   }
 
@@ -134,7 +134,8 @@ export class TuitionController {
    * GET /tuition/refund/:id
    */
   @Get('refund/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS) // сурагчийн нэр, буцаалтын дүн — ажилтанд л (G03)
   async getRefund(@Param('id') refundId: string) {
     return this.tuitionService.getRefund(refundId);
   }
@@ -144,7 +145,8 @@ export class TuitionController {
    * GET /tuition/refunds?studentId&classroomId&status&limit&offset
    */
   @Get('refunds')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS) // сурагчийн нэр, буцаалтын дүн — ажилтанд л (G03)
   async listRefunds(
     @Query('studentId') studentId?: string,
     @Query('classroomId') classroomId?: string,
@@ -169,7 +171,7 @@ export class TuitionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.STUDENT)
   async getMyPaidUntil(@NestRequest() req: Request) {
-    const userId = (req.user as any).id;
+    const userId = (req.user as any).userId;
     const paidUntil = await this.tuitionService.getPaidUntil(userId);
     return { paidUntil };
   }
@@ -185,7 +187,7 @@ export class TuitionController {
     @Param('studentId') studentId: string,
     @NestRequest() req: Request,
   ) {
-    const userId = (req.user as any).id;
+    const userId = (req.user as any).userId;
     const userRole = (req.user as any).role;
 
     // TEACHER → өөрийн ангийн сурагчид л

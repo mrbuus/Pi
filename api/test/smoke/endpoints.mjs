@@ -39,6 +39,35 @@ const INTENTIONALLY_PUBLIC = new Map([
   ],
 ]);
 
+/**
+ * Сурагч ХЭЗЭЭ Ч амжилттай хариу авах ёсгүй маршрутууд (мөнгө, хувийн
+ * мэдээлэл, удирдлага). Анонимыг шалгах нь хангалтгүй — 2026-09-26-нд
+ * /finance/report, /tuition/refunds нэвтэрсэн сурагчид нээлттэй байсныг
+ * зөвхөн кодыг уншиж олсон (G02–G03). Энэ жагсаалт тэрийг дахин барина.
+ */
+const STAFF_ONLY_PREFIXES = [
+  '/api/finance',
+  '/api/tuition/refund',
+  '/api/tuition/refunds',
+  '/api/audit',
+  '/api/analytics',
+  '/api/insights',
+  '/api/sms',
+  '/api/reconcile',
+  '/api/store/admin',
+  '/api/payments/outstanding',
+  '/api/payments/months',
+  '/api/payments/student',
+];
+const STAFF_ONLY_EXACT = new Set(['GET /api/payments', 'GET /api/users']);
+
+function isStaffOnly(method, path) {
+  return (
+    STAFF_ONLY_EXACT.has(`${method} ${path}`) ||
+    STAFF_ONLY_PREFIXES.some((p) => path === p || path.startsWith(p + '/'))
+  );
+}
+
 const args = process.argv.slice(2);
 const BASE = valueOf("--base") ?? "http://localhost:3000";
 const ONLY = valueOf("--only"); // жишээ: --only /api/sms
@@ -135,6 +164,7 @@ async function main() {
 
   const serverErrors = [];
   const unprotected = [];
+  const studentLeaks = [];
   const slow = [];
   let checked = 0;
 
@@ -156,6 +186,13 @@ async function main() {
       ) {
         unprotected.push({ ...route, status: r.status });
       }
+      if (
+        actor === "student" &&
+        (r.status === 200 || r.status === 201) &&
+        isStaffOnly(route.method, route.path)
+      ) {
+        studentLeaks.push({ ...route, status: r.status });
+      }
       if (r.ms > 3000) slow.push({ ...route, actor, ms: r.ms });
     }
   }
@@ -170,10 +207,15 @@ async function main() {
     unprotected,
     (e) => `${e.method} ${e.path} → ${e.status}`,
   );
+  report(
+    "🔴 СУРАГЧИД НЭЭЛТТЭЙ (зөвхөн ажилтны маршрут сурагчид 2xx буцаав)",
+    studentLeaks,
+    (e) => `${e.method} ${e.path} → ${e.status}`,
+  );
   report("🟡 УДААН (>3с)", slow, (e) => `${e.method} ${e.path} [${e.actor}] ${e.ms}ms`);
 
-  const failed = serverErrors.length > 0;
-  console.log(failed ? "\nҮР ДҮН: АЛДААТАЙ" : "\nҮР ДҮН: серверийн алдаагүй");
+  const failed = serverErrors.length > 0 || studentLeaks.length > 0;
+  console.log(failed ? "\nҮР ДҮН: АЛДААТАЙ" : "\nҮР ДҮН: серверийн алдаагүй, эрхийн задралгүй");
   process.exit(failed ? 1 : 0);
 }
 

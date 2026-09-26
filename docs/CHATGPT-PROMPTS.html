@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi.mn — ChatGPT агентын даалгаврууд</title>
+<meta name="description" content="ChatGPT Codex-ийн зэрэг ажиллах агентуудад зориулсан дэлгэрэнгүй prompt багц: 4 долгион, файлын эзэмшилтэй.">
+<script>
+/* =====================================================================
+   ӨГӨГДӨЛ — энэ хэсгийг л засна. Доорх бүх харагдац эндээс үүснэ.
+   Бичвэрт backtick болон доллар+хаалт бүү оруул (template literal).
+   R`...` = String.raw — backslash-ийг яг байгаагаар нь үлдээнэ.
+   ===================================================================== */
+const R = String.raw;
+const BASE = "claude/100-dollar-credit-usage-ksqjev";
+
+const COMMON = R`# Pi.mn — НИЙТЛЭГ КОНТЕКСТ (бүх агентад)
+
+Та Pi.mn төсөл дээр ажиллах программист агент. Энэ блок бүх даалгаварт хамаарна. Таны тусгай даалгавар энэ блокийн ДАРАА ирнэ. Эхлээд хоёуланг бүтэн уншаад дараа нь код бич.
+
+## 1. Төсөл
+Pi.mn — «Шинэ Ирээдүйн Эзэд» сургалтын төвийн дотоод платформ: ЭЕШ-ийн бэлтгэл, математикийн хоцрогдол арилгах танхимын сургалт, онлайн хичээл. ~700 сурагч, 16 ажилтан, эцэг эхчүүд. Хэрэглэгчдийн ихэнх нь ГАР УТАСНААС ордог. UI бүхэлдээ монгол хэлээр.
+Эрхүүд: ADMIN, TEACHER_PLUS, TEACHER, STUDENT, PARENT, BUYER. Мөнгө, SMS, эрх солих үйлдэл зөвхөн ADMIN.
+
+Репо: github.com/mrbuus/Pi
+Суурь branch: claude/100-dollar-credit-usage-ksqjev — PR-ээ ЗААВАЛ энэ branch руу нээнэ.
+main руу ХЭЗЭЭ Ч push хийхгүй, PR нээхгүй: Render main-ийг шууд прод руу deploy хийдэг.
+
+Эх сурвалж баримт (кодыг бичихээсээ өмнө унш):
+- STATUS.md — §3 эзний хатуу дүрэм, §6 дизайны гэрээ, §8 урхинууд. Энэ блоктой зөрчилдвөл STATUS.md давамгайлна.
+- docs/PLATFORM-SPEC.html — модуль, эрхийн матриц, API каталог, цоорхойн бүртгэл (G01–G41).
+- web/AGENTS.md — Next.js-ийн хувилбарын анхааруулга.
+
+## 2. Стек
+- api/ — NestJS 11 + Prisma 7 + PostgreSQL. Prisma client: api/src/generated/prisma (npx prisma generate). Глобал префикс нь api (main.ts дээр setGlobalPrefix). Модуль бүр api/src/<нэр>/.
+- web/ — Next.js 16.2 App Router + React 19 + Tailwind v4 (STATUS.md-д «15» гэж бичсэн ч package.json-д 16.2.9). Энэ хувилбарын API таны мэдэхээс өөр байж болно — эргэлзвэл web/node_modules/next/dist/docs/-ийг унш.
+- Node 22 (api/.nvmrc, web/.nvmrc).
+- Клиентийн сүлжээ: web/src/lib/api.ts — api<T>(path, {method, body, auth}), uploadFile(file), fileUrl(key), getToken(), getRole(), homeForRole(role).
+
+## 3. Эзний ХАТУУ дүрэм — зөрчвөл PR хүчингүй
+1. Математик бичвэр ҮРГЭЛЖ LaTeX, web/src/components/MathText.tsx-ээр харуулна. Unicode математик тэмдэгт (U+03C0 пи, U+00B2 дээд индекс, U+2153 бутархай, U+221A язгуур, U+00D7 үржих) ХЭЗЭЭ Ч бичихгүй.
+2. Emoji болон unicode глиф ХОРИОТОЙ (сум, од, дугуй, тэмдэг: U+2190–U+2BFF, U+1F300 ба түүнээс дээш). Дүрс хэрэгтэй бол зөвхөн lucide-react (аль хэдийн суусан). Суулгасан хувилбарт тухайн дүрс байгаа эсэхийг web/node_modules/lucide-react-оос шалга.
+3. Мета тусгаарлагч цэг (U+00B7, U+2022) гараар бичихгүй. web/src/components/ui/Meta.tsx: <Meta items={[a, b, c]} />, <Dot />, <MetaTitle>. title= / aria-label= зэрэг заавал мөр байх газарт « — » зураас.
+4. Өнгийг гараар бичихгүй: #fff, rgb(), text-blue-500, bg-green-50, bg-white, text-white БОЛОХГҮЙ. Зөвхөн токен: bg-surface bg-panel bg-bg text-ink text-ink-dim border-line text-brand bg-brand text-brand-soft bg-brand-soft bg-brand-bright text-on-brand, мөн success / warning / error / info (жишээ: text-success, bg-error/10, text-on-error), accent-teal / accent-gold / accent-violet / accent-sky / accent-rose. Өнгөт дэвсгэр дээрх текст text-on-brand. Жагсаалт: web/src/app/globals.css (--color-*).
+5. Гадаад фонт, CDN, гадаад зураг, видео, WebGL, ШИНЭ client npm сан ХОРИОТОЙ (удаан интернэттэй хэрэглэгч). Эффект бүр цэвэр CSS. Серверийн (api) шинэ сан зөвхөн даалгаварт тусгайлан зөвшөөрсөн үед.
+6. Түүхий fetch("/api/...") ХЭЗЭЭ Ч бичихгүй. Вэб нь Vercel, API нь Render дээр тул харьцангуй зам прод дээр 404 болно, токен ч дамжихгүй. Үргэлж api() ашигла: api("/tuition/refunds") (замд /api гэж бичихгүй — api() өөрөө нэмнэ). Файл: uploadFile(). Зураг: fileUrl(key).
+7. Гарагийн дугаарлалт: эзэн МОНГОЛ журмаар (1=Даваа ... 7=Ням), өгөгдлийн сан болон JS нь (0=Ням ... 6=Бямба). Хөрвүүлэлтийг андуурвал бүх хуваарь нэг өдрөөр гулсана. Гарагтай ажилласан бол тест бич.
+8. Хэрэглэгчийн нууц үг = утасны дугаар (эзний шийдвэр). Нууц үгийн хүчтэй байдлын шаардлага, бодлого, «сайжруулалт» НЭМЭХГҮЙ.
+9. Гар утас тэргүүнд: 375px өргөнд хуудас хэвтээ гүйлгэхгүй (том хүснэгт зөвхөн өөрийн хайрцаг дотор гүйлгэнэ эсвэл карт болно). Хүрэх талбай 44x44px-ээс багагүй.
+10. Өгөгдөл харуулдаг хэсэг бүр 3 төлөвтэй: ачаалж байна (web/src/components/ui/Skeleton.tsx — бодит бүтцийн хэлбэр; эсвэл StateBlock-ийн LoadingState), хоосон (EmptyState — яагаад хоосон, юу хийвэл дүүрэх), алдаа (ErrorState onRetry — монгол мессеж + «Дахин оролдох»). Хоосон цагаан дэлгэц, «мөнхөд ачаалж байна» байдал болохгүй. Алдааг console.error-оор залгиж нуухгүй.
+11. Функц УСТГАХГҮЙ. Дизайн сайжруулах нь юм хасах гэсэн үг биш.
+12. Бэлэн компонентыг ашигла, шинээр бүү зохио: ui/StateBlock.tsx (LoadingState, ErrorState, EmptyState), ui/Skeleton.tsx (SkeletonLine, SkeletonRows, SkeletonCard), ui/Surface.tsx (Card, SectionHeader, PageHeader — «Surface» нэртэй компонент БАЙХГҮЙ), ui/Meta.tsx, ui/InfoHint.tsx (default export), ui/Button.tsx, ui/Tabs.tsx, nav/RequireRole.tsx (allow={[...]}). Бүгд web/src/components/ дотор.
+13. Бичвэрийн өнгө аяс: монгол, товч, хүндэтгэлтэй, тайлбарласан. «API», «server», «null», «error», «undefined» гэх техникийн үг хэрэглэгчид харуулахгүй. Айлгах, ичээх, буруутгах өнгө аяс хориотой. Жижиг тайлбар бичвэрийг олшруулахгүй — хэрэгтэй бол InfoHint.
+14. «Математик болон Нийгмийн ухаанд төвлөрсөн» гэсэн хэллэг хэрэглэхгүй.
+15. Хүртээмж: интерактив бүхэн гарнаас хүрнэ; outline-none бүү бич; зөвхөн дүрстэй товчинд aria-label; өнгө дангаараа утга илэрхийлэхгүй (дүрс эсвэл текст дагалдана); модалд role="dialog" aria-modal="true" aria-labelledby + Escape товчоор хаагдана.
+16. Мөнгө, SMS, устгах, архивлах зэрэг буцаах боломжгүй үйлдэл 2 алхамт баталгаажуулалттай (дүн, нэрийг дахин харуулна), хүсэлт явж байх үед товч идэвхгүй (давхар дарахаас хамгаална).
+
+## 4. Техникийн урхи (бүгд бодит алдаанаас гарсан)
+- "use client": useState / useEffect / onClick ашигладаг файлын эхний мөрөнд. Дутуу бол tsc өнгөрч npm run build УНАНА. useSearchParams ашигласан компонентыг <Suspense> дотор ороо.
+- metadata экспортлох хуудас нь server component байх ёстой — client хэсгийг тусдаа файлд салга.
+- NestJS: шинэ модулийг api/src/app.module.ts-ийн imports-д бүртгэнэ; өөр модуль ашиглах provider-оо exports-д нэмнэ. Дутуу бол tsc, jest хоёулаа өнгөрч апп асахдаа УНАНА.
+- @Controller('finance') гэж бичнэ, @Controller('api/finance') БИШ (давхар /api/api/ болж 404).
+- Статик маршрутыг (@Get('verified')) динамик маршрутаас (@Get(':id')) ӨМНӨ зарла.
+- Ажилтны маршрут: @UseGuards(JwtAuthGuard, RolesGuard) + @Roles(...). req.user нь { userId, role } — id ч биш, sub ч биш.
+- DTO-д class-validator декоратор заавал (ValidationPipe whitelist: true — декораторгүй талбар чимээгүй хасагдана).
+- Prisma миграци (зөвхөн даалгаварт зөвшөөрсөн үед): шинэ хавтас api/prisma/migrations/<YYYYMMDDHHMMSS>_<нэр>/migration.sql. CREATE TABLE / CREATE INDEX / ADD COLUMN бүгд IF NOT EXISTS. ADD CONSTRAINT-ийг DO $$ ... pg_constraint шалгалттай. Хуучин миграцийн файлыг ХЭЗЭЭ Ч өөрчлөхгүй. SQL-ийн хүснэгт, багана бүрийг schema.prisma-тай (мөн @@map / @map-тай) тулга.
+- Timestamp баганууд нь timestamp without time zone, утга нь UTC. Raw SQL-д now() бүү хэрэглэ; огноо хасах тооцоог JS талд хийж бэлэн утга дамжуул. Хэрэглэгчид харуулах огноо Asia/Ulaanbaatar бүсээр.
+- Prisma-ийн JSON null нь SQL NULL биш.
+- eslint --fix бүү ажиллуул (type assertion хасаад tsc унагадаг).
+- api() GET хүсэлтийг dedupe хийдэг — нэг endpoint-ийг олон компонент зэрэг дуудаж болно.
+
+## 5. Файлын эзэмшил (хамгийн чухал)
+Хэд хэдэн агент ЗЭРЭГ ажиллаж байна. Даалгаврын «ЗӨВХӨН эдгээр файл» жагсаалтад байгаа файлыг л засна / үүсгэнэ (** гэдэг нь тэр хавтасны доторх бүх файл). Бусад файлыг уншиж, импортолж болно, гэхдээ ЗАСАХГҮЙ. Өөр файл засах шаардлага гарвал засалгүйгээр PR-ийн «Дутуу үлдсэн» хэсэгт яг ямар файлд юу, яагаад хэрэгтэйг бич.
+Даалгаварт заагаагүй бол эдгээрт бүү хүр: package.json, package-lock.json, api/prisma/schema.prisma, api/prisma/migrations/**, api/src/app.module.ts, web/src/app/globals.css, web/src/lib/api.ts, web/src/components/nav/nav-data.ts, .github/**, STATUS.md, docs/**.
+
+## 6. Орчин
+Хамаарал суугаагүй бол: cd api && npm ci && npx prisma generate ; cd web && npm ci
+DATABASE_URL-д бодит өгөгдлийн сан байхгүй (зөвхөн prisma generate-д зориулсан хуурамч хаяг). Unit тестүүд өгөгдлийн сангүйгээр ажилладаг. Өгөгдлийн сан, ажиллаж буй сервер шаардсан шалгалтыг хийж чадахгүй бол ХИЙСЭН МЭТ бүү бич — «ажиллуулж чадсангүй: шалтгаан» гэж шууд бич.
+
+## 7. Шалгалт — бодит гаралтыг PR-д хуулна
+api/ өөрчилсөн бол:
+  cd api
+  npx tsc --noEmit
+  npx jest                      (одоогоор 25 файл, 358 тест бүгд ногоон; тоо буурах ёсгүй, шинэ логикт тест нэм)
+  npm run build
+  node -e "setTimeout(()=>process.exit(0),15000); require('./dist/src/main')" 2>&1 | grep -cE "Nest can't resolve"     (0 байх ёстой)
+  node -e "setTimeout(()=>process.exit(0),15000); require('./dist/src/main')" 2>&1 | grep -c "Mapped {/api/api"        (0 байх ёстой)
+  (Өгөгдлийн сангүй орчинд апп холболтын алдаа хэвлэж болно — хэвийн. Дээрх 2 тоо 0 байх нь чухал.)
+  Схем өөрчилсөн бол нэмээд: npx prisma validate
+web/ өөрчилсөн бол:
+  cd web && npx tsc --noEmit && npm run build          (build ЗААВАЛ — tsc хангалтгүй)
+Өөрийн өөрчилсөн .ts/.tsx файлууд дээр (жагсаалтыг git status, git diff --name-only-оор ол, FILES гэж нэрлэе):
+  LC_ALL=C.UTF-8 grep -nP '[\x{2190}-\x{2BFF}\x{1F300}-\x{1FAFF}\x{00B7}\x{2022}\x{03C0}\x{00B2}\x{221A}]' $FILES      (хоосон байх ёстой; сэтгэгдэл дотор байвал тайлбарла)
+  grep -nE '(bg|text|border|ring|fill|stroke)-(red|blue|green|orange|yellow|amber|emerald|gray|slate|zinc|indigo|purple|pink|sky|teal|white|black)(-[0-9]+)?\b' $FILES     (хоосон)
+  grep -nE 'fetch\(' $FILES     (хоосон — web/src/lib/api.ts-ээс бусад)
+UI өөрчилсөн бол: 375px ба 1280px өргөнд нээж, хуудас хэвтээ гүйлгэхгүй байгааг (document.documentElement.scrollWidth <= 375) шалга; боломжтой бол дэлгэцийн зураг ав.
+
+## 8. Үнэн тайлагнал — ЗААВАЛ
+Өмнө нь агентууд «хийсэн» гэж худлаа мэдээлж, файл өөрчлөгдөөгүй атал tsc/jest-ийн ХУУРАМЧ гаралт бичиж байсан (STATUS.md §8.2). Тиймээс:
+- Ажиллуулаагүй командын гаралтыг хэзээ ч бүү бич, бүү зохио. Гаралтыг засваргүй хуул.
+- Дууссан гэж хэлэхээсээ өмнө git diff --stat-аар бодит өөрчлөлтөө шалга.
+- Дуусаагүй, туршаагүй, эргэлзээтэй зүйлийг ил бич. Нуусан дутуу нь олдсон дутуугаас хамаагүй муу.
+- Байхгүй компонент, функц, endpoint, баганыг бүү зохио — ашиглахаасаа өмнө кодоос олж шалга.
+
+## 9. PR
+- Base: claude/100-dollar-credit-usage-ksqjev (main БИШ). Нэг PR = нэг даалгавар.
+- Гарчиг: [Gxx] монгол товч тайлбар (жишээ: [G06] Буцаалтын дэлгэрэнгүй хуудас ба зөвшөөрөх урсгал)
+- Тайлбарт заавал:
+  1. Юу хийсэн (3–8 мөр, энгийн үгээр)
+  2. Өөрчилсөн файлууд — git diff --stat-ийн бодит гаралт
+  3. Шалгалтын гаралт — команд бүрийн сүүлийн 5–15 мөр, засваргүй
+  4. UI бол 375px өргөнтэй дэлгэцийн зураг (боломжгүй бол яагаад)
+  5. Дутуу үлдсэн / өөр файлд хэрэгтэй өөрчлөлт / эзний шийдвэр шаардсан асуулт — шударга
+  6. Эзэн Safari-д шалгах хаяг (http://localhost:3001/...)
+- Commit мессеж монголоор, товч. Нууц үг, токен, .env, xlsx зэрэг хувийн өгөгдлийг commit хийхгүй. Тестэд бодит хүний нэр, утас бүү ашигла — зохиомол өгөгдөл.`;
+
+/* Долгион: mode "par" = зэрэг, "seq" = нэг нэгээр */
+const WAVES = [
+  { n: 1, mode: "par", title: "Эвдэрхий, аюулгүй байдал, цэс", when: "Эхлээд. 7 агентыг ЗЭРЭГ ажиллуулна.",
+    note: "P0 ба P1 ажил. Даалгавар бүр өөр файлуудыг эзэмшдэг тул зэрэг ажиллахад зөрчилдөхгүй. Бүгд дууссаны дараа PR-уудын холбоосыг Claude-д өгч шалгуулна, нэгтгэсний дараа 2-р долгионыг эхлүүлнэ." },
+  { n: 2, mode: "par", title: "Удирдлагын дутуу UI, тест", when: "1-р долгион нэгтгэгдсэний дараа. 7 агентыг ЗЭРЭГ.",
+    note: "1-р долгионы өөрчлөлт дээр суурилна (жишээ нь G22 нь 1-р долгионы засварласан цэсэнд нэг мөр нэмнэ). Тиймээс 1-р долгион нэгтгэгдэхээс өмнө бүү эхлүүл." },
+  { n: 3, mode: "seq", title: "Өгөгдлийн сангийн схем өөрчлөх ажил", when: "2-р долгионы дараа. НЭГ НЭГЭЭР: нэгийг нь нэгтгэсний дараа дараагийнхыг.",
+    note: "Гурвуулаа api/prisma/schema.prisma ба шинэ миграци бичдэг. Зэрэг ажиллуулбал миграцийн дараалал, схем зөрчилдөж прод API-г унагаах эрсдэлтэй. Дараалал: G25, дараа нь G17, дараа нь G27. 4-р долгионтой зэрэг явж болно." },
+  { n: 4, mode: "par", title: "Нэмэлт боломжууд (схемгүй)", when: "2-р долгионы дараа. 5 агентыг ЗЭРЭГ — 3-р долгионы эхний даалгавартай нэгэн зэрэг ч болно.",
+    note: "Схемд хүрэхгүй. 3-р долгионы 3 даалгаврын аль нэгтэй ч файлаар давхцахгүйгээр хуваасан." },
+];
+
+const TASKS = [
+/* ============================ ДОЛГИОН 1 ============================ */
+{ id: "G06", wave: 1, pri: "P0", title: "Буцаалтын модулийг прод дээр ажилладаг болгох",
+  why: R`Сурагч ангиас гарахад төлбөрийн үлдэгдлийг буцаах модуль прод дээр ажиллахгүй байна. Тооцоолуур (RefundCalculator.tsx) түүхий fetch("/api/...") ашигладаг тул прод дээр 404 болно. «Хадгалах»-ын дараа /app/tuition/refund/<id> руу шилждэг ч тэр хуудас БАЙХГҮЙ. Жагсаалт, зөвшөөрөх / олгосон / цуцлах UI огт байхгүй. API тал бүрэн бэлэн, эрхээр хамгаалагдсан.`,
+  owned: [
+    ["web/src/app/app/tuition/**", "page.tsx засна; шинэ: layout.tsx, refund/[id]/page.tsx, refunds/page.tsx"],
+    ["web/src/components/tuition/**", "RefundCalculator.tsx засна; шинэ компонентууд энд"],
+  ],
+  avoid: ["api/** (зөвхөн унших)", "web/src/components/nav/** (цэсийг G08 агент нэмнэ)", "web/src/lib/api.ts", "web/src/app/app/admin/reconcile/** (UserSearch-ийг импортолж болно, засахгүй)"],
+  api: [
+    "GET  /tuition/refund/preview?studentId&classroomId&leftOn — ADMIN, TEACHER_PLUS",
+    "POST /tuition/refund {studentId, classroomId, leftOn} — DRAFT үүсгэнэ — ADMIN, TEACHER_PLUS",
+    "POST /tuition/refund/:id/pending — ADMIN, TEACHER_PLUS",
+    "POST /tuition/refund/:id/approve — ЗӨВХӨН ADMIN",
+    "POST /tuition/refund/:id/paid {paymentMethod?} — ЗӨВХӨН ADMIN",
+    "POST /tuition/refund/:id/cancel {cancelReason?} — ADMIN, TEACHER_PLUS",
+    "GET  /tuition/refund/:id ; GET /tuition/refunds?studentId&classroomId&status&limit&offset — {refunds, total}",
+    "GET  /users/search?q= (2+ тэмдэгт; id, studentCode, firstName, lastName) ; GET /users/:id (идэвхтэй анги)",
+  ],
+  steps: [
+    R`api/src/tuition/tuition.controller.ts, tuition.service.ts (previewRefund, createRefund, submitForApproval, approveRefund, markAsPaid, cancelRefund, getRefund, listRefunds), proration.ts-ийг уншиж хариуны ЯГ хэлбэрийг тогтоо. Төрлүүдийг web/src/components/tuition/types.ts-д бич. Төлвүүд: DRAFT, PENDING_APPROVAL, APPROVED, PAID, CANCELLED (schema.prisma-ийн RefundStatus).`,
+    R`RefundCalculator.tsx: түүхий fetch-ийг api<PreviewData>("/tuition/refund/preview?studentId=...&classroomId=...&leftOn=...") болго (утга бүрийг encodeURIComponent). Одоо байгаа тооцооны харагдацыг бүгдийг хадгал.`,
+    R`ID-г гараар бичүүлдэг 2 талбарыг сонгогчоор соль: сурагч хайх (GET /users/search?q=, 300ms debounce, 2+ тэмдэгт, код + нэрээр харуулна) — сонгосны дараа GET /users/:id-аас идэвхтэй ангийг ав (api/src/users/users.service.ts getUserDetail-ээс талбарын нэрийг шалга); ганц анги бол автоматаар сонго. Гарсан огноо өгөгдмөл нь өнөөдөр (Asia/Ulaanbaatar).`,
+    R`Мөнгөний формат: RefundCalculator доторх format функцийг web/src/components/tuition/format.ts руу гаргаж бүх газарт ашигла.`,
+    R`Шинэ хуудас web/src/app/app/tuition/refund/[id]/page.tsx: GET /tuition/refund/:id. Сурагч, анги, элссэн / гарсан огноо, тооцооны задрал (нийт хичээлийн өдөр, суусан өдөр, төлөх ёстой, төлсөн, буцаах дүн, дутуу), тайлбарын мөрүүд, анхааруулга, төлвийн тэмдэг (Ноорог / Зөвшөөрөл хүлээж буй / Зөвшөөрсөн / Олгосон / Цуцалсан — дүрс + текст, зөвхөн өнгө биш), хэн хэзээ зөвшөөрсөн / олгосон (хариунд байгаа бол).`,
+    R`Үйлдлийн товч (эрх: getRole() — web/src/lib/api.ts): DRAFT үед «Зөвшөөрөлд илгээх» (ADMIN, TEACHER_PLUS); DRAFT ба PENDING_APPROVAL үед «Зөвшөөрөх» (ЗӨВХӨН ADMIN); APPROVED үед «Олгосон гэж тэмдэглэх» + олгосон арга сонгох (Бэлнээр / Дансаар) (ЗӨВХӨН ADMIN); DRAFT, PENDING_APPROVAL, APPROVED үед «Цуцлах» + шалтгаан заавал (ADMIN, TEACHER_PLUS). TEACHER_PLUS-д зөвшөөрөх / олгох товчийг огт харуулахгүй. Мөнгөний үйлдэл бүр 2 алхамт баталгаажуулалттай (сурагчийн нэр, дүнг дахин харуулна). Амжилттай бол хуудсыг дахин ачаалалгүй шинэ төлвийг харуул.`,
+    R`Шинэ хуудас web/src/app/app/tuition/refunds/page.tsx: GET /tuition/refunds — төлвөөр шүүх товчнууд, гар утсанд карт хэлбэр (өргөн хүснэгт биш), мөр бүр дэлгэрэнгүй рүү холбоостой, «Цааш үзэх» (offset). Ачаалж байна / хоосон / алдаа.`,
+    R`web/src/app/app/tuition/page.tsx: тооцоолуурыг хэвээр үлдээж «Буцаалтын жагсаалт» руу холбоос нэм. Шинэ web/src/app/app/tuition/layout.tsx-д RequireRole allow ADMIN, TEACHER_PLUS (жишээ: web/src/app/app/admin/classrooms/ClassroomsClient.tsx).`,
+  ],
+  accept: [
+    "web/src/components/tuition ба web/src/app/app/tuition дотор fetch( огт байхгүй",
+    "Тооцоо, үүсгэх урсгал ажиллаж, үүсгэсний дараа дэлгэрэнгүй хуудас нээгдэнэ (404 биш)",
+    "ADMIN зөвшөөрөх, олгох товч харна; TEACHER_PLUS харахгүй",
+    "Цуцлах шалтгаангүйгээр явахгүй; 2 алхамт баталгаажуулалт бүх мөнгөний үйлдэлд",
+    "Жагсаалтыг төлвөөр шүүж болно; 375px-д хэвтээ гүйлгэхгүй",
+    "Бүх хэсэг ачаалж байна / хоосон / алдааны төлөвтэй; web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/tuition", "http://localhost:3001/app/tuition/refunds", "http://localhost:3001/app/tuition/refund/<ID>"],
+},
+{ id: "G07", wave: 1, pri: "P1", title: "Дүн шинжилгээ хуудсыг бодит өгөгдөлд холбох",
+  why: R`/app/insights хуудас одоо зохиомол (MOCK_INSIGHTS) тоо харуулдаг — багш хуурамч тоон дээр шийдвэр гаргах эрсдэлтэй. API-д 3 бодит endpoint бэлэн байгаа ч UI холбогдоогүй.`,
+  owned: [
+    ["web/src/components/insights/**", ""],
+    ["web/src/app/app/insights/**", "page.tsx засна; шинэ layout.tsx болон client компонент"],
+  ],
+  avoid: ["api/src/insights/** (зөвхөн унших)", "web/src/components/nav/**", "web/src/app/app/tests/** (холбоос байвал PR-д бич)"],
+  api: [
+    "GET /insights/topic-mastery?classroomId&limit — TEACHER, TEACHER_PLUS, ADMIN — TopicMastery[]",
+    "GET /insights/problem-quality?limit — ProblemQuality[] (difficulty, discrimination, isDefective, attemptCount, correctCount)",
+    "GET /insights/distractor-analysis?problemIds&limit — DistractorAnalysis[]",
+    "GET /classrooms — ангийн жагсаалт (TEACHER зөвхөн өөрийнхийг авна)",
+  ],
+  steps: [
+    R`api/src/insights/insights.service.ts-ийн DistractorAnalysis, ProblemQuality, TopicMastery интерфейс, insights.controller.ts-ийн query параметрийг уншаад web/src/components/insights/types.ts-д яг таарсан төрөл бич.`,
+    R`MOCK_INSIGHTS болон setTimeout-оор хуурамч ачаалал дуурайдаг кодыг бүрэн устга. Ямар ч зохиомол тоо үлдэхгүй.`,
+    R`Хуудсыг 3 табтай болго (web/src/components/ui/Tabs.tsx): «Сэдвийн эзэмшил», «Бодлогын чанар», «Андуурсан сонголт». Таб бүр өөрийн өгөгдлөө тусад нь ачаална.`,
+    R`Сэдвийн эзэмшил: GET /classrooms-оос анги сонгуул, GET /insights/topic-mastery?classroomId=...&limit=50. Сурагч x сэдвийн дулааны зураг (TopicHeatmap.tsx-ийг дасга). masteryRate (0–1)-ийг хувь болгож тоог ҮРГЭЛЖ харуул; өнгө нь зөвхөн туслах (bg-error/15, bg-warning/15, bg-success/15). 640px-ээс нарийн дэлгэцэд сурагч бүрийг карт болгох эсвэл хүснэгтийг зөвхөн өөрийн хайрцаг дотор гүйлгэж эхний баганыг наалттай болго.`,
+    R`Бодлогын чанар: GET /insights/problem-quality?limit=200. isDefective (discrimination < 0) бодлогуудыг эхэнд анхааруулгатай, дараа нь хүндрэлээр эрэмбэл. problemToken, оролдлогын тоо, зөв хувь, discrimination (2 орон). p-value, discrimination гэж юу болохыг энгийн монгол үгээр InfoHint-д тайлбарла. Бодлогыг id-гаар нь харах хуудас байгаа эсэхийг шалга (web/src/app/app/library, web/src/app/app/admin/content); байвал холбоос, үгүй бол зөвхөн token.`,
+    R`Андуурсан сонголт: GET /insights/distractor-analysis?limit=100. Бодлого бүрт хамгийн их сонгогдсон буруу хувилбарууд, сонголтын хувь. choiceText LaTeX агуулж болох тул MathText-ээр харуул.`,
+    R`Жижиг түүврийн хамгаалалт: attemptCount < 10 бол хүчтэй дүгнэлтийн оронд «Дүгнэлт гаргахад оролдлого хангалтгүй (N)» гэж харуул.`,
+    R`Хуучин ?test= параметрт суурилсан «шалгалтын тайлан» (TestReportCard) зохиомол өгөгдөл дээр байсан бөгөөд тухайн шалгалтын тайлангийн endpoint байхгүй. Бодит өгөгдөлгүй тул харуулахгүй; файлыг устгахгүй. PR-д «шалгалт тус бүрийн тайланд endpoint хэрэгтэй» гэж бич. Өөр хуудас /app/insights?test= руу холбодог эсэхийг grep-ээр шалгаж PR-д дурд.`,
+    R`Шинэ web/src/app/app/insights/layout.tsx: RequireRole allow TEACHER, TEACHER_PLUS, ADMIN. page.tsx server хэвээр (metadata), client хэсэг тусдаа файлд. useSearchParams ашиглавал Suspense.`,
+    R`Таб бүр: ачаалж байна (skeleton), хоосон («Одоогоор оролдлогын өгөгдөл алга. Сурагчид тест бөглөсний дараа энд гарна.»), алдаа + «Дахин оролдох».`,
+  ],
+  accept: [
+    "grep -rn MOCK web/src/components/insights хоосон",
+    "3 таб тус бүр бодит endpoint дууддаг (PR-д дуудлага бүрийг жагсаа)",
+    "Хувь зөв тооцоологдоно, өнгө дангаараа утга илэрхийлэхгүй",
+    "LaTeX сонголт MathText-ээр зөв харагдана",
+    "375px-д хуудас хэвтээ гүйлгэхгүй; web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/insights"],
+},
+{ id: "G08, G09", wave: 1, pri: "P1", title: "Эвдэрсэн холбоос, цэсгүй хуудсууд, холбоос шалгагч",
+  why: R`Дэлгүүрт нэвтрээгүй хүн «Худалдаж авах» дарахад /auth/login руу явдаг — ийм хуудас байхгүй (404). 7 хуудас (ангиуд, санхүү, дэлгүүрийн удирдлага, дүн шинжилгээ, дасгал, дэлгүүр, буцаалт) цэсэнд байхгүй тул хэрэглэгч олохгүй. /app/password хуудас давхардсан. Цаашид эвдэрсэн холбоос гарахаас сэргийлж CI-д шалгагч хэрэгтэй.`,
+  owned: [
+    ["web/src/components/nav/nav-data.ts", "ЭНЭ долгионд зөвхөн энэ агент"],
+    ["web/src/components/nav/icons.tsx", ""],
+    ["web/src/app/app/store/store-products.tsx", ""],
+    ["web/src/app/app/password/page.tsx", ""],
+    ["web/src/app/app/admin/AdminDashboardClient.tsx", "зөвхөн холбоосын хэсэг нэмэх"],
+    ["web/src/app/app/admin/finance/layout.tsx", "шинэ"],
+    ["web/src/app/app/admin/store/layout.tsx", "шинэ"],
+    ["web/src/app/app/practice/layout.tsx", "шинэ"],
+    ["web/src/app/app/store/layout.tsx", "шинэ"],
+    ["web/scripts/check-links.mjs", "шинэ"],
+    ["web/scripts/check-links.allow.txt", "шинэ"],
+    [".github/workflows/ci.yml", "зөвхөн web job-д нэг алхам нэмэх"],
+  ],
+  avoid: ["web/src/app/app/tuition/** (G06)", "web/src/app/app/insights/** (G07)", "web/src/app/app/admin/classrooms/** (G16)", "web/src/components/nav/Sidebar.tsx, NavList.tsx", "web/package.json"],
+  api: ["API өөрчлөхгүй. Эрхийг шалгахдаа уншина: api/src/store/store.controller.ts (admin/* нь ADMIN, TEACHER_PLUS), api/src/finance/finance.controller.ts (ADMIN), api/src/recommend/*.ts"],
+  steps: [
+    R`web/src/app/app/store/store-products.tsx (77-р мөр орчим): router.push('/auth/login') -> '/login' (бодит маршрут web/src/app/login). Нэвтэрсний дараа буцаах ?next= параметрийг login хуудас аль хэдийн дэмждэг бол ашигла, дэмждэггүй бол нэмэхгүй.`,
+    R`web/src бүхэлд href=, router.push(, router.replace(, redirect( дотор «/»-ээр эхэлсэн зам бүрийг web/src/app доторх хавтастай тулга ([id] мэт динамик хэсэг ямар ч утгатай таарна). Өөрийн файлд байгаа эвдрэлийг зас; бусдыг PR-д жагсаа.`,
+    R`web/scripts/check-links.mjs (хамааралгүй цэвэр Node): web/src/app-аас маршрутуудыг цуглуулна (page.tsx, route.ts; (group) хавтсыг алгасна; [param]-ийг орлуулагч гэж үзнэ); .ts/.tsx файлаас href="/...", href={"/..."}, template literal-ийн статик эхлэл, router.push/replace, redirect, Link href-ийг олж танигдаагүй замыг файл:мөрөөр хэвлээд exit 1. Гадаад холбоос, #зангуу, /api, mailto, tel-ийг алгасна. web/scripts/check-links.allow.txt — түр зөвшөөрөх жагсаалт (мөр бүр нэг зам + шалтгаан). Одоо байхгүй ч 1-р долгионы өөр агентын нэмэх /app/tuition/refund/[id], /app/tuition/refunds-ийг «G06 нэмнэ» гэж энд оруул.`,
+    R`.github/workflows/ci.yml-ийн web job-д tsc-ийн дараа «node scripts/check-links.mjs» алхам нэм (working-directory нь web). Өөр job, алхамд хүрэхгүй.`,
+    R`nav-data.ts: NAV_BY_ROLE, ITEM_GROUP-д нэм (getPageTitle нь эндээс гарчиг авдаг): /app/admin/classrooms «Ангиуд» (ADMIN, TEACHER_PLUS; admin бүлэг); /app/admin/finance «Санхүү» (ADMIN; admin); /app/admin/store «Дэлгүүрийн удирдлага» (ADMIN, TEACHER_PLUS; admin); /app/tuition «Төлбөрийн буцаалт» (ADMIN, TEACHER_PLUS; admin); /app/insights «Дүн шинжилгээ» (TEACHER, TEACHER_PLUS, ADMIN; class бүлэг); /app/practice «Дасгал» (STUDENT; learn); /app/store «Дэлгүүр» (STUDENT, BUYER; personal). Одоо байгаа мөрийг устгахгүй, дарааллыг утга учиртай байлга. «Шинэ маршрут ОРУУЛААГҮЙ» гэсэн хуучирсан сэтгэгдлийг шинэчил.`,
+    R`icons.tsx: шинэ дүрсийг lucide-react-оос нэм (жишээ: School, Wallet, Store, Sparkles, LineChart, Undo2 эсвэл ReceiptText). Нэр бүр суулгасан хувилбарт байгаа эсэхийг web/node_modules/lucide-react-оос шалга. IconName төрөлд нэм.`,
+    R`/app/password: page.tsx-ийг /app/profile руу чиглүүлэгч болго (next/navigation-ийн redirect, server component). ChangePasswordSection нь /app/profile дотор аль хэдийн байгааг шалга. password/layout.tsx-д хүрэхгүй.`,
+    R`Эрхийн хамгаалалт: шинэ layout.tsx файлууд <RequireRole allow={[...]}>{children}</RequireRole> буцаана — admin/finance: ADMIN; admin/store: ADMIN, TEACHER_PLUS; practice: STUDENT; store: STUDENT, BUYER, PARENT, ADMIN, TEACHER_PLUS (дэлгүүрийг хэн ашигладгийг store.controller.ts-ээс шалгаад тохируул). Хуудсуудын metadata экспорт эвдрэхгүй.`,
+    R`AdminDashboardClient.tsx: одоо байгаа /app/admin/content холбоосын орчимд «Удирдлагын хэсгүүд» гэсэн нягт холбоосын сүлжээ нэм — ангиуд, санхүү, дэлгүүр, буцаалт, дүн шинжилгээ, сурагчид, элсэлт, мессеж. Зөвхөн одоо БАЙГАА маршрут. lucide дүрс, токен өнгө, 44px хүрэх талбай. Бусад логикт хүрэхгүй.`,
+    R`/app/admin/passes-ийг ОДОО нэмэхгүй — 2-р долгионд G22 агент хуудастай нь хамт нэмнэ.`,
+  ],
+  accept: [
+    "Нэвтрээгүй үед дэлгүүрт «Худалдаж авах» дарахад /login нээгдэнэ",
+    "/app/password нь /app/profile руу шилжинэ",
+    "Эрх бүрт шинэ цэсийн мөрүүд харагдана (PR-д эрх бүрийн цэсийн жагсаалт)",
+    "node scripts/check-links.mjs (web хавтаснаас) exit 0; зориуд эвдэрсэн холбоос нэмэхэд exit 1 (туршаад буцаа)",
+    "web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/admin", "http://localhost:3001/app/password", "http://localhost:3001/app/store (гарсан үед)", "Эрх бүрээр нэвтэрч зүүн цэсийг шалгах"],
+},
+{ id: "G11", wave: 1, pri: "P1", title: "Тест засах боломж (PATCH /tests/:id + засах хуудас)",
+  why: R`Тест үүсгэсний дараа засах арга огт байхгүй — алдаатай бодлого, буруу хугацаа тавибал устгаад дахин үүсгэхээс өөр аргагүй, тэгвэл дүнгийн түүх тасарна.`,
+  owned: [
+    ["api/src/tests/tests.controller.ts", ""],
+    ["api/src/tests/tests.service.ts", ""],
+    ["api/src/tests/dto/update-test.dto.ts", "шинэ"],
+    ["api/src/tests/tests-update.spec.ts", "шинэ"],
+    ["web/src/app/app/tests/[id]/edit/**", "шинэ"],
+    ["web/src/app/app/tests/new/page.tsx", "засах горимд дахин ашиглахаар хуваах шаардлагатай бол"],
+    ["web/src/components/test-builder/**", ""],
+    ["web/src/components/test-list/TeacherRowMeta.tsx", ""],
+  ],
+  avoid: ["api/src/tests/grading.ts", "web/src/app/app/tests/[id]/page.tsx (шалгалт өгөх дэлгэц)", "web/src/components/exam/**", "web/src/components/test-list/TopicGroup.tsx (G28)", "api/prisma/**"],
+  api: [
+    "POST /tests (одоо байгаа) — CreateTestDto: title, type, gradingMode, chapterId, timeLimitMin, problems[{problemId, order, points}], classroomIds ...",
+    "DELETE /tests/:id — зөөлөн устгал, recordAudit жишээ",
+    "ШИНЭ: PATCH /tests/:id ; GET /tests/:id/edit-info -> { mode: 'FULL' | 'LIMITED', reason }",
+  ],
+  steps: [
+    R`api/src/tests/tests.service.ts-ийн create(), remove(), checkAnswerCoverage(), recordAudit(), мөн сессийн хугацааг хэрхэн тооцдогийг (start / heartbeat / submit) уншиж ойлго. schema.prisma: Test, TestProblem, TestAccess (id багана БАЙХГҮЙ — нийлмэл түлхүүр), TestResult, TestAttemptSession.`,
+    R`«Өгсөн» гэдэг нь тухайн тестэд TestResult ЭСВЭЛ TestAttemptSession дор хаяж нэг байх. Энэ шалгалтыг нэг private функцэд.`,
+    R`dto/update-test.dto.ts: бүх талбар сонголттой, class-validator-тэй (CreateTestDto-г дуурай).`,
+    R`PATCH /tests/:id — @Roles(ADMIN, TEACHER_PLUS, TEACHER). TEACHER зөвхөн өөрийн үүсгэсэн (createdById) тест — бусад үед 403 монгол мессежтэй. deletedAt-тай тест 404. Хэн ч өгөөгүй бол бүх талбар (problems-ийг $transaction дотор TestProblem deleteMany + createMany-аар бүрэн солих; classroomIds ирвэл TestAccess солих ба create()-тэй адил checkAnswerCoverage). Өгсөн бол зөвхөн title ба timeLimitMin; өөр талбар ирвэл 409 «Энэ тестийг сурагчид өгсөн тул зөвхөн нэр, хугацааг засах боломжтой». Дуусаагүй сесс байгаа үед хугацааг БОГИНОСГОХЫГ хориглоно (409) — сурагчийн хугацаа гэнэт дуусч болохгүй. recordAudit(..., 'UPDATE', 'Test', id, өмнөх, дараах).`,
+    R`GET /tests/:id/edit-info — { mode, reason } (засах хуудас аль горимыг харуулахаа мэднэ). Маршрутын дарааллыг шалга.`,
+    R`tests-update.spec.ts (PrismaService-ийг mock хийх жишээ: api/src/classrooms/classrooms.service.spec.ts): өгөөгүй тест бүрэн засагдана; өгсөн тестэд problems ирвэл 409; өөр багшийн тест 403; устгасан тест 404; идэвхтэй сесстэй үед хугацаа богиносгох 409.`,
+    R`Вэб: web/src/app/app/tests/[id]/edit/page.tsx — GET /tests/:id (багшид юу буцаадгийг шалга) + edit-info. FULL горимд test-builder компонентуудыг (ProblemPicker, SelectedProblemsList, SummaryRail) урьдчилан бөглөж дахин ашигла; LIMITED горимд зөвхөн нэр ба хугацааны талбар + яагаад хязгаартайг тайлбарласан мөр. Хадгалах -> PATCH -> /app/tests руу амжилтын мессежтэй буцна.`,
+    R`TeacherRowMeta.tsx: «Засах» холбоос (lucide Pencil + текст) — ADMIN, TEACHER_PLUS, эсвэл тест үүсгэсэн багш (мөрөнд createdById байхгүй бол ADMIN, TEACHER_PLUS-д л).`,
+  ],
+  accept: [
+    "Хэн ч өгөөгүй тестийн бодлого, хугацаа, нэрийг засч болно",
+    "Өгсөн тестэд зөвхөн нэр, хугацаа; бусад нь серверээс 409",
+    "Өөр багшийн тестийг TEACHER засаж чадахгүй (403)",
+    "Шинэ unit тестүүд ногоон, jest нийт тоо 358-аас багасаагүй",
+    "api ачаалалтын шалгалтын 2 тоо 0; web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/tests", "http://localhost:3001/app/tests/<ID>/edit"],
+},
+{ id: "G16", wave: 1, pri: "P1", title: "Анги засах, архивлах, сурагч хасах / шилжүүлэх",
+  why: R`Анги засах, архивлах, сурагч хасах / шилжүүлэх API бэлэн ч UI байхгүй тул ажилтан хийж чадахгүй. Одоо зөвхөн «тараах» товч бий.`,
+  owned: [
+    ["web/src/app/app/admin/classrooms/**", "ClassroomsClient.tsx засна; шинэ [id]/page.tsx болон энэ хавтаст компонентууд"],
+    ["api/src/classrooms/**", "зөвхөн ангийн сурагчдын жагсаалтын endpoint хэрэгтэй бол"],
+  ],
+  avoid: ["api/src/auth/**", "web/src/components/enrollment/**", "web/src/components/nav/**", "api/src/schedule/**"],
+  api: [
+    "GET /classrooms (teacher, _count) ; GET /classrooms/unassigned-students",
+    "PATCH /classrooms/:id {name?, type?, grade?, teacherId?} — ADMIN",
+    "DELETE /classrooms/:id?confirmCode= — ADMIN; код = өнөөдрийн огноо YYYYMMDD (Asia/Ulaanbaatar) — api/src/auth/auth.service.ts todayCodeUB()",
+    "POST /classrooms/:id/enroll {studentId} — ӨМНӨХ идэвхтэй ангиас автоматаар гаргана = шилжүүлэг",
+    "POST /classrooms/:id/remove-student {studentId} ; POST /classrooms/:id/disband",
+    "GET /users/teachers (ADMIN) ; GET /users/search?q=",
+  ],
+  steps: [
+    R`api/src/classrooms/classrooms.controller.ts, classrooms.service.ts (enroll, removeStudent, update, archive, assertCanManageStudents)-ийг унш. Шилжүүлэлт нь зорилтот ангид enroll хийхэд л болно — шинэ endpoint хэрэггүй.`,
+    R`Ангийн идэвхтэй сурагчдыг буцаадаг endpoint аль хэдийн байгаа эсэхийг хай (api/src дотор enrollments + leftAt: null; attendance, schedule, users модулиуд). Тохирох нь байхгүй бол GET /classrooms/:id -> { classroom (teacher-тэй), students: [{ id, firstName, lastName, studentCode, joinedAt }] } нэм: @Roles(ADMIN, TEACHER_PLUS, TEACHER), TEACHER зөвхөн өөрийн анги (403). @Get('unassigned-students') нь @Get(':id')-ээс ӨМНӨ хэвээр байх ёстой. classrooms.service.spec.ts-д тест нэм.`,
+    R`ClassroomsClient.tsx: мөр бүр /app/admin/classrooms/<id> руу холбогдоно; одоо байгаа «тараах» хэвээр.`,
+    R`Шинэ [id]/page.tsx: толгой (нэр, төрөл — Танхим / Онлайн, анги, багш, сурагчийн тоо — Meta-аар). Хэсгүүд: (а) Засах — ADMIN: нэр, төрөл, анги, багш (GET /users/teachers) -> PATCH; (б) Сурагчид — сурагч бүрт «Хасах» (баталгаажуулах цонх -> remove-student) ба «Шилжүүлэх» (зорилтот анги сонгох цонх, одоогийн ба архивласан ангийг хасна -> POST /classrooms/<зорилт>/enroll); ирцийн түүх хадгалагдана гэдгийг тайлбарла; (в) Сурагч нэмэх — GET /classrooms/unassigned-students + GET /users/search; (г) Архивлах — ADMIN, «аюултай бүс»: үр дагаврыг тайлбарлаж, баталгаажуулах кодыг бичүүлнэ (одоогийн идэвхжүүлэх кодтой адил зарчим), амжилттай бол жагсаалт руу буцна.`,
+    R`TEACHER_PLUS: харах, нэмэх, хасах, шилжүүлэх (assertCanManageStudents-ийн дүрмээр) боломжтой; засах, архивлах товчийг харуулахгүй.`,
+    R`Цонхнууд хүртээмжтэй (role="dialog", Escape, фокус). Ачаалж байна / хоосон / алдаа. 375px.`,
+  ],
+  accept: [
+    "Анги засаж хадгалахад жагсаалтад шууд тусна",
+    "Сурагчийг хасах, өөр ангид шилжүүлэх ажиллана; шилжүүлсэн сурагч хуучин ангиас алга болно",
+    "Архивлах код буруу бол монгол алдаа; зөв бол анги жагсаалтаас алга болно",
+    "TEACHER_PLUS засах / архивлах товч харахгүй",
+    "api шалгалт (шинэ endpoint нэмсэн бол) ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/admin/classrooms", "http://localhost:3001/app/admin/classrooms/<ID>"],
+},
+{ id: "G20, G21", wave: 1, pri: "P1", title: "Аюулгүй байдлын толгой, нэвтрэлтийн түгжээ, 404 ба алдааны хуудас",
+  why: R`API болон вэб хамгаалалтын HTTP толгойгүй. Нэвтрэлтэд IP-ээр хязгаар бий (auth.controller.ts-д аль хэдийн: login 10/мин, forgot-password 5/15мин, reset 10/15мин) ч нэг бүртгэл рүү олон IP-ээс таах оролдлогыг зогсоох түгжээ алга. Вэбд монгол 404, алдааны хуудас байхгүй — Next-ийн англи өгөгдмөл хуудас гардаг.`,
+  owned: [
+    ["api/src/main.ts", ""],
+    ["api/src/common/security-headers.ts", "шинэ"],
+    ["api/src/common/security-headers.spec.ts", "шинэ"],
+    ["api/src/auth/login-attempts.ts", "шинэ"],
+    ["api/src/auth/login-attempts.spec.ts", "шинэ"],
+    ["api/src/auth/auth.service.ts", "зөвхөн login()"],
+    ["web/next.config.ts", ""],
+    ["web/src/app/not-found.tsx", "шинэ"],
+    ["web/src/app/error.tsx", "шинэ"],
+    ["web/src/app/global-error.tsx", "шинэ"],
+    ["web/src/app/app/error.tsx", "шинэ"],
+  ],
+  avoid: ["api/package.json — helmet сан НЭМЭХГҮЙ, өөрөө бичнэ", "api/src/app.module.ts (throttler тохиргоо)", "api/src/auth/auth.controller.ts (одоогийн хязгаарыг зөвхөн шалгаад PR-д бич)", "web/src/app/layout.tsx"],
+  api: ["Бүх маршрутад толгой; POST /auth/login-д түгжээ"],
+  steps: [
+    R`security-headers.ts: express middleware буцаадаг функц: X-Content-Type-Options: nosniff; X-Frame-Options: DENY; Referrer-Policy: strict-origin-when-cross-origin; Permissions-Policy: camera=(), microphone=(), geolocation=(); Cross-Origin-Opener-Policy: same-origin; NODE_ENV=production үед л Strict-Transport-Security: max-age=15552000; includeSubDomains. АНХААР: вэб (Vercel домэйн) API-аас зургийг fileUrl()-ээр <img src> хэлбэрээр өөр домэйнээс ачаалдаг — Cross-Origin-Resource-Policy: same-origin эсвэл хатуу Content-Security-Policy тавьбал БҮХ зураг эвдэрнэ. CORP тавих бол cross-origin. CSP энэ даалгаварт тавихгүй.`,
+    R`main.ts: compression()-ийн дараа бүртгэ; app.getHttpAdapter().getInstance().disable('x-powered-by'). Одоо байгаа body parser, timeout, shutdown логикт хүрэхгүй. security-headers.spec.ts: хуурамч res-ээр толгойнуудыг шалга.`,
+    R`login-attempts.ts: цэвэр анги, цагийг гаднаас өгч болдог (тестэд). Түлхүүр = жижиг үсгээр, хоосон зайгүй identifier. 15 минутад 8 буруу оролдлого -> 15 минут түгжинэ; амжилттай нэвтрэлт тоолуурыг цэвэрлэнэ; санах ой хязгаартай (хуучирсан бичлэгийг цэвэрлэ). Сэтгэгдэлд: санах ойд — instance бүрт тусдаа, deploy-д шинэчлэгдэнэ, одоогийн нэг instance-д хангалттай.`,
+    R`auth.service.ts login(): нууц үг шалгахаас ӨМНӨ түгжээтэй эсэх -> HttpException 429 «Олон удаа буруу оролдсон тул 15 минутын дараа дахин оролдоно уу. Нууц үгээ мартсан бол «Нууц үг сэргээх»-ийг ашиглана уу.»; бүтэлгүйтвэл бүртгэ, амжилттай бол цэвэрлэ. Байхгүй хэрэглэгч ба буруу нууц үгийн хариу ижил хэвээр (бүртгэл байгаа эсэхийг задлахгүй). Нууц үг = утасны дугаар дүрэмд хүрэхгүй. login-attempts.spec.ts: N дахь оролдлогод түгжих, хугацааны дараа тайлах, амжилт цэвэрлэх.`,
+    R`web/next.config.ts: async headers() бүх замд X-Content-Type-Options, Referrer-Policy, X-Frame-Options: DENY, Permissions-Policy. Content-Security-Policy НЭМЭХГҮЙ (KaTeX-ийн inline style, Next-ийн inline script эвдэрнэ) — PR-д дараагийн алхам гэж бич. turbopack, devIndicators хэвээр.`,
+    R`not-found.tsx: монгол, брэндтэй (web/src/components/LogoMark.tsx), «Хуудас олдсонгүй» + энгийн тайлбар, «Нүүр хуудас» (/) ба «Миний самбар» товч. /app гэсэн хуудас БАЙХГҮЙ — самбарын холбоосыг homeForRole(getRole()) (web/src/lib/api.ts)-оор client талд тооцоол; нэвтрээгүй бол /login. Токен өнгө, lucide дүрс.`,
+    R`error.tsx ("use client", {error, reset}): «Алдаа гарлаа», «Дахин оролдох» (reset()), «Нүүр хуудас». error.message-ийг хэрэглэгчид харуулахгүй. global-error.tsx: өөрийн html, body-той (Next 16-ийн дүрмийг web/node_modules/next/dist/docs-оос шалга), globals.css-ийг импортолж токен ашигла. web/src/app/app/error.tsx: апп доторх алдаа — зүүн цэс хэвээр үлдэнэ.`,
+  ],
+  accept: [
+    "curl -sI http://localhost:3000/api/catalog/passes гаралтад шинэ толгойнууд, x-powered-by алга (гаралтыг PR-д хуул)",
+    "Байршуулсан зураг вэбд хэвээр харагдана (CORP эвдээгүй)",
+    "Нэг бүртгэлээр 9 дэх буруу оролдлогод 429 монгол мессеж",
+    "Байхгүй хаяг руу ороход монгол 404; алдаа гарахад монгол алдааны хуудас",
+    "jest-д шинэ тестүүд ногоон; api ачаалалтын шалгалт 0/0; web build ногоон",
+  ],
+  urls: ["http://localhost:3001/ene-khuudas-baikhgui", "http://localhost:3001/app/ene-baikhgui", "http://localhost:3001/login (буруу нууц үгээр олон удаа)"],
+},
+{ id: "G28, G29", wave: 1, pri: "P2", title: "Түүхий fetch-ийг api() руу, глиф ба гараар бичсэн өнгийг цэвэрлэх",
+  why: R`Хоёр газар 403-ыг ялгахын тулд түүхий fetch ашигладаг (api() HTTP статус дамжуулдаггүй тул). Хэд хэдэн файлд emoji / unicode глиф (сум, элсэн цаг, тэмдэг) болон гараар бичсэн өнгө (bg-blue-600, text-white) үлдсэн — эзний хатуу дүрмийн зөрчил.`,
+  owned: [
+    ["web/src/lib/api.ts", "ЗӨВХӨН нэмэлт: ApiError анги"],
+    ["web/src/components/lesson/api.ts", ""],
+    ["web/src/app/app/library/page.tsx", ""],
+    ["web/src/components/results/ResultsTable.tsx", ""],
+    ["web/src/components/groups/**", ""],
+    ["web/src/app/app/admin/reconcile/ImportUploader.tsx", ""],
+    ["web/src/app/app/admin/reconcile/TransactionList.tsx", ""],
+    ["web/src/app/app/admin/reconcile/UserSearch.tsx", ""],
+    ["web/src/components/attendance/StatusPills.tsx", ""],
+    ["web/src/components/enrollment/PendingApprovalList.tsx", ""],
+    ["web/src/components/exam/ExamHeader.tsx", "зөвхөн глифийн мөр"],
+    ["web/src/components/exam/ExamIntro.tsx", "зөвхөн глифийн мөр"],
+    ["web/src/components/planner/TimelineView.tsx", ""],
+    ["web/src/components/store-admin/ProductsManager.tsx", ""],
+    ["web/src/components/test-list/TopicGroup.tsx", ""],
+  ],
+  avoid: ["web/src/components/finance/** (2-р долгионд G23)", "web/src/components/tuition/** (G06)", "web/src/components/landing/**, checkout/**", "exam/ доторх бусад файл, шалгалтын логик"],
+  api: ["API өөрчлөхгүй"],
+  steps: [
+    R`web/src/lib/api.ts: export class ApiError extends Error { status: number } нэм. api() нь !res.ok үед яг ижил монгол мессежтэй ApiError(formatted, res.status) шиднэ. Буцах нийцтэй: message өөрчлөгдөхгүй, instanceof Error үнэн хэвээр. retry, dedupe, timeout-д хүрэхгүй. uploadFile-ийн алдааг ч мөн адил болгож болно (сонголттой).`,
+    R`web/src/components/lesson/api.ts fetchLessonDetail: api<LessonDetail>("/lessons/" + encodeURIComponent(chapterId)) болго; ApiError status 403 -> LessonAccessDeniedError (анги, мессеж хэвээр). API_URL тогтмол ба түүхий fetch-ийг хас.`,
+    R`web/src/app/app/library/page.tsx fetchChapterProblems: мөн адил, ChapterAccessDeniedError хэвээр. «Эрхгүй» ба «сүлжээний алдаа» төлөв хоёр ялгаатай хэвээр харагдах ёстой.`,
+    R`Глиф солих (мөрийн дугаар ойролцоо): ResultsTable.tsx ~142 U+2B07 -> lucide Download; TransactionList.tsx ~219, ~236 ба UserSearch.tsx ~102 U+23F3 (элсэн цаг) -> lucide Loader2 + animate-spin; ImportUploader.tsx ~209–212 U+00B7 -> <Meta items={[...]} />; StatusPills.tsx ~28 «Хоцорсон»-ийн U+25D0 -> lucide (Clock гэх мэт), getStatusIcon-ийн зураглалыг нийцүүл; PendingApprovalList.tsx ~117–118 U+2705 ба U+26A0 мөр -> lucide CheckCircle2 / AlertTriangle элемент + текст (англи «CONFIRMED» -> «Төлбөр баталгаажсан»); ExamHeader.tsx ~57 U+25A6 -> lucide LayoutGrid (aria-hidden, title хэвээр); ExamIntro.tsx ~253 U+2699 -> lucide Settings; TimelineView.tsx ~197 U+21B3 -> lucide CornerDownRight; ProductsManager.tsx ~354 U+00B7 -> Meta; TopicGroup.tsx ~35 U+25B6 -> lucide ChevronRight (rotate-90 зан хэвээр).`,
+    R`components/groups/**: CreateGroupForm (bg-blue-600 text-white hover:bg-blue-700) -> bg-brand text-on-brand эсвэл ui/Button; JoinGroupForm, RegisterExternalTeacher, GroupMembersCard доторх ногоон / улаан / цэнхэр -> text-success, bg-success/10, text-error, bg-error/10 гэх мэт токен.`,
+    R`Эцэст нь web/src бүхэлд глиф ба өнгөний grep ажиллуулаад ӨӨРИЙН бус файлд үлдсэнийг PR-д жагсаа (засахгүй). Сэтгэгдэл доторх, эсвэл өгөгдөл задлах split(" U+00B7 ") мэт логик хэрэглээг ялгаж бич.`,
+  ],
+  accept: [
+    "web/src-д fetch( зөвхөн lib/api.ts болон сэтгэгдэлд үлдэнэ (G06 нэгтгэгдэхээс өмнө tuition-д нэг үлдэж болно)",
+    "Эзэмшсэн файлуудад глиф, гараар бичсэн өнгө 0",
+    "Түгжээтэй бүлэг «эрхгүй» төлөвөө, сүлжээний алдаа өөрийн төлөвөө хэвээр харуулна",
+    "Шалгалтын дэлгэцийн логик өөрчлөгдөөгүй (diff зөвхөн глифийн мөр)",
+    "web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/library", "http://localhost:3001/app/learn/<chapterId>", "http://localhost:3001/app/groups", "http://localhost:3001/app/admin/reconcile", "http://localhost:3001/app/tests"],
+},
+
+/* ============================ ДОЛГИОН 2 ============================ */
+{ id: "G12", wave: 2, pri: "P1", title: "Гадны багшийг баталгаажуулах UI (+ бүртгүүлэх хуудас)",
+  why: R`Гадны багш бүртгүүлж өөрийн бүлэг нээх модуль бий ч админ баталгаажуулах UI байхгүй тул нэг ч гадны багш ажиллаж чадахгүй. RegisterExternalTeacher компонент ямар ч хуудсанд холбогдоогүй.`,
+  owned: [
+    ["web/src/app/app/admin/enrollment/page.tsx", "«Гадны багш» таб нэмэх"],
+    ["web/src/components/enrollment/ExternalTeachersPanel.tsx", "шинэ"],
+    ["web/src/components/groups/RegisterExternalTeacher.tsx", ""],
+    ["web/src/app/teacher-register/page.tsx", "шинэ, нийтийн"],
+    ["api/src/teacher-groups/**", ""],
+  ],
+  avoid: ["web/src/components/enrollment/EnrollmentClient.tsx, PendingApprovalList.tsx", "web/src/components/nav/** (G22)", "api/prisma/**"],
+  api: [
+    "POST /teacher-groups/register (нийтийн) ; GET /teacher-groups/unverified (ADMIN, TEACHER_PLUS)",
+    "PUT /teacher-groups/verify/:userId {note?} (ADMIN, TEACHER_PLUS)",
+    "ШИНЭ: GET /teacher-groups/verified (ADMIN, TEACHER_PLUS) ; PUT /teacher-groups/unverify/:userId (ЗӨВХӨН ADMIN)",
+  ],
+  steps: [
+    R`api/src/teacher-groups/teacher-groups.controller.ts, service, dto-г унш. ExternalTeacherProfile: organization, verifiedAt, verifiedById, note (схем өөрчлөхгүй).`,
+    R`API: GET verified — баталгаажсан гадны багш (нэр, имэйл, байгууллага, verifiedAt, note, бүлгийн тоо); PUT unverify/:userId — verifiedAt, verifiedById-г null болгоно. АНХААР: @Get(':groupId') нь 'verified'-ийг барьж авах тул шинэ статик маршрутуудыг түүнээс ӨМНӨ зарла. Service-ийн шинэ функцэд unit тест (prisma mock).`,
+    R`web/src/app/app/admin/enrollment/page.tsx: одоо байгаа табын загвараар «Гадны багш» таб нэм (одоогийн 2 таб хэвээр).`,
+    R`ExternalTeachersPanel.tsx: «Хүлээгдэж буй» (баталгаажуулах товч + сонголттой тэмдэглэл, баталгаажуулах цонх) ба «Баталгаажсан» (ADMIN-д «Баталгаажуулалтыг цуцлах», 2 алхамт) хэсэг. Баталгаажаагүй багш юу хийж чадахгүйг (service-ээс шалгаад) InfoHint-д тайлбарла.`,
+    R`Шинэ нийтийн хуудас /teacher-register: RegisterExternalTeacher-ийг байрлуул, амжилттай бол «Таны хүсэлтийг хүлээн авлаа, баталгаажсаны дараа нэвтэрнэ» гэх мэт тайлбар. Компонентын үлдсэн гараар бичсэн өнгийг токен болго. Нүүр хуудаснаас холбоос нэмэхгүй (эзэн шийднэ) — PR-д санал болго.`,
+    R`/app/groups хуудас цэсэнд байхгүйг PR-ийн «Дутуу» хэсэгт бич (цэсийг энэ долгионд G22 эзэмшдэг).`,
+  ],
+  accept: [
+    "Шинэ гадны багш /teacher-register-ээр бүртгүүлж, «Хүлээгдэж буй»-д гарна",
+    "Баталгаажуулахад «Баталгаажсан» руу шилжинэ; ADMIN цуцалж чадна, TEACHER_PLUS цуцлах товч харахгүй",
+    "GET /teacher-groups/verified нь /teacher-groups/:groupId-д баригдахгүй (тестээр эсвэл curl-ээр нотол)",
+    "api шалгалт ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/teacher-register", "http://localhost:3001/app/admin/enrollment (Гадны багш таб)"],
+},
+{ id: "G22", wave: 2, pri: "P2", title: "Эрх (pass)-ийн удирдлага: засах, устгах, гараар олгох, цуцлах",
+  why: R`Эрх үүсгэх, засах, олгох, цуцлах API бий ч удирдлагын UI байхгүй. Идэвхгүй эрх ба хэн эрх эзэмшиж байгааг харах endpoint ч алга.`,
+  owned: [
+    ["api/src/passes/**", ""],
+    ["web/src/app/app/admin/passes/**", "шинэ"],
+    ["web/src/components/passes-admin/**", "шинэ"],
+    ["web/src/components/nav/nav-data.ts", "ЗӨВХӨН /app/admin/passes-ийг ADMIN цэсэнд нэмэх"],
+    ["web/src/components/nav/icons.tsx", "шаардлагатай бол нэг дүрс"],
+  ],
+  avoid: ["api/src/store/** (G40-ийн шийдвэр хүлээгдэж байна)", "api/prisma/**"],
+  api: [
+    "GET /catalog/passes (нийтийн, зөвхөн идэвхтэй) ; POST /passes, PATCH /passes/:id, DELETE /passes/:id (ADMIN)",
+    "POST /passes/:id/grant {userId} (ADMIN, TEACHER_PLUS) ; DELETE /me/passes/:userPassId (ADMIN — олгосныг цуцлах)",
+    "ШИНЭ: GET /passes (ADMIN, идэвхгүйг оруулаад + эзэмшигчийн тоо) ; GET /passes/:id/holders (ADMIN)",
+  ],
+  steps: [
+    R`api/src/passes/passes.service.ts (listActive, create, update, remove, grant, myPasses, revokeUserPass) ба dto/-г унш. UserPass-ийн талбарын нэрийг schema.prisma-аас шалга.`,
+    R`Шинэ service функц + маршрут: GET /passes, GET /passes/:id/holders (хэрэглэгчийн нэр, код, эхэлсэн / дуусах огноо). Одоо байгаа маршрутыг эвдэхгүй (DELETE /me/passes/:userPassId-ийн замыг хэвээр үлдээ). Unit тест.`,
+    R`/app/admin/passes: эрхийн жагсаалт (нэр, хоног, хамрах хүрээ, үнэ, идэвхтэй эсэх, эзэмшигчийн тоо). Үүсгэх / засах маягт — CreatePassDto, UpdatePassDto-ийн талбарыг ЯГ дагана. Устгах — 2 алхамт; эзэмшигчтэй үед сервер татгалзвал түүний мессежийг харуул.`,
+    R`Эзэмшигчийн хэсэг (эрх дээр дарахад): жагсаалт + «Цуцлах» (2 алхамт); «Гараар олгох» — GET /users/search?q=-ээр сурагч хайж POST /passes/:id/grant.`,
+    R`layout.tsx: RequireRole allow ADMIN. nav-data.ts: ADMIN цэсэнд «Эрхүүд» (admin бүлэг, ITEM_GROUP-д нэм), icons.tsx-д Ticket гэх мэт lucide дүрс (суулгасан хувилбарт байгааг шалга).`,
+  ],
+  accept: [
+    "Эрх үүсгэх, засах, идэвхгүй болгох, устгах ажиллана; идэвхгүй эрх ч жагсаалтад харагдана",
+    "Сурагчид гараар олгож, эзэмшигчийн жагсаалтаас цуцалж болно",
+    "Цэсэнд ADMIN-д «Эрхүүд» гарна, бусад эрхэд гарахгүй",
+    "api шалгалт ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/admin/passes"],
+},
+{ id: "G23", wave: 2, pri: "P2", title: "Зарлага засах, устгах; «Ааш»-ийг «Түрээс» болгох; өнгийг токен болгох",
+  why: R`Санхүүгийн хуудсанд буруу оруулсан зарлагыг засах, устгах арга алга (API бэлэн). «Ааш» гэдэг нь «Түрээс» байх ёстой шошгоны алдаа. Хуудсанд 15 газар гараар бичсэн өнгө бий.`,
+  owned: [
+    ["web/src/components/finance/**", ""],
+    ["web/src/app/app/admin/finance/page.tsx", ""],
+  ],
+  avoid: ["api/src/finance/** (зөвхөн унших)", "web/src/app/app/admin/finance/layout.tsx (1-р долгионд үүссэн)"],
+  api: ["GET /finance/report ; GET /finance/expenses ; POST /finance/expenses ; PATCH /finance/expenses/:id ; DELETE /finance/expenses/:id — бүгд ADMIN"],
+  steps: [
+    R`api/src/finance/finance.controller.ts, service, dto-г уншиж PATCH-ийн талбарыг ЯГ тогтоо.`,
+    R`Зарлагын мөр бүрт «Засах» (урьдчилан бөглөсөн маягт: ангилал, дүн, огноо, тэмдэглэл — DTO-гоор) ба «Устгах» (дүн, огноог харуулсан 2 алхамт баталгаажуулалт). Амжилттай бол тайлан ба жагсаалтыг дахин ачаал.`,
+    R`«Ааш» шошгыг бүх газарт (~295, ~375, ~549-р мөр орчим) «Түрээс» болго. RENT enum утга өөрчлөгдөхгүй — зөвхөн шошго.`,
+    R`Гараар бичсэн бүх өнгийг токен болго: эерэг / сөрөг үлдэгдэл text-success / text-error; багана диаграммын өнгө bg-brand, bg-accent-teal, bg-accent-gold, bg-accent-violet, bg-accent-sky, bg-accent-rose, bg-ink-dim; багана бүр текст шошготой (өнгө дангаараа биш). Товч bg-brand text-on-brand.`,
+    R`Гар утсанд хүснэгтийг карт болго; ачаалж байна / хоосон / алдаа.`,
+  ],
+  accept: [
+    "Зарлага засах, устгах ажиллаж, тайлангийн нийлбэр шинэчлэгдэнэ",
+    "grep «Ааш» web/src/components/finance -> хоосон",
+    "Глиф / өнгөний grep эзэмшсэн файлд хоосон",
+    "375px-д хэвтээ гүйлгэхгүй; web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/admin/finance"],
+},
+{ id: "G24", wave: 2, pri: "P2", title: "SMS загвар үүсгэх / засах, илгээхийн өмнөх серверийн өртгийн тооцоо",
+  why: R`SMS мөнгөтэй бөгөөд буцаах боломжгүй. Одоо өртгийг вэб дээр «кирилл бол 10, үгүй бол 5 төгрөг» гэж таамаглан тооцдог — серверийн жинхэнэ тооцоо (POST /sms/bulk/estimate) ашиглагдаагүй. Загвар үүсгэх, засах UI байхгүй (зөвхөн устгах).`,
+  owned: [
+    ["web/src/components/sms/**", ""],
+    ["web/src/app/app/sms/**", ""],
+  ],
+  avoid: ["api/src/notifications/** (зөвхөн унших)"],
+  api: [
+    "GET /sms/templates (ADMIN, TEACHER_PLUS) ; POST /sms/templates {name, body, kind} ; PATCH /sms/templates/:id {name?, body?} ; DELETE (ADMIN)",
+    "POST /sms/bulk/estimate (SmsBulkDto) -> хүн, хэсэг, өртөг ; POST /sms/bulk ; POST /sms/bulk/:id/start ; POST /sms/send (ADMIN)",
+  ],
+  steps: [
+    R`api/src/notifications/sms.controller.ts, sms-management.service.ts (estimateBulkSms, createTemplate, updateTemplate), sms-segments.ts, dto/-г уншиж хариуны ЯГ хэлбэр ба SmsKind-ийн утгуудыг (schema.prisma) тогтоо.`,
+    R`SmsTemplates.tsx: үүсгэх маягт (нэр — давтагдашгүй, төрөл сонгох монгол шошготой, бичвэр + тэмдэгт / хэсгийн тоолуур), мөр дотор засах, одоогийн устгахыг 2 алхамт болго. Бичих үйлдэл зөвхөн ADMIN; TEACHER_PLUS зөвхөн харна.`,
+    R`web/src/components/sms/segments.ts: sms-segments.ts-ийн дүрмийг (GSM-7 160/153, UCS-2 70/67) дуурайсан жижиг тоолуур — зөвхөн шууд харуулахад; сэтгэгдэлд серверийн эх файлыг заа. Илгээхийн өмнөх эцсийн өртгийг ҮРГЭЛЖ серверээс авна.`,
+    R`SmsSend.tsx: хатуу бичсэн өртгийн таамгийг хас. Бөөн илгээлтийн өмнө /sms/bulk-д явуулах яг ижил body-оор POST /sms/bulk/estimate дуудаж хүний тоо, мессеж тутмын хэсэг, нийт хэсэг, ойролцоо өртгийг харуул. Тооцоо ирэх ба «Буцаах боломжгүйг ойлгосон» тэмдэглэгээ хийгдэх хүртэл илгээх товч идэвхгүй. Ганц илгээлтэд шууд хэсгийн тоо.`,
+    R`Загвар сонгоход бичвэрийг бөглөнө. Загвар хувьсагч ({name} гэх мэт) дэмждэг эсэхийг серверээс шалга — дэмжихгүй бол ийм боломж зохиохгүй. PASSWORD_RESET төрлийн бичвэрт код хадгалахгүй дүрмийг хүндэтгэ (STATUS §7.8).`,
+  ],
+  accept: [
+    "Загвар үүсгэх, засах, устгах ажиллана; TEACHER_PLUS товч харахгүй",
+    "Бөөн илгээлтийн өмнө серверийн тооцоо харагдаж, түүнгүйгээр илгээх боломжгүй",
+    "Кирилл 71 тэмдэгт = 2 хэсэг гэж зөв харуулна",
+    "web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/sms"],
+},
+{ id: "G26", wave: 2, pri: "P2", title: "«Хэдий хүртэл төлсөн» карт — сурагч ба эцэг эхэд",
+  why: R`Сурагч, эцэг эх төлбөр хэзээ дуусахыг мэдэхгүй тул ажилтнаас байнга асуудаг. GET /tuition/paid-until/my ба /:studentId бэлэн. Мөн алдаа байна: /:studentId маршрутын @Roles-д PARENT байхгүй тул доторх эцэг эхийн шалгалт хэзээ ч ажилладаггүй, мөн холбоос баталгаажсан (verifiedAt) эсэхийг шалгадаггүй.`,
+  owned: [
+    ["api/src/tuition/tuition.controller.ts", "ЗӨВХӨН paid-until маршрутууд"],
+    ["api/src/tuition/paid-until-access.ts", "шинэ, цэвэр функц"],
+    ["api/src/tuition/paid-until-access.spec.ts", "шинэ"],
+    ["web/src/components/payments/PaidUntilCard.tsx", "шинэ"],
+    ["web/src/app/app/student/page.tsx", "нэмэлт мөр л"],
+    ["web/src/app/app/parent/page.tsx", "нэмэлт мөр л"],
+  ],
+  avoid: ["api/src/tuition/paid-until.ts, proration.ts (тооцоо)", "web/src/components/tuition/**", "web/src/components/homework/**"],
+  api: ["GET /tuition/paid-until/my (STUDENT) -> {paidUntil}", "GET /tuition/paid-until/:studentId (ADMIN, TEACHER_PLUS, TEACHER; ЗАСВАРЫН ДАРАА + PARENT) -> {paidUntil}", "GET /parent/children ; GET /auth/me"],
+  steps: [
+    R`API: @Roles-д Role.PARENT нэм. Хандах эрхийн шалгалтыг paid-until-access.ts-д цэвэр функц болгон гарга: TEACHER — өөрийн ангийн сурагч; PARENT — verifiedAt нь null биш ParentLink-тэй; ADMIN, TEACHER_PLUS — бүгд. spec-д тохиолдол бүр. getPaidUntil-ийн тооцоонд хүрэхгүй.`,
+    R`PaidUntilCard.tsx: studentId өгөөгүй бол /my. Огноог Asia/Ulaanbaatar бүсээр монголоор (жишээ нь «2026 оны 10-р сарын 15»), үлдсэн хоног. 7 хоног ба түүнээс бага — анхааруулгын хэв + «7 хоногийн дотор дуусна»; өнгөрсөн — «Төлбөрийн хугацаа дууссан» + /app/student/payments руу холбоос; null — «Төлбөрийн мэдээлэл алга». Дүрс + текст (өнгө дангаараа биш). Ачаалж байна / алдаа.`,
+    R`Энэ тооцоо танхимын сурагчид зориулагдсан эсэхийг tuition.service.ts getPaidUntil-ээс шалга; онлайн сурагчид хамаарахгүй бол картыг харуулахгүй (сурагчийн самбар /auth/me-ийн studentProfile.type-ийг аль хэдийн ашигладаг — STATUS §7.11).`,
+    R`Сурагчийн самбар: картыг дээд хэсэгт нэм. Энэ хуудас саяхан гэрийн даалгаврын ажлаар засагдсан — одоо байгаа хэсэг, #homework зангууг хөндөхгүй, зөвхөн НЭМНЭ.`,
+    R`Эцэг эхийн хуудас: баталгаажсан хүүхэд бүрт карт (GET /parent/children-ийн хариунаас studentId-г ав). Одоо байгаа хэсгийг хөндөхгүй.`,
+  ],
+  accept: [
+    "Сурагч өөрийн дуусах огноог харна; эцэг эх баталгаажсан хүүхдийнхээ огноог харна",
+    "Баталгаажаагүй холбоостой эцэг эх 403; өөр ангийн багш 403 (тестээр)",
+    "Самбарын одоогийн хэсгүүд хэвээр",
+    "api шалгалт ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/student", "http://localhost:3001/app/parent"],
+},
+{ id: "G30", wave: 2, pri: "P2", title: "Playwright-оор 8 гол аяллын E2E тест (тусдаа e2e/ хавтас)",
+  why: R`Вэбд автомат тест бараг байхгүй — нэг засвар өөр хуудсыг эвдэхийг зөвхөн хэрэглэгч олж мэддэг. docs/PLATFORM-SPEC.html-ийн «Хэрэглэгчийн аялал» хэсгийн 8 аяллыг автомат болгоно.`,
+  owned: [
+    ["e2e/**", "шинэ дээд түвшний хавтас: package.json, playwright.config.ts, tests/, README.md"],
+  ],
+  avoid: ["web/**, api/** (зөвхөн унших)", "web/package.json", ".github/** (CI-д одоохондоо нэмэхгүй — сервер, өгөгдлийн сан хэрэгтэй)", "Бүх репогийн lint засвар (энэ даалгаварт биш)"],
+  api: ["POST /auth/login ; бусад нь аялал тус бүрийн хуудсаар"],
+  steps: [
+    R`e2e/package.json — devDependency зөвхөн @playwright/test (энэ нь вэбийн bundle-д орохгүй тусдаа тестийн багц). Скрипт: test, test:mobile, test:headed.`,
+    R`playwright.config.ts: baseURL = E2E_WEB_URL (өгөгдмөл http://localhost:3001); API = E2E_API_URL (өгөгдмөл http://localhost:3000/api). 2 project: mobile (375x812) ба desktop (1280x800). Хамгаалалт: E2E_WEB_URL эсвэл E2E_API_URL localhost биш бол ШУУД зогсоно (api/test/load/lib/env.js-ийн assertLocalhost-тай адил зарчим) — прод өгөгдлийг хэзээ ч өөрчлөхгүй.`,
+    R`Бүртгэл: E2E_ADMIN_PHONE, E2E_TEACHER_PLUS_PHONE, E2E_TEACHER_PHONE, E2E_STUDENT_PHONE, E2E_PARENT_PHONE орчны хувьсагч (нууц үг = утас). Бодит дугаар кодод БИЧИХГҮЙ. Хувьсагч байхгүй аяллыг тодорхой шалтгаантай test.skip. Нэвтрэлт: API-аар POST /auth/login -> localStorage-ийн pi_token, pi_role (web/src/lib/api.ts) -> эрх бүрийн storageState.`,
+    R`8 аялал (docs/PLATFORM-SPEC.html, JOURNEYS): 1) Танхимын сурагч элсэх — бүртгэлээс «зөвшөөрөл хүлээгч» хүртэл, ажилтны зөвшөөрөх дэлгэц; 2) Өдөр тутмын хичээл — багшийн самбар, ирцийн дэлгэц; 3) Онлайн шалгалт — багш тест үүсгэх, сурагч эхлэх, хариулах, илгээх, оноо харах; 4) Онлайн худалдан авагч эрх авах — каталог, checkout дэлгэц хүртэл (бодит төлбөргүй); 5) Эцэг эх холбогдох — хүсэлт, ажилтан баталгаажуулах; 6) Буцаалт — TEACHER_PLUS тооцоо үүсгэх, ADMIN зөвшөөрөх (G06 нэгтгэгдсэн байх); 7) Сарын төлбөр хөөцөлдөх — /app/payments үлдэгдлийн хэсэг ачаалагдана; 8) Нууц үгээ мартах — хуудас, «Код ирэхгүй байна уу?» тусламж (SMS илгээхгүй).`,
+    R`Тест бүр: консолын алдаа 0, 375px-д document.documentElement.scrollWidth <= 375, гол текст харагдана. Selector-ыг role / текстээр (getByRole, getByText); class-аар бүү барь.`,
+    R`e2e/README.md (монгол): эзний Mac дээр ажиллуулах алхам — API ба вэбийг асаах, дараа нь cd e2e && npm install && npx playwright install chromium && E2E_ADMIN_PHONE=... npx playwright test. Ямар аялал локал өгөгдлийн сан дахь өгөгдлийг өөрчилдгийг тэмдэглэ.`,
+    R`Энэ орчинд сервер, өгөгдлийн сан асаах боломжгүй бол: npx tsc --noEmit (e2e дотор) ба npx playwright test --list-ийн бодит гаралтыг PR-д хуулж, «аяллуудыг ажиллуулаагүй» гэж ТОД бич.`,
+  ],
+  accept: [
+    "e2e/ бие даасан (web, api-ийн package.json хөндөгдөөгүй)",
+    "8 аялал тус бүр тусдаа тест файлд; playwright test --list 8+ тест харуулна",
+    "localhost биш хаяг руу ажиллахаас татгалзана",
+    "Бодит утасны дугаар, нууц үг кодод алга",
+  ],
+  urls: ["(Хуудас биш — эзэн e2e/README.md-ийн командаар ажиллуулна)"],
+  ownerNote: "Энэ агентад Codex-ийн орчны тохиргоонд интернэт (npm registry) нээлттэй байх шаардлагатай — @playwright/test суулгана.",
+},
+{ id: "G31", wave: 2, pri: "P2", title: "Ачааллын тест: 2000 зэрэг сурагч (одоогийн Node скрипт + k6)",
+  why: R`2000 сурагч зэрэг шалгалт өгөх зорилт батлагдаагүй. api/test/load/-д аль хэдийн Node дээр бичсэн ачааллын тест бий (50, 200, 500, 1000 түвшин, зөвхөн localhost) — түүнийг 2000 хүртэл өргөтгөж, тайлан гаргадаг болгож, k6 хувилбар нэмнэ.`,
+  owned: [
+    ["api/test/load/**", ""],
+    ["api/package.json", "ЗӨВХӨН scripts хэсэгт нэг мөр (loadtest:k6)"],
+  ],
+  avoid: ["api/src/** (гүйцэтгэлийн асуудал олдвол засахгүй — PR-д бич)", "api/package-lock.json", "render.yaml"],
+  api: ["POST /tests/:id/start ; PATCH /tests/:id/session (autosave) ; POST /tests/:id/heartbeat ; POST /tests/:id/submit"],
+  steps: [
+    R`api/test/load/index.js, run-level.js, vuser.js, fixture.js, lib/-ийг бүтэн уншиж одоогийн сценари, хамгаалалт (assertLocalhost), тохиргооны хувьсагчийг ойлго.`,
+    R`2000 түвшинг дэмжүүл (LOADTEST_LEVELS=...,2000): fixture хангалттай сурагч үүсгэдэг эсэх, DB_POOL_MAX (render.yaml-ийн тайлбар) нөлөөг шалга. Heartbeat байхгүй бол сценарид нэм.`,
+    R`Түвшин бүрийн тайлан: endpoint тус бүрийн p50 / p95 / p99 хоцрол, алдааны хувь, секундэд хүсэлт. api/test/load/results/<огноо>.json ба .md руу бич; results/-ийг .gitignore-д нэм (жишээ тайлан commit хийхгүй — зөвхөн бодитоор ажиллуулсан бол нэгийг хавсаргаж болно).`,
+    R`k6 хувилбар api/test/load/k6/exam.js (k6 бол тусдаа програм, npm сан биш): start -> autosave x N -> heartbeat -> submit, 2000 VU хүртэл шатлан өсөх, босго: http_req_failed < 1%, autosave p95 < 800ms. Токеныг fixture-ийн гаргасан файлаас (LOADTEST_KEEP_FIXTURE=1) эсвэл setup()-д нэвтэрч авна. Хамгаалалт: BASE_URL localhost биш бол зогсоно; pimn-api.onrender.com-ыг ямар ч нөхцөлд ХОРИГЛОНО.`,
+    R`LOADTEST_DRY_RUN=1 горим — сүлжээгүйгээр тохиргоо, fixture төлөвлөгөөг шалгаж хэвлэнэ.`,
+    R`api/test/load/README.md (монгол): эзний Mac дээр — brew install k6; API-г асаах; npm run loadtest:exam; npm run loadtest:k6. Үр дүнг хэрхэн уншихыг энгийн үгээр.`,
+    R`api/package.json scripts-д «loadtest:k6»: «k6 run test/load/k6/exam.js» нэм — өөр мөрөнд хүрэхгүй. Өгөгдлийн сан байхгүй бол бодит тоо зохиохгүй: node --check ба dry-run-ийн гаралтыг л хуулж «бодитоор ажиллуулаагүй» гэж бич.`,
+  ],
+  accept: [
+    "LOADTEST_LEVELS=2000 дэмжигдэнэ; dry-run гаралт PR-д",
+    "k6 скрипт localhost биш хаягаас татгалзана",
+    "Хуурамч гүйцэтгэлийн тоо PR-д алга",
+    "api tsc, jest ногоон (src хөндөгдөөгүй)",
+  ],
+  urls: ["(Хуудас биш — эзэн api/test/load/README.md-ийн командаар)"],
+},
+
+/* ============================ ДОЛГИОН 3 ============================ */
+{ id: "G25", wave: 3, pri: "P2", title: "Сурагч архивлах, Excel-ээс импорт (урьдчилан харахтай), экспорт",
+  why: R`Гарсан сурагч жагсаалтад үүрд үлддэг (архивлах талбар байхгүй). Шинэ сурагчийг бөөнөөр оруулах нь зөвхөн скриптээр (import-students.cjs) хийгддэг тул эзэн өөрөө хийж чадахгүй. Экспорт байхгүй.`,
+  owned: [
+    ["api/prisma/schema.prisma", "User-д archivedAt нэг талбар"],
+    ["api/prisma/migrations/<шинэ>_add_user_archived/migration.sql", "шинэ"],
+    ["api/src/users/**", ""],
+    ["web/src/components/students/**", ""],
+    ["web/src/app/app/admin/students/**", "шинэ import/ хуудас орно"],
+  ],
+  avoid: ["Хуучин миграцийн файл", "api/src/auth/** (нэвтрэлтийг хаах шийдвэр гараагүй)", "api/src/classrooms/**, attendance (архивласныг шүүх шаардлагатай газрыг PR-д жагсаа)"],
+  api: ["ШИНЭ: POST /users/:id/archive, POST /users/:id/unarchive (ADMIN)", "ШИНЭ: GET /users/students/export (ADMIN) -> JSON мөрүүд", "ШИНЭ: POST /users/students/import/preview {fileKey}, POST /users/students/import/commit {fileKey, rows} (ADMIN)", "Одоогийн: uploadFile() -> /uploads (key буцаана)"],
+  steps: [
+    R`Схем: User.archivedAt DateTime? + индекс. Миграци: ALTER TABLE ... ADD COLUMN IF NOT EXISTS, CREATE INDEX IF NOT EXISTS; хүснэгт / баганын нэрийг schema.prisma-ийн @@map / @map-тай тулга. npx prisma validate, npx prisma generate.`,
+    R`Архивын утга: жагсаалт, хайлтаас өгөгдмөлөөр нуух (includeArchived=1 үед ADMIN харна), идэвхтэй ангиас гаргах (enrollment leftAt). Нэвтрэлтийг ХААХГҮЙ — эзний шийдвэр хүлээгдэж байна, PR-д асуулт болгон бич. Архивлах, сэргээх нь audit-д бичигдэнэ (AuditService жишээ: classrooms.service.ts).`,
+    R`Экспорт: GET /users/students/export — мөрүүдийг JSON-оор (код, овог, нэр, утас, анги, төрөл, төлөв, бүртгэсэн огноо). Вэб CSV-г client талд үүсгэж (UTF-8 BOM — Excel кирилл) Blob-оор татуулна — түүхий fetch хэрэггүй.`,
+    R`Импорт: api/src/users/student-import.ts — цэвэр функц: мөр задлах, баталгаажуулах (нэр заавал, утсыг api/src/notifications/phone.ts-ээр хэвшүүлэх, өгөгдлийн сан дахь болон файл доторх давхардал), api/prisma/import-students.cjs-ийн дүрмийг дагана: нууц үг = утас (bcrypt), давхцлыг утсаар, дараа нь овог нэрээр шалгах, сурагчийн код нь Excel-ийн 7 оронтой код (2027001 ...) — B27 формат руу ШИЛЖҮҮЛЭХГҮЙ (эзний шийдвэр 2026-09-26); кодгүй мөрд одоо байгаа хамгийн их кодоос үргэлжлүүлнэ. Логикийг хуулахын оронд цэвэр функц болгон гаргаж скрипт ба endpoint хоёулаа ашиглаж болох эсэхийг судал (скриптийг энэ даалгаварт засахгүй — PR-д санал болго). exceljs (api-д аль хэдийн суусан)-ээр серверт уншина. preview -> мөр бүрийн алдаатай жагсаалт; commit -> зөвхөн алдаагүй, сонгосон мөр; утсаар идемпотент. Байршуулсан файлыг commit-ийн дараа устга. student-import.spec.ts — зохиомол өгөгдлөөр.`,
+    R`Вэб: сурагчдын жагсаалтад «Идэвхтэй / Архивласан» шүүлтүүр, мөрийн «Архивлах / Сэргээх» (2 алхамт), «CSV татах». Шинэ /app/admin/students/import: файл сонгох -> урьдчилан харах (алдаатай мөр тодорхой, шалтгаан монголоор) -> баталгаажуулах -> үр дүн (нэмсэн, алгассан).`,
+    R`ХУВИЙН ӨГӨГДӨЛ: жинхэнэ xlsx (BURTGEL-2027-1.xlsx гэх мэт)-ийг репод хэзээ ч бүү нэм; тест, жишээ бүгд зохиомол.`,
+  ],
+  accept: [
+    "Миграци IF NOT EXISTS-тэй, хуучин миграци хөндөгдөөгүй, prisma validate ногоон",
+    "Архивласан сурагч өгөгдмөл жагсаалтад харагдахгүй, шүүлтүүрээр харагдана, сэргээж болно",
+    "Импортын урьдчилан харалт алдаатай мөрийг тодорхой заана; commit давхардал үүсгэхгүй",
+    "CSV Excel-д кирилл зөв нээгдэнэ",
+    "api шалгалт (jest-д шинэ тест) ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/admin/students", "http://localhost:3001/app/admin/students/import"],
+  ownerNote: "Локалд шалгахын өмнө: cd api && npx prisma migrate deploy (локал өгөгдлийн сан).",
+},
+{ id: "G17", wave: 3, pri: "P1", title: "Нууцлалын бодлого, үйлчилгээний нөхцөл, бүртгэлийн зөвшөөрөл",
+  why: R`Хүүхдийн хувийн мэдээлэл (нэр, утас, дүн, төлбөр) хадгалдаг атлаа нууцлалын бодлого, үйлчилгээний нөхцөл, эцэг эхийн зөвшөөрлийн бүртгэл байхгүй. Хуулийн шаардлага, итгэлийн асуудал.`,
+  owned: [
+    ["api/prisma/schema.prisma", "User-д termsAcceptedAt, termsVersion, guardianConsentAt"],
+    ["api/prisma/migrations/<шинэ>_add_user_consent/migration.sql", "шинэ"],
+    ["api/src/auth/dto/register.dto.ts", ""],
+    ["api/src/auth/auth.service.ts", "зөвхөн register()"],
+    ["api/src/auth/register-consent.spec.ts", "шинэ"],
+    ["web/src/app/register/page.tsx", ""],
+    ["web/src/app/privacy/page.tsx", "шинэ"],
+    ["web/src/app/terms/page.tsx", "шинэ"],
+    ["web/src/components/landing/Footer.tsx", "зөвхөн 2 холбоос"],
+  ],
+  avoid: ["login() болон нууц үгийн логик (нууц үг = утас дүрэм)", "web/src/components/landing/ бусад файл (4-р долгионд G33 Nav.tsx-ийг засна)"],
+  api: ["POST /auth/register — acceptTerms, guardianConsent талбар нэмэгдэнэ"],
+  steps: [
+    R`Схем: User.termsAcceptedAt DateTime?, User.termsVersion String?, User.guardianConsentAt DateTime?. Миграци IF NOT EXISTS; хуучин хэрэглэгчид null хэвээр (албадах цонх нэмэхгүй — эзний шийдвэр).`,
+    R`register.dto.ts: acceptTerms (заавал true), guardianConsent (сурагчийн бүртгэлд заавал true — «Би сурагчийн эцэг эх / асран хамгаалагч, эсвэл эцэг эхийн зөвшөөрөлтэй»). Бусад талбар, урсгал хэвээр. auth.service register(): огноо + TERMS_VERSION тогтмол (жишээ «2026-10-draft») хадгална. register-consent.spec.ts: зөвшөөрөлгүй бол 400, байвал огноо бичигдэнэ (prisma mock).`,
+    R`/privacy ба /terms: server component, монгол, 375px-д уншигдахуйц. Агуулга ТӨСӨЛ: ямар мэдээлэл цуглуулдаг (нэр, утас, имэйл, сургууль, тест, ирц, төлбөр), зорилго, хаана хадгалдаг, хэр удаан, хэн хардаг (эрхээр), эцэг эхийн эрх (харах, засуулах, устгуулах хүсэлт), холбогдох хаяг — web/src/lib/orgInfo.ts-ээс. Хуудасны дээд хэсэгт тод тэмдэглэл: «Төсөл — хуулийн зөвлөхөөр хянуулж, эзэн батлах хүртэл эцсийн биш». Хувилбар, огноо. Хуулийн нэр дурдвал «Хувь хүний мэдээлэл хамгаалах тухай хууль»-ийг ерөнхийд нь дурдаж, заалт зохиохгүй.`,
+    R`Бүртгэлийн хуудас: 2 checkbox (холбоос шинэ цонхонд нээгдэнэ), тэмдэглээгүй бол илгээх товч идэвхгүй + ойлгомжтой тайлбар. Одоогийн бүх талбар, элсэлтийн цонхны логик хэвээр.`,
+    R`Footer.tsx: «Нууцлалын бодлого», «Үйлчилгээний нөхцөл» холбоос.`,
+  ],
+  accept: [
+    "Зөвшөөрөлгүйгээр бүртгэл үүсэхгүй (сервер ба вэб хоёулаа)",
+    "Бүртгэлийн дараа огноо, хувилбар өгөгдлийн санд бичигдэнэ",
+    "/privacy, /terms 375px-д уншигдана, «төсөл» тэмдэглэгээтэй",
+    "Миграци IF NOT EXISTS; api шалгалт ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/register", "http://localhost:3001/privacy", "http://localhost:3001/terms"],
+  ownerNote: "Хуулийн бичвэрийг эзэн / хуульч заавал батална. Локалд: cd api && npx prisma migrate deploy.",
+},
+{ id: "G27", wave: 3, pri: "P2", title: "Апп доторх мэдэгдлийн төв (хонх) + имэйл суваг",
+  why: R`Сурагч, эцэг эх шинэ даалгавар, шалгагдсан ажил, зарын талаар мэдэх арга байхгүй — зөвхөн самбараа өөрөө нээж харна. Мэдэгдлийн нэг төв хэрэгтэй.`,
+  owned: [
+    ["api/prisma/schema.prisma", "Notification загвар"],
+    ["api/prisma/migrations/<шинэ>_add_notifications/migration.sql", "шинэ"],
+    ["api/src/notification-center/**", "шинэ модуль"],
+    ["api/src/app.module.ts", "зөвхөн бүртгэл"],
+    ["api/src/assignments/assignments.service.ts, assignments.module.ts", "зөвхөн notify дуудлага"],
+    ["api/src/announcements/announcements.service.ts, announcements.module.ts", "зөвхөн notify дуудлага"],
+    ["web/src/components/notifications/**", "шинэ"],
+    ["web/src/app/app/notifications/**", "шинэ"],
+    ["web/src/app/app/layout.tsx", "зөвхөн толгойд хонх байрлуулах"],
+  ],
+  avoid: ["api/src/notifications/** (SMS, имэйл — EmailService-ийг импортолж ашиглана, засахгүй)", "api/src/schedule/** (4-р долгионд G39)", "SMS суваг (өртөгтэй, зөвхөн ADMIN)", "web/src/components/nav/nav-data.ts"],
+  api: ["ШИНЭ: GET /notifications/my?cursor&limit ; GET /notifications/unread-count ; POST /notifications/:id/read ; POST /notifications/read-all (нэвтэрсэн хэрэглэгч, зөвхөн өөрийнх)"],
+  steps: [
+    R`Схем: Notification { id cuid, userId (User, onDelete Cascade), kind String, title String, body String?, link String?, readAt DateTime?, createdAt DateTime @default(now()) } + @@index([userId, readAt]), @@index([userId, createdAt]). Миграци IF NOT EXISTS, FK-г DO $$ pg_constraint шалгалттай.`,
+    R`api/src/notification-center/: module (NotificationCenterService-ийг EXPORT хийнэ), service — notify(userIds, {kind, title, body, link}) createMany; жагсаалт (cursor), уншаагүй тоо, уншсан болгох (зөвхөн өөрийн мэдэгдэл — өөр хүнийх 404). Controller @Controller('notifications') — 'api/' префиксгүй. app.module.ts-д бүртгэ.`,
+    R`Имэйл суваг: EmailService.isConfigured() (api/src/notifications/email.service.ts) үнэн, хэрэглэгч имэйлтэй бол илгээнэ — алдааг catch хийж гол үйлдлийг саатуулахгүй.`,
+    R`Триггер (service-ийг эхлээд уншиж, аль функц юу хийдгийг ойлгосны дараа): онлайн даалгавар үүсэхэд тухайн ангийн сурагчдад; илгээлт Батлагдах / Буцаагдахад сурагчид; зар үүсэхэд хүлээн авагчдад. Модулийн imports-д NotificationCenterModule нэм.`,
+    R`Unit тест: notify, өөр хүний мэдэгдлийг уншсан болгох боломжгүй, уншаагүй тоо.`,
+    R`Вэб: хонх (lucide Bell) web/src/app/app/layout.tsx-ийн толгойд — уншаагүй тоо текстээр, aria-label «Мэдэгдэл, 3 уншаагүй». Сүүлийн 10-ыг харуулах жагсаалт + «Бүгдийг харах» -> /app/notifications (жагсаалт, уншсан / уншаагүй, «Бүгдийг уншсан болгох»). unread-count-ийг 60 секунд тутам, зөвхөн хуудас харагдаж байхад (document.visibilityState) шалгана; websocket хэрэглэхгүй.`,
+    R`Хичээл цуцлагдсан тухай мэдэгдэл (G39)-ийг энэ даалгаварт ХИЙХГҮЙ — хуваарийн модульд хүрэхгүй; PR-д дараагийн алхам гэж бич.`,
+  ],
+  accept: [
+    "Даалгавар үүсэхэд ангийн сурагч хонхонд мэдэгдэл харна",
+    "Уншсан болгох, бүгдийг уншсан болгох ажиллана; өөр хүнийхийг өөрчлөх боломжгүй",
+    "Nest ачаалалтын шалгалт 0/0 (модуль бүртгэл, export зөв)",
+    "Миграци IF NOT EXISTS; web build ногоон; 375px-д хонх, жагсаалт эвдрэхгүй",
+  ],
+  urls: ["http://localhost:3001/app/notifications", "Дурын дотоод хуудасны толгой дахь хонх"],
+  ownerNote: "Локалд: cd api && npx prisma migrate deploy.",
+},
+
+/* ============================ ДОЛГИОН 4 ============================ */
+{ id: "G32", wave: 4, pri: "P2", title: "OpenAPI баримт (зөвхөн хөгжүүлэлтийн орчинд)",
+  why: R`API-ийн 260 орчим маршрутын баримт байхгүй — шинэ хөгжүүлэгч, агент бүр кодыг уншиж таамагладаг. Swagger UI зөвхөн локалд нээгдэнэ, продод хаалттай.`,
+  owned: [
+    ["api/package.json", "@nestjs/swagger нэмэх"],
+    ["api/package-lock.json", ""],
+    ["api/nest-cli.json", "swagger CLI plugin (сонголттой)"],
+    ["api/src/main.ts", "swagger тохиргоо дуудах нэг блок"],
+    ["api/src/swagger.ts", "шинэ"],
+  ],
+  avoid: ["api/src/**/dto (декоратор нэмэхгүй — plugin-оор хангалттай)", "api/prisma/**", "api/src/app.module.ts"],
+  api: ["ШИНЭ (зөвхөн локал): /api/docs"],
+  steps: [
+    R`Nest 11-тэй нийцэх @nestjs/swagger-ийг суулга (api/package.json, package-lock.json). Өөр сан нэмэхгүй.`,
+    R`api/src/swagger.ts: setupSwagger(app) — NODE_ENV !== 'production' БӨГӨӨД ENABLE_SWAGGER === '1' үед л /api/docs; Bearer auth; гарчиг «Pi.mn API». Swagger UI нь node_modules-аас үйлчилнэ (CDN биш) — шалга.`,
+    R`main.ts: setGlobalPrefix-ийн дараа нэг мөр setupSwagger(app). Бусад логикт хүрэхгүй. (1-р долгионд security-headers нэмэгдсэн — эвдэхгүй.)`,
+    R`nest-cli.json-д @nestjs/swagger plugin (DTO-оос автомат схем) — build эвдэрвэл plugin-гүй үлдээж PR-д бич.`,
+    R`Нотолгоо: ENABLE_SWAGGER=1 npm run start:dev үед /api/docs-json маршрутын тоо; NODE_ENV=production үед /api/docs 404. api/test/smoke/endpoints.mjs нь /api/docs-ийг «нэвтрэлтгүй 200» гэж алдаа болгох эсэхийг шалгаж PR-д бич (smoke файлыг засахгүй).`,
+  ],
+  accept: [
+    "Продын горимд /api/docs 404",
+    "ENABLE_SWAGGER=1 локал горимд баримт нээгдэнэ",
+    "api tsc, jest, build, ачаалалтын шалгалт 0/0",
+  ],
+  urls: ["http://localhost:3000/api/docs (ENABLE_SWAGGER=1 үед)"],
+  ownerNote: "Энэ агентад интернэт (npm registry) нээлттэй байх шаардлагатай.",
+},
+{ id: "G33", wave: 4, pri: "P2", title: "Үнэгүй урьдчилан харах (freemium) нийтийн хуудас",
+  why: R`Нүүр хуудсанд зочин «энэ сургалт ямар байдаг вэ» гэдгийг харах боломжгүй. /catalog/* нийтийн endpoint бэлэн (бүлгийн жагсаалт, бүлгийн урьдчилсан харалт, кэштэй) ч UI алга.`,
+  owned: [
+    ["web/src/app/preview/**", "шинэ"],
+    ["web/src/components/preview/**", "шинэ"],
+    ["web/src/components/landing/Nav.tsx", "зөвхөн нэг холбоос"],
+  ],
+  avoid: ["web/src/components/landing/Footer.tsx (G17)", "бусад landing файл", "api/** (зөвхөн унших)", "Нүүр хуудсанд «Мэдээлэл авах» маягт нэмэхгүй (эзний дүрэм)"],
+  api: ["GET /catalog/grades/:grade/chapters?subject (нийтийн)", "GET /catalog/chapters/:id/preview (нийтийн)"],
+  steps: [
+    R`api/src/content/catalog.controller.ts, content.service.ts (publicChaptersByGrade, publicChapterPreview), api/src/common/subject.ts-ийг уншиж ямар анги, хичээл, ямар талбар буцаадгийг тогтоо. Хариулт буцаадаг бол ХАРУУЛАХГҮЙ.`,
+    R`Client компонентоос api(path, { auth: false }) ашигла (түүхий fetch биш).`,
+    R`/preview: анги ба хичээл сонгох -> бүлгийн жагсаалт. /preview/[chapterId]: урьдчилсан харалтын бодлого, онол (MathText-ээр LaTeX), доор нь «Бүртгүүлэх» (/register) ба «Нэвтрэх» (/login) дуудлага. Ачаалж байна / хоосон / алдаа. SEO metadata (server page + client хэсэг).`,
+    R`landing/Nav.tsx: «Жишээ хичээл» холбоос (/preview). Бусдыг хөндөхгүй.`,
+    R`Эзний дүрэм: «Математик болон Нийгмийн ухаанд төвлөрсөн» хэллэг хориотой; удаан интернэт — зураг, видео нэмэхгүй.`,
+  ],
+  accept: [
+    "Нэвтрээгүй зочин бүлгийн жагсаалт, урьдчилсан бодлогыг харна",
+    "Хариулт задрахгүй; LaTeX зөв",
+    "375px-д хэвтээ гүйлгэхгүй; web build ногоон",
+  ],
+  urls: ["http://localhost:3001/preview", "http://localhost:3001/preview/<chapterId>"],
+},
+{ id: "G36", wave: 4, pri: "P3", title: "Тест хуулах, үүсгэж байх үеийн ноорог хадгалах",
+  why: R`Өмнөх жилийн тестийг бага зэрэг өөрчилж дахин ашиглахын тулд багш бүгдийг гараар дахин сонгодог. Тест үүсгэж байхдаа хуудас хаагдвал бүх сонголт алдагдана.`,
+  owned: [
+    ["api/src/tests/tests.controller.ts", ""],
+    ["api/src/tests/tests.service.ts", ""],
+    ["api/src/tests/tests-duplicate.spec.ts", "шинэ"],
+    ["web/src/app/app/tests/new/page.tsx", ""],
+    ["web/src/components/test-builder/**", ""],
+    ["web/src/components/test-list/TeacherRowMeta.tsx", ""],
+  ],
+  avoid: ["api/prisma/** (схем өөрчлөхгүй)", "api/src/tests/grading.ts", "web/src/app/app/tests/[id]/page.tsx", "PDF импорт (энэ даалгаварт биш)"],
+  api: ["ШИНЭ: POST /tests/:id/duplicate (ADMIN, TEACHER_PLUS, эсвэл тест үүсгэсэн TEACHER)", "1-р долгионы G11: PATCH /tests/:id, /app/tests/<id>/edit"],
+  steps: [
+    R`POST /tests/:id/duplicate: шинэ Test — гарчиг «<хуучин нэр> (хуулбар)», ижил type, gradingMode, timeLimitMin, chapterId, бодлого (дараалал, оноо), TestAccess-ГҮЙ (ангид оноогоогүй тул ноорог), createdById = хуулсан хүн. deletedAt-тай бол 404. recordAudit('CREATE', ...). Unit тест.`,
+    R`TeacherRowMeta.tsx: «Хуулах» (lucide Copy) -> амжилттай бол /app/tests/<шинэ id>/edit (G11-ийн хуудас) руу.`,
+    R`Ноорог: тест үүсгэх хуудасны төлөвийг (нэр, сонгосон бодлого, хугацаа, анги) 1 секундын debounce-оор localStorage-д (түлхүүр хэрэглэгч тус бүр) хадгална; дахин нээхэд ноорог байвал «Үргэлжлүүлэх / Шинээр эхлэх» мөр; амжилттай үүсгэсний дараа цэвэрлэнэ. localStorage-ийн бүх уншилт, бичилт try/catch дотор (хувийн цонхонд унадаг).`,
+  ],
+  accept: [
+    "Хуулсан тест бүх бодлоготой, ангид оноогдоогүй байдлаар үүснэ",
+    "Хуудас хаагаад дахин нээхэд ноорог санал болгоно",
+    "api шалгалт ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/tests", "http://localhost:3001/app/tests/new"],
+},
+{ id: "G37", wave: 4, pri: "P3", title: "PWA: утсан дээр суулгах боломж (manifest, дүрс, энгийн service worker)",
+  why: R`Хэрэглэгчдийн ихэнх нь утсаар ордог. Нүүр дэлгэцэд апп мэт суулгах боломж хэрэгтэй. Push мэдэгдэл энэ даалгаварт ороогүй.`,
+  owned: [
+    ["web/src/app/manifest.ts", "шинэ"],
+    ["web/src/app/icon.tsx", "шинэ (эсвэл icon.svg)"],
+    ["web/src/app/apple-icon.tsx", "шинэ"],
+    ["web/public/sw.js", "шинэ"],
+    ["web/src/components/pwa/**", "шинэ"],
+    ["web/src/app/layout.tsx", "зөвхөн SW бүртгэгч ба viewport themeColor"],
+  ],
+  avoid: ["web/src/app/app/layout.tsx (G27)", "web/next.config.ts", "гадаад зураг, шинэ npm сан"],
+  api: ["Байхгүй"],
+  steps: [
+    R`manifest.ts: name «Шинэ Ирээдүйн Эзэд», short_name «Pi.mn», start_url «/», display standalone, theme / background өнгө — web/src/app/globals.css-ийн брэнд утгууд (manifest hex шаарддаг тул энд л hex зөвшөөрнө, сэтгэгдэлд эх сурвалжийг заа).`,
+    R`Дүрс: web/src/components/LogoMark.tsx-ийн геометрээс next/og ImageResponse-оор 192, 512, maskable, apple-icon 180 — гадаад зураггүй.`,
+    R`sw.js: хамгийн энгийн — /_next/static/* ба дүрсэд cache-first; бусад БҮХ хүсэлт (HTML, /api, шалгалтын хуудас) сүлжээнээс шууд, кэшлэхгүй. Кэшийн нэр хувилбартай, шинэчлэлтэд хуучныг устгана. Зөвхөн production-д бүртгэнэ (components/pwa/RegisterSW.tsx).`,
+    R`iPhone Safari-д «Share -> Add to Home Screen»-ээр суулгах заавар PR-д (эзэн Safari хэрэглэдэг).`,
+  ],
+  accept: [
+    "/manifest.webmanifest зөв JSON, дүрс ачаалагдана",
+    "Service worker /api хүсэлтийг кэшлэхгүй (кодоор нотол)",
+    "web build ногоон; хөгжүүлэлтийн горимд SW бүртгэгдэхгүй",
+  ],
+  urls: ["http://localhost:3001/manifest.webmanifest", "npm run build && npm run start дараа http://localhost:3001"],
+},
+{ id: "G39", wave: 4, pri: "P3", title: "Хуваарийг утасны хуанли руу татах (ICS)",
+  why: R`Сурагч, багш хичээлийн хуваарийг утасныхаа хуанлид оруулж сануулга авах боломжгүй.`,
+  owned: [
+    ["api/src/schedule/ics.ts", "шинэ, цэвэр функц"],
+    ["api/src/schedule/ics.spec.ts", "шинэ"],
+    ["api/src/schedule/schedule.controller.ts", "нэг маршрут"],
+    ["web/src/components/schedule/IcsExportButton.tsx", "шинэ"],
+    ["web/src/components/schedule/ScheduleClient.tsx", "зөвхөн товч байрлуулах"],
+  ],
+  avoid: ["api/src/schedule/schedule.service.ts, split-series.ts, week-resolver.ts (унших л)", "Хуваарийн бусад компонент", "api/prisma/**"],
+  api: ["ШИНЭ: GET /schedule/me/ics?from&to (нэвтэрсэн хэрэглэгч) -> { filename, ics } JSON", "Одоогийн: GET /schedule/me"],
+  steps: [
+    R`GET /schedule/me ямар өгөгдөл, хэрхэн давтамжийг задалдгийг (expandDays, week-resolver, exceptions) уншиж ойлго — ижил эх сурвалжийг дахин ашигла, логик хуулбарлахгүй.`,
+    R`Маршрут: @Get('schedule/me/ics') — @Get('schedule/:id')-ээс ӨМНӨ зарла. Өгөгдмөл хугацаа: өнөөдрөөс 8 долоо хоног. JSON { filename, ics } буцаана — вэб api()-аар авч Blob болгож татна (түүхий fetch хэрэггүй).`,
+    R`ics.ts: RFC 5545 — VCALENDAR, TZID=Asia/Ulaanbaatar-тай VTIMEZONE (UTC+8, зуны цаггүй) эсвэл UTC Z цаг; хичээл бүрт VEVENT (SUMMARY анги / хичээл, LOCATION танхим, UID тогтвортой: entryId + огноо + @pi.mn), CRLF мөр, 75 октетоор мөр нугалах, таслал / цэг таслалыг escape. Цуцлагдсан давтамж орохгүй, зөөгдсөн нь шинэ цагтаа.`,
+    R`ГАРАГИЙН УРХИ: эзний 1=Даваа ... 7=Ням, JS 0=Ням. ics.spec.ts-д Даваа гарагийн хичээл ICS-д Даваа гарагт (2026 оны тодорхой огноогоор) буухыг, Ням гараг зөв буухыг заавал шалга.`,
+    R`IcsExportButton.tsx: «Хуанли руу нэмэх» (lucide CalendarPlus) -> файл татна; iPhone дээр .ics нээхэд Calendar апп санал болгодгийг богино тайлбарла.`,
+  ],
+  accept: [
+    "Татсан .ics файл macOS / iPhone Calendar-т алдаагүй нээгдэнэ (эзэн шалгана)",
+    "Гарагийн тест ногоон; цуцлагдсан хичээл файлд алга",
+    "api шалгалт ба web build ногоон",
+  ],
+  urls: ["http://localhost:3001/app/schedule"],
+},
+];
+
+/* Эзний гараар хийх ажил — ChatGPT хийж чадахгүй (данс, төлбөр, нууц түлхүүр) */
+const OWNER = [
+  { id: "G01", pri: "P0", title: "Өгөгдлийн сангийн багц ба нөөцлөлт — ЯГ ОДОО шалга",
+    body: [
+      R`Анхааруулга: үнэгүй Postgres-ийн хугацаа 2026-08-18-нд дуусах байсан — өгөгдлийн сан аль хэдийн устсан байх эрсдэлтэй. Таны curl https://pimn-api.onrender.com/api/enrollment-windows хоосон буцаасан: энэ нь «нээлттэй элсэлт алга» ([] хариу) гэсэн утгатай ч байж болно, сервер унасан ч байж болно. Эхлээд статус кодыг хар:`,
+      "CMD:curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 90 https://pimn-api.onrender.com/api/catalog/passes",
+      R`200 — API ба өгөгдлийн сан амьд. 000 эсвэл хугацаа дуусвал — сервер унтсан / унасан (90 секунд хүлээгээд дахин). 500 / 503 — өгөгдлийн сангийн асуудал байх магадлалтай.`,
+      R`dashboard.render.com -> pimn-db -> төлөв (Available / Suspended / Expired). Амьд бол ШУУД төлбөртэй багц руу шилжүүл (Upgrade). Төлбөртэй багцад автомат нөөцлөлт (Backups / Recovery хэсэг) идэвхтэй эсэхийг шалга.`,
+      R`Гар нөөц (Mac, нэг удаа brew install libpq): Render -> pimn-db -> Connect -> External Database URL-ийг хуулна (ЭНЭ ХАЯГИЙГ ChatGPT-д бүү өг):`,
+      "CMD:pg_dump \"<External Database URL>?sslmode=require\" -Fc -f ~/Desktop/pimn-$(date +%F).dump",
+      R`Файлыг репо дотор биш, найдвартай газар (гадаад диск, хувийн cloud) хадгал. Өгөгдлийн сан устсан байвал: шинэ төлбөртэй өгөгдлийн сан үүсгээд STATUS.md §4 «Прод ӨС дахин үүсгэх дараалал»-аар сэргээнэ — үүнийг Claude-тэй хамт хий.`,
+    ] },
+  { id: "G18", pri: "P1", title: "API серверийг төлбөртэй багц болгох (унтдаггүй)",
+    body: [R`dashboard.render.com -> pimn-api -> Settings -> Instance Type -> Starter. Үнэгүй багц 15 минут ажилгүй бол унтаж, эхний хүсэлт ~60 секунд хүлээлгэдэг — шалгалтын өглөө ноцтой. Төлбөртэй багц нь дараагийн алхмын (G05) диск ашиглах нөхцөл.`] },
+  { id: "G05", pri: "P0", title: "Байршуулсан зураг устахгүй болгох (тогтвортой диск)",
+    body: [R`G18 хийгдсэний дараа: Claude-д «render.yaml-ийн disk ба UPLOAD_DIR-ийг идэвхжүүл» гэж хэл (render.yaml дотор 2 алхмаар бэлдсэн). Эсвэл Render -> pimn-api -> Disks -> Add Disk: mount path /var/data/uploads, 5 GB; Environment-д UPLOAD_DIR=/var/data/uploads. Өмнө байршуулсан зураг сэргэхгүй — дискийн дараа дахин оруулна.`] },
+  { id: "G13", pri: "P1", title: "Имэйл (SMTP) — Gmail App Password",
+    body: [
+      R`Gmail данс -> Google Account -> Security -> 2-Step Verification-ийг асаана -> «App passwords» -> шинэ нууц үг үүсгэнэ (16 тэмдэгт).`,
+      R`Render -> pimn-api -> Environment -> дараах 5 хувьсагчийг нэмээд Save (кодын бодит нэрс — api/src/notifications/email.service.ts):`,
+      "CMD:EMAIL_SMTP_HOST=smtp.gmail.com\nEMAIL_SMTP_PORT=587\nEMAIL_SMTP_USER=<таны gmail хаяг>\nEMAIL_SMTP_PASS=<16 тэмдэгттэй App Password>\nEMAIL_FROM=Шинэ Ирээдүйн Эзэд <таны gmail хаяг>",
+      R`Анхаар: «EMAIL_SMTP_FROM» биш — код EMAIL_FROM-ийг уншдаг. App Password-ыг ChatGPT, Claude-д бүү бич — зөвхөн Render-т.`,
+    ] },
+  { id: "G14", pri: "P1", title: "QPay merchant гэрээ ба түлхүүр",
+    body: [
+      R`QPay-тэй merchant гэрээ хийж эхлээд sandbox, дараа нь production түлхүүр авна. Render -> pimn-api -> Environment:`,
+      "CMD:QPAY_BASE_URL=https://merchant-sandbox.qpay.mn\nQPAY_CLIENT_ID=<QPay-ээс>\nQPAY_CLIENT_SECRET=<QPay-ээс>\nQPAY_INVOICE_CODE=<QPay-ээс>\nQPAY_CALLBACK_URL=https://pimn-api.onrender.com/api/gateways/qpay/callback",
+      R`Sandbox-оор туршсаны дараа QPAY_BASE_URL-ийг https://merchant.qpay.mn болгоно. Дэлгэрэнгүй: api/src/gateways/README.md. Түлхүүрийг ChatGPT-д бүү өг.`,
+    ] },
+  { id: "G15", pri: "P1", title: "Шинэ бүртгэлийг (~700 сурагч) прод руу оруулах — кодын backfill-ийг БҮҮ ажиллуул",
+    body: [
+      R`Эзний шийдвэр (2026-09-26): Excel-ийн 7 оронтой кодыг (2027001 ...) хадгална. backfill-new-codes.cjs-ийг прод дээр АЖИЛЛУУЛАХГҮЙ.`,
+      R`G01-ээр прод өгөгдлийн сан амьд эсэхийг баталж, нөөц авсны ДАРАА шинэ бүртгэлийг импортлоно — эхлээд туршилт (юу ч бичихгүй), үр дүнг Claude-д үзүүлээд --commit. Excel файл Mac дээрээ л байна, репод болон ChatGPT-д хэзээ ч оруулахгүй:`,
+      "CMD:cd /Users/mr.buus/Intern/Pi.mn/api\nDATABASE_URL=\"<External Database URL>?sslmode=require\" node prisma/import-students.cjs --source=\"<Excel файлын зам>\"            # туршилт\nDATABASE_URL=\"<External Database URL>?sslmode=require\" node prisma/import-students.cjs --source=\"<Excel файлын зам>\" --commit   # зөв бол",
+      R`Энэ алхмыг Claude-тэй хамт хий (STATUS.md §9.1).`,
+    ] },
+  { id: "G19", pri: "P1", title: "Алдааны мөрдөлт ба uptime монитор",
+    body: [
+      R`Uptime: uptimerobot.com (үнэгүй) -> New Monitor -> HTTP(s) -> https://pimn-api.onrender.com/api/catalog/passes, 5 минут, имэйл сэрэмжлүүлэг. Вэбд https://web-one-pi-59.vercel.app.`,
+      R`Алдааны мөрдөлт (Sentry гэх мэт): данс нээж Node ба Next.js төсөл үүсгэнэ. Кодын холболт шинэ npm сан (вэбд bundle-ийн хэмжээ нэмэгдэнэ) шаарддаг тул эзний шийдвэр — шийдсэний дараа Claude-д DSN-ийг өгч холбуулна.`,
+    ] },
+  { id: "G17", pri: "P1", title: "Хуулийн бичвэрийг батлах",
+    body: [R`3-р долгионы G17 агент нууцлалын бодлого, үйлчилгээний нөхцөлийн ТӨСӨЛ бичнэ. Эзэн ба хуульч уншиж засварласны дараа л «төсөл» тэмдэглэгээг авна. Хуучин хэрэглэгчдээс дахин зөвшөөрөл авах эсэхийг эзэн шийднэ.`] },
+  { id: "Бусад", pri: "P2", title: "Шийдвэр шаардсан, агентад өгөхгүй зүйлс",
+    body: [R`G34 Е-баримт — нягтлан бодогчтой шийднэ. G35 Бодлогын контент (1913 placeholder сонголт, 13 REVIEW) — багш нар гараар. G40 Дэлгүүр ба эрхийг нэгтгэх — бизнесийн шийдвэр. G38 Баримт шинэчлэх — Claude хийнэ. Vercel (вэб) нь автоматаар deploy хийдэггүй — долгион бүр main руу орсны дараа Claude-д «Vercel deploy» гэж хэл.`] },
+];
+
+const REVIEWER = R`Та Pi.mn репогийн КОДЫН ШАЛГАГЧ. Доорх PR-ийг зөвхөн шалгана — код засахгүй, commit хийхгүй.
+
+PR: <PR-ийн холбоос>
+Даалгаврын ID: <жишээ: G06>
+Даалгаврын анхны prompt (нийтлэг контекст + даалгавар): <энд буулгана>
+
+PR-ийн branch-ийг татаж, дараах бүрийг ТИЙМ / ҮГҮЙ / ТОДОРХОЙГҮЙ гэж, нотолгоотой (файл:мөр эсвэл командын гаралт) бич:
+1. Base branch нь claude/100-dollar-credit-usage-ksqjev мөн үү (main биш)?
+2. Өөрчлөгдсөн файл бүр даалгаврын «ЗӨВХӨН эдгээр файл» жагсаалтад багтах уу? (git diff --name-only <base>...HEAD)
+3. Функц устгагдаагүй юу? Устгасан мөр бүрийг шалгаж, орлуулалтгүй хасагдсан зүйлийг жагсаа.
+4. Emoji / unicode глиф (U+2190–U+2BFF, U+1F300+, U+00B7, U+2022), математикийн unicode тэмдэгт алга уу? (нийтлэг контекстийн grep)
+5. Гараар бичсэн өнгө (bg-blue-600, text-white, #hex) алга уу? Зөвхөн токен уу?
+6. Түүхий fetch алга, api() ашигласан уу?
+7. Математик MathText-ээр уу?
+8. Өгөгдөл харуулдаг хэсэг бүрт ачаалж байна / хоосон / алдааны төлөв бий юу?
+9. Hook ашигласан файлд "use client" бий юу? metadata-тай хуудас server хэвээр үү?
+10. NestJS: шинэ модуль app.module.ts-д бүртгэлтэй, provider export хийгдсэн, @Controller-т 'api/' префикс алга, статик маршрут динамикаас өмнө үү?
+11. Эрх: @Roles зөв үү? Мөнгө, SMS, эрх солих нь зөвхөн ADMIN уу? UI эрхгүй товчийг нуудаг уу?
+12. Миграци (байвал): IF NOT EXISTS, хуучин миграци хөндөгдөөгүй, багана / хүснэгтийн нэр schema.prisma-тай таарч байна уу?
+13. Гарагийн дугаарлалт (1=Даваа ... 7=Ням ба JS 0=Ням) зөв хөрвүүлэгдсэн үү?
+14. Нууц үг = утасны дугаар дүрэм хөндөгдөөгүй юу?
+15. Шалгалтыг ӨӨРӨӨ ажиллуул: api — npx tsc --noEmit, npx jest, npm run build, ачаалалтын 2 шалгалт; web — npx tsc --noEmit, npm run build. Гаралтыг PR-д бичсэнтэй харьцуул. Зөрвөл тод тэмдэглэ.
+16. PR тайлбарын «Дутуу үлдсэн» хэсэг шударга уу? Кодод байгаа TODO, хагас хийсэн зүйл тайлбарт дурдагдсан уу?
+17. 375px өргөнд хуудас хэвтээ гүйлгэхгүй юу (боломжтой бол шалга)?
+18. Монгол бичвэр: техникийн үг, айлгах өнгө аяс, англи үг хэрэглэгчид харагдаж байна уу?
+
+Эцэст нь: НЭГТГЭЖ БОЛНО / ЗАСВАРТАЙ / БОЛОХГҮЙ — засах зүйлсийг чухлаас нь эрэмбэлсэн жагсаалтаар.`;
+
+const HANDBACK = R`Claude, ChatGPT-ийн <N>-р долгион дууслаа. PR-уудыг шалгаж, асуудалгүйг нь claude/100-dollar-credit-usage-ksqjev руу нэгтгэнэ үү.
+
+PR-ууд:
+- [G..] https://github.com/mrbuus/Pi/pull/...
+- [G..] https://github.com/mrbuus/Pi/pull/...
+- [G..] https://github.com/mrbuus/Pi/pull/...
+
+Шалгах зүйл:
+- PR бүрийн өөрчилсөн файл даалгаврын эзэмшлийн жагсаалтад багтаж байгаа эсэх (docs/CHATGPT-PROMPTS.html)
+- api: tsc + jest + build + ачаалалтын шалгалт (STATUS §2); web: tsc + build; боломжтой бол smoke
+- Агентын бичсэн гаралтыг өөрөө давтаж шалгах (хуурамч гаралт байж болно)
+- PR хоорондын зөрчил, нэгтгэсний дараа бүх шалгалтыг дахин
+- UI өөрчлөлтийг 375px дээр
+- PLATFORM-SPEC.html-ийн GAPS-д хаагдсан G-г "done" болгох, STATUS.md-д шинэ урхи / шийдвэр
+- Нэгтгэсний дараа намайг Safari-д шалгах терминалын команд, холбоосыг өг
+
+Миний тэмдэглэл:
+- (жишээ: G16-ийн агент GET /classrooms/:id нэмсэн гэж хэлсэн, G07 шалгалтын тайлан хийгээгүй гэж бичсэн)`;
+</script>
+<style>
+  :root {
+    --bg: #f7f7f4; --panel: #ffffff; --ink: #1e293b; --dim: #5b6b80; --line: #e2e8f0;
+    --brand: #273e75; --brand-soft: #eef2fb;
+    --ok: #15803d; --part: #b45309; --bug: #b91c1c; --none: #6d28d9;
+    --ok-bg: #ecfdf3; --part-bg: #fff7ed; --bug-bg: #fef2f2; --none-bg: #f5f3ff;
+    --code: #f1f5f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f172a; --panel: #172033; --ink: #e2e8f0; --dim: #94a3b8; --line: #2b3a52;
+      --brand: #9db4ee; --brand-soft: #1c2a47;
+      --ok: #4ade80; --part: #fbbf24; --bug: #f87171; --none: #c4b5fd;
+      --ok-bg: #12301f; --part-bg: #33260f; --bug-bg: #3a1717; --none-bg: #261d45;
+      --code: #1e293b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f172a; --panel: #172033; --ink: #e2e8f0; --dim: #94a3b8; --line: #2b3a52;
+    --brand: #9db4ee; --brand-soft: #1c2a47;
+    --ok: #4ade80; --part: #fbbf24; --bug: #f87171; --none: #c4b5fd;
+    --ok-bg: #12301f; --part-bg: #33260f; --bug-bg: #3a1717; --none-bg: #261d45;
+    --code: #1e293b;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 120px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    font-size: 14.5px; line-height: 1.55;
+  }
+  a { color: var(--brand); }
+  header.top { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); padding: 10px 16px 8px; }
+  .top-row { display: flex; align-items: center; gap: 8px; }
+  .top h1 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.01em; flex: 1; min-width: 0; }
+  .top h1 .muted { font-weight: 600; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+  .bar .lbl { font-size: 12px; font-weight: 700; color: var(--dim); }
+  .btn {
+    padding: 6px 10px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink);
+    min-height: 34px; font-family: inherit;
+  }
+  .btn:hover { border-color: var(--brand); }
+  .btn.primary { background: var(--brand); color: var(--panel); border-color: var(--brand); }
+  .btn[aria-pressed="true"] { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); }
+  .btn:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; max-width: 1280px; margin: 0 auto; padding: 16px; }
+  nav.toc { position: sticky; top: 110px; align-self: start; max-height: calc(100vh - 130px); overflow: auto; font-size: 13px; }
+  nav.toc a { display: block; padding: 4px 8px; border-radius: 8px; text-decoration: none; color: var(--ink); }
+  nav.toc a:hover { background: var(--brand-soft); }
+  nav.toc .grp { margin: 10px 0 4px; font-size: 11px; font-weight: 800; color: var(--dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  nav.toc .sub { padding-left: 18px; color: var(--dim); }
+  section.sec { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+  section.sec > h2 { margin: 0 0 6px; font-size: 19px; }
+  h3 { font-size: 15.5px; margin: 18px 0 6px; }
+  p { margin: 6px 0; }
+  .lead { color: var(--dim); }
+  .muted { color: var(--dim); font-size: 12.5px; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; background: var(--code); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+  pre.prompt {
+    margin: 8px 0; padding: 12px; background: var(--code); border: 1px solid var(--line); border-radius: 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.5;
+    white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; max-height: 460px; overflow-y: auto;
+  }
+  pre.cmd { max-height: none; }
+  .pri { display: inline-block; min-width: 26px; text-align: center; padding: 0 5px; border-radius: 6px; font-size: 11.5px; font-weight: 800; }
+  .pri.P0 { background: var(--bug); color: var(--panel); }
+  .pri.P1 { background: var(--part); color: var(--panel); }
+  .pri.P2 { background: var(--brand); color: var(--panel); }
+  .pri.P3 { background: var(--dim); color: var(--panel); }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+  .tag.par { color: var(--ok); background: var(--ok-bg); }
+  .tag.seq { color: var(--part); background: var(--part-bg); }
+  .callout { border-left: 4px solid var(--part); background: var(--part-bg); padding: 10px 12px; border-radius: 0 10px 10px 0; margin: 10px 0; }
+  .callout.red { border-left-color: var(--bug); background: var(--bug-bg); }
+  .callout.blue { border-left-color: var(--brand); background: var(--brand-soft); }
+  .callout.green { border-left-color: var(--ok); background: var(--ok-bg); }
+  ol.steps { padding-left: 22px; } ol.steps > li { margin: 6px 0; }
+  ul.tight { margin: 4px 0; padding-left: 20px; } ul.tight li { margin: 2px 0; }
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 10px 0; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); }
+  .card .big { font-size: 22px; font-weight: 800; }
+  .wave { border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin: 14px 0; background: var(--bg); }
+  .wave-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .wave-head h3 { margin: 0; flex: 1 1 260px; }
+  .task { border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: 12px; margin: 10px 0; background: var(--panel); }
+  .task[data-pri="P0"] { border-left-color: var(--bug); }
+  .task[data-pri="P1"] { border-left-color: var(--part); }
+  .task[data-pri="P3"] { border-left-color: var(--dim); }
+  .task > summary { list-style: none; cursor: pointer; padding: 10px 12px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; min-height: 44px; }
+  .task > summary::-webkit-details-marker { display: none; }
+  .task > summary .tid { font-weight: 800; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+  .task > summary .tt { font-weight: 700; flex: 1 1 220px; min-width: 0; }
+  .task > summary .chev { color: var(--dim); font-size: 12px; }
+  .task[open] > summary .chev .o { display: none; }
+  .task:not([open]) > summary .chev .c { display: none; }
+  .task .body { padding: 0 12px 12px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+  .files { margin: 6px 0; padding-left: 18px; font-size: 12.5px; }
+  .files li { margin: 2px 0; overflow-wrap: anywhere; }
+  .files .note { color: var(--dim); }
+  details.own { margin: 8px 0; }
+  details.own > summary { cursor: pointer; font-weight: 700; font-size: 13px; min-height: 36px; display: flex; align-items: center; }
+  .owntbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .owntbl td { border-bottom: 1px solid var(--line); padding: 5px 6px; vertical-align: top; overflow-wrap: anywhere; }
+  .owntbl td:first-child { font-weight: 800; white-space: nowrap; width: 90px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; }
+  .check input { width: 22px; height: 22px; margin-top: 2px; flex: 0 0 auto; accent-color: var(--brand); }
+  .owner-item { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 8px 0; background: var(--panel); }
+  .owner-item.done { opacity: 0.6; }
+  .owner-item h4 { margin: 0; font-size: 14px; }
+  .owner-item p { margin: 6px 0; }
+  .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 60; max-width: calc(100vw - 32px); }
+  .toast.show { opacity: 1; }
+  .hidden { display: none !important; }
+  .only-m { display: none; }
+  .toc-close { display: none; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); padding: 12px 16px; }
+    nav.toc { display: none; }
+    nav.toc.open { display: block; position: fixed; inset: 0; z-index: 40; background: var(--bg); padding: 60px 16px 24px; max-height: none; overflow: auto; font-size: 15px; }
+    nav.toc.open a { padding: 10px 8px; border-bottom: 1px solid var(--line); border-radius: 0; }
+    .toc-close { display: block !important; position: fixed; top: 10px; right: 16px; z-index: 41; }
+    .only-m { display: inline-block; }
+  }
+  @media (max-width: 700px) {
+    body { font-size: 14px; }
+    header.top { padding: 8px 12px; }
+    .top h1 { font-size: 15px; }
+    .top h1 .muted, .hide-m { display: none; }
+    html { scroll-padding-top: 110px; }
+    section.sec { padding: 14px 12px; border-radius: 12px; }
+    section.sec > h2 { font-size: 17px; }
+    .wave { padding: 10px; }
+    .task .body { padding: 0 10px 10px; }
+    pre.prompt { font-size: 11.5px; padding: 10px; }
+    .bar .btn { flex: 1 1 auto; }
+  }
+  @media print { header.top, nav.toc, .actions { display: none; } .layout { display: block; } pre.prompt { max-height: none; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <button class="btn only-m" id="tocBtn" type="button" aria-expanded="false" aria-controls="toc">Агуулга</button>
+    <h1>Pi.mn — ChatGPT агентын даалгаврууд <span class="muted">prompt багц</span></h1>
+  </div>
+  <div class="bar" role="group" aria-label="Долгионоор шүүх">
+    <span class="lbl hide-m">Долгион:</span>
+    <button class="btn" type="button" data-wave="all" aria-pressed="true">Бүгд</button>
+    <button class="btn" type="button" data-wave="1" aria-pressed="false">1</button>
+    <button class="btn" type="button" data-wave="2" aria-pressed="false">2</button>
+    <button class="btn" type="button" data-wave="3" aria-pressed="false">3</button>
+    <button class="btn" type="button" data-wave="4" aria-pressed="false">4</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" id="toc" aria-label="Агуулга">
+    <button class="btn toc-close" id="tocClose" type="button">Хаах</button>
+    <div class="grp">Эхлэх</div>
+    <a href="#summary">Тойм</a>
+    <a href="#howto">1. Хэрхэн ашиглах</a>
+    <a href="#owner">2. Эзний гараар хийх ажил</a>
+    <a href="#common">3. Нийтлэг контекст</a>
+    <div class="grp">Даалгаврууд</div>
+    <a href="#tasks">4. Даалгаврууд</a>
+    <div id="tocWaves"></div>
+    <div class="grp">Шалгах</div>
+    <a href="#reviewer">5. Шалгагч агентын prompt</a>
+    <a href="#handback">6. Claude-д буцааж өгөх</a>
+    <a href="#warn">7. Анхааруулга</a>
+  </nav>
+
+  <main>
+    <section class="sec" id="summary">
+      <h2>Тойм</h2>
+      <p class="lead">ChatGPT-ийн Codex агентуудад Pi.mn-ийн нээлттэй цоорхойнуудыг (docs/PLATFORM-SPEC.html, G01–G41) засуулах бэлэн даалгаврууд. Даалгавар бүр яг ямар файлыг засахаа мэддэг тул олон агентыг зэрэг ажиллуулахад бие биеэ дарж бичихгүй.</p>
+      <div class="grid4" id="stats"></div>
+      <div class="callout blue"><b>Товчхондоо:</b> 1) Codex-т репог холбоно. 2) Долгион 1-ийн 7 даалгавар тус бүрийн «Хуулах» товчийг дарж, тус тусдаа шинэ агентад буулгана. 3) Бүгд PR нээсний дараа холбоосуудыг Claude-д өгнө. 4) Claude нэгтгэсний дараа дараагийн долгион.</div>
+      <div id="overlapBox"></div>
+    </section>
+
+    <section class="sec" id="howto">
+      <h2>1. Хэрхэн ашиглах</h2>
+      <h3>Нэг удаагийн тохиргоо</h3>
+      <ol class="steps">
+        <li><b>chatgpt.com/codex</b>-ийг Safari-д нээж ChatGPT данснаараа нэвтэрнэ.</li>
+        <li>GitHub-ийг холбоно (Connect GitHub) — <code>mrbuus/Pi</code> репод хандах эрх өгнө.</li>
+        <li>Орчин (Environment) үүсгэнэ: репо <code>mrbuus/Pi</code>. Тохиргооны хэсэгт доорх <b>setup script</b>-ийг буулгана. Орчны хувьсагчид <code>DATABASE_URL</code>-ийг доорх <b>хуурамч</b> утгаар тавина (бодит өгөгдлийн сангийн хаягийг ХЭЗЭЭ Ч бүү оруул).</li>
+        <li>Агентын интернэт хандалт: өгөгдмөлөөр хаалттай байж болно. G30 ба G32 даалгаварт шинэ сан суулгах тул тэр хоёрыг ажиллуулахдаа npm registry-г зөвшөөрнө (жишээ нь «Common dependencies» сонголт). Бусад даалгаварт хэрэггүй.</li>
+      </ol>
+      <p class="muted">Codex-ийн товчнуудын нэр шинэчлэгдсэн байж болно — утгаараа ойролцоог нь сонго.</p>
+      <div class="actions"><button class="btn" type="button" data-copy="setup">Setup script хуулах</button></div>
+      <pre class="prompt cmd" id="setupPre"></pre>
+
+      <h3>Долгион бүрийн ажил</h3>
+      <ol class="steps">
+        <li>Даалгавар бүрт <b>тусдаа шинэ task</b> нээнэ. Branch сонгох газарт <code>claude/100-dollar-credit-usage-ksqjev</code>-ийг сонгоно — <b>main БИШ</b>. main руу орсон бүхнийг Render шууд продод гаргадаг тул алдаатай код сурагчдад хүрнэ.</li>
+        <li>Горимыг «Code» (кодчилох) болгоно — «Ask» биш.</li>
+        <li>Даалгаврын картын <b>«Хуулах»</b> товчийг дарна — нийтлэг контекст ба тухайн даалгавар хамт хуулагдана. Шууд буулгаад эхлүүлнэ.</li>
+        <li>Долгионы бүх даалгаврыг нэгэн зэрэг эхлүүлнэ (1-р долгион 7 агент). Хувилбарын тоог (attempts) 1 дээр үлдээ — шалгах PR цөөн байна.</li>
+        <li>Агент дуусмагц «Create PR» / «PR үүсгэх» дарна. GitHub дээр PR-ийн <b>base</b> нь <code>claude/100-dollar-credit-usage-ksqjev</code> эсэхийг шалгана; <code>main</code> байвал «Edit»-ээр солино.</li>
+        <li>Бүх PR нээгдсэний дараа холбоосуудыг <a href="#handback">6-р хэсгийн загвараар</a> Claude-д өгнө. Claude шалгаж, нэгтгэнэ. Та PR-ийг өөрөө бүү нэгтгэ.</li>
+        <li>Долгион нэгтгэгдсэний ДАРАА л дараагийн долгионыг эхлүүлнэ — шинэ агентууд шинэчлэгдсэн кодоос эхлэх ёстой.</li>
+      </ol>
+
+      <h3>Яагаад долгион гэж хуваасан бэ?</h3>
+      <p>Хоёр агент нэг файлыг зэрэг засвал хоёр дахь нь эхнийхийн ажлыг дарж бичнэ (2026-08-08-нд SMS модуль ингэж бүхэлдээ эвдэрсэн). Тиймээс нэг долгион доторх даалгаврууд <b>огт давхцахгүй файлуудыг</b> эзэмшдэг — «Файлын эзэмшил» хүснэгтээс харж болно. Дараагийн долгион өмнөхийн үр дүн дээр суурилдаг. 3-р долгион өгөгдлийн сангийн схемийг өөрчилдөг тул нэг нэгээр явна.</p>
+
+      <h3>PR-ийг Mac дээрээ Safari-д шалгах</h3>
+      <div class="actions"><button class="btn" type="button" data-copy="local">Командуудыг хуулах</button></div>
+      <pre class="prompt cmd" id="localPre"></pre>
+
+      <h3>ChatGPT-д ЮУГ өгөхгүй вэ</h3>
+      <ul class="tight">
+        <li>Render, Vercel, GitHub, Gmail, QPay-ийн нууц үг, түлхүүр, токен; <code>.env</code> файл; продын <code>DATABASE_URL</code>.</li>
+        <li>Сурагчдын бодит мэдээлэл: <code>BURTGEL-2027-1.xlsx</code> гэх мэт Excel, утасны жагсаалт. Туршилтын бүртгэлийн утасны дугаар нь нууц үг тул мөн өгөхгүй.</li>
+        <li>Данс, төлбөр, багц солих ажил — эдгээрийг <a href="#owner">2-р хэсгээр</a> эзэн өөрөө хийнэ.</li>
+      </ul>
+    </section>
+
+    <section class="sec" id="owner">
+      <h2>2. Эзний гараар хийх ажил (ChatGPT хийж чадахгүй)</h2>
+      <p class="lead">Данс, төлбөр, нууц түлхүүр шаардсан ажил. Тэмдэглэсэн төлөв энэ хөтчид хадгалагдана.</p>
+      <div id="ownerList"></div>
+    </section>
+
+    <section class="sec" id="common">
+      <h2>3. Нийтлэг контекст</h2>
+      <p class="lead">Агент бүрт даалгаврын өмнө өгөгдөнө. Даалгаврын «Хуулах» товч үүнийг автоматаар хамт хуулдаг — энд зөвхөн уншиж танилцах зорилготой.</p>
+      <div class="actions"><button class="btn" type="button" data-copy="common">Зөвхөн нийтлэг контекстийг хуулах</button></div>
+      <pre class="prompt" id="commonPre"></pre>
+    </section>
+
+    <section class="sec" id="tasks">
+      <h2>4. Даалгаврууд</h2>
+      <p class="lead">Карт бүрийг дэлгэхэд бүтэн prompt харагдана. «Хуулах» = нийтлэг контекст + тухайн даалгавар, нэг агентад. «Долгион бүхлээр хуулах» нь тэмдэглэлдээ хадгалах эсвэл Claude-д үзүүлэхэд — нэг агентад бүх долгионыг бүү өг.</p>
+      <div id="waveList"></div>
+    </section>
+
+    <section class="sec" id="reviewer">
+      <h2>5. Шалгагч агентын prompt (сонголттой)</h2>
+      <p class="lead">Нэг PR-ийг тусдаа ChatGPT агентаар шалгуулах бол. Доорх хаалттай хэсгүүдийг бөглөнө. Энэ нь Claude-ийн шалгалтыг орлохгүй — нэмэлт давхарга.</p>
+      <div class="actions"><button class="btn primary" type="button" data-copy="reviewer">Хуулах</button></div>
+      <pre class="prompt" id="reviewerPre"></pre>
+    </section>
+
+    <section class="sec" id="handback">
+      <h2>6. Хариугаа Claude-д өгөх</h2>
+      <p class="lead">Долгион дуусмагц PR-уудын холбоосыг энэ загвараар Claude-д илгээнэ.</p>
+      <div class="actions"><button class="btn primary" type="button" data-copy="handback">Хуулах</button></div>
+      <pre class="prompt" id="handbackPre"></pre>
+    </section>
+
+    <section class="sec" id="warn">
+      <h2>7. Анхааруулга</h2>
+      <div class="callout red">
+        <ul class="tight">
+          <li>Нэг файл дээр хоёр агентыг зэрэг бүү ажиллуул — долгионы хуваарийг л дага. Даалгаврыг өөрөө нийлүүлж, хувааж бүү өөрчил.</li>
+          <li>Агентыг <code>main</code> руу push хийлгэж, PR нээлгэж болохгүй — Render main-ийг шууд продод гаргадаг.</li>
+          <li>CI (GitHub-ийн шалгалт) улаан байгаа PR-ийг хэзээ ч бүү нэгтгэ. PR-ийг Claude шалгаж нэгтгэнэ.</li>
+          <li>Нууц үг, токен, API түлхүүр, продын өгөгдлийн сангийн хаягийг ChatGPT-д бүү буулга.</li>
+          <li>Сурагчдын мэдээлэлтэй xlsx файлыг (BURTGEL-2027-1.xlsx г.м.) ямар ч репод, ямар ч агентад бүү оруул.</li>
+          <li>Агентын «бүгд ногоон» гэсэн тайланг шууд бүү итгэ — өмнө нь хуурамч гаралт бичиж байсан. Claude давтан шалгана.</li>
+          <li>3-р долгионыг нэг нэгээр: G25 нэгтгэгдсэний дараа G17, түүний дараа G27.</li>
+          <li>Вэб (Vercel) автоматаар шинэчлэгддэггүй — main руу орсны дараа Claude-д deploy хийлгэнэ.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SETUP = [
+    "# Codex орчны setup script (нэг удаа тохируулна)",
+    "cd api && npm ci && npx prisma generate",
+    "cd ../web && npm ci",
+    "",
+    "# Орчны хувьсагч (Environment variables) — ХУУРАМЧ хаяг, зөвхөн prisma generate-д:",
+    "# DATABASE_URL=postgresql://ci:ci@localhost:5432/ci",
+  ].join("\n");
+
+  var LOCAL = [
+    "# 1) PR-ийн branch-ийг татах (нэрийг GitHub-ийн PR хуудаснаас хуулна, жишээ нь codex/...)",
+    "cd /Users/mr.buus/Intern/Pi.mn",
+    "git fetch origin",
+    "git checkout <PR-ийн branch нэр>",
+    "",
+    "# 2) API асаах (терминал 1)",
+    "cd /Users/mr.buus/Intern/Pi.mn/api && npm install && npx prisma generate",
+    "npx prisma migrate deploy        # зөвхөн 3-р долгион (схем өөрчилсөн) үед, локал өгөгдлийн сан",
+    "npm run start:dev                # http://localhost:3000",
+    "",
+    "# 3) Вэб асаах (терминал 2)",
+    "cd /Users/mr.buus/Intern/Pi.mn/web && npm install && npm run dev   # http://localhost:3001",
+    "",
+    "# 4) Safari-д нээх (даалгаврын картын «Safari-д шалгах» хаягаар)",
+    "open -a Safari http://localhost:3001/app",
+    "",
+    "# 5) Дуусаад буцах",
+    "cd /Users/mr.buus/Intern/Pi.mn && git checkout " + BASE,
+  ].join("\n");
+
+  var waveLabel = { par: "Зэрэг", seq: "Нэг нэгээр" };
+
+  function el(tag, attrs, children) {
+    var e = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "text") e.textContent = attrs[k];
+      else if (k === "class") e.className = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    }
+    (children || []).forEach(function (c) { if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+
+  function waveOf(n) { return WAVES.filter(function (w) { return w.n === n; })[0]; }
+
+  function taskPrompt(t) {
+    var w = waveOf(t.wave);
+    var L = [];
+    L.push("# ДААЛГАВАР [" + t.id + "] " + t.title);
+    L.push("Долгион " + w.n + " (" + (w.mode === "par" ? "бусад агентуудтай ЗЭРЭГ ажиллаж байна" : "нэг нэгээр — таныг ажиллах үед схем өөрчлөх өөр агент байхгүй") + ") | Чухал байдал: " + t.pri + " | Цоорхой: " + t.id + " (docs/PLATFORM-SPEC.html)");
+    L.push("");
+    L.push("## Яагаад");
+    L.push(t.why);
+    L.push("");
+    L.push("## ЗӨВХӨН эдгээр файлыг засна / үүсгэнэ");
+    t.owned.forEach(function (o) { L.push("- " + o[0] + (o[1] ? "  (" + o[1] + ")" : "")); });
+    if (t.avoid && t.avoid.length) {
+      L.push("");
+      L.push("## ХҮРЭХГҮЙ (өөр агентынх эсвэл хамааралгүй — уншиж болно)");
+      t.avoid.forEach(function (a) { L.push("- " + a); });
+    }
+    L.push("");
+    L.push("## Холбогдох API (ашиглахаасаа өмнө кодоос хариуны яг хэлбэрийг шалга)");
+    t.api.forEach(function (a) { L.push("- " + a); });
+    L.push("");
+    L.push("## Хийх алхам");
+    t.steps.forEach(function (s, i) { L.push((i + 1) + ". " + s); });
+    L.push("");
+    L.push("## Хүлээн авах шалгуур (PR-д тус бүрийг хэрхэн шалгасныг бич)");
+    t.accept.forEach(function (a) { L.push("- [ ] " + a); });
+    L.push("");
+    L.push("## Шалгалт");
+    L.push("Нийтлэг контекстийн §7-ийн командуудыг (өөрчилсөн тал бүрт) ажиллуулж бодит гаралтыг PR-д хуул. Ажиллуулж чадаагүйг шууд бич.");
+    L.push("");
+    L.push("## Эзэн Safari-д шалгах хаяг (PR тайлбарт хуул)");
+    t.urls.forEach(function (u) { L.push("- " + u); });
+    L.push("");
+    L.push("## PR");
+    L.push("Base: " + BASE + " (main БИШ). Гарчиг: [" + t.id.replace(/\s/g, "") + "] " + t.title);
+    L.push("Тайлбар: нийтлэг контекстийн §9-ийн 6 хэсэг. «Дутуу үлдсэн» хэсгийг заавал бөглө (юу ч үлдээгүй бол «үлдсэн зүйл алга» гэж бич).");
+    return L.join("\n");
+  }
+
+  function fullPrompt(t) {
+    return COMMON + "\n\n==================================================\n\n" + taskPrompt(t);
+  }
+
+  function waveBundle(w) {
+    var ts = TASKS.filter(function (t) { return t.wave === w.n; });
+    var out = ["# ДОЛГИОН " + w.n + " — " + w.title + " (" + waveLabel[w.mode] + ", " + ts.length + " даалгавар)",
+      "# АНХААР: энэ бол жагсаалт. Даалгавар бүрийг ТУСДАА агентад өгнө; нэг агентад бүгдийг бүү өг.", ""];
+    ts.forEach(function (t, i) {
+      out.push("########## " + (i + 1) + "/" + ts.length + " ##########");
+      out.push(fullPrompt(t));
+      out.push("");
+    });
+    return out.join("\n");
+  }
+
+  /* ---- Файлын давхцлын шалгалт (нэг долгион дотор) ---- */
+  function norm(p) { return p.split(",")[0].trim(); }
+  function overlaps(a, b) {
+    function base(x) { return x.replace(/\/\*\*$/, "/"); }
+    var A = base(a), B = base(b);
+    if (A === B) return true;
+    if (A.endsWith("/") && B.indexOf(A) === 0) return true;
+    if (B.endsWith("/") && A.indexOf(B) === 0) return true;
+    return false;
+  }
+  function paths(t) {
+    var out = [];
+    t.owned.forEach(function (o) { o[0].split(",").forEach(function (p) {
+      p = p.trim();
+      if (p.indexOf("/") < 0 && out.length) { var prev = out[out.length - 1]; p = prev.slice(0, prev.lastIndexOf("/") + 1) + p; }
+      out.push(p);
+    }); });
+    return out;
+  }
+  function findOverlaps() {
+    var issues = [];
+    WAVES.forEach(function (w) {
+      if (w.mode !== "par") return;
+      var ts = TASKS.filter(function (t) { return t.wave === w.n; });
+      for (var i = 0; i < ts.length; i++) for (var j = i + 1; j < ts.length; j++) {
+        paths(ts[i]).forEach(function (a) { paths(ts[j]).forEach(function (b) {
+          if (overlaps(a, b)) issues.push("Долгион " + w.n + ": " + ts[i].id + " ба " + ts[j].id + " — " + a + " / " + b);
+        }); });
+      }
+    });
+    return issues;
+  }
+  window.__overlaps = findOverlaps;
+
+  /* ---- Хуулах ---- */
+  var toastEl = document.getElementById("toast"), toastT;
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.classList.add("show");
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove("show"); }, 1800);
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", "");
+    ta.style.position = "fixed"; ta.style.top = "0"; ta.style.left = "0"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { ta.setSelectionRange(0, text.length); } catch (e) {}
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copy(text, label) {
+    var done = function () { toast((label || "Хуулсан") + " — " + text.length + " тэмдэгт"); };
+    var fail = function () { if (fallbackCopy(text)) done(); else toast("Хуулж чадсангүй — бичвэрийг гараар сонгоно уу"); };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, fail);
+    } else { fail(); }
+  }
+  var COPY = { setup: function () { return SETUP; }, local: function () { return LOCAL; }, common: function () { return COMMON; },
+               reviewer: function () { return REVIEWER; }, handback: function () { return HANDBACK; } };
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-copy]");
+    if (!b) return;
+    var key = b.getAttribute("data-copy");
+    if (COPY[key]) return copy(COPY[key](), "Хуулсан");
+    if (key.indexOf("task:") === 0) {
+      var t = TASKS[+key.slice(5)]; return copy(fullPrompt(t), "[" + t.id + "] хуулсан");
+    }
+    if (key.indexOf("taskonly:") === 0) {
+      var t2 = TASKS[+key.slice(9)]; return copy(taskPrompt(t2), "[" + t2.id + "] (контекстгүй) хуулсан");
+    }
+    if (key.indexOf("wave:") === 0) {
+      var w = waveOf(+key.slice(5)); return copy(waveBundle(w), "Долгион " + w.n + " хуулсан");
+    }
+  });
+
+  /* ---- Зурах ---- */
+  document.getElementById("setupPre").textContent = SETUP;
+  document.getElementById("localPre").textContent = LOCAL;
+  document.getElementById("commonPre").textContent = COMMON;
+  document.getElementById("reviewerPre").textContent = REVIEWER;
+  document.getElementById("handbackPre").textContent = HANDBACK;
+
+  var stats = document.getElementById("stats");
+  WAVES.forEach(function (w) {
+    var c = TASKS.filter(function (t) { return t.wave === w.n; }).length;
+    stats.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "muted", text: "Долгион " + w.n + " — " + waveLabel[w.mode] }),
+      el("div", { class: "big", text: String(c) }),
+      el("div", { class: "muted", text: w.title }),
+    ]));
+  });
+  stats.appendChild(el("div", { class: "card" }, [
+    el("div", { class: "muted", text: "Эзний гараар" }),
+    el("div", { class: "big", text: String(OWNER.length) }),
+    el("div", { class: "muted", text: "данс, төлбөр, түлхүүр" }),
+  ]));
+
+  var ov = findOverlaps();
+  document.getElementById("overlapBox").appendChild(ov.length
+    ? el("div", { class: "callout red" }, [el("b", { text: "Файлын давхцал илэрлээ: " }), ov.join("; ")])
+    : el("div", { class: "callout green", text: "Шалгалт: зэрэг ажиллах долгион бүрт хоёр даалгавар нэг файлыг эзэмшээгүй (энэ хуудас ачаалахдаа автоматаар шалгадаг)." }));
+
+  /* Эзний ажил */
+  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  var ownerList = document.getElementById("ownerList");
+  OWNER.forEach(function (o, i) {
+    var key = "pi-owner-" + o.id;
+    var box = el("input", { type: "checkbox", id: "own" + i, "aria-label": o.title + " — хийсэн" });
+    var item = el("div", { class: "owner-item" });
+    if (store.get(key) === "1") { box.checked = true; item.classList.add("done"); }
+    box.addEventListener("change", function () { store.set(key, box.checked ? "1" : "0"); item.classList.toggle("done", box.checked); });
+    var content = el("div", {}, [el("h4", {}, [el("span", { class: "pri " + o.pri, text: o.pri }), " ", o.id + " — " + o.title])]);
+    o.body.forEach(function (p) {
+      if (p.indexOf("CMD:") === 0) content.appendChild(el("pre", { class: "prompt cmd", text: p.slice(4) }));
+      else content.appendChild(el("p", { text: p }));
+    });
+    item.appendChild(el("label", { class: "check", for: "own" + i }, [box, content]));
+    ownerList.appendChild(item);
+  });
+
+  /* Долгион ба даалгавар */
+  var waveList = document.getElementById("waveList"), tocWaves = document.getElementById("tocWaves");
+  WAVES.forEach(function (w) {
+    var ts = TASKS.filter(function (t) { return t.wave === w.n; });
+    var sec = el("div", { class: "wave", id: "wave" + w.n, "data-wave": String(w.n) });
+    sec.appendChild(el("div", { class: "wave-head" }, [
+      el("h3", { text: "Долгион " + w.n + ": " + w.title }),
+      el("span", { class: "tag " + w.mode, text: waveLabel[w.mode] + ", " + ts.length + " даалгавар" }),
+    ]));
+    sec.appendChild(el("p", {}, [el("b", { text: "Хэзээ: " }), w.when]));
+    sec.appendChild(el("p", { class: "muted", text: w.note }));
+    sec.appendChild(el("div", { class: "actions" }, [
+      el("button", { class: "btn", type: "button", "data-copy": "wave:" + w.n, text: "Долгион бүхлээр хуулах" }),
+    ]));
+
+    var tbl = el("table", { class: "owntbl" });
+    ts.forEach(function (t) {
+      tbl.appendChild(el("tr", {}, [el("td", { text: t.id }), el("td", { text: t.owned.map(function (o) { return o[0]; }).join("  |  ") })]));
+    });
+    sec.appendChild(el("details", { class: "own" }, [el("summary", { text: "Файлын эзэмшил (давхцалгүйг шалгах)" }), tbl]));
+
+    ts.forEach(function (t) {
+      var idx = TASKS.indexOf(t);
+      var anchor = "t-" + t.id.replace(/[^A-Za-z0-9]/g, "");
+      var d = el("details", { class: "task", id: anchor, "data-pri": t.pri });
+      d.appendChild(el("summary", {}, [
+        el("span", { class: "pri " + t.pri, text: t.pri }),
+        el("span", { class: "tid", text: t.id }),
+        el("span", { class: "tt", text: t.title }),
+        el("span", { class: "chev" }, [el("span", { class: "o", text: "Дэлгэх" }), el("span", { class: "c", text: "Хураах" })]),
+      ]));
+      var body = el("div", { class: "body" });
+      body.appendChild(el("p", { text: t.why }));
+      if (t.ownerNote) body.appendChild(el("div", { class: "callout", text: t.ownerNote }));
+      var fl = el("ul", { class: "files" });
+      t.owned.forEach(function (o) { fl.appendChild(el("li", {}, [el("code", { text: o[0] }), o[1] ? el("span", { class: "note", text: " — " + o[1] }) : null])); });
+      body.appendChild(el("div", { class: "muted", text: "Эзэмшдэг файлууд:" }));
+      body.appendChild(fl);
+      var ul = el("ul", { class: "files" });
+      t.urls.forEach(function (u) { ul.appendChild(el("li", { text: u })); });
+      body.appendChild(el("div", { class: "muted", text: "Safari-д шалгах:" }));
+      body.appendChild(ul);
+      body.appendChild(el("div", { class: "actions" }, [
+        el("button", { class: "btn primary", type: "button", "data-copy": "task:" + idx, text: "Хуулах (контекст + даалгавар)" }),
+        el("button", { class: "btn", type: "button", "data-copy": "taskonly:" + idx, text: "Зөвхөн даалгавар" }),
+      ]));
+      body.appendChild(el("pre", { class: "prompt", text: taskPrompt(t) }));
+      d.appendChild(body);
+      sec.appendChild(d);
+    });
+    waveList.appendChild(sec);
+    tocWaves.appendChild(el("a", { class: "sub", href: "#wave" + w.n, text: "Долгион " + w.n + " (" + ts.length + ")" }));
+  });
+
+  /* Долгионы шүүлтүүр */
+  var filterBtns = document.querySelectorAll("[data-wave].btn");
+  function applyFilter(v) {
+    filterBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-wave") === v)); });
+    document.querySelectorAll(".wave").forEach(function (s) { s.classList.toggle("hidden", v !== "all" && s.getAttribute("data-wave") !== v); });
+    store.set("pi-wave-filter", v);
+  }
+  filterBtns.forEach(function (b) { b.addEventListener("click", function () {
+    var v = b.getAttribute("data-wave"); applyFilter(v);
+    if (v !== "all") { var t = document.getElementById("wave" + v); if (t) t.scrollIntoView({ behavior: "instant", block: "start" }); }
+  }); });
+  var saved = store.get("pi-wave-filter"); if (saved && /^(all|[1-4])$/.test(saved)) applyFilter(saved);
+
+  /* Агуулга (гар утас) */
+  var toc = document.getElementById("toc"), tocBtn = document.getElementById("tocBtn");
+  function setToc(open) { toc.classList.toggle("open", open); tocBtn.setAttribute("aria-expanded", String(open)); }
+  tocBtn.addEventListener("click", function () { setToc(!toc.classList.contains("open")); });
+  document.getElementById("tocClose").addEventListener("click", function () { setToc(false); });
+  toc.addEventListener("click", function (e) { if (e.target.tagName === "A") setToc(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") setToc(false); });
+})();
+</script>
+</body>
+</html>
