@@ -25,29 +25,30 @@ export default function DistractorAnalysisPanel() {
 
   const choices = useMemo(() => rows.map((row) => ({
     ...row,
-    wrongChoices: row.distractor
-      .filter((choice) => choice.mistakeType && choice.mistakeType !== "NONE" && choice.selectionCount > 0)
+    selectedChoices: row.distractor
+      .filter((choice) => choice.selectionCount > 0)
       .sort((a, b) => b.selectionCount - a.selectionCount)
-      .slice(0, 3),
-  })).filter((row) => row.wrongChoices.length > 0)
-    .sort((a, b) => (b.wrongChoices[0]?.selectionCount ?? 0) - (a.wrongChoices[0]?.selectionCount ?? 0)), [rows]);
+  })).filter((row) => row.selectedChoices.length > 0)
+    .sort((a, b) => (b.selectedChoices[0]?.selectionCount ?? 0) - (a.selectedChoices[0]?.selectionCount ?? 0)), [rows]);
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-line bg-panel px-4 py-3 text-sm text-ink-dim">Зөв хариуны сонголтыг хасаж, хамгийн олон сонгосон буруу хувилбаруудыг харуулав.</div>
+      <div className="rounded-xl border border-line bg-panel px-4 py-3 text-sm text-ink-dim">Сонголт тус бүрийг хэдэн удаа сонгосныг харуулна. Одоогийн өгөгдөл зөв, буруу сонголтыг ялгахгүй тул эндээс буруу хариулт гэж дүгнэх боломжгүй.</div>
       {loading && <LoadingState rows={6} label="Сонголтын статистик ачаалж байна" />}
       {!loading && error && <ErrorState message="Сонголтын статистик ачаалсангүй. Дахин оролдоно уу." onRetry={() => { setError(false); setLoading(true); setRetry((value) => value + 1); }} />}
       {!loading && !error && rows.length === 0 && <EmptyState title="Одоогоор оролдлогын өгөгдөл алга" hint="Сурагчид тест бөглөсний дараа энд гарна." />}
-      {!loading && !error && rows.length > 0 && choices.length === 0 && <EmptyState title="Бүртгэгдсэн буруу сонголт алга" hint="Оролдлогоос буруу хувилбар сонгогдсон үед энд гарна." />}
+      {!loading && !error && rows.length > 0 && choices.length === 0 && <EmptyState title="Сонголтын мэдээлэл бүртгэгдээгүй байна" hint="Сурагчид тест бөглөж сонголтоо илгээсний дараа энд гарна." />}
       {!loading && !error && choices.length > 0 && choices.map((row) => (
         <Card key={row.problemId} padding="tight">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h2 className="break-all font-semibold text-ink">{row.problemToken}</h2>
             <span className="text-sm text-ink-dim"><Meta items={[`${row.totalAttempts} оролдлого`]} /></span>
           </div>
-          {row.totalAttempts < 10 && <p className="mt-3 rounded-lg bg-panel px-3 py-2 text-sm text-ink-dim">Дүгнэлт гаргахад оролдлого хангалтгүй ({row.totalAttempts})</p>}
+          {row.totalAttempts < 10 ? (
+            <p className="mt-3 rounded-lg bg-panel px-3 py-2 text-sm text-ink-dim">Оролдлогын тоо бага тул сонголтын хувь, эрэмбийг харуулахгүй. Дүгнэлт гаргахад оролдлого хангалтгүй ({row.totalAttempts}).</p>
+          ) : (
           <ol className="mt-3 space-y-2">
-            {row.wrongChoices.map((choice) => (
+            {row.selectedChoices.map((choice) => (
               <li key={`${row.problemId}-${choice.choiceLabel}`} className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 break-words text-ink">
                   <span className="mr-2 font-bold">{choice.choiceLabel}</span>
@@ -61,6 +62,7 @@ export default function DistractorAnalysisPanel() {
               </li>
             ))}
           </ol>
+          )}
         </Card>
       ))}
     </div>
