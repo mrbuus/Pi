@@ -145,6 +145,14 @@ function formatErrorMessage(status: number, serverMsg: string | null): string {
   return `Алдаа ${status}`;
 }
 
+/** HTTP failures retain their status without changing existing Error/message callers. */
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 export async function api<T = unknown>(
   path: string,
   opts: { method?: string; body?: unknown; auth?: boolean } = {},
@@ -198,7 +206,7 @@ export async function api<T = unknown>(
         ? data.message.join(", ")
         : data?.message;
       const formatted = formatErrorMessage(res.status, msg ?? null);
-      throw new Error(formatted);
+      throw new ApiError(formatted, res.status);
     }
     return data;
   })();
@@ -249,7 +257,7 @@ export async function uploadFile(
     if (!res.ok) {
       const msg = data?.message;
       const formatted = formatErrorMessage(res.status, msg ?? null);
-      throw new Error(formatted);
+      throw new ApiError(formatted, res.status);
     }
     return data;
   } catch (error) {

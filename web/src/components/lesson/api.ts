@@ -1,57 +1,21 @@
-import { api, getToken } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import type {
   LessonDetail,
   LessonProgressBody,
 } from "./types";
 
-/**
- * "Хичээл үзэх" (lesson) урсгалын API дуудлагууд — нэг дороос.
- *
- * 403 (эрхгүй) ба бусад алдааг (сүлжээ/сервер) ЗААВАЛ ялгаж таниулна: сурагч
- * "интернэт тасарсан" гэдгийг "энэ бүлгийг үзэх эрхгүй" гэдгээс ялгаж мэдэх
- * ёстой (эхнийх нь дахин оролдоход л шийдэгдэнэ, хоёр дахь нь эрх худалдаж
- * авах шаардлагатай). `api()` helper нь HTTP статусыг дамжуулдаггүй тул
- * (Бодлогын сан хуудасны fetchChapterProblems-тэй ижил зарчмаар) энд шууд
- * fetch хийж res.status шалгана.
- */
+// Preserve the distinction between missing access and connectivity failures.
 export class LessonAccessDeniedError extends Error {}
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
-
 export async function fetchLessonDetail(chapterId: string): Promise<LessonDetail> {
-  const headers: Record<string, string> = {};
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  let res: Response;
   try {
-    res = await fetch(`${API_URL}/lessons/${chapterId}`, { headers });
-  } catch {
-    throw new Error(
-      "Сүлжээний алдаа — интернэт холболтоо шалгаад дахин оролдоно уу.",
-    );
+    return await api<LessonDetail>("/lessons/" + encodeURIComponent(chapterId));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      throw new LessonAccessDeniedError("энэ бүлгийг үзэх эрхгүй байна");
+    }
+    throw error;
   }
-
-  if (res.status === 403) {
-    throw new LessonAccessDeniedError("энэ бүлгийг үзэх эрхгүй байна");
-  }
-
-  const data = (await res.json().catch(() => null)) as
-    | LessonDetail
-    | { message?: string | string[] }
-    | null;
-
-  if (!res.ok) {
-    const message =
-      data && !("chapter" in (data as object))
-        ? Array.isArray((data as { message?: string | string[] }).message)
-          ? (data as { message?: string[] }).message!.join(", ")
-          : (data as { message?: string }).message
-        : undefined;
-    throw new Error(message ?? `Алдаа ${res.status}`);
-  }
-
-  return data as LessonDetail;
 }
 
 export async function postLessonProgress(

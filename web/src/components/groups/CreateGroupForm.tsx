@@ -40,7 +40,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700"
+        className="px-4 py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90"
       >
         Шинэ ангийн бүлэг үүсгэх
       </button>
@@ -78,7 +78,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex-1 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90 disabled:opacity-50"
           >
             {isLoading ? 'Үүсгэж байна...' : 'Үүсгэх'}
           </button>

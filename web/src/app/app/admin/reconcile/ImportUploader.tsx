@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
+import { Meta } from '@/components/ui/Meta';
 import { api, uploadFile } from '@/lib/api';
 import { ImportConfig, ImportResult } from './types';
 import { SectionHeader } from '@/components/ui/Surface';
@@ -206,11 +207,10 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
               <p className="font-medium">Импорт амжилттай</p>
               <ul className="text-xs mt-1 space-y-0.5">
                 <li>
-                  нийт {result.totalRows} мөр · импортлосон {result.imported}
+                  <Meta items={[`нийт ${result.totalRows} мөр`, `импортлосон ${result.imported}`]} />
                 </li>
                 <li>
-                  давхардсан {result.skipped} · автоматаар холбогдсон{' '}
-                  {result.matched}
+                  <Meta items={[`давхардсан ${result.skipped}`, `автоматаар холбогдсон ${result.matched}`]} />
                 </li>
                 {result.errors.length > 0 && (
                   <li className="text-warning mt-1">
