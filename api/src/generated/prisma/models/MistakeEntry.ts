@@ -42,6 +42,7 @@ export type MistakeEntryMinAggregateOutputType = {
   problemId: string | null
   source: string | null
   sourceRefId: string | null
+  sourceOccurredAt: Date | null
   testTitle: string | null
   status: string | null
   retryCount: number | null
@@ -61,6 +62,7 @@ export type MistakeEntryMaxAggregateOutputType = {
   problemId: string | null
   source: string | null
   sourceRefId: string | null
+  sourceOccurredAt: Date | null
   testTitle: string | null
   status: string | null
   retryCount: number | null
@@ -80,6 +82,7 @@ export type MistakeEntryCountAggregateOutputType = {
   problemId: number
   source: number
   sourceRefId: number
+  sourceOccurredAt: number
   testTitle: number
   givenAnswer: number
   status: number
@@ -112,6 +115,7 @@ export type MistakeEntryMinAggregateInputType = {
   problemId?: true
   source?: true
   sourceRefId?: true
+  sourceOccurredAt?: true
   testTitle?: true
   status?: true
   retryCount?: true
@@ -131,6 +135,7 @@ export type MistakeEntryMaxAggregateInputType = {
   problemId?: true
   source?: true
   sourceRefId?: true
+  sourceOccurredAt?: true
   testTitle?: true
   status?: true
   retryCount?: true
@@ -150,6 +155,7 @@ export type MistakeEntryCountAggregateInputType = {
   problemId?: true
   source?: true
   sourceRefId?: true
+  sourceOccurredAt?: true
   testTitle?: true
   givenAnswer?: true
   status?: true
@@ -257,6 +263,7 @@ export type MistakeEntryGroupByOutputType = {
   problemId: string
   source: string
   sourceRefId: string | null
+  sourceOccurredAt: Date | null
   testTitle: string | null
   givenAnswer: runtime.JsonValue | null
   status: string
@@ -300,6 +307,7 @@ export type MistakeEntryWhereInput = {
   problemId?: Prisma.StringFilter<"MistakeEntry"> | string
   source?: Prisma.StringFilter<"MistakeEntry"> | string
   sourceRefId?: Prisma.StringNullableFilter<"MistakeEntry"> | string | null
+  sourceOccurredAt?: Prisma.DateTimeNullableFilter<"MistakeEntry"> | Date | string | null
   testTitle?: Prisma.StringNullableFilter<"MistakeEntry"> | string | null
   givenAnswer?: Prisma.JsonNullableFilter<"MistakeEntry">
   status?: Prisma.StringFilter<"MistakeEntry"> | string
@@ -322,6 +330,7 @@ export type MistakeEntryOrderByWithRelationInput = {
   problemId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourceRefId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceOccurredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   testTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   givenAnswer?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -348,6 +357,7 @@ export type MistakeEntryWhereUniqueInput = Prisma.AtLeast<{
   problemId?: Prisma.StringFilter<"MistakeEntry"> | string
   source?: Prisma.StringFilter<"MistakeEntry"> | string
   sourceRefId?: Prisma.StringNullableFilter<"MistakeEntry"> | string | null
+  sourceOccurredAt?: Prisma.DateTimeNullableFilter<"MistakeEntry"> | Date | string | null
   testTitle?: Prisma.StringNullableFilter<"MistakeEntry"> | string | null
   givenAnswer?: Prisma.JsonNullableFilter<"MistakeEntry">
   status?: Prisma.StringFilter<"MistakeEntry"> | string
@@ -370,6 +380,7 @@ export type MistakeEntryOrderByWithAggregationInput = {
   problemId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourceRefId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceOccurredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   testTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   givenAnswer?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -398,6 +409,7 @@ export type MistakeEntryScalarWhereWithAggregatesInput = {
   problemId?: Prisma.StringWithAggregatesFilter<"MistakeEntry"> | string
   source?: Prisma.StringWithAggregatesFilter<"MistakeEntry"> | string
   sourceRefId?: Prisma.StringNullableWithAggregatesFilter<"MistakeEntry"> | string | null
+  sourceOccurredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MistakeEntry"> | Date | string | null
   testTitle?: Prisma.StringNullableWithAggregatesFilter<"MistakeEntry"> | string | null
   givenAnswer?: Prisma.JsonNullableWithAggregatesFilter<"MistakeEntry">
   status?: Prisma.StringWithAggregatesFilter<"MistakeEntry"> | string
@@ -416,6 +428,7 @@ export type MistakeEntryCreateInput = {
   id?: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -438,6 +451,7 @@ export type MistakeEntryUncheckedCreateInput = {
   problemId: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -456,6 +470,7 @@ export type MistakeEntryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -478,6 +493,7 @@ export type MistakeEntryUncheckedUpdateInput = {
   problemId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -498,6 +514,7 @@ export type MistakeEntryCreateManyInput = {
   problemId: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -516,6 +533,7 @@ export type MistakeEntryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -536,6 +554,7 @@ export type MistakeEntryUncheckedUpdateManyInput = {
   problemId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -571,6 +590,7 @@ export type MistakeEntryCountOrderByAggregateInput = {
   problemId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourceRefId?: Prisma.SortOrder
+  sourceOccurredAt?: Prisma.SortOrder
   testTitle?: Prisma.SortOrder
   givenAnswer?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -596,6 +616,7 @@ export type MistakeEntryMaxOrderByAggregateInput = {
   problemId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourceRefId?: Prisma.SortOrder
+  sourceOccurredAt?: Prisma.SortOrder
   testTitle?: Prisma.SortOrder
   status?: Prisma.SortOrder
   retryCount?: Prisma.SortOrder
@@ -615,6 +636,7 @@ export type MistakeEntryMinOrderByAggregateInput = {
   problemId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourceRefId?: Prisma.SortOrder
+  sourceOccurredAt?: Prisma.SortOrder
   testTitle?: Prisma.SortOrder
   status?: Prisma.SortOrder
   retryCount?: Prisma.SortOrder
@@ -721,6 +743,7 @@ export type MistakeEntryCreateWithoutUserInput = {
   id?: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -741,6 +764,7 @@ export type MistakeEntryUncheckedCreateWithoutUserInput = {
   problemId: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -790,6 +814,7 @@ export type MistakeEntryScalarWhereInput = {
   problemId?: Prisma.StringFilter<"MistakeEntry"> | string
   source?: Prisma.StringFilter<"MistakeEntry"> | string
   sourceRefId?: Prisma.StringNullableFilter<"MistakeEntry"> | string | null
+  sourceOccurredAt?: Prisma.DateTimeNullableFilter<"MistakeEntry"> | Date | string | null
   testTitle?: Prisma.StringNullableFilter<"MistakeEntry"> | string | null
   givenAnswer?: Prisma.JsonNullableFilter<"MistakeEntry">
   status?: Prisma.StringFilter<"MistakeEntry"> | string
@@ -808,6 +833,7 @@ export type MistakeEntryCreateWithoutProblemInput = {
   id?: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -828,6 +854,7 @@ export type MistakeEntryUncheckedCreateWithoutProblemInput = {
   userId: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -873,6 +900,7 @@ export type MistakeEntryCreateManyUserInput = {
   problemId: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -891,6 +919,7 @@ export type MistakeEntryUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -911,6 +940,7 @@ export type MistakeEntryUncheckedUpdateWithoutUserInput = {
   problemId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -930,6 +960,7 @@ export type MistakeEntryUncheckedUpdateManyWithoutUserInput = {
   problemId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -949,6 +980,7 @@ export type MistakeEntryCreateManyProblemInput = {
   userId: string
   source: string
   sourceRefId?: string | null
+  sourceOccurredAt?: Date | string | null
   testTitle?: string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
@@ -967,6 +999,7 @@ export type MistakeEntryUpdateWithoutProblemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -987,6 +1020,7 @@ export type MistakeEntryUncheckedUpdateWithoutProblemInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1006,6 +1040,7 @@ export type MistakeEntryUncheckedUpdateManyWithoutProblemInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   testTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1028,6 +1063,7 @@ export type MistakeEntrySelect<ExtArgs extends runtime.Types.Extensions.Internal
   problemId?: boolean
   source?: boolean
   sourceRefId?: boolean
+  sourceOccurredAt?: boolean
   testTitle?: boolean
   givenAnswer?: boolean
   status?: boolean
@@ -1050,6 +1086,7 @@ export type MistakeEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   problemId?: boolean
   source?: boolean
   sourceRefId?: boolean
+  sourceOccurredAt?: boolean
   testTitle?: boolean
   givenAnswer?: boolean
   status?: boolean
@@ -1072,6 +1109,7 @@ export type MistakeEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   problemId?: boolean
   source?: boolean
   sourceRefId?: boolean
+  sourceOccurredAt?: boolean
   testTitle?: boolean
   givenAnswer?: boolean
   status?: boolean
@@ -1094,6 +1132,7 @@ export type MistakeEntrySelectScalar = {
   problemId?: boolean
   source?: boolean
   sourceRefId?: boolean
+  sourceOccurredAt?: boolean
   testTitle?: boolean
   givenAnswer?: boolean
   status?: boolean
@@ -1108,7 +1147,7 @@ export type MistakeEntrySelectScalar = {
   updatedAt?: boolean
 }
 
-export type MistakeEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "problemId" | "source" | "sourceRefId" | "testTitle" | "givenAnswer" | "status" | "retryCount" | "consecutiveCorrect" | "lastRetryAt" | "lastCorrectAt" | "nextRetryAt" | "reason" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["mistakeEntry"]>
+export type MistakeEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "problemId" | "source" | "sourceRefId" | "sourceOccurredAt" | "testTitle" | "givenAnswer" | "status" | "retryCount" | "consecutiveCorrect" | "lastRetryAt" | "lastCorrectAt" | "nextRetryAt" | "reason" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["mistakeEntry"]>
 export type MistakeEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -1134,6 +1173,7 @@ export type $MistakeEntryPayload<ExtArgs extends runtime.Types.Extensions.Intern
     problemId: string
     source: string
     sourceRefId: string | null
+    sourceOccurredAt: Date | null
     testTitle: string | null
     givenAnswer: runtime.JsonValue | null
     status: string
@@ -1576,6 +1616,7 @@ export interface MistakeEntryFieldRefs {
   readonly problemId: Prisma.FieldRef<"MistakeEntry", 'String'>
   readonly source: Prisma.FieldRef<"MistakeEntry", 'String'>
   readonly sourceRefId: Prisma.FieldRef<"MistakeEntry", 'String'>
+  readonly sourceOccurredAt: Prisma.FieldRef<"MistakeEntry", 'DateTime'>
   readonly testTitle: Prisma.FieldRef<"MistakeEntry", 'String'>
   readonly givenAnswer: Prisma.FieldRef<"MistakeEntry", 'Json'>
   readonly status: Prisma.FieldRef<"MistakeEntry", 'String'>

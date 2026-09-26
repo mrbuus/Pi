@@ -735,6 +735,7 @@ export const MistakeEntryScalarFieldEnum = {
   problemId: 'problemId',
   source: 'source',
   sourceRefId: 'sourceRefId',
+  sourceOccurredAt: 'sourceOccurredAt',
   testTitle: 'testTitle',
   givenAnswer: 'givenAnswer',
   status: 'status',

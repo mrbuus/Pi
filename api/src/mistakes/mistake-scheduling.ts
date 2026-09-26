@@ -18,7 +18,7 @@ function ubDayKey(date: Date): string {
 }
 
 function ubMidnight(date: Date): Date {
-  return new Date(`${ubDayKey(date)}T00:00:00.000Z`);
+  return new Date(`${ubDayKey(date)}T00:00:00.000+08:00`);
 }
 
 function plusDays(date: Date, days: number): Date {

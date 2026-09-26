@@ -141,7 +141,7 @@ export class AttemptsService {
       ...new Map(resolvedRows.map((r) => [r.problemId, r])).values(),
     ];
 
-    await this.prisma.$transaction(async (tx) => {
+    const createdAttempts = await this.prisma.$transaction(async (tx) => {
       await tx.attempt.deleteMany({
         where: {
           studentId,
@@ -151,10 +151,16 @@ export class AttemptsService {
           problemId: { in: rows.map((r) => r.problemId) },
         },
       });
-      await tx.attempt.createMany({ data: rows });
+      return tx.attempt.createManyAndReturn({
+        data: rows,
+        select: { id: true, mistakeCollectedAt: true },
+      });
     });
-    // Self-report is best-effort; the durable null marker lets the collector retry.
-    try { await this.mistakes.retryPending(); } catch { /* grading/recording must remain available */ }
+    for (const attempt of createdAttempts) {
+      if (attempt.mistakeCollectedAt === null) {
+        await this.mistakes.collectAttempt(attempt.id);
+      }
+    }
     return { recorded: rows.length, date: occurredOn };
   }
 

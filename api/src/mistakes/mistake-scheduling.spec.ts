@@ -8,7 +8,7 @@ describe('nextMistakeRetryState', () => {
   it('does not count two correct attempts on one Ulaanbaatar day as mastery', () => {
     const first = nextMistakeRetryState({ status: 'NEW', retryCount: 0, consecutiveCorrect: 0, lastCorrectAt: null }, true, day1);
     const second = nextMistakeRetryState(first, true, day1Later);
-    expect(first).toMatchObject({ status: 'RETRYING', consecutiveCorrect: 1, nextRetryAt: new Date('2026-09-02T00:00:00Z') });
+    expect(first).toMatchObject({ status: 'RETRYING', consecutiveCorrect: 1, nextRetryAt: new Date('2026-09-01T16:00:00Z') });
     expect(second).toMatchObject({ status: 'RETRYING', consecutiveCorrect: 1, retryCount: 2 });
   });
 
@@ -17,15 +17,25 @@ describe('nextMistakeRetryState', () => {
     const mastered = nextMistakeRetryState(first, true, day2);
     expect(mastered).toMatchObject({ status: 'MASTERED', consecutiveCorrect: 2, nextRetryAt: null });
     const wrong = nextMistakeRetryState(mastered, false, new Date('2026-09-03T02:00:00Z'));
-    expect(wrong).toMatchObject({ status: 'RETRYING', consecutiveCorrect: 0, nextRetryAt: new Date('2026-09-10T00:00:00Z') });
+    expect(wrong).toMatchObject({ status: 'RETRYING', consecutiveCorrect: 0, nextRetryAt: new Date('2026-09-09T16:00:00Z') });
   });
 
   it('uses 1, 3, then 7 day spacing for repeated wrong attempts', () => {
     const first = nextMistakeRetryState({ status: 'NEW', retryCount: 0, consecutiveCorrect: 0, lastCorrectAt: null }, false, day1);
     const second = nextMistakeRetryState(first, false, day2);
     const third = nextMistakeRetryState(second, false, new Date('2026-09-03T02:00:00Z'));
-    expect(first.nextRetryAt).toEqual(new Date('2026-09-02T00:00:00Z'));
-    expect(second.nextRetryAt).toEqual(new Date('2026-09-05T00:00:00Z'));
-    expect(third.nextRetryAt).toEqual(new Date('2026-09-10T00:00:00Z'));
+    expect(first.nextRetryAt).toEqual(new Date('2026-09-01T16:00:00Z'));
+    expect(second.nextRetryAt).toEqual(new Date('2026-09-04T16:00:00Z'));
+    expect(third.nextRetryAt).toEqual(new Date('2026-09-09T16:00:00Z'));
+  });
+
+  it('uses the real Ulaanbaatar midnight when separating consecutive days', () => {
+    const beforeMidnight = new Date('2026-09-01T15:59:00Z'); // 23:59 UB
+    const afterMidnight = new Date('2026-09-01T16:00:00Z'); // 00:00 UB next day
+    const first = nextMistakeRetryState({ status: 'NEW', retryCount: 0, consecutiveCorrect: 0, lastCorrectAt: null }, true, beforeMidnight);
+    const second = nextMistakeRetryState(first, true, afterMidnight);
+    expect(first.nextRetryAt).toEqual(afterMidnight);
+    expect(second.status).toBe('MASTERED');
+    expect(second.consecutiveCorrect).toBe(2);
   });
 });

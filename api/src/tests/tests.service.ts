@@ -1507,7 +1507,7 @@ export class TestsService {
     const now = new Date();
 
     // АТОМИК хэсэг: TestResult, Attempt, Session нэг transaction-д
-    const [result] = await this.prisma.$transaction([
+    const [result, createdAttempts] = await this.prisma.$transaction([
       this.prisma.testResult.upsert({
         where: {
           testId_studentId: { testId: test.id, studentId },
@@ -1522,7 +1522,10 @@ export class TestsService {
         // Цаасан дүн аль хэдийн орсон бол дарж бичихгүй (өөрчлөлтгүй update)
         update: {},
       }),
-      this.prisma.attempt.createMany({ data: attempts }),
+      this.prisma.attempt.createManyAndReturn({
+        data: attempts,
+        select: { id: true, mistakeCollectedAt: true },
+      }),
       this.prisma.testAttemptSession.update({
         where: { id: session.id },
         data: {
@@ -1537,9 +1540,13 @@ export class TestsService {
       }),
     ]);
 
-    // This work happens after the score is committed. A failed collection leaves
-    // the attempt pending for the scheduled collector and never blocks submission.
-    try { await this.mistakes.retryPending(); } catch { /* leave durable pending rows for the next pass */ }
+    // Collect only this submission's wrong attempts; failure leaves them pending
+    // for the scheduled bounded recovery pass and cannot undo the committed score.
+    for (const attempt of createdAttempts) {
+      if (attempt.mistakeCollectedAt === null) {
+        await this.mistakes.collectAttempt(attempt.id);
+      }
+    }
 
     // ТУСДАА: Problem статистик (дүгнэлт хадгалагдсаны дараа).
     // Алдаа гарвал сурагчийн илгээлтийг унагаахгүй, зөвхөн log.

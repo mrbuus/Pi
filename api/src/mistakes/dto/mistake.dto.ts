@@ -15,4 +15,5 @@ export class MistakeQueryDto {
   @IsOptional() @IsEnum(MistakeStatusDto) status?: MistakeStatusDto;
   @IsOptional() @IsString() @MaxLength(80) topic?: string;
   @IsOptional() @IsEnum(MistakeSourceDto) source?: MistakeSourceDto;
+  @IsOptional() @IsString() @MaxLength(80) cursor?: string;
 }

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS "MistakeEntry" (
   "problemId" TEXT NOT NULL,
   "source" TEXT NOT NULL,
   "sourceRefId" TEXT,
+  "sourceOccurredAt" TIMESTAMP(3),
   "testTitle" TEXT,
   "givenAnswer" JSONB,
   "status" TEXT NOT NULL DEFAULT 'NEW',

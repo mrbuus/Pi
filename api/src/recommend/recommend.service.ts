@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Role } from '../generated/prisma/enums';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { canAccessChapter } from '../common/access';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
+import { choiceModeOf, gradeAnswer, GradableProblem, hasKnownAnswer } from '../tests/grading';
 import {
   recommend,
   buildTopicStates,
@@ -8,6 +12,18 @@ import {
   type CandidateProblem,
   type Recommendation,
 } from './scheduler';
+
+export function canonicalizePracticeChoiceInput(problem: GradableProblem, givenAnswer: unknown): unknown {
+  if (choiceModeOf(problem) !== 'TEXT' || typeof givenAnswer !== 'string') return givenAnswer;
+  const token = givenAnswer.trim();
+  const choices = problem.choiceOptions?.length
+    ? [...problem.choiceOptions].sort((a, b) => a.order - b.order).map((option) => option.text)
+    : Array.isArray(problem.choices) ? problem.choices.map(String) : [];
+  const textIndex = choices.findIndex((choice) => choice.trim().toLowerCase() === token.toLowerCase());
+  if (textIndex >= 0) return textIndex;
+  if (/^[A-Za-z]$/.test(token)) return token.toUpperCase().charCodeAt(0) - 65;
+  return givenAnswer;
+}
 
 @Injectable()
 export class RecommendService {
@@ -154,7 +170,14 @@ export class RecommendService {
       }),
       this.prisma.problem.findUnique({
         where: { id: problemId },
-        select: { id: true },
+        select: {
+          id: true,
+          format: true,
+          choices: true,
+          correctAnswer: true,
+          choiceOptions: { orderBy: { order: 'asc' }, select: { order: true, text: true, isCorrect: true } },
+          chapter: { select: { id: true, bookId: true, freePreview: true, deletedAt: true } },
+        },
       }),
       this.prisma.enrollment.findFirst({
         where: { studentId, leftAt: null },
@@ -165,6 +188,23 @@ export class RecommendService {
     if (!student) throw new NotFoundException('Сурагч олдсонгүй');
     if (!problem) throw new NotFoundException('Бодлого олдсонгүй');
     if (!enrollment) throw new NotFoundException('Та идэвхтэй ангид бүртгэлгүй');
+    if (problem.chapter.deletedAt) throw new NotFoundException('Бодлого олдсонгүй');
+    const allowed = await canAccessChapter(this.prisma, studentId, Role.STUDENT, problem.chapter);
+    if (!allowed) throw new ForbiddenException('Энэ бодлогыг бодох эрхгүй байна');
+
+    const gradable: GradableProblem = {
+      id: problem.id,
+      format: problem.format,
+      choices: problem.choices,
+      correctAnswer: problem.correctAnswer,
+      choiceOptions: problem.choiceOptions,
+    };
+    // Practice submits free text; exact numeric-looking choice text wins.
+    // A numeric JSON value still means the selected display index.
+    const rawAnswer = canonicalizePracticeChoiceInput(gradable, givenAnswer);
+    const known = hasKnownAnswer(gradable);
+    const grade = known ? gradeAnswer(gradable, rawAnswer) : null;
+    const scoredAnswer = grade?.canonicalAnswer ?? rawAnswer;
 
     // Attempt үүсгэнэ (source = ONLINE_TEST — вэб дээр оролдсон)
     const attempt = await this.prisma.attempt.create({
@@ -173,17 +213,17 @@ export class RecommendService {
         problemId,
         source: 'ONLINE_TEST',
         occurredOn: new Date(),
-        autoCorrect,
-        selfState: selfState as any,
-        givenAnswer,
+        // The client-supplied grade/state is advisory only; the server owns the key.
+        autoCorrect: known ? grade?.correct ?? false : null,
+        selfState: null,
+        givenAnswer: scoredAnswer as Prisma.InputJsonValue,
         classroomId: enrollment.classroomId,
-        mistakeCollectedAt: autoCorrect === false || selfState === 'FAILED' || selfState === 'FIXED_AFTER_ERROR' ? null : new Date(),
+        mistakeCollectedAt: known && grade?.correct === false ? null : new Date(),
       },
     });
-    if (autoCorrect === false || selfState === 'FAILED' || selfState === 'FIXED_AFTER_ERROR') {
+    if (known && grade?.correct === false) {
       try {
-        const ok = await this.mistakes.collect({ userId: studentId, problemId, source: 'PRACTICE', sourceRefId: attempt.id, givenAnswer });
-        if (ok) await this.prisma.attempt.updateMany({ where: { id: attempt.id, mistakeCollectedAt: null }, data: { mistakeCollectedAt: new Date() } });
+        await this.mistakes.collectAttempt(attempt.id);
       } catch { /* the submitted practice attempt remains saved and collector can retry */ }
     }
   }
