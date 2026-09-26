@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi.mn — Платформын бүрэн тодорхойлолт</title>
+<style>
+  :root {
+    --bg: #f7f7f4; --panel: #ffffff; --ink: #1e293b; --dim: #5b6b80; --line: #e2e8f0;
+    --brand: #273e75; --brand-soft: #eef2fb;
+    --ok: #15803d; --part: #b45309; --bug: #b91c1c; --none: #6d28d9;
+    --ok-bg: #ecfdf3; --part-bg: #fff7ed; --bug-bg: #fef2f2; --none-bg: #f5f3ff;
+    --code: #f1f5f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f172a; --panel: #172033; --ink: #e2e8f0; --dim: #94a3b8; --line: #2b3a52;
+      --brand: #9db4ee; --brand-soft: #1c2a47;
+      --ok: #4ade80; --part: #fbbf24; --bug: #f87171; --none: #c4b5fd;
+      --ok-bg: #12301f; --part-bg: #33260f; --bug-bg: #3a1717; --none-bg: #261d45;
+      --code: #1e293b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f172a; --panel: #172033; --ink: #e2e8f0; --dim: #94a3b8; --line: #2b3a52;
+    --brand: #9db4ee; --brand-soft: #1c2a47;
+    --ok: #4ade80; --part: #fbbf24; --bug: #f87171; --none: #c4b5fd;
+    --ok-bg: #12301f; --part-bg: #33260f; --bug-bg: #3a1717; --none-bg: #261d45;
+    --code: #1e293b;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 130px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    font-size: 14.5px; line-height: 1.55;
+  }
+  a { color: var(--brand); }
+  header.top {
+    position: sticky; top: 0; z-index: 20; background: var(--bg);
+    border-bottom: 1px solid var(--line); padding: 12px 16px 10px;
+  }
+  .top h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+  .top .sub { color: var(--dim); font-size: 12.5px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+  .bar input[type=search] {
+    flex: 1 1 200px; max-width: 360px; padding: 7px 11px; font-size: 13.5px;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink);
+  }
+  .bar select, .btn {
+    padding: 6px 10px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink);
+    min-height: 34px;
+  }
+  .btn:hover, .bar select:hover { border-color: var(--brand); }
+  .btn.primary { background: var(--brand); color: var(--panel); border-color: var(--brand); }
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 20px; max-width: 1280px; margin: 0 auto; padding: 16px; }
+  nav.toc { position: sticky; top: 120px; align-self: start; max-height: calc(100vh - 140px); overflow: auto; font-size: 13px; }
+  nav.toc a { display: block; padding: 4px 8px; border-radius: 8px; text-decoration: none; color: var(--ink); }
+  nav.toc a:hover { background: var(--brand-soft); }
+  nav.toc .grp { margin: 10px 0 4px; font-size: 11px; font-weight: 800; color: var(--dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  nav.toc .num { color: var(--dim); display: inline-block; min-width: 28px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); padding: 12px 16px; } nav.toc { position: static; max-height: none; } }
+  section.sec { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+  section.sec > h2 { margin: 0 0 4px; font-size: 19px; }
+  .sec-actions { float: right; display: flex; gap: 6px; }
+  h3 { font-size: 15.5px; margin: 18px 0 6px; }
+  h4 { font-size: 14px; margin: 14px 0 4px; }
+  p { margin: 6px 0; }
+  .lead { color: var(--dim); }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 13px; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; color: var(--dim); font-weight: 700; background: var(--bg); position: sticky; top: 0; }
+  .tablewrap { overflow-x: auto; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; background: var(--code); padding: 1px 5px; border-radius: 5px; }
+  .st { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+  .st.ok { color: var(--ok); background: var(--ok-bg); }
+  .st.part { color: var(--part); background: var(--part-bg); }
+  .st.bug { color: var(--bug); background: var(--bug-bg); }
+  .st.none { color: var(--none); background: var(--none-bg); }
+  .ver { display: inline-block; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--dim); }
+  .pri { display: inline-block; min-width: 26px; text-align: center; padding: 0 5px; border-radius: 6px; font-size: 11.5px; font-weight: 800; }
+  .pri.P0 { background: var(--bug); color: var(--panel); }
+  .pri.P1 { background: var(--part); color: var(--panel); }
+  .pri.P2 { background: var(--brand); color: var(--panel); }
+  .pri.P3 { background: var(--dim); color: var(--panel); }
+  .role { display: inline-block; padding: 0 5px; margin: 1px 2px 1px 0; border-radius: 5px; font-size: 11px; font-weight: 700; background: var(--brand-soft); color: var(--brand); white-space: nowrap; }
+  .mod { border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: 12px; margin: 12px 0; background: var(--panel); }
+  .mod > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .mod > summary::-webkit-details-marker { display: none; }
+  .mod > summary .mt { font-weight: 800; font-size: 15px; }
+  .mod > summary .md { color: var(--dim); font-size: 12.5px; flex-basis: 100%; }
+  .mod .body { padding: 0 14px 14px; }
+  .mod[data-st="bug"] { border-left-color: var(--bug); }
+  .mod[data-st="part"] { border-left-color: var(--part); }
+  .mod[data-st="none"] { border-left-color: var(--none); }
+  .mod[data-st="ok"] { border-left-color: var(--ok); }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 4px 12px; font-size: 13px; margin: 6px 0; }
+  .kv dt { color: var(--dim); font-weight: 600; }
+  .kv dd { margin: 0; }
+  ul.gaps { margin: 6px 0; padding-left: 18px; }
+  ul.gaps li { margin: 3px 0; }
+  .callout { border-left: 4px solid var(--part); background: var(--part-bg); padding: 10px 12px; border-radius: 0 10px 10px 0; margin: 10px 0; }
+  .callout.red { border-left-color: var(--bug); background: var(--bug-bg); }
+  .callout.blue { border-left-color: var(--brand); background: var(--brand-soft); }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); }
+  .card b { display: block; }
+  .stat { font-size: 22px; font-weight: 800; }
+  .muted { color: var(--dim); font-size: 12.5px; }
+  ol.steps { padding-left: 20px; } ol.steps li { margin: 3px 0; }
+  .hidden { display: none !important; }
+  mark { background: #fde047; color: #1e293b; border-radius: 3px; }
+  .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  @media print { header.top, nav.toc, .sec-actions { display: none; } .layout { display: block; } .mod { break-inside: avoid; } details.mod { display: block; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Pi.mn — Платформын бүрэн тодорхойлолт (v1 суурь)</h1>
+  <div class="sub">Шинэ Ирээдүйн Эзэд — бүтээгдэхүүний шаардлага (PRD), системийн тодорхойлолт, цоорхойн бүртгэл. Кодын бодит байдлаас 2026-09-26-нд түүсэн.</div>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Хайх — жишээ нь: ирц, буцаалт, QPay, /payments ..." aria-label="Хайх">
+    <select id="fStatus" aria-label="Төлвөөр шүүх">
+      <option value="">Бүх төлөв</option>
+      <option value="ok">Бэлэн</option>
+      <option value="part">Хагас</option>
+      <option value="bug">Эвдэрхий</option>
+      <option value="none">Байхгүй</option>
+    </select>
+    <select id="fVer" aria-label="Хувилбараар шүүх">
+      <option value="">Бүх хувилбар</option>
+      <option value="v1">v1.0</option>
+      <option value="v1.1">v1.1</option>
+      <option value="v2">v2</option>
+    </select>
+    <button class="btn" id="expandAll" type="button">Бүгдийг дэлгэх</button>
+    <button class="btn" id="collapseAll" type="button">Бүгдийг хаах</button>
+    <button class="btn primary" id="copyAll" type="button" title="Бүх баримтыг Markdown болгож хуулна — ChatGPT руу шууд буулгана">Бүгдийг Markdown-оор хуулах</button>
+  </div>
+</header>
+<div class="layout">
+  <nav class="toc" id="toc" aria-label="Агуулга"></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================================
+   ӨГӨГДӨЛ — энэ баримтын ЦОРЫН ГАНЦ эх сурвалж. Засах бол зөвхөн энд засна.
+   Төлөв: ok = бэлэн, part = хагас/дутуу, bug = эвдэрхий, none = байхгүй (хийх)
+   Хувилбар: v1 = нээлтэд заавал, v1.1 = удахгүй, v2 = дараагийн том шат
+   Эрх: А=Админ, Б+=Багш+, Б=Багш, С=Сурагч, ЭЭ=Эцэг эх, ХА=Худалдан авагч,
+        ГБ=Гадны багш, Н=Нийтэд (нэвтрэлтгүй)
+   ========================================================================== */
+
+const META = {
+  generated: "2026-09-26",
+  source: "mrbuus/Pi — main (46d520b)",
+  counts: [
+    ["~359", "прод сурагч"], ["21", "анги"], ["13", "багш"], ["~6125", "бодлого"],
+    ["271", "API endpoint"], ["46", "вэб хуудас"], ["67", "өгөгдлийн модель"],
+    ["33", "миграци"], ["338", "API unit тест"], ["64", "UI-гүй endpoint"], ["8", "цэсгүй хуудас"],
+  ],
+};
+
+/* ---------- 1. Бүтээгдэхүүн ---------- */
+const PRODUCT = {
+  vision: "Шинэ Ирээдүйн Эзэд сургалтын төвийн танхимын болон онлайн сургалтыг нэг платформд нэгтгэж, элсэлтийн шалгалтад бэлдэх болон математикийн хоцрогдол арилгах сургалтыг сурагч бүрт тохирсон, хэмжигдэхүйц, ил тод болгох.",
+  problems: [
+    ["Үйл ажиллагаа цаас, Excel дээр", "Ирц, даалгавар, төлбөр, хуваарь тусдаа хүснэгтүүдэд тархсан — алдаа, давхардал, цаг их зарцуулалт."],
+    ["Төлбөрийн хяналт гар ажиллагаатай", "Хэн, хэдий хүртэл төлсөн нь тодорхойгүй, банкны хуулгыг гараар тулгадаг, буцаалтын тооцоо маргаантай."],
+    ["Эцэг эх хүүхдийнхээ явцыг харахгүй", "Ирц, даалгавар, шалгалтын дүн зөвхөн утсаар, санамсаргүй байдлаар дамждаг."],
+    ["Сурагч бүрт тохирсон бэлтгэл байхгүй", "Бүгд ижил бодлого боддог, сул талыг хэмждэггүй, азын оноо жинхэнэ чадвараас ялгагддаггүй."],
+    ["Онлайн орлогын суваг байхгүй", "Ном, тест, видео хичээлийг төвөөс гадуурх хүмүүст зарах систем байхгүй."],
+  ],
+  users: [
+    ["Танхимын сурагч", "~359 (зорилт 800)", "Өдөр бүр хичээлдээ ирдэг, 7 хоногт 3 ба түүнээс олон удаа. Ихэвчлэн гар утсаар хандана."],
+    ["Онлайн сурагч", "шинэ", "Багшгүй, өөрийн хурдаар. Эрх (pass) худалдаж аваад контент үзнэ."],
+    ["Эцэг эх", "~359+", "Хүүхдийнхээ ирц, дүн, төлбөрийг хардаг. Техникийн мэдлэг харилцан адилгүй."],
+    ["Багш", "9", "Өөрийн ангийн ирц, даалгавар, тест. Анги өмнө зогсоод утсаараа хурдан бүртгэнэ."],
+    ["Багш+ (ахлах багш)", "~10", "Контентын эзэн, сурагчийн бүртгэл, төлбөр хөөцөлдөх, хуваарь."],
+    ["Админ (эзэн)", "1", "Бүх эрх: мөнгө, SMS, эрх солих, тайлан."],
+    ["Худалдан авагч", "шинэ", "Сурагч биш, ном/тест/эрх худалдаж авдаг хүн."],
+    ["Гадны багш", "шинэ", "Өөр сургуулийн багш — өөрийн бүлгийн сурагчдын явцыг онлайнаар дагана."],
+  ],
+  model: [
+    ["Танхимын сургалтын төлбөр", "Жилийн нэг удаа / хэсэгчилсэн / сарын. Гол орлого."],
+    ["Онлайн эрх (pass)", "Сарын онлайн эрх, элсэлтийн шалгалтын ангийн эрх, бүлэг сэдвийн эрх — хугацаатай."],
+    ["Дэлгүүр", "Нэг удаагийн шалгалт, ном (цаасан ба цахим)."],
+    ["Гадны багш (ирээдүйд B2B)", "Бусад сургуулийн багш нарт платформ ашиглуулах."],
+  ],
+  kpis: [
+    ["North star", "7 хоногт дор хаяж 3 өдөр идэвхтэй суралцсан сурагчийн тоо", "одоогоор хэмжигддэггүй (LearningEvent бий, самбар хагас)"],
+    ["Сурлага", "Элсэлтийн шалгалтын сорилын дундаж оноо — улирлын өсөлт", "TestResult-аас тооцоолж болно"],
+    ["Хадгалалт", "Сар бүр идэвхтэй үлдсэн сурагчийн хувь (retention)", "байхгүй"],
+    ["Мөнгө", "Төлбөр цуглуулалтын хувь = төлсөн / төлөх ёстой", "finance.service-д TODO"],
+    ["Ирц", "Ангийн ирцийн хувь, хоцролтын давтамж", "attendance/history-оос"],
+    ["Ажлын үр ашиг", "Багш нэг ангийн ирцийг 60 секундэд багтааж бүртгэх", "хэмжээгүй"],
+    ["Техник", "API p95 хариу < 300мс, алдааны хувь < 0.5%, uptime >= 99.5%", "мониторинг байхгүй"],
+  ],
+  scopeIn: [
+    "Бүртгэл, нэвтрэлт, 6 төрлийн эрх (+ гадны багш)",
+    "Анги, хуваарь, ирц, гэрийн даалгавар, зарлал",
+    "Контент: ном → бүлэг → бодлого, онол, видео (бүгд LaTeX)",
+    "Шалгалт: бүтээх → өгөх (серверийн таймертай, autosave) → дүгнэх → дүн",
+    "Төлбөр: гараар баталгаажуулах, банкны хуулга тулгах, QPay, буцаалт",
+    "Эцэг эхийн самбар, баталгаажуулалттай холболт",
+    "Аналитик, аудит лог",
+  ],
+  scopeOut: [
+    "Шууд (live) видео хичээл — v2",
+    "Жинхэнэ нэйтив апп — v2 (эхлээд PWA, v1.1)",
+    "IRT / knowledge tracing загвар — 1 жилийн дата хуримтлагдсаны дараа (v2)",
+    "Олон хэл — зөвхөн монгол",
+    "Хаан банкны корпорацийн API — гэрээ хийгдвэл",
+  ],
+};
+
+/* ---------- 2. Эрхийн матриц ---------- */
+const ROLES = ["Н", "ХА", "С", "ЭЭ", "Б", "Б+", "А", "ГБ"];
+// Y = бүрэн, O = зөвхөн өөрийн хүрээнд, V = зөвхөн харах, - = үгүй
+const MATRIX = [
+  ["Нүүр хуудас, хичээлийн танилцуулга үзэх", "Y Y Y Y Y Y Y Y"],
+  ["Бүртгүүлэх, нэвтрэх, нууц үг сэргээх", "Y Y Y Y Y Y Y Y"],
+  ["Онол, бодлогын сан, видео үзэх (эрхийн хүрээнд)", "- O Y - Y Y Y -"],
+  ["Бодлогын зөв хариуг харах", "- - - - Y Y Y -"],
+  ["Бодлого НЭМЭХ", "- - - - Y Y Y -"],
+  ["Бодлого, ном, бүлэг ЗАСАХ ба УСТГАХ", "- - - - - Y Y -"],
+  ["Ном, бүлэг сэдэв ҮҮСГЭХ", "- - - - - - Y -"],
+  ["Шалгалт өгөх", "- - Y - - - - -"],
+  ["Шалгалт үүсгэх, ангид оноох, цаасан дүн оруулах", "- - - - O Y Y -"],
+  ["Шалгалт устгах", "- - - - - Y Y -"],
+  ["Ирц бүртгэх, гэрийн даалгавар тэмдэглэх", "- - - - O Y Y -"],
+  ["Зарлал гаргах", "- - - - O Y Y -"],
+  ["Сурагчид өнгөний шошго, тэмдэглэл хийх (сурагчид харагдахгүй)", "- - - - O Y Y -"],
+  ["Ангид сурагч элсүүлэх, хасах", "- - - - - Y Y -"],
+  ["Анги үүсгэх, засах, архивлах", "- - - - - - Y -"],
+  ["Хуваарь харах", "Y Y O O O Y Y -"],
+  ["Хуваарь, багшийн ажлын өдөр засах", "- - - - - Y Y -"],
+  ["Сургалтын хуанли (амралт) засах", "- - - - - - Y -"],
+  ["Сурагчийн бүтэн профайл, утасны дугаар харах", "- - O O - Y Y -"],
+  ["Сурагчийн нэрийн өмнөөс нууц үг сэргээх код илгээх", "- - - - - Y Y -"],
+  ["Төлбөр төлөх (өөрийн)", "- Y Y - - - - -"],
+  ["Төлбөр баталгаажуулах, татгалзах, засах, буцаах", "- - - - - Y Y -"],
+  ["Банкны хуулга тулгах", "- - - - - Y Y -"],
+  ["Буцаалтын тооцоо үүсгэх", "- - - - - Y Y -"],
+  ["Буцаалтыг зөвшөөрөх, төлсөн гэж тэмдэглэх", "- - - - - - Y -"],
+  ["Санхүүгийн тайлан, зарлага", "- - - - - - Y -"],
+  ["Эрх (pass), дэлгүүрийн бүтээгдэхүүн, үнэ", "- - - - - - Y -"],
+  ["SMS илгээх (өртөгтэй, буцаах боломжгүй)", "- - - - - - Y -"],
+  ["SMS түүх харах", "- - - - - Y Y -"],
+  ["Хэрэглэгч үүсгэх, эрх солих", "- - - - - - Y -"],
+  ["Эцэг эхийн холболтыг баталгаажуулах", "- - - - - Y Y -"],
+  ["Хүүхдийн ирц, дүн, даалгавар, төлбөр харах", "- - - O - - - -"],
+  ["Гадны багшийг баталгаажуулах", "- - - - - Y Y -"],
+  ["Бүлэг үүсгэх, кодоор сурагч нэгтгэх", "- - - - - - - O"],
+  ["Аналитик самбар", "- - - - - Y Y -"],
+  ["Аудит лог", "- - - - - V Y -"],
+  ["ML экспорт (нэр нууцалсан)", "- - - - - - Y -"],
+];
+
+/* ---------- 3. Модулиуд ----------
+   actions: [товч/үйлдэл, юу болох, API, эрх, төлөв]
+*/
+const MODULES = [
+{
+  id: "public", grp: "Нийтийн хэсэг", t: "Нийтийн нүүр хуудас", st: "part", ver: "v1",
+  routes: ["/"], roles: ["Н"],
+  purpose: "Төвийг танилцуулж, зочныг бүртгэл рүү хөтлөх. Интернэт удаан үед ч хурдан ачаалах ёстой (видео, WebGL, гадаад фонт, CDN хориотой).",
+  screens: [
+    { t: "Нүүр хуудас (Landing)", actions: [
+      ["Дээд цэс: «Нэвтрэх»", "/login руу шилжинэ", "—", "Н", "ok"],
+      ["Дээд цэс: «Бүртгүүлэх»", "/register руу шилжинэ", "—", "Н", "ok"],
+      ["Hero хэсэг", "Гол мессеж: элсэлтийн шалгалтад бэлдэх + математикийн хоцрогдол арилгах танхимын сургалт", "—", "Н", "ok"],
+      ["Хичээлүүд (Subjects): хичээл сонгох", "Тухайн хичээлийн ном, бүлгийн жагсаалтыг харуулна", "GET /books?subject, GET /chapters?bookId", "Н", "ok"],
+      ["Хэрхэн ажилладаг (HowItWorks, StudyRhythmLoop)", "Хичээл → даалгавар → тэмдэглэгээ → шалгалтын мөчлөг", "—", "Н", "ok"],
+      ["Сургалтын төлбөр (Tuition)", "Төлбөрийн тайлбар — үнэ тулгахгүй, заавар өгнө", "—", "Н", "ok"],
+      ["Амжилт, итгэлцэл (Achievements, TrustBar)", "Төгсөгчдийн үр дүн", "—", "Н", "part"],
+      ["Салбарууд (Branches)", "Хаяг, танхимууд", "—", "Н", "ok"],
+      ["Төвийн тоон мэдээлэл (CentreInfo)", "Тоо тодорхойгүй тул «__» үлдсэн — зохиомол тоо бичихгүй", "—", "Н", "part"],
+      ["Хөл хэсэг (Footer)", "Холбоо барих, сошиал холбоос", "—", "Н", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Үнэгүй урьдчилан харах (freemium preview) хийгдээгүй — /catalog/grades/:grade/chapters, /catalog/chapters/:id/preview endpoint бэлэн боловч UI байхгүй",
+    "Нууцлалын бодлого, үйлчилгээний нөхцөл хуудас байхгүй — насанд хүрээгүй хүүхдийн мэдээлэл цуглуулдаг тул заавал хэрэгтэй",
+    "404 (not-found) болон алдааны (error) хуудас байхгүй — Next.js-ийн өгөгдмөл англи хуудас гарна",
+    "SEO: robots.txt, sitemap.xml, Open Graph зураг байхгүй",
+    "CentreInfo-ийн «__» тоонуудыг эзэн бодит тоогоор бөглөх",
+    "Сайтын гарчиг (metadata) «математик, нийгэм судлалын бэлтгэл» гэж бичигдсэн — эзний §3.6 дүрэмтэй тулгаж шалгах",
+  ],
+  accept: [
+    "3G сүлжээн дээр анхны харагдах байдал (LCP) 2.5 секундээс бага",
+    "375px өргөнтэй утсан дээр хэвтээ гүйлт байхгүй",
+    "Бүх холбоос ажиллана, 404 гарахгүй",
+  ],
+},
+{
+  id: "auth", grp: "Нийтийн хэсэг", t: "Бүртгэл, нэвтрэлт, нууц үг", st: "part", ver: "v1",
+  routes: ["/login", "/register", "/forgot-password", "/app/profile", "/app/password"], roles: ["Н", "бүгд"],
+  purpose: "Хэрэглэгчийг танина. Эзний дүрэм: анхны нууц үг = утасны дугаар. Нэвтрэх талбар утас, имэйл, нэвтрэх нэрийн аль нэгийг хүлээн авна.",
+  screens: [
+    { t: "Нэвтрэх (/login)", actions: [
+      ["Нэвтрэх нэр талбар", "Утас / имэйл / нэр. Сүүлд ашигласныг санана (localStorage login_identifier)", "—", "Н", "ok"],
+      ["«Нууц үг харах» товч", "Нууцалсан 8 цифрийг ил харуулна. Өгөгдмөл хаалттай", "—", "Н", "ok"],
+      ["«Юу бичих вэ» тусламж (InfoHint)", "Нууц үг нь утасны дугаар гэдгийг тайлбарлана", "—", "Н", "ok"],
+      ["«Нэвтрэх»", "Токен авч эрхийн нүүр рүү шилжинэ (Сурагч → /app/student гэх мэт)", "POST /auth/login", "Н", "ok"],
+      ["«Нууц үгээ мэдэхгүй байна уу»", "/forgot-password руу", "—", "Н", "ok"],
+    ]},
+    { t: "Бүртгүүлэх (/register)", actions: [
+      ["«Та хэн бэ?» — 4 сонголт", "Танхимын сурагч / Онлайн сурагч / Зүгээр үзэх (худалдан авагч) / Эцэг эх", "—", "Н", "ok"],
+      ["Хичээл сонгох (SubjectPicker)", "Элсэлт нээлттэй хичээлүүдийг харуулна", "GET /enrollment-windows", "Н", "ok"],
+      ["«Бүртгүүлэх»", "Хэрэглэгч үүсгэнэ. Танхимын сурагч «зөвшөөрөл хүлээгч» болж багш баталгаажуулна", "POST /auth/register", "Н", "ok"],
+      ["«Буцах» (төрөл дахин сонгох)", "Сонгосон төрлийг цэвэрлэнэ", "—", "Н", "ok"],
+      ["Амжилтын дараах товч", "Эрхийн нүүр рүү шилжинэ", "—", "Н", "ok"],
+    ]},
+    { t: "Нууц үг сэргээх (/forgot-password)", actions: [
+      ["«Код авах»", "SMS эсвэл имэйлээр 6 оронтой код илгээнэ (HMAC хадгална)", "POST /auth/forgot-password", "Н", "part"],
+      ["«Дахин илгээх»", "Код дахин илгээнэ", "POST /auth/forgot-password", "Н", "part"],
+      ["Код + шинэ нууц үг → «Солих»", "Нууц үг солиод бүх сессийг таслана (passwordChangedAt)", "POST /auth/reset-password", "Н", "ok"],
+      ["«Код ирэхгүй байна уу?» тусламж", "Илгээлт бүтэлгүйтвэл өөрөө нээгдэж ажилтнаас код авах замыг заана", "—", "Н", "ok"],
+    ]},
+    { t: "Миний мэдээлэл (/app/profile)", actions: [
+      ["Профайл зураг солих", "Зураг байршуулна", "POST /auth/me/avatar", "бүгд", "part"],
+      ["Мэдээлэл харах (нэр, утас, имэйл)", "Зөвхөн харах", "GET /auth/me", "бүгд", "ok"],
+      ["Нууц үг солих", "Хуучин + шинэ нууц үг", "POST /auth/change-password", "бүгд", "ok"],
+      ["Цэс: «Гарах»", "Токен устгаад /login руу", "—", "бүгд", "ok"],
+    ]},
+  ],
+  gaps: [
+    "SMTP тохируулаагүй (EMAIL_SMTP_*) — имэйлээр код илгээх чимээгүй алгасагдана. SMS үйлчилгээ үзүүлэгч сонгогдоогүй",
+    "/app/password — /app/profile-тэй давхардсан, цэсгүй хуудас. Устгах эсвэл /app/profile руу чиглүүлэх",
+    "Нэвтрэх оролдлогын хязгаар зөвхөн ерөнхий (300/мин). Нэвтрэлт, код шалгах маршрутад тусгай хязгаар, түр түгжих шаардлагатай — нууц үг таамаглахад хялбар тул",
+    "Токен localStorage-д, 7 хоногийн хугацаатай, refresh байхгүй. XSS эрсдэл — httpOnly cookie эсвэл богино токен + refresh-ийг судлах",
+    "«Бүх төхөөрөмжөөс гарах» товч байхгүй",
+    "mustChangePassword талбар бэлэн боловч идэвхгүй (эзний шийдвэрээр хойшлуулсан)",
+  ],
+  accept: [
+    "Буруу нууц үг 5 удаа оруулбал 15 минут түгжинэ, монголоор ойлгомжтой мессеж гарна",
+    "Код 10 минутын дотор хүчинтэй, нэг удаа ашиглагдана",
+  ],
+},
+{
+  id: "shell", grp: "Нийтийн хэсэг", t: "Апп бүрхүүл ба навигаци", st: "part", ver: "v1",
+  routes: ["/app/*"], roles: ["бүгд"],
+  purpose: "Эрх бүрт тохирсон цэс (nav-data.ts), гар утсанд зориулсан шургуулга цэс, харанхуй/цайвар горим, сүлжээ тасрах үед доод тууз.",
+  screens: [
+    { t: "Хажуугийн цэс (Sidebar)", actions: [
+      ["Нүүр холбоос", "Эрх бүрийн самбар: Сурагч → Миний самбар, Багш → Багшийн самбар, Админ → Удирдлага, ХА → Миний эрхүүд, ЭЭ → Хүүхдийн явц", "—", "бүгд", "ok"],
+      ["Бүлгүүд: Сургалт / Анги / Удирдлага / Хувийн", "Эрхээр шүүсэн холбоосууд", "—", "бүгд", "ok"],
+      ["Гар утсан дээр цэс нээх/хаах", "Шургуулга цэс", "—", "бүгд", "ok"],
+      ["Горим солих (ThemeToggle)", "Цайвар / харанхуй", "—", "бүгд", "ok"],
+      ["«Гарах»", "Сесс дуусгана", "—", "бүгд", "ok"],
+      ["Сүлжээний тууз (ConnectionStatus)", "Интернэт тасрахад доор анхааруулга", "—", "бүгд", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Цэсэнд ороогүй 8 хуудас: /app/admin/classrooms, /app/admin/finance, /app/admin/store, /app/insights, /app/practice, /app/store, /app/tuition, /app/password",
+    "Эвдэрсэн холбоос: DashboardGreeting → /app/homework (хуудас байхгүй); дэлгүүр → /auth/login (хуудас байхгүй, /login байх ёстой)",
+    "Гадны багш (ГБ) эрхийн цэс байхгүй — /app/groups руу зөвхөн шууд холбоосоор ордог",
+    "Мэдэгдлийн төв (хонх) байхгүй — зарлал, төлбөрийн сануулга, шалгалт оноосон мэдээ апп дотор очихгүй",
+    "Глобал хайлт байхгүй (сурагч, бодлого, анги)",
+  ],
+  accept: ["Цэсний холбоос бүр 200 буцаана", "Эрхгүй хуудас руу орвол эрхийн нүүр рүү шилжүүлж ойлгомжтой мессеж гаргана"],
+},
+{
+  id: "student-home", grp: "Сурагч", t: "Сурагчийн самбар", st: "part", ver: "v1",
+  routes: ["/app/student"], roles: ["С"],
+  purpose: "Сурагч нэвтэрмэгц «өнөөдөр юу хийх вэ» гэдгийг нэг дор харна.",
+  screens: [
+    { t: "Миний самбар", actions: [
+      ["Мэндчилгээ + профайл зураг солих", "Зураг байршуулна", "GET /auth/me, POST /auth/me/avatar", "С", "ok"],
+      ["Мэндчилгээн дээрх даалгаврын холбоос", "/app/homework руу — ХУУДАС БАЙХГҮЙ", "—", "С", "bug"],
+      ["Зарлал (3 ширхэг) + «Бүгдийг харах / Бага харуулах»", "Багшийн зарлалууд", "GET /announcements", "С", "ok"],
+      ["Оройн тэмдэглэгээ (EveningMarking)", "Өнөөдөр бодсон бодлого бүрт 4 төлөвөөс сонгоно: бүрэн ойлгосон / алдаад зассан / алдсан / буудсан", "GET /me/todo-marking, POST /attempts/evening", "С", "ok"],
+      ["Гэрийн даалгавар (HomeworkList)", "Даалгавар харах, зураг хавсаргаж илгээх", "GET /assignments/my, POST /assignments/:id/submit, POST /uploads", "С", "part"],
+      ["Миний сул талууд", "Шошго бүрийн амжилтын хувь", "GET /attempts/my-stats", "С", "ok"],
+      ["Шалгалтын дүн", "Сүүлийн дүнгүүд", "GET /tests/my-results", "С", "ok"],
+      ["Сүүлийн ирц", "Ирсэн, хоцорсон, тасалсан", "GET /attendance/my", "С", "ok"],
+      ["Идэвхийн heatmap + «Өмнөх/Дараагийн жил»", "GitHub маягийн өдөр тутмын идэвх, дараалсан өдөр (streak)", "GET /activity/streak", "С", "ok"],
+    ]},
+    { t: "Миний төлбөр (/app/student/payments)", actions: [
+      ["Төлбөрийн түүх", "Хүлээгдэж буй, баталгаажсан, татгалзсан, буцаасан", "GET /payments/my", "С", "ok"],
+      ["«Дахин оролдох»", "Алдааны дараа дахин ачаална", "GET /payments/my", "С", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Гэрийн даалгаврын жагсаалт үргэлж хоосон байх магадлалтай: багш Assignment үүсгэх UI байхгүй (POST /classrooms/:id/assignments ашиглагдаагүй). Багшийн самбар өөр загвар (DailyHomeworkMark) ашигладаг. Аль нэгийг сонгох шийдвэр хэрэгтэй",
+    "«Хэдий хүртэл төлсөн» харагдахгүй — GET /tuition/paid-until/my бэлэн боловч UI байхгүй",
+    "Өнөөдрийн хичээл (хуваарь + сэдэв) самбар дээр харагдахгүй — /app/schedule руу орох шаардлагатай",
+    "Бодлого санал болгох (/app/practice) цэс ба самбарт холбоосгүй",
+  ],
+  accept: ["Самбар 3G дээр 2 секундэд skeleton-оор, 4 секундэд бүрэн гарна", "Хэсэг бүр бие даан алдаа харуулж, «Дахин оролдох» товчтой"],
+},
+{
+  id: "learn", grp: "Сурагч", t: "Хичээл үзэх (онол)", st: "part", ver: "v1",
+  routes: ["/app/learn", "/app/learn/[chapterId]"], roles: ["С", "ХА"],
+  purpose: "Бүлэг сэдэв бүрийн онолын хураангуй + видеог алхамчилж үзүүлэх.",
+  screens: [
+    { t: "Бүлгийн жагсаалт (/app/learn)", actions: [
+      ["Хичээл сонгох", "Математик / Нийгэм", "GET /lessons/chapters?subject", "С ХА", "ok"],
+      ["«Үргэлжлүүлэх»", "Сүүлд үзсэн бүлэг рүү (continueStore)", "—", "С ХА", "ok"],
+      ["Бүлэг сонгох", "/app/learn/[id] руу", "—", "С ХА", "ok"],
+    ]},
+    { t: "Бүлэг (/app/learn/[chapterId])", actions: [
+      ["Алхмын зам (StepRail)", "Онолын блок, видео, дасгал хооронд шилжих", "GET /lessons/:chapterId", "С ХА", "part"],
+      ["Видео тоглуулах", "LessonVideoPlayer", "—", "С ХА", "ok"],
+      ["«Уншсан гэж тэмдэглэх»", "Явц хадгална", "POST /lessons/:chapterId/progress", "С ХА", "ok"],
+      ["Үйл явдал бүртгэх", "Аналитикт", "POST /events", "С ХА", "ok"],
+    ]},
+  ],
+  gaps: [
+    "lesson/api.ts нь api()-г тойрч түүхий fetch ашигладаг — retry, timeout, монгол алдааны мессеж алга",
+    "Эрхгүй (pass-гүй) контентыг «түгжээтэй» харуулж худалдан авах руу хөтлөх урсгал тодорхойгүй",
+    "Бүлэг дууссаны дараа «Дараагийн бүлэг», «Энэ сэдвийн тест өгөх» товч байхгүй",
+  ],
+  accept: ["Бүх томьёо LaTeX-ээр (MathText) гарна"],
+},
+{
+  id: "library", grp: "Сурагч", t: "Бодлогын сан", st: "part", ver: "v1",
+  routes: ["/app/library"], roles: ["С", "ХА", "Б", "Б+", "А"],
+  purpose: "~6125 бодлогыг ном → бүлэг → бодлогоор үзэх. Багш нар ангилал, агуулгыг эндээс засна.",
+  screens: [
+    { t: "Бодлогын сан", actions: [
+      ["Хичээл, ном сонгох", "Номын жагсаалт", "GET /books?subject", "бүгд", "ok"],
+      ["Бүлэг нээх", "Бүлгийн бодлогууд", "GET /chapters?bookId, GET /chapters/:id/problems", "бүгд", "part"],
+      ["Таб: Сэдэв / Тест / Бодлого", "Харагдах байдлыг солино", "—", "бүгд", "ok"],
+      ["Бодлогын карт: Томьёо, Арга, Тодорхойлох муж, Тэмдгийн дүрэм, Түгээмэл алдаа", "Бодлогын шинжилгээ (ProblemAnalysis)", "—", "Б Б+ А", "ok"],
+      ["«Засах» → ProblemClassifyEditor", "Таб: Ангилал / Агуулга засах", "GET /classification/problems/:id", "Б Б+ А", "ok"],
+      ["Засварлагч: «+ Сонголт нэмэх», «Зөв хариу болгох», хасах", "Сонголтуудыг бүхэлд нь дахин бичнэ", "PUT /classification/problems/:id/choices", "Б Б+ А", "ok"],
+      ["Засварлагч: шошго сонгох", "Шошгыг бүхэлд нь дахин тогтооно", "PUT /classification/problems/:id/tags", "Б Б+ А", "ok"],
+      ["Засварлагч: ангилал нэмэх / нэр солих", "Нэр солиход холбоотой бүх бодлогод тусна", "POST/PATCH /classification/categories", "Б Б+ А", "ok"],
+      ["Засварлагч: агуулга засах", "Текст, зураг", "PATCH /problems/:id", "Б+ А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "library/page.tsx түүхий fetch ашигладаг (api()-г тойрсон)",
+    "Текстээр, шошгоор, хүндрэлээр хайх, шүүх боломж байхгүй",
+    "1913/1916 бодлого placeholder сонголттой (A–E) — жинхэнэ хувилбарууд текст дотор",
+    "13 бодлого REVIEW төлөвтэй, 8 шалгалтын бодлого сэргээгдээгүй",
+    "Зураг alt текст талбар байхгүй (ProblemStudentPreview TODO)",
+  ],
+  accept: ["Сурагчид зөв хариу хэзээ ч харагдахгүй (API түвшинд хасна)"],
+},
+{
+  id: "videos", grp: "Сурагч", t: "Онлайн (видео) хичээл", st: "part", ver: "v1",
+  routes: ["/app/videos"], roles: ["С", "ХА", "Б", "Б+", "А"],
+  purpose: "Бүлэг сэдэвт холбосон бичлэгүүд.",
+  screens: [
+    { t: "Видео", actions: [
+      ["Бүлэг сонгох", "Бичлэгтэй бүлгүүд", "GET /videos/chapters", "бүгд", "ok"],
+      ["Бичлэг үзэх", "Жагсаалт", "GET /videos?chapterId", "бүгд", "ok"],
+      ["«Нэмэх» (багш)", "Бичлэгийн холбоос нэмнэ", "POST /videos", "Б Б+ А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Видео хаана байрших вэ гэдэг шийдвэр алга (YouTube unlisted, Bunny, S3 гэх мэт). Эрхгүй хүн холбоосыг хуваалцах эрсдэл",
+    "Үзсэн хувь, үргэлжлүүлэх цэг хадгалагдахгүй",
+  ],
+  accept: [],
+},
+{
+  id: "exam", grp: "Сурагч", t: "Шалгалт өгөх", st: "ok", ver: "v1",
+  routes: ["/app/tests", "/app/tests/[id]"], roles: ["С"],
+  purpose: "Серверийн таймертай, autosave-тэй, шударга байдлын хяналттай онлайн шалгалт. Системийн хамгийн их ачаалалтай хэсэг.",
+  screens: [
+    { t: "Шалгалтын жагсаалт (/app/tests)", actions: [
+      ["«Үргэлжлүүлэх» тууз (ContinueBanner)", "Дуусаагүй шалгалт руу буцна", "GET /tests", "С", "ok"],
+      ["Сэдвээр бүлэглэсэн жагсаалт (TopicGroup)", "Өгсөн / өгөөгүй", "GET /tests?subject", "С", "ok"],
+      ["«Цааш харуулах»", "Хуудаслалт", "—", "С", "ok"],
+    ]},
+    { t: "Эхлэхийн өмнө (ExamIntro)", actions: [
+      ["Бодлогын тоо, хугацаа, нийт оноо", "Мэдээлэл", "GET /tests/:id", "С", "ok"],
+      ["Сүлжээ шалгах", "Холболтыг туршина", "—", "С", "ok"],
+      ["Бэлтгэлийн жагсаалт (гараар тэмдэглэх)", "Wifi, мэдэгдэл, цэнэг — вэб эдгээрийг хянаж чадахгүй тул сурагч өөрөө баталгаажуулна", "—", "С", "ok"],
+      ["«Тийм, эхлэх»", "Сесс үүсгэж дарааллыг хөлдөөнө", "POST /tests/:id/start", "С", "ok"],
+      ["«Буцах»", "Жагсаалт руу", "—", "С", "ok"],
+    ]},
+    { t: "Шалгалтын явц", actions: [
+      ["Толгой хэсэг: таймер, «Дуусгах»", "Үлдсэн хугацаа (серверээс)", "—", "С", "ok"],
+      ["Бодлогын навигатор (Esc-ээр хаана)", "Дугаар бүр рүү үсрэх, хариулсан эсэх", "—", "С", "ok"],
+      ["Хариулт сонгох / тоон гар (NumericKeypad)", "Цифр, сүүлийн цифр устгах, бүгдийг устгах", "—", "С", "ok"],
+      ["«Өмнөх» / «Дараах» / «Тойм харах»", "Бодлого хооронд шилжих", "—", "С", "ok"],
+      ["Autosave (1.2 сек debounce) + хадгалсан тэмдэг", "Хөтөч хаагдахад sendBeacon", "PATCH /tests/:id/session", "С", "ok"],
+      ["Heartbeat (20с ± 20%)", "Амьд байгааг илгээнэ", "POST /tests/:id/heartbeat", "С", "ok"],
+      ["Офлайн тууз", "Сүлжээ тасрахад анхааруулга", "—", "С", "ok"],
+      ["Шалгалтаас гарах анхааруулга → «Ойлголоо, үргэлжлүүлэх»", "1 дэх удаа анхааруулна, 2 дахь удаа автоматаар илгээнэ (2 сек-ээс богиныг тоохгүй)", "PATCH /tests/:id/session", "С", "ok"],
+    ]},
+    { t: "Илгээх ба үр дүн", actions: [
+      ["Тойм (PreSubmitReview): «Буцаж бодох» / «Шалгалт илгээх»", "Хариулаагүй бодлогыг харуулна", "—", "С", "ok"],
+      ["Баталгаажуулах цонх: «Хариултаа шалгах» / «Шалгалт илгээх»", "Эцэслэн илгээнэ", "POST /tests/:id/submit", "С", "ok"],
+      ["Үр дүн (ExamResult) → «Шалгалтын жагсаалт руу»", "Оноо, зөв/буруу", "GET /tests/:id/review", "С", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Үр дүнгийн дараа «Сул сэдвээ үзэх», «Ижил төрлийн бодлого бодох» холбоос байхгүй (UX аудит №8)",
+    "2000 зэрэг хэрэглэгчийн ачааллын тест (k6) хийгдээгүй",
+    "Render үнэгүй багц 15 минут ажилгүй бол унтдаг — шалгалтын эхэнд 60 секунд хүлээлт үүсэх эрсдэл",
+  ],
+  accept: ["Интернэт 30 секунд тасарсан ч хариулт алдагдахгүй", "Таймер серверийнх — хөтөч дахин ачаалсан ч хугацаа зөв"],
+},
+{
+  id: "tests-teacher", grp: "Багш", t: "Тест бүтээх, дүн оруулах", st: "part", ver: "v1",
+  routes: ["/app/tests/new", "/app/tests/[id]/results", "/app/tests"], roles: ["Б", "Б+", "А"],
+  purpose: "Сангаас бодлого сонгож тест үүсгэх (элсэлтийн шалгалтын 36+4 загвар), ангид оноох, цаасан шалгалтын дүнг гараар оруулах.",
+  screens: [
+    { t: "Шинэ тест (4 алхамт wizard)", actions: [
+      ["1. Үндсэн мэдээлэл", "Нэр, төрөл (ЭЕШ сорил гэх мэт), хичээл, хугацаа", "GET /classrooms", "Б Б+ А", "ok"],
+      ["«36+4 загвар ашиглах»", "Элсэлтийн шалгалтын бүтцээр автоматаар", "—", "Б Б+ А", "ok"],
+      ["2. Бодлого сонгох: бүлэг → бодлого, «Эхний 40», «Цэвэрлэх», урьдчилан харах", "ProblemPicker, ProblemPreviewModal", "GET /chapters, GET /chapters/:id/problems?take=100", "Б Б+ А", "ok"],
+      ["3. Оноо, дараалал: дээш/доош, хасах, харах", "SelectedProblemsList", "—", "Б Б+ А", "ok"],
+      ["4. Хэн үзэх вэ: анги сонгох", "Хариугүй бодлоготой бол ангид оноохыг хориглоно", "—", "Б Б+ А", "ok"],
+      ["«Шинэ тест үүсгэх»", "Тест хадгална", "POST /tests", "Б Б+ А", "ok"],
+    ]},
+    { t: "Дүн (/app/tests/[id]/results)", actions: [
+      ["Дүнгийн хүснэгт: баганаар эрэмбэлэх", "Оноо, хугацаа, шалгалтаас гарсан тоо", "GET /tests/:id/results", "Б Б+ А", "ok"],
+      ["«CSV татах»", "Хүснэгт татах", "—", "Б Б+ А", "part"],
+      ["Бөөн оноо оруулах: анги сонгох → ирцээр жагсаалт → оноо → «Оруулах»", "Цаасан шалгалтын дүн", "GET /classrooms/:id/attendance, POST /tests/:id/results", "Б Б+ А", "ok"],
+      ["Сурагч хайж ганцаар оруулах (StudentPicker)", "Нэрээр хайна", "GET /users/search", "Б Б+ А", "ok"],
+    ]},
+    { t: "Ангид тест хийснийг бүртгэх (Багшийн самбар → ClassDidTest)", actions: [
+      ["«Сангаас сонгох» / «Гараар бичих»", "Горим сонгох", "GET /tests, GET /books, GET /chapters", "Б Б+ А", "ok"],
+      ["«Бүртгэх»", "Анги өнөөдөр энэ тестийг хийсэн", "POST /classrooms/:id/did-test", "Б Б+ А", "ok"],
+      ["Хассан бодлого тэмдэглэх", "Сурагчийн оройн тэмдэглэгээнээс хасна", "POST /test-sessions/:id/excluded", "Б Б+ А", "ok"],
+      ["Устгах", "Бүртгэл устгах", "DELETE /test-sessions/:id", "Б Б+ А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Тест ЗАСАХ боломж байхгүй — PATCH /tests/:id endpoint огт алга. Алдаа гарвал устгаад дахин үүсгэх шаардлагатай",
+    "Ноорог хадгалах, «Өмнөх тестээс хуулах» байхгүй (UX аудит №4)",
+    "«⬇ CSV татах» товчинд unicode сум глиф — эзний дүрэм №2 зөрчил, lucide дүрсээр солих",
+    "Эцэг эх дүнтэй танилцсаныг харах (GET /tests/:id/acknowledgements) UI байхгүй",
+    "PDF-ээр тест оруулах (Багш+) — SPEC §13-т байсан, хийгдээгүй",
+  ],
+  accept: ["Тест үүсгэхэд 10-аас бага алхам", "Хариугүй бодлоготой тестийг ангид оноохыг сервер хориглоно"],
+},
+{
+  id: "practice", grp: "Сурагч", t: "Бодлого санал болгох (адаптив дасгал)", st: "part", ver: "v1.1",
+  routes: ["/app/practice"], roles: ["С"],
+  purpose: "Давтан сэргээх, хүссэн хүндрэл, холих, сул тал руу чиглэх зарчмаар дараагийн бодлогыг санал болгоно (recommend/scheduler.ts, 23 тест).",
+  screens: [
+    { t: "Дасгал", actions: [
+      ["Санал болгосон 10 бодлого", "Сэдвийн интервалаар", "GET /recommend/next?limit=10", "С", "part"],
+      ["Бодлого бодох цонх (AttemptModal) → хариулах / «Цуцлах»", "Оролдлого бүртгэнэ", "GET /problems/:id, POST /recommend/attempt", "С", "part"],
+    ]},
+  ],
+  gaps: ["Цэс, самбарт холбоосгүй — сурагч олж чадахгүй", "Нүдээр шалгаагүй (STATUS §9.2)"],
+  accept: [],
+},
+{
+  id: "goals", grp: "Сурагч", t: "Зорилго ба идэвх", st: "ok", ver: "v1",
+  routes: ["/app/goals"], roles: ["С"],
+  purpose: "Сурагч өөрөө зорилго тавьж биелэлтээ хянана.",
+  screens: [
+    { t: "Миний зорилго", actions: [
+      ["Зорилго нэмэх", "Гарчиг, тайлбар, зорилтот огноо", "POST /goals", "С", "ok"],
+      ["«Засах» → «Хадгалах» / болих", "Засна", "PATCH /goals/:id", "С", "ok"],
+      ["«Биелсэн»", "Төлөв DONE", "PATCH /goals/:id", "С", "ok"],
+      ["«Устгах»", "Устгана", "DELETE /goals/:id", "С", "ok"],
+    ]},
+  ],
+  gaps: ["Зорилгыг элсэлтийн шалгалтын зорилтот оноотой, сэдвийн эзэмшилтэй холбох (v1.1)", "Streak хөлдөөх (StreakFreeze) загвар бий, UI тодорхойгүй"],
+  accept: [],
+},
+{
+  id: "teacher-home", grp: "Багш", t: "Багшийн самбар", st: "part", ver: "v1",
+  routes: ["/app/teacher"], roles: ["Б", "Б+", "А"],
+  purpose: "Анги өмнө зогсоод утсаараа ирц, даалгаврыг хурдан бүртгэх гол дэлгэц.",
+  screens: [
+    { t: "Толгой хэсэг", actions: [
+      ["Анги сонгох (ClassroomSelect)", "Багш зөвхөн өөрийн ангиа, Багш+ өөрийн + эзэмшсэн, Админ бүгдийг", "GET /classrooms", "Б Б+ А", "ok"],
+      ["Огноо: «Өмнөх өдөр» / «Өнөөдөр» / «Дараагийн өдөр»", "Бүх хэсгийн огноо солигдоно", "—", "Б Б+ А", "ok"],
+      ["«Дахин ачаалах»", "Хуудсыг бүхэлд нь дахин ачаална (window.location.reload)", "—", "Б Б+ А", "part"],
+    ]},
+    { t: "Хяналт ба хураангуй", actions: [
+      ["Хяналт (MonitoringSection)", "Ирц + даалгаврын нэгдсэн зураг", "GET /classrooms/:id/attendance, /homework-marks", "Б Б+ А", "ok"],
+      ["Өдрийн хураангуй (SummarySection)", "Ангийн өдрийн дүн", "GET /classrooms/:id/daily-summary", "Б Б+ А", "ok"],
+      ["Анхаарах сурагчид (AttentionSection)", "Байнга сул, хоцрогдолтой", "GET /classrooms/:id/attention", "Б Б+ А", "ok"],
+      ["Ангид ороогүй сурагчид → «Ангид оруулах»", "Элсүүлнэ", "GET /classrooms/unassigned-students, POST /classrooms/:id/enroll", "Б+ А", "ok"],
+      ["Эцэг эхийн хүсэлт → «Батлах» / «Татгалзах»", "Эцэг эх-хүүхдийн холболт", "GET /parent/links/pending, POST /parent/links/:id/verify|reject", "Б+ А", "ok"],
+    ]},
+    { t: "Ирц ба даалгавар", actions: [
+      ["Ирц: Ирсэн / Хоцорсон (5–10, 10–30, 30–60 мин, 1 цагаас дээш) / Тасалсан / Чөлөөтэй", "Сурагч бүрт нэг товшилт", "POST /classrooms/:id/attendance", "Б Б+ А", "ok"],
+      ["Ирцийн түүх", "Хугацааны мужид хоцролт, тасалалт", "GET /classrooms/:id/attendance/history", "Б Б+ А", "ok"],
+      ["Гэрийн даалгавар: Хийсэн / Дутуу / Хийгээгүй", "Өдрийн тэмдэглэгээ (DailyHomeworkMark)", "GET/PATCH /classrooms/:id/homework-marks", "Б Б+ А", "ok"],
+      ["Зарлал бичих → «Зарлах», устгах", "Анги эсвэл бүх сурагчид", "POST /announcements, DELETE /announcements/:id", "Б Б+ А", "ok"],
+      ["Өнгөний шошго (ColorTagControl)", "Сурагчийн түвшин, хандлага — зөвхөн багш нарт", "PUT/DELETE /students/:id/color-tag", "Б Б+ А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Онлайнаар илгээсэн даалгаврыг шалгах (Батлах / Буцаах / Ангид шалгасан) компонентууд бэлэн (TeacherHomeworkCalendar, TeacherHomeworkTestCard, TeacherHomeworkFrequencyPanel) боловч ЯМАР Ч хуудсанд холбогдоогүй",
+    "Сүүлд сонгосон ангийг санахгүй (UX аудит №3)",
+    "Зарлал засах (PATCH /announcements/:id) UI байхгүй",
+    "Ангийн өнгөний шошгыг нэг дор харах (GET /classrooms/:id/color-tags) ашиглагдаагүй",
+  ],
+  accept: ["30 сурагчтай ангийн ирцийг 60 секундэд бүртгэнэ", "Хадгалах товч шаардлагагүй — товшмогц хадгална"],
+},
+{
+  id: "homework", grp: "Багш", t: "Гэрийн даалгавар — хоёр загварын зөрчил", st: "bug", ver: "v1",
+  routes: ["/app/student", "/app/teacher"], roles: ["С", "Б", "Б+", "А"],
+  purpose: "SPEC §10: Хийгээгүй → Илгээсэн → Хийсэн (онлайн эсвэл ангид шалгасан) / Буцаасан. Одоо кодод хоёр зэрэгцээ загвар байна.",
+  screens: [
+    { t: "Загвар А — Assignment + Submission (онлайн илгээлт)", actions: [
+      ["Багш даалгавар үүсгэх", "UI БАЙХГҮЙ", "POST /classrooms/:id/assignments", "Б Б+ А", "none"],
+      ["Сурагч жагсаалт харах, зураг илгээх", "HomeworkList, HomeworkCard", "GET /assignments/my, POST /assignments/:id/submit", "С", "part"],
+      ["Багш шалгах: Батлах / Буцаах / Ангид шалгасан", "Компонент бэлэн, хуудсанд холбоогүй", "POST /assignments/:id/review", "Б Б+ А", "none"],
+      ["Засах, устгах, статистик", "UI байхгүй", "PATCH/DELETE /assignments/:id, GET .../stats", "Б Б+ А", "none"],
+    ]},
+    { t: "Загвар Б — DailyHomeworkMark (багшийн өдрийн тэмдэглэгээ)", actions: [
+      ["Хийсэн / Дутуу / Хийгээгүй", "Багшийн самбар дээр ажилладаг", "PATCH /classrooms/:id/homework-marks/:studentId", "Б Б+ А", "ok"],
+      ["Сурагчийн явцад харагдах", "ClassProgressTab", "GET /classrooms/:id/homework-marks", "Б Б+ А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "ШИЙДВЭР: танхимын сурагчид Б загвар, онлайн сурагчид А загвар гэж хуваах уу, эсвэл нэгтгэх үү. Санал: Б загварыг үндсэн болгож, А загварыг «зураг илгээх» нэмэлт болгон Б-тэй холбох",
+    "Эцэг эх даалгаврыг аль загвараас харж байгааг шалгах",
+  ],
+  accept: [],
+},
+{
+  id: "schedule", grp: "Анги", t: "Хуваарь ба хуанли", st: "ok", ver: "v1",
+  routes: ["/app/schedule"], roles: ["бүгд"],
+  purpose: "77 мөрийн давтагдах хуваарь, 21 анги, 9 танхим. Эх сурвалж: api/prisma/schedule-plan.cjs. Гараг: эзэн 1=Даваа, өгөгдлийн сан 0=Ням.",
+  screens: [
+    { t: "Сурагч, эцэг эх, худалдан авагч", actions: [
+      ["Ойрын өдрүүд (UpcomingAgenda)", "Амралт хассан бодит хичээлийн өдрүүд", "GET /schedule/days, GET /schedule/me", "С ЭЭ ХА", "ok"],
+      ["Ангийн долоо хоногийн хуваарь", "Анги сонгох", "GET /schedule/classroom/:id", "С Б Б+", "ok"],
+    ]},
+    { t: "Багш", actions: [["Миний заадаг хичээлүүд", "Өөрийн хуваарь", "GET /schedule/me", "Б", "ok"]] },
+    { t: "Багш+ / Админ — хуваарийн засвар (StaffScheduleBuilder)", actions: [
+      ["Ерөнхий хуваарь (PatternOverview)", "Баруун 4 / Зүүн 4 бүс × 4 давтамжийн багана. Өнгө = анги, дүрс = танхим", "GET /schedule", "Б+ А", "ok"],
+      ["Долоо хоногийн төлөвлөгөө (WeekBuilder): өмнөх/энэ/дараагийн долоо хоног, «Сэдэв зоох»", "Огноот, сэдэвтэй", "GET /schedule/week", "Б+ А", "ok"],
+      ["Давтамж үүсгэх (PatternBuilder) → «N хичээл үүсгэх»", "Бөөнөөр", "POST /schedule/bulk", "Б+ А", "ok"],
+      ["Мөрийн үйлдэл: Сэдэв / Зөөх / Танхим солих / Цуцлах (2 алхам)", "Зөвхөн энэ өдөр — exception", "PATCH|DELETE /schedule/:id/topic, POST /schedule/:id/exceptions", "Б+ А", "ok"],
+      ["«Энэ ба цаашдын бүх» → «Өөрчлөх»", "Өнгөрсөн бүртгэлийг хөндөхгүйгээр хуваана", "POST /schedule/:id/split", "Б+ А", "ok"],
+      ["Бүх давтамжийг устгах (улаан, 2 алхам)", "Устгана", "DELETE /schedule/:id", "Б+ А", "ok"],
+      ["Хуваарийн хүснэгт (ScheduleAdmin): Засах / Устгах", "CRUD", "POST|PATCH|DELETE /schedule", "Б+ А", "ok"],
+      ["Сургалтын хуанли (CalendarAdmin): амралт, завсар, ажлын өдөр", "Нэмэх, засах, «Тийм, устга»", "POST|PATCH|DELETE /calendar", "А", "ok"],
+      ["Багшийн ажлын өдөр: долоо хоног шилжих, «Ажиллана / Ажиллахгүй»", "Онцгой өдөр", "GET|PUT /schedule/teacher-workdays, POST .../exception", "Б+ А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Онцгой өдрийг (exception) буцаах UI байхгүй — DELETE /schedule/:id/exceptions/:exceptionId ашиглагдаагүй",
+    "Хичээл цуцлагдах, зөөгдөхөд сурагч, эцэг эхэд мэдэгдэл очихгүй",
+    "Утасны хуанли руу экспорт (ICS) байхгүй (v1.1)",
+  ],
+  accept: ["Гараг андуурахгүй — Даваа гаригийн хичээл Даваа гаригт харагдана (тесттэй)"],
+},
+{
+  id: "planner", grp: "Анги", t: "Ажилтны төлөвлөгч", st: "ok", ver: "v1",
+  routes: ["/app/planner"], roles: ["Б", "Б+", "А"],
+  purpose: "Багш нарын жилийн ажлын төлөвлөлт, ачаалал.",
+  screens: [
+    { t: "Төлөвлөгч", actions: [
+      ["«Шинэ даалгавар» (TaskFormModal)", "Нэр, хугацаа, эрэмбэ, хариуцагч", "POST /tasks", "Б+ А", "ok"],
+      ["Картын цэс: «+ Дэд даалгавар», «Засах», «Устгах»", "", "PATCH|DELETE /tasks/:id", "Б Б+ А", "ok"],
+      ["Цагийн шугам / Ачаалал: өмнөх/дараагийн жил", "TimelineView, WorkloadView", "GET /tasks/workload", "Б Б+ А", "ok"],
+      ["Ажилтны жагсаалт", "Хариуцагч сонгоход", "GET /tasks/staff-directory", "Б Б+ А", "ok"],
+    ]},
+  ],
+  gaps: ["Хариуцагч нэмэх/хасах тусдаа endpoint ашиглагдаагүй (форм дотор шийдсэн эсэхийг шалгах)", "Хугацаа дөхөхөд сануулга байхгүй"],
+  accept: [],
+},
+{
+  id: "students-admin", grp: "Удирдлага", t: "Сурагчдын бүртгэл", st: "part", ver: "v1",
+  routes: ["/app/admin/students", "/app/admin/students/[id]", "/app/students/[id]"], roles: ["Б", "Б+", "А"],
+  purpose: "Сурагчийн бүрэн профайл, төлбөр, тэмдэглэл, явц.",
+  screens: [
+    { t: "Сурагчдын жагсаалт", actions: [
+      ["Хайх, шүүх («Ангид ороогүй», төлбөр дутуу)", "", "GET /users?role=STUDENT, GET /classrooms/unassigned-students, GET /payments/outstanding", "Б+ А", "ok"],
+      ["«Шүүлтүүр цэвэрлэх», хуудаслалт, «Дахин ачаалах»", "", "—", "Б+ А", "ok"],
+    ]},
+    { t: "Сурагчийн дэлгэрэнгүй", actions: [
+      ["«Мэдээлэл засах» → хадгалах / «Болих»", "Овог, нэр, утас, имэйл, сургууль, анги, секц, салбар, аав/ээжийн утас, тэмдэглэл, төлбөрийн багц, дүн", "GET /users/:id, PATCH /users/:id/profile", "Б+ А", "ok"],
+      ["Төлбөрийн түүх", "", "GET /payments/student/:id", "Б+ А", "ok"],
+      ["Тэмдэглэл: нэмэх, засах, устгах", "Зөвхөн ажилтанд харагдана", "GET|POST /students/:id/notes, PATCH|DELETE /notes/:id", "Б Б+ А", "ok"],
+      ["«Нууц үг сэргээх код илгээх» (2 алхам)", "Сурагчийн утас руу", "POST /users/:id/send-password-reset", "Б+ А", "ok"],
+    ]},
+    { t: "Сурагчийн явц (/app/students/[id])", actions: [
+      ["Ангийн явц: сар сар ирц, даалгавар", "ClassProgressTab", "GET /users/:id", "Б Б+ А", "ok"],
+      ["Бие даасан явц: шалгалтын дүн", "IndependentProgressTab", "", "Б Б+ А", "ok"],
+      ["«Буцах»", "", "—", "Б Б+ А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Сурагчийг бөөнөөр импортлох UI байхгүй (зөвхөн скрипт)",
+    "Сурагчийг архивлах (гарсан) боломж байхгүй — archived талбар алга",
+    "Сурагчийг нэг ангиас нөгөөд шилжүүлэх нэг товч байхгүй (хасах endpoint UI-гүй)",
+    "CSV/Excel экспорт байхгүй",
+    "Давхардсан бүртгэл (нэг утас хоёр удаа) илрүүлэх, нэгтгэх байхгүй",
+    "Шинэ формат сурагчийн код (B27120001) прод дээр backfill хийгдээгүй",
+  ],
+  accept: [],
+},
+{
+  id: "classrooms", grp: "Удирдлага", t: "Анги удирдлага", st: "part", ver: "v1",
+  routes: ["/app/admin", "/app/admin/classrooms"], roles: ["Б+", "А"],
+  purpose: "Анги үүсгэх, засах, архивлах (баталгаажуулах кодтой), сурагч элсүүлэх/хасах.",
+  screens: [
+    { t: "Удирдлага → «Шинэ анги»", actions: [["Анги үүсгэх", "Нэр, төрөл (танхим/онлайн), анги, багш", "POST /classrooms", "А", "ok"]] },
+    { t: "Ангиуд (/app/admin/classrooms) — ЦЭСГҮЙ", actions: [
+      ["Жагсаалт", "", "GET /classrooms", "Б+ А", "part"],
+      ["Цэс → «Тарааж хаах» → баталгаажуулах", "Ангийг тараана", "POST /classrooms/:id/disband", "Б+ А", "part"],
+    ]},
+  ],
+  gaps: [
+    "Хуудас цэсгүй",
+    "Анги засах (PATCH /classrooms/:id), архивлах (DELETE), сурагч хасах (POST /classrooms/:id/remove-student) UI байхгүй",
+    "Ангийн дэлгэрэнгүй хуудас (сурагчид, хуваарь, багш, ирцийн хувь) байхгүй",
+  ],
+  accept: [],
+},
+{
+  id: "enrollment", grp: "Удирдлага", t: "Элсэлт ба хүсэлтүүд", st: "ok", ver: "v1",
+  routes: ["/app/admin/enrollment", "/app/admin/leads"], roles: ["Б+", "А"],
+  purpose: "Хичээл бүрт элсэлт нээх/хаах, шинэ бүртгэлийг зөвшөөрөх, хүсэлт (лид) удирдах.",
+  screens: [
+    { t: "Элсэлтийн удирдлага", actions: [
+      ["Таб: «Элсэлтийн цонх» / «Зөвшөөрөл хүлээгч»", "", "—", "Б+ А", "ok"],
+      ["Хичээлийн карт: танхим / онлайн / хоёулаа / хаах (баталгаатай)", "Сайт дээр шууд тусна", "GET|PATCH /enrollment-windows/:subject", "Б+ А", "ok"],
+      ["Бөөнөөр солих + «Буцаах»", "", "PATCH /enrollment-windows", "Б+ А", "ok"],
+      ["Зочинд хэрхэн харагдах (VisitorPreview)", "", "—", "Б+ А", "ok"],
+      ["Зөвшөөрөл хүлээгч сурагч → зөвшөөрөх", "", "GET /users/students/pending-approval, POST /users/students/:id/approve", "Б Б+ А", "ok"],
+      ["Ангид ороогүй сурагчид", "", "GET /classrooms/unassigned-students", "Б+ А", "ok"],
+    ]},
+    { t: "Хүсэлтүүд (лид)", actions: [
+      ["Хүсэлтийн жагсаалт, статус солих", "Шинэ → холбогдсон → элссэн / татгалзсан", "GET /leads, PATCH /leads/:id/status", "Б+ А", "ok"],
+    ]},
+  ],
+  gaps: ["Хүсэлт хаанаас ирэх нь тодорхойгүй — нүүрний маягтыг эзэн хассан (§3.7), POST /leads UI-гүй. Лид зөвхөн гараар орох уу?", "Хүлээлгийн жагсаалт (waitlist) байхгүй"],
+  accept: [],
+},
+{
+  id: "online", grp: "Удирдлага", t: "Онлайн сурагчийн хяналт", st: "part", ver: "v1.1",
+  routes: ["/app/online", "/app/online/[id]"], roles: ["Б", "Б+", "А"],
+  purpose: "Багшгүй онлайн сурагчдын явцыг дагах.",
+  screens: [
+    { t: "Онлайн сурагчид", actions: [
+      ["Жагсаалт", "", "GET /progress/online-students", "Б Б+ А", "ok"],
+      ["Сурагчийн дэлгэрэнгүй", "", "GET /progress/student/:id", "Б Б+ А", "ok"],
+      ["Тест оноох (AssignTestDialog)", "", "POST /progress/student/:id/assign-test", "Б+ А", "ok"],
+      ["Бүлгийн явц дахин эхлүүлэх (шалтгаантай)", "", "POST /progress/student/:id/reset-chapter", "Б+ А", "ok"],
+      ["Цагийн шугам: оролдлого засах / устгах", "", "GET .../timeline, PATCH|DELETE .../attempt/:attemptId", "Б+ А", "ok"],
+    ]},
+  ],
+  gaps: ["Цэсэнд байхгүй — зөвхөн өөр хуудаснаас холбоосоор"],
+  accept: [],
+},
+{
+  id: "content", grp: "Удирдлага", t: "Контент удирдлага", st: "ok", ver: "v1",
+  routes: ["/app/admin/content", "/app/admin/theory"], roles: ["Б", "Б+", "А"],
+  purpose: "Ном → бүлэг → бодлого, элсэлтийн шалгалтын мужууд, тест, видео, онолын блокууд.",
+  screens: [
+    { t: "Контент (6 таб)", actions: [
+      ["Ном: «+ Ном нэмэх», засах, устгах, «Устгагдсан», хичээлээр шүүх", "", "GET|POST|PATCH|DELETE /books", "Б+ А", "ok"],
+      ["Бүлэг: «+ Бүлэг нэмэх», дээш/доош зөөх, засах, устгах", "", "POST|PATCH|DELETE /chapters, PATCH /chapters/reorder", "Б+ А", "ok"],
+      ["Бодлого: «+ Бодлого нэмэх» (зураг, тоон хариу), устгах", "", "POST /problems, DELETE /problems/:id, POST /uploads", "Б Б+ А", "ok"],
+      ["Элсэлтийн шалгалтын муж: нэмэх, засах, устгах", "", "GET|POST|PATCH|DELETE /topics", "Б+ А", "ok"],
+      ["Тест: жагсаалт, устгах", "", "GET /tests, DELETE /tests/:id", "Б+ А", "ok"],
+      ["Видео: засах, устгах", "", "PATCH|DELETE /videos/:id", "Б+ А", "ok"],
+    ]},
+    { t: "Онолын агуулга", actions: [
+      ["Ном → бүлэг сонгох", "", "GET /books, GET /chapters, GET /lessons/:id", "Б Б+ А", "ok"],
+      ["«+ Шинэ блок нэмэх», засах, зураг хасах, «Болих»", "", "POST /lessons/:id/theory, PATCH /lessons/theory/:id", "Б Б+ А", "ok"],
+      ["Дээш/доош зөөх, устгах", "", "PATCH /lessons/:id/theory/reorder, DELETE /lessons/theory/:id", "Б Б+ А", "ok"],
+      ["Хадгалаагүй өөрчлөлтийн анхааруулга", "", "—", "Б Б+ А", "ok"],
+    ]},
+  ],
+  gaps: ["Бодлогыг бөөнөөр импортлох UI байхгүй (LaTeX импорт зөвхөн скрипт)", "Засварын түүх (version history) байхгүй", "Шошго, томьёоны лавлах (GET /tags, /formulas) UI-д ашиглагдаагүй"],
+  accept: [],
+},
+{
+  id: "payments", grp: "Мөнгө", t: "Төлбөр", st: "part", ver: "v1",
+  routes: ["/app/payments", "/app/student/payments", "checkout"], roles: ["С", "ХА", "Б+", "А"],
+  purpose: "Чөлөөт дүнгийн зарчим. QPay (автомат), дансны шилжүүлэг, бэлэн (гараар). Төлбөр бүр: хэн, хэд, ямар замаар, хэзээ, аль сар/эрх, төлөв.",
+  screens: [
+    { t: "Төлбөрийн удирдлага (Багш+ / Админ)", actions: [
+      ["Хүлээгдэж буй: «Баталгаажуулах» / «Татгалзах» / «Засах»", "Баталгаажуулахад эрх (UserPass) үүснэ", "GET /payments?status=PENDING, POST /payments/:id/confirm|reject, PATCH /payments/:id", "Б+ А", "ok"],
+      ["Бүх төлбөр", "", "GET /payments", "Б+ А", "ok"],
+      ["Сарын төлөв (төлсөн / төлөөгүй)", "", "GET /payments/months/:month", "Б+ А", "ok"],
+      ["Дутуу төлсөн (OutstandingPanel)", "Хөөцөлдөх жагсаалт", "GET /payments/outstanding", "Б+ А", "ok"],
+      ["Сурагчийн түүх: хайх → «Засах» / «Буцаах»", "Буцаахад эрх автоматаар цуцлагдана", "GET /payments/student/:id, POST /payments/:id/reverse", "Б+ А", "ok"],
+    ]},
+    { t: "Төлөх (Checkout)", actions: [
+      ["Төлбөрийн арга сонгох", "QPay / данс", "—", "С ХА", "ok"],
+      ["QPay: QR (компьютер) эсвэл банкны апп (утас)", "5 сек тутам шалгана, 5 минутын дараа зогсоно", "POST /payments, GET /payments/:id", "С ХА", "part"],
+      ["«Хуулах» (дансны дугаар, гүйлгээний утга)", "", "—", "С ХА", "ok"],
+      ["«Буцах / өөр арга сонгох», «Дахин оролдох»", "", "—", "С ХА", "ok"],
+    ]},
+  ],
+  gaps: [
+    "QPay merchant гэрээ, түлхүүр байхгүй — код бэлэн, ажиллахгүй",
+    "Төлбөрийн хугацаа дуусахаас 3 хоногийн өмнөх автомат сануулга — SMTP/SMS тохируулаагүй тул очихгүй",
+    "Е-баримт (НӨАТ-ын цахим баримт) олгох интеграци байхгүй — Монголд хуулиар шаардлагатай эсэхийг нягтлан бодогчтой шалгах",
+    "Төлбөрийн жагсаалтын CSV экспорт байхгүй (UX аудит №6)",
+    "Эцэг эх хүүхдийнхээ өмнөөс төлөх урсгал байхгүй",
+  ],
+  accept: ["Нэг гүйлгээ хоёр удаа бүртгэгдэхгүй (providerPaymentId unique)", "Баталгаажсан төлбөрийг засахгүй — эхлээд буцааж, дараа нь шинээр"],
+},
+{
+  id: "reconcile", grp: "Мөнгө", t: "Банкны хуулга тулгалт", st: "ok", ver: "v1",
+  routes: ["/app/admin/reconcile"], roles: ["Б+", "А"],
+  purpose: "Хаан банкны хуулгыг оруулж гүйлгээг сурагчтай тулгах. 391 гүйлгээнээс 92 авто-тулгалттай туршсан.",
+  screens: [
+    { t: "Банкны тулгалт", actions: [
+      ["Хуулга импортлох (ImportUploader)", "Хаан банкны жинхэнэ формат", "POST /reconcile/import", "Б+ А", "ok"],
+      ["Тоонууд: тулгаагүй / авто / гараар", "", "GET /reconcile/transactions?status", "Б+ А", "ok"],
+      ["Тулгаагүй жагсаалт, хуудаслалт", "", "GET /reconcile/transactions", "А", "ok"],
+      ["Сурагч хайж «Тулгах»", "", "GET /users/search, POST /reconcile/:id/match", "А", "ok"],
+      ["«Үл тоох»", "", "POST /reconcile/:id/ignore", "А", "ok"],
+    ]},
+  ],
+  gaps: ["Хуулгыг 7 хоног бүр гараар оруулах шаардлагатай", "Бусад банкны формат байхгүй", "Цэсэнд Багш+ харагдана, гэвч тулгах эрх зөвхөн Админд — эрхийг нэгтгэх"],
+  accept: [],
+},
+{
+  id: "passes", grp: "Мөнгө", t: "Эрх (pass) ба худалдан авагч", st: "part", ver: "v1",
+  routes: ["/app/buyer", "/app/admin"], roles: ["ХА", "А"],
+  purpose: "Нэр, хугацаа, хамрах хүрээтэй эрх. Хугацаа дуусахад хандалт автоматаар хаагдана.",
+  screens: [
+    { t: "Миний эрхүүд (/app/buyer)", actions: [
+      ["Идэвхтэй эрхүүд", "", "GET /me/passes", "ХА", "ok"],
+      ["Ном, дэлгүүрийн багц, сургалтын төлбөрийн шат", "", "GET /catalog/passes", "ХА", "ok"],
+      ["Багц сонгох → «Төлбөр төлөх»", "Checkout руу", "POST /payments", "ХА", "ok"],
+    ]},
+    { t: "Удирдлага → «Шинэ эрх (pass)»", actions: [["Эрх үүсгэх", "Нэр, хугацаа, хамрах хүрээ, үнэ", "POST /passes", "А", "ok"]] },
+  ],
+  gaps: [
+    "Эрх засах, устгах, гараар олгох (PATCH|DELETE /passes/:id, POST /passes/:id/grant) UI байхгүй",
+    "Эрх цуцлах (DELETE /me/passes/:id) UI байхгүй",
+    "Эрх дуусахаас өмнө сануулга байхгүй",
+    "Эрх (pass) ба дэлгүүр (store) — хоёр тусдаа худалдааны систем. Нэгтгэх шийдвэр хэрэгтэй",
+  ],
+  accept: [],
+},
+{
+  id: "store", grp: "Мөнгө", t: "Дэлгүүр", st: "bug", ver: "v1.1",
+  routes: ["/app/store", "/app/admin/store"], roles: ["С", "ХА", "А"],
+  purpose: "Нэг удаагийн шалгалт, ном тусад нь зарах.",
+  screens: [
+    { t: "Дэлгүүр (/app/store) — ЦЭСГҮЙ", actions: [
+      ["Бүтээгдэхүүний жагсаалт", "", "GET /store/products", "бүгд", "part"],
+      ["Худалдаж авах", "Нэвтрээгүй бол /auth/login руу — ХУУДАС БАЙХГҮЙ", "POST /store/purchase", "бүгд", "bug"],
+      ["Миний худалдан авалт", "", "GET /store/my-purchases", "бүгд", "part"],
+    ]},
+    { t: "Дэлгүүрийн удирдлага (/app/admin/store) — ЦЭСГҮЙ", actions: [
+      ["Бүтээгдэхүүн үүсгэх, үнэ тогтоох, идэвхгүй болгох", "", "POST /store/admin/products, .../price, .../deactivate", "Б+ А", "part"],
+      ["Худалдан авалтын түүх, орлого", "", "GET /store/admin/purchases, /revenue", "Б+ А", "ok"],
+    ]},
+  ],
+  gaps: ["Хоёр хуудас цэсгүй", "/auth/login холбоос эвдэрхий", "Үнэ тогтоох UI дутуу (STATUS §9.2)"],
+  accept: [],
+},
+{
+  id: "tuition", grp: "Мөнгө", t: "Сургалтын төлбөрийн буцаалт", st: "bug", ver: "v1",
+  routes: ["/app/tuition"], roles: ["Б+", "А"],
+  purpose: "Сурагч ангиас гарахад ХИЧЭЭЛИЙН өдрөөр (хуанлийн биш) буцаалт тооцох. Дугуйруулалт сурагчийн талд. Төлөв: Ноорог → Зөвшөөрөл хүлээж буй → Зөвшөөрсөн → Төлсөн / Цуцалсан.",
+  screens: [
+    { t: "Буцаалт (/app/tuition) — ЦЭСГҮЙ", actions: [
+      ["Тооцоолуур (RefundCalculator): сурагч, анги, гарсан огноо", "Түүхий fetch('/api/…') — прод дээр 404", "GET /tuition/refund/preview", "Б+ А", "bug"],
+      ["Буцаалт үүсгэх", "Дараа нь /app/tuition/refund/[id] руу шилжинэ — ХУУДАС БАЙХГҮЙ", "POST /tuition/refund", "Б+ А", "bug"],
+      ["Зөвшөөрөл хүсэх / зөвшөөрөх / төлсөн / цуцлах", "UI БАЙХГҮЙ", "POST /tuition/refund/:id/pending|approve|paid|cancel", "Б+ А", "none"],
+      ["Буцаалтын жагсаалт", "UI БАЙХГҮЙ", "GET /tuition/refunds", "Б+ А", "none"],
+    ]},
+  ],
+  gaps: [
+    "Модуль бүхэлдээ ажиллахгүй: түүхий fetch, байхгүй хуудас руу шилжилт, дагах UI алга",
+    "АЮУЛГҮЙ БАЙДАЛ: GET /tuition/refunds ба GET /tuition/refund/:id зөвхөн нэвтрэлт шалгадаг — сурагч бүх буцаалтыг (нэр, дүн) харж чадна",
+  ],
+  accept: ["Буцаалтын тооцооны алхам бүр харагдана", "Зөвхөн Админ зөвшөөрч, төлсөн гэж тэмдэглэнэ"],
+},
+{
+  id: "finance", grp: "Мөнгө", t: "Санхүүгийн тайлан", st: "bug", ver: "v1",
+  routes: ["/app/admin/finance"], roles: ["А"],
+  purpose: "Сарын орлого (сургалт, шалгалт, ном, бусад), зарлага (цалин, түрээс, коммунал, сурталчилгаа, материал, тоног төхөөрөмж).",
+  screens: [
+    { t: "Санхүү (/app/admin/finance) — ЦЭСГҮЙ", actions: [
+      ["«Өмнөх сар» / «Дараагийн сар»", "", "GET /finance/report?month", "А", "ok"],
+      ["Зарлага нэмэх → «Нэмэх»", "", "POST /finance/expenses", "А", "ok"],
+      ["Зарлага засах, устгах", "UI БАЙХГҮЙ", "PATCH|DELETE /finance/expenses/:id", "А", "none"],
+    ]},
+  ],
+  gaps: [
+    "АЮУЛГҮЙ БАЙДАЛ (P0): GET /finance/report ба GET /finance/expenses-д эрхийн шалгалт байхгүй — нэвтэрсэн сурагч цалин, орлогыг харж чадна",
+    "«Түрээс» ангилал «Ааш» гэж буруу бичигдсэн",
+    "Гараар бичсэн өнгө (bg-orange-600 гэх мэт) — дизайны гэрээ §6.1.3 зөрчил",
+    "Цуглуулалтын хувь тооцоогүй (TODO)",
+    "Хуудас цэсгүй",
+  ],
+  accept: [],
+},
+{
+  id: "sms", grp: "Харилцаа", t: "SMS ба мэдэгдэл", st: "part", ver: "v1",
+  routes: ["/app/sms"], roles: ["Б+", "А"],
+  purpose: "SMS өртөгтэй, буцаах боломжгүй. Кирилл текст 2 дахин үнэтэй (70 тэмдэгт/хэсэг). Илгээхийн өмнө хүний тоо, хэсэг, өртгийг харуулна.",
+  screens: [
+    { t: "Дугаар руу мессеж (4 таб)", actions: [
+      ["Төлөв: үйлчилгээ холбогдсон эсэх, энэ сарын тоо", "", "GET /sms/status", "Б+ А", "ok"],
+      ["Илгээх: хүлээн авагч сонгох, текст, ойролцоо өртөг", "Ганц эсвэл бөөн", "POST /sms/send, POST /sms/bulk, POST /sms/bulk/:id/start", "А", "part"],
+      ["Түүх: шүүлтүүр, «Дахин илгээх»", "", "GET /sms/messages, POST /sms/messages/:id/retry", "Б+ А", "ok"],
+      ["Загвар: жагсаалт, устгах", "", "GET /sms/templates, DELETE /sms/templates/:id", "А", "part"],
+    ]},
+  ],
+  gaps: [
+    "SMS үйлчилгээ үзүүлэгч, түлхүүр тохируулаагүй — эзэн SMS-ийг түр хойшлуулж имэйлээр явуулахаар шийдсэн",
+    "Загвар үүсгэх, засах UI байхгүй",
+    "Өртгийг клиент талд таамгаар (10₮/5₮) тооцдог — серверийн POST /sms/bulk/estimate ашиглагдаагүй",
+    "Бөөн илгээлтийн түүх (GET /sms/batches) UI-гүй",
+    "Имэйлийн суваг UI байхгүй, апп доторх мэдэгдэл байхгүй",
+  ],
+  accept: ["Илгээхийн өмнө хүний тоо, хэсгийн тоо, нийт өртөг харагдана"],
+},
+{
+  id: "parent", grp: "Харилцаа", t: "Эцэг эхийн самбар", st: "ok", ver: "v1",
+  routes: ["/app/parent"], roles: ["ЭЭ"],
+  purpose: "Хүүхдийн ирц, даалгавар, шалгалт, төлбөрийг харах. Холболтыг ажилтан баталгаажуулна.",
+  screens: [
+    { t: "Хүүхдийн явц", actions: [
+      ["Хүүхэд холбох: сурагчийн утасны дугаар → илгээх", "Багш+ баталгаажуулна", "POST /parent/links", "ЭЭ", "ok"],
+      ["Хүүхдийн карт: сүүлийн шалгалт, даалгавар, төлбөрийн төлөв, ирц", "", "GET /parent/children", "ЭЭ", "ok"],
+      ["Шалгалтын дүнтэй «Танилцсан» → OTP", "Баталгаажуулалт", "POST /parent/results/:id/ack/request|verify", "ЭЭ", "part"],
+      ["«Дахин оролдох»", "", "—", "ЭЭ", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Танилцсан баталгаажуулалтын OTP имэйлээр явдаг — SMTP тохируулаагүй тул очихгүй",
+    "Хүлээлтийн явц харагдахгүй («3–5 өдөр хүлээлт», UX аудит №7) — автомат шинэчлэл, хүлээлтийн мессеж",
+    "Эцэг эхэд мэдэгдэл (хүүхэд тасалсан, дүн гарсан, төлбөр дөхсөн) очихгүй",
+    "Хүүхдийн хуваарь: цэсэнд «Хуваарь» бий, хүүхдийн хуваарийг харуулах эсэхийг шалгах",
+  ],
+  accept: [],
+},
+{
+  id: "groups", grp: "Харилцаа", t: "Гадны багшийн бүлэг", st: "bug", ver: "v1.1",
+  routes: ["/app/groups", "/app/groups/[groupId]"], roles: ["ГБ", "С", "Б+", "А"],
+  purpose: "Өөр сургуулийн багш бүртгүүлж, бүлэг үүсгэн joinCode-оо сурагчдад тараана. Админ баталгаажуулах хүртэл хандахгүй.",
+  screens: [
+    { t: "Бүлгүүд", actions: [
+      ["Гадны багш бүртгүүлэх", "", "POST /teacher-groups/register", "Н", "ok"],
+      ["Бүлэг үүсгэх", "", "POST /teacher-groups/create", "ГБ", "ok"],
+      ["Сурагч кодоор нэгдэх", "", "POST /teacher-groups/join", "С", "ok"],
+      ["Кодыг «Копи хийх»", "", "—", "ГБ", "ok"],
+      ["Бүлгийн гишүүд → сурагч хасах", "", "GET /teacher-groups/:id, DELETE .../students/:studentId", "ГБ", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Админ/Багш+ гадны багшийг БАТАЛГААЖУУЛАХ UI байхгүй (GET /teacher-groups/unverified, PUT /teacher-groups/verify/:userId) — бүртгүүлсэн багш үүрд гацна",
+    "Бүлэг архивлах UI байхгүй",
+    "Цэсэнд байхгүй, гарын авлагын өнгө гараар бичсэн (bg-blue-600)",
+  ],
+  accept: [],
+},
+{
+  id: "analytics", grp: "Удирдлага", t: "Аналитик, шинжилгээ, аудит", st: "part", ver: "v1",
+  routes: ["/app/admin/analytics", "/app/insights", "/app/admin/audit"], roles: ["Б", "Б+", "А"],
+  purpose: "Ил тод статистик, бодлогын чанар, аудит лог.",
+  screens: [
+    { t: "Аналитик", actions: [
+      ["Хугацааны муж сонгох", "", "—", "Б+ А", "ok"],
+      ["KPI: DAU, WAU, MAU, дундаж сесс, идэвхтэй сурагч, бодсон бодлого", "", "GET /analytics/overview", "Б+ А", "ok"],
+      ["Өдөр тутмын идэвх, ангиудын харьцуулалт, хамгийн сул сэдэв", "", "GET /analytics/engagement|classrooms|topics", "Б+ А", "ok"],
+      ["Эрсдэлтэй сурагч: 7 / 14 / 30 хоног", "", "GET /analytics/at-risk?days", "Б+ А", "ok"],
+    ]},
+    { t: "Шинжилгээ (/app/insights) — ЦЭСГҮЙ", actions: [
+      ["Шалгалт сонгох, хамгийн хүнд/амархан бодлого, андуурсан сонголт, сэдвийн ялгаа", "ЗОХИОМОЛ (MOCK_INSIGHTS) өгөгдөл харуулна", "—", "Б Б+ А", "bug"],
+    ]},
+    { t: "Аудит", actions: [
+      ["Шүүх: хэрэглэгч, үйлдэл, огноо → «Шүүх» / «Цэвэрлэх»", "", "GET /audit, GET /users", "А", "ok"],
+      ["Хуудаслалт", "", "—", "А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "/app/insights хуурамч өгөгдөлтэй — бодит /insights/distractor-analysis, /problem-quality, /topic-mastery endpoint-уудад холбох",
+    "ML экспорт (нэр нууцалсан) товч байхгүй",
+    "Нэг объектын аудит түүх (GET /audit/entity/:entity/:id) — сурагч, төлбөрийн хуудсанд «Түүх» таб болгох",
+  ],
+  accept: [],
+},
+{
+  id: "admin-home", grp: "Удирдлага", t: "Удирдлагын самбар", st: "part", ver: "v1",
+  routes: ["/app/admin"], roles: ["А"],
+  purpose: "Эзний нэг дор удирдах төв.",
+  screens: [
+    { t: "Удирдлага", actions: [
+      ["Шинэ хэрэглэгч нэмэх → түр нууц үг «Хуулах»", "", "POST /users", "А", "ok"],
+      ["Хэрэглэгчдийн үүрэг солих", "", "GET /users, PATCH /users/:id/role", "А", "ok"],
+      ["Багш нарын эрх: Багш ↔ Багш+, «Багш болгох»", "", "PATCH /users/:id/teacher-status, POST /users/promote-teacher", "А", "ok"],
+      ["Хүлээгдэж буй төлбөр → «Баталгаажуулах»", "", "GET /payments?status=PENDING, POST /payments/:id/confirm", "А", "ok"],
+      ["Сарын төлбөрийн төлөв", "", "GET /payments/months/:m", "А", "ok"],
+      ["«Шинэ анги», «Шинэ эрх (pass)»", "", "POST /classrooms, POST /passes", "А", "ok"],
+    ]},
+  ],
+  gaps: [
+    "Цэсгүй удирдлагын хуудсууд (санхүү, дэлгүүр, анги, буцаалт, шинжилгээ) руу холбоос байхгүй",
+    "Системийн төлөв (QPay, SMS, имэйл, диск) — GET /gateways/status UI-гүй",
+    "Тохиргоо хуудас байхгүй: төвийн мэдээлэл, дансны дугаар, SMS/имэйл түлхүүр, сануулгын хоног",
+  ],
+  accept: [],
+},
+];
+
+/* ---------- 4. Хэрэглэгчийн аялал (end-to-end) ---------- */
+const JOURNEYS = [
+  { t: "Шинэ танхимын сурагч элсэх", st: "part", steps: [
+    "Эцэг эх/сурагч нүүр хуудсаар орж «Бүртгүүлэх» → «Танхимын сурагч» → хичээл сонгоно (элсэлт нээлттэй бол)",
+    "Нууц үг автоматаар утасны дугаар болно → «Зөвшөөрөл хүлээгч» төлөвт орно",
+    "Багш+ «Элсэлтийн удирдлага → Зөвшөөрөл хүлээгч»-оос зөвшөөрнө",
+    "Эхний сарын төлбөр: дансаар шилжүүлнэ → Багш+ баталгаажуулна эсвэл банкны хуулгаар тулгагдана",
+    "Төлбөр CONFIRMED болмогц сурагчийн код (B27…) үүснэ",
+    "Багш «Ангид ороогүй сурагчид»-аас ангид оруулна → хуваарь, самбар нээгдэнэ",
+    "ЦООРХОЙ: мэдэгдэл (зөвшөөрсөн, ангид орсон) очихгүй; код үүсгэх урсгал прод дээр backfill хүлээж байна",
+  ]},
+  { t: "Өдөр тутмын хичээл", st: "part", steps: [
+    "Багш самбараа нээж ангиа сонгоно → ирц бүртгэнэ (нэг товшилт)",
+    "Хичээлийн төгсгөлд «Тест хийсэн» бүртгэж, хассан бодлогыг тэмдэглэнэ",
+    "Гэрийн даалгаврыг Хийсэн / Дутуу / Хийгээгүй гэж тэмдэглэнэ",
+    "Сурагч орой нь «Оройн тэмдэглэгээ»-гээр бодлого бүрээ 4 төлөвөөр үнэлнэ",
+    "Шөнө cron өдрийн хураангуй тооцоолж, маргааш багшид «Анхаарах сурагчид» гарна",
+    "ЦООРХОЙ: онлайн даалгаврын илгээлт, багшийн шалгалтын урсгал холбогдоогүй",
+  ]},
+  { t: "Онлайн шалгалт", st: "ok", steps: [
+    "Багш тест үүсгэж ангид онооно",
+    "Сурагч «Шалгалт» → тест → урьдчилсан анхааруулга, бэлтгэлийн жагсаалт → «Тийм, эхлэх»",
+    "Бодох явцад autosave, heartbeat; гарвал анхааруулга, 2 дахь удаа автоматаар илгээнэ",
+    "Илгээнэ → оноо, зөв/буруу; эцэг эх дүнтэй танилцана",
+    "Багш дүнгийн хүснэгт, CSV",
+    "ЦООРХОЙ: дүнгийн дараа сул сэдэв рүү хөтлөх алхам",
+  ]},
+  { t: "Онлайн худалдан авагч эрх авах", st: "part", steps: [
+    "«Бүртгүүлэх» → «Зүгээр үзэх» → «Миний эрхүүд»",
+    "Багц сонгоод «Төлбөр төлөх» → QPay эсвэл данс",
+    "QPay: callback эсвэл 5 секундийн шалгалтаар автоматаар баталгаажна → эрх нээгдэнэ",
+    "ЦООРХОЙ: QPay түлхүүргүй тул одоогоор зөвхөн дансаар, гараар баталгаажуулна",
+  ]},
+  { t: "Эцэг эх холбогдох", st: "part", steps: [
+    "«Бүртгүүлэх» → «Эцэг эх» → хүүхдийн утасны дугаар оруулна",
+    "Багш+ самбарынхаа «Эцэг эхийн хүсэлт»-ээс баталгаажуулна",
+    "Эцэг эх хүүхдийн ирц, даалгавар, дүн, төлбөрийг харна",
+    "ЦООРХОЙ: хүлээлтийн явц, мэдэгдэл байхгүй",
+  ]},
+  { t: "Сурагч ангиас гарах, буцаалт авах", st: "bug", steps: [
+    "Багш+ буцаалтын тооцоолуур дээр сурагч, анги, гарсан огноо оруулна",
+    "Хичээлийн өдрөөр тооцоолж ноорог үүснэ",
+    "Админ зөвшөөрч, мөнгө шилжүүлээд «Төлсөн» гэж тэмдэглэнэ",
+    "Сурагчийг архивлана",
+    "ЦООРХОЙ: 1–3 дахь алхам прод дээр ажиллахгүй; архивлах боломж байхгүй",
+  ]},
+  { t: "Сарын төлбөр хөөцөлдөх", st: "part", steps: [
+    "Сар бүр «Төлбөр → Дутуу төлсөн»",
+    "Хаан банкны хуулгыг оруулж автоматаар тулгана, үлдсэнийг гараар тулгана",
+    "Төлөөгүй хүмүүст сануулга (SMS/имэйл)",
+    "ЦООРХОЙ: сануулга автомат биш, SMTP/SMS тохируулаагүй",
+  ]},
+  { t: "Нууц үгээ мартах", st: "part", steps: [
+    "«Нууц үгээ мэдэхгүй байна уу» → утас/имэйл → код",
+    "Код ирэхгүй бол тусламж автоматаар нээгдэж ажилтнаас код авах замыг заана",
+    "Ажилтан сурагчийн хуудаснаас «Нууц үг сэргээх код илгээх»",
+    "ЦООРХОЙ: илгээх суваг (SMS/имэйл) тохируулагдаагүй",
+  ]},
+];
+
+/* ---------- 5. Өгөгдлийн загвар ---------- */
+const DATA_MODEL = [
+  ["Хэрэглэгч ба таних", "User, StudentProfile, TeacherProfile, ExternalTeacherProfile, ParentLink, PasswordResetToken, EmailOtp, StudentCodeLegacy"],
+  ["Анги ба элсэлт", "Classroom, Enrollment, EnrollmentWindow, Lead, TeacherGroup, TeacherGroupMember"],
+  ["Өдөр тутмын үйл ажиллагаа", "Attendance, Assignment, Submission, DailyHomeworkMark, ClassTestSession, Announcement, AnnouncementClassroomTarget, StudentColorTag, StudentNote"],
+  ["Хуваарь ба хуанли", "ClassSchedule, ScheduleException, LessonTopic, TeacherWorkDay, TeacherWorkException, AcademicCalendarDay"],
+  ["Контент", "Book, Chapter, Topic, TheoryBlock, Video, Problem, ProblemChoice, Tag, ProblemTag, Formula, ProblemFormula, ProblemAnalysis (Subject = enum: MATH, SOCIAL_STUDIES, SAT)"],
+  ["Үнэлгээ", "Test, TestProblem, TestAccess, TestAttemptSession, TestResult, ResultAcknowledgement"],
+  ["Суралцахуйн өгөгдөл", "Attempt (givenAnswer — ML-ийн гол дохио), DailyClassSummary, Prediction, LearningEvent, StudentGoal, StreakFreeze"],
+  ["Мөнгө", "Pass, UserPass, Payment, BankTransaction, ProductItem, Purchase, ExpenseRecord, TuitionRefund"],
+  ["Харилцаа", "SmsMessage, SmsBatch, SmsTemplate"],
+  ["Дотоод ажил", "StaffTask, StaffTaskAssignee, AuditLog"],
+];
+
+/* ---------- 6. Функциональ бус шаардлага (олон улсын стандарт) ---------- */
+const NFR = [
+  { area: "Гүйцэтгэл", std: "Google Core Web Vitals", items: [
+    ["LCP < 2.5с, INP < 200мс, CLS < 0.1 (утас, 3G)", "part", "Эзний §3.8 дүрмээр суурь нь зөв, хэмжилт хийгдээгүй"],
+    ["API p95 < 300мс, шалгалтын hot path < 150мс", "part", "Мониторинг байхгүй тул мэдэгдэхгүй"],
+    ["2000 зэрэг шалгалт өгөгчийг даах", "none", "k6 ачааллын тест хийгдээгүй; DB_POOL_MAX=25 түр шийдэл"],
+    ["Сервер унтдаггүй (cold start < 1с)", "bug", "Render үнэгүй багц 15 минутын дараа унтдаг, эхний хүсэлт ~60с"],
+  ]},
+  { area: "Аюулгүй байдал", std: "OWASP ASVS 4.0 — L2, OWASP Top 10", items: [
+    ["Endpoint бүр эрхээ шалгана (A01 Broken Access Control)", "bug", "/finance/report, /finance/expenses, /tuition/refunds, /tuition/refund/:id эрх шалгадаггүй. Ownership шалгалтыг бүх «JWT-only» маршрутад аудит хийх"],
+    ["Аюулгүй HTTP толгой (CSP, HSTS, X-Frame-Options) — helmet", "none", "helmet суугаагүй"],
+    ["Нэвтрэлт, OTP-д тусгай rate limit, түр түгжих", "part", "Зөвхөн глобал 300/мин"],
+    ["Токен хадгалалт — XSS-ээс хамгаалах", "part", "localStorage, 7 хоног. httpOnly cookie эсвэл богино токен"],
+    ["Файл байршуулалтын шалгалт (төрөл, хэмжээ, вирус)", "part", "25MB, зураг+PDF — MIME шалгалтыг нягтлах"],
+    ["Хамаарлын эмзэг байдлын скан (npm audit, Dependabot)", "none", "CI-д байхгүй"],
+    ["Нууц түлхүүрийг кодод хадгалахгүй", "ok", "Render env"],
+  ]},
+  { area: "Хувийн мэдээлэл", std: "Хүний хувийн мэдээлэл хамгаалах тухай хууль (2021), GDPR-ийн зарчим", items: [
+    ["Нууцлалын бодлого, үйлчилгээний нөхцөл — нийтэд", "none", "Хуудас байхгүй"],
+    ["Насанд хүрээгүй хүүхдийн мэдээлэлд эцэг эхийн зөвшөөрөл", "none", "Бүртгэлд зөвшөөрлийн тэмдэглэгээ байхгүй"],
+    ["Хамгийн бага мэдээлэл, зөвхөн хэрэгтэй хүнд харагдах", "part", "Энгийн багшид утас нуусан; санхүүгийн цоорхой бий"],
+    ["Хадгалах хугацаа, устгах хүсэлт", "none", "Бодлого байхгүй"],
+    ["ML экспортод нэр нууцлах", "ok", "Hash хийсэн"],
+    ["PASSWORD_RESET SMS-д код хадгалахгүй", "ok", ""],
+  ]},
+  { area: "Найдвартай байдал", std: "SRE практик — SLO, RPO/RTO", items: [
+    ["Uptime SLO >= 99.5% (сард ~3.6 цаг)", "none", "Хэмжигддэггүй"],
+    ["Өгөгдлийн санг өдөр бүр нөөцлөх, RPO <= 24 цаг, RTO <= 4 цаг, сэргээлтийг туршсан", "bug", "render.yaml-д DB plan: free. STATUS: үнэгүй ӨС 2026-08-18-нд дуусна гэж байсан — ОДОО шалгах"],
+    ["Байршуулсан файл тогтвортой хадгалагдах (S3/R2 эсвэл disk)", "bug", "Redeploy бүрт устдаг"],
+    ["Staging орчин (прод-той ижил)", "none", "Шууд прод руу"],
+    ["Deploy шалгалт автомат (Vercel гараар, Render чимээгүй уналт)", "part", "§2-ын ачаалалтын шалгалт гараар"],
+  ]},
+  { area: "Хяналт (observability)", std: "OpenTelemetry-ийн суурь зарчим", items: [
+    ["Алдааны мөрдөлт (Sentry эсвэл түүнтэй адил)", "none", "Байхгүй"],
+    ["Бүтэцтэй лог (JSON), хүсэлтийн ID", "none", ""],
+    ["Uptime монитор + сэрэмжлүүлэг", "none", ""],
+    ["Бизнес метрик самбар", "part", "Аналитик самбар бий"],
+  ]},
+  { area: "Хүртээмж", std: "WCAG 2.2 AA", items: [
+    ["Контраст 4.5:1, өгөгдлийн өнгийг текст дээр тавихгүй", "ok", "Дизайны гэрээ §6.4"],
+    ["Гарнаас бүгд хүрэх, фокус харагдах", "part", "Бүрэн аудит хийгдээгүй"],
+    ["Хүрэх талбай 44×44px", "part", ""],
+    ["Модал: role=dialog, фокус занга, Escape", "part", ""],
+  ]},
+  { area: "Инженерчлэл", std: "12-Factor App, trunk-based development", items: [
+    ["CI: typecheck + unit тест", "ok", "api + web job"],
+    ["CI: lint, build, smoke, e2e", "part", "Lint унтраасан (~166 анхааруулга), e2e байхгүй"],
+    ["API баримт (OpenAPI/Swagger)", "none", "271 endpoint баримтгүй"],
+    ["Нэгдсэн алдааны формат, хуудаслалт, огнооны формат", "part", "PrismaExceptionFilter бий"],
+    ["Вэбийн тест", "none", "2 жижиг тест"],
+    ["Миграцийн аюулгүй байдал (IF NOT EXISTS, хуучныг өөрчлөхгүй)", "ok", "STATUS §4"],
+    ["Нэг эх сурвалжтай баримт", "part", "STATUS.md 2026-08-08-наас хойш шинэчлэгдээгүй, тестийн тоо зөрсөн; локал SYSTEM-DESIGN.html репод байхгүй"],
+  ]},
+  { area: "Апп ба мэдэгдэл", std: "PWA (Web App Manifest, Service Worker), Web Push", items: [
+    ["Утсанд суулгадаг PWA (manifest, дүрс, офлайн хуудас)", "none", "manifest байхгүй"],
+    ["Push мэдэгдэл (даалгавар, шалгалт, төлбөр)", "none", ""],
+    ["Апп доторх мэдэгдлийн төв", "none", ""],
+    ["Нэйтив апп (Expo) — v2", "none", "PWA хангалттай бол заавал биш"],
+  ]},
+];
+
+/* ---------- 7. Цоорхойн бүртгэл ----------
+   [id, эрэмбэ, ангилал, гарчиг, хаана, яах вэ, хувилбар]
+*/
+const GAPS = [
+  ["G01", "P0", "Дэд бүтэц", "Өгөгдлийн сан үнэгүй багцтай — 359 сурагчийн бүртгэл устах эрсдэл", "render.yaml (pimn-db plan: free), STATUS §9.1", "Render Dashboard дээр ӨС амьд эсэх, багцыг ЯГ ОДОО шалгах. Төлбөртэй багц + өдөр тутмын нөөцлөл + сэргээлтийн туршилт", "v1"],
+  ["G02", "P0", "Аюулгүй байдал", "Санхүүгийн тайлан, зарлагыг нэвтэрсэн хэн ч харна", "api/src/finance/finance.controller.ts — GET report, GET expenses", "@Roles(ADMIN) + RolesGuard нэмэх, smoke тестэд «сурагч → 403» шалгалт нэмэх", "v1"],
+  ["G03", "P0", "Аюулгүй байдал", "Буцаалтын жагсаалт, дэлгэрэнгүйг нэвтэрсэн хэн ч харна", "api/src/tuition/tuition.controller.ts — GET refunds, GET refund/:id", "@Roles(ADMIN, TEACHER_PLUS) нэмэх", "v1"],
+  ["G04", "P0", "Аюулгүй байдал", "«JWT-only» маршрутуудын эрхийн аудит", "API-ийн @Roles-гүй бүх маршрут (энэ баримтын API каталогоос шүүж харна)", "Маршрут бүрт эрх эсвэл ownership шалгалт; smoke-д 4 дүрийн хүлээгдэх код", "v1"],
+  ["G05", "P0", "Дэд бүтэц", "Байршуулсан зураг redeploy бүрт устдаг", "render.yaml disk, storage модуль", "S3-тэй нийцтэй хадгалалт (Cloudflare R2 гэх мэт) эсвэл starter багц + disk", "v1"],
+  ["G06", "P0", "Эвдэрхий", "Буцаалтын модуль прод дээр ажиллахгүй", "web/src/components/tuition/RefundCalculator.tsx (түүхий fetch), /app/tuition/refund/[id] байхгүй", "api() ашиглах, дэлгэрэнгүй хуудас + зөвшөөрөх/төлсөн/цуцлах UI, цэсэнд нэмэх", "v1"],
+  ["G07", "P1", "Эвдэрхий", "Шинжилгээ хуудас зохиомол өгөгдөл харуулна", "web/src/components/insights/InsightsDashboard.tsx (MOCK_INSIGHTS)", "Бодит /insights/* endpoint-д холбох, цэсэнд нэмэх", "v1"],
+  ["G08", "P1", "Эвдэрхий", "Эвдэрсэн холбоос: /app/homework, /auth/login", "DashboardGreeting.tsx:153, app/app/store/store-products.tsx:77", "Зөв хаяг руу засах; CI-д дотоод холбоос шалгагч нэмэх", "v1"],
+  ["G09", "P1", "Навигаци", "Цэсгүй 8 хуудас", "admin/classrooms, admin/finance, admin/store, insights, practice, store, tuition, password", "Цэсэнд оруулах эсвэл устгах шийдвэр; /app/password-ийг /app/profile руу чиглүүлэх", "v1"],
+  ["G10", "P1", "Функц", "Гэрийн даалгаврын хоёр зэрэгцээ загвар", "Assignment/Submission ба DailyHomeworkMark", "Эзний шийдвэр → нэг урсгал; бэлэн байгаа TeacherHomework* компонентуудыг холбох эсвэл устгах", "v1"],
+  ["G11", "P1", "Функц", "Тест засах боломжгүй", "api/src/tests — PATCH байхгүй", "PATCH /tests/:id (өгөөгүй бол бүрэн, өгсөн бол зөвхөн нэр/хугацаа)", "v1"],
+  ["G12", "P1", "Функц", "Гадны багшийг баталгаажуулах UI байхгүй", "teacher-groups unverified/verify", "Элсэлтийн удирдлагад «Гадны багш» таб", "v1.1"],
+  ["G13", "P1", "Интеграц", "Имэйл (SMTP) тохируулаагүй", "Render env EMAIL_SMTP_*", "Gmail App Password эсвэл транзакцын имэйлийн үйлчилгээ", "v1"],
+  ["G14", "P1", "Интеграц", "QPay merchant түлхүүр байхгүй", "api/src/gateways", "Гэрээ хийж түлхүүр оруулах, sandbox-оор турших", "v1"],
+  ["G15", "P1", "Өгөгдөл", "Прод дээр сурагчийн шинэ кодын backfill хийгдээгүй", "prisma/backfill-new-codes.cjs", "Dry-run → apply, нөөцлөлтийн дараа", "v1"],
+  ["G16", "P1", "Функц", "Анги засах, архивлах, сурагч хасах/шилжүүлэх UI", "classrooms endpoint-ууд", "Ангийн дэлгэрэнгүй хуудас", "v1"],
+  ["G17", "P1", "Хууль", "Нууцлалын бодлого, үйлчилгээний нөхцөл, эцэг эхийн зөвшөөрөл", "Нийтийн хэсэг, бүртгэл", "Хуудас + бүртгэлд зөвшөөрлийн checkbox + хадгалах огноо", "v1"],
+  ["G18", "P1", "Дэд бүтэц", "API унтдаг (үнэгүй багц)", "Render pimn-api plan: free", "Starter багц; шалгалтын өмнө унтахгүй байх", "v1"],
+  ["G19", "P1", "Хяналт", "Алдааны мөрдөлт, uptime монитор байхгүй", "api + web", "Sentry (эсвэл адил) + uptime сэрэмжлүүлэг", "v1"],
+  ["G20", "P1", "Аюулгүй байдал", "helmet, нэвтрэлтийн тусгай rate limit", "api/src/main.ts, auth", "helmet + /auth/login, /auth/forgot-password-д хязгаар, түгжих", "v1"],
+  ["G21", "P2", "UI", "404, алдааны хуудас", "web/src/app/not-found.tsx, error.tsx", "Монгол, брэндтэй хуудас", "v1"],
+  ["G22", "P2", "Функц", "Эрх (pass) засах, устгах, гараар олгох", "passes endpoint-ууд", "Удирдлагад эрхийн хүснэгт", "v1"],
+  ["G23", "P2", "Функц", "Зарлага засах, устгах; «Ааш» → «Түрээс»", "FinanceDashboardClient", "UI нэмэх, шошго засах, гараар бичсэн өнгийг токен болгох", "v1"],
+  ["G24", "P2", "Функц", "SMS загвар үүсгэх, засах; серверийн өртгийн тооцоо", "components/sms", "POST/PATCH /sms/templates, POST /sms/bulk/estimate ашиглах", "v1.1"],
+  ["G25", "P2", "Функц", "Сурагчийг бөөнөөр импортлох, архивлах, экспорт", "students", "Excel импорт (урьдчилан харах + алдаа), archived талбар, CSV", "v1.1"],
+  ["G26", "P2", "Функц", "«Хэдий хүртэл төлсөн» сурагч, эцэг эхэд", "GET /tuition/paid-until/*", "Самбарт карт", "v1"],
+  ["G27", "P2", "Функц", "Мэдэгдлийн төв + сануулга (төлбөр, даалгавар, хуваарь)", "шинэ модуль", "Notification загвар + апп доторх хонх + имэйл/SMS суваг", "v1.1"],
+  ["G28", "P2", "Код", "api()-г тойрсон түүхий fetch", "lesson/api.ts:28, library/page.tsx:224", "api() руу шилжүүлэх", "v1"],
+  ["G29", "P2", "Дизайн", "Дизайны дүрэм зөрчил: «⬇» глиф, bg-blue-600, bg-orange-600", "ResultsTable, groups, finance", "lucide дүрс, өнгөний токен", "v1"],
+  ["G30", "P2", "Чанар", "E2E тест, вэб тест, lint CI-д", "web", "Playwright-оор 8 гол аялал; lint анхааруулгыг 0 болгох", "v1.1"],
+  ["G31", "P2", "Чанар", "Ачааллын тест (2000 зэрэг)", "шалгалтын hot path", "k6 скрипт + үр дүнг STATUS-т", "v1"],
+  ["G32", "P2", "Баримт", "API баримт (OpenAPI)", "api", "@nestjs/swagger — зөвхөн дотоод орчинд", "v1.1"],
+  ["G33", "P2", "Функц", "Үнэгүй урьдчилан харах (freemium)", "/catalog/* endpoint-ууд", "Нүүр хуудсанд бүлэг бүрийн эхний хэсэг", "v1.1"],
+  ["G34", "P2", "Мөнгө", "Е-баримт интеграци", "payments", "Нягтлан бодогчтой шалгаж шаардлагатай бол PosAPI", "v1.1"],
+  ["G35", "P3", "Контент", "1913 бодлого placeholder сонголттой, 13 REVIEW, 8 сэргээгдээгүй", "problems", "Контентын засварын ажлын дараалал", "v1.1"],
+  ["G36", "P3", "Функц", "Тест: ноорог, хуулах, PDF импорт", "tests/new", "UX аудит №4", "v1.1"],
+  ["G37", "P3", "Апп", "PWA + push мэдэгдэл", "web", "manifest, service worker, дүрс", "v1.1"],
+  ["G38", "P3", "Баримт", "STATUS.md хуучирсан, SYSTEM-DESIGN.html репод байхгүй", "STATUS.md, docs/", "Энэ баримтыг репод байлгаж, STATUS-ыг шинэчлэх", "v1"],
+  ["G39", "P3", "Функц", "Хичээл цуцлагдахад мэдэгдэх, ICS экспорт", "schedule", "G27-той хамт", "v1.1"],
+  ["G40", "P3", "Функц", "Дэлгүүр ба эрх (pass) — хоёр худалдааны систем", "store, passes", "Нэг каталог болгох шийдвэр", "v1.1"],
+];
+
+/* ---------- 8. Хувилбарын төлөвлөгөө ---------- */
+const ROADMAP = [
+  { v: "v1.0 — Тогтвортой суурь", goal: "Одоо байгаа бүх зүйл найдвартай, аюулгүй, бүрэн ажилладаг. Шинэ том функц нэмэхгүй.", items: [
+    "7 хоног 1: G01 (ӨС), G02–G04 (эрхийн цоорхой), G05 (файл), G18 (унтдаг сервер) — хамгийн түрүүнд",
+    "7 хоног 2: G06 (буцаалт), G07 (шинжилгээ), G08–G09 (холбоос, цэс), G28–G29 (түүхий fetch, дизайн)",
+    "7 хоног 3: G10 (даалгаврын загварын шийдвэр), G11 (тест засах), G16 (анги), G22–G23, G26",
+    "7 хоног 4: G13–G15 (имэйл, QPay, код), G17 (хууль), G19–G21 (монитор, helmet, 404), G31 (ачаалал), G38 (баримт)",
+    "Гарах шалгуур: P0/P1 бүгд хаагдсан, smoke 4 дүр × бүх маршрут ногоон, k6 2000 зэрэг амжилттай, нөөцлөлтөөс сэргээлт туршсан",
+  ]},
+  { v: "v1.1 — Хэрэглээ ба харилцаа", goal: "Хэрэглэгч бүр мэдэгдэл авч, утсандаа суулгадаг болох.", items: [
+    "Мэдэгдлийн төв + имэйл/SMS сануулга (G27, G39)", "PWA (G37)", "Гадны багш (G12), дэлгүүр/эрхийн нэгдэл (G40)",
+    "Сурагчийн импорт, архив, экспорт (G25)", "Freemium урьдчилсан харалт (G33)", "E2E тест, OpenAPI (G30, G32)", "Е-баримт (G34)",
+  ]},
+  { v: "v2 — Ухаалаг систем ба апп", goal: "1 жилийн оролдлогын датагаар адаптив загвар, нэйтив апп.", items: [
+    "IRT → knowledge tracing (SPEC §9.3 үе 2–3)", "OMR хуудас уншигчийн импорт", "Нэйтив апп (Expo) — PWA хангалтгүй бол",
+    "Банкны API-гаар бүрэн автомат тулгалт", "Гадны багшийн B2B багц", "Шууд (live) хичээл",
+  ]},
+];
+
+/* ---------- 9. Эзний шийдвэр хүлээж буй асуултууд ---------- */
+const QUESTIONS = [
+  "Render дээрх өгөгдлийн сан одоо ямар багцтай, амьд байна уу? Сүүлийн нөөцлөл хэзээ хийгдсэн бэ?",
+  "Гэрийн даалгавар: танхимд «Хийсэн/Дутуу/Хийгээгүй» тэмдэглэгээ, онлайнд «зураг илгээх» гэж хуваах уу, эсвэл нэг урсгал болгох уу?",
+  "Дэлгүүр ба эрх (pass): нэг каталог болгох уу?",
+  "Цэсгүй 8 хуудас бүрийн хувьд: цэсэнд оруулах уу, устгах уу?",
+  "Имэйл: Gmail App Password хангалттай юу, эсвэл транзакцын имэйлийн үйлчилгээ ашиглах уу?",
+  "SMS үйлчилгээ үзүүлэгч хэн бэ, хэзээ идэвхжүүлэх вэ?",
+  "Видео хичээлийг хаана байршуулах вэ, эрхгүй хүн үзэхээс яаж хамгаалах вэ?",
+  "Е-баримт олгох шаардлагатай юу (нягтлан бодогчоос)?",
+  "Хүсэлт (лид) хаанаас ирэх вэ — зөвхөн утсаар гараар оруулах уу?",
+  "Сурагч гарахад архивлах уу, эсвэл устгах уу? Мэдээллийг хэдэн жил хадгалах вэ?",
+  "Нууцлалын бодлого, үйлчилгээний нөхцөлийн текстийг хэн бичих вэ (хуульч уу)?",
+];
+
+/* ---------- 10. API каталог (кодоос автоматаар) ---------- */
+const ENDPOINTS = [{"mod":"activity","m":"GET","p":"/activity/classroom/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"activity","m":"GET","p":"/activity/me","roles":["STUDENT"],"ui":false},{"mod":"activity","m":"GET","p":"/activity/streak","roles":["STUDENT"],"ui":true},{"mod":"activity","m":"GET","p":"/activity/student/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"analytics","m":"GET","p":"/analytics/at-risk","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"analytics","m":"GET","p":"/analytics/classrooms","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"analytics","m":"GET","p":"/analytics/engagement","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"analytics","m":"GET","p":"/analytics/overview","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"analytics","m":"GET","p":"/analytics/topics","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"announcements","m":"GET","p":"/announcements","roles":["JWT"],"ui":true},{"mod":"announcements","m":"POST","p":"/announcements","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"announcements","m":"DELETE","p":"/announcements/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"announcements","m":"PATCH","p":"/announcements/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"announcements","m":"GET","p":"/announcements/manage","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"assignments","m":"DELETE","p":"/assignments/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"assignments","m":"PATCH","p":"/assignments/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"assignments","m":"POST","p":"/assignments/:id/review","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"assignments","m":"GET","p":"/assignments/:id/submissions","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"assignments","m":"POST","p":"/assignments/:id/submit","roles":["STUDENT"],"ui":true},{"mod":"assignments","m":"GET","p":"/assignments/my","roles":["STUDENT"],"ui":true},{"mod":"assignments","m":"GET","p":"/classrooms/:id/assignments","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"assignments","m":"POST","p":"/classrooms/:id/assignments","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"assignments","m":"GET","p":"/classrooms/:id/assignments/stats","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"assignments","m":"GET","p":"/classrooms/:id/homework-marks","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"assignments","m":"PATCH","p":"/classrooms/:id/homework-marks/:studentId","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"assignments","m":"GET","p":"/students/:id/homework-marks","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"attempts","m":"POST","p":"/admin/run-daily-summary","roles":["ADMIN"],"ui":false},{"mod":"attempts","m":"POST","p":"/attempts/evening","roles":["STUDENT"],"ui":true},{"mod":"attempts","m":"GET","p":"/attempts/my","roles":["STUDENT"],"ui":false},{"mod":"attempts","m":"GET","p":"/attempts/my-stats","roles":["STUDENT"],"ui":true},{"mod":"attempts","m":"GET","p":"/classrooms/:id/attention","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"attempts","m":"GET","p":"/classrooms/:id/daily-summary","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"attendance","m":"GET","p":"/attendance/my","roles":["STUDENT"],"ui":true},{"mod":"attendance","m":"GET","p":"/classrooms/:id/attendance","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"attendance","m":"POST","p":"/classrooms/:id/attendance","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"attendance","m":"GET","p":"/classrooms/:id/attendance/history","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"attendance","m":"GET","p":"/students/:id/attendance","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"audit","m":"GET","p":"/audit","roles":["ADMIN"],"ui":true},{"mod":"audit","m":"GET","p":"/audit/entity/:entity/:entityId","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"auth","m":"POST","p":"/auth/change-password","roles":["JWT"],"ui":true},{"mod":"auth","m":"POST","p":"/auth/forgot-password","roles":["JWT"],"ui":true},{"mod":"auth","m":"POST","p":"/auth/login","roles":["JWT"],"ui":true},{"mod":"auth","m":"GET","p":"/auth/me","roles":["JWT"],"ui":true},{"mod":"auth","m":"POST","p":"/auth/me/avatar","roles":["JWT"],"ui":true},{"mod":"auth","m":"POST","p":"/auth/register","roles":["JWT"],"ui":true},{"mod":"auth","m":"POST","p":"/auth/reset-password","roles":["JWT"],"ui":true},{"mod":"class-sessions","m":"POST","p":"/classrooms/:id/did-test","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"class-sessions","m":"GET","p":"/classrooms/:id/test-sessions","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"class-sessions","m":"GET","p":"/me/todo-marking","roles":["STUDENT"],"ui":true},{"mod":"class-sessions","m":"DELETE","p":"/test-sessions/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"class-sessions","m":"POST","p":"/test-sessions/:id/excluded","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classification","m":"GET","p":"/classification/categories","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classification","m":"POST","p":"/classification/categories","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classification","m":"PATCH","p":"/classification/categories/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classification","m":"GET","p":"/classification/problems/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classification","m":"PUT","p":"/classification/problems/:id/choices","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classification","m":"PUT","p":"/classification/problems/:id/tags","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classrooms","m":"GET","p":"/classrooms","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"classrooms","m":"POST","p":"/classrooms","roles":["ADMIN"],"ui":true},{"mod":"classrooms","m":"DELETE","p":"/classrooms/:id","roles":["ADMIN"],"ui":false},{"mod":"classrooms","m":"PATCH","p":"/classrooms/:id","roles":["ADMIN"],"ui":false},{"mod":"classrooms","m":"POST","p":"/classrooms/:id/disband","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"classrooms","m":"POST","p":"/classrooms/:id/enroll","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"classrooms","m":"POST","p":"/classrooms/:id/remove-student","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"classrooms","m":"GET","p":"/classrooms/unassigned-students","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"colortags","m":"GET","p":"/classrooms/:id/color-tags","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"colortags","m":"DELETE","p":"/students/:id/color-tag","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"colortags","m":"PUT","p":"/students/:id/color-tag","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"colortags","m":"GET","p":"/students/:id/color-tags","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"content","m":"GET","p":"/books","roles":["JWT"],"ui":true},{"mod":"content","m":"POST","p":"/books","roles":["ADMIN"],"ui":true},{"mod":"content","m":"DELETE","p":"/books/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"PATCH","p":"/books/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"GET","p":"/catalog/chapters/:id/preview","roles":["JWT"],"ui":false},{"mod":"content","m":"GET","p":"/catalog/grades/:grade/chapters","roles":["JWT"],"ui":false},{"mod":"content","m":"GET","p":"/chapters","roles":["JWT"],"ui":true},{"mod":"content","m":"POST","p":"/chapters","roles":["ADMIN"],"ui":true},{"mod":"content","m":"DELETE","p":"/chapters/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"PATCH","p":"/chapters/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"GET","p":"/chapters/:id/problems","roles":["JWT"],"ui":true},{"mod":"content","m":"PATCH","p":"/chapters/reorder","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"GET","p":"/formulas","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"content","m":"POST","p":"/problems","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"content","m":"DELETE","p":"/problems/:problemId","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"GET","p":"/problems/:problemId","roles":["STUDENT","ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"content","m":"PATCH","p":"/problems/:problemId","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"GET","p":"/tags","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"content","m":"GET","p":"/topics","roles":["JWT"],"ui":true},{"mod":"content","m":"POST","p":"/topics","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"DELETE","p":"/topics/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"content","m":"PATCH","p":"/topics/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"enrollment-windows","m":"GET","p":"/enrollment-windows","roles":["JWT"],"ui":true},{"mod":"enrollment-windows","m":"PATCH","p":"/enrollment-windows/:subject","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"events","m":"POST","p":"/events","roles":["JWT"],"ui":true},{"mod":"events","m":"GET","p":"/events/my-summary","roles":["JWT"],"ui":false},{"mod":"events","m":"GET","p":"/events/stats","roles":["ADMIN"],"ui":false},{"mod":"finance","m":"GET","p":"/finance/expenses","roles":["JWT"],"ui":true},{"mod":"finance","m":"POST","p":"/finance/expenses","roles":["JWT"],"ui":true},{"mod":"finance","m":"DELETE","p":"/finance/expenses/:id","roles":["JWT"],"ui":false},{"mod":"finance","m":"PATCH","p":"/finance/expenses/:id","roles":["JWT"],"ui":false},{"mod":"finance","m":"GET","p":"/finance/report","roles":["JWT"],"ui":true},{"mod":"gateways","m":"POST","p":"/gateways/qpay/callback","roles":["JWT"],"ui":false},{"mod":"gateways","m":"GET","p":"/gateways/qpay/payments/:paymentId/status","roles":["JWT"],"ui":false},{"mod":"gateways","m":"GET","p":"/gateways/status","roles":["ADMIN"],"ui":false},{"mod":"goals","m":"GET","p":"/goals","roles":["STUDENT"],"ui":true},{"mod":"goals","m":"POST","p":"/goals","roles":["STUDENT"],"ui":true},{"mod":"goals","m":"DELETE","p":"/goals/:id","roles":["STUDENT"],"ui":true},{"mod":"goals","m":"PATCH","p":"/goals/:id","roles":["STUDENT"],"ui":true},{"mod":"insights","m":"GET","p":"/insights/distractor-analysis","roles":["TEACHER","TEACHER_PLUS","ADMIN"],"ui":false},{"mod":"insights","m":"GET","p":"/insights/ml-export","roles":["ADMIN"],"ui":false},{"mod":"insights","m":"GET","p":"/insights/ml-export-count","roles":["ADMIN"],"ui":false},{"mod":"insights","m":"GET","p":"/insights/problem-quality","roles":["TEACHER","TEACHER_PLUS","ADMIN"],"ui":false},{"mod":"insights","m":"GET","p":"/insights/topic-mastery","roles":["TEACHER","TEACHER_PLUS","ADMIN"],"ui":false},{"mod":"leads","m":"GET","p":"/leads","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"leads","m":"POST","p":"/leads","roles":["JWT"],"ui":false},{"mod":"leads","m":"PATCH","p":"/leads/:id/status","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"lessons","m":"GET","p":"/lessons/:chapterId","roles":["JWT"],"ui":true},{"mod":"lessons","m":"POST","p":"/lessons/:chapterId/progress","roles":["JWT"],"ui":true},{"mod":"lessons","m":"POST","p":"/lessons/:chapterId/theory","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"lessons","m":"PATCH","p":"/lessons/:chapterId/theory/reorder","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"lessons","m":"GET","p":"/lessons/chapters","roles":["JWT"],"ui":true},{"mod":"lessons","m":"DELETE","p":"/lessons/theory/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"lessons","m":"PATCH","p":"/lessons/theory/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"notes","m":"DELETE","p":"/notes/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"notes","m":"PATCH","p":"/notes/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"notes","m":"GET","p":"/students/:id/notes","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"notes","m":"POST","p":"/students/:id/notes","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"notifications","m":"GET","p":"/sms/batches","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"notifications","m":"POST","p":"/sms/bulk","roles":["ADMIN"],"ui":true},{"mod":"notifications","m":"POST","p":"/sms/bulk/:id/start","roles":["ADMIN"],"ui":true},{"mod":"notifications","m":"POST","p":"/sms/bulk/estimate","roles":["ADMIN"],"ui":false},{"mod":"notifications","m":"GET","p":"/sms/messages","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"notifications","m":"POST","p":"/sms/messages/:id/retry","roles":["ADMIN"],"ui":true},{"mod":"notifications","m":"POST","p":"/sms/send","roles":["ADMIN"],"ui":true},{"mod":"notifications","m":"GET","p":"/sms/status","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"notifications","m":"GET","p":"/sms/templates","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"notifications","m":"POST","p":"/sms/templates","roles":["ADMIN"],"ui":false},{"mod":"notifications","m":"DELETE","p":"/sms/templates/:id","roles":["ADMIN"],"ui":true},{"mod":"notifications","m":"PATCH","p":"/sms/templates/:id","roles":["ADMIN"],"ui":false},{"mod":"parents","m":"GET","p":"/parent/children","roles":["PARENT"],"ui":true},{"mod":"parents","m":"POST","p":"/parent/links","roles":["PARENT"],"ui":true},{"mod":"parents","m":"POST","p":"/parent/links/:id/reject","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"parents","m":"POST","p":"/parent/links/:id/verify","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"parents","m":"GET","p":"/parent/links/pending","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"parents","m":"POST","p":"/parent/results/:testResultId/ack/request","roles":["PARENT"],"ui":true},{"mod":"parents","m":"POST","p":"/parent/results/:testResultId/ack/verify","roles":["PARENT"],"ui":true},{"mod":"passes","m":"GET","p":"/catalog/passes","roles":["JWT"],"ui":true},{"mod":"passes","m":"GET","p":"/me/passes","roles":["JWT"],"ui":true},{"mod":"passes","m":"DELETE","p":"/me/passes/:userPassId","roles":["ADMIN"],"ui":false},{"mod":"passes","m":"POST","p":"/passes","roles":["ADMIN"],"ui":true},{"mod":"passes","m":"DELETE","p":"/passes/:id","roles":["ADMIN"],"ui":false},{"mod":"passes","m":"PATCH","p":"/passes/:id","roles":["ADMIN"],"ui":false},{"mod":"passes","m":"POST","p":"/passes/:id/grant","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"payments","m":"GET","p":"/payments","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"payments","m":"POST","p":"/payments","roles":["ADMIN","TEACHER_PLUS","STUDENT"],"ui":true},{"mod":"payments","m":"PATCH","p":"/payments/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"payments","m":"POST","p":"/payments/:id/confirm","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"payments","m":"POST","p":"/payments/:id/reject","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"payments","m":"POST","p":"/payments/:id/reverse","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"payments","m":"GET","p":"/payments/months/:month","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"payments","m":"GET","p":"/payments/my","roles":["JWT"],"ui":true},{"mod":"payments","m":"GET","p":"/payments/outstanding","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"payments","m":"GET","p":"/payments/student/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"progress","m":"GET","p":"/progress/online-students","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"progress","m":"GET","p":"/progress/student/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"progress","m":"POST","p":"/progress/student/:id/assign-test","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"progress","m":"DELETE","p":"/progress/student/:id/attempt/:attemptId","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"progress","m":"PATCH","p":"/progress/student/:id/attempt/:attemptId","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"progress","m":"POST","p":"/progress/student/:id/reset-chapter","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"progress","m":"GET","p":"/progress/student/:id/timeline","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"recommend","m":"POST","p":"/recommend/attempt","roles":["STUDENT"],"ui":true},{"mod":"recommend","m":"GET","p":"/recommend/next","roles":["STUDENT"],"ui":true},{"mod":"reconcile","m":"POST","p":"/reconcile/:id/ignore","roles":["ADMIN"],"ui":true},{"mod":"reconcile","m":"POST","p":"/reconcile/:id/match","roles":["ADMIN"],"ui":true},{"mod":"reconcile","m":"POST","p":"/reconcile/import","roles":["ADMIN"],"ui":true},{"mod":"reconcile","m":"GET","p":"/reconcile/transactions","roles":["ADMIN"],"ui":true},{"mod":"schedule","m":"GET","p":"/calendar","roles":["JWT"],"ui":true},{"mod":"schedule","m":"POST","p":"/calendar","roles":["ADMIN"],"ui":true},{"mod":"schedule","m":"DELETE","p":"/calendar/:id","roles":["ADMIN"],"ui":true},{"mod":"schedule","m":"GET","p":"/calendar/:id","roles":["JWT"],"ui":false},{"mod":"schedule","m":"PATCH","p":"/calendar/:id","roles":["ADMIN"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule","roles":["JWT"],"ui":true},{"mod":"schedule","m":"POST","p":"/schedule","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"DELETE","p":"/schedule/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule/:id","roles":["JWT"],"ui":false},{"mod":"schedule","m":"PATCH","p":"/schedule/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"POST","p":"/schedule/:id/exceptions","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"DELETE","p":"/schedule/:id/exceptions/:exceptionId","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"schedule","m":"POST","p":"/schedule/:id/split","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"DELETE","p":"/schedule/:id/topic","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"schedule","m":"PATCH","p":"/schedule/:id/topic","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"schedule","m":"POST","p":"/schedule/bulk","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule/classroom/:id","roles":["JWT"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule/days","roles":["JWT"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule/me","roles":["STUDENT","TEACHER","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule/teacher-workdays","roles":["JWT"],"ui":true},{"mod":"schedule","m":"PUT","p":"/schedule/teacher-workdays","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"POST","p":"/schedule/teacher-workdays/exception","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule/teachers","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"schedule","m":"GET","p":"/schedule/week","roles":["JWT"],"ui":true},{"mod":"src","m":"GET","p":"/","roles":["JWT"],"ui":false},{"mod":"storage","m":"GET","p":"/files/:key","roles":["JWT"],"ui":true},{"mod":"storage","m":"POST","p":"/uploads","roles":["JWT"],"ui":true},{"mod":"store","m":"GET","p":"/store/admin/products","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"store","m":"POST","p":"/store/admin/products","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"store","m":"POST","p":"/store/admin/products/:id/deactivate","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"store","m":"POST","p":"/store/admin/products/:id/price","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"store","m":"GET","p":"/store/admin/purchases","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"store","m":"GET","p":"/store/admin/revenue","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"store","m":"GET","p":"/store/my-purchases","roles":["JWT"],"ui":true},{"mod":"store","m":"GET","p":"/store/products","roles":["JWT"],"ui":true},{"mod":"store","m":"POST","p":"/store/purchase","roles":["JWT"],"ui":true},{"mod":"tasks","m":"GET","p":"/tasks","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"tasks","m":"POST","p":"/tasks","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"tasks","m":"DELETE","p":"/tasks/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"tasks","m":"GET","p":"/tasks/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"tasks","m":"PATCH","p":"/tasks/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"tasks","m":"POST","p":"/tasks/:id/assignees","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"tasks","m":"DELETE","p":"/tasks/:id/assignees/:userId","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"tasks","m":"GET","p":"/tasks/staff-directory","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"tasks","m":"GET","p":"/tasks/workload","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"teacher-groups","m":"GET","p":"/teacher-groups/:groupId","roles":["JWT"],"ui":true},{"mod":"teacher-groups","m":"PUT","p":"/teacher-groups/:groupId/archive","roles":["JWT"],"ui":false},{"mod":"teacher-groups","m":"DELETE","p":"/teacher-groups/:groupId/students/:studentId","roles":["JWT"],"ui":true},{"mod":"teacher-groups","m":"POST","p":"/teacher-groups/create","roles":["JWT"],"ui":true},{"mod":"teacher-groups","m":"POST","p":"/teacher-groups/join","roles":["JWT"],"ui":true},{"mod":"teacher-groups","m":"GET","p":"/teacher-groups/my-groups","roles":["JWT"],"ui":true},{"mod":"teacher-groups","m":"POST","p":"/teacher-groups/register","roles":["JWT"],"ui":true},{"mod":"teacher-groups","m":"GET","p":"/teacher-groups/unverified","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"teacher-groups","m":"PUT","p":"/teacher-groups/verify/:userId","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"tests","m":"GET","p":"/tests","roles":["JWT"],"ui":true},{"mod":"tests","m":"POST","p":"/tests","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"tests","m":"DELETE","p":"/tests/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"tests","m":"GET","p":"/tests/:id","roles":["JWT"],"ui":true},{"mod":"tests","m":"GET","p":"/tests/:id/acknowledgements","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"tests","m":"POST","p":"/tests/:id/heartbeat","roles":["STUDENT"],"ui":true},{"mod":"tests","m":"GET","p":"/tests/:id/results","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"tests","m":"POST","p":"/tests/:id/results","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"tests","m":"GET","p":"/tests/:id/review","roles":["STUDENT"],"ui":true},{"mod":"tests","m":"PATCH","p":"/tests/:id/session","roles":["STUDENT"],"ui":true},{"mod":"tests","m":"POST","p":"/tests/:id/start","roles":["STUDENT"],"ui":true},{"mod":"tests","m":"POST","p":"/tests/:id/submit","roles":["STUDENT"],"ui":true},{"mod":"tests","m":"GET","p":"/tests/my-results","roles":["STUDENT"],"ui":true},{"mod":"tests","m":"GET","p":"/tests/students/:id/test-results","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"tuition","m":"GET","p":"/tuition/paid-until/:studentId","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":false},{"mod":"tuition","m":"GET","p":"/tuition/paid-until/my","roles":["STUDENT"],"ui":false},{"mod":"tuition","m":"POST","p":"/tuition/refund","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"tuition","m":"GET","p":"/tuition/refund/:id","roles":["JWT"],"ui":false},{"mod":"tuition","m":"POST","p":"/tuition/refund/:id/approve","roles":["ADMIN"],"ui":false},{"mod":"tuition","m":"POST","p":"/tuition/refund/:id/cancel","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"tuition","m":"POST","p":"/tuition/refund/:id/paid","roles":["ADMIN"],"ui":false},{"mod":"tuition","m":"POST","p":"/tuition/refund/:id/pending","roles":["ADMIN","TEACHER_PLUS"],"ui":false},{"mod":"tuition","m":"GET","p":"/tuition/refund/preview","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"tuition","m":"GET","p":"/tuition/refunds","roles":["JWT"],"ui":false},{"mod":"users","m":"GET","p":"/users","roles":["ADMIN"],"ui":true},{"mod":"users","m":"POST","p":"/users","roles":["ADMIN"],"ui":true},{"mod":"users","m":"GET","p":"/users/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"users","m":"PATCH","p":"/users/:id/profile","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"users","m":"PATCH","p":"/users/:id/role","roles":["ADMIN"],"ui":true},{"mod":"users","m":"POST","p":"/users/:id/send-password-reset","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"users","m":"PATCH","p":"/users/:id/teacher-status","roles":["ADMIN"],"ui":true},{"mod":"users","m":"POST","p":"/users/promote-teacher","roles":["ADMIN"],"ui":true},{"mod":"users","m":"GET","p":"/users/search","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"users","m":"POST","p":"/users/students/:id/approve","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"users","m":"GET","p":"/users/students/pending-approval","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"users","m":"GET","p":"/users/teachers","roles":["ADMIN"],"ui":true},{"mod":"videos","m":"GET","p":"/videos","roles":["JWT"],"ui":true},{"mod":"videos","m":"POST","p":"/videos","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"videos","m":"DELETE","p":"/videos/:id","roles":["ADMIN","TEACHER_PLUS"],"ui":true},{"mod":"videos","m":"PATCH","p":"/videos/:id","roles":["ADMIN","TEACHER_PLUS","TEACHER"],"ui":true},{"mod":"videos","m":"GET","p":"/videos/chapters","roles":["JWT"],"ui":true}];
+</script>
+
+<script>
+/* ===================== РЕНДЕР ===================== */
+const ST_LABEL = { ok: "Бэлэн", part: "Хагас", bug: "Эвдэрхий", none: "Байхгүй" };
+const ROLE_NAME = { ADMIN: "А", TEACHER_PLUS: "Б+", TEACHER: "Б", STUDENT: "С", PARENT: "ЭЭ", BUYER: "ХА", PUBLIC: "Н", JWT: "нэвтэрсэн бүгд" };
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const st = (k) => `<span class="st ${k}">${ST_LABEL[k] || k}</span>`;
+const roles = (s) => String(s || "").split(/\s+/).filter(Boolean).map((r) => `<span class="role">${esc(r)}</span>`).join("");
+const apiCell = (s) => s && s !== "—" ? `<code>${esc(s)}</code>` : `<span class="muted">—</span>`;
+
+const SECTIONS = [];
+function section(id, num, title, html, md, grp) {
+  SECTIONS.push({ id, num, title, html, md, grp });
+}
+
+/* 0 — Хэрхэн ашиглах */
+section("howto", "0", "Энэ баримтыг хэрхэн ашиглах", `
+  <p class="lead">Энэ бол Pi.mn-ийн v1-ийн <b>суурь тодорхойлолт</b>: юу байх ёстой, одоо юу байгаа, юу дутуу, ямар дарааллаар хийх вэ. Кодыг бичихээс өмнө энд тохиролцоно.</p>
+  <div class="grid2">${META.counts.map(([n, l]) => `<div class="card"><span class="stat">${esc(n)}</span><div class="muted">${esc(l)}</div></div>`).join("")}</div>
+  <h3>Тэмдэглэгээ</h3>
+  <p>${st("ok")} ажилладаг, ${st("part")} ажилладаг ч дутуу, ${st("bug")} эвдэрхий, ${st("none")} хийгдээгүй. Хувилбар: <span class="ver">v1</span> нээлтэд заавал, <span class="ver">v1.1</span> удахгүй, <span class="ver">v2</span> дараагийн шат. Эрэмбэ: <span class="pri P0">P0</span> яаралтай, <span class="pri P1">P1</span> v1-д заавал, <span class="pri P2">P2</span> чухал, <span class="pri P3">P3</span> сайжруулалт.</p>
+  <p>Эрх: ${roles("Н ХА С ЭЭ Б Б+ А ГБ")} = Нийтэд, Худалдан авагч, Сурагч, Эцэг эх, Багш, Багш+, Админ, Гадны багш.</p>
+  <h3>ChatGPT-тэй хамтран ажиллах арга</h3>
+  <ol class="steps">
+    <li>Хэсэг бүрийн баруун дээд талын <b>«Markdown хуулах»</b> товчоор тухайн хэсгийг хуулж ChatGPT руу буулга. Бүх баримт хэрэгтэй бол дээд талын товчийг ашигла.</li>
+    <li>ChatGPT-ээс «энэ модульд олон улсын ижил төстэй платформд (Google Classroom, Khan Academy, ClassDojo, Moodle) байдаг, бидэнд дутуу зүйл юу байна вэ» гэж асуу.</li>
+    <li>Гарсан санааг Claude-д өг. Claude кодтой тулгаж энэ баримтад нэмнэ. <b>Эх сурвалж ганц:</b> энэ файл + STATUS.md. Чат дотор үлдсэн шийдвэр алга болдог — энэ зун яг ингэж холилдсон.</li>
+    <li>Шийдвэр гарсан асуултыг §9-өөс хасаж, холбогдох модульд бичнэ.</li>
+    <li>Код бичихдээ §7-ийн цоорхойн ID-г (жишээ нь G06) commit мессежид дурдана.</li>
+  </ol>
+  <div class="callout blue">Эх сурвалж: <code>${esc(META.source)}</code>. Өмнөх <code>docs/SYSTEM-MAP.html</code> (2026-08-08) кодын зураглал байсан; энэ баримт түүнийг бүтээгдэхүүний шаардлага, цоорхойн бүртгэл, хувилбарын төлөвлөгөөгөөр өргөтгөсөн. Таны Mac дээрх <code>docs/SYSTEM-DESIGN.html</code> репод байхгүй — push хийвэл эндэхтэй нэгтгэнэ.</div>
+`, () => "# Pi.mn — Платформын бүрэн тодорхойлолт (v1 суурь)\n\nТөлөв: Бэлэн / Хагас / Эвдэрхий / Байхгүй. Хувилбар: v1 / v1.1 / v2. Эрэмбэ: P0–P3.\nЭрх: Н=Нийтэд, ХА=Худалдан авагч, С=Сурагч, ЭЭ=Эцэг эх, Б=Багш, Б+=Багш+, А=Админ, ГБ=Гадны багш.\n\n" + META.counts.map(([n, l]) => `- ${n} ${l}`).join("\n"), "Эхлэл");
+
+/* 1 — Бүтээгдэхүүн */
+section("product", "1", "Бүтээгдэхүүний тодорхойлолт", `
+  <h3>Алсын хараа</h3><p>${esc(PRODUCT.vision)}</p>
+  <h3>Шийдэх асуудлууд</h3>
+  <div class="tablewrap"><table><tr><th>Асуудал</th><th>Тайлбар</th></tr>${PRODUCT.problems.map(([a, b]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td></tr>`).join("")}</table></div>
+  <h3>Хэрэглэгчид</h3>
+  <div class="tablewrap"><table><tr><th>Хэн</th><th>Тоо</th><th>Онцлог</th></tr>${PRODUCT.users.map(([a, b, c]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td><td>${esc(c)}</td></tr>`).join("")}</table></div>
+  <h3>Бизнес загвар</h3>
+  <div class="tablewrap"><table><tr><th>Орлого</th><th>Тайлбар</th></tr>${PRODUCT.model.map(([a, b]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td></tr>`).join("")}</table></div>
+  <h3>Амжилтын хэмжүүр (KPI)</h3>
+  <div class="tablewrap"><table><tr><th>Төрөл</th><th>Хэмжүүр</th><th>Одоогийн байдал</th></tr>${PRODUCT.kpis.map(([a, b, c]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td><td class="muted">${esc(c)}</td></tr>`).join("")}</table></div>
+  <div class="grid2">
+    <div class="card"><b>v1-д багтана</b><ul class="gaps">${PRODUCT.scopeIn.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div class="card"><b>v1-д багтахгүй</b><ul class="gaps">${PRODUCT.scopeOut.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+  </div>
+`, () => [
+  "## 1. Бүтээгдэхүүний тодорхойлолт", "", "**Алсын хараа:** " + PRODUCT.vision, "",
+  "### Шийдэх асуудлууд", ...PRODUCT.problems.map(([a, b]) => `- **${a}** — ${b}`), "",
+  "### Хэрэглэгчид", "| Хэн | Тоо | Онцлог |", "|---|---|---|", ...PRODUCT.users.map((r) => `| ${r.join(" | ")} |`), "",
+  "### Бизнес загвар", ...PRODUCT.model.map(([a, b]) => `- **${a}** — ${b}`), "",
+  "### KPI", "| Төрөл | Хэмжүүр | Одоо |", "|---|---|---|", ...PRODUCT.kpis.map((r) => `| ${r.join(" | ")} |`), "",
+  "### v1-д багтана", ...PRODUCT.scopeIn.map((x) => "- " + x), "", "### v1-д багтахгүй", ...PRODUCT.scopeOut.map((x) => "- " + x),
+].join("\n"), "Эхлэл");
+
+/* 2 — Эрхийн матриц */
+const MARK = { Y: "Тийм", O: "Өөрийн", V: "Харах", "-": "" };
+section("rbac", "2", "Эрхийн матриц", `
+  <p class="lead">Хэн юу хийж чадах вэ — API-ийн <code>@Roles</code> болон эзний шийдвэрээс (2026-07-27: контент Багш+-т, мөнгө/SMS/эрх солих зөвхөн Админд).</p>
+  <div class="tablewrap"><table><tr><th>Чадвар</th>${ROLES.map((r) => `<th>${r}</th>`).join("")}</tr>
+  ${MATRIX.map(([cap, row]) => `<tr><td>${esc(cap)}</td>${row.split(" ").map((c) => `<td>${c === "-" ? '<span class="muted">—</span>' : `<b>${MARK[c]}</b>`}</td>`).join("")}</tr>`).join("")}
+  </table></div>
+  <div class="callout red">Зөрчил: матрицад «Санхүүгийн тайлан — зөвхөн А» гэж байхад API нэвтэрсэн бүх хүнд нээлттэй (G02). Буцаалтын жагсаалт мөн адил (G03).</div>
+`, () => ["## 2. Эрхийн матриц", "", "| Чадвар | " + ROLES.join(" | ") + " |", "|---|" + ROLES.map(() => "---").join("|") + "|",
+  ...MATRIX.map(([c, r]) => `| ${c} | ${r.split(" ").map((x) => MARK[x] || "—").join(" | ")} |`)].join("\n"), "Эхлэл");
+
+/* 3 — Модулиуд */
+function moduleHtml(m) {
+  const screens = m.screens.map((s) => `
+    <h4>${esc(s.t)}</h4>
+    <div class="tablewrap"><table><tr><th style="width:26%">Товч / үйлдэл</th><th>Юу болох</th><th style="width:24%">API</th><th>Эрх</th><th>Төлөв</th></tr>
+    ${s.actions.map(([a, b, c, d, e]) => `<tr data-st="${e}"><td><b>${esc(a)}</b></td><td>${esc(b)}</td><td>${apiCell(c)}</td><td>${roles(d)}</td><td>${st(e)}</td></tr>`).join("")}
+    </table></div>`).join("");
+  return `<details class="mod" id="m-${m.id}" data-st="${m.st}" data-ver="${m.ver}">
+    <summary><span class="mt">${esc(m.t)}</span> ${st(m.st)} <span class="ver">${m.ver}</span> ${m.routes.map((r) => `<code>${esc(r)}</code>`).join(" ")}
+      <span class="md">${esc(m.purpose)}</span></summary>
+    <div class="body">
+      <dl class="kv"><dt>Хэрэглэгч</dt><dd>${roles(m.roles.join(" "))}</dd><dt>Хуудас</dt><dd>${m.routes.map((r) => `<code>${esc(r)}</code>`).join(" ")}</dd></dl>
+      ${screens}
+      ${m.gaps.length ? `<h4>Дутуу ба алдаа</h4><ul class="gaps">${m.gaps.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>` : ""}
+      ${m.accept.length ? `<h4>Хүлээн авах шалгуур</h4><ul class="gaps">${m.accept.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>` : ""}
+      <p><button class="btn" type="button" data-copy-mod="${m.id}">Энэ модулийг Markdown-оор хуулах</button></p>
+    </div></details>`;
+}
+function moduleMd(m) {
+  return [`### ${m.t} [${ST_LABEL[m.st]}, ${m.ver}]`, `Хуудас: ${m.routes.join(", ")} — Хэрэглэгч: ${m.roles.join(", ")}`, "", m.purpose, "",
+    ...m.screens.flatMap((s) => [`#### ${s.t}`, "| Товч / үйлдэл | Юу болох | API | Эрх | Төлөв |", "|---|---|---|---|---|",
+      ...s.actions.map(([a, b, c, d, e]) => `| ${a} | ${b} | ${c || "—"} | ${d} | ${ST_LABEL[e]} |`), ""]),
+    m.gaps.length ? "**Дутуу ба алдаа:**\n" + m.gaps.map((g) => "- " + g).join("\n") : "",
+    m.accept.length ? "\n**Хүлээн авах шалгуур:**\n" + m.accept.map((g) => "- " + g).join("\n") : "", ""].join("\n");
+}
+const grpOrder = [...new Set(MODULES.map((m) => m.grp))];
+const modCounts = MODULES.reduce((a, m) => (a[m.st] = (a[m.st] || 0) + 1, a), {});
+section("modules", "3", "Модулиуд — дэлгэц, товч бүрийн үйлдэл", `
+  <p class="lead">${MODULES.length} модуль. Модуль дээр дарж дэлгэнэ. Мөр бүр: товч эсвэл үйлдэл, юу болох, ямар API дуудах, хэн хийж чадах, одоогийн төлөв.</p>
+  <p>${Object.entries(modCounts).map(([k, v]) => `${st(k)} ${v}`).join(" &nbsp; ")}</p>
+  ${grpOrder.map((g) => `<h3>${esc(g)}</h3>` + MODULES.filter((m) => m.grp === g).map(moduleHtml).join("")).join("")}
+`, () => "## 3. Модулиуд\n\n" + grpOrder.map((g) => `## ${g}\n\n` + MODULES.filter((m) => m.grp === g).map(moduleMd).join("\n")).join("\n"), "Функц");
+
+/* 4 — Аялал */
+section("journeys", "4", "Хэрэглэгчийн аялал (эхнээс төгсгөл хүртэл)", `
+  <p class="lead">Модулиуд хоорондоо хэрхэн холбогддог вэ. Аялал бүр E2E тестийн сценари болно (G30).</p>
+  ${JOURNEYS.map((j) => `<div class="card" style="margin:10px 0" data-st="${j.st}"><b>${esc(j.t)} ${st(j.st)}</b><ol class="steps">${j.steps.map((s) => `<li>${s.startsWith("ЦООРХОЙ") ? `<span style="color:var(--bug)"><b>${esc(s)}</b></span>` : esc(s)}</li>`).join("")}</ol></div>`).join("")}
+`, () => "## 4. Хэрэглэгчийн аялал\n\n" + JOURNEYS.map((j) => `### ${j.t} [${ST_LABEL[j.st]}]\n` + j.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")).join("\n\n"), "Функц");
+
+/* 5 — Өгөгдлийн загвар */
+section("data", "5", "Өгөгдлийн загвар", `
+  <p class="lead">67 модель, 42 enum, 33 миграци (<code>api/prisma/schema.prisma</code>). Бүх timestamp UTC-ээр хадгалагдана (STATUS §8.9).</p>
+  <div class="tablewrap"><table><tr><th>Домэйн</th><th>Модель</th></tr>${DATA_MODEL.map(([a, b]) => `<tr><td><b>${esc(a)}</b></td><td><code>${esc(b)}</code></td></tr>`).join("")}</table></div>
+  <div class="callout">Дутуу талбар: <code>User.archived</code> (сурагч гарах), бүртгэлийн зөвшөөрлийн огноо (хууль), <code>Problem.imageAlt</code>, мэдэгдлийн загвар (<code>Notification</code>), тохиргооны загвар (<code>Setting</code>).</div>
+`, () => "## 5. Өгөгдлийн загвар\n\n" + DATA_MODEL.map(([a, b]) => `- **${a}:** ${b}`).join("\n") + "\n\nДутуу: User.archived, зөвшөөрлийн огноо, Problem.imageAlt, Notification, Setting.", "Техник");
+
+/* 6 — NFR */
+section("nfr", "6", "Функциональ бус шаардлага — олон улсын стандарт", `
+  <p class="lead">Олон улсын startup-ууд нээлтийн өмнө заавал хангадаг суурь шаардлагууд, Pi.mn-ийн одоогийн байдалтай нь.</p>
+  ${NFR.map((a) => `<h3>${esc(a.area)} <span class="muted">— ${esc(a.std)}</span></h3>
+    <div class="tablewrap"><table><tr><th>Шаардлага</th><th>Төлөв</th><th>Тайлбар</th></tr>${a.items.map(([x, s, n]) => `<tr data-st="${s}"><td>${esc(x)}</td><td>${st(s)}</td><td class="muted">${esc(n)}</td></tr>`).join("")}</table></div>`).join("")}
+`, () => "## 6. Функциональ бус шаардлага\n\n" + NFR.map((a) => `### ${a.area} (${a.std})\n| Шаардлага | Төлөв | Тайлбар |\n|---|---|---|\n` + a.items.map(([x, s, n]) => `| ${x} | ${ST_LABEL[s]} | ${n} |`).join("\n")).join("\n\n"), "Техник");
+
+/* 7 — Цоорхой */
+section("gaps", "7", "Цоорхойн бүртгэл — юу дутуу, юу эвдэрсэн", `
+  <p class="lead">${GAPS.length} цоорхой. Энэ зун хийсэн ажлаас дутуу үлдсэн, холбогдоогүй, эвдэрсэн бүх зүйл нэг дор. ID-г commit мессежид ашигла.</p>
+  <p>${["P0", "P1", "P2", "P3"].map((p) => `<span class="pri ${p}">${p}</span> ${GAPS.filter((g) => g[1] === p).length}`).join(" &nbsp; ")}</p>
+  <div class="tablewrap"><table><tr><th>ID</th><th>Эрэмбэ</th><th>Ангилал</th><th>Юу</th><th>Хаана</th><th>Яах вэ</th><th>Хувилбар</th></tr>
+  ${GAPS.map(([id, p, c, t, w, f, v]) => `<tr data-ver="${v}"><td><b>${id}</b></td><td><span class="pri ${p}">${p}</span></td><td>${esc(c)}</td><td><b>${esc(t)}</b></td><td><code>${esc(w)}</code></td><td>${esc(f)}</td><td><span class="ver">${v}</span></td></tr>`).join("")}
+  </table></div>
+`, () => "## 7. Цоорхойн бүртгэл\n\n| ID | Эрэмбэ | Ангилал | Юу | Хаана | Яах вэ | Хувилбар |\n|---|---|---|---|---|---|---|\n" + GAPS.map((r) => `| ${r.join(" | ")} |`).join("\n"), "Төлөвлөгөө");
+
+/* 8 — Roadmap */
+section("roadmap", "8", "Хувилбарын төлөвлөгөө", `
+  ${ROADMAP.map((r) => `<div class="card" style="margin:10px 0"><b>${esc(r.v)}</b><p class="muted">${esc(r.goal)}</p><ul class="gaps">${r.items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}
+  <h3>Ажлын дүрэм (Definition of Done)</h3>
+  <ul class="gaps">
+    <li><code>cd api && npx tsc --noEmit && npx jest</code> ногоон</li>
+    <li><code>cd web && npx tsc --noEmit && npm run build</code> ногоон — tsc хангалтгүй</li>
+    <li><code>npm run smoke</code> — 4 дүр × бүх маршрут, 5xx байхгүй, эрхгүй хүнд 403</li>
+    <li>Апп боох шалгалт (STATUS §2): «Nest can't resolve» 0, «/api/api» 0</li>
+    <li>Эзний дүрэм: LaTeX, emoji/глиф байхгүй, өнгөний токен, 375px, хоосон/ачаалж буй/алдааны төлөв</li>
+    <li>Энэ баримт + STATUS.md шинэчлэгдсэн</li>
+  </ul>
+`, () => "## 8. Хувилбарын төлөвлөгөө\n\n" + ROADMAP.map((r) => `### ${r.v}\n${r.goal}\n` + r.items.map((x) => "- " + x).join("\n")).join("\n\n"), "Төлөвлөгөө");
+
+/* 9 — Асуултууд */
+section("questions", "9", "Эзний шийдвэр хүлээж буй асуултууд", `
+  <ol class="steps">${QUESTIONS.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
+`, () => "## 9. Эзний шийдвэр хүлээж буй асуултууд\n\n" + QUESTIONS.map((q, i) => `${i + 1}. ${q}`).join("\n"), "Төлөвлөгөө");
+
+/* 10 — API */
+function apiTable(filterNoUi) {
+  const rows = ENDPOINTS.filter((e) => !filterNoUi || !e.ui);
+  const mods = [...new Set(rows.map((e) => e.mod))].sort();
+  return mods.map((mod) => `<h4>${esc(mod)}</h4><div class="tablewrap"><table><tr><th>Арга</th><th>Зам</th><th>Эрх</th><th>Вэбэд ашиглагдсан</th></tr>${rows.filter((e) => e.mod === mod).map((e) => `<tr><td><code>${e.m}</code></td><td><code>/api${esc(e.p)}</code></td><td>${e.roles.map((r) => `<span class="role">${esc(ROLE_NAME[r] || r)}</span>`).join("")}</td><td>${e.ui ? st("ok") : st("none")}</td></tr>`).join("")}</table></div>`).join("");
+}
+section("api", "10", "API каталог (кодоос автоматаар)", `
+  <p class="lead">${ENDPOINTS.length} маршрут, үүнээс ${ENDPOINTS.filter((e) => !e.ui).length} нь вэбээс дуудагддаггүй (backend бэлэн, UI дутуу — эсвэл илүүдэл). «нэвтэрсэн бүгд» гэсэн маршрутуудыг G04-ийн дагуу эрхийн аудит хийнэ. Динамик замаар дуудагддаг цөөн маршрут «ашиглагдаагүй» гэж андуурагдсан байж болно.</p>
+  <p><label><input type="checkbox" id="apiNoUi"> Зөвхөн UI-гүйг харуулах</label></p>
+  <div id="apiBox">${apiTable(false)}</div>
+`, () => "## 10. API каталог\n\n| Модуль | Арга | Зам | Эрх | Вэбэд |\n|---|---|---|---|---|\n" + ENDPOINTS.map((e) => `| ${e.mod} | ${e.m} | /api${e.p} | ${e.roles.map((r) => ROLE_NAME[r] || r).join(", ")} | ${e.ui ? "тийм" : "үгүй"} |`).join("\n"), "Техник");
+
+/* ---------- Байршуулах ---------- */
+const main = $("#main"), toc = $("#toc");
+let lastGrp = "";
+for (const s of SECTIONS) {
+  const el = document.createElement("section");
+  el.className = "sec"; el.id = s.id;
+  el.innerHTML = `<div class="sec-actions"><button class="btn" type="button" data-copy="${s.id}">Markdown хуулах</button></div><h2>${s.num}. ${esc(s.title)}</h2>${s.html}`;
+  main.appendChild(el);
+  if (s.grp !== lastGrp) { toc.insertAdjacentHTML("beforeend", `<div class="grp">${esc(s.grp)}</div>`); lastGrp = s.grp; }
+  toc.insertAdjacentHTML("beforeend", `<a href="#${s.id}"><span class="num">${s.num}</span>${esc(s.title)}</a>`);
+  if (s.id === "modules") MODULES.forEach((m) => toc.insertAdjacentHTML("beforeend", `<a href="#m-${m.id}" style="padding-left:36px;font-size:12.5px">${esc(m.t)}</a>`));
+}
+
+/* ---------- Хуулах ---------- */
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
+async function copy(text) {
+  try { await navigator.clipboard.writeText(text); toast("Хуулагдлаа — ChatGPT руу буулгана уу"); }
+  catch { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast("Хуулагдлаа"); }
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-copy]"); if (b) { const s = SECTIONS.find((x) => x.id === b.dataset.copy); copy(s.md()); }
+  const m = e.target.closest("[data-copy-mod]"); if (m) copy(moduleMd(MODULES.find((x) => x.id === m.dataset.copyMod)));
+});
+$("#copyAll").onclick = () => copy(SECTIONS.map((s) => s.md()).join("\n\n---\n\n"));
+$("#expandAll").onclick = () => document.querySelectorAll("details.mod").forEach((d) => (d.open = true));
+$("#collapseAll").onclick = () => document.querySelectorAll("details.mod").forEach((d) => (d.open = false));
+$("#apiNoUi").onchange = (e) => { $("#apiBox").innerHTML = apiTable(e.target.checked); };
+
+/* ---------- Шүүлтүүр ба хайлт ---------- */
+function applyFilters() {
+  const q = $("#q").value.trim().toLowerCase(), fs = $("#fStatus").value, fv = $("#fVer").value;
+  document.querySelectorAll("details.mod").forEach((d) => {
+    const okS = !fs || d.dataset.st === fs || d.querySelector(`tr[data-st="${fs}"]`);
+    const okV = !fv || d.dataset.ver === fv;
+    const okQ = !q || d.textContent.toLowerCase().includes(q);
+    d.classList.toggle("hidden", !(okS && okV && okQ));
+    if (q && okQ) d.open = true;
+  });
+  document.querySelectorAll("#gaps tr[data-ver], #api tr, #nfr tr[data-st]").forEach((tr) => {
+    const okV = !fv || !tr.dataset.ver || tr.dataset.ver === fv;
+    const okS = !fs || !tr.dataset.st || tr.dataset.st === fs;
+    const okQ = !q || tr.textContent.toLowerCase().includes(q) || tr.querySelector("th");
+    tr.classList.toggle("hidden", !(okV && okS && okQ));
+  });
+}
+["input", "change"].forEach((ev) => { $("#q").addEventListener(ev, applyFilters); });
+$("#fStatus").addEventListener("change", applyFilters);
+$("#fVer").addEventListener("change", applyFilters);
+
+/* ---------- Hash холбоос (#m-payments гэх мэт) ---------- */
+function openHash() { const id = decodeURIComponent(location.hash.slice(1)); const el = id && document.getElementById(id); if (el && el.tagName === "DETAILS") el.open = true; }
+window.addEventListener("hashchange", openHash); openHash();
+</script>
+</body>
+</html>
