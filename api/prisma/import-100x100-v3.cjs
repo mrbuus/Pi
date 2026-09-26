@@ -2,15 +2,15 @@
 /**
  * 100x100 V3 импорт — ЗӨВХӨН A/B хувилбар (эзний дүрэм: C нь эзний хувийн материал).
  *
- * ⚠️ РЕПО НИЙТЭД НЭЭЛТТЭЙ (public). Тиймээс бодлого, хариуны түлхүүр, зургийг
- *    репод ОРУУЛАХГҮЙ. Энэ скрипт эзний Mac дээрх plan JSON болон зургийн
- *    хавтсаас уншина (Claude-ийн бэлдсэн `100x100-v3-plan.zip`-ийг задалсан).
+ * Өгөгдөл: api/prisma/data/100x100-v3/ (plan JSON + зургууд). Эзний шийдвэр
+ * (2026-09-27): репо одоохондоо нийтэд нээлттэй ч өгөгдлийг оруулж болно —
+ * нийтэд гаргахдаа репог private болгоно.
  *
  * Анхдагчаар DRY-RUN: ӨС-д юу ч бичихгүй, юу хийхийг л тоолж хэвлэнэ.
  *
- *   node prisma/import-100x100-v3.cjs --plan=~/Desktop/100x100-v3/plan-100x100-v3.json
- *   node prisma/import-100x100-v3.cjs --plan=... --commit            # ӨС-д бичнэ
- *   node prisma/import-100x100-v3.cjs --plan=... --commit --hide-others
+ *   node prisma/import-100x100-v3.cjs                       # dry-run
+ *   node prisma/import-100x100-v3.cjs --commit              # ӨС-д бичнэ
+ *   node prisma/import-100x100-v3.cjs --commit --hide-others
  *        # бусад бүх номыг archived=true (УСТГАХГҮЙ) — номын санд зөвхөн V3 харагдана
  *
  * Идемпотент: token (100V3-…)-оор upsert. Дахин ажиллуулахад давхардахгүй.
@@ -214,11 +214,7 @@ async function commit(prisma, built, { adminId, hideOthers }) {
 }
 
 async function main() {
-  const planPath = arg('plan');
-  if (!planPath) {
-    console.error('--plan=<plan-100x100-v3.json зам> заавал. Жишээ: --plan=~/Desktop/100x100-v3/plan-100x100-v3.json');
-    process.exit(2);
-  }
+  const planPath = arg('plan') ?? path.join(__dirname, 'data', '100x100-v3', 'plan-100x100-v3.json');
   const imagesDir = arg('images') ?? path.join(path.dirname(planPath), 'images');
   const plan = JSON.parse(fs.readFileSync(planPath, 'utf8'));
   const built = buildImport(plan, imagesDir);
