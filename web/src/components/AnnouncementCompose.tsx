@@ -104,7 +104,7 @@ export default function AnnouncementCompose() {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="chunky p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Төвийн самбар — зар тавих</h2>
       <p className="mb-4 text-sm text-ink-dim">
         Бүх сурагч, онлайн сурагчид эсвэл сонгосон ангиудад тусад нь зарлана.

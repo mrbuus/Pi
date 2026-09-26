@@ -54,7 +54,7 @@ export default function IndependentProgressTab({ studentId }: { studentId: strin
     <div className="space-y-6">
       <ActivityHeatmap studentId={studentId} />
 
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Онлайн шалгалтын дүн</h2>
 
         {resultsQ.status === "loading" && <SectionLoading label="Шалгалтын дүн" />}

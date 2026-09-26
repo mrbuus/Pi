@@ -71,7 +71,7 @@ function ChapterSample({ id }: { id: string }) {
       {sample.problems.map((p, i) => (
         <article
           key={p.id}
-          className="min-w-0 space-y-3 overflow-x-auto rounded-2xl border border-line bg-panel p-4"
+          className="min-w-0 space-y-3 overflow-x-auto chunky p-4"
         >
           <h3 className="text-sm font-semibold text-ink-dim">
             Бодлого {i + 1}

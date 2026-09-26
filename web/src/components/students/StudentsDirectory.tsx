@@ -190,7 +190,7 @@ export default function StudentsDirectory() {
       </div>
 
       {/* Хайлт + шүүлтүүр */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-panel p-4">
+      <div className="flex flex-col gap-3 chunky p-4">
         <label className="sr-only" htmlFor="student-search">
           Код, нэр, утасны дугаараар хайх
         </label>
@@ -321,7 +321,7 @@ export default function StudentsDirectory() {
       {!loading && !error && students && (
         <>
           {filtered.length === 0 ? (
-            <p className="rounded-2xl border border-line bg-panel p-8 text-center text-sm text-ink-dim">
+            <p className="chunky p-8 text-center text-sm text-ink-dim">
               Тохирох сурагч олдсонгүй
             </p>
           ) : (
@@ -416,7 +416,7 @@ export default function StudentsDirectory() {
                 ? "0 мөр"
                 : `${page * pageSize + 1}–${Math.min(filtered.length, (page + 1) * pageSize)} / ${filtered.length}`}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <label className="sr-only" htmlFor="page-size">
                 Хуудсанд харуулах тоо
               </label>
@@ -438,20 +438,20 @@ export default function StudentsDirectory() {
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
+                className="inline-flex items-center gap-1.5 min-h-11 min-w-11 justify-center rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden />
-                Өмнөх
+                <span className="sr-only sm:not-sr-only">Өмнөх</span>
               </button>
-              <span>
+              <span className="whitespace-nowrap tabular-nums">
                 {page + 1} / {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
+                className="inline-flex items-center gap-1.5 min-h-11 min-w-11 justify-center rounded-lg border border-line px-3 py-2 font-semibold text-ink-dim transition disabled:opacity-30"
               >
-                Дараах
+                <span className="sr-only sm:not-sr-only">Дараах</span>
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </button>
             </div>

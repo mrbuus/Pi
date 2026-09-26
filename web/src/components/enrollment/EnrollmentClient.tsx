@@ -271,7 +271,7 @@ export default function EnrollmentClient() {
 
       {!loading && !error && windows && (
         <>
-          <div className="rounded-2xl border border-line bg-panel p-4">
+          <div className="chunky p-4">
             <h2 className="text-sm font-bold text-ink">Бүгдийг нэг дор</h2>
             <p className="mt-1 text-xs text-ink-dim">
               Бүх 3 хичээлийн элсэлтийн ТӨЛӨВИЙГ нэг товчоор адилхан

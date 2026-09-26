@@ -273,7 +273,7 @@ export default function ClassroomDetailClient({ classroomId }: { classroomId: st
 
       {isAdmin && teachersError && <ErrorState message={teachersError} onRetry={() => void openEdit()} />}
       {teachersLoading && <LoadingState rows={2} label="Багшийн жагсаалт ачаалж байна" />}
-      {intent?.kind === 'edit' && <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5" aria-labelledby="class-edit-heading">
+      {intent?.kind === 'edit' && <section className="chunky p-4 sm:p-5" aria-labelledby="class-edit-heading">
         <div className="flex items-start justify-between gap-3"><div><h2 id="class-edit-heading" className="text-lg font-bold text-ink">Ангийн мэдээлэл засах</h2><p className="mt-1 text-sm text-ink-dim">Нэр, төрөл, анги болон хариуцсан багшийг өөрчилнө.</p></div><button type="button" onClick={() => setIntent(null)} aria-label="Засвар хаах" className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-ink-dim hover:bg-surface focus-visible:outline-2 focus-visible:outline-brand"><X size={18} aria-hidden /></button></div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Ангийн нэр" htmlFor="class-name"><input id="class-name" required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className={inputClass} /></Field>

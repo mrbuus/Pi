@@ -103,7 +103,7 @@ export default function ConsentPage() {
           else setOpen(false);
         }}
         aria-labelledby="consent-heading"
-        className="m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-lg overflow-auto rounded-2xl border border-line bg-panel p-5 text-ink backdrop:bg-ink/40"
+        className="m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-lg overflow-auto chunky p-5 text-ink backdrop:bg-ink/40"
       >
         <form onSubmit={submit} className="space-y-4">
           <h2 id="consent-heading" className="text-xl font-bold">

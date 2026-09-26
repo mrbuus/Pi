@@ -32,7 +32,7 @@ interface SummarySectionProps {
 export default function SummarySection({ summary }: SummarySectionProps) {
   if (!summary) {
     return (
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">
           Өчигдрийн/өнөөдрийн дүгнэлт
         </h2>
@@ -46,7 +46,7 @@ export default function SummarySection({ summary }: SummarySectionProps) {
   const { stats } = summary;
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <h2 className="mb-4 font-bold text-brand-soft">
         Өчигдрийн/өнөөдрийн дүгнэлт
       </h2>

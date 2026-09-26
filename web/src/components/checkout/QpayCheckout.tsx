@@ -322,7 +322,7 @@ export default function QpayCheckout({
   };
 
   return (
-    <div className={`rounded-2xl border border-line bg-panel p-5 sm:p-6 ${className}`}>
+    <div className={`chunky p-5 sm:p-6 ${className}`}>
       {/* Дэлгэцийн уншигчид зориулж — төлөв өөрчлөгдөх бүрт дуудагдана */}
       <p aria-live="polite" role="status" className="sr-only">
         {statusLine[state]}

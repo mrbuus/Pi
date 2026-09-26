@@ -50,7 +50,7 @@ export type { AttentionResponse };
 
 export default function AttentionSection({ attention }: AttentionSectionProps) {
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="font-bold text-brand-soft">Анхаарах</h2>

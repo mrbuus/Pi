@@ -36,7 +36,7 @@ export default function GoalForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-line bg-panel p-4 md:p-6"
+      className="chunky p-4 md:p-6"
     >
       <h2 className="mb-4 font-bold text-brand-soft">Шинэ зорилго нэмэх</h2>
 

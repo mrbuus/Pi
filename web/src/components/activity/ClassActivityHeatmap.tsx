@@ -74,7 +74,7 @@ export default function ClassActivityHeatmap({
 
   if (loading) {
     return (
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-2 font-bold text-brand-soft">Ангийн идэвхийн түүх</h2>
         <LoadingState rows={3} label="Ачаалж байна" />
       </section>
@@ -83,7 +83,7 @@ export default function ClassActivityHeatmap({
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-2 font-bold text-brand-soft">Ангийн идэвхийн түүх</h2>
         <p className="text-sm text-error">{error}</p>
       </section>
@@ -95,7 +95,7 @@ export default function ClassActivityHeatmap({
   const yearLabel = activeYear === currentYear ? "Энэ жил" : `${activeYear} онд`;
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h2 className="font-bold text-brand-soft">Ангийн идэвхийн түүх</h2>
         <div className="flex items-center gap-2 text-sm">
