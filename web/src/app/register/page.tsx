@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check } from "lucide-react";
+import ConsentFields, { EMPTY_CONSENT, PRIVACY_VERSION, consentReady } from "@/components/consent/ConsentFields";
 import LogoMark from "@/components/LogoMark";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, setAuth } from "@/lib/api";
@@ -69,6 +70,7 @@ function isStudentKind(kind: Kind): kind is "CLASSROOM" | "ONLINE" {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [consent, setConsent] = useState(EMPTY_CONSENT);
   const [kind, setKind] = useState<Kind | null>(null);
   const [form, setForm] = useState({
     lastName: "",
@@ -114,9 +116,11 @@ export default function RegisterPage() {
     setSubmitError("");
     if (!kind) return;
     if (!validate(kind)) return;
+    if (!consentReady(consent)) { setSubmitError("Нөхцөл, насны ангилал болон зөвшөөрлөө сонгоно уу"); return; }
     setLoading(true);
     try {
       const body: Record<string, unknown> = {
+        ...consent, privacyVersion: PRIVACY_VERSION,
         phone: form.phone,
         firstName: form.firstName,
         lastName: form.lastName,
@@ -448,6 +452,8 @@ export default function RegisterPage() {
               </div>
             )}
 
+            <ConsentFields value={consent} onChange={setConsent} disabled={loading} />
+
             {submitError && (
               <p role="alert" className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
                 {submitError}
@@ -456,7 +462,7 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !consentReady(consent)}
               aria-busy={loading}
               className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
             >

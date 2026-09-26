@@ -44,6 +44,9 @@ model User {
   // харьцуулж, түүнээс ӨМНӨ олгогдсон бүх токеныг хүчингүйд тооцно. Ингэснээр
   // нууц үгээ сэргээхэд хулгайлагдсан сесс автоматаар тасарна — сэргээлтийн
   // гол утга учир нь энэ (эс бөгөөс халдагч хуучин токеноороо орсоор байна).
+  termsAcceptedAt    DateTime?
+  privacyVersion     String?
+  guardianConsentAt  DateTime?
   passwordChangedAt  DateTime?
   role               Role
   avatarUrl          String?

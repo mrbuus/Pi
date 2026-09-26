@@ -1,3 +1,5 @@
+import { ConsentController } from './consent.controller';
+import { ConsentService } from './consent.service';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -22,8 +24,14 @@ import { GoogleAuthService } from './google/google-auth.service';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  controllers: [AuthController, GoogleAuthController],
-  providers: [AuthService, JwtStrategy, PasswordResetService, GoogleAuthService],
+  controllers: [AuthController, GoogleAuthController, ConsentController],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    PasswordResetService,
+    GoogleAuthService,
+    ConsentService,
+  ],
   // PasswordResetService-ийг UsersModule мөн ашиглана (ажилтан сурагчийн
   // өмнөөс код илгээх).
   exports: [AuthService, PasswordResetService],

@@ -12,13 +12,14 @@ import {
   MinLength,
   Min,
 } from 'class-validator';
+import { ConsentDto } from './consent.dto';
 import { StudentType } from '../../generated/prisma/enums';
 
 // Сурагчийн хичээл — сурагчийн кодын үсгийг тодорхойлно (common/codes.ts):
 // MATH -> M, SOCIAL_STUDIES -> N, BOTH -> B (эсвэл заагаагүй бол мөн B)
 export type RegisterSubject = 'MATH' | 'SOCIAL_STUDIES' | 'BOTH';
 
-export class RegisterDto {
+export class RegisterDto extends ConsentDto {
   // Утас эсвэл имэйл аль нэг нь заавал (доор service шалгана).
   @IsOptional()
   @Matches(/^\d{8}$/, { message: 'Утасны дугаар 8 оронтой байх ёстой' })

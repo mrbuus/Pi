@@ -1,0 +1,18 @@
+[
+  {
+    "width": 375,
+    "legalDraft": true,
+    "minorRequiresGuardian": true,
+    "oldUserCanDismiss": true,
+    "retry": true,
+    "noRepeatedDialog": true
+  },
+  {
+    "width": 1280,
+    "legalDraft": true,
+    "minorRequiresGuardian": true,
+    "oldUserCanDismiss": true,
+    "retry": true,
+    "noRepeatedDialog": true
+  }
+]
