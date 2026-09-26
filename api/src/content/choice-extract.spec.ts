@@ -93,6 +93,77 @@ describe('extractChoices', () => {
     expect(result.confidence).toBeLessThan(0.9);
   });
 
+  it.each([
+    [
+      'Бодлого \\text{A. fake B. fake C. fake D. fake E. fake}. A. real A B. real B C. real C D. real D E. real E',
+      ['real A', 'real B', 'real C', 'real D', 'real E'],
+    ],
+    [
+      'Нөхцөл {\\text{(A) fake (Б) fake}}. А. бодит А Б) бодит Б (В) бодит В Г. бодит Г Д. бодит Д',
+      ['бодит А', 'бодит Б', 'бодит В', 'бодит Г', 'бодит Д'],
+    ],
+    [
+      'Бодлого. a. alpha b. beta c. gamma d. delta e. epsilon',
+      ['alpha', 'beta', 'gamma', 'delta', 'epsilon'],
+    ],
+    [
+      'Бодлого. а. альфа б. бета в. гамма г. дельта д. эпсилон',
+      ['альфа', 'бета', 'гамма', 'дельта', 'эпсилон'],
+    ],
+    [
+      'Бодлого. A. \\frac{1}{2}\\hspace{1cm}B. \\sqrt{2}\\hspace{1cm}C. 3\\hspace{1cm}D. 4\\hspace{1cm}E. 5',
+      ['\\frac{1}{2}', '\\sqrt{2}', '3', '4', '5'],
+    ],
+    [
+      'Бодлого. A. {x+1} B. {x+2} C. {x+3} D. {x+4} E. {x+5}',
+      ['{x+1}', '{x+2}', '{x+3}', '{x+4}', '{x+5}'],
+    ],
+    [
+      'Бодлого. A. $\\{1,2\\}$ B. $\\{2,3\\}$ C. $\\{3,4\\}$ D. $\\{4,5\\}$ E. $\\{5,6\\}$.',
+      [
+        '$\\{1,2\\}$',
+        '$\\{2,3\\}$',
+        '$\\{3,4\\}$',
+        '$\\{4,5\\}$',
+        '$\\{5,6\\}$.',
+      ],
+    ],
+    [
+      'Бодлого. A. \\text{сонголт A.} B. \\text{сонголт B.} C. \\text{сонголт C.} D. \\text{сонголт D.} E. \\text{сонголт E.}',
+      [
+        '\\text{сонголт A.}',
+        '\\text{сонголт B.}',
+        '\\text{сонголт C.}',
+        '\\text{сонголт D.}',
+        '\\text{сонголт E.}',
+      ],
+    ],
+    [
+      'Бодлого. (A) нэг (B) хоёр (C) гурав (D) дөрөв (E) тав',
+      ['нэг', 'хоёр', 'гурав', 'дөрөв', 'тав'],
+    ],
+  ])('handles nested markup and label edge cases', (statement, expected) => {
+    const result = extractChoices(statement);
+    expect(result.choices).toEqual(expected);
+  });
+
+  it.each([
+    ['Бодлого. A. $\\frac{1}{2} B. 2 C. 3 D. 4 E. 5', 'UNBALANCED_MATH'],
+    ['Бодлого. A. $\\frac{1}{2}$ B. {2 C. 3 D. 4 E. 5', 'UNBALANCED_BRACES'],
+    ['Бодлого. A. $\\frac{1}{2}$ B. 2} C. 3 D. 4 E. 5', 'UNBALANCED_BRACES'],
+    [
+      'Бодлого. A. \\begin{aligned} x B. 2 C. 3 D. 4 E. 5',
+      'UNBALANCED_LATEX_ENVIRONMENT',
+    ],
+  ])(
+    'rejects malformed delimiters and LaTeX groups',
+    (statement, expectedIssue) => {
+      const result = extractChoices(statement);
+      expect(result.choices).toEqual([]);
+      expect(result.issues[0]?.code).toBe(expectedIssue);
+    },
+  );
+
   it('keeps legacy letter grading and grades newly structured options by the same key', () => {
     const oldLetterSession = gradeAnswer(
       {

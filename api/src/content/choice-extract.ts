@@ -17,6 +17,7 @@ export type ChoiceExtractionIssueCode =
   | 'EMPTY_STEM'
   | 'EMPTY_OPTION'
   | 'UNBALANCED_MATH'
+  | 'UNBALANCED_BRACES'
   | 'UNBALANCED_LATEX_ENVIRONMENT'
   | 'UNSAFE_FRAGMENT';
 
@@ -136,6 +137,25 @@ function hasBalancedLatexEnvironments(text: string): boolean {
   return stack.length === 0;
 }
 
+function hasBalancedBraces(text: string): boolean {
+  let depth = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    if ((text[i] !== '{' && text[i] !== '}') || isEscaped(text, i)) continue;
+    depth += text[i] === '{' ? 1 : -1;
+    if (depth < 0) return false;
+  }
+  return depth === 0;
+}
+
+function isInsideBraces(text: string, index: number): boolean {
+  let depth = 0;
+  for (let i = 0; i < index; i += 1) {
+    if ((text[i] !== '{' && text[i] !== '}') || isEscaped(text, i)) continue;
+    depth += text[i] === '{' ? 1 : -1;
+  }
+  return depth > 0;
+}
+
 function trimSeparators(text: string): string {
   let result = text.trim();
   let previous = '';
@@ -198,7 +218,11 @@ function isBoundary(text: string, index: number): boolean {
   const previous = text[index - 1];
   if (/\s/.test(previous)) return true;
   const before = text.slice(0, index);
-  if (/\\(?:qquad|quad|enspace|;|,|\\)$/.test(before)) return true;
+  if (
+    /\\(?:qquad|quad|enspace|;|,|\\)$/.test(before) ||
+    /\\hspace\{[^{}]*\}$/.test(before)
+  )
+    return true;
   // Inline math options may directly follow a closing math delimiter.
   if (previous !== '$') return false;
   if (mathScan(before).balanced) return true;
@@ -211,7 +235,8 @@ function collectMarkers(text: string): Marker[] {
   MARKER_RE.lastIndex = 0;
   for (const match of text.matchAll(MARKER_RE)) {
     const start = match.index ?? -1;
-    if (start < 0 || !isBoundary(text, start)) continue;
+    if (start < 0 || isInsideBraces(text, start) || !isBoundary(text, start))
+      continue;
     const raw = match[1] ?? match[2];
     if (!raw) continue;
     const end = start + match[0].length;
@@ -264,6 +289,12 @@ export function extractChoices(
     return failure(
       source,
       issue('EMPTY_STATEMENT', 'Бодлогын текст хоосон байна.'),
+    );
+  }
+  if (!hasBalancedBraces(source)) {
+    return failure(
+      source,
+      issue('UNBALANCED_BRACES', 'Текстийн `{` ба `}` тэнцвэргүй байна.'),
     );
   }
 
