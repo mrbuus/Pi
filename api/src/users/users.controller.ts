@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   BadRequestException,
   Body,
@@ -33,21 +34,25 @@ import { ArchiveStudentDto, CommitStudentImportDto } from './students.dto';
 import { UsersService } from './users.service';
 
 class SetTeacherStatusDto {
+  @ApiProperty({ type: Boolean })
   @IsBoolean()
   plus!: boolean;
 
+  @ApiPropertyOptional({ type: Boolean })
   @IsOptional()
   @IsBoolean()
   canManageStudents?: boolean;
 }
 
 class PromoteDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   phone!: string;
 }
 
 class SetUserRoleDto {
+  @ApiProperty({ enum: Role })
   @IsEnum(Role)
   role!: Role;
 }

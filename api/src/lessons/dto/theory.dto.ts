@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -15,11 +16,13 @@ import {
 export const UPLOAD_KEY_REGEX = /^[\w][\w.-]*$/;
 
 export class CreateTheoryDto {
+  @ApiProperty({ type: String, minLength: 1, maxLength: 200 })
   @IsString()
   @MinLength(1, { message: 'Гарчиг хоосон байж болохгүй' })
   @MaxLength(200, { message: 'Гарчиг 200 тэмдэгтээс хэтрэхгүй байх ёстой' })
   title: string;
 
+  @ApiProperty({ type: String, minLength: 1, maxLength: 50000 })
   @IsString()
   @MinLength(1, { message: 'Онолын агуулга хоосон байж болохгүй' })
   @MaxLength(50000, {
@@ -27,6 +30,7 @@ export class CreateTheoryDto {
   })
   content: string;
 
+  @ApiPropertyOptional({ type: [String], maxItems: 50 })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(50)
@@ -36,12 +40,14 @@ export class CreateTheoryDto {
 }
 
 export class UpdateTheoryDto {
+  @ApiPropertyOptional({ type: String, minLength: 1, maxLength: 200 })
   @IsOptional()
   @IsString()
   @MinLength(1, { message: 'Гарчиг хоосон байж болохгүй' })
   @MaxLength(200, { message: 'Гарчиг 200 тэмдэгтээс хэтрэхгүй байх ёстой' })
   title?: string;
 
+  @ApiPropertyOptional({ type: String, minLength: 1, maxLength: 50000 })
   @IsOptional()
   @IsString()
   @MinLength(1, { message: 'Онолын агуулга хоосон байж болохгүй' })
@@ -50,6 +56,7 @@ export class UpdateTheoryDto {
   })
   content?: string;
 
+  @ApiPropertyOptional({ type: [String], maxItems: 50 })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(50)
@@ -59,6 +66,7 @@ export class UpdateTheoryDto {
 }
 
 export class ReorderTheoryDto {
+  @ApiProperty({ type: [String], minItems: 1 })
   @IsArray()
   @ArrayMinSize(1)
   @IsString({ each: true })

@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -30,25 +31,30 @@ import { TuitionService } from './tuition.service';
 // ЧИМЭЭГҮЙ хасагддаг — өмнө нь эдгээр DTO декораторгүй байсан тул буцаалт
 // үүсгэх, олгох, цуцлах бүх хүсэлт хоосон биетэй сервис рүү очдог байв.
 export class CreateRefundDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   studentId!: string;
 
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   classroomId!: string;
 
+  @ApiProperty({ type: String })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна' })
   leftOn!: string;
 }
 
 export class MarkAsPaidDto {
+  @ApiPropertyOptional({ enum: ['CASH', 'BANK_TRANSFER', 'QPAY'] })
   @IsOptional()
   @IsIn(['CASH', 'BANK_TRANSFER', 'QPAY'])
   paymentMethod?: string;
 }
 
 export class CancelRefundDto {
+  @ApiPropertyOptional({ type: String, maxLength: 1000 })
   @IsOptional()
   @IsString()
   @MaxLength(1000)
