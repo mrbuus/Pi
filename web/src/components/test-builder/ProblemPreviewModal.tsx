@@ -66,7 +66,7 @@ export default function ProblemPreviewModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="problem-preview-title"
-      className="fixed inset-0 z-40 flex items-center justify-center bg-brand/60 p-4"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-ink/50 p-4"
       onClick={onClose}
     >
       <div
