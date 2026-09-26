@@ -145,7 +145,7 @@ export default function NewTestPage() {
   useEffect(() => {
     let cancelled = false;
     const role = getRole();
-    if (role !== "ADMIN" && role !== "TEACHER") {
+    if (role !== "ADMIN" && role !== "TEACHER_PLUS" && role !== "TEACHER") {
       return;
     }
     api<{ id: string }>("/auth/me")

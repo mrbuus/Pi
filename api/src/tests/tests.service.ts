@@ -123,7 +123,7 @@ export class TestsService {
   }
 
   private assertDraftRole(actorRole: Role) {
-    if (actorRole !== Role.ADMIN && actorRole !== Role.TEACHER) {
+    if (actorRole !== Role.ADMIN && actorRole !== Role.TEACHER_PLUS && actorRole !== Role.TEACHER) {
       throw new ForbiddenException(
         'Ноорогийг зөвхөн админ эсвэл багш удирдана',
       );
@@ -139,7 +139,7 @@ export class TestsService {
     const draft = await this.prisma.testDraft.findUnique({
       where: { id: draftId },
     });
-    if (!draft || (actorRole === Role.TEACHER && draft.ownerId !== actorId)) {
+    if (!draft || (actorRole !== Role.ADMIN && draft.ownerId !== actorId)) {
       throw new NotFoundException('Ноорог олдсонгүй');
     }
     return draft;
@@ -172,7 +172,7 @@ export class TestsService {
     await this.findDraftForActor(draftId, actorId, actorRole);
     const state = this.draftState(dto);
     const where =
-      actorRole === Role.TEACHER
+      actorRole !== Role.ADMIN
         ? { id: draftId, ownerId: actorId, revision: dto.expectedRevision }
         : { id: draftId, revision: dto.expectedRevision };
     // The UPDATE holds the row lock until the matching snapshot is read.
@@ -200,7 +200,7 @@ export class TestsService {
   async deleteTestDraft(draftId: string, actorId: string, actorRole: Role) {
     await this.findDraftForActor(draftId, actorId, actorRole);
     const where =
-      actorRole === Role.TEACHER
+      actorRole !== Role.ADMIN
         ? { id: draftId, ownerId: actorId }
         : { id: draftId };
     await this.prisma.testDraft.deleteMany({ where });
@@ -356,7 +356,7 @@ export class TestsService {
       null,
       duplicate,
     );
-    return duplicate;
+    return { ...duplicate, problems: source.problems.length };
   }
 
   async editInfo(testId: string, actorId: string, actorRole: Role) {

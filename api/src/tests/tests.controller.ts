@@ -42,19 +42,19 @@ export class TestsController {
     return this.tests.create(dto, req.user.userId);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Post('drafts')
   createDraft(@Body() dto: CreateTestDraftDto, @Req() req: AuthedRequest) {
     return this.tests.createTestDraft(dto, req.user.userId, req.user.role);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('drafts/:id')
   getDraft(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.getTestDraft(id, req.user.userId, req.user.role);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Patch('drafts/:id')
   updateDraft(
     @Param('id') id: string,
@@ -64,7 +64,7 @@ export class TestsController {
     return this.tests.updateTestDraft(id, dto, req.user.userId, req.user.role);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Delete('drafts/:id')
   deleteDraft(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.deleteTestDraft(id, req.user.userId, req.user.role);

@@ -141,6 +141,14 @@ describe('TestsService duplicate and server-side draft behavior', () => {
     expect(prisma.testDraft.updateMany).not.toHaveBeenCalled();
   });
 
+  it('allows teacher-plus drafts but never another teacher draft', async () => {
+    await service.createTestDraft({ title: 'Own draft' }, 'teacher-1', Role.TEACHER_PLUS);
+    await expect(service.getTestDraft('draft-1', 'teacher-1', Role.TEACHER_PLUS)).resolves.toMatchObject({ ownerId: 'teacher-1' });
+    await expect(service.getTestDraft('draft-1', 'other', Role.TEACHER_PLUS)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.updateTestDraft('draft-1', { expectedRevision: 1 }, 'other', Role.TEACHER_PLUS)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.deleteTestDraft('draft-1', 'other', Role.TEACHER_PLUS)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
   it('autosaves with an owner-scoped expected revision and increments the version', async () => {
     await service.updateTestDraft(
       'draft-1',
@@ -157,7 +165,7 @@ describe('TestsService duplicate and server-side draft behavior', () => {
     });
   });
 
-  it.each([Role.STUDENT, Role.PARENT, Role.TEACHER_PLUS, Role.BUYER])(
+  it.each([Role.STUDENT, Role.PARENT, Role.BUYER])(
     'rejects draft access for %s',
     async (role) => {
       await expect(
@@ -242,6 +250,7 @@ describe('POST /tests/:id/duplicate (G36)', () => {
       isDraft: true,
       createdById: 'teacher-1',
     });
+    expect(res.problems).toBe(ownerSource.problems.length);
     expect(created[0]).toMatchObject({
       createdById: 'teacher-1',
       price: null,
