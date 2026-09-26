@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, KeyRound, TriangleAlert } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, setAuth } from "@/lib/api";
 
@@ -249,6 +250,9 @@ export default function LoginPage() {
             {loading ? "Нэвтэрч байна…" : "Нэвтрэх"}
           </button>
         </form>
+
+        {/* Google-ээр нэвтрэх — сервер тохируулаагүй бол харагдахгүй */}
+        <GoogleSignInButton />
 
         {/* ---------- Сэргээх зам ----------
             Хоёр удаа бүтэлгүйтсэний дараа энэ нь жижиг холбоос байхаа болиод

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ChangePasswordSection from "@/components/profile/ChangePasswordSection";
+import GoogleLinkSection from "@/components/profile/GoogleLinkSection";
 import ProfileInfo from "@/components/profile/ProfileInfo";
 import ProfilePhoto from "@/components/profile/ProfilePhoto";
 import { api } from "@/lib/api";
@@ -73,6 +74,8 @@ export default function ProfilePage() {
       </section>
 
       <ProfileInfo me={me} role={me.role} />
+
+      <GoogleLinkSection />
 
       <ChangePasswordSection />
     </div>

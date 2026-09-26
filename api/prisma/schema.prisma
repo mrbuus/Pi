@@ -96,6 +96,12 @@ model User {
 
   passwordResetTokens PasswordResetToken[]
 
+  // Google-ээр нэвтрэх (20260908_add_google_identity_auth). Нэг хэрэглэгч ↔ нэг
+  // Google бүртгэл. Шинэ бүртгэл Google-ээр ҮҮСГЭХГҮЙ — зөвхөн холбосон хүн нэвтэрнэ.
+  googleIdentity       GoogleIdentity?
+  googleOAuthStates    GoogleOAuthState[]
+  googleLoginExchanges GoogleLoginExchange[]
+
   // SMS: бүртгэл, загвар, батч
   smsMessagesAsRecipient SmsMessage[]      @relation("SmsMessageRecipient")
   smsMessagesAsCreator   SmsMessage[]      @relation("SmsMessageCreatedBy")
@@ -1764,4 +1770,57 @@ model StreakFreeze {
   createdAt DateTime @default(now())
 
   @@unique([studentId, date])
+}
+
+// ============================================================================
+// Google OAuth (authorization code flow, сервер талд).
+//
+// Урсгал: вэб → GET /auth/google/url (эсвэл POST /auth/google/link) → Google →
+// GET /auth/google/callback (state шалгана, code-ыг токеноор солино, id_token-ийг
+// шалгана) → вэб /auth/google?code=<нэг удаагийн> → POST /auth/google/exchange →
+// JWT. Нууц утгуудын зөвхөн SHA-256 хэшийг хадгална.
+// ============================================================================
+
+enum GoogleOAuthPurpose {
+  LOGIN
+  LINK
+}
+
+model GoogleIdentity {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  googleSubject String   @unique // id_token-ийн `sub` — имэйл солигдсон ч тогтвортой
+  email         String
+  pictureUrl    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GoogleOAuthState {
+  id         String             @id @default(cuid())
+  stateHash  String             @unique
+  purpose    GoogleOAuthPurpose
+  userId     String? // LINK үед холбох хэрэглэгч
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime           @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model GoogleLoginExchange {
+  id         String    @id @default(cuid())
+  codeHash   String    @unique
+  userId     String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
 }
