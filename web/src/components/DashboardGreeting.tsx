@@ -93,7 +93,7 @@ export default function DashboardGreeting() {
         onClick={() => fileRef.current?.click()}
         disabled={uploading}
         title="Профайл зураг солих"
-        className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-line bg-brand-bright/15 text-lg font-extrabold text-brand-soft transition hover:border-brand-bright/50 disabled:opacity-60"
+        className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-line bg-brand-bright/15 text-lg font-extrabold text-brand-soft transition hover:border-brand-bright/50 disabled:opacity-60"
       >
         {me.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -156,7 +156,7 @@ export default function DashboardGreeting() {
             <Link
               key={href}
               href={href}
-              className="group flex min-h-24 flex-col justify-between rounded-2xl border border-line bg-panel p-4 transition hover:-translate-y-0.5 hover:border-brand-bright/40 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="group chunky chunky-press flex min-h-24 flex-col justify-between p-4"
             >
               <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tone}`}>
                 <Icon className="h-5 w-5" aria-hidden />

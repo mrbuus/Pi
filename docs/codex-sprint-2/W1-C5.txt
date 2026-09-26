@@ -1,0 +1,288 @@
+# НИЙТЛЭГ ЗААВАР (даалгавар бүрт хамаарна)
+
+Чи Pi.mn (Монголын ЭЕШ-ийн бэлтгэлийн сургалтын төвийн платформ, NestJS API
++ Next.js вэб) дээр БИЕ ДААН ажиллана. Эзэн асуултад хариулах боломжгүй.
+Эргэлзвэл хамгийн аюулгүй, хамгийн жижиг, буцаах боломжтой шийдлийг сонго.
+Сонголтоо PR тайлбарын «Эзэн шийдэх» хэсэгт бич. Ажлыг дундаас нь бүү орхи:
+гацвал шалтгаанаа бичээд дараагийн дэд ажил руу шилж, эцэст нь PR заавал нээ.
+Энэ даалгавар урт, том. Хугацаа бүү хэмн. Чанар, бүрэн байдал, тест хамгийн чухал.
+
+## 0. Эхлэхийн өмнө
+- Repo: `mrbuus/Pi`. Суурь салбар: `claude/100-dollar-credit-usage-ksqjev`
+  (хамгийн сүүлийн commit, 49814f3 ба түүнээс хойш).
+- Заавал унш: `STATUS.md` (бүхэлд нь: §2 шалгалт, §3 эзний дүрэм, §6 дизайны
+  гэрээ, §7 дэд системүүд, §8 урхи), `CLAUDE.md`, `web/AGENTS.md`,
+  `web/src/components/ui/kit/README.md`, `api/prisma/schema.prisma`.
+- Next.js 16.2 нь сургалтын өгөгдлөөс ЯЛГААТАЙ. Web код бичихийн өмнө
+  `web/node_modules/next/dist/docs/`-оос холбогдох хэсгийг унш.
+- Стек: NestJS, Prisma 7.8 + `@prisma/adapter-pg`, Next.js 16.2 App Router,
+  Tailwind v4, KaTeX (`components/MathText.tsx`: `$...$` мөр дотор,
+  `$$...$$` тусдаа мөр).
+- Суурь шалгалтыг ЭХЛЭЭД ажиллуулж тоог нь PR-д бич:
+  `cd api && npx tsc --noEmit && npx jest`,
+  `cd web && npx tsc --noEmit && npx eslint src && npm run build`,
+  `cd e2e && npx playwright test`. Эдгээр тоо буурах ЁСГҮЙ.
+
+## 1. ХАТУУ ДҮРЭМ (зөрчвөл PR буцаагдана)
+1. `main` руу push/merge ХОРИОТОЙ. Force-push хориотой. PR-ийн base =
+   `claude/100-dollar-credit-usage-ksqjev` (эсвэл хамаарах даалгаврын салбар:
+   тэр тохиолдолд PR-д «<салбар>-аас хамаарна» гэж бич). Салбарын нэр:
+   `codex/s2-<ДААЛГАВАР>-<богино-нэр>`. Нэг даалгавар = нэг PR.
+2. Математик бичвэр ҮРГЭЛЖ LaTeX (`MathText`). `π ² · ≤ √ ∞` гэх мэт unicode
+   математик тэмдэгт кодод ч, өгөгдөлд ч хориотой: `\pi`, `^2`, `\cdot`, `\le`,
+   `\sqrt{}`, `\infty` бич.
+3. Emoji, unicode глиф (`✓ ✗ → • ★`) хориотой. Зөвхөн `lucide-react` дүрс.
+   Тусгаарлагч цэгийг `components/ui/Meta.tsx`-ээр.
+4. Өнгө зөвхөн токеноор (`bg-brand`, `text-ink-dim`, `bg-accent-teal/15`,
+   `text-success`, `border-line` …). `bg-blue-600`, `#hex`, `text-green-500`
+   хориотой. Гадны CDN, гадны зураг хориотой. Фонт (Onest + Unbounded)
+   `web/public/fonts`-оос өөрөө хост хийгдсэн. `next/font/google` ХЭРЭГЛЭХГҮЙ
+   (CI build сүлжээгүй үед унадаг). Шинэ фонт нэмэхгүй.
+5. UI-г `web/src/components/ui/kit/`-ээс бүтээ (Button, Card, Badge, Progress,
+   Tabs, Drawer, Toaster). Мэдэгдэл `toast` (sonner). Шинэ дизайн нь «chunky 3D»:
+   карт `chunky` utility (2px хүрээ + 4px доод хүрээ, radius 1.5rem), дарагддаг
+   хавтан `chunky chunky-press`, товч `btn-3d`. Жишээ:
+   `web/src/app/app/library/page.tsx`, `components/payments/PaidUntilCard.tsx`,
+   `components/activity/StreakWeekCard.tsx`. Өнгөлөг, урам өгөх (Duolingo /
+   Khan Academy хэв маяг). Гэхдээ «AI-аар хийсэн» мэт ерөнхий харагдах ёсгүй.
+6. Web-ээс API дуудахдаа ЗӨВХӨН `web/src/lib/api.ts`-ийн `api()` / `uploadFile()`.
+   Түүхий `fetch("/api/…")` хориотой (прод дээр вэб Vercel, API Render дээр).
+7. Mobile-first: 375px өргөнд хэвтээ гүйлгэлтгүй, товч 44px-ээс багагүй. Утас болон
+   компьютер хоёулаа адил чухал. Дэлгэц бүрт loading / empty / error төлөв
+   (`components/ui/StateBlock.tsx`). `"use client"`-ийг мартахгүй.
+8. Гараг: эзэн 1=Даваа…7=Ням, ӨС нь JS 0=Ням…6=Бямба.
+9. Хэрэглэгчийн анхны нууц үг = утасны дугаар (эзний дүрэм). Нууц үгийн
+   бодлого (үсэг+тоо), `auth/*` DTO-д Claude ажиллаж байна. ХҮРЭХГҮЙ.
+10. Backend: контроллер бүр `@UseGuards(JwtAuthGuard, RolesGuard)` + `@Roles(...)`.
+    `req.user = { userId, role }`. DTO-ийн талбар бүрт class-validator decorator
+    ЗААВАЛ (`whitelist:true` decorator-гүй талбарыг чимээгүй хасдаг). DTO бүрт
+    `.spec.ts` доторх `validate()` тест. Шинэ модулийг `app.module.ts`-д бүртгэж,
+    хамаарах модулийн `exports`-ийг шалга (NestJS boot унадаг урхи, STATUS §8.1/8.4).
+11. Эрх: TEACHER зөвхөн өөрийн анги (`classroom.teacherId === userId`),
+    TEACHER_PLUS ба ADMIN бүгдийг. STUDENT зөвхөн өөрийнхийгөө. PARENT зөвхөн
+    `verifiedAt != null` холбоотой хүүхдийнхээ. Шинэ endpoint бүрт эрхийн тест
+    (403 тохиолдол заавал).
+12. Функц ХЭЗЭЭ Ч устгахгүй. Одоо байгаа endpoint-ийн хариуны хэлбэрийг эвдэхгүй
+    (зөвхөн талбар нэмнэ).
+13. Мөнгөтэй үйлчилгээ, шинэ SaaS, API түлхүүр ХОРИОТОЙ (эзэн нэмэлт мөнгө
+    төлөхгүй). Имэйл нь одоо байгаа `EMAIL_SMTP_*` env-ээр. Тохируулаагүй бол
+    чимээгүй алгасна. Е-баримт ХИЙХГҮЙ (эзний дүрэм 13).
+14. Хувийн мэдээлэл бүхий бодит файл, дамп, скриншотыг commit хийхгүй. Тестэд
+    зохиомол өгөгдөл. 100x100-ийн C хувилбар бол эзний хувийн материал: нээхгүй,
+    импортлохгүй.
+15. Шинэ хуудсыг ЦЭСЭНД бүү нэм (`components/nav/*` Claude-ийнх). PR тайлбарт
+    «Цэсэнд нэмэх: /app/..., role, бүлэг, lucide дүрс» гэж бич.
+16. Самбарт (student/parent/teacher/admin dashboard) шууд бүү нэм. Бие даасан
+    компонент бичээд, хаана залгахыг PR-д бич.
+17. Шинэ web endpoint дуудлага бүрт `e2e/tests/mock-api.ts`-д mock гэрээ нэм
+    (замыг ЯГ тааруулдаг, дутуу mock бол тест унана). Шинэ хуудас бүрт
+    `e2e/tests/`-д дор хаяж нэг journey тест (desktop + mobile-375 project).
+
+## 2. Өгөгдлийн сан (миграци)
+- Зөвхөн НЭМЭХ: шинэ хүснэгт, nullable эсвэл default-той багана, index.
+  DROP, RENAME, төрөл солих, default-гүй NOT NULL ХОРИОТОЙ.
+- Миграцийн нэр (давхцахгүй, зөвхөн өөрийнхөө дугаарыг ашигла):
+  `20260928_01_formula_library` = T01,
+  `20260928_02_formula_review` = T10,
+  `20260928_03_mistake_notebook` = T12,
+  `20260928_04_reminders_reports` = T14,
+  `20260928_05_readiness_snapshot` = T13 (хэрэгтэй бол л).
+  Байршил: `api/prisma/migrations/<нэр>/migration.sql`.
+- Гараар бичээд `npx prisma validate` + `npx prisma generate` ажиллуул.
+  Үүсгэсэн клиент `api/src/generated`-д commit хийгддэг. Үүнийг шинэчилж commit
+  хий. Локал Postgres дээр `prisma migrate deploy`-оор хоосон ӨС-д туршиж PR-д бич.
+- `20260908_add_google_identity_auth` нь прод ӨС-д бий. Google* хүснэгтэд хүрэхгүй.
+- `schema.prisma` дээр зөвхөн өөрийн model/талбарыг хөндөнө.
+
+## 3. ХҮРЭХГҮЙ ФАЙЛ (Claude эзэмшдэг)
+`web/src/app/app/layout.tsx` · `web/src/components/nav/**` ·
+`web/src/app/globals.css` · `web/src/app/fonts.css` · `web/src/components/ui/**`
+(kit-д шинэ компонент нэмэхийг зөвшөөрнө, байгааг засахгүй) ·
+`web/src/components/activity/**` · `web/src/app/app/student/page.tsx` ·
+`web/src/app/app/parent/page.tsx` · `web/src/app/app/teacher/**` ·
+`web/src/app/app/admin/page.tsx`, `AdminDashboardClient.tsx` ·
+`web/src/components/TeacherDashboard/**` · `web/src/components/exam/**` ·
+`api/src/auth/**` · `api/prisma/import-*.cjs` · `api/prisma/reimport-latex.cjs` ·
+`api/prisma/data/100x100-v3/**` · `.github/workflows/**` (зөвхөн T18 шинэ job
+санал болгож болно, PR тайлбарт).
+
+## 4. PR тайлбарын загвар (заавал)
+```
+## Даалгавар: <ID> — <нэр>
+## Юу хийсэн (backend / web / миграци / өгөгдөл)
+## Яагаад ийм шийдэл (судалгаа, сурах шинжлэх ухааны үндэслэл)
+## Эрх (role бүрээр хэн юу хийж чадах)
+## Шалгалт (командууд + тоо: jest N/N, e2e N passed, build OK)
+## Эзний Mac дээр ажиллуулах команд (хэрэв скрипт бол: dry-run → --commit)
+## Цэсэнд нэмэх / Самбарт залгах
+## Эзэн шийдэх
+## Хамаарал (өөр PR, салбар)
+```
+
+# ТОМЬЁОНЫ ГЭРЭЭ (хамаарах бол мөрд)
+
+## A. Томьёоны өгөгдлийн файл
+
+Байршил: `api/prisma/data/formulas/<section-slug>.json`. Нэг файл = нэг бүлэг.
+UTF-8, 2 зайтай. Бүх математик LaTeX. Текст дотор `$...$`, бие даасан талбарт
+(`latex`, `general` …) `$`-гүй цэвэр LaTeX.
+
+```jsonc
+{
+  "section": {
+    "slug": "trigonometry",               // доорх B хүснэгтийн slug-аас
+    "title": "Тригонометр",
+    "order": 5,
+    "icon": "triangle-right",             // lucide дүрсний kebab нэр
+    "description": "Нэгж тойрог, адилтгал, тэгшитгэл — ЭЕШ-ийн 3–5 бодлого"
+  },
+  "formulas": [
+    {
+      "slug": "trig-double-sin",          // давтагдашгүй, [a-z0-9-], бүх файлд
+      "title": "Давхар өнцгийн синус",
+      "order": 12,
+      "level": "CORE",                    // CORE = ЭЕШ-д заавал, EXTRA = гүнзгий
+      "grade": 10,                        // анх заагддаг анги (7–12)
+      "topicSlugs": ["TRIG"],             // B хүснэгтийн сэдвийн код(ууд)
+      "latex": "\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha",
+      "general": "\\sin 2x = 2\\sin x\\cos x",   // ЕРӨНХИЙ хэлбэр (хувьсагчаар)
+      "variants": [                       // бусад хэлбэр, эсрэг чиглэл
+        { "label": "Урвуу чиглэлд", "latex": "\\sin\\alpha\\cos\\alpha = \\tfrac{1}{2}\\sin 2\\alpha" }
+      ],
+      "conditions": [],                   // LaTeX: ["a > 0", "a \\ne 1"]
+      "explanation": "…$\\sin$ …",        // 2–5 өгүүлбэр, энгийн монгол хэлээр, 9–12-р ангийн хүүхдэд
+      "derivation": [                     // яагаад ийм болдог: 2–6 алхам, текст+$LaTeX$
+        "Нийлбэрийн томьёо: $\\sin(\\alpha+\\beta)=\\sin\\alpha\\cos\\beta+\\cos\\alpha\\sin\\beta$",
+        "$\\beta=\\alpha$ гэж тавибал …"
+      ],
+      "mnemonic": "…",                    // цээжлэх арга: хэллэг, хэв маяг, зураг төсөөлөх, 1–3 өгүүлбэр
+      "examples": [                       // ДОР ХАЯЖ 2. Нэг нь ЭЕШ-ийн хэв маягтай (A–E сонголттой байж болно)
+        {
+          "problem": "$\\sin\\alpha=\\tfrac{3}{5}$, $\\alpha$ I мөчид бол $\\sin 2\\alpha$-г ол.",
+          "steps": ["$\\cos\\alpha=\\tfrac{4}{5}$", "$\\sin2\\alpha=2\\cdot\\tfrac35\\cdot\\tfrac45=\\tfrac{24}{25}$"],
+          "answer": "$\\tfrac{24}{25}$"
+        }
+      ],
+      "commonMistakes": ["$\\sin 2\\alpha$-г $2\\sin\\alpha$ гэж бодох"],
+      "eeshTip": "ЭЕШ-д ихэвчлэн … хэлбэрээр гардаг",   // 1–2 өгүүлбэр
+      "related": ["trig-double-cos", "trig-sum-sin"],    // бусад slug (байх ёстой)
+      "keywords": ["давхар өнцөг", "синус"],             // хайлтад
+      "widget": null,                      // эсвэл C хүснэгтийн widget нэр
+      "quiz": [                            // цээжлэх тоглоомд, ДОР ХАЯЖ 2
+        { "type": "blank", "prompt": "\\sin 2\\alpha = \\square", "answer": "2\\sin\\alpha\\cos\\alpha",
+          "distractors": ["2\\sin\\alpha", "\\sin^2\\alpha-\\cos^2\\alpha", "\\sin\\alpha\\cos\\alpha"] },
+        { "type": "truefalse", "prompt": "\\sin 2\\alpha = 2\\sin\\alpha", "answer": "false",
+          "why": "Аргументийг 2 дахин өсгөхөд утга 2 дахин өсдөггүй" }
+      ]
+    }
+  ]
+}
+```
+
+Чанарын шаардлага (файл бүр):
+- LaTeX бүр KaTeX-ээр алдаагүй рендерлэгдэнэ. Шалгах: T01 бичих
+  `node api/prisma/validate-formulas.cjs [файл]`. T01 болоогүй бол энэ түр
+  шалгагчийг ашигла:
+  ```bash
+  node -e 'const k=require("./web/node_modules/katex");const f=process.argv[1];const d=require(require("path").resolve(f));let n=0,e=0;const chk=s=>{try{k.renderToString(s,{throwOnError:true,strict:"ignore"});n++}catch(x){e++;console.error(f,s,x.message)}};const txt=t=>String(t).split("$").forEach((p,i)=>{if(i%2)chk(p)});for(const x of d.formulas){["latex","general"].forEach(k2=>x[k2]&&chk(x[k2]));(x.variants||[]).forEach(v=>chk(v.latex));(x.conditions||[]).forEach(chk);[x.explanation,x.mnemonic,x.eeshTip,...(x.derivation||[]),...(x.commonMistakes||[])].forEach(t=>t&&txt(t));(x.examples||[]).forEach(ex=>[ex.problem,ex.answer,...ex.steps].forEach(txt));(x.quiz||[]).forEach(q=>{chk(q.prompt.replace("\\square","\\boxed{?}"));if(q.type==="blank"){chk(q.answer);q.distractors.forEach(chk)}})}console.log("ok",n,"err",e);process.exit(e?1:0)' api/prisma/data/formulas/<файл>.json
+  ```
+- Unicode математик тэмдэгт (`π ² ³ · × ÷ ≤ ≥ ≠ √ ∞ ∈ α β`) текстэнд ч
+  байхгүй. Үргэлж `$\\pi$` гэх мэт.
+- Математик ЗӨВ байх ёстой. Жишээ бүрийг өөрөө бодож шалга. Хариуг тоогоор
+  шалгах боломжтой бол жижиг Node скриптээр шалга (жишээ нь тригонометрийн
+  адилтгалыг санамсаргүй 20 утгаар). Эргэлзээтэй бол PR-ийн «Эзэн шийдэх»
+  хэсэгт жагсаа.
+- Хэл: ойлгомжтой, найрсаг, 9–12-р ангийн сурагчид зориулсан. Нэр томьёо Монгол
+  сургуулийн сурах бичгийнхтэй ижил («дискриминант», «тодорхойлогдох муж»,
+  «прогресс», «уламжлал», «эх функц», «интеграл», «хэсэглэл», «байрлал»,
+  «сэлгэмэл», «магадлал»).
+- Зохиогчийн эрх: сурах бичиг, ЭЕШ-ийн материалаас текст бүү хуул. Жишээг
+  өөрөө зохио.
+
+## B. Бүлгүүд (section) ба сэдвийн кодууд (topicSlugs)
+
+| Файл / section.slug | Гарчиг | order | Даалгавар |
+|---|---|---|---|
+| `numbers-algebra` | Тоо ба алгебрийн илэрхийлэл | 1 | C1 |
+| `equations-inequalities` | Тэгшитгэл ба тэнцэтгэл биш | 2 | C2 |
+| `functions-exp-log` | Функц, илтгэгч ба логарифм | 3 | C3 |
+| `trigonometry` | Тригонометр | 4 | C4 |
+| `sequences-combinatorics-probability` | Прогресс, комбинаторик, магадлал, статистик | 5 | C5 |
+| `calculus` | Хязгаар, уламжлал, интеграл | 6 | C6 |
+| `plane-geometry` | Хавтгайн геометр | 7 | C7 |
+| `solid-geometry-vectors-coordinates` | Огторгуйн геометр, вектор, координат | 8 | C8 |
+
+`topicSlugs` утгууд (одоо байгаа 100x100-ийн сэдвийн кодтой нийцнэ, шинийг
+зөвхөн эндээс): `TOO` (тоо), `ALG` (алгебрийн хувиргалт), `RATEQ`, `RATINEQ`,
+`ABSEQ`, `ABSINEQ`, `IRREQ`, `IRRINEQ`, `EXPEQ`, `EXPINEQ`, `LOGEXP`, `LOGEQ`,
+`LOGINEQ`, `FUNC`, `TRIG`, `TRIGEQ`, `SEQ`, `COMB`, `PROB`, `STAT`, `LIMIT`,
+`DERIV`, `INTEG`, `PLANE`, `SOLID`, `VECTOR`, `COORD`, `SYSTEM`, `PARAM`.
+
+## C. Интерактив widget-ийн нэрс (T21 хийнэ; C1–C8 тохирох томьёонд `widget` тавина)
+
+`square-of-sum` (талбайгаар $(a+b)^2$) · `difference-of-squares` ·
+`quadratic-graph` (a,b,c гулсуур, орой, дискриминант, язгуур) ·
+`vieta` · `abs-graph` · `exp-graph` (суурь гулсуур, a>1 vs 0<a<1) ·
+`log-graph` · `unit-circle` (өнцөг чирэх, sin/cos/tg утга) · `sine-graph`
+(A, ω, φ гулсуур) · `arith-seq` · `geom-seq` (хязгааргүй нийлбэр рүү
+ойртох) · `pascal-triangle` · `probability-dice` (симуляц) ·
+`derivative-tangent` (шүргэгч чирэх) · `integral-area` (Риманы нийлбэр) ·
+`pythagoras` (талбайн баталгаа) · `triangle-area` · `inscribed-angle` ·
+`circle-sector` · `prism-volume` · `cone-cylinder` · `vector-add` ·
+`line-slope`.
+
+## D. API гэрээ (T01 хийнэ. T09, T10, T11, T13, T21 үүн дээр тулгуурлана)
+
+Бүгд `JwtAuthGuard`. Хариуны хэлбэр ЯГ ийм:
+
+```
+GET  /formulas/sections
+     → [{ slug, title, order, icon, description, count }]
+GET  /formulas?section=&q=&topic=&level=&grade=
+     → [{ slug, title, section, order, level, grade, topicSlugs, latex, general, widget }]
+       (q нь title, keywords, slug дээр ILIKE; бүх role)
+GET  /formulas/:slug
+     → { ...бүх талбар (A-гийн дагуу), section: {slug,title,icon},
+         related: [{slug,title,latex}],
+         practice: [{ problemId, token, statementText, chapterTitle }] (≤5, ProblemFormula-аас) }
+     404 → { message: "Томьёо олдсонгүй" }
+GET  /formulas/my?studentId=
+     «Туулсан тест хүртэлх томьёо»: сурагчийн оролдлого хийсэн (Attempt ба
+     шалгалтын session) бодлогуудын ProblemFormula-аар холбогдсон томьёонууд.
+     → { totalFormulas, seenFormulas,
+         items: [{ slug, title, section, latex, general,
+                   firstSeenAt, lastSeenAt, seenCount, correctCount,
+                   lastTestTitle }] }   // firstSeenAt өсөхөөр
+     STUDENT: өөрийнх (studentId өгвөл үл хэрэгсэнэ). PARENT: verified хүүхэд
+     (studentId заавал). TEACHER: өөрийн ангийн сурагч. TEACHER_PLUS/ADMIN: хэн ч.
+POST /formulas            (ADMIN, TEACHER_PLUS) A-гийн бүтэн объект → үүсгэнэ
+PATCH /formulas/:slug     (ADMIN, TEACHER_PLUS) хэсэгчилсэн засвар
+```
+
+T10 нэмнэ:
+```
+GET  /formulas/review/due?limit=10
+     → { dueCount, newCount, cards: [{ slug, title, latex, general, quiz, box, dueAt }] }
+       (эхлээд хугацаа нь болсон, дараа нь «туулсан» боловч давтаагүй, эцэст нь CORE шинэ)
+POST /formulas/review/:slug  { result: "AGAIN" | "HARD" | "GOOD" | "EASY" }
+     → { slug, box, dueAt, streak }
+GET  /formulas/review/stats → { mastered, learning, new, reviewedToday, streakDays }
+```
+
+# ЧИНИЙ ДААЛГАВАР
+
+## C5: Томьёоны контент — Прогресс, комбинаторик, магадлал, статистик
+**Долгион 1. Салбар:** `codex/s2-C5-formulas-seq-comb-prob`. **Файл:** `api/prisma/data/formulas/sequences-combinatorics-probability.json`.
+
+**Хамгийн багадаа 36.** Заавал:
+- Арифметик прогресс: $a_n$, $S_n$ (2 хэлбэр), $a_n=\frac{a_{n-1}+a_{n+1}}2$, $a_m+a_n=a_k+a_l$ ($m+n=k+l$), ялгавар олох.
+- Геометр прогресс: $b_n$, $S_n$, $b_n^2=b_{n-1}b_{n+1}$, хязгааргүй буурах $S=\frac{b_1}{1-q}$ ($|q|<1$), үеэр давтагдах бутархай.
+- Нийлбэрүүд: $1+2+\dots+n$, $1^2+\dots+n^2$, $1^3+\dots+n^3$, сондгой тоонуудын нийлбэр.
+- Комбинаторик: нэмэх ба үржүүлэх зарчим, факториал, сэлгэмэл $P_n=n!$, байрлал $A_n^k$, хэсэглэл $C_n^k$, $C_n^k=C_n^{n-k}$, $C_n^k+C_n^{k+1}=C_{n+1}^{k+1}$, $\sum C_n^k=2^n$, давталттай сэлгэмэл $\frac{n!}{n_1!n_2!\dots}$, давталттай байрлал $n^k$, тойрог дээр суулгах $(n-1)!$.
+- Магадлал: сонгодог тодорхойлолт, $P(\bar A)=1-P(A)$, үл нийцэх ба нийцэх үзэгдлийн нэмэх, хамааралгүйн үржүүлэх, нөхцөлт магадлал, бүтэн магадлал, Бернуллийн томьёо, «ядаж нэг» арга, геометр магадлал.
+- Статистик: арифметик дундаж, жигнэсэн дундаж, медиан, моод, далайц, дисперс ($\overline{x^2}-\bar x^2$ хэлбэр), стандарт хазайлт, математик дундаж $E(X)$.
+
+`widget`: `arith-seq`, `geom-seq`, `pascal-triangle`, `probability-dice`. Сэдэв: `SEQ`, `COMB`, `PROB`, `STAT`.
+Комбинаторикийн жишээг Node-оор тоолж (brute force) шалга.
+
+ЭЦЭСТ НЬ: бүх шалгалт ногоон болсны дараа PR нээ (§4 загвараар). Хийж чадаагүй зүйлээ нуухгүй, PR-д бич.

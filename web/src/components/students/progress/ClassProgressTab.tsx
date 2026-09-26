@@ -135,7 +135,7 @@ export default function ClassProgressTab({ studentId }: { studentId: string }) {
       )}
 
       {/* Ирцийн түүх */}
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Ирцийн түүх</h2>
         {attendanceQ.status === "loading" && <SectionLoading label="Ирц" />}
         {attendanceQ.status === "error" && (
@@ -174,7 +174,7 @@ export default function ClassProgressTab({ studentId }: { studentId: string }) {
       </section>
 
       {/* Гэрийн даалгаврын түүх */}
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Гэрийн даалгаврын түүх</h2>
         {homeworkQ.status === "loading" && <SectionLoading label="Гэрийн даалгавар" />}
         {homeworkQ.status === "error" && (

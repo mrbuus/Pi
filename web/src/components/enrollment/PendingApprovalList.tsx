@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Card, PageHeader, SectionHeader } from '@/components/ui/Surface';
+import { Card, SectionHeader } from '@/components/ui/Surface';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StateBlock';
 import { Meta } from '@/components/ui/Meta';
 
@@ -31,7 +31,7 @@ export default function PendingApprovalList() {
     loadStudents();
   }, []);
 
-  const loadStudents = async () => {
+  async function loadStudents() {
     try {
       setLoading(true);
       setError(null);
@@ -43,7 +43,7 @@ export default function PendingApprovalList() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleApprove = async (studentId: string) => {
     try {

@@ -82,7 +82,7 @@ export default function ClassWeekCard({ classroomId }: { classroomId: string }) 
 
   if (status === "loading") {
     return (
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="chunky p-5">
         <LoadingState rows={3} label="Ангийн идэвх" />
       </section>
     );
@@ -104,7 +104,7 @@ export default function ClassWeekCard({ classroomId }: { classroomId: string }) 
   const todayRow = week.find((d) => d.isToday);
 
   return (
-    <section aria-labelledby="class-week-title" className="overflow-hidden rounded-3xl border border-line bg-panel">
+    <section aria-labelledby="class-week-title" className="overflow-hidden chunky">
       <div className="flex flex-wrap items-center gap-4 bg-accent-teal/10 p-5">
         <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-teal/15 text-accent-teal">
           <TrendingUp className="h-8 w-8" aria-hidden />
@@ -113,7 +113,7 @@ export default function ClassWeekCard({ classroomId }: { classroomId: string }) 
           <h2 id="class-week-title" className="text-sm font-semibold text-ink-dim">
             Ангийн идэвх, энэ долоо хоног
           </h2>
-          <p className="text-3xl font-extrabold leading-tight tabular-nums text-ink">
+          <p className="font-display text-3xl font-bold leading-tight tabular-nums text-ink">
             {avg}% <span className="text-base font-bold text-ink-dim">дундаж</span>
           </p>
         </div>

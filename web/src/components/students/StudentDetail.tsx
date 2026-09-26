@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Check, Pencil, ArrowLeft, TriangleAlert } from "lucide-react";
 import { Meta } from "@/components/ui/Meta";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 // Төлбөрийн төлөв/аргын нэрс НЭГ эх сурвалжаас — өмнө нь энд, PaymentsClient-д,
 // student/payments-д гурав давхардаж, тус бүр өөр үгтэй байв.
 import { METHOD_LABEL, STATUS_LABEL } from "@/components/payments/paymentHelpers";
@@ -300,7 +300,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
       </Link>
 
       {/* ---- Танилцуулга / Identity ---- */}
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold text-ink">{fullName(detail)}</h1>
@@ -524,7 +524,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
 
       {/* ---- Эцэг эх — зөвхөн ADMIN/TEACHER_PLUS-д харагдана ---- */}
       {showGuardians && (
-        <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+        <section className="chunky p-4 md:p-6">
           <h2 className="mb-3 font-bold text-brand-soft">Эцэг эхийн мэдээлэл</h2>
           <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             {editing && f ? (
@@ -604,7 +604,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
       )}
 
       {/* ---- Төлбөр ---- */}
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-3 font-bold text-brand-soft">Сургалтын төлбөр</h2>
 
         <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">

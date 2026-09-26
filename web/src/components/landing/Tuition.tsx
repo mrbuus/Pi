@@ -16,7 +16,7 @@ function TierCard({ tier }: { tier: TuitionTier }) {
       : 0;
 
   return (
-    <div className="reveal rounded-2xl border border-line bg-panel p-7">
+    <div className="reveal chunky p-7">
       <h3 className="text-xl font-extrabold text-ink">{tier.label}</h3>
 
       {fullYear && savings > 0 && (

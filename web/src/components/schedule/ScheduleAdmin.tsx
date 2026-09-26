@@ -179,7 +179,7 @@ export default function ScheduleAdmin({ role }: { role: string }) {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="chunky p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Хичээлийн хуваарь удирдах</h2>
       <p className="mb-4 text-xs text-ink-dim">
         Долоо хоног бүр давтагддаг хэв маяг — тодорхой огноо биш, ӨДӨР (Ням…

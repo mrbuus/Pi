@@ -748,8 +748,8 @@ export class ContentService {
   }
 
   async publicChapterPreview(chapterId: string) {
-    const chapter = await this.prisma.chapter.findUnique({
-      where: { id: chapterId },
+    const chapter = await this.prisma.chapter.findFirst({
+      where: { id: chapterId, deletedAt: null, OR: [{ bookId: null }, { book: { archived: false, deletedAt: null } }] },
       select: {
         id: true,
         title: true,

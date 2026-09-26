@@ -1,53 +1,57 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card } from '../ui/Surface';
-import InfoHint from '../ui/InfoHint';
-
+import Link from "next/link";
+import { useState } from "react";
+import { Card } from "../ui/Surface";
+import InfoHint from "../ui/InfoHint";
 import { api } from "@/lib/api";
+
+interface RegistrationForm {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  organization: string;
+}
+
 export function RegisterExternalTeacher() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    password: '',
-    organization: '',
+  const [formData, setFormData] = useState<RegistrationForm>({
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "",
+    organization: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
-    setSuccess(false);
     setIsLoading(true);
 
     try {
-      await api('/teacher-groups/register', { method: 'POST', body: formData });
-
+      await api("/teacher-groups/register", { method: "POST", body: formData });
       setSuccess(true);
       setFormData({
-        email: '',
-        firstName: '',
-        lastName: '',
-        password: '',
-        organization: '',
+        email: "",
+        firstName: "",
+        lastName: "",
+        password: "",
+        organization: "",
       });
-
-      // 2 секундын дараа нэвтрэх хуудас руу явах
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Бүртгэл илгээж чадсангүй. Мэдээллээ шалгаад дахин оролдоно уу.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -55,90 +59,135 @@ export function RegisterExternalTeacher() {
 
   if (success) {
     return (
-      <Card className="max-w-md border border-success/30 bg-success/10">
-        <h2 className="text-lg font-bold text-success mb-2">Амжилттай бүртгүүлэв</h2>
-        <p className="text-success text-sm mb-4">
-          Баталгаажуулагдсаны дараа ангийн бүлгүүдийг ашиглаж болно.
+      <Card className="w-full max-w-lg border border-success/30 bg-success/10">
+        <h2 className="mb-2 text-lg font-bold text-success">
+          Хүсэлт хүлээн авлаа
+        </h2>
+        <p className="mb-4 text-sm text-ink">
+          Таны хүсэлтийг хүлээн авлаа. Баталгаажсаны дараа нэвтэрч гадны багшийн
+          бүлгийг ашиглах боломжтой.
         </p>
-        <p className="text-success text-xs">Нэвтрэх хуудас руу зөөлж байна...</p>
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-4 text-sm font-medium text-ink hover:bg-bg"
+        >
+          Нүүр хуудас руу буцах
+        </Link>
       </Card>
     );
   }
 
   return (
-    <Card className="max-w-md">
-      <h1 className="text-xl font-bold mb-4">Гадны багшийн бүртгэл</h1>
+    <Card className="w-full max-w-lg">
+      <h1 className="mb-4 text-xl font-bold">Гадны багшийн бүртгэл</h1>
 
       <InfoHint>
-        Админ баталгаажуулсан хүртэл сурагчийн мэдээлэл харахгүй байна.
+        Баталгаажих хүртэл шинэ бүлэг үүсгэх боломжгүй. Сурагчид баталгаажаагүй
+        багшийн бүлэгт нэгдэх эрхгүй.
       </InfoHint>
 
-      <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Имэйл</label>
+          <label
+            htmlFor="external-email"
+            className="mb-1 block text-sm font-medium"
+          >
+            Имэйл
+          </label>
           <input
+            id="external-email"
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
+            autoComplete="email"
             required
-            className="w-full px-3 py-2 border border-line rounded"
+            className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium mb-1">Нэр</label>
+            <label
+              htmlFor="external-first-name"
+              className="mb-1 block text-sm font-medium"
+            >
+              Нэр
+            </label>
             <input
+              id="external-first-name"
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
+              autoComplete="given-name"
               required
-              className="w-full px-3 py-2 border border-line rounded"
+              className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Овог</label>
+            <label
+              htmlFor="external-last-name"
+              className="mb-1 block text-sm font-medium"
+            >
+              Овог
+            </label>
             <input
+              id="external-last-name"
               type="text"
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
+              autoComplete="family-name"
               required
-              className="w-full px-3 py-2 border border-line rounded"
+              className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Нууц үг</label>
+          <label
+            htmlFor="external-password"
+            className="mb-1 block text-sm font-medium"
+          >
+            Нууц үг
+          </label>
           <input
+            id="external-password"
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
+            autoComplete="new-password"
             required
             minLength={8}
-            className="w-full px-3 py-2 border border-line rounded"
+            className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Ажилладаг сургууль/төв (сонголтой)
+          <label
+            htmlFor="external-organization"
+            className="mb-1 block text-sm font-medium"
+          >
+            Ажилладаг сургууль/төв (сонголттой)
           </label>
           <input
+            id="external-organization"
             type="text"
             name="organization"
             value={formData.organization}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-line rounded"
+            autoComplete="organization"
+            className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
           />
         </div>
 
         {error && (
-          <div className="p-3 border border-error/30 bg-error/10 rounded text-error text-sm">
+          <div
+            role="alert"
+            className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error"
+          >
             {error}
           </div>
         )}
@@ -146,9 +195,9 @@ export function RegisterExternalTeacher() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90 disabled:opacity-50"
+          className="min-h-11 w-full rounded-lg bg-brand font-medium text-on-brand hover:bg-brand/90 disabled:opacity-50"
         >
-          {isLoading ? 'Бүртгүүлж байна...' : 'Бүртгүүлэх'}
+          {isLoading ? "Бүртгүүлж байна" : "Бүртгүүлэх"}
         </button>
       </form>
     </Card>

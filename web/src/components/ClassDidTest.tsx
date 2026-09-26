@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, AlertTriangle } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 
 /* ============================================================================
@@ -298,7 +298,7 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Өнөөдөр хийсэн тест</h2>
       <p className="mb-4 text-sm text-ink-dim">
         Ангид хийсэн тестээ сонгоход сурагчид цаасаа хараад өөрсдийгөө тэмдэглэнэ

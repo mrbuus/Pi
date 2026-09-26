@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronUp, ChevronDown, Check, Pencil } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import MathText from "@/components/MathText";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
 import { api, getRole, ApiError } from "@/lib/api";
@@ -404,7 +404,7 @@ export default function LibraryPage() {
       )}
 
       {currentBook && (
-        <section className="rounded-2xl border border-line bg-panel p-5">
+        <section className="chunky p-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase text-brand-soft">
@@ -442,7 +442,7 @@ export default function LibraryPage() {
                     setLocked(false);
                     setProblemsError("");
                   }}
-                  className={`w-full rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${
+                  className={`w-full rounded-3xl border-2 border-b-4 p-4 text-left transition hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 ${
                     selected
                       ? `shadow-lg ${group.tone.border} ${group.tone.bg}`
                       : "border-line bg-ink/[0.03]"
@@ -475,7 +475,7 @@ export default function LibraryPage() {
           </aside>
 
           <section className="min-w-0 space-y-3">
-            <div className={`rounded-2xl border p-5 ${activeGroup.tone.border} ${activeGroup.tone.bg}`}>
+            <div className={`rounded-3xl border-2 border-b-4 p-5 ${activeGroup.tone.border} ${activeGroup.tone.bg}`}>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className={`text-xs font-bold uppercase ${activeGroup.tone.text}`}>
@@ -517,7 +517,7 @@ export default function LibraryPage() {
                   <div key={ch.id} className="relative">
                     <button
                       onClick={() => openChapter(ch)}
-                      className={`flex w-full items-center gap-4 rounded-2xl border bg-panel p-5 text-left transition hover:border-brand-bright/40 ${
+                      className={`flex w-full items-center gap-4 rounded-3xl border-2 border-b-4 bg-panel p-5 text-left transition active:translate-y-0.5 active:border-b-2 hover:border-brand-bright/40 ${
                         isOpen ? `${activeGroup.tone.border} ${activeGroup.tone.bg}` : "border-line"
                       }`}
                     >
@@ -555,7 +555,7 @@ export default function LibraryPage() {
                     </button>
 
                     {isOpen && (
-                      <div className="mt-2 rounded-2xl border border-line bg-panel p-5">
+                      <div className="mt-2 chunky p-5">
                         {loadingProblems && (
                           <p className="text-sm text-ink-dim">Ачаалж байна…</p>
                         )}
@@ -566,7 +566,7 @@ export default function LibraryPage() {
                             </p>
                             <Link
                               href="/app/buyer"
-                              className="mt-3 inline-block rounded-lg bg-brand-bright px-5 py-2 text-sm font-bold"
+                              className="mt-3 inline-block btn-3d rounded-2xl bg-brand-bright px-5 py-2 text-sm font-bold"
                             >
                               Эрх худалдаж авах
                             </Link>

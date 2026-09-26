@@ -155,7 +155,7 @@ export default function PatternBuilder({
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="chunky p-6">
       <div className="mb-4 flex items-center gap-2">
         <Repeat className="h-5 w-5 text-brand-soft" aria-hidden />
         <h2 className="font-bold text-brand-soft">Давтагддаг хуваарь үүсгэх</h2>
@@ -368,7 +368,7 @@ export default function PatternBuilder({
         {!problem && classroom && (
           <p className="text-sm text-ink-dim">
             <Meta items={[
-              <span className="font-semibold text-ink">{classroom.name}</span>,
+              <span key="classroom" className="font-semibold text-ink">{classroom.name}</span>,
               WORKWEEK_ORDER.filter((d) => weekdays.includes(d))
                 .map((d) => WEEKDAY_LABELS[d])
                 .join(", "),

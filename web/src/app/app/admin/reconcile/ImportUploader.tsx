@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import { Meta } from '@/components/ui/Meta';
-import { api, uploadFile } from '@/lib/api';
+import { api } from '@/lib/api';
 import { ImportConfig, ImportResult } from './types';
 import { SectionHeader } from '@/components/ui/Surface';
 
@@ -68,7 +68,8 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
         fileInputRef.current.value = '';
       }
       onSuccess?.(response);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       const message =
         err?.message ||
         'Файл импортлоход алдаа гарлаа. Дахин оролдоно уу';

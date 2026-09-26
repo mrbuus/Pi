@@ -48,7 +48,7 @@ export default function QuestionFooterNav({
         <button
           type="button"
           onClick={onNext}
-          className="flex-1 rounded-xl bg-brand-bright py-3 font-bold text-on-brand"
+          className="btn-3d flex-1 rounded-2xl bg-brand-bright py-3 font-bold text-on-brand"
         >
           Дараах
         </button>

@@ -56,13 +56,13 @@ export default function Hero() {
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
               href="/register"
-              className="glow-pulse rounded-full bg-brand-bright px-7 py-3.5 text-center font-bold text-on-brand transition hover:opacity-95"
+              className="btn-3d rounded-2xl bg-brand-bright px-7 py-3.5 text-center font-bold tracking-wide text-on-brand transition hover:brightness-105"
             >
               Одоо бүртгүүлэх
             </a>
             <a
               href="#subjects"
-              className="rounded-full border border-line px-7 py-3.5 font-semibold text-ink transition hover:border-brand"
+              className="chunky chunky-press rounded-2xl px-7 py-3.5 font-semibold text-ink"
             >
               Бодлогын сан үзэх
             </a>

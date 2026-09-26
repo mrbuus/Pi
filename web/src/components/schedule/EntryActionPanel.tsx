@@ -14,21 +14,9 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
-import { Meta, Dot } from "@/components/ui/Meta";
+import { Meta } from "@/components/ui/Meta";
 import RoomShape from "./RoomShape";
-import {
-  formatMinutes,
-  ROOMS,
-  roomShapeOf,
-  SUBJECT_LABEL,
-  timeToMinutes,
-  WEEKDAY_LABELS,
-  WORKWEEK_ORDER,
-  type BookLite,
-  type ChapterLite,
-  type TeacherLite,
-  type WeekEntry,
-} from "./types";
+import { formatMinutes, ROOMS, SUBJECT_LABEL, timeToMinutes, WEEKDAY_LABELS, WORKWEEK_ORDER, type BookLite, type ChapterLite, type TeacherLite, type WeekEntry } from "./types";
 
 /**
  * Танхимын сонголт — чөлөөт текст биш тогтмол жагсаалт (types.ts дахь ROOMS).

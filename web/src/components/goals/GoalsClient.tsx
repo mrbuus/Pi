@@ -118,7 +118,7 @@ export default function GoalsClient() {
 
       <GoalForm onCreate={handleCreate} />
 
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Бүх зорилго</h2>
         {loading && (
           <LoadingState rows={3} label="Ачаалж байна" />

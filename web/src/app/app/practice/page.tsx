@@ -21,14 +21,6 @@ interface Recommendation {
   reason: RecommendReason;
 }
 
-const REASON_TEXT: Record<RecommendReason, string> = {
-  RETRY_TOPIC: 'Өмнө нь бүдэрсэн сэдэв — одоо дахин оролдох цаг болжээ',
-  WEAK_TOPIC: 'Энэ сэдвийг бэхжүүлэх хэрэгтэй',
-  RIGHT_LEVEL: 'Танд яг тохирох түвшин',
-  NEW_TOPIC: 'Шинэ сэдэв',
-  CONFIDENCE: 'Сайн эзэмшсэн сэдэв — мартахгүйн тулд',
-};
-
 /**
  * Дасгал хуудас — сурагчийн дараагийн бодлогуудыг санал болгоно.
  *

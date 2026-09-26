@@ -101,7 +101,7 @@ export default function WeeklyActivitySummary({
   const daysWithoutHoliday = week.filter((d) => !d.isHoliday);
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       {/* Гарчиг */}
       <div className="mb-6 flex flex-col gap-2">
         <h2 className="font-bold text-brand-soft">Энэ долоо хоногийн идэвх</h2>

@@ -5,6 +5,12 @@ import { formatDate } from "./format";
 
 const EXPIRING_SOON_DAYS = 7;
 
+// Үлдсэн хоногийг render-ийн мөчөөр тооцно (өдрийн нарийвчлалтай тул
+// дахин render хоорондын ялгаа ач холбогдолгүй).
+function nowMs(): number {
+  return Date.now();
+}
+
 export default function PassBadge({
   activePass,
   className = "",
@@ -23,8 +29,9 @@ export default function PassBadge({
     );
   }
 
+  const now = nowMs();
   const daysLeft = Math.ceil(
-    (new Date(activePass.expiresAt).getTime() - Date.now()) / 86400000,
+    (new Date(activePass.expiresAt).getTime() - now) / 86400000,
   );
   const expiringSoon = daysLeft <= EXPIRING_SOON_DAYS;
 

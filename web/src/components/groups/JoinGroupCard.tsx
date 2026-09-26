@@ -40,7 +40,7 @@ export function JoinGroupCard({ joinCode, groupName }: JoinGroupCardProps) {
       </div>
 
       <p className="text-xs text-ink-dim mt-2">
-        Сурагчид энэ кодоор "{groupName}" ангийн бүлэгт нэгдэнэ.
+        Сурагчид энэ кодоор «{groupName}» ангийн бүлэгт нэгдэнэ.
       </p>
     </Card>
   );

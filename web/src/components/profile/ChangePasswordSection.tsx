@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Check, Eye, EyeOff, TriangleAlert } from "lucide-react";
 import InfoHint from "@/components/ui/InfoHint";
 import { NavIcon } from "@/components/nav/icons";
+import PasswordChecklist from "@/components/auth/PasswordChecklist";
 import { api, setAuth } from "@/lib/api";
-
-const MIN_LENGTH = 6;
+import { PASSWORD_MIN_LENGTH, isPasswordStrong } from "@/lib/passwordPolicy";
 
 /* Нууц үг солих хэсэг — өмнө нь /app/password тусдаа, гарцаагүй тод цэсийн
    зүйл байсныг эзний хүсэлтээр /app/profile дотор нэг хэсэг болгов (SPEC
@@ -23,9 +23,11 @@ export default function ChangePasswordSection() {
   const [loading, setLoading] = useState(false);
 
   const currentError = touched.current && !current ? "Одоогийн нууц үгээ оруулна уу" : "";
+  const nextStrong = isPasswordStrong(next);
+  const canSubmit = !!current && nextStrong && next === confirm;
   const nextError =
-    touched.next && next.length > 0 && next.length < MIN_LENGTH
-      ? `Дор хаяж ${MIN_LENGTH} тэмдэгт байх ёстой`
+    touched.next && next.length > 0 && !nextStrong
+      ? `Дор хаяж ${PASSWORD_MIN_LENGTH} тэмдэгт, үсэг ба тоо холилдсон байх ёстой`
       : touched.next && !next
         ? "Шинэ нууц үгээ оруулна уу"
         : "";
@@ -45,7 +47,7 @@ export default function ChangePasswordSection() {
     setSubmitError("");
     setOk(false);
     setTouched({ current: true, next: true, confirm: true });
-    if (!current || next.length < MIN_LENGTH || next !== confirm) {
+    if (!canSubmit) {
       return;
     }
     setLoading(true);
@@ -130,8 +132,8 @@ export default function ChangePasswordSection() {
             <label htmlFor="new-password" className="block text-sm font-medium text-ink">
               Шинэ нууц үг
             </label>
-            <InfoHint label="Хичнээ урт байх вэ">
-              Дор хаяж {MIN_LENGTH} тэмдэгт байх ёстой.
+            <InfoHint label="Ямар байх вэ">
+              Дор хаяж {PASSWORD_MIN_LENGTH} тэмдэгт, үсэг ба тоо холилдсон байх ёстой.
             </InfoHint>
           </div>
           <div className="relative">
@@ -146,7 +148,7 @@ export default function ChangePasswordSection() {
               onBlur={() => markTouched("next")}
               autoComplete="new-password"
               aria-invalid={!!nextError}
-              aria-describedby={nextError ? "new-password-error" : undefined}
+              aria-describedby={nextError ? "new-password-rules new-password-error" : "new-password-rules"}
               className={`w-full rounded-xl border bg-bg px-4 py-3 pr-12 text-ink outline-none transition focus:border-brand ${
                 nextError ? "border-error" : "border-line"
               }`}
@@ -165,19 +167,8 @@ export default function ChangePasswordSection() {
               )}
             </button>
           </div>
-          {/* Шинэ нууц үгийн урт хүрсэн эсэхийг шалгаж харуулна */}
-          <p
-            className={`mt-1.5 flex items-center gap-1.5 text-xs ${
-              next.length === 0
-                ? "text-ink-dim"
-                : next.length >= MIN_LENGTH
-                  ? "text-success"
-                  : "text-ink-dim"
-            }`}
-          >
-            {next.length >= MIN_LENGTH && <Check aria-hidden className="h-3.5 w-3.5 shrink-0" />}
-            Дор хаяж {MIN_LENGTH} тэмдэгт
-          </p>
+          {/* Шинэ нууц үгийн шаардлага (8+ тэмдэгт, үсэг, тоо) шууд */}
+          <PasswordChecklist id="new-password-rules" value={next} />
           {nextError && (
             <p id="new-password-error" role="alert" className="mt-1.5 text-sm text-error">
               {nextError}
@@ -256,7 +247,7 @@ export default function ChangePasswordSection() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !nextStrong}
           aria-busy={loading}
           className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50 sm:w-auto sm:px-8"
         >

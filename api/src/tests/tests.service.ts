@@ -189,7 +189,8 @@ export class TestsService {
     if (!saved) {
       const latest = await this.findDraftForActor(draftId, actorId, actorRole);
       throw new ConflictException({
-        message: 'Ноорог өөр төхөөрөмжөөс шинэчлэгдсэн байна. Шинэ хувилбарыг ачаална уу.',
+        message:
+          'Ноорог өөр төхөөрөмжөөс шинэчлэгдсэн байна. Шинэ хувилбарыг ачаална уу.',
         draft: latest,
       });
     }
@@ -204,44 +205,6 @@ export class TestsService {
         : { id: draftId };
     await this.prisma.testDraft.deleteMany({ where });
     return { deleted: true };
-  }
-
-  async duplicateTest(testId: string, actorId: string, actorRole: Role) {
-    this.assertDraftRole(actorRole);
-    const source = await this.findEditableTest(testId, actorId, actorRole);
-    const duplicate = await this.prisma.test.create({
-      data: {
-        title: `${source.title} (хуулбар)`,
-        type: source.type,
-        gradingMode: source.gradingMode,
-        timeLimitMin: source.timeLimitMin,
-        chapterId: source.chapterId,
-        groupKey: source.groupKey,
-        variantLabel: source.variantLabel,
-        pdfKey: source.pdfKey,
-        price: source.price,
-        createdById: actorId,
-        isDraft: true,
-        problems: {
-          create: source.problems.map(({ problemId, order, points }) => ({
-            problemId,
-            order,
-            points,
-          })),
-        },
-      },
-      include: { problems: { orderBy: { order: 'asc' } }, access: true },
-    });
-    await this.recordAudit(
-      actorId,
-      actorRole,
-      'CREATE',
-      'Test',
-      duplicate.id,
-      null,
-      duplicate,
-    );
-    return duplicate;
   }
 
   // TODO(followUp): api/src/audit/audit.service.ts бэлэн болмогц энэ
@@ -345,6 +308,55 @@ export class TestsService {
         Prisma.sql`SELECT "id" FROM "Test" WHERE "id" = ${testId} FOR UPDATE`,
       );
     }
+  }
+
+  /**
+   * Тест хуулах (G36). Хуулбар нь ямар ч ангид харагдахгүй (TestAccess
+   * хуулахгүй) — багш засаад анги сонгосны дараа л сурагчид харна. Үр дүн,
+   * оролдлого хуулагдахгүй. Үнийг зөвхөн ADMIN хуулна (үнэ тогтоох эрх ADMIN-д).
+   */
+  async duplicate(testId: string, actorId: string, actorRole: Role) {
+    if (
+      actorRole !== Role.ADMIN &&
+      actorRole !== Role.TEACHER_PLUS &&
+      actorRole !== Role.TEACHER
+    ) {
+      throw new ForbiddenException('Тест хуулах эрхгүй байна');
+    }
+    const source = await this.findEditableTest(testId, actorId, actorRole);
+    // Access, learner results and attempt sessions are intentionally not copied.
+    // A copy remains a private draft until its owner edits and assigns it.
+    const duplicate = await this.prisma.test.create({
+      data: {
+        title: `${source.title} (хуулбар)`.slice(0, 200),
+        type: source.type,
+        gradingMode: source.gradingMode,
+        timeLimitMin: source.timeLimitMin,
+        chapterId: source.chapterId,
+        pdfKey: source.pdfKey,
+        price: actorRole === Role.ADMIN ? source.price : null,
+        createdById: actorId,
+        isDraft: true,
+        problems: {
+          create: source.problems.map(({ problemId, order, points }) => ({
+            problemId,
+            order,
+            points,
+          })),
+        },
+      },
+      include: { problems: { orderBy: { order: 'asc' } }, access: true },
+    });
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'CREATE',
+      'Test',
+      duplicate.id,
+      null,
+      duplicate,
+    );
+    return duplicate;
   }
 
   async editInfo(testId: string, actorId: string, actorRole: Role) {
@@ -625,7 +637,12 @@ export class TestsService {
     }
 
     const rows = await this.prisma.test.findMany({
-      where: { ...subjectFilter, ...accessFilter, deletedAt: null, isDraft: false },
+      where: {
+        ...subjectFilter,
+        ...accessFilter,
+        deletedAt: null,
+        isDraft: false,
+      },
       select: {
         id: true,
         title: true,
@@ -806,7 +823,7 @@ export class TestsService {
               studentId: userId,
               seed,
               problemOrder,
-              choiceOrder: choiceOrder as Prisma.InputJsonValue,
+              choiceOrder: choiceOrder,
               deadlineAt: lockedTest.timeLimitMin
                 ? new Date(now.getTime() + lockedTest.timeLimitMin * 60_000)
                 : null,
@@ -1485,7 +1502,7 @@ export class TestsService {
           // Хариулаагүй бол JsonNull — Prisma-д `undefined` нь «талбарыг
           // алгас» гэсэн утгатай тул тэднийг ялгах ЁСТОЙ (STATUS.md §7 урхи).
           givenAnswer: answered
-            ? ((canonicalAnswer ?? Prisma.JsonNull) as Prisma.InputJsonValue)
+            ? (canonicalAnswer ?? Prisma.JsonNull)
             : Prisma.JsonNull,
           selfState: selfState ?? null,
           timeSpentSec: typeof m.times[pid] === 'number' ? m.times[pid] : null,

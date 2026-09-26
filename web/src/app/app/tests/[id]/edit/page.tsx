@@ -1,6 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Copy } from "lucide-react";
+import { Button } from "@/components/ui/kit/button";
 import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { Check, TriangleAlert } from "lucide-react";
 import { api, getRole, uploadFile } from "@/lib/api";
@@ -89,6 +93,22 @@ export default function EditTestPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
+  const [duplicating, setDuplicating] = useState(false);
+
+  // Тест хуулах (G36): хуулбар нь ямар ч ангид харагдахгүй — засаад анги сонгоно.
+  async function duplicateTest() {
+    setDuplicating(true);
+    try {
+      const copy = await api<{ id: string; title: string }>(`/tests/${id}/duplicate`, { method: "POST" });
+      toast.success(`«${copy.title}» үүслээ. Анги сонгож нийтэлнэ үү.`);
+      router.push(`/app/tests/${copy.id}/edit`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Хуулж чадсангүй");
+    } finally {
+      setDuplicating(false);
+    }
+  }
   const role = getRole();
   const isAdmin = role === "ADMIN";
   const [test, setTest] = useState<TestDetails | null>(null);
@@ -425,12 +445,18 @@ export default function EditTestPage({
             <DuplicateTestButton testId={id} />
             <p className="mt-1 text-base text-ink-dim">{test.title}</p>
           </div>
-          <Link
-            href="/app/tests"
-            className="inline-flex min-h-11 items-center rounded-lg border border-line px-4 py-2 text-base transition hover:border-brand"
-          >
-            Жагсаалт руу буцах
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={duplicateTest} disabled={duplicating}>
+              <Copy aria-hidden />
+              {duplicating ? "Хуулж байна…" : "Хуулах"}
+            </Button>
+            <Link
+              href="/app/tests"
+              className="inline-flex min-h-11 items-center rounded-lg border border-line px-4 py-2 text-base transition hover:border-brand"
+            >
+              Жагсаалт руу буцах
+            </Link>
+          </div>
         </header>
 
         {saved ? (

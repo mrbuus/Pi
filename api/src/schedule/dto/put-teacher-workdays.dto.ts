@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsInt,
@@ -8,11 +9,13 @@ import {
 } from 'class-validator';
 
 export class PutTeacherWorkDaysDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   teacherId: string;
 
   // Хоосон массив = багш "тогтмол ажлын өдөргүй" болгоно (бүхнийг цэвэрлэнэ)
+  @ApiProperty({ type: [Number], minimum: 0, maximum: 6 })
   @IsArray()
   @IsInt({ each: true })
   @Min(0, { each: true })

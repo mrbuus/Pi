@@ -18,6 +18,7 @@ import { AttemptsModule } from './attempts/attempts.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationCenterModule } from './notification-center/notification-center.module';
 import { requireJwtSecret } from './auth/jwt.strategy';
 import { ClassroomsModule } from './classrooms/classrooms.module';
 import { ColorTagsModule } from './colortags/colortags.module';
@@ -98,6 +99,7 @@ import { ReconcileModule } from './reconcile/reconcile.module';
     // @Global — SMS илгээх үйлчилгээг бүх модульд нээж өгнө (нууц үг сэргээх,
     // ирээдүйд ирц/төлбөрийн мэдэгдэл гэх мэт).
     NotificationsModule,
+    NotificationCenterModule,
     AuthModule,
     ClassroomsModule,
     AttendanceModule,

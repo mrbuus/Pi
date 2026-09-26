@@ -105,6 +105,7 @@ export const ModelName = {
   TuitionRefund: 'TuitionRefund',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
+  Notification: 'Notification',
   ClassTestSession: 'ClassTestSession',
   LearningEvent: 'LearningEvent',
   EnrollmentWindow: 'EnrollmentWindow',
@@ -118,7 +119,11 @@ export const ModelName = {
   TeacherWorkException: 'TeacherWorkException',
   AcademicCalendarDay: 'AcademicCalendarDay',
   StudentGoal: 'StudentGoal',
-  StreakFreeze: 'StreakFreeze'
+  StreakFreeze: 'StreakFreeze',
+  GoogleIdentity: 'GoogleIdentity',
+  GoogleOAuthState: 'GoogleOAuthState',
+  GoogleLoginExchange: 'GoogleLoginExchange',
+  StoredFile: 'StoredFile'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -148,11 +153,19 @@ export const UserScalarFieldEnum = {
   lastName: 'lastName',
   passwordHash: 'passwordHash',
   mustChangePassword: 'mustChangePassword',
+  termsAcceptedAt: 'termsAcceptedAt',
+  privacyVersion: 'privacyVersion',
+  guardianConsentAt: 'guardianConsentAt',
   passwordChangedAt: 'passwordChangedAt',
   role: 'role',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  calendarTokenHash: 'calendarTokenHash',
+  calendarTokenVersion: 'calendarTokenVersion',
+  archivedAt: 'archivedAt',
+  archivedById: 'archivedById',
+  archiveReason: 'archiveReason'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -910,6 +923,20 @@ export const AnnouncementClassroomTargetScalarFieldEnum = {
 export type AnnouncementClassroomTargetScalarFieldEnum = (typeof AnnouncementClassroomTargetScalarFieldEnum)[keyof typeof AnnouncementClassroomTargetScalarFieldEnum]
 
 
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  kind: 'kind',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
 export const ClassTestSessionScalarFieldEnum = {
   id: 'id',
   classroomId: 'classroomId',
@@ -1105,6 +1132,55 @@ export const StreakFreezeScalarFieldEnum = {
 } as const
 
 export type StreakFreezeScalarFieldEnum = (typeof StreakFreezeScalarFieldEnum)[keyof typeof StreakFreezeScalarFieldEnum]
+
+
+export const GoogleIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  googleSubject: 'googleSubject',
+  email: 'email',
+  pictureUrl: 'pictureUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleIdentityScalarFieldEnum = (typeof GoogleIdentityScalarFieldEnum)[keyof typeof GoogleIdentityScalarFieldEnum]
+
+
+export const GoogleOAuthStateScalarFieldEnum = {
+  id: 'id',
+  stateHash: 'stateHash',
+  purpose: 'purpose',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type GoogleOAuthStateScalarFieldEnum = (typeof GoogleOAuthStateScalarFieldEnum)[keyof typeof GoogleOAuthStateScalarFieldEnum]
+
+
+export const GoogleLoginExchangeScalarFieldEnum = {
+  id: 'id',
+  codeHash: 'codeHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type GoogleLoginExchangeScalarFieldEnum = (typeof GoogleLoginExchangeScalarFieldEnum)[keyof typeof GoogleLoginExchangeScalarFieldEnum]
+
+
+export const StoredFileScalarFieldEnum = {
+  key: 'key',
+  mime: 'mime',
+  size: 'size',
+  bytes: 'bytes',
+  createdAt: 'createdAt'
+} as const
+
+export type StoredFileScalarFieldEnum = (typeof StoredFileScalarFieldEnum)[keyof typeof StoredFileScalarFieldEnum]
 
 
 export const SortOrder = {

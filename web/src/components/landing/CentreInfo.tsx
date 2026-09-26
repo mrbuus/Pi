@@ -65,7 +65,7 @@ export default function CentreInfo() {
           {HOW_IT_WORKS_POINTS.map((p, i) => (
             <div
               key={p.title}
-              className="reveal rounded-2xl border border-line bg-panel p-6"
+              className="reveal chunky p-6"
               style={{ transitionDelay: `${i * 90}ms` }}
             >
               <p className="text-base font-bold text-ink">{p.title}</p>
@@ -83,7 +83,7 @@ export default function CentreInfo() {
           {CLASS_RHYTHM_POINTS.map((p, i) => (
             <div
               key={p.title}
-              className="reveal rounded-2xl border border-line bg-panel p-6"
+              className="reveal chunky p-6"
               style={{ transitionDelay: `${i * 90}ms` }}
             >
               <p className="text-base font-bold text-ink">{p.title}</p>
@@ -96,7 +96,7 @@ export default function CentreInfo() {
 
         <StudyRhythmLoop />
 
-        <div className="reveal mt-10 rounded-2xl border border-line bg-panel p-6">
+        <div className="reveal mt-10 chunky p-6">
           <p className="text-base font-bold text-ink">
             Хичээл бүр адилхан биш — аль анги бидэнд тохирохыг сонгоорой
           </p>
