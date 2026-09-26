@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, IsIn, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsIn,
+  IsBoolean,
+} from 'class-validator';
 
 export class PurchaseDto {
   @ApiProperty({ type: String })
@@ -22,7 +30,9 @@ export class CreateProductDto {
   refId: string;
 
   @ApiProperty({ type: Number })
-  @IsNumber()
+  @IsInt()
+  @Min(0)
+  @Max(2147483647)
   price: number;
 
   @ApiPropertyOptional({ type: Boolean })
@@ -33,6 +43,14 @@ export class CreateProductDto {
 
 export class UpdatePriceDto {
   @ApiProperty({ type: Number })
-  @IsNumber()
+  @IsInt()
+  @Min(0)
+  @Max(2147483647)
   price: number;
+}
+
+export class UpdateProductStatusDto {
+  @ApiProperty({ type: Boolean })
+  @IsBoolean()
+  active: boolean;
 }

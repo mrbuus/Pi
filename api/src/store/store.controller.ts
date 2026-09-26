@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   UseGuards,
@@ -13,7 +14,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/client';
 import type { RequestWithUser } from '../auth/request.interface';
-import type { PurchaseDto, CreateProductDto, UpdatePriceDto } from './dto/purchase.dto';
+import { PurchaseDto, CreateProductDto, UpdatePriceDto, UpdateProductStatusDto } from './dto/purchase.dto';
 
 // main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
 // зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
@@ -91,7 +92,7 @@ export class StoreController {
    * POST /api/store/admin/products/:id/price — үнэ солих
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Roles(Role.ADMIN)
   @Post('admin/products/:id/price')
   updatePrice(
     @Request() req: RequestWithUser,
@@ -104,6 +105,17 @@ export class StoreController {
       req.user.userId,
       req.user.role,
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('admin/products/:id/status')
+  updateStatus(
+    @Request() req: RequestWithUser,
+    @Param('id') productItemId: string,
+    @Body() dto: UpdateProductStatusDto,
+  ) {
+    return this.storeService.updateStatus(productItemId, dto.active, req.user.role);
   }
 
   /**

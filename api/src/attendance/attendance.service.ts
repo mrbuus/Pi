@@ -68,7 +68,7 @@ export class AttendanceService {
     const activeStudentIds = new Set(
       (
         await this.prisma.enrollment.findMany({
-          where: { classroomId, leftAt: null },
+          where: { classroomId, leftAt: null, student: { archivedAt: null } },
           select: { studentId: true },
         })
       ).map((e) => e.studentId),
@@ -213,7 +213,7 @@ export class AttendanceService {
     // Тухайн өдөр идэвхтэй байсан бүх сурагчийг ирцтэй нь хамт буцаана —
     // ирц тэмдэглээгүй сурагч null статустай харагдана
     const enrollments = await this.prisma.enrollment.findMany({
-      where: { classroomId, leftAt: null },
+      where: { classroomId, leftAt: null, student: { archivedAt: null } },
       select: {
         student: {
           select: { id: true, firstName: true, lastName: true },
@@ -305,7 +305,7 @@ export class AttendanceService {
 
     const [enrollments, counts] = await Promise.all([
       this.prisma.enrollment.findMany({
-        where: { classroomId, leftAt: null },
+        where: { classroomId, leftAt: null, student: { archivedAt: null } },
         select: {
           student: { select: { id: true, firstName: true, lastName: true } },
         },

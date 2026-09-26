@@ -250,8 +250,8 @@ export class StoreService {
     if (!TEACHER_ROLES.includes(role)) {
       throw new ForbiddenException('Зөвхөн админ бүтээгдэхүүн үүсгэнэ');
     }
-    if (price < 0) {
-      throw new BadRequestException('Үнэ сөрөг байж болохгүй');
+    if (!Number.isInteger(price) || price < 0 || price > 2147483647) {
+      throw new BadRequestException('Үнэ 0–2147483647 хоорондох бүхэл тоо байна');
     }
 
     // BOOK-д л видео сонголт зөвшөөрнө
@@ -312,11 +312,11 @@ export class StoreService {
     userId: string,
     role: Role,
   ) {
-    if (!TEACHER_ROLES.includes(role)) {
+    if (role !== Role.ADMIN) {
       throw new ForbiddenException('Зөвхөн админ үнэ соллоно');
     }
-    if (newPrice < 0) {
-      throw new BadRequestException('Үнэ сөрөг байж болохгүй');
+    if (!Number.isInteger(newPrice) || newPrice < 0 || newPrice > 2147483647) {
+      throw new BadRequestException('Үнэ 0–2147483647 хоорондох бүхэл тоо байна');
     }
 
     const product = await this.prisma.productItem.findUnique({
@@ -330,6 +330,22 @@ export class StoreService {
       where: { id: productItemId },
       data: { price: newPrice },
     });
+  }
+
+  async updateStatus(productItemId: string, active: boolean, role: Role) {
+    if (role !== Role.ADMIN) throw new ForbiddenException('Зөвхөн админ өөрчилнө');
+    if (typeof active !== 'boolean') throw new BadRequestException('Идэвхийн төлөв буруу байна');
+    const product = await this.prisma.productItem.findUnique({ where: { id: productItemId } });
+    if (!product) throw new NotFoundException('Бүтээгдэхүүн олдсонгүй');
+    if (active && product.kind === ProductKind.TEST) {
+      const test = await this.prisma.test.findUnique({ where: { id: product.refId } });
+      if (!test || test.deletedAt || test.isDraft) throw new NotFoundException('Нийтлэгдсэн тест олдсонгүй');
+    }
+    if (active && product.kind === ProductKind.BOOK) {
+      const book = await this.prisma.book.findUnique({ where: { id: product.refId } });
+      if (!book || book.deletedAt) throw new NotFoundException('Ном олдсонгүй');
+    }
+    return this.prisma.productItem.update({ where: { id: productItemId }, data: { active } });
   }
 
   /**

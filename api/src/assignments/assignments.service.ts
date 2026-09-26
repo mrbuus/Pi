@@ -78,6 +78,7 @@ export class AssignmentsService {
         where: {
           classroomId,
           leftAt: null,
+          student: { archivedAt: null },
           joinedAt: { lte: assignment.createdAt },
         },
         select: { studentId: true },
@@ -182,6 +183,7 @@ export class AssignmentsService {
           WHERE s.state IN ('SUBMITTED', 'RETURNED')
         )::bigint AS "partialCount"
       FROM "Enrollment" e
+      JOIN "User" student ON student.id = e."studentId" AND student."archivedAt" IS NULL
       JOIN "Assignment" a
         ON a."classroomId" = e."classroomId"
         AND a."deletedAt" IS NULL
@@ -201,7 +203,7 @@ export class AssignmentsService {
     );
 
     const enrollments = await this.prisma.enrollment.findMany({
-      where: { classroomId, leftAt: null },
+      where: { classroomId, leftAt: null, student: { archivedAt: null } },
       select: {
         student: { select: { id: true, firstName: true, lastName: true } },
       },
@@ -292,7 +294,7 @@ export class AssignmentsService {
   // Сурагч идэвхтэй ангийнхаа, элссэн өдрөөс хойшхи даалгавруудыг л харна (SPEC §6.3)
   async myAssignments(studentId: string) {
     const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null },
+      where: { studentId, leftAt: null, student: { archivedAt: null } },
       include: { classroom: { select: { id: true, name: true } } },
     });
     if (!enrollment) return [];
@@ -339,11 +341,12 @@ export class AssignmentsService {
         studentId,
         classroomId: assignment.classroomId,
         leftAt: null,
+        student: { archivedAt: null },
         joinedAt: { lte: assignment.createdAt },
       },
     });
     const enrolledNow = await this.prisma.enrollment.findFirst({
-      where: { studentId, classroomId: assignment.classroomId, leftAt: null },
+      where: { studentId, classroomId: assignment.classroomId, leftAt: null, student: { archivedAt: null } },
     });
     if (!enrolledNow) {
       throw new ForbiddenException('Та энэ ангийн сурагч биш байна');
@@ -391,6 +394,18 @@ export class AssignmentsService {
       throw new NotFoundException('Даалгавар олдсонгүй');
     }
     await this.assertClassAccess(assignment.classroomId, userId, role);
+
+    // A current roster action must not create a mark for an archived/unrelated pupil.
+    const enrolled = await this.prisma.enrollment.findFirst({
+      where: {
+        classroomId: assignment.classroomId,
+        studentId: dto.studentId,
+        leftAt: null,
+        student: { archivedAt: null },
+        joinedAt: { lte: assignment.createdAt },
+      },
+    });
+    if (!enrolled) throw new NotFoundException('Сурагч энэ даалгаврын идэвхтэй бүртгэлд алга байна');
 
     const existing = await this.prisma.submission.findUnique({
       where: {
@@ -462,7 +477,7 @@ export class AssignmentsService {
     await this.assertClassAccess(assignment.classroomId, userId, role);
 
     const enrollments = await this.prisma.enrollment.findMany({
-      where: { classroomId: assignment.classroomId, leftAt: null },
+      where: { classroomId: assignment.classroomId, leftAt: null, student: { archivedAt: null } },
       select: {
         joinedAt: true,
         student: { select: { id: true, firstName: true, lastName: true } },

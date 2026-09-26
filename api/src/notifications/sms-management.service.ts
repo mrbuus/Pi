@@ -28,6 +28,7 @@ export interface BulkSmsRequest {
 export interface BulkSmsEstimate {
   recipientCount: number;
   deduplicatedCount: number;
+  excludedArchivedCount?: number;
   estimatedSegments: number;
   estimatedCost: number; // ₮
 }
@@ -46,6 +47,19 @@ export class SmsManagementService {
     private sms: SmsService,
   ) {}
 
+  // Manual external phone numbers stay available. Known archived learner numbers
+  // are excluded in one query; history is never deleted. Recheck before sending.
+  private async activePhones(phones: string[]): Promise<string[]> {
+    const normalized = [...new Set(phones.map(toNationalMn).filter((phone): phone is string => phone !== null))];
+    if (!normalized.length) return [];
+    const archived = await this.prisma.user.findMany({
+      where: { role: 'STUDENT', archivedAt: { not: null }, phone: { in: normalized.flatMap(phone => [phone, `+976${phone}`, `976${phone}`]) } },
+      select: { phone: true },
+    });
+    const excluded = new Set(archived.map(user => toNationalMn(user.phone ?? '')).filter(Boolean));
+    return normalized.filter(phone => !excluded.has(phone));
+  }
+
   /**
    * Нэг дугаар руу SMS илгээнэ (асинхрон БИШТЭЙ, шууд дараалалд сагс).
    */
@@ -56,6 +70,10 @@ export class SmsManagementService {
     const phone = toE164Mn(request.phone);
     if (!phone) {
       throw new BadRequestException(`Утасны дугаар танигдсангүй: ${request.phone}`);
+    }
+
+    if (!(await this.activePhones([phone])).length) {
+      throw new BadRequestException('Архивласан сурагчид SMS илгээхгүй');
     }
 
     // Дугаарын ҮНЭ хязгаалалт (нэг жижиг SMS-ээр бөөнөөр цэглэхээс сэргийлнэ)
@@ -99,7 +117,7 @@ export class SmsManagementService {
       .filter((p): p is string => p !== null);
 
     // 2. Давхардсан дугаарыг арилгана
-    const deduped = new Set(validPhones);
+    const deduped = new Set(await this.activePhones(validPhones));
 
     // 3. SMS хэсгийн тоо (бүгд ИЖИЛ текст)
     const segments = calculateSmsSegments(request.text);
@@ -111,6 +129,7 @@ export class SmsManagementService {
     return {
       recipientCount: request.phones.length,
       deduplicatedCount: deduped.size,
+      excludedArchivedCount: new Set(validPhones).size - deduped.size,
       estimatedSegments: totalSegments,
       estimatedCost,
     };
@@ -139,6 +158,15 @@ export class SmsManagementService {
       );
     }
 
+    const phones = await this.activePhones(request.phones);
+    if (!phones.length) throw new BadRequestException('Идэвхтэй хүлээн авагч алга байна');
+    if (phones.length > 500) throw new BadRequestException('Нэг удаад 500 хүртэл дугаар сонгоно');
+    const segments = calculateSmsSegments(request.text);
+    estimate.excludedArchivedCount = new Set(request.phones.map(toNationalMn).filter(Boolean)).size - phones.length;
+    estimate.deduplicatedCount = phones.length;
+    estimate.estimatedSegments = phones.length * segments;
+    estimate.estimatedCost = estimate.estimatedSegments * this.pricePerSegment;
+
     // 1. SmsBatch үүсгэнэ
     const batch = await this.prisma.smsBatch.create({
       data: {
@@ -151,11 +179,7 @@ export class SmsManagementService {
     });
 
     // 2. Нэг нэгээр SmsMessage-г QUEUED-д үүсгэнэ (асинхрон эхлүүлэхээс өмнө)
-    const deduped = new Set(
-      request.phones
-        .map((p) => toNationalMn(p))
-        .filter((p): p is string => p !== null),
-    );
+    const deduped = new Set(phones);
 
     const messageIds: string[] = [];
     for (const phone of deduped) {
@@ -204,6 +228,18 @@ export class SmsManagementService {
         `Batch нь DRAFT байх ёстой, одоо ${batch.status} байна`,
       );
     }
+
+    // A pupil may have been archived after the draft was created.
+    const pending = await this.prisma.smsMessage.findMany({
+      where: { batchId, status: 'QUEUED' }, select: { id: true, toPhone: true },
+    });
+    const allowed = new Set(await this.activePhones(pending.map(message => message.toPhone)));
+    const excludedIds = pending.filter(message => !allowed.has(toNationalMn(message.toPhone) ?? '')).map(message => message.id);
+    if (excludedIds.length) await this.prisma.smsMessage.updateMany({
+      where: { id: { in: excludedIds }, status: 'QUEUED' },
+      data: { status: 'FAILED', error: 'Архивласан сурагч: илгээгээгүй' },
+    });
+    if (!allowed.size) throw new BadRequestException('Идэвхтэй хүлээн авагч алга байна');
 
     // Batch-ыг SENDING-д оруулна
     await this.prisma.smsBatch.update({
@@ -310,6 +346,10 @@ export class SmsManagementService {
 
     if (message.status !== 'FAILED') {
       throw new BadRequestException('Зөвхөн FAILED статусын мессежийг дахин оролддог');
+    }
+
+    if (!(await this.activePhones([message.toPhone])).length) {
+      throw new BadRequestException('Архивласан сурагчид SMS дахин илгээхгүй');
     }
 
     // Шинээр оролдоно (sendAndLog ашиглаж бүртгэлнэ)
