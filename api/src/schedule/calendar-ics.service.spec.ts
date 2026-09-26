@@ -71,6 +71,42 @@ describe('CalendarIcsService', () => {
     expect(prisma.user.findUnique).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['archive field absent before G25 is integrated', {}],
+    ['archive field explicitly null', { archivedAt: null }],
+  ])('accepts a non-archived user when %s', async (_label, archiveField) => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-1',
+      role: Role.STUDENT,
+      ...archiveField,
+    });
+    prisma.enrollment.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.feedByToken(Buffer.alloc(32, 5).toString('base64url')),
+    ).resolves.toMatchObject({ filename: 'pi.mn-huvaari.ics' });
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: {
+        calendarTokenHash: createHash('sha256')
+          .update(Buffer.alloc(32, 5).toString('base64url'))
+          .digest('hex'),
+      },
+    });
+  });
+
+  it('revokes a calendar link when the token owner is archived', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-1',
+      role: Role.STUDENT,
+      archivedAt: new Date('2026-09-26T00:00:00.000Z'),
+    });
+
+    await expect(
+      service.feedByToken(Buffer.alloc(32, 5).toString('base64url')),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.enrollment.findFirst).not.toHaveBeenCalled();
+  });
+
   it('limits export to the token owner enrolled class and caps the date range', async () => {
     prisma.user.findUnique.mockResolvedValue({
       id: 'user-1',

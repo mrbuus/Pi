@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { CalendarIcsAuthController } from './calendar-ics-auth.controller';
 import { CalendarIcsFeedController } from './calendar-ics.controller';
 import { CalendarIcsService } from './calendar-ics.service';
+import { NotificationCenterModule } from '../notification-center/notification-center.module';
 import { ScheduleController } from './schedule.controller';
 import { ScheduleService } from './schedule.service';
 
 @Module({
+  imports: [NotificationCenterModule],
   // Public static /schedule/my.ics is registered before ScheduleController's
   // GET /schedule/:id so Express does not treat "my.ics" as an id.
   controllers: [

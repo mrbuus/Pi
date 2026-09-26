@@ -39,6 +39,13 @@ function parseDateKey(value: string, label: string): Date {
   }
 }
 
+/** G25 adds archivedAt to User. Keep this branch buildable against the current
+ * schema while automatically revoking calendar links after that migration. */
+function isArchivedUser(user: object): boolean {
+  const archivedAt = (user as { archivedAt?: unknown }).archivedAt;
+  return archivedAt !== undefined && archivedAt !== null;
+}
+
 function feedRange(fromValue?: string, toValue?: string) {
   const from = fromValue ? parseDateKey(fromValue, 'Эхлэх') : todayUB();
   const to = toValue
@@ -92,9 +99,8 @@ export class CalendarIcsService {
     const calendarTokenHash = createHash('sha256').update(token).digest('hex');
     const user = await this.prisma.user.findUnique({
       where: { calendarTokenHash },
-      select: { id: true, role: true },
     });
-    if (!user || !CALENDAR_ROLES.includes(user.role)) {
+    if (!user || isArchivedUser(user) || !CALENDAR_ROLES.includes(user.role)) {
       throw new NotFoundException(
         'Хуанлийн холбоос хүчингүй эсвэл шинэчлэгдсэн байна.',
       );
