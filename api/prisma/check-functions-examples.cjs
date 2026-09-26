@@ -138,7 +138,7 @@ console.log(`${covered.size}/80 worked examples; ${identityAssertions} seeded ch
 // quizzes use truth sets, not string inequality, so weaker necessary conditions
 // cannot count as unique answers. Prose true/false claims remain manually reviewed.
 let quizChecks=0;
-function numeric(s){if(!/^-?\d+(?:\/\d+)?$/.test(s))throw new Error(`unsupported numeric choice: ${s}`);const [a,b]=s.split('/').map(Number);return b===undefined?a:a/b;}
+function numeric(s){if(s==='e')return Math.E;if(!/^-?\d+(?:\/\d+)?$/.test(s))throw new Error(`unsupported numeric choice: ${s}`);const [a,b]=s.split('/').map(Number);return b===undefined?a:a/b;}
 function unique(slug, isCorrect){const q=formulas.get(`fn-${slug}`).quiz[0];const options=[q.answer,...q.distractors];const accepted=options.filter(isCorrect);assert.deepEqual(accepted,[q.answer],`nonunique or incorrect quiz: ${slug}`);quizChecks++;}
 for(const [slug,expected] of [
  ['even',(-3)**2+1],['odd',(-2)**3],['vertical-scale',-4*-3],['absolute-output',Math.abs(1-3)],['absolute-input',2*Math.abs(-2)+1],
