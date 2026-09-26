@@ -53,6 +53,9 @@ mode hides the prompt. Existing server-rendered logo icons were exported as loca
   skipped in desktop; web build passes. No API code/schema changed in T15.
 - `node --test web/tests/pwa.test.cjs`: 13 tests (privacy, routes, errors, quota
   bounds, update gating, list/detail refresh and offline fallback).
+- After incorporating the owner’s 9c0cbb0 base: API 578/578; TypeScript/build
+  pass; full lint 0 errors/92 warnings (one additional warning belongs to the
+  base’s test-builder page, no warning in new PWA files).
 - New `e2e/tests/pwa.spec.ts`: cached/empty/search/clear and install dismissal,
   375px + 1280px. Full suite: 21 passed, 1 desktop-only skip.
 - Real Chrome service worker, synthetic localhost API: public projection only,
