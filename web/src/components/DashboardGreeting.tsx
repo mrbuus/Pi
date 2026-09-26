@@ -1,5 +1,6 @@
 "use client";
 
+import { BookOpen, ClipboardCheck, CreditCard, NotebookPen } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api, fileUrl, getRole, uploadFile } from "@/lib/api";
@@ -32,6 +33,13 @@ const ROLE_LABEL: Record<string, string> = {
   PARENT: "Эцэг эх",
   BUYER: "Худалдан авагч",
 };
+
+const QUICK_ACTIONS = [
+  { href: "/app/tests", label: "Шалгалт", hint: "Тест өгөх", icon: ClipboardCheck, tone: "bg-brand-bright/15 text-brand-soft" },
+  { href: "/app/student#homework", label: "Даалгавар", hint: "Гэрийн даалгавар", icon: NotebookPen, tone: "bg-accent-violet/15 text-accent-violet" },
+  { href: "/app/learn", label: "Хичээл", hint: "Онол, видео", icon: BookOpen, tone: "bg-accent-teal/15 text-accent-teal" },
+  { href: "/app/student/payments", label: "Төлбөр", hint: "Миний төлбөр", icon: CreditCard, tone: "bg-accent-gold/15 text-accent-gold" },
+] as const;
 
 function initials(firstName: string, lastName: string): string {
   return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
@@ -140,28 +148,26 @@ export default function DashboardGreeting() {
         </p>
       )}
 
-      {/* Сурагчид үйл явцын товчийг харуулна */}
+      {/* Сурагчийн түргэн үйлдэл — өнгөт хавтан (шинэ дизайн, 2026-09-26).
+          Утсан дээр 2x2, компьютер дээр 4 багана. */}
       {isStudent && (
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/app/tests"
-            className="inline-flex items-center justify-center rounded-lg border border-brand-bright bg-brand-bright/15 px-4 py-2.5 text-sm font-semibold text-brand-soft transition hover:bg-brand-bright/25"
-          >
-            Шалгалт хай
-          </Link>
-          <Link
-            href="/app/student#homework"
-            className="inline-flex items-center justify-center rounded-lg border border-line px-4 py-2.5 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
-          >
-            Даалгавар
-          </Link>
-          <Link
-            href="/app/student/payments"
-            className="inline-flex items-center justify-center rounded-lg border border-line px-4 py-2.5 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
-          >
-            Төлбөр
-          </Link>
-        </div>
+        <nav aria-label="Түргэн үйлдэл" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {QUICK_ACTIONS.map(({ href, label, hint, icon: Icon, tone }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex min-h-24 flex-col justify-between rounded-2xl border border-line bg-panel p-4 transition hover:-translate-y-0.5 hover:border-brand-bright/40 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            >
+              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tone}`}>
+                <Icon className="h-5 w-5" aria-hidden />
+              </span>
+              <span>
+                <span className="block font-bold text-ink">{label}</span>
+                <span className="block text-xs text-ink-dim">{hint}</span>
+              </span>
+            </Link>
+          ))}
+        </nav>
       )}
     </div>
   );

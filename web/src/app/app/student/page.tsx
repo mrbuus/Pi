@@ -2,7 +2,7 @@
 
 import { Pin } from "lucide-react";
 import { useEffect, useState } from "react";
-import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
+import StreakWeekCard from "@/components/activity/StreakWeekCard";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import EveningMarking from "@/components/EveningMarking";
 import HomeworkList from "@/components/homework/HomeworkList";
@@ -101,10 +101,12 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-8">
       <DashboardGreeting />
-      <h1 className="text-2xl font-extrabold">Миний самбар</h1>
+      {/* Гарчиг дээд мөрөнд (layout) аль хэдийн харагддаг тул давхардуулахгүй. */}
+      <h1 className="sr-only">Миний самбар</h1>
 
-      {/* Идэвхийн heatmap — хадгалуулах (retention) гол шинж чанар тул самбарын дээд хэсэгт */}
-      <ActivityHeatmap />
+      {/* Дараалсан өдөр + 7 хоногийн тууз — урам өгөх гол карт. Жилийн heatmap
+          карт дотор «Бүтэн жилийн түүх»-ээр нээгдэнэ. */}
+      <StreakWeekCard />
 
       {/* Төвийн самбар — зөвхөн танхимын сурагчид */}
       {announcementsQ.status === "loading" && (
