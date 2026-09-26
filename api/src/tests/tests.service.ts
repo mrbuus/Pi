@@ -15,12 +15,21 @@ import {
   Subject,
   TestGradingMode,
 } from '../generated/prisma/enums';
-import { collectPassScope, hasCoveringPass, TEACHER_ROLES } from '../common/access';
+import {
+  collectPassScope,
+  hasCoveringPass,
+  TEACHER_ROLES,
+} from '../common/access';
 import { todayUB } from '../common/date';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
+import {
+  CreateTestDraftDto,
+  TestDraftStateDto,
+  UpdateTestDraftDto,
+} from './dto/test-draft.dto';
 import { SaveSessionDto } from './dto/submit-test.dto';
 import {
   answerToken,
@@ -101,9 +110,150 @@ function toGradable(row: TestProblemRow): GradableProblem {
 export class TestsService {
   constructor(private prisma: PrismaService) {}
 
+  private draftState(dto: TestDraftStateDto): Prisma.InputJsonValue {
+    if (
+      dto.pointOverrides &&
+      Object.values(dto.pointOverrides).some(
+        (value) => !Number.isInteger(value) || value < 1,
+      )
+    ) {
+      throw new BadRequestException('Бодлогын оноо эерэг бүхэл тоо байх ёстой');
+    }
+    return JSON.parse(JSON.stringify(dto)) as Prisma.InputJsonValue;
+  }
+
+  private assertDraftRole(actorRole: Role) {
+    // TEACHER_PLUS тест үүсгэж чаддаг тул ноорог ба хуулбарыг ч ашиглана.
+    if (
+      actorRole !== Role.ADMIN &&
+      actorRole !== Role.TEACHER_PLUS &&
+      actorRole !== Role.TEACHER
+    ) {
+      throw new ForbiddenException(
+        'Ноорогийг зөвхөн админ эсвэл багш удирдана',
+      );
+    }
+  }
+
+  private async findDraftForActor(
+    draftId: string,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    this.assertDraftRole(actorRole);
+    const draft = await this.prisma.testDraft.findUnique({
+      where: { id: draftId },
+    });
+    if (!draft || (actorRole === Role.TEACHER && draft.ownerId !== actorId)) {
+      throw new NotFoundException('Ноорог олдсонгүй');
+    }
+    return draft;
+  }
+
+  async createTestDraft(
+    dto: CreateTestDraftDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    this.assertDraftRole(actorRole);
+    const state = this.draftState(dto);
+    const draft = await this.prisma.testDraft.create({
+      data: { ownerId: actorId, state },
+      select: { id: true, revision: true, state: true, updatedAt: true },
+    });
+    return draft;
+  }
+
+  async getTestDraft(draftId: string, actorId: string, actorRole: Role) {
+    return this.findDraftForActor(draftId, actorId, actorRole);
+  }
+
+  async updateTestDraft(
+    draftId: string,
+    dto: UpdateTestDraftDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    await this.findDraftForActor(draftId, actorId, actorRole);
+    const state = this.draftState(dto);
+    const where =
+      actorRole === Role.TEACHER
+        ? { id: draftId, ownerId: actorId, revision: dto.expectedRevision }
+        : { id: draftId, revision: dto.expectedRevision };
+    // The UPDATE holds the row lock until the matching snapshot is read.
+    // Returning a snapshot from outside the transaction could pair a later
+    // writer's revision with this client's older form contents.
+    const saved = await this.prisma.$transaction(async (tx) => {
+      const changed = await tx.testDraft.updateMany({
+        where,
+        data: { state, revision: { increment: 1 } },
+      });
+      if (changed.count !== 1) return null;
+      return tx.testDraft.findUnique({ where: { id: draftId } });
+    });
+    if (!saved) {
+      const latest = await this.findDraftForActor(draftId, actorId, actorRole);
+      throw new ConflictException({
+        message: 'Ноорог өөр төхөөрөмжөөс шинэчлэгдсэн байна. Шинэ хувилбарыг ачаална уу.',
+        draft: latest,
+      });
+    }
+    return saved;
+  }
+
+  async deleteTestDraft(draftId: string, actorId: string, actorRole: Role) {
+    await this.findDraftForActor(draftId, actorId, actorRole);
+    const where =
+      actorRole === Role.TEACHER
+        ? { id: draftId, ownerId: actorId }
+        : { id: draftId };
+    await this.prisma.testDraft.deleteMany({ where });
+    return { deleted: true };
+  }
+
+  async duplicateTest(testId: string, actorId: string, actorRole: Role) {
+    this.assertDraftRole(actorRole);
+    const source = await this.findEditableTest(testId, actorId, actorRole);
+    const duplicate = await this.prisma.test.create({
+      data: {
+        title: `${source.title} (хуулбар)`,
+        type: source.type,
+        gradingMode: source.gradingMode,
+        timeLimitMin: source.timeLimitMin,
+        chapterId: source.chapterId,
+        groupKey: source.groupKey,
+        variantLabel: source.variantLabel,
+        pdfKey: source.pdfKey,
+        price: source.price,
+        createdById: actorId,
+        isDraft: true,
+        problems: {
+          create: source.problems.map(({ problemId, order, points }) => ({
+            problemId,
+            order,
+            points,
+          })),
+        },
+      },
+      include: { problems: { orderBy: { order: 'asc' } }, access: true },
+    });
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'CREATE',
+      'Test',
+      duplicate.id,
+      null,
+      duplicate,
+    );
+    return duplicate;
+  }
+
   // TODO(followUp): api/src/audit/audit.service.ts бэлэн болмогц энэ
   // helper-ийг хасаад тэрхүү нэгдсэн AuditService-ийг DI-аар ашиглах.
-  private toAuditJson(v: unknown): Prisma.InputJsonValue | typeof Prisma.JsonNull {
+  private toAuditJson(
+    v: unknown,
+  ): Prisma.InputJsonValue | typeof Prisma.JsonNull {
     if (v === null || v === undefined) return Prisma.JsonNull;
     return JSON.parse(JSON.stringify(v)) as Prisma.InputJsonValue;
   }
@@ -201,41 +351,6 @@ export class TestsService {
       );
     }
   }
-
-  /**
-   * Тест хуулах (G36). Хуулбар нь ямар ч ангид харагдахгүй (TestAccess
-   * хуулахгүй) — багш засаад анги сонгосны дараа л сурагчид харна. Үр дүн,
-   * оролдлого хуулагдахгүй. Үнийг зөвхөн ADMIN хуулна (үнэ тогтоох эрх ADMIN-д).
-   */
-  async duplicate(testId: string, actorId: string, actorRole: Role) {
-    const src = await this.findEditableTest(testId, actorId, actorRole);
-    return this.prisma.$transaction(async (tx) => {
-      const copy = await tx.test.create({
-        data: {
-          title: `${src.title} (хуулбар)`.slice(0, 200),
-          type: src.type,
-          gradingMode: src.gradingMode,
-          chapterId: src.chapterId,
-          timeLimitMin: src.timeLimitMin,
-          pdfKey: src.pdfKey,
-          price: actorRole === Role.ADMIN ? src.price : null,
-          createdById: actorId,
-        },
-      });
-      if (src.problems.length) {
-        await tx.testProblem.createMany({
-          data: src.problems.map((p) => ({
-            testId: copy.id,
-            problemId: p.problemId,
-            order: p.order,
-            points: p.points,
-          })),
-        });
-      }
-      return { id: copy.id, title: copy.title, problems: src.problems.length };
-    });
-  }
-
   async editInfo(testId: string, actorId: string, actorRole: Role) {
     await this.findEditableTest(testId, actorId, actorRole);
     const taken = await this.hasBeenTaken(testId);
@@ -267,8 +382,13 @@ export class TestsService {
     if (dto.problems !== undefined) {
       const ids = dto.problems.map((problem) => problem.problemId);
       const orders = dto.problems.map((problem) => problem.order);
-      if (new Set(ids).size !== ids.length || new Set(orders).size !== orders.length) {
-        throw new BadRequestException('Бодлого бүр давтагдаагүй дугаар, дараалалтай байна');
+      if (
+        new Set(ids).size !== ids.length ||
+        new Set(orders).size !== orders.length
+      ) {
+        throw new BadRequestException(
+          'Бодлого бүр давтагдаагүй дугаар, дараалалтай байна',
+        );
       }
     }
 
@@ -283,84 +403,92 @@ export class TestsService {
     if (dto.variantLabel !== undefined) data.variantLabel = dto.variantLabel;
     if (dto.price !== undefined) data.price = dto.price;
 
-    const { updated, answerWarning } = await this.prisma.$transaction(async (tx) => {
-      await this.lockTestRow(tx, testId);
-      const test = await this.findEditableTest(testId, actorId, actorRole, tx);
-      const taken = await this.hasBeenTaken(testId, tx);
-      if (
-        taken &&
-        changedFields.some(
-          (field) => field !== 'title' && field !== 'timeLimitMin',
-        )
-      ) {
-        throw new ConflictException(
-          'Энэ тестийг сурагчид өгсөн тул зөвхөн нэр, хугацааг засах боломжтой',
+    const { updated, answerWarning } = await this.prisma.$transaction(
+      async (tx) => {
+        await this.lockTestRow(tx, testId);
+        const test = await this.findEditableTest(
+          testId,
+          actorId,
+          actorRole,
+          tx,
         );
-      }
-
-      const shortensTime =
-        dto.timeLimitMin !== undefined &&
-        dto.timeLimitMin !== null &&
-        (test.timeLimitMin === null || dto.timeLimitMin < test.timeLimitMin);
-      if (shortensTime) {
-        const activeSessionCount = await tx.testAttemptSession.count({
-          where: { testId, status: AttemptSessionStatus.IN_PROGRESS },
-        });
-        if (activeSessionCount > 0) {
+        const taken = await this.hasBeenTaken(testId, tx);
+        if (
+          taken &&
+          changedFields.some(
+            (field) => field !== 'title' && field !== 'timeLimitMin',
+          )
+        ) {
           throw new ConflictException(
-            'Сурагч шалгалт өгч байгаа тул дуусахаас өмнө хугацааг богиносгох боломжгүй',
+            'Энэ тестийг сурагчид өгсөн тул зөвхөн нэр, хугацааг засах боломжтой',
           );
         }
-      }
 
-      const problemIds = dto.problems ?? test.problems;
-      const answerWarning = dto.classroomIds?.length
-        ? await this.checkAnswerCoverage(problemIds, tx)
-        : undefined;
-      if (dto.problems !== undefined) {
-        await tx.testProblem.deleteMany({ where: { testId } });
-        if (dto.problems.length > 0) {
-          await tx.testProblem.createMany({
-            data: dto.problems.map((problem) => ({
-              testId,
-              problemId: problem.problemId,
-              order: problem.order,
-              points: problem.points ?? 1,
-            })),
+        const shortensTime =
+          dto.timeLimitMin !== undefined &&
+          dto.timeLimitMin !== null &&
+          (test.timeLimitMin === null || dto.timeLimitMin < test.timeLimitMin);
+        if (shortensTime) {
+          const activeSessionCount = await tx.testAttemptSession.count({
+            where: { testId, status: AttemptSessionStatus.IN_PROGRESS },
           });
+          if (activeSessionCount > 0) {
+            throw new ConflictException(
+              'Сурагч шалгалт өгч байгаа тул дуусахаас өмнө хугацааг богиносгох боломжгүй',
+            );
+          }
         }
-      }
-      if (dto.classroomIds !== undefined) {
-        await tx.testAccess.deleteMany({ where: { testId } });
-        if (dto.classroomIds.length > 0) {
-          await tx.testAccess.createMany({
-            data: dto.classroomIds.map((classroomId) => ({
-              testId,
-              classroomId,
-            })),
-          });
+
+        const problemIds = dto.problems ?? test.problems;
+        const answerWarning = dto.classroomIds?.length
+          ? await this.checkAnswerCoverage(problemIds, tx)
+          : undefined;
+        if (dto.problems !== undefined) {
+          await tx.testProblem.deleteMany({ where: { testId } });
+          if (dto.problems.length > 0) {
+            await tx.testProblem.createMany({
+              data: dto.problems.map((problem) => ({
+                testId,
+                problemId: problem.problemId,
+                order: problem.order,
+                points: problem.points ?? 1,
+              })),
+            });
+          }
         }
-      }
-      const updated = await tx.test.update({
-        where: { id: testId },
-        data,
-        include: {
-          problems: { orderBy: { order: 'asc' } },
-          access: true,
-        },
-      });
-      await this.recordAudit(
-        actorId,
-        actorRole,
-        'UPDATE',
-        'Test',
-        testId,
-        test,
-        updated,
-        tx,
-      );
-      return { updated, answerWarning };
-    });
+        if (dto.classroomIds !== undefined) {
+          await tx.testAccess.deleteMany({ where: { testId } });
+          if (dto.classroomIds.length > 0) {
+            await tx.testAccess.createMany({
+              data: dto.classroomIds.map((classroomId) => ({
+                testId,
+                classroomId,
+              })),
+            });
+            data.isDraft = false;
+          }
+        }
+        const updated = await tx.test.update({
+          where: { id: testId },
+          data,
+          include: {
+            problems: { orderBy: { order: 'asc' } },
+            access: true,
+          },
+        });
+        await this.recordAudit(
+          actorId,
+          actorRole,
+          'UPDATE',
+          'Test',
+          testId,
+          test,
+          updated,
+          tx,
+        );
+        return { updated, answerWarning };
+      },
+    );
     return answerWarning ? { ...updated, answerWarning } : updated;
   }
 
@@ -460,8 +588,12 @@ export class TestsService {
       : {};
 
     if (TEACHER_ROLES.includes(role)) {
+      const draftOwnerFilter: Prisma.TestWhereInput =
+        role === Role.TEACHER
+          ? { OR: [{ isDraft: false }, { isDraft: true, createdById: userId }] }
+          : {};
       return this.prisma.test.findMany({
-        where: { ...subjectFilter, deletedAt: null },
+        where: { ...subjectFilter, ...draftOwnerFilter, deletedAt: null },
         include: {
           _count: { select: { problems: true, results: true } },
           access: { include: { classroom: { select: { name: true } } } },
@@ -481,7 +613,9 @@ export class TestsService {
     if (!scope.all) {
       const accessOr: Prisma.TestWhereInput[] = [];
       if (enrollment) {
-        accessOr.push({ access: { some: { classroomId: enrollment.classroomId } } });
+        accessOr.push({
+          access: { some: { classroomId: enrollment.classroomId } },
+        });
       }
       if (scope.testIds.length) accessOr.push({ id: { in: scope.testIds } });
       if (scope.chapterIds.length) {
@@ -495,7 +629,7 @@ export class TestsService {
     }
 
     const rows = await this.prisma.test.findMany({
-      where: { ...subjectFilter, ...accessFilter, deletedAt: null },
+      where: { ...subjectFilter, ...accessFilter, deletedAt: null, isDraft: false },
       select: {
         id: true,
         title: true,
@@ -564,7 +698,15 @@ export class TestsService {
           access: true,
         },
       });
-      if (!test || test.deletedAt) throw new NotFoundException('Тест олдсонгүй');
+      if (!test || test.deletedAt)
+        throw new NotFoundException('Тест олдсонгүй');
+      if (
+        test.isDraft &&
+        role === Role.TEACHER &&
+        test.createdById !== userId
+      ) {
+        throw new NotFoundException('Тест олдсонгүй');
+      }
       return test;
     }
 
@@ -662,16 +804,18 @@ export class TestsService {
         const problemOrder = lockedTest.problems.map((tp) => tp.problemId);
         const now = new Date();
         await tx.testAttemptSession.createMany({
-          data: [{
-            testId,
-            studentId: userId,
-            seed,
-            problemOrder,
-            choiceOrder: choiceOrder as Prisma.InputJsonValue,
-            deadlineAt: lockedTest.timeLimitMin
-              ? new Date(now.getTime() + lockedTest.timeLimitMin * 60_000)
-              : null,
-          }],
+          data: [
+            {
+              testId,
+              studentId: userId,
+              seed,
+              problemOrder,
+              choiceOrder: choiceOrder as Prisma.InputJsonValue,
+              deadlineAt: lockedTest.timeLimitMin
+                ? new Date(now.getTime() + lockedTest.timeLimitMin * 60_000)
+                : null,
+            },
+          ],
           skipDuplicates: true,
         });
         const createdSession = (await tx.testAttemptSession.findUnique({
@@ -760,7 +904,8 @@ export class TestsService {
         ? [...(session.events as unknown[])]
         : [];
       events.push({ t: new Date().toISOString(), type: event });
-      if (events.length > MAX_EVENTS) events.splice(0, events.length - MAX_EVENTS);
+      if (events.length > MAX_EVENTS)
+        events.splice(0, events.length - MAX_EVENTS);
 
       await this.prisma.testAttemptSession.update({
         where: { id: session.id },
@@ -1103,10 +1248,13 @@ export class TestsService {
       id: string;
       chapterId: string | null;
       access: { classroomId: string }[];
+      isDraft?: boolean;
     },
     userId: string,
     db: TestDatabase = this.prisma,
   ): Promise<void> {
+    if (test.isDraft)
+      throw new ForbiddenException('Ноорог тестэд сурагч нэвтрэх боломжгүй');
     const enrollment = await db.enrollment.findFirst({
       where: { studentId: userId, leftAt: null },
     });
@@ -1148,7 +1296,9 @@ export class TestsService {
       return;
     }
 
-    throw new ForbiddenException('Энэ тестийг худалдаж авууд эсвэл танай ангид оноогдоон байна');
+    throw new ForbiddenException(
+      'Энэ тестийг худалдаж авууд эсвэл танай ангид оноогдоон байна',
+    );
   }
 
   private isExpired(session: SessionRow): boolean {

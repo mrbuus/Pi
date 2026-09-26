@@ -81,6 +81,7 @@ export const ModelName = {
   ProblemFormula: 'ProblemFormula',
   ProblemAnalysis: 'ProblemAnalysis',
   Test: 'Test',
+  TestDraft: 'TestDraft',
   TestProblem: 'TestProblem',
   TestAccess: 'TestAccess',
   TestAttemptSession: 'TestAttemptSession',
@@ -576,10 +577,23 @@ export const TestScalarFieldEnum = {
   variantLabel: 'variantLabel',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  isDraft: 'isDraft'
 } as const
 
 export type TestScalarFieldEnum = (typeof TestScalarFieldEnum)[keyof typeof TestScalarFieldEnum]
+
+
+export const TestDraftScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  state: 'state',
+  revision: 'revision',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TestDraftScalarFieldEnum = (typeof TestDraftScalarFieldEnum)[keyof typeof TestDraftScalarFieldEnum]
 
 
 export const TestProblemScalarFieldEnum = {
