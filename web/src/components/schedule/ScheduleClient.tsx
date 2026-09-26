@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { api, getRole } from "@/lib/api";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import PatternOverview from "./PatternOverview";
 import StaffScheduleBuilder from "./StaffScheduleBuilder";
 import UpcomingAgenda from "./UpcomingAgenda";
 import WeeklyGrid from "./WeeklyGrid";
+import CalendarSubscriptionCard from "./CalendarSubscriptionCard";
 import {
   todayUBKey,
   type ClassroomLite,
@@ -40,15 +41,19 @@ function StudentSchedule() {
   if (error) return <ErrorState message={error} />;
   if (!data?.classroomId) {
     return (
-      <div className="rounded-xl border border-line bg-panel p-6 text-sm text-ink-dim">
-        Та одоогоор идэвхтэй ангид элсээгүй байгаа тул хуваарь харагдахгүй
-        байна. Асуудалтай бол багштайгаа холбогдоно уу.
+      <div className="space-y-6">
+        <div className="rounded-xl border border-line bg-panel p-6 text-sm text-ink-dim">
+          Та одоогоор идэвхтэй ангид элсээгүй байгаа тул хуваарь харагдахгүй
+          байна. Асуудалтай бол багштайгаа холбогдоно уу.
+        </div>
+        <CalendarSubscriptionCard />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
+      <CalendarSubscriptionCard />
       <section>
         <h2 className="mb-3 font-bold text-brand-soft">
           Миний ангийн долоо хоногийн хуваарь
@@ -80,6 +85,7 @@ function TeacherSchedule({ role }: { role: string }) {
 
   return (
     <div className="space-y-8">
+      <CalendarSubscriptionCard />
       {/* Багш+ -ийн хувьд зохион байгуулах хэсэг нь ӨДӨР ТУТМЫН ажил тул
           хамгийн дээр байрлана — өөрийн хичээлийн жагсаалт доогуур орно. */}
       {role === "TEACHER_PLUS" && <StaffScheduleBuilder role={role} />}
@@ -109,7 +115,8 @@ function AdminSchedule() {
   const [classrooms, setClassrooms] = useState<ClassroomLite[]>([]);
   const [selected, setSelected] = useState<string>("");
   const [entries, setEntries] = useState<ScheduleEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [classroomsLoaded, setClassroomsLoaded] = useState(false);
+  const [loadedSelection, setLoadedSelection] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -117,21 +124,31 @@ function AdminSchedule() {
       .then((rows) => {
         setClassrooms(rows);
         setSelected((prev) => prev || rows[0]?.id || "");
+        setClassroomsLoaded(true);
       })
-      .catch((e) => setError(errMsg(e)));
+      .catch((e) => {
+        setError(errMsg(e));
+        setClassroomsLoaded(true);
+      });
   }, []);
 
   useEffect(() => {
     if (!selected) {
-      setLoading(false);
       return;
     }
-    setLoading(true);
+    let active = true;
     api<ScheduleEntry[]>(`/schedule/classroom/${selected}`)
-      .then(setEntries)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
+      .then((rows) => {
+        if (!active) return;
+        setEntries(rows);
+        setError(null);
+      })
+      .catch((e) => { if (active) setError(errMsg(e)); })
+      .finally(() => { if (active) setLoadedSelection(selected); });
+    return () => { active = false; };
   }, [selected]);
+
+  const loading = !classroomsLoaded || Boolean(selected && loadedSelection !== selected);
 
   return (
     <div className="space-y-8">
@@ -157,7 +174,8 @@ function AdminSchedule() {
         </div>
         {error && <ErrorState message={error} />}
         {!error && loading && <LoadingState rows={5} />}
-        {!error && !loading && <WeeklyGrid entries={entries} todayWeekday={todayWeekday()} />}
+        {!error && !loading && classrooms.length === 0 && <p className="text-sm text-ink-dim">Хуваарь харах анги алга байна.</p>}
+        {!error && !loading && classrooms.length > 0 && <WeeklyGrid entries={entries} todayWeekday={todayWeekday()} />}
       </section>
     </div>
   );
@@ -166,11 +184,11 @@ function AdminSchedule() {
 // ---------------------------------------------------------------------------
 
 export default function ScheduleClient() {
-  const [role, setRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    setRole(getRole());
-  }, []);
+  const role = useSyncExternalStore(
+    () => () => {},
+    getRole,
+    () => null,
+  );
 
   if (!role) return null;
 

@@ -6,8 +6,13 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
-import { Role, ScheduleExceptionKind } from '../generated/prisma/enums';
+import {
+  NotificationKind,
+  Role,
+  ScheduleExceptionKind,
+} from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationCenterService } from '../notification-center/notification-center.service';
 import { BulkCreateScheduleDto } from './dto/bulk-create-schedule.dto';
 import { ClearTopicDto } from './dto/clear-topic.dto';
 import { CreateCalendarDayDto } from './dto/create-calendar-day.dto';
@@ -42,7 +47,52 @@ const TEACHER_SELECT = {
 
 @Injectable()
 export class ScheduleService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly notifications: NotificationCenterService,
+  ) {}
+
+  /** Keep schedule notices scoped to active class rosters and never let an inbox
+   * outage turn a successful timetable edit into a failed request. */
+  private async notifyScheduleChange(
+    classroomIds: string[],
+    teacherIds: Array<string | null | undefined> = [],
+  ) {
+    const ids = [...new Set(classroomIds.filter(Boolean))];
+    if (ids.length === 0) return;
+    try {
+      const [enrollments, classrooms] = await Promise.all([
+        this.prisma.enrollment.findMany({
+          where: { classroomId: { in: ids }, leftAt: null },
+          select: { studentId: true },
+        }),
+        this.prisma.classroom.findMany({
+          where: { id: { in: ids }, archived: false },
+          select: { teacherId: true },
+        }),
+      ]);
+      await this.notifications.notify(
+        [...new Set([
+          ...enrollments.map((enrollment) => enrollment.studentId),
+          ...classrooms.map((classroom) => classroom.teacherId),
+          ...teacherIds,
+        ].filter((userId): userId is string => Boolean(userId)))],
+        {
+          kind: NotificationKind.SCHEDULE_CHANGE,
+          title: 'Хуваарь өөрчлөгдлөө',
+          body: 'Таны суралцаж буй эсвэл заадаг ангийн хуваарьт өөрчлөлт орлоо. Шинэчилсэн хуваарийг шалгана уу.',
+          link: '/app/schedule',
+        },
+      );
+    } catch {
+      // The schedule write has already succeeded. Notification failures are
+      // deliberately best-effort and must not be reported as a failed edit.
+    }
+  }
+
+  private sameDate(a: Date | null | undefined, b: Date | null | undefined) {
+    return a?.getTime() === b?.getTime();
+  }
 
   // ============ Хичээлийн хуваарь (ClassSchedule) ============
 
@@ -212,7 +262,22 @@ export class ScheduleService {
       excludeId: id,
     });
 
-    return this.prisma.classSchedule.update({
+    const teacherId =
+      dto.teacherId === undefined ? existing.teacherId : dto.teacherId;
+    const room = dto.room === undefined ? existing.room : dto.room;
+    const subject = dto.subject === undefined ? existing.subject : dto.subject;
+    const changed =
+      classroomId !== existing.classroomId ||
+      weekday !== existing.weekday ||
+      startMinute !== existing.startMinute ||
+      endMinute !== existing.endMinute ||
+      teacherId !== existing.teacherId ||
+      room !== existing.room ||
+      subject !== existing.subject ||
+      !this.sameDate(effectiveFrom, existing.effectiveFrom) ||
+      !this.sameDate(effectiveTo, existing.effectiveTo);
+
+    const updated = await this.prisma.classSchedule.update({
       where: { id },
       data: {
         classroomId: dto.classroomId,
@@ -227,6 +292,13 @@ export class ScheduleService {
       },
       include: { classroom: CLASSROOM_SELECT, teacher: TEACHER_SELECT },
     });
+    if (changed) {
+      await this.notifyScheduleChange(
+        [existing.classroomId, updated.classroomId],
+        [existing.teacherId, updated.teacherId],
+      );
+    }
+    return updated;
   }
 
   /**
@@ -281,7 +353,7 @@ export class ScheduleService {
       return { mode: 'REPLACED_ALL' as const, schedule: updated };
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // Давхцлын шалгалтыг ГАР АЖИЛЛАГААГААР энд хийнэ: assertNoOverlap нь
       // this.prisma ашигладаг тул энэ транзакц дотор хаагдаж буй хуучин мөрийг
       // хуучин хэвээр нь харах бөгөөд өөртэйгөө "давхцаж байна" гэж худал
@@ -352,6 +424,11 @@ export class ScheduleService {
         movedExceptions: movedExceptions.count,
       };
     });
+    await this.notifyScheduleChange(
+      [existing.classroomId],
+      [existing.teacherId, result.schedule.teacherId],
+    );
+    return result;
   }
 
   async remove(id: string) {
@@ -360,6 +437,7 @@ export class ScheduleService {
     });
     if (!existing) throw new NotFoundException('Хуваарь олдсонгүй');
     await this.prisma.classSchedule.delete({ where: { id } });
+    await this.notifyScheduleChange([existing.classroomId], [existing.teacherId]);
     return { removed: true };
   }
 
@@ -878,6 +956,21 @@ export class ScheduleService {
         })
       : await this.prisma.scheduleException.create({ data });
 
+    const occurrenceChanged =
+      !existing ||
+      existing.kind !== result.kind ||
+      !this.sameDate(existing.newDate, result.newDate) ||
+      existing.newStartMinute !== result.newStartMinute ||
+      existing.newEndMinute !== result.newEndMinute ||
+      existing.newRoom !== result.newRoom;
+    if (
+      occurrenceChanged &&
+      (result.kind === ScheduleExceptionKind.CANCELLED ||
+        result.kind === ScheduleExceptionKind.MOVED)
+    ) {
+      await this.notifyScheduleChange([schedule.classroomId], [schedule.teacherId]);
+    }
+
     await this.recordAudit(
       actorId,
       actorRole,
@@ -898,11 +991,16 @@ export class ScheduleService {
   ) {
     const existing = await this.prisma.scheduleException.findUnique({
       where: { id: exceptionId },
+      include: { schedule: { select: { classroomId: true, teacherId: true } } },
     });
     if (!existing || existing.scheduleId !== scheduleId) {
       throw new NotFoundException('Өөрчлөлт олдсонгүй');
     }
     await this.prisma.scheduleException.delete({ where: { id: exceptionId } });
+    await this.notifyScheduleChange(
+      [existing.schedule.classroomId],
+      [existing.schedule.teacherId],
+    );
     await this.recordAudit(
       actorId,
       actorRole,
