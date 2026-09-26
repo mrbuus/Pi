@@ -2,6 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  HttpException,
+  HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -19,6 +21,7 @@ import {
 } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { loginAttempts } from './login-attempts';
 import { RegisterDto } from './dto/register.dto';
 
 // Идэвхжүүлэх код = тухайн өдрийн огноо УБ-ийн цагаар, ЖЖЖЖССӨӨ (SPEC §6.3)
@@ -192,6 +195,9 @@ export class AuthService {
   async login(dto: LoginDto) {
     // Утас / имэйл / username аль нэгээр нэвтэрнэ
     const identifier = (dto.identifier ?? dto.phone ?? '').trim();
+    if (loginAttempts.isLocked(identifier)) {
+      throw new HttpException('Олон удаа буруу оролдсон тул 15 минутын дараа дахин оролдоно уу. Нууц үгээ мартсан бол «Нууц үг сэргээх»-ийг ашиглана уу.', HttpStatus.TOO_MANY_REQUESTS);
+    }
     if (!identifier) {
       throw new UnauthorizedException('Нэвтрэх мэдээлэл буруу байна');
     }
@@ -205,16 +211,19 @@ export class AuthService {
       },
     });
     if (!user) {
+      loginAttempts.failure(identifier);
       throw new UnauthorizedException(
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
     }
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) {
+      loginAttempts.failure(identifier);
       throw new UnauthorizedException(
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
     }
+    loginAttempts.success(identifier);
     return this.issueToken(user.id, user.role);
   }
 
