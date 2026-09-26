@@ -1,9 +1,11 @@
 import { expect, type Page } from '@playwright/test';
+import { formulaSections, formulaSummaries, formulaDetail, seenFormulas } from './formula-fixtures';
 export const student = { id: 'synthetic-student', firstName: 'Туршилт', lastName: 'Зохиомол', phone: '99000000' };
 export const classroom = { id: 'synthetic-class', name: 'Туршилтын анги', type: 'CLASSROOM', grade: 12, _count: { enrollments: 1 } };
 export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
   const calls: { path: string; method: string; body: Record<string, unknown> }[] = [];
   const unexpected: string[] = [], errors: string[] = [];
+  const formulas = { empty: false, emptySeen: false, extraCount: 0, printLong: false, listFailures: 0, sectionsFailures: 0, detailFailures: 0, seenFailures: 0, listDelayMs: 0, delayedStudent: '', requests: [] as string[] };
   let attendance: string | null = null, homework: string | null = null;
   let users: unknown[] = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -24,6 +26,30 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     if (method === 'OPTIONS') return route.fulfill({ status: 204, headers });
     const body = req.postData() ? req.postDataJSON() : {};
     calls.push({ path, method, body });
+    if (method === 'GET' && (path === '/formulas' || path.startsWith('/formulas/'))) {
+      formulas.requests.push(path + url.search);
+      if (path === '/formulas/sections') {
+        if (formulas.sectionsFailures > 0) { formulas.sectionsFailures--; return reply({ message: 'Synthetic sections failure' }, 503); }
+        return reply(formulas.empty ? [] : formulaSections);
+      }
+      if (path === '/formulas/my') {
+        const studentId = url.searchParams.get('studentId') ?? student.id;
+        if (studentId === formulas.delayedStudent) await new Promise(resolve => setTimeout(resolve, 800));
+        if (formulas.seenFailures > 0 || studentId === 'forbidden-child') { formulas.seenFailures--; return reply({ message: 'Synthetic ownership failure' }, 403); }
+        return reply(formulas.emptySeen ? { totalFormulas: 3, seenFormulas: 0, items: [] } : seenFormulas(studentId));
+      }
+      if (path === '/formulas') {
+        if (formulas.listDelayMs) await new Promise(resolve => setTimeout(resolve, formulas.listDelayMs));
+        if (formulas.listFailures > 0) { formulas.listFailures--; return reply({ message: 'Synthetic catalog failure' }, 503); }
+        const rows = [...formulaSummaries, ...Array.from({ length: formulas.extraCount }, (_, i) => ({ ...formulaSummaries[0], id: `synthetic-more-${i}`, slug: `synthetic-more-${i}`, title: `Зохиомол томьёо ${i + 1}`, order: i + 10 }))];
+        if (formulas.printLong) rows[0] = { ...rows[0], general: String.raw`\sum_{k=1}^{20}a_k=` + Array.from({ length: 20 }, (_, i) => `a_{${i + 1}}`).join('+') };
+        return reply(formulas.empty ? [] : rows.filter(f => !url.searchParams.get('level') || f.level === url.searchParams.get('level')));
+      }
+      if (!/^\/formulas\/synthetic-(square-sum|cube-sum|linear|unknown)$/.test(path)) { unexpected.push(`${method} ${path}`); return reply({ message: 'Unknown formula contract' }, 501); }
+      if (formulas.detailFailures > 0) { formulas.detailFailures--; return reply({ message: 'Synthetic detail failure' }, 503); }
+      const detail = formulaDetail(decodeURIComponent(path.slice('/formulas/'.length)));
+      return detail ? reply(detail) : reply({ message: 'Synthetic formula not found' }, 404);
+    }
     if (path === '') return reply({ status: 'ok' });
     if (path === '/auth/login') return body.password === '99000000'
       ? reply({ accessToken: 'synthetic-token-never-valid-on-server', role })
@@ -63,5 +89,5 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     unexpected.push(`${method} ${path}`);
     return reply({ message: `Unmocked endpoint: ${method} ${path}` }, 501);
   });
-  return { calls, async verify() { expect(unexpected, 'Every backend call must have an explicit synthetic contract').toEqual([]); expect(errors, 'Browser runtime errors').toEqual([]); } };
+  return { calls, formulas, async verify() { expect(unexpected, 'Every backend call must have an explicit synthetic contract').toEqual([]); expect(errors, 'Browser runtime errors').toEqual([]); } };
 }
