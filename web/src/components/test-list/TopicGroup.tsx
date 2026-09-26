@@ -21,7 +21,7 @@ export default function TopicGroup({
 
   return (
     <div
-      className={`overflow-hidden rounded-2xl border border-line bg-surface ${book ? `border-l-4 ${book.bar}` : ""}`}
+      className={`overflow-hidden chunky ${book ? `border-l-4 ${book.bar}` : ""}`}
     >
       {/* Сэдвийн толгой — дарж задлана */}
       <button

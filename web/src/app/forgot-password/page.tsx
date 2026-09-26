@@ -13,7 +13,9 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
+import PasswordChecklist from "@/components/auth/PasswordChecklist";
 import { api } from "@/lib/api";
+import { PASSWORD_MIN_LENGTH, isPasswordStrong } from "@/lib/passwordPolicy";
 
 /**
  * Нууц үг сэргээх — 2 алхам.
@@ -46,7 +48,6 @@ import { api } from "@/lib/api";
  *    илгээхээс ӨМНӨ харуулна — илгээгээд буцаж алдаа авах нь цаг алдуулна.
  */
 
-const MIN_PASSWORD = 6;
 const CODE_LENGTH = 6;
 /** Дахин код хүсэх хүртэлх хүлээлт (сервер талд ч 15 минутад 3 удаа гэсэн хязгаартай) */
 const RESEND_COOLDOWN_SEC = 60;
@@ -149,8 +150,8 @@ export default function ForgotPasswordPage() {
       codeRef.current?.focus();
       return;
     }
-    if (password.length < MIN_PASSWORD) {
-      setError(`Шинэ нууц үг дор хаяж ${MIN_PASSWORD} тэмдэгт байна`);
+    if (!isPasswordStrong(password)) {
+      setError(`Нууц үг дор хаяж ${PASSWORD_MIN_LENGTH} тэмдэгт, үсэг ба тоо холилдсон байх ёстой`);
       return;
     }
     if (password !== confirm) {
@@ -173,14 +174,14 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  const passwordLongEnough = password.length >= MIN_PASSWORD;
+  const passwordStrong = isPasswordStrong(password);
   const passwordsMatch = confirm.length > 0 && password === confirm;
   const codeExpired = step === "verify" && codeLeft === 0;
 
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
+      <div className="relative w-full max-w-sm chunky p-6 sm:p-8">
         <Link
           href="/"
           aria-label="Pi.mn үндсэн нүүр"
@@ -251,7 +252,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
               {loading ? "Илгээж байна…" : "Код илгээх"}
             </button>
@@ -359,20 +360,8 @@ export default function ForgotPasswordPage() {
                   )}
                 </button>
               </div>
-              {/* Шаардлагыг илгээхээс ӨМНӨ шалгаж харуулна */}
-              <p
-                id="pw-rule"
-                className={`mt-1.5 flex items-center gap-1.5 text-xs ${
-                  password.length === 0
-                    ? "text-ink-dim"
-                    : passwordLongEnough
-                      ? "text-success"
-                      : "text-ink-dim"
-                }`}
-              >
-                {passwordLongEnough && <Check aria-hidden className="h-3.5 w-3.5 shrink-0" />}
-                Дор хаяж {MIN_PASSWORD} тэмдэгт
-              </p>
+              {/* Шаардлагыг (8+ тэмдэгт, үсэг, тоо) илгээхээс ӨМНӨ шалгаж харуулна */}
+              <PasswordChecklist id="pw-rule" value={password} />
             </div>
 
             <div>
@@ -421,9 +410,9 @@ export default function ForgotPasswordPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !passwordStrong}
               aria-busy={loading}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
               {loading ? "Хадгалж байна…" : "Нууц үг солих"}
             </button>
@@ -448,7 +437,7 @@ export default function ForgotPasswordPage() {
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105"
             >
               Нэвтрэх
             </button>

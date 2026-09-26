@@ -1,3 +1,4 @@
+import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -9,6 +10,9 @@ import {
   IsOptional,
   IsString,
   Min,
+  MinLength,
+  MaxLength,
+  Matches,
   ValidateNested,
   ValidationOptions,
   registerDecorator,
@@ -56,20 +60,24 @@ function NoUnknownScopeKeys(validationOptions?: ValidationOptions) {
 // Pass.scope-ийн бодит бүтэц (access.ts-тэй яг тохирно):
 // { "all": true } эсвэл { "chapterIds": [...], "bookIds": [...], "testIds": [...] }
 export class PassScopeDto {
+  @ApiPropertyOptional({ type: Boolean })
   @IsOptional()
   @IsBoolean()
   all?: boolean;
 
+  @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   chapterIds?: string[];
 
+  @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   bookIds?: string[];
 
+  @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -79,14 +87,17 @@ export class PassScopeDto {
 // Нэртэй эрх: нэр + хугацаа + хамрах хүрээ (SPEC §11)
 // scope жишээ: { "all": true } эсвэл { "chapterIds": [...], "bookIds": [...], "testIds": [...] }
 export class CreatePassDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ type: Number, minimum: 1 })
   @IsInt()
   @Min(1)
   durationDays: number;
 
+  @ApiProperty({ type: () => PassScopeDto })
   @IsDefined()
   @IsObject()
   @ValidateNested()
@@ -94,34 +105,55 @@ export class CreatePassDto {
   @NoUnknownScopeKeys()
   scope: PassScopeDto;
 
+  @ApiPropertyOptional({ type: Number, minimum: 0 })
   @IsOptional()
   @IsInt()
   @Min(0)
   price?: number;
 
+  @ApiPropertyOptional({ type: Boolean })
   @IsOptional()
   @IsBoolean()
   active?: boolean;
 }
 
 export class GrantPassDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   userId: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  note?: string;
+}
+
+export class RevokePassGrantDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(500)
+  @Matches(/\S/)
+  reason: string;
 }
 
 // Админ л засна — нэр/хугацаа/хамрах хүрээ/үнэ/идэвх солино
 export class UpdatePassDto {
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   name?: string;
 
+  @ApiPropertyOptional({ type: Number, minimum: 1 })
   @IsOptional()
   @IsInt()
   @Min(1)
   durationDays?: number;
 
+  @ApiPropertyOptional({ type: () => PassScopeDto })
   @IsOptional()
   @IsObject()
   @ValidateNested()
@@ -129,11 +161,13 @@ export class UpdatePassDto {
   @NoUnknownScopeKeys()
   scope?: PassScopeDto;
 
+  @ApiPropertyOptional({ type: Number, minimum: 0 })
   @IsOptional()
   @IsInt()
   @Min(0)
   price?: number;
 
+  @ApiPropertyOptional({ type: Boolean })
   @IsOptional()
   @IsBoolean()
   active?: boolean;

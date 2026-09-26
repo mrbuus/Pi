@@ -21,6 +21,14 @@ const STEPS = [
   },
 ] as const;
 
+// Алхам бүр өөр өнгө (товгор хэв маяг) — дараалал нүдэнд тод.
+const STEP_TONES = [
+  "bg-accent-teal/15 text-accent-teal",
+  "bg-accent-violet/15 text-accent-violet",
+  "bg-accent-gold/15 text-accent-gold",
+  "bg-brand-bright/15 text-brand-soft",
+];
+
 export default function HowItWorks() {
   return (
     <section id="how" className="relative scroll-mt-20 py-24">
@@ -36,10 +44,10 @@ export default function HowItWorks() {
           {STEPS.map((s, i) => (
             <div
               key={s.n}
-              className="reveal rounded-2xl border border-line bg-panel p-6"
+              className="reveal chunky p-6"
               style={{ transitionDelay: `${i * 90}ms` }}
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-bright/15 font-serif text-lg font-bold text-brand">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl font-display text-lg font-bold ${STEP_TONES[i % STEP_TONES.length]}`}>
                 {s.n}
               </div>
               <p className="mt-4 text-base font-bold text-ink">{s.title}</p>

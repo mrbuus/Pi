@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * ЖИНХЭНЭ ШАЛГАЛТЫН АЧААЛЛЫН ТЕСТ — 1000 сурагч зэрэг 100 минутын шалгалт
+ * ЖИНХЭНЭ ШАЛГАЛТЫН АЧААЛЛЫН ТЕСТ — 2000 сурагч зэрэг 100 минутын шалгалт
  * өгөх сценарийг ХЭМЖИНЭ (CLAUDE.md-ийн "PROVE IT" даалгавар).
  *
  *   1) N виртуал сурагч POST /tests/:id/start
@@ -32,10 +32,11 @@ const { createPrisma } = require('./lib/db');
 const { ensureServer, stopServer } = require('./lib/server');
 const { seed, cleanup } = require('./fixture');
 const { runLevel } = require('./run-level');
+const { meetsTargets } = require('./lib/acceptance');
 
 const DEFAULTS = {
-  levels: [50, 200, 500, 1000],
-  saveCount: 8, // сурагч тутамд autosave тоо (шахсан — §-ийн тайлбар vuser.js-д)
+  levels: [50, 200, 500, 1000, 2000],
+  saveCount: 20, // сурагч тутамд autosave тоо (шахсан — §-ийн тайлбар vuser.js-д)
   saveIntervalMs: 200, // autosave-ийн зай (жинхэнэ 1200ms debounce-оос шахсан)
   arriveSpreadMs: 3000, // "proctor эхлүүлье" бөөгнөрлийг энэ хугацаанд тарааж эхлүүлнэ
   settleMs: 1500, // түвшин хоорондын амралт (холболт chill down)
@@ -97,7 +98,7 @@ async function main() {
   const keepFixture = !!process.env.LOADTEST_KEEP_FIXTURE;
   const skipBuild = !!process.env.LOADTEST_SKIP_BUILD;
 
-  console.log('=== Ачааллын тест — 1000 сурагч 100 минутын шалгалт сценар ===');
+  console.log('=== Ачааллын тест — 2000 сурагч 100 минутын шалгалт сценар ===');
   console.log(`Зорилтот API: ${config.apiBase}`);
   console.log(`DATABASE_URL host баталгаажлаа: localhost ✅`);
   console.log(`Түвшнүүд: ${levels.join(', ')}`);
@@ -116,7 +117,7 @@ async function main() {
     manifest = await seed({ prisma, levels });
 
     for (const { level, testId } of manifest.levelTests) {
-      // Илүү их сурагч → илүү урт ирэлтийн цонх (жинхэнэ "1000 сурагч 30-60с
+      // Илүү их сурагч → илүү урт ирэлтийн цонх (жинхэнэ "2000 сурагч 30-60с
       // дотор нэвтэрнэ" бөөгнөрлийг ойролцоолсон дүрэм — line
       const arriveSpreadMs = Math.round(arriveSpreadMsBase * Math.max(1, level / 200));
       console.log(`\n[level ${level}] эхэллээ — testId=${testId}, arriveSpread=${arriveSpreadMs}ms`);
@@ -177,6 +178,9 @@ async function main() {
         `алдаа=${(r.overallErrorRate * 100).toFixed(2)}%`,
     );
   }
+  const passed = !abortedAt && results.length === levels.length && results.every(meetsTargets);
+  console.log(`Acceptance targets: ${passed ? "PASS" : "FAIL"} (p95 < 500ms, errors < 0.5%, every student finishes)`);
+  if (!passed) process.exitCode = 2;
   if (abortedAt) {
     console.log(`\n⚠️  N=${abortedAt}-д зогссон (алдааны хувь >50%).`);
   }

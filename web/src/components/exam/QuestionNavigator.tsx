@@ -77,7 +77,7 @@ export default function QuestionNavigator({
         role="dialog"
         aria-modal="true"
         aria-label="Бодлогын навигатор"
-        className="w-full max-w-lg rounded-2xl border border-line bg-surface p-5"
+        className="chunky w-full max-w-lg p-5"
       >
         <div className="mb-4 flex items-center justify-between">
           <div>

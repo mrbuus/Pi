@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
-import { SkeletonCard as Skeleton } from '@/components/ui/Skeleton';
+
 import { Card as Surface } from '@/components/ui/Surface';
-import { Meta } from '@/components/ui/Meta';
+
 import { Button } from '@/components/ui/Button';
 import { ShoppingBag, Check } from 'lucide-react';
 
@@ -42,11 +42,7 @@ export default function StoreProducts() {
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [purchaseError, setPurchaseError] = useState<{id: string, message: string} | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -70,7 +66,9 @@ export default function StoreProducts() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [user]);
+
+  useEffect(() => { void loadData(); }, [loadData]);
 
   async function handlePurchase(productId: string) {
     if (!user) {

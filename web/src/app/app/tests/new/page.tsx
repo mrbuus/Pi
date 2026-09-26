@@ -90,6 +90,56 @@ export default function NewTestPage() {
   // тусдаа, учир нь энэ нь ЖИНХЭНЭ ангид оноогдсоны дараах баталгаа.
   const [createdAnswerWarning, setCreatedAnswerWarning] = useState("");
 
+  // ---------- Ноорог (G36): маягтыг энэ төхөөрөмж дээр автоматаар хадгална ----------
+  // Сервер рүү биш — хагас бөглөсөн тест сурагчид харагдах эрсдэлгүй. Хуудсыг
+  // санамсаргүй хаавал дараагийн удаа «Ноорог сэргээх» санал гарна.
+  const DRAFT_KEY = "pi_test_draft_v1";
+  type Draft = {
+    subject: string; title: string; type: string; gradingMode: string; chapterId: string;
+    timeLimit: string; groupKey: string; variantLabel: string; selectedProblems: string[];
+    pointOverrides: Record<string, number>; selectedClasses: string[]; savedAt: string;
+  };
+  const [draftOffer, setDraftOffer] = useState<Draft | null>(null);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw) as Draft;
+        queueMicrotask(() => setDraftOffer(d));
+      }
+    } catch {
+      // localStorage боломжгүй (private mode) — ноорог ажиллахгүй, маягт хэвийн.
+    }
+  }, []);
+  useEffect(() => {
+    if (createdTest) {
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+      return;
+    }
+    if (!title.trim() && selectedProblems.length === 0) return;
+    const t = setTimeout(() => {
+      const d: Draft = {
+        subject, title, type, gradingMode, chapterId, timeLimit, groupKey, variantLabel,
+        selectedProblems, pointOverrides, selectedClasses, savedAt: new Date().toISOString(),
+      };
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch {}
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [createdTest, subject, title, type, gradingMode, chapterId, timeLimit, groupKey, variantLabel, selectedProblems, pointOverrides, selectedClasses]);
+  function restoreDraft() {
+    if (!draftOffer) return;
+    setSubject(draftOffer.subject); setTitle(draftOffer.title); setType(draftOffer.type);
+    setGradingMode(draftOffer.gradingMode); setChapterId(draftOffer.chapterId); setTimeLimit(draftOffer.timeLimit);
+    setGroupKey(draftOffer.groupKey); setVariantLabel(draftOffer.variantLabel);
+    setSelectedProblems(draftOffer.selectedProblems); setPointOverrides(draftOffer.pointOverrides);
+    setSelectedClasses(draftOffer.selectedClasses);
+    setDraftOffer(null);
+  }
+  function discardDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    setDraftOffer(null);
+  }
+
   useEffect(() => {
     api<Classroom[]>("/classrooms")
       .then(setClassrooms)
@@ -498,6 +548,22 @@ export default function NewTestPage() {
         reviewNeededCount={reviewNeededCount}
       />
 
+      {draftOffer && (
+        <div role="status" className="chunky flex flex-wrap items-center gap-3 border-brand-bright/40 bg-brand-bright/5 p-4">
+          <p className="min-w-0 flex-1 text-sm text-ink">
+            <b>Хадгалагдаагүй ноорог байна:</b> «{draftOffer.title || "нэргүй"}», {draftOffer.selectedProblems.length} бодлого
+            ({new Date(draftOffer.savedAt).toLocaleString("mn-MN")}).
+          </p>
+          <div className="flex w-full gap-2 sm:w-auto">
+            <button type="button" onClick={restoreDraft} className="btn-3d min-h-11 flex-1 rounded-2xl bg-brand-bright px-4 text-sm font-bold text-on-brand sm:flex-none">
+              Сэргээх
+            </button>
+            <button type="button" onClick={discardDraft} className="min-h-11 flex-1 rounded-2xl border-2 border-line px-4 text-sm font-semibold text-ink-dim hover:text-ink sm:flex-none">
+              Устгах
+            </button>
+          </div>
+        </div>
+      )}
       <section className="rounded-2xl border border-line bg-surface p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <StepHeader n={1} title="Үндсэн мэдээлэл" />

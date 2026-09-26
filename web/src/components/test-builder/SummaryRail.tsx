@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Check } from "lucide-react";
-import { Dot, Meta } from "@/components/ui/Meta";
+import { Meta } from "@/components/ui/Meta";
 import {
   EESH_CHOICE_COUNT,
   EESH_FILL_COUNT,
@@ -64,7 +64,7 @@ export default function SummaryRail({
   return (
     // top-14 (56px) — апп-ийн толгой хэсэг (header) h-14 өндөртэй, sticky
     // header-тэй давхцахгүйн тулд яг доор нь наалдана.
-    <div className="sticky top-14 z-20 mb-4 space-y-2 rounded-2xl border border-line bg-panel p-4 shadow-sm">
+    <div className="sticky top-14 z-20 mb-4 space-y-2 chunky p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-1.5">
         {steps.map((s, i) => (
           <span

@@ -88,7 +88,7 @@ export default function StudentProgress({ studentId }: { studentId: string }) {
         )}
 
         {!loading && !error && detail && (
-          <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+          <section className="chunky p-4 md:p-6">
             <h1 className="text-xl font-bold text-ink">{fullName(detail)}</h1>
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-dim">
               {grade && <span>{grade}-р анги</span>}

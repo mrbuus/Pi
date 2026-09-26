@@ -243,7 +243,7 @@ function CreateAssignmentForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-2xl border border-line bg-panel p-4">
+    <form onSubmit={submit} className="space-y-3 chunky p-4">
       <h3 className="font-bold">Шинэ даалгавар</h3>
       <label className="block text-sm">
         <span className="mb-1 block font-medium">Гарчиг</span>

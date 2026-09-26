@@ -12,7 +12,7 @@ interface TestResult {
   createdAt: string;
 }
 
-interface GroupMember {
+export interface GroupMember {
   id: string;
   student: {
     id: string;

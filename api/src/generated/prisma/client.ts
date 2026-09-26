@@ -322,6 +322,11 @@ export type Announcement = Prisma.AnnouncementModel
  */
 export type AnnouncementClassroomTarget = Prisma.AnnouncementClassroomTargetModel
 /**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
  * Model ClassTestSession
  * 
  */
@@ -391,3 +396,23 @@ export type StudentGoal = Prisma.StudentGoalModel
  * 
  */
 export type StreakFreeze = Prisma.StreakFreezeModel
+/**
+ * Model GoogleIdentity
+ * 
+ */
+export type GoogleIdentity = Prisma.GoogleIdentityModel
+/**
+ * Model GoogleOAuthState
+ * 
+ */
+export type GoogleOAuthState = Prisma.GoogleOAuthStateModel
+/**
+ * Model GoogleLoginExchange
+ * 
+ */
+export type GoogleLoginExchange = Prisma.GoogleLoginExchangeModel
+/**
+ * Model StoredFile
+ * 
+ */
+export type StoredFile = Prisma.StoredFileModel

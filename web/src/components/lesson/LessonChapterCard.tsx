@@ -32,7 +32,7 @@ export default function LessonChapterCard({
           ? `/app/learn/${chapter.id}?subject=${subject}`
           : `/app/learn/${chapter.id}`
       }
-      className="flex items-center gap-4 rounded-2xl border border-line bg-panel p-4 text-left transition hover:border-brand-bright/40 hover:-translate-y-0.5"
+      className="flex items-center gap-4 chunky p-4 text-left transition hover:border-brand-bright/40 hover:-translate-y-0.5"
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">

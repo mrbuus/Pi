@@ -126,7 +126,7 @@ export default function CalendarAdmin() {
   const past = days.filter((d) => d.date.slice(0, 10) < todayUBKey());
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="chunky p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Сургалтын хуанли</h2>
       <p className="mb-4 text-xs text-ink-dim">
         Энд бүртгэсэн амралт/завсарлага/шалгалтын өдөр нь долоо хоногийн

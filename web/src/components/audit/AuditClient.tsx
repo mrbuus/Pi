@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp, Coins, NotebookPen } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";

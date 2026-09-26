@@ -73,7 +73,7 @@ export default function MyHomeworkMarks() {
   }));
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 sm:p-6">
+    <section className="rounded-2xl border-2 border-line bg-panel p-4 sm:p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Гэрийн даалгавар</h2>
       <p className="mb-4 text-sm text-ink-dim">Сүүлийн 14 хоногт багшийн тэмдэглэсэн байдал</p>
 

@@ -1,6 +1,17 @@
 "use client";
 
+import { CircleCheck, CircleHelp, CircleX, RotateCcw, Sparkles, type LucideIcon } from "lucide-react";
 import { Dot } from "@/components/ui/Meta";
+
+// Өмнө нь түүхий enum утга («SOLVED_CLEAN: 12») харагддаг байсан.
+// SelfState (schema.prisma) + AUTO (өөрөө тэмдэглээгүй, автомат шалгалт).
+const STATE_LABEL: Record<string, { text: string; icon: LucideIcon; cls: string }> = {
+  SOLVED_CLEAN: { text: "Алдалгүй бодсон", icon: CircleCheck, cls: "bg-success/15 text-success" },
+  FIXED_AFTER_ERROR: { text: "Алдаад зассан", icon: RotateCcw, cls: "bg-accent-teal/15 text-accent-teal" },
+  FAILED: { text: "Чадаагүй", icon: CircleX, cls: "bg-error/15 text-error" },
+  GUESSED: { text: "Таамагласан", icon: CircleHelp, cls: "bg-warning/15 text-warning" },
+  AUTO: { text: "Автомат", icon: Sparkles, cls: "bg-ink/10 text-ink-dim" },
+};
 
 interface SummaryStats {
   studentsTotal: number;
@@ -21,7 +32,7 @@ interface SummarySectionProps {
 export default function SummarySection({ summary }: SummarySectionProps) {
   if (!summary) {
     return (
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-4 font-bold text-brand-soft">
           Өчигдрийн/өнөөдрийн дүгнэлт
         </h2>
@@ -35,7 +46,7 @@ export default function SummarySection({ summary }: SummarySectionProps) {
   const { stats } = summary;
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <h2 className="mb-4 font-bold text-brand-soft">
         Өчигдрийн/өнөөдрийн дүгнэлт
       </h2>
@@ -55,14 +66,19 @@ export default function SummarySection({ summary }: SummarySectionProps) {
           <div>
             <p className="mb-2 text-xs text-ink-dim">Статус:</p>
             <div className="flex flex-wrap gap-2">
-              {Object.entries(stats.byState).map(([state, count]) => (
-                <span
-                  key={state}
-                  className="rounded-lg bg-ink/5 px-3 py-1 text-xs font-medium"
-                >
-                  {state}: {count}
-                </span>
-              ))}
+              {Object.entries(stats.byState).map(([state, count]) => {
+                const st = STATE_LABEL[state] ?? { text: state, icon: Sparkles, cls: "bg-ink/10 text-ink-dim" };
+                return (
+                  <span
+                    key={state}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${st.cls}`}
+                  >
+                    <st.icon className="h-3.5 w-3.5" aria-hidden />
+                    {st.text}
+                    <b className="tabular-nums">{count}</b>
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 // .env-ийг хамгийн түрүүнд ачаална — module decorator-ууд (JwtModule.register)
 // import үед үнэлэгддэг тул ConfigModule-ээс өмнө орчны хувьсагч хэрэгтэй.
 import 'dotenv/config';
+import { setupSwagger } from './swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -48,6 +49,7 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api');
+  setupSwagger(app);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // Prisma-гийн алдааг зөв HTTP код руу буулгана (500 → 400/404/409/503).

@@ -17,6 +17,7 @@ import { CreateTeacherGroupDto } from './dto/create-teacher-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { RegisterExternalTeacherDto } from './dto/register-external-teacher.dto';
 import { VerifyExternalTeacherDto } from './dto/verify-external-teacher.dto';
+import { RejectExternalTeacherDto } from './dto/reject-external-teacher.dto';
 
 // main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
 // зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
@@ -29,9 +30,7 @@ export class TeacherGroupsController {
    * Гадны багш бүртгүүлнэ (нэвтэрээгүй хэрэглэгч).
    */
   @Post('register')
-  async registerExternalTeacher(
-    @Body() dto: RegisterExternalTeacherDto,
-  ) {
+  async registerExternalTeacher(@Body() dto: RegisterExternalTeacherDto) {
     return this.service.registerExternalTeacher(dto);
   }
 
@@ -47,6 +46,17 @@ export class TeacherGroupsController {
   }
 
   /**
+   * GET /api/teacher-groups/verified
+   * Баталгаажсан гадны багшийн жагсаалт.
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'TEACHER_PLUS')
+  @Get('verified')
+  async getVerifiedTeachers() {
+    return this.service.getVerifiedTeachers();
+  }
+
+  /**
    * PUT /api/teacher-groups/verify/:userId
    * Админ/TEACHER_PLUS гадны багшийг баталгаажуулна.
    */
@@ -58,11 +68,40 @@ export class TeacherGroupsController {
     @Body() dto: VerifyExternalTeacherDto,
     @Request() req: any,
   ) {
-    return this.service.verifyExternalTeacher(
-      userId,
-      req.user.userId,
-      dto,
-    );
+    return this.service.verifyExternalTeacher(userId, req.user.userId, dto);
+  }
+
+  /**
+   * PUT /api/teacher-groups/unverify/:userId
+   * Баталгаажуулалтыг зөвхөн админ цуцална.
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Put('unverify/:userId')
+  async unverifyExternalTeacher(@Param('userId') userId: string) {
+    return this.service.unverifyExternalTeacher(userId);
+  }
+
+  /**
+   * PUT /api/teacher-groups/reject/:userId
+   * Хүсэлтийг шалтгаантай татгалзаж, дахин шалгах боломжтойгоор тэмдэглэнэ.
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'TEACHER_PLUS')
+  @Put('reject/:userId')
+  async rejectExternalTeacher(
+    @Param('userId') userId: string,
+    @Body() dto: RejectExternalTeacherDto,
+  ) {
+    return this.service.rejectExternalTeacher(userId, dto);
+  }
+
+  /** Татгалзсан хүсэлтийг дахин хүлээгдэж буй жагсаалтад оруулна. */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'TEACHER_PLUS')
+  @Put('reconsider/:userId')
+  async reconsiderExternalTeacher(@Param('userId') userId: string) {
+    return this.service.reconsiderExternalTeacher(userId);
   }
 
   /**
@@ -71,10 +110,7 @@ export class TeacherGroupsController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('create')
-  async createGroup(
-    @Body() dto: CreateTeacherGroupDto,
-    @Request() req: any,
-  ) {
+  async createGroup(@Body() dto: CreateTeacherGroupDto, @Request() req: any) {
     return this.service.createGroup(req.user.userId, dto);
   }
 
@@ -107,10 +143,7 @@ export class TeacherGroupsController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('join')
-  async joinGroup(
-    @Body() dto: JoinGroupDto,
-    @Request() req: any,
-  ) {
+  async joinGroup(@Body() dto: JoinGroupDto, @Request() req: any) {
     return this.service.joinGroup(req.user.userId, dto);
   }
 
@@ -120,10 +153,7 @@ export class TeacherGroupsController {
    */
   @UseGuards(JwtAuthGuard)
   @Put(':groupId/archive')
-  async archiveGroup(
-    @Param('groupId') groupId: string,
-    @Request() req: any,
-  ) {
+  async archiveGroup(@Param('groupId') groupId: string, @Request() req: any) {
     return this.service.archiveGroup(groupId, req.user.userId);
   }
 

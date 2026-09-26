@@ -29,8 +29,9 @@ export function JoinGroupForm({ onSuccess }: JoinGroupFormProps) {
       setJoinCode('');
       setIsOpen(false);
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Ангийн бүлэгт нэгдэх үед алдаа гарлаа');
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
+      setError(err?.message || 'Ангийн бүлэгт нэгдэх үед алдаа гарлаа');
     } finally {
       setIsLoading(false);
     }

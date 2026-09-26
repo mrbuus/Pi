@@ -253,6 +253,9 @@ function FigureLightbox({
           style={{
             ...CONTAIN_STYLE,
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+            // Чирэх/чимхэх эхэлсэн эсэхийг ref-ээс уншина: pan/scale state өөрчлөгдөх
+            // бүрд дахин render хийгддэг тул утга нь үргэлж шинэ (зориуд).
+            // eslint-disable-next-line react-hooks/refs
             transition: dragStart.current || pinchStart.current ? "none" : "transform 120ms ease-out",
             cursor: scale > 1 ? "grab" : "default",
           }}

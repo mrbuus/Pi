@@ -176,7 +176,7 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
 
   return (
     <form onSubmit={handleCalculate} className="space-y-6">
-      <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+      <section className="chunky p-4 sm:p-5">
         <h2 className="text-base font-bold text-ink">1. Сурагч, гарах өдрөө сонгох</h2>
         <div className="mt-4 space-y-4">
           <div>

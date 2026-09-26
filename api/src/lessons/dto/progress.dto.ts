@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 // LearningEventType enum-д (prisma/schema.prisma) яг ийм нэртэй утга байхгүй
@@ -11,13 +12,16 @@ export enum LessonProgressAction {
 }
 
 export class RecordProgressDto {
+  @ApiProperty({ enum: LessonProgressAction })
   @IsEnum(LessonProgressAction)
   action: LessonProgressAction;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   theoryId?: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   videoId?: string;

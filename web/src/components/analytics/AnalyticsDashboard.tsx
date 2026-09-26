@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Database } from "lucide-react";
+
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
@@ -99,7 +99,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <h2 className="font-bold text-brand-soft">{title}</h2>
       {subtitle && <p className="mb-3 mt-0.5 text-xs text-ink-dim">{subtitle}</p>}
       {!subtitle && <div className="mb-3" />}
@@ -121,7 +121,7 @@ export default function AnalyticsDashboard() {
   return (
     <RequireRole allow={["ADMIN", "TEACHER_PLUS"]}>
     <div className="flex flex-col gap-5">
-      <div className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <div className="chunky p-4 md:p-6">
         <h1 className="text-lg font-bold text-ink">Аналитик самбар</h1>
         <p className="mb-3 mt-0.5 text-sm text-ink-dim">
           Сурагчдын идэвх, ангийн оролцоо, сэдвийн амжилт — сүүлийн үеийн

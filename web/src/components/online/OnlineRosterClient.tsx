@@ -176,7 +176,7 @@ export default function OnlineRosterClient() {
       )}
 
       {!loading && !error && ordered.length === 0 && (
-        <div className="rounded-2xl border border-line bg-panel p-8 text-center">
+        <div className="chunky p-8 text-center">
           <Search className="mx-auto h-6 w-6 text-ink-dim" aria-hidden />
           <p className="mt-2 font-semibold text-ink">Тохирох сурагч олдсонгүй</p>
           <p className="mt-1 text-sm text-ink-dim">

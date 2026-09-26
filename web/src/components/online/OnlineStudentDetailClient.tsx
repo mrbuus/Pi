@@ -142,7 +142,7 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
         Онлайн сурагчдын жагсаалт руу буцах
       </Link>
 
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold text-ink">{detail.student.name}</h1>
@@ -231,7 +231,7 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
 
       <ActivityHeatmap studentId={studentId} />
 
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-3 font-bold text-brand-soft">Бүлэг тус бүрийн явц</h2>
         <ChapterProgressList
           chapters={detail.chapters}
@@ -243,17 +243,17 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
         />
       </section>
 
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-3 font-bold text-brand-soft">Сул талууд</h2>
         <WeakestTopicsList tags={detail.weakestTopics} />
       </section>
 
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-3 font-bold text-brand-soft">Сүүлийн идэвх</h2>
         <Timeline studentId={studentId} canEdit={canEdit} />
       </section>
 
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-3 font-bold text-brand-soft">Тестийн түүх</h2>
         <TestHistoryList tests={detail.tests} />
       </section>

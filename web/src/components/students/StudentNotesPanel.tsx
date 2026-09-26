@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TriangleAlert, Check } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { StudentNote, StudentNoteType, errMsg } from "./types";
 
@@ -144,7 +144,7 @@ export default function StudentNotesPanel({
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <h2 className="mb-3 font-bold text-brand-soft">Тэмдэглэл</h2>
 
       <div className="mb-4 flex gap-2 border-b border-line pb-2">
@@ -312,7 +312,7 @@ export default function StudentNotesPanel({
           onClick={() => setDeleteTarget(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-line bg-panel p-6"
+            className="w-full max-w-sm chunky p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="font-bold text-ink">Тэмдэглэл устгах уу?</p>
