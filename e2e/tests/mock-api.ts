@@ -48,7 +48,7 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     if (path === '/classrooms/synthetic-class/attention') return reply({ date: '2026-09-26', windowDays: 30, rows: [], totals: { flagged: 0, students: 1 } });
     if (path === '/tests/synthetic-exam') return reply({ id: 'synthetic-exam', title: 'Туршилтын шалгалт', problemCount: 1, totalPoints: 1, timeLimitMin: 60, gradingMode: 'AUTO', sessionStatus: null });
     if (path === '/tests/synthetic-exam/start') return reply({ session: { status: 'IN_PROGRESS', remainingSec: 3600, leaveCount: 0 }, problems: [{ id: 'synthetic-problem', format: 'CHOICE', statementText: '$1+1$ нийлбэрийг сонгоно уу.', points: 1, choiceMode: 'LETTER', choices: ['A', 'B', 'C'] }] });
-    if (path === '/tests/synthetic-exam/save') return reply({ status: 'IN_PROGRESS', remainingSec: 3550, leaveCount: 0 });
+    if (path === '/tests/synthetic-exam/session' && method === 'PATCH') return reply({ status: 'IN_PROGRESS', remainingSec: 3550, leaveCount: 0 });
     if (path === '/tests/synthetic-exam/submit') return reply({ result: { totalScore: 1, maxScore: 1 } });
     if (path === '/tests/synthetic-exam/review') return reply({ result: { totalScore: 1, maxScore: 1 }, leaveCount: 0, items: [{ n: 1, points: 1, chapterTitle: 'Тоо', statementText: '$1+1$', answered: true, correct: true, myAnswer: 'A' }] });
     if (path === '/users') { if (method === 'POST') { const user = { id: 'synthetic-new-user', ...body, studentProfile: null, teacherProfile: null, ownedClassrooms: [], email: null, username: null }; users = [user]; return reply({ user }); } return reply(users); }

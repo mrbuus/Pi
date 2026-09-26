@@ -34,6 +34,7 @@ test('03 шалгалтыг эхэлж хариулаад дүн авах', asyn
   await page.getByRole('button', { name: 'Шалгалт эхлэх', exact: true }).click();
   await page.getByRole('button', { name: 'Тийм, эхлэх', exact: true }).click();
   await page.getByRole('group', { name: '1-р бодлогын хариултын сонголтууд' }).getByRole('button', { name: 'A', exact: true }).click();
+  await expect.poll(() => mock.calls.some(c => c.path.endsWith('/session') && c.method === 'PATCH' && (c.body.answers as Record<string, unknown> | undefined)?.['synthetic-problem'] === 'A')).toBe(true);
   await page.getByRole('button', { name: 'Тойм харах', exact: true }).click();
   await page.getByRole('button', { name: 'Шалгалт илгээх', exact: true }).click();
   await page.getByRole('alertdialog').getByRole('button', { name: 'Шалгалт илгээх', exact: true }).click();
