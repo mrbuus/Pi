@@ -24,13 +24,13 @@ export default function Nav() {
         </div>
         <a
           href="/login"
-          className="rounded-full border border-line px-5 py-2 text-sm font-semibold text-ink transition hover:border-brand hover:text-brand"
+          className="chunky chunky-press rounded-2xl px-5 py-2 text-sm font-semibold text-ink"
         >
           Нэвтрэх
         </a>
         <a
           href="/register"
-          className="rounded-full bg-brand-bright px-5 py-2 text-sm font-bold text-on-brand transition hover:opacity-90"
+          className="btn-3d rounded-2xl bg-brand-bright px-5 py-2 text-sm font-bold text-on-brand transition hover:brightness-105"
         >
           Бүртгүүлэх
         </a>

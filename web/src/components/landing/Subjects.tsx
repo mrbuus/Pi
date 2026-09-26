@@ -104,7 +104,7 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
   }
 
   return (
-    <div className="reveal rounded-2xl border border-line bg-panel p-7">
+    <div className="reveal chunky p-7">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
         <meta.icon aria-hidden size={28} strokeWidth={2.25} />
       </div>
