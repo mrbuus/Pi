@@ -38,6 +38,7 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     if (path === '/activity/me') return reply({ year: 2026, totalActiveDays: 0, days: [] });
     if (path === '/activity/streak') return reply({ currentStreak: 0, longestStreak: 0, totalActiveDays: 0 });
     if (path === '/tuition/paid-until/my') return reply({ paidUntil: '2026-10-20T00:00:00.000Z' });
+    if (path.startsWith('/tuition/paid-until/')) return reply({ paidUntil: '2026-10-20T00:00:00.000Z' });
     if (path === '/payments/my') return reply([{ id: 'synthetic-payment', amount: 100, status: 'CONFIRMED', method: 'BANK_TRANSFER', forMonth: '2026-09', paidAt: '2026-09-01T00:00:00Z', createdAt: '2026-09-01T00:00:00Z' }]);
     if (path === '/classrooms') return reply([classroom]);
     if (path === '/classrooms/synthetic-class/attendance') {

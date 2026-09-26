@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  CalendarCheck,
-  CalendarClock,
-  CalendarX,
   Check,
   Clock,
   Copy,
@@ -24,6 +21,7 @@ import { BANK, PHONES, formatMnt, TUITION } from "@/lib/orgInfo";
 // (2) "REVERSED" төлөв огт байхгүй — буцаагдсан төлбөр мөн түүхий гарна.
 // Мөн үгс нь бусад дэлгэцээс өөр байсан ("Төлөгдсөн" vs "Баталгаажсан").
 import { METHOD_LABEL, STATUS_LABEL } from "@/components/payments/paymentHelpers";
+import PaidUntilCard from "@/components/payments/PaidUntilCard";
 
 /* ============================================================================
  * Сурагчийн «Миний төлбөр» (шинэ дизайн, 2026-09-26).
@@ -65,14 +63,6 @@ function dateLabel(iso: string): string {
   return `${d.getUTCFullYear()}.${String(d.getUTCMonth() + 1).padStart(2, "0")}.${String(d.getUTCDate()).padStart(2, "0")}`;
 }
 
-function daysUntil(iso: string): number {
-  const end = new Date(iso);
-  const endUtc = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate());
-  const now = new Date();
-  const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.round((endUtc - todayUtc) / 86_400_000);
-}
-
 function useLoad<T>(path: string) {
   const [data, setData] = useState<T>();
   const [status, setStatus] = useState<Status>("loading");
@@ -104,73 +94,6 @@ function useLoad<T>(path: string) {
       setTick((t) => t + 1);
     },
   };
-}
-
-function PaidUntilHero() {
-  const q = useLoad<{ paidUntil: string | null }>("/tuition/paid-until/my");
-
-  if (q.status === "loading") {
-    return (
-      <section className="chunky p-5">
-        <LoadingState rows={2} label="Төлбөрийн хугацаа" />
-      </section>
-    );
-  }
-  if (q.status === "error") return <ErrorState message={q.error} onRetry={q.reload} />;
-
-  const paidUntil = q.data?.paidUntil ?? null;
-  const left = paidUntil ? daysUntil(paidUntil) : null;
-
-  // Өнгө + дүрс + үг гурвуулаа утга илэрхийлнэ (өнгө дангаараа биш).
-  const view =
-    left === null
-      ? {
-          tone: "bg-ink/5 text-ink-dim",
-          icon: CalendarClock,
-          title: "Төлбөрийн хугацаа тооцогдоогүй байна",
-          hint: "Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана.",
-        }
-      : left < 0
-        ? {
-            tone: "bg-error/10 text-error",
-            icon: CalendarX,
-            title: `${Math.abs(left)} хоногийн өмнө дууссан`,
-            hint: "Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй.",
-          }
-        : left <= 7
-          ? {
-              tone: "bg-warning/10 text-warning",
-              icon: CalendarClock,
-              title: left === 0 ? "Өнөөдөр дуусна" : `${left} хоногийн дараа дуусна`,
-              hint: "Удахгүй дуусах гэж байна — дараагийн сарын төлбөрөө бэлдээрэй.",
-            }
-          : {
-              tone: "bg-success/10 text-success",
-              icon: CalendarCheck,
-              title: `${left} хоног үлдсэн`,
-              hint: "Бүх зүйл хэвийн. Хичээлдээ анхаараарай!",
-            };
-  const Icon = view.icon;
-
-  return (
-    <section aria-labelledby="paid-until-title" className="overflow-hidden chunky">
-      <div className={`flex items-center gap-4 p-5 ${view.tone}`}>
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-panel/70">
-          <Icon className="h-9 w-9" aria-hidden />
-        </span>
-        <div className="min-w-0">
-          <h2 id="paid-until-title" className="text-sm font-semibold text-ink-dim">
-            Хэдий хүртэл төлсөн
-          </h2>
-          <p className="font-display text-3xl font-bold leading-tight text-ink tabular-nums">
-            {paidUntil ? dateLabel(paidUntil) : "—"}
-          </p>
-          <p className="mt-0.5 text-sm font-semibold">{view.title}</p>
-        </div>
-      </div>
-      <p className="px-5 py-3 text-sm text-ink-dim">{view.hint}</p>
-    </section>
-  );
 }
 
 function HowToPay() {
@@ -244,7 +167,7 @@ export default function StudentPaymentsClient() {
     <div className="space-y-6">
       <h1 className="sr-only">Миний төлбөр</h1>
 
-      <PaidUntilHero />
+      <PaidUntilCard />
 
       {q.status === "loading" && (
         <section className="chunky p-5">

@@ -8,6 +8,7 @@ import { Check, CircleCheck, CircleX, Clock, Link2, Wallet, type LucideIcon } fr
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { formatMnt } from "@/lib/orgInfo";
 import { STATUS_LABEL } from "@/components/payments/paymentHelpers";
+import PaidUntilCard from "@/components/payments/PaidUntilCard";
 import {
   HOMEWORK_MARK_OPTIONS,
   type HomeworkMark,
@@ -153,6 +154,11 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
             Холбогдсон
           </span>
         </div>
+      </div>
+
+      {/* «Хэдий хүртэл төлсөн» (G26) — баталгаажсан хүүхдэд л (сервер шалгана). */}
+      <div className="mt-5">
+        <PaidUntilCard studentId={link.student.id} compact />
       </div>
 
       {/* Өнгөт тоон хавтан (шинэ дизайн) — өнгө + дүрс + үг хамт. */}

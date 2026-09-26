@@ -211,7 +211,9 @@ export class TuitionController {
    */
   @Get('paid-until/:studentId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  // PARENT (G26, 2026-09-27): доорх салбар өмнө нь бичигдсэн ч @Roles-д
+  // байгаагүй тул эцэг эх 403 авдаг байв. Зөвхөн БАТАЛГААЖСАН холбоотой хүүхэд.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER, Role.PARENT)
   async getPaidUntil(
     @Param('studentId') studentId: string,
     @NestRequest() req: Request,
@@ -235,7 +237,7 @@ export class TuitionController {
     // PARENT -> өөрийн хүүхдэд
     if (userRole === Role.PARENT) {
       const parentLink = await this.tuitionService['prisma'].parentLink.findFirst({
-        where: { parentId: userId, studentId: studentId },
+        where: { parentId: userId, studentId: studentId, verifiedAt: { not: null } },
       });
       if (!parentLink) {
         throw new ForbiddenException(
