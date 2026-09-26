@@ -4,20 +4,22 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-[color,background-color,border-color,box-shadow,transform] outline-none focus-visible:ring-2 focus-visible:ring-brand-bright/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 motion-reduce:active:scale-100 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl font-bold tracking-wide transition-[color,background-color,border-color,box-shadow,transform] outline-none focus-visible:ring-2 focus-visible:ring-brand-bright/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-brand-bright text-on-brand shadow-sm shadow-brand-bright/25 hover:bg-brand",
-        secondary: "bg-brand-bright/10 text-brand-soft hover:bg-brand-bright/15",
-        outline: "border border-line bg-surface text-ink hover:border-ink/25 hover:bg-bg",
+        // «Товгор» 3D товч — доод сүүдэр нь өөрийн өнгөний бараан хувилбар.
+        default: "btn-3d bg-brand-bright text-on-brand hover:brightness-105",
+        success: "btn-3d bg-success text-on-success [--btn-3d-base:var(--success)] hover:brightness-105",
+        secondary: "chunky chunky-press rounded-2xl border-brand-bright/30 bg-brand-bright/10 text-brand-soft",
+        outline: "chunky chunky-press rounded-2xl text-ink hover:bg-bg",
         ghost: "text-ink-dim hover:bg-ink/5 hover:text-ink",
-        danger: "border border-error/30 text-error hover:bg-error/10",
+        danger: "chunky chunky-press rounded-2xl border-error/35 text-error hover:bg-error/5",
         link: "text-brand underline-offset-4 hover:underline",
       },
       size: {
         sm: "min-h-9 px-3 text-sm",
-        md: "min-h-11 px-4 text-sm",
+        md: "min-h-12 px-5 text-sm",
         lg: "min-h-12 px-6 text-base",
         icon: "size-11",
       },

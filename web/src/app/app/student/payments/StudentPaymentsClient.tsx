@@ -111,7 +111,7 @@ function PaidUntilHero() {
 
   if (q.status === "loading") {
     return (
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="chunky p-5">
         <LoadingState rows={2} label="Төлбөрийн хугацаа" />
       </section>
     );
@@ -153,7 +153,7 @@ function PaidUntilHero() {
   const Icon = view.icon;
 
   return (
-    <section aria-labelledby="paid-until-title" className="overflow-hidden rounded-3xl border border-line bg-panel">
+    <section aria-labelledby="paid-until-title" className="overflow-hidden chunky">
       <div className={`flex items-center gap-4 p-5 ${view.tone}`}>
         <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-panel/70">
           <Icon className="h-9 w-9" aria-hidden />
@@ -187,7 +187,7 @@ function HowToPay() {
   }
 
   return (
-    <section aria-labelledby="how-to-pay" className="rounded-3xl border border-line bg-panel p-5">
+    <section aria-labelledby="how-to-pay" className="chunky p-5">
       <h2 id="how-to-pay" className="mb-3 font-bold text-ink">
         Хэрхэн төлөх вэ
       </h2>
@@ -247,7 +247,7 @@ export default function StudentPaymentsClient() {
       <PaidUntilHero />
 
       {q.status === "loading" && (
-        <section className="rounded-3xl border border-line bg-panel p-5">
+        <section className="chunky p-5">
           <LoadingState rows={4} label="Төлбөрийн түүх" />
         </section>
       )}
@@ -279,7 +279,7 @@ export default function StudentPaymentsClient() {
             </div>
           </dl>
 
-          <section aria-labelledby="pay-history" className="rounded-3xl border border-line bg-panel p-5">
+          <section aria-labelledby="pay-history" className="chunky p-5">
             <h2 id="pay-history" className="mb-4 font-bold text-ink">
               Төлбөрийн түүх
             </h2>
@@ -300,7 +300,7 @@ export default function StudentPaymentsClient() {
                       {rows.map((p) => {
                         const st = STATUS_LABEL[p.status] || STATUS_LABEL.PENDING;
                         return (
-                          <li key={p.id} className="flex items-center gap-3 rounded-2xl border border-line p-3">
+                          <li key={p.id} className="flex items-center gap-3 rounded-2xl border-2 border-line p-3">
                             <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${st.cls}`}>
                               <st.icon className="h-5 w-5" aria-hidden />
                             </span>

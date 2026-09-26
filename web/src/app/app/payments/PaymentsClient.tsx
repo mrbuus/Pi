@@ -226,7 +226,7 @@ export default function PaymentsClient() {
             key={c.label}
             type="button"
             onClick={() => setTab(c.tab)}
-            className={`flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-panel p-3 text-left transition sm:p-4 hover:border-brand-bright/40 ${
+            className={`chunky chunky-press flex min-w-0 items-center gap-3 p-3 text-left sm:p-4 hover:border-brand-bright/40 ${
               i === 2 ? "col-span-2 sm:col-span-1" : ""
             }`}
           >
@@ -258,7 +258,7 @@ export default function PaymentsClient() {
       </TabsList>
 
       <TabsContent value="pending">
-      <section className="rounded-3xl border border-line bg-panel p-4 sm:p-6">
+      <section className="chunky p-4 sm:p-6">
         <h2 className="mb-4 font-bold text-ink">Баталгаажуулах төлбөрүүд</h2>
         <SectionStatus
           loading={pendingLoading}
@@ -278,7 +278,7 @@ export default function PaymentsClient() {
             {pending.map((p) => {
               const match = matchTuitionPlan(p.amount);
               return (
-                <div key={p.id} className="rounded-2xl border border-line p-4">
+                <div key={p.id} className="rounded-2xl border-2 border-line p-4">
                   <div className="flex items-start gap-3">
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
                       <Clock className="h-5 w-5" aria-hidden />
@@ -367,7 +367,7 @@ export default function PaymentsClient() {
       </TabsContent>
 
       <TabsContent value="month" className="space-y-6">
-      <section className="rounded-3xl border border-line bg-panel p-4 sm:p-6">
+      <section className="chunky p-4 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-bold text-ink">Сарын төлөлт</h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -423,7 +423,7 @@ export default function PaymentsClient() {
             {visibleMonthRows.map((r, i) => (
               <li
                 key={`${r.student.phone}-${i}`}
-                className="flex items-center gap-3 rounded-2xl border border-line px-3 py-2.5 text-sm"
+                className="flex items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
               >
                 <span
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
@@ -464,7 +464,7 @@ export default function PaymentsClient() {
       </TabsContent>
 
       <TabsContent value="recent">
-      <section className="rounded-3xl border border-line bg-panel p-4 sm:p-6">
+      <section className="chunky p-4 sm:p-6">
         <h2 className="mb-4 font-bold text-ink">Сүүлийн төлбөрүүд</h2>
         <SectionStatus
           loading={recentLoading}
@@ -480,7 +480,7 @@ export default function PaymentsClient() {
               return (
                 <li
                   key={p.id}
-                  className="flex flex-wrap items-center gap-3 rounded-2xl border border-line px-3 py-2.5 text-sm"
+                  className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
                 >
                   <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}>
                     <st.icon className="h-4 w-4" aria-hidden />
@@ -521,7 +521,7 @@ export default function PaymentsClient() {
 
       {/* Лавлагаа: сурагч ЮУ төлөх ЁСТОЙ вэ — бодит төлбөртэй харьцуулж харах */}
       <TabsContent value="reference">
-      <section className="rounded-3xl border border-line bg-panel p-4 sm:p-6">
+      <section className="chunky p-4 sm:p-6">
         <h2 className="mb-1 font-bold text-ink">
           Сургалтын төлбөрийн лавлагаа
         </h2>
@@ -531,7 +531,7 @@ export default function PaymentsClient() {
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           {TUITION.map((tier) => (
-            <div key={tier.id} className="rounded-2xl border border-line p-4">
+            <div key={tier.id} className="rounded-2xl border-2 border-line p-4">
               <p className="mb-2 text-sm font-semibold">{tier.label}</p>
               <div className="space-y-1.5">
                 {tier.plans.map((plan) => (

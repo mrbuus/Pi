@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, ChevronDown, Flame, Sparkles, Target, Trophy } from "lucide-react";
+import { Check, ChevronDown, Sparkles, Target, Trophy } from "lucide-react";
+import Flame from "@/components/illustrations/Flame";
 import { useEffect, useMemo, useState } from "react";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
@@ -100,7 +101,7 @@ export default function StreakWeekCard() {
 
   if (status === "loading") {
     return (
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="chunky p-5">
         <LoadingState rows={3} label="Идэвх" />
       </section>
     );
@@ -117,11 +118,11 @@ export default function StreakWeekCard() {
   return (
     <section
       aria-labelledby="streak-title"
-      className="overflow-hidden rounded-3xl border border-line bg-panel"
+      className="overflow-hidden chunky"
     >
       <div className="flex items-center gap-4 bg-accent-gold/10 p-5">
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent-gold/20 text-accent-gold">
-          <Flame className="h-9 w-9" aria-hidden />
+        <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-surface/70">
+          <Flame lit={current > 0} className="h-14 w-14" />
         </span>
         <div className="min-w-0">
           <h2 id="streak-title" className="text-sm font-semibold text-ink-dim">
