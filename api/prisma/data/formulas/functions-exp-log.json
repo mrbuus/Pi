@@ -333,7 +333,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "f(x)=\\sin(2\\pi x):\\quad\\text{өгсөн сонголтуудаас үе нь }\\square",
+          "prompt": "f(x)=\\sin(2\\pi x),\\ x\\in\\mathbb R\\ (\\text{радиан}):\\quad\\text{өгсөн сонголтуудаас үе нь }\\square",
           "answer": "1",
           "distractors": [
             "1/2",
@@ -404,7 +404,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "f(x)=-2x+1,\\ x_1<x_2:\\quad f(x_2)-f(x_1)=\\square",
+          "prompt": "f(x)=-2x+1,\\ x\\in\\mathbb R:\\quad\\text{бүх }x_1<x_2\\text{-д }f(x_2)-f(x_1)=\\square",
           "answer": "-2(x_2-x_1)",
           "distractors": [
             "2(x_2-x_1)",
@@ -616,7 +616,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "f\\text{-ийн }(6,2)\\text{ цэг }g(x)=f(3x)\\text{-д }\\square",
+          "prompt": "f\\text{-ийн }(6,2)\\text{ цэг }g(x)=f(3x)\\text{ хувиргалтаар }\\square\\text{ цэгт шилжинэ}",
           "answer": "(2,2)",
           "distractors": [
             "(18,2)",
@@ -626,7 +626,7 @@
         },
         {
           "type": "truefalse",
-          "prompt": "g(x)=f(-x)\\text{ нь }f\\text{-ийн графикийг босоо тэнхлэгээр тусгана}",
+          "prompt": "g(x)=f(-x),\\ D_g=-D_f:\\quad g\\text{-ийн график нь }f\\text{-ийг босоо тэнхлэгээр тусгасан дүрс}",
           "answer": "true",
           "why": "$(u,f(u))$ цэг $(-u,f(u))$ болно."
         }
@@ -688,7 +688,7 @@
       "quiz": [
         {
           "type": "blank",
-          "prompt": "f(x)=x+3:\\quad f(-x)=\\square",
+          "prompt": "f(x)=x+3,\\ x\\in\\mathbb R:\\quad f(-x)=\\square",
           "answer": "-x+3",
           "distractors": [
             "-x-3",
@@ -2000,7 +2000,7 @@
         },
         {
           "type": "truefalse",
-          "prompt": "\\log_2((-2)^2)=2\\log_2(-2)",
+          "prompt": "\\log_2((-2)^2)\\text{-г бодит тоон дээр }2\\log_2(-2)\\text{ гэж задлаж болно}",
           "answer": "false",
           "why": "Зүүн тал тодорхойлогдоно, баруун талын сөрөг аргументтай логарифм бодит утгагүй."
         }
@@ -2223,7 +2223,7 @@
         },
         {
           "type": "truefalse",
-          "prompt": "\\log_2 1\\cdot\\log_1 2=1",
+          "prompt": "\\log_2 1\\cdot\\log_1 2\\text{ үржвэр бодит утгатай бөгөөд }1\\text{-тэй тэнцүү}",
           "answer": "false",
           "why": "Нэг суурьтай логарифм байхгүй тул үржвэр тодорхойлогдохгүй."
         }
@@ -2586,7 +2586,7 @@
         },
         {
           "type": "truefalse",
-          "prompt": "\\log_{1/3}x>0\\iff0<x<1",
+          "prompt": "x>0:\\quad\\log_{1/3}x>0\\iff0<x<1",
           "answer": "true",
           "why": "Буурах логарифм нэг аргумент дээр тэг утгатай тул түүнээс бага эерэг аргумент дээр эерэг."
         }
