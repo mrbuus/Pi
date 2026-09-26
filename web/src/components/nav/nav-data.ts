@@ -23,6 +23,17 @@ export const GROUP_ICON: Record<GroupKey, IconName> = {
   personal: "user",
 };
 
+// Бүлэг бүрийн өнгө (шинэ дизайн, 2026-09-26 — «өнгөлөг, урам өгөх»).
+// Зөвхөн дүрсний дэвсгэрт хэрэглэнэ; шошго нь ink хэвээр тул уншигдац буурахгүй.
+// Tailwind-ийн бүрэн анги нэрээр бичсэн (динамик залгавал purge хийгдэнэ).
+export const GROUP_TONE: Record<GroupKey | "home", string> = {
+  home: "bg-brand-bright/15 text-brand-soft",
+  learn: "bg-accent-teal/15 text-accent-teal",
+  class: "bg-accent-violet/15 text-accent-violet",
+  admin: "bg-accent-gold/15 text-accent-gold",
+  personal: "bg-accent-sky/15 text-accent-sky",
+};
+
 // Role бүрийн НҮҮР (dashboard) холбоос — самбарын дээд хэсэгт бүлэглэлгүй,
 // тод байдлаар харагдана.
 export const HOME: Record<string, NavLink> = {
@@ -149,6 +160,46 @@ const ITEM_GROUP: Record<string, GroupKey> = {
 // "Миний мэдээлэл"-руу орох ганц холбоос үлдээв. Role бүрт нийтлэг тул
 // автоматаар Хувийн бүлэгт нэмэгдэнэ.
 const PROFILE_LINK: NavLink = { href: "/app/profile", label: "Миний мэдээлэл", icon: "user" };
+
+// Гар утасны доод мөрөнд байнга харагдах гол цэс (нүүрний дараа, «Бусад»-аас өмнө).
+// Бусад бүх холбоос «Бусад» дотор хэвээр — нэг ч цэс хасагдахгүй.
+const PRIMARY_BY_ROLE: Record<string, string[]> = {
+  STUDENT: ["/app/learn", "/app/tests", "/app/schedule"],
+  TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
+  TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
+  ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
+  BUYER: ["/app/library", "/app/videos", "/app/schedule"],
+  PARENT: ["/app/schedule"],
+};
+
+// Доод мөрөнд харуулах богино шошго (урт нэр 375px-т багтахгүй).
+const SHORT_LABEL: Record<string, string> = {
+  "/app/learn": "Хичээл",
+  "/app/library": "Сан",
+  "/app/videos": "Видео",
+  "/app/tests": "Шалгалт",
+  "/app/schedule": "Хуваарь",
+  "/app/payments": "Төлбөр",
+  "/app/admin/students": "Сурагчид",
+  "/app/admin/leads": "Хүсэлт",
+};
+
+export interface BottomTab extends NavLink {
+  short: string;
+}
+
+export function getBottomTabs(role: string | null): BottomTab[] {
+  if (!role) return [];
+  const items = NAV_BY_ROLE[role] ?? [];
+  const home = items[0];
+  const primary = (PRIMARY_BY_ROLE[role] ?? [])
+    .map((href) => items.find((i) => i.href === href))
+    .filter((i): i is NavLink => !!i);
+  const tabs: BottomTab[] = [];
+  if (home) tabs.push({ ...home, short: "Нүүр" });
+  for (const item of primary) tabs.push({ ...item, short: SHORT_LABEL[item.href] ?? item.label });
+  return tabs;
+}
 
 export interface NavGroup {
   key: GroupKey;

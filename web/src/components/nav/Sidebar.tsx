@@ -172,7 +172,8 @@ export default function Sidebar({
         </div>
       </aside>
 
-      {/* ── MOBILE: off-canvas drawer, зүүн талаас гулсаж гарна ── */}
+      {/* ── MOBILE: «Бусад» — доороос гарч ирэх хуудас (bottom sheet). Доод таб
+          мөрний «Бусад» товч нээнэ; бүрэн цэс энд байгаа тул юу ч хасагдаагүй. ── */}
       <div
         aria-hidden={!mobileOpen}
         className={`fixed inset-0 z-40 bg-ink/40 transition-opacity duration-300 motion-reduce:transition-none lg:hidden ${
@@ -188,12 +189,13 @@ export default function Sidebar({
         aria-label="Үндсэн цэс"
         aria-hidden={!mobileOpen}
         inert={!mobileOpen ? true : undefined}
-        className={`fixed inset-y-0 left-0 z-50 flex w-[82vw] max-w-[300px] flex-col bg-surface shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none lg:hidden ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col rounded-t-3xl bg-surface pb-[env(safe-area-inset-bottom)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none lg:hidden ${
+          mobileOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-line px-3">
-          <LogoMark variant="full" size={30} />
+        <div aria-hidden className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-line" />
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-line px-4">
+          <span className="text-base font-bold text-ink">Бүх цэс</span>
           <button
             type="button"
             onClick={() => onMobileOpenChange(false)}

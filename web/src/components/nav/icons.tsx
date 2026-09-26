@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Home,
   KeyRound,
+  LayoutGrid,
   Library,
   ListChecks,
   LogOut,
@@ -61,7 +62,8 @@ export type IconName =
   | "logout"
   | "teacher"
   | "bar-chart"
-  | "message-square";
+  | "message-square"
+  | "grid";
 
 const ICONS: Record<IconName, LucideIcon> = {
   school: School, wallet: Wallet, store: Store, chart: ChartNoAxesCombined, refund: Undo2, practice: Dumbbell,
@@ -91,6 +93,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   logout: LogOut,
   teacher: GraduationCap,
   "bar-chart": BarChart3,
+  grid: LayoutGrid,
 };
 
 export function NavIcon({
