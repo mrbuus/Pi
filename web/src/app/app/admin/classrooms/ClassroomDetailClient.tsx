@@ -26,7 +26,9 @@ function messageFor(error: unknown) { return error instanceof Error ? error.mess
 function dateLabel(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Огноо тодорхойгүй';
-  return new Intl.DateTimeFormat('mn-MN', { timeZone: 'Asia/Ulaanbaatar', year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Ulaanbaatar', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+  const part = (type: string) => parts.find((item) => item.type === type)?.value ?? '';
+  return `${part('year')}.${part('month')}.${part('day')}`;
 }
 
 function todayCodeUB() {
