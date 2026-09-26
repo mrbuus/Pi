@@ -1,3 +1,4 @@
+import RegisterSW from '@/components/pwa/RegisterSW';
 import type { Metadata, Viewport } from "next";
 import { Onest, Unbounded } from "next/font/google";
 import "./globals.css";
@@ -39,6 +40,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "light dark",
+  // Same light --brand token as manifest.ts.
+  themeColor: "#1D4ED8",
 };
 
 // Эхний зурагт "буруу" горим гялсхийж харагдахаас сэргийлэх blocking script.
@@ -96,6 +99,7 @@ export default function RootLayout({
             нэмэлт сүлжээний шалгалт явуулахгүй. */}
         <ConnectionStatus />
         <Toaster />
+        <RegisterSW />
       </body>
     </html>
   );
