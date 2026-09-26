@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import LogoMark from "@/components/LogoMark";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/kit/drawer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { NavIcon } from "./icons";
 import NavList from "./NavList";
@@ -65,54 +66,11 @@ export default function Sidebar({
     readRailCollapsed,
     getServerRailCollapsed,
   );
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLElement | null>(null);
 
   function toggleRail() {
     writeRailCollapsed(!railCollapsed);
   }
 
-  // Mobile drawer: backdrop click / Escape-ээр хаах, focus trap, body scroll
-  // түгжих, нээх дээр сум удирдсан товч (hamburger)-руу фокусыг буцаах.
-  useEffect(() => {
-    if (!mobileOpen) return;
-    triggerRef.current = document.activeElement as HTMLElement;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const drawer = drawerRef.current;
-    const focusableSelector =
-      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-    const first = drawer?.querySelector<HTMLElement>(focusableSelector);
-    first?.focus();
-
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        onMobileOpenChange(false);
-        return;
-      }
-      if (e.key !== "Tab" || !drawer) return;
-      const items = Array.from(
-        drawer.querySelectorAll<HTMLElement>(focusableSelector),
-      );
-      if (items.length === 0) return;
-      const firstItem = items[0];
-      const lastItem = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === firstItem) {
-        e.preventDefault();
-        lastItem.focus();
-      } else if (!e.shiftKey && document.activeElement === lastItem) {
-        e.preventDefault();
-        firstItem.focus();
-      }
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = prevOverflow;
-      triggerRef.current?.focus();
-    };
-  }, [mobileOpen, onMobileOpenChange]);
 
   return (
     <>
@@ -172,67 +130,44 @@ export default function Sidebar({
         </div>
       </aside>
 
-      {/* ── MOBILE: «Бусад» — доороос гарч ирэх хуудас (bottom sheet). Доод таб
-          мөрний «Бусад» товч нээнэ; бүрэн цэс энд байгаа тул юу ч хасагдаагүй. ── */}
-      <div
-        aria-hidden={!mobileOpen}
-        className={`fixed inset-0 z-40 bg-ink/40 transition-opacity duration-300 motion-reduce:transition-none lg:hidden ${
-          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-        onClick={() => onMobileOpenChange(false)}
-      />
-      <div
-        id="app-mobile-nav"
-        ref={drawerRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Үндсэн цэс"
-        aria-hidden={!mobileOpen}
-        inert={!mobileOpen ? true : undefined}
-        className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col rounded-t-3xl bg-surface pb-[env(safe-area-inset-bottom)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none lg:hidden ${
-          mobileOpen ? "translate-y-0" : "translate-y-full"
-        }`}
-      >
-        <div aria-hidden className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-line" />
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-line px-4">
-          <span className="text-base font-bold text-ink">Бүх цэс</span>
-          <button
-            type="button"
-            onClick={() => onMobileOpenChange(false)}
-            aria-label="Цэсийг хаах"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink-dim transition hover:text-ink"
-          >
-            <NavIcon name="x" />
-          </button>
-        </div>
-        {/* Драверыг хаалттай үед дотоод агуулгыг mount хийхгүй — desktop
-            aside-тай зэрэг IdentityBadge-ийн /auth/me-г 2 дахин дуудахаас
-            сэргийлнэ, зөвхөн нээгдэх үед л ачаална. */}
-        {mobileOpen && (
-          <>
-            <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
-              <NavList
-                home={home}
-                groups={groups}
-                pathname={pathname}
-                onNavigate={() => onMobileOpenChange(false)}
-              />
-            </div>
-            <div className="flex shrink-0 flex-col gap-2 border-t border-line p-2.5">
-              <ThemeToggle className="w-full justify-center" />
-              <div className="px-0.5">{identity}</div>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink"
-              >
-                <NavIcon name="logout" />
-                <span>Гарах</span>
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+      {/* ── MOBILE: «Бусад» — доороос гарч ирэх, хуруугаар доош чирч хаадаг хуудас
+          (shadcn/ui Drawer = vaul). Фокус занга, Escape, дэвсгэр дарж хаах,
+          body гүйлгэлт түгжих бүгд vaul дотор. Бүрэн цэс энд — юу ч хасагдаагүй. ── */}
+      <Drawer open={mobileOpen} onOpenChange={onMobileOpenChange}>
+        <DrawerContent id="app-mobile-nav" aria-describedby={undefined} className="lg:hidden">
+          <div className="flex h-12 shrink-0 items-center justify-between border-b border-line px-4">
+            <DrawerTitle className="text-base font-bold text-ink">Бүх цэс</DrawerTitle>
+            <button
+              type="button"
+              onClick={() => onMobileOpenChange(false)}
+              aria-label="Цэсийг хаах"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink-dim transition hover:text-ink"
+            >
+              <NavIcon name="x" />
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3" data-vaul-no-drag>
+            <NavList
+              home={home}
+              groups={groups}
+              pathname={pathname}
+              onNavigate={() => onMobileOpenChange(false)}
+            />
+          </div>
+          <div className="flex shrink-0 flex-col gap-2 border-t border-line p-2.5">
+            <ThemeToggle className="w-full justify-center" />
+            <div className="px-0.5">{identity}</div>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink"
+            >
+              <NavIcon name="logout" />
+              <span>Гарах</span>
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }

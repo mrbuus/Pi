@@ -162,7 +162,7 @@ function PaidUntilHero() {
           <h2 id="paid-until-title" className="text-sm font-semibold text-ink-dim">
             Хэдий хүртэл төлсөн
           </h2>
-          <p className="text-3xl font-extrabold leading-tight text-ink tabular-nums">
+          <p className="font-display text-3xl font-bold leading-tight text-ink tabular-nums">
             {paidUntil ? dateLabel(paidUntil) : "—"}
           </p>
           <p className="mt-0.5 text-sm font-semibold">{view.title}</p>

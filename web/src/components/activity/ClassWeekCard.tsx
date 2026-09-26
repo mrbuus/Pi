@@ -113,7 +113,7 @@ export default function ClassWeekCard({ classroomId }: { classroomId: string }) 
           <h2 id="class-week-title" className="text-sm font-semibold text-ink-dim">
             Ангийн идэвх, энэ долоо хоног
           </h2>
-          <p className="text-3xl font-extrabold leading-tight tabular-nums text-ink">
+          <p className="font-display text-3xl font-bold leading-tight tabular-nums text-ink">
             {avg}% <span className="text-base font-bold text-ink-dim">дундаж</span>
           </p>
         </div>

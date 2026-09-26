@@ -127,7 +127,7 @@ export default function StreakWeekCard() {
           <h2 id="streak-title" className="text-sm font-semibold text-ink-dim">
             Дараалсан өдөр
           </h2>
-          <p className="text-3xl font-extrabold leading-tight text-ink tabular-nums">
+          <p className="font-display text-3xl font-bold leading-tight text-ink tabular-nums">
             {current} <span className="text-lg font-bold">өдөр</span>
           </p>
           <p className="mt-0.5 text-sm text-ink-dim">{cheer(current, activeToday)}</p>
