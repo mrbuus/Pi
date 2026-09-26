@@ -1213,7 +1213,7 @@ const NFR = [
    [id, эрэмбэ, ангилал, гарчиг, хаана, яах вэ, хувилбар]
 */
 const GAPS = [
-  ["G01", "P0", "Дэд бүтэц", "Өгөгдлийн сан үнэгүй багцтай — 359 сурагчийн бүртгэл устах эрсдэл", "render.yaml (pimn-db plan: free), STATUS §9.1", "Render Dashboard дээр ӨС амьд эсэх, багцыг ЯГ ОДОО шалгах. Төлбөртэй багц + өдөр тутмын нөөцлөл + сэргээлтийн туршилт", "v1", "open"],
+  ["G01", "P0", "Дэд бүтэц", "Прод өгөгдлийн сан устсан — Supabase үнэгүй багц руу сэргээв", "Supabase pimn (eiukrlrqpykzqkgwgxyy), render.yaml, STATUS §4", "Хийсэн 2026-09-26: локал нөөцөөс pg_restore (6125 бодлого, 701 хэрэглэгч, 565 тест, 92 төлбөр), DATABASE_URL = Session pooler + sslmode=require&uselibpqcompat=true, API HTTP 200. Долоо хоног бүр pg_dump", "v1", "done"],
   ["G02", "P0", "Аюулгүй байдал", "Санхүүгийн тайлан, зарлагыг нэвтэрсэн хэн ч харна", "api/src/finance/finance.controller.ts — GET report, GET expenses", "Хийсэн: класс түвшинд RolesGuard + @Roles(ADMIN); access-control.spec.ts; smoke-д сурагчийн задрал шалгагч", "v1", "done"],
   ["G03", "P0", "Аюулгүй байдал", "Буцаалтын жагсаалт, дэлгэрэнгүйг нэвтэрсэн хэн ч харна", "api/src/tuition/tuition.controller.ts — GET refunds, GET refund/:id", "Хийсэн: @Roles(ADMIN, TEACHER_PLUS) + RolesGuard; буцаалтын БҮХ маршрут @Roles-тэй эсэхийг тест шалгана", "v1", "done"],
   ["G04", "P0", "Аюулгүй байдал", "«JWT-only» маршрутуудын эрхийн аудит", "API-ийн @Roles-гүй бүх маршрут (энэ баримтын API каталогоос шүүж харна)", "Хийсэн: 58 маршрутыг шалгав. Бусад нь үйлчилгээн дотор эрх/эзэмшил шалгадаг эсвэл зориудаар нийтэд нээлттэй (хуваарь, каталог, QPay callback — серверээс баталгаажуулдаг). Дараагийн алхам: прод ӨС-тэй smoke ажиллуулах", "v1", "done"],

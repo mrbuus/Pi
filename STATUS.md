@@ -191,6 +191,31 @@ curl -s -o /dev/null -w "%{http_code}" https://pimn-api.onrender.com/api/sms/sta
 # 401 = маршрут БАЙНА (шинэ код) · 404 = хуучин код хэвээр
 ```
 
+### Прод өгөгдлийн сан — Supabase (2026-09-26-ээс)
+
+Render-ийн үнэгүй Postgres (`pimn-db`) 30 хоногийн хугацаа дуусаж **устсан**,
+API ~2 сар «Failed» байсан. Эзэн нэмэлт төлбөр төлөхгүй гэж шийдсэн тул
+**Supabase** үнэгүй багц руу шилжив.
+
+| | |
+|---|---|
+| Төсөл | `pimn` — ref `eiukrlrqpykzqkgwgxyy`, us-west-1, PostgreSQL 17 |
+| Хязгаар | 500 MB. **Устдаггүй**, харин 7 хоног огт хандалтгүй бол pause → dashboard-аас Resume |
+| Холболт | **Session pooler** (Render free нь IPv4 тул Direct ажиллахгүй) |
+| `DATABASE_URL` | `postgresql://postgres.eiukrlrqpykzqkgwgxyy:<нууц>@aws-0-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require&uselibpqcompat=true` — Render dashboard-оос гараар (render.yaml-д `sync: false`) |
+| Сэргээсэн эх | Эзний Mac-ын локал ӨС → `pg_dump` (`~/pimn-backup-2026-09-26.dump`) → `pg_restore` |
+
+**Нөөцлөл (долоо хоног бүр, эзний Mac дээр)** — Supabase-ийн үнэгүй нөөцлөл хязгаартай:
+```bash
+read -rs "SUPA_PW?Supabase нууц үг: " && echo && /opt/homebrew/bin/pg_dump -Fc --no-owner --no-acl \
+  -d "postgresql://postgres.eiukrlrqpykzqkgwgxyy:${SUPA_PW}@aws-0-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+  -f ~/pimn-backup-$(date +%F).dump && ls -lh ~/pimn-backup-$(date +%F).dump
+```
+
+⚠️ Прод ӨС-д `20260908_add_google_identity_auth` миграци (Google* 3 хүснэгт)
+байгаа ч репод АЛГА — эзний локал commit хийгээгүй ажил. Репод оруулах эсвэл
+цуцлахыг шийдэх хүртэл тэр хүснэгтүүдэд бүү хүр.
+
 ### Прод ӨС дахин үүсгэх дараалал
 
 Бүх скрипт идемпотент:
@@ -642,7 +667,7 @@ HTTP 200 буцаасаар байв — гаднаас нь бүх зүйл з�
 | Урхи | Дэлгэрэнгүй |
 |---|---|
 | `nest build` → `dist/src/main.js` | `dist/main.js` БИШ. `prisma.config.ts` нь `src/`-ээс гадна байдгаас |
-| Render Prisma | `?sslmode=require` ЗААВАЛ — эс бөгөөс «User was denied access» |
+| Прод ӨС SSL | `?sslmode=require&uselibpqcompat=true` ЗААВАЛ. `pg` 8.x нь `require`-ийг `verify-full` гэж ойлгодог → Supabase-ийн гэрчилгээ итгэмжлэгдээгүй тул runtime холболт чимээгүй унаж бүх endpoint 500 (харин `prisma migrate deploy` амжилттай өнгөрдөг тул deploy «Live» харагдана!). 2026-09-26 |
 | Prisma JSON `null` ≠ SQL NULL | `choices: null` нь JSON `null` бичдэг. `WHERE choices::text='null'` |
 | `eslint --fix` | type assertion хасдаг → tsc унана |
 | `TestAccess` хүснэгт | `id` багана БАЙХГҮЙ — нийлмэл түлхүүртэй |
@@ -699,7 +724,7 @@ P2002-ыг 409, холболтын доголдлыг 503 болгоно; ТАН
 
 | Юу | Хугацаа | Хэрэв хийхгүй бол |
 |---|---|---|
-| **Render Postgres төлбөртэй багц** | **2026-08-18** | Үнэгүй ӨС-ийн хугацаа дуусна. **359 сурагчийн бүртгэл устана** — сэргээх боломжгүй |
+| ~~Render Postgres төлбөртэй багц~~ | **ШИЙДЭГДСЭН 2026-09-26** | Хуучин ӨС устсан; Supabase үнэгүй багц руу шилжиж локал нөөцөөс бүрэн сэргээв (§4). Долоо хоног бүрийн `pg_dump`-ийг мартахгүй |
 | **Имэйлийн SMTP тохиргоо** (Render env: EMAIL_SMTP_HOST, EMAIL_SMTP_PORT, EMAIL_SMTP_USER, EMAIL_SMTP_PASS, EMAIL_FROM — Gmail App Password; кодоос шалгасан 2026-09-26) | — | Эцэг эхийн танилцуулга OTP, төлбөрийн сануулга илгээгдэхгүй (isConfigured=false тул чимээгүй алгасна). SMS-ийг эзэн ТҮР хойшлуулж имэйлээр явахаар шийдсэн (2026-08-08) |
 | **Прод дээр кодын backfill — БҮҮ АЖИЛЛУУЛ** (`backfill-new-codes.cjs --apply`) | — | Эзэн Excel-ийн 7 оронтой кодыг (2027001…) ХАДГАЛАХААР шийдсэн (2026-09-26) — B27… формат руу шилжүүлэхгүй. Оронд нь прод ӨС амьд эсэхийг баталсны ДАРАА шинэ бүртгэлийг (~700 сурагч) `node prisma/import-students.cjs --source="…/БҮРТГЭЛ-2027-1 (2).xlsx" --commit` (эхлээд `--commit`-гүй dry run) — байгаа сурагчийн кодыг Excel-ийнхээр солино |
 | **QPay merchant гэрээ** | — | Код бэлэн, зөвхөн түлхүүр дутуу |
