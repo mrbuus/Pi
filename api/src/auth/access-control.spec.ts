@@ -43,3 +43,96 @@ describe('Буцаалтын маршрутууд — зөвхөн ажилта�
     expect(unguarded).toEqual([]);
   });
 });
+
+// Night-1 PRs deliberately share the owner's base. Missing sibling features are
+// visible skips here; NIGHT1_COMPLETE=1 makes a merged/integration checkout fail
+// if even one required contract is absent. Never call this mode a full check otherwise.
+import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
+import { ExecutionContext, RequestMethod } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { Role } from '../generated/prisma/enums';
+interface NightContract {
+  gap: string;
+  file: string;
+  controller: string;
+  method: string;
+  path: string;
+  roles: string[];
+  feature?: string;
+}
+const contracts =
+  require('../../test/smoke/night1-contracts.json') as NightContract[];
+const missing: string[] = [];
+const roleGuard = new RolesGuard(new Reflector());
+function loadContract(contract: NightContract) {
+  const file = join(__dirname, '..', contract.file + '.ts');
+  if (
+    !existsSync(file) ||
+    (contract.feature &&
+      !existsSync(join(__dirname, '../../..', contract.feature)))
+  )
+    return null;
+  const controller = require(file)[contract.controller];
+  if (!controller)
+    throw new Error(`Missing controller export: ${contract.controller}`);
+  const prefix = Reflect.getMetadata(PATH_METADATA, controller) ?? '';
+  for (const name of Object.getOwnPropertyNames(controller.prototype)) {
+    if (name === 'constructor') continue;
+    const handler = controller.prototype[name];
+    const method = RequestMethod[Reflect.getMetadata(METHOD_METADATA, handler)];
+    const rawPaths = Reflect.getMetadata(PATH_METADATA, handler) ?? '';
+    const paths = (Array.isArray(rawPaths) ? rawPaths : [rawPaths]).map((route) =>
+      '/api/' + [prefix, route]
+        .map((p) => String(p).replace(/^\/+|\/+$/g, ''))
+        .filter(Boolean).join('/'),
+    );
+    if (method === contract.method && paths.includes(contract.path))
+      return { controller, handler };
+  }
+  return null;
+}
+describe('Night-1 route guards across six roles', () => {
+  for (const contract of contracts) {
+    const target = loadContract(contract);
+    const label = `${contract.gap} ${contract.method} ${contract.path}`;
+    if (!target) missing.push(label);
+    (target ? it : it.skip)(label, () => {
+      if (!target) throw new Error('Missing required route');
+      const { controller, handler } = target;
+      const guards = [...guardsOf(controller), ...guardsOf(handler)];
+      if (!contract.roles.length) {
+        expect(guards).not.toContain(JwtAuthGuard);
+        return;
+      }
+      expect(guards).toContain(JwtAuthGuard);
+      expect(guards).toContain(RolesGuard);
+      expect(
+        [...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort(),
+      ).toEqual([...contract.roles].sort());
+      for (const role of [undefined, ...Object.values(Role)]) {
+        const context = {
+          getHandler: () => handler,
+          getClass: () => controller,
+          switchToHttp: () => ({
+            getRequest: () => ({
+              user: role ? { userId: 'synthetic-user', role } : undefined,
+            }),
+          }),
+        } as unknown as ExecutionContext;
+        expect(roleGuard.canActivate(context)).toBe(
+          !!role && contract.roles.includes(role),
+        );
+      }
+    });
+  }
+  it('strict integration mode requires every sibling feature', () => {
+    if (process.env.NIGHT1_COMPLETE === '1') expect(missing).toEqual([]);
+    else if (missing.length)
+      console.info(
+        `Night-1 pending sibling contracts: ${missing.length}; run NIGHT1_COMPLETE=1 after integrating listed PR dependencies.`,
+      );
+  });
+});

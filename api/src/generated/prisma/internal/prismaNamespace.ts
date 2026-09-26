@@ -415,6 +415,7 @@ export const ModelName = {
   ProblemFormula: 'ProblemFormula',
   ProblemAnalysis: 'ProblemAnalysis',
   Test: 'Test',
+  TestDraft: 'TestDraft',
   TestProblem: 'TestProblem',
   TestAccess: 'TestAccess',
   TestAttemptSession: 'TestAttemptSession',
@@ -473,7 +474,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "teacherWorkDay" | "teacherWorkException" | "academicCalendarDay" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "teacherWorkDay" | "teacherWorkException" | "academicCalendarDay" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2768,6 +2769,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TestCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TestCountAggregateOutputType> | number
+        }
+      }
+    }
+    TestDraft: {
+      payload: Prisma.$TestDraftPayload<ExtArgs>
+      fields: Prisma.TestDraftFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TestDraftFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TestDraftFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>
+        }
+        findFirst: {
+          args: Prisma.TestDraftFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TestDraftFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>
+        }
+        findMany: {
+          args: Prisma.TestDraftFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>[]
+        }
+        create: {
+          args: Prisma.TestDraftCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>
+        }
+        createMany: {
+          args: Prisma.TestDraftCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TestDraftCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>[]
+        }
+        delete: {
+          args: Prisma.TestDraftDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>
+        }
+        update: {
+          args: Prisma.TestDraftUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>
+        }
+        deleteMany: {
+          args: Prisma.TestDraftDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TestDraftUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TestDraftUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>[]
+        }
+        upsert: {
+          args: Prisma.TestDraftUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestDraftPayload>
+        }
+        aggregate: {
+          args: Prisma.TestDraftAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTestDraft>
+        }
+        groupBy: {
+          args: Prisma.TestDraftGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TestDraftGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TestDraftCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TestDraftCountAggregateOutputType> | number
         }
       }
     }
@@ -6459,10 +6534,23 @@ export const TestScalarFieldEnum = {
   variantLabel: 'variantLabel',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  isDraft: 'isDraft'
 } as const
 
 export type TestScalarFieldEnum = (typeof TestScalarFieldEnum)[keyof typeof TestScalarFieldEnum]
+
+
+export const TestDraftScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  state: 'state',
+  revision: 'revision',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TestDraftScalarFieldEnum = (typeof TestDraftScalarFieldEnum)[keyof typeof TestDraftScalarFieldEnum]
 
 
 export const TestProblemScalarFieldEnum = {
@@ -7977,6 +8065,7 @@ export type GlobalOmitConfig = {
   problemFormula?: Prisma.ProblemFormulaOmit
   problemAnalysis?: Prisma.ProblemAnalysisOmit
   test?: Prisma.TestOmit
+  testDraft?: Prisma.TestDraftOmit
   testProblem?: Prisma.TestProblemOmit
   testAccess?: Prisma.TestAccessOmit
   testAttemptSession?: Prisma.TestAttemptSessionOmit

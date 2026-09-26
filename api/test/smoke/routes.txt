@@ -23,6 +23,7 @@ DELETE /api/tasks/:id/assignees/:userId
 DELETE /api/teacher-groups/:groupId/students/:studentId
 DELETE /api/test-sessions/:id
 DELETE /api/tests/:id
+DELETE /api/tests/drafts/:id
 DELETE /api/topics/:id
 DELETE /api/videos/:id
 GET /api
@@ -158,6 +159,7 @@ GET /api/tests/:id/acknowledgements
 GET /api/tests/:id/edit-info
 GET /api/tests/:id/results
 GET /api/tests/:id/review
+GET /api/tests/drafts/:id
 GET /api/tests/my-results
 GET /api/topics
 GET /api/tuition/paid-until/:studentId
@@ -199,6 +201,7 @@ PATCH /api/sms/templates/:id
 PATCH /api/tasks/:id
 PATCH /api/tests/:id
 PATCH /api/tests/:id/session
+PATCH /api/tests/drafts/:id
 PATCH /api/topics/:id
 PATCH /api/users/:id/profile
 PATCH /api/users/:id/role
@@ -287,6 +290,7 @@ POST /api/tests/:id/heartbeat
 POST /api/tests/:id/results
 POST /api/tests/:id/start
 POST /api/tests/:id/submit
+POST /api/tests/drafts
 POST /api/topics
 POST /api/tuition/refund
 POST /api/tuition/refund/:id/approve

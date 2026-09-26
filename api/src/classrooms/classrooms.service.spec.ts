@@ -87,7 +87,7 @@ describe('ClassroomsService.get — ангийн дэлгэрэнгүй', () => 
       include: {
         teacher: { select: { id: true, firstName: true, lastName: true } },
         enrollments: {
-          where: { leftAt: null },
+          where: { leftAt: null, student: { archivedAt: null } },
           orderBy: { joinedAt: 'asc' },
           select: {
             joinedAt: true,

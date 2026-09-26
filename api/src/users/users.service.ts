@@ -16,12 +16,33 @@ import { Role, StudentType, PaymentStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { toNationalMn } from '../notifications/phone';
 import {
   nextSevenDigitStudentCode,
   parseGrade,
   parseStudentWorkbook,
   RawStudentImportRow,
 } from './student-import';
+
+type StudentImportPreviewRow = RawStudentImportRow & {
+  status: 'NEW' | 'UPDATE' | 'ERROR';
+  reason: string | null;
+  grade: number | null;
+  section: string | null;
+  targetUserId: string | null;
+};
+type StudentImportSavedRow = {
+  rowNumber: number;
+  action: 'NEW' | 'UPDATE';
+  id: string;
+};
+type StudentImportResult = { imported: number; rows: StudentImportSavedRow[] };
+type StudentImportPreview = {
+  ownerId: string;
+  expiresAt: number;
+  rows: StudentImportPreviewRow[];
+  completed: Map<string, StudentImportResult>;
+};
 
 @Injectable()
 export class UsersService {
@@ -156,22 +177,9 @@ export class UsersService {
   }
 
   // Админ: бүх хэрэглэгчийн үүргийг нэг дор удирдах жагсаалт
-  private importPreviews = new Map<
-    string,
-    {
-      ownerId: string;
-      expiresAt: number;
-      rows: Array<
-        RawStudentImportRow & {
-          status: 'NEW' | 'UPDATE' | 'ERROR';
-          reason: string | null;
-          grade: number | null;
-          section: string | null;
-          targetUserId: string | null;
-        }
-      >;
-    }
-  >();
+  private importPreviews = new Map<string, StudentImportPreview>();
+  private importCommits = new Map<string, Promise<StudentImportResult>>();
+  private importQueues = new Map<string, Promise<void>>();
 
   async archiveStudent(
     id: string,
@@ -219,22 +227,16 @@ export class UsersService {
   async previewStudentImport(buffer: Buffer, ownerId: string) {
     const input = await parseStudentWorkbook(buffer);
     const seen = new Set<string>();
-    const rows = [] as Array<
-      RawStudentImportRow & {
-        status: 'NEW' | 'UPDATE' | 'ERROR';
-        reason: string | null;
-        grade: number | null;
-        section: string | null;
-        targetUserId: string | null;
-      }
-    >;
-    for (const row of input) {
-      const phone = row.phone.replace(/[\s()-]/g, '');
-      const guardianPhone = (row.guardianPhone ?? '').replace(/[\s()-]/g, '');
+    const rows: StudentImportPreviewRow[] = input.map((source) => {
+      const nationalPhone = toNationalMn(source.phone);
+      const phone = nationalPhone ?? source.phone.replace(/[\s()-]/g, '');
+      const normalizedGuardian = source.guardianPhone.trim()
+        ? toNationalMn(source.guardianPhone)
+        : '';
       let reason: string | null =
-        !row.lastName || !row.firstName || !/^\+?[0-9]{8,15}$/.test(phone)
-          ? 'Овог, нэр болон зөв утасны дугаар шаардлагатай.'
-          : guardianPhone && !/^\+?[0-9]{8,15}$/.test(guardianPhone)
+        !source.lastName || !source.firstName || !nationalPhone
+          ? 'Овог, нэр болон Монголын зөв утасны дугаар шаардлагатай.'
+          : source.guardianPhone.trim() && !normalizedGuardian
             ? 'Асран хамгаалагчийн утасны дугаарыг шалгана уу.'
             : null;
       if (!reason && seen.has(phone))
@@ -243,31 +245,49 @@ export class UsersService {
       let grade: number | null = null;
       let section: string | null = null;
       try {
-        ({ grade, section } = parseGrade(row.classroomLabel));
-      } catch (e) {
-        reason = e instanceof Error ? e.message : 'Анги/түвшинг шалгана уу.';
+        ({ grade, section } = parseGrade(source.classroomLabel));
+      } catch (error) {
+        reason =
+          error instanceof Error ? error.message : 'Анги/түвшинг шалгана уу.';
       }
-      const match = phone
-        ? await this.prisma.user.findUnique({
-            where: { phone },
-            select: { id: true, role: true, archivedAt: true },
-          })
-        : null;
-      if (!reason && match && match.role !== Role.STUDENT)
-        reason = 'Энэ утас сурагчийн бус бүртгэлтэй байна.';
-      if (!reason && match?.archivedAt)
-        reason = 'Архивлагдсан сурагч байна. Эхлээд сэргээнэ үү.';
-      rows.push({
-        ...row,
+      return {
+        ...source,
         phone,
-        guardianPhone,
-        status: reason ? 'ERROR' : match ? 'UPDATE' : 'NEW',
+        guardianPhone: normalizedGuardian || '',
+        status: reason ? 'ERROR' : 'NEW',
         reason,
-        targetUserId: match?.id ?? null,
         grade,
         section,
-      });
+        targetUserId: null,
+      };
+    });
+
+    const phones = [
+      ...new Set(rows.filter((row) => !row.reason).map((row) => row.phone)),
+    ];
+    const matches = phones.length
+      ? await this.prisma.user.findMany({
+          where: { phone: { in: phones } },
+          select: { id: true, phone: true, role: true, archivedAt: true },
+        })
+      : [];
+    const matchesByPhone = new Map(
+      matches.map((match) => [match.phone, match]),
+    );
+    for (const row of rows) {
+      if (row.reason) continue;
+      const match = matchesByPhone.get(row.phone);
+      if (match && match.role !== Role.STUDENT)
+        row.reason = 'Энэ утас сурагчийн бус бүртгэлтэй байна.';
+      else if (match?.archivedAt)
+        row.reason = 'Архивлагдсан сурагч байна. Эхлээд сэргээнэ үү.';
+      else if (match) {
+        row.status = 'UPDATE';
+        row.targetUserId = match.id;
+      }
+      if (row.reason) row.status = 'ERROR';
     }
+
     const previewId = crypto.randomUUID();
     const now = Date.now();
     for (const [key, value] of this.importPreviews)
@@ -285,6 +305,7 @@ export class UsersService {
       ownerId,
       expiresAt: now + 900000,
       rows,
+      completed: new Map(),
     });
     return { previewId, expiresInSeconds: 900, rows };
   }
@@ -294,7 +315,7 @@ export class UsersService {
     rowNumbers: number[],
     actorId: string,
     actorRole: Role,
-  ) {
+  ): Promise<StudentImportResult> {
     const preview = this.importPreviews.get(previewId);
     if (
       !preview ||
@@ -306,6 +327,67 @@ export class UsersService {
       );
     if (!rowNumbers.length || new Set(rowNumbers).size !== rowNumbers.length)
       throw new BadRequestException('Импортлох мөрөө сонгоно уу.');
+    if (rowNumbers.length > 100)
+      throw new BadRequestException(
+        'Нэг багцад 100 хүртэл мөр сонгоно уу. Бүх мөрийг дараалсан багцаар импортолж болно.',
+      );
+    const sortedRows = [...rowNumbers].sort((a, b) => a - b);
+    const selectionKey = `${actorId}:${sortedRows.join(',')}`;
+    const completed = preview.completed.get(selectionKey);
+    if (completed) return completed;
+    const commitKey = `${previewId}:${selectionKey}`;
+    const inFlight = this.importCommits.get(commitKey);
+    if (inFlight) return inFlight;
+
+    const previousBatch = this.importQueues.get(previewId) ?? Promise.resolve();
+    const operation = previousBatch
+      .catch(() => undefined)
+      .then(() =>
+        this.commitStudentImportBatch(
+          previewId,
+          preview,
+          rowNumbers,
+          actorId,
+          actorRole,
+        ),
+      );
+    const queueTail = operation.then(
+      () => undefined,
+      () => undefined,
+    );
+    this.importCommits.set(commitKey, operation);
+    this.importQueues.set(previewId, queueTail);
+    try {
+      const result = await operation;
+      preview.completed.set(selectionKey, result);
+      for (const savedRow of result.rows) {
+        const previewRow = preview.rows.find(
+          (item) => item.rowNumber === savedRow.rowNumber,
+        );
+        if (previewRow) {
+          previewRow.status = 'UPDATE';
+          previewRow.targetUserId = savedRow.id;
+        }
+      }
+      return result;
+    } finally {
+      this.importCommits.delete(commitKey);
+      if (this.importQueues.get(previewId) === queueTail)
+        this.importQueues.delete(previewId);
+    }
+  }
+
+  private async commitStudentImportBatch(
+    previewId: string,
+    preview: StudentImportPreview,
+    rowNumbers: number[],
+    actorId: string,
+    actorRole: Role,
+  ): Promise<StudentImportResult> {
+    if (preview.expiresAt < Date.now())
+      throw new BadRequestException(
+        'Урьдчилан харах хугацаа дууссан байна. Файлаа дахин оруулна уу.',
+      );
     const chosen = rowNumbers.map((n) =>
       preview.rows.find((r) => r.rowNumber === n),
     );
@@ -327,11 +409,7 @@ export class UsersService {
             select: { studentCode: true },
           })
         ).map((r) => r.studentCode);
-        const result: Array<{
-          rowNumber: number;
-          action: 'NEW' | 'UPDATE';
-          id: string;
-        }> = [];
+        const result: StudentImportSavedRow[] = [];
         for (const row of chosen as Array<
           NonNullable<(typeof chosen)[number]>
         >) {
@@ -433,7 +511,6 @@ export class UsersService {
       },
       { maxWait: 10000, timeout: 120000 },
     );
-    this.importPreviews.delete(previewId);
     return { imported: saved.length, rows: saved };
   }
 
@@ -915,6 +992,7 @@ export class UsersService {
         studentProfile: {
           approvalPending: true,
         },
+        archivedAt: null,
       },
       select: {
         id: true,
@@ -984,8 +1062,13 @@ export class UsersService {
     // Сурагчийн код авна
     const user = await this.prisma.user.findUnique({
       where: { id: studentId },
-      select: { studentCode: true },
+      select: { studentCode: true, archivedAt: true },
     });
+
+    if (user?.archivedAt)
+      throw new BadRequestException(
+        'Архивлагдсан сурагчийг эхлээд сэргээнэ үү.',
+      );
 
     // Кодгүй байвал үүсгэнэ
     let newCode: string | null = null;

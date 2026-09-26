@@ -190,6 +190,11 @@ export type ProblemAnalysis = Prisma.ProblemAnalysisModel
  */
 export type Test = Prisma.TestModel
 /**
+ * Model TestDraft
+ *
+ */
+export type TestDraft = Prisma.TestDraftModel
+/**
  * Model TestProblem
  *
  */

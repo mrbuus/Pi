@@ -37,6 +37,8 @@ export class FormulasService {
       where: { ...where, ...(ids ? { id: { in: ids } } : {}) },
       orderBy: [{ sectionSlug: 'asc' }, { order: 'asc' }], include: { section: true },
     })).then((rows) => rows.map((formula) => ({
+      // id/name/description: хуучин content GET /formulas-ийн хэлбэртэй нийцтэй.
+      id: formula.id, name: formula.name, description: formula.description,
       slug: formula.slug, title: formula.name, section: formula.section?.slug ?? formula.sectionSlug,
       order: formula.order, level: formula.level, grade: formula.grade, topicSlugs: formula.topicSlugs,
       latex: formula.latex, general: formula.general, widget: formula.widget,

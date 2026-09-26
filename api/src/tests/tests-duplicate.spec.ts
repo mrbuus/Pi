@@ -1,68 +1,183 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { ROLES_KEY } from '../auth/decorators/roles.decorator';
-import { Role } from '../generated/prisma/enums';
-import { TestsController } from './tests.controller';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Role, TestType } from '../generated/prisma/enums';
 import { TestsService } from './tests.service';
 
-function setup(src: Record<string, unknown> | null) {
-  const created: Record<string, unknown>[] = [];
-  const createdProblems: unknown[] = [];
-  const tx = {
-    test: { create: jest.fn(async ({ data }) => { const row = { id: 'copy-1', ...data }; created.push(row); return row; }) },
-    testProblem: { createMany: jest.fn(async ({ data }) => { createdProblems.push(...data); return { count: data.length }; }) },
+describe('TestsService duplicate and server-side draft behavior', () => {
+  let prisma: any;
+  let service: TestsService;
+  const source = {
+    id: 'test-source',
+    title: 'Synthetic mock',
+    type: TestType.CHAPTER_EXAM,
+    gradingMode: 'AUTO',
+    timeLimitMin: 60,
+    chapterId: 'chapter-1',
+    createdById: 'teacher-1',
+    deletedAt: null,
+    problems: [
+      { problemId: 'problem-1', order: 1, points: 2 },
+      { problemId: 'problem-2', order: 2, points: 3 },
+    ],
+    access: [{ classroomId: 'old-class' }],
   };
-  const prisma = {
-    test: { findUnique: jest.fn(async () => src) },
-    $transaction: jest.fn(async (fn: (t: typeof tx) => unknown) => fn(tx)),
-  };
-  return { svc: new TestsService(prisma as any, { retryPending: jest.fn() } as any), created, createdProblems, tx };
-}
 
-const source = {
-  id: 't1',
-  title: 'Логарифм 1',
-  type: 'DAILY',
-  gradingMode: 'AUTO',
-  chapterId: 'ch1',
-  timeLimitMin: 40,
-  pdfKey: null,
-  price: 5000,
-  groupKey: 'G',
-  variantLabel: 'A',
-  createdById: 'teacher-1',
-  deletedAt: null,
-  problems: [
-    { problemId: 'p1', order: 1, points: 1 },
-    { problemId: 'p2', order: 2, points: 2 },
-  ],
-  access: [{ classroomId: 'c1' }],
-};
-
-describe('POST /tests/:id/duplicate (G36)', () => {
-  it('эзэмшигч багш хуулна: бодлого, дараалал, оноо хуулагдана; анги, үнэ, groupKey хуулагдахгүй', async () => {
-    const { svc, created, createdProblems } = setup(source);
-    const res = await svc.duplicate('t1', 'teacher-1', Role.TEACHER);
-    expect(res).toEqual({ id: 'copy-1', title: 'Логарифм 1 (хуулбар)', problems: 2 });
-    expect(created[0]).toMatchObject({ createdById: 'teacher-1', price: null, chapterId: 'ch1', timeLimitMin: 40 });
-    expect(created[0]).not.toHaveProperty('groupKey');
-    expect(createdProblems).toEqual([
-      { testId: 'copy-1', problemId: 'p1', order: 1, points: 1 },
-      { testId: 'copy-1', problemId: 'p2', order: 2, points: 2 },
-    ]);
+  beforeEach(() => {
+    prisma = {
+      test: {
+        findUnique: jest.fn().mockResolvedValue(source),
+        create: jest
+          .fn()
+          .mockResolvedValue({
+            id: 'test-copy',
+            title: 'Synthetic mock (хуулбар)',
+          }),
+      },
+      testDraft: {
+        create: jest.fn().mockResolvedValue({
+          id: 'draft-1',
+          ownerId: 'teacher-1',
+          revision: 1,
+          state: { title: 'Synthetic draft' },
+        }),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'draft-1',
+          ownerId: 'teacher-1',
+          revision: 1,
+          state: { title: 'Synthetic draft' },
+        }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+      auditLog: { create: jest.fn().mockResolvedValue({}) },
+    };
+    prisma.$transaction = jest.fn((callback) => callback(prisma));
+    service = new TestsService(prisma, { retryPending: jest.fn() } as any);
   });
 
-  it('ADMIN үнийг хуулна', async () => {
-    const { svc, created } = setup(source);
-    await svc.duplicate('t1', 'admin', Role.ADMIN);
-    expect(created[0]).toMatchObject({ price: 5000, createdById: 'admin' });
+  it('duplicates only configuration into an unpublished, unassigned test and audits it', async () => {
+    await service.duplicateTest('test-source', 'teacher-1', Role.TEACHER);
+    const args = prisma.test.create.mock.calls[0][0];
+    expect(args.data).toMatchObject({
+      title: 'Synthetic mock (хуулбар)',
+      chapterId: 'chapter-1',
+      createdById: 'teacher-1',
+      isDraft: true,
+      problems: { create: source.problems },
+    });
+    expect(args.data.access).toBeUndefined();
+    expect(args.data).not.toHaveProperty('results');
+    expect(args.data).not.toHaveProperty('attemptSessions');
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: 'CREATE',
+          entity: 'Test',
+          entityId: 'test-copy',
+        }),
+      }),
+    );
   });
 
-  it('өөр багшийн тест → 403, устгасан → 404', async () => {
-    await expect(setup(source).svc.duplicate('t1', 'teacher-2', Role.TEACHER)).rejects.toThrow(ForbiddenException);
-    await expect(setup({ ...source, deletedAt: new Date() }).svc.duplicate('t1', 'teacher-1', Role.TEACHER)).rejects.toThrow(NotFoundException);
+  it('does not allow a teacher to duplicate another teacher’s test', async () => {
+    await expect(
+      service.duplicateTest('test-source', 'other-teacher', Role.TEACHER),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.test.create).not.toHaveBeenCalled();
   });
 
-  it('сурагч хуулж чадахгүй (@Roles)', () => {
-    expect(Reflect.getMetadata(ROLES_KEY, TestsController.prototype.duplicate)).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
+  it('returns 404 for missing or soft-deleted source tests', async () => {
+    prisma.test.findUnique.mockResolvedValueOnce(null);
+    await expect(
+      service.duplicateTest('missing', 'admin-1', Role.ADMIN),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    prisma.test.findUnique.mockResolvedValueOnce({
+      ...source,
+      deletedAt: new Date(),
+    });
+    await expect(
+      service.duplicateTest('deleted', 'admin-1', Role.ADMIN),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.test.create).not.toHaveBeenCalled();
+  });
+
+  it('blocks a student from a duplicated draft before checking paid access', async () => {
+    prisma.test.findUnique.mockResolvedValueOnce({ ...source, isDraft: true });
+    await expect(service.getOne('test-source', 'student', Role.STUDENT)).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('creates a private server draft for its authenticated owner', async () => {
+    await service.createTestDraft(
+      { title: 'Synthetic draft' },
+      'teacher-1',
+      Role.TEACHER,
+    );
+    expect(prisma.testDraft.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { ownerId: 'teacher-1', state: { title: 'Synthetic draft' } },
+      }),
+    );
+  });
+
+  it('enforces draft ownership for read and write without leaking another owner’s record', async () => {
+    await expect(
+      service.getTestDraft('draft-1', 'other-teacher', Role.TEACHER),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      service.updateTestDraft(
+        'draft-1',
+        { expectedRevision: 1, title: 'Changed' },
+        'other-teacher',
+        Role.TEACHER,
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.testDraft.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('autosaves with an owner-scoped expected revision and increments the version', async () => {
+    await service.updateTestDraft(
+      'draft-1',
+      { expectedRevision: 1, title: 'Updated' },
+      'teacher-1',
+      Role.TEACHER,
+    );
+    expect(prisma.testDraft.updateMany).toHaveBeenCalledWith({
+      where: { id: 'draft-1', ownerId: 'teacher-1', revision: 1 },
+      data: {
+        state: { expectedRevision: 1, title: 'Updated' },
+        revision: { increment: 1 },
+      },
+    });
+  });
+
+  it.each([Role.STUDENT, Role.PARENT, Role.BUYER])('rejects draft access for %s', async (role) => {
+    await expect(service.createTestDraft({}, 'forbidden', role)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.testDraft.create).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 and the latest snapshot when another write wins the revision race', async () => {
+    prisma.testDraft.updateMany.mockResolvedValueOnce({ count: 0 });
+    await expect(
+      service.updateTestDraft(
+        'draft-1',
+        { expectedRevision: 1, title: 'Stale' },
+        'teacher-1',
+        Role.TEACHER,
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(prisma.testDraft.updateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows an administrator to inspect any draft and limits teacher deletion to owner', async () => {
+    await expect(
+      service.getTestDraft('draft-1', 'admin-1', Role.ADMIN),
+    ).resolves.toMatchObject({ id: 'draft-1' });
+    await service.deleteTestDraft('draft-1', 'teacher-1', Role.TEACHER);
+    expect(prisma.testDraft.deleteMany).toHaveBeenCalledWith({
+      where: { id: 'draft-1', ownerId: 'teacher-1' },
+    });
   });
 });
