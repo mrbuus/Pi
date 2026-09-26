@@ -91,7 +91,8 @@
     "path": "/api/tests/:id/duplicate",
     "roles": [
       "ADMIN",
-      "TEACHER"
+      "TEACHER",
+      "TEACHER_PLUS"
     ]
   },
   {
