@@ -1,4 +1,6 @@
 import { Test } from '@nestjs/testing';
+import { AttendanceModule } from '../attendance/attendance.module';
+import { AttendanceService } from '../attendance/attendance.service';
 import { AnnouncementsModule } from '../announcements/announcements.module';
 import { AnnouncementsService } from '../announcements/announcements.service';
 import { AssignmentsModule } from '../assignments/assignments.module';
@@ -30,6 +32,7 @@ describe('NotificationCenter module wiring', () => {
         NotificationCenterModule,
         AssignmentsModule,
         AnnouncementsModule,
+        AttendanceModule,
       ],
     })
       .overrideProvider(PrismaService)
@@ -40,6 +43,7 @@ describe('NotificationCenter module wiring', () => {
     expect(moduleRef.get(NotificationCenterService)).toBeDefined();
     expect(moduleRef.get(AssignmentsService)).toBeDefined();
     expect(moduleRef.get(AnnouncementsService)).toBeDefined();
+    expect(moduleRef.get(AttendanceService)).toBeDefined();
     await moduleRef.close();
   });
 });

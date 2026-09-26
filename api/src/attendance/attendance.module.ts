@@ -1,16 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
-import { ScheduleService } from '../schedule/schedule.service';
+import { ScheduleModule } from '../schedule/schedule.module';
 import { AttendanceController } from './attendance.controller';
 import { AttendanceService } from './attendance.service';
 
 @Module({
+  imports: [ScheduleModule],
   controllers: [AttendanceController],
-  // ScheduleService-ийг schedule.module.ts-ийг импортлохгүйгээр шууд
-  // provider болгож нэмсэн (assignments.module.ts-ийн AuditService-тэй
-  // адилхан хэв маяг) — зөвхөн PrismaService (global)-аас хамаардаг тул
-  // аюулгүй. AuditService-ийг мөн шууд provider болгож нэмсэн (assignments
-  // модультай ижил хэв маяг).
-  providers: [AttendanceService, ScheduleService, AuditService],
+  // Reuse the exported service with its notification dependencies intact.
+  providers: [AttendanceService, AuditService],
 })
 export class AttendanceModule {}
