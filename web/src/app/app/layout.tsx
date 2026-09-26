@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import BottomTabs from "@/components/nav/BottomTabs";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import Sidebar from "@/components/nav/Sidebar";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
@@ -108,6 +109,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [router]);
 
+  // Нууцлалын нөхцөлийг (G17) хараахан зөвшөөрөөгүй хэрэглэгчийг нэг удаа
+  // /app/consent руу чиглүүлнэ. Сервер алдаа өгвөл ажлыг ХААХГҮЙ (шалгалт
+  // саадгүй үргэлжилнэ) — дараагийн ачааллаар дахин шалгана.
+  const [consentChecked, setConsentChecked] = useState(false);
+  useEffect(() => {
+    if (consentChecked || !getToken() || pathname === "/app/consent") return;
+    api<{ needsConsent: boolean }>("/consent/my")
+      .then((r) => {
+        setConsentChecked(true);
+        if (r.needsConsent) router.replace("/app/consent");
+      })
+      .catch(() => setConsentChecked(true));
+  }, [consentChecked, pathname, router]);
+
   useEffect(() => {
     function sync() {
       setExamFullscreen(!!document.fullscreenElement);
@@ -158,6 +173,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   ref={setTopBarSlotEl}
                   className="ml-2 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 />
+                {/* Мэдэгдлийн хонх (G27) — 60 сек тутам уншаагүй тоог шалгана */}
+                <div className="shrink-0">
+                  <NotificationBell />
+                </div>
               </div>
             </header>
           )}

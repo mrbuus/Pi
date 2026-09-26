@@ -92,11 +92,10 @@ test('08 эцэг эх хүүхдийн дүн ирц даалгаврыг ха�
   await snapshot(page, info, 'parent-progress'); await mock.verify();
 });
 
-test('09 хамгаалсан админ самбарын гар утасны өргөн', async ({ page }, info) => {
-  test.skip(info.project.name !== 'mobile-375', 'Known mobile-only defect');
+test('09 админ самбар 375px-т хэвтээ гүйлгэхгүй', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile-375', 'Зөвхөн утасны өргөнд хамаатай');
   const mock = await mockApi(page, 'ADMIN'); await page.goto('/app/admin');
   await expect(page.getByRole('heading', { name: 'Шинэ хэрэглэгч нэмэх', exact: true })).toBeVisible();
   await mock.verify();
-  test.fail(true, 'Existing AdminDashboardClient.tsx overflow; CODEX-NIGHT-1 section 3 forbids editing it. Remove this marker when the owner updates the dashboard.');
-  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth), { message: 'Protected admin dashboard must fit 375px' }).toBeLessThanOrEqual(375);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth), { message: 'Admin dashboard must fit 375px' }).toBeLessThanOrEqual(375);
 });

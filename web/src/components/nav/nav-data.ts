@@ -111,6 +111,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
     { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/finance", label: "Санхүү", icon: "wallet" },
+    { href: "/app/admin/passes", label: "Эрхийн удирдлага", icon: "key" },
     { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
     { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
     { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
@@ -132,6 +133,9 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/admin/classrooms": "admin",
   "/app/admin/finance": "admin",
+  "/app/admin/passes": "admin",
+  "/app/notifications": "personal",
+  "/app/consent": "personal",
   "/app/admin/store": "admin",
   "/app/tuition": "admin",
   "/app/insights": "class",
@@ -164,6 +168,11 @@ const ITEM_GROUP: Record<string, GroupKey> = {
 // "Миний мэдээлэл"-руу орох ганц холбоос үлдээв. Role бүрт нийтлэг тул
 // автоматаар Хувийн бүлэгт нэмэгдэнэ.
 const PROFILE_LINK: NavLink = { href: "/app/profile", label: "Миний мэдээлэл", icon: "user" };
+// Бүх role-д нийтлэг (Codex G27, G17): мэдэгдэл ба нууцлалын зөвшөөрөл.
+const COMMON_PERSONAL: NavLink[] = [
+  { href: "/app/notifications", label: "Мэдэгдэл", icon: "bell" },
+  { href: "/app/consent", label: "Нууцлал, зөвшөөрөл", icon: "shield-check" },
+];
 
 // Гар утасны доод мөрөнд байнга харагдах гол цэс (нүүрний дараа, «Бусад»-аас өмнө).
 // Бусад бүх холбоос «Бусад» дотор хэвээр — нэг ч цэс хасагдахгүй.
@@ -234,7 +243,7 @@ export function getRoleNav(role: string | null): RoleNav {
     const group = ITEM_GROUP[item.href] ?? "learn";
     buckets[group].push(item);
   }
-  buckets.personal.push(PROFILE_LINK);
+  buckets.personal.push(PROFILE_LINK, ...COMMON_PERSONAL);
 
   const groups = GROUP_ORDER.filter((key) => buckets[key].length > 0).map((key) => ({
     key,

@@ -739,8 +739,10 @@ export default function AdminDashboardClient() {
         )}
       </section>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="rounded-2xl border-2 border-line bg-surface p-6">
+      {/* min-w-0: grid-ийн хүүхэд анхдагчаар min-width:auto тул input-ийн
+          дотоод өргөн 375px дээр хуудсыг хэвтээ гүйлгэдэг байсан (e2e 09). */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <section className="min-w-0 rounded-2xl border-2 border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шинэ анги</h2>
           <div className="flex gap-2">
             <label className="sr-only" htmlFor="new-classroom-name">
@@ -751,7 +753,7 @@ export default function AdminDashboardClient() {
               value={newClass}
               onChange={(e) => setNewClass(e.target.value)}
               placeholder="Ангийн нэр"
-              className={`flex-1 ${inputCls}`}
+              className={`min-w-0 flex-1 ${inputCls}`}
             />
             <button
               onClick={createClassroom}
@@ -763,7 +765,7 @@ export default function AdminDashboardClient() {
           </div>
         </section>
 
-        <section className="rounded-2xl border-2 border-line bg-surface p-6">
+        <section className="min-w-0 rounded-2xl border-2 border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шинэ эрх (pass)</h2>
           <div className="space-y-2">
             <label className="sr-only" htmlFor="new-pass-name">

@@ -29,6 +29,9 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
       ? reply({ accessToken: 'synthetic-token-never-valid-on-server', role })
       : reply({ message: 'Нэвтрэх мэдээлэл буруу байна' }, 401);
     if (path === '/auth/google/config') return reply({ enabled: false });
+    // App shell (2026-09-27): нууцлалын зөвшөөрлийн шалгалт (G17) ба мэдэгдлийн хонх (G27).
+    if (path === '/consent/my') return reply({ termsAcceptedAt: '2026-09-01T00:00:00.000Z', privacyVersion: '2026-09-26-draft', guardianConsentAt: null, currentVersion: '2026-09-26-draft', needsConsent: false });
+    if (path === '/notifications/my/unread-count') return reply({ count: 0 });
     if (path === '/auth/me') return reply({ ...student, role, studentProfile: { type: 'CLASSROOM', grade: 12 } });
     if (path === '/attempts/my-stats') return reply({ totalAttempts: 12, weakestTags: [] });
     if (path === '/activity/classroom/synthetic-class') return reply({ year: 2026, totalStudents: 1, days: [] });

@@ -1,6 +1,7 @@
 import type { SVGProps } from "react";
 import {
   BarChart3,
+  Bell,
   School, Wallet, Store, ChartNoAxesCombined, Undo2, Dumbbell,
   BookOpen,
   Building,
@@ -65,7 +66,8 @@ export type IconName =
   | "bar-chart"
   | "message-square"
   | "grid"
-  | "clock";
+  | "clock"
+  | "bell";
 
 const ICONS: Record<IconName, LucideIcon> = {
   school: School, wallet: Wallet, store: Store, chart: ChartNoAxesCombined, refund: Undo2, practice: Dumbbell,
@@ -97,6 +99,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   "bar-chart": BarChart3,
   grid: LayoutGrid,
   clock: Clock,
+  bell: Bell,
 };
 
 export function NavIcon({

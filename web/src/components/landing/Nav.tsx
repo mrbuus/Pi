@@ -5,6 +5,7 @@ const LINKS = [
   { href: "#achievements", label: "Амжилтууд" },
   { href: "#tuition", label: "Төлбөр" },
   { href: "#branches", label: "Салбар" },
+  { href: "/preview", label: "Номоос үзэх" },
 ];
 
 export default function Nav() {
