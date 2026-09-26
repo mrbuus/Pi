@@ -26,11 +26,13 @@ export default function RefundList() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
+  const [moreError, setMoreError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
   const requestSequence = useRef(0);
 
   const loadPage = useCallback(async (filter: RefundStatus | 'ALL', offset: number, append: boolean) => {
     const requestId = ++requestSequence.current;
+    setMoreError('');
     if (append) setLoadingMore(true);
     else { setLoading(true); setError(''); }
     try {
@@ -40,9 +42,10 @@ export default function RefundList() {
       if (requestId !== requestSequence.current) return;
       setRows((current) => append ? [...current, ...result.refunds] : result.refunds);
       setTotal(result.total);
-    } catch (err) {
+    } catch {
       if (requestId !== requestSequence.current) return;
-      setError(err instanceof Error ? err.message : 'Буцаалтын жагсаалт авч чадсангүй.');
+      if (append) setMoreError('Дараагийн бүртгэлийг авч чадсангүй. Дахин оролдоно уу.');
+      else setError('Буцаалтын жагсаалт авч чадсангүй. Дахин оролдоно уу.');
     } finally {
       if (requestId === requestSequence.current) {
         setLoading(false);
@@ -57,8 +60,11 @@ export default function RefundList() {
   }, [loadPage, reloadKey, status]);
 
   function changeStatus(next: RefundStatus | 'ALL') {
+    if (next === status) return;
+    requestSequence.current += 1;
     setRows([]);
     setTotal(0);
+    setMoreError('');
     setStatus(next);
   }
 
@@ -91,6 +97,7 @@ export default function RefundList() {
       <ul className="grid gap-3 sm:grid-cols-2">
         {rows.map((refund) => <RefundCard key={refund.id} refund={refund} />)}
       </ul>
+      {moreError && <ErrorState message={moreError} onRetry={() => void loadMore()} />}
       {hasMore && <div className="flex justify-center">
         <button type="button" onClick={() => void loadMore()} disabled={loadingMore} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-5 py-2 font-semibold text-ink hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50">
           {loadingMore ? 'Ачаалж байна...' : 'Цааш үзэх'}<ArrowRight className="h-4 w-4" aria-hidden />

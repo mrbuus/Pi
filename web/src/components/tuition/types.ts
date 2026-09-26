@@ -59,7 +59,6 @@ export interface RefundRow {
 }
 
 export interface RefundDetail extends RefundRow {
-  joinedOn?: string;
   createdBy?: { id: string; firstName: string; lastName: string } | null;
   approvedBy?: { id: string; firstName: string; lastName: string } | null;
   paidBy?: { id: string; firstName: string; lastName: string } | null;

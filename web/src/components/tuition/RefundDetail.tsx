@@ -18,16 +18,14 @@ const ACTION_INFO: Record<Action, { title: string; confirm: string; path: string
   cancel: { title: 'Буцаалт цуцлах', confirm: 'Цуцлах', path: 'cancel' },
 };
 
-export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { refundId: string; joinedOn?: string }) {
+export default function RefundDetail({ refundId }: { refundId: string }) {
   const role = getRole();
   const isAdmin = role === 'ADMIN';
   const canManage = isAdmin || role === 'TEACHER_PLUS';
   const [refund, setRefund] = useState<RefundRecord | null>(null);
-  const joinedOn = initialJoinedOn ?? '';
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
   const [actionMessage, setActionMessage] = useState('');
   const [action, setAction] = useState<Action | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
@@ -43,8 +41,8 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
     try {
       const record = await api<RefundRecord>(`/tuition/refund/${encodeURIComponent(refundId)}`);
       setRefund(record);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Буцаалтын мэдээлэл авч чадсангүй.');
+    } catch {
+      setError('Буцаалтын мэдээлэл авч чадсангүй. Дахин оролдоно уу.');
     } finally {
       setLoading(false);
     }
@@ -74,8 +72,8 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
   }, [action, actionBusy]);
 
   function openAction(next: Action, event: React.MouseEvent<HTMLButtonElement>) {
+    if (actionBusy || refreshing || loading || error) return;
     triggerRef.current = event.currentTarget;
-    setActionError('');
     setDialogError('');
     setAction(next);
   }
@@ -98,7 +96,6 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
     }
     setActionBusy(true);
     setDialogError('');
-    setActionError('');
     try {
       const body = action === 'paid'
         ? { paymentMethod }
@@ -111,8 +108,8 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
       setActionMessage('Төлөв шинэчлэгдлээ.');
       setRefreshing(true);
       await load(false);
-    } catch (err) {
-      setDialogError(err instanceof Error ? err.message : 'Өөрчлөлт хадгалж чадсангүй.');
+    } catch {
+      setDialogError('Өөрчлөлт хадгалж чадсангүй. Мэдээллээ шалгаад дахин оролдоно уу.');
     } finally {
       setActionBusy(false);
       setRefreshing(false);
@@ -132,7 +129,6 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
   return <div className="space-y-5">
     <Link href="/app/tuition/refunds" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"><ArrowLeft size={17} aria-hidden /> Буцаалтын жагсаалт руу</Link>
     {error && <ErrorState message={error} onRetry={() => void load(false)} />}
-    {actionError && <ErrorState message={actionError} onRetry={() => void load(false)} />}
     {actionMessage && <p role="status" className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-semibold text-success">{actionMessage}</p>}
     {refreshing && <p role="status" className="text-sm text-ink-dim">Шинэ төлөв авч байна...</p>}
 
@@ -140,7 +136,7 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
       <div className="min-w-0">
         <p className="text-sm text-ink-dim">{refund.classroom.name} <span className="mx-1" aria-hidden>—</span> Ангиас гарсан: {formatDate(refund.leftOn)}</p>
         <h1 className="mt-1 break-words text-2xl font-extrabold text-ink">{person}</h1>
-        <p className="mt-1 text-sm text-ink-dim">Буцаалтын бүртгэлийн дугаар: {refund.id}</p>
+        <p className="mt-1 break-all text-sm text-ink-dim">Буцаалтын бүртгэлийн дугаар: {refund.id}</p>
       </div>
       <RefundStatusBadge status={refund.status} />
     </header>
@@ -150,7 +146,7 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
       <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <DetailValue label="Сурагч" value={person} />
         <DetailValue label="Анги" value={refund.classroom.name} />
-        <DetailValue label="Элссэн огноо" value={joinedOn ? formatDate(joinedOn) : 'Энэ огноо буцаалтын бүртгэлд хадгалагдаагүй'} />
+        <DetailValue label="Элссэн огноо" value="Энэ огноо буцаалтын бүртгэлд хадгалагдаагүй" />
         <DetailValue label="Гарсан огноо" value={formatDate(refund.leftOn)} />
         <DetailValue label="Нийт хичээлийн өдөр" value={`${refund.totalLessonDays} өдөр`} />
         <DetailValue label="Суусан өдөр" value={`${refund.attendedLessonDays} өдөр`} />
@@ -195,10 +191,10 @@ export default function RefundDetail({ refundId, joinedOn: initialJoinedOn }: { 
     {(canRequest || canApprove || canPay || canCancel) && <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
       <h2 className="text-base font-bold text-ink">Боломжтой үйлдэл</h2>
       <div className="mt-3 flex flex-wrap gap-2">
-        {canRequest && <ActionButton icon={Clock3} onClick={(event) => openAction('pending', event)}>Зөвшөөрөлд илгээх</ActionButton>}
-        {canApprove && <ActionButton icon={Check} onClick={(event) => openAction('approve', event)}>Зөвшөөрөх</ActionButton>}
-        {canPay && <ActionButton icon={Banknote} onClick={(event) => openAction('paid', event)}>Олгосон гэж тэмдэглэх</ActionButton>}
-        {canCancel && <ActionButton icon={XCircle} danger onClick={(event) => openAction('cancel', event)}>Цуцлах</ActionButton>}
+        {canRequest && <ActionButton disabled={actionBusy || refreshing || loading || Boolean(error)} icon={Clock3} onClick={(event) => openAction('pending', event)}>Зөвшөөрөлд илгээх</ActionButton>}
+        {canApprove && <ActionButton disabled={actionBusy || refreshing || loading || Boolean(error)} icon={Check} onClick={(event) => openAction('approve', event)}>Зөвшөөрөх</ActionButton>}
+        {canPay && <ActionButton disabled={actionBusy || refreshing || loading || Boolean(error)} icon={Banknote} onClick={(event) => openAction('paid', event)}>Олгосон гэж тэмдэглэх</ActionButton>}
+        {canCancel && <ActionButton disabled={actionBusy || refreshing || loading || Boolean(error)} icon={XCircle} danger onClick={(event) => openAction('cancel', event)}>Цуцлах</ActionButton>}
       </div>
     </section>}
 
@@ -236,6 +232,6 @@ function Audit({ label, person, date }: { label: string; person?: { firstName: s
   return <li className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-line pb-2 last:border-0 last:pb-0"><span className="font-medium text-ink">{label}</span><span className="text-ink-dim">{person ? `${person.lastName} ${person.firstName}` : '—'} <span className="mx-1" aria-hidden>—</span> {formatDateTime(date)}</span></li>;
 }
 
-function ActionButton({ icon: Icon, children, onClick, danger = false }: { icon: typeof Check; children: string; onClick: (event: React.MouseEvent<HTMLButtonElement>) => void; danger?: boolean }) {
-  return <button type="button" onClick={onClick} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${danger ? 'border border-error/30 bg-error/10 text-error hover:bg-error/20' : 'bg-brand text-on-brand hover:bg-brand/90'}`}><Icon className="h-4 w-4" aria-hidden />{children}</button>;
+function ActionButton({ icon: Icon, children, onClick, danger = false, disabled = false }: { icon: typeof Check; children: string; onClick: (event: React.MouseEvent<HTMLButtonElement>) => void; danger?: boolean; disabled?: boolean }) {
+  return <button type="button" onClick={onClick} disabled={disabled} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50 ${danger ? 'border border-error/30 bg-error/10 text-error hover:bg-error/20' : 'bg-brand text-on-brand hover:bg-brand/90'}`}><Icon className="h-4 w-4" aria-hidden />{children}</button>;
 }

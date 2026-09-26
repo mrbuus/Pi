@@ -23,7 +23,7 @@ interface StudentDetail {
 
 interface RefundCalculatorProps {
   onCalculate: (data: RefundPreview) => void;
-  onSubmit: (studentId: string, classroomId: string, leftOn: string, joinedOn: string) => Promise<void>;
+  onSubmit: (studentId: string, classroomId: string, leftOn: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -53,6 +53,15 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
   const [error, setError] = useState('');
   const requestSequence = useRef(0);
   const searchId = useRef(0);
+  const previewSequence = useRef(0);
+  const previewKey = useRef<string | null>(null);
+
+  function clearPreview() {
+    previewSequence.current += 1;
+    previewKey.current = null;
+    setPreview(null);
+    setCalculating(false);
+  }
 
   useEffect(() => {
     const term = query.trim();
@@ -72,9 +81,9 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
       try {
         const results = await api<StudentSearchResult[]>(`/users/search?q=${encodeURIComponent(term)}`);
         if (active && requestId === searchId.current) setSearchResults(Array.isArray(results) ? results : []);
-      } catch (err) {
+      } catch {
         if (active && requestId === searchId.current) {
-          setSearchError(err instanceof Error ? err.message : 'Сурагч хайж чадсангүй.');
+          setSearchError('Сурагч хайж чадсангүй. Дахин оролдоно уу.');
           setSearchResults([]);
         }
       } finally {
@@ -92,7 +101,7 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
     setSelectedStudent(student);
     setQuery('');
     setSearchResults([]);
-    setPreview(null);
+    clearPreview();
     setError('');
     setClassroom(null);
     setStudentError('');
@@ -107,8 +116,8 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
       } else {
         setClassroom(detail.currentClassroom);
       }
-    } catch (err) {
-      if (requestId === requestSequence.current) setStudentError(err instanceof Error ? err.message : 'Сурагчийн мэдээлэл авч чадсангүй.');
+    } catch {
+      if (requestId === requestSequence.current) setStudentError('Сурагчийн мэдээлэл авч чадсангүй. Дахин оролдоно уу.');
     } finally {
       if (requestId === requestSequence.current) setStudentLoading(false);
     }
@@ -118,7 +127,8 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
     requestSequence.current += 1;
     setSelectedStudent(null);
     setClassroom(null);
-    setPreview(null);
+    clearPreview();
+    setStudentLoading(false);
     setStudentError('');
     setError('');
   }
@@ -126,6 +136,9 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
   async function handleCalculate(event?: FormEvent) {
     event?.preventDefault();
     if (!selectedStudent || !classroom || !leftOn) return;
+    const requestId = ++previewSequence.current;
+    const key = JSON.stringify([selectedStudent.id, classroom.id, leftOn]);
+    previewKey.current = null;
     setCalculating(true);
     setError('');
     setPreview(null);
@@ -136,22 +149,25 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
         leftOn,
       });
       const data = await api<RefundPreview>(`/tuition/refund/preview?${params.toString()}`);
+      if (requestId !== previewSequence.current) return;
+      previewKey.current = key;
       setPreview(data);
       onCalculate(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Буцаалтын тооцоо хийж чадсангүй.');
+    } catch {
+      if (requestId === previewSequence.current) setError('Буцаалтын тооцоо хийж чадсангүй. Дахин оролдоно уу.');
     } finally {
-      setCalculating(false);
+      if (requestId === previewSequence.current) setCalculating(false);
     }
   }
 
   async function handleSubmit() {
-    if (!preview || !selectedStudent || !classroom) return;
+    if (!preview || !selectedStudent || !classroom || loading ||
+        previewKey.current !== JSON.stringify([selectedStudent.id, classroom.id, leftOn])) return;
     setError('');
     try {
-      await onSubmit(selectedStudent.id, classroom.id, leftOn, preview.joinedOn);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Буцаалт үүсгэж чадсангүй.');
+      await onSubmit(selectedStudent.id, classroom.id, leftOn);
+    } catch {
+      setError('Буцаалт үүсгэж чадсангүй. Мэдээллээ шалгаад дахин оролдоно уу.');
     }
   }
 
@@ -170,7 +186,7 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
                 <span className="block truncate font-semibold text-ink">{selectedStudent.lastName} {selectedStudent.firstName}</span>
                 <span className="block text-sm text-ink-dim">{selectedStudent.studentCode || selectedStudent.username || 'Сурагч'}</span>
               </span>
-              <button type="button" onClick={clearStudent} aria-label="Сурагчийн сонголтыг арилгах" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-bg focus-visible:outline-2 focus-visible:outline-brand"><X className="h-5 w-5" aria-hidden /></button>
+              <button type="button" onClick={clearStudent} disabled={loading} aria-label="Сурагчийн сонголтыг арилгах" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-bg focus-visible:outline-2 focus-visible:outline-brand"><X className="h-5 w-5" aria-hidden /></button>
             </div> : <div className="relative">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" aria-hidden />
@@ -200,7 +216,7 @@ export default function RefundCalculator({ onCalculate, onSubmit, loading = fals
 
           <div>
             <label htmlFor="refund-left-on" className="mb-1 block text-sm font-semibold text-ink">Ангиас гарсан огноо</label>
-            <input id="refund-left-on" type="date" required value={leftOn} onChange={(event) => { setLeftOn(event.target.value); setPreview(null); setError(''); }} disabled={calculating || loading} className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink focus-visible:outline-2 focus-visible:outline-brand" />
+            <input id="refund-left-on" type="date" required value={leftOn} onChange={(event) => { setLeftOn(event.target.value); clearPreview(); setError(''); }} disabled={calculating || loading} className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink focus-visible:outline-2 focus-visible:outline-brand" />
           </div>
         </div>
         <button type="submit" disabled={!canCalculate} className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 font-semibold text-on-brand hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">

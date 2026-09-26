@@ -16,7 +16,6 @@ export default function TuitionPage() {
     studentId: string,
     classroomId: string,
     leftOn: string,
-    joinedOn: string,
   ) => {
     setSubmitting(true);
     try {
@@ -25,7 +24,7 @@ export default function TuitionPage() {
         method: 'POST',
         body: { studentId, classroomId, leftOn },
       });
-      router.push(`/app/tuition/refund/${encodeURIComponent(refund.id)}?joinedOn=${encodeURIComponent(joinedOn)}`);
+      router.push(`/app/tuition/refund/${encodeURIComponent(refund.id)}`);
     } finally {
       setSubmitting(false);
     }
