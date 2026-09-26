@@ -371,10 +371,10 @@ export default function AdminDashboardClient() {
               <Link
                 key={t.href}
                 href={t.href}
-                className={`group flex min-h-24 flex-col justify-between gap-3 rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
+                className={`group chunky chunky-press flex min-h-24 flex-col justify-between gap-3 p-4 ${
                   t.featured
                     ? "col-span-2 border-brand-bright/40 bg-brand-bright/10 sm:col-span-1"
-                    : "border-line bg-panel hover:border-brand-bright/40"
+                    : ""
                 }`}
               >
                 <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.tone}`}>
@@ -400,7 +400,7 @@ export default function AdminDashboardClient() {
       </div>
 
       {/* Шинэ хэрэглэгч — эрхийг нь шууд сонгоно */}
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-1 font-bold text-brand-soft">Шинэ хэрэглэгч нэмэх</h2>
         <p className="mb-4 text-xs text-ink-dim">
           Эрхийг (роль) нь энд шууд сонгоно — дараа нь дахин солих шаардлагагүй
@@ -495,7 +495,7 @@ export default function AdminDashboardClient() {
       </section>
 
       {/* Хэрэглэгчдийн үүрэг */}
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-bold text-brand-soft">Хэрэглэгчдийн үүрэг</h2>
@@ -564,7 +564,7 @@ export default function AdminDashboardClient() {
       </section>
 
       {/* Багш нарын эрх удирдах */}
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Багш нарын эрх</h2>
         <div className="mb-4 flex flex-wrap gap-2">
           <label className="sr-only" htmlFor="promote-phone">
@@ -641,7 +641,7 @@ export default function AdminDashboardClient() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-4 font-bold text-brand-soft">
           Хүлээгдэж буй төлбөрүүд
         </h2>
@@ -703,7 +703,7 @@ export default function AdminDashboardClient() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-4 font-bold text-brand-soft">
           {month} сарын төлөлт (танхимын сурагчид)
         </h2>
@@ -739,8 +739,10 @@ export default function AdminDashboardClient() {
         )}
       </section>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-surface p-6">
+      {/* min-w-0: grid-ийн хүүхэд анхдагчаар min-width:auto тул input-ийн
+          дотоод өргөн 375px дээр хуудсыг хэвтээ гүйлгэдэг байсан (e2e 09). */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <section className="min-w-0 rounded-2xl border-2 border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шинэ анги</h2>
           <div className="flex gap-2">
             <label className="sr-only" htmlFor="new-classroom-name">
@@ -751,7 +753,7 @@ export default function AdminDashboardClient() {
               value={newClass}
               onChange={(e) => setNewClass(e.target.value)}
               placeholder="Ангийн нэр"
-              className={`flex-1 ${inputCls}`}
+              className={`min-w-0 flex-1 ${inputCls}`}
             />
             <button
               onClick={createClassroom}
@@ -763,7 +765,7 @@ export default function AdminDashboardClient() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-line bg-surface p-6">
+        <section className="min-w-0 rounded-2xl border-2 border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шинэ эрх (pass)</h2>
           <div className="space-y-2">
             <label className="sr-only" htmlFor="new-pass-name">

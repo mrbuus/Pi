@@ -78,7 +78,7 @@ export function AcknowledgeResultDialog({
         <div className="mb-4 flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold">Дүнтэй танилцлаа</h2>
-            <p className="mt-1 text-sm text-ink-dim">"{testTitle}"</p>
+            <p className="mt-1 text-sm text-ink-dim">«{testTitle}»</p>
           </div>
           <button
             onClick={onClose}

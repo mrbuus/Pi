@@ -1,7 +1,7 @@
 "use client";
 
-import { Lock, Check, ArrowLeft, ArrowRight, Clock } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { Lock, Check, ArrowLeft, ArrowRight } from "lucide-react";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -152,7 +152,7 @@ export default function LessonChapterPage() {
           </p>
           <Link
             href="/app/buyer"
-            className="mt-4 inline-block rounded-lg bg-brand-bright px-5 py-2 text-sm font-bold text-on-brand"
+            className="mt-4 inline-block btn-3d rounded-2xl bg-brand-bright px-5 py-2 text-sm font-bold text-on-brand"
           >
             Эрх худалдаж авах
           </Link>
@@ -288,7 +288,7 @@ function BackLink({ subject }: { subject: string }) {
 
 function StepEmpty({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-line bg-panel p-8 text-center text-sm text-ink-dim">
+    <div className="chunky p-8 text-center text-sm text-ink-dim">
       {text}
     </div>
   );
@@ -317,7 +317,7 @@ function TheoryStep({
         return (
           <article
             key={theory.id}
-            className="rounded-2xl border border-line bg-panel p-5"
+            className="chunky p-5"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <h2 className="text-lg font-extrabold">{theory.title}</h2>
@@ -398,7 +398,7 @@ function ProblemsStep({
     ? `/app/library?subject=${subject}&book=${encodeURIComponent(chapter.book.code)}`
     : `/app/library?subject=${subject}`;
   return (
-    <div className="rounded-2xl border border-line bg-panel p-6 text-center">
+    <div className="chunky p-6 text-center">
       <p className="text-3xl font-extrabold text-brand-soft">{problemCount}</p>
       <p className="mt-1 text-sm text-ink-dim">
         дасгалын бодлого &ldquo;{chapter.title}&rdquo; бүлэгт хамаарна
@@ -406,7 +406,7 @@ function ProblemsStep({
       <Link
         href={libraryHref}
         onClick={onOpen}
-        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:opacity-90"
+        className="mt-4 inline-flex items-center gap-1.5 btn-3d rounded-2xl bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:brightness-105"
       >
         Бодлогын сан руу очих <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>

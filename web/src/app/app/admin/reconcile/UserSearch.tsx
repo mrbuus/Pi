@@ -46,7 +46,8 @@ export function UserSearch({
 
         setResults(response.items || []);
         setShowResults(true);
-      } catch (err: any) {
+      } catch (caught: unknown) {
+        const err = caught as { message?: string } | null;
         setError(err?.message || 'Хайлт амжилтгүй');
         setResults([]);
       } finally {

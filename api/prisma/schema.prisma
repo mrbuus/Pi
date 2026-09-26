@@ -44,6 +44,9 @@ model User {
   // харьцуулж, түүнээс ӨМНӨ олгогдсон бүх токеныг хүчингүйд тооцно. Ингэснээр
   // нууц үгээ сэргээхэд хулгайлагдсан сесс автоматаар тасарна — сэргээлтийн
   // гол утга учир нь энэ (эс бөгөөс халдагч хуучин токеноороо орсоор байна).
+  termsAcceptedAt    DateTime?
+  privacyVersion     String?
+  guardianConsentAt  DateTime?
   passwordChangedAt  DateTime?
   role               Role
   avatarUrl          String?
@@ -96,6 +99,17 @@ model User {
 
   passwordResetTokens PasswordResetToken[]
 
+  // Google-ээр нэвтрэх (20260908_add_google_identity_auth). Нэг хэрэглэгч ↔ нэг
+  // Google бүртгэл. Шинэ бүртгэл Google-ээр ҮҮСГЭХГҮЙ — зөвхөн холбосон хүн нэвтэрнэ.
+  googleIdentity       GoogleIdentity?
+  googleOAuthStates    GoogleOAuthState[]
+  googleLoginExchanges GoogleLoginExchange[]
+
+  // Secure schedule calendar feed tokens (G39). Only a one-way token hash is stored.
+  calendarTokenHash    String?         @unique
+  calendarTokenVersion Int?
+  notifications        Notification[]
+
   // SMS: бүртгэл, загвар, батч
   smsMessagesAsRecipient SmsMessage[]      @relation("SmsMessageRecipient")
   smsMessagesAsCreator   SmsMessage[]      @relation("SmsMessageCreatedBy")
@@ -107,6 +121,13 @@ model User {
   bankTransactionsImported BankTransaction[]       @relation("BankTxImportedBy")
   resultAcknowledgements   ResultAcknowledgement[]
   emailOtps                EmailOtp[]
+
+  // Архивласан сурагчийн түүхийг хадгална; үйлдлийг auditLog давхар мөрдөнө.
+  archivedAt    DateTime?
+  archivedById  String?
+  archiveReason String?
+
+  @@index([archivedAt])
 }
 
 // ============ Нууц үг сэргээлт ============
@@ -1392,6 +1413,30 @@ model AnnouncementClassroomTarget {
   @@index([classroomId])
 }
 
+// In-app inbox entries. Each row belongs to exactly one recipient.
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+enum NotificationKind {
+  PAYMENT_DUE
+  HOMEWORK
+  SCHEDULE_CHANGE
+  ANNOUNCEMENT
+  SYSTEM
+}
+
 // Анги тухайн өдөр ямар тест/шалгалт хийснийг багш бүртгэнэ.
 // Сурагч оройн тэмдэглэгээндээ token мэдэхгүйгээр бодлогуудаа эндээс шууд хардаг.
 model ClassTestSession {
@@ -1764,4 +1809,71 @@ model StreakFreeze {
   createdAt DateTime @default(now())
 
   @@unique([studentId, date])
+}
+
+// ============================================================================
+// Google OAuth (authorization code flow, сервер талд).
+//
+// Урсгал: вэб → GET /auth/google/url (эсвэл POST /auth/google/link) → Google →
+// GET /auth/google/callback (state шалгана, code-ыг токеноор солино, id_token-ийг
+// шалгана) → вэб /auth/google?code=<нэг удаагийн> → POST /auth/google/exchange →
+// JWT. Нууц утгуудын зөвхөн SHA-256 хэшийг хадгална.
+// ============================================================================
+
+enum GoogleOAuthPurpose {
+  LOGIN
+  LINK
+}
+
+model GoogleIdentity {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  googleSubject String   @unique // id_token-ийн `sub` — имэйл солигдсон ч тогтвортой
+  email         String
+  pictureUrl    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GoogleOAuthState {
+  id         String             @id @default(cuid())
+  stateHash  String             @unique
+  purpose    GoogleOAuthPurpose
+  userId     String? // LINK үед холбох хэрэглэгч
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime           @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model GoogleLoginExchange {
+  id         String    @id @default(cuid())
+  codeHash   String    @unique
+  userId     String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+// ============================================================================
+// Байршуулсан файлын байнгын хуулбар (G05, 2026-09-27).
+// Render-ийн үнэгүй багцын диск deploy бүрт устдаг — файлыг ӨС-д (Supabase,
+// үнэгүй) давхар хадгалж, диск дээр байхгүй бол эндээс сэргээж үйлчилнэ.
+// Диск нь кэш, энэ хүснэгт нь эх сурвалж. 25MB хүртэл (upload-ийн хязгаар).
+// ============================================================================
+model StoredFile {
+  key       String   @id // uploads-ийн key (uuid.ext)
+  mime      String
+  size      Int
+  bytes     Bytes
+  createdAt DateTime @default(now())
 }

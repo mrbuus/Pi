@@ -141,7 +141,7 @@ export default function RefundDetail({ refundId }: { refundId: string }) {
       <RefundStatusBadge status={refund.status} />
     </header>
 
-    <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+    <section className="chunky p-4 sm:p-5">
       <h2 className="text-base font-bold text-ink">Тооцооны дэлгэрэнгүй</h2>
       <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <DetailValue label="Сурагч" value={person} />
@@ -188,7 +188,7 @@ export default function RefundDetail({ refundId }: { refundId: string }) {
       </ul>
     </section>
 
-    {(canRequest || canApprove || canPay || canCancel) && <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+    {(canRequest || canApprove || canPay || canCancel) && <section className="chunky p-4 sm:p-5">
       <h2 className="text-base font-bold text-ink">Боломжтой үйлдэл</h2>
       <div className="mt-3 flex flex-wrap gap-2">
         {canRequest && <ActionButton disabled={actionBusy || refreshing || loading || Boolean(error)} icon={Clock3} onClick={(event) => openAction('pending', event)}>Зөвшөөрөлд илгээх</ActionButton>}

@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -17,6 +18,7 @@ import {
  * болгож, service-д ХЭЗЭЭ Ч undefined ирэхгүй.
  */
 export class SmsBulkDto {
+  @ApiProperty({ type: [String], minItems: 1, maxItems: 2000 })
   @IsArray()
   @ArrayMinSize(1)
   // Нэг батчийн дээд хэмжээ — санамсаргүй бүх сурагч руу давхар илгээхээс
@@ -25,14 +27,17 @@ export class SmsBulkDto {
   @IsString({ each: true })
   phones: string[];
 
+  @ApiProperty({ type: String, maxLength: 1000 })
   @IsString()
   @MaxLength(1000)
   text: string;
 
+  @ApiPropertyOptional({ enum: ['NOTIFICATION', 'MARKETING', 'REMINDER'] })
   @IsOptional()
   @IsIn(['NOTIFICATION', 'MARKETING', 'REMINDER'])
   kind?: string;
 
+  @ApiPropertyOptional({ type: String, maxLength: 200 })
   @IsOptional()
   @IsString()
   @MaxLength(200)

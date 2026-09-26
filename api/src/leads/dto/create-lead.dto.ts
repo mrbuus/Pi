@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -20,11 +21,13 @@ import { Subject } from '../../generated/prisma/enums';
 const PHONE_REGEX = /^[0-9]{8}$/;
 
 export class CreateLeadDto {
+  @ApiProperty({ type: String })
   @IsString()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @Length(2, 100, { message: 'Нэр 2-100 тэмдэгтийн хооронд байх ёстой' })
   name: string;
 
+  @ApiProperty({ type: String })
   @IsString()
   @Transform(({ value }) =>
     typeof value === 'string' ? value.replace(/\s+/g, '') : value,
@@ -36,6 +39,7 @@ export class CreateLeadDto {
 
   // 1–3 хичээл сонгож болно, давхцалгүй байх ёстой. Тухайн хичээл
   // нээлттэй эсэхийг сервер тал (LeadsService.create) жинхэнээр шалгана.
+  @ApiProperty({ enum: Subject, isArray: true, minItems: 1, maxItems: 3 })
   @IsArray()
   @ArrayMinSize(1, { message: 'Хамгийн багадаа 1 хичээл сонгоно уу' })
   @ArrayMaxSize(3, { message: 'Хамгийн ихдээ 3 хичээл сонгож болно' })
@@ -43,6 +47,7 @@ export class CreateLeadDto {
   @IsEnum(Subject, { each: true })
   subjects: Subject[];
 
+  @ApiProperty({ type: Number, minimum: 1, maximum: 12 })
   @IsInt()
   @Min(1)
   @Max(12)

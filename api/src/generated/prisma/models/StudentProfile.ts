@@ -706,14 +706,6 @@ export type EnumStudentTypeFieldUpdateOperationsInput = {
   set?: $Enums.StudentType
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type NullableEnumTuitionPlanFieldUpdateOperationsInput = {
   set?: $Enums.TuitionPlan | null
 }

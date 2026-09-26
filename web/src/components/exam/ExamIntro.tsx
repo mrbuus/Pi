@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Settings, TriangleAlert, Wifi, WifiOff, AlertCircle, CheckCircle2, Circle } from "lucide-react";
+import { Settings, TriangleAlert, Wifi, WifiOff } from "lucide-react";
 
 import { pingApi } from "@/lib/api";
 /* ============================================================================
@@ -74,7 +74,7 @@ export default function ExamIntro({
   const checkBattery = useCallback(async () => {
     try {
       if ("getBattery" in navigator) {
-        const battery = await (navigator as any).getBattery();
+        const battery = await (navigator as Navigator & { getBattery: () => Promise<{ level: number }> }).getBattery();
         setBatteryPercent(Math.round(battery.level * 100));
       }
     } catch {
@@ -147,7 +147,7 @@ export default function ExamIntro({
                 type="button"
                 onClick={handleResumeClick}
                 disabled={starting}
-                className="glow-pulse mt-7 w-full rounded-xl bg-brand-bright py-4 text-lg font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+                className="btn-3d mt-7 w-full rounded-2xl bg-brand-bright py-4 text-lg font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
                 aria-label={resume ? "Үргэлжлүүлэх" : "Бэлтгэл шалга"}
               >
                 {starting ? "Ачаалж байна…" : resume ? "Үргэлжлүүлэх" : "Бэлтгэл шалга"}
@@ -271,7 +271,7 @@ export default function ExamIntro({
               type="button"
               onClick={handlePrepDone}
               disabled={starting}
-              className="flex-1 rounded-lg bg-brand-bright px-4 py-3 text-sm font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              className="btn-3d flex-1 rounded-2xl bg-brand-bright px-4 py-3 text-sm font-bold text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
               {starting ? "Ачаалж байна…" : "Шалгалт эхлэх"}
             </button>

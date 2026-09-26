@@ -10,6 +10,7 @@ import { maskPhone, toNationalMn } from '../notifications/phone';
 import { SmsService } from '../notifications/sms.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { requireJwtSecret } from './jwt.strategy';
+import { validatePasswordStrength } from './password-policy';
 import {
   CODE_TTL_MS,
   MAX_REQUESTS_PER_WINDOW,
@@ -209,6 +210,10 @@ export class PasswordResetService {
       });
       throw fail();
     }
+
+    // DTO шалгасан ч сервисийн түвшинд давхар хамгаалалт (password-policy.ts)
+    const weak = validatePasswordStrength(newPassword);
+    if (weak) throw new BadRequestException(weak);
 
     const now = new Date();
     const passwordHash = await bcrypt.hash(newPassword, 10);

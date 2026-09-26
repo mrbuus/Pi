@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -30,25 +31,30 @@ import { TuitionService } from './tuition.service';
 // ЧИМЭЭГҮЙ хасагддаг — өмнө нь эдгээр DTO декораторгүй байсан тул буцаалт
 // үүсгэх, олгох, цуцлах бүх хүсэлт хоосон биетэй сервис рүү очдог байв.
 export class CreateRefundDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   studentId!: string;
 
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   classroomId!: string;
 
+  @ApiProperty({ type: String })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна' })
   leftOn!: string;
 }
 
 export class MarkAsPaidDto {
+  @ApiPropertyOptional({ enum: ['CASH', 'BANK_TRANSFER', 'QPAY'] })
   @IsOptional()
   @IsIn(['CASH', 'BANK_TRANSFER', 'QPAY'])
   paymentMethod?: string;
 }
 
 export class CancelRefundDto {
+  @ApiPropertyOptional({ type: String, maxLength: 1000 })
   @IsOptional()
   @IsString()
   @MaxLength(1000)
@@ -205,7 +211,9 @@ export class TuitionController {
    */
   @Get('paid-until/:studentId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  // PARENT (G26, 2026-09-27): доорх салбар өмнө нь бичигдсэн ч @Roles-д
+  // байгаагүй тул эцэг эх 403 авдаг байв. Зөвхөн БАТАЛГААЖСАН холбоотой хүүхэд.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER, Role.PARENT)
   async getPaidUntil(
     @Param('studentId') studentId: string,
     @NestRequest() req: Request,
@@ -229,7 +237,7 @@ export class TuitionController {
     // PARENT -> өөрийн хүүхдэд
     if (userRole === Role.PARENT) {
       const parentLink = await this.tuitionService['prisma'].parentLink.findFirst({
-        where: { parentId: userId, studentId: studentId },
+        where: { parentId: userId, studentId: studentId, verifiedAt: { not: null } },
       });
       if (!parentLink) {
         throw new ForbiddenException(

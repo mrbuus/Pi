@@ -146,7 +146,7 @@ export default function AssignmentsSection({
   const isToday = selectedDate === ubToday();
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       {/* Огноо шилжүүлэх толгой — эцэг компонент өөрийн ГАНЦ ерөнхий
           огнооны хяналттай үед (hideDateHeader) энд харагдахгүй. */}
       {!hideDateHeader && (

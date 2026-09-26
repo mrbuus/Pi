@@ -4,12 +4,12 @@ import type { LucideIcon } from "lucide-react";
 /**
  * Хуудас/хэсгийн стандарт бүрхүүлүүд.
  *
- * Өмнө нь `rounded-2xl border border-line bg-panel p-6` гэсэн мөр 100 гаруй
+ * Өмнө нь `chunky p-6` гэсэн мөр 100 гаруй
  * газар гараар давтагдаж, зарим нь p-4, зарим нь p-6, зарим нь rounded-xl
  * байсан тул хэмнэл алдагдаж байв. Эндээс цаашид нэг эх сурвалж.
  */
 
-/** Агуулгын карт. `interactive` бол hover-т 1px өргөгдөнө. */
+/** Агуулгын карт (chunky хэв маяг). `interactive` бол hover-т өргөгдөж, дарахад шигдэнэ. */
 export function Card({
   children,
   className = "",
@@ -24,9 +24,7 @@ export function Card({
   const pad = padding === "none" ? "" : padding === "tight" ? "p-4" : "p-5 md:p-6";
   return (
     <div
-      className={`rounded-2xl border border-line bg-panel elev-1 ${pad} ${
-        interactive ? "surface-interactive" : ""
-      } ${className}`}
+      className={`chunky ${pad} ${interactive ? "chunky-press" : ""} ${className}`}
     >
       {children}
     </div>

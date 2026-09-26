@@ -17,6 +17,10 @@ import {
 import { api } from "@/lib/api";
 import { formatMnt, TUITION } from "@/lib/orgInfo";
 import { Meta } from "@/components/ui/Meta";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/kit/button";
+import { Progress } from "@/components/ui/kit/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import OutstandingPanel from "@/components/payments/OutstandingPanel";
 import PaymentEditModal from "@/components/payments/PaymentEditModal";
 import ReversePaymentModal from "@/components/payments/ReversePaymentModal";
@@ -105,9 +109,6 @@ export default function PaymentsClient() {
 
   const [passPick, setPassPick] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [msg, setMsg] = useState<{ kind: "success" | "error"; text: string } | null>(
-    null,
-  );
 
   // Багш+ бүрэн эрхийн засах/буцаах цонхнууд — хаана ч байгаа мөрөөс нээгдэнэ
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
@@ -155,8 +156,7 @@ export default function PaymentsClient() {
   }, [pending, monthRows]);
 
   async function confirm(id: string) {
-    setMsg(null);
-    try {
+        try {
       await api(`/payments/${id}/confirm`, {
         method: "POST",
         body: {
@@ -166,31 +166,30 @@ export default function PaymentsClient() {
       });
       setPassPick((m) => ({ ...m, [id]: "" }));
       setNotes((m) => ({ ...m, [id]: "" }));
-      setMsg({ kind: "success", text: "Төлбөр баталгаажлаа" });
+      toast.success("Төлбөр баталгаажлаа");
       load();
     } catch (e) {
-      setMsg({ kind: "error", text: errMsg(e) });
+      toast.error(errMsg(e));
     }
   }
 
   async function reject(id: string) {
-    setMsg(null);
-    try {
+        try {
       await api(`/payments/${id}/reject`, { method: "POST" });
-      setMsg({ kind: "success", text: "Төлбөр цуцлагдлаа" });
+      toast.success("Төлбөр цуцлагдлаа");
       load();
     } catch (e) {
-      setMsg({ kind: "error", text: errMsg(e) });
+      toast.error(errMsg(e));
     }
   }
 
   function handleEdited() {
-    setMsg({ kind: "success", text: "Төлбөр засагдлаа" });
+    toast.success("Төлбөр засагдлаа");
     load();
   }
 
   function handleReversed() {
-    setMsg({ kind: "success", text: "Төлбөр буцаагдаж, эрх цуцлагдлаа" });
+    toast.success("Төлбөр буцаагдаж, эрх цуцлагдлаа");
     load();
   }
 
@@ -218,23 +217,6 @@ export default function PaymentsClient() {
             сар бүрийг ч засах/буцаах бүрэн эрхтэй.
           </p>
         </div>
-        {msg && (
-          <span
-            role="status"
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm ${
-              msg.kind === "error"
-                ? "bg-error/10 text-error"
-                : "bg-success/10 text-success"
-            }`}
-          >
-            {msg.kind === "error" ? (
-              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
-            ) : (
-              <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
-            )}
-            {msg.text}
-          </span>
-        )}
       </div>
 
       {/* Өнгөт тоон картууд — дарахад холбогдох таб нээгдэнэ */}
@@ -244,7 +226,7 @@ export default function PaymentsClient() {
             key={c.label}
             type="button"
             onClick={() => setTab(c.tab)}
-            className={`flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-panel p-3 text-left transition sm:p-4 hover:border-brand-bright/40 ${
+            className={`chunky chunky-press flex min-w-0 items-center gap-3 p-3 text-left sm:p-4 hover:border-brand-bright/40 ${
               i === 2 ? "col-span-2 sm:col-span-1" : ""
             }`}
           >
@@ -259,52 +241,24 @@ export default function PaymentsClient() {
         ))}
       </div>
 
-      {/* Табууд — утсан дээр хажуу тийш гүйлгэнэ (хуудас биш, зөвхөн энэ мөр) */}
-      <div
-        role="tablist"
-        aria-label="Төлбөрийн хэсгүүд"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {TABS.map((t) => {
-          const active = tab === t.key;
-          return (
-            <button
-              key={t.key}
-              type="button"
-              role="tab"
-              id={`pay-tab-${t.key}`}
-              aria-selected={active}
-              aria-controls={`pay-panel-${t.key}`}
-              onClick={() => setTab(t.key)}
-              className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-bold transition ${
-                active
-                  ? "bg-brand-bright text-on-brand"
-                  : "border border-line bg-panel text-ink-dim hover:text-ink"
-              }`}
-            >
-              <t.icon className="h-4 w-4" aria-hidden />
-              {t.label}
-              {t.key === "pending" && pending.length > 0 && (
-                <span
-                  className={`rounded-full px-1.5 text-xs tabular-nums ${
-                    active ? "bg-on-brand/20" : "bg-warning/15 text-warning"
-                  }`}
-                >
-                  {pending.length}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Табууд (shadcn/ui Tabs = Radix): сумаар шилжинэ, утсан дээр хажуу тийш гүйлгэнэ */}
+      <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="space-y-6">
+      <TabsList aria-label="Төлбөрийн хэсгүүд">
+        {TABS.map((t) => (
+          <TabsTrigger key={t.key} value={t.key} className="group">
+            <t.icon aria-hidden />
+            {t.label}
+            {t.key === "pending" && pending.length > 0 && (
+              <span className="rounded-full bg-warning/15 px-1.5 text-xs tabular-nums text-warning group-data-[state=active]:bg-on-brand/20 group-data-[state=active]:text-on-brand">
+                {pending.length}
+              </span>
+            )}
+          </TabsTrigger>
+        ))}
+      </TabsList>
 
-      {tab === "pending" && (
-      <section
-        id="pay-panel-pending"
-        role="tabpanel"
-        aria-labelledby="pay-tab-pending"
-        className="rounded-3xl border border-line bg-panel p-4 sm:p-6"
-      >
+      <TabsContent value="pending">
+      <section className="chunky p-4 sm:p-6">
         <h2 className="mb-4 font-bold text-ink">Баталгаажуулах төлбөрүүд</h2>
         <SectionStatus
           loading={pendingLoading}
@@ -324,7 +278,7 @@ export default function PaymentsClient() {
             {pending.map((p) => {
               const match = matchTuitionPlan(p.amount);
               return (
-                <div key={p.id} className="rounded-2xl border border-line p-4">
+                <div key={p.id} className="rounded-2xl border-2 border-line p-4">
                   <div className="flex items-start gap-3">
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
                       <Clock className="h-5 w-5" aria-hidden />
@@ -388,27 +342,21 @@ export default function PaymentsClient() {
                       placeholder="Баталгаажуулалтын тайлбар"
                       className={`${inputCls} col-span-2 lg:col-span-1`}
                     />
-                    <button
-                      onClick={() => confirm(p.id)}
-                      className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-brand-bright px-4 text-sm font-bold text-on-brand transition"
-                    >
-                      <Check className="h-4 w-4" aria-hidden />
+                    <Button onClick={() => confirm(p.id)}>
+                      <Check aria-hidden />
                       Батлах
-                    </button>
-                    <button
-                      onClick={() => reject(p.id)}
-                      className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-error/30 px-4 text-sm font-bold text-error transition hover:bg-error/10"
-                    >
-                      <X className="h-4 w-4" aria-hidden />
+                    </Button>
+                    <Button variant="danger" onClick={() => reject(p.id)}>
+                      <X aria-hidden />
                       Цуцлах
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
+                      variant="outline"
                       onClick={() => setEditingPayment(p)}
-                      className="min-h-11 rounded-lg border border-line px-4 text-sm font-semibold transition hover:border-brand col-span-2 lg:col-span-1"
+                      className="col-span-2 lg:col-span-1"
                     >
                       Засах
-                    </button>
+                    </Button>
                   </div>
                 </div>
               );
@@ -416,11 +364,10 @@ export default function PaymentsClient() {
           </div>
         )}
       </section>
-      )}
+      </TabsContent>
 
-      {tab === "month" && (
-      <div id="pay-panel-month" role="tabpanel" aria-labelledby="pay-tab-month" className="space-y-6">
-      <section className="rounded-3xl border border-line bg-panel p-4 sm:p-6">
+      <TabsContent value="month" className="space-y-6">
+      <section className="chunky p-4 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-bold text-ink">Сарын төлөлт</h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -453,16 +400,12 @@ export default function PaymentsClient() {
               </span>
               <span className="font-bold tabular-nums text-success">{paidPct}%</span>
             </div>
-            <div
-              className="h-3 overflow-hidden rounded-full bg-error/15"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={paidPct}
+            <Progress
+              value={paidPct}
               aria-label="Төлсөн сурагчийн хувь"
-            >
-              <div className="h-full rounded-full bg-success" style={{ width: `${paidPct}%` }} />
-            </div>
+              className="bg-error/15"
+              indicatorClassName="bg-success"
+            />
           </div>
         )}
         <SectionStatus
@@ -480,7 +423,7 @@ export default function PaymentsClient() {
             {visibleMonthRows.map((r, i) => (
               <li
                 key={`${r.student.phone}-${i}`}
-                className="flex items-center gap-3 rounded-2xl border border-line px-3 py-2.5 text-sm"
+                className="flex items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
               >
                 <span
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
@@ -508,31 +451,20 @@ export default function PaymentsClient() {
 
       {/* Тухайн сард дутуу төлсөн бүх сурагч — хамгийн их зөрүүтэй нь эхэндээ */}
       <OutstandingPanel month={month} />
-      </div>
-      )}
+      </TabsContent>
 
       {/* Нэг сурагчийн ёстой/төлсөн/үлдэгдэл, бүх түүх — хайж сонгоод шууд удирдана.
           Табаас гарсан ч сонголт хадгалагдахын тулд нуух (hidden), unmount хийхгүй. */}
-      <div
-        id="pay-panel-student"
-        role="tabpanel"
-        aria-labelledby="pay-tab-student"
-        hidden={tab !== "student"}
-      >
+      <TabsContent value="student" forceMount hidden={tab !== "student"}>
         <StudentHistoryPanel
           onEdit={setEditingPayment}
           onReverse={setReversingPayment}
           refreshKey={refreshKey}
         />
-      </div>
+      </TabsContent>
 
-      {tab === "recent" && (
-      <section
-        id="pay-panel-recent"
-        role="tabpanel"
-        aria-labelledby="pay-tab-recent"
-        className="rounded-3xl border border-line bg-panel p-4 sm:p-6"
-      >
+      <TabsContent value="recent">
+      <section className="chunky p-4 sm:p-6">
         <h2 className="mb-4 font-bold text-ink">Сүүлийн төлбөрүүд</h2>
         <SectionStatus
           loading={recentLoading}
@@ -548,7 +480,7 @@ export default function PaymentsClient() {
               return (
                 <li
                   key={p.id}
-                  className="flex flex-wrap items-center gap-3 rounded-2xl border border-line px-3 py-2.5 text-sm"
+                  className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
                 >
                   <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}>
                     <st.icon className="h-4 w-4" aria-hidden />
@@ -585,16 +517,11 @@ export default function PaymentsClient() {
           </ul>
         )}
       </section>
-      )}
+      </TabsContent>
 
       {/* Лавлагаа: сурагч ЮУ төлөх ЁСТОЙ вэ — бодит төлбөртэй харьцуулж харах */}
-      {tab === "reference" && (
-      <section
-        id="pay-panel-reference"
-        role="tabpanel"
-        aria-labelledby="pay-tab-reference"
-        className="rounded-3xl border border-line bg-panel p-4 sm:p-6"
-      >
+      <TabsContent value="reference">
+      <section className="chunky p-4 sm:p-6">
         <h2 className="mb-1 font-bold text-ink">
           Сургалтын төлбөрийн лавлагаа
         </h2>
@@ -604,7 +531,7 @@ export default function PaymentsClient() {
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           {TUITION.map((tier) => (
-            <div key={tier.id} className="rounded-2xl border border-line p-4">
+            <div key={tier.id} className="rounded-2xl border-2 border-line p-4">
               <p className="mb-2 text-sm font-semibold">{tier.label}</p>
               <div className="space-y-1.5">
                 {tier.plans.map((plan) => (
@@ -627,7 +554,8 @@ export default function PaymentsClient() {
           ))}
         </div>
       </section>
-      )}
+      </TabsContent>
+      </Tabs>
 
       <PaymentEditModal
         open={!!editingPayment}

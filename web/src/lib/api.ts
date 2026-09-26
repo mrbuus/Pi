@@ -70,7 +70,7 @@ async function fetchWithWakeRetry(
       ...init,
       signal: AbortSignal.timeout(FIRST_TRY_TIMEOUT_MS),
     });
-  } catch (error) {
+  } catch {
     // Сүлжээний алдаа/timeout — сервер унтсан байж болзошгүй тул
     // житер-ээр саатаатаж дахин оролдоно.
     await new Promise((resolve) => {
@@ -155,10 +155,11 @@ export class ApiError extends Error {
 
 export async function api<T = unknown>(
   path: string,
-  opts: { method?: string; body?: unknown; auth?: boolean } = {},
+  opts: { method?: string; body?: unknown; auth?: boolean; responseType?: "json" | "text" } = {},
 ): Promise<T> {
   const headers: Record<string, string> = {};
-  if (opts.body !== undefined) headers["Content-Type"] = "application/json";
+  const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
+  if (opts.body !== undefined && !isFormData) headers["Content-Type"] = "application/json";
   if (opts.auth !== false) {
     const token = getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -167,7 +168,7 @@ export async function api<T = unknown>(
   const init: RequestInit = {
     method,
     headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    body: opts.body === undefined ? undefined : isFormData ? opts.body as FormData : JSON.stringify(opts.body),
   };
 
   // In-flight dedupe: ижил GET зэрэг хийгдвэл нэг л хүсэлт явна.
@@ -198,7 +199,7 @@ export async function api<T = unknown>(
       );
     }
 
-    const data = (await res.json().catch(() => null)) as T & {
+    const data = (opts.responseType === "text" ? await res.text().catch(() => "") : await res.json().catch(() => null)) as T & {
       message?: string | string[];
     };
     if (!res.ok) {

@@ -35,7 +35,7 @@ export default function StepRail({
       : 0;
 
   return (
-    <div className="rounded-2xl border border-line bg-panel p-4">
+    <div className="chunky p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="text-xs font-bold uppercase tracking-wide text-ink-dim">
           Явц

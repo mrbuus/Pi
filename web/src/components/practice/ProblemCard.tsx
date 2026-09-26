@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/Surface';
+
 
 // Recommendation type
 type RecommendReason =
@@ -40,7 +40,7 @@ export default function ProblemCard({
   return (
     <div
       onClick={() => onSelect(recommendation)}
-      className={`cursor-pointer transition-all rounded-2xl border border-line bg-panel elev-1 p-5 md:p-6 ${
+      className={`cursor-pointer transition-all chunky elev-1 p-5 md:p-6 ${
         selected
           ? 'ring-2 ring-brand bg-brand-bright'
           : 'hover:border-line-focus'

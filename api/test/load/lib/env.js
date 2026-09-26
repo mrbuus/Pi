@@ -18,8 +18,9 @@ function assertLocalhost(urlStr, label) {
   try {
     parsed = new URL(urlStr);
   } catch {
-    throw new Error(`🚨 SAFETY GUARD: ${label} буруу URL байна: ${urlStr}`);
+    throw new Error(`🚨 SAFETY GUARD: ${label} буруу URL байна`);
   }
+  if (label.includes('API') && (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash || parsed.pathname.replace(/\/$/, '') !== '/api')) throw new Error('Invalid local API URL; expected http(s)://localhost:port/api without credentials');
   if (!LOCAL_HOSTS.has(parsed.hostname)) {
     throw new Error(
       `🚨 SAFETY GUARD: ${label} нь localhost биш байна (host="${parsed.hostname}"). ` +

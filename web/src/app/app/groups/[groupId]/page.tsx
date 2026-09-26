@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { JoinGroupCard } from '../../../../components/groups/JoinGroupCard';
-import { GroupMembersCard } from '../../../../components/groups/GroupMembersCard';
-import { Card } from '../../../../components/ui/Surface';
-import { LoadingState, ErrorState, EmptyState } from '../../../../components/ui/StateBlock';
+import { GroupMembersCard, type GroupMember } from '../../../../components/groups/GroupMembersCard';
+
+import { LoadingState, ErrorState } from '../../../../components/ui/StateBlock';
 import { api } from '@/lib/api';
 
 interface GroupDetails {
@@ -17,12 +17,11 @@ interface GroupDetails {
     firstName: string;
     lastName: string;
   };
-  members: any[];
+  members: GroupMember[];
   createdAt: string;
 }
 
 export default function GroupDetailPage() {
-  const router = useRouter();
   const params = useParams();
   const groupId = params.groupId as string;
 
@@ -31,25 +30,24 @@ export default function GroupDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (groupId) {
-      fetchGroupDetails();
-    }
-  }, [groupId]);
-
-  const fetchGroupDetails = async () => {
+  const fetchGroupDetails = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
       const data = await api<GroupDetails>(`/teacher-groups/${groupId}`);
       setGroup(data);
-    } catch (err: any) {
-      setError(err.message || 'Бүлэгийн мэдээлэл авахад алдаа гарлаа');
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
+      setError(err?.message || 'Бүлэгийн мэдээлэл авахад алдаа гарлаа');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [groupId]);
+
+  useEffect(() => {
+    if (groupId) void fetchGroupDetails();
+  }, [groupId, fetchGroupDetails]);
 
   const handleRemoveStudent = async (studentId: string) => {
     if (!confirm('Энэ сурагчийг бүлгээс хасах уу?')) {

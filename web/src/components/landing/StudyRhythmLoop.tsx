@@ -16,7 +16,7 @@ export default function StudyRhythmLoop() {
   return (
     <div
       role="img"
-      className="reveal mt-10 rounded-2xl border border-line bg-panel p-6 md:p-8"
+      className="reveal mt-10 chunky p-6 md:p-8"
       aria-label="Сурах хэмнэлийн мөчлөг: хичээл, даалгавар, орой тэмдэглэл, сар бүрийн шалгалт — дараа нь дахин хичээлээс эхэлнэ"
     >
       <div className="relative">

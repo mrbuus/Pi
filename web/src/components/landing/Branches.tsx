@@ -14,7 +14,7 @@ export default function Branches() {
           {BRANCHES.map((b, i) => (
             <div
               key={b.id}
-              className="reveal rounded-2xl border border-line bg-panel p-7"
+              className="reveal chunky p-7"
               style={{ transitionDelay: `${i * 90}ms` }}
             >
               <p className="text-xs font-bold uppercase tracking-wider text-brand">
@@ -32,7 +32,7 @@ export default function Branches() {
           ))}
         </div>
 
-        <div className="reveal mt-8 rounded-2xl border border-line bg-panel p-6 text-center">
+        <div className="reveal mt-8 chunky p-6 text-center">
           <p className="text-sm font-semibold text-ink-dim">Утсаар холбогдох</p>
           <div className="mt-2 flex flex-wrap justify-center gap-x-6 gap-y-1">
             {PHONES.map((phone) => (

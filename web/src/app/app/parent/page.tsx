@@ -8,6 +8,7 @@ import { Check, CircleCheck, CircleX, Clock, Link2, Wallet, type LucideIcon } fr
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { formatMnt } from "@/lib/orgInfo";
 import { STATUS_LABEL } from "@/components/payments/paymentHelpers";
+import PaidUntilCard from "@/components/payments/PaidUntilCard";
 import {
   HOMEWORK_MARK_OPTIONS,
   type HomeworkMark,
@@ -99,7 +100,7 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
   const payments = link.student.payments ?? [];
   const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [selectedResult, setSelectedResult] = useState<{ id: string; test: { title: string } } | null>(null);
 
   const attendanceSummary = attendance.reduce<Record<string, number>>((acc, row) => {
     acc[row.status] = (acc[row.status] ?? 0) + 1;
@@ -128,7 +129,7 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
   }
 
   return (
-    <section className="rounded-3xl border border-line bg-panel p-4 sm:p-6">
+    <section className="chunky p-4 sm:p-6">
       <div className="flex flex-wrap items-center gap-4">
         <span
           aria-hidden
@@ -153,6 +154,11 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
             Холбогдсон
           </span>
         </div>
+      </div>
+
+      {/* «Хэдий хүртэл төлсөн» (G26) — баталгаажсан хүүхдэд л (сервер шалгана). */}
+      <div className="mt-5">
+        <PaidUntilCard studentId={link.student.id} compact />
       </div>
 
       {/* Өнгөт тоон хавтан (шинэ дизайн) — өнгө + дүрс + үг хамт. */}
@@ -300,7 +306,7 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
               return (
                 <div
                   key={`${p.id}-${i}`}
-                  className="flex items-center gap-3 rounded-2xl border border-line px-3 py-2.5 text-sm"
+                  className="flex items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
                 >
                   <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}>
                     <st.icon className="h-4 w-4" aria-hidden />
@@ -417,7 +423,7 @@ export default function ParentPage() {
       </div>
 
       {loadState === "loading" && (
-        <section className="rounded-3xl border border-line bg-panel p-6">
+        <section className="chunky p-6">
           <LoadingState rows={4} label="Хүүхдийн мэдээлэл" />
         </section>
       )}
@@ -427,7 +433,7 @@ export default function ParentPage() {
       )}
 
       {loadState === "ready" && links.length === 0 && (
-        <section className="rounded-2xl border border-line bg-panel p-6">
+        <section className="rounded-2xl border-2 border-line bg-panel p-6">
           <h2 className="font-bold text-brand-soft">Холбосон хүүхэд алга байна</h2>
           <p className="mt-2 text-sm text-ink-dim">
             Доорх хэсэгт сурагчийн утасны дугаарыг оруулж хүсэлт илгээнэ үү.

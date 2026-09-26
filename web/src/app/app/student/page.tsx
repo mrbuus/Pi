@@ -110,7 +110,7 @@ export default function StudentDashboard() {
 
       {/* Төвийн самбар — зөвхөн танхимын сурагчид */}
       {announcementsQ.status === "loading" && (
-        <section className="rounded-2xl border border-line bg-panel p-6">
+        <section className="chunky p-6">
           <LoadingState rows={3} label="Төвийн самбар" />
         </section>
       )}
@@ -123,7 +123,7 @@ export default function StudentDashboard() {
 
       <div id="homework" className="scroll-mt-24">
         {meQ.status === "loading" && (
-          <section className="rounded-2xl border border-line bg-panel p-6">
+          <section className="chunky p-6">
             <LoadingState rows={3} label="Гэрийн даалгавар" />
           </section>
         )}
@@ -135,7 +135,7 @@ export default function StudentDashboard() {
       <EveningMarking />
 
       <div className="grid gap-6 md:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-panel p-6">
+        <section className="chunky p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Миний сул талууд</h2>
           {statsQ.status === "loading" && <LoadingState rows={4} label="Сул талууд" />}
           {statsQ.status === "error" && (
@@ -149,7 +149,7 @@ export default function StudentDashboard() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-line bg-panel p-6">
+        <section className="chunky p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шалгалтын дүн</h2>
           {resultsQ.status === "loading" && <LoadingState rows={3} label="Шалгалтын дүн" />}
           {resultsQ.status === "error" && (

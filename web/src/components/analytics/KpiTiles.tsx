@@ -23,7 +23,7 @@ function Tile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-line bg-panel p-4">
+    <div className="chunky p-4">
       <p className="text-xs font-semibold text-ink-dim">{label}</p>
       <p className="mt-1 text-2xl font-bold text-ink">{value}</p>
       {hint && <p className="mt-0.5 text-xs text-ink-dim">{hint}</p>}

@@ -16,7 +16,7 @@ export default function ProgressSummary({ goals }: { goals: Goal[] }) {
   if (total === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <div className="chunky p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-bold text-brand-soft">Явц</h2>
         <p className="text-sm text-ink-dim">

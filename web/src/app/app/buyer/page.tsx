@@ -155,7 +155,7 @@ export default function BuyerDashboard() {
       <h1 className="text-2xl font-extrabold">Миний эрхүүд</h1>
 
       {/* Идэвхтэй эрхүүд */}
-      <section className="rounded-2xl border border-line bg-panel p-6">
+      <section className="chunky p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Идэвхтэй эрхүүд</h2>
         {passesQ.status === "loading" && (
           <LoadingState rows={2} label="Эрхүүдийг ачааллаж байна" />
@@ -196,7 +196,7 @@ export default function BuyerDashboard() {
       </section>
 
       {/* Номын сан — одоохондоо нэрсээр нь л (тун удахгүй тус тусад нь худалдана) */}
-      <section className="rounded-2xl border border-line bg-panel p-6">
+      <section className="chunky p-6">
         <h2 className="mb-1 font-bold text-brand-soft">Ном</h2>
         <p className="mb-4 text-sm text-ink-dim">
           Тун удахгүй ном тус бүрээр нь эрх худалдаж авах боломжтой болно
@@ -237,7 +237,7 @@ export default function BuyerDashboard() {
       </section>
 
       {/* Дэлгүүр — багц сонгоно */}
-      <section className="rounded-2xl border border-line bg-panel p-6">
+      <section className="chunky p-6">
         <h2 className="mb-1 font-bold text-brand-soft">Дэлгүүр</h2>
         <p className="mb-4 text-sm text-ink-dim">
           Багцаа сонгоход төлбөрийн мэдээлэл автоматаар бөглөгдөнө
@@ -293,7 +293,7 @@ export default function BuyerDashboard() {
       </section>
 
       {/* Сургалтын төлбөр — төвийн албан ёсны үнэ */}
-      <section className="rounded-2xl border border-line bg-panel p-6">
+      <section className="chunky p-6">
         <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-bold text-brand-soft">Сургалтын төлбөр</h2>
           <p className="text-xs text-ink-dim">2026–2027 оны хичээлийн жил</p>

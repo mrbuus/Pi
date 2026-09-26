@@ -12,7 +12,7 @@ import LeadCard, {
   STATUS_ORDER,
 } from "./LeadCard";
 import StatsHeader from "./StatsHeader";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 
 /** API алдааг хэрэглэгчид харуулах эвтэй мессеж болгоно (утасны дугаар
  * агуулаагүй эсэхийг анхаарна — алдааны мессежид хэзээ ч хувийн мэдээлэл

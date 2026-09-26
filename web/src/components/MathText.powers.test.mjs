@@ -61,7 +61,7 @@ let pass = 0, fail = 0;
 for (const [input, expected, label] of CASES) {
   const got = show(input);
   const ok = got === expected;
-  ok ? pass++ : fail++;
+  if (ok) pass++; else fail++;
   console.log(`${ok ? "ЗӨВ " : "БУРУУ"} │ ${label}`);
   if (!ok) {
     console.log(`      оролт:    ${JSON.stringify(input)}`);
