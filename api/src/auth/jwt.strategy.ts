@@ -33,16 +33,28 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, role: true, passwordChangedAt: true },
+      select: {
+        id: true,
+        role: true,
+        passwordChangedAt: true,
+        archivedAt: true,
+      },
     });
     if (!user) throw new UnauthorizedException();
+
+    if (user.archivedAt)
+      throw new UnauthorizedException(
+        'Энэ сурагчийн бүртгэл архивлагдсан байна. Сургалтын төвтэй холбогдоно уу.',
+      );
 
     // Нууц үг солигдохоос ӨМНӨ олгогдсон токеныг хүчингүйд тооцно.
     //
     // Энэ мөргүйгээр нууц үг сэргээх нь утгагүй болно: хэн нэгэн токеныг чинь
     // хулгайлсан бол нууц үгээ сольсон ч тэр токен 7 хоног ажилласаар байна.
     // Хэрэглэгчийг DB-ээс аль хэдийн уншиж байгаа тул нэмэлт өртөггүй.
-    if (!isTokenIssuedAfterPasswordChange(payload.iat, user.passwordChangedAt)) {
+    if (
+      !isTokenIssuedAfterPasswordChange(payload.iat, user.passwordChangedAt)
+    ) {
       throw new UnauthorizedException(
         'Нууц үг өөрчлөгдсөн тул дахин нэвтэрнэ үү',
       );

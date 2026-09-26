@@ -16,6 +16,12 @@ import { Role, StudentType, PaymentStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import {
+  nextSevenDigitStudentCode,
+  parseGrade,
+  parseStudentWorkbook,
+  RawStudentImportRow,
+} from './student-import';
 
 @Injectable()
 export class UsersService {
@@ -124,13 +130,12 @@ export class UsersService {
   async searchStudents(q: string) {
     const query = q.trim();
     if (query.length < 2) {
-      throw new BadRequestException(
-        'Хайх үг 2-оос дээш тэмдэгттэй байх ёстой',
-      );
+      throw new BadRequestException('Хайх үг 2-оос дээш тэмдэгттэй байх ёстой');
     }
     return this.prisma.user.findMany({
       where: {
         role: Role.STUDENT,
+        archivedAt: null,
         OR: [
           { studentCode: { contains: query, mode: 'insensitive' } },
           { firstName: { contains: query, mode: 'insensitive' } },
@@ -151,10 +156,305 @@ export class UsersService {
   }
 
   // Админ: бүх хэрэглэгчийн үүргийг нэг дор удирдах жагсаалт
-  listUsers() {
+  private importPreviews = new Map<
+    string,
+    {
+      ownerId: string;
+      expiresAt: number;
+      rows: Array<
+        RawStudentImportRow & {
+          status: 'NEW' | 'UPDATE' | 'ERROR';
+          reason: string | null;
+          grade: number | null;
+          section: string | null;
+        }
+      >;
+    }
+  >();
+
+  async archiveStudent(
+    id: string,
+    actorId: string,
+    reason: string,
+    restore = false,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, role: true, archivedAt: true },
+    });
+    if (!user || user.role !== Role.STUDENT)
+      throw new NotFoundException('Сурагч олдсонгүй');
+    if (restore ? !user.archivedAt : !!user.archivedAt)
+      throw new BadRequestException(
+        'Сурагчийн архивын төлөв өөрчлөгдсөн байна.',
+      );
+    if (!restore && !reason.trim())
+      throw new BadRequestException('Архивлах шалтгаан оруулна уу.');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: restore
+        ? { archivedAt: null, archivedById: null, archiveReason: null }
+        : {
+            archivedAt: new Date(),
+            archivedById: actorId,
+            archiveReason: reason.trim(),
+          },
+      select: { id: true, archivedAt: true },
+    });
+    await this.audit.record({
+      actorId,
+      actorRole: Role.ADMIN,
+      action: restore ? 'RESTORE' : 'ARCHIVE',
+      entity: 'User',
+      entityId: id,
+      before: { archivedAt: user.archivedAt?.toISOString() ?? null },
+      after: { archivedAt: updated.archivedAt?.toISOString() ?? null },
+      reason: reason.trim(),
+    });
+    return updated;
+  }
+
+  async previewStudentImport(buffer: Buffer, ownerId: string) {
+    const input = await parseStudentWorkbook(buffer);
+    const seen = new Set<string>();
+    const rows = [] as Array<
+      RawStudentImportRow & {
+        status: 'NEW' | 'UPDATE' | 'ERROR';
+        reason: string | null;
+        grade: number | null;
+        section: string | null;
+      }
+    >;
+    for (const row of input) {
+      const phone = row.phone.replace(/[\s()-]/g, '');
+      let reason: string | null =
+        !row.lastName || !row.firstName || !/^\+?[0-9]{8,15}$/.test(phone)
+          ? 'Овог, нэр болон зөв утасны дугаар шаардлагатай.'
+          : null;
+      if (!reason && seen.has(phone))
+        reason = 'Файл дотор ижил утас давхар байна.';
+      seen.add(phone);
+      let grade: number | null = null;
+      let section: string | null = null;
+      try {
+        ({ grade, section } = parseGrade(row.classroomLabel));
+      } catch (e) {
+        reason = e instanceof Error ? e.message : 'Анги/түвшинг шалгана уу.';
+      }
+      const match = phone
+        ? await this.prisma.user.findUnique({
+            where: { phone },
+            select: { role: true, archivedAt: true },
+          })
+        : null;
+      if (!reason && match && match.role !== Role.STUDENT)
+        reason = 'Энэ утас сурагчийн бус бүртгэлтэй байна.';
+      if (!reason && match?.archivedAt)
+        reason = 'Архивлагдсан сурагч байна. Эхлээд сэргээнэ үү.';
+      rows.push({
+        ...row,
+        phone,
+        status: reason ? 'ERROR' : match ? 'UPDATE' : 'NEW',
+        reason,
+        grade,
+        section,
+      });
+    }
+    const previewId = crypto.randomUUID();
+    const now = Date.now();
+    for (const [key, value] of this.importPreviews)
+      if (value.expiresAt < now) this.importPreviews.delete(key);
+    while (this.importPreviews.size >= 10) {
+      let oldest: string | undefined;
+      for (const key of this.importPreviews.keys()) {
+        oldest = key;
+        break;
+      }
+      if (!oldest) break;
+      this.importPreviews.delete(oldest);
+    }
+    this.importPreviews.set(previewId, {
+      ownerId,
+      expiresAt: now + 900000,
+      rows,
+    });
+    return { previewId, expiresInSeconds: 900, rows };
+  }
+
+  async commitStudentImport(
+    previewId: string,
+    rowNumbers: number[],
+    actorId: string,
+  ) {
+    const preview = this.importPreviews.get(previewId);
+    if (
+      !preview ||
+      preview.ownerId !== actorId ||
+      preview.expiresAt < Date.now()
+    )
+      throw new BadRequestException(
+        'Урьдчилан харах хугацаа дууссан байна. Файлаа дахин оруулна уу.',
+      );
+    if (!rowNumbers.length || new Set(rowNumbers).size !== rowNumbers.length)
+      throw new BadRequestException('Импортлох мөрөө сонгоно уу.');
+    const chosen = rowNumbers.map((n) =>
+      preview.rows.find((r) => r.rowNumber === n),
+    );
+    if (chosen.some((r) => !r || r.status === 'ERROR'))
+      throw new BadRequestException('Алдаатай мөрийг импортлох боломжгүй.');
+    const saved = await this.prisma.$transaction(async (tx) => {
+      const existingCodes = (
+        await tx.user.findMany({
+          where: { role: Role.STUDENT },
+          select: { studentCode: true },
+        })
+      ).map((r) => r.studentCode);
+      const result: Array<{
+        rowNumber: number;
+        action: 'NEW' | 'UPDATE';
+        id: string;
+      }> = [];
+      for (const row of chosen as Array<NonNullable<(typeof chosen)[number]>>) {
+        const prior = await tx.user.findUnique({
+          where: { phone: row.phone },
+          select: { id: true, role: true, archivedAt: true },
+        });
+        if (prior && (prior.role !== Role.STUDENT || prior.archivedAt))
+          throw new ConflictException(
+            'Бүртгэл өөрчлөгдсөн байна. Урьдчилан харахыг дахин хийнэ үү.',
+          );
+        if (prior) {
+          await tx.user.update({
+            where: { id: prior.id },
+            data: { firstName: row.firstName, lastName: row.lastName },
+          });
+          await tx.studentProfile.upsert({
+            where: { userId: prior.id },
+            create: {
+              userId: prior.id,
+              type: StudentType.CLASSROOM,
+              grade: row.grade,
+              section: row.section,
+              fatherPhone: row.guardianPhone || null,
+            },
+            update: {
+              grade: row.grade,
+              section: row.section,
+              fatherPhone: row.guardianPhone || null,
+            },
+          });
+          result.push({
+            rowNumber: row.rowNumber,
+            action: 'UPDATE',
+            id: prior.id,
+          });
+        } else {
+          const code = nextSevenDigitStudentCode(existingCodes);
+          const base = `${row.lastName}.${row.firstName}`
+            .trim()
+            .replace(/\s+/g, '');
+          let username = base;
+          let suffix = 1;
+          while (await tx.user.findUnique({ where: { username } })) {
+            suffix += 1;
+            username = `${base}${suffix}`;
+          }
+          const user = await tx.user.create({
+            data: {
+              role: Role.STUDENT,
+              phone: row.phone,
+              username,
+              firstName: row.firstName,
+              lastName: row.lastName,
+              passwordHash: await bcrypt.hash(row.phone, 10),
+              studentCode: code,
+              studentProfile: {
+                create: {
+                  type: StudentType.CLASSROOM,
+                  grade: row.grade,
+                  section: row.section,
+                  fatherPhone: row.guardianPhone || null,
+                  approvalPending: false,
+                },
+              },
+            },
+            select: { id: true },
+          });
+          existingCodes.push(code);
+          result.push({ rowNumber: row.rowNumber, action: 'NEW', id: user.id });
+        }
+      }
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          actorRole: Role.ADMIN,
+          action: 'IMPORT',
+          entity: 'User',
+          entityId: `student-import:${previewId}`,
+          after: {
+            rowCount: result.length,
+            created: result.filter((r) => r.action === 'NEW').length,
+            updated: result.filter((r) => r.action === 'UPDATE').length,
+          },
+        },
+      });
+      return result;
+    });
+    this.importPreviews.delete(previewId);
+    return { imported: saved.length, rows: saved };
+  }
+
+  async exportStudentsCsv() {
+    const rows = await this.prisma.user.findMany({
+      where: { role: Role.STUDENT, archivedAt: null },
+      select: {
+        studentCode: true,
+        lastName: true,
+        firstName: true,
+        phone: true,
+        studentProfile: {
+          select: {
+            fatherPhone: true,
+            motherPhone: true,
+            grade: true,
+            section: true,
+          },
+        },
+      },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+    });
+    const csv = [
+      ['Код', 'Овог', 'Нэр', 'Утас', 'Эцэг эхийн утас', 'Анги', 'Түвшин'],
+      ...rows.map((r) => [
+        r.studentCode,
+        r.lastName,
+        r.firstName,
+        r.phone,
+        r.studentProfile?.fatherPhone ?? r.studentProfile?.motherPhone,
+        r.studentProfile?.section,
+        r.studentProfile?.grade,
+      ]),
+    ];
+    const field = (value: unknown) => {
+      const raw =
+        typeof value === 'string' || typeof value === 'number'
+          ? String(value)
+          : '';
+      const safe = /^[=+@\-\t\r]/.test(raw) ? `'${raw}` : raw;
+      return `"${safe.replace(/"/g, '""')}"`;
+    };
+    return '\uFEFF' + csv.map((row) => row.map(field).join(',')).join('\r\n');
+  }
+
+  listUsers(includeArchived = false) {
     return this.prisma.user.findMany({
+      where: includeArchived
+        ? { role: Role.STUDENT, archivedAt: { not: null } }
+        : { archivedAt: null },
       select: {
         id: true,
+        studentCode: true,
+        archivedAt: true,
         firstName: true,
         lastName: true,
         phone: true,
@@ -616,7 +916,9 @@ export class UsersService {
       grade: s.studentProfile?.grade ?? 12,
       registeredAt: s.createdAt,
       hasConfirmedPayment: s.payments.some(
-        (p) => p.status === PaymentStatus.CONFIRMED || p.status === PaymentStatus.REVERSED,
+        (p) =>
+          p.status === PaymentStatus.CONFIRMED ||
+          p.status === PaymentStatus.REVERSED,
       ),
     }));
   }

@@ -1,13 +1,18 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Req,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   IsBoolean,
@@ -21,8 +26,10 @@ import { PasswordResetService } from '../auth/password-reset.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { ArchiveStudentDto, CommitStudentImportDto } from './students.dto';
 import { UsersService } from './users.service';
 
 class SetTeacherStatusDto {
@@ -59,8 +66,51 @@ export class UsersController {
   ) {}
 
   @Get()
-  listUsers() {
-    return this.users.listUsers();
+  listUsers(@Query('archived') archived?: string) {
+    return this.users.listUsers(archived === 'true');
+  }
+
+  @Post('students/import/preview')
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }),
+  )
+  previewStudentImport(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: AuthedRequest,
+  ) {
+    if (!file?.buffer) throw new BadRequestException('Excel файл сонгоно уу.');
+    return this.users.previewStudentImport(file.buffer, req.user.userId);
+  }
+
+  @Post('students/import/commit')
+  commitStudentImport(
+    @Body() dto: CommitStudentImportDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.commitStudentImport(
+      dto.previewId,
+      dto.rowNumbers,
+      req.user.userId,
+    );
+  }
+
+  @Post(':id/archive')
+  archiveStudent(
+    @Param('id') id: string,
+    @Body() dto: ArchiveStudentDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.archiveStudent(id, req.user.userId, dto.reason);
+  }
+
+  @Post(':id/unarchive')
+  @HttpCode(HttpStatus.OK)
+  unarchiveStudent(
+    @Param('id') id: string,
+    @Body() dto: ArchiveStudentDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.archiveStudent(id, req.user.userId, dto.reason, true);
   }
 
   // Шинэ хэрэглэгчийг эрхийг нь шууд сонгож нэг дороос үүсгэнэ
@@ -156,10 +206,7 @@ export class UsersController {
   // Сурагчийг зөвшөөрнө
   @Post('students/:id/approve')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
-  approveStudent(
-    @Param('id') id: string,
-    @Req() req: AuthedRequest,
-  ) {
+  approveStudent(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.users.approveStudent(id, req.user.userId);
   }
 }

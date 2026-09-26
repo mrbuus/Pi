@@ -107,6 +107,13 @@ model User {
   bankTransactionsImported BankTransaction[]       @relation("BankTxImportedBy")
   resultAcknowledgements   ResultAcknowledgement[]
   emailOtps                EmailOtp[]
+
+  // Архивласан сурагчийн түүхийг хадгална; үйлдлийг auditLog давхар мөрдөнө.
+  archivedAt    DateTime?
+  archivedById  String?
+  archiveReason String?
+
+  @@index([archivedAt])
 }
 
 // ============ Нууц үг сэргээлт ============

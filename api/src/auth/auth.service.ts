@@ -112,10 +112,10 @@ export class AuthService {
       );
       if (classroomOnly) {
         const label =
-          classroomOnly.subject === Subject.MATH ? 'Математик' : 'Нийгэм судлал';
-        throw new BadRequestException(
-          `${label} зөвхөн танхимын ангид байдаг`,
-        );
+          classroomOnly.subject === Subject.MATH
+            ? 'Математик'
+            : 'Нийгэм судлал';
+        throw new BadRequestException(`${label} зөвхөн танхимын ангид байдаг`);
       }
     }
 
@@ -135,13 +135,14 @@ export class AuthService {
     // Үлдэх сурагч (ONLINE эсвэл CLASSROOM гараар бүртгүүлэн): код шууд
     const shouldDeferCode =
       isStudent && dto.studentType === StudentType.CLASSROOM;
-    const studentCode = isStudent && !shouldDeferCode
-      ? await generateStudentCode(this.prisma, {
-          branch: null, // Салаа мэдэгдэхгүй (дараагийн агент өөрчилнө)
-          grade: dto.grade ?? 12,
-          registeredAt: new Date(), // UB цагаар одоо
-        })
-      : undefined;
+    const studentCode =
+      isStudent && !shouldDeferCode
+        ? await generateStudentCode(this.prisma, {
+            branch: null, // Салаа мэдэгдэхгүй (дараагийн агент өөрчилнө)
+            grade: dto.grade ?? 12,
+            registeredAt: new Date(), // UB цагаар одоо
+          })
+        : undefined;
 
     const teacherRoles: Role[] = [Role.TEACHER, Role.TEACHER_PLUS];
     const teacherCode = teacherRoles.includes(role)
@@ -196,7 +197,10 @@ export class AuthService {
     // Утас / имэйл / username аль нэгээр нэвтэрнэ
     const identifier = (dto.identifier ?? dto.phone ?? '').trim();
     if (loginAttempts.isLocked(identifier)) {
-      throw new HttpException('Олон удаа буруу оролдсон тул 15 минутын дараа дахин оролдоно уу. Нууц үгээ мартсан бол «Нууц үг сэргээх»-ийг ашиглана уу.', HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        'Олон удаа буруу оролдсон тул 15 минутын дараа дахин оролдоно уу. Нууц үгээ мартсан бол «Нууц үг сэргээх»-ийг ашиглана уу.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
     if (!identifier) {
       throw new UnauthorizedException('Нэвтрэх мэдээлэл буруу байна');
@@ -223,6 +227,10 @@ export class AuthService {
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
     }
+    if (user.archivedAt)
+      throw new UnauthorizedException(
+        'Энэ сурагчийн бүртгэл архивлагдсан байна. Сургалтын төвтэй холбогдоно уу.',
+      );
     loginAttempts.success(identifier);
     return this.issueToken(user.id, user.role);
   }
