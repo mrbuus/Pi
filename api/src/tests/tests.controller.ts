@@ -18,6 +18,7 @@ import { parseSubjectQuery } from '../common/subject';
 import { Role } from '../generated/prisma/enums';
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
+import { UpdateTestDto } from './dto/update-test.dto';
 import { SaveSessionDto, SubmitTestDto } from './dto/submit-test.dto';
 import { TestsService } from './tests.service';
 import { ParentsService } from '../parents/parents.service';
@@ -55,6 +56,22 @@ export class TestsController {
     return this.tests.myResults(req.user.userId);
   }
 
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get(':id/edit-info')
+  editInfo(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tests.editInfo(id, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Patch(':id')
+  updateTest(
+    @Param('id') id: string,
+    @Body() dto: UpdateTestDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.tests.updateTest(id, dto, req.user.userId, req.user.role);
+  }
+
   @Get(':id')
   getOne(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.getOne(id, req.user.userId, req.user.role);
@@ -84,8 +101,8 @@ export class TestsController {
     return this.tests.heartbeat(id, req.user.userId, dto?.event);
   }
 
-  // Autosave + анти-чит үйл явдал — HOT PATH. Бодит дээд хурд/сурагч ≈
-  // debounce (1/1.2с ≈ 50/мин) + heartbeat (20с тутамд) ≈ 53/мин. 180/мин
+  // Autosave + анти-чит үйл явдал — HOT PATH. Бодит дээд хурд/сурагч ~
+  // debounce (1/1.2с ~ 50/мин) + heartbeat (20с тутамд) ~ 53/мин. 180/мин
   // (userId-аар) нь үүнээс 3+ дахин их тул тогтмол ажиллагаанд огт
   // хүрэхгүй, зөвхөн бодит хэтрүүлэг/чит хийх оролдлогыг барина.
   @Roles(Role.STUDENT)
