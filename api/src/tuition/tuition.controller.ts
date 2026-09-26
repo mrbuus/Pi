@@ -236,12 +236,13 @@ export class TuitionController {
     }
     // PARENT -> өөрийн хүүхдэд
     if (userRole === Role.PARENT) {
-      const parentLink = await this.tuitionService['prisma'].parentLink.findFirst({
-        where: { parentId: userId, studentId: studentId, verifiedAt: { not: null } },
-      });
-      if (!parentLink) {
+      const verifiedLink = await this.tuitionService.hasVerifiedParentLink(
+        userId,
+        studentId,
+      );
+      if (!verifiedLink) {
         throw new ForbiddenException(
-          'Та энэ хүүхдийн эцэг эх биш байна',
+          'Эцэг эхийн холбоос баталгаажаагүй байна',
         );
       }
     }
