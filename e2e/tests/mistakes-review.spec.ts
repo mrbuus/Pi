@@ -78,3 +78,14 @@ test('notebook can reach the next page without losing previous entries', async (
   await expect(page.getByRole('button', { name: 'Дараагийн бодлогууд' })).toHaveCount(0);
   await mock.verify();
 });
+
+
+test('linked formula opens inline without navigating to an unmerged sibling route', async ({ page }) => {
+  const mock = await mockApi(page);
+  await page.goto('/app/mistakes');
+  const preview = page.locator('details').filter({ hasText: 'Нийлбэрийн квадрат' });
+  await preview.locator('summary').click();
+  await expect(preview.locator('.katex')).toBeVisible();
+  await expect(page).toHaveURL(/\/app\/mistakes$/);
+  await mock.verify();
+});

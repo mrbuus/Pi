@@ -3,7 +3,7 @@ export const student = { id: 'synthetic-student', firstName: 'Туршилт', l
 export const classroom = { id: 'synthetic-class', name: 'Туршилтын анги', type: 'CLASSROOM', grade: 12, _count: { enrollments: 1 } };
 export const mistakeFixture = {
   id: 'mistake-1', problem: { id: 'problem-1', statementText: '$2+2$ хэд вэ?', choices: ['3', '4'], format: 'CHOICE', choiceMode: 'TEXT', imageKey: null },
-  givenAnswer: '3', status: 'NEW', reason: null as string | null, note: null as string | null, testTitle: 'Туршилтын тест', formulas: [],
+  givenAnswer: '3', status: 'NEW', reason: null as string | null, note: null as string | null, testTitle: 'Туршилтын тест', formulas: [{ slug: 'square-of-sum', title: 'Нийлбэрийн квадрат', latex: '(a+b)^2=a^2+2ab+b^2' }],
 };
 export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mistakes: { emptyToday?: boolean; failPatch?: boolean; failRetryOnce?: boolean; structured?: boolean; paginated?: boolean } = {}) {
   const mistake = structuredClone(mistakeFixture);

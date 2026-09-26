@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { CheckCircle2, RotateCw, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -169,10 +168,15 @@ export default function MistakeCard({ item, onChange, onRetried, sessionMode = f
         {item.nextRetryAt && <p className="text-sm text-ink-dim">Дараагийн давтлага: {new Date(item.nextRetryAt).toLocaleDateString("mn-MN", { timeZone: "Asia/Ulaanbaatar" })}</p>}
         {item.formulas.length > 0 && <div>
           <p className="text-sm font-bold">Хэрэгтэй томьёо</p>
-          <div className="mt-2 flex flex-wrap gap-2">{item.formulas.map(formula => (
-            <Button key={formula.slug} asChild variant="outline" className="whitespace-normal">
-              <Link href={`/app/formulas/${encodeURIComponent(formula.slug)}`}><MathText>{formula.title}</MathText></Link>
-            </Button>
+          <div className="mt-2 space-y-2">{item.formulas.map(formula => (
+            <details key={formula.slug} className="rounded-xl border border-line">
+              <summary className="min-h-11 cursor-pointer rounded-xl px-3 py-3 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+                <MathText>{formula.title}</MathText>
+              </summary>
+              <div className="overflow-x-auto border-t border-line p-3">
+                {formula.latex ? <MathText>{`$$${formula.latex}$$`}</MathText> : <p className="text-sm text-ink-dim">Томьёоны бичвэр одоогоор алга байна.</p>}
+              </div>
+            </details>
           ))}</div>
         </div>}
       </CardContent>
