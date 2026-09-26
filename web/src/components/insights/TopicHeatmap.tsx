@@ -26,7 +26,7 @@ export default function TopicHeatmap({ rows }: { rows: TopicMastery[] }) {
             {rows.map((student) => (
               <tr key={student.studentId} className="border-b border-line last:border-0">
                 <th scope="row" className="sticky left-0 z-10 max-w-40 truncate bg-panel px-3 py-3 text-left font-medium text-ink">{student.studentName}</th>
-                {topics.map(([topicId, topicName]) => {
+                {topics.map(([topicId]) => {
                   const item = student.topicMasteries.find((topic) => topic.topicId === topicId);
                   if (!item) return <td key={topicId} className="px-3 py-3 text-ink-dim">—</td>;
                   const rate = Math.max(0, Math.min(1, item.masteryRate));
@@ -35,7 +35,6 @@ export default function TopicHeatmap({ rows }: { rows: TopicMastery[] }) {
                     <td key={topicId} className={`px-3 py-3 ${tone}`}>
                       <span className="font-semibold text-ink">{Math.round(rate * 100)}%</span>
                       <span className="mt-1 block text-xs text-ink-dim">{item.correctCount} зөв, {item.problemCount} бодлого</span>
-                      <span className="sr-only">{student.studentName} — {topicName}</span>
                     </td>
                   );
                 })}
