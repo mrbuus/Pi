@@ -101,7 +101,7 @@ export default function ClassroomsClient() {
           </div>
         </li>)}
       </ul>}
-              {disbandTarget && <Dialog title={`“${disbandTarget.name}” ангийг тараах уу?`} onClose={() => !busy && setDisbandTarget(null)} busy={busy} confirmLabel="Ангийг тараах" confirmDisabled={disbandConfirmText !== disbandTarget.name} onConfirm={disband} danger>
+              {disbandTarget && <Dialog title={`«${disbandTarget.name}» ангийг тараах уу?`} onClose={() => !busy && setDisbandTarget(null)} busy={busy} confirmLabel="Ангийг тараах" confirmDisabled={disbandConfirmText !== disbandTarget.name} onConfirm={disband} danger>
         <p className="text-sm text-ink-dim">Идэвхтэй {disbandTarget._count?.enrollments ?? 0} сурагчийг ангиас гаргана. Ирцийн түүх хадгалагдана. Баталгаажуулахын тулд ангийн нэрийг бичнэ үү.</p>
         <label htmlFor="disband-classroom-name" className="mt-4 block text-sm font-semibold text-ink">Ангийн нэр</label>
         <input id="disband-classroom-name" value={disbandConfirmText} onChange={(event) => setDisbandConfirmText(event.target.value)} className="mt-1 min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-ink focus-visible:outline-2 focus-visible:outline-brand" autoComplete="off" />
