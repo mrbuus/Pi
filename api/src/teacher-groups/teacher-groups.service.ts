@@ -31,9 +31,7 @@ export class TeacherGroupsService {
    * Гадны багш бүртгүүлэх. Анх verifiedAt = null, админ баталгаажуулах хүртэл
    * сурагчийн мэдээлэл харахгүй.
    */
-  async registerExternalTeacher(
-    dto: RegisterExternalTeacherDto,
-  ) {
+  async registerExternalTeacher(dto: RegisterExternalTeacherDto) {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -141,6 +139,92 @@ export class TeacherGroupsService {
   }
 
   /**
+   * Баталгаажсан гадны багшийн жагсаалт. Нууц үг болон бусад хэрэглэгчийн
+   * хувийн талбарыг сонголтоор буцаахгүй.
+   */
+  async getVerifiedTeachers() {
+    const teachers = await this.prisma.user.findMany({
+      where: {
+        role: 'TEACHER',
+        externalTeacherProfile: {
+          verifiedAt: { not: null },
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        externalTeacherProfile: {
+          select: {
+            organization: true,
+            verifiedAt: true,
+            note: true,
+          },
+        },
+        _count: {
+          select: { teacherGroups: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return teachers.map((teacher) => ({
+      id: teacher.id,
+      email: teacher.email,
+      firstName: teacher.firstName,
+      lastName: teacher.lastName,
+      organization: teacher.externalTeacherProfile?.organization,
+      verifiedAt: teacher.externalTeacherProfile?.verifiedAt,
+      note: teacher.externalTeacherProfile?.note,
+      groupCount: teacher._count.teacherGroups,
+    }));
+  }
+
+  /** Баталгаажуулалтыг буцааж цуцалж, анхны тэмдэглэлийг хэвээр үлдээнэ. */
+  async unverifyExternalTeacher(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        externalTeacherProfile: {
+          select: {
+            userId: true,
+            organization: true,
+            verifiedAt: true,
+            note: true,
+          },
+        },
+      },
+    });
+
+    if (!user?.externalTeacherProfile) {
+      throw new NotFoundException('Гадны багш олдсонгүй');
+    }
+    if (!user.externalTeacherProfile.verifiedAt) {
+      throw new BadRequestException('Энэ багш хараахан баталгаажаагүй');
+    }
+
+    const updated = await this.prisma.externalTeacherProfile.update({
+      where: { userId },
+      data: { verifiedAt: null, verifiedById: null },
+      select: {
+        userId: true,
+        organization: true,
+        verifiedAt: true,
+        note: true,
+      },
+    });
+
+    return {
+      userId: updated.userId,
+      organization: updated.organization,
+      verifiedAt: updated.verifiedAt,
+      note: updated.note,
+    };
+  }
+
+  /**
    * Багш ангийн бүлэг үүсгэнэ. joinCode нь 6-8 тэмдэгт,
    * өнгийн үнэгүүд үл ойлгомжтой.
    */
@@ -152,9 +236,7 @@ export class TeacherGroupsService {
     });
 
     if (!user || !user.externalTeacherProfile) {
-      throw new ForbiddenException(
-        'Зөвхөн гадны багш анги үүсгэх боломжтой',
-      );
+      throw new ForbiddenException('Зөвхөн гадны багш анги үүсгэх боломжтой');
     }
 
     if (!user.externalTeacherProfile.verifiedAt) {
