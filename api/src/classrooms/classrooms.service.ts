@@ -56,6 +56,60 @@ export class ClassroomsService {
     });
   }
 
+  async get(id: string, userId: string, role: Role) {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id },
+      include: {
+        teacher: { select: { id: true, firstName: true, lastName: true } },
+        enrollments: {
+          where: { leftAt: null },
+          orderBy: { joinedAt: 'asc' },
+          select: {
+            joinedAt: true,
+            student: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                studentCode: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!classroom || classroom.archived) {
+      throw new NotFoundException('Анги олдсонгүй');
+    }
+    if (role === Role.TEACHER && classroom.teacherId !== userId) {
+      throw new ForbiddenException('Энэ ангид хандах эрхгүй');
+    }
+    const canManageStudents =
+      role === Role.ADMIN ||
+      (role === Role.TEACHER_PLUS &&
+        (await this.prisma.teacherProfile.findUnique({
+          where: { userId },
+          select: { canManageStudents: true },
+        }))?.canManageStudents === true);
+
+    return {
+      classroom: {
+        id: classroom.id,
+        name: classroom.name,
+        type: classroom.type,
+        grade: classroom.grade,
+        teacherId: classroom.teacherId,
+        teacher: classroom.teacher,
+      },
+      students: classroom.enrollments.map((enrollment) => ({
+        ...enrollment.student,
+        joinedAt: enrollment.joinedAt,
+      })),
+      permissions: { canManageStudents },
+    };
+  }
+
   // Идэвхжсэн ч ангид ороогүй танхимын сурагчид (SPEC §6.3)
   // Эрэмбэлэлт: хамгийн удаан ангигүй байгаа нь эхэндээ.
   // Өөрөөр хэлбэл, сүүлийн enrollment-ийн leftAt огноо (байхгүй бол User.createdAt)
