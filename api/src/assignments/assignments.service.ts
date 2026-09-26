@@ -85,7 +85,7 @@ export class AssignmentsService {
       await this.notifications.notify(
         enrollments.map((enrollment) => enrollment.studentId),
         {
-          kind: 'ASSIGNMENT_CREATED',
+          kind: 'HOMEWORK',
           title: 'Шинэ гэрийн даалгавар',
           body: assignment.title,
           link: '/app/student',
@@ -438,10 +438,7 @@ export class AssignmentsService {
       dto.action === ReviewAction.RETURN
     ) {
       await this.notifications.notify([dto.studentId], {
-        kind:
-          dto.action === ReviewAction.APPROVE
-            ? 'ASSIGNMENT_APPROVED'
-            : 'ASSIGNMENT_RETURNED',
+        kind: 'HOMEWORK',
         title:
           dto.action === ReviewAction.APPROVE
             ? 'Даалгавар шалгагдлаа'

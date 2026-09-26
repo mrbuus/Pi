@@ -6,9 +6,10 @@ import {
 } from '@nestjs/common';
 import { EmailService } from '../notifications/email.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationKind } from '../generated/prisma/enums';
 
 export interface NewNotification {
-  kind: string;
+  kind: NotificationKind;
   title: string;
   body?: string | null;
   link?: string | null;

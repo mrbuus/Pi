@@ -5,10 +5,19 @@ ALTER TABLE "User"
 CREATE UNIQUE INDEX IF NOT EXISTS "User_calendarTokenHash_key"
   ON "User" ("calendarTokenHash");
 
+DO $$
+BEGIN
+  CREATE TYPE "NotificationKind" AS ENUM (
+    'PAYMENT_DUE', 'HOMEWORK', 'SCHEDULE_CHANGE', 'ANNOUNCEMENT', 'SYSTEM'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE TABLE IF NOT EXISTS "Notification" (
   "id" TEXT NOT NULL,
   "userId" TEXT NOT NULL,
-  "kind" TEXT NOT NULL,
+  "kind" "NotificationKind" NOT NULL,
   "title" TEXT NOT NULL,
   "body" TEXT,
   "link" TEXT,

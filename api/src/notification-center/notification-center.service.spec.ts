@@ -26,7 +26,7 @@ describe('NotificationCenterService', () => {
   it('creates one row per unique existing recipient and skips external email when disabled', async () => {
     prisma.user.findMany.mockResolvedValue([{ id: 'student-1', email: null }]);
     await service.notify(['student-1', 'student-1', 'missing'], {
-      kind: 'ASSIGNMENT',
+      kind: 'HOMEWORK',
       title: 'Шинэ даалгавар',
       body: 'Дасгал 1',
       link: '/app/homework',
@@ -40,7 +40,7 @@ describe('NotificationCenterService', () => {
       data: [
         {
           userId: 'student-1',
-          kind: 'ASSIGNMENT',
+          kind: 'HOMEWORK',
           title: 'Шинэ даалгавар',
           body: 'Дасгал 1',
           link: '/app/homework',

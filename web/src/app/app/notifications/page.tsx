@@ -43,7 +43,7 @@ export default function NotificationsPage() {
     let active = true;
     Promise.all([
       api<NotificationPage>("/notifications/my?limit=20"),
-      api<{ count: number }>("/notifications/unread-count"),
+      api<{ count: number }>("/notifications/my/unread-count"),
     ])
       .then(([page, unread]) => {
         if (!active) return;
@@ -68,7 +68,7 @@ export default function NotificationsPage() {
     try {
       const [page, unread] = await Promise.all([
         api<NotificationPage>("/notifications/my?limit=20"),
-        api<{ count: number }>("/notifications/unread-count"),
+        api<{ count: number }>("/notifications/my/unread-count"),
       ]);
       setItems(page.notifications);
       setNextCursor(page.nextCursor);

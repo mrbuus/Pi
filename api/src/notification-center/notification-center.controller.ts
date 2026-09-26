@@ -39,7 +39,7 @@ export class NotificationCenterController {
     return this.notifications.listMine(req.user.userId, cursor, limit);
   }
 
-  @Get('unread-count')
+  @Get(['my/unread-count', 'unread-count'])
   unreadCount(@Req() req: AuthedRequest) {
     return this.notifications.unreadCount(req.user.userId);
   }

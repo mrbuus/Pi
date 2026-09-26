@@ -45,7 +45,7 @@ export function NotificationBell() {
 
   const refreshCount = useCallback(async () => {
     try {
-      const result = await api<{ count: number }>("/notifications/unread-count");
+      const result = await api<{ count: number }>("/notifications/my/unread-count");
       setUnreadCount(result.count);
       setCountError(null);
     } catch (error) {
@@ -56,7 +56,7 @@ export function NotificationBell() {
   useEffect(() => {
     let active = true;
     const updateCount = () => {
-      api<{ count: number }>("/notifications/unread-count")
+      api<{ count: number }>("/notifications/my/unread-count")
         .then((result) => {
           if (!active) return;
           setUnreadCount(result.count);
