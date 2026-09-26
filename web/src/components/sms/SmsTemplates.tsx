@@ -103,7 +103,7 @@ export function SmsTemplates() {
   }
 
   async function remove(item: SmsTemplate) {
-    if (!window.confirm(`“${item.name}” загварыг устгах уу?`)) return;
+    if (!window.confirm(`«${item.name}» загварыг устгах уу?`)) return;
     setError(null);
     try {
       await api(`/sms/templates/${item.id}`, { method: "DELETE" });

@@ -7,6 +7,7 @@ import { Card, SectionHeader } from "@/components/ui/Surface";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
 import { previewSmsSegments } from "./segments";
+import { Meta } from "@/components/ui/Meta";
 
 interface TemplateOption { id: string; name: string; body: string; kind: string }
 interface BulkBody { phones: string[]; text: string }
@@ -170,7 +171,7 @@ export function SmsSend() {
         <label htmlFor="sms-body" className="block text-sm font-semibold text-ink">Илгээх текст</label>
         <textarea id="sms-body" value={text} onChange={(event) => changeInput(() => setText(event.target.value))} maxLength={1000} rows={5} placeholder="Мессежээ бичнэ үү" className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" />
         <div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm text-ink-dim">
-          <span>{text.length} тэмдэгт · {preview.encoding} · {preview.segments} хэсэг{preview.segments > 1 ? ` (нэг хэсэгт ${preview.encoding === "GSM-7" ? 153 : 67} нэгж)` : ""}</span>
+          <Meta items={[`${text.length} тэмдэгт`, preview.encoding, `${preview.segments} хэсэг${preview.segments > 1 ? ` (нэг хэсэгт ${preview.encoding === "GSM-7" ? 153 : 67} нэгж)` : ""}`]} />
           <span>Илгээх дүнгийн тооцоог баталгаажуулахын өмнө серверээс авна.</span>
         </div>
       </Card>
@@ -202,7 +203,7 @@ export function SmsSend() {
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-ink">Илгээх үйлдлийг баталгаажуулах</h3>
               <p className="mt-1 text-sm text-ink-dim">SMS явуулсны дараа буцаах боломжгүй. Дугаар болон текстийг шалгаад үргэлжлүүлнэ үү.</p>
-              {isBulk && estimateIsCurrent && estimate && <p className="mt-2 text-sm text-ink">{estimate.deduplicatedCount} дугаар · {estimate.estimatedSegments} хэсэг · ойролцоогоор ₮{estimate.estimatedCost.toLocaleString("mn-MN")}</p>}
+              {isBulk && estimateIsCurrent && estimate && <p className="mt-2 text-sm text-ink"><Meta items={[`${estimate.deduplicatedCount} дугаар`, `${estimate.estimatedSegments} хэсэг`, `ойролцоогоор ${estimate.estimatedCost.toLocaleString("mn-MN")}₮`]} /></p>}
               {pendingBatchId && <p className="mt-2 text-sm text-ink-dim">Ноорог үүссэн: {pendingBatchId}. Дахин ноорог үүсгэхгүйгээр илгээлтийг эхлүүлж болно.</p>}
               <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-ink">
                 <input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} className="h-4 w-4 accent-brand" />
