@@ -147,6 +147,19 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
     expect(prisma.userPass.create).not.toHaveBeenCalled();
   });
 
+  it('цуцлах шалтгаан хоосон үед олголтыг хэвээр үлдээнэ', async () => {
+    await expect(
+      service.revokeUserPass(
+        'grant-1',
+        { id: 'admin-1', role: Role.ADMIN },
+        '  ',
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.userPass.findUnique).not.toHaveBeenCalled();
+    expect(prisma.userPass.delete).not.toHaveBeenCalled();
+    expect(audit.record).not.toHaveBeenCalled();
+  });
+
   it('эрхийг зөвхөн сурагчид олгоно', async () => {
     prisma.pass.findUnique.mockResolvedValue({
       id: 'pass-1',
@@ -183,21 +196,29 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
     };
     prisma.userPass.create.mockResolvedValue(granted);
     await expect(
-      service.grant('pass-1', 'student-1', undefined, actor, true),
+      service.grant(
+        'pass-1',
+        'student-1',
+        undefined,
+        actor,
+        true,
+        'Шалтгаан тэмдэглэл',
+      ),
     ).resolves.toBe(granted);
     expect(audit.record).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 'GRANT',
         entity: 'UserPass',
         actorId: actor.id,
+        after: expect.objectContaining({ note: 'Шалтгаан тэмдэглэл' }),
       }),
     );
 
     prisma.userPass.findUnique.mockResolvedValue(granted);
     prisma.userPass.delete.mockResolvedValue(granted);
-    await expect(service.revokeUserPass('grant-1', actor)).resolves.toEqual({
-      revoked: true,
-    });
+    await expect(
+      service.revokeUserPass('grant-1', actor, 'Цуцлах болсон шалтгаан'),
+    ).resolves.toEqual({ revoked: true });
     expect(prisma.userPass.delete).toHaveBeenCalledWith({
       where: { id: 'grant-1' },
     });
@@ -206,6 +227,7 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
         action: 'REVOKE',
         entity: 'UserPass',
         actorId: actor.id,
+        reason: 'Цуцлах болсон шалтгаан',
       }),
     );
   });

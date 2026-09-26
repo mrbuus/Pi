@@ -420,6 +420,8 @@ export default function PassesAdminClient() {
   const [holdersLoading, setHoldersLoading] = useState(false);
   const [holdersError, setHoldersError] = useState<string | null>(null);
   const [grantPass, setGrantPass] = useState<PassRow | null>(null);
+  const [grantNote, setGrantNote] = useState("");
+  const [revokeReason, setRevokeReason] = useState("");
   const [search, setSearch] = useState("");
   const [students, setStudents] = useState<StudentResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -572,11 +574,13 @@ export default function PassesAdminClient() {
         setHolders([]);
         await loadPasses();
       } else {
-        await api(`/me/passes/${encodeURIComponent(confirmAction.holder.id)}`, {
-          method: "DELETE",
-        });
+        await api(
+          `/passes/grants/${encodeURIComponent(confirmAction.holder.id)}/revoke`,
+          { method: "POST", body: { reason: revokeReason.trim() } },
+        );
         setNotice({ kind: "success", text: "Олгосон эрхийг цуцаллаа." });
         setConfirmAction(null);
+        setRevokeReason("");
         if (selectedPass) await loadHolders(selectedPass);
         await loadPasses();
       }
@@ -595,7 +599,10 @@ export default function PassesAdminClient() {
     try {
       await api(`/passes/${encodeURIComponent(grantPass.id)}/grant`, {
         method: "POST",
-        body: { userId: selectedStudent.id },
+        body: {
+          userId: selectedStudent.id,
+          ...(grantNote.trim() ? { note: grantNote.trim() } : {}),
+        },
       });
       setNotice({
         kind: "success",
@@ -606,6 +613,7 @@ export default function PassesAdminClient() {
       setSearch("");
       setStudents([]);
       setSelectedStudent(null);
+      setGrantNote("");
       await Promise.all([loadPasses(), loadHolders(activePass)]);
     } catch (error) {
       setActionError(errorMessage(error));
@@ -930,9 +938,10 @@ export default function PassesAdminClient() {
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
-                        setConfirmAction({ kind: "revoke", holder })
-                      }
+                      onClick={() => {
+                        setRevokeReason("");
+                        setConfirmAction({ kind: "revoke", holder });
+                      }}
                       className="min-h-11 rounded-xl border border-error/30 px-3 text-sm font-semibold text-error hover:bg-error/5"
                     >
                       Цуцлах
@@ -968,6 +977,7 @@ export default function PassesAdminClient() {
               setGrantPass(null);
               setSearch("");
               setSelectedStudent(null);
+              setGrantNote("");
               setActionError(null);
             }
           }}
@@ -1052,6 +1062,16 @@ export default function PassesAdminClient() {
                 </strong>
               </p>
             )}
+            <label className="block space-y-1.5 text-sm font-semibold text-ink">
+              <span>Олголтын тэмдэглэл (сонголттой)</span>
+              <textarea
+                value={grantNote}
+                onChange={(event) => setGrantNote(event.target.value)}
+                maxLength={500}
+                rows={2}
+                className="w-full rounded-xl border border-line bg-surface p-3 font-normal"
+              />
+            </label>
             {actionError && (
               <p
                 role="alert"
@@ -1092,6 +1112,7 @@ export default function PassesAdminClient() {
           onClose={() => {
             if (!saving) {
               setConfirmAction(null);
+              setRevokeReason("");
               setActionError(null);
             }
           }}
@@ -1114,10 +1135,23 @@ export default function PassesAdminClient() {
                     {confirmAction.holder.user.firstName}
                   </strong>
                   -ийн эрхийг цуцална. Энэ олголт устсанаар нэвтрэх эрх шууд
-                  дуусна.
+                  дуусна. Цуцлах шалтгаан аудитад хадгалагдана.
                 </>
               )}
             </p>
+            {confirmAction.kind === "revoke" && (
+              <label className="block space-y-1.5 text-sm font-semibold text-ink">
+                <span>Цуцлах шалтгаан</span>
+                <textarea
+                  value={revokeReason}
+                  onChange={(event) => setRevokeReason(event.target.value)}
+                  maxLength={500}
+                  rows={3}
+                  required
+                  className="w-full rounded-xl border border-line bg-surface p-3 font-normal"
+                />
+              </label>
+            )}
             {actionError && (
               <p
                 role="alert"
@@ -1141,7 +1175,10 @@ export default function PassesAdminClient() {
               <button
                 type="button"
                 onClick={() => void runConfirmation()}
-                disabled={saving}
+                disabled={
+                  saving ||
+                  (confirmAction.kind === "revoke" && !revokeReason.trim())
+                }
                 className="min-h-11 rounded-xl bg-error px-4 py-2 text-sm font-bold text-on-brand disabled:opacity-50"
               >
                 {saving ? "Хүлээнэ үү" : "Баталгаажуулах"}

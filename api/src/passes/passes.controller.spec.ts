@@ -30,6 +30,13 @@ describe('PassesController эрхийн хамгаалалт', () => {
     );
   });
 
+  it('шалтгаантай олголт цуцлах нь ADMIN болон TEACHER_PLUS-д нээлттэй', () => {
+    expect(roles('revokeWithReason')).toEqual([Role.ADMIN, Role.TEACHER_PLUS]);
+    expect(guards('revokeWithReason')).toEqual(
+      expect.arrayContaining([JwtAuthGuard, RolesGuard]),
+    );
+  });
+
   it.each([Role.TEACHER, Role.STUDENT])(
     '%s жагсаалт, эзэмшигч, устгах зэрэг админ үйлдлээс татгалзана',
     (role) => {
@@ -53,4 +60,17 @@ describe('PassesController эрхийн хамгаалалт', () => {
     } as never;
     expect(guard.canActivate(context)).toBe(false);
   });
+
+  it.each([Role.TEACHER, Role.STUDENT])(
+    '%s шалтгаантай эрх цуцалж чадахгүй',
+    (role) => {
+      const guard = new RolesGuard(new Reflector());
+      const context = {
+        getHandler: () => proto.revokeWithReason,
+        getClass: () => PassesController,
+        switchToHttp: () => ({ getRequest: () => ({ user: { role } }) }),
+      } as never;
+      expect(guard.canActivate(context)).toBe(false);
+    },
+  );
 });

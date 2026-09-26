@@ -156,6 +156,7 @@ export class PassesService {
     paymentId?: string,
     actor?: PassActor,
     manual = false,
+    note?: string,
   ) {
     const pass = await this.prisma.pass.findUnique({ where: { id: passId } });
     if (!pass) throw new NotFoundException('Эрх олдсонгүй');
@@ -189,6 +190,7 @@ export class PassesService {
           startsAt,
           expiresAt,
           paymentId: paymentId ?? null,
+          note: note ?? null,
         },
       });
     }
@@ -204,7 +206,11 @@ export class PassesService {
   }
 
   // Админ: аль хэдийн олгосон эрхийг цуцална (устгана)
-  async revokeUserPass(userPassId: string, actor: PassActor) {
+  async revokeUserPass(userPassId: string, actor: PassActor, reason: string) {
+    const auditReason = reason?.trim();
+    if (!auditReason) {
+      throw new BadRequestException('Цуцлах шалтгааныг бичнэ үү');
+    }
     const userPass = await this.prisma.userPass.findUnique({
       where: { id: userPassId },
     });
@@ -217,6 +223,7 @@ export class PassesService {
       entity: 'UserPass',
       entityId: userPassId,
       before: { ...userPass },
+      reason: auditReason,
     });
     return { revoked: true };
   }

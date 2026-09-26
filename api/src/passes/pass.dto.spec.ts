@@ -1,7 +1,12 @@
 import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { CreatePassDto, GrantPassDto, UpdatePassDto } from './dto/pass.dto';
+import {
+  CreatePassDto,
+  GrantPassDto,
+  RevokePassGrantDto,
+  UpdatePassDto,
+} from './dto/pass.dto';
 
 async function errors<T extends object>(cls: new () => T, value: unknown) {
   return validate(plainToInstance(cls, value));
@@ -55,5 +60,21 @@ describe('эрхийн хүсэлтийн DTO', () => {
       0,
     );
     expect(await errors(GrantPassDto, { userId: 'student-1' })).toHaveLength(0);
+    expect(
+      (await errors(GrantPassDto, { userId: 'student-1', note: '' })).length,
+    ).toBeGreaterThan(0);
+    expect(
+      await errors(GrantPassDto, { userId: 'student-1', note: 'Синтетик' }),
+    ).toHaveLength(0);
+  });
+
+  it('RevokePassGrantDto цуцлах шалтгаан шаардана', async () => {
+    expect(await errors(RevokePassGrantDto, {})).not.toHaveLength(0);
+    expect(
+      await errors(RevokePassGrantDto, { reason: '   ' }),
+    ).not.toHaveLength(0);
+    expect(
+      await errors(RevokePassGrantDto, { reason: 'Шалтгаантай туршилт' }),
+    ).toHaveLength(0);
   });
 });

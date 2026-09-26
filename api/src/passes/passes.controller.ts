@@ -13,7 +13,12 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
-import { CreatePassDto, GrantPassDto, UpdatePassDto } from './dto/pass.dto';
+import {
+  CreatePassDto,
+  GrantPassDto,
+  RevokePassGrantDto,
+  UpdatePassDto,
+} from './dto/pass.dto';
 import { PassesService } from './passes.service';
 
 interface AuthedRequest {
@@ -94,6 +99,22 @@ export class PassesController {
       undefined,
       { id: req.user.userId, role: req.user.role },
       true,
+      dto.note?.trim() || undefined,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post('passes/grants/:grantId/revoke')
+  revokeWithReason(
+    @Param('grantId') grantId: string,
+    @Body() dto: RevokePassGrantDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.passes.revokeUserPass(
+      grantId,
+      { id: req.user.userId, role: req.user.role },
+      dto.reason,
     );
   }
 
@@ -108,9 +129,13 @@ export class PassesController {
   @Roles(Role.ADMIN)
   @Delete('me/passes/:userPassId')
   revoke(@Param('userPassId') userPassId: string, @Req() req: AuthedRequest) {
-    return this.passes.revokeUserPass(userPassId, {
-      id: req.user.userId,
-      role: req.user.role,
-    });
+    return this.passes.revokeUserPass(
+      userPassId,
+      {
+        id: req.user.userId,
+        role: req.user.role,
+      },
+      'Хуучин цуцлах endpoint ашигласан',
+    );
   }
 }

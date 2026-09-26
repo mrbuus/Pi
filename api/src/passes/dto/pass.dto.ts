@@ -9,6 +9,9 @@ import {
   IsOptional,
   IsString,
   Min,
+  MinLength,
+  MaxLength,
+  Matches,
   ValidateNested,
   ValidationOptions,
   registerDecorator,
@@ -108,6 +111,21 @@ export class GrantPassDto {
   @IsString()
   @IsNotEmpty()
   userId: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  note?: string;
+}
+
+export class RevokePassGrantDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(500)
+  @Matches(/\S/)
+  reason: string;
 }
 
 // Админ л засна — нэр/хугацаа/хамрах хүрээ/үнэ/идэвх солино
