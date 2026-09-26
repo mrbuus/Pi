@@ -1,0 +1,3374 @@
+{
+  "section": {
+    "slug": "trigonometry",
+    "title": "Тригонометр",
+    "order": 4,
+    "icon": "triangle-right",
+    "description": "Нэгж тойрог, тригонометрийн адилтгал, тэгшитгэл, график ба гурвалжны хэрэглээ"
+  },
+  "formulas": [
+    {
+      "slug": "trig-radians",
+      "title": "Градус ба радиан",
+      "order": 1,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\theta_{\\rm rad}=\\frac\\pi{180}\\theta_{\\rm deg},\\qquad\\theta_{\\rm deg}=\\frac{180}\\pi\\theta_{\\rm rad}",
+      "general": "\\theta_{\\rm rad}=\\frac\\pi{180}\\theta_{\\rm deg},\\qquad\\theta_{\\rm deg}=\\frac{180}\\pi\\theta_{\\rm rad}",
+      "conditions": [],
+      "explanation": "Радиан нь нумын уртыг радиуст харьцуулж хэмжсэн өнцөг юм. Хагас эргэлт градусаар нэг зуун ная, радианаар $\\pi$ байдаг. Хоёр хэмжих нэгжийг солихдоо утгын хэмжээг бус нэгжийг өөрчилж байгааг сана.",
+      "derivation": [
+        "Бүтэн тойргийн урт $2\\pi r$ тул бүтэн эргэлт $(2\\pi r)/r=2\\pi$ радиан.",
+        "Бүтэн эргэлт $360^\\circ$ учраас $180^\\circ=\\pi$ радиан; нэгж тус бүрийн харьцааг авч шилжүүлнэ."
+      ],
+      "mnemonic": "Градусаас радианд зуун наягаар хувааж, пигаар үржүүл.",
+      "examples": [
+        {
+          "problem": "$150^\\circ$-ыг радианд шилжүүл.",
+          "steps": [
+            "$150\\cdot\\pi/180$ гэж үржүүлнэ.",
+            "$150/180=5/6$."
+          ],
+          "answer": "$5\\pi/6$"
+        },
+        {
+          "problem": "$7\\pi/4$ радианыг градуст шилжүүл.",
+          "steps": [
+            "$(7\\pi/4)\\cdot180/\\pi$.",
+            "$7\\cdot45=315$."
+          ],
+          "answer": "$315^\\circ$"
+        }
+      ],
+      "commonMistakes": [
+        "Градусын утгыг радианы томьёонд шууд орлуулах."
+      ],
+      "eeshTip": "Тоо машины өнцгийн горим бодлогын нэгжтэй таарч байгаа эсэхийг шалга.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "60^\\circ=\\square\\text{ радиан}",
+          "answer": "\\pi/3",
+          "distractors": [
+            "\\pi/6",
+            "3\\pi",
+            "\\pi/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\pi\\text{ радиан}=180^\\circ",
+          "answer": "true",
+          "why": "Хоёул хагас эргэлтийг хэмжинэ."
+        }
+      ],
+      "related": [
+        "trig-arc",
+        "trig-unit-circle"
+      ],
+      "keywords": [
+        "Градус ба радиан"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-arc",
+      "title": "Нумын урт",
+      "order": 2,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "s=r\\theta",
+      "general": "s=r\\theta",
+      "conditions": [
+        "r>0",
+        "\\theta\\ge0\\text{ радиан}"
+      ],
+      "explanation": "Радианаар өгсөн төвийн өнцгийг радиусаар үржүүлэхэд нумын урт гарна. Өнцөг тогтмол байхад том тойргийн нум радиустайгаа пропорциональ уртасна. Чиглэлтэй өнцөг өгсөн бол урт олохдоо өнцгийн модулийг авна.",
+      "derivation": [
+        "Радианы тодорхойлолт $\\theta=s/r$.",
+        "Хоёр талыг $r>0$-ээр үржүүлбэл $s=r\\theta$."
+      ],
+      "mnemonic": "Радиан бол нумыг радиуст хуваасан нь; буцаахдаа радиусаар үржүүл.",
+      "examples": [
+        {
+          "problem": "Радиус $6$, төвийн өнцөг $\\pi/3$ радиан бол нумын уртыг ол.",
+          "steps": [
+            "$s=6\\cdot\\pi/3$.",
+            "Хураавал $s=2\\pi$."
+          ],
+          "answer": "$2\\pi$"
+        },
+        {
+          "problem": "Радиус $4$, төвийн өнцөг $135^\\circ$ бол нумын уртыг ол.",
+          "steps": [
+            "$135^\\circ=3\\pi/4$ радиан.",
+            "$s=4\\cdot3\\pi/4=3\\pi$."
+          ],
+          "answer": "$3\\pi$"
+        }
+      ],
+      "commonMistakes": [
+        "$135$ гэсэн градусын тоог радиан мэт үржүүлэх."
+      ],
+      "eeshTip": "Урт ба радиус ижил уртын нэгжтэй байна.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "r=3,\\ \\theta=2\\text{ радиан}:\\quad s=\\square",
+          "answer": "6",
+          "distractors": [
+            "2/3",
+            "3/2",
+            "5"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "r=2,\\ \\theta=90^\\circ:\\quad s=180",
+          "answer": "false",
+          "why": "Өнцөг $\\pi/2$ радиан тул нумын урт $\\pi$."
+        }
+      ],
+      "related": [
+        "trig-radians",
+        "trig-unit-circle"
+      ],
+      "keywords": [
+        "Нумын урт"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-unit-circle",
+      "title": "Нэгж тойрог дээрх тригонометрийн утга",
+      "order": 3,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "P=(\\cos\\theta,\\sin\\theta),\\qquad\\operatorname{tg}\\theta=\\frac{\\sin\\theta}{\\cos\\theta},\\quad\\operatorname{ctg}\\theta=\\frac{\\cos\\theta}{\\sin\\theta}",
+      "general": "P=(\\cos\\theta,\\sin\\theta),\\qquad\\operatorname{tg}\\theta=\\frac{\\sin\\theta}{\\cos\\theta},\\quad\\operatorname{ctg}\\theta=\\frac{\\cos\\theta}{\\sin\\theta}",
+      "conditions": [
+        "\\theta\\in\\mathbb R\\text{ радиан}",
+        "\\operatorname{tg}:\\cos\\theta\\ne0",
+        "\\operatorname{ctg}:\\sin\\theta\\ne0"
+      ],
+      "explanation": "Нэгж тойргийн цэгийн хэвтээ координат косинус, босоо координат синус болно. Өнцгийг эерэг хэвтээ тэнхлэгээс цагийн зүүний эсрэг хэмжинэ. Тангенс ба котангенс нь эдгээр координатын харьцаа тул хуваарь тэг болох өнцөгт тодорхойлогдохгүй.",
+      "derivation": [
+        "Нэгж радиустай тойрогт цэгийн координат нь тэгш өнцөгт гурвалжны катетуудын гипотенузтай харьцаатай тэнцэнэ.",
+        "Босоо координатыг хэвтээд хуваахад тангенс, урвуу харьцаанд котангенс үүснэ; тэг хуваарийг хасна."
+      ],
+      "mnemonic": "Косинус хэвтээ, синус босоо.",
+      "examples": [
+        {
+          "problem": "Нэгж тойргийн цэг $(3/5,4/5)$ бол харгалзах өнцгийн синус ба тангенсийг ол.",
+          "steps": [
+            "Босоо координатаас $\\sin\\theta=4/5$.",
+            "$\\operatorname{tg}\\theta=(4/5)/(3/5)=4/3$."
+          ],
+          "answer": "$\\sin\\theta=4/5,\\ \\operatorname{tg}\\theta=4/3$"
+        },
+        {
+          "problem": "Нэгж тойргийн цэг $(-\\sqrt3/2,-1/2)$ бол синус, косинусыг ол.",
+          "steps": [
+            "Хэвтээ координат косинус тул $\\cos\\theta=-\\sqrt3/2$.",
+            "Босоо координат синус тул $\\sin\\theta=-1/2$."
+          ],
+          "answer": "$\\sin\\theta=-1/2,\\ \\cos\\theta=-\\sqrt3/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Координатын хоёр байрлалыг сольж синусыг хэвтээ гэж авах."
+      ],
+      "eeshTip": "Тойргийн координатаар бодвол өнцгийн мөч ба тэмдэг хамт харагдана.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "P=(\\cos\\theta,\\sin\\theta)=(0,1):\\quad\\sin\\theta=\\square",
+          "answer": "1",
+          "distractors": [
+            "0",
+            "-1",
+            "1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{tg}(\\pi/2)\\text{ бодит утгатай}",
+          "answer": "false",
+          "why": "Косинус тэг тул харьцааны хуваарь тэг болно."
+        }
+      ],
+      "related": [
+        "trig-quadrants",
+        "trig-pythagorean"
+      ],
+      "keywords": [
+        "Нэгж тойрог дээрх тригонометрийн утга"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-quadrants",
+      "title": "Мөч бүрд тригонометрийн тэмдэг",
+      "order": 4,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\begin{array}{c|rrrr}&I&II&III&IV\\\\\\sin&+&+&-&-\\\\\\cos&+&-&-&+\\\\\\operatorname{tg},\\operatorname{ctg}&+&-&+&-\\end{array}",
+      "general": "\\begin{array}{c|rrrr}&I&II&III&IV\\\\\\sin&+&+&-&-\\\\\\cos&+&-&-&+\\\\\\operatorname{tg},\\operatorname{ctg}&+&-&+&-\\end{array}",
+      "conditions": [
+        "\\theta\\text{ тэнхлэг дээр бус өнцөг}"
+      ],
+      "explanation": "Синусын тэмдэг босоо координат, косинусын тэмдэг хэвтээ координатаас хамаарна. Тангенс ба котангенс ижил тэмдэгтэй координатуудын харьцаанд эерэг байна. Тэнхлэг дээрх өнцгүүдэд тэг болон тодорхойлогдохгүй утгыг тусад нь шалгана.",
+      "derivation": [
+        "Дээд хагас тойрогт босоо координат эерэг, баруун хагас тойрогт хэвтээ координат эерэг.",
+        "Хоёр координатын тэмдэг ижил бол харьцаа эерэг, өөр бол сөрөг тул хүснэгт гарна."
+      ],
+      "mnemonic": "Нэгдүгээр мөчид бүгд, хоёрт синус, гуравт тангенс, дөрөвт косинус эерэг.",
+      "examples": [
+        {
+          "problem": "$\\sin200^\\circ$-ын тэмдгийг тогтоо.",
+          "steps": [
+            "$180^\\circ<200^\\circ<270^\\circ$ тул гуравдугаар мөч.",
+            "Босоо координат сөрөг учраас синус сөрөг."
+          ],
+          "answer": "$\\sin200^\\circ<0$"
+        },
+        {
+          "problem": "$\\cos300^\\circ$ ба $\\operatorname{tg}300^\\circ$-ын тэмдгийг тогтоо.",
+          "steps": [
+            "Өнцөг дөрөвдүгээр мөчид, хэвтээ координат эерэг, босоо нь сөрөг.",
+            "Косинус эерэг, тэдний харьцаа тангенс сөрөг."
+          ],
+          "answer": "$\\cos300^\\circ>0,\\ \\operatorname{tg}300^\\circ<0$"
+        }
+      ],
+      "commonMistakes": [
+        "Мөчийн дүрмийг тэнхлэг дээрх өнцөгт хэрэглэж тэг утгыг эерэг гэж үзэх."
+      ],
+      "eeshTip": "Үндсэн өнцгийн утга олохоос өмнө хариуны тэмдгийг тогтоо.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\pi/2<\\theta<\\pi:\\quad\\operatorname{tg}\\theta\\text{-ын тэмдэг }\\square",
+          "answer": "<0",
+          "distractors": [
+            ">0",
+            "=0",
+            "\\text{үргэлж тодорхойгүй}"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\pi<\\theta<3\\pi/2\\text{ бол }\\sin\\theta<0,\\ \\cos\\theta<0",
+          "answer": "true",
+          "why": "Гуравдугаар мөчид хоёр координат сөрөг."
+        }
+      ],
+      "related": [
+        "trig-unit-circle",
+        "trig-reduction"
+      ],
+      "keywords": [
+        "Мөч бүрд тригонометрийн тэмдэг"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-values",
+      "title": "Үндсэн өнцгүүдийн утгын хүснэгт",
+      "order": 5,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\begin{array}{c|cccc}x&\\sin x&\\cos x&\\operatorname{tg}x&\\operatorname{ctg}x\\\\0&0&1&0&\\text{тодорхойгүй}\\\\\\pi/6&1/2&\\sqrt3/2&1/\\sqrt3&\\sqrt3\\\\\\pi/4&\\sqrt2/2&\\sqrt2/2&1&1\\\\\\pi/3&\\sqrt3/2&1/2&\\sqrt3&1/\\sqrt3\\\\\\pi/2&1&0&\\text{тодорхойгүй}&0\\\\\\pi&0&-1&0&\\text{тодорхойгүй}\\end{array}",
+      "general": "\\begin{array}{c|cccc}x&\\sin x&\\cos x&\\operatorname{tg}x&\\operatorname{ctg}x\\\\0&0&1&0&\\text{тодорхойгүй}\\\\\\pi/6&1/2&\\sqrt3/2&1/\\sqrt3&\\sqrt3\\\\\\pi/4&\\sqrt2/2&\\sqrt2/2&1&1\\\\\\pi/3&\\sqrt3/2&1/2&\\sqrt3&1/\\sqrt3\\\\\\pi/2&1&0&\\text{тодорхойгүй}&0\\\\\\pi&0&-1&0&\\text{тодорхойгүй}\\end{array}",
+      "conditions": [
+        "x\\text{ радианаар}"
+      ],
+      "explanation": "Тусгай өнцгүүдийн утгуудыг ижил хажуут тэгш өнцөгт болон тэнцүү талт гурвалжнаас гаргана. Тангенс, котангенсийг синус ба косинусын харьцаагаар олно. Хуваарь тэг болох нүдийг тоогоор нөхөхгүй.",
+      "derivation": [
+        "Катетууд нь нэг байх тэгш өнцөгт гурвалжны гипотенуз $\\sqrt2$ тул $\\sin(\\pi/4)=\\cos(\\pi/4)=1/\\sqrt2$.",
+        "Тал нь хоёр байх тэнцүү талт гурвалжны өндрөөр хуваахад катетууд $1,\\sqrt3$, гипотенуз $2$ болно; үүнээс $\\pi/6$, $\\pi/3$-ын утгууд гарна.",
+        "Тэнхлэг дээрх өнцгүүдийн синус, косинусыг нэгж тойргийн координатаас авна."
+      ],
+      "mnemonic": "Эхний мөчийн синусын дараалал нь язгуур доорх тэг, нэг, хоёр, гурав, дөрвийг хоёрт хуваасан нь.",
+      "examples": [
+        {
+          "problem": "$\\sin(\\pi/6)+\\cos(\\pi/3)$-ыг ол.",
+          "steps": [
+            "Хоёр утга тус бүр $1/2$.",
+            "$1/2+1/2=1$."
+          ],
+          "answer": "$1$"
+        },
+        {
+          "problem": "$\\operatorname{tg}(\\pi/4)+\\operatorname{ctg}(\\pi/4)$-ыг ол.",
+          "steps": [
+            "Ижил хоёр катетын харьцаа тул хоёулаа нэг.",
+            "$1+1=2$."
+          ],
+          "answer": "$2$"
+        }
+      ],
+      "commonMistakes": [
+        "$\\operatorname{tg}(\\pi/2)$-ыг тэг гэж бичих; үнэндээ хуваарь тэг тул тодорхойгүй."
+      ],
+      "eeshTip": "Хүснэгтийн нэг мөрийг мартвал синус, косинусаас харьцааг нь сэргээ.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(\\pi/6)=\\square",
+          "answer": "\\sqrt3/2",
+          "distractors": [
+            "1/2",
+            "\\sqrt2/2",
+            "\\sqrt3"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{ctg}0\\text{ бодит утгатай бөгөөд }0\\text{-тэй тэнцүү}",
+          "answer": "false",
+          "why": "Котангенсын хуваарь синус тэг тул утга тодорхойгүй."
+        }
+      ],
+      "related": [
+        "trig-unit-circle",
+        "trig-pythagorean"
+      ],
+      "keywords": [
+        "Үндсэн өнцгүүдийн утгын хүснэгт"
+      ],
+      "widget": "unit-circle",
+      "variants": [
+        {
+          "label": "Тэг өнцөг",
+          "latex": "\\sin0=0,\\ \\cos0=1,\\ \\operatorname{tg}0=0,\\ \\operatorname{ctg}0\\text{ тодорхойгүй}"
+        },
+        {
+          "label": "Гучин градус",
+          "latex": "\\sin(\\pi/6)=1/2,\\ \\cos(\\pi/6)=\\sqrt3/2,\\ \\operatorname{tg}(\\pi/6)=1/\\sqrt3,\\ \\operatorname{ctg}(\\pi/6)=\\sqrt3"
+        },
+        {
+          "label": "Дөчин таван градус",
+          "latex": "\\sin(\\pi/4)=\\cos(\\pi/4)=\\sqrt2/2,\\ \\operatorname{tg}(\\pi/4)=\\operatorname{ctg}(\\pi/4)=1"
+        },
+        {
+          "label": "Жаран градус",
+          "latex": "\\sin(\\pi/3)=\\sqrt3/2,\\ \\cos(\\pi/3)=1/2,\\ \\operatorname{tg}(\\pi/3)=\\sqrt3,\\ \\operatorname{ctg}(\\pi/3)=1/\\sqrt3"
+        },
+        {
+          "label": "Ерэн градус",
+          "latex": "\\sin(\\pi/2)=1,\\ \\cos(\\pi/2)=0,\\ \\operatorname{tg}(\\pi/2)\\text{ тодорхойгүй},\\ \\operatorname{ctg}(\\pi/2)=0"
+        },
+        {
+          "label": "Зуун наян градус",
+          "latex": "\\sin\\pi=0,\\ \\cos\\pi=-1,\\ \\operatorname{tg}\\pi=0,\\ \\operatorname{ctg}\\pi\\text{ тодорхойгүй}"
+        }
+      ]
+    },
+    {
+      "slug": "trig-pythagorean",
+      "title": "Тригонометрийн үндсэн адилтгал",
+      "order": 6,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin^2x+\\cos^2x=1",
+      "general": "\\sin^2x+\\cos^2x=1",
+      "conditions": [
+        "x\\in\\mathbb R\\text{ радиан}"
+      ],
+      "explanation": "Нэгж тойргийн цэгийн координатуудын квадратуудын нийлбэр нэгтэй тэнцүү. Энэ адилтгалаар синус эсвэл косинусын нэгийг мэдэхэд нөгөөгийн модулийг олно. Квадрат язгуурын тэмдгийг өнцгийн мөчөөс сонгоно.",
+      "derivation": [
+        "Нэгж тойргийн тэгшитгэл $X^2+Y^2=1$.",
+        "$X=\\cos x$, $Y=\\sin x$-г орлуулбал үндсэн адилтгал гарна."
+      ],
+      "mnemonic": "Нэгж тойргийн радиусын квадрат нь нэг.",
+      "examples": [
+        {
+          "problem": "$\\sin x=3/5$, $0<x<\\pi/2$ бол $\\cos x$-ийг ол.",
+          "steps": [
+            "$\\cos^2x=1-9/25=16/25$.",
+            "Нэгдүгээр мөчид косинус эерэг тул $4/5$."
+          ],
+          "answer": "$4/5$"
+        },
+        {
+          "problem": "$\\sin x=-5/13$, $3\\pi/2<x<2\\pi$ бол $\\cos x$-ийг ол.",
+          "steps": [
+            "$\\cos^2x=1-25/169=144/169$.",
+            "Дөрөвдүгээр мөчид косинус эерэг тул $12/13$."
+          ],
+          "answer": "$12/13$"
+        }
+      ],
+      "commonMistakes": [
+        "Квадрат язгуурын тэмдгийг мөчөөс үл хамааран үргэлж эерэг авах."
+      ],
+      "eeshTip": "Мөч тодорхойгүй бол эцсийн хариу хоёр тэмдэгтэй байж болно.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin x=4/5,\\ 0<x<\\pi/2:\\quad\\cos x=\\square",
+          "answer": "3/5",
+          "distractors": [
+            "-3/5",
+            "1/5",
+            "4/5"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin^2x+\\cos^2x=1\\text{ бүх бодит }x\\text{-д}",
+          "answer": "true",
+          "why": "Энэ нь нэгж тойргийн тэгшитгэл."
+        }
+      ],
+      "related": [
+        "trig-tan-cot",
+        "trig-secant"
+      ],
+      "keywords": [
+        "Тригонометрийн үндсэн адилтгал"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-tan-cot",
+      "title": "Тангенс ба котангенсын харилцан урвуу",
+      "order": 7,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\operatorname{tg}x\\operatorname{ctg}x=1",
+      "general": "\\operatorname{tg}x\\operatorname{ctg}x=1",
+      "conditions": [
+        "\\sin x\\ne0",
+        "\\cos x\\ne0"
+      ],
+      "explanation": "Тангенс ба котангенс нь синус, косинусын харьцааны хоёр эсрэг дараалал юм. Хоёулаа тодорхойлогдох үед харилцан урвуу утгатай байна. Аль нэгийн хуваарь тэг болсон цэгт үржвэрийн адилтгалыг хэрэглэж болохгүй.",
+      "derivation": [
+        "$\\operatorname{tg}x=\\sin x/\\cos x$, $\\operatorname{ctg}x=\\cos x/\\sin x$.",
+        "Тэг биш үржигдэхүүнүүдийг хураахад үржвэр нэг болно."
+      ],
+      "mnemonic": "Ижил өнцгийн тангенс, котангенсийг үржүүлбэл нэг.",
+      "examples": [
+        {
+          "problem": "$\\operatorname{tg}x=3/4$ бол $\\operatorname{ctg}x$-ийг ол.",
+          "steps": [
+            "Тангенс тэг биш тул котангенс тодорхойлогдоно.",
+            "$\\operatorname{ctg}x=1/(3/4)=4/3$."
+          ],
+          "answer": "$4/3$"
+        },
+        {
+          "problem": "$\\operatorname{tg}(-\\pi/3)\\operatorname{ctg}(-\\pi/3)$-ыг ол.",
+          "steps": [
+            "Энэ өнцгийн синус, косинус хоёулаа тэг биш.",
+            "Урвуу харьцаануудын үржвэр нэг."
+          ],
+          "answer": "$1$"
+        }
+      ],
+      "commonMistakes": [
+        "$x=0$-д котангенс тодорхойгүйг үл харгалзан үржвэрийг нэг гэж тооцох."
+      ],
+      "eeshTip": "Харьцааны урвууг авахын өмнө тухайн утга тэг бишийг шалга.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{tg}x=-2:\\quad\\operatorname{ctg}x=\\square",
+          "answer": "-1/2",
+          "distractors": [
+            "1/2",
+            "-2",
+            "2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{tg}0\\operatorname{ctg}0\\text{ бодит утгатай}",
+          "answer": "false",
+          "why": "Котангенс тэг өнцөгт тодорхойгүй."
+        }
+      ],
+      "related": [
+        "trig-secant",
+        "trig-cosecant"
+      ],
+      "keywords": [
+        "Тангенс ба котангенсын харилцан урвуу"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-secant",
+      "title": "Тангенсын квадраттай адилтгал",
+      "order": 8,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "1+\\operatorname{tg}^2x=\\frac1{\\cos^2x}",
+      "general": "1+\\operatorname{tg}^2x=\\frac1{\\cos^2x}",
+      "conditions": [
+        "\\cos x\\ne0"
+      ],
+      "explanation": "Үндсэн адилтгалыг косинусын квадратад хуваавал тангенстай холбоос гарна. Тангенсаас косинусын квадратыг шууд олж болно. Косинусын тэмдгийг энэ тэнцэл дангаараа тогтоохгүй.",
+      "derivation": [
+        "$\\sin^2x+\\cos^2x=1$-ийг $\\cos^2x\\ne0$-д хуваана.",
+        "$(\\sin x/\\cos x)^2+1=1/\\cos^2x$ болно."
+      ],
+      "mnemonic": "Косинусын квадратад хуваавал тангенс гарна.",
+      "examples": [
+        {
+          "problem": "$\\operatorname{tg}x=2$ бол $\\cos^2x$-ийг ол.",
+          "steps": [
+            "$1/\\cos^2x=1+4=5$.",
+            "Урвууг авбал $\\cos^2x=1/5$."
+          ],
+          "answer": "$1/5$"
+        },
+        {
+          "problem": "$x=2\\pi/3$ үед $1+\\operatorname{tg}^2x$-ийг ол.",
+          "steps": [
+            "$\\cos x=-1/2$ тул $\\cos^2x=1/4$.",
+            "Урвуу нь дөрөв."
+          ],
+          "answer": "$4$"
+        }
+      ],
+      "commonMistakes": [
+        "$1+\\operatorname{tg}x$-г $1/\\cos x$ гэж квадратуудыг хасах."
+      ],
+      "eeshTip": "Зөвхөн квадратын утга хэрэгтэй үед мөчийг тогтоох шаардлагагүй.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{tg}x=3:\\quad\\cos^2x=\\square",
+          "answer": "1/10",
+          "distractors": [
+            "1/9",
+            "10",
+            "9"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "1+\\operatorname{tg}^2x=1/\\cos^2x\\text{ нь }x=\\pi/2\\text{-д хэрэглэгдэнэ}",
+          "answer": "false",
+          "why": "Хоёр талын хуваарь тэг тул бодит утгагүй."
+        }
+      ],
+      "related": [
+        "trig-pythagorean",
+        "trig-cosecant"
+      ],
+      "keywords": [
+        "Тангенсын квадраттай адилтгал"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-cosecant",
+      "title": "Котангенсын квадраттай адилтгал",
+      "order": 9,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "1+\\operatorname{ctg}^2x=\\frac1{\\sin^2x}",
+      "general": "1+\\operatorname{ctg}^2x=\\frac1{\\sin^2x}",
+      "conditions": [
+        "\\sin x\\ne0"
+      ],
+      "explanation": "Үндсэн адилтгалыг синусын квадратад хуваахад котангенстай холбоос гарна. Энэ нь өмнөх тангенсын дүрмийн синус, косинусыг сольсон хувилбар юм. Хуваарьт орсон синус тэг биш байх шаардлага хэвээр.",
+      "derivation": [
+        "$\\sin^2x+\\cos^2x=1$-ийг $\\sin^2x$-д хуваана.",
+        "$1+(\\cos x/\\sin x)^2=1/\\sin^2x$ болно."
+      ],
+      "mnemonic": "Синусын квадратад хуваавал котангенс гарна.",
+      "examples": [
+        {
+          "problem": "$\\operatorname{ctg}x=-3$ бол $\\sin^2x$-ийг ол.",
+          "steps": [
+            "$1/\\sin^2x=1+9=10$.",
+            "Иймээс $\\sin^2x=1/10$."
+          ],
+          "answer": "$1/10$"
+        },
+        {
+          "problem": "$x=\\pi/6$ үед $1+\\operatorname{ctg}^2x$-ийг ол.",
+          "steps": [
+            "$\\sin x=1/2$ тул $\\sin^2x=1/4$.",
+            "Урвууг авбал дөрөв."
+          ],
+          "answer": "$4$"
+        }
+      ],
+      "commonMistakes": [
+        "Котангенсын дүрмийн баруун талд косинус бичих."
+      ],
+      "eeshTip": "Тангенс, котангенсын хоёр дүрмийг анхны үндсэн адилтгалаас сэргээж болно.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{ctg}x=2:\\quad\\sin^2x=\\square",
+          "answer": "1/5",
+          "distractors": [
+            "1/4",
+            "5",
+            "4"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{ctg}(\\pi/2)=0\\text{ тул }1+\\operatorname{ctg}^2(\\pi/2)=1",
+          "answer": "true",
+          "why": "Синус нэг тул энэ цэгт бүх илэрхийлэл тодорхойлогдоно."
+        }
+      ],
+      "related": [
+        "trig-secant",
+        "trig-tan-cot"
+      ],
+      "keywords": [
+        "Котангенсын квадраттай адилтгал"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-parity",
+      "title": "Тригонометрийн тэгш ба сондгой шинж",
+      "order": 10,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin(-x)=-\\sin x,\\quad\\cos(-x)=\\cos x,\\quad\\operatorname{tg}(-x)=-\\operatorname{tg}x,\\quad\\operatorname{ctg}(-x)=-\\operatorname{ctg}x",
+      "general": "\\sin(-x)=-\\sin x,\\quad\\cos(-x)=\\cos x,\\quad\\operatorname{tg}(-x)=-\\operatorname{tg}x,\\quad\\operatorname{ctg}(-x)=-\\operatorname{ctg}x",
+      "conditions": [
+        "x\\in\\mathbb R\\text{ радиан}",
+        "\\operatorname{tg}:\\cos x\\ne0",
+        "\\operatorname{ctg}:\\sin x\\ne0"
+      ],
+      "explanation": "Өнцгийн чиглэлийг урвуулахад нэгж тойргийн цэг хэвтээ тэнхлэгээр тусна. Косинусын координат хэвээр, синусын координат эсрэг тэмдэгтэй болно. Харьцааны дүрмээр тангенс ба котангенс мөн сондгой байна.",
+      "derivation": [
+        "$(\\cos x,\\sin x)$ цэгийн тусгал $(\\cos x,-\\sin x)$ нь $-x$ өнцөгт харгалзана.",
+        "Синус, косинусын харьцааг авахад тангенс, котангенсын тэмдэг мөн солигдоно."
+      ],
+      "mnemonic": "Косинус тэгш, үлдсэн гурвын тэмдэг солигдоно.",
+      "examples": [
+        {
+          "problem": "$\\sin(-\\pi/6)$-г ол.",
+          "steps": [
+            "Синус сондгой тул $-\\sin(\\pi/6)$.",
+            "Утга $-1/2$."
+          ],
+          "answer": "$-1/2$"
+        },
+        {
+          "problem": "$\\cos(-\\pi/3)+\\operatorname{tg}(-\\pi/4)$-ыг ол.",
+          "steps": [
+            "Косинус тэгш тул $1/2$, тангенс сондгой тул $-1$.",
+            "$1/2-1=-1/2$."
+          ],
+          "answer": "$-1/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Сөрөг өнцөгтэй бүх функцийг сөрөг гэж бодох."
+      ],
+      "eeshTip": "Эхлээд өнцгийн сөрөг тэмдгийг гаргаад, дараа нь үндсэн өнцгийг бод.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(-\\pi/4)=\\square",
+          "answer": "\\sqrt2/2",
+          "distractors": [
+            "-\\sqrt2/2",
+            "1/2",
+            "-1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin(-x)=-\\sin x\\text{ бүх бодит }x\\text{-д}",
+          "answer": "true",
+          "why": "Хэвтээ тэнхлэгийн тусгал босоо координатын тэмдгийг солино."
+        }
+      ],
+      "related": [
+        "trig-period",
+        "trig-reduction"
+      ],
+      "keywords": [
+        "Тригонометрийн тэгш ба сондгой шинж"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-period",
+      "title": "Тригонометрийн үндсэн үе",
+      "order": 11,
+      "level": "CORE",
+      "grade": 9,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin(x+2\\pi)=\\sin x,\\quad\\cos(x+2\\pi)=\\cos x,\\quad\\operatorname{tg}(x+\\pi)=\\operatorname{tg}x,\\quad\\operatorname{ctg}(x+\\pi)=\\operatorname{ctg}x",
+      "general": "\\sin(x+2\\pi)=\\sin x,\\quad\\cos(x+2\\pi)=\\cos x,\\quad\\operatorname{tg}(x+\\pi)=\\operatorname{tg}x,\\quad\\operatorname{ctg}(x+\\pi)=\\operatorname{ctg}x",
+      "conditions": [
+        "x\\text{ радиан}",
+        "\\operatorname{tg}:\\cos x\\ne0",
+        "\\operatorname{ctg}:\\sin x\\ne0"
+      ],
+      "explanation": "Бүтэн эргэлтийн дараа нэгж тойргийн цэг давхцах тул синус, косинусын үндсэн үе бүтэн эргэлт байна. Хагас эргэлтэд хоёр координат зэрэг тэмдэг сольдог учраас тэдний харьцаанууд хэвээр үлдэнэ. Тангенс, котангенсын үндсэн үе хагас эргэлт юм.",
+      "derivation": [
+        "$x+2\\pi$ өнцөг $x$-тэй нэг цэгт бууна.",
+        "$x+\\pi$ үед синус ба косинус хоёул эсрэг тэмдэгтэй болох тул харьцаанд хоёр хасах тэмдэг хураагдана."
+      ],
+      "mnemonic": "Координат бүтэн эргэлт, харьцаа хагас эргэлтээр давтагдана.",
+      "examples": [
+        {
+          "problem": "$\\sin(13\\pi/6)$-г ол.",
+          "steps": [
+            "$13\\pi/6=2\\pi+\\pi/6$.",
+            "Бүтэн үеийг хасахад $\\sin(\\pi/6)=1/2$."
+          ],
+          "answer": "$1/2$"
+        },
+        {
+          "problem": "$\\operatorname{tg}(5\\pi/4)$-ийг ол.",
+          "steps": [
+            "$5\\pi/4=\\pi+\\pi/4$.",
+            "Хагас эргэлтийн үеийг хасахад тангенс нэг."
+          ],
+          "answer": "$1$"
+        }
+      ],
+      "commonMistakes": [
+        "Синусын үеийг $\\pi$ гэж авч тэмдгийг алдах."
+      ],
+      "eeshTip": "Том өнцгөөс бүтэн үеүдийг хасаж танил завсарт оруул.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(7\\pi/3)=\\square",
+          "answer": "1/2",
+          "distractors": [
+            "-1/2",
+            "\\sqrt3/2",
+            "1"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin(x+\\pi)=\\sin x\\text{ бүх бодит }x\\text{-д}",
+          "answer": "false",
+          "why": "$x=\\pi/2$ үед зүүн тал $-1$, баруун тал $1$."
+        }
+      ],
+      "related": [
+        "trig-parity",
+        "trig-sine-wave"
+      ],
+      "keywords": [
+        "Тригонометрийн үндсэн үе"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-reduction",
+      "title": "Эргүүлэх томьёоны дүрэм",
+      "order": 12,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin(\\pi/2-x)=\\cos x,\\quad\\cos(\\pi/2-x)=\\sin x,\\quad\\sin(\\pi-x)=\\sin x,\\quad\\cos(\\pi-x)=-\\cos x",
+      "general": "\\sin(\\pi/2-x)=\\cos x,\\quad\\cos(\\pi/2-x)=\\sin x,\\quad\\sin(\\pi-x)=\\sin x,\\quad\\cos(\\pi-x)=-\\cos x",
+      "conditions": [
+        "x\\in\\mathbb R\\text{ радиан}"
+      ],
+      "explanation": "Хагас ба бүтэн эргэлтэд функцийн нэр хадгалагдаж, сондгой тооны дөрөвний нэг эргэлтэд синус, косинусын нэр солигдоно. Тангенс, котангенс ч ийм үед хоорондоо солигдоно. Тэмдгийг тогтоохдоо туслах хурц өнцөг сонгон анхны өнцөг аль мөчид орж байгааг харна.",
+      "derivation": [
+        "$\\pi/2-x$ өнцгийн цэгийн хэвтээ ба босоо проекцууд $x$ өнцгийнхтэй байр солигдоно.",
+        "$\\pi-x$ нь босоо тэнхлэгээр тусгал тул хэвтээ координат тэмдэг сольж, босоо нь хэвээр байна.",
+        "Үеүд ба тусгалуудыг хослуулж $3\\pi/2\\pm x$, $2\\pi\\pm x$ зэрэг бусад хувилбарыг гаргана."
+      ],
+      "mnemonic": "Хагас пи, гурван хагас пи бол нэр солигдоно; тэмдгийг анхны мөчөөс ав.",
+      "examples": [
+        {
+          "problem": "$\\cos(\\pi-\\pi/6)$-г ол.",
+          "steps": [
+            "$\\pi-\\pi/6$ нь хоёрдугаар мөчид тул косинус сөрөг.",
+            "$-\\cos(\\pi/6)=-\\sqrt3/2$."
+          ],
+          "answer": "$-\\sqrt3/2$"
+        },
+        {
+          "problem": "$\\sin(3\\pi/2+\\pi/6)$-г ол.",
+          "steps": [
+            "$3\\pi/2+\\pi/6=5\\pi/3$ нь дөрөвдүгээр мөчид тул синус сөрөг.",
+            "Функцийн нэр солигдож $-\\cos(\\pi/6)=-\\sqrt3/2$."
+          ],
+          "answer": "$-\\sqrt3/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Нэр солих дүрмийг хэрэглээд анхны функцийн тэмдгийг үл тоох."
+      ],
+      "eeshTip": "Тангенс, котангенсийн хувилбарт хуваарь тэг болох өнцгийг тусад нь хас.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(\\pi/2-\\pi/3)=\\square",
+          "answer": "1/2",
+          "distractors": [
+            "\\sqrt3/2",
+            "-1/2",
+            "1"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos(\\pi+x)=-\\cos x\\text{ бүх бодит }x\\text{-д}",
+          "answer": "true",
+          "why": "Хагас эргэлт хоёр координатын тэмдгийг зэрэг солино."
+        }
+      ],
+      "related": [
+        "trig-sin-add",
+        "trig-cos-add"
+      ],
+      "keywords": [
+        "Эргүүлэх томьёоны дүрэм"
+      ],
+      "widget": "unit-circle",
+      "variants": [
+        {
+          "label": "Гурван хагас пи",
+          "latex": "\\sin(3\\pi/2+x)=-\\cos x,\\quad\\cos(3\\pi/2+x)=\\sin x"
+        },
+        {
+          "label": "Тангенс ба котангенс",
+          "latex": "\\operatorname{tg}(\\pi/2-x)=\\operatorname{ctg}x\\quad(\\sin x\\ne0)"
+        }
+      ]
+    },
+    {
+      "slug": "trig-sin-add",
+      "title": "Нийлбэр өнцгийн синус",
+      "order": 13,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin(u+v)=\\sin u\\cos v+\\cos u\\sin v",
+      "general": "\\sin(u+v)=\\sin u\\cos v+\\cos u\\sin v",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Нийлбэрийн синус нь хоёр өнцгийн синус, косинусыг солбилцуулан үржүүлсэн нийлбэр юм. Өнцгүүдийг нэмэхэд функцийн утгуудыг шууд нэмдэггүй. Нэгж тойргийн цэгийг эргүүлэхэд босоо координат ингэж өөрчлөгдөнө.",
+      "derivation": [
+        "$(\\cos u,\\sin u)$ векторыг $v$-ээр эргүүлэхэд суурь векторууд $(\\cos v,\\sin v)$ ба $(-\\sin v,\\cos v)$ болно.",
+        "Шинэ босоо координат $\\cos u\\sin v+\\sin u\\cos v$ бөгөөд энэ нь $\\sin(u+v)$."
+      ],
+      "mnemonic": "Синусын нийлбэрт солбисон үржвэрүүд нэмэгдэнэ.",
+      "examples": [
+        {
+          "problem": "$\\sin75^\\circ$-ыг яг утгаар ол.",
+          "steps": [
+            "$75^\\circ=45^\\circ+30^\\circ$.",
+            "$\\sin75^\\circ=(\\sqrt2/2)(\\sqrt3/2)+(\\sqrt2/2)(1/2)$."
+          ],
+          "answer": "$(\\sqrt6+\\sqrt2)/4$"
+        },
+        {
+          "problem": "$u,v$ хурц өнцөг, $\\sin u=3/5$, $\\sin v=5/13$ бол $\\sin(u+v)$-г ол.",
+          "steps": [
+            "$\\cos u=4/5$, $\\cos v=12/13$.",
+            "$(3/5)(12/13)+(4/5)(5/13)=56/65$."
+          ],
+          "answer": "$56/65$"
+        }
+      ],
+      "commonMistakes": [
+        "$\\sin(u+v)=\\sin u+\\sin v$ гэж бичих."
+      ],
+      "eeshTip": "Өнцгийг танил хоёр өнцгийн нийлбэр болгон задалж үз.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(\\pi/4+\\pi/6)=\\square",
+          "answer": "(\\sqrt6+\\sqrt2)/4",
+          "distractors": [
+            "(\\sqrt6-\\sqrt2)/4",
+            "\\sqrt2/2+1/2",
+            "1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin(\\pi/6+\\pi/6)=\\sin(\\pi/6)+\\sin(\\pi/6)",
+          "answer": "false",
+          "why": "Зүүн тал $\\sqrt3/2$, баруун тал нэг."
+        }
+      ],
+      "related": [
+        "trig-sin-difference",
+        "trig-double-sin"
+      ],
+      "keywords": [
+        "Нийлбэр өнцгийн синус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-sin-difference",
+      "title": "Ялгавар өнцгийн синус",
+      "order": 14,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin(u-v)=\\sin u\\cos v-\\cos u\\sin v",
+      "general": "\\sin(u-v)=\\sin u\\cos v-\\cos u\\sin v",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Ялгаврын синус нь нийлбэрийн дүрэмтэй адил солбисон үржвэртэй боловч хоёр дахь гишүүнийг хасна. Өнцгүүдийн дарааллыг сольбол нийт утгын тэмдэг солигдоно. Иймээс ялгаврын аль өнцөг эхэлж байгааг анхаарна.",
+      "derivation": [
+        "Нийлбэрийн томьёонд $v$-ийн оронд $-v$ тавина.",
+        "$\\cos(-v)=\\cos v$, $\\sin(-v)=-\\sin v$ тул хоёр дахь үржвэр сөрөг болно."
+      ],
+      "mnemonic": "Синус доторх хасах тэмдэг гаднах хоёр дахь үржвэрт шилжинэ.",
+      "examples": [
+        {
+          "problem": "$\\sin15^\\circ$-ыг ол.",
+          "steps": [
+            "$15^\\circ=45^\\circ-30^\\circ$.",
+            "$(\\sqrt2/2)(\\sqrt3/2)-(\\sqrt2/2)(1/2)$."
+          ],
+          "answer": "$(\\sqrt6-\\sqrt2)/4$"
+        },
+        {
+          "problem": "$u,v$ хурц, $\\sin u=3/5$, $\\sin v=5/13$ бол $\\sin(u-v)$-г ол.",
+          "steps": [
+            "$\\cos u=4/5$, $\\cos v=12/13$.",
+            "$(36-20)/65=16/65$."
+          ],
+          "answer": "$16/65$"
+        }
+      ],
+      "commonMistakes": [
+        "Хоёр үржвэрийн дарааллыг сольж ялгаврын тэмдгийг алдах."
+      ],
+      "eeshTip": "Хариуны тэмдгийг өнцгүүдийн хэмжээгээр урьдчилан таамаглаж шалгаж болно.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(\\pi/3-\\pi/6)=\\square",
+          "answer": "1/2",
+          "distractors": [
+            "\\sqrt3/2",
+            "0",
+            "-1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin(u-v)=-\\sin(v-u)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "true",
+          "why": "Хоёр аргумент эсрэг тоонууд бөгөөд синус сондгой."
+        }
+      ],
+      "related": [
+        "trig-sin-add",
+        "trig-sum-sines"
+      ],
+      "keywords": [
+        "Ялгавар өнцгийн синус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-cos-add",
+      "title": "Нийлбэр өнцгийн косинус",
+      "order": 15,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos(u+v)=\\cos u\\cos v-\\sin u\\sin v",
+      "general": "\\cos(u+v)=\\cos u\\cos v-\\sin u\\sin v",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Нийлбэрийн косинус ижил нэртэй функцуудын үржвэрүүдээс бүтнэ. Косинусуудын үржвэрээс синусуудын үржвэрийг хасна. Доторх нэмэх тэмдэг гадна хасах болдог нь синусын дүрмээс ялгаатай.",
+      "derivation": [
+        "$(\\cos u,\\sin u)$ цэгийг $v$-ээр эргүүлэхэд хэвтээ суурийн проекц $\\cos v$, босоо суурийн проекц $-\\sin v$ байна.",
+        "Шинэ хэвтээ координат $\\cos u\\cos v-\\sin u\\sin v$ буюу $\\cos(u+v)$."
+      ],
+      "mnemonic": "Косинус ижил хосуудтай, тэмдэг нь доторхоос эсрэг.",
+      "examples": [
+        {
+          "problem": "$\\cos75^\\circ$-ыг ол.",
+          "steps": [
+            "$75^\\circ=45^\\circ+30^\\circ$.",
+            "$(\\sqrt2/2)(\\sqrt3/2)-(\\sqrt2/2)(1/2)$."
+          ],
+          "answer": "$(\\sqrt6-\\sqrt2)/4$"
+        },
+        {
+          "problem": "$u,v$ хурц, $\\sin u=3/5$, $\\sin v=5/13$ бол $\\cos(u+v)$-г ол.",
+          "steps": [
+            "$\\cos u=4/5$, $\\cos v=12/13$.",
+            "$(48-15)/65=33/65$."
+          ],
+          "answer": "$33/65$"
+        }
+      ],
+      "commonMistakes": [
+        "Нийлбэрийн косинуст синусуудын үржвэрийг нэмэх."
+      ],
+      "eeshTip": "Синусын ба косинусын хоёр дүрмийг зэрэг бичиж тэмдгийг харьцуул.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(\\pi/3+\\pi/6)=\\square",
+          "answer": "0",
+          "distractors": [
+            "1",
+            "1/2",
+            "\\sqrt3/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos(u+v)=\\cos u\\cos v+\\sin u\\sin v\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "false",
+          "why": "$u=v=\\pi/4$ үед зүүн тал тэг, баруун тал нэг."
+        }
+      ],
+      "related": [
+        "trig-cos-difference",
+        "trig-double-cos"
+      ],
+      "keywords": [
+        "Нийлбэр өнцгийн косинус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-cos-difference",
+      "title": "Ялгавар өнцгийн косинус",
+      "order": 16,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos(u-v)=\\cos u\\cos v+\\sin u\\sin v",
+      "general": "\\cos(u-v)=\\cos u\\cos v+\\sin u\\sin v",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Ялгаврын косинуст ижил нэртэй функцуудын үржвэрүүд нэмэгдэнэ. Өнцгүүдийн дарааллыг солиход утга өөрчлөгдөхгүй. Энэ дүрэм нэгж векторуудын скаляр үржвэрээр мөн тайлбарлагддаг.",
+      "derivation": [
+        "Косинусын нийлбэрийн дүрэмд $v$-ийн оронд $-v$ тавина.",
+        "Косинус тэгш, синус сондгой тул хасахын дараах сөрөг тэмдэг нэмэх болно."
+      ],
+      "mnemonic": "Косинусын ялгаварт нэмэх тэмдэг гарна.",
+      "examples": [
+        {
+          "problem": "$\\cos15^\\circ$-ыг ол.",
+          "steps": [
+            "$15^\\circ=45^\\circ-30^\\circ$.",
+            "$(\\sqrt2/2)(\\sqrt3/2)+(\\sqrt2/2)(1/2)$."
+          ],
+          "answer": "$(\\sqrt6+\\sqrt2)/4$"
+        },
+        {
+          "problem": "$u,v$ хурц, $\\sin u=3/5$, $\\sin v=5/13$ бол $\\cos(u-v)$-г ол.",
+          "steps": [
+            "$\\cos u=4/5$, $\\cos v=12/13$.",
+            "$(48+15)/65=63/65$."
+          ],
+          "answer": "$63/65$"
+        }
+      ],
+      "commonMistakes": [
+        "Ялгаврын косинусыг синус шиг дараалал солиход сөрөг болно гэж үзэх."
+      ],
+      "eeshTip": "Ижил нэртэй хоёр үржвэрийн нийлбэр харвал өнцгүүдийн ялгаврын косинусыг тань.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(\\pi/3-\\pi/3)=\\square",
+          "answer": "1",
+          "distractors": [
+            "0",
+            "-1",
+            "1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos(u-v)=\\cos(v-u)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "true",
+          "why": "Эсрэг аргументуудад косинусын утга ижил."
+        }
+      ],
+      "related": [
+        "trig-cos-add",
+        "trig-sum-cosines"
+      ],
+      "keywords": [
+        "Ялгавар өнцгийн косинус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-tan-add",
+      "title": "Нийлбэр өнцгийн тангенс",
+      "order": 17,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\operatorname{tg}(u+v)=\\frac{\\operatorname{tg}u+\\operatorname{tg}v}{1-\\operatorname{tg}u\\operatorname{tg}v}",
+      "general": "\\operatorname{tg}(u+v)=\\frac{\\operatorname{tg}u+\\operatorname{tg}v}{1-\\operatorname{tg}u\\operatorname{tg}v}",
+      "conditions": [
+        "\\cos u\\ne0",
+        "\\cos v\\ne0",
+        "1-\\operatorname{tg}u\\operatorname{tg}v\\ne0"
+      ],
+      "explanation": "Нийлбэрийн тангенсыг синусын нийлбэрийг косинусын нийлбэрт хувааж гаргана. Хүртвэрт тангенсуудын нийлбэр, хуваарьт нэгээс үржвэрийг хассан илэрхийлэл байна. Анхны хоёр тангенс болон эцсийн хуваарь бүгд тодорхойлогдох ёстой.",
+      "derivation": [
+        "$\\operatorname{tg}(u+v)=\\sin(u+v)/\\cos(u+v)$-д нийлбэрийн дүрмүүдийг орлуулна.",
+        "Хүртвэр, хуваарийг $\\cos u\\cos v$-д хуваавал хүссэн харьцаа гарна."
+      ],
+      "mnemonic": "Тангенсуудыг нэм, хуваарьт үржвэрийг хас.",
+      "examples": [
+        {
+          "problem": "$\\operatorname{tg}75^\\circ$-ыг ол.",
+          "steps": [
+            "$75^\\circ=45^\\circ+30^\\circ$ тул $(1+1/\\sqrt3)/(1-1/\\sqrt3)$.",
+            "Хүртвэр хуваарийг хялбарчилбал $2+\\sqrt3$."
+          ],
+          "answer": "$2+\\sqrt3$"
+        },
+        {
+          "problem": "$\\operatorname{tg}u=1/2$, $\\operatorname{tg}v=1/3$ бол $\\operatorname{tg}(u+v)$-г ол.",
+          "steps": [
+            "Хүртвэр $5/6$, хуваарь $1-1/6=5/6$.",
+            "Хуваарь тэг биш тул харьцаа нэг."
+          ],
+          "answer": "$1$"
+        }
+      ],
+      "commonMistakes": [
+        "Хуваарьт нэмэх тэмдэг хэрэглэж ялгаврын дүрэмтэй холих."
+      ],
+      "eeshTip": "Хоёр тангенсын үржвэр нэг бол нийлбэрийн тангенс тодорхойгүй гэдгийг анзаар.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{tg}u=1,\\ \\operatorname{tg}v=1/2:\\quad\\operatorname{tg}(u+v)=\\square",
+          "answer": "3",
+          "distractors": [
+            "1",
+            "1/3",
+            "3/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{tg}(\\pi/4+\\pi/4)\\text{ бодит утгатай}",
+          "answer": "false",
+          "why": "Нийлбэр $\\pi/2$ бөгөөд косинус тэг."
+        }
+      ],
+      "related": [
+        "trig-tan-difference",
+        "trig-double-tan"
+      ],
+      "keywords": [
+        "Нийлбэр өнцгийн тангенс"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-tan-difference",
+      "title": "Ялгавар өнцгийн тангенс",
+      "order": 18,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\operatorname{tg}(u-v)=\\frac{\\operatorname{tg}u-\\operatorname{tg}v}{1+\\operatorname{tg}u\\operatorname{tg}v}",
+      "general": "\\operatorname{tg}(u-v)=\\frac{\\operatorname{tg}u-\\operatorname{tg}v}{1+\\operatorname{tg}u\\operatorname{tg}v}",
+      "conditions": [
+        "\\cos u\\ne0",
+        "\\cos v\\ne0",
+        "1+\\operatorname{tg}u\\operatorname{tg}v\\ne0"
+      ],
+      "explanation": "Ялгаврын тангенсийн хүртвэрт ялгавар, хуваарьт нэмэх тэмдэг орно. Өнцгүүдийн дарааллыг солиход хүртвэрийн тэмдэг солигддог. Хуваарь тэг болох үед эцсийн тангенс тодорхойлогдохгүй.",
+      "derivation": [
+        "Нийлбэрийн тангенсын дүрэмд $v$-ийн оронд $-v$ тавина.",
+        "$\\operatorname{tg}(-v)=-\\operatorname{tg}v$ тул хүртвэр хасах, хуваарь нэмэх тэмдэгтэй болно."
+      ],
+      "mnemonic": "Дотор хасах байвал хүртвэр хасах, хуваарь нэмэх.",
+      "examples": [
+        {
+          "problem": "$\\operatorname{tg}15^\\circ$-ыг ол.",
+          "steps": [
+            "$(1-1/\\sqrt3)/(1+1/\\sqrt3)$ гэж бичнэ.",
+            "Хялбарчилбал $2-\\sqrt3$."
+          ],
+          "answer": "$2-\\sqrt3$"
+        },
+        {
+          "problem": "$\\operatorname{tg}u=2$, $\\operatorname{tg}v=1/3$ бол $\\operatorname{tg}(u-v)$-г ол.",
+          "steps": [
+            "Хүртвэр $5/3$, хуваарь $1+2/3=5/3$.",
+            "Харьцаа нэг."
+          ],
+          "answer": "$1$"
+        }
+      ],
+      "commonMistakes": [
+        "Өнцгүүдийн ялгаварт тангенсуудын үржвэрийг хуваарьт хасах."
+      ],
+      "eeshTip": "Хүртвэрийн дараалал эх өнцгүүдийн дараалалтай таарна.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{tg}u=1,\\ \\operatorname{tg}v=1/2:\\quad\\operatorname{tg}(u-v)=\\square",
+          "answer": "1/3",
+          "distractors": [
+            "3",
+            "1/2",
+            "-1/3"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{tg}(\\pi/3-\\pi/6)=1/\\sqrt3",
+          "answer": "true",
+          "why": "Өнцгийн ялгавар $\\pi/6$."
+        }
+      ],
+      "related": [
+        "trig-tan-add",
+        "trig-half-tan"
+      ],
+      "keywords": [
+        "Ялгавар өнцгийн тангенс"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-double-sin",
+      "title": "Давхар өнцгийн синус",
+      "order": 19,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin2x=2\\sin x\\cos x",
+      "general": "\\sin2x=2\\sin x\\cos x",
+      "conditions": [
+        "x\\in\\mathbb R"
+      ],
+      "explanation": "Давхар өнцгийн синус нь тухайн өнцгийн синус, косинусын үржвэрийг хоёр дахин авсантай тэнцүү. Нийлбэрийн дүрэмд ижил өнцөг тавихад солбисон хоёр гишүүн давхцана. Синус эсвэл косинусын аль нэг сөрөг бол давхар өнцгийн синусын тэмдэг мөн хамаарна.",
+      "derivation": [
+        "$\\sin(x+x)=\\sin x\\cos x+\\cos x\\sin x$.",
+        "Ижил хоёр үржвэрийг нэгтгэвэл $2\\sin x\\cos x$."
+      ],
+      "mnemonic": "Хоёр ижил солбисон үржвэрээс хоёр гэсэн үржүүлэгч үүснэ.",
+      "examples": [
+        {
+          "problem": "$\\sin x=3/5$, $\\pi/2<x<\\pi$ бол $\\sin2x$-г ол.",
+          "steps": [
+            "Хоёрдугаар мөчид $\\cos x=-4/5$.",
+            "$2(3/5)(-4/5)=-24/25$."
+          ],
+          "answer": "$-24/25$"
+        },
+        {
+          "problem": "$2\\sin(\\pi/12)\\cos(\\pi/12)$-ыг ол.",
+          "steps": [
+            "Давхар өнцгөөр $\\sin(\\pi/6)$ гэж бичнэ.",
+            "Үндсэн утга $1/2$."
+          ],
+          "answer": "$1/2$"
+        }
+      ],
+      "commonMistakes": [
+        "$\\sin2x$-г $2\\sin x$ гэж үзэх."
+      ],
+      "eeshTip": "Синус, косинусын ижил өнцөгтэй үржвэрийг харвал өнцгийг хоёр дахин өсгөж болно.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin x=3/5,\\ \\cos x=4/5:\\quad\\sin2x=\\square",
+          "answer": "24/25",
+          "distractors": [
+            "6/5",
+            "7/25",
+            "12/25"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin(2\\cdot\\pi/6)=2\\sin(\\pi/6)",
+          "answer": "false",
+          "why": "Хоёр тал $\\sqrt3/2$ ба нэг гэсэн өөр утгатай."
+        }
+      ],
+      "related": [
+        "trig-sin-add",
+        "trig-double-cos"
+      ],
+      "keywords": [
+        "Давхар өнцгийн синус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-double-cos",
+      "title": "Давхар өнцгийн косинусын гурван хэлбэр",
+      "order": 20,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos2x=\\cos^2x-\\sin^2x=2\\cos^2x-1=1-2\\sin^2x",
+      "general": "\\cos2x=\\cos^2x-\\sin^2x=2\\cos^2x-1=1-2\\sin^2x",
+      "conditions": [
+        "x\\in\\mathbb R"
+      ],
+      "explanation": "Давхар өнцгийн косинусыг синус, косинус хоёроор эсвэл аль нэгээр нь бичиж болно. Өгөгдсөн утгад таарсан хэлбэрийг сонговол нөгөө функцийг заавал олохгүй. Квадратууд ордог тул мөчөөс шалтгаалсан тэмдгийг тусад нь авах шаардлагагүй.",
+      "derivation": [
+        "$\\cos(x+x)=\\cos^2x-\\sin^2x$.",
+        "$\\sin^2x=1-\\cos^2x$ эсвэл $\\cos^2x=1-\\sin^2x$-г орлуулж бусад хоёр хэлбэрийг гаргана."
+      ],
+      "mnemonic": "Косинусын квадраттай бол хоёр квадрат хасах нэг, синусын квадраттай бол нэг хасах хоёр квадрат.",
+      "examples": [
+        {
+          "problem": "$\\sin x=3/5$ бол $\\cos2x$-г ол.",
+          "steps": [
+            "$1-2\\sin^2x$ хэлбэрийг сонгоно.",
+            "$1-18/25=7/25$."
+          ],
+          "answer": "$7/25$"
+        },
+        {
+          "problem": "$\\cos x=1/3$ бол $\\cos2x$-г ол.",
+          "steps": [
+            "$2\\cos^2x-1$ хэлбэрийг сонгоно.",
+            "$2/9-1=-7/9$."
+          ],
+          "answer": "$-7/9$"
+        }
+      ],
+      "commonMistakes": [
+        "$2\\sin^2x-1$-ийг $\\cos2x$ гэж тэмдгийг урвуулах."
+      ],
+      "eeshTip": "Өгсөн нь синус уу, косинус уу гэдгээр хэлбэрээ сонго.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos x=1/2:\\quad\\cos2x=\\square",
+          "answer": "-1/2",
+          "distractors": [
+            "1/2",
+            "0",
+            "-1"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos2x=1-2\\sin^2x\\text{ бүх бодит }x\\text{-д}",
+          "answer": "true",
+          "why": "Үндсэн адилтгалыг давхар косинусын эх хэлбэрт орлуулсан."
+        }
+      ],
+      "related": [
+        "trig-power-reduction",
+        "trig-half-cos"
+      ],
+      "keywords": [
+        "Давхар өнцгийн косинусын гурван хэлбэр"
+      ],
+      "widget": null,
+      "variants": [
+        {
+          "label": "Косинусаар",
+          "latex": "\\cos2x=2\\cos^2x-1"
+        },
+        {
+          "label": "Синусаар",
+          "latex": "\\cos2x=1-2\\sin^2x"
+        }
+      ]
+    },
+    {
+      "slug": "trig-double-tan",
+      "title": "Давхар өнцгийн тангенс",
+      "order": 21,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\operatorname{tg}2x=\\frac{2\\operatorname{tg}x}{1-\\operatorname{tg}^2x}",
+      "general": "\\operatorname{tg}2x=\\frac{2\\operatorname{tg}x}{1-\\operatorname{tg}^2x}",
+      "conditions": [
+        "\\cos x\\ne0",
+        "1-\\operatorname{tg}^2x\\ne0"
+      ],
+      "explanation": "Нийлбэрийн тангенст ижил хоёр өнцөг тавихад давхар өнцгийн дүрэм гарна. Хуваарь тэг болох үед давхар өнцгийн косинус тэг болж тангенс нь тодорхойгүй. Эх өнцгийн тангенс өөрөө мөн тодорхойлогдох ёстой.",
+      "derivation": [
+        "Нийлбэрийн дүрэмд $u=v=x$ тавина.",
+        "Хүртвэр $\\operatorname{tg}x+\\operatorname{tg}x=2\\operatorname{tg}x$, хуваарь $1-\\operatorname{tg}^2x$ болно."
+      ],
+      "mnemonic": "Дээр нь давхар тангенс, доор нь нэг хасах квадрат.",
+      "examples": [
+        {
+          "problem": "$\\operatorname{tg}x=1/3$ бол $\\operatorname{tg}2x$-г ол.",
+          "steps": [
+            "Хуваарь $1-1/9=8/9$.",
+            "$(2/3)/(8/9)=3/4$."
+          ],
+          "answer": "$3/4$"
+        },
+        {
+          "problem": "$\\operatorname{tg}x=2$ бол $\\operatorname{tg}2x$-г ол.",
+          "steps": [
+            "Хуваарь $1-4=-3\\ne0$.",
+            "$4/(-3)=-4/3$."
+          ],
+          "answer": "$-4/3$"
+        }
+      ],
+      "commonMistakes": [
+        "$\\operatorname{tg}x=1$ үед тэг хуваарийг үл тоож тоон хариу гаргах."
+      ],
+      "eeshTip": "Хариуны тэмдэг хуваарийн тэмдгээс өөрчлөгдөж болохыг шалга.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{tg}x=1/2:\\quad\\operatorname{tg}2x=\\square",
+          "answer": "4/3",
+          "distractors": [
+            "1",
+            "3/4",
+            "2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{tg}x=1\\text{ бол }\\operatorname{tg}2x\\text{ бодит утгатай}",
+          "answer": "false",
+          "why": "Давхар өнцөгт косинус тэг тул тангенс тодорхойгүй."
+        }
+      ],
+      "related": [
+        "trig-tan-add",
+        "trig-universal"
+      ],
+      "keywords": [
+        "Давхар өнцгийн тангенс"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-triple-sin",
+      "title": "Гурвалсан өнцгийн синус",
+      "order": 22,
+      "level": "CORE",
+      "grade": 11,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin3x=3\\sin x-4\\sin^3x",
+      "general": "\\sin3x=3\\sin x-4\\sin^3x",
+      "conditions": [
+        "x\\in\\mathbb R"
+      ],
+      "explanation": "Гурвалсан өнцгийн синусыг зөвхөн эх өнцгийн синусаар илэрхийлж болно. Нийлбэрийн дүрэмд давхар өнцгийн хэлбэрүүдийг орлуулсны дараа косинусын квадрат арилна. Гуравдугаар зэрэг нь өнцөгт бус функцийн утгад үйлчилж байгааг ялгана.",
+      "derivation": [
+        "$\\sin(2x+x)=\\sin2x\\cos x+\\cos2x\\sin x$.",
+        "$2\\sin x\\cos^2x+(1-2\\sin^2x)\\sin x$ гэж орлуулна.",
+        "$\\cos^2x=1-\\sin^2x$-г ашиглавал $3\\sin x-4\\sin^3x$."
+      ],
+      "mnemonic": "Синус гурав дахин, дараа нь кубыг дөрөв дахин хас.",
+      "examples": [
+        {
+          "problem": "$\\sin x=1/3$ бол $\\sin3x$-г ол.",
+          "steps": [
+            "$3(1/3)-4(1/3)^3$.",
+            "$1-4/27=23/27$."
+          ],
+          "answer": "$23/27$"
+        },
+        {
+          "problem": "$3\\sin(\\pi/18)-4\\sin^3(\\pi/18)$-ыг ол.",
+          "steps": [
+            "Гурвалсан өнцгийн дүрмээр $\\sin(\\pi/6)$.",
+            "Утга $1/2$."
+          ],
+          "answer": "$1/2$"
+        }
+      ],
+      "commonMistakes": [
+        "$\\sin^3x$-ийг $\\sin3x$-тэй андуурах."
+      ],
+      "eeshTip": "Куб ба шугаман гишүүнтэй илэрхийлэлд гурвалсан өнцгийг таних боломжтой.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin x=1/2:\\quad\\sin3x=\\square",
+          "answer": "1",
+          "distractors": [
+            "3/2",
+            "1/2",
+            "0"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin3x=3\\sin x\\text{ бүх бодит }x\\text{-д}",
+          "answer": "false",
+          "why": "$x=\\pi/6$ үед зүүн тал нэг, баруун тал $3/2$."
+        }
+      ],
+      "related": [
+        "trig-triple-cos",
+        "trig-sin-add"
+      ],
+      "keywords": [
+        "Гурвалсан өнцгийн синус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-triple-cos",
+      "title": "Гурвалсан өнцгийн косинус",
+      "order": 23,
+      "level": "CORE",
+      "grade": 11,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos3x=4\\cos^3x-3\\cos x",
+      "general": "\\cos3x=4\\cos^3x-3\\cos x",
+      "conditions": [
+        "x\\in\\mathbb R"
+      ],
+      "explanation": "Гурвалсан өнцгийн косинус нь эх косинусын куб болон шугаман гишүүний ялгавар юм. Синусын гурвалсан дүрэмтэй ижил тоонуудтай боловч гишүүдийн дараалал өөр. Косинусын кубтай илэрхийллийг багасгахад хэрэглэнэ.",
+      "derivation": [
+        "$\\cos(2x+x)=\\cos2x\\cos x-\\sin2x\\sin x$.",
+        "$(2\\cos^2x-1)\\cos x-2\\sin^2x\\cos x$ гэж орлуулна.",
+        "$\\sin^2x=1-\\cos^2x$-оос $4\\cos^3x-3\\cos x$ гарна."
+      ],
+      "mnemonic": "Косинус эхлээд дөрвөн куб, дараа нь гурван энгийн утга.",
+      "examples": [
+        {
+          "problem": "$\\cos x=2/3$ бол $\\cos3x$-г ол.",
+          "steps": [
+            "$4(2/3)^3-3(2/3)$.",
+            "$32/27-2=-22/27$."
+          ],
+          "answer": "$-22/27$"
+        },
+        {
+          "problem": "$4\\cos^3(\\pi/9)-3\\cos(\\pi/9)$-ийг ол.",
+          "steps": [
+            "$\\cos(3\\pi/9)=\\cos(\\pi/3)$ гэж бичнэ.",
+            "Үндсэн утга $1/2$."
+          ],
+          "answer": "$1/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Синусын дүрмийн дарааллыг дуурайж $3\\cos x-4\\cos^3x$ гэж бичих."
+      ],
+      "eeshTip": "Тусгай өнцгийн утгыг кублахын оронд эхлээд өнцгийг гурав дахин өсгөж үз.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos x=1/2:\\quad\\cos3x=\\square",
+          "answer": "-1",
+          "distractors": [
+            "1",
+            "-1/2",
+            "1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "4\\cos^3(\\pi/3)-3\\cos(\\pi/3)=\\cos\\pi",
+          "answer": "true",
+          "why": "Гурвалсан өнцгийн хоёр тал хоёулаа $-1$."
+        }
+      ],
+      "related": [
+        "trig-triple-sin",
+        "trig-cos-add"
+      ],
+      "keywords": [
+        "Гурвалсан өнцгийн косинус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-half-sin",
+      "title": "Хагас өнцгийн синус",
+      "order": 24,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin\\frac x2=\\pm\\sqrt{\\frac{1-\\cos x}{2}}",
+      "general": "\\sin\\frac x2=\\pm\\sqrt{\\frac{1-\\cos x}{2}}",
+      "conditions": [
+        "x\\in\\mathbb R",
+        "\\pm\\text{ тэмдгийг }x/2\\text{-ын мөчөөр сонгоно}"
+      ],
+      "explanation": "Хагас өнцгийн синусын модуль бүтэн өнцгийн косинусаар тодорхойлогдоно. Квадратаас язгуур авч байгаа тул тэмдгийг хагас өнцгийн мөчөөс сонгох шаардлагатай. Бүтэн өнцгийн мөчийн тэмдгийг шууд хэрэглэхгүй.",
+      "derivation": [
+        "$\\cos x=1-2\\sin^2(x/2)$-оос $\\sin^2(x/2)=(1-\\cos x)/2$.",
+        "Язгуур авахад эхлээд модуль гарна; $x/2$-ын мөчөөр эерэг эсвэл сөрөг тэмдгийг сонгоно."
+      ],
+      "mnemonic": "Язгуур нь хэмжээг, хагас өнцөг нь тэмдгийг хэлнэ.",
+      "examples": [
+        {
+          "problem": "$\\cos x=7/25$, $0<x<\\pi$ бол $\\sin(x/2)$-г ол.",
+          "steps": [
+            "$0<x/2<\\pi/2$ тул синус эерэг.",
+            "$\\sqrt{(1-7/25)/2}=\\sqrt{9/25}=3/5$."
+          ],
+          "answer": "$3/5$"
+        },
+        {
+          "problem": "$x=5\\pi/2$ бол $\\sin(x/2)$-г ол.",
+          "steps": [
+            "$x/2=5\\pi/4$ гуравдугаар мөчид тул сөрөг.",
+            "$\\cos x=0$ учраас $-\\sqrt{1/2}=-\\sqrt2/2$."
+          ],
+          "answer": "$-\\sqrt2/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Хагас өнцгийн синусыг үргэлж эерэг язгуураар авах."
+      ],
+      "eeshTip": "Өнцөг нэг бүтэн эргэлтээс их байвал эхлээд хагасласан өнцгийн мөчийг тогтоо.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(\\pi/12)=\\square",
+          "answer": "\\sqrt{2-\\sqrt3}/2",
+          "distractors": [
+            "-\\sqrt{2-\\sqrt3}/2",
+            "\\sqrt{2+\\sqrt3}/2",
+            "1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin(5\\pi/4)=\\sqrt{(1-\\cos(5\\pi/2))/2}",
+          "answer": "false",
+          "why": "Баруун тал эерэг, зүүн тал сөрөг; тэмдэг дутуу."
+        }
+      ],
+      "related": [
+        "trig-half-cos",
+        "trig-power-reduction"
+      ],
+      "keywords": [
+        "Хагас өнцгийн синус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-half-cos",
+      "title": "Хагас өнцгийн косинус",
+      "order": 25,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos\\frac x2=\\pm\\sqrt{\\frac{1+\\cos x}{2}}",
+      "general": "\\cos\\frac x2=\\pm\\sqrt{\\frac{1+\\cos x}{2}}",
+      "conditions": [
+        "x\\in\\mathbb R",
+        "\\pm\\text{ тэмдгийг }x/2\\text{-ын мөчөөр сонгоно}"
+      ],
+      "explanation": "Хагас өнцгийн косинусын язгуур дотор нэг дээр бүтэн өнцгийн косинусыг нэмнэ. Синусын хувилбартай ялгаа нь энэ нэмэх тэмдэг юм. Гаднах тэмдгийг хагас өнцгийн косинус эерэг эсэхээр тогтооно.",
+      "derivation": [
+        "$\\cos x=2\\cos^2(x/2)-1$-ээс $\\cos^2(x/2)=(1+\\cos x)/2$.",
+        "Язгуур авч, хагас өнцгийн мөчөөр гаднах тэмдгийг сонгоно."
+      ],
+      "mnemonic": "Косинусын хагас өнцөгт дотор нь нэмэх тэмдэг.",
+      "examples": [
+        {
+          "problem": "$\\cos x=7/25$, $0<x<\\pi$ бол $\\cos(x/2)$-г ол.",
+          "steps": [
+            "Хагас өнцөг нэгдүгээр мөчид тул эерэг.",
+            "$\\sqrt{(1+7/25)/2}=4/5$."
+          ],
+          "answer": "$4/5$"
+        },
+        {
+          "problem": "$\\cos x=-7/25$, $\\pi<x<2\\pi$ бол $\\cos(x/2)$-г ол.",
+          "steps": [
+            "$\\pi/2<x/2<\\pi$ тул косинус сөрөг.",
+            "$-\\sqrt{(1-7/25)/2}=-3/5$."
+          ],
+          "answer": "$-3/5$"
+        }
+      ],
+      "commonMistakes": [
+        "Хагас өнцгийн косинусын доторх нэмэхийг хасахтай солих."
+      ],
+      "eeshTip": "Синус, косинусын хагас өнцгийг хоёул олсон бол квадратуудын нийлбэрийг шалга.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(\\pi/8)=\\square",
+          "answer": "\\sqrt{2+\\sqrt2}/2",
+          "distractors": [
+            "\\sqrt{2-\\sqrt2}/2",
+            "-\\sqrt{2+\\sqrt2}/2",
+            "\\sqrt2/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos(3\\pi/4)<0",
+          "answer": "true",
+          "why": "Хоёрдугаар мөчид хэвтээ координат сөрөг."
+        }
+      ],
+      "related": [
+        "trig-half-sin",
+        "trig-half-tan"
+      ],
+      "keywords": [
+        "Хагас өнцгийн косинус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-half-tan",
+      "title": "Хагас өнцгийн тангенс",
+      "order": 26,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\operatorname{tg}\\frac x2=\\frac{\\sin x}{1+\\cos x}",
+      "general": "\\operatorname{tg}\\frac x2=\\frac{\\sin x}{1+\\cos x}",
+      "conditions": [
+        "\\cos x\\ne-1"
+      ],
+      "explanation": "Хагас өнцгийн тангенсыг язгуургүй харьцаагаар бичиж болно. Энэ хэлбэр тэмдгийг синус ба хуваарийн утгаар өөрөө хадгалдаг. Косинус хасах нэг болох цэгт хуваарь тэг, хагас өнцгийн тангенс мөн тодорхойгүй.",
+      "derivation": [
+        "$\\sin x=2\\sin(x/2)\\cos(x/2)$, $1+\\cos x=2\\cos^2(x/2)$.",
+        "Хуваарь тэг биш үед харьцааг хураавал $\\sin(x/2)/\\cos(x/2)$."
+      ],
+      "mnemonic": "Бүтэн синусыг нэг нэмэх бүтэн косинуст хуваа.",
+      "examples": [
+        {
+          "problem": "$\\sin x=3/5$, $\\cos x=4/5$ бол $\\operatorname{tg}(x/2)$-г ол.",
+          "steps": [
+            "Хуваарь $1+4/5=9/5$.",
+            "$(3/5)/(9/5)=1/3$."
+          ],
+          "answer": "$1/3$"
+        },
+        {
+          "problem": "$\\sin x=-4/5$, $\\cos x=3/5$ бол $\\operatorname{tg}(x/2)$-г ол.",
+          "steps": [
+            "Хуваарь $1+3/5=8/5$.",
+            "$(-4/5)/(8/5)=-1/2$."
+          ],
+          "answer": "$-1/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Урвуу хувилбар $(1-\\cos x)/\\sin x$-г $\\sin x=0$ цэгт хэрэглэх."
+      ],
+      "eeshTip": "Өгсөн синус, косинусын харьцаа байгаа бол язгууртай хэлбэрээс энэ нь хурдан.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{tg}(\\pi/6)=\\square",
+          "answer": "1/\\sqrt3",
+          "distractors": [
+            "\\sqrt3",
+            "1/2",
+            "1"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{tg}(0/2)=\\sin0/(1+\\cos0)",
+          "answer": "true",
+          "why": "Хуваарь хоёр, хоёр тал тэг."
+        }
+      ],
+      "related": [
+        "trig-universal",
+        "trig-half-sin"
+      ],
+      "keywords": [
+        "Хагас өнцгийн тангенс"
+      ],
+      "widget": null,
+      "variants": [
+        {
+          "label": "Синус тэг биш үед",
+          "latex": "\\operatorname{tg}(x/2)=\\frac{1-\\cos x}{\\sin x}\\quad(\\sin x\\ne0)"
+        }
+      ]
+    },
+    {
+      "slug": "trig-power-reduction",
+      "title": "Квадрат зэргийг бууруулах",
+      "order": 27,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin^2x=\\frac{1-\\cos2x}{2},\\qquad\\cos^2x=\\frac{1+\\cos2x}{2}",
+      "general": "\\sin^2x=\\frac{1-\\cos2x}{2},\\qquad\\cos^2x=\\frac{1+\\cos2x}{2}",
+      "conditions": [
+        "x\\in\\mathbb R"
+      ],
+      "explanation": "Синус, косинусын квадратыг давхар өнцгийн косинустай шугаман илэрхийлэл болгож болно. Энэ хэлбэрт гаднах язгуур байхгүй учраас мөчийн тэмдэг сонгох шаардлагагүй. Квадраттай илэрхийллийг нийлбэр, ялгавар болгоход хэрэглэнэ.",
+      "derivation": [
+        "$\\cos2x=1-2\\sin^2x$-ийг синусын квадратын хувьд бодно.",
+        "$\\cos2x=2\\cos^2x-1$-ийг косинусын квадратын хувьд бодно."
+      ],
+      "mnemonic": "Синусын квадрат хасах, косинусын квадрат нэмэх.",
+      "examples": [
+        {
+          "problem": "$\\sin^2 15^\\circ$-ыг ол.",
+          "steps": [
+            "$(1-\\cos30^\\circ)/2$.",
+            "$(1-\\sqrt3/2)/2=(2-\\sqrt3)/4$."
+          ],
+          "answer": "$(2-\\sqrt3)/4$"
+        },
+        {
+          "problem": "$\\cos^2(\\pi/8)$-ыг ол.",
+          "steps": [
+            "$(1+\\cos(\\pi/4))/2$.",
+            "$(1+\\sqrt2/2)/2=(2+\\sqrt2)/4$."
+          ],
+          "answer": "$(2+\\sqrt2)/4$"
+        }
+      ],
+      "commonMistakes": [
+        "Баруун талд давхар өнцгийн оронд эх өнцгийг үлдээх."
+      ],
+      "eeshTip": "Хагас өнцгийн томьёотой холбоотой ч квадратын утга асуувал язгуур авах хэрэггүй.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin^2(\\pi/4)=\\square",
+          "answer": "1/2",
+          "distractors": [
+            "\\sqrt2/2",
+            "1",
+            "1/4"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos^2x=(1+\\cos2x)/2\\text{ бүх бодит }x\\text{-д}",
+          "answer": "true",
+          "why": "Давхар косинусын дүрмийг шилжүүлж бичсэн."
+        }
+      ],
+      "related": [
+        "trig-double-cos",
+        "trig-half-sin"
+      ],
+      "keywords": [
+        "Квадрат зэргийг бууруулах"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-sum-sines",
+      "title": "Синусуудын нийлбэрийг үржвэрт шилжүүлэх",
+      "order": 28,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin u+\\sin v=2\\sin\\frac{u+v}{2}\\cos\\frac{u-v}{2}",
+      "general": "\\sin u+\\sin v=2\\sin\\frac{u+v}{2}\\cos\\frac{u-v}{2}",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Хоёр синусын нийлбэрийг дундаж өнцгийн синус ба хагас ялгаврын косинусын үржвэр болгож болно. Энэ нь нийлбэр, ялгаврын синусын дүрмүүдийг нэмсэн үр дүн. Тэгшитгэлд үржвэр тэг байх аргыг хэрэглэхэд тустай.",
+      "derivation": [
+        "$p=(u+v)/2$, $q=(u-v)/2$ гэвэл $u=p+q$, $v=p-q$.",
+        "$\\sin(p+q)+\\sin(p-q)$-д солбисон хоёр гишүүн хураагдаж $2\\sin p\\cos q$ үлдэнэ."
+      ],
+      "mnemonic": "Синусын нийлбэрт дундаж нь синус, хагас ялгавар нь косинус.",
+      "examples": [
+        {
+          "problem": "$\\sin75^\\circ+\\sin15^\\circ$-ыг ол.",
+          "steps": [
+            "Дундаж өнцөг $45^\\circ$, хагас ялгавар $30^\\circ$.",
+            "$2\\sin45^\\circ\\cos30^\\circ=\\sqrt6/2$."
+          ],
+          "answer": "$\\sqrt6/2$"
+        },
+        {
+          "problem": "$\\sin x+\\sin3x$-ийг үржвэр болго.",
+          "steps": [
+            "Дундаж нь $2x$, хагас ялгавар $-x$.",
+            "Косинус тэгш тул $2\\sin2x\\cos x$."
+          ],
+          "answer": "$2\\sin2x\\cos x$"
+        }
+      ],
+      "commonMistakes": [
+        "Дундаж өнцөг ба хагас ялгаврыг хоёрт хуваахаа мартах."
+      ],
+      "eeshTip": "Олон гишүүнттэй тригонометр тэгшитгэлийг үржвэрт задлахад хэрэглэ.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(\\pi/6)+\\sin(5\\pi/6)=\\square",
+          "answer": "1",
+          "distractors": [
+            "0",
+            "\\sqrt3",
+            "-1"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin u+\\sin v=2\\sin((u+v)/2)\\cos((u-v)/2)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "true",
+          "why": "Нийлбэр ба ялгаврын синусын дүрмүүдийг нэмэхэд гарна."
+        }
+      ],
+      "related": [
+        "trig-difference-sines",
+        "trig-sin-add"
+      ],
+      "keywords": [
+        "Синусуудын нийлбэрийг үржвэрт шилжүүлэх"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-difference-sines",
+      "title": "Синусуудын ялгаврыг үржвэрт шилжүүлэх",
+      "order": 29,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin u-\\sin v=2\\cos\\frac{u+v}{2}\\sin\\frac{u-v}{2}",
+      "general": "\\sin u-\\sin v=2\\cos\\frac{u+v}{2}\\sin\\frac{u-v}{2}",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Синусуудын ялгаварт дундаж өнцөг косинус болж, хагас ялгавар синус болно. Өнцгүүдийн дараалал хагас ялгаврын тэмдэгт нөлөөлнө. Нийлбэрийн дүрмээс функцуудын байр солигдсоноор ялгарна.",
+      "derivation": [
+        "$u=p+q$, $v=p-q$ гэж тэмдэглэнэ.",
+        "$\\sin(p+q)-\\sin(p-q)$-д ижил синус-косинус гишүүд хасагдаж $2\\cos p\\sin q$ үлдэнэ."
+      ],
+      "mnemonic": "Синусын ялгавар дундаж дээр косинус хэрэглэнэ.",
+      "examples": [
+        {
+          "problem": "$\\sin75^\\circ-\\sin15^\\circ$-ыг ол.",
+          "steps": [
+            "$2\\cos45^\\circ\\sin30^\\circ$.",
+            "$2(\\sqrt2/2)(1/2)=\\sqrt2/2$."
+          ],
+          "answer": "$\\sqrt2/2$"
+        },
+        {
+          "problem": "$\\sin3x-\\sin x$-ийг үржвэр болго.",
+          "steps": [
+            "Дундаж $2x$, хагас ялгавар $x$.",
+            "$2\\cos2x\\sin x$ гарна."
+          ],
+          "answer": "$2\\cos2x\\sin x$"
+        }
+      ],
+      "commonMistakes": [
+        "Хагас ялгаврыг урвуу дарааллаар бичиж тэмдэг солих."
+      ],
+      "eeshTip": "Эхний өнцөг багавал хагас ялгавар сөрөг болох нь зөв.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(5\\pi/6)-\\sin(\\pi/6)=\\square",
+          "answer": "0",
+          "distractors": [
+            "1",
+            "-1",
+            "\\sqrt3/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin u-\\sin v=2\\sin((u+v)/2)\\cos((u-v)/2)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "false",
+          "why": "$u=v=\\pi/6$ үед зүүн тал тэг, баруун тал нэг."
+        }
+      ],
+      "related": [
+        "trig-sum-sines",
+        "trig-sin-difference"
+      ],
+      "keywords": [
+        "Синусуудын ялгаврыг үржвэрт шилжүүлэх"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-sum-cosines",
+      "title": "Косинусуудын нийлбэрийг үржвэрт шилжүүлэх",
+      "order": 30,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos u+\\cos v=2\\cos\\frac{u+v}{2}\\cos\\frac{u-v}{2}",
+      "general": "\\cos u+\\cos v=2\\cos\\frac{u+v}{2}\\cos\\frac{u-v}{2}",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Косинусуудын нийлбэр хоёр косинусын үржвэр болдог. Дундаж өнцөг ба хагас ялгавар дахин гарч ирнэ. Косинус тэгш тул эх хоёр өнцгийн дарааллыг солиход үр дүн өөрчлөгдөхгүй.",
+      "derivation": [
+        "$u=p+q$, $v=p-q$ гэж бичнэ.",
+        "$\\cos(p+q)+\\cos(p-q)$-д синусуудын үржвэрүүд хураагдаж $2\\cos p\\cos q$ үлдэнэ."
+      ],
+      "mnemonic": "Косинусын нийлбэрт хоёр косинус хэвээр.",
+      "examples": [
+        {
+          "problem": "$\\cos15^\\circ+\\cos75^\\circ$-ыг ол.",
+          "steps": [
+            "$2\\cos45^\\circ\\cos(-30^\\circ)$.",
+            "Косинус тэгш тул утга $\\sqrt6/2$."
+          ],
+          "answer": "$\\sqrt6/2$"
+        },
+        {
+          "problem": "$\\cos x+\\cos3x$-ийг үржвэр болго.",
+          "steps": [
+            "Дундаж $2x$, хагас ялгавар $-x$.",
+            "$2\\cos2x\\cos x$ гарна."
+          ],
+          "answer": "$2\\cos2x\\cos x$"
+        }
+      ],
+      "commonMistakes": [
+        "Нийлбэрийн косинусын хоёр гишүүнийг нэг өнцгийн косинус гэж нийлүүлэх."
+      ],
+      "eeshTip": "Тэг болох нөхцөлд хоёр косинусын аль нэгийг тэгтэй тэнцүүлж болно.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(\\pi/3)+\\cos(2\\pi/3)=\\square",
+          "answer": "0",
+          "distractors": [
+            "1",
+            "-1",
+            "\\sqrt3"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos u+\\cos v=2\\cos((u+v)/2)\\cos((u-v)/2)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "true",
+          "why": "Косинусын нийлбэр ба ялгаврын дүрмүүдийн нийлбэр."
+        }
+      ],
+      "related": [
+        "trig-difference-cosines",
+        "trig-cos-difference"
+      ],
+      "keywords": [
+        "Косинусуудын нийлбэрийг үржвэрт шилжүүлэх"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-difference-cosines",
+      "title": "Косинусуудын ялгаврыг үржвэрт шилжүүлэх",
+      "order": 31,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos u-\\cos v=-2\\sin\\frac{u+v}{2}\\sin\\frac{u-v}{2}",
+      "general": "\\cos u-\\cos v=-2\\sin\\frac{u+v}{2}\\sin\\frac{u-v}{2}",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Косинусуудын ялгаварт хоёр синус болон гаднах хасах тэмдэг үүснэ. Хасах тэмдгийг хагас ялгаврын дарааллыг солих замаар дотор оруулж болно. Аль нэг хэлбэрийг тогтвортой хэрэглэвэл тэмдгийн алдаа багасна.",
+      "derivation": [
+        "$u=p+q$, $v=p-q$ гэж тавина.",
+        "$\\cos(p+q)-\\cos(p-q)$-д косинусуудын үржвэр хасагдаж $-2\\sin p\\sin q$ үлдэнэ."
+      ],
+      "mnemonic": "Косинусын ялгавар бол хасах хоёр синус.",
+      "examples": [
+        {
+          "problem": "$\\cos15^\\circ-\\cos75^\\circ$-ыг ол.",
+          "steps": [
+            "$-2\\sin45^\\circ\\sin(-30^\\circ)$.",
+            "Хоёр сөрөг тэмдэг хураагдаж $\\sqrt2/2$."
+          ],
+          "answer": "$\\sqrt2/2$"
+        },
+        {
+          "problem": "$\\cos3x-\\cos x$-ийг үржвэр болго.",
+          "steps": [
+            "Дундаж $2x$, хагас ялгавар $x$.",
+            "$-2\\sin2x\\sin x$."
+          ],
+          "answer": "$-2\\sin2x\\sin x$"
+        }
+      ],
+      "commonMistakes": [
+        "Гаднах хасах тэмдгийг орхих."
+      ],
+      "eeshTip": "Нэг хурц өнцгийн косинус нөгөөгөөс их эсэхээр хариуны тэмдгийг шалга.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(\\pi/3)-\\cos(2\\pi/3)=\\square",
+          "answer": "1",
+          "distractors": [
+            "0",
+            "-1",
+            "1/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos u-\\cos v=2\\sin((u+v)/2)\\sin((v-u)/2)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "true",
+          "why": "Хагас ялгаврын дарааллыг солиход синусын тэмдэг солигдоно."
+        }
+      ],
+      "related": [
+        "trig-sum-cosines",
+        "trig-cos-add"
+      ],
+      "keywords": [
+        "Косинусуудын ялгаврыг үржвэрт шилжүүлэх"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-product-sines",
+      "title": "Хоёр синусын үржвэрийг нийлбэрт шилжүүлэх",
+      "order": 32,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin u\\sin v=\\frac{\\cos(u-v)-\\cos(u+v)}2",
+      "general": "\\sin u\\sin v=\\frac{\\cos(u-v)-\\cos(u+v)}2",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Хоёр синусын үржвэрийг хоёр косинусын ялгаврын хагас болгон бичнэ. Ялгаврын өнцгийн косинус эхэлж орно. Энэ дараалал нь гаднах тэмдгийг зөв хадгална.",
+      "derivation": [
+        "$\\cos(u-v)=\\cos u\\cos v+\\sin u\\sin v$.",
+        "Үүнээс $\\cos(u+v)$-г хасвал $2\\sin u\\sin v$ үлдэнэ; хоёрт хуваана."
+      ],
+      "mnemonic": "Синус үржихэд ялгаврын косинусаас нийлбэрийн косинусыг хас.",
+      "examples": [
+        {
+          "problem": "$\\sin(\\pi/6)\\sin(\\pi/3)$-ыг ол.",
+          "steps": [
+            "$[\\cos(-\\pi/6)-\\cos(\\pi/2)]/2$.",
+            "$[\\sqrt3/2-0]/2=\\sqrt3/4$."
+          ],
+          "answer": "$\\sqrt3/4$"
+        },
+        {
+          "problem": "$\\sin x\\sin3x$-ийг нийлбэрээр илэрхийл.",
+          "steps": [
+            "$[\\cos(-2x)-\\cos4x]/2$.",
+            "Косинус тэгш тул $[\\cos2x-\\cos4x]/2$."
+          ],
+          "answer": "$(\\cos2x-\\cos4x)/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Нийлбэр ба ялгаврын косинусын дарааллыг сольж тэмдэг алдах."
+      ],
+      "eeshTip": "Квадратыг энэ дүрэмд хоёр ижил өнцөг тавьж мөн бууруулж болно.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(\\pi/4)\\sin(\\pi/4)=\\square",
+          "answer": "1/2",
+          "distractors": [
+            "1",
+            "1/4",
+            "\\sqrt2/2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin u\\sin v=[\\cos(u-v)-\\cos(u+v)]/2\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "true",
+          "why": "Косинусын ялгавар ба нийлбэрийн томьёог хассан үр дүн."
+        }
+      ],
+      "related": [
+        "trig-product-cosines",
+        "trig-power-reduction"
+      ],
+      "keywords": [
+        "Хоёр синусын үржвэрийг нийлбэрт шилжүүлэх"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-product-cosines",
+      "title": "Хоёр косинусын үржвэрийг нийлбэрт шилжүүлэх",
+      "order": 33,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\cos u\\cos v=\\frac{\\cos(u-v)+\\cos(u+v)}2",
+      "general": "\\cos u\\cos v=\\frac{\\cos(u-v)+\\cos(u+v)}2",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Хоёр косинусын үржвэр нь нийлбэр ба ялгаврын өнцгийн косинусуудын дундаж болно. Хоёр гишүүн нэмэгддэг тул дараалал солиход асуудалгүй. Гэхдээ хагас гэсэн үржүүлэгчийг заавал хадгална.",
+      "derivation": [
+        "Косинусын нийлбэр ба ялгаврын томьёог нэмнэ.",
+        "Синусуудын үржвэрүүд хураагдаж $2\\cos u\\cos v$ гарна; хоёрт хуваана."
+      ],
+      "mnemonic": "Косинус үржихэд хоёр косинус нэмэгдэнэ.",
+      "examples": [
+        {
+          "problem": "$\\cos(\\pi/6)\\cos(\\pi/3)$-ыг ол.",
+          "steps": [
+            "$[\\cos(-\\pi/6)+\\cos(\\pi/2)]/2$.",
+            "$\\sqrt3/4$."
+          ],
+          "answer": "$\\sqrt3/4$"
+        },
+        {
+          "problem": "$\\cos x\\cos3x$-ийг нийлбэрээр илэрхийл.",
+          "steps": [
+            "$[\\cos(-2x)+\\cos4x]/2$.",
+            "Косинусын тэгш чанараар $[\\cos2x+\\cos4x]/2$."
+          ],
+          "answer": "$(\\cos2x+\\cos4x)/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Үржвэрийг нийлбэрт шилжүүлэхдээ хоёрт хуваахаа мартах."
+      ],
+      "eeshTip": "Ижил өнцөгтэй хоёр косинус дээр хэрэглэвэл зэрэг бууруулах дүрэм буцаад гарна.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos(\\pi/3)\\cos(\\pi/3)=\\square",
+          "answer": "1/4",
+          "distractors": [
+            "1/2",
+            "1",
+            "0"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "2\\cos u\\cos v=\\cos(u-v)+\\cos(u+v)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "true",
+          "why": "Хоёрт хуваасан хэлбэрийг хоёр дахин үржүүлсэн."
+        }
+      ],
+      "related": [
+        "trig-product-sines",
+        "trig-product-sin-cos"
+      ],
+      "keywords": [
+        "Хоёр косинусын үржвэрийг нийлбэрт шилжүүлэх"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-product-sin-cos",
+      "title": "Синус ба косинусын үржвэр",
+      "order": 34,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\sin u\\cos v=\\frac{\\sin(u+v)+\\sin(u-v)}2",
+      "general": "\\sin u\\cos v=\\frac{\\sin(u+v)+\\sin(u-v)}2",
+      "conditions": [
+        "u,v\\in\\mathbb R"
+      ],
+      "explanation": "Синус, косинусын үржвэр нь хоёр синусын нийлбэрийн хагас болно. Ялгаврын өнцөгт синусын эх аргументыг эхэлж бичнэ. Үржигдэхүүнүүдийн үүргийг сольвол ялгаврын тэмдгийг мөн зөв тохируулна.",
+      "derivation": [
+        "$\\sin(u+v)$ ба $\\sin(u-v)$-ийн томьёог нэмнэ.",
+        "Косинус-синус солбисон гишүүн хураагдаж $2\\sin u\\cos v$ гарна."
+      ],
+      "mnemonic": "Синусын аргумент ялгаврын эхэнд байна.",
+      "examples": [
+        {
+          "problem": "$\\sin(\\pi/6)\\cos(\\pi/3)$-ыг ол.",
+          "steps": [
+            "$[\\sin(\\pi/2)+\\sin(-\\pi/6)]/2$.",
+            "$(1-1/2)/2=1/4$."
+          ],
+          "answer": "$1/4$"
+        },
+        {
+          "problem": "$\\sin3x\\cos x$-ийг нийлбэр болго.",
+          "steps": [
+            "Нийлбэр өнцөг $4x$, ялгавар $2x$.",
+            "$[\\sin4x+\\sin2x]/2$."
+          ],
+          "answer": "$(\\sin4x+\\sin2x)/2$"
+        }
+      ],
+      "commonMistakes": [
+        "Ялгаврыг $v-u$ гэж бичиж хоёр дахь синусын тэмдгийг солих."
+      ],
+      "eeshTip": "Нэг өнцөгтэй синус, косинусын үржвэрт давхар өнцгийн дүрэм илүү богино.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin(\\pi/4)\\cos(\\pi/4)=\\square",
+          "answer": "1/2",
+          "distractors": [
+            "1",
+            "1/4",
+            "\\sqrt2"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "2\\sin u\\cos v=\\sin(u+v)+\\sin(v-u)\\text{ бүх бодит }u,v\\text{-д}",
+          "answer": "false",
+          "why": "$u=\\pi/2$, $v=0$ үед зүүн тал хоёр, баруун тал тэг."
+        }
+      ],
+      "related": [
+        "trig-product-cosines",
+        "trig-double-sin"
+      ],
+      "keywords": [
+        "Синус ба косинусын үржвэр"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-universal",
+      "title": "Хагас өнцгийн тангенсаар универсал орлуулга",
+      "order": 35,
+      "level": "EXTRA",
+      "grade": 11,
+      "topicSlugs": [
+        "TRIG",
+        "TRIGEQ"
+      ],
+      "latex": "t=\\operatorname{tg}\\frac x2:\\quad\\sin x=\\frac{2t}{1+t^2},\\quad\\cos x=\\frac{1-t^2}{1+t^2},\\quad\\operatorname{tg}x=\\frac{2t}{1-t^2}",
+      "general": "t=\\operatorname{tg}\\frac x2:\\quad\\sin x=\\frac{2t}{1+t^2},\\quad\\cos x=\\frac{1-t^2}{1+t^2},\\quad\\operatorname{tg}x=\\frac{2t}{1-t^2}",
+      "conditions": [
+        "x\\ne\\pi+2\\pi k\\quad(k\\in\\mathbb Z)",
+        "\\operatorname{tg}x\\text{-ийн хэлбэрт }t\\ne\\pm1"
+      ],
+      "explanation": "Хагас өнцгийн тангенсыг шинэ хувьсагч болговол синус, косинус рационал илэрхийлэл болно. Ингэснээр зарим тригонометр тэгшитгэлийг алгебрийн тэгшитгэлд шилжүүлдэг. Орлуулга тодорхойгүй сондгой хагас эргэлтийн цэгүүдийг эх тэгшитгэлд тусад нь шалгах хэрэгтэй.",
+      "derivation": [
+        "$1+t^2=1/\\cos^2(x/2)$ тул $\\cos^2(x/2)=1/(1+t^2)$.",
+        "$\\sin x=2\\sin(x/2)\\cos(x/2)=2t/(1+t^2)$.",
+        "$\\cos x=2\\cos^2(x/2)-1=(1-t^2)/(1+t^2)$; харьцаа авч тангенсыг олно."
+      ],
+      "mnemonic": "Нийтлэг хуваарь нэг нэмэх квадрат; синус дээр хоёр энгийн, косинус дээр нэг хасах квадрат.",
+      "examples": [
+        {
+          "problem": "$t=\\operatorname{tg}(x/2)=1/2$ бол $\\sin x$, $\\cos x$-ийг ол.",
+          "steps": [
+            "$1+t^2=5/4$.",
+            "$\\sin x=1/(5/4)=4/5$, $\\cos x=(3/4)/(5/4)=3/5$."
+          ],
+          "answer": "$\\sin x=4/5,\\ \\cos x=3/5$"
+        },
+        {
+          "problem": "$t=\\operatorname{tg}(x/2)=-2$ бол $\\sin x$, $\\cos x$-ийг ол.",
+          "steps": [
+            "$1+t^2=5$.",
+            "$\\sin x=-4/5$, $\\cos x=(1-4)/5=-3/5$."
+          ],
+          "answer": "$\\sin x=-4/5,\\ \\cos x=-3/5$"
+        }
+      ],
+      "commonMistakes": [
+        "$x=\\pi$ зэрэг орлуулгагүй цэгийг эх тэгшитгэлд шалгахгүй хаях."
+      ],
+      "eeshTip": "Орлуулгын дараа олсон бодит $t$ бүрт $x=2\\operatorname{arctg}t+2\\pi k$ гэж буцна.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "t=\\operatorname{tg}(x/2)=1/3:\\quad\\sin x=\\square",
+          "answer": "3/5",
+          "distractors": [
+            "4/5",
+            "1/3",
+            "2/3"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "t=\\operatorname{tg}(x/2)\\text{ орлуулга }x=\\pi\\text{-д тодорхойлогдоно}",
+          "answer": "false",
+          "why": "Хагас өнцөг $\\pi/2$ тул тангенс тодорхойгүй."
+        }
+      ],
+      "related": [
+        "trig-half-tan",
+        "trig-sine-equation"
+      ],
+      "keywords": [
+        "Хагас өнцгийн тангенсаар универсал орлуулга"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-harmonic",
+      "title": "Синус ба косинусын шугаман нийлбэр",
+      "order": 36,
+      "level": "CORE",
+      "grade": 11,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "a\\sin x+b\\cos x=R\\sin(x+\\varphi),\\quad R=\\sqrt{a^2+b^2},\\quad E=[-R,R]",
+      "general": "a\\sin x+b\\cos x=R\\sin(x+\\varphi),\\quad R=\\sqrt{a^2+b^2},\\quad E=[-R,R]",
+      "conditions": [
+        "a,b\\in\\mathbb R",
+        "a^2+b^2>0",
+        "\\cos\\varphi=a/R",
+        "\\sin\\varphi=b/R",
+        "x\\in\\mathbb R"
+      ],
+      "explanation": "Ижил өнцөгтэй синус, косинусын шугаман нийлбэрийг нэг шилжсэн синус болгож болно. Шинэ далайц нь хоёр коэффициентийн квадратуудын нийлбэрийн язгуур байна. Фазын өнцгийг хоёр харьцаагаар нь зэрэг тогтоох тул зөв мөчийг сонгоно.",
+      "derivation": [
+        "$R\\sin(x+\\varphi)=R\\cos\\varphi\\sin x+R\\sin\\varphi\\cos x$.",
+        "Коэффициентуудыг тааруулахад $R\\cos\\varphi=a$, $R\\sin\\varphi=b$; квадратлаж нэмбэл $R^2=a^2+b^2$.",
+        "Синус $[-1,1]$-ийн бүх утгыг авдаг тул шинэ илэрхийллийн утгын муж $[-R,R]$."
+      ],
+      "mnemonic": "Коэффициентуудыг катет гэж төсөөл; шинэ далайц нь гипотенуз.",
+      "examples": [
+        {
+          "problem": "$3\\sin x+4\\cos x$, $x\\in\\mathbb R$-ийн утгын мужийг ол.",
+          "steps": [
+            "$R=\\sqrt{9+16}=5$.",
+            "Шилжсэн синусын хамгийн бага, их утга $-5,5$."
+          ],
+          "answer": "$[-5,5]$"
+        },
+        {
+          "problem": "$\\sin x+\\cos x$-ийг нэг синусаар илэрхийл.",
+          "steps": [
+            "$R=\\sqrt2$, $\\cos\\varphi=\\sin\\varphi=1/\\sqrt2$.",
+            "$\\varphi=\\pi/4$ сонгож болно."
+          ],
+          "answer": "$\\sqrt2\\sin(x+\\pi/4)$"
+        }
+      ],
+      "commonMistakes": [
+        "Далайцыг $a+b$ гэж коэффициентуудыг шууд нэмэх."
+      ],
+      "eeshTip": "Хамгийн их утга асуувал фазын өнцгийг заавал олох шаардлагагүй.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "5\\sin x+12\\cos x,\\ x\\in\\mathbb R:\\quad E=\\square",
+          "answer": "[-13,13]",
+          "distractors": [
+            "[-17,17]",
+            "[-7,7]",
+            "[0,13]"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin x+\\cos x\\le\\sqrt2\\text{ бүх бодит }x\\text{-д}",
+          "answer": "true",
+          "why": "Нийлбэр нь далайц $\\sqrt2$-той синус болно."
+        }
+      ],
+      "related": [
+        "trig-sine-wave",
+        "trig-sin-add"
+      ],
+      "keywords": [
+        "Синус ба косинусын шугаман нийлбэр"
+      ],
+      "widget": "sine-graph",
+      "variants": []
+    },
+    {
+      "slug": "trig-inverse",
+      "title": "Урвуу тригонометрийн үндсэн утгууд",
+      "order": 37,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\begin{array}{c|c}\\text{функц}&\\text{утгын муж}\\\\\\arcsin t&[-\\pi/2,\\pi/2]\\\\\\arccos t&[0,\\pi]\\\\\\operatorname{arctg}t&(-\\pi/2,\\pi/2)\\\\\\operatorname{arcctg}t&(0,\\pi)\\end{array}",
+      "general": "\\begin{array}{c|c}\\text{функц}&\\text{утгын муж}\\\\\\arcsin t&[-\\pi/2,\\pi/2]\\\\\\arccos t&[0,\\pi]\\\\\\operatorname{arctg}t&(-\\pi/2,\\pi/2)\\\\\\operatorname{arcctg}t&(0,\\pi)\\end{array}",
+      "conditions": [
+        "\\arcsin,\\arccos:\\ -1\\le t\\le1",
+        "\\operatorname{arctg},\\operatorname{arcctg}:\\ t\\in\\mathbb R",
+        "\\text{утгууд радианаар}"
+      ],
+      "explanation": "Үелэх функц бүх бодит тоон дээр нэг-нэг утгатай биш тул урвуу байгуулахдаа нэг монотон завсарт хязгаарлана. Урвуугийн гаралт нь хүснэгтэд заасан үндсэн өнцөг байна. Котангенсын урвууг энд тэгээс пи хүртэлх нээлттэй завсарт сонгосон.",
+      "derivation": [
+        "Синусыг $[-\\pi/2,\\pi/2]$, косинусыг $[0,\\pi]$ дээр хязгаарлахад тус бүр $[-1,1]$-д нэг-нэгээр харгалзана.",
+        "Тангенсыг $(-\\pi/2,\\pi/2)$, котангенсыг $(0,\\pi)$ дээр хязгаарлахад бүх бодит гаралт бүрд ганц өнцөг харгалзана.",
+        "Эдгээр харгалзааг урвуулахад оролтын муж ба утгын муж солигдож хүснэгт гарна."
+      ],
+      "mnemonic": "Урвуу функц бүх өнцгийг биш, сонгосон цонхон дахь ганц өнцгийг өгнө.",
+      "examples": [
+        {
+          "problem": "$\\arcsin(1/2)+\\arccos(1/2)$-ыг ол.",
+          "steps": [
+            "Үндсэн завсруудаас $\\arcsin(1/2)=\\pi/6$, $\\arccos(1/2)=\\pi/3$.",
+            "Нийлбэр $\\pi/2$."
+          ],
+          "answer": "$\\pi/2$"
+        },
+        {
+          "problem": "$\\operatorname{arctg}(-1)$ ба $\\operatorname{arcctg}(-1)$-г үндсэн завсруудад ол.",
+          "steps": [
+            "Тангенс $-1$ болох үндсэн өнцөг $-\\pi/4$.",
+            "Котангенс $-1$ болох $(0,\\pi)$ доторх өнцөг $3\\pi/4$."
+          ],
+          "answer": "$-\\pi/4,\\ 3\\pi/4$"
+        }
+      ],
+      "commonMistakes": [
+        "Урвуу функцийн утгад дурын бүтэн үе нэмж олон хариу бичих."
+      ],
+      "eeshTip": "Урвуугийн үндсэн утга ба тэгшитгэлийн ерөнхий шийдийг ялгаж унш.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\arccos0=\\square",
+          "answer": "\\pi/2",
+          "distractors": [
+            "-\\pi/2",
+            "3\\pi/2",
+            "0"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\arcsin2\\text{ бодит утгатай}",
+          "answer": "false",
+          "why": "Синусын утгын муж $[-1,1]$ тул хоёр гаралт боломжгүй."
+        }
+      ],
+      "related": [
+        "trig-inverse-parity",
+        "trig-sine-equation"
+      ],
+      "keywords": [
+        "Урвуу тригонометрийн үндсэн утгууд"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-inverse-parity",
+      "title": "Урвуу тригонометрийн сөрөг аргумент",
+      "order": 38,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\arcsin(-a)=-\\arcsin a,\\qquad\\arccos(-a)=\\pi-\\arccos a",
+      "general": "\\arcsin(-a)=-\\arcsin a,\\qquad\\arccos(-a)=\\pi-\\arccos a",
+      "conditions": [
+        "-1\\le a\\le1"
+      ],
+      "explanation": "Арксинусын үндсэн завсар тэгш хэмтэй учраас синусын сондгой чанарыг хадгалдаг. Арккосинусын үндсэн завсар тэгээс пи хүртэл тул сөрөг аргумент нь пи-гээс анхны өнцгийг хассантай таарна. Урвууг шууд сөрөг гаргах дүрэм бүх функцэд ижил биш.",
+      "derivation": [
+        "$u=\\arcsin a$ бол $-u$ үндсэн завсарт хэвээр ба $\\sin(-u)=-a$.",
+        "$v=\\arccos a$ бол $\\pi-v\\in[0,\\pi]$ ба $\\cos(\\pi-v)=-a$ тул үндсэн утгыг олно."
+      ],
+      "mnemonic": "Арксинусын хасах гадагш, арккосинусын хасах пи-гээс хасагдана.",
+      "examples": [
+        {
+          "problem": "$\\arcsin(-\\sqrt3/2)$-ыг ол.",
+          "steps": [
+            "$\\arcsin(\\sqrt3/2)=\\pi/3$.",
+            "Сондгой чанараар $-\\pi/3$."
+          ],
+          "answer": "$-\\pi/3$"
+        },
+        {
+          "problem": "$\\arccos(-1/2)$-ыг ол.",
+          "steps": [
+            "$\\arccos(1/2)=\\pi/3$.",
+            "$\\pi-\\pi/3=2\\pi/3$."
+          ],
+          "answer": "$2\\pi/3$"
+        }
+      ],
+      "commonMistakes": [
+        "$\\arccos(-a)=-\\arccos a$ гэж үндсэн завсрын гаднах сөрөг утга гаргах."
+      ],
+      "eeshTip": "Тоо олсны дараа үндсэн завсарт багтсан эсэхийг заавал шалга.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\arccos(-\\sqrt2/2)=\\square",
+          "answer": "3\\pi/4",
+          "distractors": [
+            "\\pi/4",
+            "-\\pi/4",
+            "5\\pi/4"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\arcsin(\\sin(5\\pi/6))=5\\pi/6",
+          "answer": "false",
+          "why": "Үндсэн завсарт буцахад $\\pi/6$ гарна."
+        }
+      ],
+      "related": [
+        "trig-inverse",
+        "trig-cosine-equation"
+      ],
+      "keywords": [
+        "Урвуу тригонометрийн сөрөг аргумент"
+      ],
+      "widget": null,
+      "variants": [
+        {
+          "label": "Тангенсын урвуу",
+          "latex": "\\operatorname{arctg}(-a)=-\\operatorname{arctg}a\\quad(a\\in\\mathbb R)"
+        },
+        {
+          "label": "Котангенсын сонгосон завсар",
+          "latex": "\\operatorname{arcctg}(-a)=\\pi-\\operatorname{arcctg}a\\quad(a\\in\\mathbb R)"
+        }
+      ]
+    },
+    {
+      "slug": "trig-sine-equation",
+      "title": "Синусын энгийн тэгшитгэлийн бүх шийд",
+      "order": 39,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIGEQ"
+      ],
+      "latex": "\\sin x=a\\iff x=(-1)^n\\arcsin a+\\pi n,\\quad n\\in\\mathbb Z",
+      "general": "\\sin x=a\\iff x=(-1)^n\\arcsin a+\\pi n,\\quad n\\in\\mathbb Z",
+      "conditions": [
+        "-1\\le a\\le1",
+        "x\\text{ радиан}"
+      ],
+      "explanation": "Нэгж тойрог дээр ижил босоо координаттай хоёр байрлалыг олж бүтэн үеүдийг нэмнэ. Хоёр салааг нэг бүхэл параметртэй хэлбэрт нэгтгэж болно. Аргументын утга нэгээс их модультай бол бодит шийдгүй, харин захын утгууд дээр хоёр салаа давхцана.",
+      "derivation": [
+        "$\\alpha=\\arcsin a$ гэвэл нэг эргэлтэд $\\alpha$ ба $\\pi-\\alpha$ чиглэлүүд ижил синустай.",
+        "Бүтэн үеүдийг нэмээд $x=\\alpha+2\\pi k$ эсвэл $x=\\pi-\\alpha+2\\pi k$.",
+        "Тэгш ба сондгой бүхэл $n$-ээр эдгээрийг $(-1)^n\\alpha+\\pi n$ болгон нэгтгэнэ."
+      ],
+      "mnemonic": "Синусын ижил өндөрт хоёр цэг, дараа нь бүтэн үеүд.",
+      "examples": [
+        {
+          "problem": "$\\sin x=1/2$-ийн бүх бодит шийдийг ол.",
+          "steps": [
+            "Үндсэн өнцөг $\\alpha=\\pi/6$.",
+            "Хоёр салаа $\\pi/6+2\\pi k$ ба $5\\pi/6+2\\pi k$."
+          ],
+          "answer": "$x=\\pi/6+2\\pi k\\ \\lor\\ x=5\\pi/6+2\\pi k,\\ k\\in\\mathbb Z$"
+        },
+        {
+          "problem": "$\\sin2x=-1$-ийн бүх бодит шийдийг ол.",
+          "steps": [
+            "$2x=-\\pi/2+2\\pi k$.",
+            "Бүх гишүүнийг хоёрт хуваана."
+          ],
+          "answer": "$x=-\\pi/4+\\pi k,\\ k\\in\\mathbb Z$"
+        }
+      ],
+      "commonMistakes": [
+        "Зөвхөн арксинусын үндсэн утгыг авч хоёр дахь салааг хаях."
+      ],
+      "eeshTip": "Тусгай утгуудыг тусад нь цээжилбэл давхардсан салаа бичихгүй.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin x=0,\\ x\\in[0,2\\pi):\\quad S=\\square",
+          "answer": "\\{0,\\pi\\}",
+          "distractors": [
+            "\\{0,\\pi,2\\pi\\}",
+            "\\{\\pi/2,3\\pi/2\\}",
+            "\\{0\\}"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\sin x=1\\text{-ийн бүх шийд }\\{\\pi/2+\\pi k:k\\in\\mathbb Z\\}",
+          "answer": "false",
+          "why": "$k=1$ үед $3\\pi/2$ орж синус нь $-1$ болно."
+        }
+      ],
+      "related": [
+        "trig-cosine-equation",
+        "trig-inverse"
+      ],
+      "keywords": [
+        "Синусын энгийн тэгшитгэлийн бүх шийд"
+      ],
+      "widget": "unit-circle",
+      "variants": [
+        {
+          "label": "Тэг утга",
+          "latex": "\\sin x=0\\iff x=\\pi k,\\ k\\in\\mathbb Z"
+        },
+        {
+          "label": "Эерэг нэг",
+          "latex": "\\sin x=1\\iff x=\\pi/2+2\\pi k,\\ k\\in\\mathbb Z"
+        },
+        {
+          "label": "Сөрөг нэг",
+          "latex": "\\sin x=-1\\iff x=-\\pi/2+2\\pi k,\\ k\\in\\mathbb Z"
+        }
+      ]
+    },
+    {
+      "slug": "trig-cosine-equation",
+      "title": "Косинусын энгийн тэгшитгэлийн бүх шийд",
+      "order": 40,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIGEQ"
+      ],
+      "latex": "\\cos x=a\\iff x=\\pm\\arccos a+2\\pi k,\\quad k\\in\\mathbb Z",
+      "general": "\\cos x=a\\iff x=\\pm\\arccos a+2\\pi k,\\quad k\\in\\mathbb Z",
+      "conditions": [
+        "-1\\le a\\le1",
+        "x\\text{ радиан}"
+      ],
+      "explanation": "Косинусын ижил утгатай хоёр өнцөг хэвтээ тэнхлэгийн хувьд тэгш хэмтэй байна. Үндсэн арккосинусыг нэмэх, хасах тэмдэгтэй авч бүтэн үеүдийг нэмнэ. Захын утгууд дээр хоёр салаа нэг олонлог болж давхцдаг.",
+      "derivation": [
+        "$\\alpha=\\arccos a\\in[0,\\pi]$ гэвэл $\\cos(-\\alpha)=\\cos\\alpha=a$.",
+        "Нэгж тойргийн ижил хэвтээ координаттай цэгүүд эдгээр чиглэлд байгаа тул бүх шийд $\\pm\\alpha+2\\pi k$."
+      ],
+      "mnemonic": "Косинусын шийд үндсэн өнцгийн нэмэх, хасах хоёр тал.",
+      "examples": [
+        {
+          "problem": "$\\cos x=-1/2$-ийн бүх бодит шийдийг ол.",
+          "steps": [
+            "$\\arccos(-1/2)=2\\pi/3$.",
+            "Хоёр тэмдэг ба бүтэн үеийг авна."
+          ],
+          "answer": "$x=\\pm2\\pi/3+2\\pi k,\\ k\\in\\mathbb Z$"
+        },
+        {
+          "problem": "$\\cos3x=1$-ийн бүх бодит шийдийг ол.",
+          "steps": [
+            "$3x=2\\pi k$.",
+            "Бүх гишүүнийг гуравт хуваана."
+          ],
+          "answer": "$x=2\\pi k/3,\\ k\\in\\mathbb Z$"
+        }
+      ],
+      "commonMistakes": [
+        "$\\cos x=1$-д үеийг $\\pi$ гэж авч $-1$ утгатай цэг оруулах."
+      ],
+      "eeshTip": "Ерөнхий шийдэд илтгэгч биш аргументын коэффициент бүх үеийг мөн хуваана.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\cos x=0,\\ x\\in[0,2\\pi):\\quad S=\\square",
+          "answer": "\\{\\pi/2,3\\pi/2\\}",
+          "distractors": [
+            "\\{0,\\pi\\}",
+            "\\{\\pi/2\\}",
+            "\\{\\pi,2\\pi\\}"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos x=-1\\text{-ийн бүх шийд }\\{\\pi+2\\pi k:k\\in\\mathbb Z\\}",
+          "answer": "true",
+          "why": "Нэгж тойргийн хамгийн зүүн цэг бүтэн эргэлтээр давтагдана."
+        }
+      ],
+      "related": [
+        "trig-sine-equation",
+        "trig-inverse-parity"
+      ],
+      "keywords": [
+        "Косинусын энгийн тэгшитгэлийн бүх шийд"
+      ],
+      "widget": "unit-circle",
+      "variants": [
+        {
+          "label": "Тэг утга",
+          "latex": "\\cos x=0\\iff x=\\pi/2+\\pi k,\\ k\\in\\mathbb Z"
+        },
+        {
+          "label": "Эерэг нэг",
+          "latex": "\\cos x=1\\iff x=2\\pi k,\\ k\\in\\mathbb Z"
+        },
+        {
+          "label": "Сөрөг нэг",
+          "latex": "\\cos x=-1\\iff x=\\pi+2\\pi k,\\ k\\in\\mathbb Z"
+        }
+      ]
+    },
+    {
+      "slug": "trig-tangent-equation",
+      "title": "Тангенсын энгийн тэгшитгэлийн бүх шийд",
+      "order": 41,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIGEQ"
+      ],
+      "latex": "\\operatorname{tg}x=a\\iff x=\\operatorname{arctg}a+\\pi k,\\quad k\\in\\mathbb Z",
+      "general": "\\operatorname{tg}x=a\\iff x=\\operatorname{arctg}a+\\pi k,\\quad k\\in\\mathbb Z",
+      "conditions": [
+        "a\\in\\mathbb R",
+        "x\\ne\\pi/2+\\pi n\\quad(n\\in\\mathbb Z)",
+        "x\\text{ радиан}"
+      ],
+      "explanation": "Тангенс нэг үндсэн завсарт бүх бодит утгыг ганц удаа авна. Дараагийн шийдүүд хагас эргэлтээр давтагдах тул нэг салаа хангалттай. Тангенсын тодорхойгүй цэгүүд энэ салаанд орохгүй.",
+      "derivation": [
+        "$\\alpha=\\operatorname{arctg}a\\in(-\\pi/2,\\pi/2)$ нь үндсэн завсрын ганц шийд.",
+        "Тангенсын үе $\\pi$ тул бүх шийд $\\alpha+\\pi k$; өөр салаа хэрэггүй."
+      ],
+      "mnemonic": "Тангенс нэг үндсэн өнцөг дээр хагас эргэлтүүдийг нэмнэ.",
+      "examples": [
+        {
+          "problem": "$\\operatorname{tg}x=\\sqrt3$-ын бүх бодит шийдийг ол.",
+          "steps": [
+            "Үндсэн өнцөг $\\pi/3$.",
+            "Тангенсын үеүдийг нэмнэ."
+          ],
+          "answer": "$x=\\pi/3+\\pi k,\\ k\\in\\mathbb Z$"
+        },
+        {
+          "problem": "$\\operatorname{tg}2x=-1$-ийн бүх бодит шийдийг ол.",
+          "steps": [
+            "$2x=-\\pi/4+\\pi k$.",
+            "Хоёрт хувааж шинэ үе $\\pi/2$ авна."
+          ],
+          "answer": "$x=-\\pi/8+\\pi k/2,\\ k\\in\\mathbb Z$"
+        }
+      ],
+      "commonMistakes": [
+        "Тангенсын үед бүтэн эргэлт хэрэглэж шийдүүдийн хагасыг алдах."
+      ],
+      "eeshTip": "Аргументын коэффициентоор үндсэн өнцөг болон үе хоёрыг зэрэг хуваа.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\operatorname{tg}x=0,\\ x\\in[0,\\pi):\\quad S=\\square",
+          "answer": "\\{0\\}",
+          "distractors": [
+            "\\{0,\\pi\\}",
+            "\\{\\pi/2\\}",
+            "\\varnothing"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\operatorname{tg}x=0\\text{-ийн бүх шийд }\\{\\pi k:k\\in\\mathbb Z\\}",
+          "answer": "true",
+          "why": "Эдгээр цэгт синус тэг, косинус тэг биш."
+        }
+      ],
+      "related": [
+        "trig-period",
+        "trig-inverse"
+      ],
+      "keywords": [
+        "Тангенсын энгийн тэгшитгэлийн бүх шийд"
+      ],
+      "widget": null,
+      "variants": [
+        {
+          "label": "Нэг ба хасах нэг",
+          "latex": "\\operatorname{tg}x=\\pm1\\iff x=\\pm\\pi/4+\\pi k,\\ k\\in\\mathbb Z\\quad\\text{харгалзах тэмдэгтэй}"
+        },
+        {
+          "label": "Котангенсын тэгшитгэл",
+          "latex": "\\operatorname{ctg}x=a\\iff x=\\operatorname{arcctg}a+\\pi k,\\ k\\in\\mathbb Z"
+        }
+      ]
+    },
+    {
+      "slug": "trig-inequalities",
+      "title": "Тригонометрийн тэнцэтгэл бишийг нэгж тойргоор бодох",
+      "order": 42,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIGEQ"
+      ],
+      "latex": "\\begin{aligned}\\sin x>a&\\iff x\\in\\bigcup_{k\\in\\mathbb Z}(\\alpha+2\\pi k,\\pi-\\alpha+2\\pi k)\\\\\\cos x>a&\\iff x\\in\\bigcup_{k\\in\\mathbb Z}(-\\beta+2\\pi k,\\beta+2\\pi k)\\end{aligned}",
+      "general": "\\begin{aligned}\\sin x>a&\\iff x\\in\\bigcup_{k\\in\\mathbb Z}(\\alpha+2\\pi k,\\pi-\\alpha+2\\pi k)\\\\\\cos x>a&\\iff x\\in\\bigcup_{k\\in\\mathbb Z}(-\\beta+2\\pi k,\\beta+2\\pi k)\\end{aligned}",
+      "conditions": [
+        "-1<a<1",
+        "\\alpha=\\arcsin a",
+        "\\beta=\\arccos a",
+        "x\\text{ радиан}"
+      ],
+      "explanation": "Синусын тэнцэтгэл биш нь тойргийн босоо координатыг, косинусынх хэвтээ координатыг харьцуулна. Зааг өнцгүүдийг олоод шаардлагатай нумыг сонгож бүтэн үеүдээр давтана. Захын тогтмолууд нэг эсвэл хасах нэгтэй тэнцсэн үед функцийн утгын мужаар тусад нь шийднэ.",
+      "derivation": [
+        "$\\sin x=a$-ийн хоёр зааг нь $\\alpha$ ба $\\pi-\\alpha$; тэдний хоорондох дээд нумд синус их байна.",
+        "$\\cos x=a$-ийн заагууд $-\\beta$, $\\beta$; баруун нумд косинус их байна.",
+        "Хатуу тэмдэгт заагуудыг хасаж, хатуу бус тэмдэгт нэмж аваад бүтэн үеүдийг нэгтгэнэ."
+      ],
+      "mnemonic": "Синус бол өндөр, косинус бол баруун зүүн байрлал.",
+      "examples": [
+        {
+          "problem": "$\\sin x\\ge1/2$, $x\\in[0,2\\pi)$-ийг бод.",
+          "steps": [
+            "Заагууд $\\pi/6$, $5\\pi/6$.",
+            "Дээд нум болон хоёр заагийг авна."
+          ],
+          "answer": "$x\\in[\\pi/6,5\\pi/6]$"
+        },
+        {
+          "problem": "$\\cos x<0$-ийн бүх бодит шийдийг ол.",
+          "steps": [
+            "Нэгж тойргийн зүүн хагас нь $\\pi/2<x<3\\pi/2$.",
+            "Хатуу тэмдэг тул заагууд орохгүй; бүтэн үеүдийг нэмнэ."
+          ],
+          "answer": "$x\\in\\bigcup_{k\\in\\mathbb Z}(\\pi/2+2\\pi k,3\\pi/2+2\\pi k)$"
+        }
+      ],
+      "commonMistakes": [
+        "Нэг үеийн шийдийг бүх бодит тоон дээрх эцсийн шийд гэж бичих."
+      ],
+      "eeshTip": "Өгсөн интервалтай огтлолцуулахдаа хамгийн сүүлийн төгсгөл орж байгаа эсэхийг шалга.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\sin x>0,\\ x\\in[0,2\\pi):\\quad S=\\square",
+          "answer": "(0,\\pi)",
+          "distractors": [
+            "[0,\\pi]",
+            "(\\pi,2\\pi)",
+            "[0,2\\pi)"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\cos x\\ge1\\text{-ийн бүх шийд }\\{2\\pi k:k\\in\\mathbb Z\\}",
+          "answer": "true",
+          "why": "Косинус нэгээс их болохгүй тул зөвхөн хамгийн их утгад хүрэх цэгүүд үлдэнэ."
+        }
+      ],
+      "related": [
+        "trig-sine-equation",
+        "trig-cosine-equation"
+      ],
+      "keywords": [
+        "Тригонометрийн тэнцэтгэл бишийг нэгж тойргоор бодох"
+      ],
+      "widget": "unit-circle",
+      "variants": []
+    },
+    {
+      "slug": "trig-sine-wave",
+      "title": "Синус хэлбэлзлийн далайц ба үе",
+      "order": 43,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "y=A\\sin(\\omega x+\\varphi):\\quad\\text{далайц}=|A|,\\quad T=\\frac{2\\pi}{|\\omega|},\\quad\\text{шилжилт}=-\\frac\\varphi\\omega",
+      "general": "y=A\\sin(\\omega x+\\varphi):\\quad\\text{далайц}=|A|,\\quad T=\\frac{2\\pi}{|\\omega|},\\quad\\text{шилжилт}=-\\frac\\varphi\\omega",
+      "conditions": [
+        "A\\ne0",
+        "\\omega\\ne0",
+        "x,\\varphi\\text{ радианаар}"
+      ],
+      "explanation": "Гаднах үржүүлэгчийн модуль нь хэлбэлзлийн хамгийн их хазайлт буюу далайц юм. Аргументын коэффициент өнцөг хэр хурдан өөрчлөгдөхийг зааж, үе нь түүний модульд урвуу хамаарна. Коэффициент эсвэл далайц тэг бол тогтмол функц үүсэж хамгийн бага эерэг үеийн энэ томьёог хэрэглэж болохгүй.",
+      "derivation": [
+        "$-1\\le\\sin t\\le1$ тул утгын муж $[-|A|,|A|]$.",
+        "Үеийн шилжилтэд аргумент $\\omega T$ нь нэг бүтэн эргэлт болох ёстой; хамгийн бага эерэг $T=2\\pi/|\\omega|$.",
+        "$\\omega x+\\varphi=\\omega(x+\\varphi/\\omega)$ тул хэвтээ шилжилт $-\\varphi/\\omega$."
+      ],
+      "mnemonic": "Гаднах тоо өндөр, доторх үржүүлэгч хурд, нэмэгдэл нь эхлэх байрлал.",
+      "examples": [
+        {
+          "problem": "$y=-3\\sin(2x+\\pi/4)$-ийн далайц, үе, хэвтээ шилжилтийг ол.",
+          "steps": [
+            "Далайц $|-3|=3$, үе $2\\pi/2=\\pi$.",
+            "Шилжилт $-(\\pi/4)/2=-\\pi/8$."
+          ],
+          "answer": "$3,\\ \\pi,\\ -\\pi/8$"
+        },
+        {
+          "problem": "$y=2\\sin(-3x+\\pi/2)$-ийн далайц ба үндсэн үеийг ол.",
+          "steps": [
+            "Далайц $2$.",
+            "Доторх коэффициентийн модуль $3$ тул үе $2\\pi/3$."
+          ],
+          "answer": "$2,\\ 2\\pi/3$"
+        }
+      ],
+      "commonMistakes": [
+        "Сөрөг далайц эсвэл сөрөг үе бичих."
+      ],
+      "eeshTip": "Хэвтээ шилжилт нь фазын өнцөгтэй дангаараа тэнцүү биш, коэффициентоор хуваагдана.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "y=4\\sin(5x):\\quad T=\\square",
+          "answer": "2\\pi/5",
+          "distractors": [
+            "5\\pi",
+            "\\pi/5",
+            "2\\pi"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "y=0\\sin x\\text{ функцийн хамгийн бага эерэг үе }2\\pi",
+          "answer": "false",
+          "why": "Тэг функцэд дурын эерэг тоо үе тул хамгийн бага нь байхгүй."
+        }
+      ],
+      "related": [
+        "trig-period",
+        "trig-harmonic"
+      ],
+      "keywords": [
+        "Синус хэлбэлзлийн далайц ба үе"
+      ],
+      "widget": "sine-graph",
+      "variants": []
+    },
+    {
+      "slug": "trig-sine-rule",
+      "title": "Синусын теорем ба багтаасан тойргийн радиус",
+      "order": 44,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "\\frac a{\\sin A}=\\frac b{\\sin B}=\\frac c{\\sin C}=2R",
+      "general": "\\frac a{\\sin A}=\\frac b{\\sin B}=\\frac c{\\sin C}=2R",
+      "conditions": [
+        "a,b,c>0",
+        "0<A,B,C<\\pi",
+        "A+B+C=\\pi",
+        "a,b,c\\text{ нь }A,B,C\\text{ өнцгүүдийн эсрэг тал}",
+        "R\\text{ нь багтаасан тойргийн радиус}"
+      ],
+      "explanation": "Гурвалжны тал бүрийг эсрэг өнцгийн синуст хуваахад ижил утга гарна. Тэр нийтлэг утга нь гурвалжныг багтаасан тойргийн диаметр юм. Тал ба өнцгийг эсрэг хосоор тааруулах нь гол алхам.",
+      "derivation": [
+        "Нэг өндрийг хоёр талаас бичихэд $h=b\\sin A=a\\sin B$, тэгэхээр $a/\\sin A=b/\\sin B$.",
+        "Тойргийн $a$ хөвчийн урт $2R\\sin A$; багтсан өнцөг мохоо бол $\\sin(\\pi-A)=\\sin A$-г хэрэглэнэ.",
+        "Иймээс нийтлэг харьцаа $2R$."
+      ],
+      "mnemonic": "Тал бүр эсрэг өнцгийн синустайгаа хослоно.",
+      "examples": [
+        {
+          "problem": "$a=6$, $A=\\pi/6$ бол багтаасан тойргийн радиусыг ол.",
+          "steps": [
+            "$2R=a/\\sin A=6/(1/2)=12$.",
+            "$R=6$."
+          ],
+          "answer": "$6$"
+        },
+        {
+          "problem": "$a=8$, $A=\\pi/6$, $B=\\pi/3$ бол $b$ талыг ол.",
+          "steps": [
+            "$b=a\\sin B/\\sin A$.",
+            "$8(\\sqrt3/2)/(1/2)=8\\sqrt3$."
+          ],
+          "answer": "$8\\sqrt3$"
+        }
+      ],
+      "commonMistakes": [
+        "Талыг хажуугийн өнцгийн синустай хослуулах."
+      ],
+      "eeshTip": "Синусаар өнцөг олоход хурц ба мохоо хоёр боломжийг гурвалжны нөхцөлөөр шүү.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\triangle ABC\\text{-д }a=BC,\\ R\\text{ нь багтаасан тойргийн радиус};\\ R=5,\\ A=\\pi/6:\\quad a=\\square",
+          "answer": "5",
+          "distractors": [
+            "10",
+            "5/2",
+            "20"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\text{Гурвалжин бүрд }a\\text{ нь }A\\text{-ийн эсрэг тал, }R\\text{ нь багтаасан тойргийн радиус бол }a/\\sin A=R",
+          "answer": "false",
+          "why": "Нийтлэг харьцаа радиус биш, диаметр $2R$."
+        }
+      ],
+      "related": [
+        "trig-cosine-rule",
+        "trig-triangle-area"
+      ],
+      "keywords": [
+        "Синусын теорем ба багтаасан тойргийн радиус"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-cosine-rule",
+      "title": "Косинусын теорем",
+      "order": 45,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "a^2=b^2+c^2-2bc\\cos A",
+      "general": "a^2=b^2+c^2-2bc\\cos A",
+      "conditions": [
+        "b,c>0",
+        "0<A<\\pi",
+        "a\\text{ нь }A\\text{-ийн эсрэг тал}",
+        "b,c\\text{ нь }A\\text{ өнцгийг үүсгэх талууд}"
+      ],
+      "explanation": "Косинусын теорем хоёр тал ба тэдгээрийн хоорондох өнцгөөс гурав дахь талыг олно. Өнцөг тэгш бол косинус тэг болж Пифагорын теоремд шилжинэ. Өнцөг мохоо үед косинус сөрөг тул хасах гишүүн нэмэгдэх нөлөөтэй.",
+      "derivation": [
+        "Өнцгийн оройг $(0,0)$, бусад оройг $(c,0)$ ба $(b\\cos A,b\\sin A)$ гэж авна.",
+        "Хоёр оройн зайны квадрат $a^2=(b\\cos A-c)^2+b^2\\sin^2A$.",
+        "Задлаад $\\sin^2A+\\cos^2A=1$ хэрэглэвэл томьёо гарна."
+      ],
+      "mnemonic": "Хоёр талын квадратын нийлбэрээс давхар үржвэрийн проекцыг хас.",
+      "examples": [
+        {
+          "problem": "$b=3$, $c=5$, $A=\\pi/3$ бол $a$-г ол.",
+          "steps": [
+            "$a^2=9+25-2\\cdot3\\cdot5\\cdot(1/2)=19$.",
+            "Тал эерэг тул $a=\\sqrt{19}$."
+          ],
+          "answer": "$\\sqrt{19}$"
+        },
+        {
+          "problem": "$a=7$, $b=5$, $c=8$ бол $A$ өнцгийг ол.",
+          "steps": [
+            "$\\cos A=(b^2+c^2-a^2)/(2bc)=(25+64-49)/80=1/2$.",
+            "Гурвалжны өнцөг $(0,\\pi)$-д тул $A=\\pi/3$."
+          ],
+          "answer": "$\\pi/3$"
+        }
+      ],
+      "commonMistakes": [
+        "Хоёр өгсөн талын хоорондох өнцгийн оронд өөр өнцөг орлуулах."
+      ],
+      "eeshTip": "Өнцөг олохдоо эхлээд косинусыг илэрхийл; утга нь $[-1,1]$-д байх ёстой.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\triangle ABC:\\ a=BC,\\ b=CA=3,\\ c=AB=4,\\ A=\\pi/2:\\quad a=\\square",
+          "answer": "5",
+          "distractors": [
+            "7",
+            "1",
+            "25"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\triangle ABC:\\ a=BC,\\ b=CA,\\ c=AB,\\ A=\\pi/2\\text{ бол }a^2=b^2+c^2",
+          "answer": "true",
+          "why": "Косинус тэг тул засварын гишүүн арилна."
+        }
+      ],
+      "related": [
+        "trig-sine-rule",
+        "trig-triangle-area"
+      ],
+      "keywords": [
+        "Косинусын теорем"
+      ],
+      "widget": null,
+      "variants": []
+    },
+    {
+      "slug": "trig-triangle-area",
+      "title": "Хоёр тал ба завсрын өнцгөөр талбай олох",
+      "order": 46,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": [
+        "TRIG"
+      ],
+      "latex": "S=\\frac12ab\\sin C",
+      "general": "S=\\frac12ab\\sin C",
+      "conditions": [
+        "a,b>0",
+        "0<C<\\pi",
+        "a,b\\text{ нь }C\\text{ өнцгийг үүсгэх талууд}"
+      ],
+      "explanation": "Хоёр талын хоорондох өнцгийн синус нь өндрийг олоход хэрэглэгдэнэ. Тиймээс талбай нь хоёр талын үржвэр, завсрын өнцгийн синусын үржвэрийн хагас байдаг. Мохоо өнцөгт өндөр гадна буусан ч синус эерэг тул ижил дүрэм хүчинтэй.",
+      "derivation": [
+        "$a$ талыг суурь авбал өндөр $h=b\\sin C$; мохоо үед $\\sin(\\pi-C)=\\sin C$.",
+        "$S=ah/2$-т орлуулбал $S=ab\\sin C/2$."
+      ],
+      "mnemonic": "Хоёр тал үржихдээ синусаар өндрийг ялгаж, талбайд хоёрт хуваана.",
+      "examples": [
+        {
+          "problem": "$a=6$, $b=8$, завсрын өнцөг $C=\\pi/6$ бол талбайг ол.",
+          "steps": [
+            "$S=(1/2)\\cdot6\\cdot8\\cdot\\sin(\\pi/6)$.",
+            "$24\\cdot(1/2)=12$."
+          ],
+          "answer": "$12$"
+        },
+        {
+          "problem": "$a=5$, $b=7$, завсрын өнцөг $C=2\\pi/3$ бол талбайг ол.",
+          "steps": [
+            "Мохоо өнцгийн синус $\\sqrt3/2$.",
+            "$S=(1/2)\\cdot5\\cdot7\\cdot\\sqrt3/2=35\\sqrt3/4$."
+          ],
+          "answer": "$35\\sqrt3/4$"
+        }
+      ],
+      "commonMistakes": [
+        "Өгсөн хоёр талын хооронд биш өнцгийг талбайн томьёонд хэрэглэх."
+      ],
+      "eeshTip": "Хоёр тал тогтмол бол тэдгээрийн завсрын өнцөг тэгш үед талбай хамгийн их.",
+      "quiz": [
+        {
+          "type": "blank",
+          "prompt": "\\text{Гурвалжны хоёр тал }a=3,b=4,\\ \\text{завсрын өнцөг }C=\\pi/2:\\quad\\text{талбай }S=\\square",
+          "answer": "6",
+          "distractors": [
+            "12",
+            "7",
+            "3"
+          ]
+        },
+        {
+          "type": "truefalse",
+          "prompt": "\\text{Гурвалжны }a,b\\text{ талын завсрын өнцөг }150^\\circ\\text{ бол талбай }S=ab/2",
+          "answer": "false",
+          "why": "$\\sin150^\\circ=1/2$ тул талбай $ab/4$."
+        }
+      ],
+      "related": [
+        "trig-sine-rule",
+        "trig-cosine-rule"
+      ],
+      "keywords": [
+        "Хоёр тал ба завсрын өнцгөөр талбай олох"
+      ],
+      "widget": null,
+      "variants": []
+    }
+  ]
+}
