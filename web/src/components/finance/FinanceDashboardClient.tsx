@@ -322,8 +322,8 @@ export default function FinanceDashboardClient() {
             <span
               className={
                 report.profitChange > 0
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400"
+                  ? "text-success"
+                  : "text-error"
               }
             >
               {report.profitChange > 0 ? "+" : ""}
@@ -415,7 +415,7 @@ export default function FinanceDashboardClient() {
 
               <button
                 type="submit"
-                className="w-full px-3 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                className="w-full px-3 py-2 rounded bg-brand hover:bg-brand/90 text-on-brand transition-colors"
               >
                 Нэмэх
               </button>
@@ -496,10 +496,10 @@ function IncomeChart({
   if (total === 0) return null;
 
   const items = [
-    { label: "Сургалт", value: income.trainingFees, color: "bg-blue-600" },
-    { label: "Шалгалт", value: income.exams, color: "bg-emerald-600" },
-    { label: "Ном", value: income.books, color: "bg-amber-600" },
-    { label: "Бусад", value: income.other, color: "bg-slate-600" },
+    { label: "Сургалт", value: income.trainingFees, color: "bg-brand" },
+    { label: "Шалгалт", value: income.exams, color: "bg-success" },
+    { label: "Ном", value: income.books, color: "bg-warning" },
+    { label: "Бусад", value: income.other, color: "bg-ink-dim" },
   ];
 
   return (
@@ -545,13 +545,13 @@ function ExpenseChart({
   if (total === 0) return null;
 
   const items = [
-    { label: "Цалин", value: expenses.salary, color: "bg-red-600" },
-    { label: "Ааш", value: expenses.rent, color: "bg-orange-600" },
-    { label: "Коммунал", value: expenses.utilities, color: "bg-yellow-600" },
-    { label: "Сурт.", value: expenses.marketing, color: "bg-purple-600" },
-    { label: "Материал", value: expenses.materials, color: "bg-pink-600" },
-    { label: "Тоног", value: expenses.equipment, color: "bg-cyan-600" },
-    { label: "Бусад", value: expenses.other, color: "bg-slate-600" },
+    { label: "Цалин", value: expenses.salary, color: "bg-error" },
+    { label: "Ааш", value: expenses.rent, color: "bg-warning" },
+    { label: "Коммунал", value: expenses.utilities, color: "bg-info" },
+    { label: "Сурт.", value: expenses.marketing, color: "bg-brand" },
+    { label: "Материал", value: expenses.materials, color: "bg-success" },
+    { label: "Тоног", value: expenses.equipment, color: "bg-brand-soft" },
+    { label: "Бусад", value: expenses.other, color: "bg-ink-dim" },
   ];
 
   return (
