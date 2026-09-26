@@ -171,8 +171,8 @@ node -e "setTimeout(()=>process.exit(0),15000); require('./dist/src/main')" 2>&1
    танхимын сургалт».
 7. **«Мэдээлэл авах» маягт** нүүр хуудсанд байхгүй (эзэн хассан).
 8. **Интернэт удаан байхад UI муудах ёсгүй.** Видео / WebGL / CDN / гадаад
-   зураг ХОРИОТОЙ. Эффект бүр цэвэр CSS. Фонт зөвхөн `next/font`-оор
-   өөрсдөө үйлчилнэ (§6.1).
+   зураг ХОРИОТОЙ. Эффект бүр цэвэр CSS. Фонт зөвхөн репод хадгалсан
+   файлаас (§6.1).
 9. **Функц устгахгүй.** Дизайн сайжруулна гэдэг нь юм хасна гэсэн үг биш.
 10. **Нэг зүйл хийгээд шууд push хийхгүй** — өдрийн төгсгөлд эсвэл эзэн хэлэхэд.
 11. **Гарагийн дугаарлалт**: эзэн МОНГОЛ (1=Даваа…7=Ням), ӨС нь JS
@@ -321,8 +321,9 @@ Pi.mn/
    бэлэн UI сан ашиглана → `web/src/components/ui/kit/` (shadcn/ui загвар:
    Radix UI, class-variance-authority, tailwind-merge, vaul, sonner). Шинэ UI
    бичихдээ эхлээд kit-ээс ав (`kit/README.md`). Фонт: **Onest** (бие) +
-   **Unbounded** (`font-display`, зөвхөн том тоо/гарчиг) — `next/font`-оор build
-   үед татаж манай домэйноос үйлчилнэ, хэрэглэгчийн браузер Google руу хандахгүй.
+   **Unbounded** (`font-display`, зөвхөн том тоо/гарчиг) — файлууд репод
+   (`web/public/fonts`, `app/fonts.css`). `next/font/google` БҮҮ ашигла: build
+   үед Google-ээс татдаг тул сүлжээ тасрахад build унадаг (2026-09-27 CI).
    Бусад шинэ npm сан — эзэнтэй зөвшилцөж байж.
 2. **Функц устгахгүй.**
 3. **Өнгийг гараар бичихгүй** — `#fff`, `text-blue-500` БОЛОХГҮЙ. Зөвхөн
@@ -640,7 +641,7 @@ UCS-2 тул 70. Илгээхийн ӨМНӨ хэдэн хүн, хэдэн хэ�
 | Файлын байнгын хадгалалт (G05) | `storage/uploads.controller.ts`, `StoredFile` | Upload → диск + ӨС. Serve → диск байхгүй бол ӨС-ээс сэргээж кэшлэнэ. ӨС-д бичиж чадахгүй бол 503 |
 | Ажилласан цаг | `schedule/teacher-hours*`, `/app/teacher-hours` | Хуваариас (resolveWeek): цуцалсан, амралтын өдөр хасна, зөөсөнийг шинэ цагт. Цагийн хөлс хадгалахгүй |
 | 100x100 V3 | `api/prisma/import-100x100-v3.cjs`, `api/prisma/data/100x100-v3/` | Анхдагч dry-run. `--commit --hide-others`. Ном `100V3`, token `100V3-…`, зураг StoredFile-д. RATINEQ-13 хариугүй → MANUAL |
-| UI kit | `web/src/components/ui/kit/*` (+`README.md`) | shadcn/ui загвар (Radix, vaul, sonner), «товгор» хэв маяг: `chunky`, `chunky-press`, `btn-3d` (globals.css). Фонт Onest + Unbounded (`font-display`) |
+| UI kit | `web/src/components/ui/kit/*` (+`README.md`) | shadcn/ui загвар (Radix, vaul, sonner), «товгор» хэв маяг: `chunky`, `chunky-press`, `btn-3d` (globals.css). Фонт Onest + Unbounded (`font-display`, `public/fonts`) |
 | Шинэ дэлгэцүүд | `nav/BottomTabs`, `activity/StreakWeekCard`, `activity/ClassWeekCard`, `payments/PaidUntilCard` | Утсан дээр доод таб + «Бусад» (vaul drawer). Жилийн heatmap устаагүй — «Бүтэн жилийн түүх» дотор |
 | Codex шөнө №1 | 13 PR (G12, G17, G22–G25, G27, G30–G33, G37, G39) | Мэдэгдлийн төв (+хонх толгойд), зөвшөөрлийн шалгалт (layout-д нэг удаа /app/consent руу), ICS, PWA, preview, OpenAPI (зөвхөн dev), e2e (`/e2e`, 17 кейс) |
 
