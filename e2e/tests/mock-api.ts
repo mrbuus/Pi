@@ -28,6 +28,7 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     if (path === '/auth/login') return body.password === '99000000'
       ? reply({ accessToken: 'synthetic-token-never-valid-on-server', role })
       : reply({ message: 'Нэвтрэх мэдээлэл буруу байна' }, 401);
+    if (path === '/auth/google/config') return reply({ enabled: false });
     if (path === '/auth/me') return reply({ ...student, role, studentProfile: { type: 'CLASSROOM', grade: 12 } });
     if (path === '/attempts/my-stats') return reply({ totalAttempts: 12, weakestTags: [] });
     if (path === '/activity/classroom/synthetic-class') return reply({ year: 2026, totalStudents: 1, days: [] });
