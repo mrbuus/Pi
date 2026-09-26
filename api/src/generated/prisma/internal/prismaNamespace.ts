@@ -411,6 +411,7 @@ export const ModelName = {
   Tag: 'Tag',
   ProblemTag: 'ProblemTag',
   Formula: 'Formula',
+  FormulaSection: 'FormulaSection',
   ProblemFormula: 'ProblemFormula',
   ProblemAnalysis: 'ProblemAnalysis',
   Test: 'Test',
@@ -471,7 +472,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "resultAcknowledgement" | "emailOtp" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "teacherWorkDay" | "teacherWorkException" | "academicCalendarDay" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "resultAcknowledgement" | "emailOtp" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "teacherWorkDay" | "teacherWorkException" | "academicCalendarDay" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2470,6 +2471,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.FormulaCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.FormulaCountAggregateOutputType> | number
+        }
+      }
+    }
+    FormulaSection: {
+      payload: Prisma.$FormulaSectionPayload<ExtArgs>
+      fields: Prisma.FormulaSectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FormulaSectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FormulaSectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>
+        }
+        findFirst: {
+          args: Prisma.FormulaSectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FormulaSectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>
+        }
+        findMany: {
+          args: Prisma.FormulaSectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>[]
+        }
+        create: {
+          args: Prisma.FormulaSectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>
+        }
+        createMany: {
+          args: Prisma.FormulaSectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FormulaSectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>[]
+        }
+        delete: {
+          args: Prisma.FormulaSectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>
+        }
+        update: {
+          args: Prisma.FormulaSectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.FormulaSectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FormulaSectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FormulaSectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.FormulaSectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaSectionPayload>
+        }
+        aggregate: {
+          args: Prisma.FormulaSectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFormulaSection>
+        }
+        groupBy: {
+          args: Prisma.FormulaSectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaSectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FormulaSectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaSectionCountAggregateOutputType> | number
         }
       }
     }
@@ -6226,10 +6301,42 @@ export const FormulaScalarFieldEnum = {
   id: 'id',
   name: 'name',
   latex: 'latex',
-  description: 'description'
+  description: 'description',
+  slug: 'slug',
+  sectionSlug: 'sectionSlug',
+  order: 'order',
+  level: 'level',
+  grade: 'grade',
+  topicSlugs: 'topicSlugs',
+  general: 'general',
+  variants: 'variants',
+  conditions: 'conditions',
+  explanation: 'explanation',
+  derivation: 'derivation',
+  mnemonic: 'mnemonic',
+  examples: 'examples',
+  commonMistakes: 'commonMistakes',
+  eeshTip: 'eeshTip',
+  relatedSlugs: 'relatedSlugs',
+  keywords: 'keywords',
+  widget: 'widget',
+  quiz: 'quiz',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type FormulaScalarFieldEnum = (typeof FormulaScalarFieldEnum)[keyof typeof FormulaScalarFieldEnum]
+
+
+export const FormulaSectionScalarFieldEnum = {
+  slug: 'slug',
+  title: 'title',
+  order: 'order',
+  icon: 'icon',
+  description: 'description'
+} as const
+
+export type FormulaSectionScalarFieldEnum = (typeof FormulaSectionScalarFieldEnum)[keyof typeof FormulaSectionScalarFieldEnum]
 
 
 export const ProblemFormulaScalarFieldEnum = {
@@ -7767,6 +7874,7 @@ export type GlobalOmitConfig = {
   tag?: Prisma.TagOmit
   problemTag?: Prisma.ProblemTagOmit
   formula?: Prisma.FormulaOmit
+  formulaSection?: Prisma.FormulaSectionOmit
   problemFormula?: Prisma.ProblemFormulaOmit
   problemAnalysis?: Prisma.ProblemAnalysisOmit
   test?: Prisma.TestOmit

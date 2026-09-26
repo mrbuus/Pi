@@ -47,6 +47,7 @@ import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
 import { ReconcileModule } from './reconcile/reconcile.module';
+import { FormulasModule } from './formulas/formulas.module';
 
 @Module({
   imports: [
@@ -140,6 +141,7 @@ import { ReconcileModule } from './reconcile/reconcile.module';
     RecommendModule,
     TuitionModule,
     ReconcileModule,
+    FormulasModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

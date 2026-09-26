@@ -78,6 +78,7 @@ export const ModelName = {
   Tag: 'Tag',
   ProblemTag: 'ProblemTag',
   Formula: 'Formula',
+  FormulaSection: 'FormulaSection',
   ProblemFormula: 'ProblemFormula',
   ProblemAnalysis: 'ProblemAnalysis',
   Test: 'Test',
@@ -525,10 +526,42 @@ export const FormulaScalarFieldEnum = {
   id: 'id',
   name: 'name',
   latex: 'latex',
-  description: 'description'
+  description: 'description',
+  slug: 'slug',
+  sectionSlug: 'sectionSlug',
+  order: 'order',
+  level: 'level',
+  grade: 'grade',
+  topicSlugs: 'topicSlugs',
+  general: 'general',
+  variants: 'variants',
+  conditions: 'conditions',
+  explanation: 'explanation',
+  derivation: 'derivation',
+  mnemonic: 'mnemonic',
+  examples: 'examples',
+  commonMistakes: 'commonMistakes',
+  eeshTip: 'eeshTip',
+  relatedSlugs: 'relatedSlugs',
+  keywords: 'keywords',
+  widget: 'widget',
+  quiz: 'quiz',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type FormulaScalarFieldEnum = (typeof FormulaScalarFieldEnum)[keyof typeof FormulaScalarFieldEnum]
+
+
+export const FormulaSectionScalarFieldEnum = {
+  slug: 'slug',
+  title: 'title',
+  order: 'order',
+  icon: 'icon',
+  description: 'description'
+} as const
+
+export type FormulaSectionScalarFieldEnum = (typeof FormulaSectionScalarFieldEnum)[keyof typeof FormulaSectionScalarFieldEnum]
 
 
 export const ProblemFormulaScalarFieldEnum = {

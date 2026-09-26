@@ -784,7 +784,42 @@ model Formula {
   latex       String?
   description String?
 
+  slug           String?         @unique
+  sectionSlug    String?
+  section        FormulaSection? @relation(fields: [sectionSlug], references: [slug], onDelete: SetNull)
+  order          Int             @default(0)
+  level          String          @default("CORE")
+  grade          Int?
+  topicSlugs     String[]        @default([])
+  general        String?
+  variants       Json?
+  conditions     Json?
+  explanation    String?
+  derivation     Json?
+  mnemonic       String?
+  examples       Json?
+  commonMistakes Json?
+  eeshTip        String?
+  relatedSlugs   String[]        @default([])
+  keywords       String[]        @default([])
+  widget         String?
+  quiz           Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+
   problems ProblemFormula[]
+
+  @@index([sectionSlug])
+  @@index([level])
+}
+
+model FormulaSection {
+  slug        String    @id
+  title       String
+  order       Int       @default(0)
+  icon        String?
+  description String?
+  formulas    Formula[]
 }
 
 model ProblemFormula {
