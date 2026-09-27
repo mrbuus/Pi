@@ -70,6 +70,21 @@ export function formulaDetail(slug: string) {
   const section = formulaSections.find((s) => s.slug === item.section)!;
   const common = {
     ...item,
+    updatedAt: "2026-09-27T00:00:00.000Z",
+    quiz: [
+      {
+        type: "blank",
+        prompt: "1+1=\\square",
+        answer: "2",
+        distractors: ["1", "3"],
+      },
+      {
+        type: "truefalse",
+        prompt: "1+1=2",
+        answer: "true",
+        why: "Хоёр нэгийг нэмнэ.",
+      },
+    ],
     section: { slug: section.slug, title: section.title, icon: section.icon },
     variants: [],
     conditions: [],
@@ -95,6 +110,11 @@ export function formulaDetail(slug: string) {
         problem: "$a=2$, $b=3$ үед $(a+b)^2$-ыг ол.",
         steps: ["$a+b=2+3=5$", "Нийлбэрийг өөрөөр нь үржүүлбэл $5\\cdot5=25$."],
         answer: "$25$",
+      },
+      {
+        problem: "$a=1$, $b=2$ үед $(a+b)^2$-ыг ол.",
+        steps: ["$1+2=3$", "$3^2=9$"],
+        answer: "$9$",
       },
     ],
     commonMistakes: ["Дундах $2ab$ гишүүнийг орхиж болохгүй."],

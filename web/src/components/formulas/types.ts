@@ -18,8 +18,18 @@ export type FormulaSummary = {
   general: string | null;
   widget: string | null;
 };
+export type FormulaQuiz =
+  | { type: "blank"; prompt: string; answer: string; distractors: string[] }
+  | {
+      type: "truefalse";
+      prompt: string;
+      answer: "true" | "false";
+      why: string;
+    };
 export type FormulaDetail = Omit<FormulaSummary, "section"> & {
   section: Pick<FormulaSection, "slug" | "title" | "icon"> | null;
+  updatedAt: string;
+  quiz?: FormulaQuiz[] | null;
   variants: { label: string; latex: string }[] | null;
   conditions: string[] | null;
   explanation: string | null;

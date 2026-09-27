@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useSyncExternalStore, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   BookOpen,
   Brain,
   Copy,
   Printer,
+  Pencil,
   TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ import { FORMULA_WIDGETS } from "@/components/formulas/widgets";
 import { useFormulaRequest } from "@/components/formulas/useFormulaRequest";
 import type { FormulaDetail } from "@/components/formulas/types";
 import styles from "@/components/formulas/Print.module.css";
+import { FormulaEditor } from "@/components/formulas/FormulaEditor";
 const subscribe = () => () => {};
 function DetailBlock({
   title,
@@ -61,6 +63,7 @@ function DisplayFormula({ text }: { text: string }) {
   );
 }
 export default function FormulaDetailClient({ slug }: { slug: string }) {
+  const [editing, setEditing] = useState(false);
   const result = useFormulaRequest<FormulaDetail>(
     `/formulas/${encodeURIComponent(slug)}`,
   );
@@ -94,6 +97,18 @@ export default function FormulaDetailClient({ slug }: { slug: string }) {
     );
   if (!result.data) return null;
   const f = result.data;
+  if (editing)
+    return (
+      <FormulaEditor
+        key={f.slug + f.updatedAt}
+        formula={f}
+        onCancel={() => setEditing(false)}
+        onSaved={() => {
+          setEditing(false);
+          result.retry();
+        }}
+      />
+    );
   const Widget =
     f.widget && Object.hasOwn(FORMULA_WIDGETS, f.widget)
       ? FORMULA_WIDGETS[f.widget]
@@ -113,6 +128,12 @@ export default function FormulaDetailClient({ slug }: { slug: string }) {
       <div className="flex flex-wrap justify-between gap-2 print:hidden">
         {back}
         <div className="flex flex-wrap gap-2">
+          {["ADMIN", "TEACHER_PLUS"].includes(role ?? "") && (
+            <Button variant="outline" onClick={() => setEditing(true)}>
+              <Pencil aria-hidden />
+              Засах
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={copy}

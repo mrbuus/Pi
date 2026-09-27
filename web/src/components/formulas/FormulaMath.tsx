@@ -15,6 +15,7 @@ export const FormulaMath = memo(function FormulaMath({
     <div
       className="min-w-0 max-w-full overflow-x-auto py-1 [overflow-wrap:anywhere] [&_.katex-display]:!my-2 [&_.katex-display]:!text-left [&_.katex]:!whitespace-normal"
       tabIndex={focusable ? 0 : undefined}
+      role={display ? "region" : undefined}
       aria-label={display ? "Томьёо" : undefined}
     >
       <MathText>{display ? `$$${text}$$` : text}</MathText>

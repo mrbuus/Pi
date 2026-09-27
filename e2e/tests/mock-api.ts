@@ -5,7 +5,8 @@ export const classroom = { id: 'synthetic-class', name: 'Туршилтын ан
 export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
   const calls: { path: string; method: string; body: Record<string, unknown> }[] = [];
   const unexpected: string[] = [], errors: string[] = [];
-  const formulas = { empty: false, emptySeen: false, extraCount: 0, printLong: false, listFailures: 0, sectionsFailures: 0, detailFailures: 0, seenFailures: 0, listDelayMs: 0, delayedStudent: '', requests: [] as string[] };
+  const formulas = { empty: false, emptySeen: false, extraCount: 0, printLong: false, listFailures: 0, sectionsFailures: 0, detailFailures: 0, editStatus: 200, seenFailures: 0, listDelayMs: 0, delayedStudent: '', requests: [] as string[] };
+  const edited = new Map<string, Record<string, unknown>>();
   let attendance: string | null = null, homework: string | null = null;
   let users: unknown[] = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -26,7 +27,17 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     if (method === 'OPTIONS') return route.fulfill({ status: 204, headers });
     const body = req.postData() ? req.postDataJSON() : {};
     calls.push({ path, method, body });
-    if (method === 'GET' && (path === '/formulas' || path.startsWith('/formulas/'))) {
+    if (method === 'PATCH' && path === '/formulas/synthetic-square-sum') {
+      if (!['ADMIN', 'TEACHER_PLUS'].includes(role)) return reply({message: 'Forbidden'}, 403);
+      if (formulas.editStatus !== 200) return reply({message: 'Synthetic edit error'}, formulas.editStatus);
+      const current = edited.get('synthetic-square-sum') ?? formulaDetail('synthetic-square-sum')!;
+      if (body.expectedUpdatedAt !== current.updatedAt) return reply({message: 'Stale edit'}, 409);
+      const {expectedUpdatedAt: _version, ...patch} = body;
+      const saved = {...current, ...patch, updatedAt: new Date(Date.parse(String(current.updatedAt)) + 1).toISOString()};
+      edited.set('synthetic-square-sum', saved);
+      return reply(saved);
+    }
+    if (method === 'GET' && (path === '/formulas'  || path.startsWith('/formulas/'))) {
       formulas.requests.push(path + url.search);
       if (path === '/formulas/sections') {
         if (formulas.sectionsFailures > 0) { formulas.sectionsFailures--; return reply({ message: 'Synthetic sections failure' }, 503); }
@@ -47,7 +58,8 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
       }
       if (!/^\/formulas\/synthetic-(square-sum|cube-sum|linear|unknown)$/.test(path)) { unexpected.push(`${method} ${path}`); return reply({ message: 'Unknown formula contract' }, 501); }
       if (formulas.detailFailures > 0) { formulas.detailFailures--; return reply({ message: 'Synthetic detail failure' }, 503); }
-      const detail = formulaDetail(decodeURIComponent(path.slice('/formulas/'.length)));
+      const slug = decodeURIComponent(path.slice('/formulas/'.length));
+      const detail = edited.get(slug) ?? formulaDetail(slug);
       return detail ? reply(detail) : reply({ message: 'Synthetic formula not found' }, 404);
     }
     if (path === '') return reply({ status: 'ok' });

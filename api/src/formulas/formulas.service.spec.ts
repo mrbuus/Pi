@@ -94,6 +94,7 @@ describe('FormulasService formula writes', () => {
     prisma.formulaSection.findUnique.mockResolvedValue(null);
     await expect(service.create(validWritePayload as any)).rejects.toMatchObject({ status: 404 });
     await expect(service.update('sample-formula', { title: null } as any)).rejects.toMatchObject({ status: 400 });
+    await expect(service.update('sample-formula', { expectedUpdatedAt: '2026-09-27T10:00:00.000Z' })).rejects.toMatchObject({ status: 400 });
     prisma.formula.findUnique.mockResolvedValue(null);
     await expect(service.update('missing-formula', { title: 'New name' } as any)).rejects.toMatchObject({ status: 404 });
     expect(prisma.formula.update).not.toHaveBeenCalled();
@@ -101,8 +102,37 @@ describe('FormulasService formula writes', () => {
 
   it('validates the merged full formula on patch and preserves the old row when invalid', async () => {
     const { service, prisma } = writeSetup();
-    prisma.formula.findUnique.mockResolvedValue({ ...validWritePayload, name: validWritePayload.title, sectionSlug: 'trigonometry', relatedSlugs: validWritePayload.related });
+    prisma.formula.findUnique.mockResolvedValue({ ...validWritePayload, name: validWritePayload.title, sectionSlug: 'trigonometry', relatedSlugs: validWritePayload.related, updatedAt: new Date('2026-09-27T10:00:00.000Z') });
     await expect(service.update('sample-formula', { latex: '\\invalidCommand{' } as any)).rejects.toMatchObject({ status: 400 });
     expect(prisma.formula.update).not.toHaveBeenCalled();
+  });
+
+  it('atomically compares the edit version and keeps legacy patches compatible', async () => {
+    const { service, prisma } = writeSetup();
+    const updatedAt = new Date('2026-09-27T10:00:00.000Z');
+    prisma.formula.findUnique.mockResolvedValue({ ...validWritePayload, name: validWritePayload.title, sectionSlug: 'trigonometry', relatedSlugs: validWritePayload.related, updatedAt });
+    await service.update('sample-formula', { title: 'Edited title', expectedUpdatedAt: updatedAt.toISOString() });
+    expect(prisma.formula.update).toHaveBeenCalledWith(expect.objectContaining({
+      where: { slug: 'sample-formula', updatedAt },
+      data: expect.objectContaining({ updatedAt: expect.any(Date) }),
+    }));
+    const writtenVersion = prisma.formula.update.mock.calls[0][0].data.updatedAt as Date;
+    expect(writtenVersion.getTime()).toBeGreaterThan(updatedAt.getTime());
+  });
+
+  it('rejects a stale client version before validating or writing', async () => {
+    const { service, prisma } = writeSetup();
+    prisma.formula.findUnique.mockResolvedValue({ ...validWritePayload, name: validWritePayload.title, sectionSlug: 'trigonometry', relatedSlugs: validWritePayload.related, updatedAt: new Date('2026-09-27T10:00:00.000Z') });
+    await expect(service.update('sample-formula', { title: 'Stale title', expectedUpdatedAt: '2026-09-27T09:59:59.000Z' })).rejects.toMatchObject({ status: 409 });
+    expect(prisma.formula.update).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 if another editor wins between read and atomic update', async () => {
+    const { service, prisma } = writeSetup();
+    const updatedAt = new Date('2026-09-27T10:00:00.000Z');
+    prisma.formula.findUnique.mockResolvedValue({ ...validWritePayload, name: validWritePayload.title, sectionSlug: 'trigonometry', relatedSlugs: validWritePayload.related, updatedAt });
+    prisma.formula.update.mockRejectedValue({ code: 'P2025' });
+    await expect(service.update('sample-formula', { title: 'Competing title' })).rejects.toMatchObject({ status: 409 });
+    expect(prisma.formula.update).toHaveBeenCalledWith(expect.objectContaining({ where: { slug: 'sample-formula', updatedAt } }));
   });
 });
