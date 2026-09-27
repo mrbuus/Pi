@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { MetaTitle } from "@/components/ui/Meta";
 import { TestPickerRow } from "./types";
@@ -33,9 +34,11 @@ export default function AssignTestDialog({
 
   useEffect(() => {
     if (!open || tests) return;
+    let alive = true;
     api<TestPickerRow[]>("/tests")
-      .then(setTests)
-      .catch((e) => setLoadError(errMsg(e)));
+      .then(rows => { if (alive) setTests(rows); })
+      .catch((e) => { if (alive) setLoadError(errMsg(e)); });
+    return () => { alive = false; };
   }, [open, tests]);
 
   const filtered = useMemo(() => {
@@ -80,7 +83,7 @@ export default function AssignTestDialog({
 
         <div className="mt-2 max-h-52 overflow-y-auto rounded-lg border border-line">
           {!tests && !loadError && (
-            <p className="p-3 text-sm text-ink-dim">Ачаалж байна…</p>
+            <LoadingState rows={3} label="Тестүүд ачаалж байна" />
           )}
           {tests && filtered.length === 0 && (
             <p className="p-3 text-sm text-ink-dim">Тохирох тест олдсонгүй.</p>

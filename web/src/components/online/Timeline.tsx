@@ -24,7 +24,9 @@ import {
   CheckCircle2,
   type LucideIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useAsyncSection } from "@/components/students/progress/useSection";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { MetaTitle } from "@/components/ui/Meta";
 import ConfirmDialog from "@/components/theory/ConfirmDialog";
@@ -74,16 +76,13 @@ function eventLine(e: TimelineEvent): { icon: LucideIcon; text: string } {
   return { icon: meta.icon, text: `${meta.label}${durationText}` };
 }
 
-export default function Timeline({
+function TimelineContent({
   studentId,
   canEdit,
 }: {
   studentId: string;
   canEdit: boolean;
 }) {
-  const [events, setEvents] = useState<TimelineEvent[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const [editing, setEditing] = useState<TimelineEvent | null>(null);
@@ -91,24 +90,13 @@ export default function Timeline({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<TimelineEvent | null>(null);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    const to = new Date();
-    const from = new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
-    api<TimelineResponse>(
-      `/progress/student/${studentId}/timeline?from=${from.toISOString().slice(0, 10)}&to=${to
-        .toISOString()
-        .slice(0, 10)}`,
-    )
-      .then((res) => setEvents(res.items))
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
+  const fetchTimeline = useCallback(async () => {
+    const to = new Date(), from = new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const result = await api<TimelineResponse>(`/progress/student/${studentId}/timeline?from=${from.toISOString().slice(0,10)}&to=${to.toISOString().slice(0,10)}`);
+    return result.items;
   }, [studentId]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { data: events, setData: setEvents, status, error, reload: load } = useAsyncSection<TimelineEvent[] | null>(studentId, fetchTimeline, null);
+  const loading = status === "loading";
 
   function saveAttempt(newSelfState: string) {
     if (!editing || editing.kind !== "ATTEMPT" || !editing.attemptId || !events) return;
@@ -155,7 +143,7 @@ export default function Timeline({
   }
 
   if (loading) {
-    return <p className="text-sm text-ink-dim">Ачаалж байна…</p>;
+    return <LoadingState rows={3} />;
   }
   if (error) {
     return (
@@ -247,4 +235,8 @@ export default function Timeline({
       />
     </div>
   );
+}
+
+export default function Timeline(props: Parameters<typeof TimelineContent>[0]) {
+  return <TimelineContent key={props.studentId} {...props} />;
 }

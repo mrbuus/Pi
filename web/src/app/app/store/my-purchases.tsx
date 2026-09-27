@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
+import { useSection } from "@/components/students/progress/useSection";
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
 
 import { Card as Surface } from '@/components/ui/Surface';
@@ -20,32 +19,10 @@ interface MyPurchase {
 }
 
 export default function MyPurchases() {
-  const { user } = useAuth();
-  const [purchases, setPurchases] = useState<MyPurchase[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (user) {
-      loadPurchases();
-    }
-  }, [user]);
-
-  async function loadPurchases() {
-    try {
-      setLoading(true);
-      setError("");
-      const result = await api('/store/my-purchases');
-      if (Array.isArray(result)) {
-        setPurchases(result);
-      }
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Худалдан авалтуудыг авахад алдаа гарлаа';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { user, loading: authLoading } = useAuth();
+  const { data: purchases, status, error, reload: loadPurchases } = useSection<MyPurchase[]>(user ? '/store/my-purchases' : null, []);
+  const loading = authLoading || status === 'loading';
+  if (authLoading) return <LoadingState rows={3} label="Миний худалдан авалтууд" />;
 
   if (!user) {
     return (

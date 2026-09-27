@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ClipboardList, Plus } from 'lucide-react';
+import { ArrowRight, LoaderCircle, ClipboardList, Plus } from 'lucide-react';
 import { api } from '@/lib/api';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
 import { formatDate, formatMoney } from './format';
@@ -99,8 +99,8 @@ export default function RefundList() {
       </ul>
       {moreError && <ErrorState message={moreError} onRetry={() => void loadMore()} />}
       {hasMore && <div className="flex justify-center">
-        <button type="button" onClick={() => void loadMore()} disabled={loadingMore} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-5 py-2 font-semibold text-ink hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50">
-          {loadingMore ? 'Ачаалж байна...' : 'Цааш үзэх'}<ArrowRight className="h-4 w-4" aria-hidden />
+        <button type="button" onClick={() => void loadMore()} disabled={loadingMore} aria-busy={loadingMore} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-5 py-2 font-semibold text-ink hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50">
+          Цааш үзэх{loadingMore ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowRight className="h-4 w-4" aria-hidden />}
         </button>
       </div>}
     </>}

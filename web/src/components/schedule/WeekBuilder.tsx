@@ -1,17 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Palmtree } from "lucide-react";
-import { api } from "@/lib/api";
+import { useSection } from "@/components/students/progress/useSection";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { getClassroomColor } from "@/lib/classroomColor";
 import RoomShape from "./RoomShape";
 import EntryActionPanel from "./EntryActionPanel";
 import { addDaysToKey, formatMinutes, todayUBKey, WEEKDAY_LABELS, type WeekDay, type WeekEntry, type WeekResponse } from "./types";
-
-function errMsg(e: unknown): string {
-  return e instanceof Error ? e.message : "Алдаа гарлаа";
-}
 
 /** Өгөгдсөн огнооны 7 хоногийн Даваа гарагийн огноог олно. */
 function mondayOf(dateKey: string): string {
@@ -175,9 +171,6 @@ function DayColumn({
  */
 export default function WeekBuilder() {
   const [weekStart, setWeekStart] = useState(() => mondayOf(todayUBKey()));
-  const [data, setData] = useState<WeekResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   // Сонголтыг ХУУЛБАР болгож хадгалахгүй, зөвхөн ТҮЛХҮҮРИЙГ нь хадгална.
   // Хуулбар хадгалбал самбар дотор сэдэв хадгалсны дараа хуучин (хоосон
   // сэдэвтэй) хуулбар руугаа буцаж, өөрчлөлт хийгдээгүй мэт харагдана.
@@ -186,15 +179,8 @@ export default function WeekBuilder() {
     date: string;
   } | null>(null);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<WeekResponse>(`/schedule/week?start=${weekStart}`)
-      .then(setData)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, [weekStart]);
-  useEffect(load, [load]);
+  const { data,  status, error, reload: load } = useSection<WeekResponse | null>(`/schedule/week?start=${weekStart}`, null);
+  const loading = status === "loading";
 
   // Сүүлд ачаалсан өгөгдлөөс сонгосон тохиолдлыг ШИНЭЭР олно. Цуцлагдсан
   // тохиолдол долоо хоногоос алга болдог тул энэ нь null болж, самбар

@@ -171,7 +171,7 @@ export default function StudentsDirectory() {
       <div>
         <h1 className="text-2xl font-extrabold text-ink">Сурагчийн жагсаалт</h1>
         <p className="mt-1 text-sm text-ink-dim">
-          {students ? `Нийт ${students.length} сурагч` : "Ачаалж байна…"}
+          {students ? `Нийт ${students.length} сурагч` : "Сурагчдын жагсаалт"}
           {role === "ADMIN" && <span className="ml-2 inline-flex flex-wrap gap-2"><button type="button" onClick={() => setShowArchived(v => !v)} className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold">{showArchived ? "Идэвхтэй" : "Архив"}</button><Link href="/app/admin/students/import" className="inline-flex min-h-10 items-center rounded-lg border border-line px-3 text-sm font-semibold">Excel импорт</Link></span>}
           {canSeeMoney && <button type="button" onClick={async () => { try { const csv = await api<string>("/students/export.csv", { responseType: "text" }); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); const a = document.createElement("a"); a.href = url; a.download = "students.csv"; a.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); } catch (e) { setError(errMsg(e)); } }} className="ml-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold"><Download size={15} aria-hidden/>CSV татах</button>}
           {unassignedIds.size > 0 && !showArchived && (

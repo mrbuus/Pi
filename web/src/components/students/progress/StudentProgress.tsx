@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import RequireRole from "@/components/nav/RequireRole";
-import { api } from "@/lib/api";
+import { useSection } from "./useSection";
 import { fullName, type StudentDetailData } from "../types";
 import ClassProgressTab from "./ClassProgressTab";
 import IndependentProgressTab from "./IndependentProgressTab";
@@ -15,10 +17,6 @@ const TAB_LABELS: Record<TabKey, string> = {
   independent: "Бие даасан явц",
 };
 
-function errMsg(e: unknown): string {
-  return e instanceof Error ? e.message : "Алдаа гарлаа";
-}
-
 /**
  * Сурагчийн явцын дэлгэрэнгүй хуудас (/app/students/:id) — Багш/Багш+/Админ.
  * Хоёр таб: "Ангийн явц" (ирц + өдөр тутмын гэрийн даалгаврын тэмдэглэгээ)
@@ -26,28 +24,12 @@ function errMsg(e: unknown): string {
  * Таб-ийн сонголт ?tab=class|independent query параметрт хадгалагдана
  * (TeacherDashboardClient.tsx-ийн ?tab= хэв маягтай ижил).
  */
-export default function StudentProgress({ studentId }: { studentId: string }) {
-  const [detail, setDetail] = useState<StudentDetailData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<StudentDetailData>(`/users/${studentId}`)
-      .then(setDetail)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, [studentId]);
-  useEffect(load, [load]);
-
-  const [tab, setTab] = useState<TabKey>("class");
-  useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get("tab");
-    if (t && (TAB_KEYS as string[]).includes(t)) setTab(t as TabKey);
-  }, []);
+function StudentProgressContent({ studentId }: { studentId: string }) {
+  const { data: detail, status, error, reload: load } = useSection<StudentDetailData>(`/users/${studentId}`);
+  const loading = status === "loading";
+  const params = useSearchParams();
+  const tab: TabKey = params.get("tab") === "independent" ? "independent" : "class";
   const changeTab = useCallback((next: TabKey) => {
-    setTab(next);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", next);
     window.history.replaceState({}, "", url);
@@ -129,4 +111,8 @@ export default function StudentProgress({ studentId }: { studentId: string }) {
       </div>
     </RequireRole>
   );
+}
+
+export default function StudentProgress({ studentId }: { studentId: string }) {
+  return <Suspense fallback={<LoadingState rows={3} />}><StudentProgressContent key={studentId} studentId={studentId} /></Suspense>;
 }

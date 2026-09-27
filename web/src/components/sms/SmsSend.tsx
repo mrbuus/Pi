@@ -14,6 +14,7 @@ interface BulkBody { phones: string[]; text: string }
 interface BulkEstimate {
   recipientCount: number;
   deduplicatedCount: number;
+  excludedArchivedCount?: number;
   estimatedSegments: number;
   estimatedCost: number;
 }
@@ -183,8 +184,9 @@ export function SmsSend() {
           <Button type="button" variant="secondary" loading={estimating} disabled={estimating || sending || !text.trim()} onClick={() => void getEstimate()}><Calculator className="h-4 w-4" aria-hidden />{estimating ? "Тооцоолж байна" : "Серверээс тооцоо авах"}</Button>
           {estimateIsCurrent && estimate && (
             <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Дугаар (давхардал хассан)</dt><dd className="mt-1 font-semibold">{estimate.deduplicatedCount.toLocaleString("mn-MN")}</dd></div>
-              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Хүлээн авагчид</dt><dd className="mt-1 font-semibold">{estimate.recipientCount.toLocaleString("mn-MN")}</dd></div>
+              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Илгээх дугаар (давхардал, архив хассан)</dt><dd className="mt-1 font-semibold">{estimate.deduplicatedCount.toLocaleString("mn-MN")}</dd></div>
+              {estimate.excludedArchivedCount !== undefined && <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Архивласан хэрэглэгчийн хасагдсан дугаар</dt><dd className="mt-1 font-semibold">{estimate.excludedArchivedCount.toLocaleString("mn-MN")}</dd></div>}
+              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Оруулсан дугаар</dt><dd className="mt-1 font-semibold">{estimate.recipientCount.toLocaleString("mn-MN")}</dd></div>
               <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Нэг дугаарт ногдох хэсэг</dt><dd className="mt-1 font-semibold">{estimate.deduplicatedCount > 0 ? (estimate.estimatedSegments / estimate.deduplicatedCount).toLocaleString("mn-MN") : "—"}</dd></div>
               <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Нийт SMS хэсэг</dt><dd className="mt-1 font-semibold">{estimate.estimatedSegments.toLocaleString("mn-MN")}</dd></div>
               <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Ойролцоо өртөг</dt><dd className="mt-1 font-semibold">₮{estimate.estimatedCost.toLocaleString("mn-MN")}</dd></div>
