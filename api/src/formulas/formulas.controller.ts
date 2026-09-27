@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PartialType } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiPropertyOptional, ApiTags, PartialType } from '@nestjs/swagger';
+import { IsDateString, IsOptional, Matches } from 'class-validator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -9,7 +9,13 @@ import { FormulaDto } from './dto/formula.dto';
 import { FormulaQueryDto, FormulaStudentQueryDto } from './dto/formula-query.dto';
 import { FormulasService } from './formulas.service';
 
-class PatchFormulaDto extends PartialType(FormulaDto) {}
+export class PatchFormulaDto extends PartialType(FormulaDto) {
+  @ApiPropertyOptional({ type: String, format: 'date-time', description: 'The updatedAt value read before editing. A stale value returns HTTP 409.' })
+  @IsOptional()
+  @IsDateString({ strict: true })
+  @Matches(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/)
+  expectedUpdatedAt?: string;
+}
 interface AuthedRequest { user: { userId: string; role: Role } }
 
 @ApiTags('formulas')

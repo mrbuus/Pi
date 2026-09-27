@@ -130,11 +130,16 @@ export class FormulasService {
     } catch (error) { this.rethrowWriteError(error); }
   }
 
-  async update(slug: string, dto: Partial<FormulaDto>) {
-    if (Object.keys(dto).length === 0) throw new BadRequestException('Patch body must include at least one field');
+  async update(slug: string, dto: Partial<FormulaDto> & { expectedUpdatedAt?: string }) {
+    const patchedFields = Object.keys(dto).filter((key) => key !== 'expectedUpdatedAt');
+    if (patchedFields.length === 0) throw new BadRequestException('Patch body must include at least one formula field');
     if (Object.entries(dto).some(([key, value]) => value === null && key !== 'widget')) throw new BadRequestException('Null cannot clear required formula fields');
     const existing = await this.prisma.formula.findUnique({ where: { slug } });
     if (!existing) throw new NotFoundException('Томьёо олдсонгүй');
+    const expectedUpdatedAt = dto.expectedUpdatedAt ? new Date(dto.expectedUpdatedAt) : existing.updatedAt;
+    if (dto.expectedUpdatedAt && expectedUpdatedAt.getTime() !== existing.updatedAt.getTime()) {
+      throw new ConflictException('Formula changed since it was loaded. Reload before saving.');
+    }
     const payload = {
       slug: existing.slug, title: dto.title ?? existing.name, section: dto.section ?? existing.sectionSlug,
       order: dto.order ?? existing.order, level: dto.level ?? existing.level, grade: dto.grade ?? existing.grade,
@@ -152,8 +157,16 @@ export class FormulasService {
     const { title, section, related, variants, conditions, derivation, examples, commonMistakes, quiz, widget, ...data } = payload;
     if (typeof section !== 'string') throw new BadRequestException('Formula section is required');
     try {
-      return await this.prisma.formula.update({ where: { slug }, data: { ...data, name: title, relatedSlugs: related, section: { connect: { slug: section } }, variants: variants as Prisma.InputJsonValue, conditions: conditions as Prisma.InputJsonValue, derivation: derivation as Prisma.InputJsonValue, examples: examples as Prisma.InputJsonValue, commonMistakes: commonMistakes as Prisma.InputJsonValue, quiz: quiz as Prisma.InputJsonValue, widget } });
-    } catch (error) { this.rethrowWriteError(error); }
+      const nextUpdatedAt = new Date(Math.max(Date.now(), existing.updatedAt.getTime() + 1));
+      return await this.prisma.formula.update({ where: { slug, updatedAt: expectedUpdatedAt }, data: { ...data, name: title, relatedSlugs: related, section: { connect: { slug: section } }, variants: variants as Prisma.InputJsonValue, conditions: conditions as Prisma.InputJsonValue, derivation: derivation as Prisma.InputJsonValue, examples: examples as Prisma.InputJsonValue, commonMistakes: commonMistakes as Prisma.InputJsonValue, quiz: quiz as Prisma.InputJsonValue, widget, updatedAt: nextUpdatedAt } });
+    } catch (error) {
+      const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : undefined;
+      if (code === 'P2025') {
+        const current = await this.prisma.formula.findUnique({ where: { slug }, select: { slug: true } });
+        if (current) throw new ConflictException('Formula changed while saving. Reload before trying again.');
+      }
+      this.rethrowWriteError(error);
+    }
   }
 
   private existingSlugs() {
