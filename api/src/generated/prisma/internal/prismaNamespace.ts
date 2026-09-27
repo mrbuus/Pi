@@ -423,6 +423,7 @@ export const ModelName = {
   ResultAcknowledgement: 'ResultAcknowledgement',
   EmailOtp: 'EmailOtp',
   Attempt: 'Attempt',
+  MistakeEntry: 'MistakeEntry',
   DailyClassSummary: 'DailyClassSummary',
   Prediction: 'Prediction',
   StudentColorTag: 'StudentColorTag',
@@ -460,7 +461,10 @@ export const ModelName = {
   GoogleIdentity: 'GoogleIdentity',
   GoogleOAuthState: 'GoogleOAuthState',
   GoogleLoginExchange: 'GoogleLoginExchange',
-  StoredFile: 'StoredFile'
+  StoredFile: 'StoredFile',
+  FormulaReview: 'FormulaReview',
+  FormulaReviewDay: 'FormulaReviewDay',
+  FormulaReviewAttempt: 'FormulaReviewAttempt'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -476,7 +480,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "resultAcknowledgement" | "emailOtp" | "attempt" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "teacherWorkDay" | "teacherWorkException" | "academicCalendarDay" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "teacherWorkDay" | "teacherWorkException" | "academicCalendarDay" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3366,6 +3370,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MistakeEntry: {
+      payload: Prisma.$MistakeEntryPayload<ExtArgs>
+      fields: Prisma.MistakeEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MistakeEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MistakeEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.MistakeEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MistakeEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>
+        }
+        findMany: {
+          args: Prisma.MistakeEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>[]
+        }
+        create: {
+          args: Prisma.MistakeEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>
+        }
+        createMany: {
+          args: Prisma.MistakeEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MistakeEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.MistakeEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>
+        }
+        update: {
+          args: Prisma.MistakeEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.MistakeEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MistakeEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MistakeEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.MistakeEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MistakeEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.MistakeEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMistakeEntry>
+        }
+        groupBy: {
+          args: Prisma.MistakeEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MistakeEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MistakeEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MistakeEntryCountAggregateOutputType> | number
+        }
+      }
+    }
     DailyClassSummary: {
       payload: Prisma.$DailyClassSummaryPayload<ExtArgs>
       fields: Prisma.DailyClassSummaryFieldRefs
@@ -6178,6 +6256,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FormulaReview: {
+      payload: Prisma.$FormulaReviewPayload<ExtArgs>
+      fields: Prisma.FormulaReviewFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FormulaReviewFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FormulaReviewFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>
+        }
+        findFirst: {
+          args: Prisma.FormulaReviewFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FormulaReviewFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>
+        }
+        findMany: {
+          args: Prisma.FormulaReviewFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>[]
+        }
+        create: {
+          args: Prisma.FormulaReviewCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>
+        }
+        createMany: {
+          args: Prisma.FormulaReviewCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FormulaReviewCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>[]
+        }
+        delete: {
+          args: Prisma.FormulaReviewDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>
+        }
+        update: {
+          args: Prisma.FormulaReviewUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>
+        }
+        deleteMany: {
+          args: Prisma.FormulaReviewDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FormulaReviewUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FormulaReviewUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>[]
+        }
+        upsert: {
+          args: Prisma.FormulaReviewUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewPayload>
+        }
+        aggregate: {
+          args: Prisma.FormulaReviewAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFormulaReview>
+        }
+        groupBy: {
+          args: Prisma.FormulaReviewGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaReviewGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FormulaReviewCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaReviewCountAggregateOutputType> | number
+        }
+      }
+    }
+    FormulaReviewDay: {
+      payload: Prisma.$FormulaReviewDayPayload<ExtArgs>
+      fields: Prisma.FormulaReviewDayFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FormulaReviewDayFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FormulaReviewDayFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>
+        }
+        findFirst: {
+          args: Prisma.FormulaReviewDayFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FormulaReviewDayFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>
+        }
+        findMany: {
+          args: Prisma.FormulaReviewDayFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>[]
+        }
+        create: {
+          args: Prisma.FormulaReviewDayCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>
+        }
+        createMany: {
+          args: Prisma.FormulaReviewDayCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FormulaReviewDayCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>[]
+        }
+        delete: {
+          args: Prisma.FormulaReviewDayDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>
+        }
+        update: {
+          args: Prisma.FormulaReviewDayUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>
+        }
+        deleteMany: {
+          args: Prisma.FormulaReviewDayDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FormulaReviewDayUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FormulaReviewDayUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>[]
+        }
+        upsert: {
+          args: Prisma.FormulaReviewDayUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewDayPayload>
+        }
+        aggregate: {
+          args: Prisma.FormulaReviewDayAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFormulaReviewDay>
+        }
+        groupBy: {
+          args: Prisma.FormulaReviewDayGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaReviewDayGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FormulaReviewDayCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaReviewDayCountAggregateOutputType> | number
+        }
+      }
+    }
+    FormulaReviewAttempt: {
+      payload: Prisma.$FormulaReviewAttemptPayload<ExtArgs>
+      fields: Prisma.FormulaReviewAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FormulaReviewAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FormulaReviewAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.FormulaReviewAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FormulaReviewAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.FormulaReviewAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.FormulaReviewAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.FormulaReviewAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FormulaReviewAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.FormulaReviewAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>
+        }
+        update: {
+          args: Prisma.FormulaReviewAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.FormulaReviewAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FormulaReviewAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FormulaReviewAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.FormulaReviewAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormulaReviewAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.FormulaReviewAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFormulaReviewAttempt>
+        }
+        groupBy: {
+          args: Prisma.FormulaReviewAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaReviewAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FormulaReviewAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormulaReviewAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6795,10 +7095,35 @@ export const AttemptScalarFieldEnum = {
   givenAnswer: 'givenAnswer',
   testId: 'testId',
   classroomId: 'classroomId',
+  mistakeCollectedAt: 'mistakeCollectedAt',
   createdAt: 'createdAt'
 } as const
 
 export type AttemptScalarFieldEnum = (typeof AttemptScalarFieldEnum)[keyof typeof AttemptScalarFieldEnum]
+
+
+export const MistakeEntryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  problemId: 'problemId',
+  source: 'source',
+  sourceRefId: 'sourceRefId',
+  sourceOccurredAt: 'sourceOccurredAt',
+  testTitle: 'testTitle',
+  givenAnswer: 'givenAnswer',
+  status: 'status',
+  retryCount: 'retryCount',
+  consecutiveCorrect: 'consecutiveCorrect',
+  lastRetryAt: 'lastRetryAt',
+  lastCorrectAt: 'lastCorrectAt',
+  nextRetryAt: 'nextRetryAt',
+  reason: 'reason',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MistakeEntryScalarFieldEnum = (typeof MistakeEntryScalarFieldEnum)[keyof typeof MistakeEntryScalarFieldEnum]
 
 
 export const DailyClassSummaryScalarFieldEnum = {
@@ -7330,6 +7655,42 @@ export const StoredFileScalarFieldEnum = {
 } as const
 
 export type StoredFileScalarFieldEnum = (typeof StoredFileScalarFieldEnum)[keyof typeof StoredFileScalarFieldEnum]
+
+
+export const FormulaReviewScalarFieldEnum = {
+  userId: 'userId',
+  formulaId: 'formulaId',
+  box: 'box',
+  dueAt: 'dueAt',
+  lastResult: 'lastResult',
+  streak: 'streak',
+  reviewCount: 'reviewCount',
+  lapses: 'lapses',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FormulaReviewScalarFieldEnum = (typeof FormulaReviewScalarFieldEnum)[keyof typeof FormulaReviewScalarFieldEnum]
+
+
+export const FormulaReviewDayScalarFieldEnum = {
+  userId: 'userId',
+  day: 'day',
+  count: 'count'
+} as const
+
+export type FormulaReviewDayScalarFieldEnum = (typeof FormulaReviewDayScalarFieldEnum)[keyof typeof FormulaReviewDayScalarFieldEnum]
+
+
+export const FormulaReviewAttemptScalarFieldEnum = {
+  userId: 'userId',
+  exerciseId: 'exerciseId',
+  formulaId: 'formulaId',
+  fingerprint: 'fingerprint',
+  response: 'response',
+  createdAt: 'createdAt'
+} as const
+
+export type FormulaReviewAttemptScalarFieldEnum = (typeof FormulaReviewAttemptScalarFieldEnum)[keyof typeof FormulaReviewAttemptScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -8241,6 +8602,7 @@ export type GlobalOmitConfig = {
   resultAcknowledgement?: Prisma.ResultAcknowledgementOmit
   emailOtp?: Prisma.EmailOtpOmit
   attempt?: Prisma.AttemptOmit
+  mistakeEntry?: Prisma.MistakeEntryOmit
   dailyClassSummary?: Prisma.DailyClassSummaryOmit
   prediction?: Prisma.PredictionOmit
   studentColorTag?: Prisma.StudentColorTagOmit
@@ -8279,6 +8641,9 @@ export type GlobalOmitConfig = {
   googleOAuthState?: Prisma.GoogleOAuthStateOmit
   googleLoginExchange?: Prisma.GoogleLoginExchangeOmit
   storedFile?: Prisma.StoredFileOmit
+  formulaReview?: Prisma.FormulaReviewOmit
+  formulaReviewDay?: Prisma.FormulaReviewDayOmit
+  formulaReviewAttempt?: Prisma.FormulaReviewAttemptOmit
 }
 
 /* Types for Logging */
