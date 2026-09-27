@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { reviewMock, type ReviewMockOptions } from './formula-review-fixture';
 import { formulaSections, formulaSummaries, formulaDetail, seenFormulas } from './formula-fixtures';
 export const student = { id: 'synthetic-student', firstName: 'Туршилт', lastName: 'Зохиомол', phone: '99000000' };
 export const classroom = { id: 'synthetic-class', name: 'Туршилтын анги', type: 'CLASSROOM', grade: 12, _count: { enrollments: 1 } };
@@ -6,7 +7,9 @@ export const mistakeFixture = {
   id: 'mistake-1', problem: { id: 'problem-1', statementText: '$2+2$ хэд вэ?', choices: ['3', '4'], format: 'CHOICE', choiceMode: 'TEXT', imageKey: null },
   givenAnswer: '3', status: 'NEW', reason: null as string | null, note: null as string | null, testTitle: 'Туршилтын тест', formulas: [{ slug: 'square-of-sum', title: 'Нийлбэрийн квадрат', latex: '(a+b)^2=a^2+2ab+b^2' }],
 };
-export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mistakes: { emptyToday?: boolean; failPatch?: boolean; failRetryOnce?: boolean; structured?: boolean; paginated?: boolean } = {}) {
+export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mistakes: { emptyToday?: boolean; failPatch?: boolean; failRetryOnce?: boolean; structured?: boolean; paginated?: boolean } & ReviewMockOptions = {}) {
+  // T10 (цээжлэх) болон T12 (алдааны дэвтэр) нэг сонголтын объектыг хуваалцана — түлхүүр давхцахгүй.
+  const review = reviewMock(mistakes);
   const mistake = structuredClone(mistakeFixture);
   let retryFailed = false;
   const projectMistake = () => mistakes.structured ? { ...mistake, problem: { ...mistake.problem, format: 'FILL_NUMBER', choices: null, choiceMode: null, answerFields: ['a', 'bc'] } } : mistake;
@@ -35,6 +38,9 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mis
     if (method === 'OPTIONS') return route.fulfill({ status: 204, headers });
     const body = req.postData() ? req.postDataJSON() : {};
     calls.push({ path, method, body });
+    // Цээжлэх маршрут (/formulas/review/*) ерөнхий томьёоны дэлгэрэнгүйгээс ӨМНӨ.
+    const reviewResponse = await review.handle(path, method, body);
+    if (reviewResponse) return reply(reviewResponse.body, reviewResponse.status ?? 200);
     if (method === 'PATCH' && path === '/formulas/synthetic-square-sum') {
       if (!['ADMIN', 'TEACHER_PLUS'].includes(role)) return reply({message: 'Forbidden'}, 403);
       if (formulas.editStatus !== 200) return reply({message: 'Synthetic edit error'}, formulas.editStatus);
