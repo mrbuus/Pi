@@ -31,6 +31,7 @@ import {
   UpdateTestDraftDto,
 } from './dto/test-draft.dto';
 import { SaveSessionDto } from './dto/submit-test.dto';
+import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import {
   answerToken,
   buildChoiceOrder,
@@ -108,7 +109,7 @@ function toGradable(row: TestProblemRow): GradableProblem {
 
 @Injectable()
 export class TestsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private mistakes: MistakeCollector) {}
 
   private draftState(dto: TestDraftStateDto): Prisma.InputJsonValue {
     if (
@@ -1501,6 +1502,7 @@ export class TestsService {
           timeSpentSec: typeof m.times[pid] === 'number' ? m.times[pid] : null,
           testId: test.id,
           classroomId: enrollment?.classroomId ?? null,
+          mistakeCollectedAt: (answered && known && !correct) || selfState === SelfState.FAILED || selfState === SelfState.FIXED_AFTER_ERROR ? null : new Date(),
         });
       }
       // Хариу тодорхойгүй бодлогыг Problem.correctRate/attemptCount
@@ -1511,7 +1513,7 @@ export class TestsService {
     const now = new Date();
 
     // АТОМИК хэсэг: TestResult, Attempt, Session нэг transaction-д
-    const [result] = await this.prisma.$transaction([
+    const [result, createdAttempts] = await this.prisma.$transaction([
       this.prisma.testResult.upsert({
         where: {
           testId_studentId: { testId: test.id, studentId },
@@ -1526,7 +1528,10 @@ export class TestsService {
         // Цаасан дүн аль хэдийн орсон бол дарж бичихгүй (өөрчлөлтгүй update)
         update: {},
       }),
-      this.prisma.attempt.createMany({ data: attempts }),
+      this.prisma.attempt.createManyAndReturn({
+        data: attempts,
+        select: { id: true, mistakeCollectedAt: true },
+      }),
       this.prisma.testAttemptSession.update({
         where: { id: session.id },
         data: {
@@ -1540,6 +1545,14 @@ export class TestsService {
         },
       }),
     ]);
+
+    // Collect only this submission's wrong attempts; failure leaves them pending
+    // for the scheduled bounded recovery pass and cannot undo the committed score.
+    for (const attempt of createdAttempts) {
+      if (attempt.mistakeCollectedAt === null) {
+        await this.mistakes.collectAttempt(attempt.id);
+      }
+    }
 
     // ТУСДАА: Problem статистик (дүгнэлт хадгалагдсаны дараа).
     // Алдаа гарвал сурагчийн илгээлтийг унагаахгүй, зөвхөн log.

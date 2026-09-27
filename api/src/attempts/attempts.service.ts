@@ -21,6 +21,7 @@ import {
 import { EVENING_MARKING_WINDOW_DAYS } from '../common/marking';
 import { PrismaService } from '../prisma/prisma.service';
 import { EveningReportDto } from './dto/evening-report.dto';
+import { MistakeCollector } from '../mistakes/mistake-collector.service';
 
 // Амжилт = алдаагүй бодсон эсвэл алдаад зассан; буудсан/алдсан = сул тал
 function isSuccess(selfState: SelfState | null, autoCorrect: boolean | null) {
@@ -48,7 +49,7 @@ function fullName(user: { firstName: string; lastName: string }) {
 
 @Injectable()
 export class AttemptsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private mistakes: MistakeCollector) {}
 
   private parseApiDate(value: string): Date {
     try {
@@ -133,13 +134,14 @@ export class AttemptsService {
         selfState: e.selfState,
         timeSpentSec: e.timeSpentSec,
         classroomId: enrollment.classroomId,
+        mistakeCollectedAt: e.selfState === SelfState.FAILED || e.selfState === SelfState.FIXED_AFTER_ERROR ? null : new Date(),
       };
     });
     const rows = [
       ...new Map(resolvedRows.map((r) => [r.problemId, r])).values(),
     ];
 
-    await this.prisma.$transaction(async (tx) => {
+    const createdAttempts = await this.prisma.$transaction(async (tx) => {
       await tx.attempt.deleteMany({
         where: {
           studentId,
@@ -149,8 +151,16 @@ export class AttemptsService {
           problemId: { in: rows.map((r) => r.problemId) },
         },
       });
-      await tx.attempt.createMany({ data: rows });
+      return tx.attempt.createManyAndReturn({
+        data: rows,
+        select: { id: true, mistakeCollectedAt: true },
+      });
     });
+    for (const attempt of createdAttempts) {
+      if (attempt.mistakeCollectedAt === null) {
+        await this.mistakes.collectAttempt(attempt.id);
+      }
+    }
     return { recorded: rows.length, date: occurredOn };
   }
 

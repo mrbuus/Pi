@@ -64,6 +64,7 @@ model User {
   payments                Payment[]
   userPasses              UserPass[]
   attempts                Attempt[]
+  mistakeEntries          MistakeEntry[]
   attendances             Attendance[]         @relation("AttendanceStudent")
   submissions             Submission[]
   dailyHomeworkMarks      DailyHomeworkMark[]  @relation("DailyHomeworkMarkStudent")
@@ -742,6 +743,7 @@ model Problem {
   analysis      ProblemAnalysis?
   choiceOptions ProblemChoice[] // бүтэцтэй сонголтууд (correct/wrong + алдааны шалтгаан)
   attempts      Attempt[]
+  mistakeEntries MistakeEntry[]
   testItems     TestProblem[]
 
   @@index([chapterId])
@@ -1089,11 +1091,41 @@ model Attempt {
   givenAnswer Json?
   testId      String?
   classroomId String?
+  // Non-null means collection is complete (new legacy rows default to now).
+  // New wrong attempts explicitly set this to null for durable collector retry.
+  mistakeCollectedAt DateTime? @default(now())
   createdAt   DateTime @default(now())
 
   @@index([studentId, occurredOn])
   @@index([problemId])
   @@index([studentId, problemId])
+  @@index([mistakeCollectedAt, autoCorrect])
+}
+
+model MistakeEntry {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId         String
+  problem           Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  source            String // "PRACTICE" | "TEST"
+  sourceRefId       String?
+  sourceOccurredAt DateTime?
+  testTitle         String?
+  givenAnswer       Json?
+  status            String   @default("NEW") // NEW | RETRYING | MASTERED
+  retryCount        Int      @default(0)
+  consecutiveCorrect Int     @default(0)
+  lastRetryAt       DateTime?
+  lastCorrectAt     DateTime?
+  nextRetryAt       DateTime?
+  reason            String? // CALC | CONCEPT | FORMULA | READING | TIME | UNKNOWN
+  note              String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([userId, problemId])
+  @@index([userId, status, nextRetryAt])
 }
 
 // Шөнө бүрийн cron-ийн анги тус бүрийн өдрийн дүгнэлт (SPEC §9.1.1)

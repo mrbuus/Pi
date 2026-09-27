@@ -100,3 +100,16 @@ test('09 админ самбар 375px-т хэвтээ гүйлгэхгүй', as
   await mock.verify();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth), { message: 'Admin dashboard must fit 375px' }).toBeLessThanOrEqual(375);
 });
+
+test('алдааны дэвтэрт шалтгаан сонгоод дахин бодож хадгалах', async ({ page }, info) => {
+  const mock = await mockApi(page); await page.goto('/app/mistakes');
+  await expect(page.getByRole('heading', { name: 'Алдааны дэвтэр' })).toBeVisible();
+  await page.getByRole('button', { name: 'Томьёо мартсан', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Томьёо мартсан', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '4', exact: true }).click();
+  await page.getByRole('button', { name: 'Дахин бодох' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Зөв.' })).toBeVisible();
+  expect(mock.calls.find(c => c.path === '/mistakes/mistake-1' && c.method === 'PATCH')?.body).toEqual({ reason: 'FORMULA' });
+  expect(mock.calls.find(c => c.path === '/mistakes/mistake-1/retry' && c.method === 'POST')?.body).toEqual({ answer: 1 });
+  await snapshot(page, info, 'mistakes-notebook'); await mock.verify();
+});
