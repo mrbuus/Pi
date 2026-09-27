@@ -17,7 +17,7 @@ export const num = (n: number) =>
     : String.raw`\text{тодорхойгүй}`;
 export function MathValue({ latex }: { latex: string }) {
   return (
-    <div className="min-w-0 overflow-x-auto text-sm" data-widget-values>
+    <div className="min-w-0 overflow-x-auto text-sm" data-widget-values role="group" aria-label="Тооцооны утга" tabIndex={0}>
       <MathText showErrorInTeacherView>{`$${latex}$`}</MathText>
     </div>
   );
