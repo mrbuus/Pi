@@ -217,7 +217,10 @@ function setup(src: Record<string, unknown> | null) {
     },
     auditLog: { create: jest.fn(async () => ({})) },
   };
-  return { svc: new TestsService(prisma as any), created };
+  // T12 adds the collector constructor dependency. Reflect.construct keeps
+  // this cloning fixture usable both before and after that additive PR merges.
+  const svc = Reflect.construct(TestsService, [prisma, { retryPending: jest.fn() }]) as TestsService;
+  return { svc, created };
 }
 
 const ownerSource = {
