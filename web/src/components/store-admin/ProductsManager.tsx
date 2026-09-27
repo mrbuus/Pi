@@ -320,6 +320,8 @@ export default function ProductsManager({
                       <Button
                         size="sm"
                         variant="secondary"
+                        aria-label={`${product.title} бүтээгдэхүүнийг идэвхгүй болгох`}
+                        className="min-h-11 min-w-11"
                         onClick={() => handleDeactivate(product.id)}
                         disabled={deletingProducts[product.id]}
                         loading={deletingProducts[product.id]}

@@ -182,7 +182,7 @@ export default function BuyerDashboard() {
                   <span
                     className={`rounded-full px-3 py-1 text-xs ${
                       active
-                        ? "bg-success/15 text-success"
+                        ? "bg-success/15 text-ink"
                         : "bg-error/15 text-error"
                     }`}
                   >

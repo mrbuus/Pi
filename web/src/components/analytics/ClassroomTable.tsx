@@ -24,7 +24,7 @@ export default function ClassroomTable({ rows }: { rows: ClassroomRow[] }) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" role="region" aria-label="Ангийн нэгтгэл" tabIndex={0}>
       <table className="w-full min-w-[560px] text-left text-sm">
         <thead>
           <tr className="text-xs text-ink-dim">

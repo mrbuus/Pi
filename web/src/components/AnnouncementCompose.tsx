@@ -124,6 +124,7 @@ export default function AnnouncementCompose() {
           className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
         />
         <select
+          aria-label="Зар хүлээн авах бүлэг"
           value={audience}
           onChange={(e) => setAudience(e.target.value)}
           className="w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
@@ -177,7 +178,7 @@ export default function AnnouncementCompose() {
             {msg && <span className="text-xs text-success">{msg}</span>}
             <button
               onClick={post}
-              className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold"
+              className="min-h-11 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand"
             >
               Зарлах
             </button>

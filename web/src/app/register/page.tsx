@@ -473,7 +473,7 @@ export default function RegisterPage() {
 
         <p className="mt-5 text-center text-sm text-ink-dim">
           Бүртгэлтэй юу?{" "}
-          <Link href="/login" className="text-brand hover:underline">
+          <Link href="/login" className="text-brand underline underline-offset-2">
             Нэвтрэх
           </Link>
         </p>
