@@ -170,7 +170,7 @@ function setup(
     }),
   };
   return {
-    service: new TestsService(prisma as unknown as PrismaService),
+    service: new TestsService(prisma as unknown as PrismaService, { retryPending: jest.fn() } as any),
     prisma,
     tx,
     test,

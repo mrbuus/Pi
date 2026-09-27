@@ -55,7 +55,7 @@ describe('TestsService duplicate and server-side draft behavior', () => {
       auditLog: { create: jest.fn().mockResolvedValue({}) },
     };
     prisma.$transaction = jest.fn((callback) => callback(prisma));
-    service = new TestsService(prisma);
+    service = new TestsService(prisma, { retryPending: jest.fn() } as any);
   });
 
   it('duplicates only configuration into an unpublished, unassigned test and audits it', async () => {
