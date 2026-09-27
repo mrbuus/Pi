@@ -107,7 +107,7 @@ function ProductEditor({
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
           <Badge>{kinds[product.kind]}</Badge>
-          <Badge tone={product.active ? "success" : "neutral"}>
+          <Badge tone={product.active ? "success" : "neutral"} className={product.active ? "text-ink" : undefined}>
             {product.active ? "Идэвхтэй" : "Идэвхгүй"}
           </Badge>
         </div>
