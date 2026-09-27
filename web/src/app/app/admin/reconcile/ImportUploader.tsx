@@ -89,9 +89,10 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
         <h3 className="text-sm font-semibold text-ink mb-3">Баганын зураглал</h3>
         <div className="grid grid-cols-1 gap-2">
           <div>
-            <label className="block text-xs text-ink-dim mb-1">Огноо (баганын #)</label>
+            <label htmlFor="reconcile-date-column" className="block text-xs text-ink-dim mb-1">Огноо (баганын #)</label>
             <input
               type="number"
+              id="reconcile-date-column"
               value={config.dateCol}
               onChange={(e) =>
                 setConfig({
@@ -104,11 +105,12 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
             />
           </div>
           <div>
-            <label className="block text-xs text-ink-dim mb-1">
+            <label htmlFor="reconcile-amount-column" className="block text-xs text-ink-dim mb-1">
               Дүн (баганын #)
             </label>
             <input
               type="number"
+              id="reconcile-amount-column"
               value={config.amountCol}
               onChange={(e) =>
                 setConfig({
@@ -121,11 +123,12 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
             />
           </div>
           <div>
-            <label className="block text-xs text-ink-dim mb-1">
+            <label htmlFor="reconcile-description-column" className="block text-xs text-ink-dim mb-1">
               Тайлбар (баганын #)
             </label>
             <input
               type="number"
+              id="reconcile-description-column"
               value={config.descCol}
               onChange={(e) =>
                 setConfig({
@@ -138,11 +141,12 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
             />
           </div>
           <div>
-            <label className="block text-xs text-ink-dim mb-1">
+            <label htmlFor="reconcile-journal-column" className="block text-xs text-ink-dim mb-1">
               Журнал / санхүүгийн код (баганын #)
             </label>
             <input
               type="number"
+              id="reconcile-journal-column"
               value={config.journalCol}
               onChange={(e) =>
                 setConfig({

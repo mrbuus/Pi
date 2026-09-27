@@ -1,0 +1,48 @@
+{
+  "mobile-375|PARENT|/app/parent": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "target": [
+        ".bg-success\\/15.mt-2.text-success"
+      ]
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "target": [
+        ".bg-success\\/15.text-success.py-1 > .inline-flex.flex-wrap.items-center"
+      ]
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "target": [
+        ".w-14"
+      ]
+    }
+  ],
+  "desktop-1280|PARENT|/app/parent": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "target": [
+        ".bg-success\\/15.mt-2.text-success"
+      ]
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "target": [
+        ".bg-success\\/15.text-success.py-1 > .inline-flex.flex-wrap.items-center"
+      ]
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "target": [
+        ".w-14"
+      ]
+    }
+  ]
+}

@@ -74,7 +74,7 @@ export default function EngagementChart({
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="w-full min-w-[420px]"
-          role="img"
+          role="group"
           aria-label={`Өдөр тутмын идэвхтэй сурагчийн тоо, ${days[0].date}-с ${days[days.length - 1].date} хүртэл. Дээд утга ${maxVal} сурагч.`}
         >
           <defs>
@@ -106,6 +106,13 @@ export default function EngagementChart({
                 onMouseEnter={() => setHoverIdx(i)}
                 onMouseLeave={() => setHoverIdx((cur) => (cur === i ? null : cur))}
                 onFocus={() => setHoverIdx(i)}
+                onBlur={() => setHoverIdx(null)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setHoverIdx(i);
+                  }
+                }}
                 tabIndex={0}
                 role="button"
                 aria-label={`${p.day.date}: ${p.day.activeStudents} идэвхтэй сурагч`}

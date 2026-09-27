@@ -86,7 +86,7 @@ function FieldRow({
             <p className="selectable truncate text-base font-medium text-ink">{value}</p>
           )
         ) : (
-          <p className="text-base text-ink-dim/70 italic">{placeholder}</p>
+          <p className="text-base text-ink-dim italic">{placeholder}</p>
         )}
       </div>
     </div>

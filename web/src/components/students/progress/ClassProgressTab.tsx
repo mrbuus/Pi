@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, Clock, X, ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { ATTENDANCE_OPTIONS } from "@/components/attendance/StatusPills";
 import { LATE_RANGE_OPTIONS, type LateRangeValue } from "@/components/attendance/LateRangePicker";
@@ -27,6 +27,8 @@ interface HomeworkMarkRow {
   classroom: { id: string; name: string };
 }
 
+const attendanceIcons: Record<string, LucideIcon> = { check: Check, clock: Clock, x: X };
+
 function attendanceBadge(status: AttendanceRow["status"]) {
   return (
     ATTENDANCE_OPTIONS.find((o) => o.value === status) ?? {
@@ -44,12 +46,12 @@ function lateRangeLabel(value: LateRangeValue | null): string | null {
 
 function homeworkBadge(status: HomeworkMark | null) {
   if (!status) {
-    return { label: "Тэмдэглээгүй", icon: "", selectedClass: "bg-ink/10 text-ink-dim" };
+    return { label: "Тэмдэглээгүй", icon: null, selectedClass: "bg-ink/10 text-ink-dim" };
   }
   return (
     HOMEWORK_MARK_OPTIONS.find((o) => o.value === status) ?? {
       label: status,
-      icon: "",
+      icon: null,
       selectedClass: "bg-ink/10 text-ink-dim",
     }
   );
@@ -148,6 +150,7 @@ export default function ClassProgressTab({ studentId }: { studentId: string }) {
           <div className="space-y-2">
             {attendance.map((row, i) => {
               const badge = attendanceBadge(row.status);
+              const StatusIcon = attendanceIcons[badge.icon];
               const late = lateRangeLabel(row.lateRange);
               return (
                 <div
@@ -155,8 +158,8 @@ export default function ClassProgressTab({ studentId }: { studentId: string }) {
                   className="flex flex-wrap items-center gap-2 rounded-lg border border-line px-4 py-2.5 text-sm"
                 >
                   <span className="w-24 shrink-0 text-ink-dim">{row.date.slice(0, 10)}</span>
-                  <span className={`rounded-lg px-2.5 py-1 text-xs font-medium ${badge.selectedClass}`}>
-                    {badge.icon ? `${badge.icon} ` : ""}
+                  <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium ${badge.selectedClass}`}>
+                    {StatusIcon && <StatusIcon className="h-3 w-3" aria-hidden />}
                     {badge.label}
                   </span>
                   {late && <span className="text-xs text-ink-dim">({late})</span>}
@@ -187,14 +190,15 @@ export default function ClassProgressTab({ studentId }: { studentId: string }) {
           <div className="space-y-2">
             {homework.map((row, i) => {
               const badge = homeworkBadge(row.status);
+              const StatusIcon = badge.icon;
               return (
                 <div
                   key={`${row.date}-${row.classroom.id}-${i}`}
                   className="flex flex-wrap items-center gap-2 rounded-lg border border-line px-4 py-2.5 text-sm"
                 >
                   <span className="w-24 shrink-0 text-ink-dim">{row.date.slice(0, 10)}</span>
-                  <span className={`rounded-lg px-2.5 py-1 text-xs font-medium ${badge.selectedClass}`}>
-                    {badge.icon ? `${badge.icon} ` : ""}
+                  <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium ${badge.selectedClass}`}>
+                    {StatusIcon && <StatusIcon className="h-3 w-3" aria-hidden />}
                     {badge.label}
                   </span>
                   <span className="text-xs text-ink-dim">{row.classroom.name}</span>

@@ -20,25 +20,25 @@ export const ATTENDANCE_OPTIONS: readonly AttendanceOption[] = [
     value: "PRESENT",
     label: "Ирсэн",
     icon: "check",
-    selectedClass: "bg-success/25 text-success",
+    selectedClass: "bg-success/25 text-ink",
   },
   {
     value: "LATE",
     label: "Хоцорсон",
     icon: "clock",
-    selectedClass: "bg-warning/25 text-warning",
+    selectedClass: "bg-warning/25 text-ink",
   },
   {
     value: "ABSENT",
     label: "Тасалсан",
     icon: "x",
-    selectedClass: "bg-error/25 text-error",
+    selectedClass: "bg-error/25 text-ink",
   },
   {
     value: "EXCUSED",
     label: "Чөлөөтэй",
     icon: "",
-    selectedClass: "bg-info/25 text-info",
+    selectedClass: "bg-info/25 text-ink",
   },
 ] as const;
 
