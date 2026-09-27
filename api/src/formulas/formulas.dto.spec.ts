@@ -3,6 +3,7 @@ import { validate } from 'class-validator';
 import { ValidationPipe } from '@nestjs/common';
 import { FormulaDto } from './dto/formula.dto';
 import { FormulaQueryDto, FormulaStudentQueryDto } from './dto/formula-query.dto';
+import { PatchFormulaDto } from './formulas.controller';
 
 const payload = {
   slug: 'trig-example', title: 'Жишээ томьёо', section: 'trigonometry', order: 1,
@@ -49,5 +50,13 @@ describe('formula DTO validation', () => {
     expect(JSON.stringify(badShape)).toMatch(/non-reserved|formulaQuizShape/i);
     const pipe = new ValidationPipe({ whitelist: true, transform: true });
     await expect(pipe.transform({ ...payload, slug: 'sections' }, { type: 'body', metatype: FormulaDto })).rejects.toThrow();
+  });
+
+  it('accepts an optional ISO timestamp precondition only on the partial patch DTO', async () => {
+    expect(await validate(plainToInstance(PatchFormulaDto, { title: 'Updated', expectedUpdatedAt: '2026-09-27T10:00:00.000Z' }))).toHaveLength(0);
+    expect(await validate(plainToInstance(PatchFormulaDto, { title: 'Updated', expectedUpdatedAt: '2026-09-27' }))).not.toHaveLength(0);
+    expect(await validate(plainToInstance(PatchFormulaDto, { title: 'Updated', expectedUpdatedAt: 'not-a-date' }))).not.toHaveLength(0);
+    const pipe = new ValidationPipe({ whitelist: true, transform: true });
+    await expect(pipe.transform({ title: 'Updated', expectedUpdatedAt: '2026-09-27T10:00:00.000Z' }, { type: 'body', metatype: PatchFormulaDto })).resolves.toMatchObject({ expectedUpdatedAt: '2026-09-27T10:00:00.000Z' });
   });
 });
