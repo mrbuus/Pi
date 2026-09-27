@@ -20,6 +20,7 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mis
   const edited = new Map<string, Record<string, unknown>>();
   let attendance: string | null = null, homework: string | null = null;
   let users: unknown[] = [];
+  let goals: { id: string; title: string; description: string }[] = [];
   page.on('pageerror', e => errors.push(e.message));
   if (signedIn) await page.addInitScript(role => {
     localStorage.setItem('pi_token', 'synthetic-token-never-valid-on-server');
@@ -86,6 +87,10 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mis
     if (path === '/notifications/my/unread-count') return reply({ count: 0 });
     if (path === '/auth/me') return reply({ ...student, role, studentProfile: { type: 'CLASSROOM', grade: 12 } });
     if (path === '/attempts/my-stats') return reply({ totalAttempts: 12, weakestTags: [] });
+    if (path === '/readiness/my') return reply({ index: 62, low: 55, high: 70, dataPoints: 18, effectiveDataPoints: 12, coverage: 35, topics: [{ topic: 'TRIG', title: 'Тригонометр', mastery: 48, measured: true, weight: 0.065, attempts: 8, effectiveAttempts: 5, trend: 'UP' }, { topic: 'DERIV', title: 'Уламжлал', mastery: 72, measured: true, weight: 0.075, attempts: 10, effectiveAttempts: 7, trend: 'FLAT' }, { topic: 'ALG', title: 'Алгебрийн хувиргалт', mastery: 58, measured: true, weight: 0.07, attempts: 5, effectiveAttempts: 4, trend: 'DOWN' }], nextBestTopics: [{ topic: 'TRIG', title: 'Тригонометр', mastery: 48, measured: true, weight: 0.065, attempts: 8, effectiveAttempts: 5, trend: 'UP' }, { topic: 'DERIV', title: 'Уламжлал', mastery: 72, measured: true, weight: 0.075, attempts: 10, effectiveAttempts: 7, trend: 'FLAT' }, { topic: 'ALG', title: 'Алгебрийн хувиргалт', mastery: 58, measured: true, weight: 0.07, attempts: 5, effectiveAttempts: 4, trend: 'DOWN' }], weeklyHistory: Array.from({ length: 8 }, (_, i) => { const d = new Date(Date.UTC(2026, 7, 3 + i * 7)); return { week: d.toISOString().slice(0, 10), index: 50 + i, coverage: 35 }; }) });
+    if (path === '/goals' && method === 'GET') return reply(goals);
+    if (path === '/goals' && method === 'POST') { const goal = { id: 'synthetic-readiness-goal', title: String(body.title), description: String(body.description) }; goals = [goal]; return reply(goal); }
+    if (path === '/goals/synthetic-readiness-goal' && method === 'PATCH') { goals = [{ id: 'synthetic-readiness-goal', title: String(body.title), description: String(body.description) }]; return reply(goals[0]); }
     if (path === '/activity/classroom/synthetic-class') return reply({ year: 2026, totalStudents: 1, days: [] });
     if (path === '/activity/me') return reply({ year: 2026, totalActiveDays: 0, days: [] });
     if (path === '/activity/streak') return reply({ currentStreak: 0, longestStreak: 0, totalActiveDays: 0 });
