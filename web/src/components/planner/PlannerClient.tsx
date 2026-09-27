@@ -2,7 +2,8 @@
 
 import { BarChart3, CalendarRange, ClipboardList, type LucideIcon } from "lucide-react";
 import { LoadingState } from "@/components/ui/StateBlock";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSection } from "@/components/students/progress/useSection";
 import { api, getRole } from "@/lib/api";
 import BoardView from "./BoardView";
 import TaskFormModal from "./TaskFormModal";
@@ -55,15 +56,10 @@ export default function PlannerClient() {
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [filters, setFilters] = useState<TaskFilters>({});
 
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [staff, setStaff] = useState<StaffUser[]>([]);
   const [classrooms, setClassrooms] = useState<ClassroomRef[]>([]);
-  const [workloadRows, setWorkloadRows] = useState<WorkloadRow[]>([]);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [workloadLoading, setWorkloadLoading] = useState(false);
-  const [workloadError, setWorkloadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<{ key: string; text: string } | null>(null);
 
   const [modal, setModal] = useState<{
     open: boolean;
@@ -75,49 +71,26 @@ export default function PlannerClient() {
   const [deleteTarget, setDeleteTarget] = useState<Task | SubTask | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const loadTasks = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api<Task[]>(`/tasks${buildTaskQuery(filters)}`);
-      setTasks(data);
-    } catch (e) {
-      setError(errMsg(e));
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
-
-  const loadWorkload = useCallback(async () => {
-    setWorkloadLoading(true);
-    setWorkloadError(null);
-    try {
-      const from = `${year}-01-01`;
-      const to = `${year}-12-31`;
-      const data = await api<WorkloadRow[]>(
-        `/tasks/workload?from=${from}&to=${to}`,
-      );
-      setWorkloadRows(data);
-    } catch (e) {
-      setWorkloadError(errMsg(e));
-    } finally {
-      setWorkloadLoading(false);
-    }
-  }, [year]);
+  const taskPath = `/tasks${buildTaskQuery(filters)}`;
+  const tasksQuery = useSection<Task[]>(taskPath, []);
+  const { data: tasks, setData: setTasks } = tasksQuery;
+  const workloadQuery = useSection<WorkloadRow[]>(view === "workload" ? `/tasks/workload?from=${year}-01-01&to=${year}-12-31` : null, []);
+  const workloadRows = workloadQuery.data;
+  const loading = tasksQuery.status === "loading";
+  const workloadLoading = workloadQuery.status === "loading";
+  const error = (actionError?.key === taskPath ? actionError.text : null) || tasksQuery.error;
+  const workloadError = workloadQuery.error;
+  function setError(value: string | null) { setActionError(value ? { key: taskPath, text: value } : null); }
+  function loadTasks() { setActionError(null); tasksQuery.reload(); }
+  const loadWorkload = workloadQuery.reload;
 
   useEffect(() => {
-    api<Me>("/auth/me").then(setMe).catch(() => {});
-    api<StaffUser[]>("/tasks/staff-directory").then(setStaff).catch(() => {});
-    api<ClassroomRef[]>("/classrooms").then(setClassrooms).catch(() => {});
+    let alive = true;
+    api<Me>("/auth/me").then(value => { if (alive) setMe(value); }).catch(() => {});
+    api<StaffUser[]>("/tasks/staff-directory").then(value => { if (alive) setStaff(value); }).catch(() => {});
+    api<ClassroomRef[]>("/classrooms").then(value => { if (alive) setClassrooms(value); }).catch(() => {});
+    return () => { alive = false; };
   }, []);
-
-  useEffect(() => {
-    loadTasks();
-  }, [loadTasks]);
-
-  useEffect(() => {
-    if (view === "workload") loadWorkload();
-  }, [view, loadWorkload]);
 
   async function handleStatusChange(task: Task | SubTask, status: TaskStatus) {
     // Өөдрөг шинэчлэл: дэлгэц дээр шууд харуулаад, амжилтгүй бол буцаана.
@@ -261,7 +234,7 @@ export default function PlannerClient() {
           )}
           {error && (
             <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-              <span>error</span>
+              <span>{error}</span>
               <button
                 onClick={loadTasks}
                 className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"

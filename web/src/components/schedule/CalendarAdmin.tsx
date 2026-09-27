@@ -1,7 +1,10 @@
 "use client";
 
+import { LoadingState } from "@/components/ui/StateBlock";
+
 import { Palmtree, AlertTriangle, Pencil, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import {
   CALENDAR_TYPE_ICON,
@@ -42,9 +45,6 @@ const EMPTY_FORM: FormState = {
  * хоногийн хэв маягаас хасдаг тул энд оруулсан ХЭР ЗӨВ байх нь чухал.
  */
 export default function CalendarAdmin() {
-  const [days, setDays] = useState<CalendarDay[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ kind: "success" | "error"; text: string } | null>(
     null,
   );
@@ -54,15 +54,8 @@ export default function CalendarAdmin() {
   const [saving, setSaving] = useState(false);
   const [armedDelete, setArmedDelete] = useState<string | null>(null);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<CalendarDay[]>("/calendar")
-      .then(setDays)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, []);
-  useEffect(load, [load]);
+  const { data: days, status, error, reload: load } = useSection<CalendarDay[]>("/calendar", []);
+  const loading = status === "loading";
 
   function startEdit(day: CalendarDay) {
     setEditingId(day.id);
@@ -218,9 +211,7 @@ export default function CalendarAdmin() {
       </div>
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} />
       )}
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">

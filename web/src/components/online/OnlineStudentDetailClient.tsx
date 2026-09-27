@@ -1,8 +1,10 @@
 "use client";
 
+import { LoadingState } from "@/components/ui/StateBlock";
 import { Eye, Flame, Plus, ArrowLeft, ArrowRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useSection } from "@/components/students/progress/useSection";
 import { api, getRole } from "@/lib/api";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import { Meta } from "@/components/ui/Meta";
@@ -18,10 +20,7 @@ import Timeline from "./Timeline";
 import AssignTestDialog from "./AssignTestDialog";
 import ResetChapterDialog from "./ResetChapterDialog";
 
-export default function OnlineStudentDetailClient({ studentId }: { studentId: string }) {
-  const [detail, setDetail] = useState<OnlineStudentDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+function OnlineStudentDetailClientContent({ studentId }: { studentId: string }) {
 
   // ⚠️ /progress/student/:id канэдит талбар буцаадаггүй — жинхэнэ хамгаалалт
   // сервер дээр мутаци бүрт (@Roles) хийгддэг тул энэ бол ЗӨВХӨН UI-г
@@ -40,18 +39,8 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
   const [resetSaving, setResetSaving] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<OnlineStudentDetail>(`/progress/student/${studentId}`)
-      .then(setDetail)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, [studentId]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { data: detail, setData: setDetail, status, error, reload: load } = useSection<OnlineStudentDetail | null>(`/progress/student/${studentId}`, null);
+  const loading = status === "loading";
 
   function assignTest(testId: string, note: string) {
     setAssignSaving(true);
@@ -98,11 +87,7 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
 
   if (loading) {
     return (
-      <div className="space-y-4" aria-busy="true" aria-live="polite">
-        <div className="h-24 animate-pulse rounded-2xl border border-line bg-panel" />
-        <div className="h-40 animate-pulse rounded-2xl border border-line bg-panel" />
-        <p className="sr-only">Ачаалж байна…</p>
-      </div>
+      <LoadingState rows={4} label="Сурагчийн мэдээлэл ачаалж байна" />
     );
   }
 
@@ -274,4 +259,8 @@ export default function OnlineStudentDetailClient({ studentId }: { studentId: st
       />
     </div>
   );
+}
+
+export default function OnlineStudentDetailClient(props: Parameters<typeof OnlineStudentDetailClientContent>[0]) {
+  return <OnlineStudentDetailClientContent key={props.studentId} {...props} />;
 }

@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test';
 import { reviewMock, type ReviewMockOptions } from './formula-review-fixture';
 import { formulaSections, formulaSummaries, formulaDetail, seenFormulas } from './formula-fixtures';
 export const student = { id: 'synthetic-student', firstName: 'Туршилт', lastName: 'Зохиомол', phone: '99000000' };
+export const storeProduct = { id: 'synthetic-product', kind: 'TEST', refId: 'synthetic-exam', title: 'Зохиомол шалгалт', price: 100, active: true, purchaseCount: 2 };
 export const classroom = { id: 'synthetic-class', name: 'Туршилтын анги', type: 'CLASSROOM', grade: 12, _count: { enrollments: 1 } };
 export const mistakeFixture = {
   id: 'mistake-1', problem: { id: 'problem-1', statementText: '$2+2$ хэд вэ?', choices: ['3', '4'], format: 'CHOICE', choiceMode: 'TEXT', imageKey: null },
@@ -22,6 +23,7 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mis
   let users: unknown[] = [];
   let goals: { id: string; title: string; description: string }[] = [];
   let notificationPreferences = { userId: 'synthetic-parent', emailWeekly: true, emailReminders: true };
+  let product = { ...storeProduct };
   page.on('pageerror', e => errors.push(e.message));
   if (signedIn) await page.addInitScript(role => {
     localStorage.setItem('pi_token', 'synthetic-token-never-valid-on-server');
@@ -101,6 +103,21 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, mis
     if (path === '/tuition/paid-until/my') return reply({ paidUntil: '2026-10-20T00:00:00.000Z' });
     if (path.startsWith('/tuition/paid-until/')) return reply({ paidUntil: '2026-10-20T00:00:00.000Z' });
     if (path === '/payments/my') return reply([{ id: 'synthetic-payment', amount: 100, status: 'CONFIRMED', method: 'BANK_TRANSFER', forMonth: '2026-09', paidAt: '2026-09-01T00:00:00Z', createdAt: '2026-09-01T00:00:00Z' }]);
+    if (path === '/store/products' && method === 'GET') return reply(product.active ? [product] : []);
+    if (path === '/store/my-purchases' && method === 'GET') return reply([]);
+    if (path === '/store/admin/products' && method === 'GET') return ['ADMIN', 'TEACHER_PLUS'].includes(role) ? reply([product]) : reply({ message: 'Forbidden' }, 403);
+    if (path === '/store/admin/products/synthetic-product/price' && method === 'POST') {
+      if (role !== 'ADMIN') return reply({ message: 'Forbidden' }, 403);
+      product = { ...product, price: body.price };
+      const { title, purchaseCount, ...raw } = product;
+      return reply(raw);
+    }
+    if (path === '/store/admin/products/synthetic-product/status' && method === 'PATCH') {
+      if (role !== 'ADMIN') return reply({ message: 'Forbidden' }, 403);
+      product = { ...product, active: body.active };
+      const { title, purchaseCount, ...raw } = product;
+      return reply(raw);
+    }
     if (path === '/classrooms') return reply([classroom]);
     if (path === '/classrooms/synthetic-class/attendance') {
       if (method === 'POST') { attendance = body.entries[0].status; return reply({ count: 1 }); }

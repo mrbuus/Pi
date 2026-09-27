@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import LeadCard, {
@@ -62,9 +63,6 @@ const GRID_COLS_CLASS: Record<number, string> = {
 };
 
 export default function LeadInboxClient() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [subjectFilter, setSubjectFilter] = useState<LeadSubject | "ALL">(
     "ALL",
@@ -83,64 +81,28 @@ export default function LeadInboxClient() {
     Record<string, LeadStatusV>
   >({});
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<Lead[]>("/leads")
-      .then(setLeads)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, []);
-  useEffect(load, [load]);
+  const { data: leads, setData: setLeads, status, error, reload: load } = useSection<Lead[]>("/leads", []);
+  const loading = status === "loading";
 
-  const changeStatus = useCallback(
-    (id: string, newStatus: LeadStatusV) => {
-      setLeads((current) => {
-        const prev = current.find((l) => l.id === id);
-        if (!prev || prev.status === newStatus) return current;
+  const changeStatus = useCallback((id: string, newStatus: LeadStatusV) => {
+    const previous = leads.find(lead => lead.id === id);
+    if (!previous || previous.status === newStatus || updating[id]) return;
+    setLastAttempt(values => ({ ...values, [id]: newStatus }));
+    setUpdateErrors(values => { const next = { ...values }; delete next[id]; return next; });
+    setUpdating(values => ({ ...values, [id]: true }));
+    setLeads(values => values.map(lead => lead.id === id ? { ...lead, status: newStatus } : lead));
+    api(`/leads/${id}/status`, { method: "PATCH", body: { status: newStatus } })
+      .catch(error => {
+        setLeads(values => values.map(lead => lead.id === id ? { ...lead, status: previous.status } : lead));
+        setUpdateErrors(values => ({ ...values, [id]: errMsg(error) }));
+      })
+      .finally(() => setUpdating(values => { const next = { ...values }; delete next[id]; return next; }));
+  }, [leads, setLeads, updating]);
 
-        setLastAttempt((m) => ({ ...m, [id]: newStatus }));
-        setUpdateErrors((m) => {
-          if (!(id in m)) return m;
-          const next = { ...m };
-          delete next[id];
-          return next;
-        });
-        setUpdating((m) => ({ ...m, [id]: true }));
-
-        api(`/leads/${id}/status`, {
-          method: "PATCH",
-          body: { status: newStatus },
-        })
-          .catch((e) => {
-            // Амжилтгүй бол сая хийсэн өөрчлөлтөө буцааж, харагдахуйц алдаа
-            // үзүүлнэ — хэрэглэгч чимээгүйхэн буруу төлөвт үлдэхгүй.
-            setLeads((ls) =>
-              ls.map((l) => (l.id === id ? { ...l, status: prev.status } : l)),
-            );
-            setUpdateErrors((m) => ({ ...m, [id]: errMsg(e) }));
-          })
-          .finally(() => {
-            setUpdating((m) => {
-              const next = { ...m };
-              delete next[id];
-              return next;
-            });
-          });
-
-        return current.map((l) => (l.id === id ? { ...l, status: newStatus } : l));
-      });
-    },
-    [],
-  );
-
-  const retryStatus = useCallback(
-    (id: string) => {
-      const target = lastAttempt[id];
-      if (target) changeStatus(id, target);
-    },
-    [lastAttempt, changeStatus],
-  );
+  const retryStatus = useCallback((id: string) => {
+    const target = lastAttempt[id];
+    if (target) changeStatus(id, target);
+  }, [lastAttempt, changeStatus]);
 
   // Статистик нь шүүлтүүрээс үл хамааран БҮХ хүсэлтээс тооцогдоно — эс
   // бөгөөс "хөрвүүлэлт" гэх мэт тоо шүүлтээр хазайж, бизнесийн бодит

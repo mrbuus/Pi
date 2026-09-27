@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { ErrorState } from '@/components/ui/StateBlock';
 import { GroupsList } from '../../../components/groups/GroupsList';
 import { CreateGroupForm } from '../../../components/groups/CreateGroupForm';
 import { JoinGroupForm } from '../../../components/groups/JoinGroupForm';
+import { useAsyncSection } from "@/components/students/progress/useSection";
 import { api } from '@/lib/api';
 
 interface Group {
@@ -20,31 +21,14 @@ interface Me {
 }
 
 export default function GroupsPage() {
-  const [groups, setGroups] = useState<Group[]>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isTeacher, setIsTeacher] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Алдааг зөвхөн console руу бичих нь хэрэглэгчийн хувьд «мөнхөд ачаалж
-  // байна» гэсэн үр дүн өгнө (STATUS.md §6 §4 — алдаа гарвал монголоор мессеж
-  // + «Дахин оролдох» товч ЗААВАЛ байх ёстой).
-  const fetchUserAndGroups = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const me = await api<Me>("/auth/me");
-      setIsTeacher(me.role === "TEACHER" || me.role === "TEACHER_PLUS");
-      setGroups(await api<Group[]>("/teacher-groups/my-groups"));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Алдаа гарлаа");
-    } finally {
-      setIsLoading(false);
-    }
+  const fetchGroups = useCallback(async () => {
+    const [me, groups] = await Promise.all([api<Me>("/auth/me"), api<Group[]>("/teacher-groups/my-groups")]);
+    return { me, groups };
   }, []);
-
-  useEffect(() => {
-    void fetchUserAndGroups();
-  }, [fetchUserAndGroups]);
+  const { data, status, error, reload: fetchUserAndGroups } = useAsyncSection("my-groups", fetchGroups, null as { me: Me; groups: Group[] } | null);
+  const groups = data?.groups;
+  const isTeacher = data?.me.role === "TEACHER" || data?.me.role === "TEACHER_PLUS";
+  const isLoading = status === "loading";
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">

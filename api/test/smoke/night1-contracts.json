@@ -531,14 +531,13 @@
     ]
   },
   {
-    "gap": "E4-store-regression",
+    "gap": "T17-price",
     "file": "store/store.controller",
     "controller": "StoreController",
     "method": "POST",
     "path": "/api/store/admin/products/:id/price",
     "roles": [
-      "ADMIN",
-      "TEACHER_PLUS"
+      "ADMIN"
     ]
   },
   {
@@ -551,6 +550,16 @@
       "ADMIN",
       "TEACHER",
       "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "T17-status",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "PATCH",
+    "path": "/api/store/admin/products/:id/status",
+    "roles": [
+      "ADMIN"
     ]
   }
 ]

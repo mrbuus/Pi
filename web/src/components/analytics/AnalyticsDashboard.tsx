@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 
-import { api } from "@/lib/api";
+import { useSection } from "@/components/students/progress/useSection";
 import RequireRole from "@/components/nav/RequireRole";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import AtRiskList from "./AtRiskList";
@@ -20,73 +20,13 @@ import type {
   TopicsResponse,
 } from "./types";
 
-interface Query<T> {
-  data: T | null;
-  loading: boolean;
-  error: string | null;
-}
-
-const INITIAL_QUERY = <T,>(): Query<T> => ({ data: null, loading: true, error: null });
-
-// Хугацааны мужаас хамаарсан 4 endpoint-ыг зэрэг татаж, тус бүрийг бие
-// даасан ачаалж/алдаа-гарсан төлөвтэй болгоно — нэг хэсэг унавал бусад нь
-// хэвийн харагдсаар байна.
 function useRangedQuery<T>(path: string, range: DateRangeValue) {
-  const [state, setState] = useState<Query<T>>(INITIAL_QUERY);
-  const [nonce, setNonce] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    setState((s) => ({ ...s, loading: true, error: null }));
-    api<T>(`${path}?from=${range.from}&to=${range.to}`)
-      .then((data) => {
-        if (!cancelled) setState({ data, loading: false, error: null });
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setState({
-            data: null,
-            loading: false,
-            error: e instanceof Error ? e.message : "Алдаа гарлаа",
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [path, range.from, range.to, nonce]);
-
-  const retry = useCallback(() => setNonce((n) => n + 1), []);
-  return { ...state, retry };
+  const query = useSection<T>(`${path}?from=${range.from}&to=${range.to}`);
+  return { data: query.data, loading: query.status === "loading", error: query.error, retry: query.reload };
 }
-
 function useAtRiskQuery(windowDays: number) {
-  const [state, setState] = useState<Query<AtRiskResponse>>(INITIAL_QUERY);
-  const [nonce, setNonce] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    setState((s) => ({ ...s, loading: true, error: null }));
-    api<AtRiskResponse>(`/analytics/at-risk?days=${windowDays}`)
-      .then((data) => {
-        if (!cancelled) setState({ data, loading: false, error: null });
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setState({
-            data: null,
-            loading: false,
-            error: e instanceof Error ? e.message : "Алдаа гарлаа",
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [windowDays, nonce]);
-
-  const retry = useCallback(() => setNonce((n) => n + 1), []);
-  return { ...state, retry };
+  const query = useSection<AtRiskResponse>(`/analytics/at-risk?days=${windowDays}`);
+  return { data: query.data, loading: query.status === "loading", error: query.error, retry: query.reload };
 }
 
 function Section({

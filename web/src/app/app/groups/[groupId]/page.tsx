@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { JoinGroupCard } from '../../../../components/groups/JoinGroupCard';
 import { GroupMembersCard, type GroupMember } from '../../../../components/groups/GroupMembersCard';
 
 import { LoadingState, ErrorState } from '../../../../components/ui/StateBlock';
+import { useSection } from "@/components/students/progress/useSection";
 import { api } from '@/lib/api';
 
 interface GroupDetails {
@@ -25,29 +26,9 @@ export default function GroupDetailPage() {
   const params = useParams();
   const groupId = params.groupId as string;
 
-  const [group, setGroup] = useState<GroupDetails>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: group, status, error, reload: fetchGroupDetails } = useSection<GroupDetails>(groupId ? `/teacher-groups/${encodeURIComponent(groupId)}` : null);
+  const isLoading = status === "loading";
   const [removeError, setRemoveError] = useState<string | null>(null);
-
-  const fetchGroupDetails = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await api<GroupDetails>(`/teacher-groups/${groupId}`);
-      setGroup(data);
-    } catch (caught: unknown) {
-      const err = caught as { message?: string } | null;
-      setError(err?.message || 'Бүлэгийн мэдээлэл авахад алдаа гарлаа');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [groupId]);
-
-  useEffect(() => {
-    if (groupId) void fetchGroupDetails();
-  }, [groupId, fetchGroupDetails]);
 
   const handleRemoveStudent = async (studentId: string) => {
     if (!confirm('Энэ сурагчийг бүлгээс хасах уу?')) {

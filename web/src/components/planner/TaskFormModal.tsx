@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { X } from "lucide-react";
 import { api } from "@/lib/api";
 import { fullName } from "./statusMeta";
@@ -32,7 +32,7 @@ function toFormValues(task?: Task | SubTask | null): TaskFormValues {
 }
 
 /** Даалгавар үүсгэх/засах модаль цонх — эцэг даалгавар болон дэд даалгаварт хоёуланд ашиглана. */
-export default function TaskFormModal({
+function TaskFormModalContent({
   open,
   onClose,
   onSaved,
@@ -59,11 +59,7 @@ export default function TaskFormModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setValues(toFormValues(initial ?? undefined));
-    setError(null);
-  }, [open, initial]);
+
 
   if (!open) return null;
 
@@ -357,4 +353,9 @@ export default function TaskFormModal({
       </div>
     </div>
   );
+}
+
+export default function TaskFormModal(props: Parameters<typeof TaskFormModalContent>[0]) {
+  if (!props.open) return null;
+  return <TaskFormModalContent key={`${props.parentTaskId ?? ""}:${JSON.stringify(props.initial ?? null)}`} {...props} />;
 }
