@@ -2,13 +2,15 @@
 'use strict';
 
 // Safe repair utility for synthetic or owner-approved datasets. It is always a
-// dry run unless --commit is supplied. The backup contains original statement
-// and choice data, so commit mode requires an explicit path outside this repo.
+// dry run unless --commit is supplied. Commit mode requires a backup outside the
+// repo and explicit offline-write confirmation. Disable session creation first:
+// Serializable isolation cannot block startSession, which does not share this lock.
 const fs = require('node:fs');
 const path = require('node:path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const REAL_REPO_ROOT = fs.realpathSync(REPO_ROOT);
 const BACKUP_REQUIRED =
   'Commit mode needs --backup=/absolute/path outside the repository.';
 const LATIN = ['A', 'B', 'C', 'D', 'E'];
@@ -20,6 +22,8 @@ const KEY_TO_INDEX = new Map(
 function parseArgs(argv) {
   const options = {
     commit: false,
+    maintenanceWindow: false,
+    offlineWriteConfirmation: false,
     flagReview: false,
     minConfidence: 0.9,
     backup: null,
@@ -27,6 +31,9 @@ function parseArgs(argv) {
   };
   for (const arg of argv) {
     if (arg === '--commit') options.commit = true;
+    else if (arg === '--maintenance-window') options.maintenanceWindow = true;
+    else if (arg === '--confirm-offline-write')
+      options.offlineWriteConfirmation = true;
     else if (arg === '--flag-review') options.flagReview = true;
     else if (arg.startsWith('--min-confidence='))
       options.minConfidence = Number(arg.slice('--min-confidence='.length));
@@ -45,10 +52,27 @@ function parseArgs(argv) {
     throw new Error('--min-confidence must be a number between 0 and 1.');
   }
   if (options.commit) {
+    if (!options.maintenanceWindow && !options.offlineWriteConfirmation) {
+      throw new Error(
+        'Commit requires --maintenance-window or --confirm-offline-write; disable session creation for the entire repair window.',
+      );
+    }
     if (!options.backup || !path.isAbsolute(options.backup))
       throw new Error(BACKUP_REQUIRED);
-    const relative = path.relative(REPO_ROOT, path.resolve(options.backup));
-    if (!relative.startsWith('..') && relative !== '..') {
+    const absoluteBackup = path.resolve(options.backup);
+    let realParent;
+    try {
+      realParent = fs.realpathSync(path.dirname(absoluteBackup));
+    } catch {
+      throw new Error('Backup parent directory must already exist.');
+    }
+    options.backup = path.join(realParent, path.basename(absoluteBackup));
+    const relative = path.relative(REAL_REPO_ROOT, options.backup);
+    if (
+      relative === '' ||
+      (relative !== '..' && !relative.startsWith(`..${path.sep}`)) ||
+      path.isAbsolute(relative)
+    ) {
       throw new Error('Backup must be outside the repository.');
     }
     if (fs.existsSync(options.backup))
@@ -63,6 +87,35 @@ function isPlaceholderChoices(choices) {
     choices.length === 5 &&
     (LATIN.every((label, index) => choices[index] === label) ||
       CYRILLIC.every((label, index) => choices[index] === label))
+  );
+}
+
+function safeContentWhere(ids) {
+  return {
+    id: { in: ids },
+    format: 'CHOICE',
+    OR: [{ choices: { equals: LATIN } }, { choices: { equals: CYRILLIC } }],
+    analysis: {
+      is: {
+        sourceVariant: { in: ['A', 'B'] },
+        status: { not: 'VERIFIED' },
+      },
+    },
+    choiceOptions: { none: {} },
+  };
+}
+
+function sameSnapshot(current, expected) {
+  return (
+    current &&
+    current._count.choiceOptions === 0 &&
+    current.format === expected.format &&
+    current.statementText === expected.statementText &&
+    JSON.stringify(current.choices) === JSON.stringify(expected.choices) &&
+    JSON.stringify(current.correctAnswer) ===
+      JSON.stringify(expected.correctAnswer) &&
+    current.analysis?.sourceVariant === expected.sourceVariant &&
+    current.analysis?.status === expected.analysisStatus
   );
 }
 
@@ -82,6 +135,57 @@ function answerIndex(answer) {
   return KEY_TO_INDEX.get(answer.trim().toUpperCase()) ?? null;
 }
 
+function loadKatex() {
+  for (const candidate of [
+    'katex',
+    path.resolve(__dirname, '../../web/node_modules/katex'),
+  ]) {
+    try {
+      return require(candidate);
+    } catch {
+      // Try the next local installation path; never install dependencies here.
+    }
+  }
+  throw new Error(
+    'KaTeX is required for repair validation; install existing web dependencies first.',
+  );
+}
+
+function mathExpressions(text) {
+  const expressions = [];
+  let opening = null;
+  let contentStart = -1;
+  for (let index = 0; index < text.length; index += 1) {
+    if (text[index] !== '$' || isEscaped(text, index)) continue;
+    const delimiter = text[index + 1] === '$' ? '$$' : '$';
+    if (delimiter === '$$') index += 1;
+    if (opening === null) {
+      opening = delimiter;
+      contentStart = index + 1;
+    } else if (opening === delimiter) {
+      expressions.push(text.slice(contentStart, index + 1 - delimiter.length));
+      opening = null;
+      contentStart = -1;
+    } else {
+      throw new Error('Mismatched math delimiters.');
+    }
+  }
+  if (opening !== null) throw new Error('Unclosed math delimiter.');
+  return expressions;
+}
+
+function validateKatex(katex, result) {
+  for (const value of [result.stem, ...result.choices]) {
+    for (const expression of mathExpressions(value)) {
+      katex.renderToString(expression, {
+        throwOnError: true,
+        strict: 'error',
+        trust: false,
+      });
+    }
+  }
+}
+
 function isSafeSourceVariant(value) {
   // This allowlist prevents fetching statementText for C or unidentified data.
   return value === 'A' || value === 'B';
@@ -89,9 +193,10 @@ function isSafeSourceVariant(value) {
 
 function previewLine(row) {
   const detail =
-    row.result?.choices?.length === 5
+    row.reason ??
+    (row.result?.choices?.length === 5
       ? `5 сонголт, stem ${row.result.stem.length} тэмдэгт, сонголтын урт ${row.result.choices.map((choice) => choice.length).join('/')}`
-      : (row.reason ?? row.result?.issues?.[0]?.code ?? 'Шалгах шаардлагатай');
+      : (row.result?.issues?.[0]?.code ?? 'Шалгах шаардлагатай'));
   return `- ${row.token}: ${detail}${row.result ? `; итгэлцэл ${row.result.confidence.toFixed(2)}` : ''}`;
 }
 
@@ -101,12 +206,14 @@ function buildReport(counts, samples, options, dryRun) {
     '',
     `Горим: ${dryRun ? 'DRY-RUN (өөрчлөлт хийгдээгүй)' : 'COMMIT'}`,
     `Доод итгэлцэл: ${options.minConfidence}; review flag: ${options.flagReview ? 'тийм' : 'үгүй'}`,
+    `Offline write confirmation: ${options.maintenanceWindow || options.offlineWriteConfirmation ? 'тийм' : 'үгүй'}`,
     `Амжилттай: ${counts.success}; эргэлзээтэй: ${counts.uncertain}; алгассан: ${counts.skipped}; бүтэлгүй: ${counts.failed}`,
     '',
     'Жишээнүүд (эх өгүүлбэрийг тайланд оруулахгүй):',
     ...samples.slice(0, 40).map(previewLine),
     '',
     'Зөв хариултын түлхүүрийг өөрчлөөгүй. C/танигдаагүй sourceVariant болон ямар нэг хадгалсан session-тэй бодлогын текстийг уншаагүй/засварлаагүй.',
+    'Commit горимд шалгалтын session эхлүүлэхийг засварын туршид унтраана. startSession энэ скриптийн serializable lock-той хуваалцдаггүй тул дан скрипт амьд session эхлэх race-ийг хааж чадахгүй.',
   ];
   return `${lines.join('\n')}\n`;
 }
@@ -142,7 +249,7 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
     console.log(
-      'Usage: npm run build && node prisma/fix-placeholder-choices.cjs [--commit --backup=/outside/repo/backup.json] [--min-confidence=0.9] [--flag-review] [--report=/path/report.md]',
+      'Usage: npm run build && node prisma/fix-placeholder-choices.cjs [--commit --maintenance-window|--confirm-offline-write --backup=/outside/repo/backup.json] [--min-confidence=0.9] [--flag-review] [--report=/path/report.md]',
     );
     return;
   }
@@ -151,6 +258,7 @@ async function main() {
   const { PrismaPg } = require('@prisma/adapter-pg');
   const { PrismaClient } = require('../dist/src/generated/prisma/client.js');
   const { extractChoices } = require('../dist/src/content/choice-extract.js');
+  const katex = loadKatex();
   const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
   });
@@ -223,7 +331,7 @@ async function main() {
       candidates.length === 0
         ? []
         : await prisma.problem.findMany({
-            where: { id: { in: candidates.map((row) => row.id) } },
+            where: safeContentWhere(candidates.map((row) => row.id)),
             select: {
               id: true,
               token: true,
@@ -234,6 +342,15 @@ async function main() {
               analysis: { select: { sourceVariant: true, status: true } },
             },
           });
+    const contentIds = new Set(contentRows.map((row) => row.id));
+    for (const candidate of candidates) {
+      if (contentIds.has(candidate.id)) continue;
+      counts.skipped += 1;
+      samples.push({
+        token: candidate.token,
+        reason: 'Контент уншихын өмнөх metadata дахин шалгалтад таараагүй',
+      });
+    }
     const plans = [];
     for (const row of contentRows) {
       let result;
@@ -243,7 +360,31 @@ async function main() {
         counts.failed += 1;
         samples.push({
           token: row.token,
-          reason: `Extractor exception: ${error.message || 'unknown'}`,
+          reason: 'Extractor алдаа; мөрийг өөрчлөхгүй үлдээв',
+        });
+        continue;
+      }
+      try {
+        validateKatex(katex, result);
+      } catch {
+        counts.uncertain += 1;
+        samples.push({
+          id: row.id,
+          token: row.token,
+          result,
+          reason: 'LaTeX KaTeX рендерлэлтийн шалгалтад унасан',
+        });
+        reviewTargets.push({
+          id: row.id,
+          token: row.token,
+          expected: {
+            format: row.format,
+            statementText: row.statementText,
+            choices: row.choices,
+            correctAnswer: row.correctAnswer,
+            sourceVariant: row.analysis?.sourceVariant,
+            analysisStatus: row.analysis?.status,
+          },
         });
         continue;
       }
@@ -259,7 +400,18 @@ async function main() {
             ? 'correctAnswer нь танигдах A-E үсэг биш'
             : undefined;
         samples.push({ id: row.id, token: row.token, result, reason });
-        reviewTargets.push({ id: row.id, token: row.token });
+        reviewTargets.push({
+          id: row.id,
+          token: row.token,
+          expected: {
+            format: row.format,
+            statementText: row.statementText,
+            choices: row.choices,
+            correctAnswer: row.correctAnswer,
+            sourceVariant: row.analysis?.sourceVariant,
+            analysisStatus: row.analysis?.status,
+          },
+        });
         continue;
       }
       plans.push({
@@ -294,16 +446,13 @@ async function main() {
       const flagTargets = options.flagReview ? reviewTargets : [];
       const reviewSnapshots = [];
       for (const target of flagTargets) {
-        const analysis = await prisma.problemAnalysis.findUnique({
-          where: { problemId: target.id },
-          select: { status: true },
-        });
-        if (analysis && analysis.status !== 'VERIFIED') {
-          reviewSnapshots.push({ ...target, expectedStatus: analysis.status });
+        const expectedStatus = target.expected.analysisStatus;
+        if (expectedStatus && expectedStatus !== 'VERIFIED') {
+          reviewSnapshots.push(target);
           backupRows.push({
             id: target.id,
             token: target.token,
-            analysisStatus: analysis.status,
+            analysisStatus: expectedStatus,
             reviewOnly: true,
           });
         }
@@ -327,52 +476,35 @@ async function main() {
                 select: { problemOrder: true },
               }),
             );
-            for (const plan of plans) {
-              if (referencedBySessionNow.has(plan.id))
+            const guarded = [...plans, ...reviewSnapshots];
+            for (const item of guarded) {
+              if (referencedBySessionNow.has(item.id))
                 throw new Error(
-                  `Session appeared before commit (${plan.token}); no rows were changed.`,
+                  `Session appeared before commit (${item.token}).`,
                 );
-              const current = await tx.problem.findUnique({
-                where: { id: plan.id },
-                select: {
-                  format: true,
-                  statementText: true,
-                  choices: true,
-                  correctAnswer: true,
-                  analysis: { select: { sourceVariant: true, status: true } },
-                  _count: { select: { choiceOptions: true } },
-                },
-              });
-              if (
-                !current ||
-                current._count.choiceOptions !== 0 ||
-                current.format !== plan.expected.format ||
-                current.statementText !== plan.expected.statementText ||
-                JSON.stringify(current.choices) !==
-                  JSON.stringify(plan.expected.choices) ||
-                JSON.stringify(current.correctAnswer) !==
-                  JSON.stringify(plan.expected.correctAnswer) ||
-                current.analysis?.sourceVariant !==
-                  plan.expected.sourceVariant ||
-                current.analysis?.status !== plan.expected.analysisStatus
-              ) {
-                throw new Error(
-                  `Problem changed since planning (${plan.token}); no rows were changed.`,
-                );
-              }
             }
-            for (const target of reviewSnapshots) {
-              const analysis = await tx.problemAnalysis.findUnique({
-                where: { problemId: target.id },
-                select: { status: true },
-              });
-              if (
-                !analysis ||
-                analysis.status !== target.expectedStatus ||
-                analysis.status === 'VERIFIED'
-              ) {
+            const currentRows = guarded.length
+              ? await tx.problem.findMany({
+                  where: safeContentWhere(guarded.map((item) => item.id)),
+                  select: {
+                    id: true,
+                    format: true,
+                    statementText: true,
+                    choices: true,
+                    correctAnswer: true,
+                    analysis: { select: { sourceVariant: true, status: true } },
+                    _count: { select: { choiceOptions: true } },
+                  },
+                })
+              : [];
+            const currentById = new Map(
+              currentRows.map((row) => [row.id, row]),
+            );
+            for (const item of guarded) {
+              const current = currentById.get(item.id);
+              if (!sameSnapshot(current, item.expected)) {
                 throw new Error(
-                  `Analysis status changed since planning (${target.token}); no rows were changed.`,
+                  `Problem changed since planning (${item.token}).`,
                 );
               }
             }
@@ -397,7 +529,10 @@ async function main() {
             }
             for (const sample of reviewSnapshots) {
               await tx.problemAnalysis.updateMany({
-                where: { problemId: sample.id, status: sample.expectedStatus },
+                where: {
+                  problemId: sample.id,
+                  status: sample.expected.analysisStatus,
+                },
                 data: { status: 'REVIEW_REQUIRED' },
               });
             }
@@ -405,8 +540,9 @@ async function main() {
           { isolationLevel: 'Serializable', timeout: 120000 },
         );
       } catch (error) {
-        fs.unlinkSync(options.backup);
-        throw error;
+        throw new Error(
+          `Repair transaction failed or its outcome is unknown; backup retained at ${options.backup}. ${error.message || error}`,
+        );
       }
     }
 
