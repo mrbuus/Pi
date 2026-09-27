@@ -50,6 +50,7 @@ import { ReconcileModule } from './reconcile/reconcile.module';
 import { FormulasModule } from './formulas/formulas.module';
 import { ReadinessModule } from './readiness/readiness.module';
 import { MistakesModule } from './mistakes/mistakes.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -146,6 +147,7 @@ import { MistakesModule } from './mistakes/mistakes.module';
     FormulasModule,
     ReadinessModule,
     MistakesModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
