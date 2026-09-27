@@ -110,6 +110,8 @@ model User {
   calendarTokenHash    String?         @unique
   calendarTokenVersion Int?
   notifications        Notification[]
+  notificationPreference NotificationPreference?
+  notificationDeliveries NotificationDelivery[]
 
   // SMS: бүртгэл, загвар, батч
   smsMessagesAsRecipient SmsMessage[]      @relation("SmsMessageRecipient")
@@ -1478,6 +1480,45 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+}
+
+model NotificationPreference {
+  userId         String   @id
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailWeekly    Boolean  @default(true)
+  emailReminders Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+}
+
+model NotificationDelivery {
+  id              String    @id @default(cuid())
+  sentKey         String    @unique
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind            NotificationKind
+  title           String
+  body            String
+  link            String?
+  inAppSentAt     DateTime?
+  emailAttemptedAt DateTime?
+  emailSentAt     DateTime?
+  emailError      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model JobRun {
+  id         String   @id @default(cuid())
+  name       String
+  lockKey    String?  @unique
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+  ok         Boolean?
+  summary    Json?
+
+  @@index([name, startedAt])
 }
 
 enum NotificationKind {

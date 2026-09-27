@@ -100,3 +100,25 @@ test('09 админ самбар 375px-т хэвтээ гүйлгэхгүй', as
   await mock.verify();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth), { message: 'Admin dashboard must fit 375px' }).toBeLessThanOrEqual(375);
 });
+
+test('10 parent weekly report loads and prints selected child summary', async ({ page }, info) => {
+  const mock = await mockApi(page, 'PARENT');
+  await page.goto('/app/parent/weekly');
+  await expect(page.getByRole('heading', { name: 'Долоо хоногийн тайлан', exact: true })).toBeVisible();
+  await expect(page.getByText('4 ирсэн', { exact: true })).toBeVisible();
+  await expect(page.getByText('8/10', { exact: true })).toBeVisible();
+  await expect(page.getByText('Давтах: Геометр', { exact: true })).toBeVisible();
+  expect(mock.calls.some((call) => call.path === '/parents/weekly-report' && call.method === 'GET')).toBe(true);
+  await mock.verify();
+});
+
+test('11 notification email preferences can be saved', async ({ page }, info) => {
+  const mock = await mockApi(page, 'PARENT');
+  await page.goto('/app/notifications/settings');
+  await expect(page.getByRole('heading', { name: 'Мэдэгдлийн тохиргоо', exact: true })).toBeVisible();
+  await page.getByRole('checkbox', { name: 'Сануулгын имэйл' }).uncheck();
+  await page.getByRole('button', { name: 'Хадгалах', exact: true }).click();
+  await expect(page.getByRole('status')).toHaveText('Тохиргоо хадгалагдлаа.');
+  expect(mock.calls.find((call) => call.path === '/notifications/settings' && call.method === 'PATCH')?.body).toEqual({ emailWeekly: true, emailReminders: false });
+  await mock.verify();
+});

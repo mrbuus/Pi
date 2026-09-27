@@ -164,6 +164,8 @@ services:
       # Өөрийн домэйн холбосон бол энд түүнийг бичнэ.
       - key: WEB_ORIGIN
         value: https://web-one-pi-59.vercel.app
+      - key: CRON_SECRET
+        sync: false
 
       # Байршуулсан файлыг тогтвортой диск рүү чиглүүлнэ.
       #

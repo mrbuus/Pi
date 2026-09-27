@@ -337,6 +337,21 @@ export type AnnouncementClassroomTarget = Prisma.AnnouncementClassroomTargetMode
  */
 export type Notification = Prisma.NotificationModel
 /**
+ * Model NotificationPreference
+ *
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model NotificationDelivery
+ *
+ */
+export type NotificationDelivery = Prisma.NotificationDeliveryModel
+/**
+ * Model JobRun
+ *
+ */
+export type JobRun = Prisma.JobRunModel
+/**
  * Model ClassTestSession
  * 
  */

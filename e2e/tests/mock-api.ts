@@ -6,6 +6,7 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
   const unexpected: string[] = [], errors: string[] = [];
   let attendance: string | null = null, homework: string | null = null;
   let users: unknown[] = [];
+  let notificationPreferences = { userId: 'synthetic-parent', emailWeekly: true, emailReminders: true };
   page.on('pageerror', e => errors.push(e.message));
   if (signedIn) await page.addInitScript(role => {
     localStorage.setItem('pi_token', 'synthetic-token-never-valid-on-server');
@@ -32,6 +33,9 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     // App shell (2026-09-27): нууцлалын зөвшөөрлийн шалгалт (G17) ба мэдэгдлийн хонх (G27).
     if (path === '/consent/my') return reply({ termsAcceptedAt: '2026-09-01T00:00:00.000Z', privacyVersion: '2026-09-26-draft', guardianConsentAt: null, currentVersion: '2026-09-26-draft', needsConsent: false });
     if (path === '/notifications/my/unread-count') return reply({ count: 0 });
+    if (path === '/notifications/settings' && method === 'GET') return reply(notificationPreferences);
+    if (path === '/notifications/settings' && method === 'PATCH') { notificationPreferences = { ...notificationPreferences, ...body }; return reply(notificationPreferences); }
+    if (path.startsWith('/parents/weekly-report')) return reply({ student: { firstName: 'Туршилт', lastName: 'Зохиомол' }, week: { start: '2026-09-21', end: '2026-09-27' }, snapshotAt: '2026-09-27T12:00:00.000Z', attendance: { present: 4, absent: 1, excused: 0 }, testResultsComplete: true, testResultLimit: null, tests: [{ title: 'Туршилтын дүн', score: 8, maxScore: 10, createdAt: '2026-09-23T00:00:00.000Z' }], practiceCount: 6, homework: { assignments: { done: 2, notDone: 1, items: [{ title: 'Туршилтын даалгавар', done: true }] }, dailyMarks: { done: 1, partial: 0, notDone: 0, unmarked: 0 } }, topics: { best: { topic: 'Алгебр', rate: 0.9 }, weakest: { topic: 'Геометр', rate: 0.4 }, complete: true, sampleLimit: null }, nextWeekSchedule: [{ date: '2026-09-28', startMinute: 540, endMinute: 600, room: '2-р өрөө', classroom: 'Туршилтын анги' }] });
     if (path === '/auth/me') return reply({ ...student, role, studentProfile: { type: 'CLASSROOM', grade: 12 } });
     if (path === '/attempts/my-stats') return reply({ totalAttempts: 12, weakestTags: [] });
     if (path === '/activity/classroom/synthetic-class') return reply({ year: 2026, totalStudents: 1, days: [] });
