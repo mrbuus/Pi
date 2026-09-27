@@ -216,11 +216,9 @@ export default function ReviewClient() {
                   ["Сурч байгаа", current.data.stats.learning],
                   ["Шинэ", current.data.stats.new],
                 ].map(([label, count]) => (
-                  <Card key={label}>
-                    <CardContent className="px-3 text-center">
-                      <dt className="text-xs text-ink-dim">{label}</dt>
-                      <dd className="mt-2 text-2xl font-bold">{count}</dd>
-                    </CardContent>
+                  <Card key={label} className="p-5 px-3 text-center sm:p-6">
+                    <dt className="text-xs text-ink-dim">{label}</dt>
+                    <dd className="mt-2 text-2xl font-bold">{count}</dd>
                   </Card>
                 ))}
               </dl>
