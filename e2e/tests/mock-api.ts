@@ -1,7 +1,9 @@
 import { expect, type Page } from '@playwright/test';
+import { reviewMock, type ReviewMockOptions } from './formula-review-fixture';
 export const student = { id: 'synthetic-student', firstName: 'Туршилт', lastName: 'Зохиомол', phone: '99000000' };
 export const classroom = { id: 'synthetic-class', name: 'Туршилтын анги', type: 'CLASSROOM', grade: 12, _count: { enrollments: 1 } };
-export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
+export async function mockApi(page: Page, role = 'STUDENT', signedIn = true, reviewOptions: ReviewMockOptions = {}) {
+  const review = reviewMock(reviewOptions);
   const calls: { path: string; method: string; body: Record<string, unknown> }[] = [];
   const unexpected: string[] = [], errors: string[] = [];
   let attendance: string | null = null, homework: string | null = null;
@@ -24,6 +26,8 @@ export async function mockApi(page: Page, role = 'STUDENT', signedIn = true) {
     if (method === 'OPTIONS') return route.fulfill({ status: 204, headers });
     const body = req.postData() ? req.postDataJSON() : {};
     calls.push({ path, method, body });
+    const reviewResponse = await review.handle(path, method, body);
+    if (reviewResponse) return reply(reviewResponse.body, reviewResponse.status ?? 200);
     if (path === '') return reply({ status: 'ok' });
     if (path === '/auth/login') return body.password === '99000000'
       ? reply({ accessToken: 'synthetic-token-never-valid-on-server', role })

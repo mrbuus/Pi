@@ -124,7 +124,10 @@ export const ModelName = {
   GoogleIdentity: 'GoogleIdentity',
   GoogleOAuthState: 'GoogleOAuthState',
   GoogleLoginExchange: 'GoogleLoginExchange',
-  StoredFile: 'StoredFile'
+  StoredFile: 'StoredFile',
+  FormulaReview: 'FormulaReview',
+  FormulaReviewDay: 'FormulaReviewDay',
+  FormulaReviewAttempt: 'FormulaReviewAttempt'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1214,6 +1217,42 @@ export const StoredFileScalarFieldEnum = {
 } as const
 
 export type StoredFileScalarFieldEnum = (typeof StoredFileScalarFieldEnum)[keyof typeof StoredFileScalarFieldEnum]
+
+
+export const FormulaReviewScalarFieldEnum = {
+  userId: 'userId',
+  formulaId: 'formulaId',
+  box: 'box',
+  dueAt: 'dueAt',
+  lastResult: 'lastResult',
+  streak: 'streak',
+  reviewCount: 'reviewCount',
+  lapses: 'lapses',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FormulaReviewScalarFieldEnum = (typeof FormulaReviewScalarFieldEnum)[keyof typeof FormulaReviewScalarFieldEnum]
+
+
+export const FormulaReviewDayScalarFieldEnum = {
+  userId: 'userId',
+  day: 'day',
+  count: 'count'
+} as const
+
+export type FormulaReviewDayScalarFieldEnum = (typeof FormulaReviewDayScalarFieldEnum)[keyof typeof FormulaReviewDayScalarFieldEnum]
+
+
+export const FormulaReviewAttemptScalarFieldEnum = {
+  userId: 'userId',
+  exerciseId: 'exerciseId',
+  formulaId: 'formulaId',
+  fingerprint: 'fingerprint',
+  response: 'response',
+  createdAt: 'createdAt'
+} as const
+
+export type FormulaReviewAttemptScalarFieldEnum = (typeof FormulaReviewAttemptScalarFieldEnum)[keyof typeof FormulaReviewAttemptScalarFieldEnum]
 
 
 export const SortOrder = {

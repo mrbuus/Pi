@@ -404,3 +404,18 @@ export type GoogleLoginExchange = Prisma.GoogleLoginExchangeModel
  * 
  */
 export type StoredFile = Prisma.StoredFileModel
+/**
+ * Model FormulaReview
+ *
+ */
+export type FormulaReview = Prisma.FormulaReviewModel
+/**
+ * Model FormulaReviewDay
+ *
+ */
+export type FormulaReviewDay = Prisma.FormulaReviewDayModel
+/**
+ * Model FormulaReviewAttempt
+ *
+ */
+export type FormulaReviewAttempt = Prisma.FormulaReviewAttemptModel
