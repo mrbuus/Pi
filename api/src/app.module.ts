@@ -48,6 +48,7 @@ import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
 import { ReconcileModule } from './reconcile/reconcile.module';
 import { FormulasModule } from './formulas/formulas.module';
+import { ReadinessModule } from './readiness/readiness.module';
 
 @Module({
   imports: [
@@ -142,6 +143,7 @@ import { FormulasModule } from './formulas/formulas.module';
     TuitionModule,
     ReconcileModule,
     FormulasModule,
+    ReadinessModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
