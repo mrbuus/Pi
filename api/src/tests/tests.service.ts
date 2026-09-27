@@ -447,9 +447,15 @@ export class TestsService {
         }
 
         const problemIds = dto.problems ?? test.problems;
-        const answerWarning = dto.classroomIds?.length
-          ? await this.checkAnswerCoverage(problemIds, tx)
-          : undefined;
+        // Ангид АЛЬ ХЭДИЙН оноогдсон тестийн бодлогыг засахад classroomIds
+        // илгээгддэггүй тул хариуны бүрэн бүтэн байдлын анхааруулга алгасагдаж
+        // байв (G11). Эцсийн ангийн жагсаалтаар шалгана.
+        const resultingClassroomIds =
+          dto.classroomIds ?? test.access.map((access) => access.classroomId);
+        const answerWarning =
+          resultingClassroomIds.length > 0
+            ? await this.checkAnswerCoverage(problemIds, tx)
+            : undefined;
         if (dto.problems !== undefined) {
           await tx.testProblem.deleteMany({ where: { testId } });
           if (dto.problems.length > 0) {

@@ -92,6 +92,7 @@ export class UpdateTestDto {
   @ApiPropertyOptional({ type: [String] })
   @ValidateIf((_object, value) => value !== undefined)
   @IsArray()
+  @ArrayUnique()
   @IsString({ each: true })
   classroomIds?: string[];
 }
