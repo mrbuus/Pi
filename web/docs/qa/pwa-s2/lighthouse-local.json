@@ -1,0 +1,65 @@
+{
+  "lighthouseVersion": "13.5.0",
+  "fetchTime": "2026-09-26T16:23:44.629Z",
+  "requestedUrl": "http://127.0.0.1:3388/offline",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "categories": {
+    "performance": {
+      "title": "Performance",
+      "score": 0.91
+    },
+    "accessibility": {
+      "title": "Accessibility",
+      "score": 1
+    },
+    "best-practices": {
+      "title": "Best Practices",
+      "score": 1
+    },
+    "seo": {
+      "title": "SEO",
+      "score": 1
+    }
+  },
+  "metrics": {
+    "first-contentful-paint": {
+      "numericValue": 1511.8867500000001,
+      "numericUnit": "millisecond"
+    },
+    "largest-contentful-paint": {
+      "numericValue": 3469.8112500000007,
+      "numericUnit": "millisecond"
+    },
+    "total-blocking-time": {
+      "numericValue": 3,
+      "numericUnit": "millisecond"
+    },
+    "cumulative-layout-shift": {
+      "numericValue": 0.004588440027144314,
+      "numericUnit": "unitless"
+    },
+    "speed-index": {
+      "numericValue": 1724.4103000113487,
+      "numericUnit": "millisecond"
+    }
+  },
+  "diagnostics": [
+    {
+      "id": "unused-javascript",
+      "title": "Reduce unused JavaScript"
+    },
+    {
+      "id": "network-dependency-tree-insight",
+      "title": "Network dependency tree"
+    },
+    {
+      "id": "render-blocking-insight",
+      "title": "Render-blocking requests"
+    }
+  ],
+  "limitations": [
+    "Single localhost run with an empty catalog before the final spacing fix; not a production SLA",
+    "PWA category removed from current Lighthouse; see real-worker.json for offline behavior",
+    "No real iOS/Android installation performed"
+  ]
+}

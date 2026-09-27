@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Шинэ Ирээдүйн Эзэд",
+    name: "Pi.mn",
     short_name: "Pi.mn",
     lang: "mn",
     start_url: "/",
@@ -13,19 +13,19 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#FAF9F6",
     icons: [
       {
-        src: "/pwa-icons/192",
+        src: "/icons/192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/pwa-icons/512",
+        src: "/icons/512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/pwa-icons/maskable",
+        src: "/icons/maskable.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
