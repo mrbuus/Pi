@@ -1,19 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Loader2,
-  Hourglass,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Undo,
-  Copy,
-  Check,
-  ArrowLeft,
-  Wifi,
-  WifiOff,
-} from "lucide-react";
+import { Loader2, Hourglass, CheckCircle, Clock, AlertTriangle, Undo, Copy, Check, ArrowLeft, WifiOff } from "lucide-react";
 import { api } from "@/lib/api";
 import type {
   CreatePaymentResponse,
@@ -334,7 +322,7 @@ export default function QpayCheckout({
   };
 
   return (
-    <div className={`rounded-2xl border border-line bg-panel p-5 sm:p-6 ${className}`}>
+    <div className={`chunky p-5 sm:p-6 ${className}`}>
       {/* Дэлгэцийн уншигчид зориулж — төлөв өөрчлөгдөх бүрт дуудагдана */}
       <p aria-live="polite" role="status" className="sr-only">
         {statusLine[state]}

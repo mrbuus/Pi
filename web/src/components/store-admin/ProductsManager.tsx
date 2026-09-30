@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/StateBlock';
 import { api } from '@/lib/api';
 import { Meta, Dot } from '@/components/ui/Meta';
-import { Trash2, Plus, Save, ChevronDown } from 'lucide-react';
+import { Trash2, Plus, Save } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -320,6 +320,8 @@ export default function ProductsManager({
                       <Button
                         size="sm"
                         variant="secondary"
+                        aria-label={`${product.title} бүтээгдэхүүнийг идэвхгүй болгох`}
+                        className="min-h-11 min-w-11"
                         onClick={() => handleDeactivate(product.id)}
                         disabled={deletingProducts[product.id]}
                         loading={deletingProducts[product.id]}
@@ -351,7 +353,7 @@ export default function ProductsManager({
                       {product.title || 'Бүтээгдэхүүн'}
                     </h3>
                     <p className="text-xs text-ink-dim mt-0.5">
-                      Идэвхигүй · {product.purchaseCount} худалдан авалт
+                      <Meta items={['Идэвхгүй', `${product.purchaseCount} худалдан авалт`]} />
                     </p>
                   </div>
                   <span className="text-sm font-medium">

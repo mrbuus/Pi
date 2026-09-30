@@ -78,9 +78,11 @@ export const ModelName = {
   Tag: 'Tag',
   ProblemTag: 'ProblemTag',
   Formula: 'Formula',
+  FormulaSection: 'FormulaSection',
   ProblemFormula: 'ProblemFormula',
   ProblemAnalysis: 'ProblemAnalysis',
   Test: 'Test',
+  TestDraft: 'TestDraft',
   TestProblem: 'TestProblem',
   TestAccess: 'TestAccess',
   TestAttemptSession: 'TestAttemptSession',
@@ -88,6 +90,7 @@ export const ModelName = {
   ResultAcknowledgement: 'ResultAcknowledgement',
   EmailOtp: 'EmailOtp',
   Attempt: 'Attempt',
+  MistakeEntry: 'MistakeEntry',
   DailyClassSummary: 'DailyClassSummary',
   Prediction: 'Prediction',
   StudentColorTag: 'StudentColorTag',
@@ -104,6 +107,10 @@ export const ModelName = {
   TuitionRefund: 'TuitionRefund',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
+  Notification: 'Notification',
+  NotificationPreference: 'NotificationPreference',
+  NotificationDelivery: 'NotificationDelivery',
+  JobRun: 'JobRun',
   ClassTestSession: 'ClassTestSession',
   LearningEvent: 'LearningEvent',
   EnrollmentWindow: 'EnrollmentWindow',
@@ -117,7 +124,14 @@ export const ModelName = {
   TeacherWorkException: 'TeacherWorkException',
   AcademicCalendarDay: 'AcademicCalendarDay',
   StudentGoal: 'StudentGoal',
-  StreakFreeze: 'StreakFreeze'
+  StreakFreeze: 'StreakFreeze',
+  GoogleIdentity: 'GoogleIdentity',
+  GoogleOAuthState: 'GoogleOAuthState',
+  GoogleLoginExchange: 'GoogleLoginExchange',
+  StoredFile: 'StoredFile',
+  FormulaReview: 'FormulaReview',
+  FormulaReviewDay: 'FormulaReviewDay',
+  FormulaReviewAttempt: 'FormulaReviewAttempt'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -147,11 +161,19 @@ export const UserScalarFieldEnum = {
   lastName: 'lastName',
   passwordHash: 'passwordHash',
   mustChangePassword: 'mustChangePassword',
+  termsAcceptedAt: 'termsAcceptedAt',
+  privacyVersion: 'privacyVersion',
+  guardianConsentAt: 'guardianConsentAt',
   passwordChangedAt: 'passwordChangedAt',
   role: 'role',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  calendarTokenHash: 'calendarTokenHash',
+  calendarTokenVersion: 'calendarTokenVersion',
+  archivedAt: 'archivedAt',
+  archivedById: 'archivedById',
+  archiveReason: 'archiveReason'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -512,10 +534,42 @@ export const FormulaScalarFieldEnum = {
   id: 'id',
   name: 'name',
   latex: 'latex',
-  description: 'description'
+  description: 'description',
+  slug: 'slug',
+  sectionSlug: 'sectionSlug',
+  order: 'order',
+  level: 'level',
+  grade: 'grade',
+  topicSlugs: 'topicSlugs',
+  general: 'general',
+  variants: 'variants',
+  conditions: 'conditions',
+  explanation: 'explanation',
+  derivation: 'derivation',
+  mnemonic: 'mnemonic',
+  examples: 'examples',
+  commonMistakes: 'commonMistakes',
+  eeshTip: 'eeshTip',
+  relatedSlugs: 'relatedSlugs',
+  keywords: 'keywords',
+  widget: 'widget',
+  quiz: 'quiz',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type FormulaScalarFieldEnum = (typeof FormulaScalarFieldEnum)[keyof typeof FormulaScalarFieldEnum]
+
+
+export const FormulaSectionScalarFieldEnum = {
+  slug: 'slug',
+  title: 'title',
+  order: 'order',
+  icon: 'icon',
+  description: 'description'
+} as const
+
+export type FormulaSectionScalarFieldEnum = (typeof FormulaSectionScalarFieldEnum)[keyof typeof FormulaSectionScalarFieldEnum]
 
 
 export const ProblemFormulaScalarFieldEnum = {
@@ -563,10 +617,23 @@ export const TestScalarFieldEnum = {
   variantLabel: 'variantLabel',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  isDraft: 'isDraft'
 } as const
 
 export type TestScalarFieldEnum = (typeof TestScalarFieldEnum)[keyof typeof TestScalarFieldEnum]
+
+
+export const TestDraftScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  state: 'state',
+  revision: 'revision',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TestDraftScalarFieldEnum = (typeof TestDraftScalarFieldEnum)[keyof typeof TestDraftScalarFieldEnum]
 
 
 export const TestProblemScalarFieldEnum = {
@@ -661,10 +728,35 @@ export const AttemptScalarFieldEnum = {
   givenAnswer: 'givenAnswer',
   testId: 'testId',
   classroomId: 'classroomId',
+  mistakeCollectedAt: 'mistakeCollectedAt',
   createdAt: 'createdAt'
 } as const
 
 export type AttemptScalarFieldEnum = (typeof AttemptScalarFieldEnum)[keyof typeof AttemptScalarFieldEnum]
+
+
+export const MistakeEntryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  problemId: 'problemId',
+  source: 'source',
+  sourceRefId: 'sourceRefId',
+  sourceOccurredAt: 'sourceOccurredAt',
+  testTitle: 'testTitle',
+  givenAnswer: 'givenAnswer',
+  status: 'status',
+  retryCount: 'retryCount',
+  consecutiveCorrect: 'consecutiveCorrect',
+  lastRetryAt: 'lastRetryAt',
+  lastCorrectAt: 'lastCorrectAt',
+  nextRetryAt: 'nextRetryAt',
+  reason: 'reason',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MistakeEntryScalarFieldEnum = (typeof MistakeEntryScalarFieldEnum)[keyof typeof MistakeEntryScalarFieldEnum]
 
 
 export const DailyClassSummaryScalarFieldEnum = {
@@ -896,6 +988,62 @@ export const AnnouncementClassroomTargetScalarFieldEnum = {
 export type AnnouncementClassroomTargetScalarFieldEnum = (typeof AnnouncementClassroomTargetScalarFieldEnum)[keyof typeof AnnouncementClassroomTargetScalarFieldEnum]
 
 
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  kind: 'kind',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const NotificationPreferenceScalarFieldEnum = {
+  userId: 'userId',
+  emailWeekly: 'emailWeekly',
+  emailReminders: 'emailReminders',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const NotificationDeliveryScalarFieldEnum = {
+  id: 'id',
+  sentKey: 'sentKey',
+  userId: 'userId',
+  kind: 'kind',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  inAppSentAt: 'inAppSentAt',
+  emailAttemptedAt: 'emailAttemptedAt',
+  emailSentAt: 'emailSentAt',
+  emailError: 'emailError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationDeliveryScalarFieldEnum = (typeof NotificationDeliveryScalarFieldEnum)[keyof typeof NotificationDeliveryScalarFieldEnum]
+
+
+export const JobRunScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  lockKey: 'lockKey',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  ok: 'ok',
+  summary: 'summary'
+} as const
+
+export type JobRunScalarFieldEnum = (typeof JobRunScalarFieldEnum)[keyof typeof JobRunScalarFieldEnum]
+
+
 export const ClassTestSessionScalarFieldEnum = {
   id: 'id',
   classroomId: 'classroomId',
@@ -1091,6 +1239,91 @@ export const StreakFreezeScalarFieldEnum = {
 } as const
 
 export type StreakFreezeScalarFieldEnum = (typeof StreakFreezeScalarFieldEnum)[keyof typeof StreakFreezeScalarFieldEnum]
+
+
+export const GoogleIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  googleSubject: 'googleSubject',
+  email: 'email',
+  pictureUrl: 'pictureUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleIdentityScalarFieldEnum = (typeof GoogleIdentityScalarFieldEnum)[keyof typeof GoogleIdentityScalarFieldEnum]
+
+
+export const GoogleOAuthStateScalarFieldEnum = {
+  id: 'id',
+  stateHash: 'stateHash',
+  purpose: 'purpose',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type GoogleOAuthStateScalarFieldEnum = (typeof GoogleOAuthStateScalarFieldEnum)[keyof typeof GoogleOAuthStateScalarFieldEnum]
+
+
+export const GoogleLoginExchangeScalarFieldEnum = {
+  id: 'id',
+  codeHash: 'codeHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type GoogleLoginExchangeScalarFieldEnum = (typeof GoogleLoginExchangeScalarFieldEnum)[keyof typeof GoogleLoginExchangeScalarFieldEnum]
+
+
+export const StoredFileScalarFieldEnum = {
+  key: 'key',
+  mime: 'mime',
+  size: 'size',
+  bytes: 'bytes',
+  createdAt: 'createdAt'
+} as const
+
+export type StoredFileScalarFieldEnum = (typeof StoredFileScalarFieldEnum)[keyof typeof StoredFileScalarFieldEnum]
+
+
+export const FormulaReviewScalarFieldEnum = {
+  userId: 'userId',
+  formulaId: 'formulaId',
+  box: 'box',
+  dueAt: 'dueAt',
+  lastResult: 'lastResult',
+  streak: 'streak',
+  reviewCount: 'reviewCount',
+  lapses: 'lapses',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FormulaReviewScalarFieldEnum = (typeof FormulaReviewScalarFieldEnum)[keyof typeof FormulaReviewScalarFieldEnum]
+
+
+export const FormulaReviewDayScalarFieldEnum = {
+  userId: 'userId',
+  day: 'day',
+  count: 'count'
+} as const
+
+export type FormulaReviewDayScalarFieldEnum = (typeof FormulaReviewDayScalarFieldEnum)[keyof typeof FormulaReviewDayScalarFieldEnum]
+
+
+export const FormulaReviewAttemptScalarFieldEnum = {
+  userId: 'userId',
+  exerciseId: 'exerciseId',
+  formulaId: 'formulaId',
+  fingerprint: 'fingerprint',
+  response: 'response',
+  createdAt: 'createdAt'
+} as const
+
+export type FormulaReviewAttemptScalarFieldEnum = (typeof FormulaReviewAttemptScalarFieldEnum)[keyof typeof FormulaReviewAttemptScalarFieldEnum]
 
 
 export const SortOrder = {

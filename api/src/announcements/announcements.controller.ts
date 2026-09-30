@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -24,26 +25,32 @@ import { AnnouncementAudience, Role } from '../generated/prisma/enums';
 import { AnnouncementsService } from './announcements.service';
 
 class CreateAnnouncementDto {
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   title: string;
 
+  @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   body: string;
 
+  @ApiProperty({ enum: AnnouncementAudience })
   @IsEnum(AnnouncementAudience)
   audience: AnnouncementAudience;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   classroomId?: string;
 
+  @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   classroomIds?: string[];
 
+  @ApiPropertyOptional({ type: Boolean })
   @IsOptional()
   @IsBoolean()
   pinned?: boolean;
@@ -51,29 +58,35 @@ class CreateAnnouncementDto {
 
 // PATCH-д зориулсан хувилбар — бүх талбар optional (partial patch)
 class UpdateAnnouncementDto {
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   title?: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   body?: string;
 
+  @ApiPropertyOptional({ enum: AnnouncementAudience })
   @IsOptional()
   @IsEnum(AnnouncementAudience)
   audience?: AnnouncementAudience;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   classroomId?: string;
 
+  @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   classroomIds?: string[];
 
+  @ApiPropertyOptional({ type: Boolean })
   @IsOptional()
   @IsBoolean()
   pinned?: boolean;

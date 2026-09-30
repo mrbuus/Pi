@@ -24,12 +24,14 @@ describe('SmsManagementService', () => {
         {
           provide: PrismaService,
           useValue: {
+            user: { findMany: jest.fn().mockResolvedValue([]) },
             smsMessage: {
               create: jest.fn(),
               findMany: jest.fn(),
               findUnique: jest.fn(),
               count: jest.fn(),
               update: jest.fn(),
+              updateMany: jest.fn(),
               aggregate: jest.fn(),
             },
             smsBatch: {

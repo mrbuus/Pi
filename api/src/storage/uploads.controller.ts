@@ -21,12 +21,15 @@ import {
   existsSync,
   mkdirSync,
   openSync,
+  readFileSync,
   readSync,
   unlinkSync,
+  writeFileSync,
 } from 'fs';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PrismaService } from '../prisma/prisma.service';
 import { FilesAuthGuard } from './files-auth.guard';
 
 // Локал диск хадгалалт — production дээр S3 руу шилжихэд энэ controller-ийн
@@ -183,6 +186,8 @@ function assertMagicBytesMatch(filePath: string): void {
 
 @Controller()
 export class UploadsController {
+  constructor(private prisma: PrismaService) {}
+
   @UseGuards(JwtAuthGuard)
   @Post('uploads')
   @UseInterceptors(
@@ -208,7 +213,7 @@ export class UploadsController {
       },
     }),
   )
-  upload(@UploadedFile() file?: Express.Multer.File) {
+  async upload(@UploadedFile() file?: Express.Multer.File) {
     // Хадгалах сан ажиллахгүй бол ил хэлнэ — multer нь destination байхгүй үед
     // ойлгомжгүй 500 шиддэг тул шалтгааныг нь тодорхой болгож 503 буцаана.
     if (uploadDirError) {
@@ -220,7 +225,19 @@ export class UploadsController {
     // Extension/mimetype шүүлтүүр (fileFilter) хуурч болохуйц (client-ийн
     // мэдэгдсэн утга) тул диск дээр аль хэдийн бичигдсэн ЖИНХЭНЭ байтуудыг
     // magic bytes-аар давхар шалгана. Зөрвөл файлыг устгаад алдаа буцаана.
-    assertMagicBytesMatch(join(UPLOAD_DIR, file.filename));
+    const path = join(UPLOAD_DIR, file.filename);
+    assertMagicBytesMatch(path);
+    // G05: Render-ийн диск deploy бүрт устдаг тул ӨС-д давхар хадгална
+    // (диск = кэш, ӨС = эх сурвалж). ӨС-д бичиж чадаагүй бол upload-ийг
+    // амжилттай гэж хэлэхгүй — дараагийн deploy-оор чимээгүй алга болохоос сэргийлнэ.
+    try {
+      await this.prisma.storedFile.create({
+        data: { key: file.filename, mime: file.mimetype, size: file.size, bytes: readFileSync(path) },
+      });
+    } catch {
+      unlinkSync(path);
+      throw new ServiceUnavailableException('Файл хадгалахад алдаа гарлаа. Дахин оролдоно уу.');
+    }
     return { key: file.filename, size: file.size, mime: file.mimetype };
   }
 
@@ -229,12 +246,26 @@ export class UploadsController {
   // татаж болдог байв. FilesAuthGuard-аар хамгаална (тайлбарыг тэндээс үз).
   @UseGuards(FilesAuthGuard)
   @Get('files/:key')
-  serve(@Param('key') key: string, @Res() res: Response) {
+  async serve(@Param('key') key: string, @Res() res: Response) {
     if (!/^[\w][\w.-]*$/.test(key)) {
       throw new BadRequestException('Буруу түлхүүр');
     }
     const path = join(UPLOAD_DIR, key);
-    if (!existsSync(path)) throw new NotFoundException('Файл олдсонгүй');
+    if (!existsSync(path)) {
+      // Диск дээр алга (redeploy) → ӨС-ээс сэргээж дискэнд кэшлэнэ.
+      const stored = await this.prisma.storedFile.findUnique({ where: { key } });
+      if (!stored) throw new NotFoundException('Файл олдсонгүй');
+      try {
+        if (!uploadDirError) writeFileSync(path, stored.bytes);
+      } catch {
+        // Кэшлэж чадаагүй ч ӨС-ээс шууд илгээнэ.
+      }
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Type', stored.mime);
+      res.setHeader('Cache-Control', 'private, max-age=86400');
+      res.end(Buffer.from(stored.bytes));
+      return;
+    }
     // Хөтөч агуулгыг таамаглаж (sniff) өөр төрлөөр ажиллуулахыг хориглоно
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.sendFile(path);

@@ -62,7 +62,7 @@ export class HomeworkMarksService {
     const parsedDate = this.parseDate(date);
 
     const enrollments = await this.prisma.enrollment.findMany({
-      where: { classroomId, leftAt: null },
+      where: { classroomId, leftAt: null, student: { archivedAt: null } },
       select: {
         student: { select: { id: true, firstName: true, lastName: true } },
       },
@@ -196,7 +196,7 @@ export class HomeworkMarksService {
     const parsedDate = this.parseDate(dto.date);
 
     const enrolled = await this.prisma.enrollment.findFirst({
-      where: { classroomId, studentId, leftAt: null },
+      where: { classroomId, studentId, leftAt: null, student: { archivedAt: null } },
     });
     if (!enrolled) {
       throw new NotFoundException('Сурагч энэ ангид алга байна');

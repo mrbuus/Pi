@@ -143,7 +143,7 @@ export default function ExamResult({
 
       {/* Сэдвээр задалсан задаргаа */}
       {topicStats.length > 0 && (
-        <div className="rounded-2xl border border-line bg-surface p-6">
+        <div className="chunky p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Сэдвүүдээр авсан оноо</h2>
           <div className="space-y-3">
             {topicStats.map((stat) => {
@@ -179,7 +179,7 @@ export default function ExamResult({
       )}
 
       {/* Дараагийн алхам */}
-      <div className="rounded-2xl border border-line bg-brand-bright/5 p-6">
+      <div className="chunky border-brand-bright/30 bg-brand-bright/5 p-6">
         <h2 className="mb-3 font-bold text-brand">Дараагийн алхам</h2>
         <ul className="space-y-2">
           {nextSteps.map((step, i) => (
@@ -192,7 +192,7 @@ export default function ExamResult({
 
       {/* Бодлого бүрийн дүн */}
       {items.length > 0 && (
-        <div className="rounded-2xl border border-line bg-surface p-6">
+        <div className="chunky p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Бодлого бүрийн дүн</h2>
           <div className="space-y-2">
             {items.map((it) => (
@@ -263,7 +263,7 @@ export default function ExamResult({
         <button
           type="button"
           onClick={onBackToList}
-          className="rounded-xl bg-brand-bright px-6 py-3 font-bold text-on-brand"
+          className="btn-3d rounded-2xl bg-brand-bright px-6 py-3 font-bold text-on-brand"
         >
           Шалгалтын жагсаалт руу
         </button>

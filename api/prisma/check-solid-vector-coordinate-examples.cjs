@@ -1,0 +1,187 @@
+#!/usr/bin/env node
+'use strict';
+// C8 independent integration, surface parameterization, coordinates and witnesses.
+// Finite samples supplement, but do not prove, the separately reviewed theorems.
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const data=JSON.parse(fs.readFileSync(process.argv[2]||path.join(__dirname,'data/formulas/solid-geometry-vectors-coordinates.json'),'utf8'));
+const rows=new Map(data.formulas.map(f=>[f.slug.slice(6),f]));let checks=0,integrals=0;const covered=new Set();
+const ok=(a,label='')=>{checks++;assert.ok(a,label);},same=(a,b,label='')=>{checks++;assert.deepEqual(a,b,label);};
+const close=(a,b,label='')=>{checks++;assert.ok(Number.isFinite(a)&&Math.abs(a-b)<=1e-8*Math.max(1,Math.abs(b)),`${label}: ${a} != ${b}`);};
+const add=(a,b)=>a.map((x,i)=>x+b[i]),sub=(a,b)=>a.map((x,i)=>x-b[i]),scale=(a,k)=>a.map(x=>x*k),dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0),norm=a=>Math.hypot(...a),dist=(a,b)=>norm(sub(a,b));
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],det=(a,b,c)=>dot(a,cross(b,c));
+const vecClose=(a,b)=>{same(a.length,b.length);a.forEach((x,i)=>close(x,b[i]));};
+const rad=t=>t*Math.PI/180,deg=t=>t*180/Math.PI;
+const angle=(a,b)=>{ok(norm(a)>0&&norm(b)>0);return deg(Math.acos(Math.max(-1,Math.min(1,dot(a,b)/(norm(a)*norm(b))))));};
+const polygonArea=p=>Math.abs(p.reduce((s,x,i)=>s+x[0]*p[(i+1)%p.length][1]-x[1]*p[(i+1)%p.length][0],0))/2;
+const triangleArea=(a,b,c)=>norm(cross(sub(b,a),sub(c,a)))/2;
+const tetra=(a,b,c,d)=>Math.abs(det(sub(b,a),sub(c,a),sub(d,a)))/6;
+function integral(f,a,b,n=200){integrals++;let s=f(a)+f(b);for(let i=1;i<n;i++)s+=(i%2?4:2)*f(a+(b-a)*i/n);return s*(b-a)/(3*n);}
+const diskArea=r=>integral(t=>2*Math.PI*t,0,r);
+const revolutionVolume=(r,h)=>integral(z=>diskArea(r(z)),0,h);
+// Surface of revolution Jacobian |dX/dtheta cross dX/dz|, integrated in z.
+const revolutionSide=(r,slope,h)=>integral(z=>{const theta=.37;const dTheta=[-r(z)*Math.sin(theta),r(z)*Math.cos(theta),0],dZ=[slope*Math.cos(theta),slope*Math.sin(theta),1];return 2*Math.PI*norm(cross(dTheta,dZ));},0,h);
+const cylinderV=(R,h)=>revolutionVolume(()=>R,h),coneV=(R,h)=>revolutionVolume(z=>R*z/h,h),frustumV=(R,r,h)=>revolutionVolume(z=>R+(r-R)*z/h,h);
+const sphereV=R=>integral(z=>Math.PI*(R*R-z*z),-R,R);
+const sphereS=R=>integral(t=>2*Math.PI*R*R*Math.sin(t),0,Math.PI,1000);
+const capV=(R,h)=>{ok(R>0&&h>=0&&h<=2*R);return integral(z=>Math.PI*(R*R-z*z),R-h,R);};
+const cubeV=a=>Math.abs(det([a,0,0],[0,a,0],[0,0,a]));
+const boxS=(a,b,c)=>2*(norm(cross([a,0,0],[0,b,0]))+norm(cross([0,b,0],[0,0,c]))+norm(cross([0,0,c],[a,0,0])));
+const squarePyramid=(a,h)=>{const base=[[-a/2,-a/2,0],[a/2,-a/2,0],[a/2,a/2,0],[-a/2,a/2,0]],apex=[0,0,h];return {volume:tetra(base[0],base[1],base[2],apex)+tetra(base[0],base[2],base[3],apex),side:base.reduce((s,p,i)=>s+triangleArea(p,base[(i+1)%4],apex),0),slant:dist(apex,[0,-a/2,0])};};
+const prismSide=(ps,h)=>ps.reduce((s,p,i)=>s+norm(cross([...sub(ps[(i+1)%ps.length],p),0],[0,0,h])),0);
+const projection=(a,b)=>{ok(norm(b)>0);return scale(b,dot(a,b)/dot(b,b));};
+const projectPointToLine=(p,A,B,C)=>{ok(A*A+B*B>0);return sub(p,scale([A,B],(A*p[0]+B*p[1]+C)/(A*A+B*B)));};
+const pointLineDistance=(p,A,B,C)=>{const H=projectPointToLine(p,A,B,C);close(A*H[0]+B*H[1]+C,0);close(dot(sub(p,H),[-B,A]),0);return dist(p,H);};
+const division=(a,b,m,n)=>{ok(m>0&&n>0&&dist(a,b)>0);const p=scale(add(scale(a,n),scale(b,m)),1/(m+n));close(dist(a,p)/dist(p,b),m/n);return p;};
+const linePlaneAngle=(u,n)=>{ok(norm(u)>0&&norm(n)>0);return 90-Math.min(angle(u,n),180-angle(u,n));};
+const v=(slug,i,answer,fn)=>{same(rows.get(slug).examples[i].answer,answer,`${slug} example ${i+1}`);fn();covered.add(`${slug}:${i}`);};
+
+v('prism-volume',0,'$120$',()=>close(integral(()=>polygonArea([[0,0],[6,0],[0,8]]),0,5),120));
+v('prism-volume',1,'$60$',()=>{const base=[[0,0],[5,0],[5,3],[0,3]];close(norm([3,0,4]),5);close(integral(z=>polygonArea(base.map(p=>[p[0]+3*z/4,p[1]])),0,4),60);});
+v('prism-surface',0,'$132$',()=>{const base=[[0,0],[3,0],[0,4]];close(prismSide(base,10)+2*polygonArea(base),132);});
+v('prism-surface',1,'$S_{\\rm lat}=126,\\ S_{\\rm total}=166$',()=>{const base=[[0,0],[4,0],[4,5],[0,5]];close(prismSide(base,7),126);close(prismSide(base,7)+2*polygonArea(base),166);});
+v('box',0,'$V=36,\\ d=7$',()=>{close(Math.abs(det([2,0,0],[0,3,0],[0,0,6])),36);close(dist([0,0,0],[2,3,6]),7);});
+v('box',1,'$S=192,\\ d=13$',()=>{close(boxS(3,4,12),192);close(dist([0,0,0],[3,4,12]),13);});
+v('cube',0,'$V=27,\\ S=54$',()=>{close(cubeV(3),27);close(boxS(3,3,3),54);});
+v('cube',1,'$8$',()=>{close(dist([0,0,0],[2,2,2]),2*Math.sqrt(3));close(cubeV(2),8);});
+v('pyramid-volume',0,'$48$',()=>close(squarePyramid(6,4).volume,48));
+v('pyramid-volume',1,'$7$',()=>{const a=[0,0,0],b=[8,0,0],c=[0,6,0];close(triangleArea(a,b,c),24);close(tetra(a,b,c,[2,2,7]),56);});
+v('regular-pyramid',0,'$60$',()=>{const p=squarePyramid(6,4);close(p.slant,5);close(p.side,60);});
+v('regular-pyramid',1,'$360$',()=>{const p=squarePyramid(10,12);close(p.slant,13);close(p.side+100,360);});
+v('frustum-pyramid',0,'$84$',()=>close(integral(z=>(6-3*z/4)**2,0,4),84));
+v('frustum-pyramid',1,'$78$',()=>close(integral(z=>(5-3*z/6)**2,0,6),78));
+v('cylinder-volume',0,'$63\\pi$',()=>close(cylinderV(3,7),63*Math.PI));
+v('cylinder-volume',1,'$80\\pi$',()=>close(cylinderV(8/2,5),80*Math.PI));
+v('cylinder-surface',0,'$28\\pi$',()=>close(revolutionSide(()=>2,0,5)+2*diskArea(2),28*Math.PI));
+v('cylinder-surface',1,'$4$',()=>close(revolutionSide(()=>3,0,4),24*Math.PI));
+v('cone-volume',0,'$12\\pi$',()=>close(coneV(3,4),12*Math.PI));
+v('cone-volume',1,'$100\\pi$',()=>{close(dist([5,0,0],[0,0,12]),13);close(coneV(5,12),100*Math.PI);});
+v('cone-surface',0,'$24\\pi$',()=>close(revolutionSide(z=>3*z/4,3/4,4)+diskArea(3),24*Math.PI));
+v('cone-surface',1,'$65\\pi$',()=>{close(dist([5,0,0],[0,0,12]),13);close(revolutionSide(z=>5*z/12,5/12,12),65*Math.PI);});
+v('frustum-cone-volume',0,'$28\\pi$',()=>close(frustumV(4,2,3),28*Math.PI));
+v('frustum-cone-volume',1,'$26\\pi$',()=>close(frustumV(3,1,6),26*Math.PI));
+v('frustum-cone-surface',0,'$35\\pi$',()=>close(revolutionSide(z=>5-3*z/4,-3/4,4),35*Math.PI));
+v('frustum-cone-surface',1,'$90\\pi$',()=>close(revolutionSide(z=>6-3*z/4,-3/4,4)+diskArea(6)+diskArea(3),90*Math.PI));
+v('sphere-measures',0,'$V=36\\pi,\\ S=36\\pi$',()=>{close(sphereV(3),36*Math.PI);close(sphereS(3),36*Math.PI);});
+v('sphere-measures',1,'$R=5,\\ V=500\\pi/3$',()=>{close(sphereS(5),100*Math.PI);close(sphereV(5),500*Math.PI/3);});
+v('sphere-cap',0,'$52\\pi/3$',()=>close(capV(5,2),52*Math.PI/3));
+v('sphere-cap',1,'$80\\pi/3$',()=>close(capV(3,4),80*Math.PI/3));
+v('sphere-section',0,'$16\\pi$',()=>{close(dist([0,0,0],[4,0,3]),5);close(diskArea(4),16*Math.PI);});
+v('sphere-section',1,'$12$',()=>close(dist([0,0,0],[5,0,12]),13));
+v('axial-section',0,'$56$',()=>close(polygonArea([[-4,0],[4,0],[4,7],[-4,7]]),56));
+v('axial-section',1,'$16$',()=>{const p=[[-3,0],[3,0],[0,4]];close(p.reduce((s,x,i)=>s+dist(x,p[(i+1)%3]),0),16);});
+v('similarity-volume',0,'$135$',()=>{const a=Math.cbrt(5);close(cubeV(a),5);close(cubeV(3*a),135);});
+v('similarity-volume',1,'$4/9$',()=>{close(cubeV(2)/cubeV(3),8/27);close(boxS(2,2,2)/boxS(3,3,3),4/9);});
+v('line-plane-angle',0,'$30^\\circ$',()=>{const u=[Math.sqrt(27),0,-3];close(norm(u),6);close(linePlaneAngle(u,[0,0,1]),30);});
+v('line-plane-angle',1,'$45^\\circ$',()=>close(linePlaneAngle([4,0,-4],[0,0,1]),45));
+v('three-perpendiculars',0,'$90^\\circ$',()=>close(angle([0,1,0],[4,0,-3]),90));
+v('three-perpendiculars',1,'$-2$',()=>{close(dot([3,-2,0],[2,3,-5]),0);close(dot([3,-2,0],[2,3,0]),0);});
+v('vector-components',0,'$(3,4,-2)$',()=>vecClose(sub([4,2,1],[1,-2,3]),[3,4,-2]));
+v('vector-components',1,'$(-5,6)$',()=>vecClose(sub([-3,5],[2,-1]),[-5,6]));
+v('vector-length',0,'$7$',()=>close(norm([-2,3,6]),7));
+v('vector-length',1,'$t\\in\\{-3,3\\}$',()=>{for(const t of [-3,3])close(norm([t,4]),5);same(Array.from({length:21},(_,i)=>i-10).filter(t=>norm([t,4])===5),[-3,3]);});
+v('vector-add',0,'$(-2,4,4)$',()=>vecClose(add([2,-1,3],[-4,5,1]),[-2,4,4]));
+v('vector-add',1,'$(5,-2)$',()=>{const A=[0,1],B=[3,2],C=[5,-1];vecClose(add(sub(B,A),sub(C,B)),[5,-2]);vecClose(sub(C,A),[5,-2]);});
+v('vector-scale',0,'$(-2,4,-6)$',()=>vecClose(scale([1,-2,3],-2),[-2,4,-6]));
+v('vector-scale',1,'$15$',()=>{const a=[3,4];close(norm(a),5);close(norm(scale(a,-3)),15);});
+v('vector-collinear',0,'$4$',()=>close(norm(cross([6,4,0],[3,2,0])),0));
+v('vector-collinear',1,'$\\mathbf a=2\\mathbf b$',()=>vecClose(scale([0,2,3],2),[0,4,6]));
+v('vector-dot-coordinates',0,'$-5$',()=>close(dot([1,2,-1],[3,-2,4]),-5));
+v('vector-dot-coordinates',1,'$7$',()=>close(dot([-2,5],[4,3]),7));
+v('vector-dot-angle',0,'$10$',()=>{const a=[4,0],b=[5*Math.cos(rad(60)),5*Math.sin(rad(60))];close(norm(b),5);close(dot(a,b),10);});
+v('vector-dot-angle',1,'$-3$',()=>close(dot([3,0],[2*Math.cos(rad(120)),2*Math.sin(rad(120))]),-3));
+v('vector-angle',0,'$60^\\circ$',()=>close(angle([1,0],[1,Math.sqrt(3)]),60));
+v('vector-angle',1,'$135^\\circ$',()=>close(angle([1,0],[-1,1]),135));
+v('vector-perpendicular',0,'$3$',()=>close(angle([2,3],[3,-2]),90));
+v('vector-perpendicular',1,'$\\mathbf a\\perp\\mathbf b$',()=>close(angle([1,2,3],[2,-1,0]),90));
+v('vector-projection',0,'$3;\\ (3,0)$',()=>{const p=projection([3,4],[1,0]);vecClose(p,[3,0]);close(dot(p,[1,0]),3);close(dot(sub([3,4],p),[1,0]),0);});
+v('vector-projection',1,'$-2;\\ (-2,0)$',()=>{const p=projection([-2,1],[2,0]);vecClose(p,[-2,0]);close(dot(p,[1,0]),-2);close(dot(sub([-2,1],p),[2,0]),0);});
+v('distance-2d',0,'$5$',()=>close(dist([-1,2],[2,6]),5));
+v('distance-2d',1,'$10$',()=>close(dist([3,-2],[-5,4]),10));
+v('midpoint-2d',0,'$(2,1)$',()=>{const A=[-2,4],B=[6,-2],M=[2,1];vecClose(sub(M,A),sub(B,M));close(dist(M,A),dist(M,B));});
+v('midpoint-2d',1,'$(7,-5)$',()=>vecClose(sub([4,-1],[1,3]),sub([7,-5],[4,-1])));
+v('division-ratio',0,'$(2,1)$',()=>vecClose(division([0,0],[6,3],1,2),[2,1]));
+v('division-ratio',1,'$(4,1)$',()=>vecClose(division([-2,4],[8,-1],3,2),[4,1]));
+v('line-slope',0,'$2$',()=>close(dot(sub([4,8],[1,2]),[2,-1]),0));
+v('line-slope',1,'$-2$',()=>close(dot(sub([2,-3],[-2,5]),[-2,-1]),0));
+v('slope-intercept',0,'$y=2x+3$',()=>{close(2*1+3,5);close(dot([1,2],[2,-1]),0);});
+v('slope-intercept',1,'$2$',()=>close(-3*2+6,0));
+v('two-point-line',0,'$y=2x$',()=>{for(const [x,y] of [[1,2],[3,6]])close(y,2*x);});
+v('two-point-line',1,'$x=2$',()=>{for(const [x,y] of [[2,-1],[2,4]]){close(x,2);ok(Number.isFinite(y));}});
+v('general-line',0,'$2x-y-5=0$',()=>{close(2*3-1-5,0);close(dot([1,2],[2,-1]),0);});
+v('general-line',1,'$3$',()=>close(3*0+4*3-12,0));
+v('vector-parallel-lines',0,'$3$',()=>{close(norm(cross([1,3,0],[1,3,0])),0);ok(1!==-2,'distinct intercepts');});
+v('vector-parallel-lines',1,'$y=2x-2$',()=>{close(2*1-2,0);close(dot([1,2],[2,-1]),0);ok(4!==-2);});
+v('perpendicular-lines',0,'$-1/2$',()=>close(angle([1,2],[1,-.5]),90));
+v('perpendicular-lines',1,'$y=3x-5$',()=>{close(3*2-5,1);close(angle([1,-1/3],[1,3]),90);});
+v('point-line-distance',0,'$2$',()=>close(pointLineDistance([1,2],3,4,-1),2));
+v('point-line-distance',1,'$0$',()=>close(pointLineDistance([-2,1],1,-2,4),0));
+v('circle-equation',0,'$(x-2)^2+(y+1)^2=9$',()=>{for(const t of [0,.4,1,2,3,4]){const p=[2+3*Math.cos(t),-1+3*Math.sin(t)];close((p[0]-2)**2+(p[1]+1)**2,9);close(dist(p,[2,-1]),3);}});
+v('circle-equation',1,'$O=(2,-3),\\ R=5$',()=>{for(const t of [0,.4,1,2,3,4]){const [x,y]=[2+5*Math.cos(t),-3+5*Math.sin(t)];close(x*x+y*y-4*x+6*y-12,0);}});
+v('parabola-vertex',0,'$(3,-4)$',()=>{const f=x=>x*x-6*x+5;close(f(3),-4);for(const t of [.1,1,2,5]){close(f(3+t),f(3-t));ok(f(3+t)>f(3));}});
+v('parabola-vertex',1,'$5$',()=>{const f=x=>-2*x*x+8*x-3;close(f(2),5);for(const t of [.1,1,2,5]){close(f(2+t),f(2-t));ok(f(2+t)<5);}});
+v('distance-3d',0,'$7$',()=>close(dist([1,2,3],[3,5,9]),7));
+v('distance-3d',1,'$13$',()=>close(dist([-1,0,2],[2,4,14]),13));
+v('midpoint-3d',0,'$(3,2,1)$',()=>vecClose(sub([3,2,1],[1,-2,4]),sub([5,6,-2],[3,2,1])));
+v('midpoint-3d',1,'$(-2,7,7)$',()=>vecClose(sub([0,4,2],[2,1,-3]),sub([-2,7,7],[0,4,2])));
+v('plane-equation',0,'$x+2y-z+1=0$',()=>{const p=[2,0,3],n=[1,2,-1];close(dot(p,n)+1,0);for(const u of [[2,-1,0],[1,0,1]]){close(dot(u,n),0);close(dot(add(p,u),n)+1,0);}});
+v('plane-equation',1,'$3$',()=>close(dot([1,2,3],[2,-1,2])-6,0));
+v('sphere-equation',0,'$(x-1)^2+(y+2)^2+(z-3)^2=16$',()=>{for(const u of [[1,0,0],[0,1,0],[0,0,1],[1,2,2]]){const p=add([1,-2,3],scale(u,4/norm(u)));close((p[0]-1)**2+(p[1]+2)**2+(p[2]-3)**2,16);}});
+v('sphere-equation',1,'$O=(1,-2,3),\\ R=5$',()=>{for(const u of [[1,0,0],[0,1,0],[0,0,1],[1,2,2]]){const [x,y,z]=add([1,-2,3],scale(u,5/norm(u)));close(x*x+y*y+z*z-2*x+4*y-6*z-11,0);}});
+// Seeded cases check claims through a different construction or calculation.
+let seed=804937;const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+const randomVector=()=>Array.from({length:3},()=>10*rnd()-5);
+for(let i=0;i<100;i++){
+ const a=.5+8*rnd(),b=.5+8*rnd(),h=.5+8*rnd(),R=.5+8*rnd(),r=R*(.1+.8*rnd());
+ close(Math.abs(det([a,0,0],[0,b,0],[2,-3,h])),a*b*h,'oblique prism perpendicular height');
+ close(squarePyramid(a,h).volume,a*a*h/3);close(squarePyramid(a,h).side,2*a*Math.hypot(h,a/2));
+ close(integral(z=>(a+(b-a)*z/h)**2,0,h),h*(a*a+a*b+b*b)/3,'frustum pyramid');
+ close(cylinderV(R,h),Math.PI*R*R*h);close(coneV(R,h),Math.PI*R*R*h/3);
+ close(frustumV(R,r,h),Math.PI*h*(R*R+R*r+r*r)/3);
+ close(revolutionSide(z=>R*z/h,R/h,h),Math.PI*R*Math.hypot(R,h));
+ close(revolutionSide(z=>R+(r-R)*z/h,(r-R)/h,h),Math.PI*(R+r)*Math.hypot(h,R-r));
+ close(sphereV(R),4*Math.PI*R**3/3);close(sphereS(R),4*Math.PI*R*R);
+ const capH=2*R*rnd();close(capV(R,capH),Math.PI*capH*capH*(R-capH/3));close(capV(R,capH)+capV(R,2*R-capH),sphereV(R));
+ close(capV(R,0),0);close(capV(R,2*R),sphereV(R));close(capV(R,R),sphereV(R)/2);
+ const d=R*rnd(),rho=Math.sqrt(R*R-d*d);close(dist([0,0,0],[rho,0,d]),R);ok(rho<=R);
+ const A=randomVector(),B=randomVector(),C=randomVector(),u=sub(B,A),v2=sub(C,B),t=4*rnd()-2;
+ vecClose(add(u,v2),sub(C,A));close(norm(scale(u,t)),Math.abs(t)*norm(u));close(dot(u,u),norm(u)**2);
+ close(dot(u,v2),(norm(u)**2+norm(v2)**2-norm(sub(u,v2))**2)/2,'dot polarization');
+ close(dot(u,v2),norm(u)*norm(v2)*Math.cos(rad(angle(u,v2))));
+ const proj=projection(u,v2),res=sub(u,proj);close(dot(res,v2),0);close(norm(u)**2,norm(proj)**2+norm(res)**2);
+ close(norm(cross(u,scale(u,t))),0);const perpendicular=cross(u,v2);close(dot(u,perpendicular),0);close(dot(v2,perpendicular),0);
+ const M=scale(add(A,B),.5);vecClose(sub(M,A),sub(B,M));close(dist(M,A),dist(M,B));
+ division(A,B,a,b);
+ const normal=randomVector(),offset=-dot(normal,A);close(dot(normal,A)+offset,0);
+ const H=sub(B,scale(normal,(dot(normal,B)+offset)/dot(normal,normal)));close(dot(normal,H)+offset,0);close(norm(cross(sub(B,H),normal)),0);
+ const n2=normal.slice(0,2),p2=B.slice(0,2);close(pointLineDistance(p2,...n2,offset),Math.abs(dot(p2,n2)+offset)/norm(n2));
+ const k=.5+3*rnd(),slope=-1/k;close(dot([1,k],[1,slope]),0);close(pointLineDistance(p2,...scale(n2,-3),-3*offset),pointLineDistance(p2,...n2,offset));
+ const qa=(rnd()<.5?-1:1)*(.5+5*rnd()),qb=8*rnd()-4,qc=8*rnd()-4,xv=-qb/(2*qa),yv=qc-qb*qb/(4*qa),x=8*rnd()-4;
+ close(qa*x*x+qb*x+qc,qa*(x-xv)**2+yv);close(2*qa*xv+qb,0);
+}
+// Explicit degenerate/boundary checks do not infer a direction for the zero vector.
+assert.throws(()=>angle([0,0],[1,0]));assert.throws(()=>projection([1,2],[0,0]));assert.throws(()=>capV(3,7));assert.throws(()=>pointLineDistance([1,2],0,0,1));
+close(linePlaneAngle([0,0,1],[0,0,1]),90);close(linePlaneAngle([1,0,0],[0,0,1]),0);
+close(capV(3,4),sphereV(3)-capV(3,2));
+// All blank answers are scalar numbers, radicals, pi multiples, or degree values.
+function numeric(s){s=s.replaceAll('^\\circ','').replace(/\\sqrt\{([^{}]+)\}/g,'sqrt($1)').replace(/\\sqrt(\d)/g,'sqrt($1)').replaceAll('\\pi','pi');const tokens=s.match(/sqrt|pi|\d+(?:\.\d+)?|[()+\-*/]/g)||[];assert.equal(tokens.join(''),s.replace(/\s/g,''),s);let pos=0;
+ function atom(){if(tokens[pos]==='-'){pos++;return -atom();}if(tokens[pos]==='sqrt'){pos++;return Math.sqrt(atom());}if(tokens[pos]==='('){pos++;const n=sum();assert.equal(tokens[pos++],')');return n;}if(tokens[pos]==='pi'){pos++;return Math.PI;}const n=Number(tokens[pos++]);assert.ok(Number.isFinite(n),s);return n;}
+ function product(){let n=atom();while(pos<tokens.length&&tokens[pos]!==')'&&tokens[pos]!=='+'&&tokens[pos]!=='-'){if(tokens[pos]==='/'){pos++;n/=atom();}else{if(tokens[pos]==='*')pos++;n*=atom();}}return n;}
+ function sum(){let n=product();while(tokens[pos]==='+'||tokens[pos]==='-'){const t=tokens[pos++],b=product();n+=t==='+'?b:-b;}return n;}const out=sum();assert.equal(pos,tokens.length);return out;
+}
+const quizExpected=[84,62,norm([1,2,2]),boxS(4,4,4),30,13,integral(z=>(4-2*z/3)**2,0,3),cylinderV(2,9),revolutionSide(()=>3,0,4),coneV(2,6),revolutionSide(z=>4*z/3,4/3,3),frustumV(5,2,3),revolutionSide(z=>4-3*z/4,-3/4,4),sphereV(2),capV(3,3),8,polygonArea([[-5,0],[5,0],[0,8]]),56,30,-6,sub([-1,5],[2,1])[0],norm([-3,4]),add([2,3],[-5,4])[1],norm(scale([4,0],-2)),6,dot([2,-1],[3,4]),3,angle([1,0],[0,2]),-2,dot(projection([3,4],[0,2]),[0,1]),dist([1,1],[4,5]),2,division([0,0],[12,0],1,3)[0],3,3,8,2,-2,-1/4,pointLineDistance([0,0],3,4,-15),4,2,norm([1,2,2]),7,4,3];
+const tfExpected=[true,false,true,false,false,false,false,true,true,true,true,true,true,true,false,true,false,true,false,true,true,true,false,true,true,true,true,false,true,false,true,true,true,false,true,true,true,false,true,true,false,true,true,true,true,false];
+same(quizExpected.length,46);same(tfExpected.length,46);same(data.formulas.length,46);
+for(const [i,f] of data.formulas.entries()){
+ same(f.examples.length,2);same(f.quiz.length,2);const q=f.quiz[0];same(q.type,'blank');const choices=[q.answer,...q.distractors].map(numeric);
+ close(choices[0],quizExpected[i],f.slug);same(choices.filter(v=>Math.abs(v-quizExpected[i])<1e-8).length,1,`${f.slug} unique correct choice`);
+ for(let a=0;a<choices.length;a++)for(let b=a+1;b<choices.length;b++)ok(Math.abs(choices[a]-choices[b])>1e-8,`${f.slug} equivalent distractors`);
+ same(f.quiz[1].type,'truefalse');same(f.quiz[1].answer,String(tfExpected[i]),`${f.slug} reviewed true/false claim`);
+ for(let j=0;j<2;j++)ok(covered.has(`${f.slug.slice(6)}:${j}`),`${f.slug} example coverage`);
+}
+// Concrete counterexamples for false universal statements, reviewed with wording.
+ok(120+12!==120+6);ok(cubeV(2)/cubeV(1)!==4);close(tetra([0,0,0],[4,0,0],[0,3,0],[8,4,5]),10);
+ok(squarePyramid(2,2).slant!==dist([0,0,2],[1,1,0]));close(integral(z=>(2-z/3)**2,0,3),7);ok(7!==3*(4+1)/2);
+ok(4>3&&4<=2*3);ok(dist([-3,0],[0,4])!==6);close(norm(add([1,0],[-1,0])),0);close(dot([-1,0],[1,0]),-1);
+close(dot([2,-3],[-2,3]),-13);close(dot([0,0,0],[0,0,0]),0);ok(0!==4);
+same(covered.size,92);
+console.log(`PASS: 46 entries; ${covered.size} worked examples; 46 scalar blank quizzes with one correct and pairwise nonequivalent options; 46 reviewed true/false answer bindings; 100 seeded solid/vector/coordinate cases; ${integrals} numerical integrations; ${checks} assertions. Finite samples do not prove theorems or exhaustive solution sets; conditions and all quiz semantics were separately reviewed.`);

@@ -1,202 +1,224 @@
 "use client";
 
-import { useState } from "react";
-import { Send, AlertTriangle } from "lucide-react";
-import { Card, SectionHeader } from "@/components/ui/Surface";
-import { api } from "@/lib/api";
-import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
-import { Meta } from "@/components/ui/Meta";
-import InfoHint from "@/components/ui/InfoHint";
+import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle, Calculator, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Card, SectionHeader } from "@/components/ui/Surface";
+import { ErrorState } from "@/components/ui/StateBlock";
+import { api, getRole } from "@/lib/api";
+import { previewSmsSegments } from "./segments";
+import { Meta } from "@/components/ui/Meta";
 
-const CYRILLIC_CHARS_PER_PART = 70;
-const LATIN_CHARS_PER_PART = 160;
+interface TemplateOption { id: string; name: string; body: string; kind: string }
+interface BulkBody { phones: string[]; text: string }
+interface BulkEstimate {
+  recipientCount: number;
+  deduplicatedCount: number;
+  excludedArchivedCount?: number;
+  estimatedSegments: number;
+  estimatedCost: number;
+}
+interface BulkDraft { batchId: string; estimate: BulkEstimate; messageIds: string[] }
 
-interface SendRequest {
-  to: string[];
-  text: string;
-  templateId?: string;
+function parsePhones(value: string): string[] {
+  return value.split(/[\s,;]+/).map((phone) => phone.trim()).filter(Boolean);
 }
 
 export function SmsSend() {
-  const [tab, setTab] = useState<"manual" | "bulk">("manual");
-  const [recipients, setRecipients] = useState<string>("");
+  const [recipients, setRecipients] = useState("");
   const [text, setText] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [templates, setTemplates] = useState<Array<{ id: string; name: string }>>([]);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [templates, setTemplates] = useState<TemplateOption[]>([]);
+  const [templateError, setTemplateError] = useState<string | null>(null);
+  const [estimate, setEstimate] = useState<BulkEstimate | null>(null);
+  const [estimateKey, setEstimateKey] = useState("");
+  const [estimating, setEstimating] = useState(false);
+  const [acknowledged, setAcknowledged] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [pendingBatchId, setPendingBatchId] = useState<string | null>(null);
+  const isAdmin = getRole() === "ADMIN";
 
-  // Текстийн урт хянах
-  const isCyrillic = /[ёъэюяаблвгдзийкмнопрстуфхцчшщ]/i.test(text);
-  const charsPerPart = isCyrillic ? CYRILLIC_CHARS_PER_PART : LATIN_CHARS_PER_PART;
-  const partCount = text ? Math.ceil(text.length / charsPerPart) : 0;
-  const remainingChars = partCount > 0 ? charsPerPart * partCount - text.length : 0;
+  const phones = useMemo(() => parsePhones(recipients), [recipients]);
+  const body: BulkBody = useMemo(() => ({ phones, text }), [phones, text]);
+  const requestKey = useMemo(() => JSON.stringify(body), [body]);
+  const preview = previewSmsSegments(text);
+  const isBulk = phones.length > 1;
+  const estimateIsCurrent = Boolean(estimate && estimateKey === requestKey);
 
-  const recipientList = recipients
-    .split(/[\s,]+/)
-    .map((x) => x.trim())
-    .filter((x) => x.length > 0);
+  useEffect(() => {
+    let active = true;
+    api<TemplateOption[]>("/sms/templates")
+      .then((rows) => { if (active) setTemplates(rows); })
+      .catch((err) => { if (active) setTemplateError(err instanceof Error ? err.message : "Загвар ачаалж чадсангүй."); });
+    return () => { active = false; };
+  }, []);
 
-  const recipientCount = recipientList.length;
-  const messageCount = recipientCount * partCount;
-  const estimatedCostPerMessage = isCyrillic ? 10 : 5; // Ойролцоо үнэ төгрөгөөр
-  const estimatedCost = messageCount * estimatedCostPerMessage;
+  function changeInput(change: () => void) {
+    change();
+    setEstimate(null);
+    setEstimateKey("");
+    setAcknowledged(false);
+    setError(null);
+    setSuccess(null);
+    setPendingBatchId(null);
+  }
 
-  const handleSend = async () => {
-    if (!text || recipientCount === 0) {
-      setError("Текст болон хүлээн авагч сонгоно уу");
-      return;
-    }
-
+  async function getEstimate() {
+    if (!isAdmin || !isBulk || !text.trim()) return;
+    setEstimating(true);
+    setError(null);
+    setSuccess(null);
+    setPendingBatchId(null);
+    setAcknowledged(false);
     try {
-      setSending(true);
-      setError(null);
+      // This exact body is also sent to POST /sms/bulk after confirmation.
+      const result = await api<BulkEstimate>("/sms/bulk/estimate", { method: "POST", body });
+      setEstimate(result);
+      setEstimateKey(requestKey);
+    } catch (err) {
+      setEstimate(null);
+      setEstimateKey("");
+      setError(err instanceof Error ? err.message : "Өртгийн тооцоо авч чадсангүй.");
+    } finally {
+      setEstimating(false);
+    }
+  }
 
-      // Нэг хүлээн авагч → /sms/send, олон → /sms/bulk (ноорог үүсгээд эхлүүлнэ).
-      // ⚠️ Талбарын нэр сервертэй таарна: `phone` / `phones` (`to` БИШ).
-      if (recipientList.length === 1) {
-        await api("/sms/send", {
-          method: "POST",
-          body: { phone: recipientList[0], text, kind: "MANUAL" },
-        });
-      } else {
-        const batch = await api<{ id: string }>("/sms/bulk", {
-          method: "POST",
-          body: { phones: recipientList, text, kind: "MANUAL" },
-        });
-        await api(`/sms/bulk/${batch.id}/start`, { method: "POST" });
-      }
-
-      // Амжилттай
+  async function sendSingle() {
+    const phone = phones[0];
+    if (!isAdmin || !phone || !text.trim() || !acknowledged) return;
+    setSending(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const result = await api<{ messageId: string; segments: number }>("/sms/send", {
+        method: "POST", body: { phone, text },
+      });
+      setSuccess(`Мессеж илгээгдлээ. ${result.segments} SMS хэсэг.`);
       setText("");
       setRecipients("");
       setSelectedTemplate("");
-      setShowConfirm(false);
-      alert("SMS амжилттай илгээлээ!");
+      setAcknowledged(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Алдаа гарлаа");
+      setError(err instanceof Error ? err.message : "Мессеж илгээж чадсангүй.");
     } finally {
       setSending(false);
     }
-  };
+  }
+
+  async function createAndStartBatch() {
+    if (!isAdmin || !estimateIsCurrent || !acknowledged || sending) return;
+    setSending(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      let batchId = pendingBatchId;
+      if (!batchId) {
+        const draft = await api<BulkDraft>("/sms/bulk", { method: "POST", body });
+        batchId = draft.batchId;
+        setPendingBatchId(batchId);
+      }
+      const result = await api<{ batchId: string; status: string; queued: number }>(`/sms/bulk/${batchId}/start`, { method: "POST" });
+      setSuccess(`${result.queued} дугаарын илгээлт эхэллээ. Багцын дугаар: ${result.batchId}`);
+      setText("");
+      setRecipients("");
+      setSelectedTemplate("");
+      setEstimate(null);
+      setEstimateKey("");
+      setAcknowledged(false);
+      setPendingBatchId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Бөөн илгээлтийг эхлүүлж чадсангүй.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (!isAdmin) {
+    return <Card><SectionHeader title="SMS илгээх эрхгүй" /><p className="text-sm text-ink-dim">Зардал үүсгэх илгээлтийг зөвхөн администратор хийнэ. Та түүх болон загварыг харах боломжтой.</p></Card>;
+  }
 
   return (
     <div className="space-y-4">
-      {/* Хүлээн авагч */}
       <Card>
-        <SectionHeader title="Хүлээн авагчид" />
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-semibold text-ink">Утасны дугаар эсвэл класс</label>
-            <textarea
-              value={recipients}
-              onChange={(e) => setRecipients(e.target.value)}
-              placeholder="+976 XXXXXXXX, +976 YYYYYYYYY"
-              className="mt-2 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-              rows={4}
-            />
-            <p className="mt-1 text-xs text-ink-dim">
-              Утасны дугаарыг таслалаар тусгаарлана. Класс сонгох шанс байхгүй (API байхгүй) — мөнгөний үнэ
-              төлбөрт орно.
-            </p>
-          </div>
-          {recipientCount > 0 && (
-            <div className="flex items-baseline justify-between rounded-lg bg-brand/5 px-3 py-2">
-              <span className="text-sm text-ink-dim">Хүлээн авагчидын тоо:</span>
-              <span className="font-bold text-brand">{recipientCount}</span>
+        <SectionHeader title="Хүлээн авагч" />
+        <label htmlFor="sms-recipients" className="block text-sm font-semibold text-ink">Утасны дугаар</label>
+        <textarea id="sms-recipients" value={recipients} onChange={(event) => changeInput(() => setRecipients(event.target.value))} placeholder="Жишээ: 99112233, 88112233" rows={3} className="mt-1 min-h-20 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" />
+        <p className="mt-1 text-xs text-ink-dim">Дугаар бүрийг зай, таслал эсвэл цэгтэй таслалаар тусгаарлана. Энэ хэсэгт анги сонгох боломж байхгүй.</p>
+        {phones.length > 0 && <p className="mt-2 text-sm text-ink">Оруулсан дугаар: <strong>{phones.length}</strong>{phones.length > 1 ? " (илгээхээс өмнө сервер давхардлыг тооцно)" : ""}</p>}
+      </Card>
+
+      <Card>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <SectionHeader title="Мессежийн агуулга" />
+          {templates.length > 0 && (
+            <div className="w-full sm:w-64">
+              <label htmlFor="sms-template-select" className="sr-only">Загвар сонгох</label>
+              <select id="sms-template-select" value={selectedTemplate} onChange={(event) => {
+                const value = event.target.value;
+                setSelectedTemplate(value);
+                const template = templates.find((row) => row.id === value);
+                if (template) changeInput(() => setText(template.body));
+              }} className="min-h-11 w-full rounded-lg border border-line bg-surface px-3 text-sm">
+                <option value="">Загвар сонгох</option>
+                {templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+              </select>
             </div>
           )}
         </div>
-      </Card>
-
-      {/* Текст */}
-      <Card>
-        <SectionHeader
-          title="Мессежийн агуулга"
-          hint={
-            <InfoHint>
-              Кириллицын үсэгт нэг хэсэг нь {CYRILLIC_CHARS_PER_PART} тэмдэгт, латинаар {LATIN_CHARS_PER_PART}{" "}
-              тэмдэгт хүртэл байна. Дээрх хэсгүүд нь тусдаа SMS болж явна.
-            </InfoHint>
-          }
-        />
-        <div className="space-y-3">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Мессежийн текст эсвэл {{name}} гэх маягийн орлуулагч"
-            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-            rows={5}
-          />
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-info/5 px-3 py-2">
-            <Meta
-              items={[
-                `Урт: ${text.length} тэмдэгт`,
-                `Хэсэг: ${partCount}`,
-                `Үлдсэн: ${remainingChars}`,
-              ]}
-              className="text-sm text-ink-dim"
-            />
-            {partCount > 1 && <span className="text-xs text-brand-soft">Олон хэсэг SMS</span>}
-          </div>
+        {templateError && <p className="mb-2 text-sm text-ink-dim">Загварын жагсаалт ачаалагдсангүй: {templateError}</p>}
+        <label htmlFor="sms-body" className="block text-sm font-semibold text-ink">Илгээх текст</label>
+        <textarea id="sms-body" value={text} onChange={(event) => changeInput(() => setText(event.target.value))} maxLength={1000} rows={5} placeholder="Мессежээ бичнэ үү" className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" />
+        <div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm text-ink-dim">
+          <Meta items={[`${text.length} тэмдэгт`, preview.encoding, `${preview.segments} хэсэг${preview.segments > 1 ? ` (нэг хэсэгт ${preview.encoding === "GSM-7" ? 153 : 67} нэгж)` : ""}`]} />
+          <span>Илгээх дүнгийн тооцоог баталгаажуулахын өмнө серверээс авна.</span>
         </div>
       </Card>
 
-      {/* Баталгаажуулах цонх */}
-      {showConfirm && (
-        <Card className="border-warning/30 bg-warning/5">
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 shrink-0 text-warning" aria-hidden />
-              <div>
-                <h4 className="font-bold text-warning">SMS явуулахаас өмнө баталгаажуулна уу</h4>
-                <p className="mt-1 text-sm text-ink">
-                  <strong>{recipientCount}</strong> хүнд, <strong>{messageCount}</strong> мессеж (
-                  <strong>{partCount}</strong> хэсэгт) явуулах болно. Ойролцоо өртөг:{" "}
-                  <strong className="font-mono">₮{estimatedCost.toLocaleString("mn-MN")}</strong>.
-                </p>
-                <p className="mt-2 text-xs text-ink-dim">SMS-г БУЦААХ БОЛОМЖ БАЙХГҮЙ. Анхаарлаар.</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="default"
-                size="sm"
-                disabled={sending}
-                onClick={handleSend}
-              >
-                {sending ? "Явуулаж байна…" : "Баталгаажуулж явуулах"}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={sending}
-                onClick={() => setShowConfirm(false)}
-              >
-                Болих
-              </Button>
-            </div>
-          </div>
+      {isBulk && (
+        <Card>
+          <SectionHeader title="Илгээх өртгийн тооцоо" />
+          <p className="mb-3 text-sm text-ink-dim">Дугаар болон текст өөрчлөгдвөл тооцоог шинээр авна. Серверийн тооцоо нь илгээхэд үүсэх багцтай ижил хүсэлтийн агуулгаар хийгдэнэ.</p>
+          <Button type="button" variant="secondary" loading={estimating} disabled={estimating || sending || !text.trim()} onClick={() => void getEstimate()}><Calculator className="h-4 w-4" aria-hidden />{estimating ? "Тооцоолж байна" : "Серверээс тооцоо авах"}</Button>
+          {estimateIsCurrent && estimate && (
+            <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Илгээх дугаар (давхардал, архив хассан)</dt><dd className="mt-1 font-semibold">{estimate.deduplicatedCount.toLocaleString("mn-MN")}</dd></div>
+              {estimate.excludedArchivedCount !== undefined && <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Архивласан хэрэглэгчийн хасагдсан дугаар</dt><dd className="mt-1 font-semibold">{estimate.excludedArchivedCount.toLocaleString("mn-MN")}</dd></div>}
+              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Оруулсан дугаар</dt><dd className="mt-1 font-semibold">{estimate.recipientCount.toLocaleString("mn-MN")}</dd></div>
+              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Нэг дугаарт ногдох хэсэг</dt><dd className="mt-1 font-semibold">{estimate.deduplicatedCount > 0 ? (estimate.estimatedSegments / estimate.deduplicatedCount).toLocaleString("mn-MN") : "—"}</dd></div>
+              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Нийт SMS хэсэг</dt><dd className="mt-1 font-semibold">{estimate.estimatedSegments.toLocaleString("mn-MN")}</dd></div>
+              <div className="rounded-lg border border-line p-3"><dt className="text-xs text-ink-dim">Ойролцоо өртөг</dt><dd className="mt-1 font-semibold">₮{estimate.estimatedCost.toLocaleString("mn-MN")}</dd></div>
+            </dl>
+          )}
         </Card>
       )}
 
-      {/* Алдаа */}
       {error && <ErrorState message={error} />}
+      {success && <p role="status" className="rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm text-success">{success}</p>}
 
-      {/* Явуулах товч */}
-      {!showConfirm && recipientCount > 0 && partCount > 0 && (
-        <div className="flex gap-2">
-          <Button
-            variant="default"
-            onClick={() => setShowConfirm(true)}
-            disabled={!recipientCount || !partCount}
-          >
-            <Send className="h-4 w-4" aria-hidden />
-            Баталгаажуулахаар явуулах ({messageCount} мессеж)
-          </Button>
-        </div>
+      {phones.length > 0 && text.trim() && (
+        <Card className="border-warning/40">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-ink">Илгээх үйлдлийг баталгаажуулах</h3>
+              <p className="mt-1 text-sm text-ink-dim">SMS явуулсны дараа буцаах боломжгүй. Дугаар болон текстийг шалгаад үргэлжлүүлнэ үү.</p>
+              {isBulk && estimateIsCurrent && estimate && <p className="mt-2 text-sm text-ink"><Meta items={[`${estimate.deduplicatedCount} дугаар`, `${estimate.estimatedSegments} хэсэг`, `ойролцоогоор ${estimate.estimatedCost.toLocaleString("mn-MN")}₮`]} /></p>}
+              {pendingBatchId && <p className="mt-2 text-sm text-ink-dim">Ноорог үүссэн: {pendingBatchId}. Дахин ноорог үүсгэхгүйгээр илгээлтийг эхлүүлж болно.</p>}
+              <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-ink">
+                <input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} className="h-4 w-4 accent-brand" />
+                Би энэ SMS-г явуулбал буцаах боломжгүйг ойлгож байна.
+              </label>
+              <Button type="button" disabled={!acknowledged || sending || (isBulk && !estimateIsCurrent)} loading={sending} onClick={() => isBulk ? void createAndStartBatch() : void sendSingle()}>
+                <Send className="h-4 w-4" aria-hidden />
+                {sending ? "Илгээж байна" : pendingBatchId ? "Илгээлтийг эхлүүлэх" : isBulk ? "Багц үүсгээд илгээх" : "SMS илгээх"}
+              </Button>
+              {isBulk && !estimateIsCurrent && <p className="mt-2 text-xs text-ink-dim">Илгээх товчийг идэвхжүүлэхийн тулд одоогийн дугаар, текстээр серверийн тооцоо авна уу.</p>}
+            </div>
+          </div>
+        </Card>
       )}
     </div>
   );

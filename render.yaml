@@ -63,6 +63,16 @@ services:
       - key: RESET_TOKEN_SECRET
         generateValue: true
 
+      # Google-ээр нэвтрэх (үнэгүй). Гурвуулаа байхгүй бол товч нуугдаж,
+      # /auth/google/* нь 503 буцаана. Тохируулах заавар: docs/GOOGLE-LOGIN.md
+      #   GOOGLE_REDIRECT_URI = https://pimn-api.onrender.com/api/auth/google/callback
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+
       # 📱 SMS нийлүүлэгч — нууц үг сэргээх код ЭНЭ сувгаар явна.
       #
       # ⚠️ ТОХИРУУЛААГҮЙ БОЛ: продакшнд /auth/forgot-password нь 503 буцааж,
@@ -154,6 +164,8 @@ services:
       # Өөрийн домэйн холбосон бол энд түүнийг бичнэ.
       - key: WEB_ORIGIN
         value: https://web-one-pi-59.vercel.app
+      - key: CRON_SECRET
+        sync: false
 
       # Байршуулсан файлыг тогтвортой диск рүү чиглүүлнэ.
       #

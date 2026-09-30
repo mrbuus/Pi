@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -10,6 +11,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import type { Request } from 'express';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -18,17 +27,37 @@ import { TuitionService } from './tuition.service';
 
 // ============ DTOs ============
 
-class CreateRefundDto {
+// ⚠️ Глобал ValidationPipe `whitelist: true` тул декораторгүй талбар бүр
+// ЧИМЭЭГҮЙ хасагддаг — өмнө нь эдгээр DTO декораторгүй байсан тул буцаалт
+// үүсгэх, олгох, цуцлах бүх хүсэлт хоосон биетэй сервис рүү очдог байв.
+export class CreateRefundDto {
+  @ApiProperty({ type: String })
+  @IsString()
+  @IsNotEmpty()
   studentId!: string;
+
+  @ApiProperty({ type: String })
+  @IsString()
+  @IsNotEmpty()
   classroomId!: string;
+
+  @ApiProperty({ type: String })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна' })
   leftOn!: string;
 }
 
-class MarkAsPaidDto {
+export class MarkAsPaidDto {
+  @ApiPropertyOptional({ enum: ['CASH', 'BANK_TRANSFER', 'QPAY'] })
+  @IsOptional()
+  @IsIn(['CASH', 'BANK_TRANSFER', 'QPAY'])
   paymentMethod?: string;
 }
 
-class CancelRefundDto {
+export class CancelRefundDto {
+  @ApiPropertyOptional({ type: String, maxLength: 1000 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
   cancelReason?: string;
 }
 
@@ -182,7 +211,9 @@ export class TuitionController {
    */
   @Get('paid-until/:studentId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  // PARENT (G26, 2026-09-27): доорх салбар өмнө нь бичигдсэн ч @Roles-д
+  // байгаагүй тул эцэг эх 403 авдаг байв. Зөвхөн БАТАЛГААЖСАН холбоотой хүүхэд.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER, Role.PARENT)
   async getPaidUntil(
     @Param('studentId') studentId: string,
     @NestRequest() req: Request,
@@ -205,12 +236,13 @@ export class TuitionController {
     }
     // PARENT -> өөрийн хүүхдэд
     if (userRole === Role.PARENT) {
-      const parentLink = await this.tuitionService['prisma'].parentLink.findFirst({
-        where: { parentId: userId, studentId: studentId },
-      });
-      if (!parentLink) {
+      const verifiedLink = await this.tuitionService.hasVerifiedParentLink(
+        userId,
+        studentId,
+      );
+      if (!verifiedLink) {
         throw new ForbiddenException(
-          'Та энэ хүүхдийн эцэг эх биш байна',
+          'Эцэг эхийн холбоос баталгаажаагүй байна',
         );
       }
     }

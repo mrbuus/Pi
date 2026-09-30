@@ -44,11 +44,18 @@ model User {
   // харьцуулж, түүнээс ӨМНӨ олгогдсон бүх токеныг хүчингүйд тооцно. Ингэснээр
   // нууц үгээ сэргээхэд хулгайлагдсан сесс автоматаар тасарна — сэргээлтийн
   // гол утга учир нь энэ (эс бөгөөс халдагч хуучин токеноороо орсоор байна).
+  termsAcceptedAt    DateTime?
+  privacyVersion     String?
+  guardianConsentAt  DateTime?
   passwordChangedAt  DateTime?
   role               Role
   avatarUrl          String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+
+  formulaReviews         FormulaReview[]
+  formulaReviewDays       FormulaReviewDay[]
+  formulaReviewAttempts   FormulaReviewAttempt[]
 
   studentProfile         StudentProfile?
   teacherProfile         TeacherProfile?
@@ -61,10 +68,12 @@ model User {
   payments                Payment[]
   userPasses              UserPass[]
   attempts                Attempt[]
+  mistakeEntries          MistakeEntry[]
   attendances             Attendance[]         @relation("AttendanceStudent")
   submissions             Submission[]
   dailyHomeworkMarks      DailyHomeworkMark[]  @relation("DailyHomeworkMarkStudent")
   testResults             TestResult[]
+  testDrafts              TestDraft[]
   predictions             Prediction[]
   colorTags               StudentColorTag[]    @relation("TaggedStudent")
   ownedClassrooms         Classroom[]          @relation("ClassroomTeacher")
@@ -96,6 +105,19 @@ model User {
 
   passwordResetTokens PasswordResetToken[]
 
+  // Google-ээр нэвтрэх (20260908_add_google_identity_auth). Нэг хэрэглэгч ↔ нэг
+  // Google бүртгэл. Шинэ бүртгэл Google-ээр ҮҮСГЭХГҮЙ — зөвхөн холбосон хүн нэвтэрнэ.
+  googleIdentity       GoogleIdentity?
+  googleOAuthStates    GoogleOAuthState[]
+  googleLoginExchanges GoogleLoginExchange[]
+
+  // Secure schedule calendar feed tokens (G39). Only a one-way token hash is stored.
+  calendarTokenHash    String?         @unique
+  calendarTokenVersion Int?
+  notifications        Notification[]
+  notificationPreference NotificationPreference?
+  notificationDeliveries NotificationDelivery[]
+
   // SMS: бүртгэл, загвар, батч
   smsMessagesAsRecipient SmsMessage[]      @relation("SmsMessageRecipient")
   smsMessagesAsCreator   SmsMessage[]      @relation("SmsMessageCreatedBy")
@@ -107,6 +129,13 @@ model User {
   bankTransactionsImported BankTransaction[]       @relation("BankTxImportedBy")
   resultAcknowledgements   ResultAcknowledgement[]
   emailOtps                EmailOtp[]
+
+  // Архивласан сурагчийн түүхийг хадгална; үйлдлийг auditLog давхар мөрдөнө.
+  archivedAt    DateTime?
+  archivedById  String?
+  archiveReason String?
+
+  @@index([archivedAt])
 }
 
 // ============ Нууц үг сэргээлт ============
@@ -720,6 +749,7 @@ model Problem {
   analysis      ProblemAnalysis?
   choiceOptions ProblemChoice[] // бүтэцтэй сонголтууд (correct/wrong + алдааны шалтгаан)
   attempts      Attempt[]
+  mistakeEntries MistakeEntry[]
   testItems     TestProblem[]
 
   @@index([chapterId])
@@ -763,7 +793,44 @@ model Formula {
   latex       String?
   description String?
 
+  slug           String?         @unique
+  sectionSlug    String?
+  section        FormulaSection? @relation(fields: [sectionSlug], references: [slug], onDelete: SetNull)
+  order          Int             @default(0)
+  level          String          @default("CORE")
+  grade          Int?
+  topicSlugs     String[]        @default([])
+  general        String?
+  variants       Json?
+  conditions     Json?
+  explanation    String?
+  derivation     Json?
+  mnemonic       String?
+  examples       Json?
+  commonMistakes Json?
+  eeshTip        String?
+  relatedSlugs   String[]        @default([])
+  keywords       String[]        @default([])
+  widget         String?
+  quiz           Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+
   problems ProblemFormula[]
+  reviews FormulaReview[]
+  reviewAttempts FormulaReviewAttempt[]
+
+  @@index([sectionSlug])
+  @@index([level])
+}
+
+model FormulaSection {
+  slug        String    @id
+  title       String
+  order       Int       @default(0)
+  icon        String?
+  description String?
+  formulas    Formula[]
 }
 
 model ProblemFormula {
@@ -849,6 +916,8 @@ model Test {
   // Зөөлөн устгал: hard DELETE хийвэл TestResult/Attempt зэрэг түүхэн
   // бичлэгүүд орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
   deletedAt DateTime?
+  // Нийтэд харагдахгүй түр хуулбар. Ангиудад оноосон үед засварын замаар ил тод нийтэлнэ.
+  isDraft Boolean @default(false)
 
   problems        TestProblem[]
   access          TestAccess[]
@@ -856,6 +925,19 @@ model Test {
   attemptSessions TestAttemptSession[]
 
   @@index([deletedAt])
+  @@index([isDraft, deletedAt])
+}
+
+model TestDraft {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  state     Json     @db.JsonB
+  revision  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId, updatedAt])
 }
 
 model TestProblem {
@@ -1017,11 +1099,41 @@ model Attempt {
   givenAnswer Json?
   testId      String?
   classroomId String?
+  // Non-null means collection is complete (new legacy rows default to now).
+  // New wrong attempts explicitly set this to null for durable collector retry.
+  mistakeCollectedAt DateTime? @default(now())
   createdAt   DateTime @default(now())
 
   @@index([studentId, occurredOn])
   @@index([problemId])
   @@index([studentId, problemId])
+  @@index([mistakeCollectedAt, autoCorrect])
+}
+
+model MistakeEntry {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId         String
+  problem           Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  source            String // "PRACTICE" | "TEST"
+  sourceRefId       String?
+  sourceOccurredAt DateTime?
+  testTitle         String?
+  givenAnswer       Json?
+  status            String   @default("NEW") // NEW | RETRYING | MASTERED
+  retryCount        Int      @default(0)
+  consecutiveCorrect Int     @default(0)
+  lastRetryAt       DateTime?
+  lastCorrectAt     DateTime?
+  nextRetryAt       DateTime?
+  reason            String? // CALC | CONCEPT | FORMULA | READING | TIME | UNKNOWN
+  note              String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([userId, problemId])
+  @@index([userId, status, nextRetryAt])
 }
 
 // Шөнө бүрийн cron-ийн анги тус бүрийн өдрийн дүгнэлт (SPEC §9.1.1)
@@ -1390,6 +1502,69 @@ model AnnouncementClassroomTarget {
 
   @@id([announcementId, classroomId])
   @@index([classroomId])
+}
+
+// In-app inbox entries. Each row belongs to exactly one recipient.
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model NotificationPreference {
+  userId         String   @id
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailWeekly    Boolean  @default(true)
+  emailReminders Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+}
+
+model NotificationDelivery {
+  id              String    @id @default(cuid())
+  sentKey         String    @unique
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind            NotificationKind
+  title           String
+  body            String
+  link            String?
+  inAppSentAt     DateTime?
+  emailAttemptedAt DateTime?
+  emailSentAt     DateTime?
+  emailError      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model JobRun {
+  id         String   @id @default(cuid())
+  name       String
+  lockKey    String?  @unique
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+  ok         Boolean?
+  summary    Json?
+
+  @@index([name, startedAt])
+}
+
+enum NotificationKind {
+  PAYMENT_DUE
+  HOMEWORK
+  SCHEDULE_CHANGE
+  ANNOUNCEMENT
+  SYSTEM
 }
 
 // Анги тухайн өдөр ямар тест/шалгалт хийснийг багш бүртгэнэ.
@@ -1764,4 +1939,110 @@ model StreakFreeze {
   createdAt DateTime @default(now())
 
   @@unique([studentId, date])
+}
+
+// ============================================================================
+// Google OAuth (authorization code flow, сервер талд).
+//
+// Урсгал: вэб → GET /auth/google/url (эсвэл POST /auth/google/link) → Google →
+// GET /auth/google/callback (state шалгана, code-ыг токеноор солино, id_token-ийг
+// шалгана) → вэб /auth/google?code=<нэг удаагийн> → POST /auth/google/exchange →
+// JWT. Нууц утгуудын зөвхөн SHA-256 хэшийг хадгална.
+// ============================================================================
+
+enum GoogleOAuthPurpose {
+  LOGIN
+  LINK
+}
+
+model GoogleIdentity {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  googleSubject String   @unique // id_token-ийн `sub` — имэйл солигдсон ч тогтвортой
+  email         String
+  pictureUrl    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GoogleOAuthState {
+  id         String             @id @default(cuid())
+  stateHash  String             @unique
+  purpose    GoogleOAuthPurpose
+  userId     String? // LINK үед холбох хэрэглэгч
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime           @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model GoogleLoginExchange {
+  id         String    @id @default(cuid())
+  codeHash   String    @unique
+  userId     String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+// ============================================================================
+// Байршуулсан файлын байнгын хуулбар (G05, 2026-09-27).
+// Render-ийн үнэгүй багцын диск deploy бүрт устдаг — файлыг ӨС-д (Supabase,
+// үнэгүй) давхар хадгалж, диск дээр байхгүй бол эндээс сэргээж үйлчилнэ.
+// Диск нь кэш, энэ хүснэгт нь эх сурвалж. 25MB хүртэл (upload-ийн хязгаар).
+// ============================================================================
+model StoredFile {
+  key       String   @id // uploads-ийн key (uuid.ext)
+  mime      String
+  size      Int
+  bytes     Bytes
+  createdAt DateTime @default(now())
+}
+
+// T10: six success stages; unseen is represented by no row.
+model FormulaReview {
+  userId String
+  formulaId String
+  box Int @default(0)
+  dueAt DateTime
+  lastResult String?
+  streak Int @default(0)
+  reviewCount Int @default(0)
+  lapses Int @default(0)
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formula Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
+  @@id([userId, formulaId])
+  @@index([userId, dueAt])
+}
+
+model FormulaReviewDay {
+  userId String
+  day DateTime @db.Date
+  count Int @default(0)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId, day])
+}
+
+// One signed exercise may be recorded once. Same-answer retries return its receipt.
+model FormulaReviewAttempt {
+  userId String
+  exerciseId String
+  formulaId String
+  fingerprint String
+  response Json
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formula Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
+  @@id([userId, exerciseId])
+  @@index([formulaId])
 }

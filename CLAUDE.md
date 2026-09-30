@@ -22,9 +22,10 @@
 ## Шалгалт
 
 ```bash
-cd api && npx tsc --noEmit && npx jest        # 349/349
+cd api && npx tsc --noEmit && npx jest        # 721/721 (2026-09-26)
 cd web && npx tsc --noEmit && npm run build   # build ЗААВАЛ
-cd api && npm run smoke                       # бүх endpoint бодит HTTP-ээр (:3000 асаалттай үед)
+cd api && NIGHT1_COMPLETE=1 npx jest src/auth/access-control.spec.ts   # маршрут бүрийн эрхийн гэрээ
+# HTTP smoke: зөвхөн локал зохиомол ӨС + 6 role-ийн токен — api/test/smoke/README.md
 ```
 
 **`tsc` цэвэр байх нь ХАНГАЛТГҮЙ.** Гурван төрлийн алдаа зөвхөн build эсвэл

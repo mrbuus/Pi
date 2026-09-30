@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { LoadingState } from "@/components/ui/StateBlock";
+
+import { useCallback, useMemo, useState } from "react";
 import {
   CalendarOff,
   Check,
@@ -9,6 +11,7 @@ import {
   CircleAlert,
   UserCheck,
 } from "lucide-react";
+import { useAsyncSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import InfoHint from "@/components/ui/InfoHint";
 import {
@@ -53,12 +56,8 @@ function shortDate(dateKey: string): string {
  *     "ажиллана / ажиллахгүй" гэж тогтмол хэв маягийг дарж бичнэ.
  */
 export default function TeacherWorkDays() {
-  const [teachers, setTeachers] = useState<TeacherLite[]>([]);
-  const [workDays, setWorkDays] = useState<Map<string, Set<number>>>(new Map());
-  const [exceptions, setExceptions] = useState<TeacherWorkExceptionRow[]>([]);
   const [weekStart, setWeekStart] = useState(() => mondayOf(todayUBKey()));
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<{ key: string; text: string } | null>(null);
   const [pending, setPending] = useState<string | null>(null);
 
   const [exTeacherId, setExTeacherId] = useState("");
@@ -70,30 +69,25 @@ export default function TeacherWorkDays() {
 
   const weekEnd = useMemo(() => addDaysToKey(weekStart, 6), [weekStart]);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    Promise.all([
+  const fetchWorkDays = useCallback(async () => {
+    const [teachers, data] = await Promise.all([
       api<TeacherLite[]>("/schedule/teachers"),
-      api<TeacherWorkDaysResponse>(
-        `/schedule/teacher-workdays?from=${weekStart}&to=${weekEnd}`,
-      ),
-    ])
-      .then(([teacherRows, data]) => {
-        setTeachers(teacherRows);
-        const map = new Map<string, Set<number>>();
-        for (const row of data.workDays) {
-          const set = map.get(row.teacherId) ?? new Set<number>();
-          set.add(row.weekday);
-          map.set(row.teacherId, set);
-        }
-        setWorkDays(map);
-        setExceptions(data.exceptions);
-      })
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
+      api<TeacherWorkDaysResponse>(`/schedule/teacher-workdays?from=${weekStart}&to=${weekEnd}`),
+    ]);
+    const workDays = new Map<string, Set<number>>();
+    for (const row of data.workDays) {
+      const days = workDays.get(row.teacherId) ?? new Set<number>();
+      days.add(row.weekday);
+      workDays.set(row.teacherId, days);
+    }
+    return { teachers, workDays, exceptions: data.exceptions };
   }, [weekStart, weekEnd]);
-  useEffect(load, [load]);
+  const query = useAsyncSection(`${weekStart}:${weekEnd}`, fetchWorkDays, { teachers: [] as TeacherLite[], workDays: new Map<string, Set<number>>(), exceptions: [] as TeacherWorkExceptionRow[] });
+  const { teachers, workDays, exceptions } = query.data;
+  const loading = query.status === "loading";
+  const error = (actionError?.key === weekStart ? actionError.text : null) || query.error;
+  function setError(text: string | null) { setActionError(text ? { key: weekStart, text } : null); }
+  function load() { setError(null); query.reload(); }
 
   async function toggle(teacherId: string, weekday: number) {
     const current = workDays.get(teacherId) ?? new Set<number>();
@@ -102,7 +96,7 @@ export default function TeacherWorkDays() {
     else next.add(weekday);
 
     // Оптимист шинэчлэл — сүлжээ удаан байхад ч нүд шууд хариу өгнө.
-    setWorkDays((prev) => new Map(prev).set(teacherId, next));
+    query.setData(prev => ({ ...prev, workDays: new Map(prev.workDays).set(teacherId, next) }));
     setPending(`${teacherId}:${weekday}`);
     setError(null);
     try {
@@ -111,7 +105,7 @@ export default function TeacherWorkDays() {
         body: { teacherId, weekdays: [...next] },
       });
     } catch (e) {
-      setWorkDays((prev) => new Map(prev).set(teacherId, current));
+      query.setData(prev => ({ ...prev, workDays: new Map(prev.workDays).set(teacherId, current) }));
       setError(errMsg(e));
     } finally {
       setPending(null);
@@ -151,7 +145,7 @@ export default function TeacherWorkDays() {
   }));
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="chunky p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <UserCheck className="h-5 w-5 text-brand-soft" aria-hidden />
@@ -197,9 +191,7 @@ export default function TeacherWorkDays() {
         </div>
       )}
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} />
       )}
 
       {!loading && teachers.length > 0 && (

@@ -342,6 +342,7 @@ export type ProblemWhereInput = {
   analysis?: Prisma.XOR<Prisma.ProblemAnalysisNullableScalarRelationFilter, Prisma.ProblemAnalysisWhereInput> | null
   choiceOptions?: Prisma.ProblemChoiceListRelationFilter
   attempts?: Prisma.AttemptListRelationFilter
+  mistakeEntries?: Prisma.MistakeEntryListRelationFilter
   testItems?: Prisma.TestProblemListRelationFilter
 }
 
@@ -370,6 +371,7 @@ export type ProblemOrderByWithRelationInput = {
   analysis?: Prisma.ProblemAnalysisOrderByWithRelationInput
   choiceOptions?: Prisma.ProblemChoiceOrderByRelationAggregateInput
   attempts?: Prisma.AttemptOrderByRelationAggregateInput
+  mistakeEntries?: Prisma.MistakeEntryOrderByRelationAggregateInput
   testItems?: Prisma.TestProblemOrderByRelationAggregateInput
 }
 
@@ -401,6 +403,7 @@ export type ProblemWhereUniqueInput = Prisma.AtLeast<{
   analysis?: Prisma.XOR<Prisma.ProblemAnalysisNullableScalarRelationFilter, Prisma.ProblemAnalysisWhereInput> | null
   choiceOptions?: Prisma.ProblemChoiceListRelationFilter
   attempts?: Prisma.AttemptListRelationFilter
+  mistakeEntries?: Prisma.MistakeEntryListRelationFilter
   testItems?: Prisma.TestProblemListRelationFilter
 }, "id" | "token">
 
@@ -478,6 +481,7 @@ export type ProblemCreateInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
 
@@ -505,6 +509,7 @@ export type ProblemUncheckedCreateInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -532,6 +537,7 @@ export type ProblemUpdateInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
 
@@ -559,6 +565,7 @@ export type ProblemUncheckedUpdateInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -864,6 +871,20 @@ export type ProblemUpdateOneRequiredWithoutAttemptsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProblemUpdateToOneWithWhereWithoutAttemptsInput, Prisma.ProblemUpdateWithoutAttemptsInput>, Prisma.ProblemUncheckedUpdateWithoutAttemptsInput>
 }
 
+export type ProblemCreateNestedOneWithoutMistakeEntriesInput = {
+  create?: Prisma.XOR<Prisma.ProblemCreateWithoutMistakeEntriesInput, Prisma.ProblemUncheckedCreateWithoutMistakeEntriesInput>
+  connectOrCreate?: Prisma.ProblemCreateOrConnectWithoutMistakeEntriesInput
+  connect?: Prisma.ProblemWhereUniqueInput
+}
+
+export type ProblemUpdateOneRequiredWithoutMistakeEntriesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProblemCreateWithoutMistakeEntriesInput, Prisma.ProblemUncheckedCreateWithoutMistakeEntriesInput>
+  connectOrCreate?: Prisma.ProblemCreateOrConnectWithoutMistakeEntriesInput
+  upsert?: Prisma.ProblemUpsertWithoutMistakeEntriesInput
+  connect?: Prisma.ProblemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProblemUpdateToOneWithWhereWithoutMistakeEntriesInput, Prisma.ProblemUpdateWithoutMistakeEntriesInput>, Prisma.ProblemUncheckedUpdateWithoutMistakeEntriesInput>
+}
+
 export type ProblemCreateWithoutChapterInput = {
   id?: string
   token: string
@@ -887,6 +908,7 @@ export type ProblemCreateWithoutChapterInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
 
@@ -913,6 +935,7 @@ export type ProblemUncheckedCreateWithoutChapterInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -989,6 +1012,7 @@ export type ProblemCreateWithoutChoiceOptionsInput = {
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
 
@@ -1015,6 +1039,7 @@ export type ProblemUncheckedCreateWithoutChoiceOptionsInput = {
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -1057,6 +1082,7 @@ export type ProblemUpdateWithoutChoiceOptionsInput = {
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
 
@@ -1083,6 +1109,7 @@ export type ProblemUncheckedUpdateWithoutChoiceOptionsInput = {
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -1109,6 +1136,7 @@ export type ProblemCreateWithoutTagsInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
 
@@ -1135,6 +1163,7 @@ export type ProblemUncheckedCreateWithoutTagsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -1177,6 +1206,7 @@ export type ProblemUpdateWithoutTagsInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
 
@@ -1203,6 +1233,7 @@ export type ProblemUncheckedUpdateWithoutTagsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -1229,6 +1260,7 @@ export type ProblemCreateWithoutFormulasInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
 
@@ -1255,6 +1287,7 @@ export type ProblemUncheckedCreateWithoutFormulasInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -1297,6 +1330,7 @@ export type ProblemUpdateWithoutFormulasInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
 
@@ -1323,6 +1357,7 @@ export type ProblemUncheckedUpdateWithoutFormulasInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -1349,6 +1384,7 @@ export type ProblemCreateWithoutAnalysisInput = {
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
 
@@ -1375,6 +1411,7 @@ export type ProblemUncheckedCreateWithoutAnalysisInput = {
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -1417,6 +1454,7 @@ export type ProblemUpdateWithoutAnalysisInput = {
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
 
@@ -1443,6 +1481,7 @@ export type ProblemUncheckedUpdateWithoutAnalysisInput = {
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -1470,6 +1509,7 @@ export type ProblemCreateWithoutTestItemsInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
 }
 
 export type ProblemUncheckedCreateWithoutTestItemsInput = {
@@ -1496,6 +1536,7 @@ export type ProblemUncheckedCreateWithoutTestItemsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
 }
 
 export type ProblemCreateOrConnectWithoutTestItemsInput = {
@@ -1538,6 +1579,7 @@ export type ProblemUpdateWithoutTestItemsInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
 }
 
 export type ProblemUncheckedUpdateWithoutTestItemsInput = {
@@ -1564,6 +1606,7 @@ export type ProblemUncheckedUpdateWithoutTestItemsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
 }
 
 export type ProblemCreateWithoutAttemptsInput = {
@@ -1589,6 +1632,7 @@ export type ProblemCreateWithoutAttemptsInput = {
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
 
@@ -1615,6 +1659,7 @@ export type ProblemUncheckedCreateWithoutAttemptsInput = {
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -1657,6 +1702,7 @@ export type ProblemUpdateWithoutAttemptsInput = {
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
 
@@ -1683,6 +1729,131 @@ export type ProblemUncheckedUpdateWithoutAttemptsInput = {
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
+}
+
+export type ProblemCreateWithoutMistakeEntriesInput = {
+  id?: string
+  token: string
+  page?: number | null
+  number?: number | null
+  format: $Enums.ProblemFormat
+  statementText?: string | null
+  imageKey?: string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: number
+  price?: number | null
+  createdById: string
+  createdAt?: Date | string
+  eloRating?: number
+  attemptCount?: number
+  correctRate?: number | null
+  deletedAt?: Date | string | null
+  chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
+  tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
+  formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
+  analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
+  choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
+}
+
+export type ProblemUncheckedCreateWithoutMistakeEntriesInput = {
+  id?: string
+  token: string
+  chapterId: string
+  page?: number | null
+  number?: number | null
+  format: $Enums.ProblemFormat
+  statementText?: string | null
+  imageKey?: string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: number
+  price?: number | null
+  createdById: string
+  createdAt?: Date | string
+  eloRating?: number
+  attemptCount?: number
+  correctRate?: number | null
+  deletedAt?: Date | string | null
+  tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
+  formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
+  analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
+  choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
+}
+
+export type ProblemCreateOrConnectWithoutMistakeEntriesInput = {
+  where: Prisma.ProblemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProblemCreateWithoutMistakeEntriesInput, Prisma.ProblemUncheckedCreateWithoutMistakeEntriesInput>
+}
+
+export type ProblemUpsertWithoutMistakeEntriesInput = {
+  update: Prisma.XOR<Prisma.ProblemUpdateWithoutMistakeEntriesInput, Prisma.ProblemUncheckedUpdateWithoutMistakeEntriesInput>
+  create: Prisma.XOR<Prisma.ProblemCreateWithoutMistakeEntriesInput, Prisma.ProblemUncheckedCreateWithoutMistakeEntriesInput>
+  where?: Prisma.ProblemWhereInput
+}
+
+export type ProblemUpdateToOneWithWhereWithoutMistakeEntriesInput = {
+  where?: Prisma.ProblemWhereInput
+  data: Prisma.XOR<Prisma.ProblemUpdateWithoutMistakeEntriesInput, Prisma.ProblemUncheckedUpdateWithoutMistakeEntriesInput>
+}
+
+export type ProblemUpdateWithoutMistakeEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  page?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumProblemFormatFieldUpdateOperationsInput | $Enums.ProblemFormat
+  statementText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: Prisma.IntFieldUpdateOperationsInput | number
+  price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
+  tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
+  formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
+  analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
+  choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
+}
+
+export type ProblemUncheckedUpdateWithoutMistakeEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  chapterId?: Prisma.StringFieldUpdateOperationsInput | string
+  page?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumProblemFormatFieldUpdateOperationsInput | $Enums.ProblemFormat
+  statementText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: Prisma.IntFieldUpdateOperationsInput | number
+  price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
+  formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
+  analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
+  choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -1729,6 +1900,7 @@ export type ProblemUpdateWithoutChapterInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
 
@@ -1755,6 +1927,7 @@ export type ProblemUncheckedUpdateWithoutChapterInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -1788,6 +1961,7 @@ export type ProblemCountOutputType = {
   formulas: number
   choiceOptions: number
   attempts: number
+  mistakeEntries: number
   testItems: number
 }
 
@@ -1796,6 +1970,7 @@ export type ProblemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   formulas?: boolean | ProblemCountOutputTypeCountFormulasArgs
   choiceOptions?: boolean | ProblemCountOutputTypeCountChoiceOptionsArgs
   attempts?: boolean | ProblemCountOutputTypeCountAttemptsArgs
+  mistakeEntries?: boolean | ProblemCountOutputTypeCountMistakeEntriesArgs
   testItems?: boolean | ProblemCountOutputTypeCountTestItemsArgs
 }
 
@@ -1840,6 +2015,13 @@ export type ProblemCountOutputTypeCountAttemptsArgs<ExtArgs extends runtime.Type
 /**
  * ProblemCountOutputType without action
  */
+export type ProblemCountOutputTypeCountMistakeEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MistakeEntryWhereInput
+}
+
+/**
+ * ProblemCountOutputType without action
+ */
 export type ProblemCountOutputTypeCountTestItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TestProblemWhereInput
 }
@@ -1870,6 +2052,7 @@ export type ProblemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   analysis?: boolean | Prisma.Problem$analysisArgs<ExtArgs>
   choiceOptions?: boolean | Prisma.Problem$choiceOptionsArgs<ExtArgs>
   attempts?: boolean | Prisma.Problem$attemptsArgs<ExtArgs>
+  mistakeEntries?: boolean | Prisma.Problem$mistakeEntriesArgs<ExtArgs>
   testItems?: boolean | Prisma.Problem$testItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProblemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problem"]>
@@ -1947,6 +2130,7 @@ export type ProblemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   analysis?: boolean | Prisma.Problem$analysisArgs<ExtArgs>
   choiceOptions?: boolean | Prisma.Problem$choiceOptionsArgs<ExtArgs>
   attempts?: boolean | Prisma.Problem$attemptsArgs<ExtArgs>
+  mistakeEntries?: boolean | Prisma.Problem$mistakeEntriesArgs<ExtArgs>
   testItems?: boolean | Prisma.Problem$testItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProblemCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1966,6 +2150,7 @@ export type $ProblemPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     analysis: Prisma.$ProblemAnalysisPayload<ExtArgs> | null
     choiceOptions: Prisma.$ProblemChoicePayload<ExtArgs>[]
     attempts: Prisma.$AttemptPayload<ExtArgs>[]
+    mistakeEntries: Prisma.$MistakeEntryPayload<ExtArgs>[]
     testItems: Prisma.$TestProblemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2387,6 +2572,7 @@ export interface Prisma__ProblemClient<T, Null = never, ExtArgs extends runtime.
   analysis<T extends Prisma.Problem$analysisArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$analysisArgs<ExtArgs>>): Prisma.Prisma__ProblemAnalysisClient<runtime.Types.Result.GetResult<Prisma.$ProblemAnalysisPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   choiceOptions<T extends Prisma.Problem$choiceOptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$choiceOptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProblemChoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attempts<T extends Prisma.Problem$attemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mistakeEntries<T extends Prisma.Problem$mistakeEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$mistakeEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MistakeEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   testItems<T extends Prisma.Problem$testItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$testItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestProblemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2948,6 +3134,30 @@ export type Problem$attemptsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.AttemptScalarFieldEnum | Prisma.AttemptScalarFieldEnum[]
+}
+
+/**
+ * Problem.mistakeEntries
+ */
+export type Problem$mistakeEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MistakeEntry
+   */
+  select?: Prisma.MistakeEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MistakeEntry
+   */
+  omit?: Prisma.MistakeEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MistakeEntryInclude<ExtArgs> | null
+  where?: Prisma.MistakeEntryWhereInput
+  orderBy?: Prisma.MistakeEntryOrderByWithRelationInput | Prisma.MistakeEntryOrderByWithRelationInput[]
+  cursor?: Prisma.MistakeEntryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MistakeEntryScalarFieldEnum | Prisma.MistakeEntryScalarFieldEnum[]
 }
 
 /**

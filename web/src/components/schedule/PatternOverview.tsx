@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { api } from "@/lib/api";
+import { useMemo, useState } from "react";
+import { useSection } from "@/components/students/progress/useSection";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { getClassroomColor } from "@/lib/classroomColor";
 import EntryActionPanel from "./EntryActionPanel";
@@ -15,10 +15,6 @@ import {
   type ScheduleEntry,
   type WeekEntry,
 } from "./types";
-
-function errMsg(e: unknown): string {
-  return e instanceof Error ? e.message : "Алдаа гарлаа";
-}
 
 /**
  * БҮТЭН ЖИЛИЙН давтагдах хуваарийн "зурагт хуудас" — эзний загвар:
@@ -93,24 +89,14 @@ function nextDateFor(weekday: number): string {
 }
 
 export default function PatternOverview({ readOnly = false }: { readOnly?: boolean }) {
-  const [rows, setRows] = useState<ScheduleEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<{
     entry: WeekEntry;
     date: string;
     dayEntries: WeekEntry[];
   } | null>(null);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<ScheduleEntry[]>("/schedule")
-      .then(setRows)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, []);
-  useEffect(load, [load]);
+  const { data: rows, status, error, reload: load } = useSection<ScheduleEntry[]>("/schedule", []);
+  const loading = status === "loading";
 
   // Хугацаа нь дууссан (effectiveTo өнгөрсөн) мөрийг зурагт хуудаснаас нуана —
   // энэ бол "одоо мөрдөгдөж буй" хуваарийн харагдац.

@@ -1,0 +1,47 @@
+import { test, expect } from '@playwright/test';
+import { mockApi } from './mock-api';
+const detail = '/app/formulas/synthetic-square-sum';
+test('formula editor previews validates and persists only changed fields', async ({page}) => {
+  const mock = await mockApi(page, 'TEACHER_PLUS');
+  await page.goto(detail);
+  await page.getByRole('button', {name: 'Засах', exact: true}).click();
+  await expect(page.getByRole('heading', {name: 'Томьёо засах', exact: true})).toBeVisible();
+  await page.getByLabel('Томьёо (LaTeX)', {exact: true}).fill('\\unknownCommand{');
+  await page.getByRole('button', {name: 'Өөрчлөлтийг хадгалах', exact: true}).click();
+  await expect(page.getByRole('alert').filter({hasText: 'Хадгалахаас өмнө'})).toContainText('LaTeX');
+  expect(mock.calls.filter(c => c.method === 'PATCH')).toHaveLength(0);
+  await page.getByLabel('Томьёо (LaTeX)', {exact: true}).fill('(a+b)^2=(a+b)(a+b)');
+  await page.getByLabel('Энгийн тайлбар', {exact: true}).fill('Шинэ тайлбар: $(a+b)^2$.');
+  await page.getByLabel('Жишээ 1 хариу', {exact: true}).fill('$5^2=25$');
+  await page.getByRole('button', {name: 'Өөрчлөлтийг хадгалах', exact: true}).click();
+  await expect(page.getByRole('heading', {name: 'Нийлбэрийн квадрат', exact: true})).toBeVisible();
+  const write = mock.calls.find(c => c.method === 'PATCH')!;
+  expect(write.body).toEqual({latex: '(a+b)^2=(a+b)(a+b)', explanation: 'Шинэ тайлбар: $(a+b)^2$.', examples: expect.any(Array), expectedUpdatedAt: '2026-09-27T00:00:00.000Z'});
+  await page.getByRole('button', {name: 'Засах', exact: true}).click();
+  await expect(page.getByLabel('Томьёо (LaTeX)', {exact: true})).toHaveValue('(a+b)^2=(a+b)(a+b)');
+  await expect(page.getByLabel('Жишээ 1 хариу', {exact: true})).toHaveValue('$5^2=25$');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await mock.verify();
+});
+test('formula editor preserves unsaved draft on conflict and has explicit discard', async ({page}) => {
+  const mock = await mockApi(page, 'ADMIN');
+  await page.goto(detail); await page.getByRole('button', {name: 'Засах', exact: true}).click();
+  await page.getByLabel('Гарчиг', {exact: true}).fill('Зассан гарчиг');
+  mock.formulas.editStatus = 409;
+  await page.getByRole('button', {name: 'Өөрчлөлтийг хадгалах', exact: true}).click();
+  await expect(page.getByRole('alert').filter({hasText: 'Өөр багш'})).toContainText('Өөр багш');
+  await expect(page.getByLabel('Гарчиг', {exact: true})).toHaveValue('Зассан гарчиг');
+  await page.getByRole('button', {name: 'Буцах', exact: true}).click();
+  await page.getByRole('button', {name: 'Үргэлжлүүлж засах', exact: true}).click();
+  await expect(page.getByLabel('Гарчиг', {exact: true})).toHaveValue('Зассан гарчиг');
+  await page.getByRole('button', {name: 'Буцах', exact: true}).click();
+  await page.getByRole('button', {name: 'Засварыг орхих', exact: true}).click();
+  await expect(page.getByRole('heading', {name: 'Нийлбэрийн квадрат', exact: true})).toBeVisible();
+  await mock.verify();
+});
+for (const role of ['STUDENT', 'PARENT', 'TEACHER', 'BUYER']) test(`formula editor is unavailable to ${role}`, async ({page}) => {
+  const mock = await mockApi(page, role); await page.goto(detail);
+  await expect(page.getByRole('heading', {name: 'Нийлбэрийн квадрат', exact: true})).toBeVisible();
+  await expect(page.getByRole('button', {name: 'Засах', exact: true})).toHaveCount(0);
+  await mock.verify();
+});

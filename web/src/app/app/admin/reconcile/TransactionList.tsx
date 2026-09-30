@@ -5,13 +5,9 @@ import { api } from '@/lib/api';
 import { BankTransaction, BankMatchStatus } from './types';
 import { SectionHeader, Card } from '@/components/ui/Surface';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StateBlock';
+import { ErrorState, EmptyState } from '@/components/ui/StateBlock';
 import { UserSearch } from './UserSearch';
-import { X, Check, AlertCircle } from 'lucide-react';
-
-interface TransactionListProps {
-  refreshKey?: number;
-}
+import { Loader2, X, Check } from 'lucide-react';
 
 const STATUS_LABEL: Record<BankMatchStatus, string> = {
   UNMATCHED: 'Тулгаагүй',
@@ -27,7 +23,7 @@ const STATUS_COLOR: Record<BankMatchStatus, string> = {
   IGNORED: 'bg-error/10 text-error border-error',
 };
 
-export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
+export function TransactionList() {
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -54,7 +50,8 @@ export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
 
       setTransactions(response.items);
       setTotal(response.total);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       setError(err?.message || 'Гүйлгээ дүүргээ амжилтгүй');
     } finally {
       setLoading(false);
@@ -82,7 +79,8 @@ export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
       setTransactions(transactions.filter((t) => t.id !== transaction.id));
       setTotal(Math.max(0, total - 1));
       setSelectedUser(null);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       setError(err?.message || 'Гүйлгээ холбоход амжилтгүй');
     } finally {
       setMatchingId(null);
@@ -98,7 +96,8 @@ export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
 
       setTransactions(transactions.filter((t) => t.id !== transaction.id));
       setTotal(Math.max(0, total - 1));
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       setError(err?.message || 'Гүйлгээ үл хэлэлцэхэд амжилтгүй');
     } finally {
       setMatchingId(null);
@@ -216,7 +215,7 @@ export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
                   >
                     {matchingId === transaction.id ? (
                       <>
-                        <span className="animate-spin">⏳</span>
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                         Холбож байна…
                       </>
                     ) : (
@@ -233,7 +232,7 @@ export function TransactionList({ refreshKey = 0 }: TransactionListProps) {
                   >
                     {matchingId === transaction.id ? (
                       <>
-                        <span className="animate-spin">⏳</span>
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                       </>
                     ) : (
                       <>

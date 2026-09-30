@@ -1,0 +1,1627 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pi.mn шинэ дизайн</title>
+<meta name="description" content="Pi.mn вэб аппын шинэ, өнгөлөг дизайны прототип: цэс, самбар, идэвх, төлбөр.">
+<style>
+/* ==========================================================================
+   Pi.mn шинэ дизайны ТОКЕНУУД
+   globals.css руу шилжүүлэхэд бэлэн. Өнгө бүр 3 давхаргатай:
+     --X       тод өнгө  — ЗӨВХӨН дүрс, зурвас, график (текст БИШ)
+     --X-soft  зөөлөн дэвсгэр — чип, дүрсний дэвсгэр
+     --X-ink   текстэд зориулсан (AA 4.5:1+ surface ба soft дээр)
+   Тод өнгөн дээрх дүрс: --on-vivid (харанхуй, 3:1+).
+   ========================================================================== */
+:root {
+  color-scheme: light;
+  --navy: #273E75;            /* брэндийн тулгуур */
+  --bg: #F4F6FB;
+  --surface: #FFFFFF;
+  --surface-2: #EEF1F8;
+  --line: #DFE4EF;
+  --ink: #141B33;
+  --ink-dim: #4A5471;
+  --brand: #273E75;           /* үндсэн товч */
+  --on-brand: #FFFFFF;
+  --brand-soft: #E5EBFA;
+  --brand-ink: #273E75;
+  --focus: #3B5BDB;
+
+  --blue: #3B82F6;   --blue-soft: #E2EDFF;   --blue-ink: #1D4ED8;
+  --green: #22C55E;  --green-soft: #DCF6E5;  --green-ink: #146C33;
+  --orange: #FF9A1F; --orange-soft: #FFEFD9; --orange-ink: #9A4700;
+  --purple: #8B5CF6; --purple-soft: #EDE7FF; --purple-ink: #6D28D9;
+  --rose: #F43F5E;   --rose-soft: #FFE2E7;   --rose-ink: #BE123C;
+  --teal: #14B8A6;   --teal-soft: #D6F5F0;   --teal-ink: #0F766E;
+  --gold: #FACC15;   --gold-soft: #FEF4C7;   --gold-ink: #854D0E;
+  --on-vivid: #1A1406;
+  --on-ink: #FFFFFF;          /* --X-ink дэвсгэртэй товч дээрх текст */
+
+  --hero: linear-gradient(135deg, #273E75 0%, #30489A 55%, #3A4FC0 100%);
+  --on-hero: #FFFFFF;
+
+  --radius-sm: 10px; --radius: 16px; --radius-lg: 24px; --radius-pill: 999px;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  --ic: 20px; --ic-lg: 24px; --tap: 44px;
+  --shadow-1: 0 1px 2px rgba(20,27,51,.06), 0 4px 14px rgba(20,27,51,.05);
+  --shadow-2: 0 10px 28px rgba(20,27,51,.14);
+  --press: inset 0 -3px 0 rgba(0,0,0,.20);
+  --dur-micro: 120ms; --dur-base: 180ms; --dur-enter: 260ms;
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --sidebar-w: 268px;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0E1322; --surface: #171E33; --surface-2: #212A44; --line: #2D3856;
+  --ink: #EDF0F7; --ink-dim: #AEB7CD;
+  --brand: #8FA8FF; --on-brand: #0E1322; --brand-soft: #22305A; --brand-ink: #B7C6FF; --focus: #8FA8FF;
+  --blue-soft: #1B2C4F;   --blue-ink: #9CC0FF;
+  --green-soft: #15382A;  --green-ink: #74E3A3;
+  --orange-soft: #3B2912; --orange-ink: #FFC37A;
+  --purple-soft: #2B2252; --purple-ink: #C9B8FF;
+  --rose-soft: #431A2B;   --rose-ink: #FFA8B7;
+  --teal-soft: #113835;   --teal-ink: #63E6D4;
+  --gold-soft: #3A3113;   --gold-ink: #FDE38A;
+  --on-ink: #0E1322;
+  --hero: linear-gradient(135deg, #22356A 0%, #2B4290 55%, #3447B0 100%);
+  --shadow-1: 0 1px 2px rgba(0,0,0,.35); --shadow-2: 0 12px 30px rgba(0,0,0,.5);
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0E1322; --surface: #171E33; --surface-2: #212A44; --line: #2D3856;
+    --ink: #EDF0F7; --ink-dim: #AEB7CD;
+    --brand: #8FA8FF; --on-brand: #0E1322; --brand-soft: #22305A; --brand-ink: #B7C6FF; --focus: #8FA8FF;
+    --blue-soft: #1B2C4F;   --blue-ink: #9CC0FF;
+    --green-soft: #15382A;  --green-ink: #74E3A3;
+    --orange-soft: #3B2912; --orange-ink: #FFC37A;
+    --purple-soft: #2B2252; --purple-ink: #C9B8FF;
+    --rose-soft: #431A2B;   --rose-ink: #FFA8B7;
+    --teal-soft: #113835;   --teal-ink: #63E6D4;
+    --gold-soft: #3A3113;   --gold-ink: #FDE38A;
+    --on-ink: #0E1322;
+    --hero: linear-gradient(135deg, #22356A 0%, #2B4290 55%, #3447B0 100%);
+    --shadow-1: 0 1px 2px rgba(0,0,0,.35); --shadow-2: 0 12px 30px rgba(0,0,0,.5);
+  }
+}
+
+/* ---------- Суурь ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: 26px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
+h2 { font-size: 19px; line-height: 1.3; font-weight: 800; }
+h3 { font-size: 16px; line-height: 1.35; font-weight: 700; }
+button, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ic { width: var(--ic); height: var(--ic); flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ic-lg { width: var(--ic-lg); height: var(--ic-lg); }
+.ic-sm { width: 16px; height: 16px; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap-any { overflow-wrap: anywhere; }
+
+/* Мета тусгаарлагч — цэгийг CSS зурна (тэмдэгт БИШ) */
+.meta { display: inline-flex; flex-wrap: wrap; align-items: center; row-gap: 2px; color: var(--ink-dim); font-size: 14px; }
+.meta > span + span::before {
+  content: ""; display: inline-block; width: 3px; height: 3px; border-radius: 50%;
+  background: currentColor; opacity: .35; margin: 0 8px; vertical-align: middle; transform: translateY(-2px);
+}
+
+/* ---------- Прототипийн удирдлага (аппын хэсэг биш) ---------- */
+.proto {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 16px; background: #0B1020; color: #E8ECF6; border-bottom: 1px solid #2A3350;
+}
+.proto-tag { font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--radius-pill); background: #FACC15; color: #1A1406; }
+.proto select {
+  min-height: 44px; min-width: 0; flex: 1 1 220px; max-width: 360px;
+  border-radius: 12px; border: 1px solid #2F3A5C; background: #151C33; color: #E8ECF6; padding: 0 12px;
+}
+.proto-btn { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; border: 1px solid #2F3A5C; background: #151C33; color: #E8ECF6; padding: 0 12px; }
+
+/* ---------- Аппын бүтэц ---------- */
+.app { display: block; min-height: 100vh; }
+@media (min-width: 1024px) { .app { background: linear-gradient(to right, var(--surface) calc(var(--sidebar-w) - 1px), var(--line) 0, var(--line) var(--sidebar-w), transparent 0); } .app.rail { --sidebar-w: 84px; } }
+.main { min-width: 0; padding: 16px 16px calc(96px + env(safe-area-inset-bottom)); }
+.main-inner { max-width: 1160px; margin: 0 auto; }
+@media (min-width: 1024px) {
+  .app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); transition: grid-template-columns var(--dur-base) var(--ease); }
+  .main { padding: 28px 32px 48px; }
+}
+
+/* Гар утасны дээд мөр */
+.topbar {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px;
+  padding: 8px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+}
+.topbar-title { flex: 1; min-width: 0; font-weight: 800; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 1024px) { .topbar { display: none; } }
+
+.logo { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 900; font-size: 19px; text-decoration: none; }
+.logo-mark {
+  width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none;
+  background: var(--navy); color: #FFFFFF; font-weight: 900; font-size: 16px; letter-spacing: -.02em;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.25);
+}
+html[data-theme="dark"] .logo-mark { background: #3A56B0; }
+.logo-dot { color: var(--orange-ink); }
+
+.icon-btn {
+  width: var(--tap); height: var(--tap); display: inline-grid; place-items: center; flex: none;
+  border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); position: relative;
+}
+.icon-btn .badge-dot { position: absolute; top: 8px; right: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--rose); border: 2px solid var(--surface); }
+
+/* ---------- Зүүн самбар (desktop) ---------- */
+.sidebar { display: none; }
+@media (min-width: 1024px) {
+  .sidebar {
+    display: flex; flex-direction: column; gap: 8px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 18px 14px; background: var(--surface); border-right: 1px solid var(--line); align-self: start;
+  }
+}
+.sb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px 10px; }
+.nav-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 12px; border-radius: 14px;
+  text-decoration: none; font-weight: 650; color: var(--ink-dim); position: relative; border: 0; background: none; width: 100%; text-align: left;
+  transition: background-color var(--dur-micro), color var(--dur-micro);
+}
+.nav-item:hover { background: var(--surface-2); color: var(--ink); }
+.nav-item .nav-ib { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.nav-item[aria-current="page"] { background: var(--brand-soft); color: var(--brand-ink); font-weight: 800; }
+.nav-item[aria-current="page"]::before { content: ""; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 4px; border-radius: 0 4px 4px 0; background: var(--brand); }
+.nav-item[aria-current="page"] .nav-ib { background: var(--brand); color: var(--on-brand); }
+.nav-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-count { font-size: 12px; font-weight: 800; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; display: inline-grid; place-items: center; background: var(--rose-soft); color: var(--rose-ink); }
+.sb-more { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 8px; }
+.sb-more > summary { list-style: none; }
+.sb-more > summary::-webkit-details-marker { display: none; }
+.sb-more[open] > summary .chev { transform: rotate(180deg); }
+.chev { transition: transform var(--dur-base) var(--ease); }
+.sb-group { margin-top: 10px; }
+.sb-group-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--ink-dim); padding: 4px 12px; }
+.sb-group-title .ic { width: 16px; height: 16px; }
+.sb-foot { margin-top: auto; padding-top: 12px; display: grid; gap: 8px; }
+.user-card { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; background: var(--surface-2); }
+.avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; flex: none; font-weight: 800; background: var(--purple-soft); color: var(--purple-ink); }
+.user-name { font-weight: 800; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role-chip { display: inline-block; margin-top: 2px; font-size: 12px; font-weight: 800; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--brand-soft); color: var(--brand-ink); }
+.sb-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sb-actions .btn { width: 100%; }
+.app.rail .sidebar .nav-label, .app.rail .sidebar .sb-group-title span, .app.rail .sidebar .user-meta,
+.app.rail .sidebar .logo-text, .app.rail .sidebar .btn-text, .app.rail .sidebar .nav-count { display: none; }
+.app.rail .sidebar .sb-actions { grid-template-columns: 1fr; }
+.app.rail .sidebar .sb-head { flex-direction: column; }
+.app.rail .sidebar .nav-item { justify-content: center; padding: 0; }
+
+/* ---------- Доод таб (гар утас) ---------- */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 20px rgba(20,27,51,.06);
+}
+@media (min-width: 1024px) { .tabbar { display: none; } }
+.tab {
+  min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border: 0; background: none; color: var(--ink-dim); font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 14px; padding: 4px 2px;
+}
+.tab .tab-pill { width: 52px; height: 30px; border-radius: 15px; display: grid; place-items: center; transition: background-color var(--dur-base); position: relative; }
+.tab[aria-current="page"] { color: var(--brand-ink); font-weight: 800; }
+.tab[aria-current="page"] .tab-pill { background: var(--brand-soft); }
+.tab .tab-label { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tab .badge-dot { position: absolute; top: 2px; right: 10px; width: 9px; height: 9px; border-radius: 50%; background: var(--rose); border: 2px solid var(--surface); }
+
+/* «Бусад» хуудас (bottom sheet) */
+.scrim { position: fixed; inset: 0; z-index: 40; background: rgba(8,12,24,.5); opacity: 0; pointer-events: none; transition: opacity var(--dur-base); }
+.scrim.open { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; max-height: 86vh; overflow-y: auto;
+  background: var(--surface); border-radius: 24px 24px 0 0; padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
+  transform: translateY(105%); visibility: hidden; transition: transform var(--dur-enter) var(--ease), visibility 0s linear var(--dur-enter); box-shadow: var(--shadow-2);
+}
+.sheet.open { transform: translateY(0); visibility: visible; transition: transform var(--dur-enter) var(--ease); }
+.sheet-grab { width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 12px; }
+.sheet-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0 16px; }
+.sheet-tile {
+  min-height: 64px; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 16px; border: 1px solid var(--line);
+  background: var(--surface); text-decoration: none; font-weight: 700; font-size: 14px; line-height: 1.25; text-align: left;
+}
+.sheet-tile[aria-current="page"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
+@media (min-width: 1024px) { .sheet, .scrim.sheet-scrim { display: none; } }
+
+/* ---------- Ерөнхий бүрэлдэхүүн ---------- */
+.screen { display: none; }
+.screen.active { display: block; animation: enter var(--dur-enter) var(--ease); }
+@keyframes enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.stack { display: grid; gap: 16px; }
+@media (min-width: 1024px) { .stack { gap: 20px; } }
+.cols { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1100px) { .cols { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; } }
+.cols-2 { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-1); min-width: 0; }
+@media (min-width: 1024px) { .card { padding: 22px; } }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.card-head h2 { display: flex; align-items: center; gap: 10px; }
+.link-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 8px; margin: -8px -8px -8px 0; font-weight: 800; font-size: 14px; color: var(--brand-ink); text-decoration: none; background: none; border: 0; border-radius: 10px; }
+
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.page-head .kicker { font-weight: 700; color: var(--ink-dim); font-size: 14px; }
+
+.btn {
+  min-height: var(--tap); display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px;
+  border-radius: 14px; border: 0; font-weight: 800; font-size: 15px; text-decoration: none; white-space: nowrap;
+  transition: transform var(--dur-micro), filter var(--dur-micro);
+}
+.btn:active { transform: translateY(2px); }
+.btn-primary { background: var(--brand); color: var(--on-brand); box-shadow: var(--press); }
+.btn-success { background: var(--green-ink); color: var(--on-ink); box-shadow: var(--press); }
+.btn-warm { background: var(--orange); color: var(--on-vivid); box-shadow: var(--press); }
+.btn-ghost { background: var(--surface-2); color: var(--ink); }
+.btn-outline { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
+.btn-danger-outline { background: var(--surface); color: var(--rose-ink); border: 1.5px solid color-mix(in srgb, var(--rose) 45%, var(--line)); }
+.btn-light { background: #FFFFFF; color: #1E2F5E; box-shadow: var(--press); }
+.btn-block { width: 100%; }
+.btn-sm { min-height: 44px; padding: 0 14px; font-size: 14px; }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-pill); font-weight: 800; font-size: 13px; line-height: 1.3; white-space: nowrap; }
+.chip .ic { width: 15px; height: 15px; }
+.t-blue { background: var(--blue-soft); color: var(--blue-ink); }
+.t-green { background: var(--green-soft); color: var(--green-ink); }
+.t-orange { background: var(--orange-soft); color: var(--orange-ink); }
+.t-purple { background: var(--purple-soft); color: var(--purple-ink); }
+.t-rose { background: var(--rose-soft); color: var(--rose-ink); }
+.t-teal { background: var(--teal-soft); color: var(--teal-ink); }
+.t-gold { background: var(--gold-soft); color: var(--gold-ink); }
+.t-brand { background: var(--brand-soft); color: var(--brand-ink); }
+.t-mute { background: var(--surface-2); color: var(--ink-dim); }
+
+.ib { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.ib-sm { width: 36px; height: 36px; border-radius: 12px; }
+.ib-lg { width: 52px; height: 52px; border-radius: 16px; }
+
+.bar { height: 10px; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 100%; border-radius: inherit; transform-origin: left center; transform: scaleX(var(--p, 0)); background: var(--c, var(--green)); animation: grow var(--dur-enter) var(--ease) both; }
+.bar-lg { height: 14px; }
+@keyframes grow { from { transform: scaleX(0); } }
+
+.ring { --p: 50; --c: var(--green); width: 60px; height: 60px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--surface-2) 0); }
+.ring > span { width: calc(100% - 14px); height: calc(100% - 14px); border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-weight: 900; font-size: 16px; }
+.ring-lg { width: 84px; height: 84px; }
+.ring-lg > span { font-size: 20px; }
+
+.row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.row-main { flex: 1; min-width: 0; }
+.list { display: grid; gap: 10px; }
+.item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); flex-wrap: wrap; min-width: 0; }
+.item > .row-main { min-width: 140px; }
+.item .chip { white-space: normal; }
+@media (max-width: 639px) { .stat-ring { flex-direction: column; align-items: flex-start; } }
+.item-title { font-weight: 800; line-height: 1.3; }
+.muted { color: var(--ink-dim); }
+.small { font-size: 14px; }
+.big-num { font-size: 30px; font-weight: 900; line-height: 1.1; letter-spacing: -.02em; }
+
+/* Баатар карт */
+.hero { background: var(--hero); color: var(--on-hero); border-radius: var(--radius-lg); padding: 20px; position: relative; overflow: hidden; box-shadow: var(--shadow-1); }
+@media (min-width: 1024px) { .hero { padding: 26px 28px; } }
+.hero::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.14), transparent 70%); pointer-events: none; }
+.hero .hero-kicker { font-weight: 700; opacity: .88; font-size: 14px; }
+.hero h1 { margin-top: 4px; color: var(--on-hero); }
+.hero .hero-sub { margin-top: 6px; opacity: .92; }
+.hero-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; position: relative; z-index: 1; }
+.hero-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: var(--radius-pill); background: rgba(255,255,255,.14); font-weight: 800; font-size: 14px; }
+.hero .meta { color: rgba(255,255,255,.9); }
+
+/* Цуврал (streak) */
+.streak-badge { display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 10px; border-radius: 20px; background: rgba(255,255,255,.12); }
+.flame-disc { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--orange); color: var(--on-vivid); box-shadow: inset 0 -4px 0 rgba(0,0,0,.18); }
+.streak-num { font-size: 30px; font-weight: 900; line-height: 1; }
+
+/* Долоо хоногийн өдрүүд */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.day-disc { width: 100%; max-width: 50px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-dim); border: 2px solid transparent; position: relative; }
+.day-disc.done { background: var(--orange); color: var(--on-vivid); box-shadow: inset 0 -4px 0 rgba(0,0,0,.15); }
+.day-disc.today { border: 3px solid var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
+.day-disc.today.done { background: var(--orange); color: var(--on-vivid); }
+.day-disc.future { background: transparent; border: 2px dashed var(--line); }
+.day-disc.today::after { content: ""; position: absolute; inset: -7px; border-radius: 50%; border: 2px solid var(--brand); opacity: 0; animation: pulse 2.2s ease-out infinite; }
+@keyframes pulse { 0% { opacity: .6; transform: scale(.9); } 100% { opacity: 0; transform: scale(1.15); } }
+.day-label { font-size: 13px; font-weight: 800; color: var(--ink-dim); }
+.day-label.today { color: var(--brand-ink); }
+.stat-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+.mini-stat { border-radius: 16px; padding: 12px; background: var(--surface-2); min-width: 0; }
+.mini-stat .ic { margin-bottom: 4px; }
+.mini-stat b { display: block; font-size: 22px; font-weight: 900; line-height: 1.15; }
+.mini-stat span { font-size: 13px; font-weight: 700; color: var(--ink-dim); line-height: 1.25; display: block; }
+
+/* Жилийн тойм (сараар) */
+.year-toggle > summary { list-style: none; }
+.year-toggle > summary::-webkit-details-marker { display: none; }
+.year-toggle[open] .chev { transform: rotate(180deg); }
+.months { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; margin-top: 12px; }
+.month { border-radius: 14px; padding: 10px; background: var(--surface-2); min-width: 0; }
+.month b { display: block; font-size: 18px; font-weight: 900; }
+.month span { font-size: 12px; font-weight: 700; color: var(--ink-dim); }
+.month .bar { height: 6px; margin-top: 6px; background: var(--surface); }
+.month.future { opacity: .55; }
+
+/* Өнөөдөр хийх */
+.task { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); }
+.task-act { grid-column: 1 / -1; }
+@media (min-width: 560px) { .task { grid-template-columns: auto minmax(0, 1fr) auto; } .task-act { grid-column: auto; } }
+.task.done-task { background: var(--green-soft); border-color: transparent; }
+.task-step { font-size: 12px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
+
+/* Амжилтын тэмдэг */
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.badge { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 14px 8px; border-radius: 18px; background: var(--surface-2); min-width: 0; }
+.badge .medal { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 -4px 0 rgba(0,0,0,.14); }
+.badge b { font-size: 14px; line-height: 1.25; }
+.badge.locked .medal { background: var(--surface); color: var(--ink-dim); border: 2px dashed var(--line); box-shadow: none; }
+
+/* Ирцийн жижиг тойрог */
+.att-row { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.att { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ink-dim); min-width: 0; }
+.att i { width: 100%; max-width: 40px; aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend .ic { width: 16px; height: 16px; }
+
+/* Спарклайн */
+.spark { width: 100%; height: 64px; display: block; }
+.spark polyline { fill: none; stroke: var(--purple); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.spark circle { fill: var(--surface); stroke: var(--purple); stroke-width: 3; }
+
+/* Сегмент (ирц) */
+.seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); width: 100%; }
+.seg button { min-height: 44px; border: 0; border-radius: 10px; background: transparent; font-size: 12px; font-weight: 800; color: var(--ink-dim); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; line-height: 1.1; }
+.seg button .ic { width: 18px; height: 18px; }
+.seg button[aria-pressed="true"][data-v="p"] { background: var(--green-ink); color: var(--on-ink); }
+.seg button[aria-pressed="true"][data-v="l"] { background: var(--orange); color: var(--on-vivid); }
+.seg button[aria-pressed="true"][data-v="a"] { background: var(--rose-ink); color: var(--on-ink); }
+.seg button[aria-pressed="true"][data-v="e"] { background: var(--blue-ink); color: var(--on-ink); }
+.att-student { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px; border-radius: 18px; border: 1px solid var(--line); }
+@media (min-width: 640px) { .att-student { grid-template-columns: minmax(0, 1fr) 320px; align-items: center; } }
+
+/* Ангийн сонголт */
+.class-switch { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; margin: 0 -2px; scrollbar-width: none; }
+.class-switch::-webkit-scrollbar { display: none; }
+.class-pill { flex: none; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: var(--radius-pill); border: 1.5px solid var(--line); background: var(--surface); font-weight: 800; }
+.class-pill i { width: 10px; height: 10px; border-radius: 50%; background: var(--cls); }
+.class-pill[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
+.class-pill small { font-weight: 700; color: var(--ink-dim); }
+
+/* Хурдан үйлдэл */
+.quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .quick { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.quick-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-height: 96px; padding: 14px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); font-weight: 800; font-size: 14px; line-height: 1.25; text-align: left; transition: transform var(--dur-micro), box-shadow var(--dur-micro); }
+.quick-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-1); }
+
+/* Статистик карт */
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 1024px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } }
+.stat { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-1); min-width: 0; }
+.stat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stat-label { font-weight: 800; font-size: 14px; color: var(--ink-dim); margin-top: 10px; line-height: 1.25; }
+.stat .big-num { margin-top: 2px; font-size: 26px; }
+.stat .stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--c); }
+.trend { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; }
+
+/* Долоо хоногийн баганан график */
+.cols-chart { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; align-items: end; height: 190px; padding-top: 8px; }
+.cc { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; min-width: 0; }
+.cc-val { font-weight: 900; font-size: 14px; }
+.cc-track { width: 100%; max-width: 44px; flex: 1; display: flex; align-items: flex-end; }
+.cc-fill { width: 100%; height: 100%; border-radius: 10px 10px 6px 6px; background: linear-gradient(180deg, var(--teal), var(--blue)); transform-origin: bottom; transform: scaleY(var(--h)); animation: growy var(--dur-enter) var(--ease) both; }
+.cc.now .cc-fill { background: linear-gradient(180deg, var(--orange), var(--gold)); }
+.cc-lbl { font-size: 12px; font-weight: 800; color: var(--ink-dim); white-space: nowrap; }
+.cc.now .cc-lbl { color: var(--ink); }
+@keyframes growy { from { transform: scaleY(0); } }
+
+/* Тэргүүлэгчид */
+.rank { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; flex: none; }
+.rank-1 { background: var(--gold); color: var(--on-vivid); }
+.rank-2 { background: #CBD5E1; color: #1A1406; }
+.rank-3 { background: #F0A36A; color: #1A1406; }
+.rank-n { background: var(--surface-2); color: var(--ink-dim); }
+
+/* Төлбөр */
+.month-strip { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+.ms { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; min-width: 0; }
+.ms i { width: 100%; max-width: 38px; aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; }
+.ms .paid { background: #FFFFFF; color: #15803D; }
+.ms .pend { background: rgba(255,255,255,.2); color: #FFFFFF; border: 2px solid rgba(255,255,255,.7); }
+.ms .due { border: 2px dashed rgba(255,255,255,.5); color: rgba(255,255,255,.85); }
+.timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+.timeline li { position: relative; padding: 0 0 18px 56px; min-height: 60px; }
+.timeline li::before { content: ""; position: absolute; left: 21px; top: 44px; bottom: 0; width: 2px; background: var(--line); }
+.timeline li:last-child::before { display: none; }
+.timeline .ib { position: absolute; left: 0; top: 0; }
+.stackbar { display: flex; height: 22px; border-radius: var(--radius-pill); overflow: hidden; gap: 3px; background: var(--surface); }
+.stackbar > i { display: block; height: 100%; }
+.pay-card { display: grid; gap: 12px; padding: 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); transition: opacity var(--dur-base), transform var(--dur-base); }
+.pay-top { display: flex; align-items: flex-start; gap: 12px; }
+.pay-amount { font-size: 20px; font-weight: 900; white-space: nowrap; }
+.pay-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (min-width: 640px) { .pay-card { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } .pay-actions { grid-template-columns: auto auto; } }
+.pay-card.is-done { background: var(--green-soft); border-color: transparent; }
+.pay-card.is-rejected { background: var(--surface-2); border-color: transparent; }
+.pay-result { display: none; font-weight: 800; align-items: center; gap: 8px; }
+.pay-card.is-done .pay-actions, .pay-card.is-rejected .pay-actions { display: none; }
+.pay-card.is-done .pay-result, .pay-card.is-rejected .pay-result { display: inline-flex; }
+.pay-card.is-done .pay-result { color: var(--green-ink); }
+.pay-card.is-rejected .pay-result { color: var(--ink-dim); }
+.tier { border-radius: 16px; border: 1px solid var(--line); padding: 14px; }
+.tier-row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 4px 0; }
+.method-grid { display: grid; gap: 10px; margin: 16px 0; }
+.method { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface); font-weight: 800; text-align: left; width: 100%; }
+.method[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
+
+/* Модал */
+.modal { position: fixed; z-index: 60; left: 50%; top: 50%; width: min(440px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow-y: auto;
+  transform: translate(-50%, -46%); opacity: 0; pointer-events: none; transition: transform var(--dur-enter) var(--ease), opacity var(--dur-base);
+  background: var(--surface); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-2); }
+.modal:not(.open) { visibility: hidden; }
+.modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%); }
+
+/* Мэдэгдэл */
+.toast { position: fixed; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom)); z-index: 70; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  display: inline-flex; align-items: center; gap: 8px; max-width: calc(100vw - 32px); padding: 12px 16px; border-radius: 14px; background: var(--ink); color: var(--bg); font-weight: 700; box-shadow: var(--shadow-2); transition: opacity var(--dur-base), transform var(--dur-base); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (min-width: 1024px) { .toast { bottom: 28px; } }
+
+/* Цэсний зураглал ба зарчим */
+.role-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .role-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mini-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; padding: 6px; border-radius: 16px; background: var(--surface-2); margin: 10px 0; }
+.mini-tabs span { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 800; color: var(--ink-dim); text-align: center; line-height: 1.15; min-width: 0; overflow-wrap: anywhere; }
+.more-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.sw { border-radius: 16px; border: 1px solid var(--line); overflow: hidden; background: var(--surface); }
+.sw i { display: block; height: 52px; }
+.sw div { padding: 8px 10px; font-size: 13px; }
+.sw b { display: block; }
+.sw code { font-size: 12px; color: var(--ink-dim); }
+.principles { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.principles li { display: flex; gap: 12px; align-items: flex-start; }
+.scale { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.scale > div { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--ink-dim); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Икон — lucide-ийн SVG замууд (inline, гадаад холбоосгүй) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+    <symbol id="i-play-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></symbol>
+    <symbol id="i-clipboard-check" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></symbol>
+    <symbol id="i-clipboard-list" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></symbol>
+    <symbol id="i-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></symbol>
+    <symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
+    <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+    <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+    <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-teacher" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-alert-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-trending-up" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+    <symbol id="i-trending-down" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+    <symbol id="i-banknote" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></symbol>
+    <symbol id="i-panel" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
+  </defs>
+</svg>
+
+<!-- ===== Прототипийн удирдлага ===== -->
+<header class="proto" aria-label="Прототипийн удирдлага">
+  <span class="proto-tag">Прототип</span>
+  <label class="sr-only" for="screenSel">Дэлгэц сонгох</label>
+  <select id="screenSel">
+    <optgroup label="Сурагч">
+      <option value="student-home">Сурагч: Миний самбар</option>
+      <option value="student-pay">Сурагч, эцэг эх: Миний төлбөр</option>
+    </optgroup>
+    <optgroup label="Багш">
+      <option value="teacher-home">Багш+: Багшийн самбар</option>
+      <option value="class-activity">Багш+: Ангийн идэвх</option>
+    </optgroup>
+    <optgroup label="Удирдлага">
+      <option value="admin-home">Админ: Удирдлагын самбар</option>
+      <option value="staff-pay">Багш+, админ: Төлбөрийн хяналт</option>
+    </optgroup>
+    <optgroup label="Ерөнхий">
+      <option value="nav-map">Бүх дүрийн цэс</option>
+      <option value="principles">Дизайны зарчим</option>
+    </optgroup>
+  </select>
+  <button class="proto-btn" type="button" data-theme-toggle aria-label="Өнгөний горим солих">
+    <svg class="ic"><use href="#i-moon"/></svg><span class="theme-label">Харанхуй</span>
+  </button>
+</header>
+
+<div class="app" id="app">
+  <!-- ===== Зүүн самбар (desktop) ===== -->
+  <nav class="sidebar" id="sidebar" aria-label="Үндсэн цэс"></nav>
+
+  <div class="app-col" style="min-width:0">
+    <!-- ===== Гар утасны дээд мөр ===== -->
+    <div class="topbar">
+      <span class="logo-mark" aria-hidden="true">Pi</span>
+      <span class="topbar-title" id="topTitle">Миний самбар</span>
+      <button class="icon-btn" type="button" aria-label="Мэдэгдэл, 3 шинэ" data-toast="Мэдэгдлийн жагсаалт энд нээгдэнэ"><svg class="ic"><use href="#i-bell"/></svg><span class="badge-dot"></span></button>
+    </div>
+
+    <main class="main" id="main">
+      <div class="main-inner">
+
+<!-- =====================================================================
+     1. СУРАГЧ — Миний самбар
+     ===================================================================== -->
+<section class="screen" id="student-home" data-roles="STUDENT" data-active="/app/student" data-title="Миний самбар">
+  <div class="stack">
+    <div class="hero">
+      <div class="hero-row">
+        <div style="min-width:0">
+          <p class="hero-kicker">Лхагва, 9-р сарын 23</p>
+          <h1>Сайн байна уу, Бат-Эрдэнэ</h1>
+          <p class="hero-sub">Өнөөдрийн 3 алхмаа хийвэл цуврал 6 хоног болно.</p>
+        </div>
+        <div class="streak-badge" role="img" aria-label="Одоогийн цуврал 5 хоног">
+          <span class="flame-disc"><svg class="ic ic-lg"><use href="#i-flame"/></svg></span>
+          <span><span class="streak-num num">5</span><br><span style="font-weight:800;font-size:14px">хоног дараалан</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="stack">
+        <!-- Өнөөдөр хийх -->
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-brand"><svg class="ic"><use href="#i-list-checks"/></svg></span>Өнөөдөр хийх</h2>
+            <span class="chip t-green"><svg class="ic"><use href="#i-check"/></svg>1 / 3 хийсэн</span>
+          </div>
+          <div class="list">
+            <div class="task done-task">
+              <span class="ib t-green" style="background:var(--surface)"><svg class="ic"><use href="#i-check-circle"/></svg></span>
+              <div style="min-width:0">
+                <p class="task-step" style="color:var(--green-ink)">Хийсэн</p>
+                <p class="item-title">Онлайн хичээл: Логарифмын шинж чанар</p>
+                <span class="meta"><span>18 минут</span><span>Өглөө 08:40</span></span>
+              </div>
+            </div>
+            <div class="task">
+              <span class="ib t-blue"><svg class="ic"><use href="#i-calendar"/></svg></span>
+              <div style="min-width:0">
+                <p class="task-step" style="color:var(--blue-ink)">Хичээл</p>
+                <p class="item-title">Математик, 12А анги</p>
+                <span class="meta"><span>16:00-17:30</span><span>Танхим 204</span><span>Номин багш</span></span>
+              </div>
+              <a class="btn btn-outline btn-sm task-act" href="#" data-toast="Хуваарь нээгдэнэ">Хуваарь</a>
+            </div>
+            <div class="task">
+              <span class="ib t-orange"><svg class="ic"><use href="#i-clipboard-list"/></svg></span>
+              <div style="min-width:0">
+                <p class="task-step" style="color:var(--orange-ink)">Гэрийн даалгавар</p>
+                <p class="item-title">Логарифм тэгшитгэл</p>
+                <div class="row" style="margin-top:6px"><div class="bar row-main"><i style="--p:.66;--c:var(--orange)"></i></div><b class="small num">8/12</b></div>
+              </div>
+              <a class="btn btn-primary btn-sm task-act" href="#" data-toast="Даалгавар үргэлжилнэ">Үргэлжлүүлэх</a>
+            </div>
+            <div class="task">
+              <span class="ib t-purple"><svg class="ic"><use href="#i-zap"/></svg></span>
+              <div style="min-width:0">
+                <p class="task-step" style="color:var(--purple-ink)">Танд санал болгох</p>
+                <p class="item-title">Тригонометр дасгал</p>
+                <span class="meta"><span>10 бодлого</span><span>15 минут орчим</span></span>
+              </div>
+              <a class="btn btn-warm btn-sm task-act" href="#" data-toast="Дасгал эхэлнэ"><svg class="ic"><use href="#i-play-circle"/></svg>Эхлэх</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Шалгалтын дүн -->
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-purple"><svg class="ic"><use href="#i-clipboard-check"/></svg></span>Шалгалтын дүн</h2>
+            <span class="chip t-green"><svg class="ic"><use href="#i-trending-up"/></svg>4 удаа дараалан өссөн</span>
+          </div>
+          <svg class="spark" viewBox="0 0 300 64" preserveAspectRatio="none" role="img" aria-label="Сүүлийн 4 шалгалтын оноо: 52, 58, 64, 72">
+            <polyline points="12,52 104,40 196,28 288,12" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="list" style="margin-top:10px">
+            <div class="item" style="flex-wrap:nowrap">
+              <div class="ring" style="--p:72;--c:var(--purple)"><span class="num">72</span></div>
+              <div class="row-main">
+                <p class="item-title wrap-any">Сорил 4, Алгебр ба функц</p>
+                <span class="meta"><span>9/20</span><span>100 онооноос</span></span>
+              </div>
+              <span class="chip t-green"><svg class="ic"><use href="#i-trending-up"/></svg>+8</span>
+            </div>
+            <div class="item" style="flex-wrap:nowrap">
+              <div class="ring" style="--p:64;--c:var(--blue)"><span class="num">64</span></div>
+              <div class="row-main">
+                <p class="item-title wrap-any">Сорил 3, Тригонометр</p>
+                <span class="meta"><span>9/13</span><span>100 онооноос</span></span>
+              </div>
+              <span class="chip t-green"><svg class="ic"><use href="#i-trending-up"/></svg>+6</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Сул талууд -->
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-teal"><svg class="ic"><use href="#i-target"/></svg></span>Миний сул талууд</h2>
+          </div>
+          <div class="list">
+            <div class="row"><div class="row-main"><div class="row" style="justify-content:space-between"><b>Тригонометр</b><span class="small num muted">45%</span></div><div class="bar" style="margin-top:6px"><i style="--p:.45;--c:var(--rose)"></i></div></div><a class="btn btn-ghost btn-sm" href="#" data-toast="Тригонометр дасгал">Дасгал</a></div>
+            <div class="row"><div class="row-main"><div class="row" style="justify-content:space-between"><b>Магадлал</b><span class="small num muted">58%</span></div><div class="bar" style="margin-top:6px"><i style="--p:.58;--c:var(--orange)"></i></div></div><a class="btn btn-ghost btn-sm" href="#" data-toast="Магадлал дасгал">Дасгал</a></div>
+            <div class="row"><div class="row-main"><div class="row" style="justify-content:space-between"><b>Вектор</b><span class="small num muted">62%</span></div><div class="bar" style="margin-top:6px"><i style="--p:.62;--c:var(--gold)"></i></div></div><a class="btn btn-ghost btn-sm" href="#" data-toast="Вектор дасгал">Дасгал</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <!-- Идэвх: долоо хоног -->
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-orange"><svg class="ic"><use href="#i-flame"/></svg></span>Энэ долоо хоног</h2>
+            <span class="chip t-orange">3 / 5 өдөр</span>
+          </div>
+          <div class="week" role="list" aria-label="Энэ долоо хоногийн идэвх">
+            <div class="day" role="listitem" aria-label="Даваа, идэвхтэй"><span class="day-disc done"><svg class="ic"><use href="#i-flame"/></svg></span><span class="day-label">Да</span></div>
+            <div class="day" role="listitem" aria-label="Мягмар, идэвхтэй"><span class="day-disc done"><svg class="ic"><use href="#i-flame"/></svg></span><span class="day-label">Мя</span></div>
+            <div class="day" role="listitem" aria-label="Лхагва, өнөөдөр, идэвхтэй"><span class="day-disc today done"><svg class="ic"><use href="#i-flame"/></svg></span><span class="day-label today">Лх</span></div>
+            <div class="day" role="listitem" aria-label="Пүрэв, удахгүй"><span class="day-disc future"></span><span class="day-label">Пү</span></div>
+            <div class="day" role="listitem" aria-label="Баасан, удахгүй"><span class="day-disc future"></span><span class="day-label">Ба</span></div>
+            <div class="day" role="listitem" aria-label="Бямба, удахгүй"><span class="day-disc future"></span><span class="day-label">Бя</span></div>
+            <div class="day" role="listitem" aria-label="Ням, удахгүй"><span class="day-disc future"></span><span class="day-label">Ня</span></div>
+          </div>
+          <div class="stat-trio">
+            <div class="mini-stat"><svg class="ic" style="color:var(--orange-ink)"><use href="#i-flame"/></svg><b class="num">5</b><span>одоогийн цуврал</span></div>
+            <div class="mini-stat"><svg class="ic" style="color:var(--gold-ink)"><use href="#i-trophy"/></svg><b class="num">12</b><span>хамгийн урт</span></div>
+            <div class="mini-stat"><svg class="ic" style="color:var(--blue-ink)"><use href="#i-calendar"/></svg><b class="num">14</b><span>энэ сард</span></div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="row" style="justify-content:space-between"><b class="small">9-р сарын зорилго</b><span class="small num"><b>14</b> / 20 өдөр</span></div>
+            <div class="bar bar-lg" style="margin-top:6px"><i style="--p:.7;--c:linear-gradient(90deg,var(--orange),var(--gold))"></i></div>
+          </div>
+          <details class="year-toggle" style="margin-top:12px">
+            <summary class="link-btn" style="margin:0">Бүтэн жилээр харах<svg class="ic chev"><use href="#i-chevron-down"/></svg></summary>
+            <div class="months" aria-label="2026 оны идэвх, сараар">
+              <div class="month"><span>1-р сар</span><b class="num">9</b><div class="bar"><i style="--p:.3;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>2-р сар</span><b class="num">11</b><div class="bar"><i style="--p:.39;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>3-р сар</span><b class="num">16</b><div class="bar"><i style="--p:.53;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>4-р сар</span><b class="num">18</b><div class="bar"><i style="--p:.6;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>5-р сар</span><b class="num">20</b><div class="bar"><i style="--p:.66;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>6-р сар</span><b class="num">4</b><div class="bar"><i style="--p:.13;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>7-р сар</span><b class="num">2</b><div class="bar"><i style="--p:.06;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>8-р сар</span><b class="num">7</b><div class="bar"><i style="--p:.23;--c:var(--teal)"></i></div></div>
+              <div class="month"><span>9-р сар</span><b class="num">14</b><div class="bar"><i style="--p:.47;--c:var(--orange)"></i></div></div>
+              <div class="month future"><span>10-р сар</span><b class="num">0</b><div class="bar"></div></div>
+              <div class="month future"><span>11-р сар</span><b class="num">0</b><div class="bar"></div></div>
+              <div class="month future"><span>12-р сар</span><b class="num">0</b><div class="bar"></div></div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Амжилт -->
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-gold"><svg class="ic"><use href="#i-award"/></svg></span>Миний амжилт</h2></div>
+          <div class="badges">
+            <div class="badge"><span class="medal" style="background:var(--orange);color:var(--on-vivid)"><svg class="ic ic-lg"><use href="#i-flame"/></svg></span><b>5 хоног дараалан</b></div>
+            <div class="badge"><span class="medal" style="background:var(--purple-soft);color:var(--purple-ink)"><svg class="ic ic-lg"><use href="#i-star"/></svg></span><b>100 бодлого</b></div>
+            <div class="badge"><span class="medal" style="background:var(--gold);color:var(--on-vivid)"><svg class="ic ic-lg"><use href="#i-trophy"/></svg></span><b>Анхны 70+ оноо</b></div>
+            <div class="badge locked"><span class="medal"><svg class="ic ic-lg"><use href="#i-target"/></svg></span><b>30 хоног</b><span class="small muted num">5 / 30</span></div>
+          </div>
+        </div>
+
+        <!-- Сүүлийн ирц -->
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-check-circle"/></svg></span>Сүүлийн ирц</h2>
+            <span class="chip t-green num">94%</span>
+          </div>
+          <div class="att-row">
+            <div class="att"><i class="t-green" aria-label="Ирсэн"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>9/22</div>
+            <div class="att"><i class="t-green" aria-label="Ирсэн"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>9/19</div>
+            <div class="att"><i class="t-orange" aria-label="Хоцорсон"><svg class="ic ic-sm"><use href="#i-clock"/></svg></i>9/17</div>
+            <div class="att"><i class="t-green" aria-label="Ирсэн"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>9/15</div>
+            <div class="att"><i class="t-green" aria-label="Ирсэн"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>9/12</div>
+            <div class="att"><i class="t-blue" aria-label="Чөлөөтэй"><svg class="ic ic-sm"><use href="#i-info"/></svg></i>9/10</div>
+            <div class="att"><i class="t-green" aria-label="Ирсэн"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>9/08</div>
+            <div class="att"><i class="t-green" aria-label="Ирсэн"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>9/05</div>
+          </div>
+          <div class="legend">
+            <span><svg class="ic" style="color:var(--green-ink)"><use href="#i-check"/></svg>Ирсэн</span>
+            <span><svg class="ic" style="color:var(--orange-ink)"><use href="#i-clock"/></svg>Хоцорсон</span>
+            <span><svg class="ic" style="color:var(--rose-ink)"><use href="#i-x"/></svg>Тасалсан</span>
+            <span><svg class="ic" style="color:var(--blue-ink)"><use href="#i-info"/></svg>Чөлөөтэй</span>
+          </div>
+        </div>
+
+        <!-- Мэдэгдэл -->
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-rose"><svg class="ic"><use href="#i-megaphone"/></svg></span>Зарлал</h2></div>
+          <div class="list">
+            <div class="item" style="flex-wrap:nowrap"><span class="ib t-blue"><svg class="ic"><use href="#i-clipboard-check"/></svg></span><div class="row-main"><p class="item-title">Бямба гарагт сорил 5 болно</p><span class="meta"><span>9/27</span><span>10:00</span><span>Танхим 204</span></span></div></div>
+            <div class="item" style="flex-wrap:nowrap"><span class="ib t-teal"><svg class="ic"><use href="#i-play-circle"/></svg></span><div class="row-main"><p class="item-title">Шинэ онлайн хичээл нэмэгдлээ</p><span class="meta"><span>Магадлалын онол</span><span>6 бичлэг</span></span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     2. СУРАГЧ / ЭЦЭГ ЭХ — Миний төлбөр
+     ===================================================================== -->
+<section class="screen" id="student-pay" data-roles="STUDENT PARENT" data-active="/app/student/payments" data-title="Миний төлбөр">
+  <div class="stack">
+    <div class="page-head"><h1>Миний төлбөр</h1></div>
+    <div class="hero">
+      <div class="hero-row">
+        <div style="min-width:0">
+          <p class="hero-kicker">Төлбөр төлөгдсөн</p>
+          <h1 style="font-size:28px">11-р сарын 30 хүртэл</h1>
+          <p class="hero-sub" style="display:flex;align-items:center;gap:8px"><svg class="ic"><use href="#i-check-circle"/></svg>Бүх зүйл хэвийн байна</p>
+        </div>
+        <div class="row" style="flex-wrap:wrap">
+          <button class="btn btn-light" type="button" data-open="payModal"><svg class="ic"><use href="#i-wallet"/></svg>Төлбөр төлөх</button>
+        </div>
+      </div>
+      <div class="month-strip" role="list" aria-label="Хичээлийн жилийн сарууд">
+        <div class="ms" role="listitem" aria-label="9-р сар төлсөн"><i class="paid"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>9</div>
+        <div class="ms" role="listitem" aria-label="10-р сар төлсөн"><i class="paid"><svg class="ic ic-sm"><use href="#i-check"/></svg></i>10</div>
+        <div class="ms" role="listitem" aria-label="11-р сар шалгагдаж байна"><i class="pend"><svg class="ic ic-sm"><use href="#i-clock"/></svg></i>11</div>
+        <div class="ms" role="listitem" aria-label="12-р сар"><i class="due"></i>12</div>
+        <div class="ms" role="listitem" aria-label="1-р сар"><i class="due"></i>1</div>
+        <div class="ms" role="listitem" aria-label="2-р сар"><i class="due"></i>2</div>
+        <div class="ms" role="listitem" aria-label="3-р сар"><i class="due"></i>3</div>
+        <div class="ms" role="listitem" aria-label="4-р сар"><i class="due"></i>4</div>
+        <div class="ms" role="listitem" aria-label="5-р сар"><i class="due"></i>5</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat" style="--c:var(--blue)"><i class="stripe"></i><div class="stat-top"><span class="ib ib-sm t-blue"><svg class="ic"><use href="#i-receipt"/></svg></span></div><p class="stat-label">Сарын төлбөр</p><p class="big-num num">₮350,000</p></div>
+      <div class="stat" style="--c:var(--green)"><i class="stripe"></i><div class="stat-top"><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-check-circle"/></svg></span></div><p class="stat-label">Төлөгдсөн</p><p class="big-num num">₮700,000</p></div>
+      <div class="stat" style="--c:var(--orange)"><i class="stripe"></i><div class="stat-top"><span class="ib ib-sm t-orange"><svg class="ic"><use href="#i-clock"/></svg></span></div><p class="stat-label">Шалгагдаж буй</p><p class="big-num num">₮350,000</p></div>
+      <div class="stat" style="--c:var(--teal)"><i class="stripe"></i><div class="stat-top"><span class="ib ib-sm t-teal"><svg class="ic"><use href="#i-wallet"/></svg></span></div><p class="stat-label">Үлдэгдэл</p><p class="big-num num">₮0</p></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2><span class="ib ib-sm t-brand"><svg class="ic"><use href="#i-receipt"/></svg></span>Төлбөрийн түүх</h2></div>
+      <ol class="timeline">
+        <li>
+          <span class="ib t-orange"><svg class="ic"><use href="#i-clock"/></svg></span>
+          <div class="row" style="justify-content:space-between;flex-wrap:wrap"><b class="num" style="font-size:18px">₮350,000</b><span class="chip t-orange"><svg class="ic"><use href="#i-clock"/></svg>Шалгагдаж байна</span></div>
+          <span class="meta"><span>9/24</span><span>Дансаар</span><span>11-р сар</span></span>
+        </li>
+        <li>
+          <span class="ib t-green"><svg class="ic"><use href="#i-check"/></svg></span>
+          <div class="row" style="justify-content:space-between;flex-wrap:wrap"><b class="num" style="font-size:18px">₮350,000</b><span class="chip t-green"><svg class="ic"><use href="#i-check"/></svg>Баталгаажсан</span></div>
+          <span class="meta"><span>9/02</span><span>QPay</span><span>10-р сар</span></span>
+        </li>
+        <li>
+          <span class="ib t-green"><svg class="ic"><use href="#i-check"/></svg></span>
+          <div class="row" style="justify-content:space-between;flex-wrap:wrap"><b class="num" style="font-size:18px">₮350,000</b><span class="chip t-green"><svg class="ic"><use href="#i-check"/></svg>Баталгаажсан</span></div>
+          <span class="meta"><span>8/28</span><span>Бэлнээр</span><span>9-р сар</span></span>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     3. БАГШ — Багшийн самбар
+     ===================================================================== -->
+<section class="screen" id="teacher-home" data-roles="TEACHER_PLUS TEACHER ADMIN" data-active="/app/teacher" data-title="Багшийн самбар">
+  <div class="stack">
+    <div class="page-head">
+      <div><p class="kicker">Лхагва, 9-р сарын 23</p><h1>Сайн байна уу, Номин багш</h1></div>
+    </div>
+
+    <div class="class-switch" role="group" aria-label="Анги сонгох">
+      <button class="class-pill" type="button" aria-pressed="true" style="--cls:#3B82F6"><i></i>12А <small>18</small></button>
+      <button class="class-pill" type="button" aria-pressed="false" style="--cls:#22C55E"><i></i>11Б <small>21</small></button>
+      <button class="class-pill" type="button" aria-pressed="false" style="--cls:#F59E0B"><i></i>10В <small>16</small></button>
+      <button class="class-pill" type="button" aria-pressed="false" style="--cls:#A855F7"><i></i>Онлайн бүлэг <small>34</small></button>
+    </div>
+
+    <div class="hero">
+      <div class="hero-row">
+        <div style="min-width:0">
+          <span class="hero-chip"><svg class="ic"><use href="#i-clock"/></svg>Өнөөдрийн хичээл, 2 цагийн дараа</span>
+          <h1 style="margin-top:10px">Математик, <span class="cls-name">12А</span> анги</h1>
+          <span class="meta" style="margin-top:4px"><span>16:00-17:30</span><span>Танхим 204</span><span>18 сурагч</span></span>
+        </div>
+        <div class="row" style="flex-wrap:wrap">
+          <a class="btn btn-light" href="#att"><svg class="ic"><use href="#i-check-circle"/></svg>Ирц бүртгэх</a>
+          <button class="btn" type="button" style="background:rgba(255,255,255,.16);color:#fff" data-toast="Даалгаврын жагсаалт нээгдэнэ"><svg class="ic"><use href="#i-clipboard-list"/></svg>Даалгавар шалгах</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="row stat-ring"><div class="ring" style="--p:92;--c:var(--green)"><span class="num" style="font-size:14px">92%</span></div><div class="row-main"><p class="stat-label" style="margin:0">Ирц, энэ 7 хоног</p><span class="trend" style="color:var(--green-ink)"><svg class="ic ic-sm"><use href="#i-trending-up"/></svg>+4%</span></div></div></div>
+      <div class="stat"><div class="row stat-ring"><div class="ring" style="--p:78;--c:var(--orange)"><span class="num" style="font-size:14px">78%</span></div><div class="row-main"><p class="stat-label" style="margin:0">Даалгавар биелэлт</p><span class="trend" style="color:var(--green-ink)"><svg class="ic ic-sm"><use href="#i-trending-up"/></svg>+6%</span></div></div></div>
+      <div class="stat"><div class="row stat-ring"><div class="ring" style="--p:71;--c:var(--purple)"><span class="num" style="font-size:14px">71</span></div><div class="row-main"><p class="stat-label" style="margin:0">Дундаж оноо</p><span class="trend" style="color:var(--green-ink)"><svg class="ic ic-sm"><use href="#i-trending-up"/></svg>+3</span></div></div></div>
+      <a class="stat" href="#class-activity" style="text-decoration:none"><div class="row stat-ring"><span class="ib t-orange"><svg class="ic"><use href="#i-flame"/></svg></span><div class="row-main"><p class="stat-label" style="margin:0">Идэвхтэй сурагч</p><b class="num" style="font-size:20px">14 / 18</b></div><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></div></a>
+    </div>
+
+    <div class="cols">
+      <div class="stack">
+        <!-- Нэг товшилтоор ирц -->
+        <div class="card" id="att">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-check-circle"/></svg></span>Ирц бүртгэх</h2>
+            <button class="btn btn-success btn-sm" type="button" data-all-present><svg class="ic"><use href="#i-check"/></svg>Бүгд ирсэн</button>
+          </div>
+          <div class="list" id="attList"></div>
+          <div class="row" style="margin-top:14px;justify-content:space-between;flex-wrap:wrap">
+            <span class="small muted" id="attSummary"></span>
+            <button class="btn btn-primary" type="button" data-toast="Ирц хадгалагдлаа">Хадгалах</button>
+          </div>
+        </div>
+
+        <!-- Анхаарах сурагчид -->
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-rose"><svg class="ic"><use href="#i-alert-triangle"/></svg></span>Анхаарал хандуулах</h2></div>
+          <div class="list">
+            <div class="item"><span class="avatar" style="background:var(--rose-soft);color:var(--rose-ink)">ТБ</span><div class="row-main"><p class="item-title">Тэмүүжин Б.</p><span class="chip t-rose" style="margin-top:4px"><svg class="ic"><use href="#i-x"/></svg>2 удаа тасалсан</span></div><button class="btn btn-ghost btn-sm" type="button" data-toast="Эцэг эхэд мессеж бичих"><svg class="ic"><use href="#i-message-square"/></svg>Холбогдох</button></div>
+            <div class="item"><span class="avatar" style="background:var(--orange-soft);color:var(--orange-ink)">ОС</span><div class="row-main"><p class="item-title">Оюу-Эрдэнэ С.</p><span class="chip t-orange" style="margin-top:4px"><svg class="ic"><use href="#i-clipboard-list"/></svg>3 даалгавар дутуу</span></div><button class="btn btn-ghost btn-sm" type="button" data-toast="Даалгаврыг харах">Харах</button></div>
+            <div class="item"><span class="avatar" style="background:var(--purple-soft);color:var(--purple-ink)">ДГ</span><div class="row-main"><p class="item-title">Дөлгөөн Г.</p><span class="chip t-purple" style="margin-top:4px"><svg class="ic"><use href="#i-trending-down"/></svg>Оноо 12-оор буурсан</span></div><button class="btn btn-ghost btn-sm" type="button" data-toast="Сул талыг харах">Харах</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <!-- Эцэг эхийн хүсэлт -->
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-blue"><svg class="ic"><use href="#i-link"/></svg></span>Эцэг эхийн хүсэлт</h2>
+            <span class="chip t-rose num">2</span>
+          </div>
+          <div class="list">
+            <div class="pay-card"><div class="pay-top"><span class="avatar">ГЭ</span><div class="row-main"><p class="item-title">Гантулга Э.</p><span class="meta"><span>Эцэг эх</span><span>Хүүхэд: Анударь</span></span></div></div><div class="pay-actions"><button class="btn btn-success btn-sm" type="button" data-pay="ok"><svg class="ic"><use href="#i-check"/></svg>Батлах</button><button class="btn btn-danger-outline btn-sm" type="button" data-pay="no"><svg class="ic"><use href="#i-x"/></svg>Цуцлах</button></div><span class="pay-result"></span></div>
+            <div class="pay-card"><div class="pay-top"><span class="avatar" style="background:var(--teal-soft);color:var(--teal-ink)">СМ</span><div class="row-main"><p class="item-title">Сарангэрэл М.</p><span class="meta"><span>Эцэг эх</span><span>Хүүхэд: Билгүүн</span></span></div></div><div class="pay-actions"><button class="btn btn-success btn-sm" type="button" data-pay="ok"><svg class="ic"><use href="#i-check"/></svg>Батлах</button><button class="btn btn-danger-outline btn-sm" type="button" data-pay="no"><svg class="ic"><use href="#i-x"/></svg>Цуцлах</button></div><span class="pay-result"></span></div>
+          </div>
+        </div>
+
+        <!-- Хурдан үйлдэл -->
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-purple"><svg class="ic"><use href="#i-sparkles"/></svg></span>Хурдан үйлдэл</h2></div>
+          <div class="quick">
+            <button class="quick-tile" type="button" data-toast="Шалгалт үүсгэх"><span class="ib t-purple"><svg class="ic"><use href="#i-clipboard-check"/></svg></span>Шалгалт үүсгэх</button>
+            <button class="quick-tile" type="button" data-toast="Даалгавар өгөх"><span class="ib t-orange"><svg class="ic"><use href="#i-plus"/></svg></span>Даалгавар өгөх</button>
+            <a class="quick-tile" href="#class-activity" style="text-decoration:none"><span class="ib t-teal"><svg class="ic"><use href="#i-bar-chart"/></svg></span>Ангийн идэвх</a>
+            <button class="quick-tile" type="button" data-toast="Бодлогын сан"><span class="ib t-blue"><svg class="ic"><use href="#i-layers"/></svg></span>Бодлогын сан</button>
+            <button class="quick-tile" type="button" data-toast="Төлөвлөгч"><span class="ib t-green"><svg class="ic"><use href="#i-list-checks"/></svg></span>Төлөвлөгч</button>
+            <button class="quick-tile" type="button" data-toast="Дугаарлуу мессеж"><span class="ib t-rose"><svg class="ic"><use href="#i-message-square"/></svg></span>Мессеж илгээх</button>
+          </div>
+        </div>
+
+        <!-- Шалгалтын дүн -->
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-gold"><svg class="ic"><use href="#i-trophy"/></svg></span>Сүүлийн сорил</h2><span class="chip t-green"><svg class="ic"><use href="#i-trending-up"/></svg>+5 дундаж</span></div>
+          <div class="list">
+            <div class="row"><b style="width:80px" class="small">80-100</b><div class="bar row-main"><i style="--p:.28;--c:var(--green)"></i></div><b class="small num">5</b></div>
+            <div class="row"><b style="width:80px" class="small">60-79</b><div class="bar row-main"><i style="--p:.5;--c:var(--blue)"></i></div><b class="small num">9</b></div>
+            <div class="row"><b style="width:80px" class="small">0-59</b><div class="bar row-main"><i style="--p:.22;--c:var(--orange)"></i></div><b class="small num">4</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     4. БАГШ — Ангийн идэвх
+     ===================================================================== -->
+<section class="screen" id="class-activity" data-roles="TEACHER_PLUS TEACHER ADMIN" data-active="/app/teacher" data-title="Ангийн идэвх">
+  <div class="stack">
+    <div class="page-head">
+      <div>
+        <a class="link-btn" href="#teacher-home" style="margin-left:-8px"><svg class="ic"><use href="#i-chevron-left"/></svg>Багшийн самбар</a>
+        <h1>Ангийн идэвх, 12А</h1>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-row">
+        <div style="min-width:0">
+          <span class="hero-chip"><svg class="ic"><use href="#i-trending-up"/></svg>Өмнөх долоо хоногоос +3 сурагч</span>
+          <h1 style="margin-top:10px">Энэ долоо хоногт 14 сурагч идэвхтэй</h1>
+          <p class="hero-sub">18 сурагчийн 78% нь хичээлээ давтсан байна.</p>
+        </div>
+        <div class="ring ring-lg" style="--p:78;--c:#FFB547;background:conic-gradient(#FFB547 78%, rgba(255,255,255,.18) 0)"><span class="num" style="background:#30489A;color:#fff">78%</span></div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat" style="--c:var(--orange)"><i class="stripe"></i><span class="ib ib-sm t-orange"><svg class="ic"><use href="#i-flame"/></svg></span><p class="stat-label">Дундаж идэвх</p><p class="big-num num">3.4 <span style="font-size:15px">өдөр</span></p></div>
+      <div class="stat" style="--c:var(--purple)"><i class="stripe"></i><span class="ib ib-sm t-purple"><svg class="ic"><use href="#i-star"/></svg></span><p class="stat-label">Бодсон бодлого</p><p class="big-num num">1,240</p></div>
+      <div class="stat" style="--c:var(--gold)"><i class="stripe"></i><span class="ib ib-sm t-gold"><svg class="ic"><use href="#i-trophy"/></svg></span><p class="stat-label">Шилдэг цуврал</p><p class="big-num num">12 <span style="font-size:15px">хоног</span></p></div>
+      <div class="stat" style="--c:var(--teal)"><i class="stripe"></i><span class="ib ib-sm t-teal"><svg class="ic"><use href="#i-play-circle"/></svg></span><p class="stat-label">Үзсэн хичээл</p><p class="big-num num">86</p></div>
+    </div>
+
+    <div class="cols">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="ib ib-sm t-teal"><svg class="ic"><use href="#i-bar-chart"/></svg></span>Долоо хоног бүрийн оролцоо</h2>
+            <span class="small muted">идэвхтэй сурагч, 18-аас</span>
+          </div>
+          <div class="cols-chart" role="img" aria-label="Сүүлийн 8 долоо хоногт идэвхтэй сурагчийн тоо: 6, 8, 7, 10, 9, 11, 12, 14">
+            <div class="cc"><span class="cc-val num">6</span><div class="cc-track"><i class="cc-fill" style="--h:.33"></i></div><span class="cc-lbl">8/04</span></div>
+            <div class="cc"><span class="cc-val num">8</span><div class="cc-track"><i class="cc-fill" style="--h:.44"></i></div><span class="cc-lbl">8/11</span></div>
+            <div class="cc"><span class="cc-val num">7</span><div class="cc-track"><i class="cc-fill" style="--h:.39"></i></div><span class="cc-lbl">8/18</span></div>
+            <div class="cc"><span class="cc-val num">10</span><div class="cc-track"><i class="cc-fill" style="--h:.56"></i></div><span class="cc-lbl">8/25</span></div>
+            <div class="cc"><span class="cc-val num">9</span><div class="cc-track"><i class="cc-fill" style="--h:.5"></i></div><span class="cc-lbl">9/01</span></div>
+            <div class="cc"><span class="cc-val num">11</span><div class="cc-track"><i class="cc-fill" style="--h:.61"></i></div><span class="cc-lbl">9/08</span></div>
+            <div class="cc"><span class="cc-val num">12</span><div class="cc-track"><i class="cc-fill" style="--h:.67"></i></div><span class="cc-lbl">9/15</span></div>
+            <div class="cc now"><span class="cc-val num">14</span><div class="cc-track"><i class="cc-fill" style="--h:.78"></i></div><span class="cc-lbl">Одоо</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-blue"><svg class="ic"><use href="#i-calendar"/></svg></span>Энэ долоо хоног, өдрөөр</h2></div>
+          <div class="week">
+            <div class="day"><span class="day-disc done" style="font-weight:900">12</span><span class="day-label">Да</span></div>
+            <div class="day"><span class="day-disc done" style="font-weight:900">9</span><span class="day-label">Мя</span></div>
+            <div class="day"><span class="day-disc today done" style="font-weight:900">11</span><span class="day-label today">Лх</span></div>
+            <div class="day"><span class="day-disc future"></span><span class="day-label">Пү</span></div>
+            <div class="day"><span class="day-disc future"></span><span class="day-label">Ба</span></div>
+            <div class="day"><span class="day-disc future"></span><span class="day-label">Бя</span></div>
+            <div class="day"><span class="day-disc future"></span><span class="day-label">Ня</span></div>
+          </div>
+          <p class="small muted" style="margin-top:10px">Тойрог дахь тоо нь тухайн өдөр идэвхтэй байсан сурагчид.</p>
+        </div>
+
+        <details class="card year-toggle">
+          <summary class="row" style="justify-content:space-between;cursor:pointer;min-height:44px">
+            <h2 style="display:flex;align-items:center;gap:10px"><span class="ib ib-sm t-purple"><svg class="ic"><use href="#i-calendar"/></svg></span>Жилийн тойм</h2>
+            <svg class="ic chev"><use href="#i-chevron-down"/></svg>
+          </summary>
+          <p class="small muted" style="margin-top:8px">Сар бүрийн дундаж идэвхтэй сурагч</p>
+          <div class="months">
+            <div class="month"><span>1-р сар</span><b class="num">8</b><div class="bar"><i style="--p:.44;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>2-р сар</span><b class="num">10</b><div class="bar"><i style="--p:.55;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>3-р сар</span><b class="num">12</b><div class="bar"><i style="--p:.66;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>4-р сар</span><b class="num">13</b><div class="bar"><i style="--p:.72;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>5-р сар</span><b class="num">15</b><div class="bar"><i style="--p:.83;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>6-р сар</span><b class="num">3</b><div class="bar"><i style="--p:.16;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>7-р сар</span><b class="num">1</b><div class="bar"><i style="--p:.05;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>8-р сар</span><b class="num">8</b><div class="bar"><i style="--p:.44;--c:var(--purple)"></i></div></div>
+            <div class="month"><span>9-р сар</span><b class="num">12</b><div class="bar"><i style="--p:.66;--c:var(--orange)"></i></div></div>
+            <div class="month future"><span>10-р сар</span><b class="num">0</b><div class="bar"></div></div>
+            <div class="month future"><span>11-р сар</span><b class="num">0</b><div class="bar"></div></div>
+            <div class="month future"><span>12-р сар</span><b class="num">0</b><div class="bar"></div></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-gold"><svg class="ic"><use href="#i-award"/></svg></span>Энэ долоо хоногийн тэргүүлэгчид</h2></div>
+          <div class="list">
+            <div class="row"><span class="rank rank-1">1</span><div class="row-main"><div class="row" style="justify-content:space-between"><b class="wrap-any">Анударь Г.</b><span class="chip t-orange"><svg class="ic"><use href="#i-flame"/></svg>7 өдөр</span></div><div class="bar" style="margin-top:6px"><i style="--p:1;--c:var(--gold)"></i></div></div></div>
+            <div class="row"><span class="rank rank-2">2</span><div class="row-main"><div class="row" style="justify-content:space-between"><b class="wrap-any">Тэмүүлэн Б.</b><span class="chip t-orange"><svg class="ic"><use href="#i-flame"/></svg>6 өдөр</span></div><div class="bar" style="margin-top:6px"><i style="--p:.86;--c:var(--blue)"></i></div></div></div>
+            <div class="row"><span class="rank rank-3">3</span><div class="row-main"><div class="row" style="justify-content:space-between"><b class="wrap-any">Мишээл Д.</b><span class="chip t-orange"><svg class="ic"><use href="#i-flame"/></svg>6 өдөр</span></div><div class="bar" style="margin-top:6px"><i style="--p:.86;--c:var(--blue)"></i></div></div></div>
+            <div class="row"><span class="rank rank-n">4</span><div class="row-main"><div class="row" style="justify-content:space-between"><b class="wrap-any">Билгүүн С.</b><span class="chip t-orange"><svg class="ic"><use href="#i-flame"/></svg>5 өдөр</span></div><div class="bar" style="margin-top:6px"><i style="--p:.71;--c:var(--teal)"></i></div></div></div>
+            <div class="row"><span class="rank rank-n">5</span><div class="row-main"><div class="row" style="justify-content:space-between"><b class="wrap-any">Сарнай Н.</b><span class="chip t-orange"><svg class="ic"><use href="#i-flame"/></svg>5 өдөр</span></div><div class="bar" style="margin-top:6px"><i style="--p:.71;--c:var(--teal)"></i></div></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-blue"><svg class="ic"><use href="#i-bell"/></svg></span>Урамшуулъя</h2><span class="chip t-mute num">4 сурагч</span></div>
+          <p class="small muted" style="margin-bottom:10px">Энэ долоо хоногт хараахан ороогүй</p>
+          <div class="list">
+            <div class="row"><span class="avatar" style="width:38px;height:38px;font-size:14px">ТБ</span><div class="row-main"><b>Тэмүүжин Б.</b><br><span class="small muted">5 хоногийн өмнө</span></div></div>
+            <div class="row"><span class="avatar" style="width:38px;height:38px;font-size:14px;background:var(--teal-soft);color:var(--teal-ink)">ХЭ</span><div class="row-main"><b>Хулан Э.</b><br><span class="small muted">6 хоногийн өмнө</span></div></div>
+            <div class="row"><span class="avatar" style="width:38px;height:38px;font-size:14px;background:var(--gold-soft);color:var(--gold-ink)">ЭО</span><div class="row-main"><b>Энхтөр О.</b><br><span class="small muted">8 хоногийн өмнө</span></div></div>
+          </div>
+          <button class="btn btn-primary btn-block" type="button" style="margin-top:14px" data-toast="Сануулга илгээгдлээ"><svg class="ic"><use href="#i-send"/></svg>Сануулга илгээх</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     5. АДМИН — Удирдлага
+     ===================================================================== -->
+<section class="screen" id="admin-home" data-roles="ADMIN" data-active="/app/admin" data-title="Удирдлага">
+  <div class="stack">
+    <div class="page-head">
+      <div><p class="kicker">Лхагва, 9-р сарын 23</p><h1>Өдрийн мэнд, Энхжин</h1></div>
+      <button class="btn btn-primary" type="button" data-toast="Шинэ хэрэглэгч нэмэх маягт"><svg class="ic"><use href="#i-user-plus"/></svg>Хэрэглэгч нэмэх</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat" style="--c:var(--blue)"><i class="stripe"></i>
+        <div class="stat-top"><span class="ib ib-sm t-blue"><svg class="ic"><use href="#i-users"/></svg></span><span class="trend" style="color:var(--green-ink)"><svg class="ic ic-sm"><use href="#i-trending-up"/></svg>+12</span></div>
+        <p class="stat-label">Идэвхтэй сурагч</p><p class="big-num num">186</p>
+      </div>
+      <div class="stat" style="--c:var(--green)"><i class="stripe"></i>
+        <div class="stat-top"><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-wallet"/></svg></span><span class="trend num" style="color:var(--green-ink)">79%</span></div>
+        <p class="stat-label">9-р сарын төлбөр</p><p class="big-num num">₮41.2<span style="font-size:15px"> сая</span></p>
+        <div class="bar" style="margin-top:8px"><i style="--p:.79;--c:var(--green)"></i></div>
+        <p class="small muted num" style="margin-top:4px">₮52.0 саяас</p>
+      </div>
+      <div class="stat" style="--c:var(--orange)"><i class="stripe"></i>
+        <div class="stat-top"><span class="ib ib-sm t-orange"><svg class="ic"><use href="#i-clock"/></svg></span><span class="chip t-orange">Хүлээгдэж буй</span></div>
+        <p class="stat-label">Батлах зүйл</p><p class="big-num num">12</p>
+      </div>
+      <div class="stat" style="--c:var(--teal)"><i class="stripe"></i>
+        <div class="stat-top"><span class="ib ib-sm t-teal"><svg class="ic"><use href="#i-check-circle"/></svg></span><span class="trend" style="color:var(--green-ink)"><svg class="ic ic-sm"><use href="#i-trending-up"/></svg>+2%</span></div>
+        <p class="stat-label">Ирцийн хувь</p><p class="big-num num">91%</p>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-rose"><svg class="ic"><use href="#i-list-checks"/></svg></span>Хийх ажил</h2><span class="chip t-rose num">5 төрөл</span></div>
+          <div class="list">
+            <a class="item" href="#staff-pay" style="text-decoration:none;flex-wrap:nowrap"><span class="ib t-green"><svg class="ic"><use href="#i-credit-card"/></svg></span><div class="row-main"><p class="item-title">Төлбөр баталгаажуулах</p><span class="meta"><span>₮2,450,000</span><span>QPay, данс</span></span></div><span class="nav-count">7</span><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></a>
+            <a class="item" href="#" data-toast="Хүсэлтүүд" style="text-decoration:none;flex-wrap:nowrap"><span class="ib t-blue"><svg class="ic"><use href="#i-user-plus"/></svg></span><div class="row-main"><p class="item-title">Шинэ элсэлтийн хүсэлт</p><span class="meta"><span>Өнөөдөр 2</span><span>Өчигдөр 1</span></span></div><span class="nav-count">3</span><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></a>
+            <a class="item" href="#" data-toast="Банкны тулгалт" style="text-decoration:none;flex-wrap:nowrap"><span class="ib t-purple"><svg class="ic"><use href="#i-building"/></svg></span><div class="row-main"><p class="item-title">Банкны гүйлгээ тулгах</p><span class="meta"><span>Хаан банк</span><span>9/22 хүртэл</span></span></div><span class="nav-count">5</span><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></a>
+            <a class="item" href="#teacher-home" style="text-decoration:none;flex-wrap:nowrap"><span class="ib t-teal"><svg class="ic"><use href="#i-link"/></svg></span><div class="row-main"><p class="item-title">Эцэг эхийн холболт</p><span class="meta"><span>12А</span><span>11Б</span></span></div><span class="nav-count">2</span><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></a>
+            <a class="item" href="#" data-toast="Багш нарын эрх" style="text-decoration:none;flex-wrap:nowrap"><span class="ib t-gold"><svg class="ic"><use href="#i-shield-check"/></svg></span><div class="row-main"><p class="item-title">Багшийн эрх олгох</p><span class="meta"><span>Шинэ багш 1</span></span></div><span class="nav-count">1</span><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-wallet"/></svg></span>9-р сарын төлөлт</h2><a class="link-btn" href="#staff-pay">Дэлгэрэнгүй<svg class="ic"><use href="#i-chevron-right"/></svg></a></div>
+          <div class="stackbar" role="img" aria-label="Төлсөн 128, хэсэгчлэн 35, төлөөгүй 23"><i style="flex:128;background:var(--green)"></i><i style="flex:35;background:var(--orange)"></i><i style="flex:23;background:var(--rose)"></i></div>
+          <div class="legend">
+            <span><svg class="ic" style="color:var(--green-ink)"><use href="#i-check-circle"/></svg>Төлсөн <b class="num">128</b></span>
+            <span><svg class="ic" style="color:var(--orange-ink)"><use href="#i-clock"/></svg>Хэсэгчлэн <b class="num">35</b></span>
+            <span><svg class="ic" style="color:var(--rose-ink)"><use href="#i-alert-circle"/></svg>Төлөөгүй <b class="num">23</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-brand"><svg class="ic"><use href="#i-grid"/></svg></span>Удирдлагын хэсэг</h2></div>
+          <div class="quick">
+            <button class="quick-tile" type="button" data-toast="Сурагчид"><span class="ib t-blue"><svg class="ic"><use href="#i-users"/></svg></span>Сурагчид</button>
+            <button class="quick-tile" type="button" data-toast="Элсэлтийн удирдлага"><span class="ib t-teal"><svg class="ic"><use href="#i-clipboard-list"/></svg></span>Элсэлт</button>
+            <button class="quick-tile" type="button" data-toast="Аналитик"><span class="ib t-purple"><svg class="ic"><use href="#i-bar-chart"/></svg></span>Аналитик</button>
+            <button class="quick-tile" type="button" data-toast="Аудит"><span class="ib t-gold"><svg class="ic"><use href="#i-shield-check"/></svg></span>Аудит</button>
+            <button class="quick-tile" type="button" data-toast="Дугаарлуу мессеж"><span class="ib t-rose"><svg class="ic"><use href="#i-message-square"/></svg></span>Мессеж</button>
+            <button class="quick-tile" type="button" data-toast="Онолын агуулга"><span class="ib t-green"><svg class="ic"><use href="#i-file-text"/></svg></span>Онолын агуулга</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-orange"><svg class="ic"><use href="#i-plus"/></svg></span>Шинээр үүсгэх</h2></div>
+          <div class="list">
+            <button class="item" type="button" data-toast="Шинэ хэрэглэгч" style="text-align:left;flex-wrap:nowrap;font:inherit;color:inherit"><span class="ib ib-sm t-blue"><svg class="ic"><use href="#i-user-plus"/></svg></span><b class="row-main">Шинэ хэрэглэгч</b><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></button>
+            <button class="item" type="button" data-toast="Шинэ анги" style="text-align:left;flex-wrap:nowrap;font:inherit;color:inherit"><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-users"/></svg></span><b class="row-main">Шинэ анги</b><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></button>
+            <button class="item" type="button" data-toast="Шинэ эрх" style="text-align:left;flex-wrap:nowrap;font:inherit;color:inherit"><span class="ib ib-sm t-purple"><svg class="ic"><use href="#i-credit-card"/></svg></span><b class="row-main">Шинэ эрх (багц)</b><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></button>
+            <button class="item" type="button" data-toast="Хэрэглэгчдийн үүрэг" style="text-align:left;flex-wrap:nowrap;font:inherit;color:inherit"><span class="ib ib-sm t-gold"><svg class="ic"><use href="#i-shield"/></svg></span><b class="row-main">Үүрэг солих</b><svg class="ic" style="color:var(--ink-dim)"><use href="#i-chevron-right"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     6. АЖИЛТАН — Төлбөрийн хяналт
+     ===================================================================== -->
+<section class="screen" id="staff-pay" data-roles="TEACHER_PLUS ADMIN" data-active="/app/payments" data-title="Төлбөрийн хяналт">
+  <div class="stack">
+    <div class="page-head">
+      <h1>Төлбөрийн хяналт</h1>
+      <div class="class-switch" role="group" aria-label="Сар сонгох" style="margin:0">
+        <button class="class-pill" type="button" aria-pressed="false" style="--cls:var(--line)">8-р сар</button>
+        <button class="class-pill" type="button" aria-pressed="true" style="--cls:var(--brand)">9-р сар</button>
+        <button class="class-pill" type="button" aria-pressed="false" style="--cls:var(--line)">10-р сар</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-bar-chart"/></svg></span>9-р сарын төлөлт</h2><b class="num" style="font-size:20px">69%</b></div>
+      <div class="stackbar" style="height:28px" role="img" aria-label="Төлсөн 128, хэсэгчлэн 35, төлөөгүй 23"><i style="flex:128;background:var(--green)"></i><i style="flex:35;background:var(--orange)"></i><i style="flex:23;background:var(--rose)"></i></div>
+      <div class="stat-trio">
+        <div class="mini-stat" style="background:var(--green-soft)"><svg class="ic" style="color:var(--green-ink)"><use href="#i-check-circle"/></svg><b class="num">128</b><span>Төлсөн</span></div>
+        <div class="mini-stat" style="background:var(--orange-soft)"><svg class="ic" style="color:var(--orange-ink)"><use href="#i-clock"/></svg><b class="num">35</b><span>Хэсэгчлэн</span></div>
+        <div class="mini-stat" style="background:var(--rose-soft)"><svg class="ic" style="color:var(--rose-ink)"><use href="#i-alert-circle"/></svg><b class="num">23</b><span>Төлөөгүй</span></div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-orange"><svg class="ic"><use href="#i-clock"/></svg></span>Баталгаажуулах</h2><span class="chip t-orange num" id="pendCount">4 хүлээгдэж буй</span></div>
+          <div class="list" id="pendList">
+            <div class="pay-card"><div class="pay-top"><span class="ib t-blue"><svg class="ic"><use href="#i-qr"/></svg></span><div class="row-main"><p class="item-title">Бат-Эрдэнэ Г.</p><span class="meta"><span>12А</span><span>QPay</span><span>11-р сар</span></span></div><span class="pay-amount num">₮350,000</span></div><div class="pay-actions"><button class="btn btn-success btn-sm" type="button" data-pay="ok"><svg class="ic"><use href="#i-check"/></svg>Батлах</button><button class="btn btn-danger-outline btn-sm" type="button" data-pay="no"><svg class="ic"><use href="#i-x"/></svg>Татгалзах</button></div><span class="pay-result"></span></div>
+            <div class="pay-card"><div class="pay-top"><span class="ib t-purple"><svg class="ic"><use href="#i-building"/></svg></span><div class="row-main"><p class="item-title">Мөнх-Очир Т.</p><span class="meta"><span>11Б</span><span>Данс</span><span>9-р сар</span></span></div><span class="pay-amount num">₮175,000</span></div><div class="pay-actions"><button class="btn btn-success btn-sm" type="button" data-pay="ok"><svg class="ic"><use href="#i-check"/></svg>Батлах</button><button class="btn btn-danger-outline btn-sm" type="button" data-pay="no"><svg class="ic"><use href="#i-x"/></svg>Татгалзах</button></div><span class="pay-result"></span></div>
+            <div class="pay-card"><div class="pay-top"><span class="ib t-green"><svg class="ic"><use href="#i-banknote"/></svg></span><div class="row-main"><p class="item-title">Хулан Э.</p><span class="meta"><span>10В</span><span>Бэлэн</span><span>9-р сар</span></span></div><span class="pay-amount num">₮350,000</span></div><div class="pay-actions"><button class="btn btn-success btn-sm" type="button" data-pay="ok"><svg class="ic"><use href="#i-check"/></svg>Батлах</button><button class="btn btn-danger-outline btn-sm" type="button" data-pay="no"><svg class="ic"><use href="#i-x"/></svg>Татгалзах</button></div><span class="pay-result"></span></div>
+            <div class="pay-card"><div class="pay-top"><span class="ib t-purple"><svg class="ic"><use href="#i-building"/></svg></span><div class="row-main"><p class="item-title">Сарнай Н.</p><span class="meta"><span>12А</span><span>Данс</span><span>10-р сар</span></span></div><span class="pay-amount num">₮350,000</span></div><div class="pay-actions"><button class="btn btn-success btn-sm" type="button" data-pay="ok"><svg class="ic"><use href="#i-check"/></svg>Батлах</button><button class="btn btn-danger-outline btn-sm" type="button" data-pay="no"><svg class="ic"><use href="#i-x"/></svg>Татгалзах</button></div><span class="pay-result"></span></div>
+          </div>
+        </div>
+
+        <details class="card year-toggle">
+          <summary class="row" style="justify-content:space-between;cursor:pointer;min-height:44px">
+            <h2 style="display:flex;align-items:center;gap:10px"><span class="ib ib-sm t-brand"><svg class="ic"><use href="#i-file-text"/></svg></span>Сургалтын төлбөрийн лавлагаа</h2>
+            <svg class="ic chev"><use href="#i-chevron-down"/></svg>
+          </summary>
+          <div class="cols-2" style="margin-top:12px">
+            <div class="tier"><b>Ахлах анги</b><div class="tier-row"><span class="muted">Сараар</span><b class="num">₮350,000</b></div><div class="tier-row"><span class="muted">Бүтэн жил</span><b class="num">₮2,900,000</b></div></div>
+            <div class="tier"><b>Дунд анги</b><div class="tier-row"><span class="muted">Сараар</span><b class="num">₮300,000</b></div><div class="tier-row"><span class="muted">Бүтэн жил</span><b class="num">₮2,500,000</b></div></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-rose"><svg class="ic"><use href="#i-alert-circle"/></svg></span>Үлдэгдэлтэй</h2><span class="chip t-rose num">23</span></div>
+          <div class="list">
+            <div class="row"><div class="row-main"><b>Тэмүүжин Б.</b><br><span class="meta"><span>12А</span><span class="num">₮350,000</span></span></div><button class="btn btn-ghost btn-sm" type="button" data-toast="Сануулга илгээгдлээ"><svg class="ic"><use href="#i-send"/></svg>Сануулах</button></div>
+            <div class="row"><div class="row-main"><b>Оюу-Эрдэнэ С.</b><br><span class="meta"><span>11Б</span><span class="num">₮175,000</span></span></div><button class="btn btn-ghost btn-sm" type="button" data-toast="Сануулга илгээгдлээ"><svg class="ic"><use href="#i-send"/></svg>Сануулах</button></div>
+            <div class="row"><div class="row-main"><b>Энхтөр О.</b><br><span class="meta"><span>10В</span><span class="num">₮300,000</span></span></div><button class="btn btn-ghost btn-sm" type="button" data-toast="Сануулга илгээгдлээ"><svg class="ic"><use href="#i-send"/></svg>Сануулах</button></div>
+          </div>
+          <button class="btn btn-outline btn-block" type="button" style="margin-top:14px" data-toast="Бүх жагсаалт">Бүгдийг харах<svg class="ic"><use href="#i-chevron-right"/></svg></button>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-check-circle"/></svg></span>Сүүлийн төлбөрүүд</h2></div>
+          <ol class="timeline">
+            <li><span class="ib t-green"><svg class="ic"><use href="#i-check"/></svg></span><b>Анударь Г.</b> <span class="num">₮350,000</span><br><span class="meta"><span>Өнөөдөр 10:24</span><span>QPay</span></span></li>
+            <li><span class="ib t-green"><svg class="ic"><use href="#i-check"/></svg></span><b>Билгүүн С.</b> <span class="num">₮300,000</span><br><span class="meta"><span>Өчигдөр</span><span>Данс</span></span></li>
+            <li><span class="ib t-green"><svg class="ic"><use href="#i-check"/></svg></span><b>Мишээл Д.</b> <span class="num">₮350,000</span><br><span class="meta"><span>9/21</span><span>Бэлэн</span></span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     7. Бүх дүрийн цэс
+     ===================================================================== -->
+<section class="screen" id="nav-map" data-roles="ADMIN" data-active="" data-title="Бүх дүрийн цэс">
+  <div class="stack">
+    <div class="page-head"><h1>Бүх дүрийн цэс</h1></div>
+    <p class="muted">Гар утсанд доод мөрөнд 4 гол цэс, үлдсэн нь «Бусад» дотор. Компьютерт зүүн самбарт мөн адил, «Бусад» нь нээгддэг хэсэг. Нэг ч цэс хасагдаагүй.</p>
+    <div class="role-grid" id="roleGrid"></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     8. Дизайны зарчим (globals.css руу шилжүүлэх лавлагаа)
+     ===================================================================== -->
+<section class="screen" id="principles" data-roles="ADMIN" data-active="" data-title="Дизайны зарчим">
+  <div class="stack">
+    <div class="page-head"><h1>Дизайны зарчим</h1></div>
+    <div class="card">
+      <div class="card-head"><h2><span class="ib ib-sm t-brand"><svg class="ic"><use href="#i-palette"/></svg></span>Өнгө</h2></div>
+      <p class="muted small" style="margin-bottom:12px">Тод өнгө зөвхөн дүрс, зурвас, графикт. Текст нь «-ink» хувилбараар. Өнгө бүр дүрс эсвэл үгтэй хамт утга илэрхийлнэ.</p>
+      <div class="swatches" id="swatches"></div>
+    </div>
+    <div class="cols-2">
+      <div class="card">
+        <div class="card-head"><h2>Зай ба булан</h2></div>
+        <div class="scale">
+          <div><i style="display:block;width:4px;height:4px;background:var(--blue)"></i>4</div>
+          <div><i style="display:block;width:8px;height:8px;background:var(--blue)"></i>8</div>
+          <div><i style="display:block;width:12px;height:12px;background:var(--blue)"></i>12</div>
+          <div><i style="display:block;width:16px;height:16px;background:var(--blue)"></i>16</div>
+          <div><i style="display:block;width:24px;height:24px;background:var(--blue)"></i>24</div>
+          <div><i style="display:block;width:32px;height:32px;background:var(--blue)"></i>32</div>
+        </div>
+        <div class="scale" style="margin-top:16px">
+          <div><i style="display:block;width:48px;height:48px;border-radius:10px;background:var(--purple-soft);border:2px solid var(--purple)"></i>10 жижиг</div>
+          <div><i style="display:block;width:48px;height:48px;border-radius:16px;background:var(--purple-soft);border:2px solid var(--purple)"></i>16 товч</div>
+          <div><i style="display:block;width:48px;height:48px;border-radius:24px;background:var(--purple-soft);border:2px solid var(--purple)"></i>24 карт</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Дүрс ба хөдөлгөөн</h2></div>
+        <ul class="principles">
+          <li><span class="ib ib-sm t-blue"><svg class="ic"><use href="#i-star"/></svg></span><span>Икон зөвхөн lucide, 20px (текст дотор), 24px (доод таб), 44px дэвсгэртэй тэмдэг.</span></li>
+          <li><span class="ib ib-sm t-green"><svg class="ic"><use href="#i-check"/></svg></span><span>Товшдог бүх зүйл 44px-ээс багагүй.</span></li>
+          <li><span class="ib ib-sm t-orange"><svg class="ic"><use href="#i-zap"/></svg></span><span>Хөдөлгөөн 120 / 180 / 260 мс, зөвхөн transform ба opacity. Хөдөлгөөн багасгах тохиргоотой үед бүгд унтарна.</span></li>
+          <li><span class="ib ib-sm t-purple"><svg class="ic"><use href="#i-sparkles"/></svg></span><span>Урам өгөх: өсөлтийг тэмдэглэнэ, хоосон торыг биш хийсэн зүйлийг том харуулна. Буруутгах үг хэрэглэхгүй.</span></li>
+          <li><span class="ib ib-sm t-rose"><svg class="ic"><use href="#i-info"/></svg></span><span>Тусгаарлагч цэгийг CSS зурна. Emoji, unicode тэмдэгт хэрэглэхгүй.</span></li>
+          <li><span class="ib ib-sm t-teal"><svg class="ic"><use href="#i-panel"/></svg></span><span>Бичвэр 16px суурь, гарчиг 26 / 19 / 16px. Системийн фонт.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Доод таб (гар утас) -->
+<nav class="tabbar" id="tabbar" aria-label="Үндсэн цэс"></nav>
+
+<!-- «Бусад» хуудас -->
+<div class="scrim sheet-scrim" id="sheetScrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1">
+  <div class="sheet-grab"></div>
+  <div class="user-card" id="sheetUser"></div>
+  <h2 id="sheetTitle" class="sr-only">Бусад цэс</h2>
+  <div id="sheetBody"></div>
+  <div class="sb-actions">
+    <button class="btn btn-ghost" type="button" data-theme-toggle><svg class="ic"><use href="#i-moon"/></svg><span class="theme-label">Харанхуй</span></button>
+    <button class="btn btn-ghost" type="button" data-toast="Системээс гарлаа"><svg class="ic"><use href="#i-log-out"/></svg>Гарах</button>
+  </div>
+</div>
+
+<!-- Төлбөр төлөх модал -->
+<div class="scrim" id="modalScrim"></div>
+<div class="modal" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payTitle" tabindex="-1">
+  <div class="row" style="justify-content:space-between">
+    <h2 id="payTitle">12-р сарын төлбөр</h2>
+    <button class="icon-btn" type="button" data-close aria-label="Хаах"><svg class="ic"><use href="#i-x"/></svg></button>
+  </div>
+  <p class="big-num num" style="margin-top:8px">₮350,000</p>
+  <div class="method-grid" role="group" aria-label="Төлөх арга">
+    <button class="method" type="button" aria-pressed="true"><span class="ib t-blue"><svg class="ic"><use href="#i-qr"/></svg></span>QPay</button>
+    <button class="method" type="button" aria-pressed="false"><span class="ib t-purple"><svg class="ic"><use href="#i-building"/></svg></span>Дансаар шилжүүлэх</button>
+    <button class="method" type="button" aria-pressed="false"><span class="ib t-green"><svg class="ic"><use href="#i-banknote"/></svg></span>Бэлнээр</button>
+  </div>
+  <button class="btn btn-primary btn-block" type="button" data-close data-toast="QPay нээгдэнэ">Үргэлжлүүлэх<svg class="ic"><use href="#i-arrow-right"/></svg></button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><svg class="ic"><use href="#i-info"/></svg><span></span></div>
+
+<script>
+(function () {
+  "use strict";
+  /* ---- nav-data.ts-тэй ЯГ ижил цэс (маршрут, шошго, икон) ---- */
+  var HOME = {
+    STUDENT: { href: "/app/student", label: "Миний самбар", icon: "home" },
+    TEACHER: { href: "/app/teacher", label: "Багшийн самбар", icon: "home" },
+    TEACHER_PLUS: { href: "/app/teacher", label: "Багшийн самбар", icon: "home" },
+    ADMIN: { href: "/app/admin", label: "Удирдлага", icon: "home" },
+    BUYER: { href: "/app/buyer", label: "Миний эрхүүд", icon: "home" },
+    PARENT: { href: "/app/parent", label: "Хүүхдийн явц", icon: "home" }
+  };
+  var L = {
+    learn: { href: "/app/learn", label: "Хичээл үзэх", icon: "book-open", short: "Хичээл" },
+    library: { href: "/app/library", label: "Бодлогын сан", icon: "layers", short: "Бодлого" },
+    videos: { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle", short: "Видео" },
+    tests: { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
+    goals: { href: "/app/goals", label: "Миний зорилго", icon: "target" },
+    schedule: { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
+    myPay: { href: "/app/student/payments", label: "Миний төлбөр", icon: "credit-card" },
+    planner: { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
+    theory: { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
+    pay: { href: "/app/payments", label: "Төлбөр", icon: "credit-card", count: 4 },
+    leads: { href: "/app/admin/leads", label: "Хүсэлтүүд", icon: "user-plus", short: "Хүсэлт", count: 3 },
+    enroll: { href: "/app/admin/enrollment", label: "Элсэлтийн удирдлага", icon: "clipboard-list" },
+    reconcile: { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
+    students: { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
+    audit: { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
+    analytics: { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
+    sms: { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
+    teacherDash: { href: "/app/teacher", label: "Багшийн самбар", icon: "teacher" },
+    profile: { href: "/app/profile", label: "Миний мэдээлэл", icon: "user" }
+  };
+  var NAV = {
+    STUDENT: [L.learn, L.library, L.videos, L.tests, L.goals, L.schedule, L.myPay],
+    TEACHER: [L.library, L.videos, L.tests, L.schedule, L.planner, L.theory],
+    TEACHER_PLUS: [L.library, L.videos, L.tests, L.pay, L.leads, L.enroll, L.reconcile, L.schedule, L.planner, L.theory, L.students, L.audit, L.analytics, L.sms],
+    ADMIN: [L.teacherDash, L.library, L.videos, L.tests, L.leads, L.enroll, L.reconcile, L.schedule, L.planner, L.theory, L.students, L.audit, L.analytics, L.sms],
+    BUYER: [L.library, L.videos, L.schedule],
+    PARENT: [L.schedule]
+  };
+  /* Гол (байнга харагдах) цэс — гар утасны доод мөрөнд мөн адил */
+  var PRIMARY = {
+    STUDENT: ["/app/learn", "/app/tests", "/app/schedule"],
+    TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
+    TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
+    ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
+    BUYER: ["/app/library", "/app/videos", "/app/schedule"],
+    PARENT: ["/app/schedule"]
+  };
+  var GROUP = {
+    "/app/learn": "learn", "/app/library": "learn", "/app/videos": "learn", "/app/tests": "learn",
+    "/app/teacher": "class", "/app/schedule": "class", "/app/planner": "class",
+    "/app/admin/leads": "admin", "/app/admin/enrollment": "admin", "/app/admin/reconcile": "admin",
+    "/app/admin/theory": "admin", "/app/admin/students": "admin", "/app/admin/audit": "admin",
+    "/app/admin/analytics": "admin", "/app/payments": "admin", "/app/sms": "admin",
+    "/app/goals": "personal", "/app/student/payments": "personal", "/app/profile": "personal"
+  };
+  var GROUPS = [["learn", "Сургалт", "book-open"], ["class", "Анги", "calendar"], ["admin", "Удирдлага", "shield"], ["personal", "Хувийн", "user"]];
+  var ROLE_LABEL = { STUDENT: "Сурагч", TEACHER: "Багш", TEACHER_PLUS: "Багш+", ADMIN: "Админ", BUYER: "Худалдан авагч", PARENT: "Эцэг эх" };
+  var USER = {
+    STUDENT: ["Бат-Эрдэнэ Г.", "БГ"], TEACHER: ["Номин Д.", "НД"], TEACHER_PLUS: ["Номин Д.", "НД"],
+    ADMIN: ["Энхжин С.", "ЭС"], BUYER: ["Цэцэг А.", "ЦА"], PARENT: ["Гантулга Э.", "ГЭ"]
+  };
+  var SCREEN_OF = { "/app/student": "student-home", "/app/student/payments": "student-pay", "/app/teacher": "teacher-home", "/app/admin": "admin-home", "/app/payments": "staff-pay" };
+
+  var role = "STUDENT", active = "/app/student";
+  function ic(name, cls) { return '<svg class="ic' + (cls ? " " + cls : "") + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>'; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function split(r) {
+    var items = NAV[r].concat([L.profile]);
+    var prim = PRIMARY[r];
+    return {
+      primary: prim.map(function (h) { return items.filter(function (i) { return i.href === h; })[0]; }),
+      more: items.filter(function (i) { return prim.indexOf(i.href) < 0; })
+    };
+  }
+  function grouped(list) {
+    return GROUPS.map(function (g) { return { key: g[0], label: g[1], icon: g[2], items: list.filter(function (i) { return (GROUP[i.href] || "learn") === g[0]; }) }; })
+      .filter(function (g) { return g.items.length; });
+  }
+  function isActive(i) { return i.href === active && !(i.icon === "teacher" && role !== "ADMIN"); }
+  function navItem(i) {
+    return '<li><a class="nav-item" href="#" data-href="' + i.href + '"' + (isActive(i) ? ' aria-current="page"' : "") + ' title="' + esc(i.label) + '">' +
+      '<span class="nav-ib">' + ic(i.icon) + '</span><span class="nav-label">' + esc(i.label) + "</span>" +
+      (i.count ? '<span class="nav-count" aria-label="' + i.count + ' шинэ">' + i.count + "</span>" : "") + "</a></li>";
+  }
+  function userCard() {
+    var u = USER[role];
+    return '<span class="avatar">' + u[1] + '</span><div class="user-meta" style="min-width:0"><div class="user-name">' + esc(u[0]) + '</div><span class="role-chip">' + ROLE_LABEL[role] + "</span></div>";
+  }
+  function renderNav() {
+    var s = split(role), home = HOME[role];
+    var moreOpen = s.more.some(isActive);
+    var sb = '<div class="sb-head"><a class="logo" href="#" data-href="' + home.href + '"><span class="logo-mark">Pi</span><span class="logo-text">Pi<span class="logo-dot">.</span>mn</span></a>' +
+      '<button class="icon-btn" type="button" id="railBtn" aria-label="Самбарыг хураах" style="border:0">' + ic("panel") + "</button></div>" +
+      '<ul class="nav-list">' + navItem(home) + s.primary.map(navItem).join("") + "</ul>" +
+      '<details class="sb-more"' + (moreOpen ? " open" : "") + '><summary class="nav-item"><span class="nav-ib">' + ic("grid") + '</span><span class="nav-label">Бусад</span>' + ic("chevron-down", "chev nav-count-hide") + "</summary>" +
+      grouped(s.more).map(function (g) {
+        return '<div class="sb-group"><div class="sb-group-title">' + ic(g.icon) + "<span>" + g.label + '</span></div><ul class="nav-list">' + g.items.map(navItem).join("") + "</ul></div>";
+      }).join("") + "</details>" +
+      '<div class="sb-foot"><div class="user-card">' + userCard() + '</div><div class="sb-actions">' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-theme-toggle aria-label="Өнгөний горим солих">' + ic("moon") + '<span class="btn-text theme-label">Харанхуй</span></button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-toast="Системээс гарлаа" aria-label="Гарах">' + ic("log-out") + '<span class="btn-text">Гарах</span></button></div></div>';
+    document.getElementById("sidebar").innerHTML = sb;
+
+    var tabs = [home].concat(s.primary);
+    var tb = tabs.map(function (i) {
+      var lbl = i === home ? "Нүүр" : (i.short || i.label);
+      return '<a class="tab" href="#" data-href="' + i.href + '"' + (isActive(i) ? ' aria-current="page"' : "") + ' aria-label="' + esc(i.label) + '"><span class="tab-pill">' + ic(i.icon, "ic-lg") +
+        (i.count ? '<span class="badge-dot"></span>' : "") + '</span><span class="tab-label">' + esc(lbl) + "</span></a>";
+    }).join("");
+    tb += '<button class="tab" type="button" id="moreTab" aria-haspopup="dialog"' + (moreOpen ? ' aria-current="page"' : "") + '><span class="tab-pill">' + ic("grid", "ic-lg") +
+      (s.more.some(function (i) { return i.count; }) ? '<span class="badge-dot"></span>' : "") + '</span><span class="tab-label">Бусад</span></button>';
+    document.getElementById("tabbar").innerHTML = tb;
+
+    document.getElementById("sheetUser").innerHTML = userCard();
+    document.getElementById("sheetBody").innerHTML = grouped(s.more).map(function (g) {
+      return '<div class="sb-group-title" style="padding:10px 2px 0">' + ic(g.icon) + "<span>" + g.label + '</span></div><div class="sheet-grid">' +
+        g.items.map(function (i) {
+          return '<a class="sheet-tile" href="#" data-href="' + i.href + '"' + (isActive(i) ? ' aria-current="page"' : "") + '><span class="ib ib-sm t-brand">' + ic(i.icon) + "</span><span>" + esc(i.label) + "</span></a>";
+        }).join("") + "</div>";
+    }).join("");
+    syncTheme();
+  }
+
+  function renderRoleGrid() {
+    var tints = ["t-blue", "t-green", "t-orange", "t-purple", "t-rose", "t-teal"];
+    document.getElementById("roleGrid").innerHTML = Object.keys(NAV).map(function (r, n) {
+      var s = split(r), home = HOME[r];
+      var tabs = [home].concat(s.primary);
+      return '<div class="card"><div class="card-head"><h2><span class="ib ib-sm ' + tints[n] + '">' + ic("user") + "</span>" + ROLE_LABEL[r] + '</h2><span class="chip t-mute num">' + (NAV[r].length + 2) + ' цэс</span></div>' +
+        '<b class="small">Доод мөр / гол цэс</b><div class="mini-tabs">' + tabs.map(function (i) { return "<span>" + ic(i.icon) + esc(i === home ? "Нүүр" : (i.short || i.label)) + "</span>"; }).join("") +
+        "<span>" + ic("grid") + "Бусад</span></div>" +
+        '<b class="small">Бусад дотор</b><div class="more-list" style="margin-top:6px">' + s.more.map(function (i) { return '<span class="chip t-mute">' + ic(i.icon) + esc(i.label) + "</span>"; }).join("") + "</div></div>";
+    }).join("");
+  }
+
+  function renderSwatches() {
+    var names = ["navy", "brand", "bg", "surface", "ink", "ink-dim", "blue", "green", "orange", "purple", "rose", "teal", "gold"];
+    var cs = getComputedStyle(document.documentElement);
+    document.getElementById("swatches").innerHTML = names.map(function (n) {
+      var v = cs.getPropertyValue("--" + n).trim();
+      var ink = cs.getPropertyValue("--" + n + "-ink").trim();
+      return '<div class="sw"><i style="background:var(--' + n + ')"></i><div><b>--' + n + "</b><code>" + v + (ink ? "<br>ink " + ink : "") + "</code></div></div>";
+    }).join("");
+  }
+
+  /* ---- Дэлгэц солих ---- */
+  var sel = document.getElementById("screenSel");
+  function show(id) {
+    var el = document.getElementById(id);
+    if (!el || !el.classList.contains("screen")) { id = "student-home"; el = document.getElementById(id); }
+    document.querySelectorAll(".screen").forEach(function (s) { s.classList.toggle("active", s === el); });
+    var roles = el.getAttribute("data-roles").split(" ");
+    if (roles.indexOf(role) < 0) role = roles[0];
+    active = el.getAttribute("data-active");
+    document.getElementById("topTitle").textContent = el.getAttribute("data-title");
+    sel.value = id;
+    renderNav();
+    if (id === "principles") renderSwatches();
+    window.scrollTo(0, 0);
+  }
+  sel.addEventListener("change", function () { location.hash = sel.value; });
+  window.addEventListener("hashchange", function () { var h = location.hash.slice(1); if (document.getElementById(h) && document.getElementById(h).classList.contains("screen")) show(h); });
+
+  /* ---- Өнгөний горим ---- */
+  function currentDark() {
+    var t = document.documentElement.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function syncTheme() {
+    var dark = currentDark();
+    document.querySelectorAll("[data-theme-toggle]").forEach(function (b) {
+      var u = b.querySelector("use"); if (u) u.setAttribute("href", dark ? "#i-sun" : "#i-moon");
+      var l = b.querySelector(".theme-label"); if (l) l.textContent = dark ? "Цайвар" : "Харанхуй";
+    });
+  }
+  try { var saved = localStorage.getItem("pi-proto-theme"); if (saved) document.documentElement.setAttribute("data-theme", saved); } catch (e) {}
+  var params = new URLSearchParams(location.search);
+  if (params.get("theme")) document.documentElement.setAttribute("data-theme", params.get("theme"));
+
+  /* ---- Toast ---- */
+  var toastEl = document.getElementById("toast"), toastT;
+  function toast(msg) {
+    toastEl.querySelector("span").textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+  }
+
+  /* ---- Sheet ба модал ---- */
+  var lastFocus = null;
+  function openLayer(layer, scrim) {
+    lastFocus = document.activeElement;
+    layer.classList.add("open"); scrim.classList.add("open");
+    layer.focus();
+  }
+  function closeLayers() {
+    document.querySelectorAll(".sheet.open, .modal.open, .scrim.open").forEach(function (e) { e.classList.remove("open"); });
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.getElementById("sheetScrim").addEventListener("click", closeLayers);
+  document.getElementById("modalScrim").addEventListener("click", closeLayers);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeLayers();
+    if (e.key === "Tab") {
+      var layer = document.querySelector(".sheet.open, .modal.open");
+      if (!layer) return;
+      var f = layer.querySelectorAll("a,button");
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+
+  /* ---- Нэгдсэн товшилт ---- */
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-theme-toggle]");
+    if (t) {
+      var next = currentDark() ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("pi-proto-theme", next); } catch (err) {}
+      syncTheme();
+      if (document.getElementById("principles").classList.contains("active")) renderSwatches();
+      return;
+    }
+    if (e.target.closest("#moreTab")) { openLayer(document.getElementById("sheet"), document.getElementById("sheetScrim")); return; }
+    if (e.target.closest("#railBtn")) { document.getElementById("app").classList.toggle("rail"); return; }
+    var nav = e.target.closest("[data-href]");
+    if (nav) {
+      e.preventDefault();
+      var href = nav.getAttribute("data-href");
+      closeLayers();
+      if (SCREEN_OF[href] && !(href === "/app/teacher" && role === "STUDENT")) { location.hash = SCREEN_OF[href]; }
+      else { active = href; renderNav(); toast("«" + nav.textContent.trim() + "» хуудас энэ прототипт ороогүй"); }
+      return;
+    }
+    var op = e.target.closest("[data-open]");
+    if (op) { openLayer(document.getElementById(op.getAttribute("data-open")), document.getElementById("modalScrim")); return; }
+    var pay = e.target.closest("[data-pay]");
+    if (pay) {
+      var card = pay.closest(".pay-card"), ok = pay.getAttribute("data-pay") === "ok";
+      card.classList.add(ok ? "is-done" : "is-rejected");
+      card.querySelector(".pay-result").innerHTML = ic(ok ? "check-circle" : "x") + (ok ? "Баталгаажлаа" : "Татгалзсан");
+      var left = document.querySelectorAll("#pendList .pay-card:not(.is-done):not(.is-rejected)").length;
+      var pc = document.getElementById("pendCount"); if (pc) pc.textContent = left + " хүлээгдэж буй";
+      if (ok && !left) toast("Бүх төлбөр шалгагдлаа. Баярлалаа!");
+      return;
+    }
+    var pill = e.target.closest(".class-pill");
+    if (pill) {
+      pill.parentNode.querySelectorAll(".class-pill").forEach(function (p) { p.setAttribute("aria-pressed", String(p === pill)); });
+      var nm = pill.childNodes[1] ? pill.childNodes[1].textContent.trim() : "";
+      document.querySelectorAll(".cls-name").forEach(function (n) { if (nm && pill.closest("#teacher-home")) n.textContent = nm; });
+      return;
+    }
+    var m = e.target.closest(".method");
+    if (m) { m.parentNode.querySelectorAll(".method").forEach(function (x) { x.setAttribute("aria-pressed", String(x === m)); }); return; }
+    var seg = e.target.closest(".seg button");
+    if (seg) { seg.parentNode.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === seg)); }); attSummary(); return; }
+    if (e.target.closest("[data-all-present]")) {
+      document.querySelectorAll("#attList .seg button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === "p")); });
+      attSummary(); return;
+    }
+    if (e.target.closest("[data-close]")) { closeLayers(); }
+    var ts = e.target.closest("[data-toast]");
+    if (ts) { e.preventDefault(); toast(ts.getAttribute("data-toast")); }
+  });
+
+  /* ---- Ирцийн жагсаалт ---- */
+  var STUD = [["Анударь Г.", "p"], ["Билгүүн С.", "p"], ["Дөлгөөн Г.", "l"], ["Тэмүүжин Б.", ""], ["Мишээл Д.", "p"]];
+  var ST = [["p", "Ирсэн", "check"], ["l", "Хоцорсон", "clock"], ["a", "Тасалсан", "x"], ["e", "Чөлөөтэй", "info"]];
+  document.getElementById("attList").innerHTML = STUD.map(function (s) {
+    return '<div class="att-student"><b>' + esc(s[0]) + '</b><div class="seg" role="group" aria-label="' + esc(s[0]) + ' ирц">' +
+      ST.map(function (o) { return '<button type="button" data-v="' + o[0] + '" aria-pressed="' + (s[1] === o[0]) + '">' + ic(o[2]) + o[1] + "</button>"; }).join("") + "</div></div>";
+  }).join("");
+  function attSummary() {
+    var rows = document.querySelectorAll("#attList .seg"), done = 0;
+    rows.forEach(function (r) { if (r.querySelector('[aria-pressed="true"]')) done++; });
+    document.getElementById("attSummary").textContent = "18-аас " + (done + 13) + " бүртгэгдсэн";
+  }
+  attSummary();
+
+  renderRoleGrid();
+  var start = location.hash.slice(1);
+  show(document.getElementById(start) ? start : "student-home");
+})();
+</script>
+</body>
+</html>

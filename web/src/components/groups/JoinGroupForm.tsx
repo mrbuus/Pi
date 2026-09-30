@@ -29,8 +29,9 @@ export function JoinGroupForm({ onSuccess }: JoinGroupFormProps) {
       setJoinCode('');
       setIsOpen(false);
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Ангийн бүлэгт нэгдэх үед алдаа гарлаа');
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
+      setError(err?.message || 'Ангийн бүлэгт нэгдэх үед алдаа гарлаа');
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +41,7 @@ export function JoinGroupForm({ onSuccess }: JoinGroupFormProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-success text-white rounded font-medium hover:bg-success"
+        className="px-4 py-2 bg-success text-on-brand rounded font-medium hover:bg-success"
       >
         Ангийн бүлэгт нэгдэх
       </button>
@@ -79,7 +80,7 @@ export function JoinGroupForm({ onSuccess }: JoinGroupFormProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex-1 py-2 bg-success text-white rounded font-medium hover:bg-success disabled:opacity-50"
+            className="flex-1 py-2 bg-success text-on-brand rounded font-medium hover:bg-success disabled:opacity-50"
           >
             {isLoading ? 'Нэгдэж байна...' : 'Нэгдэх'}
           </button>

@@ -1,7 +1,10 @@
+import { consentData } from './consent.service';
 import {
   BadRequestException,
   ConflictException,
   Injectable,
+  HttpException,
+  HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -19,6 +22,12 @@ import {
 } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { loginAttempts } from './login-attempts';
+import {
+  PASSWORD_SAME_AS_PHONE_MESSAGE,
+  isSameAsPhone,
+  validatePasswordStrength,
+} from './password-policy';
 import { RegisterDto } from './dto/register.dto';
 
 // Идэвхжүүлэх код = тухайн өдрийн огноо УБ-ийн цагаар, ЖЖЖЖССӨӨ (SPEC §6.3)
@@ -38,6 +47,7 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    const consent = consentData(dto);
     // Утас эсвэл имэйл аль нэг нь заавал хэрэгтэй
     if (!dto.phone && !dto.email) {
       throw new BadRequestException('Утас эсвэл имэйл хаяг шаардлагатай');
@@ -109,10 +119,10 @@ export class AuthService {
       );
       if (classroomOnly) {
         const label =
-          classroomOnly.subject === Subject.MATH ? 'Математик' : 'Нийгэм судлал';
-        throw new BadRequestException(
-          `${label} зөвхөн танхимын ангид байдаг`,
-        );
+          classroomOnly.subject === Subject.MATH
+            ? 'Математик'
+            : 'Нийгэм судлал';
+        throw new BadRequestException(`${label} зөвхөн танхимын ангид байдаг`);
       }
     }
 
@@ -132,13 +142,14 @@ export class AuthService {
     // Үлдэх сурагч (ONLINE эсвэл CLASSROOM гараар бүртгүүлэн): код шууд
     const shouldDeferCode =
       isStudent && dto.studentType === StudentType.CLASSROOM;
-    const studentCode = isStudent && !shouldDeferCode
-      ? await generateStudentCode(this.prisma, {
-          branch: null, // Салаа мэдэгдэхгүй (дараагийн агент өөрчилнө)
-          grade: dto.grade ?? 12,
-          registeredAt: new Date(), // UB цагаар одоо
-        })
-      : undefined;
+    const studentCode =
+      isStudent && !shouldDeferCode
+        ? await generateStudentCode(this.prisma, {
+            branch: null, // Салаа мэдэгдэхгүй (дараагийн агент өөрчилнө)
+            grade: dto.grade ?? 12,
+            registeredAt: new Date(), // UB цагаар одоо
+          })
+        : undefined;
 
     const teacherRoles: Role[] = [Role.TEACHER, Role.TEACHER_PLUS];
     const teacherCode = teacherRoles.includes(role)
@@ -149,6 +160,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
+        ...consent,
         phone: dto.phone ?? null,
         email: dto.email ?? null,
         username,
@@ -192,6 +204,12 @@ export class AuthService {
   async login(dto: LoginDto) {
     // Утас / имэйл / username аль нэгээр нэвтэрнэ
     const identifier = (dto.identifier ?? dto.phone ?? '').trim();
+    if (loginAttempts.isLocked(identifier)) {
+      throw new HttpException(
+        'Олон удаа буруу оролдсон тул 15 минутын дараа дахин оролдоно уу. Нууц үгээ мартсан бол «Нууц үг сэргээх»-ийг ашиглана уу.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
     if (!identifier) {
       throw new UnauthorizedException('Нэвтрэх мэдээлэл буруу байна');
     }
@@ -205,16 +223,23 @@ export class AuthService {
       },
     });
     if (!user) {
+      loginAttempts.failure(identifier);
       throw new UnauthorizedException(
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
     }
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) {
+      loginAttempts.failure(identifier);
       throw new UnauthorizedException(
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
     }
+    if (user.archivedAt)
+      throw new UnauthorizedException(
+        'Энэ сурагчийн бүртгэл архивлагдсан байна. Сургалтын төвтэй холбогдоно уу.',
+      );
+    loginAttempts.success(identifier);
     return this.issueToken(user.id, user.role);
   }
 
@@ -229,6 +254,12 @@ export class AuthService {
     const ok = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!ok) {
       throw new BadRequestException('Одоогийн нууц үг буруу байна');
+    }
+    // DTO аль хэдийн шалгасан ч сервисийг өөр газраас дуудвал бодлого алгасагдахгүй
+    const weak = validatePasswordStrength(newPassword);
+    if (weak) throw new BadRequestException(weak);
+    if (isSameAsPhone(newPassword, user.phone)) {
+      throw new BadRequestException(PASSWORD_SAME_AS_PHONE_MESSAGE);
     }
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({

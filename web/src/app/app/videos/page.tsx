@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Check, Video as VideoIcon } from "lucide-react";
 import { api, getRole } from "@/lib/api";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { ErrorState, EmptyState } from "@/components/ui/StateBlock";
 
 /* ============================================================================
  * Онлайн хичээл — бичлэг үзэх хуудас (Videos MVP).
@@ -205,6 +205,7 @@ export default function VideosPage() {
           <h2 className="mb-3 font-bold text-brand-soft">Бичлэг нэмэх</h2>
           <div className="flex flex-wrap gap-2">
             <select
+              aria-label="Видео нэмэх сэдэв"
               value={form.chapterId}
               onChange={(e) => setForm({ ...form, chapterId: e.target.value })}
               className="min-w-[200px] flex-1 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
@@ -231,7 +232,7 @@ export default function VideosPage() {
             />
             <button
               onClick={addVideo}
-              className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold"
+              className="min-h-11 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand"
             >
               Нэмэх
             </button>

@@ -1,7 +1,15 @@
+import RegisterSW from '@/components/pwa/RegisterSW';
 import type { Metadata, Viewport } from "next";
+import "./fonts.css";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import ConnectionStatus from "@/components/ui/ConnectionStatus";
+import { Toaster } from "@/components/ui/kit/toaster";
+
+// Фонт (шинэ дизайн, 2026-09-26): Onest (бие) + Unbounded (том тоо, гарчиг).
+// Файлууд репод (public/fonts, fonts.css) — next/font/google нь BUILD үед
+// Google-ээс татдаг байсан тул сүлжээ тасрахад build унадаг байв (CI e2e,
+// 2026-09-27). Одоо build ч, хэрэглэгч ч гадны сервер рүү хандахгүй.
 
 export const metadata: Metadata = {
   title: "Шинэ Ирээдүйн Эзэд — ЭЕШ-ийн математик, нийгэм судлалын бэлтгэл",
@@ -19,6 +27,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "light dark",
+  // Same light --brand token as manifest.ts.
+  themeColor: "#1D4ED8",
 };
 
 // Эхний зурагт "буруу" горим гялсхийж харагдахаас сэргийлэх blocking script.
@@ -58,7 +68,11 @@ export default function RootLayout({
     // <html>-д "js" класс, data-theme, color-scheme нэмдэг тул сервер болон
     // клиентийн атрибут санаатайгаар зөрнө. Үүнгүйгээр React консол дээр
     // хуудас бүр дээр hydration mismatch алдаа хэвлэдэг байв.
-    <html lang="mn" className="h-full antialiased" suppressHydrationWarning>
+    <html
+      lang="mn"
+      className="h-full antialiased"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
@@ -71,6 +85,8 @@ export default function RootLayout({
             гэж дүгнэдэг. Браузерын online/offline эвентээс л хамаарна,
             нэмэлт сүлжээний шалгалт явуулахгүй. */}
         <ConnectionStatus />
+        <Toaster />
+        <RegisterSW />
       </body>
     </html>
   );

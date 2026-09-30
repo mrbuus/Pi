@@ -49,11 +49,71 @@ export class ClassroomsService {
           select: { id: true, firstName: true, lastName: true },
         },
         _count: {
-          select: { enrollments: { where: { leftAt: null } } },
+          select: {
+            enrollments: {
+              where: { leftAt: null, student: { archivedAt: null } },
+            },
+          },
         },
       },
       orderBy: { createdAt: 'asc' },
     });
+  }
+
+  async get(id: string, userId: string, role: Role) {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id },
+      include: {
+        teacher: { select: { id: true, firstName: true, lastName: true } },
+        enrollments: {
+          where: { leftAt: null, student: { archivedAt: null } },
+          orderBy: { joinedAt: 'asc' },
+          select: {
+            joinedAt: true,
+            student: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                studentCode: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!classroom || classroom.archived) {
+      throw new NotFoundException('Анги олдсонгүй');
+    }
+    if (role === Role.TEACHER && classroom.teacherId !== userId) {
+      throw new ForbiddenException('Энэ ангид хандах эрхгүй');
+    }
+    const canManageStudents =
+      role === Role.ADMIN ||
+      (role === Role.TEACHER_PLUS &&
+        (
+          await this.prisma.teacherProfile.findUnique({
+            where: { userId },
+            select: { canManageStudents: true },
+          })
+        )?.canManageStudents === true);
+
+    return {
+      classroom: {
+        id: classroom.id,
+        name: classroom.name,
+        type: classroom.type,
+        grade: classroom.grade,
+        teacherId: classroom.teacherId,
+        teacher: classroom.teacher,
+      },
+      students: classroom.enrollments.map((enrollment) => ({
+        ...enrollment.student,
+        joinedAt: enrollment.joinedAt,
+      })),
+      permissions: { canManageStudents },
+    };
   }
 
   // Идэвхжсэн ч ангид ороогүй танхимын сурагчид (SPEC §6.3)
@@ -63,6 +123,7 @@ export class ClassroomsService {
     const users = await this.prisma.user.findMany({
       where: {
         role: Role.STUDENT,
+        archivedAt: null,
         studentProfile: {
           type: StudentType.CLASSROOM,
           activatedAt: { not: null },
@@ -120,7 +181,7 @@ export class ClassroomsService {
     const student = await this.prisma.user.findUnique({
       where: { id: studentId },
     });
-    if (!student || student.role !== Role.STUDENT) {
+    if (!student || student.role !== Role.STUDENT || student.archivedAt) {
       throw new NotFoundException('Сурагч олдсонгүй');
     }
 
@@ -159,7 +220,12 @@ export class ClassroomsService {
   }
 
   // Ангийн мэдээлэл засах — Админ (SPEC: ROLES = ADMIN only)
-  async update(id: string, dto: UpdateClassroomDto, actorId: string, actorRole: Role) {
+  async update(
+    id: string,
+    dto: UpdateClassroomDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
     const classroom = await this.prisma.classroom.findUnique({
       where: { id },
     });
@@ -173,9 +239,7 @@ export class ClassroomsService {
         !teacher ||
         (teacher.role !== Role.TEACHER && teacher.role !== Role.TEACHER_PLUS)
       ) {
-        throw new BadRequestException(
-          'Заасан хэрэглэгч багшийн эрхгүй байна',
-        );
+        throw new BadRequestException('Заасан хэрэглэгч багшийн эрхгүй байна');
       }
     }
 
@@ -238,11 +302,7 @@ export class ClassroomsService {
 
   // Анги тараах — идэвхтэй бүх сурагчийг ангиас гаргана
   // Шаардлага: ангийн удирдлагын дэлгэцээс "анги тараах" үйлдэлээр дуудагдана
-  async disband(
-    classroomId: string,
-    actorId: string,
-    actorRole: Role,
-  ) {
+  async disband(classroomId: string, actorId: string, actorRole: Role) {
     const classroom = await this.prisma.classroom.findUnique({
       where: { id: classroomId },
     });

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import StoreProducts from './store-products';
 import MyPurchases from './my-purchases';
+import { AdminStoreLink } from '@/components/store/AdminProducts';
 
 export const metadata: Metadata = {
   title: 'Дэлгүүр — Pi.mn',
@@ -17,6 +18,8 @@ export default function StorePage() {
           Нэг удаагийн шалгалт, номуудыг худалдаж авах
         </p>
       </div>
+
+      <AdminStoreLink />
 
       <Tabs defaultValue="products" className="w-full">
         <TabsList>

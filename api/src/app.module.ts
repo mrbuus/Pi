@@ -18,6 +18,7 @@ import { AttemptsModule } from './attempts/attempts.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationCenterModule } from './notification-center/notification-center.module';
 import { requireJwtSecret } from './auth/jwt.strategy';
 import { ClassroomsModule } from './classrooms/classrooms.module';
 import { ColorTagsModule } from './colortags/colortags.module';
@@ -46,6 +47,10 @@ import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
 import { ReconcileModule } from './reconcile/reconcile.module';
+import { FormulasModule } from './formulas/formulas.module';
+import { ReadinessModule } from './readiness/readiness.module';
+import { MistakesModule } from './mistakes/mistakes.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -98,6 +103,7 @@ import { ReconcileModule } from './reconcile/reconcile.module';
     // @Global — SMS илгээх үйлчилгээг бүх модульд нээж өгнө (нууц үг сэргээх,
     // ирээдүйд ирц/төлбөрийн мэдэгдэл гэх мэт).
     NotificationsModule,
+    NotificationCenterModule,
     AuthModule,
     ClassroomsModule,
     AttendanceModule,
@@ -138,6 +144,10 @@ import { ReconcileModule } from './reconcile/reconcile.module';
     RecommendModule,
     TuitionModule,
     ReconcileModule,
+    FormulasModule,
+    ReadinessModule,
+    MistakesModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

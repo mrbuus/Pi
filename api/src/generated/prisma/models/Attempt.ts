@@ -45,6 +45,7 @@ export type AttemptMinAggregateOutputType = {
   timeSpentSec: number | null
   testId: string | null
   classroomId: string | null
+  mistakeCollectedAt: Date | null
   createdAt: Date | null
 }
 
@@ -59,6 +60,7 @@ export type AttemptMaxAggregateOutputType = {
   timeSpentSec: number | null
   testId: string | null
   classroomId: string | null
+  mistakeCollectedAt: Date | null
   createdAt: Date | null
 }
 
@@ -74,6 +76,7 @@ export type AttemptCountAggregateOutputType = {
   givenAnswer: number
   testId: number
   classroomId: number
+  mistakeCollectedAt: number
   createdAt: number
   _all: number
 }
@@ -98,6 +101,7 @@ export type AttemptMinAggregateInputType = {
   timeSpentSec?: true
   testId?: true
   classroomId?: true
+  mistakeCollectedAt?: true
   createdAt?: true
 }
 
@@ -112,6 +116,7 @@ export type AttemptMaxAggregateInputType = {
   timeSpentSec?: true
   testId?: true
   classroomId?: true
+  mistakeCollectedAt?: true
   createdAt?: true
 }
 
@@ -127,6 +132,7 @@ export type AttemptCountAggregateInputType = {
   givenAnswer?: true
   testId?: true
   classroomId?: true
+  mistakeCollectedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -229,6 +235,7 @@ export type AttemptGroupByOutputType = {
   givenAnswer: runtime.JsonValue | null
   testId: string | null
   classroomId: string | null
+  mistakeCollectedAt: Date | null
   createdAt: Date
   _count: AttemptCountAggregateOutputType | null
   _avg: AttemptAvgAggregateOutputType | null
@@ -267,6 +274,7 @@ export type AttemptWhereInput = {
   givenAnswer?: Prisma.JsonNullableFilter<"Attempt">
   testId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableFilter<"Attempt"> | string | null
+  mistakeCollectedAt?: Prisma.DateTimeNullableFilter<"Attempt"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Attempt"> | Date | string
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   problem?: Prisma.XOR<Prisma.ProblemScalarRelationFilter, Prisma.ProblemWhereInput>
@@ -284,6 +292,7 @@ export type AttemptOrderByWithRelationInput = {
   givenAnswer?: Prisma.SortOrderInput | Prisma.SortOrder
   testId?: Prisma.SortOrderInput | Prisma.SortOrder
   classroomId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mistakeCollectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   student?: Prisma.UserOrderByWithRelationInput
   problem?: Prisma.ProblemOrderByWithRelationInput
@@ -304,6 +313,7 @@ export type AttemptWhereUniqueInput = Prisma.AtLeast<{
   givenAnswer?: Prisma.JsonNullableFilter<"Attempt">
   testId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableFilter<"Attempt"> | string | null
+  mistakeCollectedAt?: Prisma.DateTimeNullableFilter<"Attempt"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Attempt"> | Date | string
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   problem?: Prisma.XOR<Prisma.ProblemScalarRelationFilter, Prisma.ProblemWhereInput>
@@ -321,6 +331,7 @@ export type AttemptOrderByWithAggregationInput = {
   givenAnswer?: Prisma.SortOrderInput | Prisma.SortOrder
   testId?: Prisma.SortOrderInput | Prisma.SortOrder
   classroomId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mistakeCollectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.AttemptCountOrderByAggregateInput
   _avg?: Prisma.AttemptAvgOrderByAggregateInput
@@ -344,6 +355,7 @@ export type AttemptScalarWhereWithAggregatesInput = {
   givenAnswer?: Prisma.JsonNullableWithAggregatesFilter<"Attempt">
   testId?: Prisma.StringNullableWithAggregatesFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableWithAggregatesFilter<"Attempt"> | string | null
+  mistakeCollectedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Attempt"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Attempt"> | Date | string
 }
 
@@ -357,6 +369,7 @@ export type AttemptCreateInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
   student: Prisma.UserCreateNestedOneWithoutAttemptsInput
   problem: Prisma.ProblemCreateNestedOneWithoutAttemptsInput
@@ -374,6 +387,7 @@ export type AttemptUncheckedCreateInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -387,6 +401,7 @@ export type AttemptUpdateInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.UserUpdateOneRequiredWithoutAttemptsNestedInput
   problem?: Prisma.ProblemUpdateOneRequiredWithoutAttemptsNestedInput
@@ -404,6 +419,7 @@ export type AttemptUncheckedUpdateInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -419,6 +435,7 @@ export type AttemptCreateManyInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -432,6 +449,7 @@ export type AttemptUpdateManyMutationInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -447,6 +465,7 @@ export type AttemptUncheckedUpdateManyInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -472,6 +491,7 @@ export type AttemptCountOrderByAggregateInput = {
   givenAnswer?: Prisma.SortOrder
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  mistakeCollectedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -490,6 +510,7 @@ export type AttemptMaxOrderByAggregateInput = {
   timeSpentSec?: Prisma.SortOrder
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  mistakeCollectedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -504,6 +525,7 @@ export type AttemptMinOrderByAggregateInput = {
   timeSpentSec?: Prisma.SortOrder
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  mistakeCollectedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -613,6 +635,7 @@ export type AttemptCreateWithoutStudentInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
   problem: Prisma.ProblemCreateNestedOneWithoutAttemptsInput
 }
@@ -628,6 +651,7 @@ export type AttemptUncheckedCreateWithoutStudentInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -672,6 +696,7 @@ export type AttemptScalarWhereInput = {
   givenAnswer?: Prisma.JsonNullableFilter<"Attempt">
   testId?: Prisma.StringNullableFilter<"Attempt"> | string | null
   classroomId?: Prisma.StringNullableFilter<"Attempt"> | string | null
+  mistakeCollectedAt?: Prisma.DateTimeNullableFilter<"Attempt"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Attempt"> | Date | string
 }
 
@@ -685,6 +710,7 @@ export type AttemptCreateWithoutProblemInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
   student: Prisma.UserCreateNestedOneWithoutAttemptsInput
 }
@@ -700,6 +726,7 @@ export type AttemptUncheckedCreateWithoutProblemInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -740,6 +767,7 @@ export type AttemptCreateManyStudentInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -753,6 +781,7 @@ export type AttemptUpdateWithoutStudentInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   problem?: Prisma.ProblemUpdateOneRequiredWithoutAttemptsNestedInput
 }
@@ -768,6 +797,7 @@ export type AttemptUncheckedUpdateWithoutStudentInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -782,6 +812,7 @@ export type AttemptUncheckedUpdateManyWithoutStudentInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -796,6 +827,7 @@ export type AttemptCreateManyProblemInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: string | null
   classroomId?: string | null
+  mistakeCollectedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -809,6 +841,7 @@ export type AttemptUpdateWithoutProblemInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.UserUpdateOneRequiredWithoutAttemptsNestedInput
 }
@@ -824,6 +857,7 @@ export type AttemptUncheckedUpdateWithoutProblemInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -838,6 +872,7 @@ export type AttemptUncheckedUpdateManyWithoutProblemInput = {
   givenAnswer?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   testId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakeCollectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -855,6 +890,7 @@ export type AttemptSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
+  mistakeCollectedAt?: boolean
   createdAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -872,6 +908,7 @@ export type AttemptSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
+  mistakeCollectedAt?: boolean
   createdAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -889,6 +926,7 @@ export type AttemptSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
+  mistakeCollectedAt?: boolean
   createdAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -906,10 +944,11 @@ export type AttemptSelectScalar = {
   givenAnswer?: boolean
   testId?: boolean
   classroomId?: boolean
+  mistakeCollectedAt?: boolean
   createdAt?: boolean
 }
 
-export type AttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "problemId" | "source" | "occurredOn" | "autoCorrect" | "selfState" | "timeSpentSec" | "givenAnswer" | "testId" | "classroomId" | "createdAt", ExtArgs["result"]["attempt"]>
+export type AttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "problemId" | "source" | "occurredOn" | "autoCorrect" | "selfState" | "timeSpentSec" | "givenAnswer" | "testId" | "classroomId" | "mistakeCollectedAt" | "createdAt", ExtArgs["result"]["attempt"]>
 export type AttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -958,6 +997,7 @@ export type $AttemptPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     givenAnswer: runtime.JsonValue | null
     testId: string | null
     classroomId: string | null
+    mistakeCollectedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["attempt"]>
   composites: {}
@@ -1395,6 +1435,7 @@ export interface AttemptFieldRefs {
   readonly givenAnswer: Prisma.FieldRef<"Attempt", 'Json'>
   readonly testId: Prisma.FieldRef<"Attempt", 'String'>
   readonly classroomId: Prisma.FieldRef<"Attempt", 'String'>
+  readonly mistakeCollectedAt: Prisma.FieldRef<"Attempt", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Attempt", 'DateTime'>
 }
     

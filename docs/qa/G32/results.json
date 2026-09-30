@@ -1,0 +1,27 @@
+[
+  {
+    "mode": "production",
+    "docsStatus": 404,
+    "jsonStatus": 404,
+    "yamlStatus": 404,
+    "dependencyErrors": 0
+  },
+  {
+    "mode": "development",
+    "width": 375,
+    "status": 200,
+    "paths": 225,
+    "schemas": 108,
+    "overflow": false,
+    "localAssetsOnly": true
+  },
+  {
+    "mode": "development",
+    "width": 1280,
+    "status": 200,
+    "paths": 225,
+    "schemas": 108,
+    "overflow": false,
+    "localAssetsOnly": true
+  }
+]

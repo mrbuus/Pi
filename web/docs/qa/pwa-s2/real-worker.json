@@ -1,0 +1,10 @@
+{
+  "projectionKeys": [
+    "http://127.0.0.1:3388/offline/formula/synthetic-sum.json"
+  ],
+  "cachedPublicAssets": 91,
+  "offlineReload": true,
+  "offlinePrivateNavigation": "generic public reader only",
+  "noOverflow": true,
+  "pageErrors": []
+}

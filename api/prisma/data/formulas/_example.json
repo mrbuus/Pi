@@ -1,0 +1,91 @@
+{
+  "section": {
+    "slug": "trigonometry",
+    "title": "Тригонометр",
+    "order": 4,
+    "icon": "triangle-right",
+    "description": "Синус, косинус болон тэдгээрийн үндсэн холбоо"
+  },
+  "formulas": [
+    {
+      "slug": "trig-pythagorean-sine-cosine",
+      "title": "Синус, косинусын үндсэн адилтгал",
+      "order": 1,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": ["TRIG"],
+      "latex": "\\sin^2 x + \\cos^2 x = 1",
+      "general": "\\sin^2 t + \\cos^2 t = 1",
+      "variants": [
+        { "label": "Синусын квадрат", "latex": "\\sin^2 x = 1 - \\cos^2 x" }
+      ],
+      "conditions": [],
+      "explanation": "Нэгж тойргийн дурын цэгийн координат $(\\cos x,\\sin x)$ байна. Тойргийн радиус нэг тул координатын квадратуудын нийлбэр нэгтэй тэнцэнэ.",
+      "derivation": [
+        "Нэгж тойргийн цэгийн координатыг $(\\cos x,\\sin x)$ гэж тэмдэглэе.",
+        "Тойргийн тэгшитгэл $X^2+Y^2=1$ тул $\\cos^2 x+\\sin^2 x=1$ болно."
+      ],
+      "mnemonic": "Синус ба косинусын квадратыг нэмэхэд нэг гарна гэж санаарай.",
+      "examples": [
+        {
+          "problem": "$\\sin x=\\tfrac{3}{5}$ бол $\\cos^2 x$-ийг ол.",
+          "steps": ["$\\cos^2 x=1-\\sin^2 x$", "$\\cos^2 x=1-\\tfrac{9}{25}=\\tfrac{16}{25}$"],
+          "answer": "$\\tfrac{16}{25}$"
+        },
+        {
+          "problem": "$\\cos x=-\\tfrac{5}{13}$ бол $\\sin^2 x$-ийг ол.",
+          "steps": ["$\\sin^2 x=1-\\cos^2 x$", "$\\sin^2 x=1-\\tfrac{25}{169}=\\tfrac{144}{169}$"],
+          "answer": "$\\tfrac{144}{169}$"
+        }
+      ],
+      "commonMistakes": ["Квадратыг орхиж $\\sin x+\\cos x=1$ гэж бичих"],
+      "eeshTip": "Нэг тригонометрийн утга өгөгдвөл нөгөөгийн квадратыг шууд олоход ашиглана.",
+      "related": ["trig-tangent-sine-cosine"],
+      "keywords": ["үндсэн адилтгал", "нэгж тойрог"],
+      "widget": "unit-circle",
+      "quiz": [
+        { "type": "blank", "prompt": "\\sin^2 x + \\cos^2 x = \\square", "answer": "1", "distractors": ["0", "2", "\\sin x\\cos x"] },
+        { "type": "truefalse", "prompt": "\\sin^2 x + \\cos^2 x = 1", "answer": "true", "why": "Энэ нь нэгж тойргийн тэгшитгэлээс гарна." }
+      ]
+    },
+    {
+      "slug": "trig-tangent-sine-cosine",
+      "title": "Тангенс ба синус, косинус",
+      "order": 2,
+      "level": "CORE",
+      "grade": 10,
+      "topicSlugs": ["TRIG"],
+      "latex": "\\tan x = \\frac{\\sin x}{\\cos x}",
+      "general": "\\tan t = \\frac{\\sin t}{\\cos t}",
+      "variants": [],
+      "conditions": ["\\cos x \\ne 0"],
+      "explanation": "Тангенс нь тухайн өнцгийн синусыг косинуст хуваасантай тэнцэнэ. Хуваарь тэг байж болохгүй тул $\\cos x\\ne0$ нөхцөлийг мартаж болохгүй.",
+      "derivation": [
+        "Тэгш өнцөгт гурвалжинд $\\tan x=\\frac{\\text{эсрэг катет}}{\\text{залгаа катет}}$.",
+        "Хоёр хуваарийг гипотенузад хуваавал $\\frac{\\sin x}{\\cos x}$ гарна."
+      ],
+      "mnemonic": "Тангенсийг олохдоо синусыг косинуст хуваа.",
+      "examples": [
+        {
+          "problem": "$\\sin x=\\tfrac{3}{5}$, $\\cos x=\\tfrac{4}{5}$ бол $\\tan x$-ийг ол.",
+          "steps": ["$\\tan x=\\frac{\\sin x}{\\cos x}$", "$\\tan x=\\frac{3/5}{4/5}=\\tfrac{3}{4}$"],
+          "answer": "$\\tfrac{3}{4}$"
+        },
+        {
+          "problem": "$\\sin x=-\\tfrac{1}{2}$, $\\cos x=\\tfrac{\\sqrt{3}}{2}$ бол $\\tan x$-ийг ол.",
+          "steps": ["$\\tan x=\\frac{\\sin x}{\\cos x}$", "$\\tan x=-\\tfrac{1}{\\sqrt{3}}=-\\tfrac{\\sqrt{3}}{3}$"],
+          "answer": "$-\\tfrac{\\sqrt{3}}{3}$"
+        }
+      ],
+      "commonMistakes": ["$\\cos x=0$ үед тангенс тодорхойгүйг мартах"],
+      "eeshTip": "Синус, косинус хоёул өгөгдвөл тангенсийг шууд харьцаагаар олж болно.",
+      "related": ["trig-pythagorean-sine-cosine"],
+      "keywords": ["тангенс", "харьцаа"],
+      "widget": "unit-circle",
+      "quiz": [
+        { "type": "blank", "prompt": "\\tan x = \\square", "answer": "\\frac{\\sin x}{\\cos x}", "distractors": ["\\frac{\\cos x}{\\sin x}", "\\sin x+\\cos x", "\\sin x\\cos x"] },
+        { "type": "truefalse", "prompt": "\\tan x тодорхой байхдаа \\cos x \\ne 0", "answer": "true", "why": "Тангенсийн томьёонд косинус хуваарь болж ордог." }
+      ]
+    }
+  ]
+}

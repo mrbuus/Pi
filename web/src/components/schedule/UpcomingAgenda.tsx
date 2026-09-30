@@ -1,8 +1,8 @@
 "use client";
 
 import { DoorOpen, Palmtree, AlertTriangle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { useSection } from "@/components/students/progress/useSection";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import {
   addDaysToKey,
@@ -22,10 +22,6 @@ interface Props {
   title?: string;
 }
 
-function errMsg(e: unknown): string {
-  return e instanceof Error ? e.message : "Алдаа гарлаа";
-}
-
 function dayLabel(dateKey: string): string {
   const weekday = new Date(`${dateKey}T00:00:00.000Z`).getUTCDay();
   const [, month, day] = dateKey.split("-");
@@ -43,42 +39,15 @@ export default function UpcomingAgenda({
   days = 14,
   title = "Ойрын өдрүүд",
 }: Props) {
-  const [data, setData] = useState<DayExpansion[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let alive = true;
-    setLoading(true);
-    setError(null);
-    const from = todayUBKey();
-    const to = addDaysToKey(from, days - 1);
-    const params = new URLSearchParams({ from, to });
-    if (classroomId) params.set("classroomId", classroomId);
-    if (teacherId) params.set("teacherId", teacherId);
-    api<DayExpansion[]>(`/schedule/days?${params.toString()}`)
-      .then((d) => {
-        if (!alive) return;
-        setData(d);
-      })
-      .catch((e) => {
-        if (!alive) return;
-        setError(errMsg(e));
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [classroomId, teacherId, days]);
+  const from = todayUBKey();
+  const params = new URLSearchParams({ from, to: addDaysToKey(from, days - 1) });
+  if (classroomId) params.set("classroomId", classroomId);
+  if (teacherId) params.set("teacherId", teacherId);
+  const { data, status, error } = useSection<DayExpansion[]>(`/schedule/days?${params.toString()}`);
+  const loading = status === "loading";
 
   if (loading) {
-    return (
-      <p className="animate-pulse text-sm text-ink-dim" role="status">
-        {title} ачаалж байна…
-      </p>
-    );
+    return <LoadingState rows={3} label={`${title} ачаалж байна`} />;
   }
   if (error) {
     return (

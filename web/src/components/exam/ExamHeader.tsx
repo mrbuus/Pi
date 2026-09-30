@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, LayoutGrid } from "lucide-react";
 import AutosaveChip, { type SaveStatus } from "./AutosaveChip";
 import ExamTimer from "./ExamTimer";
 
@@ -54,7 +54,7 @@ export default function ExamHeader({
           className="flex min-h-11 items-center rounded-lg border border-line px-3 text-xs font-semibold text-ink-dim transition hover:text-ink"
           title="Бодлогын навигатор"
         >
-          ▦ {answeredCount}/{totalCount}
+          <LayoutGrid className="inline h-4 w-4" aria-hidden /> {answeredCount}/{totalCount}
         </button>
         <button
           type="button"

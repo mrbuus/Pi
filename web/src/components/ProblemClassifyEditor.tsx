@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, X, Pencil, AlertTriangle, Circle } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 import MathText from "@/components/MathText";
 import { api, fileUrl, uploadFile } from "@/lib/api";
 
@@ -552,7 +552,7 @@ export default function ProblemClassifyEditor({
       onClick={onClose}
     >
       <div
-        className="my-8 w-full max-w-2xl rounded-2xl border border-line bg-panel p-6"
+        className="my-8 w-full max-w-2xl chunky p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">

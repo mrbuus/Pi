@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { NavIcon } from "./icons";
-import type { NavGroup, NavLink as NavLinkType } from "./nav-data";
+import { GROUP_TONE, type NavGroup, type NavLink as NavLinkType } from "./nav-data";
 
 // Идэвхтэй маршрутыг зөвхөн өнгөөр биш — зүүн талын зураас + тод үсгээр
 // давхар илэрхийлнэ (өнгө дам харагдахгүй хэрэглэгчид ч ялгах боломжтой).
@@ -11,11 +11,13 @@ function ItemRow({
   item,
   active,
   collapsedRail,
+  tone,
   onNavigate,
 }: {
   item: NavLinkType;
   active: boolean;
   collapsedRail: boolean;
+  tone: string;
   onNavigate?: () => void;
 }) {
   return (
@@ -31,7 +33,7 @@ function ItemRow({
         onClick={onNavigate}
         title={collapsedRail ? item.label : undefined}
         aria-current={active ? "page" : undefined}
-        className={`row-interactive flex items-center gap-3 rounded-lg py-1.5 transition-colors ${
+        className={`row-interactive flex items-center gap-3 rounded-lg py-1 transition-colors ${
           collapsedRail ? "justify-center px-2" : "px-3"
         } ${
           active
@@ -39,7 +41,13 @@ function ItemRow({
             : "text-ink-dim hover:bg-panel hover:text-ink"
         }`}
       >
-        <NavIcon name={item.icon} className="h-[18px] w-[18px]" />
+        {/* Бүлгийн өнгөт дэвсгэртэй дүрс — цэсийг нүдээр хурдан ялгана. */}
+        <span
+          aria-hidden
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${tone}`}
+        >
+          <NavIcon name={item.icon} className="h-[18px] w-[18px]" />
+        </span>
         <span className={collapsedRail ? "sr-only" : "truncate text-sm"}>
           {item.label}
         </span>
@@ -72,6 +80,7 @@ function GroupSection({
               item={item}
               active={item.href === pathname}
               collapsedRail
+              tone={GROUP_TONE[group.key]}
               onNavigate={onNavigate}
             />
           </ul>
@@ -109,6 +118,7 @@ function GroupSection({
               item={item}
               active={item.href === pathname}
               collapsedRail={false}
+              tone={GROUP_TONE[group.key]}
               onNavigate={onNavigate}
             />
           ))}
@@ -139,6 +149,7 @@ export default function NavList({
             item={home}
             active={home.href === pathname}
             collapsedRail={collapsedRail}
+            tone={GROUP_TONE.home}
             onNavigate={onNavigate}
           />
         </ul>

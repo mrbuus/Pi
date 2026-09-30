@@ -1,0 +1,73 @@
+.flip {
+  perspective: 1200px;
+  width: 100%;
+  min-height: 17rem;
+  cursor: pointer;
+}
+.inner {
+  display: grid;
+  min-height: inherit;
+  transform-style: preserve-3d;
+  transition: transform 350ms ease;
+}
+.flipped {
+  transform: rotateY(180deg);
+}
+.face {
+  grid-area: 1 / 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  backface-visibility: hidden;
+  border: 2px solid var(--line);
+  border-bottom-width: 4px;
+  border-radius: 1.5rem;
+  background: var(--surface);
+}
+.back {
+  transform: rotateY(180deg);
+}
+.math {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.complete {
+  animation: arrive 220ms ease-out;
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inner,
+  .flipped,
+  .back {
+    transform: none;
+    transition: opacity 120ms linear;
+  }
+  .face {
+    backface-visibility: visible;
+  }
+  .back {
+    opacity: 0;
+  }
+  .flipped .front {
+    opacity: 0;
+  }
+  .flipped .back {
+    opacity: 1;
+  }
+  .complete {
+    animation: none;
+  }
+}

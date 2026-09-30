@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check } from "lucide-react";
+import ConsentFields, { EMPTY_CONSENT, PRIVACY_VERSION, consentReady } from "@/components/consent/ConsentFields";
 import LogoMark from "@/components/LogoMark";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, setAuth } from "@/lib/api";
@@ -69,6 +70,7 @@ function isStudentKind(kind: Kind): kind is "CLASSROOM" | "ONLINE" {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [consent, setConsent] = useState(EMPTY_CONSENT);
   const [kind, setKind] = useState<Kind | null>(null);
   const [form, setForm] = useState({
     lastName: "",
@@ -114,9 +116,11 @@ export default function RegisterPage() {
     setSubmitError("");
     if (!kind) return;
     if (!validate(kind)) return;
+    if (!consentReady(consent)) { setSubmitError("Нөхцөл, насны ангилал болон зөвшөөрлөө сонгоно уу"); return; }
     setLoading(true);
     try {
       const body: Record<string, unknown> = {
+        ...consent, privacyVersion: PRIVACY_VERSION,
         phone: form.phone,
         firstName: form.firstName,
         lastName: form.lastName,
@@ -171,7 +175,7 @@ export default function RegisterPage() {
     return (
       <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
         <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-        <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
+        <div className="relative w-full max-w-sm chunky p-6 text-center sm:p-8">
           <div className="flex items-center justify-center gap-1.5">
             <Check className="h-4 w-4 text-success" aria-hidden />
             <p className="text-sm font-semibold text-success">Бүртгэл амжилттай үүслээ</p>
@@ -207,7 +211,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => router.push(homeForRole(result.role))}
-            className="mt-3 w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90"
+            className="mt-3 btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105"
           >
             Үргэлжлүүлэх
           </button>
@@ -219,7 +223,7 @@ export default function RegisterPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
+      <div className="relative w-full max-w-sm chunky p-6 sm:p-8">
         <div className="mb-6">
           <Link
             href="/"
@@ -299,7 +303,7 @@ export default function RegisterPage() {
                   placeholder="Овог"
                   aria-invalid={!!fieldErrors.lastName}
                   aria-describedby={fieldErrors.lastName ? "lastName-error" : undefined}
-                  className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                  className={`w-full rounded-2xl border-2 bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
                     fieldErrors.lastName ? "border-error" : "border-line"
                   }`}
                 />
@@ -320,7 +324,7 @@ export default function RegisterPage() {
                   placeholder="Нэр"
                   aria-invalid={!!fieldErrors.firstName}
                   aria-describedby={fieldErrors.firstName ? "firstName-error" : undefined}
-                  className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                  className={`w-full rounded-2xl border-2 bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
                     fieldErrors.firstName ? "border-error" : "border-line"
                   }`}
                 />
@@ -351,7 +355,7 @@ export default function RegisterPage() {
                 placeholder="99112233"
                 aria-invalid={!!fieldErrors.phone}
                 aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
-                className={`w-full rounded-xl border bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
+                className={`w-full rounded-2xl border-2 bg-bg px-3 py-2.5 text-sm text-ink outline-none focus:border-brand ${
                   fieldErrors.phone ? "border-error" : "border-line"
                 }`}
               />
@@ -448,6 +452,8 @@ export default function RegisterPage() {
               </div>
             )}
 
+            <ConsentFields value={consent} onChange={setConsent} disabled={loading} />
+
             {submitError && (
               <p role="alert" className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
                 {submitError}
@@ -456,9 +462,9 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !consentReady(consent)}
               aria-busy={loading}
-              className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
               {loading ? "Бүртгэж байна…" : "Бүртгүүлэх"}
             </button>
@@ -467,7 +473,7 @@ export default function RegisterPage() {
 
         <p className="mt-5 text-center text-sm text-ink-dim">
           Бүртгэлтэй юу?{" "}
-          <Link href="/login" className="text-brand hover:underline">
+          <Link href="/login" className="text-brand underline underline-offset-2">
             Нэвтрэх
           </Link>
         </p>

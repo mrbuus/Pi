@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { NavIcon, type IconName } from "@/components/nav/icons";
 import { useCallback, useEffect, useState } from "react";
 import { TriangleAlert, Check, X } from "lucide-react";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import RequireRole from "@/components/nav/RequireRole";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
-import { api } from "@/lib/api";
+import { api, getRole } from "@/lib/api";
 
 interface Payment {
   id: string;
@@ -72,6 +73,25 @@ const ROLE_LABEL: Record<string, string> = {
 type Msg = { kind: "success" | "error"; text: string } | null;
 
 /** API алдааг хэрэглэгчид харуулах эвтэй мессеж болгоно. */
+const ADMIN_TILES: {
+  href: string;
+  label: string;
+  icon: IconName;
+  tone: string;
+  adminOnly?: boolean;
+  featured?: boolean;
+}[] = [
+  { href: "/app/admin/content", label: "Контент (ном, бодлого)", icon: "layers", tone: "bg-brand-bright/15 text-brand-soft", featured: true },
+  { href: "/app/admin/students", label: "Сурагчид", icon: "users", tone: "bg-accent-teal/15 text-accent-teal" },
+  { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school", tone: "bg-accent-violet/15 text-accent-violet" },
+  { href: "/app/admin/enrollment", label: "Элсэлт", icon: "clipboard-list", tone: "bg-accent-sky/15 text-accent-sky" },
+  { href: "/app/admin/finance", label: "Санхүү", icon: "wallet", tone: "bg-accent-gold/15 text-accent-gold", adminOnly: true },
+  { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund", tone: "bg-accent-rose/15 text-accent-rose" },
+  { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart", tone: "bg-accent-fuchsia/15 text-accent-fuchsia" },
+  { href: "/app/admin/store", label: "Дэлгүүр", icon: "store", tone: "bg-accent-teal/15 text-accent-teal" },
+  { href: "/app/sms", label: "Мессеж", icon: "message-square", tone: "bg-accent-sky/15 text-accent-sky" },
+];
+
 function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";
 }
@@ -341,13 +361,30 @@ export default function AdminDashboardClient() {
     <div className="space-y-8">
       <DashboardGreeting />
       <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-2xl font-extrabold">Удирдлага</h1>
-        <Link
-          href="/app/admin/content"
-          className={primaryBtn}
-        >
-          Контент удирдах (ном/бодлого)
-        </Link>
+        <h1 className="sr-only">Удирдлага</h1>
+        {/* Удирдлагын хэсгүүд — өнгөт хавтан (шинэ дизайн, 2026-09-26).
+            Өмнө нь hover:bg-brand-soft (бараан) дээр ink бичвэр уншигдахгүй болдог байв. */}
+        <section aria-labelledby="management-title" className="w-full">
+          <h2 id="management-title" className="mb-3 font-bold text-ink">Удирдлагын хэсгүүд</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {ADMIN_TILES.filter((t) => !t.adminOnly || getRole() === "ADMIN").map((t) => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className={`group chunky chunky-press flex min-h-24 flex-col justify-between gap-3 p-4 ${
+                  t.featured
+                    ? "col-span-2 border-brand-bright/40 bg-brand-bright/10 sm:col-span-1"
+                    : ""
+                }`}
+              >
+                <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.tone}`}>
+                  <NavIcon name={t.icon} className="h-5 w-5" />
+                </span>
+                <span className="font-bold leading-tight text-ink">{t.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
         {msg && (
           <span
             role="status"
@@ -363,7 +400,7 @@ export default function AdminDashboardClient() {
       </div>
 
       {/* Шинэ хэрэглэгч — эрхийг нь шууд сонгоно */}
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-1 font-bold text-brand-soft">Шинэ хэрэглэгч нэмэх</h2>
         <p className="mb-4 text-xs text-ink-dim">
           Эрхийг (роль) нь энд шууд сонгоно — дараа нь дахин солих шаардлагагүй
@@ -458,7 +495,7 @@ export default function AdminDashboardClient() {
       </section>
 
       {/* Хэрэглэгчдийн үүрэг */}
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-bold text-brand-soft">Хэрэглэгчдийн үүрэг</h2>
@@ -527,7 +564,7 @@ export default function AdminDashboardClient() {
       </section>
 
       {/* Багш нарын эрх удирдах */}
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-4 font-bold text-brand-soft">Багш нарын эрх</h2>
         <div className="mb-4 flex flex-wrap gap-2">
           <label className="sr-only" htmlFor="promote-phone">
@@ -604,7 +641,7 @@ export default function AdminDashboardClient() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-4 font-bold text-brand-soft">
           Хүлээгдэж буй төлбөрүүд
         </h2>
@@ -666,7 +703,7 @@ export default function AdminDashboardClient() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded-2xl border-2 border-line bg-surface p-6">
         <h2 className="mb-4 font-bold text-brand-soft">
           {month} сарын төлөлт (танхимын сурагчид)
         </h2>
@@ -702,8 +739,10 @@ export default function AdminDashboardClient() {
         )}
       </section>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-surface p-6">
+      {/* min-w-0: grid-ийн хүүхэд анхдагчаар min-width:auto тул input-ийн
+          дотоод өргөн 375px дээр хуудсыг хэвтээ гүйлгэдэг байсан (e2e 09). */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <section className="min-w-0 rounded-2xl border-2 border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шинэ анги</h2>
           <div className="flex gap-2">
             <label className="sr-only" htmlFor="new-classroom-name">
@@ -714,7 +753,7 @@ export default function AdminDashboardClient() {
               value={newClass}
               onChange={(e) => setNewClass(e.target.value)}
               placeholder="Ангийн нэр"
-              className={`flex-1 ${inputCls}`}
+              className={`min-w-0 flex-1 ${inputCls}`}
             />
             <button
               onClick={createClassroom}
@@ -726,7 +765,7 @@ export default function AdminDashboardClient() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-line bg-surface p-6">
+        <section className="min-w-0 rounded-2xl border-2 border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-4 font-bold text-brand-soft">Шинэ эрх (pass)</h2>
           <div className="space-y-2">
             <label className="sr-only" htmlFor="new-pass-name">

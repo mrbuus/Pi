@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import { BRANCHES, ORG, PHONES } from "@/lib/orgInfo";
@@ -83,6 +84,7 @@ export default function Footer() {
 
       <div className="mx-auto mt-10 max-w-6xl border-t border-white/10 px-5 pt-6 text-xs text-white/50">
         © 2026 {ORG.name}
+        <nav aria-label="Бодлого" className="mt-3 flex flex-wrap gap-4"><Link href="/privacy" className="inline-flex min-h-11 items-center text-on-brand underline">Нууцлалын бодлого</Link><Link href="/terms" className="inline-flex min-h-11 items-center text-on-brand underline">Үйлчилгээний нөхцөл</Link></nav>
       </div>
     </footer>
   );

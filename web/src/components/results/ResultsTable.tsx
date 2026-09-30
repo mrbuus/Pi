@@ -7,7 +7,7 @@
  * ========================================================================== */
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, TriangleAlert, X } from "lucide-react";
+import { Download, Check, ChevronDown, ChevronUp, ChevronsUpDown, TriangleAlert, X } from "lucide-react";
 import type { ResultRow } from "./types";
 import { scorePercent, sourceLabel } from "./types";
 
@@ -139,7 +139,7 @@ export default function ResultsTable({
             onClick={exportCsv}
             className="h-11 rounded-lg border border-line px-4 text-base font-semibold text-ink transition hover:bg-panel"
           >
-            ⬇ CSV татах
+            <Download className="inline h-4 w-4" aria-hidden /> CSV татах
           </button>
         )}
       </div>

@@ -9,6 +9,9 @@ import { CreateTeacherGroupDto } from './dto/create-teacher-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { RegisterExternalTeacherDto } from './dto/register-external-teacher.dto';
 import { VerifyExternalTeacherDto } from './dto/verify-external-teacher.dto';
+import { RejectExternalTeacherDto } from './dto/reject-external-teacher.dto';
+
+const REJECTION_REASON_PREFIX = 'ТАТГАЛЗСАН ШАЛТГААН: ';
 
 /**
  * Join code үүсгэх функц: 6-8 тэмдэгт, үл ойлгомжтой тэмдэгтүүд хэрэглэхгүй
@@ -31,9 +34,7 @@ export class TeacherGroupsService {
    * Гадны багш бүртгүүлэх. Анх verifiedAt = null, админ баталгаажуулах хүртэл
    * сурагчийн мэдээлэл харахгүй.
    */
-  async registerExternalTeacher(
-    dto: RegisterExternalTeacherDto,
-  ) {
+  async registerExternalTeacher(dto: RegisterExternalTeacherDto) {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -137,7 +138,166 @@ export class TeacherGroupsService {
       lastName: t.lastName,
       organization: t.externalTeacherProfile?.organization,
       createdAt: t.createdAt,
+      rejectionReason: t.externalTeacherProfile?.note?.startsWith(
+        REJECTION_REASON_PREFIX,
+      )
+        ? t.externalTeacherProfile.note.slice(REJECTION_REASON_PREFIX.length)
+        : null,
     }));
+  }
+
+  async rejectExternalTeacher(
+    userId: string,
+    dto: RejectExternalTeacherDto,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { externalTeacherProfile: true },
+    });
+
+    if (!user?.externalTeacherProfile) {
+      throw new NotFoundException('Гадны багш олдсонгүй');
+    }
+    if (user.externalTeacherProfile.verifiedAt) {
+      throw new BadRequestException(
+        'Баталгаажсан багшийг хүсэлтээс татгалзаж болохгүй',
+      );
+    }
+    if (user.externalTeacherProfile.note?.startsWith(REJECTION_REASON_PREFIX)) {
+      throw new BadRequestException('Энэ хүсэлт аль хэдийн татгалзсан');
+    }
+
+    const reason = dto.reason.trim();
+    if (!reason) {
+      throw new BadRequestException('Татгалзах шалтгааныг бичнэ үү');
+    }
+
+    const updated = await this.prisma.externalTeacherProfile.update({
+      where: { userId },
+      data: { note: `${REJECTION_REASON_PREFIX}${reason}` },
+      select: { userId: true, note: true, verifiedAt: true },
+    });
+
+    return {
+      userId: updated.userId,
+      rejected: true,
+      rejectionReason: updated.note?.slice(REJECTION_REASON_PREFIX.length) ?? reason,
+      verifiedAt: updated.verifiedAt,
+    };
+  }
+
+  async reconsiderExternalTeacher(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        externalTeacherProfile: { select: { note: true, verifiedAt: true } },
+      },
+    });
+
+    if (!user?.externalTeacherProfile) {
+      throw new NotFoundException('Гадны багш олдсонгүй');
+    }
+    if (
+      user.externalTeacherProfile.verifiedAt ||
+      !user.externalTeacherProfile.note?.startsWith(REJECTION_REASON_PREFIX)
+    ) {
+      throw new BadRequestException('Татгалзсан хүсэлт олдсонгүй');
+    }
+
+    const updated = await this.prisma.externalTeacherProfile.update({
+      where: { userId },
+      data: { note: null },
+      select: { userId: true, note: true, verifiedAt: true },
+    });
+
+    return { userId: updated.userId, rejectionReason: null, verifiedAt: null };
+  }
+
+  /**
+   * Баталгаажсан гадны багшийн жагсаалт. Нууц үг болон бусад хэрэглэгчийн
+   * хувийн талбарыг сонголтоор буцаахгүй.
+   */
+  async getVerifiedTeachers() {
+    const teachers = await this.prisma.user.findMany({
+      where: {
+        role: 'TEACHER',
+        externalTeacherProfile: {
+          verifiedAt: { not: null },
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        externalTeacherProfile: {
+          select: {
+            organization: true,
+            verifiedAt: true,
+            note: true,
+          },
+        },
+        _count: {
+          select: { teacherGroups: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return teachers.map((teacher) => ({
+      id: teacher.id,
+      email: teacher.email,
+      firstName: teacher.firstName,
+      lastName: teacher.lastName,
+      organization: teacher.externalTeacherProfile?.organization,
+      verifiedAt: teacher.externalTeacherProfile?.verifiedAt,
+      note: teacher.externalTeacherProfile?.note,
+      groupCount: teacher._count.teacherGroups,
+    }));
+  }
+
+  /** Баталгаажуулалтыг буцааж цуцалж, анхны тэмдэглэлийг хэвээр үлдээнэ. */
+  async unverifyExternalTeacher(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        externalTeacherProfile: {
+          select: {
+            userId: true,
+            organization: true,
+            verifiedAt: true,
+            note: true,
+          },
+        },
+      },
+    });
+
+    if (!user?.externalTeacherProfile) {
+      throw new NotFoundException('Гадны багш олдсонгүй');
+    }
+    if (!user.externalTeacherProfile.verifiedAt) {
+      throw new BadRequestException('Энэ багш хараахан баталгаажаагүй');
+    }
+
+    const updated = await this.prisma.externalTeacherProfile.update({
+      where: { userId },
+      data: { verifiedAt: null, verifiedById: null },
+      select: {
+        userId: true,
+        organization: true,
+        verifiedAt: true,
+        note: true,
+      },
+    });
+
+    return {
+      userId: updated.userId,
+      organization: updated.organization,
+      verifiedAt: updated.verifiedAt,
+      note: updated.note,
+    };
   }
 
   /**
@@ -152,9 +312,7 @@ export class TeacherGroupsService {
     });
 
     if (!user || !user.externalTeacherProfile) {
-      throw new ForbiddenException(
-        'Зөвхөн гадны багш анги үүсгэх боломжтой',
-      );
+      throw new ForbiddenException('Зөвхөн гадны багш анги үүсгэх боломжтой');
     }
 
     if (!user.externalTeacherProfile.verifiedAt) {

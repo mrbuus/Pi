@@ -4,7 +4,7 @@ import InsightsDashboard from "@/components/insights/InsightsDashboard";
 export const metadata: Metadata = {
   title: "Дүн шинжилгээ | Шинэ Ирээдүйн Эзэд",
   description:
-    "Шалгалтын дараа ангийн дундаж, сэдвийн ялгаа, бодлогын чанарын дүн шинжилгээ",
+    "Оролдлогод суурилсан сэдвийн эзэмшил, бодлогын чанарын бодит хэмжилт",
 };
 
 export default function InsightsPage() {

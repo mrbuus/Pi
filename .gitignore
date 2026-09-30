@@ -22,3 +22,8 @@ api/prisma/reports/staff-roster.json
 # БҮХ хэрэглэгчийн нэвтрэх мэдээлэл (утас = нууц үг) — print-credentials.cjs
 # үүсгэдэг. НАСАНД ХҮРЭЭГҮЙ сурагчдын PII агуулдаг тул git-д ХЭЗЭЭ Ч орохгүй.
 api/prisma/reports/credentials.txt
+
+# Local load-test credentials and reports
+api/test/load/.synthetic-k6/
+k6/fixture.json
+k6/results*.json

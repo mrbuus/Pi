@@ -1,7 +1,10 @@
 "use client";
 
+import { LoadingState } from "@/components/ui/StateBlock";
+
 import { DoorOpen, AlertTriangle, Pencil, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import {
   formatMinutes,
@@ -67,10 +70,8 @@ function emptyForm(classroomId: string): FormState {
 export default function ScheduleAdmin({ role }: { role: string }) {
   const [classrooms, setClassrooms] = useState<ClassroomLite[]>([]);
   const [teachers, setTeachers] = useState<TeacherLite[]>([]);
-  const [entries, setEntries] = useState<ScheduleEntry[]>([]);
   const [filterClassroomId, setFilterClassroomId] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [optionsError, setOptionsError] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ kind: "success" | "error"; text: string } | null>(
     null,
   );
@@ -81,31 +82,29 @@ export default function ScheduleAdmin({ role }: { role: string }) {
   const [armedDelete, setArmedDelete] = useState<string | null>(null);
 
   useEffect(() => {
+    let alive = true;
     api<ClassroomLite[]>("/classrooms")
       .then((rows) => {
+        if (!alive) return;
         setClassrooms(rows);
         setForm((f) => (f.classroomId ? f : emptyForm(rows[0]?.id ?? "")));
       })
-      .catch((e) => setError(errMsg(e)));
+      .catch((e) => { if (alive) setOptionsError(errMsg(e)); });
     // /users/teachers нь зөвхөн ADMIN-д нээлттэй — TEACHER_PLUS-д 403 өгвөл
     // зүгээр л багш сонгох талбарыг далдлана (ангийн үндсэн багшаар орлоно)
     if (role === "ADMIN") {
       api<TeacherLite[]>("/users/teachers")
-        .then(setTeachers)
+        .then(rows => { if (alive) setTeachers(rows); })
         .catch(() => {});
     }
+    return () => { alive = false; };
   }, [role]);
 
-  const loadEntries = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    const qs = filterClassroomId ? `?classroomId=${filterClassroomId}` : "";
-    api<ScheduleEntry[]>(`/schedule${qs}`)
-      .then(setEntries)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, [filterClassroomId]);
-  useEffect(loadEntries, [loadEntries]);
+  const entriesQuery = useSection<ScheduleEntry[]>(`/schedule${filterClassroomId ? `?classroomId=${encodeURIComponent(filterClassroomId)}` : ""}`, []);
+  const { data: entries, reload: loadEntries } = entriesQuery;
+  const loading = entriesQuery.status === "loading";
+  const error = entriesQuery.error || optionsError;
+
 
   function startEdit(entry: ScheduleEntry) {
     setEditingId(entry.id);
@@ -179,7 +178,7 @@ export default function ScheduleAdmin({ role }: { role: string }) {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="chunky p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Хичээлийн хуваарь удирдах</h2>
       <p className="mb-4 text-xs text-ink-dim">
         Долоо хоног бүр давтагддаг хэв маяг — тодорхой огноо биш, ӨДӨР (Ням…
@@ -395,9 +394,7 @@ export default function ScheduleAdmin({ role }: { role: string }) {
       </div>
 
       {loading && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Ачаалж байна…
-        </p>
+        <LoadingState rows={3} />
       )}
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">

@@ -64,7 +64,7 @@ export class EmailService {
 
     const port = parseInt(portRaw, 10);
     if (isNaN(port)) {
-      this.logger.error(`EMAIL_SMTP_PORT-ийн утга сохи биш: ${portRaw}`);
+      this.logger.error('EMAIL_SMTP_PORT-ийн утга тоо биш');
       return;
     }
 
@@ -75,9 +75,9 @@ export class EmailService {
         secure: port === 465, // SSL-д 465, TLS-д 587
         auth: { user, pass },
       });
-      this.logger.debug(`SMTP транспорт дүнгэлсэн: ${host}:${port}`);
+      this.logger.debug(`SMTP транспорт дүнгэлсэн (порт ${port})`);
     } catch (err) {
-      this.logger.error(`SMTP транспорт үүсгэлт амжилтгүй: ${err}`);
+      this.logger.error('SMTP транспорт үүсгэж чадсангүй');
     }
   }
 
@@ -106,9 +106,7 @@ export class EmailService {
     // Тохируулаагүй бол дуугүй алгасна — хэрэглэгчид "имэйл идэвхжээгүй" гэж
     // харуулсан бол сервис үйлдэл хийхгүй (мөнхөд хүлээлтээ сэргийлнэ)
     if (!this.isConfigured()) {
-      this.logger.warn(
-        `Имэйл үйлчилгээ идэвхжээгүй байна; ${params.to} уг иммэйл явахгүй`,
-      );
+      this.logger.warn('Имэйл үйлчилгээ идэвхжээгүй тул имэйл алгасав');
       return;
     }
 
@@ -141,15 +139,14 @@ export class EmailService {
         timeoutPromise,
       ]);
 
-      this.logger.debug(
-        `Имэйл амжилттай илгээгдсэн: ${to} (гарчиг: "${subject}")`,
-      );
+      this.logger.debug('Имэйл амжилттай илгээгдсэн');
     } catch (err) {
       // Алдаа бүрэлсэн — дуудагч гүйцэж авна (нуугүй)
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      this.logger.error(
-        `Имэйл илгээлт амжилтгүй: ${to} → ${errorMessage}`,
-      );
+      const errorCode =
+        err && typeof err === 'object' && 'code' in err
+          ? String((err as { code?: unknown }).code).slice(0, 40)
+          : 'SMTP_ERROR';
+      this.logger.error(`Имэйл илгээлт амжилтгүй (${errorCode})`);
       throw err;
     }
   }
