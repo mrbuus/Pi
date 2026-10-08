@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Шинэ Ирээдүйн Эзэд</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700&display=swap&subset=cyrillic-ext" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+  :root {
+    --paper: #FAF9F6;
+    --grid: #E7E3EF;
+    --ink: #1A1730;
+    --ink-soft: #565170;
+    --brand: #1D4ED8;
+    --violet: #6B2A8E;
+    --unlit: #CBC5D8;
+    --display: "Unbounded", system-ui, sans-serif;
+    --text: "Golos Text", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 var(--text); }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 6px; }
+
+  /* Дөрвөлжин дэвтрийн тор — ирмэг рүү уусна */
+  .hero { position: relative; overflow: hidden; min-height: 100svh; display: flex; flex-direction: column; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(120% 80% at 70% 35%, #000 30%, transparent 78%);
+            mask-image: radial-gradient(120% 80% at 70% 35%, #000 30%, transparent 78%);
+  }
+
+  nav { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; max-width: 1180px; width: 100%; margin: 0 auto; }
+  .brand { font-weight: 600; font-size: 16px; text-decoration: none; letter-spacing: -.01em; }
+  .login { font-size: 15px; font-weight: 500; text-decoration: none; padding: 10px 14px; border-radius: 10px; }
+  .login:hover { background: rgba(26,23,48,.05); }
+
+  .stage { position: relative; z-index: 1; flex: 1; display: grid; gap: 8px; max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 20px 40px; align-content: start; }
+  /* Утсанд: гарчиг → спираль → тайлбар, товч. Компьютерт: зүүн талд текст, баруунд спираль */
+  @media (min-width: 900px) {
+    .stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); grid-template-areas: "title art" "rest art"; align-items: end; column-gap: 48px; padding-bottom: 64px; }
+    .title { grid-area: title; } .rest { grid-area: rest; align-self: start; } .art { grid-area: art; align-self: center; }
+  }
+
+  /* ----- Спираль ----- */
+  .art { display: grid; justify-items: center; }
+  .spiral { width: min(84vw, 560px); aspect-ratio: 1; display: block; overflow: visible; }
+  .spiral .d { font-family: var(--text); font-weight: 600; fill: var(--unlit); transition: fill .35s ease; }
+  .spiral .d.lit { fill: var(--violet); }
+  .spiral .e { font-family: "KaTeX_Math", "Times New Roman", serif; font-style: italic; fill: var(--violet); }
+  .spiral .core { fill: #fff; }
+  .spiral .track { fill: none; stroke: #E9E4F0; stroke-width: 10; }
+  .spiral .ring { fill: none; stroke: var(--violet); stroke-width: 10; stroke-linecap: round; transform: rotate(-90deg); transition: stroke-dashoffset .45s cubic-bezier(.2,.7,.2,1); }
+
+  .limit { width: min(92vw, 440px); margin-top: 4px; }
+  .formula { display: flex; align-items: baseline; justify-content: center; gap: 10px; font-size: 19px; min-height: 44px; }
+  .formula output { font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: .01em; }
+  .formula output .hit { color: var(--violet); }
+  .formula output .miss { color: var(--ink-soft); }
+  .slider { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; margin-top: 6px; font-size: 14px; color: var(--ink-soft); }
+  .slider label { font-variant-numeric: tabular-nums; min-width: 92px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: transparent; cursor: pointer; }
+  input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--violet) var(--p, 0%), var(--unlit) var(--p, 0%)); }
+  input[type=range]::-moz-range-track { height: 4px; border-radius: 4px; background: var(--unlit); }
+  input[type=range]::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--violet); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px; border-radius: 50%; background: #fff; border: 2px solid var(--violet); box-shadow: 0 2px 6px rgba(107,42,142,.25); }
+  input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--violet); }
+  .count { text-align: center; font-size: 14px; color: var(--ink-soft); margin: 2px 0 0; min-height: 22px; }
+
+  /* ----- Текст ----- */
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 8.4vw, 58px); line-height: 1.06; letter-spacing: -.02em; margin: 8px 0 0; max-width: 13ch; }
+  h1 span { display: block; }
+  h1 .second { color: var(--ink-soft); }
+  .lede { font-size: clamp(17px, 2.4vw, 19px); color: var(--ink-soft); max-width: 36ch; margin: 18px 0 0; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 28px; }
+  .primary { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 24px; border-radius: 14px; background: var(--brand); color: #fff; font-weight: 600; text-decoration: none; }
+  .primary:hover { background: #1A45C2; }
+  .secondary { font-weight: 500; text-underline-offset: 4px; text-decoration-thickness: 1px; padding: 12px 0; }
+  @media (max-width: 899px) { .primary { flex: 1 1 100%; } .title h1 { margin-bottom: 6px; } }
+
+  /* Ачааллын нэг мөч: спираль гаднаас төв рүү бичигдэнэ */
+  @media (prefers-reduced-motion: no-preference) {
+    .spiral .d { opacity: 0; animation: write .5s ease forwards; animation-delay: calc(var(--i) * 6ms); }
+    .spiral .e, .spiral .core { opacity: 0; animation: write .6s ease forwards; animation-delay: 1.3s; }
+    @keyframes write { to { opacity: 1; } }
+  }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <nav>
+    <a class="brand" href="#">Шинэ Ирээдүйн Эзэд</a>
+    <a class="login" href="#">Нэвтрэх</a>
+  </nav>
+
+  <div class="stage">
+    <div class="title"><h1><span>Цифрийг цээжилж болно.</span><span class="second">Ойлголтыг болохгүй.</span></h1></div>
+
+    <div class="art">
+      <svg class="spiral" id="spiral" viewBox="-260 -260 520 520" role="img" aria-labelledby="spiralTitle">
+        <title id="spiralTitle">e тооны цифрүүд спиралаар. Доорх гулсуураар n-ийг ихэсгэхэд таарсан цифрүүд гэрэлтэнэ.</title>
+        <circle class="track" r="78"/>
+        <circle class="ring" id="ring" r="78"/>
+        <circle class="core" r="73"/>
+        <text class="e" text-anchor="middle" dominant-baseline="central" font-size="96" y="-4">e</text>
+        <g id="digits"></g>
+      </svg>
+      <div class="limit">
+        <div class="formula"><span id="tex"></span><span aria-hidden="true">=</span><output id="value" for="n" aria-live="polite"></output></div>
+        <div class="slider">
+          <label for="n" id="nLabel">n = 1</label>
+          <input id="n" type="range" min="0" max="6" step="0.01" value="0" aria-describedby="count">
+          <span aria-hidden="true">10<sup>6</sup></span>
+        </div>
+        <p class="count" id="count"></p>
+      </div>
+    </div>
+
+    <div class="rest">
+      <p class="lede">Зөв хариулсан нь ойлгосон гэсэн үг биш. Хүүхэд юуг ойлгоогүйгээ олж, сууриас нь эхэлж, шинэ бодлогыг өөрөө бодох хүртэл бид «сурсан» гэж тооцдоггүй.</p>
+      <div class="actions">
+        <a class="primary" href="#">Нэг бодлого бодож үзэх</a>
+        <a class="secondary" href="#">Танхимын сургалтын тухай</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // e-гийн цифрүүд (танай номын хавтас дээрхтэй ижил)
+  const E = "2718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427427466391932003059921817413596629043572900334295260595630738132328627943490763233829880753195251019011573834187930702154089149934884167509244761460668082264800168477411853742345442437107539077744992069551702761838606261331384583000752044933826560297606737113200709328709127443747047230696977209310141692836819025515108657463772111252389784425056953696770785449969967946864454905987931636889230098793127736178215424999229576351482208269895193668033182528869398496465105820939239829488793320362509443117301238197068416140397019837679320683282376464804295311802328782509819455815301756717361332069811250996181881593041690351598888519345807273866738589422879228499892086805825749279610484198444363463244968487560233624827041978623209002160990235304369941849146314093431738143640546253152096183690888707016768396424378140592714563549061303107208510383750510115747704171898610687396965521267154688957035035";
+  const svg = document.getElementById("digits");
+  const ns = "http://www.w3.org/2000/svg";
+
+  // Архимедийн спираль: гаднаас (r=244) төв рүү (r=96), цифр бүр нумын тэнцүү зайд, том → жижиг
+  const R0 = 244, R1 = 96, TURNS = 5.2, b = (R0 - R1) / (TURNS * 2 * Math.PI);
+  const nodes = [];
+  let theta = 0, i = 0;
+  while (i < E.length) {
+    const r = R0 - b * theta;
+    if (r < R1) break;
+    const size = 6 + (r - R1) / (R0 - R1) * 16;          // 22px гадна → 6px дотор
+    const x = r * Math.cos(theta), y = r * Math.sin(theta);
+    const t = document.createElementNS(ns, "text");
+    t.setAttribute("class", "d");
+    t.setAttribute("x", x.toFixed(2)); t.setAttribute("y", y.toFixed(2));
+    t.setAttribute("font-size", size.toFixed(2));
+    t.setAttribute("text-anchor", "middle"); t.setAttribute("dominant-baseline", "central");
+    t.setAttribute("transform", `rotate(${(theta * 180 / Math.PI + 90).toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)})`);
+    t.style.setProperty("--i", i);
+    t.textContent = (i === 1 ? "." : "") + E[i];       // «2.7…» — хоёр дахь цифрийн өмнө цэг
+    svg.appendChild(t); nodes.push(t);
+    theta += (size * 0.78) / r;                          // нумын урт ≈ үсгийн өргөн
+    i++;
+  }
+  svg.setAttribute("aria-hidden", "true");
+
+  // ---------- (1 + 1/n)^n ----------
+  const range = document.getElementById("n"), out = document.getElementById("value"),
+        nLabel = document.getElementById("nLabel"), count = document.getElementById("count");
+  const fmt = n => n.toLocaleString("mn-MN").replace(/,/g, " ");
+  function update() {
+    const n = Math.round(10 ** Number(range.value));
+    const v = Math.exp(n * Math.log1p(1 / n));          // log1p: их n дээр нарийвчлал хадгална
+    const s = v.toFixed(7).replace(".", "");             // 8 орон
+    let hit = 0; while (hit < s.length && s[hit] === E[hit]) hit++;
+    const shown = v.toFixed(7);
+    const split = hit === 0 ? 0 : hit + 1;               // цэгийг тооцох
+    out.innerHTML = `<span class="hit">${shown.slice(0, split)}</span><span class="miss">${shown.slice(split)}</span>`;
+    nLabel.textContent = "n = " + fmt(n);
+    count.textContent = hit <= 1 ? "e-тэй эхний цифр л таарч байна" : `e-тэй эхний ${hit} цифр таарч байна`;
+    nodes.forEach((d, k) => d.classList.toggle("lit", k < hit));
+    // e-г хүрээлсэн цагираг: таарсан цифр бүр нэг алхам дүүргэнэ (8 оронд бүтэн)
+    ring.style.strokeDashoffset = (C * (1 - Math.min(hit, 8) / 8)).toFixed(1);
+    range.style.setProperty("--p", (Number(range.value) / 6 * 100) + "%");
+  }
+  const ring = document.getElementById("ring"), C = 2 * Math.PI * 78;
+  ring.style.strokeDasharray = C.toFixed(1);
+  range.addEventListener("input", update);
+  update();
+
+  window.addEventListener("load", () => {
+    katex.render("\\left(1+\\tfrac{1}{n}\\right)^{n}", document.getElementById("tex"), { throwOnError: false });
+  });
+</script>
+</body>
+</html>
