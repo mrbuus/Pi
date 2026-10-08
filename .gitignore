@@ -48,3 +48,6 @@ api/skills-lock.json
 
 # Blender рендерийн гаралт (том зургууд)
 docs/v2/render/out/
+
+# Facebook-ийн зургууд — сурагчдын царайтай, зөвхөн лавлагаа
+docs/v2/brand/fb-private/
