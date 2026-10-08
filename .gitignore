@@ -45,3 +45,6 @@ api/.agents/
 api/.claude/
 api/.windsurf/
 api/skills-lock.json
+
+# Blender рендерийн гаралт (том зургууд)
+docs/v2/render/out/
