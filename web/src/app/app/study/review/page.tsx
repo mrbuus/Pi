@@ -162,12 +162,20 @@ export default function ReviewPage() {
   }
   useEffect(() => {
     if (!run) return;
+    // Үлдсэн хугацааг сурагчид амласан төсвөөс дээш харуулахгүй. deadlineAt нь
+    // цагийн зөрүү, timezone алдаа эсвэл буруу өгөгдлөөс болж ирээдүйд хол
+    // байвал тоолуур утгагүй том тоо харуулж, 10 минутын давталт хязгааргүй
+    // болно. Энэ нь серверийн шалгалтыг орлохгүй — зөвхөн харагдацын хамгаалалт.
+    const budgetSeconds = Math.max(0, run.budgetMinutes) * 60;
     const update = () =>
       setRemaining(
         Math.max(
           0,
-          Math.ceil(
-            (Date.parse(run.deadlineAt) - Date.now() - offset.current) / 1000,
+          Math.min(
+            budgetSeconds,
+            Math.ceil(
+              (Date.parse(run.deadlineAt) - Date.now() - offset.current) / 1000,
+            ),
           ),
         ),
       );

@@ -127,25 +127,23 @@ export default function StudyPage() {
     setFailures(missing);
     setLoading(false);
   }
+  // Өгөгдөл татахыг requestAnimationFrame-д боож болохгүй: нуугдсан таб дээр
+  // браузер frame гаргахгүй тул callback ажиллахгүй, хуудас skeleton дээрээ
+  // гацна. useEffect өөрөө paint-ийн дараа ажилладаг тул хойшлуулах хэрэггүй.
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      void load();
-      const query = new URLSearchParams(window.location.search);
-      const saved = query.get("task");
-      const savedMode = query.get("mode");
-      const path = restoredStudyTask(getRole(), saved);
-      if (path) {
-        setMode(studyMode(getRole(), savedMode));
-        setBusy(true);
-        void api<Task>(path)
-          .then(setTask)
-          .catch(() =>
-            setError("Өмнөх бодлого нээгдсэнгүй. Дахин оролдоно уу."),
-          )
-          .finally(() => setBusy(false));
-      }
-    });
-    return () => cancelAnimationFrame(frame);
+    void load();
+    const query = new URLSearchParams(window.location.search);
+    const saved = query.get("task");
+    const savedMode = query.get("mode");
+    const path = restoredStudyTask(getRole(), saved);
+    if (path) {
+      setMode(studyMode(getRole(), savedMode));
+      setBusy(true);
+      void api<Task>(path)
+        .then(setTask)
+        .catch(() => setError("Өмнөх бодлого нээгдсэнгүй. Дахин оролдоно уу."))
+        .finally(() => setBusy(false));
+    }
   }, []);
   async function start(id?: string, probeFamily?: string, forcedMode?: string) {
     if (!isStudyLearner(getRole())) {
