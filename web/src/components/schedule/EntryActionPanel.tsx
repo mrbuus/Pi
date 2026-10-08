@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import {
   AlertTriangle,
   BookOpen,
@@ -12,23 +12,12 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
-import { Meta, Dot } from "@/components/ui/Meta";
+import { Meta } from "@/components/ui/Meta";
 import RoomShape from "./RoomShape";
-import {
-  formatMinutes,
-  ROOMS,
-  roomShapeOf,
-  SUBJECT_LABEL,
-  timeToMinutes,
-  WEEKDAY_LABELS,
-  WORKWEEK_ORDER,
-  type BookLite,
-  type ChapterLite,
-  type TeacherLite,
-  type WeekEntry,
-} from "./types";
+import { formatMinutes, ROOMS, SUBJECT_LABEL, timeToMinutes, WEEKDAY_LABELS, WORKWEEK_ORDER, type BookLite, type ChapterLite, type TeacherLite, type WeekEntry } from "./types";
 
 /**
  * Танхимын сонголт — чөлөөт текст биш тогтмол жагсаалт (types.ts дахь ROOMS).
@@ -115,7 +104,7 @@ const outlineBtn =
  * үйлдлийг ЯЛГААТАЙ, тод тусгаарласан хэсэгт байрлуулна (Google Calendar-ийн
  * "this event" vs "the whole series" конвенц).
  */
-export default function EntryActionPanel({
+function EntryActionPanelContent({
   open,
   entry,
   date,
@@ -140,16 +129,14 @@ export default function EntryActionPanel({
 
   const [showSettings, setShowSettings] = useState(false);
 
-  const [topicTitle, setTopicTitle] = useState("");
+  const [topicTitle, setTopicTitle] = useState(entry?.topic ?? "");
   const [topicOpen, setTopicOpen] = useState(false);
   const [topicSaving, setTopicSaving] = useState(false);
   const [topicError, setTopicError] = useState<string | null>(null);
 
   const [showChapterPicker, setShowChapterPicker] = useState(false);
-  const [subject, setSubject] = useState<string>("");
-  const [books, setBooks] = useState<BookLite[]>([]);
+  const [subject, setSubject] = useState<string>(entry?.subject ?? "");
   const [bookId, setBookId] = useState("");
-  const [chapters, setChapters] = useState<ChapterLite[]>([]);
   const [chapterId, setChapterId] = useState("");
 
   const [cancelArmed, setCancelArmed] = useState(false);
@@ -157,24 +144,23 @@ export default function EntryActionPanel({
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   const [moveOpen, setMoveOpen] = useState(false);
-  const [moveDate, setMoveDate] = useState("");
-  const [moveStart, setMoveStart] = useState("");
-  const [moveEnd, setMoveEnd] = useState("");
-  const [moveRoom, setMoveRoom] = useState("");
+  const [moveDate, setMoveDate] = useState(date);
+  const [moveStart, setMoveStart] = useState(entry ? formatMinutes(entry.startMinute) : "");
+  const [moveEnd, setMoveEnd] = useState(entry ? formatMinutes(entry.endMinute) : "");
+  const [moveRoom, setMoveRoom] = useState(entry?.room ?? "");
   const [moveNote, setMoveNote] = useState("");
   const [moveSaving, setMoveSaving] = useState(false);
   const [moveError, setMoveError] = useState<string | null>(null);
 
   // "Энэ ба цаашдын бүх" — цувралыг энэ огнооноос салгаж өөрчилнө
   const [splitOpen, setSplitOpen] = useState(false);
-  const [splitWeekday, setSplitWeekday] = useState<number>(1);
-  const [splitStart, setSplitStart] = useState("");
-  const [splitEnd, setSplitEnd] = useState("");
-  const [splitRoom, setSplitRoom] = useState("");
-  const [splitTeacherId, setSplitTeacherId] = useState("");
+  const [splitWeekday, setSplitWeekday] = useState<number>(() => new Date(`${date}T00:00:00.000Z`).getUTCDay());
+  const [splitStart, setSplitStart] = useState(entry ? formatMinutes(entry.startMinute) : "");
+  const [splitEnd, setSplitEnd] = useState(entry ? formatMinutes(entry.endMinute) : "");
+  const [splitRoom, setSplitRoom] = useState(entry?.room ?? "");
+  const [splitTeacherId, setSplitTeacherId] = useState(entry?.teacherId ?? "");
   const [splitSaving, setSplitSaving] = useState(false);
   const [splitError, setSplitError] = useState<string | null>(null);
-  const [teachers, setTeachers] = useState<TeacherLite[]>([]);
 
   const [deleteArmStep, setDeleteArmStep] = useState(0);
   const [deleteSaving, setDeleteSaving] = useState(false);
@@ -183,74 +169,14 @@ export default function EntryActionPanel({
   // Танхим солих — эзний хүсэлт (2026-08-09): «Зөөх»-өөс тусдаа, огноо/цаг
   // хөндөхгүйгээр зөвхөн танхимыг л сольдог хялбар урсгал.
   const [roomOpen, setRoomOpen] = useState(false);
-  const [roomValue, setRoomValue] = useState("");
+  const [roomValue, setRoomValue] = useState(entry?.room ?? "");
   const [roomScope, setRoomScope] = useState<"once" | "always">("once");
   const [roomSaving, setRoomSaving] = useState(false);
   const [roomError, setRoomError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!entry) return;
-    setShowSettings(false);
-    setTopicTitle(entry.topic ?? "");
-    setTopicOpen(false);
-    setShowChapterPicker(false);
-    setSubject(entry.subject ?? "");
-    setBookId("");
-    setChapterId("");
-    setBooks([]);
-    setChapters([]);
-    setCancelArmed(false);
-    setCancelError(null);
-    setMoveOpen(false);
-    setMoveDate(date);
-    setMoveStart(formatMinutes(entry.startMinute));
-    setMoveEnd(formatMinutes(entry.endMinute));
-    setMoveRoom(entry.room ?? "");
-    setMoveNote("");
-    setMoveError(null);
-    setDeleteArmStep(0);
-    setDeleteError(null);
-    setSplitOpen(false);
-    setSplitError(null);
-    // Салгах маягтын анхны утга = ОДООГИЙН тохиргоо. Багш ихэвчлэн ганц
-    // талбарыг л (жишээ нь цагийг) солино — бусдыг нь дахин бөглөх шаардлагагүй.
-    setSplitWeekday(new Date(`${date}T00:00:00.000Z`).getUTCDay());
-    setSplitStart(formatMinutes(entry.startMinute));
-    setSplitEnd(formatMinutes(entry.endMinute));
-    setSplitRoom(entry.room ?? "");
-    setSplitTeacherId(entry.teacherId ?? "");
-    setRoomOpen(false);
-    setRoomValue(entry.room ?? "");
-    setRoomScope("once");
-    setRoomError(null);
-  }, [entry, date]);
-
-  // Багшийн жагсаалтыг зөвхөн салгах маягт нээгдэх үед татна — самбар нээх
-  // бүрд шаардлагагүй хүсэлт явуулахгүй.
-  useEffect(() => {
-    if (!splitOpen || teachers.length) return;
-    api<TeacherLite[]>("/schedule/teachers")
-      .then(setTeachers)
-      .catch(() => setTeachers([]));
-  }, [splitOpen, teachers.length]);
-
-  useEffect(() => {
-    if (!showChapterPicker) return;
-    const qs = subject ? `?subject=${subject}` : "";
-    api<BookLite[]>(`/books${qs}`)
-      .then(setBooks)
-      .catch(() => setBooks([]));
-  }, [showChapterPicker, subject]);
-
-  useEffect(() => {
-    if (!bookId) {
-      setChapters([]);
-      return;
-    }
-    api<ChapterLite[]>(`/chapters?bookId=${bookId}`)
-      .then(setChapters)
-      .catch(() => setChapters([]));
-  }, [bookId]);
+  const { data: teachers } = useSection<TeacherLite[]>(splitOpen ? "/schedule/teachers" : null, []);
+  const { data: books } = useSection<BookLite[]>(showChapterPicker ? `/books${subject ? `?subject=${encodeURIComponent(subject)}` : ""}` : null, []);
+  const { data: chapters } = useSection<ChapterLite[]>(bookId ? `/chapters?bookId=${encodeURIComponent(bookId)}` : null, []);
 
   const weekdayLabel = useMemo(
     () => WEEKDAY_LABELS[new Date(`${date}T00:00:00.000Z`).getUTCDay()],
@@ -1016,4 +942,9 @@ export default function EntryActionPanel({
       </div>
     </div>
   );
+}
+
+export default function EntryActionPanel(props: Parameters<typeof EntryActionPanelContent>[0]) {
+  if (!props.entry) return null;
+  return <EntryActionPanelContent key={`${props.date}:${JSON.stringify(props.entry)}`} {...props} />;
 }

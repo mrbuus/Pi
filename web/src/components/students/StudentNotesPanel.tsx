@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { TriangleAlert, Check } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
+import { useSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import { StudentNote, StudentNoteType, errMsg } from "./types";
 
@@ -22,7 +23,7 @@ function formatDateTime(iso: string): string {
   });
 }
 
-export default function StudentNotesPanel({
+function StudentNotesPanelContent({
   studentId,
   paymentNotesBlocked,
   paymentNotesBlockedReason,
@@ -35,9 +36,6 @@ export default function StudentNotesPanel({
   paymentNotesBlockedReason: string;
 }) {
   const [tab, setTab] = useState<StudentNoteType>("GENERAL");
-  const [notes, setNotes] = useState<StudentNote[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -47,16 +45,8 @@ export default function StudentNotesPanel({
   const [editVal, setEditVal] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<StudentNote[]>(`/students/${studentId}/notes`)
-      .then(setNotes)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, [studentId]);
-
-  useEffect(load, [load]);
+  const { data: notes, setData: setNotes, status, error, reload: load } = useSection<StudentNote[] | null>(`/students/${studentId}/notes`, null);
+  const loading = status === "loading";
 
   const visible = useMemo(
     () => (notes ?? []).filter((n) => n.type === tab),
@@ -144,7 +134,7 @@ export default function StudentNotesPanel({
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+    <section className="chunky p-4 md:p-6">
       <h2 className="mb-3 font-bold text-brand-soft">Тэмдэглэл</h2>
 
       <div className="mb-4 flex gap-2 border-b border-line pb-2">
@@ -312,7 +302,7 @@ export default function StudentNotesPanel({
           onClick={() => setDeleteTarget(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-line bg-panel p-6"
+            className="w-full max-w-sm chunky p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="font-bold text-ink">Тэмдэглэл устгах уу?</p>
@@ -336,4 +326,8 @@ export default function StudentNotesPanel({
       )}
     </section>
   );
+}
+
+export default function StudentNotesPanel(props: Parameters<typeof StudentNotesPanelContent>[0]) {
+  return <StudentNotesPanelContent key={props.studentId} {...props} />;
 }

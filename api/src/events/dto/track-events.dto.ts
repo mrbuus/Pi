@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -77,35 +78,43 @@ function MaxJsonSize(maxLength: number, validationOptions?: ValidationOptions) {
 }
 
 export class TrackEventDto {
+  @ApiProperty({ enum: LearningEventType })
   @IsEnum(LearningEventType)
   type: LearningEventType;
 
+  @ApiProperty({ type: String, format: 'date-time' })
   @IsDateString()
   @IsRecentTimestamp()
   occurredAt: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   problemId?: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   testId?: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   chapterId?: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   videoId?: string;
 
+  @ApiPropertyOptional({ type: Number, minimum: 0, maximum: 86_400_000 })
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(86_400_000)
   durationMs?: number;
 
+  @ApiPropertyOptional({ type: Object, additionalProperties: true })
   @IsOptional()
   @IsObject()
   @MaxJsonSize(MAX_META_JSON_LENGTH)
@@ -115,10 +124,12 @@ export class TrackEventDto {
 // sessionId нь бүлэг event-үүдийн нийтлэг холбоос (нэг landing-аас гарах
 // хүртэлх урсгал) — тус бүрийг биш, бүхэл batch-ийг нэг сессионд оноодог.
 export class TrackEventsDto {
+  @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   sessionId?: string;
 
+  @ApiProperty({ type: () => [TrackEventDto], minItems: 1, maxItems: 100 })
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(100)

@@ -1,84 +1,49 @@
 /**
- * SMS мессежийн хэсгийн тооцоо (segment count).
- *
- * GSM-7 (латин, англи, ихэнхи символ): 160 тэмдэгт/хэсэг
- * UCS-2 (монгол кирилл, бусад цомог): 70 тэмдэгт/хэсэг
- *
- * ЯАГААД ЧУХАЛ ВЭ: SMS илгээх өртөг = хэсгийн тоо * үнэ. Мессеж удаагүй
- * болоход зардал 2 дахин ихэвхэгдэнэ. Тооцоо зөв байх ёстой.
+ * SMS message segment count using GSM-7 septets or UCS-2 UTF-16 code units.
+ * A single segment holds 160 GSM-7 septets / 70 UCS-2 units; concatenated
+ * messages hold 153 / 67 units because each part reserves a concatenation header.
  */
 
-/**
- * GSM-7-д кодлогдох боломжтой нэг тэмдэгтүүд.
- * Орно: A–Z, a–z, 0–9, цэлгээлт, ихэнхи пунктуацион.
- * Орохгүй: кирилл, эмодзи, CJK, дээрх escape авах тэмдэгтүүд.
- */
-const GSM7_CHARS = new Set(
-  '@£$¥èéùìòÇØøÅåΔ_ΦΓΛΩΠΨΣΘΞ{}\\[~]|^' +
-    '0123456789' +
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-    'abcdefghijklmnopqrstuvwxyz' +
-    ' !"#¤%&\'()*+,-./:;<=>?¡¿§ªº',
+/** GSM 03.38 default alphabet. The escape character itself is intentionally omitted. */
+const GSM7_BASIC = new Set(
+  '@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !"#¤%&\'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà',
 );
 
-/**
- * GSM-7-ийн extended character set — 2 байттай кодлогддог, тийм болохоор
- * лимит нь 160 / 2 байдал мэт ажилладаг (үнэндээ үлдсэн байтанд орно).
- */
-const GSM7_EXTENDED_CHARS = new Set(
-  '[]{}\\~|€' // Escape { + одоо нэр байхгүй хэрвээ
-);
+/** GSM 03.38 extension alphabet; each character consumes two septets. */
+const GSM7_EXTENDED = new Set('^{}\\[~]|€');
 
-/**
- * Монгол кирилл үг санагдах тэмдэгтүүд. Кирилл алфавит нь a...я
- * болон Cyrillic block-д (U+0400 – U+04FF) байдаг.
- */
-function isCyrillic(char: string): boolean {
-  const code = char.charCodeAt(0);
-  return (code >= 0x0400 && code <= 0x04ff) || (code >= 0x0100 && code <= 0x017f);
+function isGsm7Character(character: string): boolean {
+  return GSM7_BASIC.has(character) || GSM7_EXTENDED.has(character);
 }
 
-/**
- * Бүтэн мессежийг скэн хийж, GSM-7 эсвэл UCS-2 ашиглахаа сонгоно.
- * Кирилл байгаа бол UCS-2 (70 т/х), эс бөгөөс GSM-7 (160 т/х).
- *
- * Тайлбар: мессеж холимог (кирилл + латин) байвал БҮХЭЛДЭЭ UCS-2-т
- * кодлогддог — хагас GSM7, хагас UCS2 боломжгүй (нийлүүлэгчийн сахилга).
- */
+/** Return how many SMS parts the provider must send for this text. */
 export function calculateSmsSegments(message: string): number {
   if (!message) return 0;
 
-  // 1. Кирилл ямар нэгэн байгаа эсэх
-  let hasCyrillic = false;
-  for (const char of message) {
-    if (isCyrillic(char)) {
-      hasCyrillic = true;
-      break;
-    }
+  const characters = Array.from(message);
+  if (characters.every(isGsm7Character)) {
+    const septets = characters.reduce(
+      (total, character) => total + (GSM7_EXTENDED.has(character) ? 2 : 1),
+      0,
+    );
+    return septets <= 160 ? 1 : Math.ceil(septets / 153);
   }
 
-  // 2. Хэсгийг тооцоолох — UCS-2 эсвэл GSM-7 аль нэг сонгоно
-  const charsPerSegment = hasCyrillic ? 70 : 160;
-  return Math.ceil(message.length / charsPerSegment);
+  // JavaScript string length is UTF-16 code units, matching UCS-2 accounting
+  // for astral symbols such as emoji (two code units each).
+  const codeUnits = message.length;
+  return codeUnits <= 70 ? 1 : Math.ceil(codeUnits / 67);
 }
 
-/**
- * DEBUG: мессежийн тэмдэгтийн бүтцийг дүрслэн гаргана (unit test-д хэргэтэй).
- *
- * Жишээ: "Привет123" → "Cyrillic, GSM7 ambiguous, GSM7 digits"
- */
+/** Character classification helper used by SMS diagnostics and tests. */
 export function analyzeMessageCharacters(message: string): string {
-  const analysis: string[] = [];
-  for (const char of message) {
-    if (isCyrillic(char)) {
-      analysis.push('Cyrillic');
-    } else if (GSM7_CHARS.has(char)) {
-      analysis.push('GSM7');
-    } else if (GSM7_EXTENDED_CHARS.has(char)) {
-      analysis.push('GSM7-ext');
-    } else {
-      analysis.push(`Unknown(U+${char.charCodeAt(0).toString(16).toUpperCase()})`);
+  return Array.from(message, (character) => {
+    const codePoint = character.codePointAt(0) ?? 0;
+    if ((codePoint >= 0x0400 && codePoint <= 0x04ff) || (codePoint >= 0x0100 && codePoint <= 0x017f)) {
+      return 'Cyrillic';
     }
-  }
-  return analysis.join(' ');
+    if (GSM7_BASIC.has(character)) return 'GSM7';
+    if (GSM7_EXTENDED.has(character)) return 'GSM7-ext';
+    return `Unknown(U+${codePoint.toString(16).toUpperCase()})`;
+  }).join(' ');
 }

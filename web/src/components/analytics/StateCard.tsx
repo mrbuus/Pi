@@ -1,6 +1,7 @@
 "use client";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { TriangleAlert } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+
 
 // Ачаалж байгаа/алдаа/хоосон төлвүүдийг нэг стандарт харагдацтай болгоно —
 // "алдаа" ба "дата байхгүй" ХОЁРЫГ ХАРИЛЦАН ЯЛГАГДАХУЙЦ харуулна (спекийн
@@ -8,11 +9,7 @@ import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock
 // текст, товчгүй.
 
 export function LoadingCard({ label = "Ачаалж байна…" }: { label?: string }) {
-  return (
-    <p className="animate-pulse text-sm text-ink-dim" role="status">
-      {label}
-    </p>
-  );
+  return <LoadingState rows={3} label={label} />;
 }
 
 export function ErrorCard({

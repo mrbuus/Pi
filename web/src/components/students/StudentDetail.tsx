@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Pencil, ArrowLeft, TriangleAlert } from "lucide-react";
 import { Meta } from "@/components/ui/Meta";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { LoadingState } from "@/components/ui/StateBlock";
 // Төлбөрийн төлөв/аргын нэрс НЭГ эх сурвалжаас — өмнө нь энд, PaymentsClient-д,
 // student/payments-д гурав давхардаж, тус бүр өөр үгтэй байв.
 import { METHOD_LABEL, STATUS_LABEL } from "@/components/payments/paymentHelpers";
+import { useSection } from "@/components/students/progress/useSection";
 import { api, getRole } from "@/lib/api";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import SendPasswordResetButton from "./SendPasswordResetButton";
@@ -138,41 +139,26 @@ function Field({
   );
 }
 
-export default function StudentDetail({ studentId }: { studentId: string }) {
+function StudentDetailContent({ studentId }: { studentId: string }) {
   const role = getRole();
   const canEdit = canEditProfile(role);
   const showGuardians = canSeeGuardianPhonesFn(role);
   const canSeeMoney = role === "ADMIN" || role === "TEACHER_PLUS";
 
-  const [detail, setDetail] = useState<StudentDetailData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const [payments, setPayments] = useState<StudentPaymentHistory | null>(null);
-  const [paymentsError, setPaymentsError] = useState<string | null>(null);
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    api<StudentDetailData>(`/users/${studentId}`)
-      .then(setDetail)
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
+  const detailQuery = useSection<StudentDetailData | null>(`/users/${studentId}`, null);
+  const paymentsQuery = useSection<StudentPaymentHistory | null>(canSeeMoney ? `/payments/student/${studentId}` : null, null);
+  const { data: detail, setData: setDetail, error } = detailQuery;
+  const { data: payments, error: paymentsError } = paymentsQuery;
+  const loading = detailQuery.status === "loading";
+  function load() { detailQuery.reload(); paymentsQuery.reload(); }
 
-    if (canSeeMoney) {
-      setPaymentsError(null);
-      api<StudentPaymentHistory>(`/payments/student/${studentId}`)
-        .then(setPayments)
-        .catch((e) => setPaymentsError(errMsg(e)));
-    }
-  }, [studentId, canSeeMoney]);
-
-  useEffect(load, [load]);
 
   // 🎯 Жилийн төлбөрөө бүтэн төлсөн сурагчид PAYMENT тэмдэглэл шаардлагагүй
   // (notes.service.ts assertPaymentNoteAllowed-тэй яг тохирсон нөхцөл) — эндээс
@@ -300,7 +286,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
       </Link>
 
       {/* ---- Танилцуулга / Identity ---- */}
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold text-ink">{fullName(detail)}</h1>
@@ -524,7 +510,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
 
       {/* ---- Эцэг эх — зөвхөн ADMIN/TEACHER_PLUS-д харагдана ---- */}
       {showGuardians && (
-        <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+        <section className="chunky p-4 md:p-6">
           <h2 className="mb-3 font-bold text-brand-soft">Эцэг эхийн мэдээлэл</h2>
           <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             {editing && f ? (
@@ -604,7 +590,7 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
       )}
 
       {/* ---- Төлбөр ---- */}
-      <section className="rounded-2xl border border-line bg-panel p-4 md:p-6">
+      <section className="chunky p-4 md:p-6">
         <h2 className="mb-3 font-bold text-brand-soft">Сургалтын төлбөр</h2>
 
         <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -771,4 +757,8 @@ export default function StudentDetail({ studentId }: { studentId: string }) {
       <ActivityHeatmap studentId={studentId} />
     </div>
   );
+}
+
+export default function StudentDetail(props: Parameters<typeof StudentDetailContent>[0]) {
+  return <StudentDetailContent key={props.studentId} {...props} />;
 }

@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Card, SectionHeader } from '@/components/ui/Surface';
 import { EmptyState } from '@/components/ui/StateBlock';
-import { Meta, Dot } from '@/components/ui/Meta';
+import { Dot } from '@/components/ui/Meta';
 
 interface RevenueSummary {
   totalPurchases: number;

@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, TriangleAlert, Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AnnouncementCompose from "@/components/AnnouncementCompose";
-import ClassActivityHeatmap from "@/components/activity/ClassActivityHeatmap";
+import ClassWeekCard from "@/components/activity/ClassWeekCard";
 import ClassDidTest from "@/components/ClassDidTest";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import AttentionSection, {
@@ -528,8 +528,9 @@ export default function TeacherDashboardClient() {
             </>
           )}
 
-          {/* Ангийн идэвхийн heatmap — сонгосон ангийн нэгдсэн дүр зураг */}
-          {selected && <ClassActivityHeatmap classroomId={selected} />}
+          {/* Ангийн энэ долоо хоногийн идэвх (баганан график). Жилийн heatmap
+              карт дотор «Бүтэн жилийн түүх»-ээр нээгдэнэ. */}
+          {selected && <ClassWeekCard classroomId={selected} />}
 
           {/* Өнөөдөр хийсэн тест — сурагчдын оройн тэмдэглэгээг тэжээнэ */}
           {selected && <ClassDidTest classroomId={selected} />}

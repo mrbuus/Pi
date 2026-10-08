@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react';
 import { Card, SectionHeader } from '@/components/ui/Surface';
 import { EmptyState } from '@/components/ui/StateBlock';
-import { Meta, Dot } from '@/components/ui/Meta';
-import { Button } from '@/components/ui/Button';
+import { Dot } from '@/components/ui/Meta';
+
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Purchase {

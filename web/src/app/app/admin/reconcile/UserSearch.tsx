@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 
 interface User {
   id: string;
@@ -46,7 +46,8 @@ export function UserSearch({
 
         setResults(response.items || []);
         setShowResults(true);
-      } catch (err: any) {
+      } catch (caught: unknown) {
+        const err = caught as { message?: string } | null;
         setError(err?.message || 'Хайлт амжилтгүй');
         setResults([]);
       } finally {
@@ -99,7 +100,7 @@ export function UserSearch({
 
           {loading && (
             <div className="absolute right-3 top-2.5">
-              <div className="animate-spin">⏳</div>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             </div>
           )}
 

@@ -51,7 +51,7 @@ export function SkeletonRows({
 export function SkeletonCard({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`rounded-2xl border border-line bg-panel p-4 ${className}`}
+      className={`chunky p-4 ${className}`}
       aria-hidden
     >
       <SkeletonLine width={140} height={16} />

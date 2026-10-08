@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
-import { api, uploadFile } from '@/lib/api';
+import { Meta } from '@/components/ui/Meta';
+import { api } from '@/lib/api';
 import { ImportConfig, ImportResult } from './types';
 import { SectionHeader } from '@/components/ui/Surface';
 
@@ -67,7 +68,8 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
         fileInputRef.current.value = '';
       }
       onSuccess?.(response);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as { message?: string } | null;
       const message =
         err?.message ||
         'Файл импортлоход алдаа гарлаа. Дахин оролдоно уу';
@@ -87,9 +89,10 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
         <h3 className="text-sm font-semibold text-ink mb-3">Баганын зураглал</h3>
         <div className="grid grid-cols-1 gap-2">
           <div>
-            <label className="block text-xs text-ink-dim mb-1">Огноо (баганын #)</label>
+            <label htmlFor="reconcile-date-column" className="block text-xs text-ink-dim mb-1">Огноо (баганын #)</label>
             <input
               type="number"
+              id="reconcile-date-column"
               value={config.dateCol}
               onChange={(e) =>
                 setConfig({
@@ -102,11 +105,12 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
             />
           </div>
           <div>
-            <label className="block text-xs text-ink-dim mb-1">
+            <label htmlFor="reconcile-amount-column" className="block text-xs text-ink-dim mb-1">
               Дүн (баганын #)
             </label>
             <input
               type="number"
+              id="reconcile-amount-column"
               value={config.amountCol}
               onChange={(e) =>
                 setConfig({
@@ -119,11 +123,12 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
             />
           </div>
           <div>
-            <label className="block text-xs text-ink-dim mb-1">
+            <label htmlFor="reconcile-description-column" className="block text-xs text-ink-dim mb-1">
               Тайлбар (баганын #)
             </label>
             <input
               type="number"
+              id="reconcile-description-column"
               value={config.descCol}
               onChange={(e) =>
                 setConfig({
@@ -136,11 +141,12 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
             />
           </div>
           <div>
-            <label className="block text-xs text-ink-dim mb-1">
+            <label htmlFor="reconcile-journal-column" className="block text-xs text-ink-dim mb-1">
               Журнал / санхүүгийн код (баганын #)
             </label>
             <input
               type="number"
+              id="reconcile-journal-column"
               value={config.journalCol}
               onChange={(e) =>
                 setConfig({
@@ -206,11 +212,10 @@ export function ImportUploader({ onSuccess, onError }: ImportUploaderProps) {
               <p className="font-medium">Импорт амжилттай</p>
               <ul className="text-xs mt-1 space-y-0.5">
                 <li>
-                  нийт {result.totalRows} мөр · импортлосон {result.imported}
+                  <Meta items={[`нийт ${result.totalRows} мөр`, `импортлосон ${result.imported}`]} />
                 </li>
                 <li>
-                  давхардсан {result.skipped} · автоматаар холбогдсон{' '}
-                  {result.matched}
+                  <Meta items={[`давхардсан ${result.skipped}`, `автоматаар холбогдсон ${result.matched}`]} />
                 </li>
                 {result.errors.length > 0 && (
                   <li className="text-warning mt-1">

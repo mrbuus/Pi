@@ -1,5 +1,6 @@
 "use client";
 
+import { CornerDownRight } from "lucide-react";
 import { useMemo } from "react";
 import { STATUS_META, STATUS_ORDER } from "./statusMeta";
 import type { SubTask, Task } from "./types";
@@ -194,7 +195,7 @@ export default function TimelineView({
                         style={{ width: LABEL_COL_WIDTH }}
                         title={sub.title}
                       >
-                        ↳ {sub.title}
+                        <CornerDownRight className="inline h-3 w-3" aria-hidden /> {sub.title}
                       </div>
                       <div className="relative h-7" style={{ width: totalWidth }}>
                         <TimelineBar task={sub} pos={barStyle(subRange)} small />

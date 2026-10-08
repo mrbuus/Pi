@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
 import { Prisma } from '../generated/prisma/client';
+import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePassDto, UpdatePassDto } from './dto/pass.dto';
 
@@ -51,6 +52,51 @@ export class PassesService {
       where: { active: true },
       orderBy: { name: 'asc' },
     });
+  }
+
+  // Удирдлагын дэлгэц: идэвхгүйг оролцуулж, өмнө нь олгосон эрхийн тоог өгнө.
+  async listAll() {
+    const passes = await this.prisma.pass.findMany({
+      orderBy: [{ active: 'desc' }, { name: 'asc' }],
+      include: { _count: { select: { userPasses: true } } },
+    });
+    return passes.map(({ _count, ...pass }) => ({
+      ...pass,
+      holdersCount: _count.userPasses,
+    }));
+  }
+
+  // Хувийн мэдээллийг зөвхөн удирдлагын endpoint-д, хамгийн бага хэмжээгээр
+  // буцаана. Утас болон имэйл энэ жагсаалтад шаардлагагүй.
+  async holders(passId: string) {
+    const pass = await this.prisma.pass.findUnique({
+      where: { id: passId },
+      select: { id: true },
+    });
+    if (!pass) throw new NotFoundException('Эрх олдсонгүй');
+
+    const rows = await this.prisma.userPass.findMany({
+      where: { passId },
+      orderBy: [{ startsAt: 'desc' }, { id: 'asc' }],
+      select: {
+        id: true,
+        startsAt: true,
+        expiresAt: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            studentCode: true,
+          },
+        },
+      },
+    });
+    const now = new Date();
+    return rows.map((row) => ({
+      ...row,
+      active: row.startsAt <= now && row.expiresAt >= now,
+    }));
   }
 
   // Админ: нэр/хугацаа/хамрах хүрээ/үнэ/идэвх засна (SPEC/эзэмшигчийн шаардлага)
@@ -109,11 +155,19 @@ export class PassesService {
     userId: string,
     paymentId?: string,
     actor?: PassActor,
+    manual = false,
+    note?: string,
   ) {
     const pass = await this.prisma.pass.findUnique({ where: { id: passId } });
     if (!pass) throw new NotFoundException('Эрх олдсонгүй');
+    if (manual && !pass.active) {
+      throw new BadRequestException('Идэвхгүй эрхийг шинээр олгох боломжгүй');
+    }
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Хэрэглэгч олдсонгүй');
+    if (manual && user.role !== Role.STUDENT) {
+      throw new BadRequestException('Эрхийг зөвхөн сурагчид олгоно');
+    }
 
     const startsAt = new Date();
     const expiresAt = new Date(
@@ -136,6 +190,7 @@ export class PassesService {
           startsAt,
           expiresAt,
           paymentId: paymentId ?? null,
+          note: note ?? null,
         },
       });
     }
@@ -151,7 +206,11 @@ export class PassesService {
   }
 
   // Админ: аль хэдийн олгосон эрхийг цуцална (устгана)
-  async revokeUserPass(userPassId: string, actor: PassActor) {
+  async revokeUserPass(userPassId: string, actor: PassActor, reason: string) {
+    const auditReason = reason?.trim();
+    if (!auditReason) {
+      throw new BadRequestException('Цуцлах шалтгааныг бичнэ үү');
+    }
     const userPass = await this.prisma.userPass.findUnique({
       where: { id: userPassId },
     });
@@ -164,6 +223,7 @@ export class PassesService {
       entity: 'UserPass',
       entityId: userPassId,
       before: { ...userPass },
+      reason: auditReason,
     });
     return { revoked: true };
   }

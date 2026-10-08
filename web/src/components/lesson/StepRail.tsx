@@ -35,7 +35,7 @@ export default function StepRail({
       : 0;
 
   return (
-    <div className="rounded-2xl border border-line bg-panel p-4">
+    <div className="chunky p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="text-xs font-bold uppercase tracking-wide text-ink-dim">
           Явц
@@ -82,7 +82,7 @@ export default function StepRail({
                 {step.done ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
               </span>
               <span className="min-w-0">
-                <span className="block text-[11px] font-bold uppercase tracking-wide opacity-70">
+                <span className="block text-[11px] font-bold uppercase tracking-wide">
                   Алхам {idx + 1}
                 </span>
                 <span className="block truncate text-sm font-semibold">

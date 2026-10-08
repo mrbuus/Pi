@@ -170,6 +170,11 @@ export type ProblemTag = Prisma.ProblemTagModel
  */
 export type Formula = Prisma.FormulaModel
 /**
+ * Model FormulaSection
+ * 
+ */
+export type FormulaSection = Prisma.FormulaSectionModel
+/**
  * Model ProblemFormula
  * 
  */
@@ -184,6 +189,11 @@ export type ProblemAnalysis = Prisma.ProblemAnalysisModel
  * 
  */
 export type Test = Prisma.TestModel
+/**
+ * Model TestDraft
+ * 
+ */
+export type TestDraft = Prisma.TestDraftModel
 /**
  * Model TestProblem
  * 
@@ -219,6 +229,11 @@ export type EmailOtp = Prisma.EmailOtpModel
  * 
  */
 export type Attempt = Prisma.AttemptModel
+/**
+ * Model MistakeEntry
+ * 
+ */
+export type MistakeEntry = Prisma.MistakeEntryModel
 /**
  * Model DailyClassSummary
  * 
@@ -300,6 +315,26 @@ export type Announcement = Prisma.AnnouncementModel
  */
 export type AnnouncementClassroomTarget = Prisma.AnnouncementClassroomTargetModel
 /**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model NotificationPreference
+ * 
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model NotificationDelivery
+ * 
+ */
+export type NotificationDelivery = Prisma.NotificationDeliveryModel
+/**
+ * Model JobRun
+ * 
+ */
+export type JobRun = Prisma.JobRunModel
+/**
  * Model ClassTestSession
  * 
  */
@@ -369,3 +404,38 @@ export type StudentGoal = Prisma.StudentGoalModel
  * 
  */
 export type StreakFreeze = Prisma.StreakFreezeModel
+/**
+ * Model GoogleIdentity
+ * 
+ */
+export type GoogleIdentity = Prisma.GoogleIdentityModel
+/**
+ * Model GoogleOAuthState
+ * 
+ */
+export type GoogleOAuthState = Prisma.GoogleOAuthStateModel
+/**
+ * Model GoogleLoginExchange
+ * 
+ */
+export type GoogleLoginExchange = Prisma.GoogleLoginExchangeModel
+/**
+ * Model StoredFile
+ * 
+ */
+export type StoredFile = Prisma.StoredFileModel
+/**
+ * Model FormulaReview
+ * 
+ */
+export type FormulaReview = Prisma.FormulaReviewModel
+/**
+ * Model FormulaReviewDay
+ * 
+ */
+export type FormulaReviewDay = Prisma.FormulaReviewDayModel
+/**
+ * Model FormulaReviewAttempt
+ * 
+ */
+export type FormulaReviewAttempt = Prisma.FormulaReviewAttemptModel

@@ -1,10 +1,14 @@
-import { Controller, Get, Query, UseGuards, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards, StreamableFile } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/enums';
 import { InsightsService } from './insights.service';
 import { Readable } from 'stream';
+
+interface AuthedRequest {
+  user: { userId: string; role: Role };
+}
 
 @Controller('insights')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -54,11 +58,12 @@ export class InsightsController {
   @Get('topic-mastery')
   @Roles(Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN)
   async getTopicMastery(
+    @Req() req: AuthedRequest,
     @Query('classroomId') classroomId?: string,
     @Query('limit') limit?: string,
   ) {
     const safeLimit = Math.min(Math.max(parseInt(limit || '50') || 50, 1), 500);
-    return this.service.getTopicMastery(classroomId, safeLimit);
+    return this.service.getTopicMastery(classroomId, safeLimit, req.user);
   }
 
   /**

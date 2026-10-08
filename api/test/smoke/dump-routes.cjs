@@ -13,7 +13,9 @@
  * (эсвэл `npm run smoke` — тэр нь build + dump + шалгалтыг цуг хийнэ)
  * ========================================================================== */
 
-require('dotenv/config');
+// Refuse a real database before creating Nest modules or loading configuration.
+require('./safety.cjs').assertConfig('http://127.0.0.1:3000');
+require('./safety.cjs').assertDatabase();
 
 function collect(stack, out) {
   for (const layer of stack) {
@@ -32,7 +34,10 @@ async function main() {
   const { AppModule } = require('../../dist/src/app.module');
 
   // Логийг бүрэн унтраана — гаралт нь ЗӨВХӨН маршрутын жагсаалт байх ёстой.
-  const app = await NestFactory.create(AppModule, { logger: false });
+  const app = await NestFactory.create(AppModule, {
+    logger: false,
+    abortOnError: false,
+  });
   app.setGlobalPrefix('api');
   await app.init();
 

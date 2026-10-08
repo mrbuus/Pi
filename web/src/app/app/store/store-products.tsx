@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useSection } from "@/components/students/progress/useSection";
 import { api } from '@/lib/api';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
-import { SkeletonCard as Skeleton } from '@/components/ui/Skeleton';
+
 import { Card as Surface } from '@/components/ui/Surface';
-import { Meta } from '@/components/ui/Meta';
+
 import { Button } from '@/components/ui/Button';
 import { ShoppingBag, Check } from 'lucide-react';
 
@@ -33,48 +34,22 @@ interface MyPurchase {
 }
 
 export default function StoreProducts() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [myPurchases, setMyPurchases] = useState<Map<string, MyPurchase>>(new Map());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [purchaseError, setPurchaseError] = useState<{id: string, message: string} | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    try {
-      setLoading(true);
-      setError("");
-      const [productsRes, purchasesRes] = await Promise.all([
-        api<Product[]>('/store/products'),
-        user ? api<MyPurchase[]>('/store/my-purchases') : Promise.resolve([]),
-      ]);
-
-      if (Array.isArray(productsRes)) {
-        setProducts(productsRes);
-      }
-      if (user && Array.isArray(purchasesRes)) {
-        const purchaseMap = new Map(
-          purchasesRes.map((p: MyPurchase) => [p.productItemId, p]),
-        );
-        setMyPurchases(purchaseMap);
-      }
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Дэлгүүрийн өгөгдөл ачаалахад алдаа гарлаа';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const productsQuery = useSection<Product[]>('/store/products', []);
+  const purchasesQuery = useSection<MyPurchase[]>(user ? '/store/my-purchases' : null, []);
+  const products = productsQuery.data;
+  const myPurchases = useMemo(() => new Map(purchasesQuery.data.map(p => [p.productItemId, p])), [purchasesQuery.data]);
+  const loading = authLoading || productsQuery.status === 'loading' || purchasesQuery.status === 'loading';
+  const error = productsQuery.error || purchasesQuery.error;
+  function loadData() { productsQuery.reload(); purchasesQuery.reload(); }
 
   async function handlePurchase(productId: string) {
     if (!user) {
-      router.push('/auth/login');
+      router.push('/login');
       return;
     }
 
@@ -88,12 +63,9 @@ export default function StoreProducts() {
 
       if (result) {
         // Миний худалдан авалтуудыг сэргээнэ
-        const purchasesRes = await api('/store/my-purchases');
+        const purchasesRes = await api<MyPurchase[]>('/store/my-purchases');
         if (Array.isArray(purchasesRes)) {
-          const purchaseMap = new Map(
-            purchasesRes.map((p: MyPurchase) => [p.productItemId, p]),
-          );
-          setMyPurchases(purchaseMap);
+          purchasesQuery.setData(purchasesRes);
         }
       }
     } catch (error) {

@@ -1,0 +1,565 @@
+[
+  {
+    "gap": "G22",
+    "file": "passes/passes.controller",
+    "controller": "PassesController",
+    "method": "GET",
+    "path": "/api/passes",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G22",
+    "file": "passes/passes.controller",
+    "controller": "PassesController",
+    "method": "PATCH",
+    "path": "/api/passes/:id",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G22",
+    "file": "passes/passes.controller",
+    "controller": "PassesController",
+    "method": "POST",
+    "path": "/api/passes/:id/grant",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G22",
+    "file": "passes/passes.controller",
+    "controller": "PassesController",
+    "method": "POST",
+    "path": "/api/passes/grants/:grantId/revoke",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G23",
+    "file": "finance/finance.controller",
+    "controller": "FinanceController",
+    "method": "PATCH",
+    "path": "/api/finance/expenses/:id",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G23",
+    "file": "finance/finance.controller",
+    "controller": "FinanceController",
+    "method": "DELETE",
+    "path": "/api/finance/expenses/:id",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G12",
+    "file": "teacher-groups/teacher-groups.controller",
+    "controller": "TeacherGroupsController",
+    "method": "GET",
+    "path": "/api/teacher-groups/unverified",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G12",
+    "file": "teacher-groups/teacher-groups.controller",
+    "controller": "TeacherGroupsController",
+    "method": "PUT",
+    "path": "/api/teacher-groups/verify/:userId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G36",
+    "file": "tests/tests.controller",
+    "controller": "TestsController",
+    "method": "POST",
+    "path": "/api/tests/:id/duplicate",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G24",
+    "file": "notifications/sms.controller",
+    "controller": "SmsController",
+    "method": "GET",
+    "path": "/api/sms/templates",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G24",
+    "file": "notifications/sms.controller",
+    "controller": "SmsController",
+    "method": "POST",
+    "path": "/api/sms/templates",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G24",
+    "file": "notifications/sms.controller",
+    "controller": "SmsController",
+    "method": "PATCH",
+    "path": "/api/sms/templates/:id",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G24",
+    "file": "notifications/sms.controller",
+    "controller": "SmsController",
+    "method": "DELETE",
+    "path": "/api/sms/templates/:id",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G24",
+    "file": "notifications/sms.controller",
+    "controller": "SmsController",
+    "method": "POST",
+    "path": "/api/sms/bulk/estimate",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G27",
+    "file": "notification-center/notification-center.controller",
+    "controller": "NotificationCenterController",
+    "method": "GET",
+    "path": "/api/notifications/my",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "G27",
+    "file": "notification-center/notification-center.controller",
+    "controller": "NotificationCenterController",
+    "method": "GET",
+    "path": "/api/notifications/my/unread-count",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "G27",
+    "file": "notification-center/notification-center.controller",
+    "controller": "NotificationCenterController",
+    "method": "POST",
+    "path": "/api/notifications/:id/read",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "G27",
+    "file": "notification-center/notification-center.controller",
+    "controller": "NotificationCenterController",
+    "method": "POST",
+    "path": "/api/notifications/read-all",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "G39",
+    "file": "schedule/calendar-ics-auth.controller",
+    "controller": "CalendarIcsAuthController",
+    "method": "GET",
+    "path": "/api/schedule/me/ics",
+    "roles": [
+      "STUDENT",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G39",
+    "file": "schedule/calendar-ics-auth.controller",
+    "controller": "CalendarIcsAuthController",
+    "method": "POST",
+    "path": "/api/schedule/me/calendar-token",
+    "roles": [
+      "STUDENT",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G25",
+    "file": "users/users.controller",
+    "controller": "UsersController",
+    "method": "POST",
+    "path": "/api/users/:id/archive",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G25",
+    "file": "users/users.controller",
+    "controller": "UsersController",
+    "method": "POST",
+    "path": "/api/users/:id/unarchive",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G25",
+    "file": "users/users.controller",
+    "controller": "UsersController",
+    "method": "POST",
+    "path": "/api/users/students/import/preview",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G25",
+    "file": "users/users.controller",
+    "controller": "UsersController",
+    "method": "POST",
+    "path": "/api/users/students/import/commit",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G25",
+    "file": "users/students-export.controller",
+    "controller": "StudentsExportController",
+    "method": "GET",
+    "path": "/api/students/export.csv",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G26",
+    "file": "tuition/tuition.controller",
+    "controller": "TuitionController",
+    "method": "GET",
+    "path": "/api/tuition/paid-until/my",
+    "roles": [
+      "STUDENT"
+    ],
+    "feature": "web/src/components/payments/PaidUntilCard.tsx"
+  },
+  {
+    "gap": "G26",
+    "file": "tuition/tuition.controller",
+    "controller": "TuitionController",
+    "method": "GET",
+    "path": "/api/tuition/paid-until/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "PARENT"
+    ],
+    "feature": "web/src/components/payments/PaidUntilCard.tsx"
+  },
+  {
+    "gap": "G17",
+    "file": "auth/consent.controller",
+    "controller": "ConsentController",
+    "method": "GET",
+    "path": "/api/consent/my",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "G17",
+    "file": "auth/consent.controller",
+    "controller": "ConsentController",
+    "method": "POST",
+    "path": "/api/consent/my",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "G33",
+    "file": "content/preview.controller",
+    "controller": "PreviewController",
+    "method": "GET",
+    "path": "/api/catalog/preview/books",
+    "roles": []
+  },
+  {
+    "gap": "G33",
+    "file": "content/preview.controller",
+    "controller": "PreviewController",
+    "method": "GET",
+    "path": "/api/catalog/preview/chapters/:id",
+    "roles": []
+  },
+  {
+    "gap": "G39",
+    "file": "schedule/calendar-ics.controller",
+    "controller": "CalendarIcsFeedController",
+    "method": "GET",
+    "path": "/api/schedule/my.ics",
+    "roles": [],
+    "auth": "opaque-token"
+  },
+  {
+    "gap": "G12",
+    "file": "teacher-groups/teacher-groups.controller",
+    "controller": "TeacherGroupsController",
+    "method": "PUT",
+    "path": "/api/teacher-groups/reject/:userId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G12",
+    "file": "teacher-groups/teacher-groups.controller",
+    "controller": "TeacherGroupsController",
+    "method": "PUT",
+    "path": "/api/teacher-groups/reconsider/:userId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G36",
+    "file": "tests/tests.controller",
+    "controller": "TestsController",
+    "method": "POST",
+    "path": "/api/tests/drafts",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G36",
+    "file": "tests/tests.controller",
+    "controller": "TestsController",
+    "method": "GET",
+    "path": "/api/tests/drafts/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G36",
+    "file": "tests/tests.controller",
+    "controller": "TestsController",
+    "method": "PATCH",
+    "path": "/api/tests/drafts/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G22",
+    "file": "passes/passes.controller",
+    "controller": "PassesController",
+    "method": "GET",
+    "path": "/api/passes/:id/holders",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G12",
+    "file": "teacher-groups/teacher-groups.controller",
+    "controller": "TeacherGroupsController",
+    "method": "GET",
+    "path": "/api/teacher-groups/verified",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G12",
+    "file": "teacher-groups/teacher-groups.controller",
+    "controller": "TeacherGroupsController",
+    "method": "PUT",
+    "path": "/api/teacher-groups/unverify/:userId",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G25",
+    "file": "users/users.controller",
+    "controller": "UsersController",
+    "method": "GET",
+    "path": "/api/users",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G27",
+    "file": "notification-center/notification-center.controller",
+    "controller": "NotificationCenterController",
+    "method": "GET",
+    "path": "/api/notifications/unread-count",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "GET",
+    "path": "/api/store/admin/products",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "GET",
+    "path": "/api/store/admin/purchases",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "GET",
+    "path": "/api/store/admin/revenue",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "POST",
+    "path": "/api/store/admin/products",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "E4-store-regression",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "POST",
+    "path": "/api/store/admin/products/:id/deactivate",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "T17-price",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "POST",
+    "path": "/api/store/admin/products/:id/price",
+    "roles": [
+      "ADMIN"
+    ]
+  },
+  {
+    "gap": "G36",
+    "file": "tests/tests.controller",
+    "controller": "TestsController",
+    "method": "DELETE",
+    "path": "/api/tests/drafts/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "T17-status",
+    "file": "store/store.controller",
+    "controller": "StoreController",
+    "method": "PATCH",
+    "path": "/api/store/admin/products/:id/status",
+    "roles": [
+      "ADMIN"
+    ]
+  }
+]

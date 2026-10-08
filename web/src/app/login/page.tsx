@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, KeyRound, TriangleAlert } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, setAuth } from "@/lib/api";
 
@@ -43,7 +44,7 @@ interface FieldErrors {
 const HELP_AFTER_ATTEMPTS = 2;
 
 const inputCls =
-  "w-full rounded-xl border bg-bg px-4 py-3 text-ink outline-none transition placeholder:text-ink-dim/70 focus:border-brand";
+  "w-full rounded-2xl border-2 bg-bg px-4 py-3 text-ink outline-none transition placeholder:text-ink-dim/70 focus:border-brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -121,7 +122,7 @@ export default function LoginPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
       <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
+      <div className="chunky relative w-full max-w-sm p-6 sm:p-8">
         <Link
           href="/"
           aria-label="Pi.mn үндсэн нүүр"
@@ -130,7 +131,7 @@ export default function LoginPage() {
           <LogoMark variant="full" size={58} priority />
         </Link>
 
-        <h1 className="text-lg font-bold text-ink">Нэвтрэх</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">Нэвтрэх</h1>
         <p className="mt-1 mb-5 text-sm text-ink-dim">
           Сургалтын төвийн бүртгэлээрээ орно уу.
         </p>
@@ -244,11 +245,14 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             aria-busy={loading}
-            className="w-full rounded-xl bg-brand-bright py-3 font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
+            className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
           >
             {loading ? "Нэвтэрч байна…" : "Нэвтрэх"}
           </button>
         </form>
+
+        {/* Google-ээр нэвтрэх — сервер тохируулаагүй бол харагдахгүй */}
+        <GoogleSignInButton />
 
         {/* ---------- Сэргээх зам ----------
             Хоёр удаа бүтэлгүйтсэний дараа энэ нь жижиг холбоос байхаа болиод

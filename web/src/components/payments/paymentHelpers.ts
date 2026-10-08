@@ -28,7 +28,7 @@ export interface PaymentStatusLabel {
  */
 export const STATUS_LABEL: Record<string, PaymentStatusLabel> = {
   PENDING: { icon: Clock, text: "Хүлээгдэж буй", cls: "bg-warning/15 text-warning" },
-  CONFIRMED: { icon: Check, text: "Баталгаажсан", cls: "bg-success/15 text-success" },
+  CONFIRMED: { icon: Check, text: "Баталгаажсан", cls: "bg-success/15 text-ink" },
   REJECTED: { icon: X, text: "Цуцалсан", cls: "bg-error/15 text-error" },
   REVERSED: { icon: Undo2, text: "Буцаасан", cls: "bg-ink/10 text-ink-dim" },
 };

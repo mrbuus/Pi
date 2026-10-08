@@ -2,10 +2,11 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import BottomTabs from "@/components/nav/BottomTabs";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import Sidebar from "@/components/nav/Sidebar";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
-import { NavIcon } from "@/components/nav/icons";
 import { Meta } from "@/components/ui/Meta";
 import { api, clearAuth, fileUrl, getRole, getToken } from "@/lib/api";
 
@@ -108,6 +109,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [router]);
 
+  // Нууцлалын нөхцөлийг (G17) хараахан зөвшөөрөөгүй хэрэглэгчийг нэг удаа
+  // /app/consent руу чиглүүлнэ. Сервер алдаа өгвөл ажлыг ХААХГҮЙ (шалгалт
+  // саадгүй үргэлжилнэ) — дараагийн ачааллаар дахин шалгана.
+  const [consentChecked, setConsentChecked] = useState(false);
+  useEffect(() => {
+    if (consentChecked || !getToken() || pathname === "/app/consent") return;
+    api<{ needsConsent: boolean }>("/consent/my")
+      .then((r) => {
+        setConsentChecked(true);
+        if (r.needsConsent) router.replace("/app/consent");
+      })
+      .catch(() => setConsentChecked(true));
+  }, [consentChecked, pathname, router]);
+
   useEffect(() => {
     function sync() {
       setExamFullscreen(!!document.fullscreenElement);
@@ -147,16 +162,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {!examFullscreen && (
             <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur">
               <div className="flex h-14 items-center gap-3 px-4">
-                <button
-                  type="button"
-                  onClick={() => setNavOpen((v) => !v)}
-                  aria-expanded={navOpen}
-                  aria-controls="app-mobile-nav"
-                  aria-label={navOpen ? "Цэсийг хаах" : "Цэсийг нээх"}
-                  className="flex shrink-0 items-center justify-center rounded-lg border border-line p-3 text-ink-dim transition hover:text-ink lg:hidden"
-                >
-                  <NavIcon name={navOpen ? "x" : "menu"} className="h-5 w-5" />
-                </button>
                 {pageTitle && (
                   <span className="shrink-0 truncate text-sm font-semibold text-ink sm:text-base">
                     {pageTitle}
@@ -168,12 +173,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   ref={setTopBarSlotEl}
                   className="ml-2 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 />
+                {/* Мэдэгдлийн хонх (G27) — 60 сек тутам уншаагүй тоог шалгана */}
+                <div className="shrink-0">
+                  <NotificationBell />
+                </div>
               </div>
             </header>
           )}
-          <main id="main-content" className="mx-auto w-full max-w-6xl px-4 py-8">{children}</main>
+          {/* Утсан дээр доод таб мөрөнд агуулга дарагдахгүйн тулд доод зай нэмэгдэнэ. */}
+          <main
+            id="main-content"
+            className={`mx-auto w-full max-w-6xl px-4 pt-6 lg:pb-8 lg:pt-8 ${
+              examFullscreen ? "pb-8" : "pb-28"
+            }`}
+          >
+            {children}
+          </main>
         </div>
       </div>
+      {!examFullscreen && (
+        <BottomTabs
+          role={role}
+          pathname={pathname}
+          moreOpen={navOpen}
+          onMore={() => setNavOpen((v) => !v)}
+        />
+      )}
     </TopBarSlotProvider>
   );
 }

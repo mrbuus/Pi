@@ -23,6 +23,17 @@ export const GROUP_ICON: Record<GroupKey, IconName> = {
   personal: "user",
 };
 
+// Бүлэг бүрийн өнгө (шинэ дизайн, 2026-09-26 — «өнгөлөг, урам өгөх»).
+// Зөвхөн дүрсний дэвсгэрт хэрэглэнэ; шошго нь ink хэвээр тул уншигдац буурахгүй.
+// Tailwind-ийн бүрэн анги нэрээр бичсэн (динамик залгавал purge хийгдэнэ).
+export const GROUP_TONE: Record<GroupKey | "home", string> = {
+  home: "bg-brand-bright/15 text-brand-soft",
+  learn: "bg-accent-teal/15 text-accent-teal",
+  class: "bg-accent-violet/15 text-accent-violet",
+  admin: "bg-accent-gold/15 text-accent-gold",
+  personal: "bg-accent-sky/15 text-accent-sky",
+};
+
 // Role бүрийн НҮҮР (dashboard) холбоос — самбарын дээд хэсэгт бүлэглэлгүй,
 // тод байдлаар харагдана.
 export const HOME: Record<string, NavLink> = {
@@ -34,8 +45,7 @@ export const HOME: Record<string, NavLink> = {
   PARENT: { href: "/app/parent", label: "Хүүхдийн явц", icon: "home" },
 };
 
-// Role бүрийн бүрэн цэс — өмнөх хэвтээ цэстэй ЯГ ижил маршрут, зөвхөн
-// бүлэглэж, самбарт зориулж дахин зохион байгуулав. Шинэ маршрут ОРУУЛААГҮЙ.
+// Бодит маршрутуудыг эрх, чиг үүргээр бүлэглэсэн бүрэн цэс.
 const NAV_BY_ROLE: Record<string, NavLink[]> = {
   STUDENT: [
     HOME.STUDENT,
@@ -46,6 +56,8 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/goals", label: "Миний зорилго", icon: "target" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/student/payments", label: "Миний төлбөр", icon: "credit-card" },
+    { href: "/app/practice", label: "Дасгал", icon: "practice" },
+    { href: "/app/store", label: "Дэлгүүр", icon: "store" },
   ],
   TEACHER: [
     HOME.TEACHER,
@@ -54,7 +66,9 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
+    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
+    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   TEACHER_PLUS: [
     HOME.TEACHER_PLUS,
@@ -67,11 +81,16 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
+    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
+    { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
+    { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
+    { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
+    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   ADMIN: [
     HOME.ADMIN,
@@ -84,17 +103,25 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
+    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
+    { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
+    { href: "/app/admin/finance", label: "Санхүү", icon: "wallet" },
+    { href: "/app/admin/passes", label: "Эрхийн удирдлага", icon: "key" },
+    { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
+    { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
+    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   BUYER: [
     HOME.BUYER,
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
+    { href: "/app/store", label: "Дэлгүүр", icon: "store" },
   ],
   PARENT: [
     HOME.PARENT,
@@ -104,6 +131,17 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 
 // Маршрут бүрийг аль бүлэгт харьяалагдахыг тодорхойлно (нүүр хуудсуудаас бусад).
 const ITEM_GROUP: Record<string, GroupKey> = {
+  "/app/admin/classrooms": "admin",
+  "/app/admin/finance": "admin",
+  "/app/admin/passes": "admin",
+  "/app/notifications": "personal",
+  "/app/consent": "personal",
+  "/app/admin/store": "admin",
+  "/app/tuition": "admin",
+  "/app/insights": "class",
+  "/app/practice": "learn",
+  "/app/store": "personal",
+
   "/app/learn": "learn",
   "/app/library": "learn",
   "/app/videos": "learn",
@@ -111,6 +149,7 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/teacher": "class",
   "/app/schedule": "class",
   "/app/planner": "class",
+  "/app/teacher-hours": "class",
   "/app/admin/leads": "admin",
   "/app/admin/enrollment": "admin",
   "/app/admin/reconcile": "admin",
@@ -129,6 +168,51 @@ const ITEM_GROUP: Record<string, GroupKey> = {
 // "Миний мэдээлэл"-руу орох ганц холбоос үлдээв. Role бүрт нийтлэг тул
 // автоматаар Хувийн бүлэгт нэмэгдэнэ.
 const PROFILE_LINK: NavLink = { href: "/app/profile", label: "Миний мэдээлэл", icon: "user" };
+// Бүх role-д нийтлэг (Codex G27, G17): мэдэгдэл ба нууцлалын зөвшөөрөл.
+const COMMON_PERSONAL: NavLink[] = [
+  { href: "/app/notifications", label: "Мэдэгдэл", icon: "bell" },
+  { href: "/app/consent", label: "Нууцлал, зөвшөөрөл", icon: "shield-check" },
+];
+
+// Гар утасны доод мөрөнд байнга харагдах гол цэс (нүүрний дараа, «Бусад»-аас өмнө).
+// Бусад бүх холбоос «Бусад» дотор хэвээр — нэг ч цэс хасагдахгүй.
+const PRIMARY_BY_ROLE: Record<string, string[]> = {
+  STUDENT: ["/app/learn", "/app/tests", "/app/schedule"],
+  TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
+  TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
+  ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
+  BUYER: ["/app/library", "/app/videos", "/app/schedule"],
+  PARENT: ["/app/schedule"],
+};
+
+// Доод мөрөнд харуулах богино шошго (урт нэр 375px-т багтахгүй).
+const SHORT_LABEL: Record<string, string> = {
+  "/app/learn": "Хичээл",
+  "/app/library": "Сан",
+  "/app/videos": "Видео",
+  "/app/tests": "Шалгалт",
+  "/app/schedule": "Хуваарь",
+  "/app/payments": "Төлбөр",
+  "/app/admin/students": "Сурагчид",
+  "/app/admin/leads": "Хүсэлт",
+};
+
+export interface BottomTab extends NavLink {
+  short: string;
+}
+
+export function getBottomTabs(role: string | null): BottomTab[] {
+  if (!role) return [];
+  const items = NAV_BY_ROLE[role] ?? [];
+  const home = items[0];
+  const primary = (PRIMARY_BY_ROLE[role] ?? [])
+    .map((href) => items.find((i) => i.href === href))
+    .filter((i): i is NavLink => !!i);
+  const tabs: BottomTab[] = [];
+  if (home) tabs.push({ ...home, short: "Нүүр" });
+  for (const item of primary) tabs.push({ ...item, short: SHORT_LABEL[item.href] ?? item.label });
+  return tabs;
+}
 
 export interface NavGroup {
   key: GroupKey;
@@ -159,7 +243,7 @@ export function getRoleNav(role: string | null): RoleNav {
     const group = ITEM_GROUP[item.href] ?? "learn";
     buckets[group].push(item);
   }
-  buckets.personal.push(PROFILE_LINK);
+  buckets.personal.push(PROFILE_LINK, ...COMMON_PERSONAL);
 
   const groups = GROUP_ORDER.filter((key) => buckets[key].length > 0).map((key) => ({
     key,

@@ -41,6 +41,7 @@ export interface StudentListItem {
   phone?: string | null;
   email?: string | null;
   role: string;
+  archivedAt?: string | null;
   studentProfile?: StudentProfileLite | null;
   currentClassroom?: ClassroomLite | null;
 }
@@ -57,6 +58,7 @@ export interface StudentDetailData {
   avatarUrl?: string | null;
   studentCode?: string | null;
   createdAt?: string;
+  archivedAt?: string | null;
   studentProfile: StudentProfileLite | null;
   currentClassroom: ClassroomLite | null;
   counts: {

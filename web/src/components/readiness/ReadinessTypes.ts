@@ -1,0 +1,2 @@
+export type ReadinessTopic = { topic: string; title: string; mastery: number | null; measured: boolean; weight: number; attempts: number; effectiveAttempts: number; trend: 'UP' | 'DOWN' | 'FLAT' };
+export type ReadinessData = { index: number; low: number; high: number; dataPoints: number; effectiveDataPoints: number; coverage: number; topics: ReadinessTopic[]; nextBestTopics: ReadinessTopic[]; weeklyHistory: { week: string; index: number; coverage: number }[] };

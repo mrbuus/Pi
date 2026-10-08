@@ -27,7 +27,7 @@ export default function Achievements() {
           үр дүнгээ доор харуулж байна.
         </p>
 
-        <div className="reveal mt-8 rounded-2xl border border-line bg-panel p-6">
+        <div className="reveal mt-8 chunky p-6">
           <p className="text-base leading-relaxed text-ink-dim">
             Жил бүрийн ЭЕШ-ийн үр дүнгийн тоо төвөөс баталгаажсаны дараа
             энд нэмэгдэнэ. Сургалтын төвөөс асуу.

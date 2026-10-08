@@ -1,17 +1,21 @@
 import type { SVGProps } from "react";
 import {
   BarChart3,
+  Bell,
+  School, Wallet, Store, ChartNoAxesCombined, Undo2, Dumbbell,
   BookOpen,
   Building,
   CalendarDays,
   ChevronDown,
   ClipboardCheck,
   ClipboardList,
+  Clock,
   CreditCard,
   FileText,
   GraduationCap,
   Home,
   KeyRound,
+  LayoutGrid,
   Library,
   ListChecks,
   LogOut,
@@ -34,6 +38,7 @@ import {
 // `currentColor` ашигладаг тул идэвхтэй/идэвхгүй өнгө нь эцэг элементийн
 // text-* классаас автоматаар удамшина — тусад нь fill өгөх шаардлагагүй.
 export type IconName =
+  | "school" | "wallet" | "store" | "chart" | "refund" | "practice"
   | "home"
   | "book-open"
   | "building"
@@ -59,9 +64,13 @@ export type IconName =
   | "logout"
   | "teacher"
   | "bar-chart"
-  | "message-square";
+  | "message-square"
+  | "grid"
+  | "clock"
+  | "bell";
 
 const ICONS: Record<IconName, LucideIcon> = {
+  school: School, wallet: Wallet, store: Store, chart: ChartNoAxesCombined, refund: Undo2, practice: Dumbbell,
   "message-square": MessageSquare,
   home: Home,
   "book-open": BookOpen,
@@ -88,6 +97,9 @@ const ICONS: Record<IconName, LucideIcon> = {
   logout: LogOut,
   teacher: GraduationCap,
   "bar-chart": BarChart3,
+  grid: LayoutGrid,
+  clock: Clock,
+  bell: Bell,
 };
 
 export function NavIcon({

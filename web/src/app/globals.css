@@ -94,7 +94,8 @@
   --leading-math: 1.35;
   --measure: 68ch;
 
-  --font-manrope: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Onest (fonts.css, репод) → ачаалагдаагүй бол системийн фонт */
+  --font-manrope: "Onest", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Систем DARK-тай үед, хэрэглэгч тодорхой LIGHT сонгоогүй л бол */
@@ -220,6 +221,8 @@
   --color-accent-sky: var(--sky);
   --color-accent-rose: var(--rose);
   --font-sans: var(--font-manrope);
+  /* Том тоо, хуудасны гол гарчиг (Unbounded). Бие бичвэрт ХЭРЭГЛЭХГҮЙ. */
+  --font-display: "Unbounded", var(--font-manrope);
 }
 
 html {
@@ -672,3 +675,43 @@ textarea:focus-visible,
   .enter-pop,
   .value-bump { animation: none; }
 }
+
+/* ============================================================================
+ * «Товгор» (chunky) хэв маяг — шинэ дизайны гол хэл (2026-09-26).
+ * Duolingo маягийн: зузаан хүрээ, доод талдаа 4px «сүүдэр», дарахад доош
+ * шигдэнэ. Ердийн нимгэн саарал хүрээтэй «AI загвар»-аас ялгарах гол зүйл.
+ * Өнгийг ЗӨВХӨН токеноор (border-* классаар дарж өгнө).
+ * ========================================================================== */
+@utility chunky {
+  border: 2px solid var(--line);
+  border-bottom-width: 4px;
+  border-radius: 1.5rem;
+  background: var(--surface);
+}
+/* Дарагддаг хавтан/карт: hover дээр бага зэрэг дээшилж, дарахад шигдэнэ. */
+@utility chunky-press {
+  transition: transform 120ms var(--ease-out, ease-out), border-bottom-width 120ms ease-out, margin 120ms ease-out;
+  &:hover { transform: translateY(-1px); }
+  &:active { transform: translateY(2px); border-bottom-width: 2px; margin-bottom: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    &:hover, &:active { transform: none; }
+  }
+}
+/* 3D товч: доод сүүдэр нь өөрийн өнгөний бараан хувилбар (color-mix) —
+   цайвар/харанхуй горимд аль алинд нь зөв. */
+@utility btn-3d {
+  box-shadow: 0 4px 0 0 color-mix(in oklab, var(--btn-3d-base, var(--brand-bright)) 68%, black);
+  transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+  &:active { transform: translateY(4px); box-shadow: 0 0 0 0 transparent; }
+  @media (prefers-reduced-motion: reduce) { transition: none; }
+}
+
+/* Streak-ийн гал — зөөлөн анивчина (хөдөлгөөн багасгах тохиргоонд зогсоно). */
+@keyframes flameFlicker {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.04, 0.97) rotate(-1.5deg); }
+  60% { transform: scale(0.98, 1.03) rotate(1.2deg); }
+}
+.flame-flicker { transform-origin: 50% 90%; animation: flameFlicker 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .flame-flicker { animation: none; } }

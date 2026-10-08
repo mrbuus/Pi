@@ -32,7 +32,7 @@ export default function BoardView({
   }
 
   return (
-    <div className="overflow-x-auto pb-2">
+    <div className="overflow-x-auto pb-2" role="region" aria-label="Ажлын самбар" tabIndex={0}>
       <div className="flex min-w-max gap-4">
         {STATUS_ORDER.map((status) => {
           const meta = STATUS_META[status];

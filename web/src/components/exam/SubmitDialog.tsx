@@ -43,7 +43,7 @@ export default function SubmitDialog({
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="submit-dialog-title"
-        className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 text-center"
+        className="chunky w-full max-w-sm p-6 text-center"
       >
         <p id="submit-dialog-title" className="text-lg font-bold text-ink">
           Шалгалтыг илгээх үү?

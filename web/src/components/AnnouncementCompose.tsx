@@ -1,9 +1,9 @@
 "use client";
 
-import { Pin, Check } from "lucide-react";
+import { Pin } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Meta, Dot } from "@/components/ui/Meta";
+import { Meta } from "@/components/ui/Meta";
 
 interface Announcement {
   id: string;
@@ -104,7 +104,7 @@ export default function AnnouncementCompose() {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="chunky p-6">
       <h2 className="mb-1 font-bold text-brand-soft">Төвийн самбар — зар тавих</h2>
       <p className="mb-4 text-sm text-ink-dim">
         Бүх сурагч, онлайн сурагчид эсвэл сонгосон ангиудад тусад нь зарлана.
@@ -124,6 +124,7 @@ export default function AnnouncementCompose() {
           className="w-full rounded-lg border border-line bg-ink/5 px-3 py-2 text-sm outline-none focus:border-brand-bright"
         />
         <select
+          aria-label="Зар хүлээн авах бүлэг"
           value={audience}
           onChange={(e) => setAudience(e.target.value)}
           className="w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand-bright"
@@ -177,7 +178,7 @@ export default function AnnouncementCompose() {
             {msg && <span className="text-xs text-success">{msg}</span>}
             <button
               onClick={post}
-              className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold"
+              className="min-h-11 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand"
             >
               Зарлах
             </button>

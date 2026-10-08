@@ -1,0 +1,61 @@
+.printRoot {
+  min-width: 0;
+}
+@media print {
+  @page formula-sheet {
+    size: A4;
+    margin: 14mm;
+  }
+  /* System paper/ink tokens stay readable even when the app uses dark mode. */
+  :global(body):has(.printRoot) {
+    page: formula-sheet;
+    color-scheme: light;
+    transition: none !important;
+    --bg: Canvas;
+    --surface: Canvas;
+    --bg-panel: var(--surface);
+    --ink: CanvasText;
+    --ink-dim: CanvasText;
+    --brand-soft: CanvasText;
+    --line: GrayText;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  :global(body):has(.printRoot) :global(aside),
+  :global(body):has(.printRoot) :global(nav),
+  :global(body):has(.printRoot) :global(header),
+  :global(body):has(.printRoot) :global(a[href="#main-content"]),
+  :global(body):has(.printRoot) :global([data-sonner-toaster]) {
+    display: none !important;
+  }
+  /* The screen shell's viewport height otherwise leaves a trailing blank page. */
+  :global(body):has(.printRoot) :global(div):has(.printRoot) {
+    display: block !important;
+    min-height: 0 !important;
+  }
+  :global(body):has(.printRoot) :global(#main-content) {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+  .printRoot {
+    color: var(--ink);
+    background: var(--bg);
+    font-size: 10pt;
+  }
+  .printRoot :global(.chunky) {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .printRoot h1,
+  .printRoot h2,
+  .printRoot h3 {
+    break-after: avoid;
+  }
+  .printRoot button {
+    display: none !important;
+  }
+  .printRoot a {
+    text-decoration: none;
+  }
+}

@@ -259,7 +259,7 @@ function ContinueHero({
         )}
         <Link
           href={`/app/learn/${chapter.id}?subject=${subject}`}
-          className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:opacity-90"
+          className="ml-auto inline-flex shrink-0 items-center gap-1.5 btn-3d rounded-2xl bg-brand-bright px-5 py-2.5 text-sm font-bold text-on-brand transition hover:brightness-105"
         >
           {label} <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>

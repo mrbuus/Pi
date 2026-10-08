@@ -44,9 +44,9 @@ export default function QuestionCard({
   const pid = problem.id;
 
   return (
-    <div className="mx-auto max-w-2xl rounded-2xl border border-line bg-surface p-6">
+    <div className="chunky mx-auto max-w-2xl p-5 sm:p-6">
       <div className="mb-4 flex items-center justify-between">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-bright/15 text-base font-bold text-brand-soft">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-bright/15 font-display text-base font-bold text-brand-soft">
           {problemNumber}
         </span>
         <span className="text-[11px] text-ink-dim">{problem.points} оноо</span>

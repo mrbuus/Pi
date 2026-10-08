@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { AcknowledgeResultDialog } from "@/components/parent/AcknowledgeResultDialog";
-import { Check } from "lucide-react";
+import { Check, CircleCheck, CircleX, Clock, Link2, Wallet, type LucideIcon } from "lucide-react";
+import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { formatMnt } from "@/lib/orgInfo";
+import { STATUS_LABEL } from "@/components/payments/paymentHelpers";
+import PaidUntilCard from "@/components/payments/PaidUntilCard";
 import {
   HOMEWORK_MARK_OPTIONS,
   type HomeworkMark,
@@ -77,6 +81,13 @@ const SUB_LABEL: Record<string, { text: string; cls: string }> = {
   RETURNED: { text: "Буцаасан", cls: "bg-error/15 text-error" },
 };
 
+const STAT_TILES: { key: string; label: string; icon: LucideIcon; tone: string }[] = [
+  { key: "PRESENT", label: "Ирсэн өдөр", icon: CircleCheck, tone: "bg-success/10 text-success" },
+  { key: "LATE", label: "Хоцорсон", icon: Clock, tone: "bg-warning/10 text-warning" },
+  { key: "ABSENT", label: "Тасалсан", icon: CircleX, tone: "bg-error/10 text-error" },
+  { key: "PAID", label: "Баталгаажсан төлбөр", icon: Wallet, tone: "bg-accent-violet/10 text-accent-violet" },
+];
+
 function pct(total: number, max: number) {
   return max > 0 ? Math.round((total / max) * 100) : 0;
 }
@@ -89,7 +100,7 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
   const payments = link.student.payments ?? [];
   const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [selectedResult, setSelectedResult] = useState<{ id: string; test: { title: string } } | null>(null);
 
   const attendanceSummary = attendance.reduce<Record<string, number>>((acc, row) => {
     acc[row.status] = (acc[row.status] ?? 0) + 1;
@@ -118,9 +129,16 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+    <section className="chunky p-4 sm:p-6">
+      <div className="flex flex-wrap items-center gap-4">
+        <span
+          aria-hidden
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-teal/15 text-lg font-extrabold text-accent-teal"
+        >
+          {(link.student.firstName[0] ?? "").toUpperCase()}
+          {(link.student.lastName[0] ?? "").toUpperCase()}
+        </span>
+        <div className="min-w-0 flex-1">
           <h2 className="text-lg font-extrabold">
             {link.student.firstName} {link.student.lastName}
           </h2>
@@ -131,26 +149,34 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
               link.student.studentProfile?.school ?? ""
             ]} />
           </p>
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success">
+            <Check className="h-3.5 w-3.5" aria-hidden />
+            Холбогдсон
+          </span>
         </div>
-        <span className="rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success">
-          Холбогдсон
-        </span>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-4">
-        {(["PRESENT", "LATE", "ABSENT"] as const).map((status) => (
-          <div key={status} className="rounded-xl border border-line p-4">
-            <p className="text-2xl font-extrabold">
-              {attendanceSummary[status] ?? 0}
-            </p>
-            <p className="mt-1 text-xs text-ink-dim">{ATT_LABEL[status].text}</p>
-          </div>
-        ))}
-        <div className="rounded-xl border border-line p-4">
-          <p className="text-2xl font-extrabold text-success">{confirmedPayments.length}</p>
-          <p className="mt-1 text-xs text-ink-dim">Төлөл</p>
-        </div>
+      {/* «Хэдий хүртэл төлсөн» (G26) — баталгаажсан хүүхдэд л (сервер шалгана). */}
+      <div className="mt-5">
+        <PaidUntilCard studentId={link.student.id} compact />
       </div>
+
+      {/* Өнгөт тоон хавтан (шинэ дизайн) — өнгө + дүрс + үг хамт. */}
+      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {STAT_TILES.map((t) => {
+          const value =
+            t.key === "PAID" ? confirmedPayments.length : (attendanceSummary[t.key] ?? 0);
+          return (
+            <div key={t.key} className={`flex flex-col rounded-2xl p-4 ${t.tone}`}>
+              <dt className="order-last text-xs text-ink-dim">{t.label}</dt>
+              <dd className="text-2xl font-extrabold tabular-nums text-ink">
+                <t.icon className="mb-1 h-5 w-5" aria-hidden />
+                {value}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div>
@@ -276,25 +302,21 @@ function ChildPanel({ link, onRefresh }: { link: ParentLink; onRefresh: () => vo
           )}
           <div className="space-y-2">
             {payments.slice(0, 5).map((p, i) => {
-              const isPending = p.status === "PENDING";
-              const isConfirmed = p.status === "CONFIRMED";
+              const st = STATUS_LABEL[p.status] ?? STATUS_LABEL.PENDING;
               return (
                 <div
                   key={`${p.id}-${i}`}
-                  className={`rounded-xl border px-4 py-3 text-sm ${
-                    isConfirmed
-                      ? "border-success/30 bg-success/5"
-                      : isPending
-                        ? "border-warning/30 bg-warning/5"
-                        : "border-line"
-                  }`}
+                  className="flex items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-ink-dim">{p.createdAt.slice(0, 10)}</span>
-                    <span className={`font-bold ${isConfirmed ? "text-success" : isPending ? "text-warning" : ""}`}>
-                      ₮{(p.amount / 1000).toFixed(0)}k
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}>
+                    <st.icon className="h-4 w-4" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold tabular-nums text-ink">{formatMnt(p.amount)}</span>
+                    <span className="block text-xs text-ink-dim">
+                      <Meta items={[st.text, p.createdAt.slice(0, 10)]} />
                     </span>
-                  </div>
+                  </span>
                 </div>
               );
             })}
@@ -392,66 +414,29 @@ export default function ParentPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold">Хүүхдийн явц</h1>
+        <h1 className="sr-only">Хүүхдийн явц</h1>
         <p className="mt-1 text-sm text-ink-dim">
           Баталгаажсан хүүхдийн ирц, даалгавар, шалгалтын дүн энд харагдана.
         </p>
       </div>
 
-      <section className="rounded-2xl border border-brand-bright/30 bg-brand-bright/5 p-6">
-        <h2 className="font-bold text-brand-soft">Хүүхэд холбох</h2>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            inputMode="numeric"
-            aria-label="Сурагчийн утасны дугаар"
-            placeholder="Сурагчийн утасны дугаар"
-            className="min-w-56 flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-brand-bright"
-          />
-          <button
-            onClick={requestLink}
-            disabled={phone.replace(/\D/g, "").length !== 8 || linkPending}
-            aria-busy={linkPending}
-            className="rounded-xl bg-brand-bright px-5 py-3 text-sm font-bold text-on-brand disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {linkPending ? "Илгээж байна…" : "Хүсэлт илгээх"}
-          </button>
-        </div>
-        {msg && <p className="mt-3 text-sm text-success">{msg}</p>}
-      </section>
-
       {loadState === "loading" && (
-        <section className="rounded-2xl border border-line bg-panel p-6">
-          <p className="animate-pulse text-sm text-ink-dim" role="status">
-            Хүүхдийн мэдээлэл ачаалж байна…
-          </p>
+        <section className="chunky p-6">
+          <LoadingState rows={4} label="Хүүхдийн мэдээлэл" />
         </section>
       )}
 
       {loadState === "error" && (
-        <section className="rounded-2xl border border-error/30 bg-error/5 p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-error">
-              Мэдээлэл ачааллахад алдаа гарлаа: {loadError}
-            </p>
-            <button
-              onClick={reload}
-              className="shrink-0 rounded-lg border border-error/40 px-3 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10"
-            >
-              Дахин оролдох
-            </button>
-          </div>
-        </section>
+        <ErrorState message={`Мэдээлэл ачааллахад алдаа гарлаа: ${loadError}`} onRetry={reload} />
       )}
 
       {loadState === "ready" && links.length === 0 && (
-        <section className="rounded-2xl border border-line bg-panel p-6">
+        <section className="rounded-2xl border-2 border-line bg-panel p-6">
           <h2 className="font-bold text-brand-soft">Холбосон хүүхэд алга байна</h2>
           <p className="mt-2 text-sm text-ink-dim">
-            Дээрх хэсэгт сурагчийн утасны дугаараа оруулж хүсэлт илгээнэ үү.
+            Доорх хэсэгт сурагчийн утасны дугаарыг оруулж хүсэлт илгээнэ үү.
             Сурагч эсвэл төвийн ажилтан баталгаажуулмагц хүүхдийн ирц,
             даалгавар, шалгалтын дүн энд харагдана.
           </p>
@@ -465,6 +450,33 @@ export default function ParentPage() {
           ))}
         </div>
       )}
+
+      {/* Хүүхэд холбох — доод талд (гол агуулга түрүүлнэ; хүүхэдгүй үед хоосон төлөв энд заана). */}
+      <section className="rounded-3xl border border-brand-bright/30 bg-brand-bright/5 p-4 sm:p-6">
+        <h2 className="flex items-center gap-2 font-bold text-brand-soft">
+          <Link2 className="h-5 w-5" aria-hidden />
+          {links.length > 0 ? "Өөр хүүхэд холбох" : "Хүүхэд холбох"}
+        </h2>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            inputMode="numeric"
+            aria-label="Сурагчийн утасны дугаар"
+            placeholder="Сурагчийн утасны дугаар"
+            className="min-w-56 flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-brand-bright"
+          />
+          <button
+            onClick={requestLink}
+            disabled={phone.replace(/\D/g, "").length !== 8 || linkPending}
+            aria-busy={linkPending}
+            className="min-h-11 rounded-xl bg-brand-bright px-5 py-3 text-sm font-bold text-on-brand disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {linkPending ? "Илгээж байна…" : "Хүсэлт илгээх"}
+          </button>
+        </div>
+        {msg && <p className="mt-3 text-sm text-success">{msg}</p>}
+      </section>
     </div>
   );
 }

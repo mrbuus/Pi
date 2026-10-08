@@ -20,11 +20,33 @@ export default function ProblemPreviewModal({
   onClose: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     closeRef.current?.focus();
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
+      if (e.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable?.length) {
+        e.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (
+        e.shiftKey &&
+        (document.activeElement === first ||
+          !dialogRef.current?.contains(document.activeElement))
+      ) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -36,26 +58,31 @@ export default function ProblemPreviewModal({
     .map((o) => ({ text: o.text, isCorrect: o.isCorrect }));
 
   const known = hasKnownAnswer(problem);
-  const reviewNeeded = known && problem.analysis?.answerKeyStatus === "REVIEW_REQUIRED";
+  const reviewNeeded =
+    known && problem.analysis?.answerKeyStatus === "REVIEW_REQUIRED";
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Бодлого ${problem.token} — урьдчилан харах`}
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4"
+      aria-labelledby="problem-preview-title"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-ink/50 p-4"
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-line bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="font-mono text-sm text-ink-dim">{problem.token}</p>
-            <p className="text-base font-bold text-ink">
+            <h2
+              id="problem-preview-title"
+              className="text-base font-bold text-ink"
+            >
               {FORMAT_LABEL[problem.format] ?? problem.format}
-            </p>
+            </h2>
           </div>
           <button
             ref={closeRef}
@@ -75,8 +102,11 @@ export default function ProblemPreviewModal({
             className="mb-3 flex items-start gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-base text-error"
           >
             <AlertTriangle size={20} className="shrink-0 mt-0.5" aria-hidden />
-            <span>Энэ бодлого хариугүй импортлогдсон — тестэд орвол ХЭНД Ч оноо
-            өгөхгүй (сурагчийг &ldquo;буруу&rdquo; гэж дүгнэхгүй, гэхдээ оноо ч авахгүй).</span>
+            <span>
+              Энэ бодлого хариугүй импортлогдсон — тестэд орвол ХЭНД Ч оноо
+              өгөхгүй (сурагчийг &ldquo;буруу&rdquo; гэж дүгнэхгүй, гэхдээ оноо
+              ч авахгүй).
+            </span>
           </p>
         )}
         {reviewNeeded && (
@@ -85,8 +115,10 @@ export default function ProblemPreviewModal({
             className="mb-3 flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-base text-warning"
           >
             <AlertTriangle size={20} className="shrink-0 mt-0.5" aria-hidden />
-            <span>Хариу шалгах шаардлагатай гэж тэмдэглэгдсэн — эх сурвалжтай
-            баталгаажаагүй байж болно.</span>
+            <span>
+              Хариу шалгах шаардлагатай гэж тэмдэглэгдсэн — эх сурвалжтай
+              баталгаажаагүй байж болно.
+            </span>
           </p>
         )}
 

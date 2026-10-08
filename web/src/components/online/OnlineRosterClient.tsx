@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingState } from "@/components/ui/StateBlock";
+
 import { AlertTriangle, Moon, MoonStar, Search, Zap, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -151,15 +153,7 @@ export default function OnlineRosterClient() {
       )}
 
       {loading && (
-        <div className="space-y-3" aria-busy="true" aria-live="polite">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-28 animate-pulse rounded-2xl border border-line bg-panel"
-            />
-          ))}
-          <p className="sr-only">Ачаалж байна…</p>
-        </div>
+        <LoadingState rows={3} label="Зайн сурагчид ачаалж байна" />
       )}
 
       {!loading && error && (
@@ -176,7 +170,7 @@ export default function OnlineRosterClient() {
       )}
 
       {!loading && !error && ordered.length === 0 && (
-        <div className="rounded-2xl border border-line bg-panel p-8 text-center">
+        <div className="chunky p-8 text-center">
           <Search className="mx-auto h-6 w-6 text-ink-dim" aria-hidden />
           <p className="mt-2 font-semibold text-ink">Тохирох сурагч олдсонгүй</p>
           <p className="mt-1 text-sm text-ink-dim">

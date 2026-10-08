@@ -1,0 +1,19 @@
+{
+  "name": "pi-night1-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "typecheck": "tsc --noEmit",
+    "test:a11y": "playwright test tests/a11y.spec.ts tests/a11y-keyboard.spec.ts",
+    "a11y:report": "node scripts/a11y-report.cjs",
+    "check:formula-titles": "node scripts/check-formula-titles.cjs",
+    "test:qa-scripts": "node --test scripts/*.test.cjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.19.1",
+    "typescript": "5.9.3"
+  }
+}

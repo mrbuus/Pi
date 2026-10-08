@@ -46,6 +46,12 @@ export class ClassroomsController {
     return this.classrooms.unassignedStudents();
   }
 
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get(':id')
+  get(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.classrooms.get(id, req.user.userId, req.user.role);
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post(':id/enroll')
   enroll(
