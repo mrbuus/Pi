@@ -57,6 +57,8 @@ model User {
   formulaReviewDays       FormulaReviewDay[]
   formulaReviewAttempts   FormulaReviewAttempt[]
 
+  staffCapabilities      StaffCapabilityGrant[]
+  feedback               Feedback[]
   studentProfile         StudentProfile?
   teacherProfile         TeacherProfile?
   externalTeacherProfile ExternalTeacherProfile?
@@ -80,6 +82,8 @@ model User {
   enrollments             Enrollment[]
   attemptSessions         TestAttemptSession[]
   learningEvents          LearningEvent[]
+  studyReviewRuns         StudyReviewRun[]
+  studyReviewResponses    StudyReviewResponse[]
 
   // Wave 3: ажилтны төлөвлөгч / хуваарь / сурагчийн зорилго / стрийк
   createdStaffTasks     StaffTask[]
@@ -401,6 +405,9 @@ model Classroom {
 
   // Түнш хөрөнгө — ТӨВИЙН ангийн буцаалт
   tuitionRefunds TuitionRefund[]
+  dismissals     ClassDismissal[]
+  lessonPackets  LessonPacket[]
+  lessonRotation LessonRotation?
 }
 
 // ============ Гадны багшийн анги ============
@@ -530,7 +537,10 @@ model Submission {
   student      User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
   state        SubmissionState @default(NOT_DONE)
   imageKeys    String[]
-  note         String?
+  note         String? // legacy: author may be ambiguous
+  studentNote  String?
+  reviewNote   String? // pupil-visible teacher feedback only
+  revisions    SubmissionRevision[]
   checkedById  String?
   submittedAt  DateTime?
   checkedAt    DateTime?
@@ -538,6 +548,23 @@ model Submission {
 
   @@unique([assignmentId, studentId])
   @@index([studentId])
+}
+
+// Durable snapshots retain original student evidence and visible teacher feedback.
+model SubmissionRevision {
+  id           String          @id @default(cuid())
+  submissionId String
+  submission   Submission      @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  action       String
+  actorId      String
+  state        SubmissionState
+  studentNote  String?
+  reviewNote   String?
+  legacyNote   String?
+  imageKeys    String[]
+  at           DateTime        @default(now())
+
+  @@index([submissionId, at])
 }
 
 // ============ Өдөр тутмын гэрийн даалгаврын тэмдэглэгээ (Daily Homework Marking) ============
@@ -632,6 +659,7 @@ model Chapter {
 
   problems Problem[]
   theories TheoryBlock[]
+  lessonPackets LessonPacket[]
   videos   Video[]
   tests    Test[]
 
@@ -657,6 +685,8 @@ model Topic {
 }
 
 model TheoryBlock {
+  createdById     String?
+  clientRequestId String?
   id          String   @id @default(cuid())
   chapterId   String
   chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
@@ -665,9 +695,17 @@ model TheoryBlock {
   imageKeys   String[]
   order       Int
   freePreview Boolean  @default(false)
+  // Retain source text, media references and historical packet identity.
+  archivedAt DateTime?
+  @@unique([createdById, clientRequestId])
+  @@index([chapterId, archivedAt])
+
 }
 
 model Video {
+  problemId   String?
+  problem     Problem? @relation(fields: [problemId], references: [id], onDelete: Restrict)
+  createdById String?
   id        String   @id @default(cuid())
   title     String
   s3Key     String
@@ -681,6 +719,7 @@ model Video {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([problemId, deletedAt])
 }
 
 enum ProblemFormat {
@@ -750,7 +789,9 @@ model Problem {
   choiceOptions ProblemChoice[] // бүтэцтэй сонголтууд (correct/wrong + алдааны шалтгаан)
   attempts      Attempt[]
   mistakeEntries MistakeEntry[]
+  videos        Video[]
   testItems     TestProblem[]
+  studyReviewItems StudyReviewItem[]
 
   @@index([chapterId])
   @@index([deletedAt])
@@ -1254,6 +1295,8 @@ model UserPass {
   startsAt  DateTime @default(now())
   expiresAt DateTime
   paymentId String?
+  // Immutable entitlement at grant; null denotes legacy live definition.
+  scopeSnapshot Json?
 
   @@index([userId, expiresAt])
 }
@@ -1330,6 +1373,12 @@ model Payment {
   paidAt            DateTime?
   confirmedById     String? // данс/бэлэн үед Багш+/Админ гараар баталгаажуулна
   qpayInvoiceId     String?
+  clientRequestId   String?
+  normalizedRequestHash String?
+  invoiceAttemptedAt DateTime?
+  qpayCheckoutSnapshot Json?
+  storePurchaseId String?
+  storePurchase Purchase? @relation("CheckoutPurchase", fields: [storePurchaseId], references: [id], onDelete: Restrict)
   // QPay-ийн ГҮЙЛГЭЭНИЙ дугаар (invoice биш). Callback хоёр удаа ирэх, эсвэл
   // callback болон polling хоёулаа нэг гүйлгээг барих нь ХЭВИЙН тохиолдол —
   // @unique нь тэр үед хоёр дахь бичилтийг ӨС түвшинд зогсооно. Кодын түвшний
@@ -1339,6 +1388,8 @@ model Payment {
 
   @@index([userId, forMonth])
   @@index([status])
+  @@unique([userId, clientRequestId])
+  @@index([storePurchaseId])
 }
 
 
@@ -1382,6 +1433,9 @@ model Purchase {
   grantedAt     DateTime? // эрх эхлэсэн цаг
   expiresAt     DateTime? // эрх дуусах цаг (ном нь null, тест = гэрээний үргэлжлэх хугацаа)
   createdAt     DateTime    @default(now())
+  // version, passId, durationDays and scope frozen at the pending quote.
+  passSnapshot  Json?
+  checkoutPayments Payment[] @relation("CheckoutPurchase")
 
   @@index([userId, productItemId])
   @@index([userId, expiresAt])
@@ -2001,6 +2055,7 @@ model GoogleLoginExchange {
 // Диск нь кэш, энэ хүснэгт нь эх сурвалж. 25MB хүртэл (upload-ийн хязгаар).
 // ============================================================================
 model StoredFile {
+  ownerId   String? // legacy ownerless files require reference authorization
   key       String   @id // uploads-ийн key (uuid.ext)
   mime      String
   size      Int
@@ -2045,4 +2100,184 @@ model FormulaReviewAttempt {
   formula Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
   @@id([userId, exerciseId])
   @@index([formulaId])
+}
+
+// Owner-visible bug reports and suggestions; administrators triage safely.
+model Feedback {
+  id              String   @id @default(cuid())
+  authorId        String
+  author          User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  clientRequestId String
+  kind            String
+  subject         String
+  body            String
+  contextPath     String?
+  attachmentKeys  String[] @default([])
+  state           String   @default("OPEN")
+  response        String?
+  respondedById   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([authorId, clientRequestId])
+  @@index([state, createdAt])
+}
+
+// Teacher-issued approximate class dismissal; never individual GPS/departure proof.
+model ClassDismissal {
+  id            String    @id @default(cuid())
+  classroomId   String
+  classroom     Classroom @relation(fields: [classroomId], references: [id], onDelete: Restrict)
+  date          DateTime  @db.Date
+  approximateAt DateTime
+  lastLeftAt    DateTime?
+  issuedById    String
+  note          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([classroomId, date])
+  @@index([date])
+}
+
+// Class/day teaching packet links theory, in-class work, homework and absent-pupil makeup.
+model LessonPacket {
+  id                   String @id @default(cuid())
+  classroomId          String
+  classroom            Classroom @relation(fields: [classroomId], references: [id], onDelete: Restrict)
+  date                 DateTime @db.Date
+  chapterId            String
+  chapter              Chapter @relation(fields: [chapterId], references: [id], onDelete: Restrict)
+  theoryBlockIds       String[]
+  testSessionId        String?
+  homeworkAssignmentId String?
+  makeupTestId         String?
+  createdById          String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  receipts             LessonReceipt[]
+  photoTurn            LessonPhotoTurn?
+  @@unique([classroomId, date])
+}
+// Append-only evidence receipts; revisions remain distinguishable and auditable.
+model LessonReceipt {
+  id              String @id @default(cuid())
+  packetId        String
+  packet          LessonPacket @relation(fields: [packetId], references: [id], onDelete: Restrict)
+  studentId       String
+  kind            String
+  imageKeys       String[]
+  clientRequestId String
+  submittedAt     DateTime @default(now())
+  @@unique([packetId, studentId, kind, clientRequestId])
+  @@index([packetId, kind, submittedAt])
+}
+model LessonPhotoTurn {
+  id           String @id @default(cuid())
+  packetId     String @unique
+  packet       LessonPacket @relation(fields: [packetId], references: [id], onDelete: Restrict)
+  studentId    String
+  reason       String
+  assignedById String?
+  createdAt    DateTime @default(now())
+}
+model LessonRotation {
+  classroomId      String @id
+  classroom        Classroom @relation(fields: [classroomId], references: [id], onDelete: Restrict)
+  cursorStudentId  String?
+  pendingStudentIds String[] @default([])
+  servedStudentIds String[] @default([])
+  cycle            Int @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+// Named privileged actions granted by stable user ID. Empty scope means global.
+// Grants are revoked in place; an audit snapshot keeps every change.
+model StaffCapabilityGrant {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  capability  String
+  scopeKey    String   @default("")
+  grantedById String
+  reason      String
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, capability, scopeKey])
+  @@index([userId, revokedAt, expiresAt])
+}
+
+
+// Self-selected reviews are independent of official TestResults and rankings.
+enum StudyReviewStatus {
+  OPEN
+  SUBMITTED
+  EXPIRED
+}
+
+model StudyReviewRun {
+  id                    String @id @default(cuid())
+  userId                String
+  user                  User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  clientRequestId       String
+  normalizedRequestHash String
+  budgetMinutes         Int
+  requestedChapterIds   String[]
+  status                StudyReviewStatus @default(OPEN)
+  startedAt             DateTime
+  deadlineAt            DateTime
+  submittedAt           DateTime?
+  selectionVersion      String
+  seed                  Int
+  createdAt             DateTime @default(now())
+  items                 StudyReviewItem[]
+
+  @@unique([userId, clientRequestId])
+  @@index([userId, startedAt])
+}
+
+model StudyReviewItem {
+  id                   String @id @default(cuid())
+  runId                String
+  run                  StudyReviewRun @relation(fields: [runId], references: [id], onDelete: Restrict)
+  problemId            String
+  problem              Problem @relation(fields: [problemId], references: [id], onDelete: Restrict)
+  order                Int
+  // Only the safe source projection may leave the API before submission.
+  sourceSnapshot       Json
+  gradeSnapshot        Json
+  gradingVersion       String
+  eligibilityAtStart   String
+  exposureBeforeFirst  Boolean @default(false)
+  firstRecordedAt      DateTime?
+  immutableFirstAnswer Json?
+  immutableFirstFlags  String[] @default([])
+  immutableFirstCorrect Boolean?
+  responses            StudyReviewResponse[]
+
+  @@unique([runId, order])
+  @@unique([runId, problemId])
+  @@index([problemId])
+}
+
+model StudyReviewResponse {
+  id              String @id @default(cuid())
+  itemId          String
+  item            StudyReviewItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  userId          String
+  user            User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  clientRequestId String
+  requestHash     String
+  kind            String
+  answer          Json
+  flags           String[] @default([])
+  correct         Boolean?
+  occurredAt      DateTime @default(now())
+  assistance      Boolean @default(false)
+
+  @@unique([itemId, userId, clientRequestId])
+  @@index([userId, occurredAt])
 }
