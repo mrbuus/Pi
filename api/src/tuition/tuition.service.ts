@@ -7,7 +7,13 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
-import { prorateTuition, explainProration, type ProrationInput, type ProrationResult, type DateKey } from './proration';
+import {
+  prorateTuition,
+  explainProration,
+  type ProrationInput,
+  type ProrationResult,
+  type DateKey,
+} from './proration';
 import { computePaidUntil } from './paid-until';
 import { todayUB } from '../common/date';
 
@@ -22,7 +28,11 @@ export class TuitionService {
    * Буцаалтын ТООЦОО (баталгаажаагүй эхний үе)
    * GET /tuition/refund/preview?studentId&classroomId&leftOn
    */
-  async previewRefund(studentId: string, classroomId: string, leftOnStr: string) {
+  async previewRefund(
+    studentId: string,
+    classroomId: string,
+    leftOnStr: string,
+  ) {
     // Сурагч болон анги байгаа эсэх шалгаж тооцооны мэдээлэл цуглуулна.
     const student = await this.prisma.user.findUnique({
       where: { id: studentId },
@@ -43,14 +53,20 @@ export class TuitionService {
       where: { studentId, classroomId, leftAt: null },
     });
     if (!enrollment) {
-      throw new BadRequestException('Сурагч энэ ангид сууж байгаа бүртгэл байхгүй');
+      throw new BadRequestException(
+        'Сурагч энэ ангид сууж байгаа бүртгэл байхгүй',
+      );
     }
 
     const joinedOn = enrollment.joinedAt.toISOString().slice(0, 10) as DateKey;
     const leftOn = leftOnStr as DateKey;
 
     // Гэрээний хугацаанаас хичээлийн өдрүүдийг авна
-    const expandedDays = await this.scheduleService.expandDays(joinedOn, leftOn, classroomId);
+    const expandedDays = await this.scheduleService.expandDays(
+      joinedOn,
+      leftOn,
+      classroomId,
+    );
     const lessonDays = expandedDays
       .filter((d) => d.holiday === null && d.classes.length > 0)
       .map((d) => d.date as DateKey);
@@ -74,7 +90,11 @@ export class TuitionService {
     const explanation = explainProration(result);
 
     return {
-      student: { id: student.id, firstName: student.firstName, lastName: student.lastName },
+      student: {
+        id: student.id,
+        firstName: student.firstName,
+        lastName: student.lastName,
+      },
       classroom: { id: classroom.id, name: classroom.name },
       joinedOn,
       leftOn,
@@ -95,34 +115,50 @@ export class TuitionService {
   ) {
     const preview = await this.previewRefund(studentId, classroomId, leftOnStr);
 
-    // Хоёр дахь гүйлгээний шалгалт: DRAFT-ийн бүртгэл байхгүй байх
-    const existing = await this.prisma.tuitionRefund.findFirst({
-      where: { studentId, classroomId, status: 'DRAFT' },
-    });
-    if (existing) {
-      throw new BadRequestException('Энэ сурагч болон ангийн DRAFT бүртгэл аль хэдийн байна');
-    }
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'tuition-refund:' + studentId + ':' + classroomId}))`;
+      // Хоёр дахь гүйлгээний шалгалт: DRAFT-ийн бүртгэл байхгүй байх
+      const existing = await tx.tuitionRefund.findFirst({
+        where: {
+          studentId,
+          classroomId,
+          OR: [
+            { status: 'DRAFT' },
+            {
+              leftOn: new Date(`${leftOnStr}T00:00:00Z`),
+              status: { not: 'CANCELLED' },
+            },
+          ],
+        },
+      });
+      if (existing) {
+        throw new BadRequestException(
+          'Энэ сурагч болон ангийн буцаалтын бүртгэл аль хэдийн байна',
+        );
+      }
 
-    const calc = preview.calculation;
-    const refund = await this.prisma.tuitionRefund.create({
-      data: {
-        studentId,
-        classroomId,
-        leftOn: new Date(`${leftOnStr}T00:00:00Z`),
-        totalLessonDays: calc.totalLessonDays,
-        attendedLessonDays: calc.attendedLessonDays,
-        dailyRate: calc.dailyRate,
-        owed: calc.owed,
-        totalPaid: calc.totalPaid,
-        refundAmount: calc.refundAmount,
-        shortfall: calc.shortfall,
-        warnings: calc.warnings.length > 0 ? JSON.stringify(calc.warnings) : null,
-        status: 'DRAFT',
-        createdById,
-      },
-    });
+      const calc = preview.calculation;
+      const refund = await tx.tuitionRefund.create({
+        data: {
+          studentId,
+          classroomId,
+          leftOn: new Date(`${leftOnStr}T00:00:00Z`),
+          totalLessonDays: calc.totalLessonDays,
+          attendedLessonDays: calc.attendedLessonDays,
+          dailyRate: calc.dailyRate,
+          owed: calc.owed,
+          totalPaid: calc.totalPaid,
+          refundAmount: calc.refundAmount,
+          shortfall: calc.shortfall,
+          warnings:
+            calc.warnings.length > 0 ? JSON.stringify(calc.warnings) : null,
+          status: 'DRAFT',
+          createdById,
+        },
+      });
 
-    return refund;
+      return refund;
+    });
   }
 
   /**
@@ -137,11 +173,13 @@ export class TuitionService {
       throw new NotFoundException('Буцаалт олдсонгүй');
     }
     if (refund.status !== 'DRAFT') {
-      throw new BadRequestException('Зөвхөн DRAFT статусны буцаалтыг явуулж болно');
+      throw new BadRequestException(
+        'Зөвхөн DRAFT статусны буцаалтыг явуулж болно',
+      );
     }
 
     return this.prisma.tuitionRefund.update({
-      where: { id: refundId },
+      where: { id: refundId, status: 'DRAFT' },
       data: { status: 'PENDING_APPROVAL' },
     });
   }
@@ -158,11 +196,13 @@ export class TuitionService {
       throw new NotFoundException('Буцаалт олдсонгүй');
     }
     if (refund.status !== 'PENDING_APPROVAL' && refund.status !== 'DRAFT') {
-      throw new BadRequestException('Зөвхөн DRAFT эсвэл PENDING_APPROVAL статусны буцаалтыг баталгаажуулж болно');
+      throw new BadRequestException(
+        'Зөвхөн DRAFT эсвэл PENDING_APPROVAL статусны буцаалтыг баталгаажуулж болно',
+      );
     }
 
     return this.prisma.tuitionRefund.update({
-      where: { id: refundId },
+      where: { id: refundId, status: { in: ['DRAFT', 'PENDING_APPROVAL'] } },
       data: { status: 'APPROVED', approvedById, approvedAt: new Date() },
     });
   }
@@ -171,11 +211,7 @@ export class TuitionService {
    * Админ буцаалтыг ТӨЛӨГДСӨН гэж тэмдэглэнэ
    * POST /tuition/refund/:id/paid
    */
-  async markAsPaid(
-    refundId: string,
-    paidById: string,
-    paymentMethod?: string,
-  ) {
+  async markAsPaid(refundId: string, paidById: string, paymentMethod?: string) {
     const refund = await this.prisma.tuitionRefund.findUnique({
       where: { id: refundId },
     });
@@ -183,11 +219,13 @@ export class TuitionService {
       throw new NotFoundException('Буцаалт олдсонгүй');
     }
     if (refund.status !== 'APPROVED') {
-      throw new BadRequestException('Зөвхөн APPROVED статусны буцаалтыг төлөгдсөн гэж тэмдэглэж болно');
+      throw new BadRequestException(
+        'Зөвхөн APPROVED статусны буцаалтыг төлөгдсөн гэж тэмдэглэж болно',
+      );
     }
 
     return this.prisma.tuitionRefund.update({
-      where: { id: refundId },
+      where: { id: refundId, status: 'APPROVED' },
       data: {
         status: 'PAID',
         paidById,
@@ -217,7 +255,7 @@ export class TuitionService {
     }
 
     return this.prisma.tuitionRefund.update({
-      where: { id: refundId },
+      where: { id: refundId, status: { notIn: ['CANCELLED', 'PAID'] } },
       data: {
         status: 'CANCELLED',
         cancelledById,
@@ -334,7 +372,10 @@ export class TuitionService {
     return link !== null;
   }
 
-  async getPaidUntil(studentId: string, classroomId?: string): Promise<Date | null> {
+  async getPaidUntil(
+    studentId: string,
+    classroomId?: string,
+  ): Promise<Date | null> {
     // Сурагч байгаа эсэх
     const student = await this.prisma.user.findUnique({
       where: { id: studentId },
@@ -347,7 +388,9 @@ export class TuitionService {
     // classroomId заагдавал ТАНХИМЫН төлбөр, үгүй бол сүүлийн төлбөр
     let classroom: { id: string } | null = null;
     if (classroomId) {
-      classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
+      classroom = await this.prisma.classroom.findUnique({
+        where: { id: classroomId },
+      });
       if (!classroom) throw new NotFoundException('Анги олдсонгүй');
     } else if (student.enrollments.length > 0) {
       // ТАНХИМЫН сурагч → сүүлийн идэвхтэй ангийг авна

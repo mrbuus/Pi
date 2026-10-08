@@ -6,8 +6,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Role } from '../generated/prisma/client';
-import { collectPassScope, hasActiveClassroomEnrollment } from '../common/access';
-import { choiceModeOf, gradeAnswer, GradableProblem, hasKnownAnswer } from '../tests/grading';
+import {
+  activePurchaseWhere,
+  collectPassScope,
+  hasActiveClassroomEnrollment,
+} from '../common/access';
+import {
+  choiceModeOf,
+  gradeAnswer,
+  GradableProblem,
+  hasKnownAnswer,
+} from '../tests/grading';
 import { PrismaService } from '../prisma/prisma.service';
 import { MistakeQueryDto, UpdateMistakeDto } from './dto/mistake.dto';
 import { nextMistakeRetryState } from './mistake-scheduling';
@@ -17,13 +26,19 @@ const ENTRY_INCLUDE = {
     include: {
       chapter: { include: { topic: true } },
       choiceOptions: { orderBy: { order: 'asc' } },
-      formulas: { include: { formula: { select: { slug: true, name: true, latex: true } } } },
+      formulas: {
+        include: {
+          formula: { select: { slug: true, name: true, latex: true } },
+        },
+      },
       analysis: { select: { status: true, solutionOutline: true } },
     },
   },
 } satisfies Prisma.MistakeEntryInclude;
 
-type EntryWithProblem = Prisma.MistakeEntryGetPayload<{ include: typeof ENTRY_INCLUDE }>;
+type EntryWithProblem = Prisma.MistakeEntryGetPayload<{
+  include: typeof ENTRY_INCLUDE;
+}>;
 
 function gradable(entry: EntryWithProblem): GradableProblem {
   return {
@@ -37,19 +52,33 @@ function gradable(entry: EntryWithProblem): GradableProblem {
 
 function safeAnswerFields(problem: GradableProblem): string[] | undefined {
   const answer = problem.correctAnswer;
-  if (!hasKnownAnswer(problem) || !answer || typeof answer !== 'object' || Array.isArray(answer)) return undefined;
-  const fields = Object.keys(answer as Record<string, unknown>).filter((key) =>
-    key !== 'manualReview' && key !== 'reason' && /^[A-Za-z][A-Za-z0-9_]{0,31}$/.test(key),
+  if (
+    !hasKnownAnswer(problem) ||
+    !answer ||
+    typeof answer !== 'object' ||
+    Array.isArray(answer)
+  )
+    return undefined;
+  const fields = Object.keys(answer as Record<string, unknown>).filter(
+    (key) =>
+      key !== 'manualReview' &&
+      key !== 'reason' &&
+      /^[A-Za-z][A-Za-z0-9_]{0,31}$/.test(key),
   );
   return fields.length > 0 && fields.length <= 20 ? fields : undefined;
 }
 
 function publicCorrectAnswer(problem: GradableProblem): unknown {
   if (choiceModeOf(problem) === 'TEXT') {
-    const options = [...(problem.choiceOptions ?? [])].sort((a, b) => a.order - b.order);
+    const options = [...(problem.choiceOptions ?? [])].sort(
+      (a, b) => a.order - b.order,
+    );
     const correctOption = options.find((option) => option.isCorrect);
     if (correctOption) return correctOption.text;
-    if (typeof problem.correctAnswer === 'string' && Array.isArray(problem.choices)) {
+    if (
+      typeof problem.correctAnswer === 'string' &&
+      Array.isArray(problem.choices)
+    ) {
       const letter = problem.correctAnswer.trim().toUpperCase();
       const index = letter.charCodeAt(0) - 65;
       return problem.choices[index] ?? problem.correctAnswer;
@@ -69,20 +98,21 @@ function parseAnswerForDisplay(value: Prisma.JsonValue): unknown {
 
 function serializeEntry(entry: EntryWithProblem) {
   const problem: GradableProblem = gradable(entry);
-  const revealAnswer = entry.status === 'MASTERED' || (
-    entry.retryCount > 0 && (
-      entry.sourceOccurredAt == null ||
-      (entry.lastRetryAt != null && entry.lastRetryAt >= entry.sourceOccurredAt)
-    )
-  );
+  const revealAnswer =
+    entry.status === 'MASTERED' ||
+    (entry.retryCount > 0 &&
+      (entry.sourceOccurredAt == null ||
+        (entry.lastRetryAt != null &&
+          entry.lastRetryAt >= entry.sourceOccurredAt)));
   return {
     id: entry.id,
     problem: {
       id: entry.problem.id,
       statementText: entry.problem.statementText,
-      choices: entry.problem.choiceOptions.length > 0
-        ? entry.problem.choiceOptions.map((choice) => choice.text)
-        : entry.problem.choices,
+      choices:
+        entry.problem.choiceOptions.length > 0
+          ? entry.problem.choiceOptions.map((choice) => choice.text)
+          : entry.problem.choices,
       choiceMode: choiceModeOf(problem),
       answerFields: safeAnswerFields(problem),
       format: entry.problem.format,
@@ -98,10 +128,12 @@ function serializeEntry(entry: EntryWithProblem) {
     nextRetryAt: entry.nextRetryAt,
     formulas: entry.problem.formulas
       .filter((link) => link.formula.slug !== null)
-      .map((link) => ({ slug: link.formula.slug, title: link.formula.name, latex: link.formula.latex })),
-    ...(revealAnswer
-      ? { correctAnswer: publicCorrectAnswer(problem) }
-      : {}),
+      .map((link) => ({
+        slug: link.formula.slug,
+        title: link.formula.name,
+        latex: link.formula.latex,
+      })),
+    ...(revealAnswer ? { correctAnswer: publicCorrectAnswer(problem) } : {}),
     ...(revealAnswer && entry.problem.analysis?.status === 'VERIFIED'
       ? { solutionOutline: entry.problem.analysis.solutionOutline }
       : {}),
@@ -112,7 +144,9 @@ function serializeEntry(entry: EntryWithProblem) {
 export class MistakesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async accessibleChapterWhere(userId: string): Promise<Prisma.ChapterWhereInput> {
+  private async accessibleChapterWhere(
+    userId: string,
+  ): Promise<Prisma.ChapterWhereInput> {
     const contentNotDeleted: Prisma.ChapterWhereInput = {
       deletedAt: null,
       OR: [{ bookId: null }, { book: { is: { deletedAt: null } } }],
@@ -126,16 +160,17 @@ export class MistakesService {
 
     const purchasedBooks = await this.prisma.purchase.findMany({
       where: {
-        userId,
-        grantedAt: { not: null },
-        productItem: { kind: 'BOOK', includesVideo: true },
+        ...activePurchaseWhere(userId),
+        productItem: { kind: 'BOOK' },
       },
       select: { productItem: { select: { refId: true } } },
     });
-    const bookIds = [...new Set([
-      ...scope.bookIds,
-      ...purchasedBooks.map((purchase) => purchase.productItem.refId),
-    ])];
+    const bookIds = [
+      ...new Set([
+        ...scope.bookIds,
+        ...purchasedBooks.map((purchase) => purchase.productItem.refId),
+      ]),
+    ];
     return {
       deletedAt: null,
       AND: [
@@ -143,7 +178,9 @@ export class MistakesService {
         {
           OR: [
             { freePreview: true },
-            ...(scope.chapterIds.length > 0 ? [{ id: { in: scope.chapterIds } }] : []),
+            ...(scope.chapterIds.length > 0
+              ? [{ id: { in: scope.chapterIds } }]
+              : []),
             ...(bookIds.length > 0 ? [{ bookId: { in: bookIds } }] : []),
           ],
         },
@@ -159,7 +196,11 @@ export class MistakesService {
         is: {
           ...chapterAccess,
           ...(query.topic
-            ? { topic: { is: { name: { contains: query.topic, mode: 'insensitive' } } } }
+            ? {
+                topic: {
+                  is: { name: { contains: query.topic, mode: 'insensitive' } },
+                },
+              }
             : {}),
         },
       },
@@ -175,7 +216,11 @@ export class MistakesService {
     };
 
     const [statusCounts, topicCounts, entries] = await Promise.all([
-      this.prisma.mistakeEntry.groupBy({ by: ['status'], where: activeProblem, _count: true }),
+      this.prisma.mistakeEntry.groupBy({
+        by: ['status'],
+        where: activeProblem,
+        _count: true,
+      }),
       this.prisma.$queryRaw<{ topic: string; count: number }[]>(Prisma.sql`
         SELECT COALESCE(topic."name", 'Бусад') AS topic, COUNT(*)::int AS count
         FROM "MistakeEntry" AS mistake
@@ -197,14 +242,15 @@ export class MistakesService {
 
     const counts = { NEW: 0, RETRYING: 0, MASTERED: 0 };
     for (const row of statusCounts) {
-      if (row.status in counts) counts[row.status as keyof typeof counts] = row._count;
+      if (row.status in counts)
+        counts[row.status as keyof typeof counts] = row._count;
     }
     const hasMore = entries.length > 200;
     const page = entries.slice(0, 200);
     return {
       counts,
       byTopic: topicCounts,
-      items: page.map((entry) => serializeEntry(entry as EntryWithProblem)),
+      items: page.map((entry) => serializeEntry(entry)),
       nextCursor: hasMore ? page[page.length - 1].id : null,
     };
   }
@@ -233,11 +279,19 @@ export class MistakesService {
     const chapterAccess = await this.accessibleChapterWhere(userId);
     return this.prisma.$transaction(async (tx) => {
       const row = await tx.mistakeEntry.findFirst({
-        where: { id, userId, problem: { deletedAt: null, chapter: { is: chapterAccess } } },
-        include: { problem: { include: {
-          choiceOptions: { orderBy: { order: 'asc' } },
-          analysis: { select: { status: true, solutionOutline: true } },
-        } } },
+        where: {
+          id,
+          userId,
+          problem: { deletedAt: null, chapter: { is: chapterAccess } },
+        },
+        include: {
+          problem: {
+            include: {
+              choiceOptions: { orderBy: { order: 'asc' } },
+              analysis: { select: { status: true, solutionOutline: true } },
+            },
+          },
+        },
       });
       if (!row) throw new NotFoundException('Алдаа олдсонгүй');
       const gradableProblem: GradableProblem = {
@@ -248,16 +302,22 @@ export class MistakesService {
         choiceOptions: row.problem.choiceOptions,
       };
       if (!hasKnownAnswer(gradableProblem)) {
-        throw new BadRequestException('Энэ бодлогын хариу баталгаажаагүй байна');
+        throw new BadRequestException(
+          'Энэ бодлогын хариу баталгаажаагүй байна',
+        );
       }
 
       const grade = gradeAnswer(gradableProblem, answer);
-      const state = nextMistakeRetryState({
-        status: row.status as 'NEW' | 'RETRYING' | 'MASTERED',
-        retryCount: row.retryCount,
-        consecutiveCorrect: row.consecutiveCorrect,
-        lastCorrectAt: row.lastCorrectAt,
-      }, grade.correct, now);
+      const state = nextMistakeRetryState(
+        {
+          status: row.status as 'NEW' | 'RETRYING' | 'MASTERED',
+          retryCount: row.retryCount,
+          consecutiveCorrect: row.consecutiveCorrect,
+          lastCorrectAt: row.lastCorrectAt,
+        },
+        grade.correct,
+        now,
+      );
       const changed = await tx.mistakeEntry.updateMany({
         where: {
           id,
@@ -277,9 +337,10 @@ export class MistakesService {
         status: state.status,
         retryCount: state.retryCount,
         nextRetryAt: state.nextRetryAt,
-        solutionOutline: row.problem.analysis?.status === 'VERIFIED'
-          ? row.problem.analysis.solutionOutline
-          : null,
+        solutionOutline:
+          row.problem.analysis?.status === 'VERIFIED'
+            ? row.problem.analysis.solutionOutline
+            : null,
       };
     });
   }
@@ -298,15 +359,20 @@ export class MistakesService {
       orderBy: [{ nextRetryAt: 'asc' }, { updatedAt: 'asc' }],
       take: 5,
     });
-    return due.map((entry) => serializeEntry(entry as EntryWithProblem));
+    return due.map((entry) => serializeEntry(entry));
   }
 
   async student(studentId: string, actor: { userId: string; role: Role }) {
     if (actor.role === Role.TEACHER) {
       const enrollment = await this.prisma.enrollment.findFirst({
-        where: { studentId, leftAt: null, classroom: { teacherId: actor.userId } },
+        where: {
+          studentId,
+          leftAt: null,
+          classroom: { teacherId: actor.userId },
+        },
       });
-      if (!enrollment) throw new ForbiddenException('Энэ сурагчийн мэдээлэлд хандах эрхгүй');
+      if (!enrollment)
+        throw new ForbiddenException('Энэ сурагчийн мэдээлэлд хандах эрхгүй');
     } else if (actor.role === Role.PARENT) {
       const link = await this.prisma.parentLink.findFirst({
         where: { parentId: actor.userId, studentId, verifiedAt: { not: null } },
@@ -316,7 +382,9 @@ export class MistakesService {
 
     const [statusCounts, topics] = await Promise.all([
       this.prisma.mistakeEntry.groupBy({
-        by: ['status'], where: { userId: studentId, problem: { deletedAt: null } }, _count: true,
+        by: ['status'],
+        where: { userId: studentId, problem: { deletedAt: null } },
+        _count: true,
       }),
       this.prisma.$queryRaw<{ topic: string; count: number }[]>(Prisma.sql`
         SELECT COALESCE(topic."name", 'Бусад') AS topic, COUNT(*)::int AS count
@@ -332,7 +400,8 @@ export class MistakesService {
     ]);
     const counts = { NEW: 0, RETRYING: 0, MASTERED: 0 };
     for (const row of statusCounts) {
-      if (row.status in counts) counts[row.status as keyof typeof counts] = row._count;
+      if (row.status in counts)
+        counts[row.status as keyof typeof counts] = row._count;
     }
     return { counts, byTopic: topics, weakestTopics: topics.slice(0, 5) };
   }

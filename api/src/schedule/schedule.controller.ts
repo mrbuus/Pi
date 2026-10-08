@@ -26,6 +26,7 @@ import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { UpsertExceptionDto } from './dto/upsert-exception.dto';
 import { UpsertTopicDto } from './dto/upsert-topic.dto';
+import { ScheduleAccessService } from './schedule-access.service';
 import { ScheduleService } from './schedule.service';
 
 interface AuthedRequest {
@@ -38,23 +39,38 @@ interface AuthedRequest {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class ScheduleController {
-  constructor(private schedule: ScheduleService) {}
+  constructor(
+    private schedule: ScheduleService,
+    private access: ScheduleAccessService,
+  ) {}
 
   // ---------- /schedule ----------
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule')
-  create(@Body() dto: CreateScheduleDto) {
+  async create(@Body() dto: CreateScheduleDto, @Req() req: AuthedRequest) {
+    await this.access.manage(req.user, dto.classroomId);
     return this.schedule.create(dto);
   }
 
   @Get('schedule')
-  findAll(@Query('classroomId') classroomId?: string) {
-    return this.schedule.findAll(classroomId);
+  async findAll(
+    @Req() req: AuthedRequest,
+    @Query('classroomId') classroomId?: string,
+  ) {
+    if (classroomId) await this.access.readClassroom(req.user, classroomId);
+    return this.schedule.findAll(
+      classroomId,
+      await this.access.readableClassrooms(req.user),
+    );
   }
 
   @Get('schedule/classroom/:id')
-  forClassroom(@Param('id') classroomId: string) {
+  async forClassroom(
+    @Param('id') classroomId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.readClassroom(req.user, classroomId);
     return this.schedule.forClassroom(classroomId);
   }
 
@@ -67,13 +83,20 @@ export class ScheduleController {
   // 🎯 ХАМГИЙН ЧУХАЛ endpoint — тухайн 7 хоногийг НЭГ дуудлагаар бүрэн
   // шийдвэрлэж (cancel/move-той, сэдэвтэй, багшийн ростертой) буцаана.
   @Get('schedule/week')
-  week(@Query('start') start: string) {
-    return this.schedule.getWeek(start);
+  async week(@Query('start') start: string, @Req() req: AuthedRequest) {
+    return this.schedule.getWeek(
+      start,
+      await this.access.readableClassrooms(req.user),
+    );
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/bulk')
-  bulkCreate(@Body() dto: BulkCreateScheduleDto) {
+  async bulkCreate(
+    @Body() dto: BulkCreateScheduleDto,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.manage(req.user, dto.classroomId);
     return this.schedule.bulkCreate(dto);
   }
 
@@ -81,27 +104,39 @@ export class ScheduleController {
   // өөрчилнө. Өнгөрсөн түүх хэвээр үлдэнэ (цувралыг хоёр хуваана).
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/:id/split')
-  splitSeries(@Param('id') id: string, @Body() dto: SplitSeriesDto) {
+  async splitSeries(
+    @Param('id') id: string,
+    @Body() dto: SplitSeriesDto,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.manageSchedule(req.user, id);
     return this.schedule.splitSeries(id, dto);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/:id/exceptions')
-  upsertException(
+  async upsertException(
     @Param('id') id: string,
     @Body() dto: UpsertExceptionDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.schedule.upsertException(id, dto, req.user.userId, req.user.role);
+    await this.access.manageSchedule(req.user, id);
+    return this.schedule.upsertException(
+      id,
+      dto,
+      req.user.userId,
+      req.user.role,
+    );
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('schedule/:id/exceptions/:exceptionId')
-  removeException(
+  async removeException(
     @Param('id') id: string,
     @Param('exceptionId') exceptionId: string,
     @Req() req: AuthedRequest,
   ) {
+    await this.access.manageSchedule(req.user, id);
     return this.schedule.removeException(
       id,
       exceptionId,
@@ -112,21 +147,23 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Patch('schedule/:id/topic')
-  upsertTopic(
+  async upsertTopic(
     @Param('id') id: string,
     @Body() dto: UpsertTopicDto,
     @Req() req: AuthedRequest,
   ) {
+    await this.access.topic(req.user, id);
     return this.schedule.upsertTopic(id, dto, req.user.userId, req.user.role);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Delete('schedule/:id/topic')
-  clearTopic(
+  async clearTopic(
     @Param('id') id: string,
     @Body() dto: ClearTopicDto,
     @Req() req: AuthedRequest,
   ) {
+    await this.access.topic(req.user, id);
     return this.schedule.clearTopic(id, dto, req.user.userId, req.user.role);
   }
 
@@ -137,33 +174,42 @@ export class ScheduleController {
   // id/нэр буцаах тусдаа маршрут үүсгэв.
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('schedule/teachers')
-  listTeacherOptions() {
+  async listTeacherOptions(@Req() req: AuthedRequest) {
+    await this.access.manage(req.user);
     return this.schedule.listTeacherOptions();
   }
 
   @Get('schedule/teacher-workdays')
-  listTeacherWorkDays(
+  async listTeacherWorkDays(
+    @Req() req: AuthedRequest,
     @Query('from') from?: string,
     @Query('to') to?: string,
   ) {
+    await this.access.manage(req.user);
     return this.schedule.listTeacherWorkDays(from, to);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('schedule/teacher-workdays')
-  putTeacherWorkDays(
+  async putTeacherWorkDays(
     @Body() dto: PutTeacherWorkDaysDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.schedule.putTeacherWorkDays(dto, req.user.userId, req.user.role);
+    await this.access.manage(req.user);
+    return this.schedule.putTeacherWorkDays(
+      dto,
+      req.user.userId,
+      req.user.role,
+    );
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/teacher-workdays/exception')
-  upsertTeacherWorkException(
+  async upsertTeacherWorkException(
     @Body() dto: TeacherWorkDayExceptionDto,
     @Req() req: AuthedRequest,
   ) {
+    await this.access.manage(req.user);
     return this.schedule.upsertTeacherWorkException(
       dto,
       req.user.userId,
@@ -174,29 +220,44 @@ export class ScheduleController {
   // 🎯 Хамгийн чухал endpoint — давтагдах хэв маягийг [from, to]-д задалж,
   // амралт/завсарлагыг хассан БОДИТ хичээлтэй өдрүүдийг буцаана.
   @Get('schedule/days')
-  days(
+  async days(
+    @Req() req: AuthedRequest,
     @Query('from') from: string,
     @Query('to') to: string,
     @Query('classroomId') classroomId?: string,
     @Query('teacherId') teacherId?: string,
   ) {
-    return this.schedule.expandDays(from, to, classroomId, teacherId);
+    if (classroomId) await this.access.readClassroom(req.user, classroomId);
+    return this.schedule.expandDays(
+      from,
+      to,
+      classroomId,
+      teacherId,
+      await this.access.readableClassrooms(req.user),
+    );
   }
 
   @Get('schedule/:id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Req() req: AuthedRequest) {
+    await this.access.readSchedule(req.user, id);
     return this.schedule.findOne(id);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('schedule/:id')
-  update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateScheduleDto,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.manageSchedule(req.user, id, dto.classroomId);
     return this.schedule.update(id, dto);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('schedule/:id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Req() req: AuthedRequest) {
+    await this.access.manageSchedule(req.user, id);
     return this.schedule.remove(id);
   }
 
@@ -212,10 +273,7 @@ export class ScheduleController {
   }
 
   @Get('calendar')
-  listCalendarDays(
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
+  listCalendarDays(@Query('from') from?: string, @Query('to') to?: string) {
     return this.schedule.listCalendarDays(from, to);
   }
 
@@ -226,7 +284,10 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN)
   @Patch('calendar/:id')
-  updateCalendarDay(@Param('id') id: string, @Body() dto: UpdateCalendarDayDto) {
+  updateCalendarDay(
+    @Param('id') id: string,
+    @Body() dto: UpdateCalendarDayDto,
+  ) {
     return this.schedule.updateCalendarDay(id, dto);
   }
 

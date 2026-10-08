@@ -67,6 +67,7 @@ export const ModelName = {
   Attendance: 'Attendance',
   Assignment: 'Assignment',
   Submission: 'Submission',
+  SubmissionRevision: 'SubmissionRevision',
   DailyHomeworkMark: 'DailyHomeworkMark',
   Book: 'Book',
   Chapter: 'Chapter',
@@ -131,7 +132,17 @@ export const ModelName = {
   StoredFile: 'StoredFile',
   FormulaReview: 'FormulaReview',
   FormulaReviewDay: 'FormulaReviewDay',
-  FormulaReviewAttempt: 'FormulaReviewAttempt'
+  FormulaReviewAttempt: 'FormulaReviewAttempt',
+  Feedback: 'Feedback',
+  ClassDismissal: 'ClassDismissal',
+  LessonPacket: 'LessonPacket',
+  LessonReceipt: 'LessonReceipt',
+  LessonPhotoTurn: 'LessonPhotoTurn',
+  LessonRotation: 'LessonRotation',
+  StaffCapabilityGrant: 'StaffCapabilityGrant',
+  StudyReviewRun: 'StudyReviewRun',
+  StudyReviewItem: 'StudyReviewItem',
+  StudyReviewResponse: 'StudyReviewResponse'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -387,6 +398,8 @@ export const SubmissionScalarFieldEnum = {
   state: 'state',
   imageKeys: 'imageKeys',
   note: 'note',
+  studentNote: 'studentNote',
+  reviewNote: 'reviewNote',
   checkedById: 'checkedById',
   submittedAt: 'submittedAt',
   checkedAt: 'checkedAt',
@@ -394,6 +407,22 @@ export const SubmissionScalarFieldEnum = {
 } as const
 
 export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
+
+
+export const SubmissionRevisionScalarFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  action: 'action',
+  actorId: 'actorId',
+  state: 'state',
+  studentNote: 'studentNote',
+  reviewNote: 'reviewNote',
+  legacyNote: 'legacyNote',
+  imageKeys: 'imageKeys',
+  at: 'at'
+} as const
+
+export type SubmissionRevisionScalarFieldEnum = (typeof SubmissionRevisionScalarFieldEnum)[keyof typeof SubmissionRevisionScalarFieldEnum]
 
 
 export const DailyHomeworkMarkScalarFieldEnum = {
@@ -450,19 +479,24 @@ export type TopicScalarFieldEnum = (typeof TopicScalarFieldEnum)[keyof typeof To
 
 
 export const TheoryBlockScalarFieldEnum = {
+  createdById: 'createdById',
+  clientRequestId: 'clientRequestId',
   id: 'id',
   chapterId: 'chapterId',
   title: 'title',
   content: 'content',
   imageKeys: 'imageKeys',
   order: 'order',
-  freePreview: 'freePreview'
+  freePreview: 'freePreview',
+  archivedAt: 'archivedAt'
 } as const
 
 export type TheoryBlockScalarFieldEnum = (typeof TheoryBlockScalarFieldEnum)[keyof typeof TheoryBlockScalarFieldEnum]
 
 
 export const VideoScalarFieldEnum = {
+  problemId: 'problemId',
+  createdById: 'createdById',
   id: 'id',
   title: 'title',
   s3Key: 's3Key',
@@ -844,7 +878,8 @@ export const UserPassScalarFieldEnum = {
   passId: 'passId',
   startsAt: 'startsAt',
   expiresAt: 'expiresAt',
-  paymentId: 'paymentId'
+  paymentId: 'paymentId',
+  scopeSnapshot: 'scopeSnapshot'
 } as const
 
 export type UserPassScalarFieldEnum = (typeof UserPassScalarFieldEnum)[keyof typeof UserPassScalarFieldEnum]
@@ -888,6 +923,11 @@ export const PaymentScalarFieldEnum = {
   paidAt: 'paidAt',
   confirmedById: 'confirmedById',
   qpayInvoiceId: 'qpayInvoiceId',
+  clientRequestId: 'clientRequestId',
+  normalizedRequestHash: 'normalizedRequestHash',
+  invoiceAttemptedAt: 'invoiceAttemptedAt',
+  qpayCheckoutSnapshot: 'qpayCheckoutSnapshot',
+  storePurchaseId: 'storePurchaseId',
   providerPaymentId: 'providerPaymentId',
   createdAt: 'createdAt'
 } as const
@@ -915,7 +955,8 @@ export const PurchaseScalarFieldEnum = {
   price: 'price',
   grantedAt: 'grantedAt',
   expiresAt: 'expiresAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  passSnapshot: 'passSnapshot'
 } as const
 
 export type PurchaseScalarFieldEnum = (typeof PurchaseScalarFieldEnum)[keyof typeof PurchaseScalarFieldEnum]
@@ -1280,6 +1321,7 @@ export type GoogleLoginExchangeScalarFieldEnum = (typeof GoogleLoginExchangeScal
 
 
 export const StoredFileScalarFieldEnum = {
+  ownerId: 'ownerId',
   key: 'key',
   mime: 'mime',
   size: 'size',
@@ -1324,6 +1366,165 @@ export const FormulaReviewAttemptScalarFieldEnum = {
 } as const
 
 export type FormulaReviewAttemptScalarFieldEnum = (typeof FormulaReviewAttemptScalarFieldEnum)[keyof typeof FormulaReviewAttemptScalarFieldEnum]
+
+
+export const FeedbackScalarFieldEnum = {
+  id: 'id',
+  authorId: 'authorId',
+  clientRequestId: 'clientRequestId',
+  kind: 'kind',
+  subject: 'subject',
+  body: 'body',
+  contextPath: 'contextPath',
+  attachmentKeys: 'attachmentKeys',
+  state: 'state',
+  response: 'response',
+  respondedById: 'respondedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeedbackScalarFieldEnum = (typeof FeedbackScalarFieldEnum)[keyof typeof FeedbackScalarFieldEnum]
+
+
+export const ClassDismissalScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  approximateAt: 'approximateAt',
+  lastLeftAt: 'lastLeftAt',
+  issuedById: 'issuedById',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClassDismissalScalarFieldEnum = (typeof ClassDismissalScalarFieldEnum)[keyof typeof ClassDismissalScalarFieldEnum]
+
+
+export const LessonPacketScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  chapterId: 'chapterId',
+  theoryBlockIds: 'theoryBlockIds',
+  testSessionId: 'testSessionId',
+  homeworkAssignmentId: 'homeworkAssignmentId',
+  makeupTestId: 'makeupTestId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonPacketScalarFieldEnum = (typeof LessonPacketScalarFieldEnum)[keyof typeof LessonPacketScalarFieldEnum]
+
+
+export const LessonReceiptScalarFieldEnum = {
+  id: 'id',
+  packetId: 'packetId',
+  studentId: 'studentId',
+  kind: 'kind',
+  imageKeys: 'imageKeys',
+  clientRequestId: 'clientRequestId',
+  submittedAt: 'submittedAt'
+} as const
+
+export type LessonReceiptScalarFieldEnum = (typeof LessonReceiptScalarFieldEnum)[keyof typeof LessonReceiptScalarFieldEnum]
+
+
+export const LessonPhotoTurnScalarFieldEnum = {
+  id: 'id',
+  packetId: 'packetId',
+  studentId: 'studentId',
+  reason: 'reason',
+  assignedById: 'assignedById',
+  createdAt: 'createdAt'
+} as const
+
+export type LessonPhotoTurnScalarFieldEnum = (typeof LessonPhotoTurnScalarFieldEnum)[keyof typeof LessonPhotoTurnScalarFieldEnum]
+
+
+export const LessonRotationScalarFieldEnum = {
+  classroomId: 'classroomId',
+  cursorStudentId: 'cursorStudentId',
+  pendingStudentIds: 'pendingStudentIds',
+  servedStudentIds: 'servedStudentIds',
+  cycle: 'cycle',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonRotationScalarFieldEnum = (typeof LessonRotationScalarFieldEnum)[keyof typeof LessonRotationScalarFieldEnum]
+
+
+export const StaffCapabilityGrantScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  capability: 'capability',
+  scopeKey: 'scopeKey',
+  grantedById: 'grantedById',
+  reason: 'reason',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaffCapabilityGrantScalarFieldEnum = (typeof StaffCapabilityGrantScalarFieldEnum)[keyof typeof StaffCapabilityGrantScalarFieldEnum]
+
+
+export const StudyReviewRunScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  clientRequestId: 'clientRequestId',
+  normalizedRequestHash: 'normalizedRequestHash',
+  budgetMinutes: 'budgetMinutes',
+  requestedChapterIds: 'requestedChapterIds',
+  status: 'status',
+  startedAt: 'startedAt',
+  deadlineAt: 'deadlineAt',
+  submittedAt: 'submittedAt',
+  selectionVersion: 'selectionVersion',
+  seed: 'seed',
+  createdAt: 'createdAt'
+} as const
+
+export type StudyReviewRunScalarFieldEnum = (typeof StudyReviewRunScalarFieldEnum)[keyof typeof StudyReviewRunScalarFieldEnum]
+
+
+export const StudyReviewItemScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  problemId: 'problemId',
+  order: 'order',
+  sourceSnapshot: 'sourceSnapshot',
+  gradeSnapshot: 'gradeSnapshot',
+  gradingVersion: 'gradingVersion',
+  eligibilityAtStart: 'eligibilityAtStart',
+  exposureBeforeFirst: 'exposureBeforeFirst',
+  firstRecordedAt: 'firstRecordedAt',
+  immutableFirstAnswer: 'immutableFirstAnswer',
+  immutableFirstFlags: 'immutableFirstFlags',
+  immutableFirstCorrect: 'immutableFirstCorrect'
+} as const
+
+export type StudyReviewItemScalarFieldEnum = (typeof StudyReviewItemScalarFieldEnum)[keyof typeof StudyReviewItemScalarFieldEnum]
+
+
+export const StudyReviewResponseScalarFieldEnum = {
+  id: 'id',
+  itemId: 'itemId',
+  userId: 'userId',
+  clientRequestId: 'clientRequestId',
+  requestHash: 'requestHash',
+  kind: 'kind',
+  answer: 'answer',
+  flags: 'flags',
+  correct: 'correct',
+  occurredAt: 'occurredAt',
+  assistance: 'assistance'
+} as const
+
+export type StudyReviewResponseScalarFieldEnum = (typeof StudyReviewResponseScalarFieldEnum)[keyof typeof StudyReviewResponseScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,33 +1,73 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { todayUB } from '../common/date';
 import { Role } from '../generated/prisma/enums';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { canAccessChapter } from '../common/access';
+import {
+  canAccessChapter,
+  activePurchaseWhere,
+  collectPassScope,
+  hasActiveClassroomEnrollment,
+} from '../common/access';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
-import { choiceModeOf, gradeAnswer, GradableProblem, hasKnownAnswer } from '../tests/grading';
+import {
+  choiceModeOf,
+  gradeAnswer,
+  GradableProblem,
+  hasKnownAnswer,
+} from '../tests/grading';
 import {
   recommend,
-  buildTopicStates,
-  type AttemptSignal,
   type CandidateProblem,
   type Recommendation,
 } from './scheduler';
 
-export function canonicalizePracticeChoiceInput(problem: GradableProblem, givenAnswer: unknown): unknown {
-  if (choiceModeOf(problem) !== 'TEXT' || typeof givenAnswer !== 'string') return givenAnswer;
+export function canonicalizePracticeChoiceInput(
+  problem: GradableProblem,
+  givenAnswer: unknown,
+): unknown {
+  if (choiceModeOf(problem) !== 'TEXT' || typeof givenAnswer !== 'string')
+    return givenAnswer;
   const token = givenAnswer.trim();
   const choices = problem.choiceOptions?.length
-    ? [...problem.choiceOptions].sort((a, b) => a.order - b.order).map((option) => option.text)
-    : Array.isArray(problem.choices) ? problem.choices.map(String) : [];
-  const textIndex = choices.findIndex((choice) => choice.trim().toLowerCase() === token.toLowerCase());
+    ? [...problem.choiceOptions]
+        .sort((a, b) => a.order - b.order)
+        .map((option) => option.text)
+    : Array.isArray(problem.choices)
+      ? problem.choices.map(String)
+      : [];
+  const textIndex = choices.findIndex(
+    (choice) => choice.trim().toLowerCase() === token.toLowerCase(),
+  );
   if (textIndex >= 0) return textIndex;
   if (/^[A-Za-z]$/.test(token)) return token.toUpperCase().charCodeAt(0) - 65;
   return givenAnswer;
 }
 
+import {
+  measuredEvidence,
+  labEvidence,
+  observedDifficulty,
+  emptyEvidence,
+} from './evidence';
+import type { TopicEvidence } from './evidence';
+export type EvidenceRecommendation = Recommendation & {
+  evidence: TopicEvidence;
+  uncertainty: 'small-sample' | 'observed-only';
+  explanation: string;
+  contract: 'observed-independent-v1';
+};
 @Injectable()
 export class RecommendService {
-  constructor(private prisma: PrismaService, private mistakes: MistakeCollector) {}
+  constructor(
+    private prisma: PrismaService,
+    private mistakes: MistakeCollector,
+  ) {}
 
   /**
    * Сурагчийн ДАРААГИЙН бодлогуудыг санал болгоно.
@@ -51,117 +91,279 @@ export class RecommendService {
    */
   async getNextProblems(
     studentId: string,
-    limit: number = 10,
-  ): Promise<Recommendation[]> {
-    // 1. Сурагч идэвхтэй ангид байгаа эсэх
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null },
-      select: {
-        id: true,
-        classroomId: true,
+    limit = 10,
+    role: Role = Role.STUDENT,
+  ): Promise<EvidenceRecommendation[]> {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 50)
+      throw new BadRequestException('Тоо 1–50 байна.');
+    if (role !== Role.STUDENT && role !== Role.BUYER)
+      throw new ForbiddenException();
+    const [attemptRows, enrollment, exposures, labFirst] = await Promise.all([
+      this.prisma.attempt.findMany({
+        where: { studentId, problem: { deletedAt: null } },
+        select: {
+          problemId: true,
+          problem: { select: { chapterId: true } },
+          autoCorrect: true,
+          selfState: true,
+          source: true,
+          createdAt: true,
+        },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        take: 10000,
+      }),
+      this.prisma.enrollment.findFirst({
+        where: { studentId, leftAt: null, classroom: { archived: false } },
+        select: {
+          classroomId: true,
+          classroom: { select: { grade: true, progressChapterId: true } },
+        },
+      }),
+      this.prisma.learningEvent.findMany({
+        where: {
+          userId: studentId,
+          type: 'HINT_USED',
+          id: { startsWith: 'lab-event-' },
+        },
+        select: { problemId: true, occurredAt: true },
+        take: 10000,
+      }),
+      this.prisma.learningEvent.findMany({
+        where: { userId: studentId, id: { startsWith: 'lab-first-' } },
+        select: { problemId: true, occurredAt: true, meta: true },
+        take: 10000,
+      }),
+    ]);
+    const labProblems = await this.prisma.problem.findMany({
+      where: {
+        id: { in: labFirst.flatMap((e) => (e.problemId ? [e.problemId] : [])) },
+        deletedAt: null,
       },
+      select: { id: true, chapterId: true },
     });
-    if (!enrollment) {
-      throw new NotFoundException('Та идэвхтэй ангид бүртгэлгүй байна');
-    }
-
-    const now = Date.now();
-
-    // 2. Сурагчийн өмнөх оролдлогуудыг уншина
-    const attemptRows = await this.prisma.attempt.findMany({
-      where: { studentId, problem: { deletedAt: null } },
-      select: {
-        problemId: true,
-        problem: { select: { chapterId: true } },
-        autoCorrect: true,
-        selfState: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'asc' },
+    const labRows = labFirst.flatMap((e) => {
+      const problem = labProblems.find((p) => p.id === e.problemId);
+      if (!problem) return [];
+      const row = labEvidence(
+        problem.id,
+        problem.chapterId,
+        e.occurredAt,
+        e.meta,
+      );
+      return row ? [row] : [];
     });
-
-    // AttemptSignal болгоно (correct = зөв бодсон эсэх)
-    const history: AttemptSignal[] = attemptRows.map((row) => {
-      const selfState = row.selfState;
-      // Өөрийн тэмдэглэгээ эсвэл автоматаар үнэлэгдсэн
-      const isCorrect = this.isSuccess(selfState, row.autoCorrect);
-      return {
-        problemId: row.problemId,
-        topicId: row.problem.chapterId,
-        correct: isCorrect,
-        at: row.createdAt.getTime(),
-      };
-    });
-
-    // 3. ГҮЙЦЭТГЭЛ ОНОВЧ: сурагчийн сүүлийн үзсэн сэдвүүдээр (Chapter) уншина
-    //
-    // ⚠️ ХЯЗГААРЛАЛТ: сүүлийн үзсэн Chapter ID-уудаас л бодлого авна.
-    // Сурагч урд нь оролдоогүй сэдвүүдийн санал (NEW_TOPIC)-ыг l scheduler
-    // үүдүүлэхгүй, оролдолгүй бүхэл бодлого үзүүлнэ.
-    //
-    // ТАТСАН МӨРИЙН ТООГООР:
-    // - history дээр бүх Chapter-нууд + шинэ 2-3 Chapter нэмнэ
-    // - дэлгүүрийн: 200-400 бодлого (Chapter 5-10-т ≈ 50 бодлого/Chapter)
-
-    const topicIds = new Set(history.map((h) => h.topicId));
-    // Сүүлийн үзсэн сэдвүүдэд нэмээд шинэ ойролцоо сэдвүүдийг давхардаггүй
-    // (анги/программ хүлээхэ байхгүй учир асуудал үүсэхгүй)
-
-    const problems = await this.prisma.problem.findMany({
+    const measured = measuredEvidence(
+      [
+        ...labRows,
+        ...attemptRows.map((row) => ({
+          problemId: row.problemId,
+          topicId: row.problem.chapterId,
+          correct: row.autoCorrect,
+          selfState: row.selfState,
+          source: row.source,
+          at: row.createdAt,
+        })),
+      ],
+      exposures
+        .filter((x): x is typeof x & { problemId: string } => !!x.problemId)
+        .map((x) => ({ problemId: x.problemId, at: x.occurredAt })),
+    );
+    const [scope, activeClass, purchases] = await Promise.all([
+      collectPassScope(this.prisma, studentId),
+      hasActiveClassroomEnrollment(this.prisma, studentId, role),
+      this.prisma.purchase.findMany({
+        where: {
+          ...activePurchaseWhere(studentId),
+          productItem: { kind: 'BOOK' },
+        },
+        select: { productItem: { select: { refId: true } } },
+      }),
+    ]);
+    const bookIds = [
+      ...scope.bookIds,
+      ...purchases.map((p) => p.productItem.refId),
+    ];
+    const entitlement: Prisma.ChapterWhereInput =
+      activeClass || scope.all
+        ? {}
+        : {
+            OR: [
+              { freePreview: true },
+              { id: { in: scope.chapterIds } },
+              { bookId: { in: bookIds } },
+            ],
+          };
+    const historicalIds = [
+      ...new Set([
+        ...attemptRows.map((r) => r.problem.chapterId),
+        ...labRows.map((r) => r.topicId),
+      ]),
+    ];
+    const historical = historicalIds.length
+      ? await this.prisma.chapter.findMany({
+          where: {
+            id: { in: historicalIds },
+            deletedAt: null,
+            AND: [entitlement],
+          },
+          select: {
+            id: true,
+            bookId: true,
+            freePreview: true,
+            order: true,
+            grade: true,
+          },
+          orderBy: [{ order: 'asc' }, { id: 'asc' }],
+          take: 30,
+        })
+      : [];
+    const initial = await this.prisma.chapter.findMany({
       where: {
         deletedAt: null,
-        chapterId: {
-          in: Array.from(topicIds), // Сүүлийн үзсэн Chapter-уудын бодлогуудыг л авна
-        },
+        AND: [entitlement],
+        ...(enrollment?.classroom.grade
+          ? { OR: [{ grade: enrollment.classroom.grade }, { grade: null }] }
+          : {}),
       },
       select: {
         id: true,
-        chapterId: true,
-        attemptCount: true,
-        correctRate: true,
+        bookId: true,
+        freePreview: true,
+        order: true,
+        grade: true,
       },
-      take: 400, // ГҮЙЦЭТГЭЛ: 200-400 мөр (нормаль хүлээх)
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
+      take: 100,
     });
-
-    // Санах ой хусагдалтын харьцуулалт: N бодлого, M=200 сонголт таран хайна
-    const seen = new Set(history.map((h) => h.problemId));
+    const eligible = new Map<string, (typeof initial)[number]>();
+    for (const chapter of [...historical, ...initial])
+      if (!eligible.has(chapter.id)) {
+        eligible.set(chapter.id, chapter);
+        if (eligible.size >= 12) break;
+      }
+    const lastClassSession =
+      enrollment && !enrollment.classroom.progressChapterId
+        ? await this.prisma.classTestSession.findFirst({
+            where: {
+              classroomId: enrollment.classroomId,
+              testId: { not: null },
+            },
+            orderBy: [{ date: 'desc' }, { id: 'desc' }],
+            select: { testId: true },
+          })
+        : null;
+    const lastTest = lastClassSession?.testId
+      ? await this.prisma.test.findUnique({
+          where: { id: lastClassSession.testId },
+          select: { chapterId: true },
+        })
+      : null;
+    const progressId =
+      enrollment?.classroom.progressChapterId ?? lastTest?.chapterId;
+    const progress = progressId
+      ? await this.prisma.chapter.findUnique({
+          where: { id: progressId },
+          select: { order: true, bookId: true },
+        })
+      : null;
+    const chapters = [...eligible.values()].filter(
+      (c) =>
+        !progress ||
+        historicalIds.includes(c.id) ||
+        c.bookId !== progress.bookId ||
+        c.order <= progress.order,
+    );
+    if (!chapters.length) return [];
+    const perChapter = Math.floor(400 / chapters.length);
+    const problems = (
+      await Promise.all(
+        chapters.map((chapter) =>
+          this.prisma.problem.findMany({
+            where: {
+              deletedAt: null,
+              chapterId: chapter.id,
+              id: { notIn: [...measured.seen] },
+            },
+            select: {
+              id: true,
+              chapterId: true,
+              attemptCount: true,
+              correctRate: true,
+            },
+            orderBy: [{ page: 'asc' }, { number: 'asc' }, { id: 'asc' }],
+            take: perChapter,
+          }),
+        ),
+      )
+    ).flat();
     const candidates: CandidateProblem[] = problems
-      .filter((p) => !seen.has(p.id))
+      .filter((p) => !measured.seen.has(p.id))
       .map((p) => ({
         id: p.id,
         topicId: p.chapterId,
-        // difficulty = 1 - correctRate (0 = амархан, 1 = хэцүү)
-        difficulty: p.correctRate ? 1 - p.correctRate : 0.5,
+        difficulty: observedDifficulty(p.correctRate),
         attemptCount: p.attemptCount,
       }));
-
-    // 4. Санал болгоно
-    const recommended = recommend(history, candidates, {
-      now,
+    const explanations: Record<string, string> = {
+      NEW_TOPIC:
+        'Энэ эрхтэй сэдвээс хараахан бие даасан хэмжсэн хариулт алга. Нэг шинэ бодлогоор эхэлнэ.',
+      RETRY_TOPIC:
+        'Өмнөх бие даасан алдаанаас дор хаяж нэг хоног өнгөрсөн; өөр бодлогоор дахин шалгана.',
+      WEAK_TOPIC:
+        'Өмнөх хэмжсэн хариултын мэдээллээр арай энгийн шинэ бодлого санал болгов.',
+      CONFIDENCE:
+        'Өмнөх бие даасан зөв хариулттай сэдвийг өөр бодлогоор сэргээнэ.',
+      RIGHT_LEVEL:
+        'Өмнөх хэмжсэн хариулт ба бодлогын ажигласан хүндрэлээр сонгосон санал.',
+    };
+    return recommend(measured.history, candidates, {
+      now: Date.now(),
       limit,
       maxConsecutiveSameTopic: 1,
       sameProblemOk: false,
+    }).map((r) => {
+      const evidence = measured.topics.get(r.topicId) ?? emptyEvidence();
+      return {
+        ...r,
+        evidence,
+        uncertainty:
+          evidence.independentAttempts < 5 ? 'small-sample' : 'observed-only',
+        explanation:
+          explanations[r.reason] +
+          (evidence.independentAttempts < 5
+            ? ' Цөөн баримттай; чадварын онош биш.'
+            : ' Энэ нь ажигласан баримт, амжилтын баталгаатай магадлал биш.'),
+        contract: 'observed-independent-v1',
+      };
     });
-
-    return recommended;
   }
 
-  /**
-   * Бодлого бодсоны дараа Attempt үүсгэх.
-   *
-   * ⚠️ givenAnswer-ыг ЗААВАЛ бөглөнө (шинэ талбар, ML-д үнэ цэнэтэй дохио)
-   * - CHOICE: сонголтын ИНДЕКС (эсвэл TEXT нэрлэсэн сонголтыг)
-   * - NUMBER: тоон хариу (число)
-   * - OPEN: сурагчийн хэрхүүчээсэн бичвэр
-   * - MARKDOWN: Markdown текст (орсон TeX томьёо)
-   */
   async createAttempt(
     studentId: string,
     problemId: string,
-    givenAnswer: any,
+    givenAnswer: unknown,
     autoCorrect?: boolean,
     selfState?: string,
+    role: Role = Role.STUDENT,
   ) {
+    if (role !== Role.STUDENT && role !== Role.BUYER)
+      throw new ForbiddenException();
+    void autoCorrect; // A client grade never changes the server's key.
+    let encoded: string | undefined;
+    try {
+      encoded = JSON.stringify(givenAnswer);
+    } catch {
+      throw new BadRequestException('Хариултаа шалгана уу.');
+    }
+    if (
+      typeof problemId !== 'string' ||
+      !problemId ||
+      problemId.length > 200 ||
+      givenAnswer === undefined ||
+      typeof encoded !== 'string' ||
+      encoded.length > 4096
+    )
+      throw new BadRequestException('Хариултаа шалгана уу.');
     // Сурагч болон бодлогыг шалгана
     const [student, problem, enrollment] = await Promise.all([
       this.prisma.user.findUnique({
@@ -172,11 +374,23 @@ export class RecommendService {
         where: { id: problemId },
         select: {
           id: true,
+          deletedAt: true,
+          analysis: { select: { answerKeyStatus: true } },
           format: true,
           choices: true,
           correctAnswer: true,
-          choiceOptions: { orderBy: { order: 'asc' }, select: { order: true, text: true, isCorrect: true } },
-          chapter: { select: { id: true, bookId: true, freePreview: true, deletedAt: true } },
+          choiceOptions: {
+            orderBy: { order: 'asc' },
+            select: { order: true, text: true, isCorrect: true },
+          },
+          chapter: {
+            select: {
+              id: true,
+              bookId: true,
+              freePreview: true,
+              deletedAt: true,
+            },
+          },
         },
       }),
       this.prisma.enrollment.findFirst({
@@ -186,11 +400,19 @@ export class RecommendService {
     ]);
 
     if (!student) throw new NotFoundException('Сурагч олдсонгүй');
-    if (!problem) throw new NotFoundException('Бодлого олдсонгүй');
-    if (!enrollment) throw new NotFoundException('Та идэвхтэй ангид бүртгэлгүй');
-    if (problem.chapter.deletedAt) throw new NotFoundException('Бодлого олдсонгүй');
-    const allowed = await canAccessChapter(this.prisma, studentId, Role.STUDENT, problem.chapter);
-    if (!allowed) throw new ForbiddenException('Энэ бодлогыг бодох эрхгүй байна');
+    if (!problem || problem.deletedAt)
+      throw new NotFoundException('Бодлого олдсонгүй');
+
+    if (problem.chapter.deletedAt)
+      throw new NotFoundException('Бодлого олдсонгүй');
+    const allowed = await canAccessChapter(
+      this.prisma,
+      studentId,
+      role,
+      problem.chapter,
+    );
+    if (!allowed)
+      throw new ForbiddenException('Энэ бодлогыг бодох эрхгүй байна');
 
     const gradable: GradableProblem = {
       id: problem.id,
@@ -202,7 +424,9 @@ export class RecommendService {
     // Practice submits free text; exact numeric-looking choice text wins.
     // A numeric JSON value still means the selected display index.
     const rawAnswer = canonicalizePracticeChoiceInput(gradable, givenAnswer);
-    const known = hasKnownAnswer(gradable);
+    const known =
+      hasKnownAnswer(gradable) &&
+      (!problem.analysis || problem.analysis.answerKeyStatus === 'VERIFIED');
     const grade = known ? gradeAnswer(gradable, rawAnswer) : null;
     const scoredAnswer = grade?.canonicalAnswer ?? rawAnswer;
 
@@ -212,32 +436,26 @@ export class RecommendService {
         studentId,
         problemId,
         source: 'ONLINE_TEST',
-        occurredOn: new Date(),
+        occurredOn: todayUB(),
         // The client-supplied grade/state is advisory only; the server owns the key.
-        autoCorrect: known ? grade?.correct ?? false : null,
-        selfState: null,
+        autoCorrect: known ? (grade?.correct ?? false) : null,
+        selfState:
+          selfState === 'FIXED_AFTER_ERROR' || selfState === 'GUESSED'
+            ? selfState
+            : null,
         givenAnswer: scoredAnswer as Prisma.InputJsonValue,
-        classroomId: enrollment.classroomId,
-        mistakeCollectedAt: known && grade?.correct === false ? null : new Date(),
+        classroomId: enrollment?.classroomId ?? null,
+        mistakeCollectedAt:
+          known && grade?.correct === false ? null : new Date(),
       },
     });
     if (known && grade?.correct === false) {
       try {
         await this.mistakes.collectAttempt(attempt.id);
-      } catch { /* the submitted practice attempt remains saved and collector can retry */ }
+      } catch {
+        /* the submitted practice attempt remains saved and collector can retry */
+      }
     }
-  }
-
-  /** Бодлого амжилттай эсэх (нэгдүүлэлт) */
-  private isSuccess(
-    selfState: string | null,
-    autoCorrect: boolean | null,
-  ): boolean {
-    if (!selfState && autoCorrect === null) return false;
-    if (selfState === 'SOLVED_CLEAN') return true;
-    if (selfState === 'FIXED_AFTER_ERROR') return true;
-    if (selfState === 'GUESSED') return false;
-    if (selfState === 'FAILED') return false;
-    return autoCorrect === true;
+    return { attemptId: attempt.id, correct: attempt.autoCorrect };
   }
 }

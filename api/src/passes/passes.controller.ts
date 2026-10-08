@@ -9,6 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -85,7 +86,7 @@ export class PassesController {
     });
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('passes/:id/grant')
   grant(
@@ -103,7 +104,7 @@ export class PassesController {
     );
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('passes/grants/:grantId/revoke')
   revokeWithReason(

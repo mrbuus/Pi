@@ -31,6 +31,7 @@ describe('TestsService duplicate and server-side draft behavior', () => {
 
   beforeEach(() => {
     prisma = {
+    user: { findUnique: jest.fn(({ where }: { where: { id: string } }) => ({ role: where.id.startsWith('admin') ? Role.ADMIN : where.id === 'student' ? Role.STUDENT : Role.TEACHER, archivedAt: null, externalTeacherProfile: null })) },
       test: {
         findUnique: jest.fn().mockResolvedValue(source),
         create: jest.fn().mockResolvedValue({
@@ -202,6 +203,7 @@ describe('TestsService duplicate and server-side draft behavior', () => {
 function setup(src: Record<string, unknown> | null) {
   const created: Record<string, any>[] = [];
   const prisma = {
+    user: { findUnique: jest.fn(({ where }: { where: { id: string } }) => ({ role: where.id.startsWith('admin') ? Role.ADMIN : where.id === 'student' ? Role.STUDENT : Role.TEACHER, archivedAt: null, externalTeacherProfile: null })) },
     test: {
       findUnique: jest.fn(async () => src),
       create: jest.fn(async ({ data }: { data: Record<string, any> }) => {

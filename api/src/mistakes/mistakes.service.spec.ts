@@ -100,7 +100,7 @@ describe('MistakesService authorization', () => {
     await service.list('learner-a', {});
     const query = findMany.mock.calls[0][0];
     expect(access.userPass.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { userId: 'learner-a', expiresAt: { gt: expect.any(Date) } },
+      where: expect.objectContaining({ userId: 'learner-a', startsAt: {lte: expect.any(Date)}, expiresAt: { gt: expect.any(Date) } }),
     }));
     expect(query.where.problem.chapter.is.AND[1].OR).toEqual([{ freePreview: true }]);
     expect(query.where.problem.chapter.is).not.toHaveProperty('id', 'private-chapter');

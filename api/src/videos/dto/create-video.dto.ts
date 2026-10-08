@@ -6,12 +6,14 @@ import {
   IsString,
   IsUrl,
   Min,
+  MaxLength,
 } from 'class-validator';
 
 export class CreateVideoDto {
   @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(200)
   title: string;
 
   @ApiProperty({ type: String })
@@ -23,6 +25,7 @@ export class CreateVideoDto {
   // production-д S3 руу шилжихэд энэ утга л key болно, гэрээ өөрчлөгдөхгүй)
   @ApiProperty({ type: String })
   @IsUrl({}, { message: 'Зөв холбоос (URL) оруулна уу' })
+  @MaxLength(2048)
   url: string;
 
   @ApiPropertyOptional({ type: Number, minimum: 1 })
@@ -30,4 +33,9 @@ export class CreateVideoDto {
   @IsInt()
   @Min(1)
   duration?: number;
+  @ApiPropertyOptional({ type: String, nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  problemId?: string | null;
 }

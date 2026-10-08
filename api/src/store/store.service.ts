@@ -7,6 +7,12 @@ import {
 } from '@nestjs/common';
 import { Prisma, ProductKind, Role } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  snapshotPass,
+  validatePassSnapshot,
+  PassSnapshot,
+} from '../passes/pass-snapshot';
+import { sumMoney } from '../finance/month-bounds';
 import { TEACHER_ROLES } from '../common/access';
 
 export interface ProductItemWithRefData {
@@ -39,16 +45,20 @@ export class StoreService {
     });
 
     // Бүтээгдэхүүн бүрийн нэр авна
-    const testIds = items.filter((i) => i.kind === ProductKind.TEST).map((i) => i.refId);
-    const bookIds = items.filter((i) => i.kind === ProductKind.BOOK).map((i) => i.refId);
+    const testIds = items
+      .filter((i) => i.kind === ProductKind.TEST)
+      .map((i) => i.refId);
+    const bookIds = items
+      .filter((i) => i.kind === ProductKind.BOOK)
+      .map((i) => i.refId);
 
     const [tests, books] = await Promise.all([
       this.prisma.test.findMany({
-        where: { id: { in: testIds } },
+        where: { id: { in: testIds }, isDraft: false, deletedAt: null },
         select: { id: true, title: true },
       }),
       this.prisma.book.findMany({
-        where: { id: { in: bookIds } },
+        where: { id: { in: bookIds }, deletedAt: null },
         select: { id: true, title: true, code: true },
       }),
     ]);
@@ -56,34 +66,40 @@ export class StoreService {
     const testMap = new Map(tests.map((t) => [t.id, t]));
     const bookMap = new Map(books.map((b) => [b.id, b]));
 
-    return items.map((item) => {
-      const base = {
-        id: item.id,
-        kind: item.kind,
-        refId: item.refId,
-        price: item.price,
-        active: item.active,
-        includesVideo: item.includesVideo,
-      };
-
-      if (item.kind === ProductKind.TEST) {
-        const test = testMap.get(item.refId);
-        return {
-          ...base,
-          title: test?.title || 'Шалгалт',
-          description: test?.title,
+    return items
+      .filter(
+        (item) =>
+          (item.kind !== ProductKind.TEST || testMap.has(item.refId)) &&
+          (item.kind !== ProductKind.BOOK || bookMap.has(item.refId)),
+      )
+      .map((item) => {
+        const base = {
+          id: item.id,
+          kind: item.kind,
+          refId: item.refId,
+          price: item.price,
+          active: item.active,
+          includesVideo: item.includesVideo,
         };
-      } else if (item.kind === ProductKind.BOOK) {
-        const book = bookMap.get(item.refId);
-        return {
-          ...base,
-          title: book?.title || 'Ном',
-          description: `${book?.code || ''} — ${book?.title || 'Ном'}`.trim(),
-        };
-      }
 
-      return base;
-    });
+        if (item.kind === ProductKind.TEST) {
+          const test = testMap.get(item.refId);
+          return {
+            ...base,
+            title: test?.title || 'Шалгалт',
+            description: test?.title,
+          };
+        } else if (item.kind === ProductKind.BOOK) {
+          const book = bookMap.get(item.refId);
+          return {
+            ...base,
+            title: book?.title || 'Ном',
+            description: `${book?.code || ''} — ${book?.title || 'Ном'}`.trim(),
+          };
+        }
+
+        return base;
+      });
   }
 
   /**
@@ -106,84 +122,230 @@ export class StoreService {
     };
     warning?: string;
   }> {
-    // Бүтээгдэхүүнийг авна (идэвхитэй байх ёстой)
-    const product = await this.prisma.productItem.findUnique({
-      where: { id: productItemId },
-    });
-    if (!product || !product.active) {
-      throw new NotFoundException('Бүтээгдэхүүн олдсонгүй эсвэл идэвхигүй байна');
-    }
-
-    // Payment баталгаажсан байхыг шалгана (заавал биш — эзний шийдвэр)
-    let paymentConfirmed = false;
-    if (paymentId) {
-      const payment = await this.prisma.payment.findUnique({
-        where: { id: paymentId },
+    return this.prisma.$transaction(async (tx) => {
+      // Serialize retries for the same account/product, including requests with no payment.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'store:' + userId + ':' + productItemId}))`;
+      const product = await tx.productItem.findUnique({
+        where: { id: productItemId },
       });
-      if (!payment) {
-        throw new NotFoundException('Төлбөр олдсонгүй');
+      if (!product || !product.active)
+        throw new NotFoundException(
+          'Бүтээгдэхүүн олдсонгүй эсвэл идэвхгүй байна',
+        );
+      if (product.kind === ProductKind.TEST) {
+        const test = await tx.test.findFirst({
+          where: { id: product.refId, deletedAt: null, isDraft: false },
+          select: { id: true },
+        });
+        if (!test) throw new NotFoundException('Шалгалт олдсонгүй');
       }
-      if (payment.userId !== userId) {
-        throw new ForbiddenException('Энэ төлбөр танд хамаарахгүй');
+      if (product.kind === ProductKind.BOOK) {
+        const book = await tx.book.findFirst({
+          where: { id: product.refId, deletedAt: null },
+          select: { id: true },
+        });
+        if (!book) throw new NotFoundException('Ном олдсонгүй');
       }
-      paymentConfirmed = payment.status === 'CONFIRMED';
-    }
-
-    // Двойн олголт сэргийлэе: Purchase аль хэдийн байвал дахин үүсгэхгүй (idempotent)
-    // Хэрэглэгч заримдаа сүлжээний саатлаас эргүүлбүү сатнав гэж дахин дарна
-    const existing = await this.prisma.purchase.findFirst({
-      where: {
-        userId,
-        productItemId,
-        // Хэрэв үнэ өөрчлөгдсөн ч сүүлийнхийн худалдан авалтыг дахин үүсгэхгүй
-        createdAt: {
-          gte: new Date(Date.now() - 60 * 60 * 1000), // сүүлийн 1 цаг
-        },
-      },
-    });
-    if (existing) {
-      return {
-        purchase: existing,
-        warning: 'Та эргэлтээ энэ бүтээгдэхүүнийг хүсэлтийг аль хэдийн илгээсэн байна',
+      const pass =
+        product.kind === ProductKind.PASS
+          ? await tx.pass.findUnique({ where: { id: product.refId } })
+          : null;
+      if (
+        product.kind === ProductKind.PASS &&
+        (!pass?.active ||
+          !Number.isSafeInteger(pass.durationDays) ||
+          pass.durationDays <= 0)
+      )
+        throw new BadRequestException('Идэвхтэй хугацаат эрх шаардлагатай');
+      if (pass)
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'pass:' + userId + ':' + pass.id}))`;
+      const now = new Date();
+      let terms: PassSnapshot | null = null;
+      let grantExpiry: Date | null = null;
+      const fulfillPass = async (purchase: {
+        paymentId: string | null;
+        grantedAt: Date | null;
+        expiresAt: Date | null;
+        price: number;
+      }) => {
+        if (
+          !pass ||
+          !purchase.grantedAt ||
+          (!purchase.paymentId && purchase.price !== 0) ||
+          !purchase.expiresAt ||
+          purchase.expiresAt <= now
+        )
+          return;
+        const active = await tx.userPass.findFirst({
+          where: {
+            userId,
+            passId: pass.id,
+            startsAt: { lte: now },
+            expiresAt: { gt: now },
+          },
+        });
+        if (active) {
+          if (active.paymentId !== purchase.paymentId)
+            throw new ConflictException('Энэ эрх идэвхтэй байна');
+          return;
+        }
+        await tx.userPass.create({
+          data: {
+            userId,
+            passId: pass.id,
+            paymentId: purchase.paymentId,
+            startsAt: purchase.grantedAt,
+            expiresAt: purchase.expiresAt!,
+            scopeSnapshot: terms!.scope as Prisma.InputJsonValue,
+          },
+        });
       };
-    }
-
-    // Ном: гэрээ байхгүй
-    // Тест: ONLINE TEST-ээр дуусаж болох эсвэл дүүргүүлнэ
-    const now = new Date();
-    let grantedAt: Date | null = now;
-    let expiresAt: Date | null = null;
-
-    if (product.kind === ProductKind.TEST) {
-      // Тестийг нэг удаа авсан бол байнгалай хандаж болно (гэрээ байхгүй)
-      expiresAt = null;
-    } else if (product.kind === ProductKind.BOOK) {
-      // Номыг нэг удаа авсан бол байнгалай хандаж болно
-      expiresAt = null;
-    } else if (product.kind === ProductKind.PASS) {
-      // Pass — гэрээ байж болно (Pass модель-ээр дүүргүүлнэ)
-      // Одоогоор: 30 хоног үргэлжлүүлнэ
-      expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    }
-
-    const purchase = await this.prisma.purchase.create({
-      data: {
-        userId,
-        productItemId,
-        paymentId: paymentId || null,
-        price: product.price, // ҮНДЭСЛЭЛТЭЙ үнэ сервер-ээс
-        grantedAt: paymentConfirmed ? grantedAt : null, // Төлбөр баталгаажсан үед л эрх олгоно
-        expiresAt,
-      },
+      let existing = await tx.purchase.findFirst({
+        where: {
+          userId,
+          productItemId,
+          OR: [
+            { createdAt: { gte: new Date(now.getTime() - 3600000) } },
+            { price: 0, grantedAt: null, expiresAt: { lte: now } },
+            {
+              grantedAt: { lte: now },
+              OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+            },
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (
+        pass &&
+        existing &&
+        !existing.grantedAt &&
+        existing.expiresAt &&
+        existing.expiresAt <= now
+      ) {
+        if (
+          (!paymentId && existing.price === 0) ||
+          (paymentId && paymentId === existing.paymentId)
+        )
+          throw new ConflictException(
+            'Цуцлагдсан эрхийг энэ төлбөрөөр дахин нээхгүй',
+          );
+        existing = null;
+      }
+      terms = pass
+        ? existing?.passSnapshot
+          ? validatePassSnapshot(existing.passSnapshot)
+          : snapshotPass(pass)
+        : null;
+      grantExpiry = terms
+        ? new Date(now.getTime() + terms.durationDays * 86400000)
+        : null;
+      if ((existing?.price ?? product.price) === 0 && paymentId)
+        throw new BadRequestException('Үнэгүй бүтээгдэхүүнд төлбөр холбохгүй');
+      let paymentConfirmed = false;
+      if (paymentId) {
+        // One confirmed transfer can fund one product; the lock closes cross-product races.
+        await tx.$queryRaw`SELECT id FROM "Payment" WHERE id = ${paymentId} FOR UPDATE`;
+        const payment = await tx.payment.findUnique({
+          where: { id: paymentId },
+        });
+        if (!payment) throw new NotFoundException('Төлбөр олдсонгүй');
+        if (payment.userId !== userId)
+          throw new ForbiddenException('Энэ төлбөр танд хамаарахгүй');
+        if (payment.storePurchaseId) {
+          const quote = await tx.purchase.findUnique({
+            where: { id: payment.storePurchaseId },
+          });
+          if (
+            !quote ||
+            quote.userId !== userId ||
+            quote.productItemId !== productItemId ||
+            (quote.grantedAt && quote.paymentId !== paymentId) ||
+            (!quote.grantedAt && quote.expiresAt && quote.expiresAt <= now)
+          )
+            throw new BadRequestException(
+              'Энэ төлбөр өөр эсвэл цуцлагдсан худалдан авалтын үнэд хамаарна',
+            );
+          existing = quote;
+          terms = pass
+            ? quote.passSnapshot
+              ? validatePassSnapshot(quote.passSnapshot)
+              : snapshotPass(pass)
+            : null;
+          grantExpiry = terms
+            ? new Date(now.getTime() + terms.durationDays * 86400000)
+            : null;
+        }
+        if (payment.forMonth)
+          throw new BadRequestException(
+            'Сарын сургалтын төлбөрийг дэлгүүрт ашиглахгүй',
+          );
+        if (payment.amount < (existing?.price ?? product.price))
+          throw new BadRequestException(
+            'Төлбөрийн дүн бүтээгдэхүүний үнээс бага байна',
+          );
+        if (payment.status === 'REJECTED' || payment.status === 'REVERSED')
+          throw new BadRequestException('Цуцлагдсан төлбөр ашиглах боломжгүй');
+        const used = await tx.purchase.findFirst({
+          where: {
+            paymentId,
+            ...(existing ? { id: { not: existing.id } } : {}),
+          },
+        });
+        const usedPass = await tx.userPass.findFirst({
+          where: { paymentId },
+          select: { id: true, userId: true, passId: true },
+        });
+        if (
+          used ||
+          (usedPass &&
+            !(
+              existing?.paymentId === paymentId &&
+              product.kind === ProductKind.PASS &&
+              usedPass.userId === userId &&
+              usedPass.passId === product.refId
+            ))
+        )
+          throw new ConflictException(
+            'Энэ төлбөрөөр эрх аль хэдийн олгосон байна',
+          );
+        paymentConfirmed = payment.status === 'CONFIRMED';
+      }
+      const entitled =
+        paymentConfirmed || (existing?.price ?? product.price) === 0;
+      if (existing) {
+        if (!existing.grantedAt && entitled) {
+          const upgraded = await tx.purchase.update({
+            where: { id: existing.id },
+            data: {
+              paymentId,
+              passSnapshot: terms
+                ? (terms as unknown as Prisma.InputJsonValue)
+                : undefined,
+              grantedAt: now,
+              expiresAt: grantExpiry,
+            },
+          });
+          await fulfillPass(upgraded);
+          return { purchase: upgraded };
+        }
+        return { purchase: existing };
+      }
+      const purchase = await tx.purchase.create({
+        data: {
+          userId,
+          productItemId,
+          paymentId: paymentId || null,
+          price: product.price,
+          passSnapshot: terms
+            ? (terms as unknown as Prisma.InputJsonValue)
+            : undefined,
+          grantedAt: entitled ? now : null,
+          expiresAt: entitled ? grantExpiry : null,
+        },
+      });
+      await fulfillPass(purchase);
+      return { purchase };
     });
-
-    // Видео эрх энд ОЛГОГДОХГҮЙ — canAccessChapter (common/access.ts) нь
-    // «grantedAt бөглөгдсөн Purchase → ProductItem(includesVideo, refId=bookId)»
-    // гинжийг хандалт БҮРД шалгадаг тул тусдаа эрхийн бичлэг хэрэггүй.
-    // Давуу тал: төлбөр REVERSED болоход Purchase.grantedAt цуцлагдмагц
-    // видео эрх нь автоматаар хаагдана (тусдаа бичлэг байсан бол мартагдана).
-
-    return { purchase };
   }
 
   /**
@@ -251,21 +413,31 @@ export class StoreService {
       throw new ForbiddenException('Зөвхөн админ бүтээгдэхүүн үүсгэнэ');
     }
     if (!Number.isInteger(price) || price < 0 || price > 2147483647) {
-      throw new BadRequestException('Үнэ 0–2147483647 хоорондох бүхэл тоо байна');
+      throw new BadRequestException(
+        'Үнэ 0–2147483647 хоорондох бүхэл тоо байна',
+      );
     }
 
     // BOOK-д л видео сонголт зөвшөөрнө
     if (includesVideo && kind !== ProductKind.BOOK) {
-      throw new BadRequestException('Видео сонголт зөвхөн ном дээр л боломжтой');
+      throw new BadRequestException(
+        'Видео сонголт зөвхөн ном дээр л боломжтой',
+      );
     }
 
     // refId нь байгаа объект эсэхийг шалгана
     if (kind === ProductKind.TEST) {
       const test = await this.prisma.test.findUnique({ where: { id: refId } });
-      if (!test || test.deletedAt || test.isDraft) throw new NotFoundException('Нийтлэгдсэн тест олдсонгүй');
+      if (!test || test.deletedAt || test.isDraft)
+        throw new NotFoundException('Нийтлэгдсэн тест олдсонгүй');
     } else if (kind === ProductKind.BOOK) {
       const book = await this.prisma.book.findUnique({ where: { id: refId } });
       if (!book) throw new NotFoundException('Ном олдсонгүй');
+    }
+
+    if (kind === ProductKind.PASS) {
+      const pass = await this.prisma.pass.findUnique({ where: { id: refId } });
+      if (!pass?.active) throw new NotFoundException('Идэвхтэй эрх олдсонгүй');
     }
 
     // Давхардал үүсгэхгүй — нэг ном одоо 2 хувилбартай (ном / ном+видео)
@@ -316,7 +488,9 @@ export class StoreService {
       throw new ForbiddenException('Зөвхөн админ үнэ соллоно');
     }
     if (!Number.isInteger(newPrice) || newPrice < 0 || newPrice > 2147483647) {
-      throw new BadRequestException('Үнэ 0–2147483647 хоорондох бүхэл тоо байна');
+      throw new BadRequestException(
+        'Үнэ 0–2147483647 хоорондох бүхэл тоо байна',
+      );
     }
 
     const product = await this.prisma.productItem.findUnique({
@@ -333,19 +507,31 @@ export class StoreService {
   }
 
   async updateStatus(productItemId: string, active: boolean, role: Role) {
-    if (role !== Role.ADMIN) throw new ForbiddenException('Зөвхөн админ өөрчилнө');
-    if (typeof active !== 'boolean') throw new BadRequestException('Идэвхийн төлөв буруу байна');
-    const product = await this.prisma.productItem.findUnique({ where: { id: productItemId } });
+    if (role !== Role.ADMIN)
+      throw new ForbiddenException('Зөвхөн админ өөрчилнө');
+    if (typeof active !== 'boolean')
+      throw new BadRequestException('Идэвхийн төлөв буруу байна');
+    const product = await this.prisma.productItem.findUnique({
+      where: { id: productItemId },
+    });
     if (!product) throw new NotFoundException('Бүтээгдэхүүн олдсонгүй');
     if (active && product.kind === ProductKind.TEST) {
-      const test = await this.prisma.test.findUnique({ where: { id: product.refId } });
-      if (!test || test.deletedAt || test.isDraft) throw new NotFoundException('Нийтлэгдсэн тест олдсонгүй');
+      const test = await this.prisma.test.findUnique({
+        where: { id: product.refId },
+      });
+      if (!test || test.deletedAt || test.isDraft)
+        throw new NotFoundException('Нийтлэгдсэн тест олдсонгүй');
     }
     if (active && product.kind === ProductKind.BOOK) {
-      const book = await this.prisma.book.findUnique({ where: { id: product.refId } });
+      const book = await this.prisma.book.findUnique({
+        where: { id: product.refId },
+      });
       if (!book || book.deletedAt) throw new NotFoundException('Ном олдсонгүй');
     }
-    return this.prisma.productItem.update({ where: { id: productItemId }, data: { active } });
+    return this.prisma.productItem.update({
+      where: { id: productItemId },
+      data: { active },
+    });
   }
 
   /**
@@ -358,8 +544,12 @@ export class StoreService {
       orderBy: { active: 'desc' },
     });
 
-    const testIds = items.filter((i) => i.kind === ProductKind.TEST).map((i) => i.refId);
-    const bookIds = items.filter((i) => i.kind === ProductKind.BOOK).map((i) => i.refId);
+    const testIds = items
+      .filter((i) => i.kind === ProductKind.TEST)
+      .map((i) => i.refId);
+    const bookIds = items
+      .filter((i) => i.kind === ProductKind.BOOK)
+      .map((i) => i.refId);
 
     const [tests, books, purchases] = await Promise.all([
       this.prisma.test.findMany({
@@ -378,7 +568,9 @@ export class StoreService {
 
     const testMap = new Map(tests.map((t) => [t.id, t]));
     const bookMap = new Map(books.map((b) => [b.id, b]));
-    const purchaseCountMap = new Map(purchases.map((p) => [p.productItemId, p._count.id]));
+    const purchaseCountMap = new Map(
+      purchases.map((p) => [p.productItemId, p._count.id]),
+    );
 
     return items.map((item) => {
       const base = {
@@ -419,7 +611,13 @@ export class StoreService {
       include: {
         productItem: true,
         user: {
-          select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+          },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -429,12 +627,13 @@ export class StoreService {
     const paymentIds = purchases
       .map((p) => p.paymentId)
       .filter((id): id is string => id !== null);
-    const payments = paymentIds.length > 0
-      ? await this.prisma.payment.findMany({
-          where: { id: { in: paymentIds } },
-          select: { id: true, status: true },
-        })
-      : [];
+    const payments =
+      paymentIds.length > 0
+        ? await this.prisma.payment.findMany({
+            where: { id: { in: paymentIds } },
+            select: { id: true, status: true },
+          })
+        : [];
     const paymentMap = new Map(payments.map((p) => [p.id, p]));
 
     // Бүтээгдэхүүнүүдийн нэр авна
@@ -489,16 +688,60 @@ export class StoreService {
   async adminGetRevenueSummary() {
     const purchases = await this.prisma.purchase.findMany();
 
-    const totalRevenue = purchases.reduce((sum, p) => sum + p.price, 0);
-    const confirmedRevenue = purchases
-      .filter((p) => p.grantedAt !== null)
-      .reduce((sum, p) => sum + p.price, 0);
-
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        OR: [
+          {
+            id: {
+              in: purchases
+                .map((p) => p.paymentId)
+                .filter((id): id is string => !!id),
+            },
+          },
+          { storePurchaseId: { in: purchases.map((p) => p.id) } },
+        ],
+      },
+      select: {
+        id: true,
+        amount: true,
+        status: true,
+        paidAt: true,
+        storePurchaseId: true,
+      },
+    });
+    // A receipt is a Payment row, never a sum of quote and payment or entitlement value.
+    const receipts = payments.filter(
+      (p) => p.status === 'CONFIRMED' && p.paidAt !== null,
+    );
+    const receiptIds = new Set(receipts.map((p) => p.id));
+    const fundedQuotes = new Set(
+      receipts.map((p) => p.storePurchaseId).filter(Boolean),
+    );
+    const pending = purchases.filter(
+      (p) => !p.grantedAt && (!p.expiresAt || p.expiresAt > new Date()),
+    );
+    const isFunded = (p: (typeof purchases)[number]) =>
+      fundedQuotes.has(p.id) || (!!p.paymentId && receiptIds.has(p.paymentId));
+    const cashReceived = sumMoney(receipts.map((p) => p.amount));
+    const pendingQuoteValue = sumMoney(
+      pending.filter((p) => !isFunded(p)).map((p) => p.price),
+    );
     return {
       totalPurchases: purchases.length,
-      totalRevenue,
-      confirmedRevenue,
-      pendingRevenue: totalRevenue - confirmedRevenue,
+      cashReceived,
+      confirmedReceiptCount: receipts.length,
+      totalOrderValue: sumMoney(purchases.map((p) => p.price)),
+      pendingQuoteValue,
+      awaitingFulfillmentValue: sumMoney(
+        pending.filter(isFunded).map((p) => p.price),
+      ),
+      // Compatibility aliases: total/confirmed are cash; pending remains unreceived quote value.
+      totalRevenue: cashReceived,
+      confirmedRevenue: cashReceived,
+      pendingRevenue: pendingQuoteValue,
+      netAfterSeparateRefunds: null,
+      receiptPolicy:
+        'CONFIRMED payments with paidAt counted once; quotes are not income; separate refunds require allocation',
     };
   }
 }

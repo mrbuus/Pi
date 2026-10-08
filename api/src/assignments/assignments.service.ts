@@ -54,6 +54,47 @@ export class AssignmentsService {
     throw new ForbiddenException('Энэ ангид хандах эрхгүй');
   }
 
+  private async assertTeacherAttachments(
+    keys: string[],
+    actorId: string,
+    retained: string[] = [],
+  ) {
+    if (keys.length > 10)
+      throw new BadRequestException('Хамгийн ихдээ 10 файл хавсаргана.');
+    const added = keys.filter((key) => !retained.includes(key));
+    if (!added.length) return;
+    const files = await this.prisma.storedFile.findMany({
+      where: { key: { in: added } },
+      select: { key: true, ownerId: true, mime: true, size: true },
+    });
+    if (
+      added.some(
+        (key) =>
+          !files.some((file) => file.key === key && file.ownerId === actorId),
+      )
+    )
+      throw new ForbiddenException(
+        'Зөвхөн өөрийн байршуулсан файлыг хавсаргана уу.',
+      );
+    if (
+      files.some(
+        (file) =>
+          ![
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+            'application/pdf',
+          ].includes(file.mime) || file.size > 25 * 1024 * 1024,
+      )
+    )
+      throw new BadRequestException(
+        '25 МБ хүртэлх зураг эсвэл PDF файл хавсаргана уу.',
+      );
+  }
+
   async create(
     classroomId: string,
     dto: CreateAssignmentDto,
@@ -61,6 +102,7 @@ export class AssignmentsService {
     role: Role,
   ) {
     await this.assertClassAccess(classroomId, userId, role);
+    await this.assertTeacherAttachments(dto.imageKeys ?? [], userId);
     const assignment = await this.prisma.assignment.create({
       data: {
         classroomId,
@@ -234,6 +276,12 @@ export class AssignmentsService {
       throw new NotFoundException('Даалгавар олдсонгүй');
     }
     await this.assertClassAccess(assignment.classroomId, userId, role);
+    if (dto.imageKeys !== undefined)
+      await this.assertTeacherAttachments(
+        dto.imageKeys,
+        userId,
+        assignment.imageKeys,
+      );
 
     const updated = await this.prisma.assignment.update({
       where: { id },
@@ -292,18 +340,42 @@ export class AssignmentsService {
   }
 
   // Сурагч идэвхтэй ангийнхаа, элссэн өдрөөс хойшхи даалгавруудыг л харна (SPEC §6.3)
-  async myAssignments(studentId: string) {
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null, student: { archivedAt: null } },
-      include: { classroom: { select: { id: true, name: true } } },
+  async myClassrooms(studentId: string) {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        studentId,
+        leftAt: null,
+        student: { archivedAt: null },
+        classroom: { archived: false },
+      },
+      select: { classroom: { select: { id: true, name: true, type: true } } },
+      orderBy: { joinedAt: 'desc' },
     });
-    if (!enrollment) return [];
+    return enrollments.map((enrollment) => enrollment.classroom);
+  }
+
+  async myAssignments(studentId: string) {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { studentId, student: { archivedAt: null } },
+      include: { classroom: { select: { id: true, name: true, type: true } } },
+      orderBy: { joinedAt: 'desc' },
+    });
+    if (enrollments.length === 0) return [];
 
     const assignments = await this.prisma.assignment.findMany({
       where: {
-        classroomId: enrollment.classroomId,
-        createdAt: { gte: enrollment.joinedAt },
-        deletedAt: null,
+        OR: enrollments.map((enrollment) => ({
+          classroomId: enrollment.classroomId,
+          createdAt: {
+            gte: enrollment.joinedAt,
+            ...(enrollment.leftAt ? { lte: enrollment.leftAt } : {}),
+          },
+        })),
+        AND: [
+          {
+            OR: [{ deletedAt: null }, { submissions: { some: { studentId } } }],
+          },
+        ],
       },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -312,6 +384,9 @@ export class AssignmentsService {
           select: {
             state: true,
             note: true,
+            studentNote: true,
+            reviewNote: true,
+            revisions: { orderBy: { at: 'asc' } },
             imageKeys: true,
             submittedAt: true,
             checkedAt: true,
@@ -319,12 +394,49 @@ export class AssignmentsService {
         },
       },
     });
-    return assignments.map(({ submissions, ...a }) => ({
-      ...a,
-      classroom: enrollment.classroom,
-      myStatus: submissions[0]?.state ?? SubmissionState.NOT_DONE,
-      mySubmission: submissions[0] ?? null,
-    }));
+    return assignments.map(({ submissions, ...a }) => {
+      const enrollment = enrollments.find(
+        (e) =>
+          e.classroomId === a.classroomId &&
+          e.joinedAt <= a.createdAt &&
+          (!e.leftAt || e.leftAt >= a.createdAt),
+      );
+      return {
+        ...a,
+        classroom: enrollment!.classroom,
+        canSubmit: enrollment!.leftAt == null && a.deletedAt == null,
+        myStatus: submissions[0]?.state ?? SubmissionState.NOT_DONE,
+        mySubmission: submissions[0] ?? null,
+      };
+    });
+  }
+
+  /** Snapshot legacy content without claiming whether its shared note was pupil or teacher authored. */
+  private async preserveLegacySubmission(
+    tx: Prisma.TransactionClient,
+    assignmentId: string,
+    studentId: string,
+  ) {
+    const current = await tx.submission.findUnique({
+      where: { assignmentId_studentId: { assignmentId, studentId } },
+      include: { revisions: { take: 1 } },
+    });
+    if (current && current.revisions.length === 0) {
+      await tx.submissionRevision.create({
+        data: {
+          submissionId: current.id,
+          action: 'LEGACY',
+          actorId: 'legacy',
+          state: current.state,
+          imageKeys: current.imageKeys,
+          studentNote: current.studentNote,
+          reviewNote: current.reviewNote,
+          legacyNote: current.studentNote == null ? current.note : null,
+          at: current.updatedAt,
+        },
+      });
+    }
+    return current;
   }
 
   // Онлайн зам: сурагч дэвтрийн зураг/хариугаа илгээнэ (SPEC §10)
@@ -346,7 +458,12 @@ export class AssignmentsService {
       },
     });
     const enrolledNow = await this.prisma.enrollment.findFirst({
-      where: { studentId, classroomId: assignment.classroomId, leftAt: null, student: { archivedAt: null } },
+      where: {
+        studentId,
+        classroomId: assignment.classroomId,
+        leftAt: null,
+        student: { archivedAt: null },
+      },
     });
     if (!enrolledNow) {
       throw new ForbiddenException('Та энэ ангийн сурагч биш байна');
@@ -357,24 +474,92 @@ export class AssignmentsService {
       );
     }
 
-    const submission = await this.prisma.submission.upsert({
-      where: {
-        assignmentId_studentId: { assignmentId, studentId },
-      },
-      create: {
-        assignmentId,
-        studentId,
-        state: SubmissionState.SUBMITTED,
-        imageKeys: dto.imageKeys ?? [],
-        note: dto.note,
-        submittedAt: new Date(),
-      },
-      update: {
-        state: SubmissionState.SUBMITTED,
-        imageKeys: dto.imageKeys ?? [],
-        note: dto.note,
-        submittedAt: new Date(),
-      },
+    const submission = await this.prisma.$transaction(async (tx) => {
+      // Serialize both first submissions and revisions for this assignment/student.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${assignmentId}), hashtext(${studentId}))::text`;
+      const keys = dto.imageKeys ?? [];
+      if (keys.length > 10)
+        throw new BadRequestException('Хамгийн ихдээ 10 файл хавсаргана.');
+      if (keys.length) {
+        const previous = await tx.submission.findUnique({
+          where: { assignmentId_studentId: { assignmentId, studentId } },
+          select: { imageKeys: true },
+        });
+        const stored = await tx.storedFile.findMany({
+          where: { key: { in: keys } },
+          select: { key: true, ownerId: true, mime: true, size: true },
+        });
+        if (
+          stored.some(
+            (file) =>
+              file.ownerId === studentId &&
+              (![
+                'image/jpeg',
+                'image/png',
+                'image/gif',
+                'image/webp',
+                'image/heic',
+                'image/heif',
+                'application/pdf',
+              ].includes(file.mime) ||
+                file.size > 25 * 1024 * 1024),
+          )
+        ) {
+          throw new BadRequestException(
+            '25 МБ хүртэлх зураг эсвэл PDF файл хавсаргана уу.',
+          );
+        }
+        const owners = new Map(stored.map((file) => [file.key, file.ownerId]));
+        if (
+          keys.some(
+            (key) =>
+              owners.get(key) !== studentId &&
+              !(owners.get(key) == null && previous?.imageKeys.includes(key)),
+          )
+        ) {
+          throw new ForbiddenException(
+            'Зөвхөн өөрийн байршуулсан файлыг хавсаргана уу.',
+          );
+        }
+      }
+      await this.preserveLegacySubmission(tx, assignmentId, studentId);
+      const saved = await tx.submission.upsert({
+        where: { assignmentId_studentId: { assignmentId, studentId } },
+        create: {
+          assignmentId,
+          studentId,
+          state: SubmissionState.SUBMITTED,
+          imageKeys: dto.imageKeys ?? [],
+          note: dto.note ?? null,
+          studentNote: dto.note ?? null,
+          submittedAt: new Date(),
+        },
+        update: {
+          state: SubmissionState.SUBMITTED,
+          imageKeys: dto.imageKeys ?? [],
+          note: dto.note ?? null,
+          studentNote: dto.note ?? null,
+          reviewNote: null,
+          checkedAt: null,
+          checkedById: null,
+          submittedAt: new Date(),
+        },
+      });
+      await tx.submissionRevision.create({
+        data: {
+          submissionId: saved.id,
+          action: 'SUBMIT',
+          actorId: studentId,
+          state: saved.state,
+          imageKeys: saved.imageKeys,
+          studentNote: saved.studentNote,
+          reviewNote: saved.reviewNote,
+        },
+      });
+      return tx.submission.findUniqueOrThrow({
+        where: { id: saved.id },
+        include: { revisions: { orderBy: { at: 'asc' } } },
+      });
     });
 
     return submission;
@@ -405,7 +590,10 @@ export class AssignmentsService {
         joinedAt: { lte: assignment.createdAt },
       },
     });
-    if (!enrolled) throw new NotFoundException('Сурагч энэ даалгаврын идэвхтэй бүртгэлд алга байна');
+    if (!enrolled)
+      throw new NotFoundException(
+        'Сурагч энэ даалгаврын идэвхтэй бүртгэлд алга байна',
+      );
 
     const existing = await this.prisma.submission.findUnique({
       where: {
@@ -428,24 +616,55 @@ export class AssignmentsService {
       throw new BadRequestException('Сурагч хараахан юу ч илгээгээгүй байна');
     }
 
-    const submission = await this.prisma.submission.upsert({
-      where: {
-        assignmentId_studentId: { assignmentId, studentId: dto.studentId },
-      },
-      create: {
+    const submission = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${assignmentId}), hashtext(${dto.studentId}))::text`;
+      const current = await this.preserveLegacySubmission(
+        tx,
         assignmentId,
-        studentId: dto.studentId,
-        state: newState,
-        note: dto.note,
-        checkedById: userId,
-        checkedAt: new Date(),
-      },
-      update: {
-        state: newState,
-        ...(dto.note ? { note: dto.note } : {}),
-        checkedById: userId,
-        checkedAt: new Date(),
-      },
+        dto.studentId,
+      );
+      if (
+        dto.action !== ReviewAction.MARK_IN_CLASS &&
+        (!current || current.state === SubmissionState.NOT_DONE)
+      ) {
+        throw new BadRequestException('Сурагч хараахан юу ч илгээгээгүй байна');
+      }
+      const saved = await tx.submission.upsert({
+        where: {
+          assignmentId_studentId: { assignmentId, studentId: dto.studentId },
+        },
+        create: {
+          assignmentId,
+          studentId: dto.studentId,
+          state: newState,
+          imageKeys: [],
+          reviewNote: dto.note ?? null,
+          checkedById: userId,
+          checkedAt: new Date(),
+        },
+        update: {
+          state: newState,
+          ...(dto.note !== undefined ? { reviewNote: dto.note } : {}),
+          checkedById: userId,
+          checkedAt: new Date(),
+        },
+      });
+      await tx.submissionRevision.create({
+        data: {
+          submissionId: saved.id,
+          action: dto.action,
+          actorId: userId,
+          state: saved.state,
+          imageKeys: saved.imageKeys,
+          studentNote: saved.studentNote,
+          reviewNote: saved.reviewNote,
+          legacyNote: saved.studentNote == null ? saved.note : null,
+        },
+      });
+      return tx.submission.findUniqueOrThrow({
+        where: { id: saved.id },
+        include: { revisions: { orderBy: { at: 'asc' } } },
+      });
     });
 
     if (
@@ -477,7 +696,11 @@ export class AssignmentsService {
     await this.assertClassAccess(assignment.classroomId, userId, role);
 
     const enrollments = await this.prisma.enrollment.findMany({
-      where: { classroomId: assignment.classroomId, leftAt: null, student: { archivedAt: null } },
+      where: {
+        classroomId: assignment.classroomId,
+        leftAt: null,
+        student: { archivedAt: null },
+      },
       select: {
         joinedAt: true,
         student: { select: { id: true, firstName: true, lastName: true } },
@@ -486,6 +709,7 @@ export class AssignmentsService {
     });
     const submissions = await this.prisma.submission.findMany({
       where: { assignmentId },
+      include: { revisions: { orderBy: { at: 'asc' } } },
     });
     const byStudent = new Map(submissions.map((s) => [s.studentId, s]));
 
@@ -498,6 +722,9 @@ export class AssignmentsService {
           state: s?.state ?? SubmissionState.NOT_DONE,
           imageKeys: s?.imageKeys ?? [],
           note: s?.note ?? null,
+          studentNote: s?.studentNote ?? null,
+          reviewNote: s?.reviewNote ?? null,
+          revisions: s?.revisions ?? [],
           submittedAt: s?.submittedAt ?? null,
           checkedAt: s?.checkedAt ?? null,
         };

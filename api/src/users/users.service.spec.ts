@@ -10,6 +10,7 @@ import { Role } from '../generated/prisma/enums';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from './users.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 
 type ImportRow = {
   rowNumber: number;
@@ -80,7 +81,8 @@ function setup(initialRow = row()) {
     user: { findUnique: archiveFindUnique, update: archiveUpdate },
   } as unknown as PrismaService;
   const audit = { record: auditRecord } as unknown as AuditService;
-  const service = new UsersService(prisma, audit);
+  const capabilities = { has: jest.fn() } as unknown as StaffCapabilityService;
+  const service = new UsersService(prisma, audit, capabilities);
   const previews = Reflect.get(service, 'importPreviews') as Map<
     string,
     Preview
@@ -123,16 +125,33 @@ describe('student import service', () => {
 
   it('normalizes country prefixes before one batched identity lookup', async () => {
     const { service, prisma } = setup();
-    const findMany = jest.fn().mockResolvedValue([{ id: 'existing', phone: '99112233', role: Role.STUDENT, archivedAt: null }]);
+    const findMany = jest.fn().mockResolvedValue([
+      {
+        id: 'existing',
+        phone: '99112233',
+        role: Role.STUDENT,
+        archivedAt: null,
+      },
+    ]);
     prisma.user.findMany = findMany;
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Synthetic');
     sheet.addRow(['Овог', 'Нэр', 'Утас', 'Эцэг эхийн утас', 'Анги/Түвшин']);
     sheet.addRow(['Тест', 'Жишээ', '+97699112233', '+97688112233', '12-2']);
-    const preview = await service.previewStudentImport(Buffer.from(await workbook.xlsx.writeBuffer()), ownerId);
+    const preview = await service.previewStudentImport(
+      Buffer.from(await workbook.xlsx.writeBuffer()),
+      ownerId,
+    );
     expect(findMany).toHaveBeenCalledTimes(1);
-    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { phone: { in: ['99112233'] } } }));
-    expect(preview.rows[0]).toMatchObject({ phone: '99112233', guardianPhone: '88112233', status: 'UPDATE', targetUserId: 'existing' });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { phone: { in: ['99112233'] } } }),
+    );
+    expect(preview.rows[0]).toMatchObject({
+      phone: '99112233',
+      guardianPhone: '88112233',
+      status: 'UPDATE',
+      targetUserId: 'existing',
+    });
   });
 
   it('limits each import commit to 100 rows', async () => {

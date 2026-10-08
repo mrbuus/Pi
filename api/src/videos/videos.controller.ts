@@ -16,6 +16,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { parseSubjectQuery } from '../common/subject';
 import { Role } from '../generated/prisma/enums';
 import { CreateVideoDto } from './dto/create-video.dto';
+import { OpenProblemVideoDto } from './dto/open-problem-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { VideosService } from './videos.service';
 
@@ -31,8 +32,8 @@ export class VideosController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Post()
-  create(@Body() dto: CreateVideoDto) {
-    return this.videos.create(dto);
+  create(@Body() dto: CreateVideoDto, @Req() req: AuthedRequest) {
+    return this.videos.create(dto, req.user.userId, req.user.role);
   }
 
   @Get()
@@ -41,6 +42,28 @@ export class VideosController {
     @Req() req: AuthedRequest,
   ) {
     return this.videos.listByChapter(chapterId, req.user.userId, req.user.role);
+  }
+
+  @Get('problem')
+  listByProblem(
+    @Query('problemId') problemId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.videos.listByProblem(problemId, req.user.userId, req.user.role);
+  }
+
+  @Post(':id/open')
+  openProblemVideo(
+    @Param('id') id: string,
+    @Body() body: OpenProblemVideoDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.videos.openProblemVideo(
+      id,
+      body.problemId,
+      req.user.userId,
+      req.user.role,
+    );
   }
 
   @Get('chapters')

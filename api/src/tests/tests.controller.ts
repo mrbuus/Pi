@@ -79,7 +79,7 @@ export class TestsController {
     );
   }
 
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Get('my-results')
   myResults(@Req() req: AuthedRequest) {
     return this.tests.myResults(req.user.userId);
@@ -116,7 +116,7 @@ export class TestsController {
   // Global throttler одоо userId-аар key хийдэг тул энэ лимит нь
   // СУРАГЧ БҮРД (IP биш) хамаарна — 1 сурагч хуудсаа дахин ачаалах/сүлжээ
   // тасрах зэргээс болж хэдэн удаа дахин дуудахад хангалттай зай үлдээнэ.
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post(':id/start')
   start(@Param('id') id: string, @Req() req: AuthedRequest) {
@@ -125,7 +125,7 @@ export class TestsController {
 
   // Heartbeat: сурагч "амьд байна" гэдгийг 20с-т давж дуудана. Бичих үйлдэл БҮҮ.
   // Асуудалтай хүсэлтийг (180/мин) автосейв-ийн lимит-д оруулна.
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Throttle({ default: { limit: 180, ttl: 60_000 } })
   @Post(':id/heartbeat')
   heartbeat(
@@ -140,7 +140,7 @@ export class TestsController {
   // debounce (1/1.2с ~ 50/мин) + heartbeat (20с тутамд) ~ 53/мин. 180/мин
   // (userId-аар) нь үүнээс 3+ дахин их тул тогтмол ажиллагаанд огт
   // хүрэхгүй, зөвхөн бодит хэтрүүлэг/чит хийх оролдлогыг барина.
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Throttle({ default: { limit: 180, ttl: 60_000 } })
   @Patch(':id/session')
   saveSession(
@@ -151,7 +151,7 @@ export class TestsController {
     return this.tests.saveSession(id, req.user.userId, dto);
   }
 
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post(':id/submit')
   submit(
@@ -163,7 +163,7 @@ export class TestsController {
   }
 
   // Дууссан шалгалтын эргэн харах (өөрийн)
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Get(':id/review')
   review(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.review(id, req.user.userId);

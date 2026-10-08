@@ -92,81 +92,87 @@ export class ReconcileService {
       try {
         const bankRef = tx.bankRef;
 
-        // Идемпотент: ижил хуулгыг (эсвэл давхацсан интервалын хуулгуудыг)
-        // дахин импортлоход ижил bankRef-тэй мөр АЛГАСАГДАНА
-        const existing = await this.prisma.bankTransaction.findUnique({
-          where: { bankRef },
-        });
-        if (existing) {
-          result.skipped++;
-          continue;
-        }
+        const imported = await this.prisma.$transaction(async (dbTx) => {
+          await dbTx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'bank-import:' + bankRef}))`;
+          // Идемпотент: ижил хуулгыг (эсвэл давхацсан интервалын хуулгуудыг)
+          // дахин импортлоход ижил bankRef-тэй мөр АЛГАСАГДАНА
+          const existing = await dbTx.bankTransaction.findUnique({
+            where: { bankRef },
+          });
+          if (existing) {
+            return null;
+          }
 
-        // BankTransaction үүсгэнэ
-        const bankTx = await this.prisma.bankTransaction.create({
-          data: {
-            bankRef,
-            bookedAt: tx.bookedAt,
-            amount: tx.amount,
-            description: tx.description,
-            accountNo: null,
-            counterparty: tx.counterparty,
-            importedById,
-            rawRow: tx.raw, // Хуулгын эх мөр — маргаан гарвал эх рүү буцаж харна
-          },
-        });
-
-        result.imported++;
-
-        // Matcher ажиллуулна
-        const matchResult = matchTransaction(
-          {
-            amount: tx.amount,
-            description: tx.description,
-          },
-          students,
-        );
-
-        // AUTO тулгалтаа Payment CONFIRMED үүсгэнэ
-        if (matchResult.decision === 'AUTO' && matchResult.userId) {
-          // AUTO бөгөөд matcher-аас user байвал Payment үүсгэлгүүлэх
-          const payment = await this.prisma.payment.create({
+          // BankTransaction үүсгэнэ
+          const bankTx = await dbTx.bankTransaction.create({
             data: {
-              userId: matchResult.userId,
-              amount: bankTx.amount,
-              method: 'BANK_TRANSFER',
-              status: PaymentStatus.CONFIRMED,
-              description: `Банкны хуулгаас автоматаар (${bankRef})`,
-              paidAt: bankTx.bookedAt,
-              forMonth: this.getMonthFromDate(bankTx.bookedAt),
+              bankRef,
+              bookedAt: tx.bookedAt,
+              amount: tx.amount,
+              description: tx.description,
+              accountNo: null,
+              counterparty: tx.counterparty,
+              importedById,
+              rawRow: tx.raw, // Хуулгын эх мөр — маргаан гарвал эх рүү буцаж харна
             },
           });
 
-          // BankTransaction-д linkage нэмнэ
-          await this.prisma.bankTransaction.update({
-            where: { id: bankTx.id },
-            data: {
-              matchedUserId: matchResult.userId,
-              matchStatus: BankMatchStatus.AUTO_MATCHED,
-              paymentId: payment.id,
+          // Matcher ажиллуулна
+          const matchResult = matchTransaction(
+            {
+              amount: tx.amount,
+              description: tx.description,
             },
-          });
+            students,
+          );
 
-          // Аудит лог
-          await this.audit.record({
-            actorId: importedById,
-            actorRole: 'ADMIN',
-            action: 'AUTO_MATCH',
-            entity: 'BankTransaction',
-            entityId: bankTx.id,
-            after: {
-              matchStatus: BankMatchStatus.AUTO_MATCHED,
-              matchedUserId: matchResult.userId,
-              paymentId: payment.id,
-            },
-          });
+          // AUTO тулгалтаа Payment CONFIRMED үүсгэнэ
+          if (matchResult.decision === 'AUTO' && matchResult.userId) {
+            // AUTO бөгөөд matcher-аас user байвал Payment үүсгэлгүүлэх
+            const payment = await dbTx.payment.create({
+              data: {
+                userId: matchResult.userId,
+                amount: bankTx.amount,
+                method: 'BANK_TRANSFER',
+                status: PaymentStatus.CONFIRMED,
+                description: `Банкны хуулгаас автоматаар (${bankRef})`,
+                paidAt: bankTx.bookedAt,
+                forMonth: this.getMonthFromDate(bankTx.bookedAt),
+              },
+            });
 
-          result.matched++;
+            // BankTransaction-д linkage нэмнэ
+            await dbTx.bankTransaction.update({
+              where: { id: bankTx.id },
+              data: {
+                matchedUserId: matchResult.userId,
+                matchStatus: BankMatchStatus.AUTO_MATCHED,
+                paymentId: payment.id,
+              },
+            });
+
+            // Аудит лог
+            await this.audit.record({
+              actorId: importedById,
+              actorRole: 'ADMIN',
+              action: 'AUTO_MATCH',
+              entity: 'BankTransaction',
+              entityId: bankTx.id,
+              after: {
+                matchStatus: BankMatchStatus.AUTO_MATCHED,
+                matchedUserId: matchResult.userId,
+                paymentId: payment.id,
+              },
+            });
+          }
+          return {
+            matched: matchResult.decision === 'AUTO' && !!matchResult.userId,
+          };
+        });
+        if (!imported) result.skipped++;
+        else {
+          result.imported++;
+          if (imported.matched) result.matched++;
         }
       } catch (err) {
         result.errors.push({
@@ -193,7 +199,11 @@ export class ReconcileService {
       if (v === null || v === undefined) return '';
       if (v instanceof Date) return v.toISOString();
       if (typeof v === 'object') {
-        const o = v as { richText?: Array<{ text: string }>; result?: unknown; text?: string };
+        const o = v as {
+          richText?: Array<{ text: string }>;
+          result?: unknown;
+          text?: string;
+        };
         if (o.richText) return o.richText.map((t) => t.text).join('');
         if (o.result !== undefined) return String(o.result);
         if (o.text !== undefined) return String(o.text);
@@ -271,9 +281,7 @@ export class ReconcileService {
       );
     }
 
-    const txs: ReturnType<
-      ReconcileService['parseKhanStatement']
-    >['txs'] = [];
+    const txs: ReturnType<ReconcileService['parseKhanStatement']>['txs'] = [];
     let debitOrEmpty = 0;
 
     for (let r = headerIdx + 1; r < grid.length; r++) {
@@ -305,7 +313,13 @@ export class ReconcileService {
         'KHAN-' +
         createHash('sha256')
           .update(
-            [bookedAt.toISOString(), credit, description, counterparty ?? '', closing].join('|'),
+            [
+              bookedAt.toISOString(),
+              credit,
+              description,
+              counterparty ?? '',
+              closing,
+            ].join('|'),
           )
           .digest('hex')
           .slice(0, 20);
@@ -388,105 +402,108 @@ export class ReconcileService {
     dto: ManualMatchDto,
     actor: PaymentActor,
   ): Promise<BankTransactionResponseDto> {
-    const bankTx = await this.prisma.bankTransaction.findUnique({
-      where: { id: bankTransactionId },
-      include: {
-        matchedUser: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
+    return this.prisma.$transaction(async (dbTx) => {
+      await dbTx.$queryRaw`SELECT id FROM "BankTransaction" WHERE id = ${bankTransactionId} FOR UPDATE`;
+      const bankTx = await dbTx.bankTransaction.findUnique({
+        where: { id: bankTransactionId },
+        include: {
+          matchedUser: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!bankTx) {
-      throw new NotFoundException('Банкны гүйлгээ олдсонгүй');
-    }
+      if (!bankTx) {
+        throw new NotFoundException('Банкны гүйлгээ олдсонгүй');
+      }
 
-    if (bankTx.matchStatus !== BankMatchStatus.UNMATCHED) {
-      throw new BadRequestException(
-        `Гүйлгээ ${bankTx.matchStatus} статустай байна. Гараар тулгалт хийх боломжгүй`,
-      );
-    }
+      if (bankTx.matchStatus !== BankMatchStatus.UNMATCHED) {
+        throw new BadRequestException(
+          `Гүйлгээ ${bankTx.matchStatus} статустай байна. Гараар тулгалт хийх боломжгүй`,
+        );
+      }
 
-    // Сурагч байгаа эсэх шалгана
-    const user = await this.prisma.user.findUnique({
-      where: { id: dto.userId },
-      select: { id: true, firstName: true, lastName: true, phone: true },
-    });
+      // Сурагч байгаа эсэх шалгана
+      const user = await dbTx.user.findUnique({
+        where: { id: dto.userId },
+        select: { id: true, firstName: true, lastName: true, phone: true },
+      });
 
-    if (!user) {
-      throw new NotFoundException('Сурагч олдсонгүй');
-    }
+      if (!user) {
+        throw new NotFoundException('Сурагч олдсонгүй');
+      }
 
-    // PENDING Payment үүсгэнэ (админ дараа CONFIRMED болно)
-    const payment = await this.prisma.payment.create({
-      data: {
-        userId: dto.userId,
-        amount: bankTx.amount,
-        method: 'BANK_TRANSFER',
-        status: PaymentStatus.PENDING,
-        description: `Админ гараар холбосон (${bankTx.bankRef})`,
-        forMonth: this.getMonthFromDate(bankTx.bookedAt),
-      },
-    });
+      // PENDING Payment үүсгэнэ (админ дараа CONFIRMED болно)
+      const payment = await dbTx.payment.create({
+        data: {
+          userId: dto.userId,
+          amount: bankTx.amount,
+          method: 'BANK_TRANSFER',
+          status: PaymentStatus.PENDING,
+          description: `Админ гараар холбосон (${bankTx.bankRef})`,
+          forMonth: this.getMonthFromDate(bankTx.bookedAt),
+        },
+      });
 
-    // BankTransaction-д linkage
-    const updated = await this.prisma.bankTransaction.update({
-      where: { id: bankTransactionId },
-      data: {
-        matchedUserId: dto.userId,
-        matchStatus: BankMatchStatus.MANUAL_MATCHED,
-        paymentId: payment.id,
-      },
-      include: {
-        matchedUser: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
+      // BankTransaction-д linkage
+      const updated = await dbTx.bankTransaction.update({
+        where: { id: bankTransactionId },
+        data: {
+          matchedUserId: dto.userId,
+          matchStatus: BankMatchStatus.MANUAL_MATCHED,
+          paymentId: payment.id,
+        },
+        include: {
+          matchedUser: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Аудит лог
-    await this.audit.record({
-      actorId: actor.id,
-      actorRole: actor.role,
-      action: 'MANUAL_MATCH',
-      entity: 'BankTransaction',
-      entityId: bankTransactionId,
-      after: {
-        matchStatus: BankMatchStatus.MANUAL_MATCHED,
-        matchedUserId: dto.userId,
-        paymentId: payment.id,
-      },
-    });
+      // Аудит лог
+      await this.audit.record({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: 'MANUAL_MATCH',
+        entity: 'BankTransaction',
+        entityId: bankTransactionId,
+        after: {
+          matchStatus: BankMatchStatus.MANUAL_MATCHED,
+          matchedUserId: dto.userId,
+          paymentId: payment.id,
+        },
+      });
 
-    return {
-      id: updated.id,
-      bankRef: updated.bankRef,
-      bookedAt: updated.bookedAt,
-      amount: updated.amount,
-      description: updated.description,
-      accountNo: updated.accountNo,
-      counterparty: updated.counterparty,
-      matchStatus: updated.matchStatus,
-      matchedUserId: updated.matchedUserId,
-      matchedUser: updated.matchedUser
-        ? {
-            id: updated.matchedUser.id,
-            firstName: updated.matchedUser.firstName,
-            lastName: updated.matchedUser.lastName,
-            phone: updated.matchedUser.phone || '',
-          }
-        : null,
-    };
+      return {
+        id: updated.id,
+        bankRef: updated.bankRef,
+        bookedAt: updated.bookedAt,
+        amount: updated.amount,
+        description: updated.description,
+        accountNo: updated.accountNo,
+        counterparty: updated.counterparty,
+        matchStatus: updated.matchStatus,
+        matchedUserId: updated.matchedUserId,
+        matchedUser: updated.matchedUser
+          ? {
+              id: updated.matchedUser.id,
+              firstName: updated.matchedUser.firstName,
+              lastName: updated.matchedUser.lastName,
+              phone: updated.matchedUser.phone || '',
+            }
+          : null,
+      };
+    });
   }
 
   /**
@@ -521,7 +538,7 @@ export class ReconcileService {
     }
 
     const updated = await this.prisma.bankTransaction.update({
-      where: { id: bankTransactionId },
+      where: { id: bankTransactionId, matchStatus: BankMatchStatus.UNMATCHED },
       data: {
         matchStatus: BankMatchStatus.IGNORED,
       },

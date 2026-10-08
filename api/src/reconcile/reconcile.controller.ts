@@ -1,3 +1,4 @@
+import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import {
   Controller,
   Post,
@@ -34,7 +35,7 @@ interface UserPayload {
 }
 
 @Controller('reconcile')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
 export class ReconcileController {
   constructor(private readonly reconcile: ReconcileService) {}
 
@@ -48,7 +49,7 @@ export class ReconcileController {
    *   Жнь: { "dateCol": 0, "amountCol": 2, "descCol": 3, "journalCol": 4, "accountCol": 5 }
    */
   @Post('import')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'TEACHER_PLUS')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -64,9 +65,7 @@ export class ReconcileController {
           cb(null, true);
         } else {
           cb(
-            new BadRequestException(
-              'Зөвхөн .xlsx эсвэл .csv файл дэмжэгдэнэ',
-            ),
+            new BadRequestException('Зөвхөн .xlsx эсвэл .csv файл дэмжэгдэнэ'),
             false,
           );
         }
@@ -114,7 +113,7 @@ export class ReconcileController {
    * Банкны гүйлгээнүүдийг жагсаалтлана
    */
   @Get('transactions')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'TEACHER_PLUS')
   async getTransactions(
     @Query() query: GetTransactionsQueryDto,
   ): Promise<{ items: BankTransactionResponseDto[]; total: number }> {
@@ -126,20 +125,16 @@ export class ReconcileController {
    * Гараар банкны гүйлгээг сурагчтай холбоно (Payment PENDING үүсгэнэ)
    */
   @Post(':id/match')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'TEACHER_PLUS')
   async manualMatch(
     @Param('id') bankTransactionId: string,
     @Body() dto: ManualMatchDto,
     @CurrentUser() user: UserPayload,
   ): Promise<BankTransactionResponseDto> {
-    return this.reconcile.manualMatch(
-      bankTransactionId,
-      dto,
-      {
-        id: user.userId,
-        role: user.role,
-      },
-    );
+    return this.reconcile.manualMatch(bankTransactionId, dto, {
+      id: user.userId,
+      role: user.role,
+    });
   }
 
   /**
@@ -147,18 +142,15 @@ export class ReconcileController {
    * Банкны гүйлгээг үл анхааралтай үл үзэх
    */
   @Post(':id/ignore')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'TEACHER_PLUS')
   @HttpCode(204)
   async ignoreTransaction(
     @Param('id') bankTransactionId: string,
     @CurrentUser() user: UserPayload,
   ): Promise<void> {
-    await this.reconcile.ignoreTransaction(
-      bankTransactionId,
-      {
-        id: user.userId,
-        role: user.role,
-      },
-    );
+    await this.reconcile.ignoreTransaction(bankTransactionId, {
+      id: user.userId,
+      role: user.role,
+    });
   }
 }

@@ -13,7 +13,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { RecommendService } from './recommend.service';
-import { Recommendation } from './scheduler';
+import type { EvidenceRecommendation } from './recommend.service';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -32,15 +32,24 @@ export class RecommendController {
    * @query limit - хэдэн бодлого санал болгох (өгөгдмөл 10)
    * @returns Recommendation[] - { problemId, topicId, score, reason }
    */
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Get('next')
   async next(
     @Req() req: AuthedRequest,
     @Query('limit') limitStr?: string,
-  ): Promise<Recommendation[]> {
+  ): Promise<EvidenceRecommendation[]> {
     if (!req.user.userId) throw new NotFoundException('Сурагч олдсонгүй');
-    const limit = limitStr ? Math.min(parseInt(limitStr), 50) : 10;
-    return this.recommend.getNextProblems(req.user.userId, limit);
+    const limit =
+      limitStr === undefined
+        ? 10
+        : /^\d{1,2}$/.test(limitStr)
+          ? Number(limitStr)
+          : NaN;
+    return this.recommend.getNextProblems(
+      req.user.userId,
+      limit,
+      req.user.role,
+    );
   }
 
   /**
@@ -50,7 +59,7 @@ export class RecommendController {
    * @body givenAnswer - сурагчийн хариулт (тоо, текст, index гэх мэт)
    * @body autoCorrect - зөв бодсон эсэх (авто үнэлгээ)
    */
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.BUYER)
   @Post('attempt')
   async submitAttempt(
     @Req() req: AuthedRequest,
@@ -69,6 +78,7 @@ export class RecommendController {
       body.givenAnswer,
       body.autoCorrect,
       body.selfState,
+      req.user.role,
     );
   }
 }

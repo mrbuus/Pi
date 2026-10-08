@@ -30,6 +30,8 @@ export type SubmissionMinAggregateOutputType = {
   studentId: string | null
   state: $Enums.SubmissionState | null
   note: string | null
+  studentNote: string | null
+  reviewNote: string | null
   checkedById: string | null
   submittedAt: Date | null
   checkedAt: Date | null
@@ -42,6 +44,8 @@ export type SubmissionMaxAggregateOutputType = {
   studentId: string | null
   state: $Enums.SubmissionState | null
   note: string | null
+  studentNote: string | null
+  reviewNote: string | null
   checkedById: string | null
   submittedAt: Date | null
   checkedAt: Date | null
@@ -55,6 +59,8 @@ export type SubmissionCountAggregateOutputType = {
   state: number
   imageKeys: number
   note: number
+  studentNote: number
+  reviewNote: number
   checkedById: number
   submittedAt: number
   checkedAt: number
@@ -69,6 +75,8 @@ export type SubmissionMinAggregateInputType = {
   studentId?: true
   state?: true
   note?: true
+  studentNote?: true
+  reviewNote?: true
   checkedById?: true
   submittedAt?: true
   checkedAt?: true
@@ -81,6 +89,8 @@ export type SubmissionMaxAggregateInputType = {
   studentId?: true
   state?: true
   note?: true
+  studentNote?: true
+  reviewNote?: true
   checkedById?: true
   submittedAt?: true
   checkedAt?: true
@@ -94,6 +104,8 @@ export type SubmissionCountAggregateInputType = {
   state?: true
   imageKeys?: true
   note?: true
+  studentNote?: true
+  reviewNote?: true
   checkedById?: true
   submittedAt?: true
   checkedAt?: true
@@ -180,6 +192,8 @@ export type SubmissionGroupByOutputType = {
   state: $Enums.SubmissionState
   imageKeys: string[]
   note: string | null
+  studentNote: string | null
+  reviewNote: string | null
   checkedById: string | null
   submittedAt: Date | null
   checkedAt: Date | null
@@ -214,12 +228,15 @@ export type SubmissionWhereInput = {
   state?: Prisma.EnumSubmissionStateFilter<"Submission"> | $Enums.SubmissionState
   imageKeys?: Prisma.StringNullableListFilter<"Submission">
   note?: Prisma.StringNullableFilter<"Submission"> | string | null
+  studentNote?: Prisma.StringNullableFilter<"Submission"> | string | null
+  reviewNote?: Prisma.StringNullableFilter<"Submission"> | string | null
   checkedById?: Prisma.StringNullableFilter<"Submission"> | string | null
   submittedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   checkedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   assignment?: Prisma.XOR<Prisma.AssignmentScalarRelationFilter, Prisma.AssignmentWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  revisions?: Prisma.SubmissionRevisionListRelationFilter
 }
 
 export type SubmissionOrderByWithRelationInput = {
@@ -229,12 +246,15 @@ export type SubmissionOrderByWithRelationInput = {
   state?: Prisma.SortOrder
   imageKeys?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNote?: Prisma.SortOrderInput | Prisma.SortOrder
   checkedById?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   checkedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assignment?: Prisma.AssignmentOrderByWithRelationInput
   student?: Prisma.UserOrderByWithRelationInput
+  revisions?: Prisma.SubmissionRevisionOrderByRelationAggregateInput
 }
 
 export type SubmissionWhereUniqueInput = Prisma.AtLeast<{
@@ -248,12 +268,15 @@ export type SubmissionWhereUniqueInput = Prisma.AtLeast<{
   state?: Prisma.EnumSubmissionStateFilter<"Submission"> | $Enums.SubmissionState
   imageKeys?: Prisma.StringNullableListFilter<"Submission">
   note?: Prisma.StringNullableFilter<"Submission"> | string | null
+  studentNote?: Prisma.StringNullableFilter<"Submission"> | string | null
+  reviewNote?: Prisma.StringNullableFilter<"Submission"> | string | null
   checkedById?: Prisma.StringNullableFilter<"Submission"> | string | null
   submittedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   checkedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   assignment?: Prisma.XOR<Prisma.AssignmentScalarRelationFilter, Prisma.AssignmentWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  revisions?: Prisma.SubmissionRevisionListRelationFilter
 }, "id" | "assignmentId_studentId">
 
 export type SubmissionOrderByWithAggregationInput = {
@@ -263,6 +286,8 @@ export type SubmissionOrderByWithAggregationInput = {
   state?: Prisma.SortOrder
   imageKeys?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNote?: Prisma.SortOrderInput | Prisma.SortOrder
   checkedById?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   checkedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -282,6 +307,8 @@ export type SubmissionScalarWhereWithAggregatesInput = {
   state?: Prisma.EnumSubmissionStateWithAggregatesFilter<"Submission"> | $Enums.SubmissionState
   imageKeys?: Prisma.StringNullableListFilter<"Submission">
   note?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
+  studentNote?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
+  reviewNote?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
   checkedById?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
   submittedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Submission"> | Date | string | null
   checkedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Submission"> | Date | string | null
@@ -293,12 +320,15 @@ export type SubmissionCreateInput = {
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
   updatedAt?: Date | string
   assignment: Prisma.AssignmentCreateNestedOneWithoutSubmissionsInput
   student: Prisma.UserCreateNestedOneWithoutSubmissionsInput
+  revisions?: Prisma.SubmissionRevisionCreateNestedManyWithoutSubmissionInput
 }
 
 export type SubmissionUncheckedCreateInput = {
@@ -308,10 +338,13 @@ export type SubmissionUncheckedCreateInput = {
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
   updatedAt?: Date | string
+  revisions?: Prisma.SubmissionRevisionUncheckedCreateNestedManyWithoutSubmissionInput
 }
 
 export type SubmissionUpdateInput = {
@@ -319,12 +352,15 @@ export type SubmissionUpdateInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignment?: Prisma.AssignmentUpdateOneRequiredWithoutSubmissionsNestedInput
   student?: Prisma.UserUpdateOneRequiredWithoutSubmissionsNestedInput
+  revisions?: Prisma.SubmissionRevisionUpdateManyWithoutSubmissionNestedInput
 }
 
 export type SubmissionUncheckedUpdateInput = {
@@ -334,10 +370,13 @@ export type SubmissionUncheckedUpdateInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revisions?: Prisma.SubmissionRevisionUncheckedUpdateManyWithoutSubmissionNestedInput
 }
 
 export type SubmissionCreateManyInput = {
@@ -347,6 +386,8 @@ export type SubmissionCreateManyInput = {
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
@@ -358,6 +399,8 @@ export type SubmissionUpdateManyMutationInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -371,6 +414,8 @@ export type SubmissionUncheckedUpdateManyInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -399,6 +444,8 @@ export type SubmissionCountOrderByAggregateInput = {
   state?: Prisma.SortOrder
   imageKeys?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  studentNote?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
   checkedById?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   checkedAt?: Prisma.SortOrder
@@ -411,6 +458,8 @@ export type SubmissionMaxOrderByAggregateInput = {
   studentId?: Prisma.SortOrder
   state?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  studentNote?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
   checkedById?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   checkedAt?: Prisma.SortOrder
@@ -423,10 +472,17 @@ export type SubmissionMinOrderByAggregateInput = {
   studentId?: Prisma.SortOrder
   state?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  studentNote?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
   checkedById?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   checkedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type SubmissionScalarRelationFilter = {
+  is?: Prisma.SubmissionWhereInput
+  isNot?: Prisma.SubmissionWhereInput
 }
 
 export type SubmissionCreateNestedManyWithoutStudentInput = {
@@ -526,16 +582,33 @@ export type SubmissionUpdateimageKeysInput = {
   push?: string | string[]
 }
 
+export type SubmissionCreateNestedOneWithoutRevisionsInput = {
+  create?: Prisma.XOR<Prisma.SubmissionCreateWithoutRevisionsInput, Prisma.SubmissionUncheckedCreateWithoutRevisionsInput>
+  connectOrCreate?: Prisma.SubmissionCreateOrConnectWithoutRevisionsInput
+  connect?: Prisma.SubmissionWhereUniqueInput
+}
+
+export type SubmissionUpdateOneRequiredWithoutRevisionsNestedInput = {
+  create?: Prisma.XOR<Prisma.SubmissionCreateWithoutRevisionsInput, Prisma.SubmissionUncheckedCreateWithoutRevisionsInput>
+  connectOrCreate?: Prisma.SubmissionCreateOrConnectWithoutRevisionsInput
+  upsert?: Prisma.SubmissionUpsertWithoutRevisionsInput
+  connect?: Prisma.SubmissionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SubmissionUpdateToOneWithWhereWithoutRevisionsInput, Prisma.SubmissionUpdateWithoutRevisionsInput>, Prisma.SubmissionUncheckedUpdateWithoutRevisionsInput>
+}
+
 export type SubmissionCreateWithoutStudentInput = {
   id?: string
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
   updatedAt?: Date | string
   assignment: Prisma.AssignmentCreateNestedOneWithoutSubmissionsInput
+  revisions?: Prisma.SubmissionRevisionCreateNestedManyWithoutSubmissionInput
 }
 
 export type SubmissionUncheckedCreateWithoutStudentInput = {
@@ -544,10 +617,13 @@ export type SubmissionUncheckedCreateWithoutStudentInput = {
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
   updatedAt?: Date | string
+  revisions?: Prisma.SubmissionRevisionUncheckedCreateNestedManyWithoutSubmissionInput
 }
 
 export type SubmissionCreateOrConnectWithoutStudentInput = {
@@ -586,6 +662,8 @@ export type SubmissionScalarWhereInput = {
   state?: Prisma.EnumSubmissionStateFilter<"Submission"> | $Enums.SubmissionState
   imageKeys?: Prisma.StringNullableListFilter<"Submission">
   note?: Prisma.StringNullableFilter<"Submission"> | string | null
+  studentNote?: Prisma.StringNullableFilter<"Submission"> | string | null
+  reviewNote?: Prisma.StringNullableFilter<"Submission"> | string | null
   checkedById?: Prisma.StringNullableFilter<"Submission"> | string | null
   submittedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   checkedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
@@ -597,11 +675,14 @@ export type SubmissionCreateWithoutAssignmentInput = {
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
   updatedAt?: Date | string
   student: Prisma.UserCreateNestedOneWithoutSubmissionsInput
+  revisions?: Prisma.SubmissionRevisionCreateNestedManyWithoutSubmissionInput
 }
 
 export type SubmissionUncheckedCreateWithoutAssignmentInput = {
@@ -610,10 +691,13 @@ export type SubmissionUncheckedCreateWithoutAssignmentInput = {
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
   updatedAt?: Date | string
+  revisions?: Prisma.SubmissionRevisionUncheckedCreateNestedManyWithoutSubmissionInput
 }
 
 export type SubmissionCreateOrConnectWithoutAssignmentInput = {
@@ -642,12 +726,90 @@ export type SubmissionUpdateManyWithWhereWithoutAssignmentInput = {
   data: Prisma.XOR<Prisma.SubmissionUpdateManyMutationInput, Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentInput>
 }
 
+export type SubmissionCreateWithoutRevisionsInput = {
+  id?: string
+  state?: $Enums.SubmissionState
+  imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
+  note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
+  checkedById?: string | null
+  submittedAt?: Date | string | null
+  checkedAt?: Date | string | null
+  updatedAt?: Date | string
+  assignment: Prisma.AssignmentCreateNestedOneWithoutSubmissionsInput
+  student: Prisma.UserCreateNestedOneWithoutSubmissionsInput
+}
+
+export type SubmissionUncheckedCreateWithoutRevisionsInput = {
+  id?: string
+  assignmentId: string
+  studentId: string
+  state?: $Enums.SubmissionState
+  imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
+  note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
+  checkedById?: string | null
+  submittedAt?: Date | string | null
+  checkedAt?: Date | string | null
+  updatedAt?: Date | string
+}
+
+export type SubmissionCreateOrConnectWithoutRevisionsInput = {
+  where: Prisma.SubmissionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SubmissionCreateWithoutRevisionsInput, Prisma.SubmissionUncheckedCreateWithoutRevisionsInput>
+}
+
+export type SubmissionUpsertWithoutRevisionsInput = {
+  update: Prisma.XOR<Prisma.SubmissionUpdateWithoutRevisionsInput, Prisma.SubmissionUncheckedUpdateWithoutRevisionsInput>
+  create: Prisma.XOR<Prisma.SubmissionCreateWithoutRevisionsInput, Prisma.SubmissionUncheckedCreateWithoutRevisionsInput>
+  where?: Prisma.SubmissionWhereInput
+}
+
+export type SubmissionUpdateToOneWithWhereWithoutRevisionsInput = {
+  where?: Prisma.SubmissionWhereInput
+  data: Prisma.XOR<Prisma.SubmissionUpdateWithoutRevisionsInput, Prisma.SubmissionUncheckedUpdateWithoutRevisionsInput>
+}
+
+export type SubmissionUpdateWithoutRevisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
+  imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignment?: Prisma.AssignmentUpdateOneRequiredWithoutSubmissionsNestedInput
+  student?: Prisma.UserUpdateOneRequiredWithoutSubmissionsNestedInput
+}
+
+export type SubmissionUncheckedUpdateWithoutRevisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assignmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
+  imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type SubmissionCreateManyStudentInput = {
   id?: string
   assignmentId: string
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
@@ -659,11 +821,14 @@ export type SubmissionUpdateWithoutStudentInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignment?: Prisma.AssignmentUpdateOneRequiredWithoutSubmissionsNestedInput
+  revisions?: Prisma.SubmissionRevisionUpdateManyWithoutSubmissionNestedInput
 }
 
 export type SubmissionUncheckedUpdateWithoutStudentInput = {
@@ -672,10 +837,13 @@ export type SubmissionUncheckedUpdateWithoutStudentInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revisions?: Prisma.SubmissionRevisionUncheckedUpdateManyWithoutSubmissionNestedInput
 }
 
 export type SubmissionUncheckedUpdateManyWithoutStudentInput = {
@@ -684,6 +852,8 @@ export type SubmissionUncheckedUpdateManyWithoutStudentInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -696,6 +866,8 @@ export type SubmissionCreateManyAssignmentInput = {
   state?: $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionCreateimageKeysInput | string[]
   note?: string | null
+  studentNote?: string | null
+  reviewNote?: string | null
   checkedById?: string | null
   submittedAt?: Date | string | null
   checkedAt?: Date | string | null
@@ -707,11 +879,14 @@ export type SubmissionUpdateWithoutAssignmentInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.UserUpdateOneRequiredWithoutSubmissionsNestedInput
+  revisions?: Prisma.SubmissionRevisionUpdateManyWithoutSubmissionNestedInput
 }
 
 export type SubmissionUncheckedUpdateWithoutAssignmentInput = {
@@ -720,10 +895,13 @@ export type SubmissionUncheckedUpdateWithoutAssignmentInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revisions?: Prisma.SubmissionRevisionUncheckedUpdateManyWithoutSubmissionNestedInput
 }
 
 export type SubmissionUncheckedUpdateManyWithoutAssignmentInput = {
@@ -732,12 +910,43 @@ export type SubmissionUncheckedUpdateManyWithoutAssignmentInput = {
   state?: Prisma.EnumSubmissionStateFieldUpdateOperationsInput | $Enums.SubmissionState
   imageKeys?: Prisma.SubmissionUpdateimageKeysInput | string[]
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type SubmissionCountOutputType
+ */
+
+export type SubmissionCountOutputType = {
+  revisions: number
+}
+
+export type SubmissionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  revisions?: boolean | SubmissionCountOutputTypeCountRevisionsArgs
+}
+
+/**
+ * SubmissionCountOutputType without action
+ */
+export type SubmissionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SubmissionCountOutputType
+   */
+  select?: Prisma.SubmissionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SubmissionCountOutputType without action
+ */
+export type SubmissionCountOutputTypeCountRevisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SubmissionRevisionWhereInput
+}
 
 
 export type SubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -747,12 +956,16 @@ export type SubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   state?: boolean
   imageKeys?: boolean
   note?: boolean
+  studentNote?: boolean
+  reviewNote?: boolean
   checkedById?: boolean
   submittedAt?: boolean
   checkedAt?: boolean
   updatedAt?: boolean
   assignment?: boolean | Prisma.AssignmentDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  revisions?: boolean | Prisma.Submission$revisionsArgs<ExtArgs>
+  _count?: boolean | Prisma.SubmissionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["submission"]>
 
 export type SubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -762,6 +975,8 @@ export type SubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   state?: boolean
   imageKeys?: boolean
   note?: boolean
+  studentNote?: boolean
+  reviewNote?: boolean
   checkedById?: boolean
   submittedAt?: boolean
   checkedAt?: boolean
@@ -777,6 +992,8 @@ export type SubmissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   state?: boolean
   imageKeys?: boolean
   note?: boolean
+  studentNote?: boolean
+  reviewNote?: boolean
   checkedById?: boolean
   submittedAt?: boolean
   checkedAt?: boolean
@@ -792,16 +1009,20 @@ export type SubmissionSelectScalar = {
   state?: boolean
   imageKeys?: boolean
   note?: boolean
+  studentNote?: boolean
+  reviewNote?: boolean
   checkedById?: boolean
   submittedAt?: boolean
   checkedAt?: boolean
   updatedAt?: boolean
 }
 
-export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assignmentId" | "studentId" | "state" | "imageKeys" | "note" | "checkedById" | "submittedAt" | "checkedAt" | "updatedAt", ExtArgs["result"]["submission"]>
+export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assignmentId" | "studentId" | "state" | "imageKeys" | "note" | "studentNote" | "reviewNote" | "checkedById" | "submittedAt" | "checkedAt" | "updatedAt", ExtArgs["result"]["submission"]>
 export type SubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignment?: boolean | Prisma.AssignmentDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  revisions?: boolean | Prisma.Submission$revisionsArgs<ExtArgs>
+  _count?: boolean | Prisma.SubmissionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SubmissionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignment?: boolean | Prisma.AssignmentDefaultArgs<ExtArgs>
@@ -817,6 +1038,7 @@ export type $SubmissionPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     assignment: Prisma.$AssignmentPayload<ExtArgs>
     student: Prisma.$UserPayload<ExtArgs>
+    revisions: Prisma.$SubmissionRevisionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -825,6 +1047,8 @@ export type $SubmissionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     state: $Enums.SubmissionState
     imageKeys: string[]
     note: string | null
+    studentNote: string | null
+    reviewNote: string | null
     checkedById: string | null
     submittedAt: Date | null
     checkedAt: Date | null
@@ -1225,6 +1449,7 @@ export interface Prisma__SubmissionClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assignment<T extends Prisma.AssignmentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssignmentDefaultArgs<ExtArgs>>): Prisma.Prisma__AssignmentClient<runtime.Types.Result.GetResult<Prisma.$AssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   student<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  revisions<T extends Prisma.Submission$revisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Submission$revisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionRevisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1260,6 +1485,8 @@ export interface SubmissionFieldRefs {
   readonly state: Prisma.FieldRef<"Submission", 'SubmissionState'>
   readonly imageKeys: Prisma.FieldRef<"Submission", 'String[]'>
   readonly note: Prisma.FieldRef<"Submission", 'String'>
+  readonly studentNote: Prisma.FieldRef<"Submission", 'String'>
+  readonly reviewNote: Prisma.FieldRef<"Submission", 'String'>
   readonly checkedById: Prisma.FieldRef<"Submission", 'String'>
   readonly submittedAt: Prisma.FieldRef<"Submission", 'DateTime'>
   readonly checkedAt: Prisma.FieldRef<"Submission", 'DateTime'>
@@ -1662,6 +1889,30 @@ export type SubmissionDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Submissions to delete.
    */
   limit?: number
+}
+
+/**
+ * Submission.revisions
+ */
+export type Submission$revisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SubmissionRevision
+   */
+  select?: Prisma.SubmissionRevisionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SubmissionRevision
+   */
+  omit?: Prisma.SubmissionRevisionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubmissionRevisionInclude<ExtArgs> | null
+  where?: Prisma.SubmissionRevisionWhereInput
+  orderBy?: Prisma.SubmissionRevisionOrderByWithRelationInput | Prisma.SubmissionRevisionOrderByWithRelationInput[]
+  cursor?: Prisma.SubmissionRevisionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SubmissionRevisionScalarFieldEnum | Prisma.SubmissionRevisionScalarFieldEnum[]
 }
 
 /**

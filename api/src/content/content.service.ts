@@ -7,13 +7,16 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { MistakeType, Role, Subject } from '../generated/prisma/enums';
-import { canAccessChapter, TEACHER_ROLES } from '../common/access';
+import {
+  canAccessChapter,
+  internalTeachingRole,
+  assertInternalTeachingStaff,
+} from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { CreateProblemDto } from './dto/create-problem.dto';
 import { CreateTopicDto } from './dto/create-topic.dto';
-import { ReorderChaptersDto } from './dto/reorder-chapters.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { UpdateProblemDto } from './dto/update-problem.dto';
@@ -27,7 +30,9 @@ export class ContentService {
   // TODO(followUp): api/src/audit/audit.service.ts бэлэн болмогц энэ helper-ийг
   // хасаад тэрхүү нэгдсэн AuditService-ийг DI-аар оруулж ашиглах (доор
   // followUps-д тэмдэглэсэн). Одоохондоо мөн зарчмаар шууд AuditLog бичнэ.
-  private toAuditJson(v: unknown): Prisma.InputJsonValue | typeof Prisma.JsonNull {
+  private toAuditJson(
+    v: unknown,
+  ): Prisma.InputJsonValue | typeof Prisma.JsonNull {
     if (v === null || v === undefined) return Prisma.JsonNull;
     return JSON.parse(JSON.stringify(v)) as Prisma.InputJsonValue;
   }
@@ -54,7 +59,8 @@ export class ContentService {
     });
   }
 
-  createBook(dto: CreateBookDto) {
+  async createBook(dto: CreateBookDto, actorId: string) {
+    await assertInternalTeachingStaff(this.prisma, actorId);
     return this.prisma.book.create({ data: dto });
   }
 
@@ -94,7 +100,13 @@ export class ContentService {
 
   // Багш+/Админ номын мета мэдээллийг засна (SPEC-ийн эрхийн матрицаар шинээр
   // нээгдсэн — code талбарыг зориудаар DTO-д оруулаагүй, token-той холбоотой).
-  async updateBook(id: string, dto: UpdateBookDto, actorId: string, actorRole: Role) {
+  async updateBook(
+    id: string,
+    dto: UpdateBookDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const book = await this.prisma.book.findUnique({ where: { id } });
     if (!book || book.deletedAt) throw new NotFoundException('Ном олдсонгүй');
 
@@ -106,7 +118,15 @@ export class ContentService {
     if (dto.archived !== undefined) data.archived = dto.archived;
 
     const updated = await this.prisma.book.update({ where: { id }, data });
-    await this.recordAudit(actorId, actorRole, 'UPDATE', 'Book', id, book, updated);
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'UPDATE',
+      'Book',
+      id,
+      book,
+      updated,
+    );
     return updated;
   }
 
@@ -119,6 +139,7 @@ export class ContentService {
     actorId: string,
     actorRole: Role,
   ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const book = await this.prisma.book.findUnique({ where: { id } });
     if (!book || book.deletedAt) throw new NotFoundException('Ном олдсонгүй');
 
@@ -149,7 +170,8 @@ export class ContentService {
     return { deleted: true, cascadedChapters: activeChapters.length };
   }
 
-  createChapter(dto: CreateChapterDto) {
+  async createChapter(dto: CreateChapterDto, actorId: string) {
+    await assertInternalTeachingStaff(this.prisma, actorId);
     return this.prisma.chapter.create({ data: dto });
   }
 
@@ -167,7 +189,13 @@ export class ContentService {
       },
       include: {
         book: { select: { code: true, title: true } },
-        _count: { select: { problems: true, theories: true, tests: true } },
+        _count: {
+          select: {
+            problems: true,
+            theories: { where: { archivedAt: null } },
+            tests: true,
+          },
+        },
       },
       orderBy: [{ grade: 'asc' }, { order: 'asc' }],
     });
@@ -181,6 +209,7 @@ export class ContentService {
     actorId: string,
     actorRole: Role,
   ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const chapter = await this.prisma.chapter.findUnique({ where: { id } });
     if (!chapter || chapter.deletedAt) {
       throw new NotFoundException('Бүлэг сэдэв олдсонгүй');
@@ -235,6 +264,7 @@ export class ContentService {
   }
 
   async deleteChapter(id: string, actorId: string, actorRole: Role) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const chapter = await this.prisma.chapter.findUnique({ where: { id } });
     if (!chapter || chapter.deletedAt) {
       throw new NotFoundException('Бүлэг сэдэв олдсонгүй');
@@ -257,6 +287,7 @@ export class ContentService {
 
   // ids-ийн БАЙРЛАЛ шинэ order (1-ээс) болно — жагсаалтыг гараар эрэмбэлэх UI-д.
   async reorderChapters(ids: string[], actorId: string, actorRole: Role) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const chapters = await this.prisma.chapter.findMany({
       where: { id: { in: ids }, deletedAt: null },
       select: { id: true, order: true },
@@ -294,6 +325,7 @@ export class ContentService {
   }
 
   async createTopic(dto: CreateTopicDto, actorId: string, actorRole: Role) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     try {
       const topic = await this.prisma.topic.create({
         data: { name: dto.name, order: dto.order ?? 0 },
@@ -327,6 +359,7 @@ export class ContentService {
     actorId: string,
     actorRole: Role,
   ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const topic = await this.prisma.topic.findUnique({ where: { id } });
     if (!topic || topic.deletedAt) {
       throw new NotFoundException('БҮТ-ийн муж олдсонгүй');
@@ -368,6 +401,7 @@ export class ContentService {
     actorId: string,
     actorRole: Role,
   ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const topic = await this.prisma.topic.findUnique({ where: { id } });
     if (!topic || topic.deletedAt) {
       throw new NotFoundException('БҮТ-ийн муж олдсонгүй');
@@ -401,6 +435,7 @@ export class ContentService {
   }
 
   async createProblem(dto: CreateProblemDto, userId: string) {
+    await assertInternalTeachingStaff(this.prisma, userId);
     const chapter = await this.prisma.chapter.findUnique({
       where: { id: dto.chapterId },
       include: { book: true },
@@ -533,6 +568,7 @@ export class ContentService {
     actorId: string,
     actorRole: Role,
   ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const problem = await this.prisma.problem.findUnique({
       where: { id: problemId },
     });
@@ -623,6 +659,7 @@ export class ContentService {
   // Багш+/Админ бодлогыг зөөлөн устгана — Attempt/TestProblem зэрэг
   // аналитикийн түүхэн бичлэгүүд орфон үлдэхгүйн тулд hard DELETE хийхгүй.
   async deleteProblem(problemId: string, actorId: string, actorRole: Role) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const problem = await this.prisma.problem.findUnique({
       where: { id: problemId },
     });
@@ -693,7 +730,7 @@ export class ContentService {
     // Багш нар хариутай нь харна (SPEC §13), сурагчид хариу харагдахгүй.
     // CHOICE сонголтоос isCorrect/mistakeType-ийг ЗААВАЛ хасна — үгүй бол
     // сурагч хариуны түлхүүрийг choiceOptions-оос шууд харах болно.
-    const withAnswers = TEACHER_ROLES.includes(role);
+    const withAnswers = !!(await internalTeachingRole(this.prisma, userId));
     return problems.map((p) =>
       withAnswers
         ? p
@@ -701,6 +738,11 @@ export class ContentService {
             ...p,
             correctAnswer: undefined,
             analysis: undefined,
+            choices:
+              Array.isArray(p.choices) &&
+              p.choices.every((c) => typeof c === 'string')
+                ? p.choices
+                : null,
             choiceOptions: p.choiceOptions.map((o) => ({
               label: o.label,
               text: o.text,
@@ -741,7 +783,9 @@ export class ContentService {
         order: true,
         freePreview: true,
         book: { select: { code: true, title: true } },
-        _count: { select: { problems: true, theories: true } },
+        _count: {
+          select: { problems: true, theories: { where: { archivedAt: null } } },
+        },
       },
       orderBy: { order: 'asc' },
     });
@@ -749,7 +793,11 @@ export class ContentService {
 
   async publicChapterPreview(chapterId: string) {
     const chapter = await this.prisma.chapter.findFirst({
-      where: { id: chapterId, deletedAt: null, OR: [{ bookId: null }, { book: { archived: false, deletedAt: null } }] },
+      where: {
+        id: chapterId,
+        deletedAt: null,
+        OR: [{ bookId: null }, { book: { archived: false, deletedAt: null } }],
+      },
       select: {
         id: true,
         title: true,
@@ -765,6 +813,7 @@ export class ContentService {
       throw new NotFoundException('Бүлэг сэдэв олдсонгүй');
     }
     const { deletedAt: _deletedAt, ...chapterView } = chapter;
+    void _deletedAt;
 
     if (!chapter.freePreview) {
       return { ...chapterView, locked: true, theories: [], problems: [] };
@@ -772,7 +821,7 @@ export class ContentService {
 
     const [theories, problems] = await Promise.all([
       this.prisma.theoryBlock.findMany({
-        where: { chapterId },
+        where: { chapterId, archivedAt: null },
         select: { id: true, title: true, content: true, imageKeys: true },
         orderBy: { order: 'asc' },
       }),
@@ -796,26 +845,42 @@ export class ContentService {
 
   /**
    * Нэг бодлогыг унших (Practice маршрутаас сурагч дуудна).
-   * Сурагчид statementText, correctAnswer-г л өгнө (hintAnswer биш).
+   * Суралцагчид бодлогын нөхцөл ба сонголтыг өгнө; хариуны түлхүүрийг нууж хадгална.
    */
-  async getProblem(problemId: string) {
+  async getProblem(problemId: string, userId: string, role: Role) {
     const problem = await this.prisma.problem.findUnique({
       where: { id: problemId },
-      select: {
-        id: true,
-        token: true,
-        format: true,
-        statementText: true,
-        choices: true,
-        correctAnswer: true,
-        imageKey: true,
+      include: {
+        chapter: { include: { book: true } },
+        choiceOptions: { orderBy: { order: 'asc' } },
       },
     });
-
-    if (!problem || problem.imageKey === null) {
+    if (
+      !problem ||
+      problem.deletedAt ||
+      problem.chapter.deletedAt ||
+      problem.chapter.book?.deletedAt
+    ) {
       throw new NotFoundException('Бодлого олдсонгүй');
     }
-
-    return problem;
+    if (!(await canAccessChapter(this.prisma, userId, role, problem.chapter))) {
+      throw new ForbiddenException('Энэ бүлгийн эрх шаардлагатай');
+    }
+    const view = {
+      id: problem.id,
+      token: problem.token,
+      format: problem.format,
+      statementText: problem.statementText,
+      imageKey: problem.imageKey,
+      choices: problem.choiceOptions.length
+        ? problem.choiceOptions.map(({ label, text }) => ({ label, text }))
+        : Array.isArray(problem.choices) &&
+            problem.choices.every((c) => typeof c === 'string')
+          ? problem.choices
+          : null,
+    };
+    return (await internalTeachingRole(this.prisma, userId))
+      ? { ...view, correctAnswer: problem.correctAnswer }
+      : view;
   }
 }

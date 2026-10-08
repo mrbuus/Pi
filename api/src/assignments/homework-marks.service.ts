@@ -30,9 +30,7 @@ export class HomeworkMarksService {
     try {
       return parseDateOnly(value);
     } catch {
-      throw new BadRequestException(
-        'Огнооны формат буруу байна (YYYY-MM-DD)',
-      );
+      throw new BadRequestException('Огнооны формат буруу байна (YYYY-MM-DD)');
     }
   }
 
@@ -57,7 +55,12 @@ export class HomeworkMarksService {
 
   // GET — сонгосон ангийн идэвхтэй сурагчид бүгд, нэрээр эрэмбэлсэн. Тэмдэглэгээгүй
   // сурагч status: null-тэй ирнэ (UI-д цагаан/хоосон харагдана).
-  async listForClass(classroomId: string, date: string, userId: string, role: Role) {
+  async listForClass(
+    classroomId: string,
+    date: string,
+    userId: string,
+    role: Role,
+  ) {
     await this.assertClassAccess(classroomId, userId, role);
     const parsedDate = this.parseDate(date);
 
@@ -169,10 +172,42 @@ export class HomeworkMarksService {
   async mine(studentId: string, days = MY_MARKS_DAYS, now = new Date()) {
     const span = Math.min(Math.max(Math.trunc(days) || MY_MARKS_DAYS, 1), 60);
     const from = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (span - 1)),
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - (span - 1),
+      ),
     );
     return this.prisma.dailyHomeworkMark.findMany({
       where: { studentId, date: { gte: from }, status: { not: null } },
+      select: {
+        date: true,
+        status: true,
+        comment: true,
+        classroom: { select: { id: true, name: true } },
+      },
+      orderBy: { date: 'desc' },
+    });
+  }
+
+  async mineYear(studentId: string, yearValue: string) {
+    if (
+      !/^\d{4}$/.test(yearValue) ||
+      Number(yearValue) < 1900 ||
+      Number(yearValue) > 2100
+    ) {
+      throw new BadRequestException('Он буруу байна');
+    }
+    const year = Number(yearValue);
+    return this.prisma.dailyHomeworkMark.findMany({
+      where: {
+        studentId,
+        date: {
+          gte: new Date(Date.UTC(year, 0, 1)),
+          lt: new Date(Date.UTC(year + 1, 0, 1)),
+        },
+        status: { not: null },
+      },
       select: {
         date: true,
         status: true,
@@ -196,7 +231,12 @@ export class HomeworkMarksService {
     const parsedDate = this.parseDate(dto.date);
 
     const enrolled = await this.prisma.enrollment.findFirst({
-      where: { classroomId, studentId, leftAt: null, student: { archivedAt: null } },
+      where: {
+        classroomId,
+        studentId,
+        leftAt: null,
+        student: { archivedAt: null },
+      },
     });
     if (!enrolled) {
       throw new NotFoundException('Сурагч энэ ангид алга байна');
@@ -204,13 +244,21 @@ export class HomeworkMarksService {
 
     const before = await this.prisma.dailyHomeworkMark.findUnique({
       where: {
-        classroomId_studentId_date: { classroomId, studentId, date: parsedDate },
+        classroomId_studentId_date: {
+          classroomId,
+          studentId,
+          date: parsedDate,
+        },
       },
     });
 
     const updated = await this.prisma.dailyHomeworkMark.upsert({
       where: {
-        classroomId_studentId_date: { classroomId, studentId, date: parsedDate },
+        classroomId_studentId_date: {
+          classroomId,
+          studentId,
+          date: parsedDate,
+        },
       },
       create: {
         classroomId,

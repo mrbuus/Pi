@@ -14,6 +14,7 @@ import {
 } from '../common/codes';
 import { Role, StudentType, PaymentStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
@@ -49,6 +50,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private capabilities: StaffCapabilityService,
   ) {}
 
   // Админ: шинэ хэрэглэгчийг ЭРХИЙГ НЬ ШУУД сонгож нэг дороос үүсгэнэ
@@ -514,7 +516,8 @@ export class UsersService {
     return { imported: saved.length, rows: saved };
   }
 
-  async exportStudentsCsv() {
+  async exportStudentsCsv(actorId: string) {
+    await this.assertCentreAdmissionsStaff(actorId);
     const rows = await this.prisma.user.findMany({
       where: { role: Role.STUDENT, archivedAt: null },
       select: {
@@ -977,14 +980,47 @@ export class UsersService {
 
   /**
    * Онлайнаар CLASSROOM-р бүртгүүлсэн сурагчдын зөвшөөрөл хүлээгч жагсаалт.
-   * Багш зөвшөөр + эхний сарын төлбөр CONFIRMED үед л код үүснэ.
+   * Энэ нь одоогийн зөвшөөрлийн жагсаалт; түвшин тогтоох/туршилтын хичээлийн
+   * шинэ урсгал нь тусдаа төлөвлөгөөтэй. Төлбөрийн байдал зөвхөн санхүүгийн эрхтэйд харагдана.
    *
    * Эзэн шаардлагагаа үг: "нэр, утас, анги, бүртгүүлсэн огноо, эхний сарын төлбөр CONFIRMED эсэх"
    */
-  async getPendingApprovalStudents() {
+  private async assertCentreAdmissionsStaff(actorId: string) {
+    // A public group-teacher account does not authorize centre-wide admissions.
+    // Read the live role, so an old JWT cannot preserve revoked staff access.
+    const actor = await this.prisma.user.findUnique({
+      where: { id: actorId },
+      select: {
+        role: true,
+        archivedAt: true,
+        externalTeacherProfile: { select: { userId: true } },
+      },
+    });
+    if (
+      !actor ||
+      actor.archivedAt ||
+      actor.externalTeacherProfile ||
+      ![Role.ADMIN, Role.TEACHER_PLUS].includes(
+        actor.role as 'ADMIN' | 'TEACHER_PLUS',
+      )
+    ) {
+      throw new ForbiddenException(
+        'Сургалтын төвийн элсэлт хариуцсан эрх шаардлагатай.',
+      );
+    }
+  }
+
+  async getPendingApprovalStudents(actorId: string) {
+    await this.assertCentreAdmissionsStaff(actorId);
+    const canSeeFinance = await this.capabilities.has(
+      actorId,
+      'finance.manage',
+    );
     const now = new Date();
-    // forMonth: "2026-09" (YYYY-MM) формат
-    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    // Tuition months follow Ulaanbaatar, independently of server TZ.
+    const currentMonthStr = new Date(now.getTime() + 8 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 7);
 
     const students = await this.prisma.user.findMany({
       where: {
@@ -1005,16 +1041,19 @@ export class UsersService {
             grade: true,
           },
         },
-        payments: {
-          where: {
-            forMonth: currentMonthStr,
-          },
-          select: {
-            status: true,
-          },
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-        },
+        payments: canSeeFinance
+          ? {
+              where: {
+                forMonth: currentMonthStr,
+                status: PaymentStatus.CONFIRMED,
+              },
+              select: {
+                status: true,
+              },
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+            }
+          : false,
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -1026,11 +1065,10 @@ export class UsersService {
       phone: s.phone,
       grade: s.studentProfile?.grade ?? 12,
       registeredAt: s.createdAt,
-      hasConfirmedPayment: s.payments.some(
-        (p) =>
-          p.status === PaymentStatus.CONFIRMED ||
-          p.status === PaymentStatus.REVERSED,
-      ),
+      // Unknown is distinct from unpaid; reversed and pending receipts do not qualify.
+      hasConfirmedPayment: canSeeFinance
+        ? s.payments.some((p) => p.status === PaymentStatus.CONFIRMED)
+        : null,
     }));
   }
 
@@ -1042,6 +1080,7 @@ export class UsersService {
    * - Аудит лог бүртгэнэ
    */
   async approveStudent(studentId: string, approverId: string) {
+    await this.assertCentreAdmissionsStaff(approverId);
     const student = await this.prisma.studentProfile.findUnique({
       where: { userId: studentId },
       select: {

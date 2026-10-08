@@ -35,6 +35,8 @@ export type VideoSumAggregateOutputType = {
 }
 
 export type VideoMinAggregateOutputType = {
+  problemId: string | null
+  createdById: string | null
   id: string | null
   title: string | null
   s3Key: string | null
@@ -45,6 +47,8 @@ export type VideoMinAggregateOutputType = {
 }
 
 export type VideoMaxAggregateOutputType = {
+  problemId: string | null
+  createdById: string | null
   id: string | null
   title: string | null
   s3Key: string | null
@@ -55,6 +59,8 @@ export type VideoMaxAggregateOutputType = {
 }
 
 export type VideoCountAggregateOutputType = {
+  problemId: number
+  createdById: number
   id: number
   title: number
   s3Key: number
@@ -75,6 +81,8 @@ export type VideoSumAggregateInputType = {
 }
 
 export type VideoMinAggregateInputType = {
+  problemId?: true
+  createdById?: true
   id?: true
   title?: true
   s3Key?: true
@@ -85,6 +93,8 @@ export type VideoMinAggregateInputType = {
 }
 
 export type VideoMaxAggregateInputType = {
+  problemId?: true
+  createdById?: true
   id?: true
   title?: true
   s3Key?: true
@@ -95,6 +105,8 @@ export type VideoMaxAggregateInputType = {
 }
 
 export type VideoCountAggregateInputType = {
+  problemId?: true
+  createdById?: true
   id?: true
   title?: true
   s3Key?: true
@@ -192,6 +204,8 @@ export type VideoGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 }
 
 export type VideoGroupByOutputType = {
+  problemId: string | null
+  createdById: string | null
   id: string
   title: string
   s3Key: string
@@ -225,6 +239,8 @@ export type VideoWhereInput = {
   AND?: Prisma.VideoWhereInput | Prisma.VideoWhereInput[]
   OR?: Prisma.VideoWhereInput[]
   NOT?: Prisma.VideoWhereInput | Prisma.VideoWhereInput[]
+  problemId?: Prisma.StringNullableFilter<"Video"> | string | null
+  createdById?: Prisma.StringNullableFilter<"Video"> | string | null
   id?: Prisma.StringFilter<"Video"> | string
   title?: Prisma.StringFilter<"Video"> | string
   s3Key?: Prisma.StringFilter<"Video"> | string
@@ -232,10 +248,13 @@ export type VideoWhereInput = {
   chapterId?: Prisma.StringNullableFilter<"Video"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Video"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Video"> | Date | string | null
+  problem?: Prisma.XOR<Prisma.ProblemNullableScalarRelationFilter, Prisma.ProblemWhereInput> | null
   chapter?: Prisma.XOR<Prisma.ChapterNullableScalarRelationFilter, Prisma.ChapterWhereInput> | null
 }
 
 export type VideoOrderByWithRelationInput = {
+  problemId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   s3Key?: Prisma.SortOrder
@@ -243,6 +262,7 @@ export type VideoOrderByWithRelationInput = {
   chapterId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  problem?: Prisma.ProblemOrderByWithRelationInput
   chapter?: Prisma.ChapterOrderByWithRelationInput
 }
 
@@ -251,16 +271,21 @@ export type VideoWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.VideoWhereInput | Prisma.VideoWhereInput[]
   OR?: Prisma.VideoWhereInput[]
   NOT?: Prisma.VideoWhereInput | Prisma.VideoWhereInput[]
+  problemId?: Prisma.StringNullableFilter<"Video"> | string | null
+  createdById?: Prisma.StringNullableFilter<"Video"> | string | null
   title?: Prisma.StringFilter<"Video"> | string
   s3Key?: Prisma.StringFilter<"Video"> | string
   duration?: Prisma.IntNullableFilter<"Video"> | number | null
   chapterId?: Prisma.StringNullableFilter<"Video"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Video"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Video"> | Date | string | null
+  problem?: Prisma.XOR<Prisma.ProblemNullableScalarRelationFilter, Prisma.ProblemWhereInput> | null
   chapter?: Prisma.XOR<Prisma.ChapterNullableScalarRelationFilter, Prisma.ChapterWhereInput> | null
 }, "id">
 
 export type VideoOrderByWithAggregationInput = {
+  problemId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   s3Key?: Prisma.SortOrder
@@ -279,6 +304,8 @@ export type VideoScalarWhereWithAggregatesInput = {
   AND?: Prisma.VideoScalarWhereWithAggregatesInput | Prisma.VideoScalarWhereWithAggregatesInput[]
   OR?: Prisma.VideoScalarWhereWithAggregatesInput[]
   NOT?: Prisma.VideoScalarWhereWithAggregatesInput | Prisma.VideoScalarWhereWithAggregatesInput[]
+  problemId?: Prisma.StringNullableWithAggregatesFilter<"Video"> | string | null
+  createdById?: Prisma.StringNullableWithAggregatesFilter<"Video"> | string | null
   id?: Prisma.StringWithAggregatesFilter<"Video"> | string
   title?: Prisma.StringWithAggregatesFilter<"Video"> | string
   s3Key?: Prisma.StringWithAggregatesFilter<"Video"> | string
@@ -289,16 +316,20 @@ export type VideoScalarWhereWithAggregatesInput = {
 }
 
 export type VideoCreateInput = {
+  createdById?: string | null
   id?: string
   title: string
   s3Key: string
   duration?: number | null
   createdAt?: Date | string
   deletedAt?: Date | string | null
+  problem?: Prisma.ProblemCreateNestedOneWithoutVideosInput
   chapter?: Prisma.ChapterCreateNestedOneWithoutVideosInput
 }
 
 export type VideoUncheckedCreateInput = {
+  problemId?: string | null
+  createdById?: string | null
   id?: string
   title: string
   s3Key: string
@@ -309,16 +340,20 @@ export type VideoUncheckedCreateInput = {
 }
 
 export type VideoUpdateInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  problem?: Prisma.ProblemUpdateOneWithoutVideosNestedInput
   chapter?: Prisma.ChapterUpdateOneWithoutVideosNestedInput
 }
 
 export type VideoUncheckedUpdateInput = {
+  problemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
@@ -329,6 +364,8 @@ export type VideoUncheckedUpdateInput = {
 }
 
 export type VideoCreateManyInput = {
+  problemId?: string | null
+  createdById?: string | null
   id?: string
   title: string
   s3Key: string
@@ -339,6 +376,7 @@ export type VideoCreateManyInput = {
 }
 
 export type VideoUpdateManyMutationInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
@@ -348,6 +386,8 @@ export type VideoUpdateManyMutationInput = {
 }
 
 export type VideoUncheckedUpdateManyInput = {
+  problemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
@@ -368,6 +408,8 @@ export type VideoOrderByRelationAggregateInput = {
 }
 
 export type VideoCountOrderByAggregateInput = {
+  problemId?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   s3Key?: Prisma.SortOrder
@@ -382,6 +424,8 @@ export type VideoAvgOrderByAggregateInput = {
 }
 
 export type VideoMaxOrderByAggregateInput = {
+  problemId?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   s3Key?: Prisma.SortOrder
@@ -392,6 +436,8 @@ export type VideoMaxOrderByAggregateInput = {
 }
 
 export type VideoMinOrderByAggregateInput = {
+  problemId?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   s3Key?: Prisma.SortOrder
@@ -447,16 +493,62 @@ export type VideoUncheckedUpdateManyWithoutChapterNestedInput = {
   deleteMany?: Prisma.VideoScalarWhereInput | Prisma.VideoScalarWhereInput[]
 }
 
+export type VideoCreateNestedManyWithoutProblemInput = {
+  create?: Prisma.XOR<Prisma.VideoCreateWithoutProblemInput, Prisma.VideoUncheckedCreateWithoutProblemInput> | Prisma.VideoCreateWithoutProblemInput[] | Prisma.VideoUncheckedCreateWithoutProblemInput[]
+  connectOrCreate?: Prisma.VideoCreateOrConnectWithoutProblemInput | Prisma.VideoCreateOrConnectWithoutProblemInput[]
+  createMany?: Prisma.VideoCreateManyProblemInputEnvelope
+  connect?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+}
+
+export type VideoUncheckedCreateNestedManyWithoutProblemInput = {
+  create?: Prisma.XOR<Prisma.VideoCreateWithoutProblemInput, Prisma.VideoUncheckedCreateWithoutProblemInput> | Prisma.VideoCreateWithoutProblemInput[] | Prisma.VideoUncheckedCreateWithoutProblemInput[]
+  connectOrCreate?: Prisma.VideoCreateOrConnectWithoutProblemInput | Prisma.VideoCreateOrConnectWithoutProblemInput[]
+  createMany?: Prisma.VideoCreateManyProblemInputEnvelope
+  connect?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+}
+
+export type VideoUpdateManyWithoutProblemNestedInput = {
+  create?: Prisma.XOR<Prisma.VideoCreateWithoutProblemInput, Prisma.VideoUncheckedCreateWithoutProblemInput> | Prisma.VideoCreateWithoutProblemInput[] | Prisma.VideoUncheckedCreateWithoutProblemInput[]
+  connectOrCreate?: Prisma.VideoCreateOrConnectWithoutProblemInput | Prisma.VideoCreateOrConnectWithoutProblemInput[]
+  upsert?: Prisma.VideoUpsertWithWhereUniqueWithoutProblemInput | Prisma.VideoUpsertWithWhereUniqueWithoutProblemInput[]
+  createMany?: Prisma.VideoCreateManyProblemInputEnvelope
+  set?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  disconnect?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  delete?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  connect?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  update?: Prisma.VideoUpdateWithWhereUniqueWithoutProblemInput | Prisma.VideoUpdateWithWhereUniqueWithoutProblemInput[]
+  updateMany?: Prisma.VideoUpdateManyWithWhereWithoutProblemInput | Prisma.VideoUpdateManyWithWhereWithoutProblemInput[]
+  deleteMany?: Prisma.VideoScalarWhereInput | Prisma.VideoScalarWhereInput[]
+}
+
+export type VideoUncheckedUpdateManyWithoutProblemNestedInput = {
+  create?: Prisma.XOR<Prisma.VideoCreateWithoutProblemInput, Prisma.VideoUncheckedCreateWithoutProblemInput> | Prisma.VideoCreateWithoutProblemInput[] | Prisma.VideoUncheckedCreateWithoutProblemInput[]
+  connectOrCreate?: Prisma.VideoCreateOrConnectWithoutProblemInput | Prisma.VideoCreateOrConnectWithoutProblemInput[]
+  upsert?: Prisma.VideoUpsertWithWhereUniqueWithoutProblemInput | Prisma.VideoUpsertWithWhereUniqueWithoutProblemInput[]
+  createMany?: Prisma.VideoCreateManyProblemInputEnvelope
+  set?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  disconnect?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  delete?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  connect?: Prisma.VideoWhereUniqueInput | Prisma.VideoWhereUniqueInput[]
+  update?: Prisma.VideoUpdateWithWhereUniqueWithoutProblemInput | Prisma.VideoUpdateWithWhereUniqueWithoutProblemInput[]
+  updateMany?: Prisma.VideoUpdateManyWithWhereWithoutProblemInput | Prisma.VideoUpdateManyWithWhereWithoutProblemInput[]
+  deleteMany?: Prisma.VideoScalarWhereInput | Prisma.VideoScalarWhereInput[]
+}
+
 export type VideoCreateWithoutChapterInput = {
+  createdById?: string | null
   id?: string
   title: string
   s3Key: string
   duration?: number | null
   createdAt?: Date | string
   deletedAt?: Date | string | null
+  problem?: Prisma.ProblemCreateNestedOneWithoutVideosInput
 }
 
 export type VideoUncheckedCreateWithoutChapterInput = {
+  problemId?: string | null
+  createdById?: string | null
   id?: string
   title: string
   s3Key: string
@@ -495,6 +587,8 @@ export type VideoScalarWhereInput = {
   AND?: Prisma.VideoScalarWhereInput | Prisma.VideoScalarWhereInput[]
   OR?: Prisma.VideoScalarWhereInput[]
   NOT?: Prisma.VideoScalarWhereInput | Prisma.VideoScalarWhereInput[]
+  problemId?: Prisma.StringNullableFilter<"Video"> | string | null
+  createdById?: Prisma.StringNullableFilter<"Video"> | string | null
   id?: Prisma.StringFilter<"Video"> | string
   title?: Prisma.StringFilter<"Video"> | string
   s3Key?: Prisma.StringFilter<"Video"> | string
@@ -504,7 +598,57 @@ export type VideoScalarWhereInput = {
   deletedAt?: Prisma.DateTimeNullableFilter<"Video"> | Date | string | null
 }
 
+export type VideoCreateWithoutProblemInput = {
+  createdById?: string | null
+  id?: string
+  title: string
+  s3Key: string
+  duration?: number | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  chapter?: Prisma.ChapterCreateNestedOneWithoutVideosInput
+}
+
+export type VideoUncheckedCreateWithoutProblemInput = {
+  createdById?: string | null
+  id?: string
+  title: string
+  s3Key: string
+  duration?: number | null
+  chapterId?: string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type VideoCreateOrConnectWithoutProblemInput = {
+  where: Prisma.VideoWhereUniqueInput
+  create: Prisma.XOR<Prisma.VideoCreateWithoutProblemInput, Prisma.VideoUncheckedCreateWithoutProblemInput>
+}
+
+export type VideoCreateManyProblemInputEnvelope = {
+  data: Prisma.VideoCreateManyProblemInput | Prisma.VideoCreateManyProblemInput[]
+  skipDuplicates?: boolean
+}
+
+export type VideoUpsertWithWhereUniqueWithoutProblemInput = {
+  where: Prisma.VideoWhereUniqueInput
+  update: Prisma.XOR<Prisma.VideoUpdateWithoutProblemInput, Prisma.VideoUncheckedUpdateWithoutProblemInput>
+  create: Prisma.XOR<Prisma.VideoCreateWithoutProblemInput, Prisma.VideoUncheckedCreateWithoutProblemInput>
+}
+
+export type VideoUpdateWithWhereUniqueWithoutProblemInput = {
+  where: Prisma.VideoWhereUniqueInput
+  data: Prisma.XOR<Prisma.VideoUpdateWithoutProblemInput, Prisma.VideoUncheckedUpdateWithoutProblemInput>
+}
+
+export type VideoUpdateManyWithWhereWithoutProblemInput = {
+  where: Prisma.VideoScalarWhereInput
+  data: Prisma.XOR<Prisma.VideoUpdateManyMutationInput, Prisma.VideoUncheckedUpdateManyWithoutProblemInput>
+}
+
 export type VideoCreateManyChapterInput = {
+  problemId?: string | null
+  createdById?: string | null
   id?: string
   title: string
   s3Key: string
@@ -514,15 +658,19 @@ export type VideoCreateManyChapterInput = {
 }
 
 export type VideoUpdateWithoutChapterInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  problem?: Prisma.ProblemUpdateOneWithoutVideosNestedInput
 }
 
 export type VideoUncheckedUpdateWithoutChapterInput = {
+  problemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
@@ -532,6 +680,8 @@ export type VideoUncheckedUpdateWithoutChapterInput = {
 }
 
 export type VideoUncheckedUpdateManyWithoutChapterInput = {
+  problemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   s3Key?: Prisma.StringFieldUpdateOperationsInput | string
@@ -540,9 +690,55 @@ export type VideoUncheckedUpdateManyWithoutChapterInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type VideoCreateManyProblemInput = {
+  createdById?: string | null
+  id?: string
+  title: string
+  s3Key: string
+  duration?: number | null
+  chapterId?: string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type VideoUpdateWithoutProblemInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  s3Key?: Prisma.StringFieldUpdateOperationsInput | string
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  chapter?: Prisma.ChapterUpdateOneWithoutVideosNestedInput
+}
+
+export type VideoUncheckedUpdateWithoutProblemInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  s3Key?: Prisma.StringFieldUpdateOperationsInput | string
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type VideoUncheckedUpdateManyWithoutProblemInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  s3Key?: Prisma.StringFieldUpdateOperationsInput | string
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 
 
 export type VideoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  problemId?: boolean
+  createdById?: boolean
   id?: boolean
   title?: boolean
   s3Key?: boolean
@@ -550,10 +746,13 @@ export type VideoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   chapterId?: boolean
   createdAt?: boolean
   deletedAt?: boolean
+  problem?: boolean | Prisma.Video$problemArgs<ExtArgs>
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
 
 export type VideoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  problemId?: boolean
+  createdById?: boolean
   id?: boolean
   title?: boolean
   s3Key?: boolean
@@ -561,10 +760,13 @@ export type VideoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   chapterId?: boolean
   createdAt?: boolean
   deletedAt?: boolean
+  problem?: boolean | Prisma.Video$problemArgs<ExtArgs>
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
 
 export type VideoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  problemId?: boolean
+  createdById?: boolean
   id?: boolean
   title?: boolean
   s3Key?: boolean
@@ -572,10 +774,13 @@ export type VideoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   chapterId?: boolean
   createdAt?: boolean
   deletedAt?: boolean
+  problem?: boolean | Prisma.Video$problemArgs<ExtArgs>
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
 
 export type VideoSelectScalar = {
+  problemId?: boolean
+  createdById?: boolean
   id?: boolean
   title?: boolean
   s3Key?: boolean
@@ -585,23 +790,29 @@ export type VideoSelectScalar = {
   deletedAt?: boolean
 }
 
-export type VideoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "s3Key" | "duration" | "chapterId" | "createdAt" | "deletedAt", ExtArgs["result"]["video"]>
+export type VideoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"problemId" | "createdById" | "id" | "title" | "s3Key" | "duration" | "chapterId" | "createdAt" | "deletedAt", ExtArgs["result"]["video"]>
 export type VideoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  problem?: boolean | Prisma.Video$problemArgs<ExtArgs>
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }
 export type VideoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  problem?: boolean | Prisma.Video$problemArgs<ExtArgs>
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }
 export type VideoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  problem?: boolean | Prisma.Video$problemArgs<ExtArgs>
   chapter?: boolean | Prisma.Video$chapterArgs<ExtArgs>
 }
 
 export type $VideoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Video"
   objects: {
+    problem: Prisma.$ProblemPayload<ExtArgs> | null
     chapter: Prisma.$ChapterPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    problemId: string | null
+    createdById: string | null
     id: string
     title: string
     s3Key: string
@@ -692,8 +903,8 @@ export interface VideoDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    * // Get first 10 Videos
    * const videos = await prisma.video.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const videoWithIdOnly = await prisma.video.findMany({ select: { id: true } })
+   * // Only select the `problemId`
+   * const videoWithProblemIdOnly = await prisma.video.findMany({ select: { problemId: true } })
    * 
    */
   findMany<T extends VideoFindManyArgs>(args?: Prisma.SelectSubset<T, VideoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -737,9 +948,9 @@ export interface VideoDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    *   ]
    * })
    * 
-   * // Create many Videos and only return the `id`
-   * const videoWithIdOnly = await prisma.video.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many Videos and only return the `problemId`
+   * const videoWithProblemIdOnly = await prisma.video.createManyAndReturn({
+   *   select: { problemId: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -828,9 +1039,9 @@ export interface VideoDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    *   ]
    * })
    * 
-   * // Update zero or more Videos and only return the `id`
-   * const videoWithIdOnly = await prisma.video.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more Videos and only return the `problemId`
+   * const videoWithProblemIdOnly = await prisma.video.updateManyAndReturn({
+   *   select: { problemId: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1003,6 +1214,7 @@ readonly fields: VideoFieldRefs;
  */
 export interface Prisma__VideoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  problem<T extends Prisma.Video$problemArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Video$problemArgs<ExtArgs>>): Prisma.Prisma__ProblemClient<runtime.Types.Result.GetResult<Prisma.$ProblemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   chapter<T extends Prisma.Video$chapterArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Video$chapterArgs<ExtArgs>>): Prisma.Prisma__ChapterClient<runtime.Types.Result.GetResult<Prisma.$ChapterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1033,6 +1245,8 @@ export interface Prisma__VideoClient<T, Null = never, ExtArgs extends runtime.Ty
  * Fields of the Video model
  */
 export interface VideoFieldRefs {
+  readonly problemId: Prisma.FieldRef<"Video", 'String'>
+  readonly createdById: Prisma.FieldRef<"Video", 'String'>
   readonly id: Prisma.FieldRef<"Video", 'String'>
   readonly title: Prisma.FieldRef<"Video", 'String'>
   readonly s3Key: Prisma.FieldRef<"Video", 'String'>
@@ -1438,6 +1652,25 @@ export type VideoDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Limit how many Videos to delete.
    */
   limit?: number
+}
+
+/**
+ * Video.problem
+ */
+export type Video$problemArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Problem
+   */
+  select?: Prisma.ProblemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Problem
+   */
+  omit?: Prisma.ProblemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProblemInclude<ExtArgs> | null
+  where?: Prisma.ProblemWhereInput
 }
 
 /**

@@ -12,6 +12,9 @@ describe('ReconcileService', () => {
   let payments: PaymentsService;
 
   const mockPrisma = {
+    $executeRaw: jest.fn().mockResolvedValue(1),
+    $queryRaw: jest.fn().mockResolvedValue([]),
+    $transaction: jest.fn(async (callback) => callback(mockPrisma)),
     bankTransaction: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -86,12 +89,25 @@ describe('ReconcileService', () => {
 
       mockPrisma.bankTransaction.findUnique.mockResolvedValue(null);
       mockPrisma.bankTransaction.create
-        .mockResolvedValueOnce({ id: 'tx1', amount: 50000, bookedAt: new Date() })
-        .mockResolvedValueOnce({ id: 'tx2', amount: 60000, bookedAt: new Date() });
+        .mockResolvedValueOnce({
+          id: 'tx1',
+          amount: 50000,
+          bookedAt: new Date(),
+        })
+        .mockResolvedValueOnce({
+          id: 'tx2',
+          amount: 60000,
+          bookedAt: new Date(),
+        });
       mockPrisma.payment.create.mockResolvedValueOnce({ id: 'pay1' });
       mockPrisma.bankTransaction.update.mockResolvedValueOnce({ id: 'tx1' });
 
-      const result = await service.importFromFile(csvBuffer, 'csv', {} as any, 'admin1');
+      const result = await service.importFromFile(
+        csvBuffer,
+        'csv',
+        {} as any,
+        'admin1',
+      );
 
       expect(result.imported).toBe(2);
       expect(result.matched).toBe(1); // зөвхөн утас+дүн хоёул таарсан нь
@@ -112,9 +128,16 @@ describe('ReconcileService', () => {
 
       mockPrisma.user.findMany.mockResolvedValueOnce([]);
       // ӨС-д ижил bankRef аль хэдийн байгаа гэж дуурайна
-      mockPrisma.bankTransaction.findUnique.mockResolvedValueOnce({ id: 'existing' });
+      mockPrisma.bankTransaction.findUnique.mockResolvedValueOnce({
+        id: 'existing',
+      });
 
-      const result = await service.importFromFile(csvBuffer, 'csv', {} as any, 'admin1');
+      const result = await service.importFromFile(
+        csvBuffer,
+        'csv',
+        {} as any,
+        'admin1',
+      );
 
       expect(result.skipped).toBeGreaterThanOrEqual(1);
       expect(mockPrisma.bankTransaction.create).not.toHaveBeenCalled();
@@ -128,7 +151,12 @@ describe('ReconcileService', () => {
 
       mockPrisma.user.findMany.mockResolvedValueOnce([]);
 
-      const result = await service.importFromFile(csvBuffer, 'csv', {} as any, 'admin1');
+      const result = await service.importFromFile(
+        csvBuffer,
+        'csv',
+        {} as any,
+        'admin1',
+      );
 
       expect(result.imported).toBe(0);
       expect(mockPrisma.bankTransaction.create).not.toHaveBeenCalled();
@@ -145,8 +173,7 @@ describe('ReconcileService', () => {
 
     it('УБ цагийн бүсийн огноог зөв хөрвүүлнэ (+08:00)', async () => {
       const csvBuffer = Buffer.from(
-        KHAN_HEADER +
-          '2026-01-15 10:00:00,5000,0,50000.00,0,50000.00,тест,1',
+        KHAN_HEADER + '2026-01-15 10:00:00,5000,0,50000.00,0,50000.00,тест,1',
       );
       mockPrisma.user.findMany.mockResolvedValueOnce([]);
       mockPrisma.bankTransaction.findUnique.mockResolvedValueOnce(null);

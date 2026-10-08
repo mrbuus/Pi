@@ -210,3 +210,17 @@ describe('TeacherGroupsService external teacher verification lists', () => {
     });
   });
 });
+
+
+describe('independent group registration', () => {
+  it('activates only the newly created group profile without an administrator verifier', async () => {
+    const create = jest.fn(({ data }) => Promise.resolve({ id: 'new-teacher', ...data, externalTeacherProfile: data.externalTeacherProfile.create }));
+    const update = jest.fn();
+    const service = new TeacherGroupsService({ user: { findUnique: jest.fn().mockResolvedValue(null), create }, externalTeacherProfile: { update } } as never);
+    const result = await service.registerExternalTeacher({ email: 'new@example.test', password: 'synthetic-password', firstName: 'New', lastName: 'Teacher' });
+    expect(create.mock.calls[0][0].data).toMatchObject({ role: 'TEACHER', externalTeacherProfile: { create: { verifiedAt: expect.any(Date), verifiedById: null } } });
+    expect(create.mock.calls[0][0].data.passwordHash).not.toBe('synthetic-password');
+    expect(result.verifiedAt).toBeInstanceOf(Date);
+    expect(update).not.toHaveBeenCalled();
+  });
+});

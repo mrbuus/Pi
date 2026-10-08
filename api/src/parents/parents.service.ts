@@ -1,6 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { canAccessChapter } from '../common/access';
+import {
+  historyWindow,
+  historyPage,
+  parentLearningMeta,
+  enrollmentDayScopes,
+} from './parent-history';
 import { EmailOtpService } from '../notifications/email-otp.service';
 
 @Injectable()
@@ -19,7 +31,6 @@ export class ParentsService {
         lastName: true,
         phone: true,
         role: true,
-        studentProfile: { select: { grade: true, school: true } },
       },
     });
     if (!student || student.role !== Role.STUDENT) {
@@ -37,24 +48,54 @@ export class ParentsService {
             firstName: true,
             lastName: true,
             phone: true,
-            studentProfile: { select: { grade: true, school: true } },
           },
         },
       },
     });
   }
 
+  private async assertVerifiedChild(parentId: string, studentId: string) {
+    const link = await this.prisma.parentLink.findUnique({
+      where: { parentId_studentId: { parentId, studentId } },
+      select: { id: true, verifiedAt: true },
+    });
+    if (!link?.verifiedAt)
+      throw new ForbiddenException('Хүүхэдтэй холболт баталгаажаагүй байна.');
+    return link;
+  }
+
   async myChildren(parentId: string) {
+    // First read only identity + verification. Pending links never query pupil records.
     const links = await this.prisma.parentLink.findMany({
       where: { parentId },
-      include: {
+      select: {
+        id: true,
+        verifiedAt: true,
+        studentId: true,
         student: {
           select: {
             id: true,
             firstName: true,
             lastName: true,
             phone: true,
-            studentProfile: { select: { grade: true, school: true } },
+          },
+        },
+      },
+      orderBy: { id: 'asc' },
+    });
+    return Promise.all(
+      links.map(async (link) => {
+        if (!link.verifiedAt) return { ...link, verified: false };
+        const student = await this.prisma.user.findUnique({
+          where: { id: link.studentId },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            studentProfile: {
+              select: { grade: true, school: true, type: true },
+            },
             enrollments: {
               where: { leftAt: null },
               select: {
@@ -72,8 +113,6 @@ export class ParentsService {
               orderBy: { date: 'desc' },
               take: 12,
             },
-            // Танхимын анги: багш ангид шалгаад тэмдэглэдэг (DailyHomeworkMark).
-            // Онлайн анги: доорх submissions. Эзний шийдвэр 2026-09-26.
             dailyHomeworkMarks: {
               where: { status: { not: null } },
               select: {
@@ -87,8 +126,9 @@ export class ParentsService {
             },
             submissions: {
               select: {
+                id: true,
                 state: true,
-                note: true,
+                imageKeys: true,
                 submittedAt: true,
                 checkedAt: true,
                 assignment: {
@@ -104,56 +144,294 @@ export class ParentsService {
             },
             testResults: {
               select: {
+                id: true,
                 totalScore: true,
                 maxScore: true,
                 source: true,
                 createdAt: true,
                 test: { select: { title: true, type: true } },
+                acknowledgements: {
+                  where: { parentId },
+                  select: { verifiedAt: true },
+                },
               },
               orderBy: { createdAt: 'desc' },
               take: 8,
             },
             payments: {
-              select: {
-                id: true,
-                status: true,
-                amount: true,
-                createdAt: true,
-              },
+              select: { id: true, status: true, amount: true, createdAt: true },
               orderBy: { createdAt: 'desc' },
               take: 12,
             },
           },
-        },
-      },
-      orderBy: { id: 'asc' },
-    });
-
-    return links.map((link) => {
-      const { student, ...rest } = link;
-      if (!link.verifiedAt) {
+        });
+        if (!student) throw new NotFoundException('Сурагч олдсонгүй.');
         return {
-          ...rest,
-          verified: false,
+          id: link.id,
+          verifiedAt: link.verifiedAt,
+          verified: true,
           student: {
-            id: student.id,
-            firstName: student.firstName,
-            lastName: student.lastName,
-            phone: student.phone,
-            studentProfile: student.studentProfile,
+            ...student,
+            classroom: student.enrollments[0]?.classroom ?? null,
+            joinedAt: student.enrollments[0]?.joinedAt ?? null,
           },
         };
-      }
-      return {
-        ...rest,
-        verified: true,
-        student: {
-          ...student,
-          classroom: student.enrollments[0]?.classroom ?? null,
-          joinedAt: student.enrollments[0]?.joinedAt ?? null,
-        },
-      };
+      }),
+    );
+  }
+
+  async childHistory(
+    parentId: string,
+    studentId: string,
+    year?: string,
+    page?: string,
+  ) {
+    await this.assertVerifiedChild(parentId, studentId);
+    const window = historyWindow(year, page);
+    const dates = { gte: window.start, lt: window.end };
+    const paging = { skip: window.skip, take: window.take };
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { studentId },
+      select: { classroomId: true, joinedAt: true, leftAt: true },
     });
+    const scopes = enrollmentDayScopes(enrollments, window.start, window.end);
+    const [
+      days,
+      eventCount,
+      attempts,
+      events,
+      homework,
+      submissions,
+      results,
+      attendance,
+      dismissals,
+      lessonPackets,
+    ] = await Promise.all([
+      this.prisma.attempt.groupBy({
+        by: ['occurredOn'],
+        where: { studentId, occurredOn: dates },
+        _count: { _all: true },
+        orderBy: { occurredOn: 'asc' },
+      }),
+      this.prisma.learningEvent.count({
+        where: {
+          userId: studentId,
+          occurredAt: dates,
+          OR: [
+            { id: { startsWith: 'lab-first-' } },
+            { id: { startsWith: 'lab-event-' } },
+          ],
+          meta: { path: ['lab'], equals: 'v1' },
+        },
+      }),
+      this.prisma.attempt.findMany({
+        where: { studentId, occurredOn: dates },
+        select: {
+          id: true,
+          problemId: true,
+          testId: true,
+          source: true,
+          occurredOn: true,
+          createdAt: true,
+          autoCorrect: true,
+          selfState: true,
+          givenAnswer: true,
+          problem: {
+            select: {
+              token: true,
+              chapterId: true,
+              chapter: { select: { title: true } },
+            },
+          },
+        },
+        orderBy: [{ occurredOn: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+      this.prisma.learningEvent.findMany({
+        where: {
+          userId: studentId,
+          occurredAt: dates,
+          OR: [
+            { id: { startsWith: 'lab-first-' } },
+            { id: { startsWith: 'lab-event-' } },
+          ],
+          meta: { path: ['lab'], equals: 'v1' },
+        },
+        select: {
+          id: true,
+          problemId: true,
+          chapterId: true,
+          occurredAt: true,
+          meta: true,
+        },
+        orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+      this.prisma.dailyHomeworkMark.findMany({
+        where: { studentId, date: dates, status: { not: null } },
+        select: {
+          id: true,
+          date: true,
+          status: true,
+          comment: true,
+          classroom: { select: { name: true } },
+        },
+        orderBy: [{ date: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+      this.prisma.submission.findMany({
+        where: {
+          studentId,
+          OR: [
+            { submittedAt: dates },
+            { checkedAt: dates },
+            { updatedAt: dates },
+            { revisions: { some: { at: dates } } },
+          ],
+        },
+        select: {
+          id: true,
+          state: true,
+          studentNote: true,
+          reviewNote: true,
+          revisions: {
+            where: { at: dates },
+            select: {
+              id: true,
+              action: true,
+              state: true,
+              studentNote: true,
+              reviewNote: true,
+              imageKeys: true,
+              at: true,
+            },
+            orderBy: { at: 'asc' },
+          },
+          imageKeys: true,
+          submittedAt: true,
+          checkedAt: true,
+          assignment: {
+            select: {
+              title: true,
+              dueDate: true,
+              classroom: { select: { name: true } },
+            },
+          },
+        },
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+      this.prisma.testResult.findMany({
+        where: { studentId, createdAt: dates },
+        select: {
+          id: true,
+          testId: true,
+          totalScore: true,
+          maxScore: true,
+          source: true,
+          createdAt: true,
+          test: { select: { title: true, type: true } },
+          acknowledgements: {
+            where: { parentId },
+            select: { verifiedAt: true },
+          },
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+      this.prisma.attendance.findMany({
+        where: { studentId, date: dates },
+        select: {
+          id: true,
+          date: true,
+          status: true,
+          classroom: { select: { name: true } },
+        },
+        orderBy: [{ date: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+      this.prisma.classDismissal.findMany({
+        where: scopes.length ? { OR: scopes } : { id: { in: [] } },
+        select: {
+          id: true,
+          date: true,
+          approximateAt: true,
+          lastLeftAt: true,
+          note: true,
+          classroom: { select: { name: true } },
+        },
+        orderBy: [{ date: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+      this.prisma.lessonPacket.findMany({
+        where: scopes.length ? { OR: scopes } : { id: { in: [] } },
+        select: {
+          id: true,
+          date: true,
+          chapter: { select: { title: true } },
+          receipts: {
+            where: { studentId },
+            select: {
+              id: true,
+              kind: true,
+              imageKeys: true,
+              submittedAt: true,
+            },
+          },
+        },
+        orderBy: [{ date: 'desc' }, { id: 'desc' }],
+        ...paging,
+      }),
+    ]);
+    return {
+      year: window.year,
+      page: window.page,
+      pageSize: 50,
+      summary: {
+        activeDays: days.length,
+        attemptCount: days.reduce((sum, d) => sum + d._count._all, 0),
+        learningEventCount: eventCount,
+        days: days.map((d) => ({
+          date: d.occurredOn,
+          attempts: d._count._all,
+        })),
+      },
+      attempts: historyPage(attempts),
+      learning: historyPage(
+        events.map((e) => ({
+          id: e.id,
+          problemId: e.problemId,
+          chapterId: e.chapterId,
+          at: e.occurredAt,
+          evidence: parentLearningMeta(e.meta),
+        })),
+      ),
+      homework: historyPage(homework),
+      submissions: historyPage(submissions),
+      results: historyPage(results),
+      attendance: historyPage(attendance),
+      dismissals: historyPage(dismissals),
+      lessonPackets: historyPage(lessonPackets),
+    };
+  }
+
+  async childTheory(parentId: string, studentId: string, chapterId: string) {
+    await this.assertVerifiedChild(parentId, studentId);
+    const chapter = await this.prisma.chapter.findUnique({
+      where: { id: chapterId },
+      select: { id: true, bookId: true, freePreview: true, title: true },
+    });
+    if (!chapter) throw new NotFoundException('Хичээл олдсонгүй.');
+    if (
+      !(await canAccessChapter(this.prisma, studentId, Role.STUDENT, chapter))
+    )
+      throw new ForbiddenException('Энэ хичээлийг үзэх эрхгүй.');
+    const theories = await this.prisma.theoryBlock.findMany({
+      where: { chapterId },
+      select: { id: true, title: true, content: true, imageKeys: true },
+      orderBy: { order: 'asc' },
+    });
+    return { chapter: { id: chapter.id, title: chapter.title }, theories };
   }
 
   pendingLinks() {
@@ -229,12 +507,7 @@ export class ParentsService {
     }
 
     // Хүүхэд олдох ба холбоотой байх ба CLASSROOM-д эргүүлэх
-    const link = await this.prisma.parentLink.findUnique({
-      where: { parentId_studentId: { parentId, studentId: result.studentId } },
-    });
-    if (!link) {
-      throw new BadRequestException('Та энэ сурагчийн эцэг эх биш байна');
-    }
+    await this.assertVerifiedChild(parentId, result.studentId);
 
     if (result.student.studentProfile?.type !== StudentType.CLASSROOM) {
       throw new BadRequestException(
@@ -253,7 +526,7 @@ export class ParentsService {
     const maskEmail = await this.emailOtp.sendOtp({
       userId: parentId,
       email: result.student.email,
-      purpose: 'RESULT_ACK',
+      purpose: `RESULT_ACK:${testResultId}`,
     });
 
     return maskEmail;
@@ -287,15 +560,14 @@ export class ParentsService {
     }
 
     // Холбоотой байх
-    const link = await this.prisma.parentLink.findUnique({
-      where: { parentId_studentId: { parentId, studentId: result.studentId } },
-    });
-    if (!link) {
-      throw new BadRequestException('Та энэ сурагчийн эцэг эх биш байна');
-    }
+    await this.assertVerifiedChild(parentId, result.studentId);
 
     // Код шалгана
-    await this.emailOtp.verifyOtp(parentId, 'RESULT_ACK', code);
+    if (result.student.studentProfile?.type !== StudentType.CLASSROOM)
+      throw new BadRequestException(
+        'Танхимын сурагчийн дүнтэй танилцах боломжтой.',
+      );
+    await this.emailOtp.verifyOtp(parentId, `RESULT_ACK:${testResultId}`, code);
 
     // Баталгаажуулалт үүсгэнэ (давтан оруулахад байгаа бичлэгээ буцаана)
     const ack = await this.prisma.resultAcknowledgement.upsert({
@@ -374,8 +646,9 @@ export class ParentsService {
         parentName: `${link.parent.lastName} ${link.parent.firstName}`,
         parentEmail: link.parent.email,
         isVerified: link.verifiedAt !== null,
-        acknowledgedAt: r.acknowledgements.find((a) => a.parentId === link.parent.id)
-          ?.verifiedAt,
+        acknowledgedAt: r.acknowledgements.find(
+          (a) => a.parentId === link.parent.id,
+        )?.verifiedAt,
         channel: r.acknowledgements.find((a) => a.parentId === link.parent.id)
           ?.channel,
       })),

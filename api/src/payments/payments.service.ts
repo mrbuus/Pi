@@ -1,8 +1,11 @@
 import {
   BadRequestException,
+  ConflictException,
+  ServiceUnavailableException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { paymentCreateHash, paymentCreateKey } from './create-idempotency';
 import { AuditService } from '../audit/audit.service';
 import { generateStudentCode } from '../common/codes';
 import { QpayService } from '../gateways/qpay.service';
@@ -11,6 +14,7 @@ import {
   PaymentMethod,
   PaymentStatus,
   StudentType,
+  Role,
 } from '../generated/prisma/enums';
 import { PassesService } from '../passes/passes.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -49,81 +53,220 @@ export class PaymentsService {
     private qpay: QpayService,
   ) {}
 
-  async create(dto: CreatePaymentDto, userId: string, actorRole: string) {
-    // АЮУЛГҮЙЛАЛТ: сурагч өөрийн төлбөр үүсгэхдээ дүнгийн хязгаарлалт
-    // (ажилтан биш үед). Ажилтан (ADMIN, TEACHER_PLUS) дүнгээ чөлөөтэй оруулч болно.
-    if (actorRole === 'STUDENT') {
-      const student = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { studentProfile: { select: { tuitionAmount: true } } },
-      });
-      const maxAllowed = student?.studentProfile?.tuitionAmount ?? 0;
-      if (maxAllowed <= 0) {
-        throw new BadRequestException(
-          'Таны төлбөрийн хэмжээ тогтоогдоогүй байна. Администратораас үзүүлэлт авна уу.',
-        );
-      }
-      // Сурагч хүлээгдэж буй дүнгээ хэтрүүлж чадахгүй болгоно
-      if (dto.amount > maxAllowed) {
-        throw new BadRequestException(
-          `Төлбөрийн дүн ${maxAllowed}₮-аас их болохгүй байна`,
-        );
-      }
-    }
-
-    const payment = await this.prisma.payment.create({
-      data: {
-        userId,
-        amount: dto.amount,
-        method: dto.method,
-        description: dto.description,
-        forMonth: dto.forMonth,
-        // QPay автоматаар, данс/бэлэн гараар баталгаажина (SPEC §12.2)
-        status: PaymentStatus.PENDING,
-        paidAt: dto.method === PaymentMethod.QPAY ? undefined : new Date(),
+  async readForCheckout(id: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+        amount: true,
+        paidAt: true,
       },
     });
+    if (!payment) throw new NotFoundException('Төлбөр олдсонгүй');
+    return payment;
+  }
+
+  async createManual(
+    dto: CreatePaymentDto,
+    userId: string,
+    actor: PaymentActor,
+  ) {
+    if (dto.method === PaymentMethod.QPAY)
+      throw new BadRequestException('Гараар бүртгэх төлбөр QPay байж болохгүй');
+    const target = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        archivedAt: null,
+        role: { in: [Role.STUDENT, Role.BUYER] },
+      },
+      select: { id: true },
+    });
+    if (!target)
+      throw new BadRequestException(
+        'Идэвхтэй сурагч эсвэл худалдан авагч шаардлагатай',
+      );
+    return this.create(dto, target.id, actor.role, actor.id);
+  }
+
+  async create(
+    dto: CreatePaymentDto,
+    userId: string,
+    actorRole: string,
+    actorId = userId,
+  ) {
+    const clientRequestId = paymentCreateKey(dto.clientRequestId);
+    const normalizedRequestHash = paymentCreateHash(dto);
+    const createNew = async (db: Prisma.TransactionClient | PrismaService) => {
+      if (!dto.purchaseId && dto.amount < 1000)
+        throw new BadRequestException('Дүн 1000₮-өөс багагүй байна');
+      if (dto.purchaseId) {
+        if (dto.forMonth)
+          throw new BadRequestException(
+            'Дэлгүүрийн төлбөрийг сургалтын сартай хольж болохгүй',
+          );
+        const quote = await db.purchase.findFirst({
+          where: { id: dto.purchaseId, userId, grantedAt: null },
+          select: {
+            price: true,
+            expiresAt: true,
+            productItem: { select: { active: true, kind: true, refId: true } },
+          },
+        });
+        if (
+          !quote ||
+          !quote.productItem.active ||
+          (quote.expiresAt && quote.expiresAt <= new Date())
+        )
+          throw new BadRequestException(
+            'Өөрийн хүлээгдэж буй идэвхтэй худалдан авалт шаардлагатай',
+          );
+        const ref = quote.productItem;
+        if (
+          ref.kind === 'TEST' &&
+          !(await db.test.findFirst({
+            where: { id: ref.refId, isDraft: false, deletedAt: null },
+            select: { id: true },
+          }))
+        )
+          throw new BadRequestException('Шалгалт нийтлэгдээгүй байна');
+        if (
+          ref.kind === 'BOOK' &&
+          !(await db.book.findFirst({
+            where: { id: ref.refId, deletedAt: null },
+            select: { id: true },
+          }))
+        )
+          throw new BadRequestException('Ном идэвхгүй байна');
+        if (
+          ref.kind === 'PASS' &&
+          !(await db.pass.findFirst({
+            where: { id: ref.refId, active: true },
+            select: { id: true },
+          }))
+        )
+          throw new BadRequestException('Эрх идэвхгүй байна');
+        if (quote.price === 0)
+          throw new BadRequestException(
+            'Үнэгүй бүтээгдэхүүнийг дэлгүүрээс төлбөргүй нээнэ',
+          );
+        if (dto.amount !== quote.price)
+          throw new BadRequestException(
+            'Төлбөрийн дүн худалдан авалтын серверийн үнэтэй таарна',
+          );
+      } else if (actorRole === 'STUDENT') {
+        const student = await db.user.findUnique({
+          where: { id: userId },
+          select: { studentProfile: { select: { tuitionAmount: true } } },
+        });
+        const maxAllowed = student?.studentProfile?.tuitionAmount ?? 0;
+        if (maxAllowed <= 0 || dto.amount > maxAllowed)
+          throw new BadRequestException(
+            'Төлбөрийн дүн сургалтын тогтоосон хэмжээнд байна',
+          );
+      }
+      if (dto.method === PaymentMethod.QPAY && !this.qpay.isConfigured())
+        throw new BadRequestException(
+          'QPay тохиргоо хийгдээгүй байна. Дансаар шилжүүлэх аргыг сонгоно уу.',
+        );
+      return db.payment.create({
+        data: {
+          userId,
+          storePurchaseId: dto.purchaseId,
+          amount: dto.amount,
+          method: dto.method,
+          description: dto.description,
+          forMonth: dto.forMonth,
+          clientRequestId,
+          normalizedRequestHash: clientRequestId
+            ? normalizedRequestHash
+            : undefined,
+          status: PaymentStatus.PENDING,
+          paidAt: dto.method === PaymentMethod.QPAY ? undefined : new Date(),
+          invoiceAttemptedAt:
+            dto.method === PaymentMethod.QPAY ? new Date() : undefined,
+        },
+      });
+    };
+    const result = clientRequestId
+      ? await this.prisma.$transaction(async (tx) => {
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'payment-create:' + userId + ':' + clientRequestId}))`;
+          const replay = await tx.payment.findUnique({
+            where: { userId_clientRequestId: { userId, clientRequestId } },
+          });
+          if (replay) {
+            if (replay.normalizedRequestHash !== normalizedRequestHash)
+              throw new ConflictException(
+                'Ижил хүсэлтийн дугаарт өөр төлбөр өгсөн байна',
+              );
+            return { payment: replay, created: false };
+          }
+          return { payment: await createNew(tx), created: true };
+        })
+      : { payment: await createNew(this.prisma), created: true };
+    const payment = result.payment;
+    const view = (row: typeof payment, qpay?: unknown) => ({
+      id: row.id,
+      userId: row.userId,
+      amount: row.amount,
+      method: row.method,
+      status: row.status,
+      paidAt: row.paidAt,
+      description: row.description,
+      forMonth: row.forMonth,
+      createdAt: row.createdAt,
+      ...(qpay ? { qpay } : {}),
+    });
+    if (!result.created) {
+      if (
+        payment.method !== PaymentMethod.QPAY ||
+        payment.status !== PaymentStatus.PENDING
+      )
+        return view(payment);
+      if (payment.qpayCheckoutSnapshot)
+        return view(payment, payment.qpayCheckoutSnapshot);
+      // The first attempt reserves the provider call before network I/O. Unknown acknowledgements require reconciliation, never another invoice call.
+      throw new ServiceUnavailableException(
+        'Нэхэмжлэлийн төлөв тодорхойгүй байна. Дахин нэхэмжлэл үүсгэхгүй; төлбөрийн төлөвийг шалгуулна уу.',
+      );
+    }
     await this.audit.record({
-      actorId: userId,
+      actorId,
       actorRole,
       action: 'CREATE',
       entity: 'Payment',
       entityId: payment.id,
       after: { ...payment },
     });
-
-    // QPay сонгосон бол тэр дор нь нэхэмжлэх үүсгэж, буцаах QR/deeplink-ийг
-    // клиент рүү дамжуулна. providerInvoiceId-г Payment.qpayInvoiceId-д
-    // хадгалснаар callback ирэхэд аль төлбөр болохыг олох боломжтой болно —
-    // өмнө нь энэ багана хэзээ ч бичигддэггүй байсан тул callback зам үхмэл байв.
-    if (dto.method === PaymentMethod.QPAY) {
-      if (!this.qpay.isConfigured()) {
-        throw new BadRequestException(
-          'QPay тохиргоо хийгдээгүй байна. Дансаар шилжүүлэх аргыг сонгоно уу.',
-        );
-      }
+    if (dto.method !== PaymentMethod.QPAY) return view(payment);
+    try {
       const invoice = await this.qpay.createInvoice({
         paymentId: payment.id,
         amount: payment.amount,
         description: payment.description ?? 'Сургалтын төлбөр',
       });
+      const qpay = {
+        invoiceId: invoice.providerInvoiceId,
+        qrText: invoice.qrText,
+        qrImage: invoice.qrImage,
+        deeplinks: invoice.deeplinks,
+      };
       await this.prisma.payment.update({
         where: { id: payment.id },
-        data: { qpayInvoiceId: invoice.providerInvoiceId },
-      });
-      return {
-        ...payment,
-        qpayInvoiceId: invoice.providerInvoiceId,
-        qpay: {
-          invoiceId: invoice.providerInvoiceId,
-          qrText: invoice.qrText,
-          qrImage: invoice.qrImage,
-          deeplinks: invoice.deeplinks,
+        data: {
+          qpayInvoiceId: invoice.providerInvoiceId,
+          qpayCheckoutSnapshot: JSON.parse(
+            JSON.stringify(qpay),
+          ) as Prisma.InputJsonValue,
         },
-      };
+      });
+      return view(payment, qpay);
+    } catch {
+      throw new ServiceUnavailableException(
+        'Нэхэмжлэлийн төлөв тодорхойгүй байна. Дахин нэхэмжлэл үүсгэхгүй; төлбөрийн төлөвийг шалгуулна уу.',
+      );
     }
-
-    return payment;
   }
 
   /**
@@ -298,20 +441,42 @@ export class PaymentsService {
       },
     });
 
-    const confirmed = await this.prisma.payment.update({
-      where: { id: paymentId },
-      data: {
-        status: PaymentStatus.CONFIRMED,
-        confirmedById: actor.id,
-        paidAt: payment.paidAt ?? new Date(),
-        ...(dto.note
-          ? {
-              description: [payment.description, dto.note]
-                .filter(Boolean)
-                .join(' | '),
-            }
-          : {}),
-      },
+    let grantedPass: Awaited<ReturnType<PassesService['grant']>> | null = null;
+    const confirmed = await this.prisma.$transaction(async (tx) => {
+      if (dto.passId)
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'pass:' + payment.userId + ':' + dto.passId}))`;
+      await tx.$queryRaw`SELECT id FROM "Payment" WHERE id = ${paymentId} FOR UPDATE`;
+      const confirmed = await tx.payment.update({
+        where: {
+          id: paymentId,
+          status: PaymentStatus.PENDING,
+          amount: payment.amount,
+        },
+        data: {
+          status: PaymentStatus.CONFIRMED,
+          confirmedById: actor.id,
+          paidAt: payment.paidAt ?? new Date(),
+          ...(dto.note
+            ? {
+                description: [payment.description, dto.note]
+                  .filter(Boolean)
+                  .join(' | '),
+              }
+            : {}),
+        },
+      });
+
+      if (dto.passId)
+        grantedPass = await this.passes.grant(
+          dto.passId,
+          payment.userId,
+          paymentId,
+          actor,
+          false,
+          undefined,
+          tx,
+        );
+      return confirmed;
     });
 
     // 🎯 Онлайнаар CLASSROOM-р бүртгүүлсэн сурагчийн кодыг үүсгэ:
@@ -333,17 +498,6 @@ export class PaymentsService {
         where: { id: payment.userId },
         data: { studentCode: newCode },
       });
-    }
-
-    // Эрх олгох бол: төлбөр → UserPass холбогдоно
-    let grantedPass: Awaited<ReturnType<PassesService['grant']>> | null = null;
-    if (dto.passId) {
-      grantedPass = await this.passes.grant(
-        dto.passId,
-        payment.userId,
-        paymentId,
-        actor,
-      );
     }
 
     await this.audit.record({
@@ -376,7 +530,7 @@ export class PaymentsService {
     }
 
     const rejected = await this.prisma.payment.update({
-      where: { id: paymentId },
+      where: { id: paymentId, status: PaymentStatus.PENDING },
       data: { status: PaymentStatus.REJECTED, confirmedById: actor.id },
     });
 
@@ -433,7 +587,7 @@ export class PaymentsService {
     if (dto.description !== undefined) data.description = dto.description;
 
     const updated = await this.prisma.payment.update({
-      where: { id: paymentId },
+      where: { id: paymentId, status: PaymentStatus.PENDING },
       data,
     });
 
@@ -481,12 +635,20 @@ export class PaymentsService {
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Payment" WHERE id = ${paymentId} FOR UPDATE`;
+      const current = await tx.payment.findUnique({ where: { id: paymentId } });
+      if (current?.status !== PaymentStatus.CONFIRMED)
+        throw new BadRequestException('Төлбөрийн төлөв өөрчлөгдсөн байна');
       const revokedPasses = await tx.userPass.findMany({
         where: { paymentId },
       });
       const reversed = await tx.payment.update({
         where: { id: paymentId },
         data: { status: PaymentStatus.REVERSED },
+      });
+      await tx.purchase.updateMany({
+        where: { paymentId },
+        data: { grantedAt: null, expiresAt: new Date() },
       });
       if (revokedPasses.length > 0) {
         await tx.userPass.deleteMany({ where: { paymentId } });

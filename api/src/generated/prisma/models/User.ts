@@ -363,6 +363,8 @@ export type UserWhereInput = {
   formulaReviews?: Prisma.FormulaReviewListRelationFilter
   formulaReviewDays?: Prisma.FormulaReviewDayListRelationFilter
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptListRelationFilter
+  staffCapabilities?: Prisma.StaffCapabilityGrantListRelationFilter
+  feedback?: Prisma.FeedbackListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
   teacherProfile?: Prisma.XOR<Prisma.TeacherProfileNullableScalarRelationFilter, Prisma.TeacherProfileWhereInput> | null
   externalTeacherProfile?: Prisma.XOR<Prisma.ExternalTeacherProfileNullableScalarRelationFilter, Prisma.ExternalTeacherProfileWhereInput> | null
@@ -385,6 +387,8 @@ export type UserWhereInput = {
   enrollments?: Prisma.EnrollmentListRelationFilter
   attemptSessions?: Prisma.TestAttemptSessionListRelationFilter
   learningEvents?: Prisma.LearningEventListRelationFilter
+  studyReviewRuns?: Prisma.StudyReviewRunListRelationFilter
+  studyReviewResponses?: Prisma.StudyReviewResponseListRelationFilter
   createdStaffTasks?: Prisma.StaffTaskListRelationFilter
   staffTaskAssignments?: Prisma.StaffTaskAssigneeListRelationFilter
   taughtSchedules?: Prisma.ClassScheduleListRelationFilter
@@ -443,6 +447,8 @@ export type UserOrderByWithRelationInput = {
   formulaReviews?: Prisma.FormulaReviewOrderByRelationAggregateInput
   formulaReviewDays?: Prisma.FormulaReviewDayOrderByRelationAggregateInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptOrderByRelationAggregateInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantOrderByRelationAggregateInput
+  feedback?: Prisma.FeedbackOrderByRelationAggregateInput
   studentProfile?: Prisma.StudentProfileOrderByWithRelationInput
   teacherProfile?: Prisma.TeacherProfileOrderByWithRelationInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileOrderByWithRelationInput
@@ -465,6 +471,8 @@ export type UserOrderByWithRelationInput = {
   enrollments?: Prisma.EnrollmentOrderByRelationAggregateInput
   attemptSessions?: Prisma.TestAttemptSessionOrderByRelationAggregateInput
   learningEvents?: Prisma.LearningEventOrderByRelationAggregateInput
+  studyReviewRuns?: Prisma.StudyReviewRunOrderByRelationAggregateInput
+  studyReviewResponses?: Prisma.StudyReviewResponseOrderByRelationAggregateInput
   createdStaffTasks?: Prisma.StaffTaskOrderByRelationAggregateInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeOrderByRelationAggregateInput
   taughtSchedules?: Prisma.ClassScheduleOrderByRelationAggregateInput
@@ -526,6 +534,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   formulaReviews?: Prisma.FormulaReviewListRelationFilter
   formulaReviewDays?: Prisma.FormulaReviewDayListRelationFilter
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptListRelationFilter
+  staffCapabilities?: Prisma.StaffCapabilityGrantListRelationFilter
+  feedback?: Prisma.FeedbackListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
   teacherProfile?: Prisma.XOR<Prisma.TeacherProfileNullableScalarRelationFilter, Prisma.TeacherProfileWhereInput> | null
   externalTeacherProfile?: Prisma.XOR<Prisma.ExternalTeacherProfileNullableScalarRelationFilter, Prisma.ExternalTeacherProfileWhereInput> | null
@@ -548,6 +558,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   enrollments?: Prisma.EnrollmentListRelationFilter
   attemptSessions?: Prisma.TestAttemptSessionListRelationFilter
   learningEvents?: Prisma.LearningEventListRelationFilter
+  studyReviewRuns?: Prisma.StudyReviewRunListRelationFilter
+  studyReviewResponses?: Prisma.StudyReviewResponseListRelationFilter
   createdStaffTasks?: Prisma.StaffTaskListRelationFilter
   staffTaskAssignments?: Prisma.StaffTaskAssigneeListRelationFilter
   taughtSchedules?: Prisma.ClassScheduleListRelationFilter
@@ -666,6 +678,8 @@ export type UserCreateInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -688,6 +702,8 @@ export type UserCreateInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -746,6 +762,8 @@ export type UserUncheckedCreateInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -768,6 +786,8 @@ export type UserUncheckedCreateInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -826,6 +846,8 @@ export type UserUpdateInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -848,6 +870,8 @@ export type UserUpdateInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -906,6 +930,8 @@ export type UserUncheckedUpdateInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -928,6 +954,8 @@ export type UserUncheckedUpdateInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -1937,6 +1965,62 @@ export type UserUpdateOneRequiredWithoutFormulaReviewAttemptsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFormulaReviewAttemptsInput, Prisma.UserUpdateWithoutFormulaReviewAttemptsInput>, Prisma.UserUncheckedUpdateWithoutFormulaReviewAttemptsInput>
 }
 
+export type UserCreateNestedOneWithoutFeedbackInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFeedbackInput, Prisma.UserUncheckedCreateWithoutFeedbackInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFeedbackInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutFeedbackNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFeedbackInput, Prisma.UserUncheckedCreateWithoutFeedbackInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFeedbackInput
+  upsert?: Prisma.UserUpsertWithoutFeedbackInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFeedbackInput, Prisma.UserUpdateWithoutFeedbackInput>, Prisma.UserUncheckedUpdateWithoutFeedbackInput>
+}
+
+export type UserCreateNestedOneWithoutStaffCapabilitiesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStaffCapabilitiesInput, Prisma.UserUncheckedCreateWithoutStaffCapabilitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStaffCapabilitiesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStaffCapabilitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStaffCapabilitiesInput, Prisma.UserUncheckedCreateWithoutStaffCapabilitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStaffCapabilitiesInput
+  upsert?: Prisma.UserUpsertWithoutStaffCapabilitiesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStaffCapabilitiesInput, Prisma.UserUpdateWithoutStaffCapabilitiesInput>, Prisma.UserUncheckedUpdateWithoutStaffCapabilitiesInput>
+}
+
+export type UserCreateNestedOneWithoutStudyReviewRunsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewRunsInput, Prisma.UserUncheckedCreateWithoutStudyReviewRunsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudyReviewRunsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStudyReviewRunsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewRunsInput, Prisma.UserUncheckedCreateWithoutStudyReviewRunsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudyReviewRunsInput
+  upsert?: Prisma.UserUpsertWithoutStudyReviewRunsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStudyReviewRunsInput, Prisma.UserUpdateWithoutStudyReviewRunsInput>, Prisma.UserUncheckedUpdateWithoutStudyReviewRunsInput>
+}
+
+export type UserCreateNestedOneWithoutStudyReviewResponsesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewResponsesInput, Prisma.UserUncheckedCreateWithoutStudyReviewResponsesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudyReviewResponsesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStudyReviewResponsesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewResponsesInput, Prisma.UserUncheckedCreateWithoutStudyReviewResponsesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudyReviewResponsesInput
+  upsert?: Prisma.UserUpsertWithoutStudyReviewResponsesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStudyReviewResponsesInput, Prisma.UserUpdateWithoutStudyReviewResponsesInput>, Prisma.UserUncheckedUpdateWithoutStudyReviewResponsesInput>
+}
+
 export type UserCreateWithoutPasswordResetTokensInput = {
   id?: string
   phone?: string | null
@@ -1964,6 +2048,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -1986,6 +2072,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -2043,6 +2131,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -2065,6 +2155,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -2138,6 +2230,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -2160,6 +2254,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -2217,6 +2313,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -2239,6 +2337,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2296,6 +2396,8 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -2318,6 +2420,8 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -2375,6 +2479,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -2397,6 +2503,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -2459,6 +2567,8 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -2481,6 +2591,8 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -2538,6 +2650,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -2560,6 +2674,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -2633,6 +2749,8 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -2655,6 +2773,8 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -2712,6 +2832,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -2734,6 +2856,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2802,6 +2926,8 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -2824,6 +2950,8 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -2881,6 +3009,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -2903,6 +3033,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -2960,6 +3092,8 @@ export type UserCreateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -2982,6 +3116,8 @@ export type UserCreateWithoutSmsBatchesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -3039,6 +3175,8 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -3061,6 +3199,8 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -3134,6 +3274,8 @@ export type UserUpdateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -3156,6 +3298,8 @@ export type UserUpdateWithoutSmsBatchesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -3213,6 +3357,8 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -3235,6 +3381,8 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3292,6 +3440,8 @@ export type UserCreateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -3314,6 +3464,8 @@ export type UserCreateWithoutSmsTemplatesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -3371,6 +3523,8 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -3393,6 +3547,8 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -3466,6 +3622,8 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -3488,6 +3646,8 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -3545,6 +3705,8 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -3567,6 +3729,8 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3624,6 +3788,8 @@ export type UserCreateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -3645,6 +3811,8 @@ export type UserCreateWithoutStudentProfileInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -3703,6 +3871,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -3724,6 +3894,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -3798,6 +3970,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -3819,6 +3993,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -3877,6 +4053,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -3898,6 +4076,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -3956,6 +4136,8 @@ export type UserCreateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -3977,6 +4159,8 @@ export type UserCreateWithoutTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -4035,6 +4219,8 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -4056,6 +4242,8 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -4130,6 +4318,8 @@ export type UserUpdateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -4151,6 +4341,8 @@ export type UserUpdateWithoutTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -4209,6 +4401,8 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -4230,6 +4424,8 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -4288,6 +4484,8 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -4309,6 +4507,8 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -4367,6 +4567,8 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -4388,6 +4590,8 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -4462,6 +4666,8 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -4483,6 +4689,8 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -4541,6 +4749,8 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -4562,6 +4772,8 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -4620,6 +4832,8 @@ export type UserCreateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -4641,6 +4855,8 @@ export type UserCreateWithoutParentLinksInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -4699,6 +4915,8 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -4720,6 +4938,8 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -4783,6 +5003,8 @@ export type UserCreateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -4804,6 +5026,8 @@ export type UserCreateWithoutChildLinksInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -4862,6 +5086,8 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -4883,6 +5109,8 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -4957,6 +5185,8 @@ export type UserUpdateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -4978,6 +5208,8 @@ export type UserUpdateWithoutParentLinksInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -5036,6 +5268,8 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -5057,6 +5291,8 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -5126,6 +5362,8 @@ export type UserUpdateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -5147,6 +5385,8 @@ export type UserUpdateWithoutChildLinksInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -5205,6 +5445,8 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -5226,6 +5468,8 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -5284,6 +5528,8 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -5305,6 +5551,8 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -5363,6 +5611,8 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -5384,6 +5634,8 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -5458,6 +5710,8 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -5479,6 +5733,8 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -5537,6 +5793,8 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -5558,6 +5816,8 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -5616,6 +5876,8 @@ export type UserCreateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -5637,6 +5899,8 @@ export type UserCreateWithoutTeacherGroupsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -5695,6 +5959,8 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -5716,6 +5982,8 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -5790,6 +6058,8 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -5811,6 +6081,8 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -5869,6 +6141,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -5890,6 +6164,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -5948,6 +6224,8 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -5969,6 +6247,8 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -6027,6 +6307,8 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -6048,6 +6330,8 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -6122,6 +6406,8 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -6143,6 +6429,8 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -6201,6 +6489,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -6222,6 +6512,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -6280,6 +6572,8 @@ export type UserCreateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -6301,6 +6595,8 @@ export type UserCreateWithoutEnrollmentsInput = {
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -6359,6 +6655,8 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -6380,6 +6678,8 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -6454,6 +6754,8 @@ export type UserUpdateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -6475,6 +6777,8 @@ export type UserUpdateWithoutEnrollmentsInput = {
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -6533,6 +6837,8 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -6554,6 +6860,8 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -6612,6 +6920,8 @@ export type UserCreateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -6633,6 +6943,8 @@ export type UserCreateWithoutAttendancesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -6691,6 +7003,8 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -6712,6 +7026,8 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -6786,6 +7102,8 @@ export type UserUpdateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -6807,6 +7125,8 @@ export type UserUpdateWithoutAttendancesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -6865,6 +7185,8 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -6886,6 +7208,8 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -6944,6 +7268,8 @@ export type UserCreateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -6965,6 +7291,8 @@ export type UserCreateWithoutSubmissionsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -7023,6 +7351,8 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -7044,6 +7374,8 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -7118,6 +7450,8 @@ export type UserUpdateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -7139,6 +7473,8 @@ export type UserUpdateWithoutSubmissionsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -7197,6 +7533,8 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -7218,6 +7556,8 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -7276,6 +7616,8 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -7297,6 +7639,8 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -7355,6 +7699,8 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -7376,6 +7722,8 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -7450,6 +7798,8 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -7471,6 +7821,8 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -7529,6 +7881,8 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -7550,6 +7904,8 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -7608,6 +7964,8 @@ export type UserCreateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -7629,6 +7987,8 @@ export type UserCreateWithoutTestDraftsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -7687,6 +8047,8 @@ export type UserUncheckedCreateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -7708,6 +8070,8 @@ export type UserUncheckedCreateWithoutTestDraftsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -7782,6 +8146,8 @@ export type UserUpdateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -7803,6 +8169,8 @@ export type UserUpdateWithoutTestDraftsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -7861,6 +8229,8 @@ export type UserUncheckedUpdateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -7882,6 +8252,8 @@ export type UserUncheckedUpdateWithoutTestDraftsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -7940,6 +8312,8 @@ export type UserCreateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -7961,6 +8335,8 @@ export type UserCreateWithoutAttemptSessionsInput = {
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -8019,6 +8395,8 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -8040,6 +8418,8 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -8114,6 +8494,8 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -8135,6 +8517,8 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -8193,6 +8577,8 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -8214,6 +8600,8 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -8272,6 +8660,8 @@ export type UserCreateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -8293,6 +8683,8 @@ export type UserCreateWithoutTestResultsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -8351,6 +8743,8 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -8372,6 +8766,8 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -8446,6 +8842,8 @@ export type UserUpdateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -8467,6 +8865,8 @@ export type UserUpdateWithoutTestResultsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -8525,6 +8925,8 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -8546,6 +8948,8 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -8604,6 +9008,8 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -8626,6 +9032,8 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -8683,6 +9091,8 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -8705,6 +9115,8 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -8778,6 +9190,8 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -8800,6 +9214,8 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -8857,6 +9273,8 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -8879,6 +9297,8 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -8936,6 +9356,8 @@ export type UserCreateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -8958,6 +9380,8 @@ export type UserCreateWithoutEmailOtpsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -9015,6 +9439,8 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -9037,6 +9463,8 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -9110,6 +9538,8 @@ export type UserUpdateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -9132,6 +9562,8 @@ export type UserUpdateWithoutEmailOtpsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -9189,6 +9621,8 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -9211,6 +9645,8 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -9268,6 +9704,8 @@ export type UserCreateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -9289,6 +9727,8 @@ export type UserCreateWithoutAttemptsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -9347,6 +9787,8 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -9368,6 +9810,8 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -9442,6 +9886,8 @@ export type UserUpdateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -9463,6 +9909,8 @@ export type UserUpdateWithoutAttemptsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -9521,6 +9969,8 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -9542,6 +9992,8 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -9600,6 +10052,8 @@ export type UserCreateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -9621,6 +10075,8 @@ export type UserCreateWithoutMistakeEntriesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -9679,6 +10135,8 @@ export type UserUncheckedCreateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -9700,6 +10158,8 @@ export type UserUncheckedCreateWithoutMistakeEntriesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -9774,6 +10234,8 @@ export type UserUpdateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -9795,6 +10257,8 @@ export type UserUpdateWithoutMistakeEntriesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -9853,6 +10317,8 @@ export type UserUncheckedUpdateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -9874,6 +10340,8 @@ export type UserUncheckedUpdateWithoutMistakeEntriesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -9932,6 +10400,8 @@ export type UserCreateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -9953,6 +10423,8 @@ export type UserCreateWithoutPredictionsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -10011,6 +10483,8 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -10032,6 +10506,8 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -10106,6 +10582,8 @@ export type UserUpdateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -10127,6 +10605,8 @@ export type UserUpdateWithoutPredictionsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -10185,6 +10665,8 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -10206,6 +10688,8 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -10264,6 +10748,8 @@ export type UserCreateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -10285,6 +10771,8 @@ export type UserCreateWithoutColorTagsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -10343,6 +10831,8 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -10364,6 +10854,8 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -10438,6 +10930,8 @@ export type UserUpdateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -10459,6 +10953,8 @@ export type UserUpdateWithoutColorTagsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -10517,6 +11013,8 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -10538,6 +11036,8 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -10596,6 +11096,8 @@ export type UserCreateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -10618,6 +11120,8 @@ export type UserCreateWithoutStudentNotesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -10675,6 +11179,8 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -10697,6 +11203,8 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -10770,6 +11278,8 @@ export type UserUpdateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -10792,6 +11302,8 @@ export type UserUpdateWithoutStudentNotesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -10849,6 +11361,8 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -10871,6 +11385,8 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -10928,6 +11444,8 @@ export type UserCreateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -10949,6 +11467,8 @@ export type UserCreateWithoutUserPassesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -11007,6 +11527,8 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -11028,6 +11550,8 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -11102,6 +11626,8 @@ export type UserUpdateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -11123,6 +11649,8 @@ export type UserUpdateWithoutUserPassesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -11181,6 +11709,8 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -11202,6 +11732,8 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -11260,6 +11792,8 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -11282,6 +11816,8 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -11339,6 +11875,8 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -11361,6 +11899,8 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -11423,6 +11963,8 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -11445,6 +11987,8 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -11502,6 +12046,8 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -11524,6 +12070,8 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -11597,6 +12145,8 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -11619,6 +12169,8 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -11676,6 +12228,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -11698,6 +12252,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -11766,6 +12322,8 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -11788,6 +12346,8 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -11845,6 +12405,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -11867,6 +12429,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -11924,6 +12488,8 @@ export type UserCreateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -11945,6 +12511,8 @@ export type UserCreateWithoutPaymentsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -12003,6 +12571,8 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -12024,6 +12594,8 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -12098,6 +12670,8 @@ export type UserUpdateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -12119,6 +12693,8 @@ export type UserUpdateWithoutPaymentsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -12177,6 +12753,8 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -12198,6 +12776,8 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -12256,6 +12836,8 @@ export type UserCreateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -12278,6 +12860,8 @@ export type UserCreateWithoutPurchasesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -12335,6 +12919,8 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -12357,6 +12943,8 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -12430,6 +13018,8 @@ export type UserUpdateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -12452,6 +13042,8 @@ export type UserUpdateWithoutPurchasesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -12509,6 +13101,8 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -12531,6 +13125,8 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -12588,6 +13184,8 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -12610,6 +13208,8 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -12667,6 +13267,8 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -12689,6 +13291,8 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -12751,6 +13355,8 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -12773,6 +13379,8 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -12830,6 +13438,8 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -12852,6 +13462,8 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -12914,6 +13526,8 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -12936,6 +13550,8 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -12993,6 +13609,8 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -13015,6 +13633,8 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -13077,6 +13697,8 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -13099,6 +13721,8 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -13156,6 +13780,8 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -13178,6 +13804,8 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -13240,6 +13868,8 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -13262,6 +13892,8 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -13319,6 +13951,8 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -13341,6 +13975,8 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -13414,6 +14050,8 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -13436,6 +14074,8 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -13493,6 +14133,8 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -13515,6 +14157,8 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -13583,6 +14227,8 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -13605,6 +14251,8 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -13662,6 +14310,8 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -13684,6 +14334,8 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -13752,6 +14404,8 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -13774,6 +14428,8 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -13831,6 +14487,8 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -13853,6 +14511,8 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -13921,6 +14581,8 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -13943,6 +14605,8 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -14000,6 +14664,8 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -14022,6 +14688,8 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -14090,6 +14758,8 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -14112,6 +14782,8 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -14169,6 +14841,8 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -14191,6 +14865,8 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -14248,6 +14924,8 @@ export type UserCreateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -14270,6 +14948,8 @@ export type UserCreateWithoutNotificationsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -14327,6 +15007,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -14349,6 +15031,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -14422,6 +15106,8 @@ export type UserUpdateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -14444,6 +15130,8 @@ export type UserUpdateWithoutNotificationsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -14501,6 +15189,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -14523,6 +15213,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -14580,6 +15272,8 @@ export type UserCreateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -14602,6 +15296,8 @@ export type UserCreateWithoutNotificationPreferenceInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -14659,6 +15355,8 @@ export type UserUncheckedCreateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -14681,6 +15379,8 @@ export type UserUncheckedCreateWithoutNotificationPreferenceInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -14754,6 +15454,8 @@ export type UserUpdateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -14776,6 +15478,8 @@ export type UserUpdateWithoutNotificationPreferenceInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -14833,6 +15537,8 @@ export type UserUncheckedUpdateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -14855,6 +15561,8 @@ export type UserUncheckedUpdateWithoutNotificationPreferenceInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -14912,6 +15620,8 @@ export type UserCreateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -14934,6 +15644,8 @@ export type UserCreateWithoutNotificationDeliveriesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -14991,6 +15703,8 @@ export type UserUncheckedCreateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -15013,6 +15727,8 @@ export type UserUncheckedCreateWithoutNotificationDeliveriesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -15086,6 +15802,8 @@ export type UserUpdateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -15108,6 +15826,8 @@ export type UserUpdateWithoutNotificationDeliveriesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -15165,6 +15885,8 @@ export type UserUncheckedUpdateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -15187,6 +15909,8 @@ export type UserUncheckedUpdateWithoutNotificationDeliveriesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -15244,6 +15968,8 @@ export type UserCreateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -15265,6 +15991,8 @@ export type UserCreateWithoutLearningEventsInput = {
   ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -15323,6 +16051,8 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -15344,6 +16074,8 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -15418,6 +16150,8 @@ export type UserUpdateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -15439,6 +16173,8 @@ export type UserUpdateWithoutLearningEventsInput = {
   ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -15497,6 +16233,8 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -15518,6 +16256,8 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -15576,6 +16316,8 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -15598,6 +16340,8 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
   studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
@@ -15655,6 +16399,8 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -15677,6 +16423,8 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
   studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
@@ -15750,6 +16498,8 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -15772,6 +16522,8 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
   studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
@@ -15829,6 +16581,8 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -15851,6 +16605,8 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
   studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
@@ -15908,6 +16664,8 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -15930,6 +16688,8 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
   studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
@@ -15987,6 +16747,8 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -16009,6 +16771,8 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
   studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
@@ -16082,6 +16846,8 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -16104,6 +16870,8 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
   studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
@@ -16161,6 +16929,8 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -16183,6 +16953,8 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
   studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
@@ -16240,6 +17012,8 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -16262,6 +17036,8 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
@@ -16319,6 +17095,8 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -16341,6 +17119,8 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
@@ -16414,6 +17194,8 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -16436,6 +17218,8 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
@@ -16493,6 +17277,8 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -16515,6 +17301,8 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
@@ -16572,6 +17360,8 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -16594,6 +17384,8 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -16651,6 +17443,8 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -16673,6 +17467,8 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -16746,6 +17542,8 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -16768,6 +17566,8 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -16825,6 +17625,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -16847,6 +17649,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -16904,6 +17708,8 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -16926,6 +17732,8 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -16983,6 +17791,8 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -17005,6 +17815,8 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -17078,6 +17890,8 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -17100,6 +17914,8 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -17157,6 +17973,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -17179,6 +17997,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -17236,6 +18056,8 @@ export type UserCreateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -17258,6 +18080,8 @@ export type UserCreateWithoutStudentGoalsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -17315,6 +18139,8 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -17337,6 +18163,8 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -17410,6 +18238,8 @@ export type UserUpdateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -17432,6 +18262,8 @@ export type UserUpdateWithoutStudentGoalsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -17489,6 +18321,8 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -17511,6 +18345,8 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -17568,6 +18404,8 @@ export type UserCreateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -17590,6 +18428,8 @@ export type UserCreateWithoutStreakFreezesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -17647,6 +18487,8 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -17669,6 +18511,8 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -17742,6 +18586,8 @@ export type UserUpdateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -17764,6 +18610,8 @@ export type UserUpdateWithoutStreakFreezesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -17821,6 +18669,8 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -17843,6 +18693,8 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -17900,6 +18752,8 @@ export type UserCreateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -17922,6 +18776,8 @@ export type UserCreateWithoutGoogleIdentityInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -17979,6 +18835,8 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -18001,6 +18859,8 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -18074,6 +18934,8 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -18096,6 +18958,8 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -18153,6 +19017,8 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -18175,6 +19041,8 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -18232,6 +19100,8 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -18254,6 +19124,8 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -18311,6 +19183,8 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -18333,6 +19207,8 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -18406,6 +19282,8 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -18428,6 +19306,8 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -18485,6 +19365,8 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -18507,6 +19389,8 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -18564,6 +19448,8 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -18586,6 +19472,8 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -18643,6 +19531,8 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -18665,6 +19555,8 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -18738,6 +19630,8 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -18760,6 +19654,8 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -18817,6 +19713,8 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -18839,6 +19737,8 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -18895,6 +19795,8 @@ export type UserCreateWithoutFormulaReviewsInput = {
   archiveReason?: string | null
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -18917,6 +19819,8 @@ export type UserCreateWithoutFormulaReviewsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -18974,6 +19878,8 @@ export type UserUncheckedCreateWithoutFormulaReviewsInput = {
   archiveReason?: string | null
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -18996,6 +19902,8 @@ export type UserUncheckedCreateWithoutFormulaReviewsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -19069,6 +19977,8 @@ export type UserUpdateWithoutFormulaReviewsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -19091,6 +20001,8 @@ export type UserUpdateWithoutFormulaReviewsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -19148,6 +20060,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -19170,6 +20084,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -19227,6 +20143,8 @@ export type UserCreateWithoutFormulaReviewDaysInput = {
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -19249,6 +20167,8 @@ export type UserCreateWithoutFormulaReviewDaysInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -19306,6 +20226,8 @@ export type UserUncheckedCreateWithoutFormulaReviewDaysInput = {
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -19328,6 +20250,8 @@ export type UserUncheckedCreateWithoutFormulaReviewDaysInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -19401,6 +20325,8 @@ export type UserUpdateWithoutFormulaReviewDaysInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -19423,6 +20349,8 @@ export type UserUpdateWithoutFormulaReviewDaysInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -19480,6 +20408,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewDaysInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -19502,6 +20432,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewDaysInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -19559,6 +20491,8 @@ export type UserCreateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
@@ -19581,6 +20515,8 @@ export type UserCreateWithoutFormulaReviewAttemptsInput = {
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
@@ -19638,6 +20574,8 @@ export type UserUncheckedCreateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
@@ -19660,6 +20598,8 @@ export type UserUncheckedCreateWithoutFormulaReviewAttemptsInput = {
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
@@ -19733,6 +20673,8 @@ export type UserUpdateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
@@ -19755,6 +20697,8 @@ export type UserUpdateWithoutFormulaReviewAttemptsInput = {
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
@@ -19812,6 +20756,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -19834,6 +20780,1400 @@ export type UserUncheckedUpdateWithoutFormulaReviewAttemptsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutFeedbackInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutFeedbackInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutFeedbackInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFeedbackInput, Prisma.UserUncheckedCreateWithoutFeedbackInput>
+}
+
+export type UserUpsertWithoutFeedbackInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFeedbackInput, Prisma.UserUncheckedUpdateWithoutFeedbackInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFeedbackInput, Prisma.UserUncheckedCreateWithoutFeedbackInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFeedbackInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFeedbackInput, Prisma.UserUncheckedUpdateWithoutFeedbackInput>
+}
+
+export type UserUpdateWithoutFeedbackInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFeedbackInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStaffCapabilitiesInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStaffCapabilitiesInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStaffCapabilitiesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStaffCapabilitiesInput, Prisma.UserUncheckedCreateWithoutStaffCapabilitiesInput>
+}
+
+export type UserUpsertWithoutStaffCapabilitiesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStaffCapabilitiesInput, Prisma.UserUncheckedUpdateWithoutStaffCapabilitiesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStaffCapabilitiesInput, Prisma.UserUncheckedCreateWithoutStaffCapabilitiesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStaffCapabilitiesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStaffCapabilitiesInput, Prisma.UserUncheckedUpdateWithoutStaffCapabilitiesInput>
+}
+
+export type UserUpdateWithoutStaffCapabilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStaffCapabilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStudyReviewRunsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStudyReviewRunsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStudyReviewRunsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewRunsInput, Prisma.UserUncheckedCreateWithoutStudyReviewRunsInput>
+}
+
+export type UserUpsertWithoutStudyReviewRunsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStudyReviewRunsInput, Prisma.UserUncheckedUpdateWithoutStudyReviewRunsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewRunsInput, Prisma.UserUncheckedCreateWithoutStudyReviewRunsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStudyReviewRunsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStudyReviewRunsInput, Prisma.UserUncheckedUpdateWithoutStudyReviewRunsInput>
+}
+
+export type UserUpdateWithoutStudyReviewRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStudyReviewRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStudyReviewResponsesInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStudyReviewResponsesInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStudyReviewResponsesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewResponsesInput, Prisma.UserUncheckedCreateWithoutStudyReviewResponsesInput>
+}
+
+export type UserUpsertWithoutStudyReviewResponsesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStudyReviewResponsesInput, Prisma.UserUncheckedUpdateWithoutStudyReviewResponsesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudyReviewResponsesInput, Prisma.UserUncheckedCreateWithoutStudyReviewResponsesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStudyReviewResponsesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStudyReviewResponsesInput, Prisma.UserUncheckedUpdateWithoutStudyReviewResponsesInput>
+}
+
+export type UserUpdateWithoutStudyReviewResponsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStudyReviewResponsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
   createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
   taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
@@ -19874,6 +22214,8 @@ export type UserCountOutputType = {
   formulaReviews: number
   formulaReviewDays: number
   formulaReviewAttempts: number
+  staffCapabilities: number
+  feedback: number
   parentLinks: number
   childLinks: number
   teacherGroups: number
@@ -19893,6 +22235,8 @@ export type UserCountOutputType = {
   enrollments: number
   attemptSessions: number
   learningEvents: number
+  studyReviewRuns: number
+  studyReviewResponses: number
   createdStaffTasks: number
   staffTaskAssignments: number
   taughtSchedules: number
@@ -19926,6 +22270,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   formulaReviews?: boolean | UserCountOutputTypeCountFormulaReviewsArgs
   formulaReviewDays?: boolean | UserCountOutputTypeCountFormulaReviewDaysArgs
   formulaReviewAttempts?: boolean | UserCountOutputTypeCountFormulaReviewAttemptsArgs
+  staffCapabilities?: boolean | UserCountOutputTypeCountStaffCapabilitiesArgs
+  feedback?: boolean | UserCountOutputTypeCountFeedbackArgs
   parentLinks?: boolean | UserCountOutputTypeCountParentLinksArgs
   childLinks?: boolean | UserCountOutputTypeCountChildLinksArgs
   teacherGroups?: boolean | UserCountOutputTypeCountTeacherGroupsArgs
@@ -19945,6 +22291,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   enrollments?: boolean | UserCountOutputTypeCountEnrollmentsArgs
   attemptSessions?: boolean | UserCountOutputTypeCountAttemptSessionsArgs
   learningEvents?: boolean | UserCountOutputTypeCountLearningEventsArgs
+  studyReviewRuns?: boolean | UserCountOutputTypeCountStudyReviewRunsArgs
+  studyReviewResponses?: boolean | UserCountOutputTypeCountStudyReviewResponsesArgs
   createdStaffTasks?: boolean | UserCountOutputTypeCountCreatedStaffTasksArgs
   staffTaskAssignments?: boolean | UserCountOutputTypeCountStaffTaskAssignmentsArgs
   taughtSchedules?: boolean | UserCountOutputTypeCountTaughtSchedulesArgs
@@ -20003,6 +22351,20 @@ export type UserCountOutputTypeCountFormulaReviewDaysArgs<ExtArgs extends runtim
  */
 export type UserCountOutputTypeCountFormulaReviewAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FormulaReviewAttemptWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStaffCapabilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StaffCapabilityGrantWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFeedbackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FeedbackWhereInput
 }
 
 /**
@@ -20136,6 +22498,20 @@ export type UserCountOutputTypeCountAttemptSessionsArgs<ExtArgs extends runtime.
  */
 export type UserCountOutputTypeCountLearningEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LearningEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStudyReviewRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StudyReviewRunWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStudyReviewResponsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StudyReviewResponseWhereInput
 }
 
 /**
@@ -20355,6 +22731,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   formulaReviews?: boolean | Prisma.User$formulaReviewsArgs<ExtArgs>
   formulaReviewDays?: boolean | Prisma.User$formulaReviewDaysArgs<ExtArgs>
   formulaReviewAttempts?: boolean | Prisma.User$formulaReviewAttemptsArgs<ExtArgs>
+  staffCapabilities?: boolean | Prisma.User$staffCapabilitiesArgs<ExtArgs>
+  feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   teacherProfile?: boolean | Prisma.User$teacherProfileArgs<ExtArgs>
   externalTeacherProfile?: boolean | Prisma.User$externalTeacherProfileArgs<ExtArgs>
@@ -20377,6 +22755,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
   attemptSessions?: boolean | Prisma.User$attemptSessionsArgs<ExtArgs>
   learningEvents?: boolean | Prisma.User$learningEventsArgs<ExtArgs>
+  studyReviewRuns?: boolean | Prisma.User$studyReviewRunsArgs<ExtArgs>
+  studyReviewResponses?: boolean | Prisma.User$studyReviewResponsesArgs<ExtArgs>
   createdStaffTasks?: boolean | Prisma.User$createdStaffTasksArgs<ExtArgs>
   staffTaskAssignments?: boolean | Prisma.User$staffTaskAssignmentsArgs<ExtArgs>
   taughtSchedules?: boolean | Prisma.User$taughtSchedulesArgs<ExtArgs>
@@ -20492,6 +22872,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   formulaReviews?: boolean | Prisma.User$formulaReviewsArgs<ExtArgs>
   formulaReviewDays?: boolean | Prisma.User$formulaReviewDaysArgs<ExtArgs>
   formulaReviewAttempts?: boolean | Prisma.User$formulaReviewAttemptsArgs<ExtArgs>
+  staffCapabilities?: boolean | Prisma.User$staffCapabilitiesArgs<ExtArgs>
+  feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   teacherProfile?: boolean | Prisma.User$teacherProfileArgs<ExtArgs>
   externalTeacherProfile?: boolean | Prisma.User$externalTeacherProfileArgs<ExtArgs>
@@ -20514,6 +22896,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
   attemptSessions?: boolean | Prisma.User$attemptSessionsArgs<ExtArgs>
   learningEvents?: boolean | Prisma.User$learningEventsArgs<ExtArgs>
+  studyReviewRuns?: boolean | Prisma.User$studyReviewRunsArgs<ExtArgs>
+  studyReviewResponses?: boolean | Prisma.User$studyReviewResponsesArgs<ExtArgs>
   createdStaffTasks?: boolean | Prisma.User$createdStaffTasksArgs<ExtArgs>
   staffTaskAssignments?: boolean | Prisma.User$staffTaskAssignmentsArgs<ExtArgs>
   taughtSchedules?: boolean | Prisma.User$taughtSchedulesArgs<ExtArgs>
@@ -20554,6 +22938,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     formulaReviews: Prisma.$FormulaReviewPayload<ExtArgs>[]
     formulaReviewDays: Prisma.$FormulaReviewDayPayload<ExtArgs>[]
     formulaReviewAttempts: Prisma.$FormulaReviewAttemptPayload<ExtArgs>[]
+    staffCapabilities: Prisma.$StaffCapabilityGrantPayload<ExtArgs>[]
+    feedback: Prisma.$FeedbackPayload<ExtArgs>[]
     studentProfile: Prisma.$StudentProfilePayload<ExtArgs> | null
     teacherProfile: Prisma.$TeacherProfilePayload<ExtArgs> | null
     externalTeacherProfile: Prisma.$ExternalTeacherProfilePayload<ExtArgs> | null
@@ -20576,6 +22962,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     enrollments: Prisma.$EnrollmentPayload<ExtArgs>[]
     attemptSessions: Prisma.$TestAttemptSessionPayload<ExtArgs>[]
     learningEvents: Prisma.$LearningEventPayload<ExtArgs>[]
+    studyReviewRuns: Prisma.$StudyReviewRunPayload<ExtArgs>[]
+    studyReviewResponses: Prisma.$StudyReviewResponsePayload<ExtArgs>[]
     createdStaffTasks: Prisma.$StaffTaskPayload<ExtArgs>[]
     staffTaskAssignments: Prisma.$StaffTaskAssigneePayload<ExtArgs>[]
     taughtSchedules: Prisma.$ClassSchedulePayload<ExtArgs>[]
@@ -21027,6 +23415,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   formulaReviews<T extends Prisma.User$formulaReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$formulaReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormulaReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   formulaReviewDays<T extends Prisma.User$formulaReviewDaysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$formulaReviewDaysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormulaReviewDayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   formulaReviewAttempts<T extends Prisma.User$formulaReviewAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$formulaReviewAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormulaReviewAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  staffCapabilities<T extends Prisma.User$staffCapabilitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$staffCapabilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffCapabilityGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  feedback<T extends Prisma.User$feedbackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$feedbackArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studentProfile<T extends Prisma.User$studentProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentProfileArgs<ExtArgs>>): Prisma.Prisma__StudentProfileClient<runtime.Types.Result.GetResult<Prisma.$StudentProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   teacherProfile<T extends Prisma.User$teacherProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teacherProfileArgs<ExtArgs>>): Prisma.Prisma__TeacherProfileClient<runtime.Types.Result.GetResult<Prisma.$TeacherProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   externalTeacherProfile<T extends Prisma.User$externalTeacherProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$externalTeacherProfileArgs<ExtArgs>>): Prisma.Prisma__ExternalTeacherProfileClient<runtime.Types.Result.GetResult<Prisma.$ExternalTeacherProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -21049,6 +23439,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   enrollments<T extends Prisma.User$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attemptSessions<T extends Prisma.User$attemptSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$attemptSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestAttemptSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   learningEvents<T extends Prisma.User$learningEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$learningEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  studyReviewRuns<T extends Prisma.User$studyReviewRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studyReviewRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudyReviewRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  studyReviewResponses<T extends Prisma.User$studyReviewResponsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studyReviewResponsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudyReviewResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdStaffTasks<T extends Prisma.User$createdStaffTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdStaffTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   staffTaskAssignments<T extends Prisma.User$staffTaskAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$staffTaskAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffTaskAssigneePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   taughtSchedules<T extends Prisma.User$taughtSchedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$taughtSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -21595,6 +23987,54 @@ export type User$formulaReviewAttemptsArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
+ * User.staffCapabilities
+ */
+export type User$staffCapabilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffCapabilityGrant
+   */
+  select?: Prisma.StaffCapabilityGrantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffCapabilityGrant
+   */
+  omit?: Prisma.StaffCapabilityGrantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffCapabilityGrantInclude<ExtArgs> | null
+  where?: Prisma.StaffCapabilityGrantWhereInput
+  orderBy?: Prisma.StaffCapabilityGrantOrderByWithRelationInput | Prisma.StaffCapabilityGrantOrderByWithRelationInput[]
+  cursor?: Prisma.StaffCapabilityGrantWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StaffCapabilityGrantScalarFieldEnum | Prisma.StaffCapabilityGrantScalarFieldEnum[]
+}
+
+/**
+ * User.feedback
+ */
+export type User$feedbackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Feedback
+   */
+  select?: Prisma.FeedbackSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Feedback
+   */
+  omit?: Prisma.FeedbackOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FeedbackInclude<ExtArgs> | null
+  where?: Prisma.FeedbackWhereInput
+  orderBy?: Prisma.FeedbackOrderByWithRelationInput | Prisma.FeedbackOrderByWithRelationInput[]
+  cursor?: Prisma.FeedbackWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FeedbackScalarFieldEnum | Prisma.FeedbackScalarFieldEnum[]
+}
+
+/**
  * User.studentProfile
  */
 export type User$studentProfileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -22105,6 +24545,54 @@ export type User$learningEventsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.LearningEventScalarFieldEnum | Prisma.LearningEventScalarFieldEnum[]
+}
+
+/**
+ * User.studyReviewRuns
+ */
+export type User$studyReviewRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StudyReviewRun
+   */
+  select?: Prisma.StudyReviewRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StudyReviewRun
+   */
+  omit?: Prisma.StudyReviewRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StudyReviewRunInclude<ExtArgs> | null
+  where?: Prisma.StudyReviewRunWhereInput
+  orderBy?: Prisma.StudyReviewRunOrderByWithRelationInput | Prisma.StudyReviewRunOrderByWithRelationInput[]
+  cursor?: Prisma.StudyReviewRunWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StudyReviewRunScalarFieldEnum | Prisma.StudyReviewRunScalarFieldEnum[]
+}
+
+/**
+ * User.studyReviewResponses
+ */
+export type User$studyReviewResponsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StudyReviewResponse
+   */
+  select?: Prisma.StudyReviewResponseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StudyReviewResponse
+   */
+  omit?: Prisma.StudyReviewResponseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StudyReviewResponseInclude<ExtArgs> | null
+  where?: Prisma.StudyReviewResponseWhereInput
+  orderBy?: Prisma.StudyReviewResponseOrderByWithRelationInput | Prisma.StudyReviewResponseOrderByWithRelationInput[]
+  cursor?: Prisma.StudyReviewResponseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StudyReviewResponseScalarFieldEnum | Prisma.StudyReviewResponseScalarFieldEnum[]
 }
 
 /**

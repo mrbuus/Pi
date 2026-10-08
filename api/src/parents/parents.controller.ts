@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   Req,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -34,6 +35,27 @@ export class ParentsController {
   @Get('children')
   myChildren(@Req() req: AuthedRequest) {
     return this.parents.myChildren(req.user.userId);
+  }
+
+  @Roles(Role.PARENT)
+  @Get('children/:studentId/history')
+  history(
+    @Req() req: AuthedRequest,
+    @Param('studentId') studentId: string,
+    @Query('year') year?: string,
+    @Query('page') page?: string,
+  ) {
+    return this.parents.childHistory(req.user.userId, studentId, year, page);
+  }
+
+  @Roles(Role.PARENT)
+  @Get('children/:studentId/theory/:chapterId')
+  theory(
+    @Req() req: AuthedRequest,
+    @Param('studentId') studentId: string,
+    @Param('chapterId') chapterId: string,
+  ) {
+    return this.parents.childTheory(req.user.userId, studentId, chapterId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)

@@ -4,6 +4,7 @@ import { CalendarIcsFeedController } from './calendar-ics.controller';
 import { CalendarIcsService } from './calendar-ics.service';
 import { NotificationCenterModule } from '../notification-center/notification-center.module';
 import { ScheduleController } from './schedule.controller';
+import { ScheduleAccessService } from './schedule-access.service';
 import { ScheduleService } from './schedule.service';
 import { TeacherHoursController } from './teacher-hours.controller';
 import { TeacherHoursService } from './teacher-hours.service';
@@ -18,7 +19,12 @@ import { TeacherHoursService } from './teacher-hours.service';
     ScheduleController,
     TeacherHoursController,
   ],
-  providers: [ScheduleService, CalendarIcsService, TeacherHoursService],
+  providers: [
+    ScheduleAccessService,
+    ScheduleService,
+    CalendarIcsService,
+    TeacherHoursService,
+  ],
   // TuitionModule нь төлбөрийн буцаалтыг ХИЧЭЭЛИЙН ӨДРӨӨР тооцохдоо
   // ScheduleService.expandDays()-ыг ашигладаг тул экспортлох ЁСТОЙ.
   //

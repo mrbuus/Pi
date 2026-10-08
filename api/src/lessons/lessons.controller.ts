@@ -17,7 +17,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { parseSubjectQuery } from '../common/subject';
 import { Role } from '../generated/prisma/enums';
-import { CreateTheoryDto, ReorderTheoryDto, UpdateTheoryDto } from './dto/theory.dto';
+import {
+  CreateTheoryDto,
+  ReorderTheoryDto,
+  UpdateTheoryDto,
+} from './dto/theory.dto';
 import { RecordProgressDto } from './dto/progress.dto';
 import { LessonsService } from './lessons.service';
 
@@ -58,22 +62,34 @@ export class LessonsController {
   createTheory(
     @Param('chapterId') chapterId: string,
     @Body() dto: CreateTheoryDto,
+    @Req() req: AuthedRequest,
   ) {
-    return this.lessons.createTheory(chapterId, dto);
+    return this.lessons.createTheory(chapterId, dto, req.user.userId);
   }
 
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Patch('theory/:id')
-  updateTheory(@Param('id') id: string, @Body() dto: UpdateTheoryDto) {
-    return this.lessons.updateTheory(id, dto);
+  updateTheory(
+    @Param('id') id: string,
+    @Body() dto: UpdateTheoryDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.lessons.updateTheory(id, dto, req.user.userId);
   }
 
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('theory/:id')
-  removeTheory(@Param('id') id: string) {
-    return this.lessons.removeTheory(id);
+  removeTheory(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.lessons.removeTheory(id, req.user.userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post('theory/:id/restore')
+  restoreTheory(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.lessons.restoreTheory(id, req.user.userId);
   }
 
   @UseGuards(RolesGuard)
@@ -82,8 +98,9 @@ export class LessonsController {
   reorderTheory(
     @Param('chapterId') chapterId: string,
     @Body() dto: ReorderTheoryDto,
+    @Req() req: AuthedRequest,
   ) {
-    return this.lessons.reorderTheory(chapterId, dto.ids);
+    return this.lessons.reorderTheory(chapterId, dto.ids, req.user.userId);
   }
 
   @HttpCode(HttpStatus.ACCEPTED)

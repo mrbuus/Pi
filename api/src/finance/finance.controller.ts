@@ -1,3 +1,4 @@
+import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import {
   Controller,
   Get,
@@ -22,8 +23,8 @@ import { CreateExpenseDto, UpdateExpenseDto } from './dto/finance.dto';
 // Цалин, орлого, зарлага — зөвхөн эзэн (ADMIN). Өмнө нь зөвхөн JwtAuthGuard
 // байсан тул нэвтэрсэн сурагч ч сарын тайланг уншиж чаддаг байв (G02).
 @Controller('finance')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+@UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
+@Roles(Role.ADMIN, Role.TEACHER_PLUS)
 export class FinanceController {
   constructor(private finance: FinanceService) {}
 

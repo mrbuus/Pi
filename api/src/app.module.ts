@@ -1,3 +1,11 @@
+import { StaffCapabilityModule } from './staff-capabilities/staff-capability.module';
+import { HealthController } from './health.controller';
+import { StudyReviewModule } from './study-review/study-review.module';
+import { LessonFlowModule } from './lesson-flow/lesson-flow.module';
+import { CentreHelpModule } from './centre-help/centre-help.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { DocumentImportModule } from './document-import/document-import.module';
+import { LearningLabModule } from './learning-lab/learning-lab.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -100,6 +108,8 @@ import { JobsModule } from './jobs/jobs.module';
     }),
     ScheduleModule.forRoot(),
     PrismaModule,
+    StaffCapabilityModule,
+    StudyReviewModule,
     // @Global — SMS илгээх үйлчилгээг бүх модульд нээж өгнө (нууц үг сэргээх,
     // ирээдүйд ирц/төлбөрийн мэдэгдэл гэх мэт).
     NotificationsModule,
@@ -148,8 +158,13 @@ import { JobsModule } from './jobs/jobs.module';
     ReadinessModule,
     MistakesModule,
     JobsModule,
+    DocumentImportModule,
+    LearningLabModule,
+    FeedbackModule,
+    CentreHelpModule,
+    LessonFlowModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

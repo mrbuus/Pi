@@ -1,3 +1,4 @@
+import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { ROLES_KEY } from './decorators/roles.decorator';
 import { RolesGuard } from './guards/roles.guard';
@@ -18,10 +19,11 @@ function guardsOf(target: object): unknown[] {
   return Reflect.getMetadata(GUARDS_METADATA, target) ?? [];
 }
 
-describe('Санхүүгийн маршрутууд — зөвхөн ADMIN', () => {
-  it('FinanceController бүхэлдээ RolesGuard + ADMIN', () => {
+describe('Санхүүгийн маршрутууд — тусгай эрхтэй ажилтан', () => {
+  it('FinanceController requires role and finance capability guards', () => {
     expect(guardsOf(FinanceController)).toContain(RolesGuard);
-    expect(rolesOf(FinanceController)).toEqual(['ADMIN']);
+    expect(rolesOf(FinanceController)).toEqual(['ADMIN', 'TEACHER_PLUS']);
+    expect(guardsOf(FinanceController)).toContain(FinanceCapabilityGuard);
   });
 });
 
@@ -32,6 +34,7 @@ describe('Буцаалтын маршрутууд — зөвхөн ажилта�
   it.each(readers)('%s — RolesGuard + ADMIN/TEACHER_PLUS', (name) => {
     const handler = proto[name];
     expect(guardsOf(handler)).toContain(RolesGuard);
+    expect(guardsOf(handler)).toContain(FinanceCapabilityGuard);
     expect(rolesOf(handler)).toEqual(['ADMIN', 'TEACHER_PLUS']);
   });
 
@@ -84,10 +87,13 @@ function loadContract(contract: NightContract) {
     const handler = controller.prototype[name];
     const method = RequestMethod[Reflect.getMetadata(METHOD_METADATA, handler)];
     const rawPaths = Reflect.getMetadata(PATH_METADATA, handler) ?? '';
-    const paths = (Array.isArray(rawPaths) ? rawPaths : [rawPaths]).map((route) =>
-      '/api/' + [prefix, route]
-        .map((p) => String(p).replace(/^\/+|\/+$/g, ''))
-        .filter(Boolean).join('/'),
+    const paths = (Array.isArray(rawPaths) ? rawPaths : [rawPaths]).map(
+      (route) =>
+        '/api/' +
+        [prefix, route]
+          .map((p) => String(p).replace(/^\/+|\/+$/g, ''))
+          .filter(Boolean)
+          .join('/'),
     );
     if (method === contract.method && paths.includes(contract.path))
       return { controller, handler };
@@ -109,6 +115,8 @@ describe('Night-1 route guards across six roles', () => {
       }
       expect(guards).toContain(JwtAuthGuard);
       expect(guards).toContain(RolesGuard);
+      if (controller === FinanceController)
+        expect(guardsOf(controller)).toContain(FinanceCapabilityGuard);
       expect(
         [...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort(),
       ).toEqual([...contract.roles].sort());

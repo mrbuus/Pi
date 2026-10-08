@@ -4,25 +4,36 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { TeacherHoursQueryDto } from './dto/teacher-hours-query.dto';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import { TeacherHoursService } from './teacher-hours.service';
 
 /** Багшийн ажилласан цаг (хуваариас). Цалингийн тооцоонд. */
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('teacher-hours')
 export class TeacherHoursController {
-  constructor(private hours: TeacherHoursService) {}
+  constructor(
+    private hours: TeacherHoursService,
+    private capabilities: StaffCapabilityService,
+  ) {}
 
   /** Бүх багшийн цаг — удирдлагад. */
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get()
-  all(@Query() q: TeacherHoursQueryDto) {
+  async all(
+    @Query() q: TeacherHoursQueryDto,
+    @Req() req: { user: { userId: string } },
+  ) {
+    await this.capabilities.assert(req.user.userId, 'time.review');
     return this.hours.forMonth(q.month);
   }
 
   /** Багш өөрийн цагийг л харна. */
   @Roles(Role.TEACHER, Role.TEACHER_PLUS)
   @Get('me')
-  mine(@Query() q: TeacherHoursQueryDto, @Req() req: { user: { userId: string } }) {
+  mine(
+    @Query() q: TeacherHoursQueryDto,
+    @Req() req: { user: { userId: string } },
+  ) {
     return this.hours.forMonth(q.month, req.user.userId);
   }
 }

@@ -23,7 +23,7 @@ describe('FinanceService expense changes', () => {
       },
     };
     audit = { record: jest.fn().mockResolvedValue(undefined) };
-    service = new FinanceService(prisma, audit);
+    service = new FinanceService(prisma, audit, { assert: jest.fn().mockResolvedValue(undefined) } as never);
   });
 
   it('rejects non-admin edits before reading or changing a record', async () => {

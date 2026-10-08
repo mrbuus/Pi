@@ -1,5 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  Matches,
+  MaxLength,
   IsArray,
   IsDateString,
   IsEnum,
@@ -30,6 +33,9 @@ export class UpdateAssignmentDto {
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(10)
+  @MaxLength(200, { each: true })
+  @Matches(/^[\w][\w.-]*$/, { each: true })
   @IsString({ each: true })
   imageKeys?: string[];
 

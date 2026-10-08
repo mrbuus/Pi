@@ -29,6 +29,10 @@ import {
   validatePasswordStrength,
 } from './password-policy';
 import { RegisterDto } from './dto/register.dto';
+import {
+  centreOnlineClassEnabled,
+  CENTRE_ONLINE_CLOSED_MESSAGE,
+} from './centre-online-policy';
 
 // Идэвхжүүлэх код = тухайн өдрийн огноо УБ-ийн цагаар, ЖЖЖЖССӨӨ (SPEC §6.3)
 export function todayCodeUB(): string {
@@ -48,6 +52,9 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const consent = consentData(dto);
+    if (dto.studentType === StudentType.ONLINE && !centreOnlineClassEnabled()) {
+      throw new BadRequestException(CENTRE_ONLINE_CLOSED_MESSAGE);
+    }
     // Утас эсвэл имэйл аль нэг нь заавал хэрэгтэй
     if (!dto.phone && !dto.email) {
       throw new BadRequestException('Утас эсвэл имэйл хаяг шаардлагатай');
@@ -303,6 +310,9 @@ export class AuthService {
         mustChangePassword: true,
         studentProfile: true,
         teacherProfile: true,
+        // Own profile only. This selects the group-management navigation mode;
+        // it never grants internal staff permissions or changes the JWT role.
+        externalTeacherProfile: { select: { verifiedAt: true } },
       },
     });
   }

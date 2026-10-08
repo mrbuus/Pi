@@ -215,9 +215,9 @@ export class UsersController {
 
   // Онлайнаар CLASSROOM-р бүртгүүлсэн сурагчдын зөвшөөрөл хүлээгч жагсаалт
   @Get('students/pending-approval')
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
-  getPendingApprovalStudents() {
-    return this.users.getPendingApprovalStudents();
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  getPendingApprovalStudents(@Req() req: AuthedRequest) {
+    return this.users.getPendingApprovalStudents(req.user.userId);
   }
 
   // Сурагчийг зөвшөөрнө

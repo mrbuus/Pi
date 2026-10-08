@@ -115,6 +115,11 @@ export type Assignment = Prisma.AssignmentModel
  */
 export type Submission = Prisma.SubmissionModel
 /**
+ * Model SubmissionRevision
+ * 
+ */
+export type SubmissionRevision = Prisma.SubmissionRevisionModel
+/**
  * Model DailyHomeworkMark
  * 
  */
@@ -439,3 +444,53 @@ export type FormulaReviewDay = Prisma.FormulaReviewDayModel
  * 
  */
 export type FormulaReviewAttempt = Prisma.FormulaReviewAttemptModel
+/**
+ * Model Feedback
+ * 
+ */
+export type Feedback = Prisma.FeedbackModel
+/**
+ * Model ClassDismissal
+ * 
+ */
+export type ClassDismissal = Prisma.ClassDismissalModel
+/**
+ * Model LessonPacket
+ * 
+ */
+export type LessonPacket = Prisma.LessonPacketModel
+/**
+ * Model LessonReceipt
+ * 
+ */
+export type LessonReceipt = Prisma.LessonReceiptModel
+/**
+ * Model LessonPhotoTurn
+ * 
+ */
+export type LessonPhotoTurn = Prisma.LessonPhotoTurnModel
+/**
+ * Model LessonRotation
+ * 
+ */
+export type LessonRotation = Prisma.LessonRotationModel
+/**
+ * Model StaffCapabilityGrant
+ * 
+ */
+export type StaffCapabilityGrant = Prisma.StaffCapabilityGrantModel
+/**
+ * Model StudyReviewRun
+ * 
+ */
+export type StudyReviewRun = Prisma.StudyReviewRunModel
+/**
+ * Model StudyReviewItem
+ * 
+ */
+export type StudyReviewItem = Prisma.StudyReviewItemModel
+/**
+ * Model StudyReviewResponse
+ * 
+ */
+export type StudyReviewResponse = Prisma.StudyReviewResponseModel

@@ -1,9 +1,13 @@
 import {
   Injectable,
+  Optional,
   BadRequestException,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { AuditService } from '../audit/audit.service';
+import { Role } from '../generated/prisma/enums';
+import { activePurchaseWhere } from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTeacherGroupDto } from './dto/create-teacher-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
@@ -28,11 +32,35 @@ function generateJoinCode(): string {
 
 @Injectable()
 export class TeacherGroupsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private audit?: AuditService,
+  ) {}
+  private async verifiedOwner(id: string) {
+    const actor = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        role: true,
+        archivedAt: true,
+        externalTeacherProfile: { select: { verifiedAt: true } },
+      },
+    });
+    if (
+      !actor ||
+      actor.archivedAt ||
+      ![Role.TEACHER, Role.TEACHER_PLUS].includes(
+        actor.role as typeof Role.TEACHER,
+      ) ||
+      !actor.externalTeacherProfile?.verifiedAt
+    )
+      throw new ForbiddenException(
+        'Идэвхтэй баталгаажсан гадны багш шаардлагатай',
+      );
+  }
 
   /**
-   * Гадны багш бүртгүүлэх. Анх verifiedAt = null, админ баталгаажуулах хүртэл
-   * сурагчийн мэдээлэл харахгүй.
+   * Шинэ бүртгэл хувийн бүлгээ шууд удирдана. verifiedAt нь бүлгийн
+   * идэвхжил бөгөөд төвийн багшийн эрх эсвэл мэргэжлийн баталгаа биш.
    */
   async registerExternalTeacher(dto: RegisterExternalTeacherDto) {
     const existing = await this.prisma.user.findUnique({
@@ -43,7 +71,7 @@ export class TeacherGroupsService {
     }
 
     // Password hash: auth.service-т ашигласан функцыг ашигла
-    const bcrypt = require('bcrypt');
+    const bcrypt = require('bcryptjs');
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     const user = await this.prisma.user.create({
@@ -56,7 +84,8 @@ export class TeacherGroupsService {
         externalTeacherProfile: {
           create: {
             organization: dto.organization || null,
-            verifiedAt: null,
+            verifiedAt: new Date(),
+            verifiedById: null,
           },
         },
       },
@@ -146,10 +175,7 @@ export class TeacherGroupsService {
     }));
   }
 
-  async rejectExternalTeacher(
-    userId: string,
-    dto: RejectExternalTeacherDto,
-  ) {
+  async rejectExternalTeacher(userId: string, dto: RejectExternalTeacherDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { externalTeacherProfile: true },
@@ -181,7 +207,8 @@ export class TeacherGroupsService {
     return {
       userId: updated.userId,
       rejected: true,
-      rejectionReason: updated.note?.slice(REJECTION_REASON_PREFIX.length) ?? reason,
+      rejectionReason:
+        updated.note?.slice(REJECTION_REASON_PREFIX.length) ?? reason,
       verifiedAt: updated.verifiedAt,
     };
   }
@@ -305,6 +332,7 @@ export class TeacherGroupsService {
    * өнгийн үнэгүүд үл ойлгомжтой.
    */
   async createGroup(ownerId: string, dto: CreateTeacherGroupDto) {
+    await this.verifiedOwner(ownerId);
     // Гадны багш байх эсэхийг шалгалт хийх
     const user = await this.prisma.user.findUnique({
       where: { id: ownerId },
@@ -355,6 +383,18 @@ export class TeacherGroupsService {
    * ХАЗААЛТ: Нэг сурагч олон бүлэгт байж болно.
    */
   async joinGroup(studentId: string, dto: JoinGroupDto) {
+    const actor = await this.prisma.user.findUnique({
+      where: { id: studentId },
+      select: { role: true, archivedAt: true },
+    });
+    if (
+      !actor ||
+      actor.archivedAt ||
+      ![Role.STUDENT, Role.BUYER].includes(actor.role as typeof Role.STUDENT)
+    )
+      throw new ForbiddenException(
+        'Идэвхтэй сурагч эсвэл худалдан авагч шаардлагатай',
+      );
     const group = await this.prisma.teacherGroup.findUnique({
       where: { joinCode: dto.joinCode },
       include: {
@@ -374,6 +414,7 @@ export class TeacherGroupsService {
       throw new BadRequestException('Энэ ангийн бүлэг хаагдсан');
     }
 
+    await this.verifiedOwner(group.ownerId);
     if (!group.owner.externalTeacherProfile?.verifiedAt) {
       throw new ForbiddenException(
         'Баталгаажаагүй багшийн бүлэгт нэгдэх боломжгүй',
@@ -397,12 +438,21 @@ export class TeacherGroupsService {
     }
 
     // Хэрэв урьд нь байсан ч гарсан бол шинэ нэгдэлт үүсгэ
-    const member = await this.prisma.teacherGroupMember.create({
-      data: {
-        groupId: group.id,
-        studentId,
-      },
+    const member = await this.prisma.teacherGroupMember.upsert({
+      where: { groupId_studentId: { groupId: group.id, studentId } },
+      create: { groupId: group.id, studentId },
+      update: { leftAt: null, joinedAt: new Date() },
     });
+    if (existing && this.audit)
+      await this.audit.record({
+        actorId: studentId,
+        actorRole: actor.role,
+        action: 'REJOIN',
+        entity: 'TeacherGroupMember',
+        entityId: member.id,
+        before: { joinedAt: existing.joinedAt, leftAt: existing.leftAt },
+        after: { joinedAt: member.joinedAt, leftAt: member.leftAt },
+      });
 
     return {
       id: member.id,
@@ -416,6 +466,7 @@ export class TeacherGroupsService {
    * Багшийн бүлгүүдийг авах (өөрийн л).
    */
   async getMyGroups(ownerId: string) {
+    await this.verifiedOwner(ownerId);
     const groups = await this.prisma.teacherGroup.findMany({
       where: {
         ownerId,
@@ -444,6 +495,7 @@ export class TeacherGroupsService {
    * Дүнгүүд ЗӨВХӨН сурагч нэгдсэнээс хойшхи (joinedAt дараа) цаг хүрэх.
    */
   async getGroupDetails(groupId: string, requesterId: string) {
+    await this.verifiedOwner(requesterId);
     const group = await this.prisma.teacherGroup.findUnique({
       where: { id: groupId },
       include: {
@@ -462,7 +514,6 @@ export class TeacherGroupsService {
                 id: true,
                 firstName: true,
                 lastName: true,
-                email: true,
               },
             },
           },
@@ -476,7 +527,7 @@ export class TeacherGroupsService {
     }
 
     // Баталгаажуулалт: зөвхөн өөрийн бүлгүүдийг харах
-    if (group.ownerId !== requesterId) {
+    if (group.archived || group.ownerId !== requesterId) {
       throw new ForbiddenException('Энэ бүлгийн мэдээлэл харах эрхгүй');
     }
 
@@ -484,10 +535,31 @@ export class TeacherGroupsService {
     // ХЯЗГААРЛАЛТ: ЗӨВХӨН joinedAt цагаас хойш
     const membersWithResults = await Promise.all(
       group.members.map(async (member) => {
+        const purchases = await this.prisma.purchase.findMany({
+          where: {
+            ...activePurchaseWhere(member.studentId),
+            productItem: { kind: 'TEST', active: true },
+          },
+          select: {
+            grantedAt: true,
+            expiresAt: true,
+            productItem: { select: { refId: true } },
+          },
+        });
         const results = await this.prisma.testResult.findMany({
           where: {
             studentId: member.studentId,
             createdAt: { gte: member.joinedAt },
+            source: { in: ['ONLINE_TEST', 'CHAPTER_EXAM', 'OMR_IMPORT'] },
+            test: {
+              isDraft: false,
+              deletedAt: null,
+              access: { none: {} },
+              OR: [
+                { createdById: requesterId },
+                { id: { in: purchases.map((p) => p.productItem.refId) } },
+              ],
+            },
           },
           include: {
             test: {
@@ -495,6 +567,7 @@ export class TeacherGroupsService {
                 id: true,
                 title: true,
                 type: true,
+                createdById: true,
               },
             },
           },
@@ -506,16 +579,29 @@ export class TeacherGroupsService {
           id: member.id,
           student: member.student,
           joinedAt: member.joinedAt,
-          testResults: results.map((r) => ({
-            id: r.id,
-            testId: r.testId,
-            testTitle: r.test.title,
-            testType: r.test.type,
-            totalScore: r.totalScore,
-            maxScore: r.maxScore,
-            percentage: (r.totalScore / r.maxScore) * 100,
-            createdAt: r.createdAt,
-          })),
+          testResults: results
+            .filter(
+              (r) =>
+                r.test.createdById === requesterId ||
+                purchases.some(
+                  (p) =>
+                    p.productItem.refId === r.testId &&
+                    p.grantedAt &&
+                    p.grantedAt <= r.createdAt &&
+                    (!p.expiresAt || p.expiresAt > r.createdAt),
+                ),
+            )
+            .map((r) => ({
+              id: r.id,
+              testId: r.testId,
+              testTitle: r.test.title,
+              testType: r.test.type,
+              totalScore: r.totalScore,
+              maxScore: r.maxScore,
+              percentage:
+                r.maxScore > 0 ? (r.totalScore / r.maxScore) * 100 : null,
+              createdAt: r.createdAt,
+            })),
         };
       }),
     );
@@ -534,6 +620,7 @@ export class TeacherGroupsService {
    * Бүлгийг архив хийх (устгахгүй, зөөлөн).
    */
   async archiveGroup(groupId: string, requesterId: string) {
+    await this.verifiedOwner(requesterId);
     const group = await this.prisma.teacherGroup.findUnique({
       where: { id: groupId },
     });
@@ -542,7 +629,7 @@ export class TeacherGroupsService {
       throw new NotFoundException('Бүлэг олдсонгүй');
     }
 
-    if (group.ownerId !== requesterId) {
+    if (group.archived || group.ownerId !== requesterId) {
       throw new ForbiddenException('Энэ бүлгийг архив хийх эрхгүй');
     }
 
@@ -565,11 +652,12 @@ export class TeacherGroupsService {
     studentId: string,
     requesterId: string,
   ) {
+    await this.verifiedOwner(requesterId);
     const group = await this.prisma.teacherGroup.findUnique({
       where: { id: groupId },
     });
 
-    if (!group || group.ownerId !== requesterId) {
+    if (!group || group.archived || group.ownerId !== requesterId) {
       throw new ForbiddenException('Энэ үйлдэл хийх эрхгүй');
     }
 

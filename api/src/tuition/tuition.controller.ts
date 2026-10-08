@@ -1,3 +1,5 @@
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Controller,
@@ -42,7 +44,9 @@ export class CreateRefundDto {
   classroomId!: string;
 
   @ApiProperty({ type: String })
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна' })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна',
+  })
   leftOn!: string;
 }
 
@@ -63,14 +67,17 @@ export class CancelRefundDto {
 
 @Controller('tuition')
 export class TuitionController {
-  constructor(private tuitionService: TuitionService) {}
+  constructor(
+    private tuitionService: TuitionService,
+    private capabilities: StaffCapabilityService,
+  ) {}
 
   /**
    * Буцаалтын тооцоо харуулна (баталгаажаагүй)
    * GET /tuition/refund/preview?studentId&classroomId&leftOn
    */
   @Get('refund/preview')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   async previewRefund(
     @Query('studentId') studentId: string,
@@ -85,7 +92,7 @@ export class TuitionController {
    * POST /tuition/refund
    */
   @Post('refund')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   async createRefund(
     @Body() dto: CreateRefundDto,
@@ -105,7 +112,7 @@ export class TuitionController {
    * POST /tuition/refund/:id/pending
    */
   @Post('refund/:id/pending')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   async submitForApproval(@Param('id') refundId: string) {
     return this.tuitionService.submitForApproval(refundId);
@@ -116,8 +123,8 @@ export class TuitionController {
    * POST /tuition/refund/:id/approve
    */
   @Post('refund/:id/approve')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   async approveRefund(
     @Param('id') refundId: string,
     @NestRequest() req: Request,
@@ -131,8 +138,8 @@ export class TuitionController {
    * POST /tuition/refund/:id/paid
    */
   @Post('refund/:id/paid')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   async markAsPaid(
     @Param('id') refundId: string,
     @Body() dto: MarkAsPaidDto,
@@ -147,7 +154,7 @@ export class TuitionController {
    * POST /tuition/refund/:id/cancel
    */
   @Post('refund/:id/cancel')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   async cancelRefund(
     @Param('id') refundId: string,
@@ -163,7 +170,7 @@ export class TuitionController {
    * GET /tuition/refund/:id
    */
   @Get('refund/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS) // сурагчийн нэр, буцаалтын дүн — ажилтанд л (G03)
   async getRefund(@Param('id') refundId: string) {
     return this.tuitionService.getRefund(refundId);
@@ -174,7 +181,7 @@ export class TuitionController {
    * GET /tuition/refunds?studentId&classroomId&status&limit&offset
    */
   @Get('refunds')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS) // сурагчийн нэр, буцаалтын дүн — ажилтанд л (G03)
   async listRefunds(
     @Query('studentId') studentId?: string,
@@ -220,18 +227,22 @@ export class TuitionController {
   ) {
     const userId = (req.user as any).userId;
     const userRole = (req.user as any).role;
+    if (userRole === Role.TEACHER_PLUS)
+      await this.capabilities.assert(userId, 'finance.manage');
 
     // TEACHER → өөрийн ангийн сурагчид л
     if (userRole === Role.TEACHER) {
-      const enrollments = await this.tuitionService['prisma'].enrollment.findMany({
+      const enrollments = await this.tuitionService[
+        'prisma'
+      ].enrollment.findMany({
         where: { studentId, leftAt: null },
         include: { classroom: true },
       });
-      const hasAccess = enrollments.some((e) => e.classroom.teacherId === userId);
+      const hasAccess = enrollments.some(
+        (e) => e.classroom.teacherId === userId,
+      );
       if (!hasAccess) {
-        throw new ForbiddenException(
-          'Та энэ сурагчийн багш биш байна',
-        );
+        throw new ForbiddenException('Та энэ сурагчийн багш биш байна');
       }
     }
     // PARENT -> өөрийн хүүхдэд
@@ -241,9 +252,7 @@ export class TuitionController {
         studentId,
       );
       if (!verifiedLink) {
-        throw new ForbiddenException(
-          'Эцэг эхийн холбоос баталгаажаагүй байна',
-        );
+        throw new ForbiddenException('Эцэг эхийн холбоос баталгаажаагүй байна');
       }
     }
 

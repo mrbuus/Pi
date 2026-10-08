@@ -7,6 +7,7 @@ import { AuditService } from '../audit/audit.service';
 import { Subject } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateEnrollmentWindowDto } from './dto/enrollment-window.dto';
+import { centreOnlineClassEnabled } from '../auth/centre-online-policy';
 
 @Injectable()
 export class EnrollmentWindowsService {
@@ -17,8 +18,8 @@ export class EnrollmentWindowsService {
 
   // GET /enrollment-windows — нийтэд нээлттэй (landing page-д JWT-гүй унших
   // ёстой). Жижиг хариу — зөвхөн UI-д хэрэгтэй талбарууд.
-  findAll() {
-    return this.prisma.enrollmentWindow.findMany({
+  async findAll() {
+    const windows = await this.prisma.enrollmentWindow.findMany({
       select: {
         subject: true,
         status: true,
@@ -27,6 +28,10 @@ export class EnrollmentWindowsService {
       },
       orderBy: { subject: 'asc' },
     });
+    return windows.map((window) => ({
+      ...window,
+      centreOnlineClassEnabled: centreOnlineClassEnabled(),
+    }));
   }
 
   // PATCH /enrollment-windows/:subject — ADMIN + TEACHER_PLUS. Хичээл тус

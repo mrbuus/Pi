@@ -1,4 +1,4 @@
-import { Controller, Get, Header, UseGuards } from '@nestjs/common';
+import { Controller, Get, Header, Req, UseGuards } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -14,7 +14,7 @@ export class StudentsExportController {
   @Get('export.csv')
   @Header('Content-Type', 'text/csv; charset=utf-8')
   @Header('Content-Disposition', 'attachment; filename="students.csv"')
-  exportStudents(): Promise<string> {
-    return this.users.exportStudentsCsv();
+  exportStudents(@Req() req: { user: { userId: string } }): Promise<string> {
+    return this.users.exportStudentsCsv(req.user.userId);
   }
 }

@@ -35,24 +35,32 @@ export type TheoryBlockSumAggregateOutputType = {
 }
 
 export type TheoryBlockMinAggregateOutputType = {
+  createdById: string | null
+  clientRequestId: string | null
   id: string | null
   chapterId: string | null
   title: string | null
   content: string | null
   order: number | null
   freePreview: boolean | null
+  archivedAt: Date | null
 }
 
 export type TheoryBlockMaxAggregateOutputType = {
+  createdById: string | null
+  clientRequestId: string | null
   id: string | null
   chapterId: string | null
   title: string | null
   content: string | null
   order: number | null
   freePreview: boolean | null
+  archivedAt: Date | null
 }
 
 export type TheoryBlockCountAggregateOutputType = {
+  createdById: number
+  clientRequestId: number
   id: number
   chapterId: number
   title: number
@@ -60,6 +68,7 @@ export type TheoryBlockCountAggregateOutputType = {
   imageKeys: number
   order: number
   freePreview: number
+  archivedAt: number
   _all: number
 }
 
@@ -73,24 +82,32 @@ export type TheoryBlockSumAggregateInputType = {
 }
 
 export type TheoryBlockMinAggregateInputType = {
+  createdById?: true
+  clientRequestId?: true
   id?: true
   chapterId?: true
   title?: true
   content?: true
   order?: true
   freePreview?: true
+  archivedAt?: true
 }
 
 export type TheoryBlockMaxAggregateInputType = {
+  createdById?: true
+  clientRequestId?: true
   id?: true
   chapterId?: true
   title?: true
   content?: true
   order?: true
   freePreview?: true
+  archivedAt?: true
 }
 
 export type TheoryBlockCountAggregateInputType = {
+  createdById?: true
+  clientRequestId?: true
   id?: true
   chapterId?: true
   title?: true
@@ -98,6 +115,7 @@ export type TheoryBlockCountAggregateInputType = {
   imageKeys?: true
   order?: true
   freePreview?: true
+  archivedAt?: true
   _all?: true
 }
 
@@ -188,6 +206,8 @@ export type TheoryBlockGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 export type TheoryBlockGroupByOutputType = {
+  createdById: string | null
+  clientRequestId: string | null
   id: string
   chapterId: string
   title: string
@@ -195,6 +215,7 @@ export type TheoryBlockGroupByOutputType = {
   imageKeys: string[]
   order: number
   freePreview: boolean
+  archivedAt: Date | null
   _count: TheoryBlockCountAggregateOutputType | null
   _avg: TheoryBlockAvgAggregateOutputType | null
   _sum: TheoryBlockSumAggregateOutputType | null
@@ -221,6 +242,8 @@ export type TheoryBlockWhereInput = {
   AND?: Prisma.TheoryBlockWhereInput | Prisma.TheoryBlockWhereInput[]
   OR?: Prisma.TheoryBlockWhereInput[]
   NOT?: Prisma.TheoryBlockWhereInput | Prisma.TheoryBlockWhereInput[]
+  createdById?: Prisma.StringNullableFilter<"TheoryBlock"> | string | null
+  clientRequestId?: Prisma.StringNullableFilter<"TheoryBlock"> | string | null
   id?: Prisma.StringFilter<"TheoryBlock"> | string
   chapterId?: Prisma.StringFilter<"TheoryBlock"> | string
   title?: Prisma.StringFilter<"TheoryBlock"> | string
@@ -228,10 +251,13 @@ export type TheoryBlockWhereInput = {
   imageKeys?: Prisma.StringNullableListFilter<"TheoryBlock">
   order?: Prisma.IntFilter<"TheoryBlock"> | number
   freePreview?: Prisma.BoolFilter<"TheoryBlock"> | boolean
+  archivedAt?: Prisma.DateTimeNullableFilter<"TheoryBlock"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterScalarRelationFilter, Prisma.ChapterWhereInput>
 }
 
 export type TheoryBlockOrderByWithRelationInput = {
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientRequestId?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -239,24 +265,31 @@ export type TheoryBlockOrderByWithRelationInput = {
   imageKeys?: Prisma.SortOrder
   order?: Prisma.SortOrder
   freePreview?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chapter?: Prisma.ChapterOrderByWithRelationInput
 }
 
 export type TheoryBlockWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  createdById_clientRequestId?: Prisma.TheoryBlockCreatedByIdClientRequestIdCompoundUniqueInput
   AND?: Prisma.TheoryBlockWhereInput | Prisma.TheoryBlockWhereInput[]
   OR?: Prisma.TheoryBlockWhereInput[]
   NOT?: Prisma.TheoryBlockWhereInput | Prisma.TheoryBlockWhereInput[]
+  createdById?: Prisma.StringNullableFilter<"TheoryBlock"> | string | null
+  clientRequestId?: Prisma.StringNullableFilter<"TheoryBlock"> | string | null
   chapterId?: Prisma.StringFilter<"TheoryBlock"> | string
   title?: Prisma.StringFilter<"TheoryBlock"> | string
   content?: Prisma.StringFilter<"TheoryBlock"> | string
   imageKeys?: Prisma.StringNullableListFilter<"TheoryBlock">
   order?: Prisma.IntFilter<"TheoryBlock"> | number
   freePreview?: Prisma.BoolFilter<"TheoryBlock"> | boolean
+  archivedAt?: Prisma.DateTimeNullableFilter<"TheoryBlock"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterScalarRelationFilter, Prisma.ChapterWhereInput>
-}, "id">
+}, "id" | "createdById_clientRequestId">
 
 export type TheoryBlockOrderByWithAggregationInput = {
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientRequestId?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -264,6 +297,7 @@ export type TheoryBlockOrderByWithAggregationInput = {
   imageKeys?: Prisma.SortOrder
   order?: Prisma.SortOrder
   freePreview?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TheoryBlockCountOrderByAggregateInput
   _avg?: Prisma.TheoryBlockAvgOrderByAggregateInput
   _max?: Prisma.TheoryBlockMaxOrderByAggregateInput
@@ -275,6 +309,8 @@ export type TheoryBlockScalarWhereWithAggregatesInput = {
   AND?: Prisma.TheoryBlockScalarWhereWithAggregatesInput | Prisma.TheoryBlockScalarWhereWithAggregatesInput[]
   OR?: Prisma.TheoryBlockScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TheoryBlockScalarWhereWithAggregatesInput | Prisma.TheoryBlockScalarWhereWithAggregatesInput[]
+  createdById?: Prisma.StringNullableWithAggregatesFilter<"TheoryBlock"> | string | null
+  clientRequestId?: Prisma.StringNullableWithAggregatesFilter<"TheoryBlock"> | string | null
   id?: Prisma.StringWithAggregatesFilter<"TheoryBlock"> | string
   chapterId?: Prisma.StringWithAggregatesFilter<"TheoryBlock"> | string
   title?: Prisma.StringWithAggregatesFilter<"TheoryBlock"> | string
@@ -282,19 +318,25 @@ export type TheoryBlockScalarWhereWithAggregatesInput = {
   imageKeys?: Prisma.StringNullableListFilter<"TheoryBlock">
   order?: Prisma.IntWithAggregatesFilter<"TheoryBlock"> | number
   freePreview?: Prisma.BoolWithAggregatesFilter<"TheoryBlock"> | boolean
+  archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TheoryBlock"> | Date | string | null
 }
 
 export type TheoryBlockCreateInput = {
+  createdById?: string | null
+  clientRequestId?: string | null
   id?: string
   title: string
   content: string
   imageKeys?: Prisma.TheoryBlockCreateimageKeysInput | string[]
   order: number
   freePreview?: boolean
+  archivedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutTheoriesInput
 }
 
 export type TheoryBlockUncheckedCreateInput = {
+  createdById?: string | null
+  clientRequestId?: string | null
   id?: string
   chapterId: string
   title: string
@@ -302,19 +344,25 @@ export type TheoryBlockUncheckedCreateInput = {
   imageKeys?: Prisma.TheoryBlockCreateimageKeysInput | string[]
   order: number
   freePreview?: boolean
+  archivedAt?: Date | string | null
 }
 
 export type TheoryBlockUpdateInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   imageKeys?: Prisma.TheoryBlockUpdateimageKeysInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutTheoriesNestedInput
 }
 
 export type TheoryBlockUncheckedUpdateInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   chapterId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -322,9 +370,12 @@ export type TheoryBlockUncheckedUpdateInput = {
   imageKeys?: Prisma.TheoryBlockUpdateimageKeysInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TheoryBlockCreateManyInput = {
+  createdById?: string | null
+  clientRequestId?: string | null
   id?: string
   chapterId: string
   title: string
@@ -332,18 +383,24 @@ export type TheoryBlockCreateManyInput = {
   imageKeys?: Prisma.TheoryBlockCreateimageKeysInput | string[]
   order: number
   freePreview?: boolean
+  archivedAt?: Date | string | null
 }
 
 export type TheoryBlockUpdateManyMutationInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   imageKeys?: Prisma.TheoryBlockUpdateimageKeysInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TheoryBlockUncheckedUpdateManyInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   chapterId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -351,6 +408,7 @@ export type TheoryBlockUncheckedUpdateManyInput = {
   imageKeys?: Prisma.TheoryBlockUpdateimageKeysInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TheoryBlockListRelationFilter = {
@@ -363,7 +421,14 @@ export type TheoryBlockOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type TheoryBlockCreatedByIdClientRequestIdCompoundUniqueInput = {
+  createdById: string
+  clientRequestId: string
+}
+
 export type TheoryBlockCountOrderByAggregateInput = {
+  createdById?: Prisma.SortOrder
+  clientRequestId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -371,6 +436,7 @@ export type TheoryBlockCountOrderByAggregateInput = {
   imageKeys?: Prisma.SortOrder
   order?: Prisma.SortOrder
   freePreview?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
 }
 
 export type TheoryBlockAvgOrderByAggregateInput = {
@@ -378,21 +444,27 @@ export type TheoryBlockAvgOrderByAggregateInput = {
 }
 
 export type TheoryBlockMaxOrderByAggregateInput = {
+  createdById?: Prisma.SortOrder
+  clientRequestId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   order?: Prisma.SortOrder
   freePreview?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
 }
 
 export type TheoryBlockMinOrderByAggregateInput = {
+  createdById?: Prisma.SortOrder
+  clientRequestId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   order?: Prisma.SortOrder
   freePreview?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
 }
 
 export type TheoryBlockSumOrderByAggregateInput = {
@@ -451,21 +523,27 @@ export type TheoryBlockUpdateimageKeysInput = {
 }
 
 export type TheoryBlockCreateWithoutChapterInput = {
+  createdById?: string | null
+  clientRequestId?: string | null
   id?: string
   title: string
   content: string
   imageKeys?: Prisma.TheoryBlockCreateimageKeysInput | string[]
   order: number
   freePreview?: boolean
+  archivedAt?: Date | string | null
 }
 
 export type TheoryBlockUncheckedCreateWithoutChapterInput = {
+  createdById?: string | null
+  clientRequestId?: string | null
   id?: string
   title: string
   content: string
   imageKeys?: Prisma.TheoryBlockCreateimageKeysInput | string[]
   order: number
   freePreview?: boolean
+  archivedAt?: Date | string | null
 }
 
 export type TheoryBlockCreateOrConnectWithoutChapterInput = {
@@ -498,6 +576,8 @@ export type TheoryBlockScalarWhereInput = {
   AND?: Prisma.TheoryBlockScalarWhereInput | Prisma.TheoryBlockScalarWhereInput[]
   OR?: Prisma.TheoryBlockScalarWhereInput[]
   NOT?: Prisma.TheoryBlockScalarWhereInput | Prisma.TheoryBlockScalarWhereInput[]
+  createdById?: Prisma.StringNullableFilter<"TheoryBlock"> | string | null
+  clientRequestId?: Prisma.StringNullableFilter<"TheoryBlock"> | string | null
   id?: Prisma.StringFilter<"TheoryBlock"> | string
   chapterId?: Prisma.StringFilter<"TheoryBlock"> | string
   title?: Prisma.StringFilter<"TheoryBlock"> | string
@@ -505,47 +585,62 @@ export type TheoryBlockScalarWhereInput = {
   imageKeys?: Prisma.StringNullableListFilter<"TheoryBlock">
   order?: Prisma.IntFilter<"TheoryBlock"> | number
   freePreview?: Prisma.BoolFilter<"TheoryBlock"> | boolean
+  archivedAt?: Prisma.DateTimeNullableFilter<"TheoryBlock"> | Date | string | null
 }
 
 export type TheoryBlockCreateManyChapterInput = {
+  createdById?: string | null
+  clientRequestId?: string | null
   id?: string
   title: string
   content: string
   imageKeys?: Prisma.TheoryBlockCreateimageKeysInput | string[]
   order: number
   freePreview?: boolean
+  archivedAt?: Date | string | null
 }
 
 export type TheoryBlockUpdateWithoutChapterInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   imageKeys?: Prisma.TheoryBlockUpdateimageKeysInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TheoryBlockUncheckedUpdateWithoutChapterInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   imageKeys?: Prisma.TheoryBlockUpdateimageKeysInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TheoryBlockUncheckedUpdateManyWithoutChapterInput = {
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   imageKeys?: Prisma.TheoryBlockUpdateimageKeysInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
 
 export type TheoryBlockSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  createdById?: boolean
+  clientRequestId?: boolean
   id?: boolean
   chapterId?: boolean
   title?: boolean
@@ -553,10 +648,13 @@ export type TheoryBlockSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   imageKeys?: boolean
   order?: boolean
   freePreview?: boolean
+  archivedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["theoryBlock"]>
 
 export type TheoryBlockSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  createdById?: boolean
+  clientRequestId?: boolean
   id?: boolean
   chapterId?: boolean
   title?: boolean
@@ -564,10 +662,13 @@ export type TheoryBlockSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   imageKeys?: boolean
   order?: boolean
   freePreview?: boolean
+  archivedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["theoryBlock"]>
 
 export type TheoryBlockSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  createdById?: boolean
+  clientRequestId?: boolean
   id?: boolean
   chapterId?: boolean
   title?: boolean
@@ -575,10 +676,13 @@ export type TheoryBlockSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   imageKeys?: boolean
   order?: boolean
   freePreview?: boolean
+  archivedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["theoryBlock"]>
 
 export type TheoryBlockSelectScalar = {
+  createdById?: boolean
+  clientRequestId?: boolean
   id?: boolean
   chapterId?: boolean
   title?: boolean
@@ -586,9 +690,10 @@ export type TheoryBlockSelectScalar = {
   imageKeys?: boolean
   order?: boolean
   freePreview?: boolean
+  archivedAt?: boolean
 }
 
-export type TheoryBlockOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "chapterId" | "title" | "content" | "imageKeys" | "order" | "freePreview", ExtArgs["result"]["theoryBlock"]>
+export type TheoryBlockOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"createdById" | "clientRequestId" | "id" | "chapterId" | "title" | "content" | "imageKeys" | "order" | "freePreview" | "archivedAt", ExtArgs["result"]["theoryBlock"]>
 export type TheoryBlockInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }
@@ -605,6 +710,8 @@ export type $TheoryBlockPayload<ExtArgs extends runtime.Types.Extensions.Interna
     chapter: Prisma.$ChapterPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    createdById: string | null
+    clientRequestId: string | null
     id: string
     chapterId: string
     title: string
@@ -612,6 +719,7 @@ export type $TheoryBlockPayload<ExtArgs extends runtime.Types.Extensions.Interna
     imageKeys: string[]
     order: number
     freePreview: boolean
+    archivedAt: Date | null
   }, ExtArgs["result"]["theoryBlock"]>
   composites: {}
 }
@@ -695,8 +803,8 @@ export interface TheoryBlockDelegate<ExtArgs extends runtime.Types.Extensions.In
    * // Get first 10 TheoryBlocks
    * const theoryBlocks = await prisma.theoryBlock.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const theoryBlockWithIdOnly = await prisma.theoryBlock.findMany({ select: { id: true } })
+   * // Only select the `createdById`
+   * const theoryBlockWithCreatedByIdOnly = await prisma.theoryBlock.findMany({ select: { createdById: true } })
    * 
    */
   findMany<T extends TheoryBlockFindManyArgs>(args?: Prisma.SelectSubset<T, TheoryBlockFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TheoryBlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -740,9 +848,9 @@ export interface TheoryBlockDelegate<ExtArgs extends runtime.Types.Extensions.In
    *   ]
    * })
    * 
-   * // Create many TheoryBlocks and only return the `id`
-   * const theoryBlockWithIdOnly = await prisma.theoryBlock.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many TheoryBlocks and only return the `createdById`
+   * const theoryBlockWithCreatedByIdOnly = await prisma.theoryBlock.createManyAndReturn({
+   *   select: { createdById: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -831,9 +939,9 @@ export interface TheoryBlockDelegate<ExtArgs extends runtime.Types.Extensions.In
    *   ]
    * })
    * 
-   * // Update zero or more TheoryBlocks and only return the `id`
-   * const theoryBlockWithIdOnly = await prisma.theoryBlock.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more TheoryBlocks and only return the `createdById`
+   * const theoryBlockWithCreatedByIdOnly = await prisma.theoryBlock.updateManyAndReturn({
+   *   select: { createdById: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1036,6 +1144,8 @@ export interface Prisma__TheoryBlockClient<T, Null = never, ExtArgs extends runt
  * Fields of the TheoryBlock model
  */
 export interface TheoryBlockFieldRefs {
+  readonly createdById: Prisma.FieldRef<"TheoryBlock", 'String'>
+  readonly clientRequestId: Prisma.FieldRef<"TheoryBlock", 'String'>
   readonly id: Prisma.FieldRef<"TheoryBlock", 'String'>
   readonly chapterId: Prisma.FieldRef<"TheoryBlock", 'String'>
   readonly title: Prisma.FieldRef<"TheoryBlock", 'String'>
@@ -1043,6 +1153,7 @@ export interface TheoryBlockFieldRefs {
   readonly imageKeys: Prisma.FieldRef<"TheoryBlock", 'String[]'>
   readonly order: Prisma.FieldRef<"TheoryBlock", 'Int'>
   readonly freePreview: Prisma.FieldRef<"TheoryBlock", 'Boolean'>
+  readonly archivedAt: Prisma.FieldRef<"TheoryBlock", 'DateTime'>
 }
     
 

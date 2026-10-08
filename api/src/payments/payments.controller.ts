@@ -1,5 +1,8 @@
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { FinanceCapabilityGuard } from './finance-capability.guard';
 import {
   Body,
+  NotFoundException,
   Controller,
   Get,
   Param,
@@ -16,6 +19,7 @@ import { PaymentStatus, Role } from '../generated/prisma/enums';
 import {
   ConfirmPaymentDto,
   CreatePaymentDto,
+  CreateManualPaymentDto,
   RejectPaymentDto,
   ReversePaymentDto,
   UpdatePaymentDto,
@@ -28,13 +32,29 @@ interface AuthedRequest {
 
 @Controller()
 export class PaymentsController {
-  constructor(private payments: PaymentsService) {}
+  constructor(
+    private payments: PaymentsService,
+    private capabilities: StaffCapabilityService,
+  ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.STUDENT)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.STUDENT, Role.BUYER)
   @Post('payments')
-  create(@Body() dto: CreatePaymentDto, @Req() req: AuthedRequest) {
+  async create(@Body() dto: CreatePaymentDto, @Req() req: AuthedRequest) {
+    if (req.user.role !== Role.STUDENT && req.user.role !== Role.BUYER)
+      await this.capabilities.assert(req.user.userId, 'finance.manage');
     return this.payments.create(dto, req.user.userId, req.user.role);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post('payments/manual')
+  manual(@Body() dto: CreateManualPaymentDto, @Req() req: AuthedRequest) {
+    const { userId, ...payment } = dto;
+    return this.payments.createManual(payment, userId, {
+      id: req.user.userId,
+      role: req.user.role,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -43,7 +63,7 @@ export class PaymentsController {
     return this.payments.my(req.user.userId);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('payments')
   list(@Query('status') status?: PaymentStatus) {
@@ -52,7 +72,7 @@ export class PaymentsController {
 
   // Багш+ бүртгэл/төлбөр/өдөртэй холбоотой ЮМЫГ ч засаж чадах ёстой (эзэмшигчийн
   // шаардлага) — дүн, арга, огноо, сар, тайлбар. Шалтгаан заавал (DTO шалгана).
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('payments/:id')
   update(
@@ -66,7 +86,7 @@ export class PaymentsController {
     });
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('payments/:id/confirm')
   confirm(
@@ -80,7 +100,7 @@ export class PaymentsController {
     });
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('payments/:id/reject')
   reject(
@@ -97,7 +117,7 @@ export class PaymentsController {
 
   // Баталгаажсан төлбөрийг буцаах — олгосон эрхийг автоматаар цуцална
   // (мөнгө/эрх зөрүүтэй үлдэхгүй байх эзэмшигчийн шаардлага)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('payments/:id/reverse')
   reverse(
@@ -111,7 +131,7 @@ export class PaymentsController {
     });
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('payments/months/:month')
   monthStatus(@Param('month') month: string) {
@@ -119,7 +139,7 @@ export class PaymentsController {
   }
 
   // Нэг сурагчийн бүх төлбөрийн түүх + хураангуй (хэдэн төлсөн/үлдэгдэл хэд)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('payments/student/:id')
   studentHistory(@Param('id') id: string) {
@@ -127,11 +147,23 @@ export class PaymentsController {
   }
 
   // Тухайн сард дутуу төлсөн танхимын сурагчдын жагсаалт — хөөцөлдөх зорилготой
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('payments/outstanding')
   outstanding(@Query('month') month: string) {
     return this.payments.outstanding(month);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('payments/:id')
+  async checkout(@Param('id') id: string, @Req() req: AuthedRequest) {
+    const { userId, ...payment } = await this.payments.readForCheckout(id);
+    if (userId !== req.user.userId) {
+      if (req.user.role !== Role.ADMIN && req.user.role !== Role.TEACHER_PLUS)
+        throw new NotFoundException('Төлбөр олдсонгүй');
+      await this.capabilities.assert(req.user.userId, 'finance.manage');
+    }
+    return payment;
   }
 
   // ⚠️ Хуучин `POST /payments/qpay/webhook` УСТГАГДСАН (2026-07-27).

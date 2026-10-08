@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -7,9 +8,11 @@ import {
 } from '@nestjs/common';
 import {
   canAccessChapter,
-  collectPassScope,
+  canAccessVideoChapter,
+  collectContentScope,
   hasActiveClassroomEnrollment,
-  TEACHER_ROLES,
+  internalTeachingRole,
+  assertInternalTeachingStaff,
 } from '../common/access';
 import { Prisma } from '../generated/prisma/client';
 import { LearningEventType, Role, Subject } from '../generated/prisma/enums';
@@ -35,7 +38,11 @@ export class LessonsService {
   // ЗААВАЛ харагдана — өмнө нь зөвхөн үнэгүй preview бүлэгт л онол буцдаг байсан).
   async getLesson(chapterId: string, userId: string, role: Role) {
     const chapter = await this.prisma.chapter.findUnique({
-      where: { id: chapterId },
+      where: {
+        id: chapterId,
+        deletedAt: null,
+        OR: [{ bookId: null }, { book: { deletedAt: null, archived: false } }],
+      },
       select: {
         id: true,
         title: true,
@@ -55,17 +62,38 @@ export class LessonsService {
       );
     }
 
+    const videoAllowed = await canAccessVideoChapter(
+      this.prisma,
+      userId,
+      role,
+      chapter,
+    );
     const [theories, videos, tests, progress] = await Promise.all([
       this.prisma.theoryBlock.findMany({
-        where: { chapterId },
-        select: { id: true, title: true, content: true, imageKeys: true, order: true },
+        where: { chapterId, archivedAt: null },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          imageKeys: true,
+          order: true,
+        },
         orderBy: { order: 'asc' },
       }),
-      this.prisma.video.findMany({
-        where: { chapterId },
-        select: { id: true, title: true, s3Key: true, duration: true },
-        orderBy: { createdAt: 'asc' },
-      }),
+      videoAllowed
+        ? this.prisma.video.findMany({
+            where: { chapterId, deletedAt: null, problemId: null },
+            select: { id: true, title: true, s3Key: true, duration: true },
+            orderBy: { createdAt: 'asc' },
+          })
+        : Promise.resolve(
+            [] as {
+              id: string;
+              title: string;
+              s3Key: string;
+              duration: number | null;
+            }[],
+          ),
       this.prisma.test.findMany({
         where: { chapterId, isDraft: false, deletedAt: null },
         select: {
@@ -116,9 +144,20 @@ export class LessonsService {
   ) {
     const chapters = await this.prisma.chapter.findMany({
       where: {
+        deletedAt: null,
         AND: [
-          { OR: [{ theories: { some: {} } }, { videos: { some: {} } }] },
-          { OR: [{ bookId: null }, { book: { archived: false } }] },
+          {
+            OR: [
+              { theories: { some: { archivedAt: null } } },
+              { videos: { some: { deletedAt: null, problemId: null } } },
+            ],
+          },
+          {
+            OR: [
+              { bookId: null },
+              { book: { archived: false, deletedAt: null } },
+            ],
+          },
           ...(bookId ? [{ bookId }] : []),
           ...(subject ? [{ book: { subject } }] : []),
         ],
@@ -131,16 +170,21 @@ export class LessonsService {
         freePreview: true,
         bookId: true,
         book: { select: { code: true, title: true, subject: true } },
-        _count: { select: { theories: true, videos: true } },
+        _count: {
+          select: {
+            theories: { where: { archivedAt: null } },
+            videos: { where: { deletedAt: null, problemId: null } },
+          },
+        },
       },
       orderBy: [{ book: { code: 'asc' } }, { order: 'asc' }],
     });
 
     let accessible = chapters;
-    if (!TEACHER_ROLES.includes(role)) {
+    if (!(await internalTeachingRole(this.prisma, userId))) {
       const [enrolled, scope] = await Promise.all([
         hasActiveClassroomEnrollment(this.prisma, userId, role),
-        collectPassScope(this.prisma, userId),
+        collectContentScope(this.prisma, userId),
       ]);
       accessible = chapters.filter(
         (c) =>
@@ -176,32 +220,125 @@ export class LessonsService {
       ]),
     );
 
-    return accessible.map(({ bookId: _bookId, freePreview: _freePreview, _count, ...c }) => {
-      const p = progressByChapter.get(c.id) ?? {
-        theoriesRead: 0,
-        videosWatched: 0,
-      };
-      const theoryCount = _count.theories;
-      const videoCount = _count.videos;
-      return {
-        ...c,
-        theoryCount,
-        videoCount,
-        theoriesRead: p.theoriesRead,
-        videosWatched: p.videosWatched,
-        completed:
-          (theoryCount === 0 || p.theoriesRead >= theoryCount) &&
-          (videoCount === 0 || p.videosWatched >= videoCount),
-      };
-    });
+    const mediaAllowed = new Map(
+      await Promise.all(
+        accessible.map(
+          async (chapter) =>
+            [
+              chapter.id,
+              await canAccessVideoChapter(this.prisma, userId, role, chapter),
+            ] as const,
+        ),
+      ),
+    );
+    return accessible.map(
+      ({ bookId: _bookId, freePreview: _freePreview, _count, ...c }) => {
+        void _bookId;
+        void _freePreview;
+        const p = progressByChapter.get(c.id) ?? {
+          theoriesRead: 0,
+          videosWatched: 0,
+        };
+        const theoryCount = _count.theories;
+        const videoCount = mediaAllowed.get(c.id) ? _count.videos : 0;
+        return {
+          ...c,
+          theoryCount,
+          videoCount,
+          theoriesRead: p.theoriesRead,
+          videosWatched: p.videosWatched,
+          completed:
+            (theoryCount === 0 || p.theoriesRead >= theoryCount) &&
+            (videoCount === 0 || p.videosWatched >= videoCount),
+        };
+      },
+    );
   }
 
   // Бүлэг сэдэвт нэг онолын блок нэмнэ — TheoryBlock загвар оршдог ч эдүгээ
   // хүртэл ЭНЭ authoring endpoint байгаагүй тул багш нар онол огт бичих
   // боломжгүй байсан (dead model fix).
-  async createTheory(chapterId: string, dto: CreateTheoryDto) {
+  private async assertTheoryAttachments(
+    keys: string[],
+    actorId: string,
+    retained: string[] = [],
+  ) {
+    const added = keys.filter((key) => !retained.includes(key));
+    if (!added.length) return;
+    const files = await this.prisma.storedFile.findMany({
+      where: { key: { in: added } },
+      select: { key: true, ownerId: true, mime: true, size: true },
+    });
+    if (
+      added.some(
+        (key) =>
+          !files.some((file) => file.key === key && file.ownerId === actorId),
+      )
+    )
+      throw new ForbiddenException(
+        'Зөвхөн өөрийн байршуулсан зургийг хавсаргана уу.',
+      );
+    if (
+      files.some(
+        (file) =>
+          ![
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+          ].includes(file.mime) || file.size > 25 * 1024 * 1024,
+      )
+    )
+      throw new BadRequestException('25 МБ хүртэлх зураг хавсаргана уу.');
+  }
+
+  async createTheory(chapterId: string, dto: CreateTheoryDto, actorId: string) {
+    await assertInternalTeachingStaff(this.prisma, actorId);
+    const where = dto.clientRequestId
+      ? {
+          createdById_clientRequestId: {
+            createdById: actorId,
+            clientRequestId: dto.clientRequestId,
+          },
+        }
+      : null;
+    const replay = (existing: {
+      chapterId: string;
+      title: string;
+      content: string;
+      imageKeys: string[];
+      archivedAt: Date | null;
+    }) => {
+      if (existing.archivedAt)
+        throw new ConflictException(
+          'Архивласан хүсэлтийг дахин ашиглах боломжгүй',
+        );
+      if (
+        existing.chapterId !== chapterId ||
+        existing.title !== dto.title ||
+        existing.content !== dto.content ||
+        JSON.stringify(existing.imageKeys) !==
+          JSON.stringify(dto.imageKeys ?? [])
+      ) {
+        throw new ConflictException(
+          'Энэ хүсэлтийн дугаараар өөр агуулга хадгалсан байна. Шинэ хүсэлтээр илгээнэ үү.',
+        );
+      }
+      return existing;
+    };
+    if (where) {
+      const existing = await this.prisma.theoryBlock.findUnique({ where });
+      if (existing) return replay(existing);
+    }
+    await this.assertTheoryAttachments(dto.imageKeys ?? [], actorId);
     const chapter = await this.prisma.chapter.findUnique({
-      where: { id: chapterId },
+      where: {
+        id: chapterId,
+        deletedAt: null,
+        OR: [{ bookId: null }, { book: { deletedAt: null, archived: false } }],
+      },
       select: { id: true },
     });
     if (!chapter) throw new NotFoundException('Бүлэг сэдэв олдсонгүй');
@@ -211,20 +348,44 @@ export class LessonsService {
       _max: { order: true },
     });
 
-    return this.prisma.theoryBlock.create({
-      data: {
-        chapterId,
-        title: dto.title,
-        content: dto.content,
-        imageKeys: dto.imageKeys ?? [],
-        order: (last._max.order ?? 0) + 1,
-      },
-    });
+    try {
+      return await this.prisma.theoryBlock.create({
+        data: {
+          chapterId,
+          createdById: actorId,
+          clientRequestId: dto.clientRequestId,
+          title: dto.title,
+          content: dto.content,
+          imageKeys: dto.imageKeys ?? [],
+          order: (last._max.order ?? 0) + 1,
+        },
+      });
+    } catch (error) {
+      if (
+        where &&
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        const winner = await this.prisma.theoryBlock.findUnique({ where });
+        if (winner) return replay(winner);
+      }
+      throw error;
+    }
   }
 
-  async updateTheory(id: string, dto: UpdateTheoryDto) {
+  async updateTheory(id: string, dto: UpdateTheoryDto, actorId: string) {
+    const role = await assertInternalTeachingStaff(this.prisma, actorId);
     const theory = await this.prisma.theoryBlock.findUnique({ where: { id } });
-    if (!theory) throw new NotFoundException('Онолын блок олдсонгүй');
+    if (!theory || theory.archivedAt)
+      throw new NotFoundException('Онолын блок олдсонгүй');
+    if (role === Role.TEACHER && theory.createdById !== actorId)
+      throw new ForbiddenException('Өөрийн онолыг засна уу');
+    if (dto.imageKeys !== undefined)
+      await this.assertTheoryAttachments(
+        dto.imageKeys,
+        actorId,
+        theory.imageKeys,
+      );
 
     return this.prisma.theoryBlock.update({
       where: { id },
@@ -236,21 +397,77 @@ export class LessonsService {
     });
   }
 
-  async removeTheory(id: string) {
-    const theory = await this.prisma.theoryBlock.findUnique({ where: { id } });
-    if (!theory) throw new NotFoundException('Онолын блок олдсонгүй');
-    await this.prisma.theoryBlock.delete({ where: { id } });
-    return { removed: true };
+  async removeTheory(id: string, actorId: string) {
+    return this.setTheoryArchive(id, actorId, true);
+  }
+
+  async restoreTheory(id: string, actorId: string) {
+    return this.setTheoryArchive(id, actorId, false);
+  }
+
+  private async setTheoryArchive(
+    id: string,
+    actorId: string,
+    archive: boolean,
+  ) {
+    const role = await assertInternalTeachingStaff(this.prisma, actorId);
+    if (role !== Role.ADMIN && role !== Role.TEACHER_PLUS)
+      throw new ForbiddenException('Архивлах эрхгүй');
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`theory:${id}`}))`;
+      const theory = await tx.theoryBlock.findUnique({ where: { id } });
+      if (!theory) throw new NotFoundException('Онолын блок олдсонгүй');
+      if (!archive) {
+        const chapter = await tx.chapter.findFirst({
+          where: {
+            id: theory.chapterId,
+            deletedAt: null,
+            OR: [
+              { bookId: null },
+              { book: { deletedAt: null, archived: false } },
+            ],
+          },
+        });
+        if (!chapter)
+          throw new ConflictException(
+            'Архивласан бүлэгт онол сэргээх боломжгүй',
+          );
+      }
+      if (!!theory.archivedAt === archive)
+        return { removed: archive, archived: archive, id };
+      const row = await tx.theoryBlock.update({
+        where: { id },
+        data: { archivedAt: archive ? new Date() : null },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          actorRole: role,
+          action: archive ? 'ARCHIVE' : 'RESTORE',
+          entity: 'TheoryBlock',
+          entityId: id,
+          before: { archivedAt: theory.archivedAt?.toISOString() ?? null },
+          after: { archivedAt: row.archivedAt?.toISOString() ?? null },
+        },
+      });
+      return { removed: archive, archived: archive, id };
+    });
   }
 
   // Бүтэн жагсаалтыг дахин бичнэ (drag/drop reorder UI). Ирсэн id-ууд тухайн
   // бүлгийн онолын блокуудтай ЯГ ТААРАХ ёстой (хэсэгчилсэн reorder-ыг зөвшөөрөхгүй
   // — эс тэгвээс жагсаалтад ороогүй блок хуучин order-ээ хадгалж давхцал үүснэ).
-  async reorderTheory(chapterId: string, ids: string[]) {
+  async reorderTheory(chapterId: string, ids: string[], actorId: string) {
+    const role = await assertInternalTeachingStaff(this.prisma, actorId);
     const existing = await this.prisma.theoryBlock.findMany({
-      where: { chapterId },
-      select: { id: true },
+      where: { chapterId, archivedAt: null },
+      select: { id: true, createdById: true },
     });
+    if (
+      role === Role.TEACHER &&
+      existing.some((t) => t.createdById !== actorId)
+    )
+      throw new ForbiddenException('Бүлгийн бүх онолыг эрэмбэлэх эрхгүй');
     const existingIds = new Set(existing.map((t) => t.id));
     const incomingIds = new Set(ids);
     if (
@@ -276,7 +493,11 @@ export class LessonsService {
   // Сурагчийн явцыг LearningEvent-д бичнэ (heatmap/аналитик давхарга үүнийг
   // уншина). ЗААВАЛ 202 буцаана: телеметр бичилт амжилтгүй болсноор сурагчийн
   // судлах явцыг хэзээ ч блоклохгүй.
-  async recordProgress(chapterId: string, userId: string, dto: RecordProgressDto) {
+  async recordProgress(
+    chapterId: string,
+    userId: string,
+    dto: RecordProgressDto,
+  ) {
     let type: LearningEventType;
     let videoId: string | undefined;
     let meta: Prisma.InputJsonValue | undefined;
@@ -284,21 +505,27 @@ export class LessonsService {
     switch (dto.action) {
       case LessonProgressAction.THEORY_READ:
         if (!dto.theoryId) {
-          throw new BadRequestException('THEORY_READ үйлдэлд theoryId шаардлагатай');
+          throw new BadRequestException(
+            'THEORY_READ үйлдэлд theoryId шаардлагатай',
+          );
         }
         type = LearningEventType.PAGE_VIEW;
         meta = { theoryId: dto.theoryId };
         break;
       case LessonProgressAction.VIDEO_STARTED:
         if (!dto.videoId) {
-          throw new BadRequestException('VIDEO_STARTED үйлдэлд videoId шаардлагатай');
+          throw new BadRequestException(
+            'VIDEO_STARTED үйлдэлд videoId шаардлагатай',
+          );
         }
         type = LearningEventType.VIDEO_STARTED;
         videoId = dto.videoId;
         break;
       case LessonProgressAction.VIDEO_COMPLETED:
         if (!dto.videoId) {
-          throw new BadRequestException('VIDEO_COMPLETED үйлдэлд videoId шаардлагатай');
+          throw new BadRequestException(
+            'VIDEO_COMPLETED үйлдэлд videoId шаардлагатай',
+          );
         }
         type = LearningEventType.VIDEO_COMPLETED;
         videoId = dto.videoId;
@@ -312,7 +539,10 @@ export class LessonsService {
         data: { userId, type, chapterId, videoId, meta },
       });
     } catch (err) {
-      this.logger.error('Хичээлийн явцын LearningEvent бичихэд алдаа гарлаа', err);
+      this.logger.error(
+        'Хичээлийн явцын LearningEvent бичихэд алдаа гарлаа',
+        err,
+      );
     }
     return { accepted: true };
   }
@@ -339,7 +569,9 @@ export class LessonsService {
     const row = rows[0];
     return {
       theoryRead: (row?.theory_read ?? []).filter((id): id is string => !!id),
-      videosWatched: (row?.videos_watched ?? []).filter((id): id is string => !!id),
+      videosWatched: (row?.videos_watched ?? []).filter(
+        (id): id is string => !!id,
+      ),
       problemsAttempted: Number(row?.problems_attempted ?? 0),
     };
   }

@@ -23,6 +23,7 @@ describe('paid-until parent access', () => {
     };
     const controller = new TuitionController(
       service as unknown as TuitionService,
+      { assert: jest.fn().mockResolvedValue(undefined) } as never,
     );
     await expect(
       controller.getPaidUntil('student-1', parentRequest),
@@ -43,6 +44,7 @@ describe('paid-until parent access', () => {
     };
     const controller = new TuitionController(
       service as unknown as TuitionService,
+      { assert: jest.fn().mockResolvedValue(undefined) } as never,
     );
     await expect(
       controller.getPaidUntil('student-1', parentRequest),

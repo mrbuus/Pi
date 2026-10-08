@@ -48,7 +48,8 @@
     "method": "PATCH",
     "path": "/api/finance/expenses/:id",
     "roles": [
-      "ADMIN"
+      "ADMIN",
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -58,7 +59,8 @@
     "method": "DELETE",
     "path": "/api/finance/expenses/:id",
     "roles": [
-      "ADMIN"
+      "ADMIN",
+      "TEACHER_PLUS"
     ]
   },
   {

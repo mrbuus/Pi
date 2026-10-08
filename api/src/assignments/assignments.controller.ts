@@ -83,6 +83,12 @@ export class AssignmentsController {
   }
 
   @Roles(Role.STUDENT)
+  @Get('assignments/my-classrooms')
+  myClassrooms(@Req() req: AuthedRequest) {
+    return this.assignments.myClassrooms(req.user.userId);
+  }
+
+  @Roles(Role.STUDENT)
   @Get('assignments/my')
   my(@Req() req: AuthedRequest) {
     return this.assignments.myAssignments(req.user.userId);

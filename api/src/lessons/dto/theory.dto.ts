@@ -5,6 +5,7 @@ import {
   IsArray,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MaxLength,
   MinLength,
@@ -16,6 +17,11 @@ import {
 export const UPLOAD_KEY_REGEX = /^[\w][\w.-]*$/;
 
 export class CreateTheoryDto {
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID('4')
+  clientRequestId?: string;
+
   @ApiProperty({ type: String, minLength: 1, maxLength: 200 })
   @IsString()
   @MinLength(1, { message: 'Гарчиг хоосон байж болохгүй' })
@@ -35,6 +41,7 @@ export class CreateTheoryDto {
   @IsArray()
   @ArrayMaxSize(50)
   @IsString({ each: true })
+  @MaxLength(200, { each: true })
   @Matches(UPLOAD_KEY_REGEX, { each: true, message: 'Буруу зургийн key' })
   imageKeys?: string[];
 }
@@ -61,6 +68,7 @@ export class UpdateTheoryDto {
   @IsArray()
   @ArrayMaxSize(50)
   @IsString({ each: true })
+  @MaxLength(200, { each: true })
   @Matches(UPLOAD_KEY_REGEX, { each: true, message: 'Буруу зургийн key' })
   imageKeys?: string[];
 }

@@ -1,3 +1,5 @@
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { financeMonthBounds, exactMoney, sumMoney } from './month-bounds';
 import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -34,6 +36,7 @@ export interface FinanceReport {
   netProfit: number;
   previousNetProfit: number | null;
   profitChange: number | null; // Эцсийн сартай харьцуулалт
+  incomeReconciliationRequired: number; // ambiguous legacy settlements needing allocation review
   targetIncome: number | null; // ёстой орлого (түүнийг тооцохын тулд мета шаардлага)
   collectionRate: number | null; // % — цуглуулалтын хувь
 }
@@ -43,7 +46,13 @@ export class FinanceService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private capabilities: StaffCapabilityService,
   ) {}
+
+  private async assertFinance(actor: FinanceActor) {
+    if (actor.role !== 'ADMIN' && actor.role !== 'TEACHER_PLUS') throw new ForbiddenException('Санхүүгийн ажилтны эрх шаардлагатай');
+    await this.capabilities.assert(actor.id, 'finance.manage');
+  }
 
   /**
    * Сар буюу хугацааны хооронд нэгдсэн орлого/зарлагын тайлан
@@ -51,45 +60,17 @@ export class FinanceService {
    * @returns FinanceReport объект
    */
   async getMonthlyReport(yearMonth: string): Promise<FinanceReport> {
-    // Сарын validate
-    if (!/^\d{4}-\d{2}$/.test(yearMonth)) {
-      throw new BadRequestException(
-        'Сарын формат: YYYY-MM (жишээ: 2026-08)',
-      );
-    }
-
-    const [yearStr, monthStr] = yearMonth.split('-');
-    const year = parseInt(yearStr, 10);
-    const month = parseInt(monthStr, 10);
-
-    if (month < 1 || month > 12) {
-      throw new BadRequestException('Сар 1-12 хооронд байх ёстой');
-    }
-
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-
-    // Орлогын агрегат
-    const income = await this.aggregateIncome(startDate, endDate);
-    const totalIncome = Object.values(income).reduce((a, b) => a + b, 0);
-
-    // Зарлагын агрегат
-    const expenses = await this.aggregateExpenses(startDate, endDate);
-    const totalExpenses = Object.values(expenses).reduce((a, b) => a + b, 0);
-
-    // Цэвэр ашиг
-    const netProfit = totalIncome - totalExpenses;
-
-    // Өмнөх сартай харьцуулалт
-    const prevMonth = new Date(year, month - 2, 1);
-    const prevMonthEnd = new Date(year, month - 1, 0);
-    const prevIncome = await this.aggregateIncome(prevMonth, prevMonthEnd);
-    const prevExpenses = await this.aggregateExpenses(prevMonth, prevMonthEnd);
-    const previousNetProfit =
-      Object.values(prevIncome).reduce((a, b) => a + b, 0) -
-      Object.values(prevExpenses).reduce((a, b) => a + b, 0);
-    const profitChange =
-      previousNetProfit !== null ? netProfit - previousNetProfit : null;
+    const bounds = financeMonthBounds(yearMonth);
+    const settled = await this.aggregateIncome(bounds.start, bounds.end);
+    const income = settled.income;
+    const totalIncome = sumMoney(Object.values(income));
+    const expenses = await this.aggregateExpenses(bounds.dateStart, bounds.dateEnd);
+    const totalExpenses = sumMoney(Object.values(expenses));
+    const netProfit = sumMoney([totalIncome, -totalExpenses]);
+    const previous = await this.aggregateIncome(bounds.previousStart, bounds.start);
+    const prevExpenses = await this.aggregateExpenses(bounds.previousDateStart, bounds.dateStart);
+    const previousNetProfit = sumMoney([sumMoney(Object.values(previous.income)), -sumMoney(Object.values(prevExpenses))]);
+    const profitChange = sumMoney([netProfit, -previousNetProfit]);
 
     // Цуглуулалтын хувь (target орлого – нийт Payment-ны ёстой хэмжээ)
     // Хэрэвээ мета эсвэл эх сурвалж байхгүй бол null
@@ -97,6 +78,7 @@ export class FinanceService {
 
     return {
       period: yearMonth,
+      incomeReconciliationRequired: settled.reconciliationRequired,
       income,
       totalIncome,
       expenses,
@@ -113,58 +95,38 @@ export class FinanceService {
    * Дугаарын агрегат сар дахь нэгд асуу
    * @private
    */
-  private async aggregateIncome(
-    startDate: Date,
-    endDate: Date,
-  ): Promise<IncomeBreakdown> {
-    // Payment: status = CONFIRMED (сургалтын төлбөр)
-    const trainingFeesResult = await this.prisma.$queryRaw<
-      Array<{ total: bigint }>
-    >(
-      Prisma.sql`
-        SELECT COALESCE(CAST(SUM(amount) AS BIGINT), 0) as total
-        FROM "Payment"
-        WHERE status = 'CONFIRMED'
-          AND "paidAt" >= ${startDate}
-          AND "paidAt" <= ${endDate}
-      `,
-    );
-    const trainingFees = Math.round(Number(trainingFeesResult[0]?.total ?? 0));
-
-    // Purchase: productItem.kind = TEST → шалгалтын төлбөр
-    const examsResult = await this.prisma.$queryRaw<Array<{ total: bigint }>>(
-      Prisma.sql`
-        SELECT COALESCE(CAST(SUM(p.price) AS BIGINT), 0) as total
-        FROM "Purchase" p
-        JOIN "ProductItem" pi ON p."productItemId" = pi.id
-        WHERE pi.kind = 'TEST'
-          AND p."createdAt" >= ${startDate}
-          AND p."createdAt" <= ${endDate}
-      `,
-    );
-    const exams = Math.round(Number(examsResult[0]?.total ?? 0));
-
-    // Purchase: productItem.kind = BOOK → номын төлбөр
-    const booksResult = await this.prisma.$queryRaw<Array<{ total: bigint }>>(
-      Prisma.sql`
-        SELECT COALESCE(CAST(SUM(p.price) AS BIGINT), 0) as total
-        FROM "Purchase" p
-        JOIN "ProductItem" pi ON p."productItemId" = pi.id
-        WHERE pi.kind = 'BOOK'
-          AND p."createdAt" >= ${startDate}
-          AND p."createdAt" <= ${endDate}
-      `,
-    );
-    const books = Math.round(Number(booksResult[0]?.total ?? 0));
-
-    const other = 0; // Үлдэх орлого (ирээдүйд нэмэх)
-
-    return {
-      trainingFees,
-      exams,
-      books,
-      other,
-    };
+  private async aggregateIncome(startDate: Date, endDate: Date): Promise<{ income: IncomeBreakdown; reconciliationRequired: number }> {
+    // Confirmed Payment is the sole receipt. Purchase only classifies it; its price is never added.
+    // A confirmed receipt whose fulfilment is pending stays unallocated (other), not tuition/sales.
+    const rows = await this.prisma.$queryRaw<Array<{ bucket: string; total: bigint; reconciliation: bigint }>>(Prisma.sql`
+      SELECT bucket, COALESCE(SUM(amount), 0)::bigint AS total,
+             COUNT(*) FILTER (WHERE ambiguous)::bigint AS reconciliation
+      FROM (
+        SELECT pay.amount,
+          CASE WHEN NOT EXISTS (SELECT 1 FROM "Purchase" any_purchase WHERE any_purchase."paymentId" = pay.id)
+            THEN 'TRAINING' ELSE COALESCE(settled.kind, 'OTHER') END AS bucket,
+          COALESCE(settled.kinds, 0) > 1 AS ambiguous
+        FROM "Payment" pay
+        LEFT JOIN LATERAL (
+          SELECT CASE WHEN COUNT(DISTINCT product.kind) = 1 THEN MAX(product.kind::text) ELSE 'OTHER' END AS kind,
+                 COUNT(DISTINCT product.kind) AS kinds
+          FROM "Purchase" purchase
+          JOIN "ProductItem" product ON product.id = purchase."productItemId"
+          WHERE purchase."paymentId" = pay.id AND purchase."grantedAt" IS NOT NULL
+            AND purchase."grantedAt" <= ${new Date()}
+        ) settled ON TRUE
+        WHERE pay.status = 'CONFIRMED' AND pay."paidAt" >= ${startDate} AND pay."paidAt" < ${endDate}
+      ) receipts
+      GROUP BY bucket
+    `);
+    const income: IncomeBreakdown = { trainingFees: 0, exams: 0, books: 0, other: 0 };
+    let reconciliationRequired = 0;
+    for (const row of rows) {
+      const key = row.bucket === 'TRAINING' ? 'trainingFees' : row.bucket === 'TEST' ? 'exams' : row.bucket === 'BOOK' ? 'books' : 'other';
+      income[key] = sumMoney([income[key], exactMoney(row.total)]);
+      reconciliationRequired += Number(row.reconciliation);
+    }
+    return { income, reconciliationRequired };
   }
 
   /**
@@ -182,7 +144,7 @@ export class FinanceService {
         SELECT category, COALESCE(CAST(SUM(amount) AS BIGINT), 0) as total
         FROM "ExpenseRecord"
         WHERE "occurredOn" >= ${startDate}
-          AND "occurredOn" <= ${endDate}
+          AND "occurredOn" < ${endDate}
         GROUP BY category
       `,
     );
@@ -199,7 +161,7 @@ export class FinanceService {
 
     for (const row of result) {
       const categoryKey = row.category.toLowerCase();
-      const total = Math.round(Number(row.total));
+      const total = exactMoney(row.total);
       if (categoryKey in breakdown) {
         breakdown[categoryKey as keyof ExpenseBreakdown] = total;
       }
@@ -220,9 +182,7 @@ export class FinanceService {
       occurredOn: Date;
     },
   ) {
-    if (actor.role !== 'ADMIN') {
-      throw new ForbiddenException('Зөвхөн админ л зарлага үүсгэх боломжтой');
-    }
+    await this.assertFinance(actor);
 
     // amount INT байх ёстой
     if (!Number.isInteger(dto.amount) || dto.amount < 0) {
@@ -286,9 +246,7 @@ export class FinanceService {
       occurredOn?: Date;
     },
   ) {
-    if (actor.role !== 'ADMIN') {
-      throw new ForbiddenException('Зөвхөн админ л зарлагыг засах боломжтой');
-    }
+    await this.assertFinance(actor);
 
     // Үнэ баталгаажуулах
     if (dto.amount !== undefined) {
@@ -358,9 +316,7 @@ export class FinanceService {
    * Зарлагыг устгах
    */
   async deleteExpense(actor: FinanceActor, expenseId: string) {
-    if (actor.role !== 'ADMIN') {
-      throw new ForbiddenException('Зөвхөн админ л зарлагыг устгах боломжтой');
-    }
+    await this.assertFinance(actor);
 
     const expense = await this.prisma.expenseRecord.findUnique({
       where: { id: expenseId },
@@ -392,24 +348,13 @@ export class FinanceService {
    * Сарын бүх зарлагыг авах
    */
   async getExpenses(yearMonth: string) {
-    if (!/^\d{4}-\d{2}$/.test(yearMonth)) {
-      throw new BadRequestException(
-        'Сарын формат: YYYY-MM (жишээ: 2026-08)',
-      );
-    }
-
-    const [yearStr, monthStr] = yearMonth.split('-');
-    const year = parseInt(yearStr, 10);
-    const month = parseInt(monthStr, 10);
-
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
+    const { dateStart: startDate, dateEnd: endDate } = financeMonthBounds(yearMonth);
 
     const records = await this.prisma.expenseRecord.findMany({
       where: {
         occurredOn: {
           gte: startDate,
-          lte: endDate,
+          lt: endDate,
         },
       },
       orderBy: { occurredOn: 'desc' },

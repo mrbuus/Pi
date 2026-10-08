@@ -3,6 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { snapshotPass } from './pass-snapshot';
 import { AuditService } from '../audit/audit.service';
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
@@ -21,6 +23,7 @@ export class PassesService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private capabilities: StaffCapabilityService,
   ) {}
 
   async create(dto: CreatePassDto, actor: PassActor) {
@@ -157,26 +160,77 @@ export class PassesService {
     actor?: PassActor,
     manual = false,
     note?: string,
+    transaction?: Prisma.TransactionClient,
   ) {
-    const pass = await this.prisma.pass.findUnique({ where: { id: passId } });
-    if (!pass) throw new NotFoundException('Эрх олдсонгүй');
-    if (manual && !pass.active) {
-      throw new BadRequestException('Идэвхгүй эрхийг шинээр олгох боломжгүй');
-    }
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new NotFoundException('Хэрэглэгч олдсонгүй');
-    if (manual && user.role !== Role.STUDENT) {
-      throw new BadRequestException('Эрхийг зөвхөн сурагчид олгоно');
-    }
-
-    const startsAt = new Date();
-    const expiresAt = new Date(
-      startsAt.getTime() + pass.durationDays * 24 * 60 * 60 * 1000,
-    );
-    const granted = await this.prisma.userPass.create({
-      data: { userId, passId, startsAt, expiresAt, paymentId },
-      include: { pass: { select: { name: true } } },
-    });
+    if (actor) await this.capabilities.assert(actor.id, 'finance.manage');
+    const work = async (tx: Prisma.TransactionClient) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'pass:' + userId + ':' + passId}))`;
+      if (paymentId)
+        await tx.$queryRaw`SELECT id FROM "Payment" WHERE id = ${paymentId} FOR UPDATE`;
+      const pass = await tx.pass.findUnique({ where: { id: passId } });
+      if (!pass) throw new NotFoundException('Эрх олдсонгүй');
+      if (!pass.active)
+        throw new BadRequestException('Идэвхгүй эрхийг шинээр олгох боломжгүй');
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      if (!user || user.archivedAt)
+        throw new NotFoundException('Хэрэглэгч олдсонгүй');
+      if (
+        ![Role.STUDENT, Role.BUYER].includes(user.role as typeof Role.STUDENT)
+      )
+        throw new BadRequestException(
+          'Эрхийг зөвхөн сурагч эсвэл худалдан авагчид олгоно',
+        );
+      const startsAt = new Date();
+      const active = await tx.userPass.findFirst({
+        where: {
+          userId,
+          passId,
+          startsAt: { lte: startsAt },
+          expiresAt: { gt: startsAt },
+        },
+      });
+      if (active) {
+        if (paymentId && active.paymentId === paymentId) return active;
+        throw new BadRequestException('Энэ эрх идэвхтэй байна');
+      }
+      if (paymentId) {
+        const payment = await tx.payment.findUnique({
+          where: { id: paymentId },
+        });
+        if (
+          !payment ||
+          payment.userId !== userId ||
+          payment.status !== 'CONFIRMED'
+        )
+          throw new BadRequestException(
+            'Баталгаажсан өөрийн төлбөр шаардлагатай',
+          );
+        const used = await tx.purchase.findFirst({ where: { paymentId } });
+        const usedPass = await tx.userPass.findFirst({ where: { paymentId } });
+        if (used || usedPass)
+          throw new BadRequestException(
+            'Энэ төлбөрөөр эрх аль хэдийн олгосон байна',
+          );
+      }
+      const terms = snapshotPass(pass);
+      const expiresAt = new Date(
+        startsAt.getTime() + terms.durationDays * 86400000,
+      );
+      return tx.userPass.create({
+        data: {
+          userId,
+          passId,
+          startsAt,
+          expiresAt,
+          paymentId,
+          scopeSnapshot: terms.scope as Prisma.InputJsonValue,
+        },
+        include: { pass: { select: { name: true } } },
+      });
+    };
+    const granted = transaction
+      ? await work(transaction)
+      : await this.prisma.$transaction(work);
     if (actor) {
       await this.audit.record({
         actorId: actor.id,
@@ -187,8 +241,8 @@ export class PassesService {
         after: {
           userId,
           passId,
-          startsAt,
-          expiresAt,
+          startsAt: granted.startsAt,
+          expiresAt: granted.expiresAt,
           paymentId: paymentId ?? null,
           note: note ?? null,
         },
@@ -211,11 +265,40 @@ export class PassesService {
     if (!auditReason) {
       throw new BadRequestException('Цуцлах шалтгааныг бичнэ үү');
     }
-    const userPass = await this.prisma.userPass.findUnique({
-      where: { id: userPassId },
+    await this.capabilities.assert(actor.id, 'finance.manage');
+    const userPass = await this.prisma.$transaction(async (tx) => {
+      const original = await tx.userPass.findUnique({
+        where: { id: userPassId },
+      });
+      if (!original) throw new NotFoundException('Олгосон эрх олдсонгүй');
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'pass:' + original.userId + ':' + original.passId}))`;
+      if (original.paymentId)
+        await tx.$queryRaw`SELECT id FROM "Payment" WHERE id = ${original.paymentId} FOR UPDATE`;
+      const current = await tx.userPass.findUnique({
+        where: { id: userPassId },
+      });
+      if (!current) throw new NotFoundException('Олгосон эрх олдсонгүй');
+      await tx.userPass.delete({ where: { id: userPassId } });
+      if (current.paymentId)
+        await tx.purchase.updateMany({
+          where: {
+            userId: current.userId,
+            paymentId: current.paymentId,
+            productItem: { kind: 'PASS', refId: current.passId },
+          },
+          data: { grantedAt: null, expiresAt: new Date() },
+        });
+      if (!current.paymentId)
+        await tx.purchase.updateMany({
+          where: {
+            userId: current.userId,
+            price: 0,
+            productItem: { kind: 'PASS', refId: current.passId },
+          },
+          data: { grantedAt: null, expiresAt: new Date() },
+        });
+      return current;
     });
-    if (!userPass) throw new NotFoundException('Олгосон эрх олдсонгүй');
-    await this.prisma.userPass.delete({ where: { id: userPassId } });
     await this.audit.record({
       actorId: actor.id,
       actorRole: actor.role,

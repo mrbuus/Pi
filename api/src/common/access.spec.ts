@@ -81,12 +81,14 @@ interface FakeUserPass {
 
 function makeAccessPrisma(opts: {
   studentProfile?: FakeStudentProfile | null;
+  currentRole?: Role;
   hasActiveEnrollment?: boolean;
   userPasses?: FakeUserPass[];
   /** Видеотой ном худалдаж авсан (grantedAt бөглөгдсөн) эсэх */
   hasVideoPurchase?: boolean;
 }) {
   return {
+    user: { findUnique: async () => ({ role: opts.currentRole ?? Role.STUDENT, archivedAt: null, externalTeacherProfile: null }) },
     studentProfile: {
       findUnique: async () => opts.studentProfile ?? null,
     },
@@ -221,9 +223,9 @@ describe('canAccessChapter — SPEC §11 хандалтын дүрэм', () => {
   const chapter = { id: 'c1', bookId: 'b1', freePreview: false };
   const freeChapter = { id: 'c2', bookId: 'b1', freePreview: true };
 
-  it('ADMIN/TEACHER_PLUS/TEACHER эрхтэй роль үргэлж (өөр ямар ч мэдээлэлгүй ч) ALLOW', async () => {
-    const prisma = makeAccessPrisma({});
+  it('current active internal ADMIN/TEACHER_PLUS/TEACHER receive staff access', async () => {
     for (const role of [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER]) {
+      const prisma = makeAccessPrisma({ currentRole: role });
       expect(await canAccessChapter(prisma, 'u1', role, chapter)).toBe(true);
     }
   });

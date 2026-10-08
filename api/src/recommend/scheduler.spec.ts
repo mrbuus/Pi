@@ -9,11 +9,21 @@ import {
 const DAY = 24 * 60 * 60 * 1000;
 const NOW = 1_800_000_000_000; // тогтмол мөч — тестийн үр дүн давтагдана
 
-function a(topicId: string, correct: boolean, daysAgo: number, problemId = `${topicId}-p${daysAgo}`): AttemptSignal {
+function a(
+  topicId: string,
+  correct: boolean,
+  daysAgo: number,
+  problemId = `${topicId}-p${daysAgo}`,
+): AttemptSignal {
   return { problemId, topicId, correct, at: NOW - daysAgo * DAY };
 }
 
-function c(id: string, topicId: string, difficulty: number, attemptCount = 50): CandidateProblem {
+function c(
+  id: string,
+  topicId: string,
+  difficulty: number,
+  attemptCount = 50,
+): CandidateProblem {
   return { id, topicId, difficulty, attemptCount };
 }
 
@@ -26,7 +36,9 @@ describe('buildTopicStates', () => {
   });
 
   it('оролдлого олон болоход бодит хувь руу ойртоно', () => {
-    const hist = Array.from({ length: 20 }, (_, i) => a('T1', i < 16, 20 - i, `p${i}`));
+    const hist = Array.from({ length: 20 }, (_, i) =>
+      a('T1', i < 16, 20 - i, `p${i}`),
+    );
     const s = buildTopicStates(hist).get('T1')!;
     expect(s.attempts).toBe(20);
     expect(s.correct).toBe(16);
@@ -65,10 +77,14 @@ describe('fitScore — хүссэн хүндрэл', () => {
   it('чиглэл ЗӨВ — эзэмшилт өсөхөд оновчтой хүндрэл ч өснө', () => {
     // Энэ бол 2026-08-08-нд илэрсэн УРВУУ томьёоны хамгаалалт.
     const idealFor = (m: number) => {
-      let best = 0, bestD = 0;
+      let best = 0,
+        bestD = 0;
       for (let d = 0; d <= 1.0001; d += 0.01) {
         const s = fitScore(d, m);
-        if (s > best) { best = s; bestD = d; }
+        if (s > best) {
+          best = s;
+          bestD = d;
+        }
       }
       return bestD;
     };
@@ -89,9 +105,12 @@ describe('fitScore — хүссэн хүндрэл', () => {
 
 describe('recommend — үндсэн зан төлөв', () => {
   const cands = [
-    c('p1', 'T1', 0.3), c('p2', 'T1', 0.8),
-    c('p3', 'T2', 0.3), c('p4', 'T2', 0.8),
-    c('p5', 'T3', 0.5), c('p6', 'T3', 0.5),
+    c('p1', 'T1', 0.3),
+    c('p2', 'T1', 0.8),
+    c('p3', 'T2', 0.3),
+    c('p4', 'T2', 0.8),
+    c('p5', 'T3', 0.5),
+    c('p6', 'T3', 0.5),
   ];
 
   it('аль хэдийн бодсон бодлогыг дахин санал болгохгүй', () => {
@@ -102,7 +121,11 @@ describe('recommend — үндсэн зан төлөв', () => {
 
   it('sameProblemOk=true үед дахин санал болгож БОЛНО', () => {
     const hist = [a('T1', true, 3, 'p1')];
-    const r = recommend(hist, cands, { now: NOW, limit: 10, sameProblemOk: true });
+    const r = recommend(hist, cands, {
+      now: NOW,
+      limit: 10,
+      sameProblemOk: true,
+    });
     expect(r.map((x) => x.problemId)).toContain('p1');
   });
 
@@ -122,7 +145,8 @@ describe('recommend — Зарчим 1: давтан сэргээх', () => {
     // T1-д 2 хоногийн өмнө буруу бодсон → RETRY_TOPIC болох ёстой
     const hist = [a('T1', false, 2, 'used')];
     const r = recommend(hist, [c('p1', 'T1', 0.4), c('p9', 'T9', 0.4)], {
-      now: NOW, limit: 2,
+      now: NOW,
+      limit: 2,
     });
     const t1 = r.find((x) => x.topicId === 'T1')!;
     expect(t1.reason).toBe('RETRY_TOPIC');
@@ -131,7 +155,12 @@ describe('recommend — Зарчим 1: давтан сэргээх', () => {
   it('буруу бодсон нь ДӨНГӨЖ САЯ бол шууд дахин өгөхгүй (богино ойн нөлөө)', () => {
     // 2 цагийн өмнө буруу → RETRY биш (1 хоног болоогүй)
     const hist: AttemptSignal[] = [
-      { problemId: 'used', topicId: 'T1', correct: false, at: NOW - 2 * 60 * 60 * 1000 },
+      {
+        problemId: 'used',
+        topicId: 'T1',
+        correct: false,
+        at: NOW - 2 * 60 * 60 * 1000,
+      },
     ];
     const r = recommend(hist, [c('p1', 'T1', 0.4)], { now: NOW, limit: 1 });
     expect(r[0].reason).not.toBe('RETRY_TOPIC');
@@ -141,11 +170,18 @@ describe('recommend — Зарчим 1: давтан сэргээх', () => {
 describe('recommend — Зарчим 3: холих (interleaving)', () => {
   it('нэг сэдэв дараалан хоёр удаа орохгүй', () => {
     const cands = [
-      c('a1', 'T1', 0.5), c('a2', 'T1', 0.5), c('a3', 'T1', 0.5),
-      c('b1', 'T2', 0.5), c('b2', 'T2', 0.5),
+      c('a1', 'T1', 0.5),
+      c('a2', 'T1', 0.5),
+      c('a3', 'T1', 0.5),
+      c('b1', 'T2', 0.5),
+      c('b2', 'T2', 0.5),
       c('c1', 'T3', 0.5),
     ];
-    const r = recommend([], cands, { now: NOW, limit: 6, maxConsecutiveSameTopic: 1 });
+    const r = recommend([], cands, {
+      now: NOW,
+      limit: 6,
+      maxConsecutiveSameTopic: 1,
+    });
     for (let i = 1; i < r.length; i++) {
       // Сэдэв 3 л байгаа тул сүүл рүүгээ давхарлаж БОЛНО — эхний 3-д хатуу шалгана
       if (i < 3) expect(r[i].topicId).not.toBe(r[i - 1].topicId);
@@ -154,7 +190,11 @@ describe('recommend — Зарчим 3: холих (interleaving)', () => {
 
   it('сэдэв ганц байвал дүрмийг сулруулж хоосон буцаахгүй', () => {
     const cands = [c('a1', 'T1', 0.5), c('a2', 'T1', 0.5), c('a3', 'T1', 0.5)];
-    const r = recommend([], cands, { now: NOW, limit: 3, maxConsecutiveSameTopic: 1 });
+    const r = recommend([], cands, {
+      now: NOW,
+      limit: 3,
+      maxConsecutiveSameTopic: 1,
+    });
     expect(r).toHaveLength(3);
   });
 });
@@ -163,14 +203,24 @@ describe('recommend — Зарчим 2 ба 4: түвшин ба итгэл', ()
   it('сул сэдэвт AMARHAN, хүчтэй сэдэвт ХҮНД бодлого сонгоно', () => {
     // T1: сул (1/10 зөв) · T2: хүчтэй (9/10 зөв)
     const hist: AttemptSignal[] = [
-      ...Array.from({ length: 10 }, (_, i) => a('T1', i < 1, 10 - i, `t1-${i}`)),
-      ...Array.from({ length: 10 }, (_, i) => a('T2', i < 9, 10 - i, `t2-${i}`)),
+      ...Array.from({ length: 10 }, (_, i) =>
+        a('T1', i < 1, 10 - i, `t1-${i}`),
+      ),
+      ...Array.from({ length: 10 }, (_, i) =>
+        a('T2', i < 9, 10 - i, `t2-${i}`),
+      ),
     ];
     const cands = [
-      c('t1-easy', 'T1', 0.15), c('t1-hard', 'T1', 0.9),
-      c('t2-easy', 'T2', 0.15), c('t2-hard', 'T2', 0.9),
+      c('t1-easy', 'T1', 0.15),
+      c('t1-hard', 'T1', 0.9),
+      c('t2-easy', 'T2', 0.15),
+      c('t2-hard', 'T2', 0.9),
     ];
-    const r = recommend(hist, cands, { now: NOW, limit: 4, maxConsecutiveSameTopic: 4 });
+    const r = recommend(hist, cands, {
+      now: NOW,
+      limit: 4,
+      maxConsecutiveSameTopic: 4,
+    });
     const rank = (id: string) => r.findIndex((x) => x.problemId === id);
     // Сул сэдэвт амархан нь хүндээсээ ӨМНӨ байх
     expect(rank('t1-easy')).toBeLessThan(rank('t1-hard'));
@@ -179,7 +229,9 @@ describe('recommend — Зарчим 2 ба 4: түвшин ба итгэл', ()
   });
 
   it('маш сайн эзэмшсэн сэдвийг CONFIDENCE гэж тэмдэглэж, жинг нь бууруулна', () => {
-    const hist = Array.from({ length: 12 }, (_, i) => a('T2', true, 12 - i, `t2-${i}`));
+    const hist = Array.from({ length: 12 }, (_, i) =>
+      a('T2', true, 12 - i, `t2-${i}`),
+    );
     const r = recommend(hist, [c('x', 'T2', 0.5)], { now: NOW, limit: 1 });
     expect(r[0].reason).toBe('CONFIDENCE');
   });
@@ -198,17 +250,29 @@ describe('recommend — ирмэгийн тохиолдол', () => {
   });
 
   it('нэр дэвшигч байхгүй бол хоосон буцаана', () => {
-    expect(recommend([a('T1', true, 1)], [], { now: NOW, limit: 5 })).toEqual([]);
+    expect(recommend([a('T1', true, 1)], [], { now: NOW, limit: 5 })).toEqual(
+      [],
+    );
   });
 
   it('оролдлого цөөнтэй бодлогын хүндрэлийг 0.5 руу татна', () => {
     // attemptCount=0 → difficulty ямар ч байсан 0.5 гэж үзнэ
-    const r0 = recommend([], [{ id: 'x', topicId: 'T', difficulty: 1, attemptCount: 0 }], {
-      now: NOW, limit: 1,
-    });
-    const r5 = recommend([], [{ id: 'x', topicId: 'T', difficulty: 1, attemptCount: 50 }], {
-      now: NOW, limit: 1,
-    });
+    const r0 = recommend(
+      [],
+      [{ id: 'x', topicId: 'T', difficulty: 1, attemptCount: 0 }],
+      {
+        now: NOW,
+        limit: 1,
+      },
+    );
+    const r5 = recommend(
+      [],
+      [{ id: 'x', topicId: 'T', difficulty: 1, attemptCount: 50 }],
+      {
+        now: NOW,
+        limit: 1,
+      },
+    );
     // 0.5 нь mastery 0.5-тай илүү таарна тул оноо ӨНДӨР байна
     expect(r0[0].score).toBeGreaterThan(r5[0].score);
   });

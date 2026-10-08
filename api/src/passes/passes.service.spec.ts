@@ -4,6 +4,11 @@ import { PassesService } from './passes.service';
 
 describe('PassesService удирдлагын үйлдлүүд', () => {
   const prisma = {
+    $transaction: jest.fn(),
+    $executeRaw: jest.fn(),
+    $queryRaw: jest.fn(),
+    purchase: { updateMany: jest.fn(), findFirst: jest.fn() },
+    payment: { findUnique: jest.fn() },
     pass: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
@@ -12,6 +17,7 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
     },
     userPass: {
       findMany: jest.fn(),
+      findFirst: jest.fn(),
       count: jest.fn(),
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -24,7 +30,12 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new PassesService(prisma as never, audit as never);
+    prisma.$transaction.mockImplementation((fn) => fn(prisma));
+    service = new PassesService(
+      prisma as never,
+      audit as never,
+      { assert: jest.fn().mockResolvedValue(undefined) } as never,
+    );
   });
 
   it('идэвхгүй эрхүүд болон эзэмшигчийн тоог хамт жагсаана', async () => {
@@ -139,6 +150,7 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
       id: 'pass-1',
       active: false,
       durationDays: 30,
+      scope: {},
     });
     await expect(
       service.grant('pass-1', 'student-1', undefined, undefined, true),
@@ -165,6 +177,7 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
       id: 'pass-1',
       active: true,
       durationDays: 30,
+      scope: {},
     });
     prisma.user.findUnique.mockResolvedValue({
       id: 'teacher-1',
@@ -182,6 +195,7 @@ describe('PassesService удирдлагын үйлдлүүд', () => {
       id: 'pass-1',
       active: true,
       durationDays: 30,
+      scope: {},
     });
     prisma.user.findUnique.mockResolvedValue({
       id: 'student-1',

@@ -37,8 +37,8 @@ export class ContentController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Post('books')
-  createBook(@Body() dto: CreateBookDto) {
-    return this.content.createBook(dto);
+  createBook(@Body() dto: CreateBookDto, @Req() req: AuthedRequest) {
+    return this.content.createBook(dto, req.user.userId);
   }
 
   @Get('books')
@@ -55,12 +55,7 @@ export class ContentController {
     @Body() dto: UpdateBookDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.content.updateBook(
-      id,
-      dto,
-      req.user.userId,
-      req.user.role,
-    );
+    return this.content.updateBook(id, dto, req.user.userId, req.user.role);
   }
 
   // Идэвхтэй бүлэг сэдэвтэй бол ?cascade=true шаардана.
@@ -83,8 +78,8 @@ export class ContentController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Post('chapters')
-  createChapter(@Body() dto: CreateChapterDto) {
-    return this.content.createChapter(dto);
+  createChapter(@Body() dto: CreateChapterDto, @Req() req: AuthedRequest) {
+    return this.content.createChapter(dto, req.user.userId);
   }
 
   @Get('chapters')
@@ -105,10 +100,7 @@ export class ContentController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('chapters/reorder')
-  reorderChapters(
-    @Body() dto: ReorderChaptersDto,
-    @Req() req: AuthedRequest,
-  ) {
+  reorderChapters(@Body() dto: ReorderChaptersDto, @Req() req: AuthedRequest) {
     return this.content.reorderChapters(
       dto.ids,
       req.user.userId,
@@ -124,12 +116,7 @@ export class ContentController {
     @Body() dto: UpdateChapterDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.content.updateChapter(
-      id,
-      dto,
-      req.user.userId,
-      req.user.role,
-    );
+    return this.content.updateChapter(id, dto, req.user.userId, req.user.role);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -180,10 +167,10 @@ export class ContentController {
 
   // Нэг бодлогыг уншина (сурагчид зөвшөөрнө)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.STUDENT, Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Roles(Role.STUDENT, Role.BUYER, Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('problems/:problemId')
-  getProblem(@Param('problemId') problemId: string) {
-    return this.content.getProblem(problemId);
+  getProblem(@Param('problemId') problemId: string, @Req() req: AuthedRequest) {
+    return this.content.getProblem(problemId, req.user.userId, req.user.role);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

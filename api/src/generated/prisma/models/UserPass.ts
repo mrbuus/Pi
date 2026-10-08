@@ -49,6 +49,7 @@ export type UserPassCountAggregateOutputType = {
   startsAt: number
   expiresAt: number
   paymentId: number
+  scopeSnapshot: number
   _all: number
 }
 
@@ -78,6 +79,7 @@ export type UserPassCountAggregateInputType = {
   startsAt?: true
   expiresAt?: true
   paymentId?: true
+  scopeSnapshot?: true
   _all?: true
 }
 
@@ -160,6 +162,7 @@ export type UserPassGroupByOutputType = {
   startsAt: Date
   expiresAt: Date
   paymentId: string | null
+  scopeSnapshot: runtime.JsonValue | null
   _count: UserPassCountAggregateOutputType | null
   _min: UserPassMinAggregateOutputType | null
   _max: UserPassMaxAggregateOutputType | null
@@ -190,6 +193,7 @@ export type UserPassWhereInput = {
   startsAt?: Prisma.DateTimeFilter<"UserPass"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"UserPass"> | Date | string
   paymentId?: Prisma.StringNullableFilter<"UserPass"> | string | null
+  scopeSnapshot?: Prisma.JsonNullableFilter<"UserPass">
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   pass?: Prisma.XOR<Prisma.PassScalarRelationFilter, Prisma.PassWhereInput>
 }
@@ -201,6 +205,7 @@ export type UserPassOrderByWithRelationInput = {
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   paymentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  scopeSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   pass?: Prisma.PassOrderByWithRelationInput
 }
@@ -215,6 +220,7 @@ export type UserPassWhereUniqueInput = Prisma.AtLeast<{
   startsAt?: Prisma.DateTimeFilter<"UserPass"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"UserPass"> | Date | string
   paymentId?: Prisma.StringNullableFilter<"UserPass"> | string | null
+  scopeSnapshot?: Prisma.JsonNullableFilter<"UserPass">
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   pass?: Prisma.XOR<Prisma.PassScalarRelationFilter, Prisma.PassWhereInput>
 }, "id">
@@ -226,6 +232,7 @@ export type UserPassOrderByWithAggregationInput = {
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   paymentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  scopeSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserPassCountOrderByAggregateInput
   _max?: Prisma.UserPassMaxOrderByAggregateInput
   _min?: Prisma.UserPassMinOrderByAggregateInput
@@ -241,6 +248,7 @@ export type UserPassScalarWhereWithAggregatesInput = {
   startsAt?: Prisma.DateTimeWithAggregatesFilter<"UserPass"> | Date | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"UserPass"> | Date | string
   paymentId?: Prisma.StringNullableWithAggregatesFilter<"UserPass"> | string | null
+  scopeSnapshot?: Prisma.JsonNullableWithAggregatesFilter<"UserPass">
 }
 
 export type UserPassCreateInput = {
@@ -248,6 +256,7 @@ export type UserPassCreateInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user: Prisma.UserCreateNestedOneWithoutUserPassesInput
   pass: Prisma.PassCreateNestedOneWithoutUserPassesInput
 }
@@ -259,6 +268,7 @@ export type UserPassUncheckedCreateInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassUpdateInput = {
@@ -266,6 +276,7 @@ export type UserPassUpdateInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneRequiredWithoutUserPassesNestedInput
   pass?: Prisma.PassUpdateOneRequiredWithoutUserPassesNestedInput
 }
@@ -277,6 +288,7 @@ export type UserPassUncheckedUpdateInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassCreateManyInput = {
@@ -286,6 +298,7 @@ export type UserPassCreateManyInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassUpdateManyMutationInput = {
@@ -293,6 +306,7 @@ export type UserPassUpdateManyMutationInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassUncheckedUpdateManyInput = {
@@ -302,6 +316,7 @@ export type UserPassUncheckedUpdateManyInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassListRelationFilter = {
@@ -321,6 +336,7 @@ export type UserPassCountOrderByAggregateInput = {
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
+  scopeSnapshot?: Prisma.SortOrder
 }
 
 export type UserPassMaxOrderByAggregateInput = {
@@ -430,6 +446,7 @@ export type UserPassCreateWithoutUserInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   pass: Prisma.PassCreateNestedOneWithoutUserPassesInput
 }
 
@@ -439,6 +456,7 @@ export type UserPassUncheckedCreateWithoutUserInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassCreateOrConnectWithoutUserInput = {
@@ -477,6 +495,7 @@ export type UserPassScalarWhereInput = {
   startsAt?: Prisma.DateTimeFilter<"UserPass"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"UserPass"> | Date | string
   paymentId?: Prisma.StringNullableFilter<"UserPass"> | string | null
+  scopeSnapshot?: Prisma.JsonNullableFilter<"UserPass">
 }
 
 export type UserPassCreateWithoutPassInput = {
@@ -484,6 +503,7 @@ export type UserPassCreateWithoutPassInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user: Prisma.UserCreateNestedOneWithoutUserPassesInput
 }
 
@@ -493,6 +513,7 @@ export type UserPassUncheckedCreateWithoutPassInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassCreateOrConnectWithoutPassInput = {
@@ -527,6 +548,7 @@ export type UserPassCreateManyUserInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassUpdateWithoutUserInput = {
@@ -534,6 +556,7 @@ export type UserPassUpdateWithoutUserInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   pass?: Prisma.PassUpdateOneRequiredWithoutUserPassesNestedInput
 }
 
@@ -543,6 +566,7 @@ export type UserPassUncheckedUpdateWithoutUserInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassUncheckedUpdateManyWithoutUserInput = {
@@ -551,6 +575,7 @@ export type UserPassUncheckedUpdateManyWithoutUserInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassCreateManyPassInput = {
@@ -559,6 +584,7 @@ export type UserPassCreateManyPassInput = {
   startsAt?: Date | string
   expiresAt: Date | string
   paymentId?: string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassUpdateWithoutPassInput = {
@@ -566,6 +592,7 @@ export type UserPassUpdateWithoutPassInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneRequiredWithoutUserPassesNestedInput
 }
 
@@ -575,6 +602,7 @@ export type UserPassUncheckedUpdateWithoutPassInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserPassUncheckedUpdateManyWithoutPassInput = {
@@ -583,6 +611,7 @@ export type UserPassUncheckedUpdateManyWithoutPassInput = {
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopeSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -594,6 +623,7 @@ export type UserPassSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   startsAt?: boolean
   expiresAt?: boolean
   paymentId?: boolean
+  scopeSnapshot?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   pass?: boolean | Prisma.PassDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPass"]>
@@ -605,6 +635,7 @@ export type UserPassSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   startsAt?: boolean
   expiresAt?: boolean
   paymentId?: boolean
+  scopeSnapshot?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   pass?: boolean | Prisma.PassDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPass"]>
@@ -616,6 +647,7 @@ export type UserPassSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   startsAt?: boolean
   expiresAt?: boolean
   paymentId?: boolean
+  scopeSnapshot?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   pass?: boolean | Prisma.PassDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPass"]>
@@ -627,9 +659,10 @@ export type UserPassSelectScalar = {
   startsAt?: boolean
   expiresAt?: boolean
   paymentId?: boolean
+  scopeSnapshot?: boolean
 }
 
-export type UserPassOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "passId" | "startsAt" | "expiresAt" | "paymentId", ExtArgs["result"]["userPass"]>
+export type UserPassOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "passId" | "startsAt" | "expiresAt" | "paymentId" | "scopeSnapshot", ExtArgs["result"]["userPass"]>
 export type UserPassInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   pass?: boolean | Prisma.PassDefaultArgs<ExtArgs>
@@ -656,6 +689,7 @@ export type $UserPassPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     startsAt: Date
     expiresAt: Date
     paymentId: string | null
+    scopeSnapshot: runtime.JsonValue | null
   }, ExtArgs["result"]["userPass"]>
   composites: {}
 }
@@ -1087,6 +1121,7 @@ export interface UserPassFieldRefs {
   readonly startsAt: Prisma.FieldRef<"UserPass", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"UserPass", 'DateTime'>
   readonly paymentId: Prisma.FieldRef<"UserPass", 'String'>
+  readonly scopeSnapshot: Prisma.FieldRef<"UserPass", 'Json'>
 }
     
 

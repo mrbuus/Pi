@@ -447,3 +447,12 @@ export const GoogleOAuthPurpose = {
 } as const
 
 export type GoogleOAuthPurpose = (typeof GoogleOAuthPurpose)[keyof typeof GoogleOAuthPurpose]
+
+
+export const StudyReviewStatus = {
+  OPEN: 'OPEN',
+  SUBMITTED: 'SUBMITTED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type StudyReviewStatus = (typeof StudyReviewStatus)[keyof typeof StudyReviewStatus]

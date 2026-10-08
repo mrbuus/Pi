@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Req,
   Res,
   ServiceUnavailableException,
   UploadedFile,
@@ -28,6 +29,7 @@ import {
 } from 'fs';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
+import type { RequestWithUser } from '../auth/request.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilesAuthGuard } from './files-auth.guard';
@@ -213,7 +215,10 @@ export class UploadsController {
       },
     }),
   )
-  async upload(@UploadedFile() file?: Express.Multer.File) {
+  async upload(
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Req() req: RequestWithUser,
+  ) {
     // Хадгалах сан ажиллахгүй бол ил хэлнэ — multer нь destination байхгүй үед
     // ойлгомжгүй 500 шиддэг тул шалтгааныг нь тодорхой болгож 503 буцаана.
     if (uploadDirError) {
@@ -232,11 +237,19 @@ export class UploadsController {
     // амжилттай гэж хэлэхгүй — дараагийн deploy-оор чимээгүй алга болохоос сэргийлнэ.
     try {
       await this.prisma.storedFile.create({
-        data: { key: file.filename, mime: file.mimetype, size: file.size, bytes: readFileSync(path) },
+        data: {
+          key: file.filename,
+          mime: file.mimetype,
+          size: file.size,
+          bytes: readFileSync(path),
+          ownerId: req.user.userId,
+        },
       });
     } catch {
       unlinkSync(path);
-      throw new ServiceUnavailableException('Файл хадгалахад алдаа гарлаа. Дахин оролдоно уу.');
+      throw new ServiceUnavailableException(
+        'Файл хадгалахад алдаа гарлаа. Дахин оролдоно уу.',
+      );
     }
     return { key: file.filename, size: file.size, mime: file.mimetype };
   }
@@ -250,10 +263,14 @@ export class UploadsController {
     if (!/^[\w][\w.-]*$/.test(key)) {
       throw new BadRequestException('Буруу түлхүүр');
     }
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Referrer-Policy', 'no-referrer');
     const path = join(UPLOAD_DIR, key);
     if (!existsSync(path)) {
       // Диск дээр алга (redeploy) → ӨС-ээс сэргээж дискэнд кэшлэнэ.
-      const stored = await this.prisma.storedFile.findUnique({ where: { key } });
+      const stored = await this.prisma.storedFile.findUnique({
+        where: { key },
+      });
       if (!stored) throw new NotFoundException('Файл олдсонгүй');
       try {
         if (!uploadDirError) writeFileSync(path, stored.bytes);
@@ -262,12 +279,40 @@ export class UploadsController {
       }
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Content-Type', stored.mime);
-      res.setHeader('Cache-Control', 'private, max-age=86400');
       res.end(Buffer.from(stored.bytes));
       return;
     }
     // Хөтөч агуулгыг таамаглаж (sniff) өөр төрлөөр ажиллуулахыг хориглоно
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.sendFile(path);
+    try {
+      await new Promise<void>((resolve, reject) => {
+        res.sendFile(
+          path,
+          { maxAge: 0, cacheControl: false, dotfiles: 'allow' },
+          (error) => {
+            if (error) reject(error);
+            else resolve();
+          },
+        );
+      });
+    } catch (error) {
+      if (res.headersSent) {
+        res.destroy(error instanceof Error ? error : undefined);
+        return;
+      }
+      const failure = error as { code?: string; status?: number };
+      if (failure.code === 'ENOENT' || failure.status === 404) {
+        const stored = await this.prisma.storedFile.findUnique({
+          where: { key },
+        });
+        if (!stored) throw new NotFoundException('Файл олдсонгүй');
+        res.setHeader('Content-Type', stored.mime);
+        res.end(Buffer.from(stored.bytes));
+        return;
+      }
+      throw new ServiceUnavailableException(
+        'Файлыг уншиж чадсангүй. Дахин оролдоно уу.',
+      );
+    }
   }
 }

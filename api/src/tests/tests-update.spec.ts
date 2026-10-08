@@ -135,6 +135,8 @@ function setup(
     },
   };
   const prisma = {
+    classroom: { count: jest.fn(({ where }: { where: { id: { in: string[] } } }) => where.id.in.length) },
+    user: { findUnique: jest.fn(({ where }: { where: { id: string } }) => ({ role: where.id.startsWith('admin') ? Role.ADMIN : where.id === 'student' ? Role.STUDENT : Role.TEACHER, archivedAt: null, externalTeacherProfile: null })) },
     test: { findUnique: jest.fn(() => { events.push('test-read-root'); return test; }) },
     enrollment: { findFirst: jest.fn(() => ({ classroomId: 'class-1' })) },
     testResult: { count: jest.fn(() => options.resultCount ?? 0) },

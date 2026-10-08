@@ -35,6 +35,7 @@ export type StoredFileSumAggregateOutputType = {
 }
 
 export type StoredFileMinAggregateOutputType = {
+  ownerId: string | null
   key: string | null
   mime: string | null
   size: number | null
@@ -43,6 +44,7 @@ export type StoredFileMinAggregateOutputType = {
 }
 
 export type StoredFileMaxAggregateOutputType = {
+  ownerId: string | null
   key: string | null
   mime: string | null
   size: number | null
@@ -51,6 +53,7 @@ export type StoredFileMaxAggregateOutputType = {
 }
 
 export type StoredFileCountAggregateOutputType = {
+  ownerId: number
   key: number
   mime: number
   size: number
@@ -69,6 +72,7 @@ export type StoredFileSumAggregateInputType = {
 }
 
 export type StoredFileMinAggregateInputType = {
+  ownerId?: true
   key?: true
   mime?: true
   size?: true
@@ -77,6 +81,7 @@ export type StoredFileMinAggregateInputType = {
 }
 
 export type StoredFileMaxAggregateInputType = {
+  ownerId?: true
   key?: true
   mime?: true
   size?: true
@@ -85,6 +90,7 @@ export type StoredFileMaxAggregateInputType = {
 }
 
 export type StoredFileCountAggregateInputType = {
+  ownerId?: true
   key?: true
   mime?: true
   size?: true
@@ -180,6 +186,7 @@ export type StoredFileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 export type StoredFileGroupByOutputType = {
+  ownerId: string | null
   key: string
   mime: string
   size: number
@@ -211,6 +218,7 @@ export type StoredFileWhereInput = {
   AND?: Prisma.StoredFileWhereInput | Prisma.StoredFileWhereInput[]
   OR?: Prisma.StoredFileWhereInput[]
   NOT?: Prisma.StoredFileWhereInput | Prisma.StoredFileWhereInput[]
+  ownerId?: Prisma.StringNullableFilter<"StoredFile"> | string | null
   key?: Prisma.StringFilter<"StoredFile"> | string
   mime?: Prisma.StringFilter<"StoredFile"> | string
   size?: Prisma.IntFilter<"StoredFile"> | number
@@ -219,6 +227,7 @@ export type StoredFileWhereInput = {
 }
 
 export type StoredFileOrderByWithRelationInput = {
+  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   key?: Prisma.SortOrder
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
@@ -231,6 +240,7 @@ export type StoredFileWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.StoredFileWhereInput | Prisma.StoredFileWhereInput[]
   OR?: Prisma.StoredFileWhereInput[]
   NOT?: Prisma.StoredFileWhereInput | Prisma.StoredFileWhereInput[]
+  ownerId?: Prisma.StringNullableFilter<"StoredFile"> | string | null
   mime?: Prisma.StringFilter<"StoredFile"> | string
   size?: Prisma.IntFilter<"StoredFile"> | number
   bytes?: Prisma.BytesFilter<"StoredFile"> | runtime.Bytes
@@ -238,6 +248,7 @@ export type StoredFileWhereUniqueInput = Prisma.AtLeast<{
 }, "key">
 
 export type StoredFileOrderByWithAggregationInput = {
+  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   key?: Prisma.SortOrder
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
@@ -254,6 +265,7 @@ export type StoredFileScalarWhereWithAggregatesInput = {
   AND?: Prisma.StoredFileScalarWhereWithAggregatesInput | Prisma.StoredFileScalarWhereWithAggregatesInput[]
   OR?: Prisma.StoredFileScalarWhereWithAggregatesInput[]
   NOT?: Prisma.StoredFileScalarWhereWithAggregatesInput | Prisma.StoredFileScalarWhereWithAggregatesInput[]
+  ownerId?: Prisma.StringNullableWithAggregatesFilter<"StoredFile"> | string | null
   key?: Prisma.StringWithAggregatesFilter<"StoredFile"> | string
   mime?: Prisma.StringWithAggregatesFilter<"StoredFile"> | string
   size?: Prisma.IntWithAggregatesFilter<"StoredFile"> | number
@@ -262,6 +274,7 @@ export type StoredFileScalarWhereWithAggregatesInput = {
 }
 
 export type StoredFileCreateInput = {
+  ownerId?: string | null
   key: string
   mime: string
   size: number
@@ -270,6 +283,7 @@ export type StoredFileCreateInput = {
 }
 
 export type StoredFileUncheckedCreateInput = {
+  ownerId?: string | null
   key: string
   mime: string
   size: number
@@ -278,6 +292,7 @@ export type StoredFileUncheckedCreateInput = {
 }
 
 export type StoredFileUpdateInput = {
+  ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
@@ -286,6 +301,7 @@ export type StoredFileUpdateInput = {
 }
 
 export type StoredFileUncheckedUpdateInput = {
+  ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
@@ -294,6 +310,7 @@ export type StoredFileUncheckedUpdateInput = {
 }
 
 export type StoredFileCreateManyInput = {
+  ownerId?: string | null
   key: string
   mime: string
   size: number
@@ -302,6 +319,7 @@ export type StoredFileCreateManyInput = {
 }
 
 export type StoredFileUpdateManyMutationInput = {
+  ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
@@ -310,6 +328,7 @@ export type StoredFileUpdateManyMutationInput = {
 }
 
 export type StoredFileUncheckedUpdateManyInput = {
+  ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
@@ -318,6 +337,7 @@ export type StoredFileUncheckedUpdateManyInput = {
 }
 
 export type StoredFileCountOrderByAggregateInput = {
+  ownerId?: Prisma.SortOrder
   key?: Prisma.SortOrder
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
@@ -330,6 +350,7 @@ export type StoredFileAvgOrderByAggregateInput = {
 }
 
 export type StoredFileMaxOrderByAggregateInput = {
+  ownerId?: Prisma.SortOrder
   key?: Prisma.SortOrder
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
@@ -338,6 +359,7 @@ export type StoredFileMaxOrderByAggregateInput = {
 }
 
 export type StoredFileMinOrderByAggregateInput = {
+  ownerId?: Prisma.SortOrder
   key?: Prisma.SortOrder
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
@@ -356,6 +378,7 @@ export type BytesFieldUpdateOperationsInput = {
 
 
 export type StoredFileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  ownerId?: boolean
   key?: boolean
   mime?: boolean
   size?: boolean
@@ -364,6 +387,7 @@ export type StoredFileSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 }, ExtArgs["result"]["storedFile"]>
 
 export type StoredFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  ownerId?: boolean
   key?: boolean
   mime?: boolean
   size?: boolean
@@ -372,6 +396,7 @@ export type StoredFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
 }, ExtArgs["result"]["storedFile"]>
 
 export type StoredFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  ownerId?: boolean
   key?: boolean
   mime?: boolean
   size?: boolean
@@ -380,6 +405,7 @@ export type StoredFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
 }, ExtArgs["result"]["storedFile"]>
 
 export type StoredFileSelectScalar = {
+  ownerId?: boolean
   key?: boolean
   mime?: boolean
   size?: boolean
@@ -387,12 +413,13 @@ export type StoredFileSelectScalar = {
   createdAt?: boolean
 }
 
-export type StoredFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"key" | "mime" | "size" | "bytes" | "createdAt", ExtArgs["result"]["storedFile"]>
+export type StoredFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"ownerId" | "key" | "mime" | "size" | "bytes" | "createdAt", ExtArgs["result"]["storedFile"]>
 
 export type $StoredFilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StoredFile"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    ownerId: string | null
     key: string
     mime: string
     size: number
@@ -481,8 +508,8 @@ export interface StoredFileDelegate<ExtArgs extends runtime.Types.Extensions.Int
    * // Get first 10 StoredFiles
    * const storedFiles = await prisma.storedFile.findMany({ take: 10 })
    * 
-   * // Only select the `key`
-   * const storedFileWithKeyOnly = await prisma.storedFile.findMany({ select: { key: true } })
+   * // Only select the `ownerId`
+   * const storedFileWithOwnerIdOnly = await prisma.storedFile.findMany({ select: { ownerId: true } })
    * 
    */
   findMany<T extends StoredFileFindManyArgs>(args?: Prisma.SelectSubset<T, StoredFileFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StoredFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -526,9 +553,9 @@ export interface StoredFileDelegate<ExtArgs extends runtime.Types.Extensions.Int
    *   ]
    * })
    * 
-   * // Create many StoredFiles and only return the `key`
-   * const storedFileWithKeyOnly = await prisma.storedFile.createManyAndReturn({
-   *   select: { key: true },
+   * // Create many StoredFiles and only return the `ownerId`
+   * const storedFileWithOwnerIdOnly = await prisma.storedFile.createManyAndReturn({
+   *   select: { ownerId: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -617,9 +644,9 @@ export interface StoredFileDelegate<ExtArgs extends runtime.Types.Extensions.Int
    *   ]
    * })
    * 
-   * // Update zero or more StoredFiles and only return the `key`
-   * const storedFileWithKeyOnly = await prisma.storedFile.updateManyAndReturn({
-   *   select: { key: true },
+   * // Update zero or more StoredFiles and only return the `ownerId`
+   * const storedFileWithOwnerIdOnly = await prisma.storedFile.updateManyAndReturn({
+   *   select: { ownerId: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -821,6 +848,7 @@ export interface Prisma__StoredFileClient<T, Null = never, ExtArgs extends runti
  * Fields of the StoredFile model
  */
 export interface StoredFileFieldRefs {
+  readonly ownerId: Prisma.FieldRef<"StoredFile", 'String'>
   readonly key: Prisma.FieldRef<"StoredFile", 'String'>
   readonly mime: Prisma.FieldRef<"StoredFile", 'String'>
   readonly size: Prisma.FieldRef<"StoredFile", 'Int'>

@@ -248,6 +248,7 @@ export type ChapterWhereInput = {
   topic?: Prisma.XOR<Prisma.TopicNullableScalarRelationFilter, Prisma.TopicWhereInput> | null
   problems?: Prisma.ProblemListRelationFilter
   theories?: Prisma.TheoryBlockListRelationFilter
+  lessonPackets?: Prisma.LessonPacketListRelationFilter
   videos?: Prisma.VideoListRelationFilter
   tests?: Prisma.TestListRelationFilter
 }
@@ -265,6 +266,7 @@ export type ChapterOrderByWithRelationInput = {
   topic?: Prisma.TopicOrderByWithRelationInput
   problems?: Prisma.ProblemOrderByRelationAggregateInput
   theories?: Prisma.TheoryBlockOrderByRelationAggregateInput
+  lessonPackets?: Prisma.LessonPacketOrderByRelationAggregateInput
   videos?: Prisma.VideoOrderByRelationAggregateInput
   tests?: Prisma.TestOrderByRelationAggregateInput
 }
@@ -285,6 +287,7 @@ export type ChapterWhereUniqueInput = Prisma.AtLeast<{
   topic?: Prisma.XOR<Prisma.TopicNullableScalarRelationFilter, Prisma.TopicWhereInput> | null
   problems?: Prisma.ProblemListRelationFilter
   theories?: Prisma.TheoryBlockListRelationFilter
+  lessonPackets?: Prisma.LessonPacketListRelationFilter
   videos?: Prisma.VideoListRelationFilter
   tests?: Prisma.TestListRelationFilter
 }, "id">
@@ -330,6 +333,7 @@ export type ChapterCreateInput = {
   topic?: Prisma.TopicCreateNestedOneWithoutChaptersInput
   problems?: Prisma.ProblemCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestCreateNestedManyWithoutChapterInput
 }
@@ -345,6 +349,7 @@ export type ChapterUncheckedCreateInput = {
   deletedAt?: Date | string | null
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockUncheckedCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketUncheckedCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestUncheckedCreateNestedManyWithoutChapterInput
 }
@@ -360,6 +365,7 @@ export type ChapterUpdateInput = {
   topic?: Prisma.TopicUpdateOneWithoutChaptersNestedInput
   problems?: Prisma.ProblemUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUpdateManyWithoutChapterNestedInput
 }
@@ -375,6 +381,7 @@ export type ChapterUncheckedUpdateInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUncheckedUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUncheckedUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUncheckedUpdateManyWithoutChapterNestedInput
 }
@@ -617,6 +624,20 @@ export type ChapterUpdateOneWithoutTestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ChapterUpdateToOneWithWhereWithoutTestsInput, Prisma.ChapterUpdateWithoutTestsInput>, Prisma.ChapterUncheckedUpdateWithoutTestsInput>
 }
 
+export type ChapterCreateNestedOneWithoutLessonPacketsInput = {
+  create?: Prisma.XOR<Prisma.ChapterCreateWithoutLessonPacketsInput, Prisma.ChapterUncheckedCreateWithoutLessonPacketsInput>
+  connectOrCreate?: Prisma.ChapterCreateOrConnectWithoutLessonPacketsInput
+  connect?: Prisma.ChapterWhereUniqueInput
+}
+
+export type ChapterUpdateOneRequiredWithoutLessonPacketsNestedInput = {
+  create?: Prisma.XOR<Prisma.ChapterCreateWithoutLessonPacketsInput, Prisma.ChapterUncheckedCreateWithoutLessonPacketsInput>
+  connectOrCreate?: Prisma.ChapterCreateOrConnectWithoutLessonPacketsInput
+  upsert?: Prisma.ChapterUpsertWithoutLessonPacketsInput
+  connect?: Prisma.ChapterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ChapterUpdateToOneWithWhereWithoutLessonPacketsInput, Prisma.ChapterUpdateWithoutLessonPacketsInput>, Prisma.ChapterUncheckedUpdateWithoutLessonPacketsInput>
+}
+
 export type ChapterCreateWithoutBookInput = {
   id?: string
   title: string
@@ -627,6 +648,7 @@ export type ChapterCreateWithoutBookInput = {
   topic?: Prisma.TopicCreateNestedOneWithoutChaptersInput
   problems?: Prisma.ProblemCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestCreateNestedManyWithoutChapterInput
 }
@@ -641,6 +663,7 @@ export type ChapterUncheckedCreateWithoutBookInput = {
   deletedAt?: Date | string | null
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockUncheckedCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketUncheckedCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestUncheckedCreateNestedManyWithoutChapterInput
 }
@@ -695,6 +718,7 @@ export type ChapterCreateWithoutTopicInput = {
   book?: Prisma.BookCreateNestedOneWithoutChaptersInput
   problems?: Prisma.ProblemCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestCreateNestedManyWithoutChapterInput
 }
@@ -709,6 +733,7 @@ export type ChapterUncheckedCreateWithoutTopicInput = {
   deletedAt?: Date | string | null
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockUncheckedCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketUncheckedCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestUncheckedCreateNestedManyWithoutChapterInput
 }
@@ -749,6 +774,7 @@ export type ChapterCreateWithoutTheoriesInput = {
   book?: Prisma.BookCreateNestedOneWithoutChaptersInput
   topic?: Prisma.TopicCreateNestedOneWithoutChaptersInput
   problems?: Prisma.ProblemCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestCreateNestedManyWithoutChapterInput
 }
@@ -763,6 +789,7 @@ export type ChapterUncheckedCreateWithoutTheoriesInput = {
   topicId?: string | null
   deletedAt?: Date | string | null
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketUncheckedCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestUncheckedCreateNestedManyWithoutChapterInput
 }
@@ -793,6 +820,7 @@ export type ChapterUpdateWithoutTheoriesInput = {
   book?: Prisma.BookUpdateOneWithoutChaptersNestedInput
   topic?: Prisma.TopicUpdateOneWithoutChaptersNestedInput
   problems?: Prisma.ProblemUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUpdateManyWithoutChapterNestedInput
 }
@@ -807,6 +835,7 @@ export type ChapterUncheckedUpdateWithoutTheoriesInput = {
   topicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUncheckedUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUncheckedUpdateManyWithoutChapterNestedInput
 }
@@ -822,6 +851,7 @@ export type ChapterCreateWithoutVideosInput = {
   topic?: Prisma.TopicCreateNestedOneWithoutChaptersInput
   problems?: Prisma.ProblemCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestCreateNestedManyWithoutChapterInput
 }
 
@@ -836,6 +866,7 @@ export type ChapterUncheckedCreateWithoutVideosInput = {
   deletedAt?: Date | string | null
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockUncheckedCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketUncheckedCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestUncheckedCreateNestedManyWithoutChapterInput
 }
 
@@ -866,6 +897,7 @@ export type ChapterUpdateWithoutVideosInput = {
   topic?: Prisma.TopicUpdateOneWithoutChaptersNestedInput
   problems?: Prisma.ProblemUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUpdateManyWithoutChapterNestedInput
 }
 
@@ -880,6 +912,7 @@ export type ChapterUncheckedUpdateWithoutVideosInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUncheckedUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUncheckedUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUncheckedUpdateManyWithoutChapterNestedInput
 }
 
@@ -893,6 +926,7 @@ export type ChapterCreateWithoutProblemsInput = {
   book?: Prisma.BookCreateNestedOneWithoutChaptersInput
   topic?: Prisma.TopicCreateNestedOneWithoutChaptersInput
   theories?: Prisma.TheoryBlockCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestCreateNestedManyWithoutChapterInput
 }
@@ -907,6 +941,7 @@ export type ChapterUncheckedCreateWithoutProblemsInput = {
   topicId?: string | null
   deletedAt?: Date | string | null
   theories?: Prisma.TheoryBlockUncheckedCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketUncheckedCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutChapterInput
   tests?: Prisma.TestUncheckedCreateNestedManyWithoutChapterInput
 }
@@ -937,6 +972,7 @@ export type ChapterUpdateWithoutProblemsInput = {
   book?: Prisma.BookUpdateOneWithoutChaptersNestedInput
   topic?: Prisma.TopicUpdateOneWithoutChaptersNestedInput
   theories?: Prisma.TheoryBlockUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUpdateManyWithoutChapterNestedInput
 }
@@ -951,6 +987,7 @@ export type ChapterUncheckedUpdateWithoutProblemsInput = {
   topicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   theories?: Prisma.TheoryBlockUncheckedUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUncheckedUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUncheckedUpdateManyWithoutChapterNestedInput
 }
@@ -966,6 +1003,7 @@ export type ChapterCreateWithoutTestsInput = {
   topic?: Prisma.TopicCreateNestedOneWithoutChaptersInput
   problems?: Prisma.ProblemCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoCreateNestedManyWithoutChapterInput
 }
 
@@ -980,6 +1018,7 @@ export type ChapterUncheckedCreateWithoutTestsInput = {
   deletedAt?: Date | string | null
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutChapterInput
   theories?: Prisma.TheoryBlockUncheckedCreateNestedManyWithoutChapterInput
+  lessonPackets?: Prisma.LessonPacketUncheckedCreateNestedManyWithoutChapterInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutChapterInput
 }
 
@@ -1010,6 +1049,7 @@ export type ChapterUpdateWithoutTestsInput = {
   topic?: Prisma.TopicUpdateOneWithoutChaptersNestedInput
   problems?: Prisma.ProblemUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUpdateManyWithoutChapterNestedInput
 }
 
@@ -1024,7 +1064,84 @@ export type ChapterUncheckedUpdateWithoutTestsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUncheckedUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUncheckedUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutChapterNestedInput
+}
+
+export type ChapterCreateWithoutLessonPacketsInput = {
+  id?: string
+  title: string
+  order: number
+  grade?: number | null
+  freePreview?: boolean
+  deletedAt?: Date | string | null
+  book?: Prisma.BookCreateNestedOneWithoutChaptersInput
+  topic?: Prisma.TopicCreateNestedOneWithoutChaptersInput
+  problems?: Prisma.ProblemCreateNestedManyWithoutChapterInput
+  theories?: Prisma.TheoryBlockCreateNestedManyWithoutChapterInput
+  videos?: Prisma.VideoCreateNestedManyWithoutChapterInput
+  tests?: Prisma.TestCreateNestedManyWithoutChapterInput
+}
+
+export type ChapterUncheckedCreateWithoutLessonPacketsInput = {
+  id?: string
+  bookId?: string | null
+  title: string
+  order: number
+  grade?: number | null
+  freePreview?: boolean
+  topicId?: string | null
+  deletedAt?: Date | string | null
+  problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutChapterInput
+  theories?: Prisma.TheoryBlockUncheckedCreateNestedManyWithoutChapterInput
+  videos?: Prisma.VideoUncheckedCreateNestedManyWithoutChapterInput
+  tests?: Prisma.TestUncheckedCreateNestedManyWithoutChapterInput
+}
+
+export type ChapterCreateOrConnectWithoutLessonPacketsInput = {
+  where: Prisma.ChapterWhereUniqueInput
+  create: Prisma.XOR<Prisma.ChapterCreateWithoutLessonPacketsInput, Prisma.ChapterUncheckedCreateWithoutLessonPacketsInput>
+}
+
+export type ChapterUpsertWithoutLessonPacketsInput = {
+  update: Prisma.XOR<Prisma.ChapterUpdateWithoutLessonPacketsInput, Prisma.ChapterUncheckedUpdateWithoutLessonPacketsInput>
+  create: Prisma.XOR<Prisma.ChapterCreateWithoutLessonPacketsInput, Prisma.ChapterUncheckedCreateWithoutLessonPacketsInput>
+  where?: Prisma.ChapterWhereInput
+}
+
+export type ChapterUpdateToOneWithWhereWithoutLessonPacketsInput = {
+  where?: Prisma.ChapterWhereInput
+  data: Prisma.XOR<Prisma.ChapterUpdateWithoutLessonPacketsInput, Prisma.ChapterUncheckedUpdateWithoutLessonPacketsInput>
+}
+
+export type ChapterUpdateWithoutLessonPacketsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  book?: Prisma.BookUpdateOneWithoutChaptersNestedInput
+  topic?: Prisma.TopicUpdateOneWithoutChaptersNestedInput
+  problems?: Prisma.ProblemUpdateManyWithoutChapterNestedInput
+  theories?: Prisma.TheoryBlockUpdateManyWithoutChapterNestedInput
+  videos?: Prisma.VideoUpdateManyWithoutChapterNestedInput
+  tests?: Prisma.TestUpdateManyWithoutChapterNestedInput
+}
+
+export type ChapterUncheckedUpdateWithoutLessonPacketsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  grade?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  freePreview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  topicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  problems?: Prisma.ProblemUncheckedUpdateManyWithoutChapterNestedInput
+  theories?: Prisma.TheoryBlockUncheckedUpdateManyWithoutChapterNestedInput
+  videos?: Prisma.VideoUncheckedUpdateManyWithoutChapterNestedInput
+  tests?: Prisma.TestUncheckedUpdateManyWithoutChapterNestedInput
 }
 
 export type ChapterCreateManyBookInput = {
@@ -1047,6 +1164,7 @@ export type ChapterUpdateWithoutBookInput = {
   topic?: Prisma.TopicUpdateOneWithoutChaptersNestedInput
   problems?: Prisma.ProblemUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUpdateManyWithoutChapterNestedInput
 }
@@ -1061,6 +1179,7 @@ export type ChapterUncheckedUpdateWithoutBookInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUncheckedUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUncheckedUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUncheckedUpdateManyWithoutChapterNestedInput
 }
@@ -1095,6 +1214,7 @@ export type ChapterUpdateWithoutTopicInput = {
   book?: Prisma.BookUpdateOneWithoutChaptersNestedInput
   problems?: Prisma.ProblemUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUpdateManyWithoutChapterNestedInput
 }
@@ -1109,6 +1229,7 @@ export type ChapterUncheckedUpdateWithoutTopicInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutChapterNestedInput
   theories?: Prisma.TheoryBlockUncheckedUpdateManyWithoutChapterNestedInput
+  lessonPackets?: Prisma.LessonPacketUncheckedUpdateManyWithoutChapterNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutChapterNestedInput
   tests?: Prisma.TestUncheckedUpdateManyWithoutChapterNestedInput
 }
@@ -1131,6 +1252,7 @@ export type ChapterUncheckedUpdateManyWithoutTopicInput = {
 export type ChapterCountOutputType = {
   problems: number
   theories: number
+  lessonPackets: number
   videos: number
   tests: number
 }
@@ -1138,6 +1260,7 @@ export type ChapterCountOutputType = {
 export type ChapterCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   problems?: boolean | ChapterCountOutputTypeCountProblemsArgs
   theories?: boolean | ChapterCountOutputTypeCountTheoriesArgs
+  lessonPackets?: boolean | ChapterCountOutputTypeCountLessonPacketsArgs
   videos?: boolean | ChapterCountOutputTypeCountVideosArgs
   tests?: boolean | ChapterCountOutputTypeCountTestsArgs
 }
@@ -1169,6 +1292,13 @@ export type ChapterCountOutputTypeCountTheoriesArgs<ExtArgs extends runtime.Type
 /**
  * ChapterCountOutputType without action
  */
+export type ChapterCountOutputTypeCountLessonPacketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LessonPacketWhereInput
+}
+
+/**
+ * ChapterCountOutputType without action
+ */
 export type ChapterCountOutputTypeCountVideosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.VideoWhereInput
 }
@@ -1194,6 +1324,7 @@ export type ChapterSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   topic?: boolean | Prisma.Chapter$topicArgs<ExtArgs>
   problems?: boolean | Prisma.Chapter$problemsArgs<ExtArgs>
   theories?: boolean | Prisma.Chapter$theoriesArgs<ExtArgs>
+  lessonPackets?: boolean | Prisma.Chapter$lessonPacketsArgs<ExtArgs>
   videos?: boolean | Prisma.Chapter$videosArgs<ExtArgs>
   tests?: boolean | Prisma.Chapter$testsArgs<ExtArgs>
   _count?: boolean | Prisma.ChapterCountOutputTypeDefaultArgs<ExtArgs>
@@ -1242,6 +1373,7 @@ export type ChapterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   topic?: boolean | Prisma.Chapter$topicArgs<ExtArgs>
   problems?: boolean | Prisma.Chapter$problemsArgs<ExtArgs>
   theories?: boolean | Prisma.Chapter$theoriesArgs<ExtArgs>
+  lessonPackets?: boolean | Prisma.Chapter$lessonPacketsArgs<ExtArgs>
   videos?: boolean | Prisma.Chapter$videosArgs<ExtArgs>
   tests?: boolean | Prisma.Chapter$testsArgs<ExtArgs>
   _count?: boolean | Prisma.ChapterCountOutputTypeDefaultArgs<ExtArgs>
@@ -1262,6 +1394,7 @@ export type $ChapterPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     topic: Prisma.$TopicPayload<ExtArgs> | null
     problems: Prisma.$ProblemPayload<ExtArgs>[]
     theories: Prisma.$TheoryBlockPayload<ExtArgs>[]
+    lessonPackets: Prisma.$LessonPacketPayload<ExtArgs>[]
     videos: Prisma.$VideoPayload<ExtArgs>[]
     tests: Prisma.$TestPayload<ExtArgs>[]
   }
@@ -1672,6 +1805,7 @@ export interface Prisma__ChapterClient<T, Null = never, ExtArgs extends runtime.
   topic<T extends Prisma.Chapter$topicArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chapter$topicArgs<ExtArgs>>): Prisma.Prisma__TopicClient<runtime.Types.Result.GetResult<Prisma.$TopicPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   problems<T extends Prisma.Chapter$problemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chapter$problemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProblemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   theories<T extends Prisma.Chapter$theoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chapter$theoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TheoryBlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  lessonPackets<T extends Prisma.Chapter$lessonPacketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chapter$lessonPacketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonPacketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   videos<T extends Prisma.Chapter$videosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chapter$videosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tests<T extends Prisma.Chapter$testsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chapter$testsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2195,6 +2329,30 @@ export type Chapter$theoriesArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.TheoryBlockScalarFieldEnum | Prisma.TheoryBlockScalarFieldEnum[]
+}
+
+/**
+ * Chapter.lessonPackets
+ */
+export type Chapter$lessonPacketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LessonPacket
+   */
+  select?: Prisma.LessonPacketSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LessonPacket
+   */
+  omit?: Prisma.LessonPacketOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonPacketInclude<ExtArgs> | null
+  where?: Prisma.LessonPacketWhereInput
+  orderBy?: Prisma.LessonPacketOrderByWithRelationInput | Prisma.LessonPacketOrderByWithRelationInput[]
+  cursor?: Prisma.LessonPacketWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LessonPacketScalarFieldEnum | Prisma.LessonPacketScalarFieldEnum[]
 }
 
 /**

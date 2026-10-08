@@ -19,6 +19,8 @@ import {
   collectPassScope,
   hasCoveringPass,
   TEACHER_ROLES,
+  internalTeachingRole,
+  assertInternalTeachingStaff,
 } from '../common/access';
 import { todayUB } from '../common/date';
 import { PrismaService } from '../prisma/prisma.service';
@@ -109,7 +111,10 @@ function toGradable(row: TestProblemRow): GradableProblem {
 
 @Injectable()
 export class TestsService {
-  constructor(private prisma: PrismaService, private mistakes: MistakeCollector) {}
+  constructor(
+    private prisma: PrismaService,
+    private mistakes: MistakeCollector,
+  ) {}
 
   private draftState(dto: TestDraftStateDto): Prisma.InputJsonValue {
     if (
@@ -141,6 +146,7 @@ export class TestsService {
     actorId: string,
     actorRole: Role,
   ) {
+    await assertInternalTeachingStaff(this.prisma, actorId);
     this.assertDraftRole(actorRole);
     const draft = await this.prisma.testDraft.findUnique({
       where: { id: draftId },
@@ -156,6 +162,7 @@ export class TestsService {
     actorId: string,
     actorRole: Role,
   ) {
+    await assertInternalTeachingStaff(this.prisma, actorId);
     this.assertDraftRole(actorRole);
     const state = this.draftState(dto);
     const draft = await this.prisma.testDraft.create({
@@ -195,7 +202,8 @@ export class TestsService {
     if (!saved) {
       const latest = await this.findDraftForActor(draftId, actorId, actorRole);
       throw new ConflictException({
-        message: 'Ноорог өөр төхөөрөмжөөс шинэчлэгдсэн байна. Шинэ хувилбарыг ачаална уу.',
+        message:
+          'Ноорог өөр төхөөрөмжөөс шинэчлэгдсэн байна. Шинэ хувилбарыг ачаална уу.',
         draft: latest,
       });
     }
@@ -326,6 +334,7 @@ export class TestsService {
     actorRole: Role,
     db: TestDatabase = this.prisma,
   ): Promise<EditableTest> {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     const test = await db.test.findUnique({
       where: { id: testId },
       include: {
@@ -375,6 +384,8 @@ export class TestsService {
     actorId: string,
     actorRole: Role,
   ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
+    await this.assertAssignedClassrooms(actorId, dto.classroomIds);
     const changedFields = Object.keys(dto).filter(
       (field) => dto[field as keyof UpdateTestDto] !== undefined,
     );
@@ -544,7 +555,23 @@ export class TestsService {
     };
   }
 
+  private async assertAssignedClassrooms(actorId: string, ids?: string[]) {
+    const role = await assertInternalTeachingStaff(this.prisma, actorId);
+    if (!ids?.length || role === Role.ADMIN) return;
+    const count = await this.prisma.classroom.count({
+      where: {
+        id: { in: [...new Set(ids)] },
+        teacherId: actorId,
+        archived: false,
+      },
+    });
+    if (count !== new Set(ids).size)
+      throw new ForbiddenException('Өөрийн ангид шалгалт онооно уу');
+  }
+
   async create(dto: CreateTestDto, userId: string) {
+    await assertInternalTeachingStaff(this.prisma, userId);
+    await this.assertAssignedClassrooms(userId, dto.classroomIds);
     // Зөвхөн ангид ШУУД оноож байгаа үед л шалгана (TestAccess бичигдэх цорын
     // ганц зам) — эс тэгвээс ангид оноогдоогүй ноорог тестэд саад болно.
     const answerWarning = dto.classroomIds?.length
@@ -594,7 +621,10 @@ export class TestsService {
       ? { chapter: { book: { subject } } }
       : {};
 
-    if (TEACHER_ROLES.includes(role)) {
+    if (
+      TEACHER_ROLES.includes(role) &&
+      (await internalTeachingRole(this.prisma, userId))
+    ) {
       const draftOwnerFilter: Prisma.TestWhereInput =
         role === Role.TEACHER
           ? { OR: [{ isDraft: false }, { isDraft: true, createdById: userId }] }
@@ -609,21 +639,47 @@ export class TestsService {
         orderBy: { createdAt: 'desc' },
       });
     }
-    const [enrollment, scope] = await Promise.all([
-      this.prisma.enrollment.findFirst({
-        where: { studentId: userId, leftAt: null },
+    const now = new Date();
+    const [enrollments, scope, purchases] = await Promise.all([
+      this.prisma.enrollment.findMany({
+        where: {
+          studentId: userId,
+          leftAt: null,
+          classroom: { archived: false },
+        },
       }),
       collectPassScope(this.prisma, userId),
+      this.prisma.purchase.findMany({
+        where: {
+          userId,
+          grantedAt: { lte: now },
+          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+        },
+        select: { productItem: { select: { kind: true, refId: true } } },
+      }),
     ]);
 
     let accessFilter: Prisma.TestWhereInput | undefined;
     if (!scope.all) {
       const accessOr: Prisma.TestWhereInput[] = [];
-      if (enrollment) {
+      if (enrollments.length) {
         accessOr.push({
-          access: { some: { classroomId: enrollment.classroomId } },
+          access: {
+            some: {
+              classroomId: { in: enrollments.map((e) => e.classroomId) },
+            },
+          },
         });
       }
+      const purchasedTests = purchases
+        .filter((p) => p.productItem.kind === 'TEST')
+        .map((p) => p.productItem.refId);
+      const purchasedBooks = purchases
+        .filter((p) => p.productItem.kind === 'BOOK')
+        .map((p) => p.productItem.refId);
+      if (purchasedTests.length) accessOr.push({ id: { in: purchasedTests } });
+      if (purchasedBooks.length)
+        accessOr.push({ chapter: { bookId: { in: purchasedBooks } } });
       if (scope.testIds.length) accessOr.push({ id: { in: scope.testIds } });
       if (scope.chapterIds.length) {
         accessOr.push({ chapterId: { in: scope.chapterIds } });
@@ -636,7 +692,12 @@ export class TestsService {
     }
 
     const rows = await this.prisma.test.findMany({
-      where: { ...subjectFilter, ...accessFilter, deletedAt: null, isDraft: false },
+      where: {
+        ...subjectFilter,
+        ...accessFilter,
+        deletedAt: null,
+        isDraft: false,
+      },
       select: {
         id: true,
         title: true,
@@ -669,7 +730,10 @@ export class TestsService {
   // GET /tests/:id — багшид бүрэн бүтэц, сурагчид зөвхөн интро мета
   // (бодлогууд ЗӨВХӨН session эхэлсний дараа очно — урьдчилж харах цоорхойг хаана)
   async getOne(testId: string, userId: string, role: Role) {
-    if (TEACHER_ROLES.includes(role)) {
+    if (
+      TEACHER_ROLES.includes(role) &&
+      (await internalTeachingRole(this.prisma, userId))
+    ) {
       const test = await this.prisma.test.findUnique({
         where: { id: testId },
         include: {
@@ -713,6 +777,13 @@ export class TestsService {
         test.createdById !== userId
       ) {
         throw new NotFoundException('Тест олдсонгүй');
+      }
+      if (role === Role.TEACHER && test.createdById !== userId) {
+        const assigned = await this.prisma.testAccess.findFirst({
+          where: { testId, classroom: { teacherId: userId, archived: false } },
+        });
+        if (!assigned)
+          throw new ForbiddenException('Энэ шалгалтад хандах эрхгүй');
       }
       return test;
     }
@@ -817,7 +888,7 @@ export class TestsService {
               studentId: userId,
               seed,
               problemOrder,
-              choiceOrder: choiceOrder as Prisma.InputJsonValue,
+              choiceOrder: choiceOrder,
               deadlineAt: lockedTest.timeLimitMin
                 ? new Date(now.getTime() + lockedTest.timeLimitMin * 60_000)
                 : null,
@@ -939,7 +1010,8 @@ export class TestsService {
    * solutionOutline-ыг DB-ээс татдаг байв — гэтэл үүнийг ЗӨВХӨН бодлогын
    * id-нуудыг шалгахад ашигладаг (mergeDrafts-ээс validIds).
    *
-   * Одоо хөнгөн query-гээр зөвхөн problemId-г татна. Бүтэн тест зөвхөн
+   * Одоо хөнгөн query-гээр problemId болон нүхний түлхүүр баталгаажуулах
+   * correctAnswer-г сервер талд татна (клиент рүү буцаахгүй). Бүтэн тест зөвхөн
    * хугацаа дуусаж finalize хийх үед л (сурагч тутамд ХАМГИЙН ИХДЭЭ 1 удаа)
    * ачаалагдана.
    */
@@ -947,7 +1019,10 @@ export class TestsService {
     return this.prisma.testProblem.findMany({
       where: { testId },
       orderBy: { order: 'asc' },
-      select: { problemId: true },
+      select: {
+        problemId: true,
+        problem: { select: { format: true, correctAnswer: true } },
+      },
     });
   }
 
@@ -1098,15 +1173,36 @@ export class TestsService {
     userId: string,
     role: Role,
   ) {
-    if (!TEACHER_ROLES.includes(role)) {
-      throw new ForbiddenException('Зөвхөн багш дүн оруулна');
+    role = await assertInternalTeachingStaff(this.prisma, userId);
+    if (
+      dto.totalScore > dto.maxScore ||
+      dto.totalScore < 0 ||
+      dto.maxScore <= 0
+    )
+      throw new BadRequestException('Дүнгийн хязгаар буруу');
+    if (role !== Role.ADMIN) {
+      const assigned = await this.prisma.testAccess.findFirst({
+        where: {
+          testId,
+          classroom: {
+            teacherId: userId,
+            archived: false,
+            enrollments: { some: { studentId: dto.studentId, leftAt: null } },
+          },
+        },
+      });
+      if (!assigned)
+        throw new ForbiddenException(
+          'Өөрийн ангид оноосон шалгалтын сурагчийн дүнг оруулна уу',
+        );
     }
     return this.prisma.$transaction(async (tx) => {
       // Гараар дүн оруулах нь мөн тестийг өгсөн болгож, бүрэн засварын
       // горимыг хаана. Анхны session үүсгэлттэй ижил түгжээ ашиглана.
       await this.lockTestRow(tx, testId, 'SHARE');
       const current = await tx.test.findUnique({ where: { id: testId } });
-      if (!current) throw new NotFoundException('Тест олдсонгүй');
+      if (!current || current.deletedAt)
+        throw new NotFoundException('Тест олдсонгүй');
       return tx.testResult.upsert({
         where: {
           testId_studentId: { testId, studentId: dto.studentId },
@@ -1130,11 +1226,34 @@ export class TestsService {
 
   // Багшийн «Шалгалтын дүн» хэсэг (SPEC §8) — тестээр нэгтгэсэн дүнгүүд
   async results(testId: string, userId: string, role: Role) {
-    if (!TEACHER_ROLES.includes(role)) {
-      throw new ForbiddenException('Зөвхөн багш нэгтгэл харна');
+    role = await assertInternalTeachingStaff(this.prisma, userId);
+    const test = await this.prisma.test.findFirst({
+      where: { id: testId, deletedAt: null },
+    });
+    if (!test) throw new NotFoundException('Тест олдсонгүй');
+    // Content curation permission does not grant access to pupils in other classes.
+    const studentScope =
+      role === Role.ADMIN
+        ? {}
+        : {
+            student: {
+              enrollments: {
+                some: {
+                  leftAt: null,
+                  classroom: { teacherId: userId, archived: false },
+                },
+              },
+            },
+          };
+    if (role !== Role.ADMIN) {
+      const assigned = await this.prisma.testAccess.findFirst({
+        where: { testId, classroom: { teacherId: userId, archived: false } },
+      });
+      if (test.createdById !== userId && !assigned)
+        throw new ForbiddenException('Энэ шалгалтын дүнг харах эрхгүй');
     }
     const rows = await this.prisma.testResult.findMany({
-      where: { testId },
+      where: { testId, ...studentScope },
       include: {
         student: { select: { id: true, firstName: true, lastName: true } },
       },
@@ -1142,7 +1261,7 @@ export class TestsService {
     });
     // Анти-чит: шалгалтын горимоос гарсан тоог багшид харуулна (Шийдвэр 3)
     const sessions = await this.prisma.testAttemptSession.findMany({
-      where: { testId },
+      where: { testId, studentId: { in: rows.map((r) => r.studentId) } },
       select: { studentId: true, leaveCount: true },
     });
     const leaveBy = new Map(sessions.map((s) => [s.studentId, s.leaveCount]));
@@ -1171,6 +1290,7 @@ export class TestsService {
     userId: string,
     role: Role,
   ) {
+    role = await assertInternalTeachingStaff(this.prisma, userId);
     const student = await this.prisma.user.findUnique({
       where: { id: studentId },
     });
@@ -1263,12 +1383,14 @@ export class TestsService {
     if (test.isDraft)
       throw new ForbiddenException('Ноорог тестэд сурагч нэвтрэх боломжгүй');
     const enrollment = await db.enrollment.findFirst({
-      where: { studentId: userId, leftAt: null },
+      where: {
+        studentId: userId,
+        leftAt: null,
+        classroomId: { in: test.access.map((a) => a.classroomId) },
+        classroom: { archived: false },
+      },
     });
-    if (
-      enrollment &&
-      test.access.some((a) => a.classroomId === enrollment.classroomId)
-    ) {
+    if (enrollment) {
       return;
     }
 
@@ -1289,17 +1411,22 @@ export class TestsService {
       return;
     }
 
-    // Нэг удаагийн худалдан авалт: Purchase.kind=TEST, refId=test.id
+    // Fulfilled, unexpired test or containing-book purchases grant exam access.
+    const now = new Date();
     const purchase = await db.purchase.findFirst({
       where: {
         userId,
+        grantedAt: { lte: now },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
         productItem: {
-          kind: 'TEST',
-          refId: test.id,
+          OR: [
+            { kind: 'TEST', refId: test.id },
+            ...(bookId ? [{ kind: 'BOOK' as const, refId: bookId }] : []),
+          ],
         },
       },
     });
-    if (purchase && purchase.grantedAt) {
+    if (purchase) {
       return;
     }
 
@@ -1369,14 +1496,20 @@ export class TestsService {
 
   // dto-г session-ий draft дээр нэгтгэнэ. Зөвхөн тестийн бодлогын түлхүүрүүдийг
   // хүлээн авна (халдлагаар дурын түлхүүр шахахаас хамгаална).
-  // Зөвхөн problemId л хэрэгтэй тул хөнгөн төрөл хүлээж авна — ингэснээр
+  // ID болон олон нүхний хариуны бүтцийг л ашиглана — ингэснээр
   // автосэйвийн зам бүтэн TestProblemRow ачаалах шаардлагагүй болно.
   private mergeDrafts(
-    problems: { problemId: string }[],
+    problems: {
+      problemId: string;
+      problem?: { format: string; correctAnswer: unknown };
+    }[],
     session: SessionRow,
     dto: SaveSessionDto,
   ) {
     const validIds = new Set(problems.map((tp) => tp.problemId));
+    const definitions = new Map(
+      problems.map((tp) => [tp.problemId, tp.problem]),
+    );
     const answers = { ...asRecord(session.draftAnswers) };
     const states = { ...asRecord(session.draftStates) };
     const times = { ...asRecord(session.problemTimes) };
@@ -1384,7 +1517,33 @@ export class TestsService {
     for (const [pid, v] of Object.entries(dto.answers ?? {})) {
       if (!validIds.has(pid)) continue;
       if (v === null || v === undefined || v === '') delete answers[pid];
-      else if (typeof v === 'number' || typeof v === 'string') answers[pid] = v;
+      else if (
+        (typeof v === 'number' && Number.isFinite(v)) ||
+        (typeof v === 'string' && v.length <= 1000)
+      )
+        answers[pid] = v;
+      else if (v && typeof v === 'object' && !Array.isArray(v)) {
+        const problem = definitions.get(pid);
+        if (problem?.format !== 'FILL_NUMBER') continue;
+        const key = asRecord(problem.correctAnswer);
+        const allowed = new Set(Object.keys(key));
+        const entries = Object.entries(v);
+        if (
+          !entries.length ||
+          entries.length > 32 ||
+          entries.some(
+            ([slot, value]) =>
+              !allowed.has(slot) ||
+              ['__proto__', 'constructor', 'prototype'].includes(slot) ||
+              !(
+                (typeof value === 'string' && value.length <= 1000) ||
+                (typeof value === 'number' && Number.isFinite(value))
+              ),
+          )
+        )
+          continue;
+        answers[pid] = Object.fromEntries(entries);
+      }
     }
     const validStates = new Set(Object.values(SelfState));
     for (const [pid, v] of Object.entries(dto.selfStates ?? {})) {
@@ -1496,13 +1655,18 @@ export class TestsService {
           // Хариулаагүй бол JsonNull — Prisma-д `undefined` нь «талбарыг
           // алгас» гэсэн утгатай тул тэднийг ялгах ЁСТОЙ (STATUS.md §7 урхи).
           givenAnswer: answered
-            ? ((canonicalAnswer ?? Prisma.JsonNull) as Prisma.InputJsonValue)
+            ? (canonicalAnswer ?? Prisma.JsonNull)
             : Prisma.JsonNull,
           selfState: selfState ?? null,
           timeSpentSec: typeof m.times[pid] === 'number' ? m.times[pid] : null,
           testId: test.id,
           classroomId: enrollment?.classroomId ?? null,
-          mistakeCollectedAt: (answered && known && !correct) || selfState === SelfState.FAILED || selfState === SelfState.FIXED_AFTER_ERROR ? null : new Date(),
+          mistakeCollectedAt:
+            (answered && known && !correct) ||
+            selfState === SelfState.FAILED ||
+            selfState === SelfState.FIXED_AFTER_ERROR
+              ? null
+              : new Date(),
         });
       }
       // Хариу тодорхойгүй бодлогыг Problem.correctRate/attemptCount
