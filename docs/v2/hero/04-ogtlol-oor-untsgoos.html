@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Өөр өнцгөөс</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700;800&family=Rubik:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sun:#FFD447;
+    --navy:#273F74;
+    --ink:#14203D;
+    --paper:#FFF8DD;
+    --red:#D6324A;
+    --mute:#4E5878;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--paper);color:var(--ink);font-family:"Rubik",system-ui,sans-serif;font-size:16px;line-height:1.5;overflow-x:hidden}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--red);outline-offset:3px;border-radius:8px}
+
+  .top{background:var(--sun)}
+  .bar{position:relative;z-index:10;display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .brand{display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:auto}
+  .brand img{height:38px;width:auto;display:block}
+  .brand span{font-family:"Montserrat Alternates";font-weight:700;font-size:12.5px;line-height:1.1;color:var(--navy)}
+  .mlogin{font-weight:600;font-size:14px;text-decoration:none;color:var(--navy)}
+  .menu{width:42px;height:42px;border-radius:50%;border:0;background:var(--navy);display:grid;place-items:center;cursor:pointer}
+  .menu svg{width:20px;height:20px}
+  .nav{display:none;position:absolute;top:100%;left:12px;right:12px;flex-direction:column;background:var(--navy);color:#fff;border-radius:22px;padding:10px}
+  .nav.open{display:flex}
+  .nav a{text-decoration:none;padding:11px 12px;border-radius:12px;font-weight:500}
+  .nav a:hover{background:rgba(255,255,255,.1)}
+  .auth{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .auth a{text-align:center;font-weight:600}
+  .login{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
+  .signup{background:var(--sun);color:var(--ink)}
+  .nav .signup:hover{background:#FFE07A}
+
+  .hero{padding:10px 16px 28px;display:grid;gap:18px}
+  h1{font-family:"Montserrat Alternates";font-weight:800;font-size:clamp(44px,13.4vw,104px);line-height:.96;letter-spacing:-.035em;color:var(--navy)}
+  h1 span{display:block}
+  .lede{margin-top:14px;max-width:40ch;font-size:16.5px}
+  .tiny{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14.5px;color:var(--mute)}
+  .tiny i{font-weight:500;color:var(--navy);background:var(--paper);border-radius:999px;padding:2px 12px}
+
+  .lab{background:var(--paper);border-radius:28px;padding:14px 14px 16px;box-shadow:0 0 0 2.5px var(--navy),6px 8px 0 var(--navy)}
+  .lab h2{font-family:"Montserrat Alternates";font-weight:700;font-size:16px;color:var(--navy);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .lab h2 small{font-family:"Rubik";font-weight:400;font-size:12.5px;color:var(--mute)}
+  canvas{display:block;width:100%;aspect-ratio:1/0.86;touch-action:pan-y;cursor:grab}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#F1E7BF;border-radius:999px;padding:4px}
+  .seg button{border:0;background:none;border-radius:999px;height:38px;font:500 14.5px "Rubik";color:var(--ink);cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+  .ctrl{margin-top:12px}
+  .ctrl label{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}
+  input[type=range]{width:100%;margin-top:6px;accent-color:var(--navy);height:28px}
+  .read{margin-top:8px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .read b{font-family:"Montserrat Alternates";font-weight:800;font-size:24px;color:var(--red);line-height:1.1}
+  .read span{font-size:15px;font-weight:500;color:var(--navy);font-style:italic}
+  .vol{margin-top:4px;font-size:13px;color:var(--mute)}
+  .vol em{font-style:italic;color:var(--ink);font-weight:500}
+
+  .cta{display:grid;gap:10px}
+  .btn{display:flex;align-items:center;justify-content:center;height:54px;border-radius:999px;font-weight:600;font-size:16px;text-decoration:none}
+  .btn.p{background:var(--navy);color:#fff}
+  .btn.s{background:var(--paper);color:var(--navy)}
+
+  .strip{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 26px}
+  .strip span{border:2px solid var(--navy);border-radius:999px;padding:6px 14px;font-weight:500;font-size:14.5px;color:var(--navy)}
+
+  .rest{padding:34px 16px 52px}
+  .rest h2{font-family:"Montserrat Alternates";font-weight:800;font-size:25px;line-height:1.1;letter-spacing:-.02em;color:var(--navy);max-width:20ch}
+  .rest .intro{margin-top:8px;color:var(--mute)}
+  .steps{list-style:none;margin-top:18px;display:grid;gap:10px;counter-reset:s}
+  .steps li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;background:#fff;border-radius:18px;padding:14px}
+  .steps li::before{content:counter(s);width:36px;height:36px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-family:"Montserrat Alternates";font-weight:800;color:var(--navy)}
+  .steps li:last-child::before{background:var(--navy);color:#fff}
+  .steps b{display:block;font-weight:600}
+  .steps span{font-size:14.5px;color:var(--mute)}
+  .more{margin-top:24px;display:grid;gap:10px}
+  .more div{border-top:2px solid var(--navy);padding-top:10px}
+  .more h3{font-size:16px;font-weight:600;color:var(--navy)}
+  .more p{font-size:14.5px;color:var(--mute)}
+
+  @media (min-width:900px){
+    .hero{grid-template-columns:1fr 1fr;column-gap:56px;align-items:center;padding:28px 48px 56px}
+    .copy{grid-row:1}
+    .lab{grid-column:2;grid-row:1/3;padding:20px 22px 22px}
+    .cta{grid-column:1;grid-row:2;align-self:start;grid-template-columns:auto auto;justify-content:start}
+    .btn{padding:0 28px}
+    .lede{font-size:19px}
+    h1{font-size:clamp(56px,6.4vw,96px)}
+    .strip{padding:0 48px 40px}
+    .rest{padding:64px 48px 80px;display:grid;grid-template-columns:1fr 1fr;column-gap:64px}
+    .rest h2{font-size:36px}
+    .more{margin-top:0}
+  }
+  @media (min-width:1180px){
+    .bar{padding:18px 48px}
+    .brand img{height:50px}.brand span{font-size:14px}
+    .mlogin,.menu{display:none}
+    .nav{display:flex;position:static;flex-direction:row;align-items:center;background:none;color:var(--ink);padding:0;gap:2px}
+    .nav a{padding:8px 10px;font-size:15px}
+    .nav a:hover{background:rgba(39,63,116,.1)}
+    .auth{margin:0 0 0 14px;display:flex;gap:8px}
+    .auth a{padding:9px 18px}
+    .login{box-shadow:inset 0 0 0 2px var(--navy)}
+    .signup{background:var(--navy);color:#fff}
+    .nav .signup:hover{background:var(--ink)}
+  }
+</style>
+</head>
+<body>
+<div class="top">
+<header class="bar">
+  <a class="brand" href="#"><img src="img/logo-full.png" alt=""><span>Шинэ Ирээдүйн<br>Эзэд</span></a>
+  <a class="mlogin" href="#">Нэвтрэх</a>
+  <button class="menu" id="menuBtn" aria-expanded="false" aria-controls="nav" aria-label="Цэс"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <nav class="nav" id="nav">
+    <a href="#">Хичээлүүд</a><a href="#">Амжилтууд</a><a href="#">Манай төв</a><a href="#">Төлбөр</a><a href="#">Салбар</a><a href="#">Номоос үзэх</a><a href="#">Тусламж</a>
+    <span class="auth"><a class="login" href="#">Нэвтрэх</a><a class="signup" href="#">Бүртгүүлэх</a></span>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="copy">
+    <h1><span>Бодож үз.</span><span>Өөрөөр хар.</span></h1>
+    <p class="lede">Математик, нийгмийн ухааны танхимын сургалт. Цахим ном, бодлогын сангаар өөрийн хурдаар давт. Ойлголтоос эхэлдэг амжилтын төлөө.</p>
+    <p class="tiny"><i>x → x+1</i>Өнөөдрийн ойлголт. Маргаашийн боломж.</p>
+  </div>
+
+  <div class="lab">
+    <h2>Математикийг өөр өнцгөөс <small>чирээд эргүүл</small></h2>
+    <canvas id="cv" aria-label="Огтлох хавтгайтай гурван хэмжээст биет"></canvas>
+    <div class="seg" role="group" aria-label="Биет сонгох">
+      <button type="button" data-m="cube" aria-pressed="false">Куб</button>
+      <button type="button" data-m="cone" aria-pressed="true">Конус</button>
+      <button type="button" data-m="sphere" aria-pressed="false">Бөмбөрцөг</button>
+    </div>
+    <div class="ctrl">
+      <label for="s"><span id="sl">Огтлох хавтгайн налуу</span><span id="sv">0°</span></label>
+      <input id="s" type="range" min="0" max="1000" value="0">
+    </div>
+    <div class="read"><b id="name">Тойрог</b><span id="eq">x² + y² = r²</span></div>
+    <p class="vol">Биетийн эзэлхүүн: <em id="vol">V = πr²h / 3</em></p>
+  </div>
+
+  <div class="cta">
+    <a class="btn p" href="#">Хичээлүүдийг үзэх</a>
+    <a class="btn s" href="#">Номоос бодож үзэх</a>
+  </div>
+</section>
+
+<div class="strip">
+  <span>Элсэлтийн шалгалтын бэлтгэл</span><span>Танхимын сургалт</span><span>Цахим ном, бие даах бодлого</span>
+</div>
+</div>
+
+<section class="rest">
+  <div>
+    <h2>Танхимд өдөр бүр ингэж хичээллэнэ.</h2>
+    <p class="intro">Бүлэг сэдэв бүр, тест бүр дээр.</p>
+    <ol class="steps">
+      <li><div><b>Онол</b><span>Өдөр бүр тухайн сэдвийн онолыг заана.</span></div></li>
+      <li><div><b>Жишээ бодлого</b><span>Онол дээрээ тулгуурлаж жишээ бодлого бодно.</span></div></li>
+      <li><div><b>Тестийн бүх бодлого</b><span>Сурагч тухайн тестийнхээ бодох ёстой бүх бодлогыг бодно.</span></div></li>
+      <li><div><b>Бүгд зөв болсны дараа</b><span>Бүх бодлогоо зөв бодож дуусгасны дараа л ангиас гарна.</span></div></li>
+    </ol>
+  </div>
+  <div class="more">
+    <div><h3>Цахим ном, бодлогын сан</h3><p>Номын бодлогоо вэб дээр бод. 10, 30, 60 минутын давталт, алдсан бодлогоо дахин бодно.</p></div>
+    <div><h3>Гэрийн даалгавар</h3><p>Дэвтэр дээрээ бодоод зургаа илгээнэ, багш шалгана.</p></div>
+    <div><h3>Жишиг шалгалт</h3><p>Дүн, ID-аар эрэмбэ, сэдэв бүрийн сул тал.</p></div>
+    <div><h3>Эцэг эхэд</h3><p>Хүүхдийнхээ ирц, даалгавар, дүнг шууд харна.</p></div>
+  </div>
+</section>
+
+<script>
+const mb=document.getElementById('menuBtn'), nav=document.getElementById('nav');
+mb.addEventListener('click',()=>{const o=nav.classList.toggle('open');mb.setAttribute('aria-expanded',o);});
+
+const cv=document.getElementById('cv'), g=cv.getContext('2d');
+const slider=document.getElementById('s'), sv=document.getElementById('sv'), sl=document.getElementById('sl');
+const nameEl=document.getElementById('name'), eqEl=document.getElementById('eq'), volEl=document.getElementById('vol');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mode='cone', s=0, yaw=0.6, pitch=0.42, W=0, H=0, dpr=1, dragging=false, lastX=0;
+
+const v3=(x,y,z)=>({x,y,z});
+const add=(a,b)=>v3(a.x+b.x,a.y+b.y,a.z+b.z), sub=(a,b)=>v3(a.x-b.x,a.y-b.y,a.z-b.z);
+const mul=(a,k)=>v3(a.x*k,a.y*k,a.z*k), dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z;
+const cross=(a,b)=>v3(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x);
+const norm=a=>mul(a,1/Math.hypot(a.x,a.y,a.z));
+
+function size(){ dpr=Math.min(devicePixelRatio||1,2); W=cv.clientWidth; H=cv.clientHeight; cv.width=W*dpr; cv.height=H*dpr; g.setTransform(dpr,0,0,dpr,0,0); }
+function P(p){ // project
+  const cy=Math.cos(yaw), sy=Math.sin(yaw);
+  let x=p.x*cy+p.z*sy, z=-p.x*sy+p.z*cy, y=p.y;
+  const cp=Math.cos(pitch), sp=Math.sin(pitch);
+  const y2=y*cp-z*sp, z2=y*sp+z*cp;
+  const k=5/(5-z2), sc=Math.min(W,H)*0.3;
+  return [W/2+x*k*sc, H*0.53-y2*k*sc];
+}
+function poly(pts,close){ if(pts.length<2)return; g.beginPath(); pts.forEach((p,i)=>{const q=P(p); i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);}); if(close)g.closePath(); }
+function circle3(c,u,v,r,n=64){ const a=[]; for(let i=0;i<=n;i++){const t=i/n*Math.PI*2; a.push(add(c,add(mul(u,r*Math.cos(t)),mul(v,r*Math.sin(t)))));} return a; }
+function line(a,b){ poly([a,b]); g.stroke(); }
+
+const NAVY='#273F74', RED='#D6324A';
+function planeQuad(p0,u,v,su,sv2){
+  const c=[add(p0,add(mul(u,-su),mul(v,-sv2))),add(p0,add(mul(u,su),mul(v,-sv2))),add(p0,add(mul(u,su),mul(v,sv2))),add(p0,add(mul(u,-su),mul(v,sv2)))];
+  poly(c,true); g.fillStyle='rgba(255,212,71,.55)'; g.fill(); g.strokeStyle='rgba(39,63,116,.55)'; g.lineWidth=1.5; g.stroke();
+}
+function drawSection(pts,close){ g.lineWidth=4; g.strokeStyle=RED; g.lineJoin='round'; g.lineCap='round'; poly(pts,close); g.stroke(); }
+
+function cone(){
+  const A=v3(0,1.1,0), r=0.75, yb=-1.0, h=A.y-yb;
+  const alpha=Math.atan(r/h), phi=s*88*Math.PI/180;
+  const n=v3(0,Math.cos(phi),-Math.sin(phi)), p0=v3(0,-0.15,0);
+  const u=v3(1,0,0), v=v3(0,Math.sin(phi),Math.cos(phi));
+  // body
+  g.strokeStyle='rgba(39,63,116,.35)'; g.lineWidth=1.2;
+  for(let i=0;i<24;i++){const t=i/24*Math.PI*2; line(A,v3(r*Math.cos(t),yb,r*Math.sin(t)));}
+  g.strokeStyle=NAVY; g.lineWidth=2; poly(circle3(v3(0,yb,0),v3(1,0,0),v3(0,0,1),r),true); g.stroke();
+  // silhouette generators
+  const sil=[-yaw+Math.PI, -yaw]; g.lineWidth=2;
+  sil.forEach(t=>line(A,v3(r*Math.cos(t),yb,r*Math.sin(t))));
+  planeQuad(p0,u,v,1.15,1.15);
+  // section
+  const segs=[]; let cur=[];
+  for(let i=0;i<=240;i++){
+    const t=i/240*Math.PI*2, B=v3(r*Math.cos(t),yb,r*Math.sin(t)), d=sub(B,A), den=dot(n,d);
+    const k= Math.abs(den)<1e-6? -1 : dot(n,sub(p0,A))/den;
+    if(k>=0&&k<=1){cur.push(add(A,mul(d,k)));} else if(cur.length){segs.push(cur);cur=[];}
+  }
+  if(cur.length) segs.push(cur);
+  if(segs.length>1 && segs[0].length && segs[segs.length-1].length){ // join wrap-around
+    const first=segs.shift(); segs[segs.length-1]=segs[segs.length-1].concat(first); }
+  const closed = phi < (Math.PI/2-alpha) - 0.026;
+  segs.forEach(sg=>drawSection(sg,closed && segs.length===1));
+  const deg=Math.round(phi*180/Math.PI), lim=90-alpha*180/Math.PI;
+  sv.textContent=deg+'°';
+  let nm,eq;
+  if(deg<1){nm='Тойрог';eq='x² + y² = r²';}
+  else if(deg<lim-1.5){nm='Эллипс';eq='x²/a² + y²/b² = 1';}
+  else if(deg<=lim+1.5){nm='Парабол';eq='y = ax²';}
+  else {nm='Гипербол';eq='x²/a² − y²/b² = 1';}
+  nameEl.textContent=nm; eqEl.textContent=eq;
+}
+
+function cube(){
+  const a=0.85, V=[];
+  for(const x of[-a,a])for(const y of[-a,a])for(const z of[-a,a])V.push(v3(x,y,z));
+  const E=[]; for(let i=0;i<8;i++)for(let j=i+1;j<8;j++){const d=sub(V[i],V[j]); if([d.x,d.y,d.z].filter(c=>Math.abs(c)>1e-9).length===1)E.push([i,j]);}
+  const top=v3(0,1,0), diag=norm(v3(1,1,1));
+  let n,d;
+  if(s<0.55){ const k=s/0.55; n=norm(add(mul(top,1-k),mul(diag,k))); d=0; }
+  else { n=diag; d=(s-0.55)/0.45*1.3; }
+  const p0=mul(n,d);
+  g.strokeStyle=NAVY; g.lineWidth=2;
+  E.forEach(([i,j])=>line(V[i],V[j]));
+  let u=cross(n,v3(0,0,1)); if(Math.hypot(u.x,u.y,u.z)<1e-3)u=v3(1,0,0); u=norm(u); const v=cross(n,u);
+  planeQuad(p0,u,v,1.45,1.45);
+  const pts=[];
+  E.forEach(([i,j])=>{const da=dot(n,sub(V[i],p0)), db=dot(n,sub(V[j],p0)); if(da*db<0||Math.abs(da)<1e-9){const t=da/(da-db); pts.push(add(V[i],mul(sub(V[j],V[i]),isFinite(t)?t:0)));}});
+  const uniq=[]; pts.forEach(p=>{if(!uniq.some(q=>Math.hypot(p.x-q.x,p.y-q.y,p.z-q.z)<1e-4))uniq.push(p);});
+  const c=uniq.reduce((m,p)=>add(m,mul(p,1/uniq.length)),v3(0,0,0));
+  uniq.sort((p,q)=>Math.atan2(dot(sub(p,c),v),dot(sub(p,c),u))-Math.atan2(dot(sub(q,c),v),dot(sub(q,c),u)));
+  if(uniq.length>2) drawSection(uniq,true);
+  g.strokeStyle='rgba(39,63,116,.35)'; g.lineWidth=1.2; E.forEach(([i,j])=>line(V[i],V[j]));
+  const names={3:'Гурвалжин',4:'Дөрвөлжин',5:'Таван өнцөгт',6:'Зургаан өнцөгт'};
+  nameEl.textContent=names[uniq.length]||'Огтлол алга'; eqEl.textContent=uniq.length>2? uniq.length+' оройтой огтлол':'';
+  sv.textContent=Math.round(s*100)+'%';
+}
+
+function sphere(){
+  const R=1, phi=20*Math.PI/180, n=v3(0,Math.cos(phi),-Math.sin(phi));
+  const u=v3(1,0,0), v=v3(0,Math.sin(phi),Math.cos(phi)), d=s*0.97, p0=mul(n,d);
+  g.strokeStyle='rgba(39,63,116,.3)'; g.lineWidth=1.1;
+  for(let i=1;i<6;i++){const y=-1+i/3; const rr=Math.sqrt(Math.max(0,1-y*y)); poly(circle3(v3(0,y,0),v3(1,0,0),v3(0,0,1),rr),true); g.stroke();}
+  for(let i=0;i<6;i++){const t=i/6*Math.PI; poly(circle3(v3(0,0,0),v3(Math.cos(t),0,Math.sin(t)),v3(0,1,0),R),true); g.stroke();}
+  // outline
+  g.strokeStyle=NAVY; g.lineWidth=2; const c0=P(v3(0,0,0)), e=P(v3(0,R,0)); g.beginPath(); g.arc(c0[0],c0[1],Math.abs(c0[1]-e[1])/Math.cos(pitch)*0.98,0,Math.PI*2); g.stroke();
+  planeQuad(p0,u,v,1.3,1.3);
+  const rho=Math.sqrt(Math.max(0,R*R-d*d));
+  drawSection(circle3(p0,u,v,rho,96),true);
+  nameEl.textContent='Тойрог'; eqEl.textContent='r = √(R² − d²)';
+  sv.textContent='d = '+d.toFixed(2)+'R';
+}
+
+const VOL={cube:'V = a³',cone:'V = πr²h / 3',sphere:'V = 4πr³ / 3'};
+const LBL={cube:'Огтлох хавтгайг эргүүл',cone:'Огтлох хавтгайн налуу',sphere:'Төвөөс хавтгай хүртэлх зай'};
+function draw(){ g.clearRect(0,0,W,H); ({cube,cone,sphere})[mode](); }
+function loop(){ if(!dragging && !reduce) yaw+=0.004; draw(); requestAnimationFrame(loop); }
+size(); addEventListener('resize',()=>{size();draw();});
+document.fonts.ready.then(()=>{draw(); requestAnimationFrame(loop);});
+
+slider.addEventListener('input',()=>{s=slider.value/1000;});
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  mode=b.dataset.m; sl.textContent=LBL[mode]; volEl.textContent=VOL[mode];
+}));
+cv.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!dragging)return; yaw+=(e.clientX-lastX)*0.01; lastX=e.clientX;});
+['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>dragging=false));
+
+// нэг удаагийн танилцуулга: налууг аажмаар өсгөж конусын огтлолуудыг харуулна
+if(!reduce){ const t0=performance.now(); (function intro(now){ const k=Math.min(1,(now-t0)/4200); if(slider.dataset.touched)return;
+  s=0.95*Math.sin(k*Math.PI*0.75); slider.value=s*1000; if(k<1)requestAnimationFrame(intro); })(t0);
+  slider.addEventListener('pointerdown',()=>slider.dataset.touched=1);
+}
+</script>
+</body>
+</html>

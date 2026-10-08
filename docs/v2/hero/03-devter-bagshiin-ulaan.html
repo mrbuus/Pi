@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дэвтэр ба улаан бал</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFAF4;
+    --grid:#D6E2EF;
+    --margin:#EC9AA0;
+    --blue:#273F74;   /* сурагчийн бал = брэндийн хөх */
+    --red:#D2232A;    /* багшийн бал */
+    --pencil:#77736B;
+    --ink:#1E2433;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{color:var(--ink);font-family:"Lora",Georgia,serif;font-size:17px;line-height:1.62;overflow-x:hidden;
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(90deg,transparent 33px,var(--margin) 33px,var(--margin) 35px,transparent 35px),
+      linear-gradient(var(--grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:100% 100%,20px 20px,20px 20px;background-attachment:local}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+  .wrap{padding-left:48px;padding-right:16px}
+
+  .bar{position:relative;z-index:10;display:flex;align-items:center;gap:12px;padding-top:12px;padding-bottom:6px}
+  .brand{display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:auto}
+  .brand img{height:38px;width:auto;display:block}
+  .brand span{font-family:"Caveat";font-weight:700;font-size:19px;line-height:.95;color:var(--blue)}
+  .mlogin{font-family:"Caveat";font-weight:700;font-size:21px;color:var(--red);text-decoration:none}
+  .menu{width:42px;height:42px;border:2px solid var(--ink);border-radius:10px;background:#fff;display:grid;place-items:center;cursor:pointer}
+  .menu svg{width:20px;height:20px}
+  .nav{display:none;position:absolute;top:100%;left:40px;right:12px;flex-direction:column;background:#fff;border:1.5px solid var(--ink);border-radius:12px;padding:10px;box-shadow:4px 5px 0 var(--ink)}
+  .nav.open{display:flex}
+  .nav a{text-decoration:none;padding:10px 12px;border-radius:8px}
+  .nav a:hover{background:#F2F5FA}
+  .auth{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .auth a{text-align:center;font-weight:600}
+  .login{border:1.5px solid var(--ink)}
+  .signup{background:var(--blue);color:#fff}
+  .nav .signup:hover{background:var(--ink)}
+
+  .hero{padding-top:16px;padding-bottom:24px;display:grid}
+  h1{font-weight:500;font-size:clamp(44px,13vw,96px);line-height:1;letter-spacing:-.025em}
+  h1 span{display:block}
+  .lede{margin-top:14px;max-width:40ch}
+  .tiny{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:15px;color:#4A4F5C}
+  .tiny i{font-family:"Caveat";font-style:normal;font-weight:700;font-size:24px;color:var(--blue);line-height:1}
+
+  .page{position:relative;margin:14px -6px 0 -14px}
+  .page figcaption{font-family:"Caveat";font-weight:700;font-size:22px;color:var(--red);line-height:1.1;padding-left:14px;transform:rotate(-1.5deg)}
+  .page svg{display:block;width:100%;height:auto;overflow:visible}
+  .hw{font-family:"Caveat";font-weight:500}
+  .blue{fill:var(--blue)} .red{fill:var(--red)}
+  .stroke-red{fill:none;stroke:var(--red);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .stroke-pencil{fill:none;stroke:var(--pencil);stroke-width:1.6;stroke-linecap:round;opacity:.85}
+  .stroke-blue{fill:none;stroke:var(--blue);stroke-width:2.4;stroke-linecap:round}
+  .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+  .on .draw{animation:draw var(--dur,.8s) var(--d,0s) cubic-bezier(.5,.1,.3,1) forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .write{clip-path:inset(-20% 100% -20% 0)}
+  .on .write{animation:write var(--dur,.9s) var(--d,0s) steps(18,end) forwards}
+  @keyframes write{to{clip-path:inset(-20% 0 -20% 0)}}
+  .pop{opacity:0}
+  .on .pop{animation:pop .3s var(--d,0s) forwards}
+  @keyframes pop{to{opacity:1}}
+  .replay{position:absolute;right:0;bottom:-6px;font-family:"Caveat";font-weight:700;font-size:20px;color:var(--pencil);background:none;border:0;cursor:pointer;padding:6px 8px}
+
+  .cta{display:grid;gap:10px;margin-top:22px}
+  .btn{display:flex;align-items:center;justify-content:center;height:54px;border-radius:12px;font-family:"Lora";font-weight:600;font-size:16.5px;text-decoration:none}
+  .btn.p{background:var(--blue);color:#fff;box-shadow:3px 4px 0 var(--ink)}
+  .btn.s{background:#fff;border:1.5px solid var(--ink)}
+
+  .strip{display:flex;flex-wrap:wrap;gap:8px 10px;padding-top:6px;padding-bottom:10px}
+  .strip span{font-family:"Caveat";font-weight:700;font-size:22px;line-height:1.1;background:#FFF6B8;padding:6px 12px 7px;box-shadow:0 8px 14px -10px rgba(30,36,51,.5)}
+  .strip span:nth-child(1){transform:rotate(-1.5deg)}
+  .strip span:nth-child(2){background:#D9F0FF;transform:rotate(1deg)}
+  .strip span:nth-child(3){background:#FFE1E6;transform:rotate(-.5deg)}
+
+  .flow{padding-top:28px;padding-bottom:48px}
+  .flow h2{font-weight:500;font-size:26px;line-height:1.2;max-width:22ch}
+  .flow .intro{color:#4A4F5C;margin-top:6px;font-size:16px}
+  .steps{list-style:none;margin-top:16px;display:grid;gap:14px;counter-reset:s}
+  .steps li{counter-increment:s;display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:start}
+  .steps li::before{content:counter(s);font-family:"Caveat";font-weight:700;font-size:30px;line-height:1;color:var(--red);display:grid;place-items:center;width:36px;height:36px;border:2px solid var(--red);border-radius:50% 44% 52% 46%/52% 50% 46% 50%}
+  .steps b{font-weight:600}
+  .steps span{display:block;font-size:15.5px;color:#4A4F5C}
+  .quote{margin-top:24px;font-family:"Caveat";font-weight:700;font-size:30px;line-height:1.1;color:var(--red);max-width:18ch;transform:rotate(-1.5deg)}
+  .quote small{display:block;font-family:"Lora";font-weight:400;font-style:italic;font-size:14px;color:var(--pencil);margin-top:6px}
+  .notes{margin-top:30px;display:grid;gap:14px}
+  .note{background:#fff;border:1.5px solid var(--ink);border-radius:12px;padding:14px 16px}
+  .note h3{font-family:"Caveat";font-weight:700;font-size:25px;line-height:1.1;color:var(--blue)}
+  .note p{font-size:15px;margin-top:2px}
+
+  @media (min-width:900px){
+    body{background-image:linear-gradient(90deg,transparent 63px,var(--margin) 63px,var(--margin) 65px,transparent 65px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)}
+    .wrap{padding-left:96px;padding-right:48px}
+    .hero{grid-template-columns:1fr 1fr;column-gap:56px;align-items:center;padding-top:36px}
+    .copy{grid-column:1;grid-row:1}
+    .page{grid-column:2;grid-row:1/3;margin:0}
+    .cta{grid-column:1;grid-row:2;align-self:start;grid-template-columns:auto auto;justify-content:start;margin-top:4px}
+    .btn{padding:0 26px}
+    .lede{font-size:18.5px}
+    .flow{display:grid;grid-template-columns:1.1fr .9fr;column-gap:64px}
+    .flow h2{font-size:34px}
+  }
+  @media (min-width:1180px){
+    .bar{padding-top:20px}
+    .brand img{height:50px}.brand span{font-size:23px}
+    .mlogin,.menu{display:none}
+    .nav{display:flex;position:static;flex-direction:row;align-items:center;background:none;border:0;box-shadow:none;padding:0;gap:2px}
+    .nav a{padding:8px 9px;font-size:15.5px}
+    .auth{margin:0 0 0 12px;display:flex;gap:8px}
+    .auth a{padding:8px 16px}
+    .nav .signup{color:#fff}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .draw{stroke-dashoffset:0}.write{clip-path:none}.pop{opacity:1}
+    .on .draw,.on .write,.on .pop{animation:none}
+  }
+</style>
+</head>
+<body>
+<header class="bar wrap">
+  <a class="brand" href="#"><img src="img/logo-full.png" alt=""><span>Шинэ Ирээдүйн<br>Эзэд</span></a>
+  <a class="mlogin" href="#">Нэвтрэх</a>
+  <button class="menu" id="menuBtn" aria-expanded="false" aria-controls="nav" aria-label="Цэс"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="#1E2433" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <nav class="nav" id="nav">
+    <a href="#">Хичээлүүд</a><a href="#">Амжилтууд</a><a href="#">Манай төв</a><a href="#">Төлбөр</a><a href="#">Салбар</a><a href="#">Номоос үзэх</a><a href="#">Тусламж</a>
+    <span class="auth"><a class="login" href="#">Нэвтрэх</a><a class="signup" href="#">Бүртгүүлэх</a></span>
+  </nav>
+</header>
+
+<section class="hero wrap">
+  <div class="copy">
+    <h1><span>Бодож үз.</span><span>Өөрөөр хар.</span></h1>
+    <p class="lede">Математик, нийгмийн ухааны танхимын сургалт. Цахим ном, бодлогын сангаар өөрийн хурдаар давт. Ойлголтоос эхэлдэг амжилтын төлөө.</p>
+    <p class="tiny"><i>x → x+1</i>Өнөөдрийн ойлголт. Маргаашийн боломж.</p>
+  </div>
+
+  <figure class="page" id="page">
+    <svg viewBox="0 0 340 430" role="img" aria-label="Сурагч квадрат тэгшитгэл бодсон. Багш зөв гэж тэмдэглээд яагаад гэж асуусан. Сурагч графикаар тайлбарласан.">
+      <g class="write" style="--d:.2s;--dur:.7s"><text class="hw blue" x="6" y="38" font-size="22">№47.</text></g>
+      <g class="write" style="--d:.6s;--dur:1s"><text class="hw blue" x="62" y="40" font-size="32">x<tspan dy="-12" font-size="20">2</tspan><tspan dy="12"> − 5x + 6 = 0</tspan></text></g>
+      <g class="write" style="--d:1.7s;--dur:1s"><text class="hw blue" x="62" y="92" font-size="30">D = 25 − 24 = 1</text></g>
+      <g class="write" style="--d:2.8s;--dur:1s"><text class="hw blue" x="62" y="146" font-size="32">x<tspan dy="7" font-size="19">1</tspan><tspan dy="-7"> = 2,   x</tspan><tspan dy="7" font-size="19">2</tspan><tspan dy="-7"> = 3</tspan></text></g>
+      <path class="stroke-red draw" style="--len:60;--d:4s;--dur:.35s" d="M256 128 l10 13 l24 -34"/>
+      <path class="stroke-red draw" style="--len:640;--d:4.5s;--dur:.9s" d="M58 150 C 40 118, 120 108, 200 112 C 262 116, 252 160, 170 164 C 110 167, 62 160, 66 134"/>
+      <g class="write" style="--d:5.5s;--dur:.8s"><text class="hw red" x="150" y="204" font-size="30" font-weight="700" transform="rotate(-3 150 204)">Зөв. Яагаад?</text></g>
+      <g class="write" style="--d:6.3s;--dur:1s"><text class="hw red" x="112" y="236" font-size="23" transform="rotate(-3 112 236)">Графикаар нь тайлбарла.</text></g>
+      <path class="stroke-pencil draw" style="--len:300;--d:7.5s;--dur:.6s" d="M30 360 H322"/>
+      <path class="stroke-pencil draw" style="--len:180;--d:7.7s;--dur:.5s" d="M70 420 V258"/>
+      <path class="stroke-pencil draw" style="--len:10;--d:8s;--dur:.1s" d="M316 356 l6 4 l-6 4"/>
+      <path class="stroke-blue draw" style="--len:320;--d:8.2s;--dur:1.2s" d="M112 272 Q 172 460 232 272"/>
+      <circle class="pop" style="--d:9.3s" cx="152" cy="360" r="4.5" fill="#273F74"/>
+      <circle class="pop" style="--d:9.5s" cx="192" cy="360" r="4.5" fill="#273F74"/>
+      <g class="pop" style="--d:9.6s"><text class="hw blue" x="146" y="388" font-size="22">2</text><text class="hw blue" x="188" y="388" font-size="22">3</text></g>
+      <g class="write" style="--d:9.9s;--dur:.9s"><text class="hw blue" x="228" y="312" font-size="21" transform="rotate(-6 228 312)">тэнхлэгийг</text><text class="hw blue" x="232" y="334" font-size="21" transform="rotate(-6 232 334)">огтлох цэг!</text></g>
+      <path class="stroke-red draw" style="--len:90;--d:11s;--dur:.5s" d="M262 392 l12 14 l30 -40"/>
+    </svg>
+    <button class="replay" id="replay" type="button">дахин үзэх</button>
+  </figure>
+
+  <div class="cta">
+    <a class="btn p" href="#">Хичээлүүдийг үзэх</a>
+    <a class="btn s" href="#">Номоос бодож үзэх</a>
+  </div>
+</section>
+
+<div class="strip wrap">
+  <span>Элсэлтийн шалгалтын бэлтгэл</span><span>Танхимын сургалт</span><span>Цахим ном, бие даах бодлого</span>
+</div>
+
+<section class="flow wrap">
+  <div>
+    <h2>Танхимын хичээл ингэж явагдана.</h2>
+    <p class="intro">Бүлэг сэдэв бүр, тест бүр дээр.</p>
+    <ol class="steps">
+      <li><div><b>Онол</b><span>Өдөр бүр тухайн сэдвийн онолыг заана.</span></div></li>
+      <li><div><b>Жишээ бодлого</b><span>Онол дээрээ тулгуурлаж жишээ бодлого бодно.</span></div></li>
+      <li><div><b>Тестийн бүх бодлого</b><span>Сурагч тухайн тестийнхээ бодох ёстой бүх бодлогыг бодно.</span></div></li>
+      <li><div><b>Бүгд зөв болсны дараа</b><span>Бүх бодлогоо зөв бодож дуусгасны дараа л ангиас гарна.</span></div></li>
+    </ol>
+    <p class="quote">Зөв хариулсан нь ойлгосон гэсэн үг биш.<small>Манай багш нарын зарчим</small></p>
+  </div>
+  <div class="notes">
+    <div class="note"><h3>Гэрийн даалгавар</h3><p>Дэвтэр дээрээ бодоод зургаа илгээнэ, багш шалгана.</p></div>
+    <div class="note"><h3>Цахим ном, бодлогын сан</h3><p>Номын бодлогоо вэб дээр бод. 10, 30, 60 минутын давталт, алдсан бодлогоо дахин бодно.</p></div>
+    <div class="note"><h3>Жишиг шалгалт</h3><p>Дүн, ID-аар эрэмбэ, сэдэв бүрийн сул тал.</p></div>
+    <div class="note"><h3>Эцэг эхэд</h3><p>Хүүхдийнхээ ирц, даалгавар, дүнг шууд харна.</p></div>
+  </div>
+</section>
+
+<script>
+const mb=document.getElementById('menuBtn'), nav=document.getElementById('nav');
+mb.addEventListener('click',()=>{const o=nav.classList.toggle('open');mb.setAttribute('aria-expanded',o);});
+const page=document.getElementById('page');
+function play(){ page.classList.remove('on'); void page.offsetWidth; page.classList.add('on'); }
+let started=false;
+function start(){ if(started) return; started=true; document.fonts.ready.then(play); }
+function check(){ const r=page.getBoundingClientRect(); if(r.top < innerHeight*0.8 && r.bottom > 0) start(); }
+addEventListener('scroll',check,{passive:true}); addEventListener('load',check); check();
+document.getElementById('replay').addEventListener('click',play);
+</script>
+</body>
+</html>
