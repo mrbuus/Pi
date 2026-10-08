@@ -11,36 +11,24 @@
   .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 16px 120px; }
   .note { font-size: 13px; color: var(--ink-dim); border: 1px dashed var(--line); border-radius: 12px; padding: 10px 14px; background: #fff; }
   .spacer { height: 36vh; display: grid; place-items: end center; color: var(--ink-dim); font-size: 13px; padding-bottom: 12px; }
-  .studio { position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 4 / 5; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; transition: background .5s; }
+  .studio { position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 4 / 5; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; background: #151318; }
   @media (min-width: 860px) { .studio { aspect-ratio: 16 / 10; } }
   .studio:active { cursor: grabbing; }
-  /* Бараан студи: номын ард зөөлөн гэрлийн толбо, ирмэгээрээ харанхуйлна */
-  .studio.dark {
-    background:
-      radial-gradient(48% 38% at 50% 44%, rgba(120,92,140,.42) 0%, rgba(120,92,140,0) 70%),
-      radial-gradient(70% 24% at 50% 82%, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 70%),
-      radial-gradient(120% 90% at 50% 40%, #2A2630 0%, #151318 58%, #0B0A0D 100%);
-  }
-  .studio.light {
-    background:
-      radial-gradient(55% 42% at 50% 42%, #FFFFFF 0%, rgba(255,255,255,0) 72%),
-      radial-gradient(120% 90% at 50% 40%, #F1EEE9 0%, #E2DDD5 64%, #CFC9BF 100%);
-  }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .fallback { position: absolute; inset: 0; display: grid; place-items: center; }
-  .fallback img { width: 52%; max-width: 280px; box-shadow: 0 30px 50px -20px rgba(0,0,0,.5); }
+  .fallback img { width: 52%; max-width: 280px; }
   .ctrl { position: absolute; top: 12px; right: 12px; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.14); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 2; }
-  .studio.light .ctrl { background: rgba(0,0,0,.06); }
+  .studio.light .ctrl { background: rgba(0,0,0,.07); }
   .ctrl button { font: inherit; font-size: 12px; border: 0; border-radius: 999px; padding: 6px 12px; min-height: 32px; background: transparent; color: rgba(255,255,255,.75); cursor: pointer; }
   .studio.light .ctrl button { color: #55504A; }
   .ctrl button[aria-pressed="true"] { background: rgba(255,255,255,.92); color: #1B1B18; }
+  .hint { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 12px; color: rgba(255,255,255,.45); pointer-events: none; }
+  .studio.light .hint { color: #7A756C; }
   .lights { display: flex; justify-content: center; gap: 4px; margin: 12px auto 0; width: max-content; padding: 4px; border-radius: 999px; background: #EFECE6; }
   .lights button { font: inherit; font-size: 12px; border: 0; border-radius: 999px; padding: 6px 10px; min-height: 32px; background: transparent; color: #8A847B; cursor: pointer; display: flex; align-items: center; gap: 6px; }
   .lights button i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .5; }
   .lights button[aria-pressed="true"] { color: #1B1B18; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-  .lights button[aria-pressed="true"] i { background: #FFD27A; opacity: 1; box-shadow: 0 0 8px #FFD27A; }
-  .hint { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 12px; color: rgba(255,255,255,.5); pointer-events: none; }
-  .studio.light .hint { color: #7A756C; }
+  .lights button[aria-pressed="true"] i { background: #F5B942; opacity: 1; box-shadow: 0 0 6px #F5B942; }
   .kicker { margin-top: 22px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--book); font-weight: 700; }
   h1 { font-size: clamp(26px, 6.4vw, 34px); margin: 6px 0 0; letter-spacing: -.015em; line-height: 1.15; }
   .meta { color: var(--ink-dim); font-size: 14px; margin-top: 6px; }
@@ -65,7 +53,6 @@
     </div>
     <div class="hint">Гүйлгэхэд эргэнэ · хажуу тийш чирнэ</div>
   </div>
-
   <div class="lights" role="group" aria-label="Гэрэл асаах, унтраах">
     <button data-light="fill" aria-pressed="true"><i></i>Дүүргэгч</button>
     <button data-light="hair" aria-pressed="true"><i></i>Арын</button>
@@ -82,7 +69,7 @@
   import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 
   const studio = document.getElementById("studio");
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   document.getElementById("fallback").remove();
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -95,97 +82,132 @@
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 60);
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const target = new THREE.Vector3(0, 0.70, 0);
+  const AIM = new THREE.Vector3(0, 0.70, 0);
+  const canvasTex = (w, h, draw, srgb = true) => { const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h); const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
 
-  // ---------- Студийн тусгалын орчин: харанхуй өрөөнд гэрэлтэх softbox-ууд ----------
-  // Гялгар хавтас эдгээр туузыг тусгаж, бүтээгдэхүүний зургийн урт гялбаа үүснэ.
+  // ===================== Студийн фон (WebGL дотор) =====================
+  const BACKDROP = {
+    dark:  { glow: "#3A3242", mid: "#17151B", edge: "#0A090C", floor: 0x141217 },
+    light: { glow: "#FFFFFF", mid: "#EAE6E0", edge: "#CDC7BD", floor: 0xE6E2DB },
+  };
+  const backdropTex = mode => canvasTex(1024, 1024, (x, w, h) => {
+    const b = BACKDROP[mode], g = x.createRadialGradient(w * .5, h * .42, 0, w * .5, h * .46, w * .78);
+    g.addColorStop(0, b.glow); g.addColorStop(.45, b.mid); g.addColorStop(1, b.edge);
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+  });
+
+  // ===================== Тусгалын орчин: градиент softbox + хар хаалт =====================
+  // Гялгар бүтээгдэхүүний зураг: жигд тууз биш, нэг ирмэг нь хар хаалтаар хурц,
+  // нөгөө тал нь бүдэгрэн уусдаг градиент тусгал.
+  const gradStrip = canvasTex(512, 8, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, "#000"); g.addColorStop(.06, "#fff"); g.addColorStop(.32, "#e8e8e8"); g.addColorStop(1, "#000");
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+  }, false);
+  const gradTop = canvasTex(8, 512, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, "#fff"); g.addColorStop(1, "#000");
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+  }, false);
+
   const on = { key: true, fill: true, hair: true };
   function studioEnv(mode) {
     const env = new THREE.Scene();
-    env.background = new THREE.Color(mode === "dark" ? 0x060508 : 0x6d6a66);
-    const box = (w, h, power, pos, tint = 0xffffff) => {
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(tint).multiplyScalar(power), side: THREE.DoubleSide, toneMapped: false }));
-      m.position.set(...pos); m.lookAt(0, 0.7, 0); env.add(m);
+    env.background = new THREE.Color(mode === "dark" ? 0x040305 : 0x5c5955);
+    const panel = (w, h, power, pos, map, tint = 0xffffff, flipX = false) => {
+      const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(tint).multiplyScalar(power), map, side: THREE.DoubleSide, toneMapped: false });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+      m.position.set(...pos); m.lookAt(AIM); if (flipX) m.scale.x = -1; env.add(m);
     };
-    if (on.key)  box(1.3, 5.5, 9, [4.2, 2.2, 2.4], 0xfff3e6);    // түлхүүр: баруун урд 45°, урт тууз
-    if (on.fill) box(1.0, 3.6, 3, [-4.4, 1.6, 2.8], 0xeef2ff);   // дүүргэгч: зүүн урд 45°, сул
-    box(4.5, 3.0, 2.5, [0, 6.5, 0.6]);                            // дээд сул ойлт
-    if (on.hair) box(3.2, 0.9, 9, [-0.4, 3.6, -3.8]);             // арын (үсний) гэрэл: ард дээрээс
-    box(6.0, 1.2, mode === "dark" ? 0.4 : 2.2, [0, -0.6, 4.5]);   // доороос сул ойлт
-    return pmrem.fromScene(env, 0.02).texture;
+    const flag = (w, h, pos) => panel(w, h, 0, pos, null);   // хар хаалт: гэрэл огт өгөхгүй
+    if (on.key)  { panel(1.5, 5.6, 5, [4.0, 2.3, 2.6], gradStrip, 0xfff2e2); flag(0.6, 5.8, [3.0, 2.3, 3.4]); }
+    if (on.fill) panel(1.2, 3.8, 1.8, [-4.2, 1.6, 3.0], gradStrip, 0xeef2ff, true);
+    if (on.hair) panel(3.4, 1.0, 9, [-0.3, 3.8, -3.8], null);
+    panel(5.0, 3.4, mode === "dark" ? 0.9 : 1.6, [0, 6.6, 0.8], gradTop);   // дээд softbox, урдаас ар руу уусна
+    if (mode === "light") panel(7, 1.4, 1.6, [0, -0.6, 4.6], null);           // цайвар шалнаас ойх гэрэл
+    return pmrem.fromScene(env, 0.015).texture;
   }
 
-  // ---------- Гэрэл: тэгш өнцөгт softbox (RectAreaLight) + сүүдэрт зориулсан нэг чиглэлт гэрэл ----------
-  const rect = (color, power, w, h, pos) => { const l = new THREE.RectAreaLight(color, power, w, h); l.position.set(...pos); l.lookAt(target); scene.add(l); return l; };
-  // Сонгодог гурван цэгийн гэрэл (дээрээс харвал): түлхүүр баруун урд, дүүргэгч зүүн урд, арын гэрэл ар дээрээс
-  const POWER = { key: 9, fill: 2.6, hair: 8 };
+  // ===================== Гэрэл =====================
+  // Схем (дээрээс): түлхүүр баруун урд 45°, дүүргэгч зүүн урд 45°, арын гэрэл ар дээрээс.
+  const rect = (color, power, w, h, pos) => { const l = new THREE.RectAreaLight(color, power, w, h); l.position.set(...pos); l.lookAt(AIM); scene.add(l); return l; };
+  const POWER = { key: 6, fill: 1.8, hair: 7.5 };
   const LIGHTS = {
-    key:  rect(0xfff1e0, POWER.key,  1.4, 4.2, [3.4, 2.4, 2.4]),
-    fill: rect(0xeef2ff, POWER.fill, 1.2, 3.0, [-3.6, 1.5, 2.8]),
-    hair: rect(0xffffff, POWER.hair, 3.0, 0.9, [-0.4, 3.4, -3.0]),
+    key:  rect(0xfff1e0, POWER.key,  1.6, 4.4, [3.4, 2.4, 2.6]),
+    fill: rect(0xeef2ff, POWER.fill, 1.4, 3.2, [-3.6, 1.5, 3.0]),
+    hair: rect(0xffffff, POWER.hair, 3.2, 1.0, [-0.3, 3.4, -3.0]),
   };
-  rect(0xffffff, 1.6, 3.5, 2.5, [0, 5.4, 0.8]);   // дээд сул ойлт — хар сүүдэр үүсгэхгүйн тулд
-  const sun = new THREE.DirectionalLight(0xffffff, 0.35);      // зөвхөн зөөлөн сүүдэр гаргана
+  rect(0xffffff, 1.4, 4.0, 3.0, [0, 5.6, 0.8]);
+  const sun = new THREE.DirectionalLight(0xffffff, 0.3);       // зөвхөн зөөлөн сүүдэр
   sun.position.set(2.4, 6.2, 3.0); sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048); sun.shadow.radius = 16; sun.shadow.blurSamples = 25; sun.shadow.bias = -0.0006;
   Object.assign(sun.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 0.5, far: 16 });
   scene.add(sun);
 
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.ShadowMaterial({ opacity: 0.3 }));
-  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
-  // Ёроолын бараан сүүдэр (ambient occlusion-ийн оронд)
-  const cs = document.createElement("canvas"); cs.width = 512; cs.height = 256;
-  const cx = cs.getContext("2d"), g = cx.createRadialGradient(256, 128, 4, 256, 128, 250);
-  g.addColorStop(0, "rgba(0,0,0,.75)"); g.addColorStop(.35, "rgba(0,0,0,.35)"); g.addColorStop(1, "rgba(0,0,0,0)");
-  cx.fillStyle = g; cx.fillRect(0, 0, 512, 256);
-  const contact = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.42), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cs), transparent: true, depthWrite: false }));
-  contact.rotation.x = -Math.PI / 2; contact.position.y = 0.002; scene.add(contact);
+  // ===================== Шал =====================
+  // Тусдаа шалны хавтгай байхгүй: фон завсаргүй үргэлжилнэ, тэнгэрийн хаяаны зураас гарахгүй.
+  // Цайвар: зөвхөн сүүдэр. Бараан: акрил мэт бүдэг ойлт (номын толин тусгал, доошоо уусна).
+  const shadowFloor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.ShadowMaterial({ opacity: 0.22 }));
+  shadowFloor.rotation.x = -Math.PI / 2; shadowFloor.receiveShadow = true; scene.add(shadowFloor);
+  const contactTex = canvasTex(512, 256, (x, w, h) => {
+    const g = x.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w * .49);
+    g.addColorStop(0, "rgba(0,0,0,.8)"); g.addColorStop(.3, "rgba(0,0,0,.35)"); g.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+  });
+  const contact = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.36), new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, depthWrite: false }));
+  contact.rotation.x = -Math.PI / 2; contact.position.y = 0.003; scene.add(contact);
 
-  // ---------- Ном: зөөлөн хавтастай, хавтас хуудастай тэгш ----------
-  const W = 1, H = 1.431, T = 0.104, C = 0.006;
+  // ===================== Ном: нэг цул биет — завсар, зураас үүсэхгүй =====================
+  const W = 1, H = 1.422, T = 0.112;          // хавтасны эх файлаас: 498 × 708, нуруу 56 px
   const loader = new THREE.TextureLoader();
-  const tex = src => { const t = loader.load(src, () => request()); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; };
-  const laminate = map => new THREE.MeshPhysicalMaterial({ map, roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1 });
-  const cut = new THREE.MeshStandardMaterial({ color: 0xF6F3EE, roughness: 0.7 });   // хавтасны зүсмэл ирмэг
-  function paperTex(vertical) {
-    const n = 1024, c = document.createElement("canvas"); c.width = vertical ? n : 4; c.height = vertical ? 4 : n;
-    const x = c.getContext("2d"); x.fillStyle = "#F6EEDC"; x.fillRect(0, 0, c.width, c.height);          // офсет цаас: бага зэрэг шаргал
-    for (let i = 0; i < n; i += 2) { x.fillStyle = `rgba(150,124,82,${0.07 + Math.random() * 0.11})`; vertical ? x.fillRect(i, 0, 1, 4) : x.fillRect(0, i, 4, 1); }
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
-  }
-  const paperFore = new THREE.MeshStandardMaterial({ map: paperTex(true), roughness: 0.92 });
-  const paperTop = new THREE.MeshStandardMaterial({ map: paperTex(false), roughness: 0.92 });
+  const coverTex = src => { const t = loader.load(src, () => request()); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; };
+  const laminate = map => new THREE.MeshPhysicalMaterial({ map, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.06 });
+  // Хуудасны ирмэг: шаргалдуу офсет цаас, хоёр захад хавтасны нимгэн цагаан ирмэг
+  const paperEdge = across => canvasTex(across ? 1024 : 8, across ? 8 : 1024, (x, w, h) => {
+    const n = Math.max(w, h); x.fillStyle = "#F6EEDC"; x.fillRect(0, 0, w, h);
+    for (let i = 0; i < n; i += 2) { x.fillStyle = `rgba(150,124,82,${0.05 + Math.random() * 0.09})`; across ? x.fillRect(i, 0, 1, h) : x.fillRect(0, i, w, 1); }
+    x.fillStyle = "#FAF8F4"; const e = Math.round(n * 0.03);
+    across ? (x.fillRect(0, 0, e, h), x.fillRect(w - e, 0, e, h)) : (x.fillRect(0, 0, w, e), x.fillRect(0, h - e, w, e));
+  });
+  const pageSide = new THREE.MeshStandardMaterial({ map: paperEdge(true), roughness: 0.9 });
+  const pageTop = new THREE.MeshStandardMaterial({ map: paperEdge(false), roughness: 0.9 });
+  // BoxGeometry материалын дараалал: +x ирмэг, −x нуруу, +y дээд, −y доод, +z урд, −z ар
+  const book = new THREE.Mesh(new THREE.BoxGeometry(W, H, T), [
+    pageSide, laminate(coverTex("img/100x100-spine.jpg")), pageTop, pageTop,
+    laminate(coverTex("img/100x100-front.jpg")), laminate(coverTex("img/100x100-back.jpg")),
+  ]);
+  book.castShadow = true; book.position.y = H / 2; scene.add(book);
+  // Акрил ойлт: номын толин хуулбар, шалнаас холдох тусам уусна (~18%)
+  const fadeReflection = m => {
+    const c = m.clone(); c.transparent = true; c.depthWrite = false;
+    c.onBeforeCompile = sh => {
+      sh.vertexShader = "varying float vY;\n" + sh.vertexShader.replace("#include <project_vertex>", "#include <project_vertex>\n  vY = (modelMatrix * vec4(transformed, 1.0)).y;");
+      sh.fragmentShader = "varying float vY;\n" + sh.fragmentShader.replace("#include <dithering_fragment>", "#include <dithering_fragment>\n  gl_FragColor.a *= 0.18 * smoothstep(-0.55, 0.0, vY);");
+    };
+    return c;
+  };
+  const reflection = new THREE.Mesh(book.geometry, book.material.map(fadeReflection));
+  reflection.scale.y = -1; reflection.position.y = -H / 2; scene.add(reflection);
 
-  const book = new THREE.Group();
-  const part = (geo, mats, pos) => { const m = new THREE.Mesh(geo, mats); m.position.set(...pos); m.castShadow = m.receiveShadow = true; book.add(m); };
-  // BoxGeometry материалын дараалал: +x, -x, +y, -y, +z, -z
-  part(new THREE.BoxGeometry(W, H, C), [cut, cut, cut, cut, laminate(tex("img/100x100-front.jpg")), cut], [0, 0, T / 2 - C / 2]);
-  part(new THREE.BoxGeometry(W, H, C), [cut, cut, cut, cut, cut, laminate(tex("img/100x100-back.jpg"))], [0, 0, -T / 2 + C / 2]);
-  part(new THREE.BoxGeometry(C, H, T), [cut, laminate(tex("img/100x100-spine.jpg")), cut, cut, cut, cut], [-W / 2 + C / 2, 0, 0]);
-  // Хуудас: дээр, доор, баруун ирмэг нь хавтастай яг нэг түвшинд
-  part(new THREE.BoxGeometry(W - C, H, T - 2 * C), [paperFore, cut, paperTop, paperTop, cut, cut], [C / 2, 0, 0]);
-  book.position.y = H / 2;
-  scene.add(book);
-
-  // ---------- Горим ----------
-  function setMode(mode) {
-    studio.className = "studio " + mode;
-    if (scene.environment) scene.environment.dispose();
-    scene.environment = studioEnv(mode);
-    renderer.toneMappingExposure = mode === "dark" ? 1.0 : 0.92;
-    floor.material.opacity = mode === "dark" ? 0.55 : 0.26;
-    contact.material.opacity = mode === "dark" ? 1 : 0.7;
-    document.querySelectorAll(".ctrl button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+  // ===================== Горим =====================
+  let mode = "dark";
+  function setMode(m) {
+    mode = m; studio.className = "studio " + m;
+    scene.background?.dispose?.(); scene.background = backdropTex(m);
+    scene.environment?.dispose?.(); scene.environment = studioEnv(m);
+    const dark = m === "dark";
+    reflection.visible = dark; shadowFloor.material.opacity = dark ? 0.0 : 0.22;
+    contact.material.opacity = dark ? 0.9 : 0.75;
+    renderer.toneMappingExposure = dark ? 0.95 : 0.88;
+    document.querySelectorAll(".ctrl button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
     request();
   }
-  let mode = "dark";
-  document.querySelectorAll(".ctrl button").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); mode = b.dataset.mode; setMode(mode); }));
-  document.querySelectorAll(".lights button").forEach(b => b.addEventListener("click", e => {
-    e.stopPropagation();
+  document.querySelectorAll(".ctrl button").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); setMode(b.dataset.mode); }));
+  document.querySelectorAll(".lights button").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.light; on[k] = !on[k];
     LIGHTS[k].intensity = on[k] ? POWER[k] : 0;
+    if (k === "key") sun.intensity = on.key ? 0.3 : 0.04;
     b.setAttribute("aria-pressed", String(on[k]));
-    if (k === "key") sun.intensity = on.key ? 0.35 : 0.05;
     setMode(mode);
   }));
 
@@ -193,12 +215,12 @@
     const { clientWidth: w, clientHeight: h } = studio;
     renderer.setSize(w, h, false); camera.aspect = w / h;
     const portrait = w / h < 1;
-    camera.position.set(0, portrait ? 1.02 : 0.95, portrait ? 4.9 : 4.3);
-    camera.lookAt(target); camera.updateProjectionMatrix(); request();
+    camera.position.set(0, portrait ? 1.0 : 0.92, portrait ? 4.9 : 4.3);
+    camera.lookAt(AIM); camera.updateProjectionMatrix(); request();
   }
   new ResizeObserver(resize).observe(studio);
 
-  // ---------- Эргэлт ----------
+  // ===================== Эргэлт =====================
   let dragAngle = 0, shown = 0;
   const progress = () => { const r = studio.getBoundingClientRect(), vh = innerHeight; return Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height))); };
   const goal = () => -0.35 + progress() * 1.6 + dragAngle;
@@ -208,7 +230,7 @@
   studio.addEventListener("pointermove", e => {
     if (!drag) return;
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-    if (!drag.axis && Math.hypot(dx, dy) > 6) { drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; if (drag.axis === "x") studio.setPointerCapture(drag.id); }
+    if (!drag.axis && Math.hypot(dx, dy) > 6) { drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; if (drag.axis === "x") try { studio.setPointerCapture(drag.id); } catch {} }
     if (drag.axis === "x") { dragAngle = drag.a + dx * 0.008; request(); }
   });
   studio.addEventListener("pointerup", () => drag = null); studio.addEventListener("pointercancel", () => drag = null);
@@ -219,7 +241,7 @@
     raf = 0;
     const g = goal(), k = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 0.14;
     shown += (g - shown) * k;
-    book.rotation.y = shown; contact.rotation.z = -shown;
+    book.rotation.y = reflection.rotation.y = shown; contact.rotation.z = -shown;
     renderer.render(scene, camera);
     if (Math.abs(g - shown) > 0.0005) request();
   }
