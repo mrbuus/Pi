@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Номын 3D — Three.js</title>
+<style>
+  :root { --bg: #FAF9F6; --ink: #1B1B18; --ink-dim: #5E5A52; --line: #E4E1DA; --book: #6B2A8E; --brand: #1D4ED8; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 16px 120px; }
+  .note { font-size: 13px; color: var(--ink-dim); border: 1px dashed var(--line); border-radius: 12px; padding: 10px 14px; background: #fff; }
+  .spacer { height: 40vh; display: grid; place-items: end center; color: var(--ink-dim); font-size: 13px; padding-bottom: 12px; }
+  .studio {
+    position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 4 / 5;
+    background:
+      radial-gradient(110% 70% at 30% 15%, #FFFFFF 0%, rgba(255,255,255,0) 60%),
+      linear-gradient(180deg, #F2F0EB 0%, #E8E4DD 64%, #DCD7CF 100%);
+    touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab;
+  }
+  @media (min-width: 860px) { .studio { aspect-ratio: 16 / 10; } }
+  .studio:active { cursor: grabbing; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .fallback { position: absolute; inset: 0; display: grid; place-items: center; }
+  .fallback img { width: 52%; max-width: 280px; box-shadow: 0 30px 50px -20px rgba(30,15,40,.45); border-radius: 2px; }
+  .hint { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 12px; color: #7A756C; pointer-events: none; }
+  .kicker { margin-top: 22px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--book); font-weight: 700; }
+  h1 { font-size: clamp(26px, 6.4vw, 34px); margin: 6px 0 0; letter-spacing: -.015em; line-height: 1.15; }
+  .meta { color: var(--ink-dim); font-size: 14px; margin-top: 6px; }
+</style>
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+</script>
+</head>
+<body>
+<div class="wrap">
+  <p class="note">Three.js туршилт. Камер, AI ашиглаагүй — хэвлэлийн файлаас бодит гэрэлтэй 3D. Доош гүйлгэхэд ном эргэнэ, хуруугаар хажуу тийш чирж ч эргүүлнэ.</p>
+  <div class="spacer">Доош гүйлгэ</div>
+
+  <div class="studio" id="studio">
+    <div class="fallback" id="fallback"><img src="img/100x100-front.jpg" alt="Математикийн тестүүд, I дэвтэр"></div>
+    <div class="hint">Гүйлгэхэд эргэнэ · хажуу тийш чирнэ</div>
+  </div>
+  <div class="kicker">100×100 · I дэвтэр</div>
+  <h1>Математикийн тестүүд</h1>
+  <div class="meta">12 бүлэг сэдэв · 30 000₮</div>
+
+  <div class="spacer"></div>
+</div>
+
+<script type="module">
+  import * as THREE from "three";
+  import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+  const studio = document.getElementById("studio");
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+  } catch { throw new Error("WebGL байхгүй — зурган хувилбар үлдэнэ"); }
+  document.getElementById("fallback").remove();
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.VSMShadowMap;
+  studio.prepend(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  // Студийн орчны тусгал — гялгар хавтас хана, таазыг зөөлөн тусгана
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.55;
+
+  const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
+
+  // ---------- Гурван цэгийн гэрэл ----------
+  const key = new THREE.DirectionalLight(0xfff6ec, 2.6);          // түлхүүр: урд зүүн, дээрээс
+  key.position.set(-2.6, 5.8, 3.2);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.radius = 14; key.shadow.blurSamples = 24; key.shadow.bias = -0.0006;
+  Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 0.5, far: 16 });
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xf2f4ff, 0.7);         // дүүргэгч: урд баруун
+  fill.position.set(3.4, 1.4, 2.6); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xffffff, 1.8);          // арын: ар дээрээс, ирмэгийг тодруулна
+  rim.position.set(0.6, 3.2, -3.6); scene.add(rim);
+
+  // ---------- Шал: зөвхөн сүүдэр ----------
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), new THREE.ShadowMaterial({ opacity: 0.18 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  // Ойрын хар сүүдэр (contact shadow)
+  const cs = document.createElement("canvas"); cs.width = cs.height = 256;
+  const cx = cs.getContext("2d"), g = cx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, "rgba(20,10,30,.55)"); g.addColorStop(1, "rgba(20,10,30,0)");
+  cx.fillStyle = g; cx.fillRect(0, 0, 256, 256);
+  const contact = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.5), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cs), transparent: true, depthWrite: false }));
+  contact.rotation.x = -Math.PI / 2; contact.position.y = 0.002; scene.add(contact);
+
+  // ---------- Ном ----------
+  const W = 1, H = 1.431, T = 0.104, C = 0.007;   // өргөн, өндөр, зузаан, хавтасны зузаан
+  const loader = new THREE.TextureLoader();
+  const tex = src => { const t = loader.load(src, () => render()); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; };
+  const laminate = map => new THREE.MeshPhysicalMaterial({ map, roughness: 0.42, clearcoat: 1, clearcoatRoughness: 0.14, color: 0xffffff });
+  const board = new THREE.MeshStandardMaterial({ color: 0xF4F1EC, roughness: 0.6 });
+
+  // Хуудасны ирмэг — нарийн цаасан зураас
+  function paperTex(vertical) {
+    const c = document.createElement("canvas"); c.width = vertical ? 512 : 8; c.height = vertical ? 8 : 512;
+    const x = c.getContext("2d"); x.fillStyle = "#FBF9F4"; x.fillRect(0, 0, c.width, c.height);
+    for (let i = 0; i < 512; i += 2) { x.fillStyle = `rgba(150,140,125,${0.10 + Math.random() * 0.12})`; vertical ? x.fillRect(i, 0, 1, 8) : x.fillRect(0, i, 8, 1); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  }
+  const paperSide = new THREE.MeshStandardMaterial({ map: paperTex(true), roughness: 0.95 });
+  const paperTop = new THREE.MeshStandardMaterial({ map: paperTex(false), roughness: 0.95 });
+
+  const book = new THREE.Group();
+  const add = (geo, mats, pos) => { const m = new THREE.Mesh(geo, mats); m.position.set(...pos); m.castShadow = true; m.receiveShadow = true; book.add(m); };
+  // BoxGeometry материалын дараалал: +x, -x, +y, -y, +z, -z
+  add(new THREE.BoxGeometry(W, H, C), [board, board, board, board, laminate(tex("img/100x100-front.jpg")), board], [0, 0, T / 2 - C / 2]);
+  add(new THREE.BoxGeometry(W, H, C), [board, board, board, board, board, laminate(tex("img/100x100-back.jpg"))], [0, 0, -T / 2 + C / 2]);
+  add(new THREE.BoxGeometry(C, H, T), [board, laminate(tex("img/100x100-spine.jpg")), board, board, board, board], [-W / 2 + C / 2, 0, 0]);
+  // Хуудасны блок хавтаснаас бага зэрэг дотогш
+  add(new THREE.BoxGeometry(W - C - 0.012, H - 0.018, T - 2 * C), [paperSide, paperSide, paperTop, paperTop, paperSide, paperSide], [C / 2 - 0.006, 0, 0]);
+  book.position.y = H / 2;
+  scene.add(book);
+
+  // ---------- Хэмжээ ----------
+  function resize() {
+    const { clientWidth: w, clientHeight: h } = studio;
+    renderer.setSize(w, h, false); camera.aspect = w / h;
+    const portrait = w / h < 1;
+    camera.position.set(0, portrait ? 1.0 : 0.92, portrait ? 4.6 : 4.1);
+    camera.lookAt(0, portrait ? 0.70 : 0.68, 0);
+    camera.updateProjectionMatrix(); render();
+  }
+  new ResizeObserver(resize).observe(studio);
+
+  // ---------- Эргэлт: scroll + хэвтээ чирэлт ----------
+  let scrollAngle = 0, dragAngle = 0, shown = 0;
+  function scrollProgress() {
+    const r = studio.getBoundingClientRect(), vh = innerHeight;
+    return Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));   // 0: доороос орж ирэв, 1: дээгүүр гарав
+  }
+  function target() { return -0.35 + scrollProgress() * 1.6 + dragAngle; }  // нуруу → урд → ирмэг
+  addEventListener("scroll", () => request(), { passive: true });
+
+  let drag = null;
+  studio.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, a: dragAngle, id: e.pointerId, axis: null }; });
+  studio.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.axis && Math.hypot(dx, dy) > 6) { drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; if (drag.axis === "x") studio.setPointerCapture(drag.id); }
+    if (drag.axis === "x") { dragAngle = drag.a + dx * 0.008; request(); }
+  });
+  const end = () => { drag = null; };
+  studio.addEventListener("pointerup", end); studio.addEventListener("pointercancel", end);
+
+  // ---------- Зөвхөн өөрчлөгдөх үед зурна (утасны батарей) ----------
+  let raf = 0;
+  function request() { if (!raf) raf = requestAnimationFrame(tick); }
+  function tick() {
+    raf = 0;
+    const goal = target(), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    shown += (goal - shown) * (reduce ? 1 : 0.14);
+    book.rotation.y = shown;
+    contact.rotation.z = -shown;
+    render();
+    if (Math.abs(goal - shown) > 0.0005) request();
+  }
+  function render() { renderer.render(scene, camera); }
+  shown = target(); resize(); request();
+</script>
+</body>
+</html>
