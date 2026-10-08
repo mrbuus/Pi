@@ -34,6 +34,11 @@
   .ctrl button { font: inherit; font-size: 12px; border: 0; border-radius: 999px; padding: 6px 12px; min-height: 32px; background: transparent; color: rgba(255,255,255,.75); cursor: pointer; }
   .studio.light .ctrl button { color: #55504A; }
   .ctrl button[aria-pressed="true"] { background: rgba(255,255,255,.92); color: #1B1B18; }
+  .lights { display: flex; justify-content: center; gap: 4px; margin: 12px auto 0; width: max-content; padding: 4px; border-radius: 999px; background: #EFECE6; }
+  .lights button { font: inherit; font-size: 12px; border: 0; border-radius: 999px; padding: 6px 10px; min-height: 32px; background: transparent; color: #8A847B; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .lights button i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .5; }
+  .lights button[aria-pressed="true"] { color: #1B1B18; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .lights button[aria-pressed="true"] i { background: #FFD27A; opacity: 1; box-shadow: 0 0 8px #FFD27A; }
   .hint { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 12px; color: rgba(255,255,255,.5); pointer-events: none; }
   .studio.light .hint { color: #7A756C; }
   .kicker { margin-top: 22px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--book); font-weight: 700; }
@@ -59,6 +64,12 @@
       <button data-mode="light" aria-pressed="false">Цайвар</button>
     </div>
     <div class="hint">Гүйлгэхэд эргэнэ · хажуу тийш чирнэ</div>
+  </div>
+
+  <div class="lights" role="group" aria-label="Гэрэл асаах, унтраах">
+    <button data-light="fill" aria-pressed="true"><i></i>Дүүргэгч</button>
+    <button data-light="hair" aria-pressed="true"><i></i>Арын</button>
+    <button data-light="key" aria-pressed="true"><i></i>Түлхүүр</button>
   </div>
   <div class="kicker">100×100 · I дэвтэр</div>
   <h1>Математикийн тестүүд</h1>
@@ -88,6 +99,7 @@
 
   // ---------- Студийн тусгалын орчин: харанхуй өрөөнд гэрэлтэх softbox-ууд ----------
   // Гялгар хавтас эдгээр туузыг тусгаж, бүтээгдэхүүний зургийн урт гялбаа үүснэ.
+  const on = { key: true, fill: true, hair: true };
   function studioEnv(mode) {
     const env = new THREE.Scene();
     env.background = new THREE.Color(mode === "dark" ? 0x060508 : 0x6d6a66);
@@ -95,22 +107,26 @@
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(tint).multiplyScalar(power), side: THREE.DoubleSide, toneMapped: false }));
       m.position.set(...pos); m.lookAt(0, 0.7, 0); env.add(m);
     };
-    box(1.3, 5.5, 9, [-4.2, 2.2, 2.4], 0xfff3e6);   // түлхүүр: босоо урт тууз, зүүн
-    box(1.0, 3.6, 3, [4.4, 1.6, 2.8], 0xeef2ff);    // дүүргэгч: баруун
-    box(4.5, 3.0, 5, [0, 6.5, 0.6]);                // дээд softbox
-    box(3.2, 0.7, 8, [0, 2.8, -4.4]);               // арын тууз — ирмэгийг тодруулна
+    if (on.key)  box(1.3, 5.5, 9, [4.2, 2.2, 2.4], 0xfff3e6);    // түлхүүр: баруун урд 45°, урт тууз
+    if (on.fill) box(1.0, 3.6, 3, [-4.4, 1.6, 2.8], 0xeef2ff);   // дүүргэгч: зүүн урд 45°, сул
+    box(4.5, 3.0, 2.5, [0, 6.5, 0.6]);                            // дээд сул ойлт
+    if (on.hair) box(3.2, 0.9, 9, [-0.4, 3.6, -3.8]);             // арын (үсний) гэрэл: ард дээрээс
     box(6.0, 1.2, mode === "dark" ? 0.4 : 2.2, [0, -0.6, 4.5]);   // доороос сул ойлт
     return pmrem.fromScene(env, 0.02).texture;
   }
 
   // ---------- Гэрэл: тэгш өнцөгт softbox (RectAreaLight) + сүүдэрт зориулсан нэг чиглэлт гэрэл ----------
   const rect = (color, power, w, h, pos) => { const l = new THREE.RectAreaLight(color, power, w, h); l.position.set(...pos); l.lookAt(target); scene.add(l); return l; };
-  const keyL  = rect(0xfff1e0, 9,   1.4, 4.2, [-3.4, 2.4, 2.4]);
-  const fillL = rect(0xeef2ff, 2.2, 1.2, 3.0, [3.6, 1.5, 2.8]);
-  const rimL  = rect(0xffffff, 7,   3.0, 0.8, [0.2, 3.0, -3.4]);
-  const topL  = rect(0xffffff, 2.6, 3.5, 2.5, [0, 5.4, 0.8]);
+  // Сонгодог гурван цэгийн гэрэл (дээрээс харвал): түлхүүр баруун урд, дүүргэгч зүүн урд, арын гэрэл ар дээрээс
+  const POWER = { key: 9, fill: 2.6, hair: 8 };
+  const LIGHTS = {
+    key:  rect(0xfff1e0, POWER.key,  1.4, 4.2, [3.4, 2.4, 2.4]),
+    fill: rect(0xeef2ff, POWER.fill, 1.2, 3.0, [-3.6, 1.5, 2.8]),
+    hair: rect(0xffffff, POWER.hair, 3.0, 0.9, [-0.4, 3.4, -3.0]),
+  };
+  rect(0xffffff, 1.6, 3.5, 2.5, [0, 5.4, 0.8]);   // дээд сул ойлт — хар сүүдэр үүсгэхгүйн тулд
   const sun = new THREE.DirectionalLight(0xffffff, 0.35);      // зөвхөн зөөлөн сүүдэр гаргана
-  sun.position.set(-2.4, 6.2, 3.0); sun.castShadow = true;
+  sun.position.set(2.4, 6.2, 3.0); sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048); sun.shadow.radius = 16; sun.shadow.blurSamples = 25; sun.shadow.bias = -0.0006;
   Object.assign(sun.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 0.5, far: 16 });
   scene.add(sun);
@@ -133,8 +149,8 @@
   const cut = new THREE.MeshStandardMaterial({ color: 0xF6F3EE, roughness: 0.7 });   // хавтасны зүсмэл ирмэг
   function paperTex(vertical) {
     const n = 1024, c = document.createElement("canvas"); c.width = vertical ? n : 4; c.height = vertical ? 4 : n;
-    const x = c.getContext("2d"); x.fillStyle = "#FBFAF6"; x.fillRect(0, 0, c.width, c.height);
-    for (let i = 0; i < n; i += 2) { x.fillStyle = `rgba(140,132,118,${0.06 + Math.random() * 0.1})`; vertical ? x.fillRect(i, 0, 1, 4) : x.fillRect(0, i, 4, 1); }
+    const x = c.getContext("2d"); x.fillStyle = "#F6EEDC"; x.fillRect(0, 0, c.width, c.height);          // офсет цаас: бага зэрэг шаргал
+    for (let i = 0; i < n; i += 2) { x.fillStyle = `rgba(150,124,82,${0.07 + Math.random() * 0.11})`; vertical ? x.fillRect(i, 0, 1, 4) : x.fillRect(0, i, 4, 1); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
   }
   const paperFore = new THREE.MeshStandardMaterial({ map: paperTex(true), roughness: 0.92 });
@@ -162,7 +178,16 @@
     document.querySelectorAll(".ctrl button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
     request();
   }
-  document.querySelectorAll(".ctrl button").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); setMode(b.dataset.mode); }));
+  let mode = "dark";
+  document.querySelectorAll(".ctrl button").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); mode = b.dataset.mode; setMode(mode); }));
+  document.querySelectorAll(".lights button").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    const k = b.dataset.light; on[k] = !on[k];
+    LIGHTS[k].intensity = on[k] ? POWER[k] : 0;
+    b.setAttribute("aria-pressed", String(on[k]));
+    if (k === "key") sun.intensity = on.key ? 0.35 : 0.05;
+    setMode(mode);
+  }));
 
   function resize() {
     const { clientWidth: w, clientHeight: h } = studio;
