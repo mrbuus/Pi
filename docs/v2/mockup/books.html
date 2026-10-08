@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Номын хэсэг — мокап</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+  :root {
+    --bg: #FAF9F6; --surface: #FFFFFF; --line: #DFDCD5;
+    --ink: #1B1B18; --ink-dim: #57544D;
+    --brand: #1D4ED8; --brand-tint: #DCE6FB;
+    --book: #6B2A8E; --book-tint: #F1E6F7;
+    --ok: #1E7D34; --ok-tint: #E3F2E6; --err: #B3261E; --err-tint: #FBE7E5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 20px 80px; }
+  .note { font-size: 13px; color: var(--ink-dim); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px; background: var(--surface); }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .variant { margin-top: 56px; }
+  .vlabel { display: flex; align-items: baseline; gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; margin-bottom: 28px; }
+  .vlabel b { font-size: 13px; letter-spacing: .08em; color: var(--brand); }
+  .vlabel span { font-size: 18px; font-weight: 600; }
+  .vlabel em { margin-left: auto; font-style: normal; font-size: 13px; color: var(--ink-dim); }
+
+  /* ---------- 3D ном ---------- */
+  .stage { perspective: 1400px; display: grid; place-items: center; min-height: 460px; user-select: none; touch-action: none; cursor: grab; }
+  .stage:active { cursor: grabbing; }
+  .book { --w: 260px; --h: 372px; --t: 27px; position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d; transform: rotateX(var(--rx, -8deg)) rotateY(var(--ry, -28deg)); transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+  .book.dragging { transition: none; }
+  .face { position: absolute; backface-visibility: hidden; background-size: 100% 100%; }
+  .front { inset: 0; background-image: url(img/100x100-front.jpg); transform: translateZ(calc(var(--t) / 2)); border-radius: 2px 4px 4px 2px; }
+  .back  { inset: 0; background-image: url(img/100x100-back.jpg);  transform: rotateY(180deg) translateZ(calc(var(--t) / 2)); border-radius: 4px 2px 2px 4px; }
+  .spine { top: 0; left: calc(50% - var(--t) / 2); width: var(--t); height: var(--h); background-image: url(img/100x100-spine.jpg); transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
+  .edge  { top: 3px; left: calc(50% - var(--t) / 2 + 1px); width: calc(var(--t) - 2px); height: calc(var(--h) - 6px); transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 3px));
+           background: repeating-linear-gradient(90deg, #fbfaf7 0 1px, #e9e6df 1px 2px); }
+  .top, .bottom { left: 3px; width: calc(var(--w) - 6px); height: calc(var(--t) - 2px); top: calc(50% - var(--t) / 2 + 1px);
+           background: repeating-linear-gradient(0deg, #fbfaf7 0 1px, #e9e6df 1px 2px); }
+  .top    { transform: rotateX(90deg)  translateZ(calc(var(--h) / 2 - 3px)); }
+  .bottom { transform: rotateX(-90deg) translateZ(calc(var(--h) / 2 - 3px)); }
+  .shadow { position: absolute; left: 50%; top: 100%; width: 300px; height: 40px; margin: 6px 0 0 -150px; background: radial-gradient(closest-side, rgba(40,20,60,.22), transparent); filter: blur(4px); }
+  .views { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+  .chip { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .chip[aria-pressed="true"] { border-color: var(--book); color: var(--book); background: var(--book-tint); }
+  .hint { text-align: center; font-size: 12px; color: var(--ink-dim); margin-top: 6px; }
+
+  /* ---------- A: ном + агуулга ---------- */
+  .grid2 { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.1fr); gap: 40px; align-items: start; }
+  @media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
+  .kicker { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--book); font-weight: 600; }
+  .btitle { font-size: 28px; font-weight: 700; margin: 4px 0 2px; letter-spacing: -.01em; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--ink-dim); font-size: 14px; margin: 10px 0 18px; }
+  .meta strong { color: var(--ink); }
+  .toc { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .toc-head { display: flex; justify-content: space-between; padding: 12px 16px; font-size: 13px; color: var(--ink-dim); border-bottom: 1px solid var(--line); }
+  .toc details { border-bottom: 1px solid var(--line); }
+  .toc details:last-child { border-bottom: 0; }
+  .toc summary { list-style: none; display: grid; grid-template-columns: 28px 1fr auto 16px; gap: 10px; align-items: center; padding: 11px 16px; cursor: pointer; }
+  .toc summary::-webkit-details-marker { display: none; }
+  .toc summary:hover { background: #faf8fc; }
+  .num { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--book); font-weight: 600; }
+  .cnt { font-size: 13px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+  .chev { transition: transform .2s; color: var(--ink-dim); }
+  details[open] .chev { transform: rotate(90deg); }
+  .toc .inner { padding: 4px 16px 14px 54px; font-size: 14px; color: var(--ink-dim); }
+  .toc .inner a { color: var(--brand); }
+  .price { display: flex; align-items: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+  .price .amt { font-size: 24px; font-weight: 700; }
+  .btn { font: inherit; font-weight: 600; padding: 11px 18px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; }
+  .btn.primary { background: var(--brand); color: #fff; }
+  .btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+  .free { font-size: 13px; color: var(--ok); }
+
+  /* ---------- B: бодит бодлого ---------- */
+  .problem { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 22px; }
+  .pmeta { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--ink-dim); margin-bottom: 12px; }
+  .pmeta .tag { background: var(--book-tint); color: var(--book); border-radius: 6px; padding: 2px 8px; font-weight: 600; }
+  .stmt { font-size: 20px; margin: 4px 0 18px; }
+  .choices { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  @media (max-width: 560px) { .choices { grid-template-columns: 1fr 1fr; } }
+  .choice { font: inherit; text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; display: flex; gap: 8px; align-items: baseline; }
+  .choice b { color: var(--ink-dim); font-size: 13px; }
+  .choice:hover:not(:disabled) { border-color: var(--brand); }
+  .choice.ok { border-color: var(--ok); background: var(--ok-tint); }
+  .choice.bad { border-color: var(--err); background: var(--err-tint); }
+  .choice:disabled { cursor: default; }
+  .status { margin-top: 14px; font-size: 14px; min-height: 22px; }
+  .ledger { margin-top: 14px; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; color: var(--ink-dim); border-top: 1px dashed var(--line); padding-top: 12px; }
+  .ledger dt { color: var(--ink); }
+  .solution { margin-top: 14px; padding: 14px 16px; background: #f7f6f2; border-radius: 10px; display: none; }
+  .solution ol { margin: 6px 0 0; padding-left: 20px; }
+  .solution.show { display: block; }
+  .side-book { display: flex; gap: 14px; align-items: center; margin-bottom: 18px; }
+  .side-book img { width: 64px; border-radius: 2px; box-shadow: 0 6px 14px rgba(40,20,60,.18); }
+
+  /* ---------- C: бодлогын тор ---------- */
+  .lattice { display: grid; gap: 10px; }
+  .row { display: grid; grid-template-columns: 210px 1fr 44px; gap: 12px; align-items: center; font-size: 14px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr 44px; } .row .cells { grid-column: 1 / -1; } }
+  .cells { display: flex; flex-wrap: wrap; gap: 3px; }
+  .cell { width: 11px; height: 11px; border-radius: 2px; background: #E4D9EC; }
+  .cell.done { background: var(--book); }
+  .cell.seen { background: #B79AC9; }
+  .row .c { text-align: right; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+  .legend { display: flex; gap: 16px; font-size: 13px; color: var(--ink-dim); margin-top: 14px; }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+  .verdict { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; }
+  .verdict table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .verdict th, .verdict td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .verdict th { font-size: 12px; letter-spacing: .06em; color: var(--ink-dim); text-transform: uppercase; }
+  @media (prefers-reduced-motion: reduce) { .book { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Нүүр хуудасны номын хэсэг — 3 хувилбар</h1>
+  <p class="note">Мокап. Вэбд холбоогүй. Хавтас нь бодит 100×100 I дэвтрийн хэвлэлийн файлаас. Бодлого нь локал ӨС-ийн баталгаажсан дээжээс.
+    <strong>Бүлэг тус бүрийн бодлого/тестийн тоо нь жишээ</strong> — бодит тоог прод-оос татна.</p>
+
+  <!-- ================= A ================= -->
+  <section class="variant" id="a">
+    <div class="vlabel"><b>A</b><span>Ном нээгддэг — 3D ном + бүрэн агуулга</span><em>Санал: үндсэн</em></div>
+    <div class="grid2">
+      <div>
+        <div class="stage" id="stage">
+          <div class="book" id="book">
+            <div class="face front" role="img" aria-label="Математикийн тестүүд, I дэвтэр — урд хавтас"></div>
+            <div class="face back"></div>
+            <div class="face spine"></div>
+            <div class="face edge"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+            <div class="shadow"></div>
+          </div>
+        </div>
+        <div class="views" role="group" aria-label="Номыг харах тал">
+          <button class="chip" data-v="front" aria-pressed="true">Урд</button>
+          <button class="chip" data-v="spine" aria-pressed="false">Нуруу</button>
+          <button class="chip" data-v="back" aria-pressed="false">Ар</button>
+        </div>
+        <p class="hint">Чирж эргүүлнэ</p>
+      </div>
+
+      <div>
+        <div class="kicker">100×100 · I дэвтэр</div>
+        <div class="btitle">Математикийн тестүүд</div>
+        <div class="meta">
+          <span><strong>12</strong> бүлэг сэдэв</span>
+          <span><strong>—</strong> тест</span>
+          <span><strong>—</strong> бодлого</span>
+          <span>Улаанбаатар, 2026</span>
+        </div>
+
+        <div class="toc">
+          <div class="toc-head"><span>Номын агуулга</span><span>Бүлэг бүрийг нээж үзэх</span></div>
+          <div id="toc"></div>
+        </div>
+
+        <div class="price">
+          <span class="amt">30 000₮</span>
+          <button class="btn primary">Худалдаж авах</button>
+          <button class="btn ghost" onclick="document.getElementById('b').scrollIntoView({behavior:'smooth'})">Нэг бодлого бодож үз</button>
+        </div>
+        <p class="free">Агуулга, жишээ бодлого, бодолтыг нэвтрэхгүйгээр үзнэ. Төлбөр нь бодох эрхэнд.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= B ================= -->
+  <section class="variant" id="b">
+    <div class="vlabel"><b>B</b><span>Номоос нэг бодит бодлого — нэвтрэхгүйгээр</span><em>Санал: A-тай хамт</em></div>
+    <div class="grid2">
+      <div>
+        <div class="side-book"><img src="img/100x100-front.jpg" alt=""><div><div class="kicker">100×100 · I дэвтэр</div><div style="font-size:14px;color:var(--ink-dim)">Өндөр зэргийн тэгшитгэл · 1-р бодлого</div></div></div>
+        <div class="problem">
+          <div class="pmeta"><span class="tag">Баталгаажсан</span><span>Хариугаа сонго</span></div>
+          <div class="stmt">$(x+1)^4=16$ тэгшитгэлийг бод.</div>
+          <div class="choices" id="choices"></div>
+          <div class="status" id="status" aria-live="polite"></div>
+          <dl class="ledger" id="ledger" hidden>
+            <dt>Анхны хариу</dt><dd id="lg-first">—</dd>
+            <dt>Дахин оролдлого</dt><dd id="lg-retry">—</dd>
+            <dt>Бодолт үзсэн</dt><dd id="lg-sol">Үгүй</dd>
+          </dl>
+          <div class="solution" id="solution">
+            <strong>Бодолт</strong>
+            <ol>
+              <li>$16=2^4$ тул $(x+1)^4=2^4$.</li>
+              <li>Зэрэг тэгш тул $x+1=2$ эсвэл $x+1=-2$.</li>
+              <li>$x=1$ эсвэл $x=-3$. Хариу: <strong>D</strong>.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="align-self:start">
+        <strong>Энэ хэсэг философиг өөрөө харуулна.</strong>
+        <ul style="margin:8px 0 0;padding-left:18px">
+          <li>Анхны хариу хадгалагдана, дараагийн оролдлого түүнийг дарахгүй.</li>
+          <li>Нэг удаа алдвал дахин оролдоно. Хоёр удаа алдвал л бодолт нээгдэнэ.</li>
+          <li>Бодолт үзсэн нь тусад нь тэмдэглэгдэнэ — «сурсан» гэж тооцохгүй.</li>
+        </ul>
+        <p style="margin:10px 0 0">Энэ нь вэбийн бодит логиктой ижил (анхны хариу өөрчлөгдөшгүй, тусламж тусдаа). Зочин юу худалдаж авахаа мэдэрнэ.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= C ================= -->
+  <section class="variant" id="c">
+    <div class="vlabel"><b>C</b><span>Бодлогын тор — номын хэмжээ нэг харцаар</span><em>Санал: дараа, бодит тоотой болохоор</em></div>
+    <div class="lattice" id="lattice"></div>
+    <div class="legend"><span><i style="background:var(--book)"></i>Бие даан зөв</span><span><i style="background:#B79AC9"></i>Оролдсон</span><span><i style="background:#E4D9EC"></i>Эхлээгүй</span></div>
+    <p class="note" style="margin-top:14px">Зочинд: нүд бүр нэг бодлого — номын бодит хэмжээ. Нэвтэрсэн сурагчид: өөрийн явцын газрын зураг. Энд харуулсан явц нь жишээ.</p>
+  </section>
+
+  <section class="verdict">
+    <h1 style="font-size:18px">Харьцуулалт</h1>
+    <table>
+      <tr><th>Хувилбар</th><th>Зочинд юу өгнө</th><th>Шаардах зүйл</th></tr>
+      <tr><td><strong>A</strong> 3D ном + агуулга</td><td>Юу авах вэ — бүлэг, тоо, үнэ</td><td>Бодит бүлэг/тестийн тоо (прод)</td></tr>
+      <tr><td><strong>B</strong> Нэг бодлого</td><td>Яаж суралцах вэ — мэдрэмж</td><td>Нийтэд нээх бодлогын сонголт</td></tr>
+      <tr><td><strong>C</strong> Бодлогын тор</td><td>Хэр их вэ — хэмжээ, явц</td><td>Бодит тоо + сурагчийн явцын API</td></tr>
+    </table>
+  </section>
+</div>
+
+<script>
+  // ---------- агуулга ----------
+  const TOPICS = ["Тоо тоолол","Рациональ тэгшитгэл","Рациональ тэнцэтгэл биш","Модультай тэгшитгэл","Модультай тэнцэтгэл биш","Иррациональ тэгшитгэл","Иррациональ тэнцэтгэл биш","Илтгэгч тэгшитгэл","Илтгэгч тэнцэтгэл биш","Логарифм илэрхийлэл","Логарифм тэгшитгэл","Логарифм тэнцэтгэл биш"];
+  const SAMPLE = [32,28,24,26,22,25,20,27,23,18,26,21]; // жишээ тоо
+  const chev = '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>';
+  document.getElementById("toc").innerHTML = TOPICS.map((t, i) => `
+    <details><summary><span class="num">${String(i + 1).padStart(2, "0")}</span><span>${t}</span><span class="cnt">${SAMPLE[i]} бодлого</span>${chev}</summary>
+    <div class="inner">Тест, бодлогын жагсаалт, жишээ нэг бодлого бодолттойгоо. <a href="#b">Жишээ бодлого үзэх</a></div></details>`).join("");
+
+  // ---------- тор ----------
+  document.getElementById("lattice").innerHTML = TOPICS.map((t, i) => {
+    const n = SAMPLE[i], done = Math.round(n * [.8,.6,.4,.7,.3,.2,.1,.5,.2,0,.1,0][i]), seen = Math.round(n * .15);
+    const cells = Array.from({ length: n }, (_, k) => `<span class="cell ${k < done ? "done" : k < done + seen ? "seen" : ""}" title="${t} · ${k + 1}"></span>`).join("");
+    return `<div class="row"><span>${t}</span><span class="cells">${cells}</span><span class="c">${n}</span></div>`;
+  }).join("");
+
+  // ---------- 3D ном ----------
+  const book = document.getElementById("book"), stage = document.getElementById("stage");
+  const VIEWS = { front: [-8, -28], spine: [-6, 62], back: [-8, 152] };
+  let rx = -8, ry = -28;
+  const apply = () => { book.style.setProperty("--rx", rx + "deg"); book.style.setProperty("--ry", ry + "deg"); };
+  document.querySelectorAll(".chip[data-v]").forEach(b => b.onclick = () => {
+    [rx, ry] = VIEWS[b.dataset.v]; apply();
+    document.querySelectorAll(".chip[data-v]").forEach(c => c.setAttribute("aria-pressed", String(c === b)));
+  });
+  let drag = null;
+  stage.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, rx, ry }; book.classList.add("dragging"); stage.setPointerCapture(e.pointerId); });
+  stage.addEventListener("pointermove", e => { if (!drag) return; ry = drag.ry + (e.clientX - drag.x) * 0.5; rx = Math.max(-35, Math.min(35, drag.rx - (e.clientY - drag.y) * 0.3)); apply(); });
+  const end = () => { drag = null; book.classList.remove("dragging"); };
+  stage.addEventListener("pointerup", end); stage.addEventListener("pointercancel", end);
+  apply();
+
+  // ---------- бодлого ----------
+  const CHOICES = [["A","$1$"],["B","$3$"],["C","$-5;\\,3$"],["D","$-3;\\,1$"],["E","$-3$"]], RIGHT = "D";
+  let tries = 0, first = null;
+  const box = document.getElementById("choices"), status = document.getElementById("status");
+  box.innerHTML = CHOICES.map(([l, t]) => `<button class="choice" data-l="${l}"><b>${l}</b><span>${t}</span></button>`).join("");
+  box.addEventListener("click", e => {
+    const b = e.target.closest(".choice"); if (!b || b.disabled) return;
+    const l = b.dataset.l, ok = l === RIGHT; tries++;
+    document.getElementById("ledger").hidden = false;
+    if (first === null) { first = l; document.getElementById("lg-first").textContent = `${l} — ${ok ? "зөв" : "буруу"} (өөрчлөгдөхгүй)`; }
+    else document.getElementById("lg-retry").textContent = `${l} — ${ok ? "зөв" : "буруу"}`;
+    b.classList.add(ok ? "ok" : "bad"); b.disabled = true;
+    if (ok) { status.textContent = tries === 1 ? "Зөв. Анхны хариугаар бие даан бодсон." : "Зөв. Гэхдээ анхны хариу буруу байсан тул тусдаа тэмдэглэгдэнэ."; box.querySelectorAll(".choice").forEach(c => c.disabled = true); }
+    else if (tries === 1) status.textContent = "Буруу. Дахин нэг оролдоорой — бодолт хараахан нээгдээгүй.";
+    else { status.innerHTML = 'Хоёр удаа алдлаа. <button class="chip" id="showsol">Бодолт харах</button>';
+      document.getElementById("showsol").onclick = () => { document.getElementById("solution").classList.add("show"); document.getElementById("lg-sol").textContent = "Тийм — «сурсан» гэж тооцохгүй"; box.querySelectorAll(".choice").forEach(c => c.disabled = true); }; }
+  });
+
+  window.addEventListener("load", () => renderMathInElement(document.body, { delimiters: [{ left: "$", right: "$", display: false }] }));
+</script>
+</body>
+</html>
