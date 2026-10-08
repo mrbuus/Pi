@@ -1,0 +1,466 @@
+{
+  "date": "2026-10-06T10:37:28.911Z",
+  "scope": "isolated-synthetic-Chrome-file-prototype",
+  "passed": 90,
+  "failed": 0,
+  "htmlSha256": "dd4b0cd8018e26ee88af8a318f7222892f487a22355123c3801459173a72c31c",
+  "dataSha256": "7bb47b26395230d281be7325ba818b003637641b18593d4ae18d22797f30c5c8",
+  "tests": [
+    {
+      "name": "Эх 50 бодлого, тусдаа 60 жишээ; зөв түлхүүр ба бүх хариуны хэлбэр",
+      "status": "PASS",
+      "detail": "{\"book\":50,\"generated\":60,\"counts\":{\"choice\":52,\"blanks\":4,\"roots\":42,\"none\":6,\"scalar\":6}}"
+    },
+    {
+      "name": "Урсгал 5 · class · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":11,\"wrong\":4,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":15,\"attempted\":15},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · class · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · class · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":10,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · class · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":15,\"total\":15,\"attempted\":15},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · class · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":0,\"missing\":8,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":7},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · class · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":15,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · class · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · makeup · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":11,\"wrong\":4,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":15,\"attempted\":15},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · makeup · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · makeup · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":10,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · makeup · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":15,\"total\":15,\"attempted\":15},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · makeup · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":0,\"missing\":8,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":7},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · makeup · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":15,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · makeup · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · online · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":11,\"wrong\":4,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":15,\"attempted\":15},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · online · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · online · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":10,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · online · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":15,\"total\":15,\"attempted\":15},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · online · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":0,\"missing\":8,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":7},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · online · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":15,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · online · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · review · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":2,\"wrong\":1,\"missing\":0,\"assisted\":0,\"guess\":1,\"total\":3,\"attempted\":3},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · review · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":3,\"attempted\":3},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · review · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":1,\"wrong\":2,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":3,\"attempted\":3},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · review · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":3,\"total\":3,\"attempted\":3},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · review · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":1,\"wrong\":0,\"missing\":2,\"assisted\":0,\"guess\":0,\"total\":3,\"attempted\":1},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · review · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":0,\"missing\":0,\"assisted\":3,\"guess\":0,\"total\":3,\"attempted\":3},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · review · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":3,\"attempted\":3},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · weekly · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":11,\"wrong\":4,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":15,\"attempted\":15},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · weekly · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · weekly · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":10,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · weekly · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":15,\"total\":15,\"attempted\":15},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · weekly · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":0,\"missing\":8,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":7},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · weekly · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":15,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 5 · weekly · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":15,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":15,\"attempted\":15},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · class · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":3,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":10,\"attempted\":10},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · class · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · class · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":7,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · class · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":10,\"total\":10,\"attempted\":10},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · class · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":0,\"missing\":5,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":5},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · class · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":10,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · class · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"paper-backfill\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · makeup · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":3,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":10,\"attempted\":10},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · makeup · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · makeup · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":7,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · makeup · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":10,\"total\":10,\"attempted\":10},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · makeup · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":0,\"missing\":5,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":5},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · makeup · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":10,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · makeup · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"makeup-web\",\"attendance\":\"өвчтэй\",\"theory\":true,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · online · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":3,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":10,\"attempted\":10},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · online · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · online · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":7,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · online · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":10,\"total\":10,\"attempted\":10},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · online · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":0,\"missing\":5,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":5},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · online · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":10,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · online · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"selfstudy-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · review · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":1,\"wrong\":1,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":2,\"attempted\":2},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · review · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":2,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":2,\"attempted\":2},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · review · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":0,\"wrong\":2,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":2,\"attempted\":2},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · review · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":2,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":2,\"total\":2,\"attempted\":2},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · review · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":1,\"wrong\":0,\"missing\":1,\"assisted\":0,\"guess\":0,\"total\":2,\"attempted\":1},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · review · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":2,\"wrong\":0,\"missing\":0,\"assisted\":2,\"guess\":0,\"total\":2,\"attempted\":2},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · review · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":2,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":2,\"attempted\":2},\"origin\":\"review-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · weekly · mixed",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":7,\"wrong\":3,\"missing\":0,\"assisted\":1,\"guess\":2,\"total\":10,\"attempted\":10},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · weekly · strong",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · weekly · struggle",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":3,\"wrong\":7,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · weekly · guess",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":10,\"total\":10,\"attempted\":10},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · weekly · partial",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":5,\"wrong\":0,\"missing\":5,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":5},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · weekly · helped",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":10,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Урсгал 9 · weekly · slow",
+      "status": "PASS",
+      "detail": "{\"first\":{\"correct\":10,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":10,\"attempted\":10},\"origin\":\"exam-web\",\"attendance\":\"ирсэн\",\"theory\":false,\"grade\":null,\"fixture\":true}"
+    },
+    {
+      "name": "Нөхөлтийн онолын шаардлага, ирц өөрчлөгдөхгүй",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "A/B хүрээний жижиг сонголт; эхэлсний дараа түгжигдэнэ",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Анхны хариу immutable; давтан тусламж ба бодолтын түүх тусдаа",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "9A/B-ийн нүд; дутуу нь wrong биш; буруу тэмдэг хүчингүй",
+      "status": "PASS",
+      "detail": "{\"incomplete\":{\"outcome\":\"incomplete\",\"correct\":null},\"invalid\":{\"outcome\":\"invalid\",\"correct\":null},\"keys\":{\"a\":1,\"b\":1,\"c\":1,\"d\":2,\"e\":4,\"f\":3,\"g\":1}}"
+    },
+    {
+      "name": "Хамгаалалттай тоо/шийдийн оролт; eval хэрэглэхгүй; дараалал, бутархай",
+      "status": "PASS",
+      "detail": "{\"reverse\":{\"outcome\":\"correct\",\"correct\":true},\"bad\":{\"outcome\":\"invalid\",\"correct\":null},\"empty\":{\"outcome\":\"notdone\",\"correct\":null},\"zero\":{\"outcome\":\"wrong\",\"correct\":false}}"
+    },
+    {
+      "name": "Материал v1→буцаасан→v2; багшийн тоо, хувилбар; parent буцаасныг харна",
+      "status": "PASS",
+      "detail": "{\"m\":{\"version\":2,\"pages\":5,\"status\":\"илгээсэн\",\"purpose\":\"HOMEWORK\",\"submittedAt\":\"2026-10-06T10:37:24.274Z\"},\"h\":[{\"version\":1,\"pages\":5,\"status\":\"буцаасан\",\"purpose\":\"HOMEWORK\",\"submittedAt\":\"2026-10-06T10:37:23.891Z\"}],\"g\":null,\"gh\":[{\"solved\":8,\"materialVersion\":1,\"at\":\"2026-10-06T10:37:24.107Z\",\"synthetic\":true}]}"
+    },
+    {
+      "name": "Шинэ review proposal өөрөө эхлэхгүй; A/B reserved; stock shortage",
+      "status": "PASS",
+      "detail": "{\"count\":30,\"available\":30}"
+    },
+    {
+      "name": "Хуучин A-г дахин эхлэхэд өмнөх review хариу үлдэхгүй; archive үлдэнэ",
+      "status": "PASS",
+      "detail": "{\"drafts\":[\"\",\"\",\"\"],\"archives\":1}"
+    },
+    {
+      "name": "Эхний мэдээлэлгүй алдааны сан хоосон; scope өргөсгөхгүй",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Шинэ probe/delayed өмнөх session/sourceID давхардахгүй; дата өдөр тусдаа",
+      "status": "PASS",
+      "detail": "{\"ids\":[\"GEN-9-3-2\",\"GEN-9-4-10\",\"GEN-9-0-3\"],\"day\":\"2026-10-09\",\"original\":\"2026-10-06\",\"probe\":\"2026-10-06\"}"
+    },
+    {
+      "name": "Weekly нээгдээгүй/хаагдсан submission; off-stage timeout; malformed хадгалагдана",
+      "status": "PASS",
+      "detail": "{\"status\":\"timeout-modeled\",\"missing\":10}"
+    },
+    {
+      "name": "Reload ба зам солих тусгаарлалт; санал local хадгална",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Эрх хаалттай үед оролдлого эхлэхгүй; draft илгээхгүй",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Суурийн 3 жишээг UI-аас нээнэ; үндсэн A-ийн хүрээ, ирцийг өөрчлөхгүй",
+      "status": "PASS",
+      "detail": "{\"ids\":[\"GEN-5-0-2\",\"GEN-5-1-2\",\"GEN-5-2-2\"],\"summary\":{\"correct\":3,\"wrong\":0,\"missing\":0,\"assisted\":0,\"guess\":0,\"total\":3,\"attempted\":3},\"origin\":\"foundation-web\",\"scope\":[\"100V3-TEG-9-A-01\",\"100V3-TEG-9-A-02\",\"100V3-TEG-9-A-03\",\"100V3-TEG-9-A-04\",\"100V3-TEG-9-A-05\",\"100V3-TEG-9-A-06\",\"100V3-TEG-9-A-07\",\"100V3-TEG-9-A-08\",\"100V3-TEG-9-A-09\",\"100V3-TEG-9-A-10\"],\"attendance\":\"өвчтэй\"}"
+    },
+    {
+      "name": "Бүртгэлийн засвар attemptId-д хамаарна; дараагийн буруу оролдлого алдааны санд үлдэнэ",
+      "status": "PASS",
+      "detail": "{\"p\":{\"factor\":2,\"zero\":2},\"ids\":[\"100V3-TEG-5-A-01\"],\"correctedId\":\"5_class-2-100V3-TEG-5-A-01\",\"newId\":\"5_class-10-100V3-TEG-5-A-01\"}"
+    },
+    {
+      "name": "Хугацааны багцад хүрэлцэх шинэ сангүйг ил тод мэдэгдэнэ",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "60 нөхцөлийн монгол тайлбар; зам, төлөв, нэрээр шүүнэ",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Mobile 320/390px; урт MathML, scaffold, үр дүн; хуудас overflow үгүй",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "JavaScript алдаа, гадаад API/сүлжээний хүсэлтгүй",
+      "status": "PASS",
+      "detail": "pageerror=0; external requests=0"
+    }
+  ],
+  "limits": [
+    "No production changes or real backend tests",
+    "No real pupil/teacher/parent or learning outcomes",
+    "Safari not executed",
+    "All 60 scenario definitions are not automatically claimed passed"
+  ]
+}

@@ -1,0 +1,28 @@
+/* Requirements review only; no production mutation. */
+(function(){
+'use strict';
+const D=window.PI_V1_SCOPE, labels={confirmed:'V1 · тодорхой шаардсан',review:'V1 эсэх · шийдэх',later:'V1-д орохгүй'},esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dialog=document.createElement('dialog');dialog.id='v1ScopeDialog';document.body.append(dialog);
+let filter='confirmed',q='';
+function open(target){
+ dialog.innerHTML=`<div class="v1-head"><div><small>ЭХНИЙ АЖИЛ · ХҮРЭЭ ТОГТООХ</small><h2>${esc(D.title)}</h2></div><button id="v1Close" aria-label="Хаах">×</button></div><div class="v1-body"><p>Таны хэлсэн шаардлагыг хувилбараар ялгасан хяналтын жагсаалт. <b>Баталсан боломж ≠ хэрэгжүүлсэн боломж.</b> Өмнөх диаграммын V1 шошгыг дангаар нь баталгаа гэж тооцоогүй. Доорх алхам, шалгах жишээ нь шаардлагыг тодруулах санал; ажилладаг кодын баталгаа биш.</p><div class="v1-filters">${Object.entries(labels).map(([k,v])=>`<button data-filter="${k}">${v} · ${D.rows.filter(r=>r.status===k).length}</button>`).join('')}<button data-filter="all">Бүгд · ${D.rows.length}</button></div><label class="v1-search">Нэр, эрх, үйлдэл, шийдэх зүйлээс хайх<input id="v1Search" type="search" placeholder="Даалгавар, төлбөр, багш…"></label><p class="v1-hint">Эхлээд тодорхой шаардсан боломжоо уншина → шийдэх хэсгийн хүрээг сонгоно → блок бүрт «Санал / уншсан тэмдэг» үлдээнэ → «Миний тэмдэглэл»-ээс JSON нөөц татна. Санал нийлсэн тэмдэг нь release-ийн төлөвийг автоматаар солихгүй.</p><p id="v1Count" role="status"></p><div id="v1Rows"></div><details class="v1-extra"><summary>Энэ эхний ажил хэзээ дууссан гэж үзэх вэ?</summary><ol><li>V1-д оруулах боломж бүрийн хэрэглэгч, үйлдэл, үр дүн, хязгаар ойлгомжтой болсон.</li><li>«V1 эсэх · шийдэх» бүрийг V1 эсвэл дараагийн хувилбарт хуваарилсан.</li><li>Үнэ/гэрээ, эрхийн хүрээ, материал хадгалалт зэрэг нээлттэй шийдвэрийг эзэнтэй, шийдвэртэй болгосон.</li><li>Шалгах жишээг хэрэглэгч хянаж зөвшөөрсөн. Дараа нь архитектурын ажил эхэлнэ.</li></ol><p>Одоогоор энэ ажил хяналтын draft. Бүх алдаа арилсан, бүх scope батлагдсан гэж тэмдэглээгүй.</p></details><details class="v1-extra"><summary>Судалгааны хэрэглээ ба эх сурвалж</summary><p>Moodle-ийн даалгаврын submission/review, quiz-ийн оролдлого, role/context-ийн ялгааг шалгах загвар болгон ашиглав. Эдгээр нь Pi-ийн V1 scope-ийг өөрөө батлах үндэслэл биш. Үндсэн эх сурвалж нь таны өгсөн шаардлага, дотоод материалын өмнөх шинжилгээ.</p><a href="https://docs.moodle.org/502/en/Assignment_activity" target="_blank" rel="noopener">Moodle: даалгавар</a> · <a href="https://docs.moodle.org/502/en/Quiz_activity" target="_blank" rel="noopener">Moodle: тест</a> · <a href="SYSTEM-DESIGN-SOURCE-REVIEW.md">Дотоод эх материалын шинжилгээ</a></details></div>`;
+ dialog.querySelector('#v1Close').onclick=()=>dialog.close();
+ dialog.querySelector('#v1Search').value=q;
+ dialog.querySelector('#v1Search').oninput=e=>{q=e.target.value;draw()};
+ dialog.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;draw()});
+ if(target)filter='all';draw();if(!dialog.open)dialog.showModal();
+ if(target){const el=dialog.querySelector(`[data-card="${target}"]`);if(el){el.open=true;el.scrollIntoView({block:'start'});}}
+}
+function draw(){
+ dialog.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(filter===b.dataset.filter)));
+ const rows=D.rows.filter(r=>(filter==='all'||r.status===filter)&&JSON.stringify(r).toLowerCase().includes(q.toLowerCase()));
+ dialog.querySelector('#v1Count').textContent=`${rows.length} боломж · Дэлгэрүүлэхийн тулд нэр дээр дарна. Төлөв нь өнгөнөөс гадна үгээр бичигдсэн.`;
+ dialog.querySelector('#v1Rows').innerHTML=rows.map(r=>{const review=window.PI_REVIEW.get(r.id);return `<details class="v1-card ${r.status}" data-card="${r.id}"><summary><span class="v1-status">${labels[r.status]}</span><strong>${r.id} · ${esc(r.title)}</strong><small>${esc(r.actor)}${review?' · '+esc(window.PI_REVIEW.states[review.state]):''}</small></summary><div class="v1-detail"><p><b>Яагаад энэ төлөвт байна?</b> ${esc(r.reason)}</p><h3>Үйлдлүүд · дээрээс доош</h3><ol class="v1-flow">${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><h3>Хадгалах мэдээлэл</h3><p>${esc(r.data)}</p><h3>Хязгаар ба анхаарах зүйл</h3><p>${esc(r.limits)}</p><h3>Хүлээн авах шалгуурын санал</h3><ul>${r.checks.map(s=>`<li>${esc(s)}</li>`).join('')}</ul><h3>Шийдэх зүйл</h3><p>${esc(r.decision)}</p><div class="v1-links"><button data-note="${r.id}">Санал / уншсан тэмдэг</button>${r.maps.map(id=>`<button data-map="${id}">Зураглал: ${esc(window.PI_DESIGN.maps.find(m=>m.id===id)?.title||id)}</button>`).join('')}</div></div></details>`}).join('')||'<p>Тохирох боломж алга. Хайлтаа өөрчилнө үү.</p>';
+ dialog.querySelectorAll('[data-note]').forEach(b=>b.onclick=()=>{const r=D.rows.find(r=>r.id===b.dataset.note);window.PI_REVIEW.open(r.id,r.title)});
+ dialog.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{dialog.close();document.dispatchEvent(new CustomEvent('pi-review-jump',{detail:'map:'+b.dataset.map}))});
+}
+document.getElementById('v1Scope').onclick=()=>open();
+// Capture to avoid legacy unknown-ID alert for this dedicated review register.
+document.addEventListener('pi-review-jump',e=>{if(D.rows.some(r=>r.id===e.detail)){e.stopImmediatePropagation();q='';open(e.detail)}},true);
+document.addEventListener('pi-review-change',()=>{if(dialog.open){dialog.querySelectorAll('[data-card]').forEach(el=>{const r=D.rows.find(r=>r.id===el.dataset.card),v=window.PI_REVIEW.get(r.id);el.querySelector('summary small').textContent=r.actor+(v?' · '+window.PI_REVIEW.states[v.state]:'')})}});
+})();

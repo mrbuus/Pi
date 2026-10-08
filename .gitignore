@@ -39,3 +39,9 @@ docs/system-design/private/
 # Хуваарь.xlsx-ийн бүтэн хуулга. Файл өөрөө "Нийтлэх / импортлох өгөгдөл биш"
 # гэж тэмдэглэсэн бөгөөд багшийн нэр, утас агуулна.
 docs/system-design/schedule-data.js
+
+# AI хэрэгслийн автоматаар татдаг skill хуулбар (prisma/nest skills)
+api/.agents/
+api/.claude/
+api/.windsurf/
+api/skills-lock.json

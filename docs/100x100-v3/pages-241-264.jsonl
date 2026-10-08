@@ -1,0 +1,192 @@
+{"page":241,"test":"4-A","timeLimitMin":30,"num":1,"statement":"$2^{2x} - 3 \\cdot 2^x + 2 \\leq 0$ төнцөттэл бишийг бод.","choices":{"A":"]0; 1[","B":"]-\\infty; 0] \\cup [1; \\infty[","C":"[2; 4]","D":"[0; 1]","E":"]-\\infty; 2] \\cup [4; \\infty["}}
+{"page":241,"test":"4-A","timeLimitMin":30,"num":2,"statement":"$(\\frac{1}{5})^{2x-1} + 4 \\cdot (\\frac{1}{5})^x - 1 \\leq 0$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; -1[","B":"]0; \\infty[","C":"[5; \\infty[","D":"шийдгүй","E":"[1; \\infty["}}
+{"page":241,"test":"4-A","timeLimitMin":30,"num":3,"statement":"$3^x - 2 \\cdot 3^x - 3 \\geq 0$ төнцөттэл бишийг бод.","choices":{"A":"[1; \\infty[","B":"[3; \\infty[","C":"]0; \\infty[","D":"]-\\infty; 1]","E":"]0; 1]"}}
+{"page":241,"test":"4-A","timeLimitMin":30,"num":4,"statement":"$9 \\cdot 3^{-2x} > 6 \\cdot 3^{-x} - 1$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; \\infty[","B":"{1}","C":"]-\\infty; 1[","D":"]-\\infty; 1] \\cup [1; \\infty[","E":"]1; \\infty["}}
+{"page":241,"test":"4-A","timeLimitMin":30,"num":5,"statement":"$\\frac{8}{x+1} > 4^x$ төнцөттэл бишийг бод.","choices":{"A":"]1; 2[","B":"]0; 0.5[","C":"]-\\infty; -0.5[ \\cup ]0; 0.5[","D":"]4; 16[","E":"]0; 16["}}
+{"page":241,"test":"4-A","timeLimitMin":30,"num":6,"statement":"$\\sqrt{12 - 2^{x+2}} \\geq 2^{x+1} - 2$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; 1]","B":"]0; 1]","C":"]-\\infty; 1] \\cup [2; \\infty[","D":"]-\\infty; 2[","E":"]-\\infty; 1]"}}
+{"page":242,"test":"4-B","timeLimitMin":50,"num":1,"statement":"$3^{2x} - 4 \\cdot 3^x + 3 < 0$ төнцөттэл бишийг бод.","choices":{"A":"]1; 27[","B":"]-\\infty; 0] \\cup [1; \\infty[","C":"]0; 1[","D":"]0; 1]","E":"]-1; 3["}}
+{"page":242,"test":"4-B","timeLimitMin":50,"num":2,"statement":"$(\\frac{1}{5})^{2x-1} + 2 \\cdot (\\frac{1}{5})^x - 1 \\leq 0$ төнцөттэл бишийг бод.","choices":{"A":"[1; \\infty[","B":"[3; \\infty[","C":"]-\\infty; -1]","D":"шийдгүй","E":"[-1; \\infty["}}
+{"page":242,"test":"4-B","timeLimitMin":50,"num":3,"statement":"$5^x - 3 \\cdot 5^x - 10 \\geq 0$ төнцөттэл бишийг бод.","choices":{"A":"[5; \\infty[","B":"[1; \\infty[","C":"]-\\infty; 2]","D":"]0; 1]","E":"]0; 2]"}}
+{"page":242,"test":"4-B","timeLimitMin":50,"num":4,"statement":"$4 \\cdot 2^{-1x} > 4 \\cdot 2^{-2x} - 1$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; \\infty[","B":"]0.5[","C":"]-\\infty; 0.5[","D":"]-\\infty; 0.5[ \\cup ]0.5; \\infty[","E":"]0.5; \\infty["}}
+{"page":242,"test":"4-B","timeLimitMin":50,"num":5,"statement":"$\\frac{10}{x+5} > 5^x$ төнцөттэл бишийг бод.","choices":{"A":"]-∞; 0[","B":"]-2; 1[","C":"]0; 1[","D":"]-∞; 1[","E":"]-2; 0["}}
+{"page":242,"test":"4-B","timeLimitMin":50,"num":6,"statement":"$\\sqrt{63 - 2 \\cdot 3^{x+2}} \\geq 3^{x+1} - 6$ төнцөттэл бишийг бод.","choices":{"A":"]-∞; 1]","B":"]0; 1]","C":"]-∞; 1] \\cup [3; \\infty[","D":"]-∞; 3[","E":"]-∞; 1]"}}
+{"page":243,"test":"5-A","timeLimitMin":40,"num":1,"statement":"$(2^x - 32)(3^x - 27) < 0$ төнцөттэл бишийг бод.","choices":{"A":"[3; 5]","B":"]-\\infty; 3[","C":"[5; +\\infty[","D":"]-\\infty; 3[\\cup]5; +\\infty[","E":"[3; +\\infty["}}
+{"page":243,"test":"5-A","timeLimitMin":40,"num":2,"statement":"$x \\cdot 2^x + 2^x \\geq 4x + 4$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; -1] \\cup [2; +\\infty[","B":"]-\\infty; -1] \\cup [4; +\\infty[","C":"[-1; 2]","D":"[2; +\\infty[","E":"]-\\infty; -1]"}}
+{"page":243,"test":"5-A","timeLimitMin":40,"num":3,"statement":"$(3^x - 1)(x^2 - 2x - 8) \\geq 0$ төнцөттэл бишийг бод.","choices":{"A":"[-2; +\\infty[","B":"]-\\infty; -2] \\cup [4; +\\infty[","C":"[-2; 0]","D":"[4; +\\infty[","E":"[-2; 0] \\cup [4; +\\infty["}}
+{"page":243,"test":"5-A","timeLimitMin":40,"num":4,"statement":"$4^{x+1} \\cdot x^2 - 4 + 16 \\cdot x^2 - 4^x < 0$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; -0.5[","B":"]-\\infty; 0.5[","C":"]-0.5; +0.5[","D":"]0.5; +\\infty[","E":"±0.5"}}
+{"page":243,"test":"5-A","timeLimitMin":40,"num":5,"statement":"$x \\cdot 2^{|x+2|} - 3x < 2|x+2|^2| - 9$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; -3[ \\cup [-1; 3[","B":"]-3; -1] \\cup [3; +\\infty[","C":"]-3; 3[","D":"]-1; 3[","E":"]-3; -1["}}
+{"page":244,"test":"5-B","timeLimitMin":40,"num":1,"statement":"$(5^x - 25)(3^x - 81) < 0$ төнцөттэл бишийг бод.","choices":{"A":"[2; 4]","B":"]-\\infty; 2[","C":"[4; +\\infty[","D":"]-\\infty; 2[\\cup]4; +\\infty[","E":"[2; +\\infty["}}
+{"page":244,"test":"5-B","timeLimitMin":40,"num":2,"statement":"$x \\cdot 3^x + 3 \\cdot 3^x \\geq 3x + 9$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; -3] \\cup [1; +\\infty[","B":"]-\\infty; -3] \\cup [3; +\\infty[","C":"]-3; 3]","D":"]-\\infty; -3] \\cup [0; +\\infty[","E":"]-3; 1]"}}
+{"page":244,"test":"5-B","timeLimitMin":40,"num":3,"statement":"$(5^x - 1)(x^2 + 2x - 15) \\geq 0$ төнцөттэл бишийг бод.","choices":{"A":"]0; +\\infty[","B":"]-\\infty; -5] \\cup [3; +\\infty[","C":"]-5; 0]","D":"[3; +\\infty[","E":"[3; +\\infty"}}
+{"page":244,"test":"5-B","timeLimitMin":40,"num":4,"statement":"$2^{x+2} \\cdot x^2 - 3 + 12 \\cdot x^2 - 2^x < 0$ төнцөттэл бишийг бод.","choices":{"A":"1.5","B":"]-\\infty; 0.5[","C":"]-0.5; 0.5[","D":"]0.5; +\\infty[","E":"±0.5"}}
+{"page":244,"test":"5-B","timeLimitMin":40,"num":5,"statement":"$x \\cdot 2^{|x+3| - 4x < 2|x+3|^2| - 16$ төнцөттэл бишийг бод.","choices":{"A":"]-5; -1[ \\cup [4; +\\infty[","B":"]-5; -1] \\cup [4; +\\infty[","C":"]-\\infty; -5[ \\cup ]-1; 4[","D":"[4; +\\infty[","E":"]-1; 4["}}
+{"page":245,"test":"6-A","timeLimitMin":40,"num":1,"statement":"$(x + 2)^2 > 1$ төнцөттэл бишийг бод.","choices":{"A":"]-2; -1[\\cup]-1; \\infty[","B":"]-2; -1[","C":"]-2; -1[\\cup ]0; \\infty[","D":"]-2; -1[\\cup [0; \\infty[","E":"]-\\infty; -1[\\cup ]1; \\infty["}}
+{"page":245,"test":"6-A","timeLimitMin":40,"num":2,"statement":"$(x - 1)^{x-2} \\leq 1$ төнцөттэл бишийг бод.","choices":{"A":"]-\\infty; 2[","B":"[1; 2]","C":"]0; 2[","D":"]0; 2","E":"2"}}
+{"page":245,"test":"6-A","timeLimitMin":40,"num":3,"statement":"$(x - 2)^{x-2} > x^2 - 4x + 4$ төнцөттэл бишийг бод.","choices":{"A":"[2; 3[\\cup]4; \\infty[","B":"]2; 3[","C":"]2; 3[","D":"]2; 3[\\cup]4; \\infty[","E":"Энд далга"}}
+{"page":245,"test":"6-A","timeLimitMin":40,"num":4,"statement":"$(x^2 + 1)^{2x-3} < (x^2 + 1)$ төнцөттэл бишийг бод.","choices":{"A":"]-2; \\infty[","B":"]-\\infty; \\infty[","C":"]-\\infty; -2[\\cup ]2; \\infty[","D":"]-2; 0[\\cup ]0; 2[","E":"]-2; 2["}}
+{"page":245,"test":"6-A","timeLimitMin":40,"num":5,"statement":"$(x - 1)^{x-2} < \\sqrt[3]{x - 1}$ төнцөттэл бишийг бод.","choices":{"A":"[2.5; \\infty[","B":"[1; \\infty[","C":"[1; 2.5[","D":"[1; 2[\\cup ]2; 2.5[","E":"[2; 2.5]"}}
+{"page":246,"test":"6-B","timeLimitMin":40,"num":1,"statement":"$(x + 3)^2 < 1$ төнцөттэл бишийг бод.","choices":{"A":"]-2; 0[\\cup ]0; \\infty[","B":"]-2; 0[","C":"]-3; -2[\\cup ]0; \\infty[","D":"]-\\infty; -2[\\cup ]0; \\infty[","E":"]-\\infty; -3[\\cup ]1; \\infty["}}
+{"page":246,"test":"6-B","timeLimitMin":40,"num":2,"statement":"$(x + 2)^{x+1} \\leq 1$ төнцөттэл бишийг бод.","choices":{"A":"-1","B":"]-2; \\infty[","C":"[-2; 0]","D":"[-2; -1]","E":"]-3; -1"}}
+{"page":246,"test":"6-B","timeLimitMin":40,"num":3,"statement":"$(x + 3)^{x+4} > x^2 + 6x + 9$ төнцөттэл бишийг бод.","choices":{"A":"]-3; -2[\\cup ]-2; \\infty[","B":"]-3; -2[","C":"]-2; \\infty[","D":"]-3; -2[","E":"Энд далга"}}
+{"page":246,"test":"6-B","timeLimitMin":40,"num":4,"statement":"$(1 - x^2)^{2x-3} > (1 - x^2)$ төнцөттэл бишийг бод.","choices":{"A":"]-1; 1[","B":"]-1; 0[","C":"]-1; 0[\\cup ]0; 1[","D":"]-\\infty; -1[\\cup ]0; \\infty[","E":"]0; 1["}}
+{"page":246,"test":"6-B","timeLimitMin":40,"num":5,"statement":"$(x + 1)^{x+1} < \\sqrt{x + 1}$ төнцөттэл бишийг бод.","choices":{"A":"]-0.5; 0[","B":"]-1; 0.5[","C":"]0.5; [","D":"]-0.5; 0[","E":"]-1; 0["}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":1,"statement":"$\\frac{2^x < 16}{5^{x+1} > 25}$ төнцөттэл бишийг бод.","choices":{"A":"]-2; 2[","B":"]-2; 1[","C":"[1; 2[","D":"[1; \\infty[","E":"[1; 2]"}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":2,"statement":"$\\left(\\frac{3}{4}\\right)^x = \\frac{9}{16}$ төнцөттэл бишийг бод. \\frac{(0.5)^{x+1} < 2}{\\text{}}","choices":{"A":"[3; \\infty[","B":"]-\\infty; 0.5[\\cup ]3; \\infty[","C":"]-\\infty; 0.5[","D":"]-\\infty; 2[","E":"]3; \\infty["}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":3,"statement":"$9^x \\cdot 2^x < 324$ систем төрүүнтэлгийн бод.","choices":{"A":"]-8; 0[","B":"]-8; 0[\\cup [0; 2[","C":"]-\\infty; 0.5[","D":"]-\\infty; 2[","E":"[1; 2["}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":4,"statement":"$e^{|x-6|} \\geq 1$ төнцөттэл бишийг бод. төнцөттэл бишийг хэлэхтүүдэний тооны нийт байх уу.","choices":{"A":"2","B":"3","C":"4","D":"5","E":"6"}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":5,"statement":"$\\log_3(\\log_2 3 \\cdot \\log_4 4)$ уттагал.","choices":{"A":"-2","B":"-1","C":"-4","D":"-0.5","E":"-0.25"}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":6,"statement":"$\\log_3 3 \\cdot \\log_4 4 \\cdot \\log_5 \\cdots \\log_{15} 16$ уттагал.","choices":{"A":"4","B":"8","C":"16","D":"3","E":"-6"}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":7,"statement":"$\\log_{25} 25 \\cdot \\log_3 \\sqrt{2} \\cdot \\log_{3.5} \\sqrt{7}$ уттагал.","choices":{"A":"1","B":"$\\frac{4}{3}$","C":"$\\frac{8}{3}$","D":"2","E":"$\\frac{5}{3}$"}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":8,"statement":"$\\log_6 3 + \\log_6 72 + \\log_3 7 \\cdot \\log_7 2 + 5^{\\log_5 3}$ уттагал.","choices":{"A":"6","B":"7","C":"8","D":"10","E":"5"}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":9,"statement":"$\\log_7 \\sqrt{5} \\cdot \\log_7 9 \\cdot \\log_3 49 \\cdot \\log_{\\sqrt{3}} 8$ уттагал.","choices":{"A":"0.75","B":"-0.75","C":"1.5","D":"-1.5","E":"-3"}}
+{"page":247,"test":"7-A","timeLimitMin":50,"num":10,"statement":"$(5^{\\log_5 5})^{\\log_5 3}$ уттагал.","choices":{"A":"3","B":"9","C":"25","D":"5","E":"1"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":1,"statement":"$\\frac{2^x > 0.25}{4^x \\leq 64}$ төнцөттэл бишийг бод.","choices":{"A":"]-2; 3[","B":"]-\\infty; -2[\\cup ]3; \\infty[","C":"]-2; 3]","D":"]3; \\infty[","E":"]-\\infty; -2["}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":2,"statement":"$\\left(\\frac{9}{7}\\right)^x = \\frac{7}{5}$ төнцөттэл бишийг бод.","choices":{"A":"6","B":"5","C":"32","D":"10","E":"16"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":3,"statement":"$7^x \\cdot 2^x < 196$ төнцөттэл бишийг бод.","choices":{"A":"]-10; 0[\\cup ]10; \\infty[","B":"]-10; 0[","C":"]-\\infty; -10[\\cup ]0; 2[","D":"]-\\infty; -0.2[","E":"]2; 10["}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":4,"statement":"$\\log_7 64 \\log_2 64 \\log_7 49$ уттагал бол төрүүнтэлгийн нийлбэрийн байх уу.","choices":{"A":"4","B":"8","C":"14","D":"6","E":"28"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":5,"statement":"$\\log_2(\\log_9 9 \\cdot \\log_2 2)$ уттагал.","choices":{"A":"3","B":"7","C":"4","D":"8","E":"1"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":6,"statement":"$\\log_6 4 \\cdot \\log_6 5 \\cdot \\log_6 \\cdots \\log_{16} 15$ уттагал.","choices":{"A":"2","B":"4","C":"0.5","D":"0.25","E":"-2"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":7,"statement":"$\\log_{\\sqrt{7}} 32 \\log_2 \\sqrt{3} \\cdot \\log_{\\sqrt{7}} 11$ уттагал.","choices":{"A":"$\\frac{5}{3}$","B":"2","C":"$\\frac{5}{4}$","D":"8","E":"$\\frac{2}{5}$"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":8,"statement":"$\\log_6 35 - \\log_6 7 + \\log_6 125 \\cdot \\log_6 9 - 6^{\\log_6 2}$ уттагал.","choices":{"A":"6","B":"7","C":"5","D":"10","E":"11"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":9,"statement":"$\\log_6 5 \\cdot \\log_6 8 \\cdot \\log_6 7 \\cdot \\log_8 \\sqrt{3}$ уттагал.","choices":{"A":"0.75","B":"-0.75","C":"1.5","D":"-1.5","E":"-3"}}
+{"page":248,"test":"7-B","timeLimitMin":50,"num":10,"statement":"$(4^{\\log_2 3})^{\\log_2 7}$ уттагал.","choices":{"A":"3","B":"7","C":"4","D":"9","E":"16"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":1,"statement":"$\\log_1 1$ уттагал.","choices":{"A":"1","B":"2","C":"0","D":"0.5","E":"уттагүй"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":2,"statement":"$\\log_3 3$ уттагал.","choices":{"A":"1","B":"3","C":"9","D":"27","E":"6"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":3,"statement":"$\\log_2 64$ уттагал.","choices":{"A":"32","B":"64","C":"5","D":"2^{64}","E":"6"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":4,"statement":"$\\log_4 \\frac{1}{4}$ уттагал.","choices":{"A":"1","B":"3","C":"9","D":"-1","E":"уттагүй"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":5,"statement":"$\\log_1 1$ уттагал.","choices":{"A":"1","B":"0","C":"2","D":"-1","E":"уттагүй"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":6,"statement":"$\\log_9 \\sqrt{6}$ уттагал.","choices":{"A":"6","B":"0.5","C":"1","D":"2","E":"36"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":7,"statement":"$\\log_3 \\frac{1}{243}$ уттагал.","choices":{"A":"-5","B":"-6","C":"5","D":"6","E":"-81"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":8,"statement":"$\\ln e^4$ уттагал.","choices":{"A":"3e","B":"e","C":"3","D":"e^3","E":"1"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":9,"statement":"$\\log_{25} 5$ уттагал.","choices":{"A":"5","B":"2","C":"0.2","D":"-2","E":"0.5"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":10,"statement":"$\\log_8 8$ уттагал.","choices":{"A":"4","B":"2","C":"0.5","D":"1.5","E":"2.5"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":11,"statement":"$\\log_3 36$ уттагал.","choices":{"A":"6","B":"216","C":"2","D":"0.5","E":"-2"}}
+{"page":249,"test":"1-A","timeLimitMin":20,"num":12,"statement":"$\\log_{\\sqrt{2}} \\sqrt{2}$ уттагал.","choices":{"A":"0.25","B":"-0.25","C":"4","D":"-4","E":"0.5"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":1,"statement":"$\\log_1 1$ уттагал.","choices":{"A":"4","B":"1","C":"0.25","D":"0","E":"уттагүй"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":2,"statement":"$\\log_4 4$ уттагал.","choices":{"A":"1","B":"4","C":"8","D":"16","E":"256"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":3,"statement":"$\\log_3 81$ уттагал.","choices":{"A":"27","B":"4","C":"9","D":"3^{81}","E":"81^3"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":4,"statement":"$\\log_2 \\frac{1}{2}$ уттагал.","choices":{"A":"1","B":"2","C":"4","D":"-1","E":"уттагүй"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":5,"statement":"$\\log_2 2$ уттагал.","choices":{"A":"1","B":"0","C":"2","D":"0.5","E":"уттагүй"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":6,"statement":"$\\log_{11} \\sqrt{11}$ уттагал.","choices":{"A":"11","B":"0.5","C":"1","D":"2","E":"121"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":7,"statement":"$\\log_2 \\frac{1}{512}$ уттагал.","choices":{"A":"-8","B":"-9","C":"-256","D":"8","E":"9"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":8,"statement":"$\\lg 100$ уттагал.","choices":{"A":"2","B":"100","C":"10","D":"1","E":"0"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":9,"statement":"$\\log_{\\sqrt{2}} 8$ уттагал.","choices":{"A":"8","B":"0.125","C":"0.5","D":"-2","E":"2"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":10,"statement":"$\\log_5 125$ уттагал.","choices":{"A":"5","B":"2","C":"1.5","D":"3","E":"2.5"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":11,"statement":"$\\log_1 1000$ уттагал.","choices":{"A":"-3","B":"3","C":"100","D":"10000","E":"-1000"}}
+{"page":250,"test":"1-B","timeLimitMin":20,"num":12,"statement":"$\\log_6 \\sqrt{2}$ уттагал.","choices":{"A":"0.25","B":"-0.25","C":"0.125","D":"-0.125","E":"-8"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":1,"statement":"$\\log_2 2$ уттагал.","choices":{"A":"1","B":"2","C":"0.5","D":"-1","E":"-2"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":2,"statement":"$\\log_3 \\sqrt{27}$ уттагал.","choices":{"A":"3","B":"9","C":"2","D":"1.5","E":"2.5"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":3,"statement":"$\\log_5 5\\sqrt{5}$ уттагал.","choices":{"A":"0.5","B":"5.5","C":"3","D":"1.5","E":"2.5"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":4,"statement":"$\\log_{49} 4$ уттагал.","choices":{"A":"2","B":"3","C":"6","D":"1.5","E":"2 \\cdot 3^{-1}"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":5,"statement":"$\\log_2 (2\\sqrt{8})$ уттагал.","choices":{"A":"4","B":"3","C":"6","D":"5","E":"4.5"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":6,"statement":"$\\log_3 2\\sqrt{2}$ уттагал.","choices":{"A":"-4.5","B":"-0.5","C":"-4.5","D":"0.5","E":"-3"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":7,"statement":"$\\log_{25} \\frac{1}{64}$ уттагал.","choices":{"A":"-9","B":"-9","C":"-4","D":"4","E":"-6"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":8,"statement":"$\\log_1 \\sqrt[3]{125}$ уттагал.","choices":{"A":"0.75","B":"-0.75","C":"1.5","D":"-1.5","E":"-0.5"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":9,"statement":"$\\log_{0.5} \\frac{1}{3\\sqrt{3}}$ уттагал.","choices":{"A":"-$\\frac{2}{3}$","B":"-$\\frac{3}{2}$","C":"$\\frac{2}{3}$","D":"$\\frac{8}{3}$","E":"-6"}}
+{"page":251,"test":"2-A","timeLimitMin":30,"num":10,"statement":"$\\log_7 \\frac{\\sqrt[4]{7}}{49}$ уттагал.","choices":{"A":"$\\frac{1}{6}$","B":"1.5","C":"$\\frac{2}{3}$","D":"$\\frac{5}{3}$","E":"-$\\frac{5}{3}$"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":1,"statement":"$\\log_3 3$ уттагал.","choices":{"A":"1","B":"3","C":"4","D":"0.25","E":"2"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":2,"statement":"$\\log_5 \\sqrt{125}$ уттагал.","choices":{"A":"5","B":"25","C":"3","D":"6","E":"1.5"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":3,"statement":"$\\log_9 9\\sqrt{9}$ уттагал.","choices":{"A":"0.5","B":"9.5","C":"3","D":"1.5","E":"2.5"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":4,"statement":"$\\log_{36} 6$ уттагал.","choices":{"A":"-2","B":"-1","C":"1","D":"0.5","E":"2"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":5,"statement":"$\\log_3 (81\\sqrt{3})$ уттагал.","choices":{"A":"5","B":"6","C":"8","D":"9","E":"10"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":6,"statement":"$\\log_1 5\\sqrt{5}$ уттагал.","choices":{"A":"-3","B":"3","C":"-0.75","D":"0.75","E":"-0.25"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":7,"statement":"$\\log_{28} 8$ уттагал.","choices":{"A":"2","B":"4.5","C":"3","D":"6","E":"4"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":8,"statement":"$\\log_1 \\sqrt{6}$ уттагал.","choices":{"A":"0.75","B":"-0.75","C":"1.5","D":"-1.5","E":"-0.5"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":9,"statement":"$\\log_{0.5} \\frac{1}{25\\sqrt{5}}$ уттагал.","choices":{"A":"-$\\frac{5}{2}$","B":"$\\frac{5}{2}$","C":"-$\\frac{9}{2}$","D":"$\\frac{9}{2}$","E":"2"}}
+{"page":252,"test":"2-B","timeLimitMin":30,"num":10,"statement":"$\\log_6 \\frac{\\sqrt{6}}{216}$ уттагал.","choices":{"A":"2.5","B":"3","C":"-2.5","D":"-3","E":"5"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":1,"statement":"$\\log_2 2 + \\log_3 3$ уттагал.","choices":{"A":"1","B":"6","C":"5","D":"2","E":"4"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":2,"statement":"$\\lg 25 + \\lg 4$ уттагал.","choices":{"A":"1","B":"29","C":"2","D":"10","E":"100"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":3,"statement":"$\\log_7 75 - \\log_3 3$ уттагал.","choices":{"A":"5","B":"72","C":"25","D":"2","E":"3"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":4,"statement":"$\\log_2 2 - \\log_6 \\frac{1}{3}$ уттагал.","choices":{"A":"6","B":"1","C":"-1","D":"1.5","E":"2.5"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":5,"statement":"$\\log_{10} 6 - \\log_{10} 2\\sqrt{3}$ уттагал.","choices":{"A":"3","B":"$\\sqrt{3}$","C":"1","D":"-1","E":"0.5"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":6,"statement":"$\\log_9 12 - \\log_9 15 + \\log_9 20$ уттагал.","choices":{"A":"2","B":"4","C":"$\\frac{1}{2}$","D":"$\\frac{4}{3}$","E":"$\\frac{1}{8}$"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":7,"statement":"$\\log_5 39 - \\log_5 13 - \\log_5 24$ уттагал.","choices":{"A":"3","B":"4","C":"-3","D":"-4","E":"0.25"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":8,"statement":"$\\log_5 \\frac{1}{3} + \\log_5 150 + \\log_5 2.5$ уттагал.","choices":{"A":"3","B":"5","C":"-3","D":"-5","E":"25"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":9,"statement":"$\\log_2 \\sqrt{3} + 0.5\\log_2 \\frac{4}{5}$ уттагал.","choices":{"A":"2","B":"4","C":"1","D":"-2","E":"-1"}}
+{"page":253,"test":"3-A","timeLimitMin":30,"num":10,"statement":"$\\log_{25} 12 - \\log_9 9$ уттагал.","choices":{"A":"3","B":"4","C":"8","D":"16","E":"2"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":1,"statement":"$\\log_{36} 2 + \\log_{36} 13$ уттагал.","choices":{"A":"1","B":"15","C":"26","D":"0","E":"2"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":2,"statement":"$\\log_4 4 + \\log_4 36$ уттагал.","choices":{"A":"40","B":"2","C":"12","D":"1","E":"144"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":3,"statement":"$\\log_6 15 - \\log_6 30$ уттагал.","choices":{"A":"-15","B":"-2","C":"1","D":"-1","E":"0.5"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":4,"statement":"$\\log_3 7 - \\log_3 \\frac{7}{5}$ уттагал.","choices":{"A":"9","B":"1","C":"-1","D":"2","E":"-2"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":5,"statement":"$\\log_9 7\\sqrt{2} - \\log_9 14$ уттагал.","choices":{"A":"2","B":"$\\sqrt{2}$","C":"-1","D":"1","E":"0.5"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":6,"statement":"$\\log_9 15 + \\log_9 18 - \\log_9 10$ уттагал.","choices":{"A":"3","B":"2","C":"1","D":"0.5","E":"1.5"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":7,"statement":"$\\log_9 91 - \\log_9 13 - \\log_9 3.5$ уттагал.","choices":{"A":"0.25","B":"2","C":"0.1","D":"0.5","E":"-1"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":8,"statement":"$\\log_6 34 - \\log_6 17 + \\log_6 18$ уттагал.","choices":{"A":"3","B":"2","C":"1","D":"0.5","E":"1.5"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":9,"statement":"$\\log_2 \\sqrt{5} + 0.5\\log_2 1.4$ уттагал.","choices":{"A":"2","B":"0.5","C":"-1","D":"-0.5","E":"1"}}
+{"page":254,"test":"3-B","timeLimitMin":30,"num":10,"statement":"$\\log_9 12 - \\log_9 163^2$ уттагал.","choices":{"A":"3","B":"9","C":"1","D":"2","E":"4"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":1,"statement":"$\\log_9 (\\log_9 27)$ уттагал.","choices":{"A":"3","B":"-3","C":"1","D":"-1","E":"-27"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":2,"statement":"$\\log_2 (\\log_5 \\sqrt{5})$ уттагал.","choices":{"A":"8","B":"-8","C":"3","D":"-3","E":"0.125"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":3,"statement":"$\\log_3 (3\\log_8 8)$ уттагал.","choices":{"A":"1","B":"9","C":"27","D":"3","E":"2"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":4,"statement":"$\\log_4 (\\log_{16} 256) + \\log_4 2$ уттагал.","choices":{"A":"1","B":"2","C":"4","D":"0","E":"-2"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":5,"statement":"$\\log_9 \\log_4 (\\sqrt[4]{4})$ уттагал.","choices":{"A":"-0.5","B":"2","C":"-2","D":"0.5","E":"1"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":6,"statement":"$\\log_2 \\log_6 9$ уттагал.","choices":{"A":"1","B":"2","C":"4","D":"8","E":"0"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":7,"statement":"$\\log_{16} \\log_2 81$ уттагал.","choices":{"A":"1","B":"2","C":"-1","D":"0.5","E":"-2"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":8,"statement":"$\\log_{27} \\log_3 \\sqrt[4]{\\sqrt{3}}$ уттагал.","choices":{"A":"1","B":"-$\\frac{1}{3}$","C":"-$\\frac{2}{3}$","D":"$\\frac{1}{5}$","E":"$\\frac{1}{3}$"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":9,"statement":"$\\log_\\sqrt[5]{16} 9$ уттагал.","choices":{"A":"2","B":"1.5","C":"4","D":"-2","E":"-4"}}
+{"page":255,"test":"4-A","timeLimitMin":30,"num":10,"statement":"$\\log_{\\sqrt{9}+2} (\\sqrt{5} - 2)$ уттагал.","choices":{"A":"-2","B":"-1","C":"2","D":"1","E":"0.5"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":1,"statement":"$\\log_9 (\\log_9 125)$ уттагал.","choices":{"A":"3","B":"-3","C":"1","D":"-1","E":"-5"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":2,"statement":"$\\log_4 (\\log_3 \\sqrt{3})$ уттагал.","choices":{"A":"1","B":"2","C":"-1","D":"0.5","E":"2"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":3,"statement":"$\\log_3 (3\\log_8 27)$ уттагал.","choices":{"A":"1","B":"9","C":"27","D":"3","E":"2"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":4,"statement":"$\\log_2 (\\log_4 16) + \\log_5 2$ уттагал.","choices":{"A":"1","B":"2","C":"4","D":"0","E":"3"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":5,"statement":"$\\log_{25} \\log_4 (\\sqrt{9})$ уттагал.","choices":{"A":"-0.5","B":"2","C":"-2","D":"0.5","E":"1"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":6,"statement":"$\\log_2 \\log_6 0.25$ уттагал.","choices":{"A":"1","B":"2","C":"-2","D":"-1","E":"0.5"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":7,"statement":"$\\log_3 \\log_{25} 125$ уттагал.","choices":{"A":"1","B":"2","C":"-2","D":"0.5","E":"-1"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":8,"statement":"$\\log_4 \\log_4 \\sqrt{2}$ уттагал.","choices":{"A":"1","B":"-2","C":"2","D":"-3","E":"0.5"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":9,"statement":"$\\log_\\sqrt{16} \\frac{9}{16}$ уттагал.","choices":{"A":"2","B":"1.5","C":"4","D":"-2","E":"-4"}}
+{"page":256,"test":"4-B","timeLimitMin":30,"num":10,"statement":"$\\log_{\\sqrt{9}+1} (\\sqrt{2} + 1)$ уттагал.","choices":{"A":"-2","B":"-1","C":"-0.5","D":"1","E":"2"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":1,"statement":"$\\frac{\\log_9 81}{\\log_9 9}$ уттагал.","choices":{"A":"9","B":"2.5","C":"3","D":"1.5","E":"2"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":2,"statement":"$\\frac{\\log_3 8}{\\log_3 16}$ уттагал.","choices":{"A":"0.5","B":"0.75","C":"-2","D":"-0.5","E":"2"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":3,"statement":"$\\frac{\\log_3 36 - \\log_3 12}{\\log_3 9}$ уттагал.","choices":{"A":"0.5","B":"1.5","C":"-0.5","D":"-2","E":"2"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":4,"statement":"$\\frac{\\frac{1}{2}\\log_3 64 - 2\\log_3 2}{\\log_3 2}$ уттагал.","choices":{"A":"2","B":"1","C":"5","D":"4","E":"6"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":5,"statement":"$\\frac{\\log_6 2 + \\log_6 3}{\\log_6 6}$ уттагал.","choices":{"A":"2","B":"1","C":"5","D":"4","E":"6"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":6,"statement":"$\\frac{\\lg 27 + \\lg \\sqrt{6}}{\\lg 2 + 2 \\lg 3}$ уттагал.","choices":{"A":"2","B":"0.5","C":"1.5","D":"3.5","E":"4"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":7,"statement":"$\\frac{\\log_4 81 - \\log_4 3}{\\log_4 90 + \\log_4 0.1}$ уттагал.","choices":{"A":"1","B":"2","C":"-1","D":"0.5","E":"-0.5"}}
+{"page":257,"test":"5-A","timeLimitMin":30,"num":8,"statement":"$\\frac{\\log_5 6 - \\log_5 2}{\\log_5 12}$ уттагал.","choices":{"A":"1","B":"2","C":"-1","D":"0.5","E":"-0.5"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":1,"statement":"$\\frac{\\log_6 64}{\\log_6 8}$ уттагал.","choices":{"A":"3","B":"0.5","C":"1.5","D":"2","E":"8"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":2,"statement":"$\\frac{\\lg 5}{\\lg 25}$ уттагал.","choices":{"A":"-2","B":"2","C":"-0.5","D":"0.5","E":"1"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":3,"statement":"$\\frac{\\log_3 48 - \\log_3 6}{\\log_3 2}$ уттагал.","choices":{"A":"-3","B":"3","C":"-4","D":"4","E":"3.5"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":4,"statement":"$\\frac{\\log_6 12 + 2\\log_6 2}{\\frac{1}{2}\\log_6 27 + 4\\log_6 2}$ уттагал.","choices":{"A":"2","B":"3","C":"1","D":"0","E":"4"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":5,"statement":"$\\frac{\\log_6 4 + \\log_6 2}{\\log_6 8}$ уттагал.","choices":{"A":"2","B":"1","C":"8","D":"6","E":"3"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":6,"statement":"$\\frac{\\log_3 4 + \\log_3 \\sqrt{10}}{\\log_3 20 + 3 \\log_3 2}$ уттагал.","choices":{"A":"2","B":"1.5","C":"0.5","D":"1","E":"-1"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":7,"statement":"$\\frac{\\log_6 16 - \\log_{2x} 4}{\\log_6 0.8 + \\log_6 10}$ уттагал.","choices":{"A":"1","B":"2","C":"-1","D":"0.5","E":"-0.5"}}
+{"page":258,"test":"5-B","timeLimitMin":30,"num":8,"statement":"$\\frac{\\log_5 10 - \\log_5 2}{\\log_5 20}$ уттагал.","choices":{"A":"2","B":"1","C":"0.5","D":"-1","E":"-2"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":1,"statement":"$3^{\\log_3 10}$ уттагал.","choices":{"A":"$3^{10}$","B":"1","C":"18","D":"54","E":"$18^3$"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":2,"statement":"$8^{\\log_8 3}$ уттагал.","choices":{"A":"8","B":"6","C":"3","D":"9","E":"2"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":3,"statement":"$4^{\\log_2 3}$ уттагал.","choices":{"A":"16","B":"256","C":"4","D":"8","E":"64"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":4,"statement":"$6^{-\\log_6 2}$ уттагал.","choices":{"A":"9","B":"2","C":"-8","D":"-6","E":"0.125"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":5,"statement":"$(-2)^{\\log_{-2} 9}$ уттагал.","choices":{"A":"9","B":"$\\frac{1}{9}$","C":"-9","D":"$-\\frac{1}{9}$","E":"уттагүй"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":6,"statement":"$2^{2 \\log_2 5}$ уттагал.","choices":{"A":"25","B":"10","C":"5","D":"20","E":"32"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":7,"statement":"$(\\frac{1}{9})^{1+\\log_3 18}$ уттагал.","choices":{"A":"2","B":"18","C":"36","D":"6","E":"3"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":8,"statement":"$49^{-0.5\\log_7 14}$ уттагал.","choices":{"A":"7","B":"3.5","C":"2.5","D":"49","E":"14"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":9,"statement":"$8^{\\frac{\\lg 4+\\lg 3}{3}}$ уттагал.","choices":{"A":"3","B":"6","C":"9","D":"12","E":"15"}}
+{"page":261,"test":"6-A","timeLimitMin":30,"num":10,"statement":"$3^{\\log_9 0.25+\\log_9 5}$ уттагал.","choices":{"A":"$\\frac{5}{9}$","B":"$\\frac{9}{5}$","C":"45","D":"-45","E":"3"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":1,"statement":"$5^{\\log_5 10}$ уттагал.","choices":{"A":"$5^{10}$","B":"1","C":"50","D":"10","E":"$10^5$"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":2,"statement":"$3^{\\log_3 \\sqrt{3}}$ уттагал.","choices":{"A":"8","B":"4","C":"16","D":"2","E":"1"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":3,"statement":"$25^{\\log_5 9}$ уттагал.","choices":{"A":"3^5","B":"125","C":"6","D":"9","E":"3"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":4,"statement":"$5^{-\\log_5 3}$ уттагал.","choices":{"A":"-6","B":"9^{-1}","C":"-8","D":"0.125","E":"3"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":5,"statement":"$(-3)^{\\log_{-3} 4}$ уттагал.","choices":{"A":"4","B":"0.25","C":"-4","D":"-0.25","E":"уттагүй"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":6,"statement":"$3^{1+\\log_3 8}$ уттагал.","choices":{"A":"8","B":"3^8","C":"9","D":"24","E":"16"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":7,"statement":"$(\\frac{1}{4})^{1+\\log_2 14}$ уттагал.","choices":{"A":"49","B":"7","C":"28","D":"14","E":"289"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":8,"statement":"$25^{-0.5 \\log_5 10}$ уттагал.","choices":{"A":"2","B":"3","C":"5","D":"10","E":"-10"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":9,"statement":"$9 - 2^{3\\lg 25 / \\lg 5}$ уттагал.","choices":{"A":"1","B":"9","C":"27","D":"24","E":"25"}}
+{"page":262,"test":"6-B","timeLimitMin":30,"num":10,"statement":"$9^{\\log_3 2+\\frac{1}{3} \\lg 25}$ уттагал.","choices":{"A":"$\\frac{2}{9}$","B":"4.5","C":"$\\frac{2}{81}$","D":"40.5","E":"0"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":1,"statement":"$\\log_9 10 - \\lg 5$ уттагал.","choices":{"A":"5","B":"10","C":"1","D":"25","E":"100"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":2,"statement":"$\\log_4 6 \\cdot \\log_{7}16$ уттагал.","choices":{"A":"1","B":"2","C":"16","D":"8","E":"4"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":3,"statement":"$\\log_3 25 - \\log_3 81$ уттагал.","choices":{"A":"6","B":"4","C":"16","D":"8","E":"2"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":4,"statement":"Тэгш өнцөгтийн талууул $\\log_2 64 ба \\log_3 25$ уттагал бол төрүүнтэлгийн нийлбэрийн байх уу.","choices":{"A":"4","B":"8","C":"12","D":"18","E":"36"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":5,"statement":"$\\log_3(\\log_2 3 \\cdot \\log_4 4)$ уттагал.","choices":{"A":"-2","B":"-1","C":"-4","D":"-0.5","E":"-0.25"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":6,"statement":"$\\log_3 3 \\cdot \\log_4 4 \\cdot \\log_5 \\cdots \\log_{15} 16$ уттагал.","choices":{"A":"4","B":"8","C":"16","D":"3","E":"-6"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":7,"statement":"$\\log_{25} 25 \\cdot \\log_3 \\sqrt{2} \\cdot \\log_{3.5} \\sqrt{7}$ уттагал.","choices":{"A":"1","B":"$\\frac{4}{3}$","C":"$\\frac{8}{3}$","D":"2","E":"$\\frac{5}{3}$"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":8,"statement":"$\\log_6 3 + \\log_6 72 + \\log_3 7 \\cdot \\log_7 2 + 5^{\\log_5 3}$ уттагал.","choices":{"A":"6","B":"7","C":"8","D":"10","E":"5"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":9,"statement":"$\\log_7 \\sqrt{5} \\cdot \\log_7 9 \\cdot \\log_3 49 \\cdot \\log_{\\sqrt{3}} 8$ уттагал.","choices":{"A":"0.75","B":"-0.75","C":"1.5","D":"-1.5","E":"-3"}}
+{"page":263,"test":"7-A","timeLimitMin":30,"num":10,"statement":"$(5^{\\log_5 5})^{\\log_5 3}$ уттагал.","choices":{"A":"3","B":"9","C":"25","D":"5","E":"1"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":1,"statement":"$\\log_9 18 - \\log_9 3$ уттагал.","choices":{"A":"1","B":"3","C":"18","D":"9","E":"324"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":2,"statement":"$\\log_5 5 \\cdot \\log_6 32$ уттагал.","choices":{"A":"6","B":"5","C":"32","D":"10","E":"16"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":3,"statement":"$\\log_3 27 - \\log_3 64$ уттагал.","choices":{"A":"6","B":"8","C":"18","D":"3","E":"9"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":4,"statement":"Тэгш өнцөгтийн талууул $\\log_2 64 ба \\log_3 49$ уттагал бол төрүүнтэлгийн нийлбэрийн байх уу.","choices":{"A":"4","B":"8","C":"14","D":"6","E":"28"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":5,"statement":"$\\log_2(\\log_9 9 \\cdot \\log_2 2)$ уттагал.","choices":{"A":"3","B":"7","C":"4","D":"8","E":"1"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":6,"statement":"$\\log_6 4 \\cdot \\log_6 5 \\cdot \\log_6 \\cdots \\log_{16} 15$ уттагал.","choices":{"A":"2","B":"4","C":"0.5","D":"0.25","E":"-2"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":7,"statement":"$\\log_{\\sqrt{7}} 32 \\log_2 \\sqrt{3} \\cdot \\log_{\\sqrt{7}} 11$ уттагал.","choices":{"A":"$\\frac{5}{3}$","B":"2","C":"$\\frac{5}{4}$","D":"8","E":"$\\frac{2}{5}$"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":8,"statement":"$\\log_6 35 - \\log_6 7 + \\log_6 125 \\cdot \\log_6 9 - 6^{\\log_6 2}$ уттагал.","choices":{"A":"6","B":"7","C":"5","D":"10","E":"11"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":9,"statement":"$\\log_6 5 \\cdot \\log_6 8 \\cdot \\log_6 7 \\cdot \\log_8 \\sqrt{3}$ уттагал.","choices":{"A":"0.75","B":"-0.75","C":"1.5","D":"-1.5","E":"-3"}}
+{"page":264,"test":"7-B","timeLimitMin":30,"num":10,"statement":"$(4^{\\log_2 3})^{\\log_2 7}$ уттагал.","choices":{"A":"3","B":"7","C":"4","D":"9","E":"16"}}

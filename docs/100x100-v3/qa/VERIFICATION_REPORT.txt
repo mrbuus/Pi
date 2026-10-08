@@ -1,0 +1,81 @@
+QUALITY GATE VERIFICATION REPORT
+================================================================================
+Date: 2026-08-26
+Task: Verify 105 mathematics problems (pages 291-312) for production database
+Students impacted: 359
+
+VERIFICATION SUMMARY
+================================================================================
+Total records checked: 105
+Status: ALL PASSED
+
+Breakdown by verdict:
+  OK (matches printed page exactly): 105
+  Corrected (differed, fixed): 0  
+  Rejected (unreliable, cannot import): 0
+
+DEFECT CHECKS PERFORMED
+================================================================================
+1. OVERLINE notation on multi-digit unknowns
+   - Checked for lost overlines (e.g., 3KM should be $\\overline{3KM}$)
+   - Status: NO ISSUES FOUND
+   
+2. MONGOLIAN LANGUAGE VALIDATION
+   - Checked for invented/misspelled Mongolian words
+   - Looked for: Цифррүүд ны, ууттаа авч, үлдэгдэлгүйн туулд, etc.
+   - Status: NO INVENTED MONGOLIAN FOUND
+   
+3. MULTIPLICATION SIGN VALIDATION
+   - Verified all multiplication uses \\cdot (only approved operator)
+   - Forbidden: \\bullet, \\times, ×, ∙, •, ·
+   - Status: NO FORBIDDEN SIGNS FOUND (grep count: 0)
+   
+4. LATEX/KATEX SYNTAX
+   - Verified all math notation is KaTeX-safe
+   - Allowed: \\sqrt{}, \\sqrt[3]{}, \\frac{}{}, ^{}, \\pi, \\cdot, \\overline{}, 
+             \\{}, \\}, \\in, \\cup, \\infty, \\le, \\ge, \\ne
+   - Status: ALL COMPLIANT
+
+5. JSON STRUCTURAL VALIDATION
+   - Verified all 105 records are valid JSON
+   - Verified all required fields present (page, test, num, statement, choices, etc.)
+   - Status: ALL VALID
+
+TESTS VERIFIED
+================================================================================
+Test 5-B (page 291): 9 problems ✓
+Test 6-A (pages 292-293): 2 problems ✓
+Test 6-B (pages 293-294): 5 problems ✓
+Test 1-A (pages 294-296): 12 problems ✓
+Test 1-B (pages 296-298): 10 problems ✓
+Test 2-A (pages 298-300): 12 problems ✓
+Test 2-B (pages 300-302): 13 problems ✓
+Test 3-A (pages 302-303): 8 problems ✓
+Test 3-B (pages 303-305): 15 problems ✓
+Test 4-A (pages 305-306): 10 problems ✓
+Test 4-B (pages 311-312): 9 problems ✓
+
+OUTPUT FILE
+================================================================================
+Location: /Users/mr.buus/Intern/Pi.mn/docs/100x100-v3/qa/q12.jsonl
+Format: One JSON object per line (JSONL)
+Records: 105
+Size: Valid and ready for import
+
+VERIFICATION METHODOLOGY
+================================================================================
+1. Extracted 105 candidate records from new-only.jsonl (pages 291-312)
+2. Read PDF pages 291-312 from source document
+3. Performed systematic comparison of each record against printed page
+4. Applied defect detection for known issues from previous passes
+5. Validated all output records against JSON schema
+6. Performed final syntax and structure validation
+
+READINESS FOR PRODUCTION
+================================================================================
+Status: APPROVED FOR IMPORT
+
+All 105 problems have been verified against the source PDF. No corrections
+were necessary. The dataset is ready for import into the production database
+and will be visible to 359 students.
+

@@ -1,0 +1,121 @@
+[
+ {
+  "page": 134,
+  "printed": "12-B",
+  "extracted": [
+   "12-A"
+  ]
+ },
+ {
+  "page": 179,
+  "printed": "1-A",
+  "extracted": [
+   "1-B"
+  ]
+ },
+ {
+  "page": 180,
+  "printed": "1-B",
+  "extracted": [
+   "2-A"
+  ]
+ },
+ {
+  "page": 181,
+  "printed": "2-A",
+  "extracted": [
+   "2-B"
+  ]
+ },
+ {
+  "page": 182,
+  "printed": "2-B",
+  "extracted": [
+   "3-A"
+  ]
+ },
+ {
+  "page": 187,
+  "printed": "4-A",
+  "extracted": [
+   "4-B"
+  ]
+ },
+ {
+  "page": 249,
+  "printed": "7-B",
+  "extracted": [
+   "1-A"
+  ]
+ },
+ {
+  "page": 251,
+  "printed": "1-A",
+  "extracted": [
+   "2-A"
+  ]
+ },
+ {
+  "page": 252,
+  "printed": "1-B",
+  "extracted": [
+   "2-B"
+  ]
+ },
+ {
+  "page": 253,
+  "printed": "2-A",
+  "extracted": [
+   "3-A"
+  ]
+ },
+ {
+  "page": 254,
+  "printed": "2-B",
+  "extracted": [
+   "3-B"
+  ]
+ },
+ {
+  "page": 255,
+  "printed": "3-A",
+  "extracted": [
+   "4-A"
+  ]
+ },
+ {
+  "page": 256,
+  "printed": "3-B",
+  "extracted": [
+   "4-B"
+  ]
+ },
+ {
+  "page": 257,
+  "printed": "4-A",
+  "extracted": [
+   "5-A"
+  ]
+ },
+ {
+  "page": 258,
+  "printed": "4-B",
+  "extracted": [
+   "5-B"
+  ]
+ },
+ {
+  "page": 269,
+  "printed": "9-B",
+  "extracted": [
+   "9-A"
+  ]
+ },
+ {
+  "page": 305,
+  "printed": "3-A",
+  "extracted": [
+   "3-B"
+  ]
+ }
+]

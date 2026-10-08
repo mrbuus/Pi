@@ -1,0 +1,116 @@
+{"page":169,"test":"4-B","timeLimitMin":50,"num":1,"statement":"$|x - 4| \\leq 2x - 2$ тэнцэтгэл бишийн бод.","choices":{"A":"$[-2;2]$","B":"$[-2;+\\infty[$","C":"$[2;+\\infty[$","D":"$]-\\infty;-2] \\cup [2;+\\infty[$","E":"шийдгүй"}}
+{"page":169,"test":"4-B","timeLimitMin":50,"num":2,"statement":"$|1 - 2x| > x + 4$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-1;5[$","B":"$]-\\infty;-1[ \\cup ]5;+\\infty[$","C":"$]-1;+\\infty[$","D":"$]-\\infty;5[$","E":"$]-\\infty;+\\infty[$"}}
+{"page":169,"test":"4-B","timeLimitMin":50,"num":3,"statement":"$|x - 2| \\leq 1 - 3x$ тэнцэтгэл бишийн ганц сөрөг хамтийн их бүхэл шийдийг ол.","choices":{"A":"-1","B":"-2","C":"0","D":"2","E":"1"}}
+{"page":169,"test":"4-B","timeLimitMin":50,"num":4,"statement":"$2 \\cdot |x - 1| \\leq 6 - x$ тэнцэтгэл бишийн ганц сөрөг хамтийн их шийдэл зав сууръ оршних үү?","choices":{"A":"$[\\frac{1}{2};\\frac{7}{2}]$","B":"$[\\frac{1}{2};\\frac{7}{3}]$","C":"$]3;4[$","D":"$]1;2[$","E":"$]2;\\frac{11}{4}[$"}}
+{"page":169,"test":"4-B","timeLimitMin":50,"num":5,"statement":"$|x^{2} - 4| < 3x$ тэнцэтгэл бишийн шийдийн интервалын уртыг ол.","choices":{"A":"3","B":"2","C":"1","D":"4","E":"5"}}
+{"page":169,"test":"4-B","timeLimitMin":50,"num":6,"statement":"$3x - 2x^{2} \\geq |x|$ тэнцэтгэл бишийн бод.","choices":{"A":"$[0;1]$","B":"$]-\\infty;0] \\cup [1;+\\infty[$","C":"$[1;+\\infty[$","D":"$[1;2]$","E":"$[0;2]$"}}
+{"page":170,"test":"4-B","timeLimitMin":50,"num":7,"statement":"$|x^{2} + 4x + 3| \\leq x + 3$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-3;-2[$","B":"$]-3;-2[$ ","C":"$]-\\infty;-3[ \\cup ]-2;-1[$","D":"$]-\\infty;-3[ \\cup ]-3;-2[ \\cup ]0;[+\\infty[$","E":"$]-\\infty;-2[$"}}
+{"page":170,"test":"4-B","timeLimitMin":50,"num":8,"statement":"$|x^{2} - 2x| \\geq x + 4$ тэнцэтгэл бишийн үл ганц сөрөг бүхэл баягын үү?","choices":{"A":"4","B":"5","C":"6","D":"3","E":"2"}}
+{"page":170,"test":"4-B","timeLimitMin":50,"num":9,"statement":"$x^{2} - 3x + 5 > |x - 8|$ тэнцэтгэл бишийн үл ганц бүхэл тооны үдийг нийлбэрийг ол.","choices":{"A":"","B":"","C":"","D":"","E":""}}
+{"page":170,"test":"4-B","timeLimitMin":50,"num":10,"statement":"$2|x - 2| + x \\leq 5$ тэнцэтгэл бишийн графикийн аргаар бод.","choices":null}
+{"page":171,"test":"5-A","timeLimitMin":40,"num":1,"statement":"$x^{2} - |x| - 2 < 0$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-\\infty;2[$","B":"$]-2;2[$","C":"$]-2;-1[ \\cup ]1;2[$","D":"$]-1;1[$","E":"$]-1;2[$"}}
+{"page":171,"test":"5-A","timeLimitMin":40,"num":2,"statement":"$3|x - 1| > (x - 1)^{2} + 2$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-1;0[$","B":"$]2;3[$","C":"$]1;2[$","D":"$]-\\infty;-1[ \\cup ]1;0[ \\cup ]2;3[$","E":"$]-1;0[ \\cup ]2;3[$"}}
+{"page":171,"test":"5-A","timeLimitMin":40,"num":3,"statement":"$x^{2} - 4x - 2|x - 2| + 1 \\leq 0$ тэнцэтгэл бишийн ганц бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"13","B":"12","C":"15","D":"14","E":"16"}}
+{"page":171,"test":"5-A","timeLimitMin":40,"num":4,"statement":"$\\frac{3}{|x - 1| + 1} > |x - 1| - 1$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-\\infty;-1[ \\cup ]3;+\\infty[$","B":"$]-1;3[$","C":"$]-3;1[$","D":"$]-\\infty;-3[ \\cup ]1;+\\infty[$","E":"шийдгүй"}}
+{"page":172,"test":"5-B","timeLimitMin":40,"num":1,"statement":"$x^{2} - 2|x| - 3 \\leq 0$ тэнцэтгэл бишийн бод.","choices":{"A":"$[3;+\\infty[$","B":"$]-3;-1[ \\cup ]1;3[$","C":"$]-\\infty;-3[ \\cup ]3;+\\infty[$","D":"$]-3;3[$","E":"$[-1;1]$"}}
+{"page":172,"test":"5-B","timeLimitMin":40,"num":2,"statement":"$(x - 2)^{2} + 3 \\leq 4|x - 2|$ тэнцэтгэл бишийн бод.","choices":{"A":"$[-1;1[ \\cup [3;5]$","B":"$]-\\infty;-1[ \\cup [1;3] \\cup [5;+\\infty[$","C":"$[-1;5]$","D":"$[3;5]$","E":"$[1;3]$"}}
+{"page":172,"test":"5-B","timeLimitMin":40,"num":3,"statement":"$x^{2} + 6x - 4|x + 3| - 12 > 0$ тэнцэтгэл бишийн үл ганц бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"0","B":"-42","C":"-45","D":"-55","E":"-49"}}
+{"page":172,"test":"5-B","timeLimitMin":40,"num":4,"statement":"$\\frac{7}{|x + 2| + 3} \\geq |x + 2| - 3$ тэнцэтгэл бишийн бод.","choices":{"A":"$[-2;6]$","B":"$[-6;2]$","C":"$]-\\infty;-6[ \\cup [2;+\\infty[$","D":"$]-\\infty;-2[ \\cup [6;+\\infty[$","E":"шийдгүй"}}
+{"page":173,"test":"5-B","timeLimitMin":40,"num":5,"statement":"$\\frac{3}{|x + 3| - 3} \\leq \\frac{1}{|x + 3| - 1}$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-\\infty;-6[ \\cup ]-4;-2[ \\cup [0;+\\infty[$","B":"$]-4;-3[ \\cup ]-2;0[$","C":"$]-6;-4[ \\cup [0;+\\infty[$","D":"$]-6;-4[ \\cup ]-3[ \\cup [-2;0[$","E":"$]-6;-4[ \\cup ]-3;-2[ \\cup [0;+\\infty[$"}}
+{"page":173,"test":"5-B","timeLimitMin":40,"num":6,"statement":"$\\frac{|8 - x|}{2 - 8} \\leq -1$ тэнцэтгэл бишийн ганц бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"21","B":"32","C":"48","D":"16","E":"27"}}
+{"page":173,"test":"5-B","timeLimitMin":40,"num":7,"statement":"$x^{2} - 4x - 2|x - 2| \\geq 4$ тэнцэтгэл бишийн бод.","choices":{"A":"","B":"","C":"","D":"","E":""}}
+{"page":173,"test":"5-B","timeLimitMin":40,"num":8,"statement":"$(|x^{2} + x| - 2)(|x^{2} + x| + 1) < 24$ тэнцэтгэл бишийн бод.","choices":null}
+{"page":174,"test":"6-A","timeLimitMin":50,"num":1,"statement":"$|x + 1| + |x - 1| \\leq 2$ тэнцэтгэл бишийн бод.","choices":{"A":"±1","B":"$[-1;1]$","C":"$]-\\infty;-1[ \\cup [1;+\\infty[$","D":"шийдгүй","E":"$]-\\infty;+\\infty[$"}}
+{"page":174,"test":"6-A","timeLimitMin":50,"num":2,"statement":"$|x - 1| - 2|x + 3| > x + 7$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-3;+\\infty[$","B":"$]-\\infty;-3[ \\cup ]1;+\\infty[$","C":"шийдгүй","D":"$]-7;-3[$","E":"$]-3;1[$"}}
+{"page":174,"test":"6-A","timeLimitMin":50,"num":3,"statement":"$||x + 3| + |x + 5| \\leq 2 - x$ тэнцэтгэл бишийн бод.","choices":{"A":"$]-\\infty;-10[ \\cup ]-2;+\\infty[$","B":"$[-10;-3]$","C":"$[-10;-2]$","D":"$]-\\infty;-10[$","E":"шийдгүй"}}
+{"page":174,"test":"6-A","timeLimitMin":50,"num":4,"statement":"$||x + 3| + |x| \\leq 1 - x$ тэнцэтгэл бишийн ганц бүхэл бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"-3","B":"-6","C":"-10","D":"-5","E":"-9"}}
+{"page":174,"test":"6-A","timeLimitMin":50,"num":5,"statement":"$3|x - 2| + |5x - 4| \\leq 10$ тэнцэтгэл бишийн ганц бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"2","B":"6","C":"3","D":"5","E":"4"}}
+{"page":175,"test":"6-A","timeLimitMin":50,"num":6,"statement":"$|x + 6| + |2x| \\geq -3x$ тэнцэтгэл бишийн $[-5;-1]$ завсарт оршних бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"-15","B":"-2","C":"-5","D":"-6","E":"-11"}}
+{"page":175,"test":"6-A","timeLimitMin":50,"num":7,"statement":"$|x - 1| + |2 - x| > 3 - x$ тэнцэтгэл бишийн бод.","choices":{"A":"","B":"","C":"","D":"","E":""}}
+{"page":175,"test":"6-A","timeLimitMin":50,"num":8,"statement":"$|x - 2| + 2|x + 1| < 9$ тэнцэтгэл бишийн графикийн аргаар бод.","choices":null}
+{"page":176,"test":"6-B","timeLimitMin":50,"num":1,"statement":"$|x + 2| - |x - 2| \\leq 4$ тэнцэтгэл бишийн бод.","choices":{"A":"±2","B":"$[-2;2]$","C":"$[2;+\\infty[$","D":"шийдгүй","E":"$]-\\infty;-2]$"}}
+{"page":176,"test":"6-B","timeLimitMin":50,"num":2,"statement":"$2|x - 3| + |x + 1| \\leq 3x - 6$ тэнцэтгэл бишийн бод.","choices":{"A":"шийдгүй","B":"$[-1;3]$","C":"$[-1;+\\infty[$","D":"$]-\\infty;-1]$","E":"$[3;+\\infty[$"}}
+{"page":176,"test":"6-B","timeLimitMin":50,"num":3,"statement":"$|x - 4| + |x + 3| \\leq 14 - x$ тэнцэтгэл бишийн бод.","choices":{"A":"$[-13;5]$","B":"$]-\\infty;-13[ \\cup [5;+\\infty[$","C":"$[-13;4]$","D":"$]-\\infty;-13[ \\cup [4;+\\infty[$","E":"$[-13;-3] \\cup [4;5]$"}}
+{"page":176,"test":"6-B","timeLimitMin":50,"num":4,"statement":"$|2x + 8| + |x| < 2 - x$ тэнцэтгэл бишийн ганц бүхэл бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"-7","B":"-12","C":"-4","D":"-8","E":"-10"}}
+{"page":176,"test":"6-B","timeLimitMin":50,"num":5,"statement":"$3|x - 2| + |x - 6| \\leq 8$ тэнцэтгэл бишийн ганц бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"7","B":"5","C":"6","D":"9","E":"10"}}
+{"page":177,"test":"6-B","timeLimitMin":50,"num":6,"statement":"$|x + 4| + |3x| \\leq -4x$ тэнцэтгэл бишийн $[-5;-1]$ завсарт оршних бүхэл шийдүүдийн нийлбэрийг ол.","choices":{"A":"-10","B":"-15","C":"-11","D":"-14","E":"-13"}}
+{"page":177,"test":"6-B","timeLimitMin":50,"num":7,"statement":"$|2x + 3| + |1 - x| > 1 - 2x$ тэнцэтгэл бишийн бод.","choices":{"A":"","B":"","C":"","D":"","E":""}}
+{"page":177,"test":"6-B","timeLimitMin":50,"num":8,"statement":"$|x - 4| + 2|x - 1| < 9$ тэнцэтгэл бишийн графикийн аргаар бод.","choices":null}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":1,"statement":"$\\sqrt{x + 2} = 3$ тэгшитгэлийн бод.","choices":{"A":"4","B":"11","C":"7","D":"1","E":"8"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":2,"statement":"$\\sqrt{3 - x} = 2$ тэгшитгэлийн бод.","choices":{"A":"1","B":"-1","C":"7","D":"-7","E":"2"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":3,"statement":"$\\sqrt{x - 4} = -1$ тэгшитгэлийн бод.","choices":{"A":"3","B":"-5","C":"5","D":"-3","E":"шийдгүй"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":4,"statement":"$\\sqrt[3]{\\frac{x}{3}} = 3$ тэгшитгэлийн бод.","choices":{"A":"-54","B":"0","C":"-6","D":"-9","E":"-18"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":5,"statement":"$\\sqrt{x + 4} = 4$ тэгшитгэлийн бод.","choices":{"A":"12","B":"20","C":"64","D":"68","E":"60"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":6,"statement":"$\\sqrt[3]{2x - 1} = -3$ тэгшитгэлийн бод.","choices":{"A":"шийдгүй","B":"-4","C":"-14","D":"-13","E":"5"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":7,"statement":"$\\sqrt{1 - 2x + 4} = 2$ тэгшитгэлийн бод.","choices":{"A":"-3","B":"-1.5","C":"1.5","D":"-3","E":"шийдгүй"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":8,"statement":"$2\\sqrt{2x + 1} = 6$ тэгшитгэлийн бод.","choices":{"A":"4","B":"2","C":"1","D":"-1","E":"5"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":9,"statement":"$7 - 2\\sqrt{-2x} = 1$ тэгшитгэлийн бод.","choices":{"A":"1","B":"-5","C":"-2","D":"-7","E":"шийдгүй"}}
+{"page":178,"test":"1-A","timeLimitMin":20,"num":10,"statement":"$\\sqrt{\\frac{x - 4}{3x + 1}} = 3$ тэгшитгэлийн бод.","choices":{"A":"2","B":"0.5","C":"-0.5","D":"-2","E":"1"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":1,"statement":"$\\sqrt{x - 5} = 9$ тэгшитгэлийн бод.","choices":{"A":"86","B":"76","C":"23","D":"13","E":"14"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":2,"statement":"$\\sqrt[3]{x - x} = 3$ тэгшитгэлийн бод.","choices":{"A":"5","B":"-2","C":"1","D":"-5","E":"-1"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":3,"statement":"$\\sqrt{x - 3} = -4$ тэгшитгэлийн бод.","choices":{"A":"-19","B":"19","C":"3","D":"-3","E":"шийдгүй"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":4,"statement":"$\\sqrt[3]{2 - \\frac{x}{2}} = 2$ тэгшитгэлийн бод.","choices":{"A":"4","B":"-4","C":"0","D":"-2","E":"2"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":5,"statement":"$\\sqrt{x + 5} = 5$ тэгшитгэлийн бод.","choices":{"A":"20","B":"120","C":"30","D":"130","E":"10"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":6,"statement":"$\\sqrt[3]{3x + 1} = -2$ тэгшитгэлийн бод.","choices":{"A":"-3","B":"3","C":"шийдгүй","D":"-1","E":"1"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":7,"statement":"$\\sqrt[3]{\\sqrt{3} - 2x + 6} = 3$ тэгшитгэлийн бод.","choices":{"A":"3","B":"1","C":"-1","D":"-3","E":"шийдгүй"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":8,"statement":"$3\\sqrt{3x + 1} = 6$ тэгшитгэлийн бод.","choices":{"A":"-1","B":"3","C":"1","D":"-3","E":"2"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":9,"statement":"$5 - 2\\sqrt{-3x} = 1$ тэгшитгэлийн бод.","choices":{"A":"1","B":"3","C":"-3","D":"-1","E":"шийдгүй"}}
+{"page":179,"test":"1-B","timeLimitMin":20,"num":10,"statement":"$\\sqrt{\\frac{x + 5}{4x - 1}} = 2$ тэгшитгэлийн бод.","choices":{"A":"9","B":"3","C":"1","D":"0.6","E":"2"}}
+{"page":180,"test":"2-A","timeLimitMin":20,"num":1,"statement":"$\\sqrt[3]{2x - 6} = \\sqrt{x}$ тэгшитгэлийн бод.","choices":{"A":"2","B":"-2","C":"-6","D":"3","E":"6"}}
+{"page":180,"test":"2-A","timeLimitMin":20,"num":2,"statement":"$2\\sqrt{x} - 5 = \\sqrt{4x} - 7$ тэгшитгэлийн бод.","choices":{"A":"1","B":"-1","C":"2","D":"4","E":"шийдгүй"}}
+{"page":180,"test":"2-A","timeLimitMin":20,"num":3,"statement":"$\\sqrt{x^{2} - 2x} = \\sqrt{x - 2}$ тэгшитгэлийн бод.","choices":{"A":"2","B":"1;2","C":"1","D":"2","E":"шийдгүй"}}
+{"page":180,"test":"2-A","timeLimitMin":20,"num":4,"statement":"$\\sqrt{x^{2} - 6x} = \\sqrt{10 - 3x}$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"3","B":"5","C":"-2","D":"-3","E":"2"}}
+{"page":180,"test":"2-A","timeLimitMin":20,"num":5,"statement":"$\\sqrt{x - 1} \\cdot \\sqrt{x - 3} = \\sqrt{x + 9}$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"5","B":"-1","C":"6","D":"-5","E":"шийдгүй"}}
+{"page":180,"test":"2-A","timeLimitMin":20,"num":6,"statement":"$\\sqrt{x^{2} + 3x + 2} + \\sqrt{x^{2} - 4} = 0$ тэгшитгэлийн бод.","choices":{"A":"-2;-1;2","B":"±2","C":"-2;-1","D":"-2","E":"шийдгүй"}}
+{"page":181,"test":"2-B","timeLimitMin":20,"num":1,"statement":"$\\sqrt[3]{3x - 8} = \\sqrt{x}$ тэгшитгэлийн бод.","choices":{"A":"4","B":"8","C":"-4","D":"2","E":"-2"}}
+{"page":181,"test":"2-B","timeLimitMin":20,"num":2,"statement":"$3\\sqrt{x} + 1 = \\sqrt{2x} - 3$ тэгшитгэлийн бод.","choices":{"A":"4","B":"2","C":"-4","D":"-2","E":"шийдгүй"}}
+{"page":181,"test":"2-B","timeLimitMin":20,"num":3,"statement":"$\\sqrt{x^{2} - 3x} = \\sqrt{x - 3}$ тэгшитгэлийн бод.","choices":{"A":"1","B":"1;3","C":"3","D":"0;3","E":"шийдгүй"}}
+{"page":181,"test":"2-B","timeLimitMin":20,"num":4,"statement":"$\\sqrt[3]{3 - x^{2}} = \\sqrt{-5x - 3}$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"6","B":"-6","C":"5","D":"-5","E":"-1"}}
+{"page":181,"test":"2-B","timeLimitMin":20,"num":5,"statement":"$\\sqrt{x - 2} \\cdot \\sqrt{x - 4} = \\sqrt{x + 26}$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"11","B":"-2","C":"7","D":"шийдгүй","E":"9"}}
+{"page":181,"test":"2-B","timeLimitMin":20,"num":6,"statement":"$\\sqrt{x^{2} + 4x + 3} + \\sqrt{x^{2} - 9} = 0$ тэгшитгэлийн бод.","choices":{"A":"-3;-1;3","B":"±3","C":"-3;-1","D":"-3","E":"шийдгүй"}}
+{"page":182,"test":"3-A","timeLimitMin":40,"num":1,"statement":"$\\sqrt[3]{\\sqrt{3} - 2x} = x$ тэгшитгэлийн бод.","choices":{"A":"1","B":"1; 3","C":"-3","D":"-3; 1","E":"-1; 3"}}
+{"page":182,"test":"3-A","timeLimitMin":40,"num":2,"statement":"$\\sqrt{x + 6} = -x$ тэгшитгэлийн бод.","choices":{"A":"-2;3","B":"-2","C":"-2; -3","D":"3","E":"шийдгүй"}}
+{"page":182,"test":"3-A","timeLimitMin":40,"num":3,"statement":"$3\\sqrt{x - 1} = x + 1$ тэгшитгэлийн бод.","choices":{"A":"-2; 5","B":"2","C":"2; 5","D":"-2","E":"5"}}
+{"page":182,"test":"3-A","timeLimitMin":40,"num":4,"statement":"$\\sqrt{x - 1} + x - 3 = 0$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"5","B":"2","C":"7","D":"10","E":"3"}}
+{"page":182,"test":"3-A","timeLimitMin":40,"num":5,"statement":"$4 + 2x - x^{2} = x - 2$ тэгшитгэлийн шийдийн уржвэрийг ол.","choices":{"A":"0","B":"2","C":"3","D":"-3","E":"-2"}}
+{"page":183,"test":"3-A","timeLimitMin":40,"num":6,"statement":"$2\\sqrt{x} + x^{2} = x - 2$ тэгшитгэлийн бод.","choices":{"A":"2","B":"$\\frac{2}{3}$","C":"1.5","D":"$\\frac{5}{9}$","E":"шийдгүй"}}
+{"page":183,"test":"3-A","timeLimitMin":40,"num":7,"statement":"$4 - x = x - 2$ тэгшитгэлийн графикийн аргаар бод.","choices":null}
+{"page":183,"test":"3-A","timeLimitMin":40,"num":8,"statement":"$\\sqrt{x + 1} \\cdot \\sqrt[3]{x - x} = x - 1$ тэгшитгэлийн бод.","choices":null}
+{"page":184,"test":"3-B","timeLimitMin":40,"num":1,"statement":"$\\sqrt[3]{\\sqrt{5} - 4x} = x$ тэгшитгэлийн бод.","choices":{"A":"-5; 1","B":"-1; 5","C":"-5","D":"1","E":"1; 5"}}
+{"page":184,"test":"3-B","timeLimitMin":40,"num":2,"statement":"$\\sqrt{x + 2} = -x$ тэгшитгэлийн бод.","choices":{"A":"-1; -2","B":"-1; 2","C":"2","D":"-1","E":"шийдгүй"}}
+{"page":184,"test":"3-B","timeLimitMin":40,"num":3,"statement":"$4\\sqrt{x - 4} = x - 1$ тэгшитгэлийн бод.","choices":{"A":"-5; 13","B":"13","C":"5","D":"-5","E":"5; 13"}}
+{"page":184,"test":"3-B","timeLimitMin":40,"num":4,"statement":"$\\sqrt{x + 4} + x - 2 = 0$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"5","B":"7","C":"-5","D":"3","E":"0"}}
+{"page":184,"test":"3-B","timeLimitMin":40,"num":5,"statement":"$6 - 4x - x^{2} = x + 4$ тэгшитгэлийн шийдийн уржвэрийг ол.","choices":{"A":"-1","B":"-5","C":"5","D":"1","E":"-6"}}
+{"page":185,"test":"3-B","timeLimitMin":40,"num":6,"statement":"$x^{2} + 5x = x - 5$ тэгшитгэлийн бод.","choices":{"A":"$\\frac{5}{3}$","B":"0.6","C":"5","D":"2","E":"шийдгүй"}}
+{"page":185,"test":"3-B","timeLimitMin":40,"num":7,"statement":"$\\sqrt{x + 1} = 5 - x$ тэгшитгэлийн графикийн аргаар бод.","choices":null}
+{"page":185,"test":"3-B","timeLimitMin":40,"num":8,"statement":"$\\sqrt{x + 2} \\cdot \\sqrt[3]{x - x} = 1 - x$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":null}
+{"page":186,"test":"4-A","timeLimitMin":30,"num":1,"statement":"$(x - 1) \\cdot \\sqrt{x + 2} = 0$ тэгшитгэлийн бод.","choices":{"A":"1","B":"-2","C":"-2; 1","D":"2","E":"-1; 2"}}
+{"page":186,"test":"4-A","timeLimitMin":30,"num":2,"statement":"$(x^{2} + 2x - 8) \\cdot \\sqrt{2 - x} = 0$ тэгшитгэлийн бод.","choices":{"A":"2","B":"-4; 2","C":"2; 4","D":"-4","E":"4"}}
+{"page":186,"test":"4-A","timeLimitMin":30,"num":3,"statement":"$(x - 4)\\sqrt{3 + 2x - x^{2}} = 0$ тэгшитгэлийн шийдүүдийн уржвэрийг ол.","choices":{"A":"12","B":"-1","C":"-3","D":"-12","E":"4"}}
+{"page":186,"test":"4-A","timeLimitMin":30,"num":4,"statement":"$\\frac{x^{2} + x - 12}{\\sqrt{x + 3}} = 0$ тэнцэтгэлийн бод.","choices":{"A":"-4; 3","B":"3","C":"±3; -4","D":"-4; -3","E":"-3"}}
+{"page":186,"test":"4-A","timeLimitMin":30,"num":5,"statement":"$\\sqrt{x^{2} - 9} - x^{2} \\cdot \\sqrt{x^{2} - 9} = 0$ тэгшитгэлийн бод.","choices":{"A":"±1","B":"±3; ±1","C":"±3","D":"-1; -3","E":"1; 3"}}
+{"page":186,"test":"4-A","timeLimitMin":30,"num":6,"statement":"$\\frac{\\sqrt{6 - x - x^{2}}}{x + 3} = \\frac{\\sqrt{6 - x - x^{2}}}{2x + 5}$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"-3","B":"1","C":"-1","D":"-2","E":"0"}}
+{"page":187,"test":"4-B","timeLimitMin":30,"num":1,"statement":"$(x - 2) \\cdot \\sqrt{x + 3} = 0$ тэгшитгэлийн бод.","choices":{"A":"2","B":"-3","C":"-3; 2","D":"-2","E":"-2; 3"}}
+{"page":187,"test":"4-B","timeLimitMin":30,"num":2,"statement":"$(x^{2} + 2x - 15) \\cdot \\sqrt{3 - x} = 0$ тэгшитгэлийн бод.","choices":{"A":"3","B":"-5","C":"±3; -5","D":"-5; 3","E":"-5; 3"}}
+{"page":187,"test":"4-B","timeLimitMin":30,"num":3,"statement":"$(x - 5)\\sqrt{20 - x - x^{2}} = 0$ тэгшитгэлийн шийдүүдийн уржвэрийг ол.","choices":{"A":"-20","B":"-100","C":"10","D":"100","E":"20"}}
+{"page":187,"test":"4-B","timeLimitMin":30,"num":4,"statement":"$\\frac{x^{2} + 2x - 15}{\\sqrt{x + 2}} = 0$ тэнцэтгэлийн бод.","choices":{"A":"-5; -2; 3","B":"-2","C":"-5; 2","D":"-8","E":"-10"}}
+{"page":187,"test":"4-B","timeLimitMin":30,"num":5,"statement":"$4 \\cdot \\sqrt{x^{2} - 25} - x^{2} \\cdot \\sqrt{x^{2} - 25} = 0$ тэгшитгэлийн бод.","choices":{"A":"±2","B":"±5","C":"±5; ±2","D":"5","E":"-5; 5"}}
+{"page":188,"test":"4-B","timeLimitMin":30,"num":6,"statement":"$\\frac{\\sqrt{3 + 2x - x^{2}}}{x - 3} = \\frac{\\sqrt{3 + 2x - x^{2}}}{3x - 11}$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":null}
+{"page":189,"test":"5-A","timeLimitMin":20,"num":1,"statement":"$x - \\sqrt{x - 2} = 0$ тэгшитгэлийн бод.","choices":{"A":"1; 4","B":"-1; 2","C":"2","D":"4","E":"1"}}
+{"page":189,"test":"5-A","timeLimitMin":20,"num":2,"statement":"$2x - 19 - \\sqrt{2x + 1} = 0$ тэгшитгэлийн бод.","choices":{"A":"5","B":"-4; 5","C":"-4","D":"12","E":"2; 12"}}
+{"page":189,"test":"5-A","timeLimitMin":20,"num":3,"statement":"$\\sqrt{x - 3} + 6 = 5 \\cdot \\sqrt[3]{x - 3}$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":{"A":"5","B":"103","C":"19","D":"12","E":"3"}}
+{"page":189,"test":"5-A","timeLimitMin":20,"num":4,"statement":"$4\\sqrt{x + 1} - \\frac{4}{\\sqrt{x + 1}} + 6 = 0$ тэгшитгэлийн шийдүүдийн уржвэрийг ол.","choices":{"A":"0","B":"-1","C":"-2.25","D":"-0.5","E":"-0.75"}}
+{"page":189,"test":"5-A","timeLimitMin":20,"num":5,"statement":"$\\sqrt{\\frac{x + 1}{1 - x}} - \\frac{\\sqrt{1 - x}}{\\sqrt{x + 1}} = \\frac{3}{2}$ тэгшитгэлийн бод.","choices":{"A":"$\\frac{2}{5}$","B":"$\\frac{3}{5}$","C":"$\\frac{1}{5}$","D":"$\\frac{3}{5}$","E":"$\\frac{4}{5}$"}}
+{"page":190,"test":"5-B","timeLimitMin":20,"num":1,"statement":"$x + \\sqrt{x - 6} = 0$ тэгшитгэлийн бод.","choices":{"A":"-3; 2","B":"4; 9","C":"4","D":"9","E":"3"}}
+{"page":190,"test":"5-B","timeLimitMin":20,"num":2,"statement":"$5x - 11 - \\sqrt{5x + 1} = 0$ тэгшитгэлийн бод.","choices":{"A":"3","B":"-3; 4","C":"1.6","D":"-3","E":"1.6; 3"}}
+{"page":190,"test":"5-B","timeLimitMin":20,"num":3,"statement":"$\\sqrt{x + 2} - 7 \\cdot \\sqrt[3]{x + 2} = -12$ тэгшитгэлийн шийдүүдийн ялгаврыг ол.","choices":{"A":"-1","B":"79","C":"7","D":"175","E":"14"}}
+{"page":190,"test":"5-B","timeLimitMin":20,"num":4,"statement":"$2\\sqrt{x + 3} + \\frac{3}{\\sqrt{x + 3}} - 5 = 0$ тэгшитгэлийн шийдүүдийн уржвэрийг ол.","choices":{"A":"-3","B":"-2.75","C":"2.5","D":"1.5","E":"0"}}
+{"page":190,"test":"5-B","timeLimitMin":20,"num":5,"statement":"$\\sqrt{\\frac{x}{1 + x}} - 3\\sqrt{\\frac{x + 1}{x}} = -\\frac{1}{2}$ тэгшитгэлийн бод.","choices":{"A":"$\\frac{1}{3}$","B":"$-\\frac{4}{3}$","C":"$-\\frac{1}{3}$","D":"4","E":"шийдгүй"}}
+{"page":191,"test":"6-A","timeLimitMin":60,"num":1,"statement":"$\\sqrt[3]{-x} + \\sqrt{x} = 2$ тэгшитгэлийн бод.","choices":{"A":"4","B":"2","C":"0; 4","D":"0; 2","E":"8"}}
+{"page":191,"test":"6-A","timeLimitMin":60,"num":2,"statement":"$\\sqrt{x + 5} - \\sqrt{x} = 1$ тэгшитгэлийн бод.","choices":{"A":"16","B":"4","C":"2","D":"1","E":"8"}}
+{"page":191,"test":"6-A","timeLimitMin":60,"num":3,"statement":"$\\sqrt{x} + \\sqrt{x - 2} = 1 - x$ тэгшитгэлийн бод.","choices":{"A":"1","B":"2","C":"0","D":"0.5","E":"шийдгүй"}}
+{"page":191,"test":"6-A","timeLimitMin":60,"num":4,"statement":"$\\sqrt{x - 5} + 2 = \\sqrt{x + 3}$ тэгшитгэлийн бод.","choices":{"A":"6","B":"6.5","C":"5","D":"5.25","E":"21"}}
+{"page":192,"test":"6-A","timeLimitMin":60,"num":5,"statement":"$\\sqrt[3]{x + 4} + \\sqrt{x - 4} = 2\\sqrt{x}$ тэгшитгэлийн бод.","choices":{"A":"$\\frac{4}{3};4$","B":"$\\frac{4}{3};4$","C":"4","D":"-4","E":"$-\\frac{4}{3}$"}}
+{"page":192,"test":"6-A","timeLimitMin":60,"num":6,"statement":"$2\\sqrt{x + 22} - \\sqrt{x + 18} = 1$ тэгшитгэлийн бод.","choices":{"A":"9","B":"-9.7","C":"7","D":"-2; 7","E":"-9"}}
+{"page":192,"test":"6-A","timeLimitMin":60,"num":7,"statement":"$\\sqrt{x - 2} + \\sqrt{x - 1} = \\sqrt{3x - 5}$ тэгшитгэлийн бод.","choices":{"A":"2; $\\frac{2}{3}$","B":"$\\frac{2}{3}$","C":"2","D":"-1; $\\frac{2}{3}$","E":"шийдгүй"}}
+{"page":192,"test":"6-A","timeLimitMin":60,"num":8,"statement":"$\\sqrt{x + 2} \\cdot \\sqrt[3]{x} = 1 - x$ тэгшитгэлийн шийдүүдийн нийлбэрийг ол.","choices":null}

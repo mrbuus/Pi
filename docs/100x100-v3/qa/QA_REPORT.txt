@@ -1,0 +1,109 @@
+================================================================================
+QUALITY ASSURANCE REPORT - 100x100 Mathematics Problems, Book 1
+================================================================================
+
+TASK: Verify 70 mathematics problems before importing into production database
+PAGES REVIEWED: 148, 150, 151, 152, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 170, 173, 174, 175
+USER: usukhbayar0525@gmail.com
+DATE: 2026-08-26
+
+================================================================================
+RESULTS SUMMARY
+================================================================================
+
+Total Records Checked: 70
+Status OK: 23 (32.9%)
+Status Corrected: 47 (67.1%)
+Status Rejected: 0 (0%)
+
+All 70 records are SAFE FOR IMPORT after corrections.
+
+================================================================================
+DEFECTS IDENTIFIED AND CORRECTED
+================================================================================
+
+1. UNICODE INEQUALITY SIGNS (43 records)
+   Issue: Used Unicode characters ≥ and ≤ instead of LaTeX \ge and \le
+   Records Affected: Pages 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 170, 173, 174, 175
+   Example: "$|x + 3| ≥ 0$" → "$|x + 3| \\ge 0$"
+   Correction: Replaced all instances of ≥ with \ge and ≤ with \le
+
+2. MISSING DOLLAR SIGNS AROUND EQUATIONS (7 records)
+   Issue: Mathematical expressions missing $ delimiters
+   Records Affected:
+     - Page 156, Problem 7 & 8: Added $ signs around equations
+     - Page 162, Problem 9 & 10: Added $ signs
+     - Page 164, Problem 9 & 10: Added $ signs  
+     - Page 168, Problem 10: Added $ signs
+     - Page 170, Problem 10: Added $ signs
+   Example: "|x + 2| + |x - 5| = 7 тэгшитгэлийн..." → "$|x + 2| + |x - 5| = 7$ тэгшитгэлийн..."
+
+3. CRITICAL: COEFFICIENT PLACEMENT ERROR (1 record)
+   Issue: Coefficient incorrectly placed inside absolute value
+   Record: Page 150, Problem 7, Test 3-B
+   Error: "$|4x + 1| = x^2 + 5x + 4$"
+   Correction: "$4|x + 1| = x^2 + 5x + 4$"
+   Note: This is a mathematically different problem - multiplication vs. equation with absolute value
+
+4. CRITICAL: UNWANTED ABSOLUTE VALUE BARS (2 records)
+   Issue: Absolute value bars incorrectly added around terms that should be plain
+   
+   Record A: Page 151, Problem 4, Test 4-A
+   Error: "$\\left(\\frac{x+2}{3}\\right)^2 + \\frac{|3x+6|}{3} - 18 = 0$"
+   Correction: "$\\left(\\frac{x+2}{3}\\right)^2 + \\frac{3x+6}{3} - 18 = 0$"
+   
+   Record B: Page 152, Problem 4, Test 4-B
+   Error: "$\\left(\\frac{x-2}{3}\\right)^2 + \\frac{|4x-8|}{3} - 12 = 0$"
+   Correction: "$\\left(\\frac{x-2}{3}\\right)^2 + \\frac{4x-8}{3} - 12 = 0$"
+
+5. CRITICAL: INCORRECT EXPRESSION GROUPING (1 record)
+   Issue: Operator precedence error - wrong grouping of terms
+   Record: Page 160, Problem 11, Test 1-B
+   Error: "$|y + 3| < 5$" (means: absolute value of (y plus 3) is less than 5)
+   Correction: "$|y| + 3 < 5$" (means: absolute value of y, plus 3, is less than 5)
+   Note: These are mathematically different expressions with different solution sets
+
+6. MONGOLIAN SPELLING ERROR (1 record)
+   Issue: Typo in Mongolian word
+   Record: Page 157, Problem 6, Test 1-A
+   Error: "амар" (nonsense)
+   Correction: "ямар" (means "what/which")
+   Context: "шийдийн интервалын урт ямар байх вэ?" = "What is the length of the solution interval?"
+
+================================================================================
+VERIFICATION CHECKLIST
+================================================================================
+
+✓ All 70 records validated against printed PDF pages
+✓ All mathematical notation converted to KaTeX-safe LaTeX
+✓ No forbidden characters found (\\bullet, \\times, ×, •, ·, ∙)
+✓ Proper multiplication signs used (\\cdot only, 3 instances found)
+✓ All inequality signs use LaTeX notation (\\ge, \\le)
+✓ All dollar sign delimiters properly placed
+✓ Mongolian text verified against PDF
+✓ JSON file syntax valid and well-formed
+✓ All required fields present (verdict, qa_note)
+✓ No records rejected - all are importable
+
+================================================================================
+FILES GENERATED
+================================================================================
+
+Output File: /Users/mr.buus/Intern/Pi.mn/docs/100x100-v3/qa/q06.jsonl
+Format: One JSON object per line (JSONL)
+Records: 70 (47 corrected, 23 unchanged)
+Encoding: UTF-8 with ensure_ascii=False
+
+================================================================================
+IMPORT READINESS
+================================================================================
+
+STATUS: ✓ READY FOR IMPORT
+
+All 70 mathematics problems have been verified and corrected. The output file
+is ready for import into the production database. No records have been rejected.
+Students will receive accurate, properly formatted mathematical problems.
+
+Quality Gate Passed: YES
+Reviewed By: Claude Code QA System
+Date: 2026-08-26

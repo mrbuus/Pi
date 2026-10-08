@@ -1,0 +1,42 @@
+[
+  {
+    "file": "eec-math-blueprint-2026.jpg",
+    "url": "https://www.eec.mn/wp-content/uploads/2026/02/Математик-2026-2048x1448.jpg",
+    "sourcePage": "https://www.eec.mn/post/6418",
+    "author": "Боловсролын үнэлгээний төв",
+    "retrievedAt": "2026-09-22",
+    "bytes": 273363,
+    "sha256": "c28979f039c54a3e0a474b3c6dc3f1e99e882596c5361c028e5c687fbd2854b2",
+    "note": "2026 summary; five groups and question counts; no full method catalogue"
+  },
+  {
+    "file": "eec-math-blueprint-2021.pdf",
+    "url": "https://eec.mn/wp-content/uploads/2021/04/Математик.pdf",
+    "sourcePage": null,
+    "author": "Боловсролын үнэлгээний төв",
+    "retrievedAt": "2026-09-22",
+    "bytes": 144357,
+    "sha256": "fac095da0568b4c67270a6f102f8f46bdab0b17162dafdf6df07b90ee7e89091",
+    "note": "Historical detailed blueprint, 3 pages; not 2026/2027 current requirements"
+  },
+  {
+    "file": "moe-a95-2025.pdf",
+    "url": "https://drive.google.com/file/d/1aXh3L2XZDHUdjE8lIQKSQQVzncFiFiJL/view",
+    "sourcePage": "https://zogii.mn/newsm/8/2/200949",
+    "author": "Боловсролын яам",
+    "retrievedAt": "2026-09-24",
+    "bytes": 1137211,
+    "sha256": "fbb5dc0b37b11cad86db9c8a10c4a42781aae527b4732d55efc975206c7fab62",
+    "note": "Signed scan obtained via secondary source link; capital annex is PDF page 3. Date conversion requires review."
+  },
+  {
+    "file": "moe-a211-2026.pdf",
+    "url": "https://moe.gov.mn/post/177123",
+    "sourcePage": "https://moe.gov.mn/post/177123",
+    "author": "Боловсролын яам",
+    "retrievedAt": "2026-09-24",
+    "bytes": 604002,
+    "sha256": "8ca035c1feb485181405821e558d9e66df1da24ecca81fe80f2f0805ddee9b85",
+    "note": "Official ministry linked PDF; capital annex page 2, rural page 3; not retroactive for 2025–26."
+  }
+]

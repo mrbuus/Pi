@@ -1,0 +1,6 @@
+/* Let the research navigation wrap without covering the canvas on narrow screens. */
+body{height:100dvh;display:flex;flex-direction:column}
+header{height:auto;min-height:83px;flex-shrink:0}
+.shell{height:auto;flex:1;min-height:0}
+@media(max-width:1100px){#detail{top:var(--header-height,83px)}}
+@media(max-width:760px){header{min-height:124px}.sidebar.open,#detail{top:var(--header-height,124px)}}

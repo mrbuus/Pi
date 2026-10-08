@@ -1,0 +1,22 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),vm=require('node:vm'),crypto=require('node:crypto');
+const here=__dirname,root=path.dirname(path.dirname(here)),ctx={window:{}};vm.createContext(ctx);
+for(const file of ['flows.js','domain-flows.js','revision-v3.js','revision-v4.js','revision-v5.js','revision-v6.js','revision-v7.js','navigation.js','ui-tasks.js','code-inventory.js','research-data.js'])vm.runInContext(fs.readFileSync(path.join(here,file),'utf8'),ctx,{filename:file});
+for(const file of ['board.js','review.js','research-library.js'])new vm.Script(fs.readFileSync(path.join(here,file),'utf8'),{filename:file});
+const docs=ctx.window.PI_RESEARCH,D=ctx.window.PI_DESIGN;
+assert.equal(new Set(docs.map(d=>d.id)).size,docs.length);
+assert.equal(docs.filter(d=>d.category!=='current').length,56);
+for(const d of docs){assert(!d.path.includes('/private/'));const bytes=fs.readFileSync(path.join(root,d.path));assert.equal(d.text,bytes.toString('utf8'),'source text lost '+d.path);assert.equal(d.sha256,crypto.createHash('sha256').update(bytes).digest('hex'));}
+const code=ctx.window.PI_CODE_INVENTORY;assert.equal(code.controllers.length,42);assert.equal(code.controllers.reduce((s,c)=>s+c.routes.length,0),276);assert.equal(code.pages.length,48);assert.equal(code.models.length,70);
+for(const c of [...code.controllers,...code.pages])assert.equal(c.sha256,crypto.createHash('sha256').update(fs.readFileSync(path.join(root,c.path))).digest('hex'),'code snapshot stale '+c.path);
+const {clean,merge}=require('./review.js'),sample={version:1,entries:{SD01:{state:'change',note:'<script>plain note</script>\nТодруулах',title:'Маргаашийн хуваарь',updatedAt:'2026-09-24T10:00:00Z'}}};
+const first=clean(JSON.parse(JSON.stringify(sample)));assert.equal(first.SD01.note,sample.entries.SD01.note);
+const second=clean({version:1,entries:{SD01:{...sample.entries.SD01,note:'Өөр санал'},'unknown:old-id':{...sample.entries.SD01,state:'read'}}});
+assert.equal(merge(first,second).entries.SD01.note,first.SD01.note);assert.equal(merge(first,second,true).entries.SD01.note,'Өөр санал');assert(merge(first,second).entries['unknown:old-id']);assert.equal(merge(first,second).conflicts,1);
+assert.throws(()=>clean({version:2,entries:{}}));assert.throws(()=>clean({version:1,entries:{x:{state:'done'}}}));assert.throws(()=>clean(JSON.parse('{"version":1,"entries":{"__proto__":{}}}')));
+const allIds=[...D.maps.flatMap(m=>m.nodes.map(n=>n.id)),...D.maps.map(m=>'map:'+m.id),...docs.map(d=>d.id)];
+for(const id of allIds)clean({version:1,entries:{[id]:sample.entries.SD01}});
+for(const id of ['personal-planner','scan-solver','age-bundles','project-agent','online-learner'])assert.equal(D.maps.find(m=>m.id===id).navigation.release,'later');
+assert.equal(D.maps.find(m=>m.id==='feedback').navigation.release,'v1');assert.equal(D.maps.find(m=>m.id==='schedule-daily').navigation.release,'decision');
+assert(D.maps.find(m=>m.id==='brand-assets').kind==='planning');assert(D.maps.find(m=>m.id==='staff-time').nodes.every(n=>n.actor));
+const html=fs.readFileSync(path.join(root,'docs/SYSTEM-DESIGN.html'),'utf8');for(const file of ['code-inventory.js','research-data.js','review.js','research-library.js','revision-v5.js'])assert(html.includes('system-design/'+file));
+console.log(`PASS v0.5: ${docs.length} complete source documents; code snapshot hashes; review round-trip, merge/conflict, invalid imports and all IDs; release scope and script syntax. No browser render performed.`);

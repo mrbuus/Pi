@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pi.mn · Үйл ажиллагааны атлас</title>
+<link rel="stylesheet" href="system-design/board.css">
+<link rel="stylesheet" href="system-design/revision-v3.css">
+<link rel="stylesheet" href="system-design/navigation.css">
+<link rel="stylesheet" href="system-design/review.css">
+<link rel="stylesheet" href="system-design/schedule-review.css">
+<link rel="stylesheet" href="system-design/v1-scope.css">
+</head>
+<body>
+<header>
+ <div class="brand"><span class="logo">π</span><div><h1>Үйл ажиллагааны атлас</h1><p>Pi.mn · хэрэглэгчийн төрөл → үйлдэл · шаардлагын төлөвлөлт v0.7</p></div></div>
+ <div class="header-actions"><div class="view-switch" role="group" aria-label="Харагдац сонгох"><button id="operations" aria-pressed="true">Үйл ажиллагаа</button><button id="tasks" aria-pressed="false">Хийх ажлууд · TODO</button></div><button id="v1Scope">V1-ийн баталсан боломжууд</button><button id="researchLibrary">Судалгааны сан</button><button id="myReview">Миний тэмдэглэл</button><details class="header-more"><summary>Бусад</summary><div><button id="scheduleEvidence">Хуваарь: өдөр бүр</button><button id="people">Хэрэглэгчийн төрлүүд</button><button id="research">Өмнөх дүгнэлт · v0.4</button><button id="library">Хуучин сан · 483</button><button id="cost">Зардлын тооцоо</button><button id="guide" aria-label="Хэрэглэх заавар">Хэрэглэх заавар</button></div></details></div>
+</header>
+<div class="shell">
+ <aside class="sidebar" aria-label="Урсгалууд"><label class="search-label" for="search">Бүх үйлдлээс хайх</label><input id="search" type="search" placeholder="ирц, QPay, эцэг эх…"><div id="searchResults" hidden></div><div class="nav-explainer">Систем хэрхэн ажиллах вэ?<br>Хөгжүүлэлтийн ажил дээд талын TODO хэсэгт.<br>Өнгөт зураас = ажлын төрөл.<br>Тэмдэглэгээ = хэрэгжүүлэх хувилбар.<div class="nav-legend"><span class="release-badge" data-release="v1">V1 · орно</span><span class="release-badge" data-release="mixed">V1 + дараа</span><span class="release-badge" data-release="later">V2+ · V1-д орохгүй</span><span class="release-badge" data-release="decision">Хувилбар шийдэх</span></div>V1 нь төлөвлөгөө; бэлэн болсон гэсэн үг биш.</div><label class="nav-filter-label" for="releaseFilter">Хувилбараар шүүх</label><select id="releaseFilter"><option value="all">Бүгд</option><option value="v1">V1-д ажилтай · холимогтой хамт</option><option value="mixed">V1 + дараа · холимог хэсгүүд</option><option value="later">V1-д бүхэлдээ орохгүй</option><option value="decision">Хувилбар шийдэх</option></select><p id="navCount" role="status" aria-live="polite"></p><nav id="maps" aria-label="Ажлын төрлөөр ангилсан урсгалууд"></nav><div class="sidebar-note"><b>Зөвхөн зураглал</b><p>Бодит систем, файл хадгалалт, устгалд өөрчлөлт орохгүй.</p><span id="counts"></span></div></aside>
+ <main id="flowPane">
+  <div class="map-heading"><div><h2 id="mapTitle"></h2><p id="mapSummary"></p><div id="mapScope" class="map-scope"></div></div><button id="menu" aria-label="Урсгалын цэс">☰</button></div>
+  <div class="toolbar"><button id="back" disabled>← Буцах</button><button id="zoomOut" aria-label="Жижигрүүлэх">−</button><output id="zoomLabel">100%</output><button id="zoomIn" aria-label="Томруулах">+</button><button id="fit">Өргөнд тааруулах</button><button id="fitAll">Бүтнээр</button><button id="reset">Байрлал сэргээх</button><label class="drag-toggle"><input type="checkbox" id="moveNodes">Блок зөөх</label><button id="saveLayout">Байрлал татах</button><label class="import-layout">Оруулах<input id="loadLayout" type="file" accept="application/json,.json" hidden></label></div>
+  <div id="viewport" aria-label="Блок зураглал. Хоосон зайг чирж шилжүүлнэ. Ctrl эсвэл Command ба scroll-оор томруулна.">
+   <div id="world"><svg id="connections" aria-hidden="true"></svg><div id="lanes"></div><div id="nodes"></div></div>
+   <div class="canvas-hint">Чирж шилжүүлэх · scroll ↑↓ ←→ · ⌘/Ctrl + scroll томруулах · блок дарж дэлгэрүүлэх</div>
+  </div>
+  <div class="statusbar"><span id="mapStatus" role="status" aria-live="polite"></span><span>Хүсэлт ● · Санал ◇ · Шийдэх ? · Хуучин баримт ▤</span></div>
+ </main>
+ <main id="taskPane" hidden aria-label="Хөгжүүлэлтийн хийх ажлууд"></main>
+ <aside id="detail" hidden aria-label="Үйлдлийн дэлгэрэнгүй"><button id="closeDetail" class="close" aria-label="Дэлгэрэнгүйг хаах">×</button><div id="detailContent"></div></aside>
+</div>
+<dialog id="modal"><div class="modal-top"><h2 id="modalTitle"></h2><button id="closeModal" aria-label="Хаах">×</button></div><div id="modalBody"></div></dialog>
+<script src="system-design/flows.js"></script>
+<script src="system-design/domain-flows.js"></script>
+<script src="system-design/revision-v3.js"></script>
+<script src="system-design/revision-v4.js"></script>
+<script src="system-design/revision-v5.js"></script>
+<script src="system-design/revision-v6.js"></script>
+<script src="system-design/revision-v7.js"></script>
+<script src="system-design/navigation.js"></script>
+<script src="system-design/ui-tasks.js"></script>
+<script src="system-design/costs.js"></script>
+<script src="system-design/inventory.js"></script>
+<script src="system-design/code-inventory.js"></script>
+<script src="system-design/research-data.js"></script>
+<script src="system-design/review.js"></script>
+<script src="system-design/research-library.js"></script>
+<script src="system-design/schedule-launcher.js"></script>
+<script src="system-design/board.js"></script>
+<script src="system-design/v1-scope-data.js"></script>
+<script src="system-design/v1-scope.js"></script>
+</body></html>

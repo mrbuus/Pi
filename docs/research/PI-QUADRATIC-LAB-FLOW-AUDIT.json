@@ -1,0 +1,764 @@
+{
+  "artifact": "read-only-flow-audit",
+  "date": "2026-10-06",
+  "prototype": "/Users/mr.buus/Intern/Pi.mn/docs/research/PI-QUADRATIC-LAB.html",
+  "snapshotHashes": [
+    "02cda333fca5584e069b3b6f75a6df19989b9127ce8e6c6207792ca1fa99f43a",
+    "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4"
+  ],
+  "productionChanged": false,
+  "sharedPrototypeChanged": false,
+  "scope": "Headless fresh snapshots plus JS read-only inspection. Parent is concurrently rebuilding; findings apply to the listed snapshot hash, not an unobserved future rebuild.",
+  "p0Findings": [],
+  "p1Findings": [
+    {
+      "id": "FLOW-P1-03",
+      "priority": "P1",
+      "status": "scope_gap_by_code_inspection",
+      "line": 79,
+      "function": "buildProposal",
+      "problem": "No prerequisite skill graph or evidence gate is implemented. Error tags only rank candidates; optional Test5 expansion does not diagnose/gate a Test9 prerequisite.",
+      "expected": "Either label this explicitly as excluded from the current selection demonstration, or implement the narrowly reviewed prerequisites required by the prototype scope.",
+      "scenarioIds": [
+        "REV-05"
+      ],
+      "evidenceFile": null
+    },
+    {
+      "id": "FLOW-P1-04",
+      "priority": "P1",
+      "status": "scope_gap_by_code_inspection",
+      "line": 84,
+      "function": "review",
+      "problem": "A nonempty minute plan shorter than the requested budget has no shortage explanation/shorter-plan option, while count shortage is explicit.",
+      "expected": "When candidate stock prevents using the budget, state the actual limited plan and why; keep scope expansion explicit.",
+      "scenarioIds": [
+        "REV-02"
+      ],
+      "evidenceFile": null
+    }
+  ],
+  "observedChecks": [
+    {
+      "check": "Repeated old-A review begins with empty answer drafts while retaining archived prior session",
+      "result": "observed_expected_behavior",
+      "evidence": "old-review-prefilled"
+    },
+    {
+      "check": "Clicking already-selected teacher solved mode keeps 3 of 10",
+      "result": "observed_expected_behavior",
+      "evidence": "grade-same-mode-click"
+    },
+    {
+      "check": "Entry correction B→C retains B history and full event payloads",
+      "result": "observed_expected_behavior",
+      "evidence": "entry-correction-revision"
+    },
+    {
+      "check": "Retry help=yes is stored and assisted=true",
+      "result": "observed_expected_behavior",
+      "evidence": "retry-help-declaration"
+    },
+    {
+      "check": "Returned material v1→new v2 preserves v1 and invalidates prior teacher review",
+      "result": "observed_expected_behavior",
+      "evidence": "material-version-after-return"
+    },
+    {
+      "check": "Weekly attempt submitted after modeled window closes is rejected",
+      "result": "observed_expected_behavior",
+      "evidence": "weekly-submit-after-window-close"
+    },
+    {
+      "check": "Deadline closes invalid/raw draft and also closes off-stage/auth-closed exam",
+      "result": "observed_expected_behavior",
+      "evidence": "timeout-invalid-answer / weekly-deadline-offstage-authclosed"
+    },
+    {
+      "check": "Actual inventory has 50 book items and correct Test9 Q9/Q10 blank-key counts",
+      "result": "observed_expected_behavior",
+      "evidence": "scope-inventory"
+    },
+    {
+      "check": "Correction targets original attemptId; a later wrong old-test first attempt adds power priority=2 and appears in errors proposal",
+      "result": "observed_expected_behavior",
+      "evidence": "correction-excludes-later-independent-first / correction-later-error-bank",
+      "snapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4"
+    },
+    {
+      "check": "Parent returned-material panel includes returned status and resubmission-required action",
+      "result": "observed_expected_behavior",
+      "evidence": "parent-returned-material",
+      "snapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4"
+    }
+  ],
+  "evidenceFiles": [
+    "/tmp/pi-flow-review-results.json",
+    "/tmp/pi-flow-review-extra-results.json"
+  ],
+  "coverage": [
+    {
+      "id": "SRC-01",
+      "route": "content",
+      "name": "Use the real 100x100 V3 Test 9 A/B scope",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Source inventory is real: Test9 10A/10B and Test5 15A/15B. Source truth was reviewed by the source agent; this audit checked counts/scaffold fields, not every source equation.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "SRC-02",
+      "route": "content",
+      "name": "Source conflict or damaged formula",
+      "possibleScenario": true,
+      "prototypeAvailability": "excluded",
+      "availabilityDetail": "Fixed reviewed dataset only; no quarantine/source-conflict editor is demonstrated.",
+      "verificationScope": "not_run",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "SRC-03",
+      "route": "content",
+      "name": "Teacher lesson scope is a subset, not the entire topic",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "A/B item selection exists before primary starts and locks thereafter; no lesson scope versions or optional makeup-extension list.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "CLS-01",
+      "route": "classroom",
+      "name": "Attend class and backfill mixed paper answers",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Paper-backfill origin, confidence/help/status and first-record submit are present; all learners remain synthetic.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "CLS-02",
+      "route": "classroom",
+      "name": "Lost paper or cannot remember the original answer",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Forgot and notdone exist; no distinct No paper marking category. Missing results do not become wrong.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "CLS-03",
+      "route": "classroom",
+      "name": "Assigned but not attempted in class",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Notdone is a noncorrectness status. A later retry exists, but no separate class-origin mixed item source or neutral assigned-not-attempted status.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "CLS-04",
+      "route": "classroom",
+      "name": "Fast entry without inferred confidence",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Current item with known context and unmarked defaults exists. Actual-child full-test 1–2 minute UX target is explicitly unverified.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "CLS-05",
+      "route": "classroom",
+      "name": "Submit invalid root answer atomically",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Submit builds rows before mutation and validates invalid fields before assigning records. This audit checked timeout invalid-input handling, not all ordinary invalid root formats.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "CLS-06",
+      "route": "classroom",
+      "name": "Double tap and reload after initial submission",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Submitted session guard prevents duplicate first submit; local run persistence is implemented. Full reload/double-tap case not executed here.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "COR-01",
+      "route": "correction",
+      "name": "Separate transcription correction from mathematical retry",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Original first records, repeat correction snapshots and full correction events are retained. Correction binds to the selected primary attemptId; later same-source attempts remain evidence. No transcription-reason input is modeled.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case",
+      "latestEvidenceSnapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4"
+    },
+    {
+      "id": "COR-02",
+      "route": "correction",
+      "name": "View solution and then enter the correct answer",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "First help is immutable and later shown solution flag/events attach to retries. Exact solution-open-close-reload case not run here.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "COR-03",
+      "route": "correction",
+      "name": "External help without clicking the built-in solution",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "First and retry help declaration controls exist; retry help=yes produces assisted=true in fresh headless run.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "COR-04",
+      "route": "correction",
+      "name": "Confident wrong versus guessed right",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Tag priority distinguishes wrong from unsure/guessed/helped correct; no mastery percentage is asserted.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "COR-05",
+      "route": "correction",
+      "name": "Multiple retries with the same error",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Retry array retains multiple attempts; errors proposal uses a deduplicated source-ID set.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "HW-01",
+      "route": "homework",
+      "name": "Assigned B work is separate from A paper backfill",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "B homework has a separate session and origin, reached after submitted A.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "HW-02",
+      "route": "homework",
+      "name": "Five notebook photos modeled as one submission",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Five static photo placeholders and one versioned material action; no choosing, ordering, previewing or actual scan/upload.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "HW-03",
+      "route": "homework",
+      "name": "Unreadable or incomplete modeled material",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Generic returned material and versioned resubmission preserve history; named page/replacement-page controls are excluded.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "HW-04",
+      "route": "homework",
+      "name": "Teacher checks work rather than assigning mastery",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Teacher completion differs from automatic correctness and binds to materialVersion; tested return/new-version clears prior grade.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "HW-05",
+      "route": "homework",
+      "name": "Teacher revises a review",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Teacher revision events contain the result, but no teacher change-reason/comment input.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "PAR-01",
+      "route": "parent",
+      "name": "Simple parent summary of one child",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Synthetic parent panel separates first correctness/teacher completion and now displays returned material plus the required resubmission action.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case",
+      "latestEvidenceSnapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4"
+    },
+    {
+      "id": "MK-01",
+      "route": "makeup",
+      "name": "Absent student makes up the exact lesson",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Theory-read gate, exact A/B scope, makeup-web origins, original lesson date and separate attempt date exist; theory is a short reminder only.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "MK-02",
+      "route": "makeup",
+      "name": "Ill student pauses and resumes",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Local pause/resume through persistence; Ill attendance choice exists without medical data.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "MK-03",
+      "route": "makeup",
+      "name": "Permitted absence and teacher review",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Permitted/ill/absent attendance remains separate from completion; material purpose MAKEUP and teacher/parent panels exist.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "MK-04",
+      "route": "makeup",
+      "name": "Partial attendance or interrupted class",
+      "possibleScenario": true,
+      "prototypeAvailability": "excluded",
+      "availabilityDetail": "A session has one origin. Mixed per-item paper attendance/backfill plus online makeup in the same learner is not modeled.",
+      "verificationScope": "not_run",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "MK-05",
+      "route": "makeup",
+      "name": "Old lesson scope changed after absence",
+      "possibleScenario": true,
+      "prototypeAvailability": "excluded",
+      "availabilityDetail": "Scope locks after first start; no task/source scope revision reconciliation flow.",
+      "verificationScope": "not_run",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "ON-01",
+      "route": "selfstudy",
+      "name": "Online learner starts from an entitled book",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Online entry bypasses paper gate and offers the two fixed source tests plus modeled entitlement; no full book catalogue.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "ON-02",
+      "route": "selfstudy",
+      "name": "First grade and second pass through wrong work",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Fixed first results, wrong/uncertain default selection, retries and worked solutions exist. No dedicated filtered second-pass queue or videos.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "ON-03",
+      "route": "selfstudy",
+      "name": "Pause a topic test and resume without premature reveal",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Draft/save/session state retains position and answers; no explicit Pause button. Exact reload sequence not executed here.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "ON-04",
+      "route": "selfstudy",
+      "name": "Rights expired or topic unavailable",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Checkbox entitlement gates start/submit and retains local work; real expiry/product entitlement is excluded.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-01",
+      "route": "review",
+      "name": "Three review entrances stay distinct",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "New/errors/old-A entrances are distinct within the run. Repeated old-A session now starts with blank drafts and preserves archive.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-02",
+      "route": "review",
+      "name": "10/30/60 minute plans respect available scope",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "10/30/60 estimated time and stock are displayed, with count shortage warning. Time underfill has no dedicated shortage/shorter-plan message.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-03",
+      "route": "review",
+      "name": "Count mode is alternative to time mode",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Count overrides duration and stock shortage is explicit; no silent fill from extra topics unless foundation checked.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-04",
+      "route": "review",
+      "name": "No evidence starts a short check",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "No-data proposals are general labeled starting checks, not learned personal ability.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-05",
+      "route": "review",
+      "name": "Prerequisite gap limits the next problem",
+      "possibleScenario": true,
+      "prototypeAvailability": "excluded",
+      "availabilityDetail": "No prerequisite graph/evidence gate. Optional Test5 foundation checkbox is explicit scope expansion, not prerequisite-aware diagnosis.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-06",
+      "route": "review",
+      "name": "Helped and guessed correct are provisional",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Help/guess/unsure first answers affect priorities and no mastered verdict appears.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-07",
+      "route": "review",
+      "name": "Slow correct learner is not weak",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Times are general teacher-to-review estimates; paper entry/browser duration is explicitly not solving speed.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "REV-08",
+      "route": "review",
+      "name": "History after review changes later proposals",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "All archived session first records are read, exposures persist, and a correction suppresses only its target attemptId. New wrong same-source review records contribute to priorities and errors mode.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case",
+      "latestEvidenceSnapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4"
+    },
+    {
+      "id": "REV-09",
+      "route": "review",
+      "name": "Choose a different topic explicitly",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Explicit Test5 foundation expansion exists for Test9; arbitrary multi-topic selection is excluded.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "EX-01",
+      "route": "assessment",
+      "name": "Unseen check after corrected practice",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Generated unexposed near-template probes hide results until finish; they are labeled limited near transfer.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "EX-02",
+      "route": "assessment",
+      "name": "Same numeric family versus independent transfer",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Generated practice is visibly distinguished and family diversity is used. A truly independent held-out source transfer assessment is excluded.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "EX-03",
+      "route": "assessment",
+      "name": "Partial check or timer expiry",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Missing outcomes remain null. Deadline auto-finishes invalid/raw drafts even off the primary stage and with rights closed.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "WK-01",
+      "route": "weekly_exam",
+      "name": "Published weekly exam within rights/window",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Window controls, modeled rights, local deadline, fixed A source scope and finish reveal exist; configurable release/pause policies and server schedule are excluded.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "WK-02",
+      "route": "weekly_exam",
+      "name": "Outside window, already completed, or release pending",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Before/closed start blocked; closed submission now blocked, deadline still auto-closes. Result-release-pending stage is excluded.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "WK-03",
+      "route": "weekly_exam",
+      "name": "Avoid ranking incomparable personal plans",
+      "possibleScenario": true,
+      "prototypeAvailability": "excluded",
+      "availabilityDetail": "No leaderboard/comparison UI is built; therefore no ranking of incomparable tests is shown.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "FMT-01",
+      "route": "answer_formats",
+      "name": "Root set accepts order and equivalent numeric forms",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Numeric generated root-set parser accepts reordered roots, fractions, separators, braces, and deduplicates. Actual source choice items preserve their source choice format.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "FMT-02",
+      "route": "answer_formats",
+      "name": "Scalar versus set and no-solution result",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Typed choice/scalar/root/no-real/blanks formats exist; source aggregate items use their actual choice/scaffold format.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "FMT-03",
+      "route": "answer_formats",
+      "name": "Substitution-domain and lost-root mistakes",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Real source solutions/steps preserve complete roots. No reasoning-error inference or substitution-domain diagnosis engine is demonstrated.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "FMT-04",
+      "route": "answer_formats",
+      "name": "Original multiple-choice input stays fast",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "A–E source choices render, while Test9 Q9/Q10 are actual digit scaffolds rather than invented multiple-choice.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "ROB-01",
+      "route": "reliability",
+      "name": "Local save, storage failure, and modeled offline",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Local save, failure label and export exist. No network/offline simulation control; no server claims. Storage-failure test not run here.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "ROB-02",
+      "route": "reliability",
+      "name": "Role/profile/route switches and reset isolation",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_partial",
+      "availabilityDetail": "Route/test run isolation and confirmation before reset exist. Profiles share a run and are fixture-fill controls; authenticated role access is excluded.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "UX-01",
+      "route": "mobile",
+      "name": "One current item and compact progress on a phone",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "One current item/progress/picker, compact choices and draft controls exist. Narrow mobile/layout measurements belong to integration QA.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "UX-02",
+      "route": "mobile",
+      "name": "Accessible notation and navigation",
+      "possibleScenario": true,
+      "prototypeAvailability": "partial_local",
+      "availabilityDetail": "Focus styles and some control labels exist. Complete screen-reader/zoom QA not run; some sibling labels have no for/id association.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "RET-01",
+      "route": "assessment",
+      "name": "Virtual delayed check stays a simulation",
+      "possibleScenario": true,
+      "prototypeAvailability": "modeled_local",
+      "availabilityDetail": "Delayed date is explicitly virtual and uses generated unexposed items; no retention/forgetting outcome is claimed.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "SRC-04",
+      "route": "content",
+      "name": "Explicit Test 5 versus Test 9 source scope choice",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Scope switch has actual 15/15 versus 10/10 source inventory and separate source limits. Combined exercise is explicit optional foundation expansion, not an arbitrary combined source-test UI.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "T5-01",
+      "route": "answer_formats",
+      "name": "Test 5 routine quadratic with two real roots",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Source equation/solution/choice stored; raw root input for the book task is intentionally the original source choice format. No full source math re-verification by this agent.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "T5-02",
+      "route": "answer_formats",
+      "name": "Test 5 no real roots remains an explicit outcome",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Source Test5 A3 is a no-real-roots task offered via actual source choices; generated none type uses explicit no-real text distinct from empty/0.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "T5-03",
+      "route": "answer_formats",
+      "name": "Test 5 irrational roots and exact equivalence",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Exact radical source solution/choices render; no raw symbolic radical parser is claimed.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "T5-04",
+      "route": "answer_formats",
+      "name": "Test 5 decimal coefficients and fractional input",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Source decimal-coefficient problem/choices/solutions included; numeric generated roots accept fraction form. Exact item input scenario not run.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "T9-01",
+      "route": "answer_formats",
+      "name": "Test 9 source digit-fill scaffolds",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "All four source digit scaffolds have the correct six/seven keyed digits in DATA; each digit checked independently. This audit checked inventory, not each full worked scaffold.",
+      "verificationScope": "headless_subset",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    },
+    {
+      "id": "T9-02",
+      "route": "answer_formats",
+      "name": "Test 9 even/odd powers and repeated roots",
+      "possibleScenario": true,
+      "prototypeAvailability": "local_implemented",
+      "availabilityDetail": "Source actual equations/roots/multiplicity/request type are included; source-agent math review supplies truth. This audit did not execute each answer case.",
+      "verificationScope": "code_inspection",
+      "wholeScenarioAcceptance": "not_evaluated_as_complete_case"
+    }
+  ],
+  "coverageSummary": {
+    "local_implemented": 23,
+    "excluded": 5,
+    "partial_local": 12,
+    "modeled_local": 12,
+    "modeled_partial": 8
+  },
+  "limits": [
+    "These 60 rows describe possible scenario coverage and availability. No whole scenario is marked passed merely because code exists.",
+    "Real accounts, uploads, PDF compression, server sync, real teacher/parent messages, trained adaptive mastery, actual timed weekly exams and retention measurements remain excluded.",
+    "Source counts/scaffolds were checked in the loaded DATA. Source agent’s verified math is separate from this flow audit.",
+    "No production-security review was performed; the prototype clearly labels synthetic/local boundaries."
+  ],
+  "currentSnapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4",
+  "latestVerificationAt": "2026-10-06T10:23:08.867Z",
+  "resolvedFindings": [
+    {
+      "id": "FLOW-P1-01",
+      "priority": "P1",
+      "status": "resolved_and_reproduced_expected_behavior",
+      "line": 78,
+      "function": "priorities / buildProposal errors filter",
+      "problem": "A transcription correction is keyed to source problem ID and suppresses every later record of that problem, including a new incorrect first attempt in an old-test review.",
+      "reproduction": [
+        "Use one-item Test9 A1 class scope; submit wrong original.",
+        "Record a transcription correction.",
+        "Start old-A review of that source item and submit another wrong answer.",
+        "priorities() returns {}, and errors filter excludes the new wrong record."
+      ],
+      "expected": "Attach correction to the original attemptId (or origin/session), and suppress only that disputed record. Later attempts must remain evidence.",
+      "scenarioIds": [
+        "COR-01",
+        "REV-08"
+      ],
+      "evidenceFile": "/tmp/pi-flow-review-extra-results.json",
+      "resolvedSnapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4",
+      "verificationAt": "2026-10-06T10:23:08.867Z"
+    },
+    {
+      "id": "FLOW-P1-02",
+      "priority": "P1",
+      "status": "resolved_and_reproduced_expected_behavior",
+      "line": 89,
+      "function": "parentView",
+      "problem": "Returned homework material is still displayed to Parent as v1 submitted with teacher assessment pending, so the required resubmission action is hidden.",
+      "reproduction": [
+        "Complete A and B in a modeled class run; submit material v1.",
+        "Teacher returns unreadable material.",
+        "Read Parent panel: it displays зураг v1 илгээсэн while material.status=буцаасан."
+      ],
+      "expected": "Display current material.status and the appropriate next action; preserve version and distinguish pending from needs resubmission.",
+      "scenarioIds": [
+        "HW-03",
+        "PAR-01"
+      ],
+      "evidenceFile": "/tmp/pi-flow-review-extra-results.json",
+      "resolvedSnapshotHash": "2bf7943abd013ee21acb85ebeff6ddded572908a5c80726600b5b0fb56f3c7b4",
+      "verificationAt": "2026-10-06T10:23:08.867Z"
+    }
+  ]
+}

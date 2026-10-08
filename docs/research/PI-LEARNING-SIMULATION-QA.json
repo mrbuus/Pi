@@ -1,0 +1,166 @@
+{
+  "date": "2026-10-06T09:42:02.865Z",
+  "results": [
+    {
+      "name": "linear / mixed complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "linear / strong complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "linear / struggle complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "linear / guess complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "linear / slow complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "linear / partial complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "word / mixed complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "word / strong complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "word / struggle complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "word / guess complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "word / slow complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "word / partial complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "vector / mixed complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "vector / strong complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "vector / struggle complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "vector / guess complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "vector / slow complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "vector / partial complete five-stage flow + delayed example",
+      "status": "PASS"
+    },
+    {
+      "name": "Assisted correction preserves original answer",
+      "status": "PASS"
+    },
+    {
+      "name": "Typing correction audit and HTML-safe reason",
+      "status": "PASS"
+    },
+    {
+      "name": "Reload restores original and corrections",
+      "status": "PASS"
+    },
+    {
+      "name": "Local disconnected-state simulation survives reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Evidence ledger opens and closes",
+      "status": "PASS"
+    },
+    {
+      "name": "Export contains state, history and synthetic boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "Invalid input rejected atomically",
+      "status": "PASS"
+    },
+    {
+      "name": "All-missing submission is unknown, not 0% ability",
+      "status": "PASS"
+    },
+    {
+      "name": "Question shortage exposed without unrelated fillers",
+      "status": "PASS"
+    },
+    {
+      "name": "Fresh review attempt IDs retain prior history",
+      "status": "PASS"
+    },
+    {
+      "name": "Empty topic choice prevents packet",
+      "status": "PASS"
+    },
+    {
+      "name": "Unsupported topic/difficulty abstains",
+      "status": "PASS"
+    },
+    {
+      "name": "Double submit creates one first attempt",
+      "status": "PASS"
+    },
+    {
+      "name": "Numeric parser supports sign/fraction and rejects invalid",
+      "status": "PASS"
+    },
+    {
+      "name": "Independent substitution/text/vector checks for 528 generated questions",
+      "status": "PASS"
+    },
+    {
+      "name": "Stage heading clears sticky navigation",
+      "status": "PASS"
+    },
+    {
+      "name": "390px mobile has no page overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "320px mobile has no page overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "Keyboard focus reaches interactive control",
+      "status": "PASS"
+    },
+    {
+      "name": "No browser exceptions and no external network requests",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "network": [],
+  "limitations": [
+    "Chromium headless; Safari not exercised",
+    "All learning data synthetic; no real learning-effect validation",
+    "No backend/sync/load test",
+    "No production database read/write",
+    "Timing measures virtual UI entry only; synthetic autofill invalidates human UX timing"
+  ]
+}

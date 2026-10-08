@@ -1,0 +1,4478 @@
+{
+  "inputFile": "/Users/mr.buus/Intern/Pi.mn/docs/research/PI-QUADRATIC-LAB-DATA.json",
+  "inputSha256": "7bb47b26395230d281be7325ba818b003637641b18593d4ae18d22797f30c5c8",
+  "method": "Read-only standalone verification. Generic polynomial parsing and expansion from the equation, exact Fraction arithmetic, rational-root theorem and synthetic division, quadratic discriminants, full surd-choice sum/product checks. No production code or generator formulas used. All book equations/choices/keys compared against earlier visual source reviews; native MathML structure checked. SymPy unavailable.",
+  "counts": {
+    "total": 110,
+    "generated": 60,
+    "bookCompared": 50,
+    "generatedKeyPassed": 60,
+    "generatedSolutionPassed": 60,
+    "generatedFullyPassed": 60,
+    "duplicateSourceIds": 0
+  },
+  "sourceIdsUnique": true,
+  "generatedKeyFailedIds": [],
+  "failedIds": [],
+  "bookFailedIds": [],
+  "overallPassed": true,
+  "results": [
+    {
+      "id": "GEN-5-0-2",
+      "equation": "x^2-2x-8=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-8",
+        "-2",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-2": 1,
+        "4": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -2,
+        4
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-2",
+          "c": "-8",
+          "D": "36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-1-2",
+      "equation": "x^2-4x+6=0",
+      "answerType": "none",
+      "polynomialCoefficientsAscending": [
+        "6",
+        "-4",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": null,
+      "storedKey": [],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-4",
+          "c": "6",
+          "D": "-8"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-2-2",
+      "equation": "(2x-2)^2=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "4",
+        "-8",
+        "4"
+      ],
+      "derivedRealRoots": {
+        "1": 2
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "1"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "4",
+          "b": "-8",
+          "c": "4",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-3-2",
+      "equation": "3x^2+7x-6=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-6",
+        "7",
+        "3"
+      ],
+      "derivedRealRoots": {
+        "-3": 1,
+        "2/3": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "2/3",
+        -3
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "3",
+          "b": "7",
+          "c": "-6",
+          "D": "121"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-4-10",
+      "equation": "x^2-20x+98=0",
+      "answerType": "choice",
+      "polynomialCoefficientsAscending": [
+        "98",
+        "-20",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": {
+        "center": "10",
+        "squareRadius": "2",
+        "sum": "20",
+        "product": "98"
+      },
+      "storedKey": "A",
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-20",
+          "c": "98",
+          "D": "8"
+        },
+        {
+          "method": "all five surd choices tested by exact root sum/product",
+          "matchingChoices": [
+            "A"
+          ],
+          "expectedRootSum": "20",
+          "expectedRootProduct": "98"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-0-3",
+      "equation": "x^2-2x-15=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-15",
+        "-2",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-3": 1,
+        "5": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -3,
+        5
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-2",
+          "c": "-15",
+          "D": "64"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-1-3",
+      "equation": "x^2-6x+11=0",
+      "answerType": "none",
+      "polynomialCoefficientsAscending": [
+        "11",
+        "-6",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": null,
+      "storedKey": [],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-6",
+          "c": "11",
+          "D": "-8"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-2-3",
+      "equation": "(2x-3)^2=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "9",
+        "-12",
+        "4"
+      ],
+      "derivedRealRoots": {
+        "3/2": 2
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "3/2"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "4",
+          "b": "-12",
+          "c": "9",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-3-3",
+      "equation": "3x^2+9x-12=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-12",
+        "9",
+        "3"
+      ],
+      "derivedRealRoots": {
+        "-4": 1,
+        "1": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "1",
+        -4
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "3",
+          "b": "9",
+          "c": "-12",
+          "D": "225"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-4-3",
+      "equation": "x^2-6x+6=0",
+      "answerType": "choice",
+      "polynomialCoefficientsAscending": [
+        "6",
+        "-6",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": {
+        "center": "3",
+        "squareRadius": "3",
+        "sum": "6",
+        "product": "6"
+      },
+      "storedKey": "D",
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-6",
+          "c": "6",
+          "D": "12"
+        },
+        {
+          "method": "all five surd choices tested by exact root sum/product",
+          "matchingChoices": [
+            "D"
+          ],
+          "expectedRootSum": "6",
+          "expectedRootProduct": "6"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-0-12",
+      "equation": "x^2-2x-168=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-168",
+        "-2",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-12": 1,
+        "14": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -12,
+        14
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-2",
+          "c": "-168",
+          "D": "676"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-1-4",
+      "equation": "x^2-8x+18=0",
+      "answerType": "none",
+      "polynomialCoefficientsAscending": [
+        "18",
+        "-8",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": null,
+      "storedKey": [],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-8",
+          "c": "18",
+          "D": "-8"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-2-4",
+      "equation": "(2x-4)^2=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "16",
+        "-16",
+        "4"
+      ],
+      "derivedRealRoots": {
+        "2": 2
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "2"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "4",
+          "b": "-16",
+          "c": "16",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-3-4",
+      "equation": "3x^2+11x-20=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-20",
+        "11",
+        "3"
+      ],
+      "derivedRealRoots": {
+        "-5": 1,
+        "4/3": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "4/3",
+        -5
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "3",
+          "b": "11",
+          "c": "-20",
+          "D": "361"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-4-4",
+      "equation": "x^2-8x+11=0",
+      "answerType": "choice",
+      "polynomialCoefficientsAscending": [
+        "11",
+        "-8",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": {
+        "center": "4",
+        "squareRadius": "5",
+        "sum": "8",
+        "product": "11"
+      },
+      "storedKey": "E",
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-8",
+          "c": "11",
+          "D": "20"
+        },
+        {
+          "method": "all five surd choices tested by exact root sum/product",
+          "matchingChoices": [
+            "E"
+          ],
+          "expectedRootSum": "8",
+          "expectedRootProduct": "11"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-0-5",
+      "equation": "x^2-2x-35=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-35",
+        "-2",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-5": 1,
+        "7": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -5,
+        7
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-2",
+          "c": "-35",
+          "D": "144"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-1-5",
+      "equation": "x^2-10x+27=0",
+      "answerType": "none",
+      "polynomialCoefficientsAscending": [
+        "27",
+        "-10",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": null,
+      "storedKey": [],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-10",
+          "c": "27",
+          "D": "-8"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-2-5",
+      "equation": "(2x-5)^2=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "25",
+        "-20",
+        "4"
+      ],
+      "derivedRealRoots": {
+        "5/2": 2
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "5/2"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "4",
+          "b": "-20",
+          "c": "25",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-3-5",
+      "equation": "3x^2+13x-30=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-30",
+        "13",
+        "3"
+      ],
+      "derivedRealRoots": {
+        "-6": 1,
+        "5/3": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "5/3",
+        -6
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "3",
+          "b": "13",
+          "c": "-30",
+          "D": "529"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-4-5",
+      "equation": "x^2-10x+19=0",
+      "answerType": "choice",
+      "polynomialCoefficientsAscending": [
+        "19",
+        "-10",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": {
+        "center": "5",
+        "squareRadius": "6",
+        "sum": "10",
+        "product": "19"
+      },
+      "storedKey": "A",
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-10",
+          "c": "19",
+          "D": "24"
+        },
+        {
+          "method": "all five surd choices tested by exact root sum/product",
+          "matchingChoices": [
+            "A"
+          ],
+          "expectedRootSum": "10",
+          "expectedRootProduct": "19"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-0-6",
+      "equation": "x^2-2x-48=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-48",
+        "-2",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-6": 1,
+        "8": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -6,
+        8
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-2",
+          "c": "-48",
+          "D": "196"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-1-6",
+      "equation": "x^2-12x+38=0",
+      "answerType": "none",
+      "polynomialCoefficientsAscending": [
+        "38",
+        "-12",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": null,
+      "storedKey": [],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-12",
+          "c": "38",
+          "D": "-8"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-2-6",
+      "equation": "(2x-6)^2=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "36",
+        "-24",
+        "4"
+      ],
+      "derivedRealRoots": {
+        "3": 2
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "3"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "4",
+          "b": "-24",
+          "c": "36",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-3-6",
+      "equation": "3x^2+15x-42=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-42",
+        "15",
+        "3"
+      ],
+      "derivedRealRoots": {
+        "-7": 1,
+        "2": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "2",
+        -7
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "3",
+          "b": "15",
+          "c": "-42",
+          "D": "729"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-4-6",
+      "equation": "x^2-12x+29=0",
+      "answerType": "choice",
+      "polynomialCoefficientsAscending": [
+        "29",
+        "-12",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": {
+        "center": "6",
+        "squareRadius": "7",
+        "sum": "12",
+        "product": "29"
+      },
+      "storedKey": "B",
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-12",
+          "c": "29",
+          "D": "28"
+        },
+        {
+          "method": "all five surd choices tested by exact root sum/product",
+          "matchingChoices": [
+            "B"
+          ],
+          "expectedRootSum": "12",
+          "expectedRootProduct": "29"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-0-7",
+      "equation": "x^2-2x-63=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-63",
+        "-2",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-7": 1,
+        "9": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -7,
+        9
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-2",
+          "c": "-63",
+          "D": "256"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-1-7",
+      "equation": "x^2-14x+51=0",
+      "answerType": "none",
+      "polynomialCoefficientsAscending": [
+        "51",
+        "-14",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": null,
+      "storedKey": [],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-14",
+          "c": "51",
+          "D": "-8"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-2-7",
+      "equation": "(2x-7)^2=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "49",
+        "-28",
+        "4"
+      ],
+      "derivedRealRoots": {
+        "7/2": 2
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "7/2"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "4",
+          "b": "-28",
+          "c": "49",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-3-7",
+      "equation": "3x^2+17x-56=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-56",
+        "17",
+        "3"
+      ],
+      "derivedRealRoots": {
+        "-8": 1,
+        "7/3": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "7/3",
+        -8
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "3",
+          "b": "17",
+          "c": "-56",
+          "D": "961"
+        }
+      ]
+    },
+    {
+      "id": "GEN-5-4-7",
+      "equation": "x^2-14x+39=0",
+      "answerType": "choice",
+      "polynomialCoefficientsAscending": [
+        "39",
+        "-14",
+        "1"
+      ],
+      "derivedRealRoots": {},
+      "derivedSurd": {
+        "center": "7",
+        "squareRadius": "10",
+        "sum": "14",
+        "product": "39"
+      },
+      "storedKey": "C",
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-14",
+          "c": "39",
+          "D": "40"
+        },
+        {
+          "method": "all five surd choices tested by exact root sum/product",
+          "matchingChoices": [
+            "C"
+          ],
+          "expectedRootSum": "14",
+          "expectedRootProduct": "39"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-0-2",
+      "equation": "(x-2)^4=81",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-65",
+        "-32",
+        "24",
+        "-8",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-1": 1,
+        "5": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -1,
+        5
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-1",
+          "residualCoefficientsAscending": [
+            "-65",
+            "33",
+            "-9",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "5",
+          "residualCoefficientsAscending": [
+            "13",
+            "-4",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-4",
+          "c": "13",
+          "D": "-36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-1-2",
+      "equation": "(2x-2)^3=125",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-133",
+        "24",
+        "-24",
+        "8"
+      ],
+      "derivedRealRoots": {
+        "7/2": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "7/2"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "7/2",
+          "residualCoefficientsAscending": [
+            "38",
+            "4",
+            "8"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "8",
+          "b": "4",
+          "c": "38",
+          "D": "-1200"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-2-2",
+      "equation": "(x-2)(x+3)=x-2",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-4",
+        "0",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-2": 1,
+        "2": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -2,
+        2
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "0",
+          "c": "-4",
+          "D": "16"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-3-2",
+      "equation": "x^3-2x^2-4x+8=0",
+      "answerType": "scalar",
+      "polynomialCoefficientsAscending": [
+        "8",
+        "-4",
+        "-2",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-2": 1,
+        "2": 2
+      },
+      "derivedSurd": null,
+      "storedKey": -4,
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-2",
+          "residualCoefficientsAscending": [
+            "4",
+            "-4",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-4",
+          "c": "4",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-4-10",
+      "equation": "x^4-x^3-133x^2+x+132=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "132",
+        "1",
+        "-133",
+        "-1",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-11": 1,
+        "-1": 1,
+        "1": 1,
+        "12": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -11,
+        -1,
+        1,
+        12
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-11",
+          "residualCoefficientsAscending": [
+            "12",
+            "-1",
+            "-12",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-1",
+          "residualCoefficientsAscending": [
+            "12",
+            "-13",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-13",
+          "c": "12",
+          "D": "121"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-0-3",
+      "equation": "(x-3)^4=81",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "0",
+        "-108",
+        "54",
+        "-12",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "0": 1,
+        "6": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        0,
+        6
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "0",
+          "residualCoefficientsAscending": [
+            "-108",
+            "54",
+            "-12",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "6",
+          "residualCoefficientsAscending": [
+            "18",
+            "-6",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-6",
+          "c": "18",
+          "D": "-36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-1-3",
+      "equation": "(2x-3)^3=125",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-152",
+        "54",
+        "-36",
+        "8"
+      ],
+      "derivedRealRoots": {
+        "4": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "4"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "4",
+          "residualCoefficientsAscending": [
+            "38",
+            "-4",
+            "8"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "8",
+          "b": "-4",
+          "c": "38",
+          "D": "-1200"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-2-3",
+      "equation": "(x-3)(x+4)=x-3",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-9",
+        "0",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-3": 1,
+        "3": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -3,
+        3
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "0",
+          "c": "-9",
+          "D": "36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-3-11",
+      "equation": "x^3-11x^2-121x+1331=0",
+      "answerType": "scalar",
+      "polynomialCoefficientsAscending": [
+        "1331",
+        "-121",
+        "-11",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-11": 1,
+        "11": 2
+      },
+      "derivedSurd": null,
+      "storedKey": -121,
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-11",
+          "residualCoefficientsAscending": [
+            "121",
+            "-22",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-22",
+          "c": "121",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-4-3",
+      "equation": "x^4-x^3-21x^2+x+20=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "20",
+        "1",
+        "-21",
+        "-1",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-4": 1,
+        "-1": 1,
+        "1": 1,
+        "5": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -4,
+        -1,
+        1,
+        5
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-4",
+          "residualCoefficientsAscending": [
+            "5",
+            "-1",
+            "-5",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-1",
+          "residualCoefficientsAscending": [
+            "5",
+            "-6",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-6",
+          "c": "5",
+          "D": "16"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-0-4",
+      "equation": "(x-4)^4=81",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "175",
+        "-256",
+        "96",
+        "-16",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "1": 1,
+        "7": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        1,
+        7
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "1",
+          "residualCoefficientsAscending": [
+            "-175",
+            "81",
+            "-15",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "7",
+          "residualCoefficientsAscending": [
+            "25",
+            "-8",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-8",
+          "c": "25",
+          "D": "-36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-1-4",
+      "equation": "(2x-4)^3=125",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-189",
+        "96",
+        "-48",
+        "8"
+      ],
+      "derivedRealRoots": {
+        "9/2": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "9/2"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "9/2",
+          "residualCoefficientsAscending": [
+            "42",
+            "-12",
+            "8"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "8",
+          "b": "-12",
+          "c": "42",
+          "D": "-1200"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-2-4",
+      "equation": "(x-4)(x+5)=x-4",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-16",
+        "0",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-4": 1,
+        "4": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -4,
+        4
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "0",
+          "c": "-16",
+          "D": "64"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-3-12",
+      "equation": "x^3-12x^2-144x+1728=0",
+      "answerType": "scalar",
+      "polynomialCoefficientsAscending": [
+        "1728",
+        "-144",
+        "-12",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-12": 1,
+        "12": 2
+      },
+      "derivedSurd": null,
+      "storedKey": -144,
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-12",
+          "residualCoefficientsAscending": [
+            "144",
+            "-24",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-24",
+          "c": "144",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-4-4",
+      "equation": "x^4-x^3-31x^2+x+30=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "30",
+        "1",
+        "-31",
+        "-1",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-5": 1,
+        "-1": 1,
+        "1": 1,
+        "6": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -5,
+        -1,
+        1,
+        6
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-5",
+          "residualCoefficientsAscending": [
+            "6",
+            "-1",
+            "-6",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-1",
+          "residualCoefficientsAscending": [
+            "6",
+            "-7",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-7",
+          "c": "6",
+          "D": "25"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-0-5",
+      "equation": "(x-5)^4=81",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "544",
+        "-500",
+        "150",
+        "-20",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "2": 1,
+        "8": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        2,
+        8
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "2",
+          "residualCoefficientsAscending": [
+            "-272",
+            "114",
+            "-18",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "8",
+          "residualCoefficientsAscending": [
+            "34",
+            "-10",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-10",
+          "c": "34",
+          "D": "-36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-1-5",
+      "equation": "(2x-5)^3=125",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-250",
+        "150",
+        "-60",
+        "8"
+      ],
+      "derivedRealRoots": {
+        "5": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "5"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "5",
+          "residualCoefficientsAscending": [
+            "50",
+            "-20",
+            "8"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "8",
+          "b": "-20",
+          "c": "50",
+          "D": "-1200"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-2-5",
+      "equation": "(x-5)(x+6)=x-5",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-25",
+        "0",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-5": 1,
+        "5": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -5,
+        5
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "0",
+          "c": "-25",
+          "D": "100"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-3-5",
+      "equation": "x^3-5x^2-25x+125=0",
+      "answerType": "scalar",
+      "polynomialCoefficientsAscending": [
+        "125",
+        "-25",
+        "-5",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-5": 1,
+        "5": 2
+      },
+      "derivedSurd": null,
+      "storedKey": -25,
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-5",
+          "residualCoefficientsAscending": [
+            "25",
+            "-10",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-10",
+          "c": "25",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-4-5",
+      "equation": "x^4-x^3-43x^2+x+42=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "42",
+        "1",
+        "-43",
+        "-1",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-6": 1,
+        "-1": 1,
+        "1": 1,
+        "7": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -6,
+        -1,
+        1,
+        7
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-6",
+          "residualCoefficientsAscending": [
+            "7",
+            "-1",
+            "-7",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-1",
+          "residualCoefficientsAscending": [
+            "7",
+            "-8",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-8",
+          "c": "7",
+          "D": "36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-0-6",
+      "equation": "(x-6)^4=81",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "1215",
+        "-864",
+        "216",
+        "-24",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "3": 1,
+        "9": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        3,
+        9
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "3",
+          "residualCoefficientsAscending": [
+            "-405",
+            "153",
+            "-21",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "9",
+          "residualCoefficientsAscending": [
+            "45",
+            "-12",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-12",
+          "c": "45",
+          "D": "-36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-1-6",
+      "equation": "(2x-6)^3=125",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-341",
+        "216",
+        "-72",
+        "8"
+      ],
+      "derivedRealRoots": {
+        "11/2": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "11/2"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "11/2",
+          "residualCoefficientsAscending": [
+            "62",
+            "-28",
+            "8"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "8",
+          "b": "-28",
+          "c": "62",
+          "D": "-1200"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-2-6",
+      "equation": "(x-6)(x+7)=x-6",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-36",
+        "0",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-6": 1,
+        "6": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -6,
+        6
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "0",
+          "c": "-36",
+          "D": "144"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-3-6",
+      "equation": "x^3-6x^2-36x+216=0",
+      "answerType": "scalar",
+      "polynomialCoefficientsAscending": [
+        "216",
+        "-36",
+        "-6",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-6": 1,
+        "6": 2
+      },
+      "derivedSurd": null,
+      "storedKey": -36,
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-6",
+          "residualCoefficientsAscending": [
+            "36",
+            "-12",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-12",
+          "c": "36",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-4-6",
+      "equation": "x^4-x^3-57x^2+x+56=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "56",
+        "1",
+        "-57",
+        "-1",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-7": 1,
+        "-1": 1,
+        "1": 1,
+        "8": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -7,
+        -1,
+        1,
+        8
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-7",
+          "residualCoefficientsAscending": [
+            "8",
+            "-1",
+            "-8",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-1",
+          "residualCoefficientsAscending": [
+            "8",
+            "-9",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-9",
+          "c": "8",
+          "D": "49"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-0-7",
+      "equation": "(x-7)^4=81",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "2320",
+        "-1372",
+        "294",
+        "-28",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "4": 1,
+        "10": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        4,
+        10
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "4",
+          "residualCoefficientsAscending": [
+            "-580",
+            "198",
+            "-24",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "10",
+          "residualCoefficientsAscending": [
+            "58",
+            "-14",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-14",
+          "c": "58",
+          "D": "-36"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-1-7",
+      "equation": "(2x-7)^3=125",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-468",
+        "294",
+        "-84",
+        "8"
+      ],
+      "derivedRealRoots": {
+        "6": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        "6"
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "6",
+          "residualCoefficientsAscending": [
+            "78",
+            "-36",
+            "8"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "8",
+          "b": "-36",
+          "c": "78",
+          "D": "-1200"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-2-7",
+      "equation": "(x-7)(x+8)=x-7",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "-49",
+        "0",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-7": 1,
+        "7": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -7,
+        7
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "0",
+          "c": "-49",
+          "D": "196"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-3-7",
+      "equation": "x^3-7x^2-49x+343=0",
+      "answerType": "scalar",
+      "polynomialCoefficientsAscending": [
+        "343",
+        "-49",
+        "-7",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-7": 1,
+        "7": 2
+      },
+      "derivedSurd": null,
+      "storedKey": -49,
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-7",
+          "residualCoefficientsAscending": [
+            "49",
+            "-14",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-14",
+          "c": "49",
+          "D": "0"
+        }
+      ]
+    },
+    {
+      "id": "GEN-9-4-7",
+      "equation": "x^4-x^3-73x^2+x+72=0",
+      "answerType": "roots",
+      "polynomialCoefficientsAscending": [
+        "72",
+        "1",
+        "-73",
+        "-1",
+        "1"
+      ],
+      "derivedRealRoots": {
+        "-8": 1,
+        "-1": 1,
+        "1": 1,
+        "9": 1
+      },
+      "derivedSurd": null,
+      "storedKey": [
+        -8,
+        -1,
+        1,
+        9
+      ],
+      "keyPassed": true,
+      "solutionPassed": true,
+      "passed": true,
+      "failedTests": [],
+      "checks": [
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-8",
+          "residualCoefficientsAscending": [
+            "9",
+            "-1",
+            "-9",
+            "1"
+          ]
+        },
+        {
+          "method": "rational-root theorem and exact synthetic division",
+          "root": "-1",
+          "residualCoefficientsAscending": [
+            "9",
+            "-10",
+            "1"
+          ]
+        },
+        {
+          "method": "quadratic discriminant",
+          "a": "1",
+          "b": "-10",
+          "c": "9",
+          "D": "64"
+        }
+      ]
+    }
+  ],
+  "bookResults": [
+    {
+      "id": "5-A-1",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-2",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-3",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-4",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-5",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-6",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-7",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-8",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-9",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-10",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-11",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-12",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-13",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-14",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-A-15",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-1",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-2",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-3",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-4",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-5",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-6",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-7",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-8",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-9",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-10",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-11",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-12",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-13",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-14",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "5-B-15",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "9-A-1",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "4"
+      ]
+    },
+    {
+      "id": "9-A-2",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "5"
+      ]
+    },
+    {
+      "id": "9-A-3",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-A-4",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": []
+    },
+    {
+      "id": "9-A-5",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "9-A-6",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-A-7",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "4",
+        "3"
+      ]
+    },
+    {
+      "id": "9-A-8",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-A-9",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-A-10",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "4",
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-B-1",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "6"
+      ]
+    },
+    {
+      "id": "9-B-2",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3"
+      ]
+    },
+    {
+      "id": "9-B-3",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-B-4",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": []
+    },
+    {
+      "id": "9-B-5",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "2"
+      ]
+    },
+    {
+      "id": "9-B-6",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-B-7",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "4",
+        "3"
+      ]
+    },
+    {
+      "id": "9-B-8",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-B-9",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "3",
+        "2"
+      ]
+    },
+    {
+      "id": "9-B-10",
+      "passed": true,
+      "differences": [],
+      "equationSuperscripts": [
+        "4",
+        "3",
+        "2"
+      ]
+    }
+  ],
+  "question13FractionMarkup": [
+    {
+      "id": "5-A-13",
+      "passed": true,
+      "fractionCount": 3,
+      "superscriptCount": 1,
+      "superscriptBase": "x",
+      "superscriptExponent": "2",
+      "equationAnnotation": [
+        "\\frac{x^2}{2}-\\frac{5x}{6}+\\frac13=0"
+      ]
+    },
+    {
+      "id": "5-B-13",
+      "passed": true,
+      "fractionCount": 3,
+      "superscriptCount": 1,
+      "superscriptBase": "x",
+      "superscriptExponent": "2",
+      "equationAnnotation": [
+        "\\frac{x^2}{2}-\\frac{7x}{6}+\\frac23=0"
+      ]
+    }
+  ],
+  "generatedBookEquationDuplicates": [],
+  "limits": "Native MathML structure verified. No screenshot or browser layout validation performed in this read-only audit.",
+  "bookWorkedStepReview": {
+    "count": 50,
+    "method": "All 50 complete source solution strings previously reviewed for signs, exponent precedence, factorization identities, real versus complex roots, distinct roots, aggregates and ordered comparisons. Latest strings each match that independently derived source review.",
+    "failedIds": [],
+    "results": [
+      {
+        "id": "5-A-1",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-2",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-3",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-4",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-5",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-6",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-7",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-8",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-9",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-10",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-11",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-12",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-13",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-14",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-A-15",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-1",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-2",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-3",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-4",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-5",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-6",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-7",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-8",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-9",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-10",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-11",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-12",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-13",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-14",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "5-B-15",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-1",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-2",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-3",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-4",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-5",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-6",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-7",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-8",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-9",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-A-10",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-1",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-2",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-3",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-4",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-5",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-6",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-7",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-8",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-9",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      },
+      {
+        "id": "9-B-10",
+        "matchesIndependentlyDerivedReview": true,
+        "precedenceReviewPassed": true
+      }
+    ]
+  },
+  "bookAppKeyReview": {
+    "count": 50,
+    "failedIds": [],
+    "results": [
+      {
+        "id": "5-A-1",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-2",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-3",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-4",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-5",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-6",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-7",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-8",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-9",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-10",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-11",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-12",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-13",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-14",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-A-15",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-1",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-2",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-3",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-4",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-5",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-6",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-7",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-8",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-9",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-10",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-11",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-12",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-13",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-14",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "5-B-15",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-1",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-2",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-3",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-4",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-5",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-6",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-7",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-8",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-9",
+        "answerType": "blanks",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-A-10",
+        "answerType": "blanks",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-1",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-2",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-3",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-4",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-5",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-6",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-7",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-8",
+        "answerType": "choice",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-9",
+        "answerType": "blanks",
+        "keyMatchesVerifiedSource": true
+      },
+      {
+        "id": "9-B-10",
+        "answerType": "blanks",
+        "keyMatchesVerifiedSource": true
+      }
+    ]
+  },
+  "allEquationDuplicateAudit": {
+    "count": 110,
+    "method": "Expand both sides with an independent polynomial parser, including TeX fractions; move RHS to LHS; divide by leading coefficient. Therefore equations that differ only by a nonzero scalar count as duplicates. Includes all 50 book plus 60 generated fixtures.",
+    "normalizationErrors": [],
+    "distinctNormalizedEquationCount": 110,
+    "duplicateGroupCount": 0,
+    "duplicateGroups": [],
+    "generatedBookOverlapCount": 0,
+    "withinGeneratedDuplicateGroupCount": 0,
+    "withinBookDuplicateGroupCount": 0,
+    "equations": [
+      {
+        "sourceId": "100V3-TEG-5-A-01",
+        "id": "5-A-1",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "30",
+          "11",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-02",
+        "id": "5-A-2",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-21",
+          "-4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-03",
+        "id": "5-A-3",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "5",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-04",
+        "id": "5-A-4",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "1/4",
+          "1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-05",
+        "id": "5-A-5",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "91",
+          "-20",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-06",
+        "id": "5-A-6",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "35",
+          "12",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-07",
+        "id": "5-A-7",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "30",
+          "-11",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-08",
+        "id": "5-A-8",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "22",
+          "-13",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-09",
+        "id": "5-A-9",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-2/3",
+          "-5/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-10",
+        "id": "5-A-10",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "6",
+          "-5",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-11",
+        "id": "5-A-11",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "18",
+          "-9",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-12",
+        "id": "5-A-12",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "2",
+          "-4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-13",
+        "id": "5-A-13",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "2/3",
+          "-5/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-14",
+        "id": "5-A-14",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-1/5",
+          "4/5",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-A-15",
+        "id": "5-A-15",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "3/2",
+          "-5/2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-01",
+        "id": "5-B-1",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "56",
+          "15",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-02",
+        "id": "5-B-2",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-32",
+          "-4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-03",
+        "id": "5-B-3",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "5",
+          "4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-04",
+        "id": "5-B-4",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "1/25",
+          "-2/5",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-05",
+        "id": "5-B-5",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "96",
+          "-20",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-06",
+        "id": "5-B-6",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "24",
+          "14",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-07",
+        "id": "5-B-7",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-20",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-08",
+        "id": "5-B-8",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "28",
+          "-11",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-09",
+        "id": "5-B-9",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "3/4",
+          "-13/4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-10",
+        "id": "5-B-10",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-12",
+          "1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-11",
+        "id": "5-B-11",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-24",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-12",
+        "id": "5-B-12",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "3",
+          "-6",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-13",
+        "id": "5-B-13",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "4/3",
+          "-7/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-14",
+        "id": "5-B-14",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-3/10",
+          "7/10",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-5-B-15",
+        "id": "5-B-15",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "32/5",
+          "-28/5",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-01",
+        "id": "9-A-1",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-15",
+          "4",
+          "6",
+          "4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-02",
+        "id": "9-A-2",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-11/81",
+          "5/81",
+          "-10/27",
+          "10/9",
+          "-5/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-03",
+        "id": "9-A-3",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "0",
+          "-4",
+          "-3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-04",
+        "id": "9-A-4",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-1",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-05",
+        "id": "9-A-5",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-6",
+          "11",
+          "-6",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-06",
+        "id": "9-A-6",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "1",
+          "-1",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-07",
+        "id": "9-A-7",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-2",
+          "-1",
+          "0",
+          "2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-08",
+        "id": "9-A-8",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "64",
+          "-16",
+          "-4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-09",
+        "id": "9-A-9",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "1",
+          "5/3",
+          "5/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-A-10",
+        "id": "9-A-10",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "12",
+          "1",
+          "-13",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-01",
+        "id": "9-B-1",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "0",
+          "-192",
+          "240",
+          "-160",
+          "60",
+          "-12",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-02",
+        "id": "9-B-2",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-13/4",
+          "3/4",
+          "3/2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-03",
+        "id": "9-B-3",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "0",
+          "-5",
+          "-4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-04",
+        "id": "9-B-4",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-21",
+          "4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-05",
+        "id": "9-B-5",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "-60",
+          "47",
+          "-12",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-06",
+        "id": "9-B-6",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "81",
+          "-81",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-07",
+        "id": "9-B-7",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "8",
+          "8",
+          "0",
+          "1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-08",
+        "id": "9-B-8",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "27",
+          "-9",
+          "-3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-09",
+        "id": "9-B-9",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "1",
+          "5/2",
+          "5/2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "100V3-TEG-9-B-10",
+        "id": "9-B-10",
+        "kind": "book",
+        "normalizedEquationCoefficientsAscending": [
+          "15",
+          "2",
+          "-16",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-0-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-8",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-1-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "6",
+          "-4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-2-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "1",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-3-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-2",
+          "7/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-4-10",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "98",
+          "-20",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-0-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-15",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-1-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "11",
+          "-6",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-2-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "9/4",
+          "-3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-3-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-4",
+          "3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-4-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "6",
+          "-6",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-0-12",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-168",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-1-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "18",
+          "-8",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-2-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "4",
+          "-4",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-3-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-20/3",
+          "11/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-4-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "11",
+          "-8",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-0-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-35",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-1-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "27",
+          "-10",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-2-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "25/4",
+          "-5",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-3-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-10",
+          "13/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-4-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "19",
+          "-10",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-0-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-48",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-1-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "38",
+          "-12",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-2-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "9",
+          "-6",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-3-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-14",
+          "5",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-4-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "29",
+          "-12",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-0-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-63",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-1-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "51",
+          "-14",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-2-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "49/4",
+          "-7",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-3-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-56/3",
+          "17/3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-5-4-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "39",
+          "-14",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-0-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-65",
+          "-32",
+          "24",
+          "-8",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-1-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-133/8",
+          "3",
+          "-3",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-2-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-4",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-3-2",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "8",
+          "-4",
+          "-2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-4-10",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "132",
+          "1",
+          "-133",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-0-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "0",
+          "-108",
+          "54",
+          "-12",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-1-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-19",
+          "27/4",
+          "-9/2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-2-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-9",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-3-11",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "1331",
+          "-121",
+          "-11",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-4-3",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "20",
+          "1",
+          "-21",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-0-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "175",
+          "-256",
+          "96",
+          "-16",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-1-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-189/8",
+          "12",
+          "-6",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-2-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-16",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-3-12",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "1728",
+          "-144",
+          "-12",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-4-4",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "30",
+          "1",
+          "-31",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-0-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "544",
+          "-500",
+          "150",
+          "-20",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-1-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-125/4",
+          "75/4",
+          "-15/2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-2-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-25",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-3-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "125",
+          "-25",
+          "-5",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-4-5",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "42",
+          "1",
+          "-43",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-0-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "1215",
+          "-864",
+          "216",
+          "-24",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-1-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-341/8",
+          "27",
+          "-9",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-2-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-36",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-3-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "216",
+          "-36",
+          "-6",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-4-6",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "56",
+          "1",
+          "-57",
+          "-1",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-0-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "2320",
+          "-1372",
+          "294",
+          "-28",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-1-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-117/2",
+          "147/4",
+          "-21/2",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-2-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "-49",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-3-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "343",
+          "-49",
+          "-7",
+          "1"
+        ]
+      },
+      {
+        "sourceId": "GEN-9-4-7",
+        "id": null,
+        "kind": "generated",
+        "normalizedEquationCoefficientsAscending": [
+          "72",
+          "1",
+          "-73",
+          "-1",
+          "1"
+        ]
+      }
+    ]
+  },
+  "transferEquationNovelty": {
+    "bookEquationCount": 50,
+    "generatedEquationCount": 60,
+    "generatedBookEquationOverlapCount": 0,
+    "withinGeneratedDuplicates": 0,
+    "allGeneratedEquationsHaveNewNumericalInstances": true,
+    "scope": "Confirms equation novelty relative to the 50 supplied book fixtures. This checks numerical transfer within existing template families; it does not establish mastery of untested methods or whether a learner has already seen a generated question."
+  },
+  "shiftedFixtures": [
+    {
+      "sourceId": "GEN-5-4-10",
+      "number": 5,
+      "equation": "x^2-20x+98=0",
+      "key": "A"
+    },
+    {
+      "sourceId": "GEN-5-0-12",
+      "number": 11,
+      "equation": "x^2-2x-168=0",
+      "key": [
+        -12,
+        14
+      ]
+    },
+    {
+      "sourceId": "GEN-9-4-10",
+      "number": 5,
+      "equation": "x^4-x^3-133x^2+x+132=0",
+      "key": [
+        -11,
+        -1,
+        1,
+        12
+      ]
+    },
+    {
+      "sourceId": "GEN-9-3-11",
+      "number": 9,
+      "equation": "x^3-11x^2-121x+1331=0",
+      "key": -121
+    },
+    {
+      "sourceId": "GEN-9-3-12",
+      "number": 14,
+      "equation": "x^3-12x^2-144x+1728=0",
+      "key": -144
+    }
+  ],
+  "snapshotStillCurrentAtWrite": true
+}

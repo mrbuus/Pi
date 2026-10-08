@@ -1,0 +1,1724 @@
+{
+  "schemaVersion": "1.1",
+  "artifactType": "pi-tests5-and9-isolated-prototype-scenario-spec",
+  "date": "2026-10-06",
+  "scope": {
+    "book": "100x100 V3",
+    "tests": [
+      {
+        "test": 9,
+        "variants": {
+          "A": 10,
+          "B": 10
+        },
+        "total": 20,
+        "topic": "Polynomial equations: powers, cubic/quartic factoring, reducible quadratic factors",
+        "sourceTimeLimitMin": 50,
+        "sourceBookPages": [
+          61,
+          62,
+          63,
+          64
+        ],
+        "verification": "Source agent reports all 4 pages visually checked and answers independently verified."
+      },
+      {
+        "test": 5,
+        "variants": {
+          "A": 15,
+          "B": 15
+        },
+        "total": 30,
+        "topic": "Routine quadratic equations",
+        "sourceTimeLimitMin": 40,
+        "verification": "Source review confirms classification/count and lists representative source equations; item-level verification belongs to the Test 5 dataset."
+      }
+    ],
+    "totalSourceItems": 50,
+    "countCorrection": "Prior scenario version incorrectly assumed 20A+20B for Test 9. Source has 10A+10B. The mistaken count was an analyst assumption, not a user instruction.",
+    "sourceTruth": "Reviewed source book/PDF + reviewed answer keys; import-ready.jsonl is provisional",
+    "productionChanges": false,
+    "modelOnly": [
+      "learners",
+      "attendance",
+      "entitlement",
+      "role switching",
+      "notebook photo bundle",
+      "teacher review",
+      "parent view",
+      "weekly exam schedule",
+      "network status",
+      "virtual delayed check"
+    ]
+  },
+  "evidenceBasis": {
+    "confirmed_request": [
+      "Use real 100x100 V3 source content instead of an overly easy fabricated linear example; the user did not specify 20 questions in each Test 9 variant.",
+      "Phones are absent in class; original paper answers/confidence/help are backfilled at home before corrections.",
+      "Homework notebook material uses a five-photo modeled submission.",
+      "Makeup covers absent/ill/permitted students: theory → exact class scope → A work then B work/review.",
+      "Teacher checking and parent visibility are required.",
+      "Online learner uses book/topic test → initial grade → second wrong-answer/solution pass; weekly exam; independent 10/30/60 review.",
+      "Selection must respect prerequisite gaps, insufficient evidence, assistance, guesses, and exposure."
+    ],
+    "documented_plan": [
+      "PI-MATH-PROJECT v0.3 is a review draft, not proof of implemented functionality.",
+      "Initial records, transcription corrections, retries, assistance, teacher completion and skill evidence stay distinct.",
+      "1–2 minutes is a full-test backfill UX goal requiring measurement.",
+      "Sparse/insufficient candidate pool must be stated; no arbitrary extra topics or difficulty."
+    ],
+    "engineering_choice": [
+      "Compact route entry and shared attempt/history components.",
+      "Teacher-specified subset scope and explicit Start after proposal.",
+      "Safe typed answer checking and immutable first records.",
+      "Modeled material version/resubmission, local run isolation, and small exam-window state controls.",
+      "Expose an explicit Test 5 quadratic versus Test 9 polynomial scope choice; mixing scopes requires an explicit review-topic selection."
+    ],
+    "source_findings": [
+      "Test 9 has 10 questions per A/B variant, 20 total, with 50-minute source metadata. It is polynomial/power/factoring content; only Q4 is originally degree 2 in each variant.",
+      "Test 5 has 15 questions per A/B variant, 30 total, with 40-minute source metadata. It provides pure routine quadratic equations.",
+      "Tests 5 and 9 together provide 50 source problems; the prototype can let the learner/teacher select either scope explicitly.",
+      "Test 9 Q9/Q10 are structured digit-fill problems, not five-choice items. Q9 asks for a root count; aggregate and greatest-root answers elsewhere differ from full root sets."
+    ]
+  },
+  "openDecisions": [
+    "The source agent reports Test 9’s 20 items visually checked and answers independently verified. Test 5 has 30 source items; its individual answer/solution verification status must travel with the dataset before auto-grading. Neither source verification proves prototype execution.",
+    "Scope choice is explicit: Test 5 pure quadratics (15A/15B) or Test 9 polynomial/power/factoring (10A/10B). A combined practice set uses selected taught skills, never an unnoticed content substitution.",
+    "Test 9 A1–A10 for class and B1–B10 for homework is a proposed example default, not a confirmed universal teacher rule. Test 5 has A1–A15/B1–B15. Every route follows the teacher’s exact published subset.",
+    "If A then B was intended specifically for makeup test variants, show both in order there; independent B review is a separate route with the same history.",
+    "Weekly exam window, pause/timer rules, solution release, and entitlement policy are unresolved; use clearly labeled scenario controls instead of asserting a production policy.",
+    "Prerequisite mapping and timing labels require teacher review; until then they are proposed metadata, not official curriculum codes or calibrated difficulty.",
+    "Do not claim broad transfer from the same template with changed numbers; source-limited unseen coverage may run out quickly."
+  ],
+  "inclusionLimits": {
+    "includeNow": [
+      "One isolated local prototype with source-aligned Test 5 and Test 9 scope choice, 50 source items total.",
+      "Classroom, makeup, self-study, independent review entrances and shared result history.",
+      "Minimal modeled teacher/parent views and five-photo material states.",
+      "Typed source answer checking; explicit verified/unverified/generated metadata.",
+      "Local pause/resume/export and meaningful error states."
+    ],
+    "excludeNow": [
+      "Production web/API/database edits",
+      "Actual student accounts/authentication/payment/entitlement enforcement",
+      "Real photo uploads/OCR/scanning/PDF compression/server synchronization",
+      "Real teacher/parent notifications or messages",
+      "All-grade curriculum authoring or a universal recommendation algorithm",
+      "Trained ML/RL, validated mastery percentages, proven retention or causal learning-effect claims",
+      "Generated items presented as real book content",
+      "Actual high-stakes exam security or concurrency/load claims"
+    ]
+  },
+  "candidateEligibilityOrder": [
+    "Explicit selected Test 5/Test 9/combined topic, published lesson scope where relevant, and valid modeled rights.",
+    "Verified readable source/version/answer/solution and compatible answer type.",
+    "Required method-specific prerequisites known enough for this task, or an explicit short prerequisite check/help branch; Test 5 quadratics can support a relevant Test 9 prerequisite, but do not require all Test 5 items for every Test 9 problem.",
+    "Relevant evidence from all attempts, preserving missing vs incorrect and initial vs later assistance.",
+    "Exposure/family status: repeated practice is allowed but not unseen; no hidden duplicate source item via a new batch ID.",
+    "Chosen practice/check mode, timing/count budget and usable candidate stock.",
+    "Offer an honest shorter/limited plan if no eligible candidate; do not silently widen scope."
+  ],
+  "minimumAttemptFields": [
+    "run_id",
+    "modeled_student_id",
+    "lesson_id_and_scope_version",
+    "source_problem_id_and_version",
+    "variant_and_number",
+    "atomic_skill_ids",
+    "prerequisite_skill_ids",
+    "attempt_id",
+    "previous_attempt_id",
+    "context",
+    "source",
+    "original_lesson_date",
+    "entered_at",
+    "answer_type",
+    "raw_answer",
+    "normalized_answer",
+    "correctness_or_ungraded",
+    "status",
+    "confidence_or_unmarked",
+    "help_at_attempt",
+    "prior_answer_or_solution_exposure",
+    "synthetic_or_source_data",
+    "solve_time_known",
+    "active_solve_time_ms_or_null"
+  ],
+  "lowActionUX": {
+    "principle": "One current task, prefilled context, compact progress, one main action; exceptional states are explicit without forcing fields never observed on paper.",
+    "classroomEntry": [
+      "Today’s assigned test opens directly.",
+      "Use A–E choice input when the verified source is multiple choice; root-set input only where useful/required.",
+      "Confidence is optional/unmarked by default; ?, ~, H have compact toggles and separate semantics.",
+      "Show full equation on demand; numbered rows/current-item navigation keeps the actual 10-/15-item variant usable.",
+      "Submit once after missing/invalid review, then immediately offer the wrong/uncertain queue."
+    ],
+    "makeupEntry": [
+      "Make up today’s lesson opens exact published scope.",
+      "Theory state then A class scope, B assignment, shared review.",
+      "Resume at the last unfinished task; no classroom-paper gate."
+    ],
+    "reviewEntry": [
+      "Choose Previous test / My mistakes / New review.",
+      "10/30/60 choices with selected taught topic as default.",
+      "Proposal shows count, methods, repeated/unseen labels, estimated time and availability; one Start action."
+    ],
+    "targets": [
+      "360px layout without horizontal scrolling",
+      "Stable focus when typing and revealing validation",
+      "Keyboard and accessible item labels",
+      "Full-test backfill 1–2 minutes remains a measurement target, not an assertion",
+      "No new fields to diagnose real medical conditions or parent communication needs"
+    ]
+  },
+  "existingPrototypeHoles": [
+    {
+      "id": "H01",
+      "severity": "P0",
+      "where": "LESSONS, data, lesson, homework",
+      "finding": "Only fabricated linear/word/vector lessons; 10 class and 6 homework items are hard-coded. There is no verified Test 9 (10A/10B) or Test 5 (15A/15B) scope choice.",
+      "recommendation": "Load a reviewed source dataset and derive counters/scope from item IDs."
+    },
+    {
+      "id": "H02",
+      "severity": "P0",
+      "where": "STAGES and publish/paper-ready/submit-class gate",
+      "finding": "Every run needs a teacher publication and virtual paper ready; absent and online learners must pretend classroom attendance.",
+      "recommendation": "Add explicit classroom, makeup, and self-study route entry with shared attempts/corrections/review."
+    },
+    {
+      "id": "H03",
+      "severity": "P0",
+      "where": "num, equal, submit, recordPractice",
+      "finding": "Only one numeric answer can be parsed; polynomial root sets, original A–E options, and no-solution results are unsupported.",
+      "recommendation": "Use verified typed answer metadata and a safe deterministic checker."
+    },
+    {
+      "id": "H04",
+      "severity": "P0",
+      "where": "evidence and assemble",
+      "finding": "Four independent skill indexes, fixed uncalibrated weights, no prerequisite graph; later review/probe attempts are ignored by evidence.",
+      "recommendation": "Use explicit reviewed prerequisite dependencies and all attempt history; keep no-evidence/help/guess states separate."
+    },
+    {
+      "id": "H05",
+      "severity": "P0",
+      "where": "assemble seen set and regenerated batch IDs",
+      "finding": "Only class/home prompts are excluded from review selection; a previous review item can reappear with a new batch ID and be mistaken for new.",
+      "recommendation": "Track source item exposure independent of batch/attempt ID; offer repeated practice deliberately."
+    },
+    {
+      "id": "H06",
+      "severity": "P0",
+      "where": "evidence help aggregation",
+      "finding": "Opening a solution after an initial submission increments historical help-based selection counts; original assistance and later exposure are not separately described in the UI explanation.",
+      "recommendation": "Keep original help state immutable and log later help/exposure separately; explain which evidence is used."
+    },
+    {
+      "id": "H07",
+      "severity": "P0",
+      "where": "chooseProbe",
+      "finding": "Probes always select three of four skills and use numeric near-variants; incomplete coverage can look like success. The helper does not explicitly handle zero eligible items.",
+      "recommendation": "Show checked versus unchecked methods; handle empty/no-independent-evidence outcomes before success wording."
+    },
+    {
+      "id": "H08",
+      "severity": "P0",
+      "where": "review page and build-review",
+      "finding": "Proposal is immediately an active practice batch; there is no distinct accept/start step. Scope/timing are generic and stock is huge compared with 40 real items.",
+      "recommendation": "Show eligible count/exposure/uncertain timing and require one clear Start review action."
+    },
+    {
+      "id": "H09",
+      "severity": "P0",
+      "where": "homework, material, teacher-grade",
+      "finding": "Material is one boolean and teacher grade is one synthetic 0–6 number; there is no page inspection/resubmission/material version or parent summary.",
+      "recommendation": "Use small modeled material/review states and a role view; preserve explicit no-upload warning."
+    },
+    {
+      "id": "H10",
+      "severity": "P0",
+      "where": "practiceCard and recordPractice",
+      "finding": "Review/probe answers force confidence=sure; unattempted and missing statuses are not editable in the same way as paper answers.",
+      "recommendation": "Avoid inferring confidence and preserve direct-test unknown/not-attempted distinctions."
+    },
+    {
+      "id": "H11",
+      "severity": "P1",
+      "where": "initial, localStorage KEY",
+      "finding": "One global local run can be reset, overwritten, or switched without a history shelf; modeled profiles are not separate learner/attempt entities.",
+      "recommendation": "Isolate scenario runs and warn before losing unfinished local drafts."
+    },
+    {
+      "id": "H12",
+      "severity": "P0",
+      "where": "home and paper rendering",
+      "finding": "The paper/backfill lists render full problems with four controls per item. The 1–2-minute entry goal remains unmeasured for the real source variants: 10 items in Test 9 and 15 in Test 5.",
+      "recommendation": "Use source A–E entry where applicable, compact numbered rows/current item, and unmarked confidence defaults."
+    },
+    {
+      "id": "H13",
+      "severity": "P0",
+      "where": "STAGES and probe comparison",
+      "finding": "No previous-test/errors/new-review entrances, no online book/topic entry, and no weekly-exam states; these exist only in the plan document.",
+      "recommendation": "Demonstrate their minimal route states using the same reviewed content without creating backend/commerce systems."
+    }
+  ],
+  "cases": [
+    {
+      "id": "SRC-01",
+      "route": "content",
+      "name": "Use the real 100x100 V3 Test 9 A/B scope",
+      "priority": "P0",
+      "basis": "confirmed_goal_with_source_findings",
+      "steps": [
+        "Open the isolated prototype with the verified source dataset.",
+        "Inspect A and B scope counters and any quarantined items."
+      ],
+      "acceptance": [
+        "Exactly 10 source item slots for Test 9 A and 10 for Test 9 B (20 total), each with stable book/topic/test/variant/item ID.",
+        "Test 9 is labeled polynomial equations solved through powers and factoring (cubic/quartic/power equations), with its 50-minute source metadata. Test 5 is a separate pure quadratic scope.",
+        "Each shown equation/choice/answer/solution has provenance and review state; an unverified answer key is not called verified."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "SRC-02",
+      "route": "content",
+      "name": "Source conflict or damaged formula",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Select an item whose OCR/import differs from the reviewed source.",
+        "Try to include it in an auto-graded or unseen check."
+      ],
+      "acceptance": [
+        "Keep original source and correction provenance.",
+        "Mark the item Needs review; exclude it from auto-grading and adaptive evidence until checked.",
+        "Explain reduced available scope instead of silently substituting an easy fabricated question."
+      ],
+      "notes": [
+        "import-ready.jsonl is not sufficient authority by itself; the reviewed source wins."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "SRC-03",
+      "route": "content",
+      "name": "Teacher lesson scope is a subset, not the entire topic",
+      "priority": "P0",
+      "basis": "documented_plan",
+      "steps": [
+        "For Test 9, teacher selects A1–A7 as class work, A8–A10 as makeup extension only if explicitly assigned, and B1–B8 as homework.",
+        "Student opens today’s lesson."
+      ],
+      "acceptance": [
+        "Student sees exactly the published class and homework lists without retyping book/test/date.",
+        "Do not infer that all 20 Test 9 problems were taught or attempted.",
+        "Optional makeup extension appears only when actually assigned."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "CLS-01",
+      "route": "classroom",
+      "name": "Attend class and backfill mixed paper answers",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Publish a lesson scope.",
+        "Use the paper fixture with a correct sure answer, wrong sure answer, unsure answer, guessed correct answer, helped answer, and unattempted answer.",
+        "At home enter the original paper answers and submit once."
+      ],
+      "acceptance": [
+        "No phone workflow is required during class.",
+        "No result or worked solution appears during initial backfill.",
+        "Original answer, confidence, help, source=paper_backfill, lesson date, entry date, and unknown class solve time remain separate.",
+        "Outcome counts preserve correct, wrong, guessed, helped, and missing categories."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "CLS-02",
+      "route": "classroom",
+      "name": "Lost paper or cannot remember the original answer",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Enter answers for half the assigned list.",
+        "Mark one Original answer unknown and one No paper marking.",
+        "Submit the initial record."
+      ],
+      "acceptance": [
+        "Unknown and unmarked entries are missing evidence, not invented wrong answers or automatically correct.",
+        "A later web answer is a new attempt with its own time/source.",
+        "Keep the lesson and missing original record available without blocking homework."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "CLS-03",
+      "route": "classroom",
+      "name": "Assigned but not attempted in class",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Mark an assigned item Did not attempt in class.",
+        "Later attempt it at home without help."
+      ],
+      "acceptance": [
+        "Status does not assert mathematical inability.",
+        "The home attempt is recorded separately and can supply new direct evidence.",
+        "A missing classroom result does not fabricate a zero-confidence mastery score."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "CLS-04",
+      "route": "classroom",
+      "name": "Fast entry without inferred confidence",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Open a preselected real source variant on a narrow phone: 10 items for Test 9 or 15 for Test 5.",
+        "Enter answer choices or source-format answers, leaving confidence unmarked where it was not on paper."
+      ],
+      "acceptance": [
+        "The child never re-enters class/book/date/test metadata.",
+        "Confidence defaults to Unmarked; no implicit Sure.",
+        "Only explicit entries count as recorded; there is no Mark all untouched correct behavior.",
+        "Measure full-test entry time and input actions; 1–2 minutes is a user goal, not a claimed achievement."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "CLS-05",
+      "route": "classroom",
+      "name": "Submit invalid root answer atomically",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Enter valid values in several rows and an invalid root-set expression in a later row.",
+        "Press Submit.",
+        "Correct the invalid field and submit again."
+      ],
+      "acceptance": [
+        "First action changes no submitted original records.",
+        "Validation identifies the item and accepted format while retaining every draft.",
+        "Successful retry creates one first record per item and one submission event."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "CLS-06",
+      "route": "classroom",
+      "name": "Double tap and reload after initial submission",
+      "priority": "P0",
+      "basis": "documented_plan",
+      "steps": [
+        "Double tap Submit, then reload.",
+        "Reopen the original answer review."
+      ],
+      "acceptance": [
+        "There is one original submission; answers remain intact.",
+        "Reload resumes the same lesson/variant/profile rather than creating a new first attempt.",
+        "No first-answer controls silently reopen after results are visible."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "COR-01",
+      "route": "correction",
+      "name": "Separate transcription correction from mathematical retry",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Submit a wrong sign copied from paper.",
+        "Use Fix entry error with a reason.",
+        "Then solve the same equation again."
+      ],
+      "acceptance": [
+        "The original value remains visible.",
+        "The transcription correction records old/new value, reason, and time; it is not learning gain.",
+        "The mathematical retry is another attempt with its own assistance/exposure status."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "COR-02",
+      "route": "correction",
+      "name": "View solution and then enter the correct answer",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Submit a wrong initial answer.",
+        "Open the worked solution.",
+        "Close it and enter a correct retry."
+      ],
+      "acceptance": [
+        "Solution exposure is logged once and remains attached after closing/reload.",
+        "Retry is correct with assistance, not independent mastery.",
+        "Original initial-help flag remains about the original attempt; later help is a distinct event."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "COR-03",
+      "route": "correction",
+      "name": "External help without clicking the built-in solution",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Get teacher/parent help or consult the answer key.",
+        "Declare help and enter a correct answer."
+      ],
+      "acceptance": [
+        "Help can be declared without needing a built-in solution event.",
+        "Correctness and help are distinct values.",
+        "Self-report is labeled as such; no claim that assistance was technically verified."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "COR-04",
+      "route": "correction",
+      "name": "Confident wrong versus guessed right",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Submit one confident wrong and one guessed correct answer on the same skill.",
+        "Build a review plan."
+      ],
+      "acceptance": [
+        "Confident wrong routes to the relevant method/prerequisite check.",
+        "Guessed correct gets a short unassisted check, not mastered labeling.",
+        "Do not equate the two cases to a single accuracy percentage."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "COR-05",
+      "route": "correction",
+      "name": "Multiple retries with the same error",
+      "priority": "P1",
+      "basis": "documented_plan",
+      "steps": [
+        "Retry incorrectly twice.",
+        "View the relevant explanation and retry correctly."
+      ],
+      "acceptance": [
+        "All attempts remain in order under one problem history.",
+        "The error bank contains one problem reference with many attempts, not duplicate problem cards.",
+        "The final correction does not erase repeated difficulty."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "HW-01",
+      "route": "homework",
+      "name": "Assigned B work is separate from A paper backfill",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "After A backfill, open the teacher-assigned B list.",
+        "Submit B first answers, then corrections."
+      ],
+      "acceptance": [
+        "B work is homework/direct web entry with its own variant and first attempt, not replacement A answers.",
+        "Auto-graded correctness, corrected work, and completion each have separate counts.",
+        "The teacher’s published homework scope determines the denominator."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "HW-02",
+      "route": "homework",
+      "name": "Five notebook photos modeled as one submission",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Open the modeled notebook material tray.",
+        "Choose five explicitly simulated photos, order them, inspect a preview, and submit the modeled bundle."
+      ],
+      "acceptance": [
+        "Show Model only / no upload alongside the action and submitted state.",
+        "The tray distinguishes five photos from one bundle; duplicate clicks do not make duplicate bundles.",
+        "Do not claim file compression, PDF conversion, OCR, server upload, or bytes saved actually occurred."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "HW-03",
+      "route": "homework",
+      "name": "Unreadable or incomplete modeled material",
+      "priority": "P1",
+      "basis": "engineering_choice",
+      "steps": [
+        "Model one blurry/missing photo and submit the bundle.",
+        "Teacher requests replacement of that page.",
+        "Student models a replacement."
+      ],
+      "acceptance": [
+        "Bundle status becomes Needs resubmission with the named page.",
+        "Version 2 points to version 1; previous review is retained.",
+        "Homework answers remain saved; material failure does not erase them."
+      ],
+      "notes": [
+        "A useful local state exercise; actual upload/scan implementation remains outside this prototype."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "HW-04",
+      "route": "homework",
+      "name": "Teacher checks work rather than assigning mastery",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Enter five correct source-format answers but incomplete written work on two items.",
+        "Model a submitted material bundle.",
+        "Teacher marks three items checked complete and records a comment."
+      ],
+      "acceptance": [
+        "Automatic first correctness and teacher-confirmed completion differ visibly.",
+        "No material means teacher review is Pending, not fabricated complete.",
+        "The teacher review attaches to the exact lesson scope/material version.",
+        "Teacher completion does not become a mathematical mastery percentage."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "HW-05",
+      "route": "homework",
+      "name": "Teacher revises a review",
+      "priority": "P1",
+      "basis": "engineering_choice",
+      "steps": [
+        "Save a modeled teacher completion result.",
+        "Correct it and explain the change."
+      ],
+      "acceptance": [
+        "The most recent review is clear and prior review remains in the event history.",
+        "Changing teacher completion never rewrites the student’s initial answers."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "PAR-01",
+      "route": "parent",
+      "name": "Simple parent summary of one child",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Switch the modeled view to Parent.",
+        "Inspect today’s lesson and a pending/resubmitted material bundle."
+      ],
+      "acceptance": [
+        "Clearly distinguish initial answer result, corrected practice, homework submission, and teacher-checked completion.",
+        "Absent/ill/permitted absence and makeup status are visible without a fabricated original class score.",
+        "Missing data is shown plainly; copied correction is not promoted as skill improvement.",
+        "Role switch is explicitly a modeled view, not authenticated access control."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "MK-01",
+      "route": "makeup",
+      "name": "Absent student makes up the exact lesson",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Set attendance to Absent for the published lesson.",
+        "Open Make up lesson.",
+        "Read linked theory, do exactly the assigned class scope, then assigned homework, then enter independent review."
+      ],
+      "acceptance": [
+        "Makeup route starts theory → exact published scope → correction/homework → B review.",
+        "No requirement to fabricate classroom paper answers or press Paper ready.",
+        "Makeup attempt source is makeup_web with both original lesson date and actual attempt date.",
+        "Attendance is retained, not changed to Attended after completing makeup."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "MK-02",
+      "route": "makeup",
+      "name": "Ill student pauses and resumes",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Set attendance reason to Ill.",
+        "Start theory, attempt three items, and stop.",
+        "Reload later and resume."
+      ],
+      "acceptance": [
+        "No minimum mastery/pace promise or punitive Unable label appears.",
+        "Theory/read state, drafts, first attempts, and exact remaining scope persist.",
+        "A shorter review remains available after the class work stage.",
+        "No medical details are required to exercise the flow."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "MK-03",
+      "route": "makeup",
+      "name": "Permitted absence and teacher review",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Set attendance to Permitted absence.",
+        "Complete the makeup class work and homework.",
+        "Teacher models checking the material; Parent views status."
+      ],
+      "acceptance": [
+        "Teacher sees attendance, makeup work, missing tasks, and review status separately.",
+        "Parent sees Needs makeup / In progress / Submitted / Teacher checked as applicable.",
+        "A permitted absence does not turn missing work into wrong answers."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "MK-04",
+      "route": "makeup",
+      "name": "Partial attendance or interrupted class",
+      "priority": "P1",
+      "basis": "engineering_choice",
+      "steps": [
+        "In Test 9, mark A1–A7 actually attempted on paper and A8–A10 assigned but not done.",
+        "Backfill A1–A7 and make up the remainder online."
+      ],
+      "acceptance": [
+        "Each item has the correct observation source: paper_backfill or makeup_web.",
+        "No duplicate first classroom attempt is invented for the remaining items.",
+        "The makeup list is exactly the unattempted assigned scope, not all 10A/10B Test 9 items or all 50 items across Tests 5 and 9."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "MK-05",
+      "route": "makeup",
+      "name": "Old lesson scope changed after absence",
+      "priority": "P1",
+      "basis": "engineering_choice",
+      "steps": [
+        "Create a makeup task from published scope version 1.",
+        "Model a teacher correction to version 2.",
+        "Resume the task."
+      ],
+      "acceptance": [
+        "Explain the changed assignment and retain completed work under its original scope version.",
+        "The child sees which items were added/removed.",
+        "No silent replacement of the task or answer key occurs."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "ON-01",
+      "route": "selfstudy",
+      "name": "Online learner starts from an entitled book",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Select Online self study.",
+        "Open the modeled entitled 100x100 V3 book → topic → Test 9 A.",
+        "Start and submit first answers."
+      ],
+      "acceptance": [
+        "No teacher-publish/paper-ready/class-backfill prerequisite is required.",
+        "Book/topic/test/variant context is prefilled and entitlement is marked modeled.",
+        "Answers are direct_selfstudy_web with item status, confidence, help, and attempt time.",
+        "Source Test 9 content remains the same as classroom content."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "ON-02",
+      "route": "selfstudy",
+      "name": "First grade and second pass through wrong work",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Finish the first test pass with correct, wrong, missing, helped, and guessed records.",
+        "Open Review mistakes and a worked solution.",
+        "Retry selected wrong items."
+      ],
+      "acceptance": [
+        "Initial grade remains fixed and separates answered/total/missing.",
+        "Second pass queues wrong/unattempted/uncertain items without erasing first results.",
+        "Worked text/formula links use verified material; unavailable video says Not available.",
+        "Correct initial items can also open their solution after submission."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "ON-03",
+      "route": "selfstudy",
+      "name": "Pause a topic test and resume without premature reveal",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Answer five items and leave drafts in two more.",
+        "Pause and reload.",
+        "Resume and submit the first pass."
+      ],
+      "acceptance": [
+        "The same attempt resumes with answer/progress state.",
+        "No automatic wrong for unsubmitted drafts; no fabricated solve time during pause.",
+        "Correct answers stay hidden until the configured submit step."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "ON-04",
+      "route": "selfstudy",
+      "name": "Rights expired or topic unavailable",
+      "priority": "P1",
+      "basis": "documented_plan",
+      "steps": [
+        "Open a modeled book/topic without access, or expire modeled rights during a paused test."
+      ],
+      "acceptance": [
+        "Clear unavailable/expired state, saved progress, and allowed next action.",
+        "Do not claim that production authorization/payment has been integrated.",
+        "Entitlement policy choices are listed as unresolved product decisions."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-01",
+      "route": "review",
+      "name": "Three review entrances stay distinct",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Choose Previous test, My mistakes, and New review in separate runs."
+      ],
+      "acceptance": [
+        "Previous test keeps original problem IDs/exposure and creates a new attempt.",
+        "My mistakes links each problem to its original history.",
+        "New review uses selected seen topics and verified candidates, with an explanation before starting.",
+        "A repeated known problem is never mislabeled unseen."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-02",
+      "route": "review",
+      "name": "10/30/60 minute plans respect available scope",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Choose a taught Test 9 scope and request 10, 30, then 60 minutes.",
+        "Inspect each proposal before Start."
+      ],
+      "acceptance": [
+        "Plans show item count, covered skills, estimated active solving time, and uncertainty.",
+        "Longer time does not automatically mean greater difficulty.",
+        "If source candidates cannot fill 60 minutes, show actual scope and offer a shorter plan or explicit topic expansion.",
+        "Do not invent unlimited source-quality questions or make elapsed browsing time the learner’s speed."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-03",
+      "route": "review",
+      "name": "Count mode is alternative to time mode",
+      "priority": "P1",
+      "basis": "documented_plan",
+      "steps": [
+        "Select item-count mode with more items than eligible verified candidates from the selected Test 5/Test 9 scope."
+      ],
+      "acceptance": [
+        "Show requested versus available count and estimated time.",
+        "Do not demand both exact duration and exact count as simultaneous mandatory inputs.",
+        "No off-topic/harder items are added silently."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-04",
+      "route": "review",
+      "name": "No evidence starts a short check",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Open independent review with no valid first attempts.",
+        "Select the Test 9 topic."
+      ],
+      "acceptance": [
+        "No-data status says Not enough evidence; a short diagnostic proposal is allowed.",
+        "Do not call unknown skills weak/mastered or assume all prerequisites mastered.",
+        "A brief source-aligned check precedes personalized claims."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-05",
+      "route": "review",
+      "name": "Prerequisite gap limits the next problem",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Model repeated failure on verified Test 5 factoring/zero-product reasoning.",
+        "Build review for a selected Test 9 method that actually requires the missing quadratic/factoring prerequisite."
+      ],
+      "acceptance": [
+        "Selection explains the missing prerequisite and proposes a focused verified prerequisite task or theory review.",
+        "Advanced substitution items are not selected solely because their skill has the largest error count.",
+        "If no prerequisite task exists, show the gap instead of fabricating one or leaving an unexplained empty plan."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-06",
+      "route": "review",
+      "name": "Helped and guessed correct are provisional",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Record only helped correct and guessed correct work.",
+        "Request a Test 9 review or unseen check."
+      ],
+      "acceptance": [
+        "Show support/guess status distinctly.",
+        "No mastered verdict from these results alone.",
+        "Select a suitable unseen unassisted item when available and otherwise explain that independent evidence is missing."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-07",
+      "route": "review",
+      "name": "Slow correct learner is not weak",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Use a slow fixture with correct unassisted work.",
+        "Request a 10-minute plan."
+      ],
+      "acceptance": [
+        "Accuracy/skill evidence and speed stay separate.",
+        "No high-confidence personal speed from paper backfill or browser-open duration.",
+        "A shorter plan is offered using labeled general timing until valid active-time history exists."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-08",
+      "route": "review",
+      "name": "History after review changes later proposals",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Complete one verified review attempt.",
+        "Generate another plan."
+      ],
+      "acceptance": [
+        "The new plan reads all relevant attempt history, including prior review/probe evidence, while retaining original classroom results.",
+        "Exposure history prevents prior review items from being called unseen.",
+        "The old batch/history survives replacing the currently displayed proposal."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "REV-09",
+      "route": "review",
+      "name": "Choose a different topic explicitly",
+      "priority": "P1",
+      "basis": "documented_plan",
+      "steps": [
+        "Request more coverage than the Test 9 verified pool can supply.",
+        "Choose Add another studied topic."
+      ],
+      "acceptance": [
+        "Show new scope before commitment and require an explicit selection.",
+        "A new topic does not appear under the label Review taught Test 9.",
+        "No automatic full-curriculum path is implied."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "EX-01",
+      "route": "assessment",
+      "name": "Unseen check after corrected practice",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Finish correction/review.",
+        "Start a short check using verified unshown item IDs.",
+        "Submit once."
+      ],
+      "acceptance": [
+        "No answer/solution/instant correctness before finishing.",
+        "Outcome shows answered/total, correct, helped and unattempted separately.",
+        "The claim is limited to the checked methods/items; no 100% mastery claim.",
+        "If all eligible source items are exposed, explain the lack of unseen evidence."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "EX-02",
+      "route": "assessment",
+      "name": "Same numeric family versus independent transfer",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Use a reviewed number-changed local variant for practice.",
+        "Compare it with a held-out source problem or structurally different verified variant."
+      ],
+      "acceptance": [
+        "Label the former Near variant / generated practice and retain generator/source metadata.",
+        "Do not claim independent broad transfer merely because its prompt differs.",
+        "Evaluation uses an unexposed problem/variant family when claiming new evidence."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "EX-03",
+      "route": "assessment",
+      "name": "Partial check or timer expiry",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Answer part of a check and finish, or simulate time expiry."
+      ],
+      "acceptance": [
+        "Unanswered items are visibly unattempted, not inferred proof of no knowledge.",
+        "Assessment completion/score denominator policy is visible.",
+        "A 0-item check or 0 unassisted answers yields No independent evidence, never a success verdict."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "WK-01",
+      "route": "weekly_exam",
+      "name": "Published weekly exam within rights/window",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Open a modeled published weekly exam covering verified Test 9 scope.",
+        "Inspect rights, scope, start/duration/release conditions.",
+        "Start, pause according to the displayed policy, and finish."
+      ],
+      "acceptance": [
+        "Published exam differs from personal review: fixed scope and configured rules.",
+        "Resume/time/reveal rules are visible and applied consistently.",
+        "Explanations are hidden until configured release.",
+        "Role/schedule/rights are modeled, not a real exam security claim."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "WK-02",
+      "route": "weekly_exam",
+      "name": "Outside window, already completed, or release pending",
+      "priority": "P1",
+      "basis": "engineering_choice",
+      "steps": [
+        "Try a not-yet-open/closed exam, reload a completed exam, and view pending results."
+      ],
+      "acceptance": [
+        "State gives the correct next action without starting a duplicate attempt.",
+        "Only one submitted result exists.",
+        "Pending solution release does not reveal answers early."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "WK-03",
+      "route": "weekly_exam",
+      "name": "Avoid ranking incomparable personal plans",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Compare a 10-minute personal plan to a 60-minute plan and a common weekly exam."
+      ],
+      "acceptance": [
+        "No leaderboard across differing personal scope/difficulty.",
+        "Any ranking shown for a common modeled exam is clearly a configured proposal with its visibility policy.",
+        "Initial grade and final corrected percentage are not interchangeable."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "FMT-01",
+      "route": "answer_formats",
+      "name": "Root set accepts order and equivalent numeric forms",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "For an illustrative roots={−2,1/2} item enter 1/2;−2, −2,0.5, and {0.5,−2}."
+      ],
+      "acceptance": [
+        "Equivalent root sets compare equally after safe, typed normalization.",
+        "Input field/example matches root-set question type.",
+        "Order and repeated representation of a root do not change mathematical equality."
+      ],
+      "notes": [
+        "Illustrative parser fixture, not a claimed transcription of a book item."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "FMT-02",
+      "route": "answer_formats",
+      "name": "Scalar versus set and no-solution result",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Use Test 9 A5 (root sum=6), B6 (greatest root=9), A9 (root count=1), and the Test 5 A3 no-real-solution equation.",
+        "Try mismatched scalar/set answers, then the proper source-format result."
+      ],
+      "acceptance": [
+        "Answer type belongs to the item: source choice, aggregate scalar, greatest root, root count, structured digit blanks, full root set, or no real solution.",
+        "A scalar is not silently treated as a complete root set; a full-root-set item checks all roots.",
+        "Real-domain policy and accepted no-solution format are displayed.",
+        "Fractions never evaluate by JavaScript eval; invalid/zero denominators are rejected."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "FMT-03",
+      "route": "answer_formats",
+      "name": "Substitution-domain and lost-root mistakes",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Use a verified equation requiring y=x² or other allowed substitution.",
+        "Enter only positive branch, a forbidden value, or an incomplete factorization result."
+      ],
+      "acceptance": [
+        "Checker compares the verified complete solution set under the original domain.",
+        "Explanation identifies substitution/domain or lost-root step only when the evidence supports it.",
+        "Do not infer the exact reasoning mistake from a wrong final answer alone."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "FMT-04",
+      "route": "answer_formats",
+      "name": "Original multiple-choice input stays fast",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Open a source item with A–E answers on mobile.",
+        "Choose one option and mark uncertainty/help."
+      ],
+      "acceptance": [
+        "The input can use the original choice letter when that is the source test format.",
+        "Root-set option text is rendered fully and readably; original choice map is retained.",
+        "A choice grade is not called observed full-solution reasoning.",
+        "Do not render Q9/Q10 as A–E choice items; retain their source digit-fill structure."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "ROB-01",
+      "route": "reliability",
+      "name": "Local save, storage failure, and modeled offline",
+      "priority": "P0",
+      "basis": "confirmed_request",
+      "steps": [
+        "Save drafts, reload, and toggle modeled offline.",
+        "Model storage-unavailable mode."
+      ],
+      "acceptance": [
+        "Label saving as local-browser state in every mode.",
+        "No Sync complete or Server received claims.",
+        "Storage failure is visible with an available export; no silent data-loss claim.",
+        "State serialization preserves route, scope, root-set data, all attempts, and material/review statuses."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "ROB-02",
+      "route": "reliability",
+      "name": "Role/profile/route switches and reset isolation",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Switch modeled Student/Teacher/Parent views.",
+        "Start a separate attendance/profile scenario, then return.",
+        "Reset one run."
+      ],
+      "acceptance": [
+        "View switching does not mutate answers or simulate teacher decisions automatically.",
+        "Separate scenario runs have separate local IDs and cannot leak results across learners.",
+        "Reset is explicit; a fresh run does not silently destroy an unfinished run."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "UX-01",
+      "route": "mobile",
+      "name": "One current item and compact progress on a phone",
+      "priority": "P0",
+      "basis": "engineering_choice",
+      "steps": [
+        "Use 360–390px viewport and keyboard with a 10-item Test 9 variant and a 15-item Test 5 variant.",
+        "Backfill, open corrections, and resume after leaving."
+      ],
+      "acceptance": [
+        "Default current task/item is clear with Answered x/10 for Test 9 or x/15 for Test 5, and a compact problem picker.",
+        "One primary action at each step; no giant six-screen form of full equations for quick backfill.",
+        "Inputs, help, structured digit blanks, and previous/next controls fit without horizontal scrolling.",
+        "Before submission, review screen lists only missing/invalid fields; it never asks for metadata already known."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "UX-02",
+      "route": "mobile",
+      "name": "Accessible notation and navigation",
+      "priority": "P1",
+      "basis": "engineering_choice",
+      "steps": [
+        "Use keyboard/screen-reader navigation and zoom.",
+        "Read equations with exponent/fraction/substitution notation."
+      ],
+      "acceptance": [
+        "Every answer/confidence/help control names the item number and role.",
+        "Touch controls are adequately sized and focus remains visible.",
+        "Results/status are text as well as color.",
+        "No correct answer leaks through accessibility labels before reveal."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "RET-01",
+      "route": "assessment",
+      "name": "Virtual delayed check stays a simulation",
+      "priority": "P1",
+      "basis": "documented_plan",
+      "steps": [
+        "After an unseen check, trigger modeled later-day check."
+      ],
+      "acceptance": [
+        "Virtual date/time is labeled modeled.",
+        "Another eligible unexposed item is required, or No eligible items is shown.",
+        "No fixed forgetting percentage or universally optimal review interval is claimed."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "SRC-04",
+      "route": "content",
+      "name": "Explicit Test 5 versus Test 9 source scope choice",
+      "priority": "P0",
+      "basis": "source_findings_with_engineering_choice",
+      "steps": [
+        "Select Test 5 / Quadratic equations.",
+        "Inspect A/B counts and source time, then select Test 9 / Polynomial equations.",
+        "Explicitly select both in a combined independent review."
+      ],
+      "acceptance": [
+        "Test 5 shows 15A+15B=30; Test 9 shows 10A+10B=20; combined source inventory has 50 unique IDs.",
+        "Retain 40-minute Test 5 and 50-minute Test 9 source-test metadata separately from 10/30/60 review budgets.",
+        "Teacher/student scope, title, item format, progress denominator and solution links all update together.",
+        "Cross-test practice is shown as a selected combined scope and never a silent substitution."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "T5-01",
+      "route": "answer_formats",
+      "name": "Test 5 routine quadratic with two real roots",
+      "priority": "P0",
+      "basis": "source_findings_with_engineering_choice",
+      "steps": [
+        "Open source Test 5 A1: x²+11x+30=0.",
+        "Enter {-5,-6}, then the reversed order."
+      ],
+      "acceptance": [
+        "Both orders match the distinct real root set {-6,-5}.",
+        "Worked solution factors (x+5)(x+6)=0 and preserves both roots.",
+        "If the source input is multiple choice, preserve its actual options rather than inventing a letter map."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "T5-02",
+      "route": "answer_formats",
+      "name": "Test 5 no real roots remains an explicit outcome",
+      "priority": "P0",
+      "basis": "source_findings_with_engineering_choice",
+      "steps": [
+        "Open source Test 5 A3: x²−2x+5=0.",
+        "Submit No real solution / ∅ in the configured source format."
+      ],
+      "acceptance": [
+        "Negative discriminant D=−16 gives no real roots.",
+        "An empty typed answer remains missing, distinct from an explicit empty solution set.",
+        "No complex roots are accepted in this real-domain source scope unless an explicitly different task is selected."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "T5-03",
+      "route": "answer_formats",
+      "name": "Test 5 irrational roots and exact equivalence",
+      "priority": "P0",
+      "basis": "source_findings_with_engineering_choice",
+      "steps": [
+        "Open source Test 5 A12: x²−4x+2=0.",
+        "Enter 2−√2;2+√2 or an equivalent exact representation."
+      ],
+      "acceptance": [
+        "The verified distinct real roots are 2±√2.",
+        "If exact radical input is not supported, the UI offers the verified source choice instead of silently treating decimal approximation as an exact symbolic answer.",
+        "Any supported numeric tolerance is stated as a checker engineering policy, not source truth."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "T5-04",
+      "route": "answer_formats",
+      "name": "Test 5 decimal coefficients and fractional input",
+      "priority": "P0",
+      "basis": "source_findings_with_engineering_choice",
+      "steps": [
+        "Open source Test 5 B15: x²−5.6x+6.4=0.",
+        "Enter 1.6;4 and 8/5;4."
+      ],
+      "acceptance": [
+        "Both representations match roots {1.6,4}.",
+        "Use a safe typed numeric parser, including Unicode minus and accepted decimal separator.",
+        "A malformed decimal/fraction is a validation error that retains draft work."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    },
+    {
+      "id": "T9-01",
+      "route": "answer_formats",
+      "name": "Test 9 source digit-fill scaffolds",
+      "priority": "P0",
+      "basis": "source_findings_with_engineering_choice",
+      "steps": [
+        "Open 9-A-9, 9-B-9, 9-A-10 and 9-B-10.",
+        "Enter the source-labeled digits and submit."
+      ],
+      "acceptance": [
+        "A9 has six digit blanks; B9, A10 and B10 have seven.",
+        "Q10 [cd] is a two-digit coefficient with adjacent c/d digits, not two independent polynomial terms.",
+        "Check scaffold digits separately from final root count/set when both are requested.",
+        "Labels, scaffold, raw digits and final answer retain source provenance; no fabricated A–E options."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "notes": [
+        "Exact scaffold digit keys are in /tmp/pi-test9-source-review.json."
+      ]
+    },
+    {
+      "id": "T9-02",
+      "route": "answer_formats",
+      "name": "Test 9 even/odd powers and repeated roots",
+      "priority": "P0",
+      "basis": "source_findings_with_engineering_choice",
+      "steps": [
+        "Solve 9-A-1: (x+1)^4=16; 9-B-1: (x−2)^6=64; 9-A-2: (3x−1)^5=32.",
+        "Solve A6/A8 and compare distinct-root sets with aggregate requests."
+      ],
+      "acceptance": [
+        "A1 roots {−3,1}; B1 roots {0,4}; A2 root {1}.",
+        "Even powers retain both signs; odd power does not create a negative branch.",
+        "Repeated roots are listed once for the distinct root-set answer; multiplicity remains available metadata.",
+        "For aggregates, compute from the exact requested distinct real roots; a set answer cannot automatically replace a scalar request."
+      ],
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      }
+    }
+  ],
+  "sourcesReviewed": [
+    {
+      "path": "/Users/mr.buus/Intern/Pi.mn/docs/research/PI-LEARNING-SIMULATION.html",
+      "role": "Existing local implementation inspected, including data/gates/answer/evidence/selection/material logic."
+    },
+    {
+      "path": "/Users/mr.buus/Intern/Pi.mn/docs/research/PI-MATH-PROJECT.json",
+      "role": "v0.3 plan structure and local-prototype limitations."
+    },
+    {
+      "path": "/Users/mr.buus/Intern/Pi.mn/docs/research/PI-MATH-PROJECT.html",
+      "role": "Detailed A/B/self-study pipeline, acceptance, parent visibility, limited evidence and timing guidance."
+    },
+    {
+      "path": "/Users/mr.buus/Intern/Pi.mn/docs/100x100-v3/import-ready.jsonl",
+      "role": "Sampled only to detect nonauthoritative source conflicts/incomplete imported Test 9 rows; not used as answer truth."
+    },
+    {
+      "path": "/tmp/pi-test9-source-review.json",
+      "role": "Source-agent verification report: exact Test 9 10A/10B count, equations, typed results, digit scaffolds, and Test 5 15A/15B classification/count."
+    }
+  ],
+  "notes": [
+    "No applicable AGENTS.md found in the repository path for docs/research or /tmp; web/AGENTS.md is outside this analysis/edit scope.",
+    "These acceptance scenarios are design requirements; creating this specification does not mean they have been implemented or passed.",
+    "Version 1.1 corrects a source-count analyst error and adds Test 5; it explicitly separates possible scenario coverage from actual implementation/execution status."
+  ],
+  "testingStatusContract": {
+    "sourceVerification": "The source agent’s reported source checking is cited separately from prototype checks.",
+    "possibleScenario": "Every case is a designed possible scenario. It can be included in a QA plan without claiming implemented behavior.",
+    "inspectedExistingPrototype": "Status applies to the existing PI-LEARNING-SIMULATION.html inspected by this scenario agent; partial support uses synthetic content and does not satisfy real-source acceptance.",
+    "targetPrototype": "The new isolated prototype has not been inspected or executed by this agent. Parent/integration QA must update implementation and execution statuses after observing behavior.",
+    "doNotClaim": "No acceptance case is marked passed by this artifact."
+  }
+}

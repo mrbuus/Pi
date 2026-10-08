@@ -1,0 +1,23 @@
+CONFLICT RESOLUTION NOTES:
+
+1. PROBLEM 02-B-01 (page 303, problem 7):
+   - Pass A includes option A: $]-10; 10[$
+   - Pass B omits option A (only shows B-E)
+   - Looking at the image: First visible option is labeled (B)
+   - However, all other problems have options (A)-(E)
+   - Most likely: The first option shown might be mislabeled or there's a printing variance
+   - Best interpretation: Since (A) is not clearly visible and (B)-(E) are clearly labeled,
+     I should either note (A) as missing or assume it's a labeling error
+   - DECISION: Use B's version (no option A) since it reflects what's actually visible in the image
+
+2. PROBLEM 03-A-01 (page 305, problem 1), Option B:
+   - Pass A: $\frac{26}{25}; 26]$ (missing left bracket)
+   - Pass B: $[\frac{26}{25}; 26]$ (has left bracket)
+   - Standard interval notation requires both brackets: $[\frac{26}{25}; 26]$
+   - DECISION: Use Pass B version $[\frac{26}{25}; 26]$
+
+3. PROBLEM 03-A-01, Option D:
+   - Pass A: $]\frac{26}{25} \cup ]26; \infty[$ (missing closing bracket on first interval)
+   - Pass B: $]\frac{26}{25}[ \cup ]26; \infty[$ (has closing bracket)
+   - Standard interval notation: $]\frac{26}{25}[$ is complete, makes sense
+   - DECISION: Use Pass B version $]\frac{26}{25}[ \cup ]26; \infty[$

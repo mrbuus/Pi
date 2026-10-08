@@ -1,0 +1,45 @@
+{
+  "artifact": "read-only-reload-investigation",
+  "date": "2026-10-06T10:37:28.911Z",
+  "prototype": "/Users/mr.buus/Intern/Pi.mn/docs/research/PI-QUADRATIC-LAB.html",
+  "htmlSha256": "dd4b0cd8018e26ee88af8a318f7222892f487a22355123c3801459173a72c31c",
+  "independentFullHarness": {
+    "passed": 90,
+    "failed": 0,
+    "report": "/tmp/pi-reload-full-QA.json"
+  },
+  "reloadCase": {
+    "status": "unreproduced_prior_failure",
+    "currentResult": "observed_expected_behavior",
+    "diagnostics": {
+      "beforeReload": {
+        "memoryActive": "5_online",
+        "storedActive": "5_online",
+        "route": "online",
+        "test": 5,
+        "primaryPresent": true,
+        "primarySubmitted": true,
+        "primaryRecordCount": 15
+      },
+      "afterReload": {
+        "memoryActive": "5_online",
+        "storedActive": "5_online",
+        "route": "online",
+        "test": 5,
+        "primaryPresent": true,
+        "primarySubmitted": true,
+        "primaryRecordCount": 15
+      }
+    },
+    "rawEvidence": "/tmp/pi-reload-case-diagnostics.json"
+  },
+  "rootCause": "Not identified. No demonstrated pagehide/visibilitychange or file:// storage race. A clean rerun does not establish that the prior intermittent failure was fixed.",
+  "codeObservations": [
+    "submit() calls stopTiming before assigning and saving immutable records.",
+    "fresh() explicitly calls stopTiming before clearing localStorage and reloading.",
+    "pagehide/hidden visibility events only call stopTiming, which saves if a timing session remains active; they do not delete sessions.",
+    "The prior failed execution did not supply before/after active-run and persisted-payload diagnostics, so it cannot be attributed to a specific lifecycle transition."
+  ],
+  "followup": "Keep the enhanced before/after localStorage + active-run diagnostics in the harness and retain them if the failure recurs. No source fix is supported by this investigation.",
+  "sharedFilesChanged": false
+}

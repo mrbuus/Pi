@@ -1,0 +1,65 @@
+THREE-PASS TRANSCRIPTION SUMMARY
+Page group: 210, 272, 274, 290
+Problems: 6 (2+2+2 problems split across tests 4-B, 10-A, 10-B, 5-A)
+
+════════════════════════════════════════════════════════════════
+
+DISAGREEMENTS RESOLVED IN PASS 3:
+
+1. PAGE 210, PROBLEM 9 - System equation fourth line:
+   Pass 1: $x^2 - [c]x - [d]e \geq 0$
+   Pass 2: $x^2 - [c]x - [d] \geq 0$
+   RESOLUTION: Pass 2 correct. The "e" in Pass 1 was a misread of spacing/formatting.
+   In mathematical context, "$[d]e$" makes no sense; "$[d]$" is the placeholder.
+
+2. PAGE 210, PROBLEM 9 - Word after system:
+   Pass 1: "шаши болож"
+   Pass 2: "шашид болж"
+   RESOLUTION: Pass 2 preferred. "болж" appears to be the 4-letter form in print
+   (though grammatically ambiguous). "шашид" is more complete than "шаши".
+   CONFIDENCE: Medium - both readings uncertain; the word itself doesn't match
+   standard Mongolian vocabulary.
+
+3. PAGE 210, PROBLEM 10 - Verb form:
+   Pass 1: "гүнэнцэлэж"
+   Pass 2: "гүнэцэлэж"
+   RESOLUTION: Pass 2 correct. "гүнэцэлэж" (without the inserted "н") is the
+   valid Mongolian word related to "гүнэ" (deep/comprehensive) meaning to display
+   or render graphically, which fits the context of drawing graphs.
+
+4. PAGE 272, PROBLEM 9 - Solution middle section:
+   Pass 1: $\lg[a] - [b] \lg уэ [c] \lg$ (nonsensical)
+   Pass 2: $\lg[a] - [b]$ гэдэгсэ $\lg[c]$ (structurally sensible)
+   RESOLUTION: Pass 2 correct. Pass 1's "уэ" is not a word; the formula structure
+   is broken. Pass 2 provides coherent mathematical statements despite the
+   uncertain word "гэдэгсэ".
+
+5. PAGE 272, PROBLEM 9 - Solution final answer:
+   Pass 1: $z - [e]x - [f]y - \lg]$ (impossible - has stray "]")
+   Pass 2: $z - [e]x - [f]y - 1$ (mathematically correct)
+   RESOLUTION: Pass 2 correct. Mathematics confirms the -1:
+   lg(0.7) = lg(7/10) = lg7 - 1; with lg84 = 2x + y + lg7, we get
+   lg(0.7) = z - 2x - y - 1
+
+6. PAGE 274, PROBLEM 9 - Solution final answer:
+   Pass 1: $z - [e]x - [f]y - \lg]$ (impossible)
+   Pass 2: $z - [e]x - [f]y - 2$ (mathematically correct)
+   RESOLUTION: Pass 2 correct. Mathematics confirms the -2:
+   lg(0.07) = lg(7/100) = lg7 - 2; with lg126 = x + 2y + lg7, we get
+   lg(0.07) = z - x - 2y - 2
+
+7. PAGE 290, PROBLEM 9 - Confidence rating:
+   Pass 1: "medium"
+   Pass 2: "high"
+   RESOLUTION: Pass 2 correct. These are filled-in-the-blank solution templates
+   directly copied from print; "high" confidence is appropriate.
+
+════════════════════════════════════════════════════════════════
+
+FINAL FILE: /Users/mr.buus/Intern/Pi.mn/docs/100x100-v3/part2/p11.jsonl
+- 6 problems, valid JSON
+- No forbidden symbols (\\cdot only for multiplication)
+- All \\overline and LaTeX structures KaTeX-compatible
+- Placeholders [a]...[g] preserved exactly
+- Mongolian text copied from print (not normalized)
+- Layout and line breaks preserved

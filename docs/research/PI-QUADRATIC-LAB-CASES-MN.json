@@ -1,0 +1,1865 @@
+{
+  "artifactType": "mongolian-scenario-coverage",
+  "source": "/tmp/pi-test9-scenarios.json",
+  "status": "Төлөвлөсөн нөхцөл ба шалгах шалгуур; PASS дүн биш",
+  "scopeMongolian": "5-р тестийн 30, 9-р тестийн 20: нийт 50 эх бодлого. Танхим, нөхөлт, вебээр бие даалт, давтлага, долоо хоногийн шалгалтын таван урсгал.",
+  "dataCategoriesMongolian": [
+    "Эх номын бодлого, хариу, хувилбар, тоо, формат, хяналтын төлөв",
+    "Загвар сурагч, ирц, эрх, материал, багш/эцэг эх, сүлжээ, виртуал өдөр ба оролдлогын төлөв"
+  ],
+  "prototypeCaveatsMongolian": [
+    "Суурь чадваруудын бүтэн холбоос, автомат оношилгоо хэрэгжээгүй. Суурийн 3 жишээ нь зөвхөн жижиг шалгалт; REV-05 бүхэлдээ биелсэн гэсэн үг биш.",
+    "Үүрэг, эрх, зураг/PDF, сервер, нэвтрэлт, төлбөрийн бодит интеграц хийсэн гэж хэлэхгүй.",
+    "Доорх нь хэрэгжүүлэлт ба ажиллуулсан шалгалтын үр дүнг өөрөө батлахгүй."
+  ],
+  "cases": [
+    {
+      "id": "SRC-01",
+      "nameMongolian": "Бодит номын 9-р тестийн хүрээ",
+      "summaryMongolian": "100x100 V3 номын 9-р тестийн А/Б хувилбар, эх сурвалжийг шалгах.",
+      "acceptanceMongolian": [
+        "А 10+Б 10=20 бодлого тогтвортой ID-тай байна.",
+        "Олон гишүүнт, зэрэг ба үржигдэхүүнд задлах агуулга; эхийн хугацаа 50 минут.",
+        "5-р тестийн квадрат тэгшитгэлээс ялгаж, баталгаажаагүй хариуг баталгаатай гэж нэрлэхгүй."
+      ],
+      "route": "content",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Use the real 100x100 V3 Test 9 A/B scope",
+        "steps": [
+          "Open the isolated prototype with the verified source dataset.",
+          "Inspect A and B scope counters and any quarantined items."
+        ],
+        "acceptance": [
+          "Exactly 10 source item slots for Test 9 A and 10 for Test 9 B (20 total), each with stable book/topic/test/variant/item ID.",
+          "Test 9 is labeled polynomial equations solved through powers and factoring (cubic/quartic/power equations), with its 50-minute source metadata. Test 5 is a separate pure quadratic scope.",
+          "Each shown equation/choice/answer/solution has provenance and review state; an unverified answer key is not called verified."
+        ]
+      }
+    },
+    {
+      "id": "SRC-02",
+      "nameMongolian": "Эхийн зөрүү, эвдэрсэн томьёо",
+      "summaryMongolian": "Импорт эсвэл OCR-ийн бичвэр эхтэй зөрөх үед тусгаарлах.",
+      "acceptanceMongolian": [
+        "Эх ба засварын гарал хадгалагдана.",
+        "Хянаагүй бодлогыг автомат дүн, чадварын нотолгоонд оруулахгүй.",
+        "Хүрээ багассаныг тайлбарлаж, зохиомол амархан бодлогоор чимээгүй солихгүй."
+      ],
+      "route": "content",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Source conflict or damaged formula",
+        "steps": [
+          "Select an item whose OCR/import differs from the reviewed source.",
+          "Try to include it in an auto-graded or unseen check."
+        ],
+        "acceptance": [
+          "Keep original source and correction provenance.",
+          "Mark the item Needs review; exclude it from auto-grading and adaptive evidence until checked.",
+          "Explain reduced available scope instead of silently substituting an easy fabricated question."
+        ]
+      }
+    },
+    {
+      "id": "SRC-03",
+      "nameMongolian": "Багшийн сонгосон хэсэг",
+      "summaryMongolian": "Сэдвийн бүх бодлого биш, багшийн нийтэлсэн нарийн жагсаалтаар ажиллах.",
+      "acceptanceMongolian": [
+        "Анги, даалгаврын яг сонгосон жагсаалт харагдана.",
+        "Ном, тест, өдрийг дахин бичүүлэхгүй; бүх 20 бодлогыг үзсэн гэж таамаглахгүй.",
+        "Нөхөлтийн нэмэлт бодлого зөвхөн оноосон үед гарна."
+      ],
+      "route": "content",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Teacher lesson scope is a subset, not the entire topic",
+        "steps": [
+          "For Test 9, teacher selects A1–A7 as class work, A8–A10 as makeup extension only if explicitly assigned, and B1–B8 as homework.",
+          "Student opens today’s lesson."
+        ],
+        "acceptance": [
+          "Student sees exactly the published class and homework lists without retyping book/test/date.",
+          "Do not infer that all 20 Test 9 problems were taught or attempted.",
+          "Optional makeup extension appears only when actually assigned."
+        ]
+      }
+    },
+    {
+      "id": "CLS-01",
+      "nameMongolian": "Цаасан хариугаа гэрт нөхөж оруулах",
+      "summaryMongolian": "Зөв, буруу, эргэлзсэн, таасан, тусламжтай, хийгээгүй ажлыг тусгаарлан бүртгэх.",
+      "acceptanceMongolian": [
+        "Ангид утас шаардахгүй; анхны оруулалтын үед дүн, бодолт нуух.",
+        "Анхны хариу, итгэл, тусламж, цааснаас нөхсөн эх сурвалж тусдаа байна.",
+        "Хичээл орсон ба оруулсан өдөр ялгаатай; бодсон хугацаа мэдэгдэхгүй бол зохиохгүй.",
+        "Зөв, буруу, таасан, тусламжтай, дутуу төлөвийн тоо алдагдахгүй."
+      ],
+      "route": "classroom",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Attend class and backfill mixed paper answers",
+        "steps": [
+          "Publish a lesson scope.",
+          "Use the paper fixture with a correct sure answer, wrong sure answer, unsure answer, guessed correct answer, helped answer, and unattempted answer.",
+          "At home enter the original paper answers and submit once."
+        ],
+        "acceptance": [
+          "No phone workflow is required during class.",
+          "No result or worked solution appears during initial backfill.",
+          "Original answer, confidence, help, source=paper_backfill, lesson date, entry date, and unknown class solve time remain separate.",
+          "Outcome counts preserve correct, wrong, guessed, helped, and missing categories."
+        ]
+      }
+    },
+    {
+      "id": "CLS-02",
+      "nameMongolian": "Анхны хариугаа санахгүй",
+      "summaryMongolian": "Цаас алга эсвэл тэмдэглээгүй хариуг мэдэхгүй гэж үлдээх.",
+      "acceptanceMongolian": [
+        "Санахгүй, тэмдэглээгүй нь нотолгоо дутуу; зөв/буруу зохиохгүй.",
+        "Дараах вебийн хариу шинэ оролдлого байна.",
+        "Дутуу бүртгэл нь гэрийн даалгаврыг хаахгүй."
+      ],
+      "route": "classroom",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Lost paper or cannot remember the original answer",
+        "steps": [
+          "Enter answers for half the assigned list.",
+          "Mark one Original answer unknown and one No paper marking.",
+          "Submit the initial record."
+        ],
+        "acceptance": [
+          "Unknown and unmarked entries are missing evidence, not invented wrong answers or automatically correct.",
+          "A later web answer is a new attempt with its own time/source.",
+          "Keep the lesson and missing original record available without blocking homework."
+        ]
+      }
+    },
+    {
+      "id": "CLS-03",
+      "nameMongolian": "Ангид бодож амжаагүй",
+      "summaryMongolian": "Оноосон боловч хийгээгүй бодлогыг гэрт бие даан бодох.",
+      "acceptanceMongolian": [
+        "Хийгээгүй төлөвийг чадваргүй гэсэн дүгнэлт болгохгүй.",
+        "Гэрийн шинэ оролдлого тусдаа нотолгоо болно.",
+        "Ангийн дүн байхгүйгээс эзэмшилтийн 0 оноо үүсгэхгүй."
+      ],
+      "route": "classroom",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Assigned but not attempted in class",
+        "steps": [
+          "Mark an assigned item Did not attempt in class.",
+          "Later attempt it at home without help."
+        ],
+        "acceptance": [
+          "Status does not assert mathematical inability.",
+          "The home attempt is recorded separately and can supply new direct evidence.",
+          "A missing classroom result does not fabricate a zero-confidence mastery score."
+        ]
+      }
+    },
+    {
+      "id": "CLS-04",
+      "nameMongolian": "Итгэлийг таамаглаагүй хурдан оруулалт",
+      "summaryMongolian": "Утаснаас 9-р тестийн 10 эсвэл 5-р тестийн 15 бодлогыг товч оруулах.",
+      "acceptanceMongolian": [
+        "Анги, ном, өдөр, тестийг дахин асуухгүй.",
+        "Итгэлийн анхны төлөв Тэмдэглээгүй; автоматаар Итгэлтэй болгохгүй.",
+        "Зөвхөн оруулсан хариуг бүртгэж, үлдсэнийг бүгд зөв болгохгүй.",
+        "Бүтэн тестийн 1–2 минутын зорилтыг бодитоор хэмжинэ; биелсэн гэж урьдчилан хэлэхгүй."
+      ],
+      "route": "classroom",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Fast entry without inferred confidence",
+        "steps": [
+          "Open a preselected real source variant on a narrow phone: 10 items for Test 9 or 15 for Test 5.",
+          "Enter answer choices or source-format answers, leaving confidence unmarked where it was not on paper."
+        ],
+        "acceptance": [
+          "The child never re-enters class/book/date/test metadata.",
+          "Confidence defaults to Unmarked; no implicit Sure.",
+          "Only explicit entries count as recorded; there is no Mark all untouched correct behavior.",
+          "Measure full-test entry time and input actions; 1–2 minutes is a user goal, not a claimed achievement."
+        ]
+      }
+    },
+    {
+      "id": "CLS-05",
+      "nameMongolian": "Буруу форматтай хариуг бүхэлд нь шалгах",
+      "summaryMongolian": "Хэдэн зөв оруулалтын дунд язгуурын буруу форматтай хариу байхад илгээх.",
+      "acceptanceMongolian": [
+        "Алдаа байвал анхны илгээсэн бүртгэлийг хэсэгчлэн үүсгэхгүй.",
+        "Алдсан бодлого, зөв форматыг зааж бүх нооргийг хадгална.",
+        "Засаж илгээхэд бодлого бүрийн анхны бүртгэл, нэг илгээлт үүснэ."
+      ],
+      "route": "classroom",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Submit invalid root answer atomically",
+        "steps": [
+          "Enter valid values in several rows and an invalid root-set expression in a later row.",
+          "Press Submit.",
+          "Correct the invalid field and submit again."
+        ],
+        "acceptance": [
+          "First action changes no submitted original records.",
+          "Validation identifies the item and accepted format while retaining every draft.",
+          "Successful retry creates one first record per item and one submission event."
+        ]
+      }
+    },
+    {
+      "id": "CLS-06",
+      "nameMongolian": "Давхар даралт ба дахин ачаалах",
+      "summaryMongolian": "Илгээхийг давхар дараад хуудсаа дахин ачаалах.",
+      "acceptanceMongolian": [
+        "Нэг анхны илгээлттэй; хариу хэвээр байна.",
+        "Ижил хичээл, хувилбар, хэрэглэгчийн загвар үргэлжилнэ.",
+        "Дүн үзсэний дараа анхны хариуг чимээгүй дахин засуулахгүй."
+      ],
+      "route": "classroom",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Double tap and reload after initial submission",
+        "steps": [
+          "Double tap Submit, then reload.",
+          "Reopen the original answer review."
+        ],
+        "acceptance": [
+          "There is one original submission; answers remain intact.",
+          "Reload resumes the same lesson/variant/profile rather than creating a new first attempt.",
+          "No first-answer controls silently reopen after results are visible."
+        ]
+      }
+    },
+    {
+      "id": "COR-01",
+      "nameMongolian": "Оруулалтын алдаа ба дахин бодолт",
+      "summaryMongolian": "Цааснаас буруу хуулсан тэмдгийг засахыг дахин бодохоос ялгах.",
+      "acceptanceMongolian": [
+        "Анхны утга хадгалагдана.",
+        "Оруулалтын засварт хуучин/шинэ утга, шалтгаан, цаг; үүнийг суралцах ахиц гэж нэрлэхгүй.",
+        "Дахин бодолт тусдаа оролдлого, тусламжийн төлөвтэй."
+      ],
+      "route": "correction",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Separate transcription correction from mathematical retry",
+        "steps": [
+          "Submit a wrong sign copied from paper.",
+          "Use Fix entry error with a reason.",
+          "Then solve the same equation again."
+        ],
+        "acceptance": [
+          "The original value remains visible.",
+          "The transcription correction records old/new value, reason, and time; it is not learning gain.",
+          "The mathematical retry is another attempt with its own assistance/exposure status."
+        ]
+      }
+    },
+    {
+      "id": "COR-02",
+      "nameMongolian": "Бодолт үзээд засах",
+      "summaryMongolian": "Буруу хариуны дараа бодолт үзэж зөв болгосон тохиолдол.",
+      "acceptanceMongolian": [
+        "Бодолт үзсэн түүх хаах, дахин ачаалахад үлдэнэ; давхардахгүй.",
+        "Зөв засвар нь тусламжтай, бие даасан эзэмшил биш.",
+        "Анхны тусламжийн төлөв өөрчлөгдөхгүй; дараах үзэлт тусдаа үйл явдал."
+      ],
+      "route": "correction",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "View solution and then enter the correct answer",
+        "steps": [
+          "Submit a wrong initial answer.",
+          "Open the worked solution.",
+          "Close it and enter a correct retry."
+        ],
+        "acceptance": [
+          "Solution exposure is logged once and remains attached after closing/reload.",
+          "Retry is correct with assistance, not independent mastery.",
+          "Original initial-help flag remains about the original attempt; later help is a distinct event."
+        ]
+      }
+    },
+    {
+      "id": "COR-03",
+      "nameMongolian": "Вебээс гадуур авсан тусламж",
+      "summaryMongolian": "Багш, эцэг эх, хариуны түлхүүрээс тусламж авснаа мэдүүлэх.",
+      "acceptanceMongolian": [
+        "Дотоод бодолт нээгээгүй ч тусламжийг тэмдэглэж болно.",
+        "Зөв хариу ба тусламж хоёр тусдаа.",
+        "Өөрийн мэдүүлгийг техникийн аргаар батлагдсан гэж нэрлэхгүй."
+      ],
+      "route": "correction",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "External help without clicking the built-in solution",
+        "steps": [
+          "Get teacher/parent help or consult the answer key.",
+          "Declare help and enter a correct answer."
+        ],
+        "acceptance": [
+          "Help can be declared without needing a built-in solution event.",
+          "Correctness and help are distinct values.",
+          "Self-report is labeled as such; no claim that assistance was technically verified."
+        ]
+      }
+    },
+    {
+      "id": "COR-04",
+      "nameMongolian": "Итгэлтэй буруу, таасан зөв",
+      "summaryMongolian": "Ижил чадварын хоёр өөр нотолгоог ялгаж давтлага санал болгох.",
+      "acceptanceMongolian": [
+        "Итгэлтэй бурууд холбоотой арга, суурийг шалгах санал байна.",
+        "Таасан зөвд богино тусламжгүй шалгалт; эзэмшсэн гэж дүгнэхгүй.",
+        "Хоёр төлөвийг ганц зөв хувьд уусгахгүй."
+      ],
+      "route": "correction",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Confident wrong versus guessed right",
+        "steps": [
+          "Submit one confident wrong and one guessed correct answer on the same skill.",
+          "Build a review plan."
+        ],
+        "acceptance": [
+          "Confident wrong routes to the relevant method/prerequisite check.",
+          "Guessed correct gets a short unassisted check, not mastered labeling.",
+          "Do not equate the two cases to a single accuracy percentage."
+        ]
+      }
+    },
+    {
+      "id": "COR-05",
+      "nameMongolian": "Ижил алдаатай олон оролдлого",
+      "summaryMongolian": "Хэд дахин алдсаны дараа тайлбар үзэж засах.",
+      "acceptanceMongolian": [
+        "Оролдлогууд нэг бодлогын түүхэнд дарааллаар үлдэнэ.",
+        "Алдааны санд нэг бодлого, олон оролдлого байна.",
+        "Сүүлчийн зөв нь өмнөх хүндрэлүүдийг устгахгүй."
+      ],
+      "route": "correction",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Multiple retries with the same error",
+        "steps": [
+          "Retry incorrectly twice.",
+          "View the relevant explanation and retry correctly."
+        ],
+        "acceptance": [
+          "All attempts remain in order under one problem history.",
+          "The error bank contains one problem reference with many attempts, not duplicate problem cards.",
+          "The final correction does not erase repeated difficulty."
+        ]
+      }
+    },
+    {
+      "id": "HW-01",
+      "nameMongolian": "Б хувилбарын даалгаврыг салгах",
+      "summaryMongolian": "А хувилбарын цаасан бүртгэлийн дараа багшийн оноосон Б ажлыг хийх.",
+      "acceptanceMongolian": [
+        "Б-ийн анхны хариу нь А-г солихгүй, өөр хувилбарын веб оролдлого.",
+        "Анхны зөв, зассан, гүйцэтгэсэн тоо тусдаа.",
+        "Нийт тооны суурь нь багшийн оноосон жагсаалт."
+      ],
+      "route": "homework",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Assigned B work is separate from A paper backfill",
+        "steps": [
+          "After A backfill, open the teacher-assigned B list.",
+          "Submit B first answers, then corrections."
+        ],
+        "acceptance": [
+          "B work is homework/direct web entry with its own variant and first attempt, not replacement A answers.",
+          "Auto-graded correctness, corrected work, and completion each have separate counts.",
+          "The teacher’s published homework scope determines the denominator."
+        ]
+      }
+    },
+    {
+      "id": "HW-02",
+      "nameMongolian": "Таван зурагтай загвар материал",
+      "summaryMongolian": "Таван дүрслэлийн зургийг нэг багц болгон эрэмбэлж илгээсэн төлөв үзүүлэх.",
+      "acceptanceMongolian": [
+        "Үйлдэл, үр дүнд Зөвхөн загвар/Бодит файл илгээгээгүй тэмдэгтэй.",
+        "Таван зураг ба нэг багцыг ялгаж, давхар даралтаар багц нэмэгдэхгүй.",
+        "PDF, OCR, шахалт, серверт илгээлт, хэмнэсэн байтыг бодитоор хийсэн гэж хэлэхгүй."
+      ],
+      "route": "homework",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Five notebook photos modeled as one submission",
+        "steps": [
+          "Open the modeled notebook material tray.",
+          "Choose five explicitly simulated photos, order them, inspect a preview, and submit the modeled bundle."
+        ],
+        "acceptance": [
+          "Show Model only / no upload alongside the action and submitted state.",
+          "The tray distinguishes five photos from one bundle; duplicate clicks do not make duplicate bundles.",
+          "Do not claim file compression, PDF conversion, OCR, server upload, or bytes saved actually occurred."
+        ]
+      }
+    },
+    {
+      "id": "HW-03",
+      "nameMongolian": "Уншигдахгүй материал дахин илгээх",
+      "summaryMongolian": "Загвар багцын дутуу хуудсыг нэрлэж шинэ хувилбар болгох.",
+      "acceptanceMongolian": [
+        "Яг хуудсыг заасан Дахин илгээх шаардлагатай төлөвтэй.",
+        "2-р хувилбар 1-р хувилбар, өмнөх шалгалттай холбоотой.",
+        "Материалын алдаа нь бодлогын хариуг устгахгүй."
+      ],
+      "route": "homework",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Unreadable or incomplete modeled material",
+        "steps": [
+          "Model one blurry/missing photo and submit the bundle.",
+          "Teacher requests replacement of that page.",
+          "Student models a replacement."
+        ],
+        "acceptance": [
+          "Bundle status becomes Needs resubmission with the named page.",
+          "Version 2 points to version 1; previous review is retained.",
+          "Homework answers remain saved; material failure does not erase them."
+        ]
+      }
+    },
+    {
+      "id": "HW-04",
+      "nameMongolian": "Багшийн хөдөлмөрийн үнэлгээ",
+      "summaryMongolian": "Материал үзсэн багшийн гүйцэтгэл ба автомат зөв хариуг ялгах.",
+      "acceptanceMongolian": [
+        "Анхны зөв, багшийн баталсан хийсэн ажил харагдахуйц тусдаа.",
+        "Материалгүй бол шалгалт хүлээгдэж байна; зохиомол бүрэн дүн өгөхгүй.",
+        "Шалгалт яг хичээл, материалын хувилбартай холбогдоно.",
+        "Багшийн гүйцэтгэлийн дүнг чадварын эзэмшилтийн хувь болгохгүй."
+      ],
+      "route": "homework",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Teacher checks work rather than assigning mastery",
+        "steps": [
+          "Enter five correct source-format answers but incomplete written work on two items.",
+          "Model a submitted material bundle.",
+          "Teacher marks three items checked complete and records a comment."
+        ],
+        "acceptance": [
+          "Automatic first correctness and teacher-confirmed completion differ visibly.",
+          "No material means teacher review is Pending, not fabricated complete.",
+          "The teacher review attaches to the exact lesson scope/material version.",
+          "Teacher completion does not become a mathematical mastery percentage."
+        ]
+      }
+    },
+    {
+      "id": "HW-05",
+      "nameMongolian": "Багш үнэлгээгээ өөрчлөх",
+      "summaryMongolian": "Шинэ шалгалтын дүн гаргахдаа өмнөх түүхийг үлдээх.",
+      "acceptanceMongolian": [
+        "Сүүлийн үнэлгээ тодорхой, өмнөх үнэлгээ түүхэнд байна.",
+        "Багшийн шинэ дүн сурагчийн анхны хариуг солихгүй."
+      ],
+      "route": "homework",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Teacher revises a review",
+        "steps": [
+          "Save a modeled teacher completion result.",
+          "Correct it and explain the change."
+        ],
+        "acceptance": [
+          "The most recent review is clear and prior review remains in the event history.",
+          "Changing teacher completion never rewrites the student’s initial answers."
+        ]
+      }
+    },
+    {
+      "id": "PAR-01",
+      "nameMongolian": "Эцэг эхийн энгийн тойм",
+      "summaryMongolian": "Нэг хүүхдийн хариу, засвар, материал, багшийн шалгалтыг товч харах.",
+      "acceptanceMongolian": [
+        "Анхны дүн, зассан ажил, илгээсэн материал, багшийн гүйцэтгэл ялгаатай.",
+        "Тасалсан/өвчтэй/чөлөөтэй, нөхөлтийн төлөв; ангийн оноо зохиохгүй.",
+        "Дутуу мэдээлэл ил; хуулж зассан хариуг чадварын ахиц гэж үзүүлэхгүй.",
+        "Эрх солих нь загвар харагдац, бодит нэвтрэх хамгаалалт биш."
+      ],
+      "route": "parent",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Simple parent summary of one child",
+        "steps": [
+          "Switch the modeled view to Parent.",
+          "Inspect today’s lesson and a pending/resubmitted material bundle."
+        ],
+        "acceptance": [
+          "Clearly distinguish initial answer result, corrected practice, homework submission, and teacher-checked completion.",
+          "Absent/ill/permitted absence and makeup status are visible without a fabricated original class score.",
+          "Missing data is shown plainly; copied correction is not promoted as skill improvement.",
+          "Role switch is explicitly a modeled view, not authenticated access control."
+        ]
+      }
+    },
+    {
+      "id": "MK-01",
+      "nameMongolian": "Тасалсан хичээлээ нөхөх",
+      "summaryMongolian": "Онол, багшийн яг хүрээ, засвар/даалгавар, Б давтлагаар нөхөх.",
+      "acceptanceMongolian": [
+        "Дараалал нь онол→оноосон хүрээ→засвар/даалгавар→Б давтлага.",
+        "Ангийн цаасан анхны хариу эсвэл Цаас бэлэн үйлдэл зохиохгүй.",
+        "Нөхөлтийн веб эх сурвалж, хичээл ба бодсон өдөр тусдаа.",
+        "Нөхсөн ч ирцийг Ирсэн болгохгүй."
+      ],
+      "route": "makeup",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Absent student makes up the exact lesson",
+        "steps": [
+          "Set attendance to Absent for the published lesson.",
+          "Open Make up lesson.",
+          "Read linked theory, do exactly the assigned class scope, then assigned homework, then enter independent review."
+        ],
+        "acceptance": [
+          "Makeup route starts theory → exact published scope → correction/homework → B review.",
+          "No requirement to fabricate classroom paper answers or press Paper ready.",
+          "Makeup attempt source is makeup_web with both original lesson date and actual attempt date.",
+          "Attendance is retained, not changed to Attended after completing makeup."
+        ]
+      }
+    },
+    {
+      "id": "MK-02",
+      "nameMongolian": "Өвчтэй сурагч түр зогсоох",
+      "summaryMongolian": "Нөхөлтийг завсарлаад үлдсэн ажлаа үргэлжлүүлэх.",
+      "acceptanceMongolian": [
+        "Заавал хурд/эзэмшилтийн амлалт эсвэл шийтгэсэн Чадахгүй шошго өгөхгүй.",
+        "Онолын төлөв, ноорог, анхны оролдлого, үлдсэн хүрээ хадгалагдана.",
+        "Анги дээрх хүрээний дараа богино давтлага сонгож болно.",
+        "Өвчний хувийн дэлгэрэнгүй мэдээлэл шаардахгүй."
+      ],
+      "route": "makeup",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Ill student pauses and resumes",
+        "steps": [
+          "Set attendance reason to Ill.",
+          "Start theory, attempt three items, and stop.",
+          "Reload later and resume."
+        ],
+        "acceptance": [
+          "No minimum mastery/pace promise or punitive Unable label appears.",
+          "Theory/read state, drafts, first attempts, and exact remaining scope persist.",
+          "A shorter review remains available after the class work stage.",
+          "No medical details are required to exercise the flow."
+        ]
+      }
+    },
+    {
+      "id": "MK-03",
+      "nameMongolian": "Чөлөөтэй таслалт ба шалгалт",
+      "summaryMongolian": "Багш, эцэг эх нөхөлтийн явцыг тус тус харах.",
+      "acceptanceMongolian": [
+        "Багшид ирц, нөхөлт, дутуу ажил, шалгалт тусдаа.",
+        "Эцэг эхэд Нөхөх хэрэгтэй/Хийж байна/Илгээсэн/Багш шалгасан төлөв тохирно.",
+        "Чөлөөтэй таслалтын дутуу ажлыг буруу хариу болгохгүй."
+      ],
+      "route": "makeup",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Permitted absence and teacher review",
+        "steps": [
+          "Set attendance to Permitted absence.",
+          "Complete the makeup class work and homework.",
+          "Teacher models checking the material; Parent views status."
+        ],
+        "acceptance": [
+          "Teacher sees attendance, makeup work, missing tasks, and review status separately.",
+          "Parent sees Needs makeup / In progress / Submitted / Teacher checked as applicable.",
+          "A permitted absence does not turn missing work into wrong answers."
+        ]
+      }
+    },
+    {
+      "id": "MK-04",
+      "nameMongolian": "Хагас хичээлд суусан",
+      "summaryMongolian": "Бодсон хэсгийг цааснаас, үлдсэнийг нөхөлтөөр бүртгэх.",
+      "acceptanceMongolian": [
+        "Бодлого бүрийн эх сурвалж зөв: цааснаас нөхсөн эсвэл нөхөлтийн веб.",
+        "Үлдсэнд зохиомол ангийн анхны оролдлого үүсгэхгүй.",
+        "Нөхөх жагсаалт зөвхөн оноосон, хийгээгүй хэсэг; бүх 20/50 бодлого биш."
+      ],
+      "route": "makeup",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Partial attendance or interrupted class",
+        "steps": [
+          "In Test 9, mark A1–A7 actually attempted on paper and A8–A10 assigned but not done.",
+          "Backfill A1–A7 and make up the remainder online."
+        ],
+        "acceptance": [
+          "Each item has the correct observation source: paper_backfill or makeup_web.",
+          "No duplicate first classroom attempt is invented for the remaining items.",
+          "The makeup list is exactly the unattempted assigned scope, not all 10A/10B Test 9 items or all 50 items across Tests 5 and 9."
+        ]
+      }
+    },
+    {
+      "id": "MK-05",
+      "nameMongolian": "Тасалсны дараа даалгавар өөрчлөгдөх",
+      "summaryMongolian": "Багшийн хүрээ шинэчлэгдэхэд өмнөх ажлыг хадгалах.",
+      "acceptanceMongolian": [
+        "Өөрчлөлтийг тайлбарлаж, хийсэн ажил хуучин хувилбартай үлдэнэ.",
+        "Нэмсэн/хассан бодлого харагдана.",
+        "Даалгавар, хариуны түлхүүрийг чимээгүй солихгүй."
+      ],
+      "route": "makeup",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Old lesson scope changed after absence",
+        "steps": [
+          "Create a makeup task from published scope version 1.",
+          "Model a teacher correction to version 2.",
+          "Resume the task."
+        ],
+        "acceptance": [
+          "Explain the changed assignment and retain completed work under its original scope version.",
+          "The child sees which items were added/removed.",
+          "No silent replacement of the task or answer key occurs."
+        ]
+      }
+    },
+    {
+      "id": "ON-01",
+      "nameMongolian": "Номоор бие даан эхлэх",
+      "summaryMongolian": "Веб сурагч эрхтэй ном, сэдэв, хувилбараас шууд эхлэх.",
+      "acceptanceMongolian": [
+        "Багш нийтлэх, Цаас бэлэн, ангийн нөхөх бүртгэл шаардахгүй.",
+        "Ном/сэдэв/тест/хувилбар бэлэн; эрх нь загвар гэдэг ил.",
+        "Веб бие даалтын оролдлого итгэл, тусламж, цагтай.",
+        "9-р тестийн эх агуулга танхимтай ижил."
+      ],
+      "route": "selfstudy",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Online learner starts from an entitled book",
+        "steps": [
+          "Select Online self study.",
+          "Open the modeled entitled 100x100 V3 book → topic → Test 9 A.",
+          "Start and submit first answers."
+        ],
+        "acceptance": [
+          "No teacher-publish/paper-ready/class-backfill prerequisite is required.",
+          "Book/topic/test/variant context is prefilled and entitlement is marked modeled.",
+          "Answers are direct_selfstudy_web with item status, confidence, help, and attempt time.",
+          "Source Test 9 content remains the same as classroom content."
+        ]
+      }
+    },
+    {
+      "id": "ON-02",
+      "nameMongolian": "Анхны дүн ба алдааны хоёр дахь давталт",
+      "summaryMongolian": "Тестийн дүнгийн дараа буруу, хийгээгүй, эргэлзсэн бодлого руу орох.",
+      "acceptanceMongolian": [
+        "Анхны дүн өөрчлөгдөхгүй; хариулсан/нийт/дутуу тусдаа.",
+        "Хоёр дахь давталт өмнөх хариуг устгахгүй.",
+        "Тайлбар, томьёо баталгаатай; бичлэггүй бол Байхгүй гэж хэлнэ.",
+        "Анх зөв хийсэн бодлогын бодолтыг ч илгээсний дараа үзэж болно."
+      ],
+      "route": "selfstudy",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "First grade and second pass through wrong work",
+        "steps": [
+          "Finish the first test pass with correct, wrong, missing, helped, and guessed records.",
+          "Open Review mistakes and a worked solution.",
+          "Retry selected wrong items."
+        ],
+        "acceptance": [
+          "Initial grade remains fixed and separates answered/total/missing.",
+          "Second pass queues wrong/unattempted/uncertain items without erasing first results.",
+          "Worked text/formula links use verified material; unavailable video says Not available.",
+          "Correct initial items can also open their solution after submission."
+        ]
+      }
+    },
+    {
+      "id": "ON-03",
+      "nameMongolian": "Тест түр зогсоож үргэлжлүүлэх",
+      "summaryMongolian": "Дутуу тестийг хадгалж буцаж ороход бодолт урьдчилан задрахгүй.",
+      "acceptanceMongolian": [
+        "Ижил оролдлого, хариу, явц сэргэнэ.",
+        "Ноорог буруу болгохгүй; завсарласан хугацааг бодсон хугацаа гэж зохиохгүй.",
+        "Тогтоосон илгээх алхам хүртэл зөв хариу нуугдана."
+      ],
+      "route": "selfstudy",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Pause a topic test and resume without premature reveal",
+        "steps": [
+          "Answer five items and leave drafts in two more.",
+          "Pause and reload.",
+          "Resume and submit the first pass."
+        ],
+        "acceptance": [
+          "The same attempt resumes with answer/progress state.",
+          "No automatic wrong for unsubmitted drafts; no fabricated solve time during pause.",
+          "Correct answers stay hidden until the configured submit step."
+        ]
+      }
+    },
+    {
+      "id": "ON-04",
+      "nameMongolian": "Эрх дууссан, сэдэв нээгдэхгүй",
+      "summaryMongolian": "Эрхийн загвар нөхцөл өөрчлөгдөх үед явцаа алдахгүй.",
+      "acceptanceMongolian": [
+        "Хаалттай/дууссан төлөв, хадгалсан явц, дараагийн боломжит үйлдэл тодорхой.",
+        "Бодит төлбөр/эрхийн холболт хийсэн гэж хэлэхгүй.",
+        "Эрхийн бодлого шийдээгүй сонголт гэдгийг тэмдэглэнэ."
+      ],
+      "route": "selfstudy",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Rights expired or topic unavailable",
+        "steps": [
+          "Open a modeled book/topic without access, or expire modeled rights during a paused test."
+        ],
+        "acceptance": [
+          "Clear unavailable/expired state, saved progress, and allowed next action.",
+          "Do not claim that production authorization/payment has been integrated.",
+          "Entitlement policy choices are listed as unresolved product decisions."
+        ]
+      }
+    },
+    {
+      "id": "REV-01",
+      "nameMongolian": "Давтлагын гурван оролт",
+      "summaryMongolian": "Өмнөх тест, Миний алдаа, Шинэ давтлага хооронд ялгаатай эхлэх.",
+      "acceptanceMongolian": [
+        "Өмнөх тест ижил бодлогын ID, үзсэн түүхтэй; шинэ оролдлого үүснэ.",
+        "Миний алдаа анхны түүхтэй холбогдоно.",
+        "Шинэ давтлага сонгосон үзсэн сэдэв, баталгаатай бодлогын сангаас, эхлэхийн өмнө тайлбартай.",
+        "Өмнө үзсэн бодлогыг шинэ гэж нэрлэхгүй."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Three review entrances stay distinct",
+        "steps": [
+          "Choose Previous test, My mistakes, and New review in separate runs."
+        ],
+        "acceptance": [
+          "Previous test keeps original problem IDs/exposure and creates a new attempt.",
+          "My mistakes links each problem to its original history.",
+          "New review uses selected seen topics and verified candidates, with an explanation before starting.",
+          "A repeated known problem is never mislabeled unseen."
+        ]
+      }
+    },
+    {
+      "id": "REV-02",
+      "nameMongolian": "10/30/60 минутын хүрээ",
+      "summaryMongolian": "Хугацааны төсөв бодит боломжит бодлогын тоонд нийцэх.",
+      "acceptanceMongolian": [
+        "Бодлогын тоо, чадвар, бодох хугацааны баримжаа, тодорхойгүй байдал харагдана.",
+        "Урт хугацаа автоматаар хүнд бодлого болохгүй.",
+        "60 минутын сан хүрэлцэхгүй бол богино багц эсвэл сэдэв өргөжүүлэх ил сонголт.",
+        "Хязгааргүй бодлого зохиохгүй; веб нээлттэй цагийг хувийн хурд болгохгүй."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "10/30/60 minute plans respect available scope",
+        "steps": [
+          "Choose a taught Test 9 scope and request 10, 30, then 60 minutes.",
+          "Inspect each proposal before Start."
+        ],
+        "acceptance": [
+          "Plans show item count, covered skills, estimated active solving time, and uncertainty.",
+          "Longer time does not automatically mean greater difficulty.",
+          "If source candidates cannot fill 60 minutes, show actual scope and offer a shorter plan or explicit topic expansion.",
+          "Do not invent unlimited source-quality questions or make elapsed browsing time the learner’s speed."
+        ]
+      }
+    },
+    {
+      "id": "REV-03",
+      "nameMongolian": "Тоогоор багц сонгох",
+      "summaryMongolian": "Хугацаанаас өөр сонголтоор хүссэн бодлогын тоо оруулах.",
+      "acceptanceMongolian": [
+        "Хүссэн/боломжит тоо, баримжаат хугацаа харагдана.",
+        "Яг хугацаа ба яг тоог зэрэг заавал оруулахыг шаардахгүй.",
+        "Өөр сэдэв, хүнд бодлого чимээгүй нэмэхгүй."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Count mode is alternative to time mode",
+        "steps": [
+          "Select item-count mode with more items than eligible verified candidates from the selected Test 5/Test 9 scope."
+        ],
+        "acceptance": [
+          "Show requested versus available count and estimated time.",
+          "Do not demand both exact duration and exact count as simultaneous mandatory inputs.",
+          "No off-topic/harder items are added silently."
+        ]
+      }
+    },
+    {
+      "id": "REV-04",
+      "nameMongolian": "Нотолгоогүй хүүхдийн эхлэл",
+      "summaryMongolian": "Чадварын түүхгүй үед богино оношлох санал гаргах.",
+      "acceptanceMongolian": [
+        "Нотолгоо хүрэлцэхгүй төлөв; богино шалгах санал боломжтой.",
+        "Мэдэхгүй чадварыг сул/эзэмшсэн гэж нэрлэхгүй, суурийг бүгд чадна гэж үзэхгүй.",
+        "Хувийн дүгнэлтээс өмнө эхэд нийцсэн богино шалгалт хийнэ."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "No evidence starts a short check",
+        "steps": [
+          "Open independent review with no valid first attempts.",
+          "Select the Test 9 topic."
+        ],
+        "acceptance": [
+          "No-data status says Not enough evidence; a short diagnostic proposal is allowed.",
+          "Do not call unknown skills weak/mastered or assume all prerequisites mastered.",
+          "A brief source-aligned check precedes personalized claims."
+        ]
+      }
+    },
+    {
+      "id": "REV-05",
+      "nameMongolian": "Суурь чадварын дутуу нотолгоо",
+      "summaryMongolian": "Дараагийн бодлогыг сонгохдоо холбоотой суурийг шалгах.",
+      "acceptanceMongolian": [
+        "Дутуу суурь, баталгаатай суурь бодлого эсвэл онолын санал тайлбартай.",
+        "Алдааны тоо их гэдгээр хүнд орлуулгын бодлого шууд сонгохгүй.",
+        "Суурийн бодлогогүй бол дутагдлыг хэлнэ, зохиохгүй/тайлбаргүй хоосон үлдээхгүй."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Prerequisite gap limits the next problem",
+        "steps": [
+          "Model repeated failure on verified Test 5 factoring/zero-product reasoning.",
+          "Build review for a selected Test 9 method that actually requires the missing quadratic/factoring prerequisite."
+        ],
+        "acceptance": [
+          "Selection explains the missing prerequisite and proposes a focused verified prerequisite task or theory review.",
+          "Advanced substitution items are not selected solely because their skill has the largest error count.",
+          "If no prerequisite task exists, show the gap instead of fabricating one or leaving an unexplained empty plan."
+        ]
+      }
+    },
+    {
+      "id": "REV-06",
+      "nameMongolian": "Тусламжтай, таасан зөв түр нотолгоо",
+      "summaryMongolian": "Эзэмшсэн дүгнэлтийг шинэ тусламжгүй шалгалтаар батлах.",
+      "acceptanceMongolian": [
+        "Тусламж, таасан төлөв тусдаа.",
+        "Зөвхөн эдгээрээр эзэмшсэн гэж хэлэхгүй.",
+        "Боломжтой шинэ тусламжгүй бодлого; байхгүй бол бие даасан нотолгоо дутууг тайлбарлана."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Helped and guessed correct are provisional",
+        "steps": [
+          "Record only helped correct and guessed correct work.",
+          "Request a Test 9 review or unseen check."
+        ],
+        "acceptance": [
+          "Show support/guess status distinctly.",
+          "No mastered verdict from these results alone.",
+          "Select a suitable unseen unassisted item when available and otherwise explain that independent evidence is missing."
+        ]
+      }
+    },
+    {
+      "id": "REV-07",
+      "nameMongolian": "Удаан зөв боддог сурагч",
+      "summaryMongolian": "Хурд ба зөв бодох чадварыг ялган багц богиносгох.",
+      "acceptanceMongolian": [
+        "Зөв хариу/чадвар ба хурд тусдаа.",
+        "Цаасан нөхөх бүртгэл, веб нээлттэй цагаас баттай хувийн хурд гаргахгүй.",
+        "Бодит идэвхтэй хугацааны түүхгүй бол ерөнхий баримжаатай богино багц."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Slow correct learner is not weak",
+        "steps": [
+          "Use a slow fixture with correct unassisted work.",
+          "Request a 10-minute plan."
+        ],
+        "acceptance": [
+          "Accuracy/skill evidence and speed stay separate.",
+          "No high-confidence personal speed from paper backfill or browser-open duration.",
+          "A shorter plan is offered using labeled general timing until valid active-time history exists."
+        ]
+      }
+    },
+    {
+      "id": "REV-08",
+      "nameMongolian": "Давтлагын түүх дараагийн саналд нөлөөлөх",
+      "summaryMongolian": "Өмнөх давтлага, шалгалтыг уншиж анхны дүнг хэвээр хадгалах.",
+      "acceptanceMongolian": [
+        "Холбоотой бүх оролдлого хэрэглэгдэж, ангийн анхны дүн хадгалагдана.",
+        "Үзсэн түүхээр өмнөх давтлагын бодлогыг шинэ гэж нэрлэхгүй.",
+        "Шинэ санал гарсан ч хуучин багц, түүх устахгүй."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "History after review changes later proposals",
+        "steps": [
+          "Complete one verified review attempt.",
+          "Generate another plan."
+        ],
+        "acceptance": [
+          "The new plan reads all relevant attempt history, including prior review/probe evidence, while retaining original classroom results.",
+          "Exposure history prevents prior review items from being called unseen.",
+          "The old batch/history survives replacing the currently displayed proposal."
+        ]
+      }
+    },
+    {
+      "id": "REV-09",
+      "nameMongolian": "Өөр сэдэвт ил сонголтоор шилжих",
+      "summaryMongolian": "Давтлагад сонгоогүй шинэ сэдэв чимээгүй оруулахгүй.",
+      "acceptanceMongolian": [
+        "Батлахаас өмнө шинэ хүрээ харагдаж, сонголт шаардана.",
+        "Шинэ сэдвийг Үзсэн 9-р тестийн давтлага гэж нэрлэхгүй.",
+        "Бүтэн хөтөлбөрийн автомат зам хэрэгжсэн мэт хэлэхгүй."
+      ],
+      "route": "review",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Choose a different topic explicitly",
+        "steps": [
+          "Request more coverage than the Test 9 verified pool can supply.",
+          "Choose Add another studied topic."
+        ],
+        "acceptance": [
+          "Show new scope before commitment and require an explicit selection.",
+          "A new topic does not appear under the label Review taught Test 9.",
+          "No automatic full-curriculum path is implied."
+        ]
+      }
+    },
+    {
+      "id": "EX-01",
+      "nameMongolian": "Засварын дараах шинэ шалгалт",
+      "summaryMongolian": "Өмнө үзээгүй бодлогоор хязгаарлагдсан чадварын нотолгоо авах.",
+      "acceptanceMongolian": [
+        "Дуусахаас өмнө зөв хариу, бодолт, шууд зөв/буруу үзүүлэхгүй.",
+        "Хариулсан/нийт, зөв, тусламжтай, хийгээгүй тусдаа.",
+        "Дүгнэлт зөвхөн шалгасан арга/бодлого;100%эзэмшил гэж нэрлэхгүй.",
+        "Шинэ бодлого дуусвал нотолгооны хүрэлцээг тайлбарлана."
+      ],
+      "route": "assessment",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Unseen check after corrected practice",
+        "steps": [
+          "Finish correction/review.",
+          "Start a short check using verified unshown item IDs.",
+          "Submit once."
+        ],
+        "acceptance": [
+          "No answer/solution/instant correctness before finishing.",
+          "Outcome shows answered/total, correct, helped and unattempted separately.",
+          "The claim is limited to the checked methods/items; no 100% mastery claim.",
+          "If all eligible source items are exposed, explain the lack of unseen evidence."
+        ]
+      }
+    },
+    {
+      "id": "EX-02",
+      "nameMongolian": "Тоонууд өөрчилсөн загвар ба шилжилт",
+      "summaryMongolian": "Ижил загварын шинэ тоотой дасгалыг өөр бүтэцтэй шалгалтаас ялгах.",
+      "acceptanceMongolian": [
+        "Ойролцоо хувилбар/Үүсгэсэн дасгал гэж нэрлэж гарал хадгална.",
+        "Бичвэр өөр гэдгээр өргөн шилжилт батлагдсан гэж хэлэхгүй.",
+        "Шинэ нотолгоонд үзээгүй бодлого эсвэл хувилбарын бүлэг хэрэглэнэ."
+      ],
+      "route": "assessment",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Same numeric family versus independent transfer",
+        "steps": [
+          "Use a reviewed number-changed local variant for practice.",
+          "Compare it with a held-out source problem or structurally different verified variant."
+        ],
+        "acceptance": [
+          "Label the former Near variant / generated practice and retain generator/source metadata.",
+          "Do not claim independent broad transfer merely because its prompt differs.",
+          "Evaluation uses an unexposed problem/variant family when claiming new evidence."
+        ]
+      }
+    },
+    {
+      "id": "EX-03",
+      "nameMongolian": "Дутуу шалгалт, хугацаа дуусах",
+      "summaryMongolian": "Зарим бодлого хариулаагүй эсвэл хоосон шалгалтаар дуусах.",
+      "acceptanceMongolian": [
+        "Хариулаагүй нь мэдэхгүйг нотолсон дүн биш; тусдаа төлөв.",
+        "Нийт тоо, дуусгах/дүнгийн бодлого харагдана.",
+        "0 бодлого эсвэл 0 тусламжгүй хариу бол Бие даасан нотолгоогүй; амжилт гэж хэлэхгүй."
+      ],
+      "route": "assessment",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Partial check or timer expiry",
+        "steps": [
+          "Answer part of a check and finish, or simulate time expiry."
+        ],
+        "acceptance": [
+          "Unanswered items are visibly unattempted, not inferred proof of no knowledge.",
+          "Assessment completion/score denominator policy is visible.",
+          "A 0-item check or 0 unassisted answers yields No independent evidence, never a success verdict."
+        ]
+      }
+    },
+    {
+      "id": "WK-01",
+      "nameMongolian": "Долоо хоногийн шалгалтын загвар",
+      "summaryMongolian": "Нийтэлсэн тогтмол хүрээтэй шалгалтыг загвар эрх, хугацаагаар эхлүүлэх.",
+      "acceptanceMongolian": [
+        "Хувийн давтлагаас ялгаатай тогтмол хүрээ, дүрэмтэй.",
+        "Үргэлжлүүлэх, цаг, хариу нээх дүрэм ил, ижил үйлчилнэ.",
+        "Тайлбар заасан хүртэл нуугдана.",
+        "Эрх, хуваарь, үүрэг загвар; бодит шалгалтын хамгаалалт биш."
+      ],
+      "route": "weekly_exam",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Published weekly exam within rights/window",
+        "steps": [
+          "Open a modeled published weekly exam covering verified Test 9 scope.",
+          "Inspect rights, scope, start/duration/release conditions.",
+          "Start, pause according to the displayed policy, and finish."
+        ],
+        "acceptance": [
+          "Published exam differs from personal review: fixed scope and configured rules.",
+          "Resume/time/reveal rules are visible and applied consistently.",
+          "Explanations are hidden until configured release.",
+          "Role/schedule/rights are modeled, not a real exam security claim."
+        ]
+      }
+    },
+    {
+      "id": "WK-02",
+      "nameMongolian": "Нээгдээгүй, хаагдсан, дүн хүлээх",
+      "summaryMongolian": "Шалгалтын цонх, дууссан оролдлого, бодолт нээх төлөв.",
+      "acceptanceMongolian": [
+        "Зөв дараагийн үйлдэлтэй; давхар оролдлого эхлүүлэхгүй.",
+        "Нэг илгээсэн үр дүн байна.",
+        "Хүлээгдсэн үед бодолт эрт задрахгүй."
+      ],
+      "route": "weekly_exam",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Outside window, already completed, or release pending",
+        "steps": [
+          "Try a not-yet-open/closed exam, reload a completed exam, and view pending results."
+        ],
+        "acceptance": [
+          "State gives the correct next action without starting a duplicate attempt.",
+          "Only one submitted result exists.",
+          "Pending solution release does not reveal answers early."
+        ]
+      }
+    },
+    {
+      "id": "WK-03",
+      "nameMongolian": "Өөр хувийн багцыг эрэмбэлэхгүй",
+      "summaryMongolian": "10 ба 60 минутын өөр хүрээтэй багцыг нийт шалгалтаас ялгах.",
+      "acceptanceMongolian": [
+        "Өөр хүрээ/хүндрэлтэй хувийн багцын лидербордгүй.",
+        "Нийтлэг загвар шалгалтын эрэмбэ бол санал, харагдах бодлоготой.",
+        "Анхны дүнг зассан эцсийн хувьтай солихгүй."
+      ],
+      "route": "weekly_exam",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Avoid ranking incomparable personal plans",
+        "steps": [
+          "Compare a 10-minute personal plan to a 60-minute plan and a common weekly exam."
+        ],
+        "acceptance": [
+          "No leaderboard across differing personal scope/difficulty.",
+          "Any ranking shown for a common modeled exam is clearly a configured proposal with its visibility policy.",
+          "Initial grade and final corrected percentage are not interchangeable."
+        ]
+      }
+    },
+    {
+      "id": "FMT-01",
+      "nameMongolian": "Язгуурын олонлогийн ижил утга",
+      "summaryMongolian": "{-2,1/2}зэрэг жишээ форматад дараалал, бутархай/аравтын бичвэрийг шалгах.",
+      "acceptanceMongolian": [
+        "Аюулгүй төрөлтэй хувиргалтаар ижил олонлог тэнцүү.",
+        "Оролтын тайлбар олонлогийн төрөлд тохирно.",
+        "Дараалал, нэг язгуурын давхар бичвэр тэнцэтгэлийг өөрчлөхгүй."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Root set accepts order and equivalent numeric forms",
+        "steps": [
+          "For an illustrative roots={−2,1/2} item enter 1/2;−2, −2,0.5, and {0.5,−2}."
+        ],
+        "acceptance": [
+          "Equivalent root sets compare equally after safe, typed normalization.",
+          "Input field/example matches root-set question type.",
+          "Order and repeated representation of a root do not change mathematical equality."
+        ]
+      }
+    },
+    {
+      "id": "FMT-02",
+      "nameMongolian": "Тоо, олонлог, шийдгүйг ялгах",
+      "summaryMongolian": "Язгуурын нийлбэр, хамгийн их язгуур, тоо, шийдгүй зэрэг эхийн шаардлага.",
+      "acceptanceMongolian": [
+        "Сонголт/нэг тоо/язгуурын тоо/цифр нөхөх/олонлог/бодит шийдгүй төрөл тус бүр.",
+        "Нэг тоог бүтэн олонлог гэж үзэхгүй; бүх язгуур шаардсан бол бүгдийг шалгана.",
+        "Бодит тооны хүрээ, шийдгүй формат ил.",
+        "eval хэрэглэхгүй;0 хуваарь, буруу бутархайг алдаа болгоно."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Scalar versus set and no-solution result",
+        "steps": [
+          "Use Test 9 A5 (root sum=6), B6 (greatest root=9), A9 (root count=1), and the Test 5 A3 no-real-solution equation.",
+          "Try mismatched scalar/set answers, then the proper source-format result."
+        ],
+        "acceptance": [
+          "Answer type belongs to the item: source choice, aggregate scalar, greatest root, root count, structured digit blanks, full root set, or no real solution.",
+          "A scalar is not silently treated as a complete root set; a full-root-set item checks all roots.",
+          "Real-domain policy and accepted no-solution format are displayed.",
+          "Fractions never evaluate by JavaScript eval; invalid/zero denominators are rejected."
+        ]
+      }
+    },
+    {
+      "id": "FMT-03",
+      "nameMongolian": "Орлуулгын хүрээ, алдсан язгуур",
+      "summaryMongolian": "y=x²зэрэг орлуулгад анхны тэгшитгэлийн бүрэн шийдийг шалгах.",
+      "acceptanceMongolian": [
+        "Анхны хүрээн дэх баталгаатай бүтэн олонлогтой харьцуулна.",
+        "Алдсан язгуур/хүрээний алхмыг зөвхөн нотолгоотой тайлбарлана.",
+        "Эцсийн буруу хариунаас яг бодсон алдааг зохиохгүй."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Substitution-domain and lost-root mistakes",
+        "steps": [
+          "Use a verified equation requiring y=x² or other allowed substitution.",
+          "Enter only positive branch, a forbidden value, or an incomplete factorization result."
+        ],
+        "acceptance": [
+          "Checker compares the verified complete solution set under the original domain.",
+          "Explanation identifies substitution/domain or lost-root step only when the evidence supports it.",
+          "Do not infer the exact reasoning mistake from a wrong final answer alone."
+        ]
+      }
+    },
+    {
+      "id": "FMT-04",
+      "nameMongolian": "Эхийн сонголттой хурдан оруулалт",
+      "summaryMongolian": "А–Есонголттой бодлогод эхийн тэмдэглэл хадгалах.",
+      "acceptanceMongolian": [
+        "Эхийн сонголтын үсгээр оруулах боломжтой.",
+        "Язгуурын сонголт бүтнээр, эхийн холбоос хэвээр.",
+        "Сонголтын дүнг ажигласан бүтэн бодолт гэж нэрлэхгүй.",
+        "9/10-р бодлогыг А–Еболгохгүй; цифр нөхөх эхийг хадгална."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Original multiple-choice input stays fast",
+        "steps": [
+          "Open a source item with A–E answers on mobile.",
+          "Choose one option and mark uncertainty/help."
+        ],
+        "acceptance": [
+          "The input can use the original choice letter when that is the source test format.",
+          "Root-set option text is rendered fully and readably; original choice map is retained.",
+          "A choice grade is not called observed full-solution reasoning.",
+          "Do not render Q9/Q10 as A–E choice items; retain their source digit-fill structure."
+        ]
+      }
+    },
+    {
+      "id": "ROB-01",
+      "nameMongolian": "Дотоод хадгалалт, алдаа, сүлжээний загвар",
+      "summaryMongolian": "Ноорог сэргээх, хадгалалт боломжгүй, офлайн төлөвийг загварчлах.",
+      "acceptanceMongolian": [
+        "Бүх горимд браузерын дотоод хадгалалт гэж нэрлэнэ.",
+        "Сервер хүлээн авсан/Sync дууссан гэж хэлэхгүй.",
+        "Алдаа ил, экспорттой; мэдээлэл алдахгүйг худал батлахгүй.",
+        "Урсгал, хүрээ, язгуур, оролдлого, материал/үнэлгээ сэргэнэ."
+      ],
+      "route": "reliability",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Local save, storage failure, and modeled offline",
+        "steps": [
+          "Save drafts, reload, and toggle modeled offline.",
+          "Model storage-unavailable mode."
+        ],
+        "acceptance": [
+          "Label saving as local-browser state in every mode.",
+          "No Sync complete or Server received claims.",
+          "Storage failure is visible with an available export; no silent data-loss claim.",
+          "State serialization preserves route, scope, root-set data, all attempts, and material/review statuses."
+        ]
+      }
+    },
+    {
+      "id": "ROB-02",
+      "nameMongolian": "Үүрэг, загвар сурагч, reset тусгаарлах",
+      "summaryMongolian": "Сурагч/багш/эцэг эхийн харагдац ба өөр туршилтын явцыг солих.",
+      "acceptanceMongolian": [
+        "Харагдац солих нь хариу эсвэл багшийн дүнг автоматаар өөрчлөхгүй.",
+        "Туршилт бүр тусдаа дотоод ID-тай; бусдын дүн холилдохгүй.",
+        "Reset ил үйлдэл; шинэ явц эхлэхэд дутууг чимээгүй устгахгүй."
+      ],
+      "route": "reliability",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Role/profile/route switches and reset isolation",
+        "steps": [
+          "Switch modeled Student/Teacher/Parent views.",
+          "Start a separate attendance/profile scenario, then return.",
+          "Reset one run."
+        ],
+        "acceptance": [
+          "View switching does not mutate answers or simulate teacher decisions automatically.",
+          "Separate scenario runs have separate local IDs and cannot leak results across learners.",
+          "Reset is explicit; a fresh run does not silently destroy an unfinished run."
+        ]
+      }
+    },
+    {
+      "id": "UX-01",
+      "nameMongolian": "Утасны нэг бодлогын харагдац",
+      "summaryMongolian": "360–390px өргөнд оруулалт, засвар, үргэлжлүүлэлтийг шалгах.",
+      "acceptanceMongolian": [
+        "Одоогийн ажил, хариулсан x/10 эсвэл x/15, жижиг сонгогч тодорхой.",
+        "Алхам бүр нэг үндсэн үйлдэл; урт томьёотой асар урт маягтгүй.",
+        "Оролт, тусламж, цифр, өмнөх/дараах хажуу тийш scroll гүй.",
+        "Илгээхээс өмнө зөвхөн дутуу/алдаатайг харуулж, мэдэгдсэн мэдээллийг дахин асуухгүй."
+      ],
+      "route": "mobile",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "One current item and compact progress on a phone",
+        "steps": [
+          "Use 360–390px viewport and keyboard with a 10-item Test 9 variant and a 15-item Test 5 variant.",
+          "Backfill, open corrections, and resume after leaving."
+        ],
+        "acceptance": [
+          "Default current task/item is clear with Answered x/10 for Test 9 or x/15 for Test 5, and a compact problem picker.",
+          "One primary action at each step; no giant six-screen form of full equations for quick backfill.",
+          "Inputs, help, structured digit blanks, and previous/next controls fit without horizontal scrolling.",
+          "Before submission, review screen lists only missing/invalid fields; it never asks for metadata already known."
+        ]
+      }
+    },
+    {
+      "id": "UX-02",
+      "nameMongolian": "Хүртээмжтэй тэмдэглэгээ",
+      "summaryMongolian": "Гар, дэлгэц уншигч, zoom оор бодлого/оролтыг ашиглах.",
+      "acceptanceMongolian": [
+        "Хариу/итгэл/тусламжийн удирдлага бодлогын дугаар, үүргээ хэлнэ.",
+        "Товших хэмжээ, focus харагдана.",
+        "Төлөв/дүн зөвхөн өнгө биш бичвэртэй.",
+        "Нээхээс өмнө accessibility тайлбараар зөв хариу задрахгүй."
+      ],
+      "route": "mobile",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Accessible notation and navigation",
+        "steps": [
+          "Use keyboard/screen-reader navigation and zoom.",
+          "Read equations with exponent/fraction/substitution notation."
+        ],
+        "acceptance": [
+          "Every answer/confidence/help control names the item number and role.",
+          "Touch controls are adequately sized and focus remains visible.",
+          "Results/status are text as well as color.",
+          "No correct answer leaks through accessibility labels before reveal."
+        ]
+      }
+    },
+    {
+      "id": "RET-01",
+      "nameMongolian": "Хожуу шалгалтын виртуал өдөр",
+      "summaryMongolian": "Хугацааны дараах шалгалтыг зөвхөн загвар байдлаар ажиллуулах.",
+      "acceptanceMongolian": [
+        "Виртуал өдөр, цаг Загвар гэсэн тэмдэгтэй.",
+        "Өөр үзээгүй бодлого шаардах; байхгүй бол хэлнэ.",
+        "Мартагдалын тогтмол хувь, бүх хүүхдийн оновчтой зай амлахгүй."
+      ],
+      "route": "assessment",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "partial_synthetic_support",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Virtual delayed check stays a simulation",
+        "steps": [
+          "After an unseen check, trigger modeled later-day check."
+        ],
+        "acceptance": [
+          "Virtual date/time is labeled modeled.",
+          "Another eligible unexposed item is required, or No eligible items is shown.",
+          "No fixed forgetting percentage or universally optimal review interval is claimed."
+        ]
+      }
+    },
+    {
+      "id": "SRC-04",
+      "nameMongolian": "5 ба 9-р тестийг ил сонгох",
+      "summaryMongolian": "Цэвэр квадрат ба олон гишүүнт хүрээг өөр өөрөөр сонгох.",
+      "acceptanceMongolian": [
+        "5-р тест 15 А+15 Б=30; 9-р тест 10 А+10 Б=20; нийлээд 50 өвөрмөц ID.",
+        "Эхийн 40/50 минутыг 10/30/60 давтлагын төсвөөс салгана.",
+        "Гарчиг, хүрээ, оролт, тоо, бодолтын холбоос хамт шинэчлэгдэнэ.",
+        "Холимог багцыг ил сонгоно, чимээгүй солихгүй."
+      ],
+      "route": "content",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Explicit Test 5 versus Test 9 source scope choice",
+        "steps": [
+          "Select Test 5 / Quadratic equations.",
+          "Inspect A/B counts and source time, then select Test 9 / Polynomial equations.",
+          "Explicitly select both in a combined independent review."
+        ],
+        "acceptance": [
+          "Test 5 shows 15A+15B=30; Test 9 shows 10A+10B=20; combined source inventory has 50 unique IDs.",
+          "Retain 40-minute Test 5 and 50-minute Test 9 source-test metadata separately from 10/30/60 review budgets.",
+          "Teacher/student scope, title, item format, progress denominator and solution links all update together.",
+          "Cross-test practice is shown as a selected combined scope and never a silent substitution."
+        ]
+      }
+    },
+    {
+      "id": "T5-01",
+      "nameMongolian": "5-р тестийн хоёр бодит язгуур",
+      "summaryMongolian": "А 1:x²+11x+30=0 тэгшитгэлийн{-5,-6}шийд.",
+      "acceptanceMongolian": [
+        "Хоёр дараалал{-6,-5}олонлогтой таарна.",
+        "(x+5)(x+6)=0 бодолт хоёр язгуурыг хадгална.",
+        "Эхийн сонголтыг хадгалж, үсгийн холбоос зохиохгүй."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Test 5 routine quadratic with two real roots",
+        "steps": [
+          "Open source Test 5 A1: x²+11x+30=0.",
+          "Enter {-5,-6}, then the reversed order."
+        ],
+        "acceptance": [
+          "Both orders match the distinct real root set {-6,-5}.",
+          "Worked solution factors (x+5)(x+6)=0 and preserves both roots.",
+          "If the source input is multiple choice, preserve its actual options rather than inventing a letter map."
+        ]
+      }
+    },
+    {
+      "id": "T5-02",
+      "nameMongolian": "5-р тестийн бодит шийдгүй",
+      "summaryMongolian": "А 3:x²−2x+5=0,∅гэсэн ил хариу.",
+      "acceptanceMongolian": [
+        "D=−16,бодит язгуургүй.",
+        "Хоосон оролт нь дутуу; ил хоосон олонлогоос өөр.",
+        "Энэ бодит хүрээнд комплекс шийд оруулахгүй, өөр даалгавар ил сонгосон үед л ялгана."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Test 5 no real roots remains an explicit outcome",
+        "steps": [
+          "Open source Test 5 A3: x²−2x+5=0.",
+          "Submit No real solution / ∅ in the configured source format."
+        ],
+        "acceptance": [
+          "Negative discriminant D=−16 gives no real roots.",
+          "An empty typed answer remains missing, distinct from an explicit empty solution set.",
+          "No complex roots are accepted in this real-domain source scope unless an explicitly different task is selected."
+        ]
+      }
+    },
+    {
+      "id": "T5-03",
+      "nameMongolian": "5-р тестийн иррационал язгуур",
+      "summaryMongolian": "А 12:x²−4x+2=0,2±√2 гэсэн яг шийд.",
+      "acceptanceMongolian": [
+        "Хоёр ялгаатай язгуур 2−√2 ба 2+√2.",
+        "Язгуурын яг формат дэмжээгүй бол баталгаатай эхийн сонголт; ойролцоог яг тэнцүү гэж нэрлэхгүй.",
+        "Тоон алдааны хүлцэл бол шалгагчийн бодлого, эхийн үнэн биш."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Test 5 irrational roots and exact equivalence",
+        "steps": [
+          "Open source Test 5 A12: x²−4x+2=0.",
+          "Enter 2−√2;2+√2 or an equivalent exact representation."
+        ],
+        "acceptance": [
+          "The verified distinct real roots are 2±√2.",
+          "If exact radical input is not supported, the UI offers the verified source choice instead of silently treating decimal approximation as an exact symbolic answer.",
+          "Any supported numeric tolerance is stated as a checker engineering policy, not source truth."
+        ]
+      }
+    },
+    {
+      "id": "T5-04",
+      "nameMongolian": "5-р тестийн аравтын коэффициент",
+      "summaryMongolian": "Б 15:x²−5.6x+6.4=0 дээр 1.6;4 ба 8/5;4.",
+      "acceptanceMongolian": [
+        "Хоёр бичвэр{1.6,4}язгууртай таарна.",
+        "Аюулгүй тоон parser, Unicode хасах тэмдэг, зөвшөөрсөн аравтын тусгаарлагч.",
+        "Буруу аравтын/бутархай формат нооргийг хадгалсан шалгах алдаа."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Test 5 decimal coefficients and fractional input",
+        "steps": [
+          "Open source Test 5 B15: x²−5.6x+6.4=0.",
+          "Enter 1.6;4 and 8/5;4."
+        ],
+        "acceptance": [
+          "Both representations match roots {1.6,4}.",
+          "Use a safe typed numeric parser, including Unicode minus and accepted decimal separator.",
+          "A malformed decimal/fraction is a validation error that retains draft work."
+        ]
+      }
+    },
+    {
+      "id": "T9-01",
+      "nameMongolian": "9-р тестийн цифр нөхөх эх",
+      "summaryMongolian": "А 9,Б 9,А 10,Б 10 бодлогын эхийн жижиг нүдийг нөхөх.",
+      "acceptanceMongolian": [
+        "А 9 зургаа; Б 9,А 10,Б 10 долоон нүдтэй.",
+        "Q10-ийн[cd]хоёр оронтой коэффициент; тусдаа хоёр гишүүн биш.",
+        "Нөхсөн цифр ба эцсийн язгуурын тоо/олонлогийг тусад нь шалгана.",
+        "Шошго, эх, цифр, хариу гаралтай; А–Езохиохгүй."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Test 9 source digit-fill scaffolds",
+        "steps": [
+          "Open 9-A-9, 9-B-9, 9-A-10 and 9-B-10.",
+          "Enter the source-labeled digits and submit."
+        ],
+        "acceptance": [
+          "A9 has six digit blanks; B9, A10 and B10 have seven.",
+          "Q10 [cd] is a two-digit coefficient with adjacent c/d digits, not two independent polynomial terms.",
+          "Check scaffold digits separately from final root count/set when both are requested.",
+          "Labels, scaffold, raw digits and final answer retain source provenance; no fabricated A–E options."
+        ]
+      }
+    },
+    {
+      "id": "T9-02",
+      "nameMongolian": "9-р тестийн зэрэг ба давхар язгуур",
+      "summaryMongolian": "А 1,Б 1 тэгш зэргийг А 2 сондгой зэрэг, давхар язгууртай харьцуулах.",
+      "acceptanceMongolian": [
+        "А 1{-3,1}; Б 1{0,4}; А 2{1}.",
+        "Тэгш зэрэг хоёр тэмдэгтэй, сондгой зэрэг зохиомол сөрөг салаагүй.",
+        "Ялгаатай язгуурын олонлогт давхардлыг нэг удаа; давхар зэрэг мета мэдээлэлд үлдэнэ.",
+        "Нийлбэр/хамгийн их/тоо асуусан бол олонлогийг шууд хариу болгохгүй."
+      ],
+      "route": "answer_formats",
+      "coverageStatus": {
+        "scenarioDefinition": "designed_possible_case",
+        "inspectedExistingPrototype": "absent_in_inspected_prototype",
+        "targetPrototypeImplementation": "not_inspected_by_scenario_agent",
+        "targetPrototypeExecution": "not_executed_by_scenario_agent",
+        "acceptanceResult": "not_yet_evaluated"
+      },
+      "englishReference": {
+        "name": "Test 9 even/odd powers and repeated roots",
+        "steps": [
+          "Solve 9-A-1: (x+1)^4=16; 9-B-1: (x−2)^6=64; 9-A-2: (3x−1)^5=32.",
+          "Solve A6/A8 and compare distinct-root sets with aggregate requests."
+        ],
+        "acceptance": [
+          "A1 roots {−3,1}; B1 roots {0,4}; A2 root {1}.",
+          "Even powers retain both signs; odd power does not create a negative branch.",
+          "Repeated roots are listed once for the distinct root-set answer; multiplicity remains available metadata.",
+          "For aggregates, compute from the exact requested distinct real roots; a set answer cannot automatically replace a scalar request."
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const here=__dirname,docs=path.dirname(here),ctx={window:{}};vm.createContext(ctx);
+for(const f of ['flows','domain-flows','revision-v3','revision-v4','revision-v5','revision-v6','revision-v7','navigation','ui-tasks','research-data'])vm.runInContext(fs.readFileSync(path.join(here,f+'.js'),'utf8'),ctx,{filename:f});
+const D=ctx.window.PI_DESIGN,newMaps=D.maps.filter(m=>m.nodes.some(n=>n.id.startsWith('V7')));
+assert.equal(D.maps.length,82);assert.equal(D.maps.flatMap(m=>m.nodes).length,673);
+assert.equal(newMaps.length,8);assert.equal(newMaps.flatMap(m=>m.nodes).length,40);
+const byId=id=>D.maps.find(m=>m.id===id);
+assert.equal(byId('payment-two-channels').navigation.release,'v1');
+for(const id of ['math-simulation','notification-delay','schedule-export'])assert.equal(byId(id).navigation.release,'decision');
+for(const id of ['scan-solver','online-learner','personal-planner','project-agent'])assert.equal(byId(id).navigation.release,'later');
+assert.equal(byId('feedback').navigation.release,'v1');
+for(const id of ['design-evidence','critical-plan-audit','backend-plan-sequence'])assert.equal(byId(id).kind,'planning');
+assert(!byId('math-simulation').nodes.some(n=>n.actor.includes('Инженер')),'Implementation task in operation flow');
+const p=byId('payment-two-channels');assert(p.edges.some(e=>e.from==='V7P01'&&e.to==='V7P03'));assert(!p.edges.some(e=>e.from==='V7P02'&&e.to==='V7P03'),'API and bank should be alternatives');
+const cover=fs.readFileSync(path.join(docs,'FEATURE-PATTERN-COVERAGE.md'),'utf8');
+for(const m of D.maps)assert(cover.includes(' / '+m.id+' |'),'Missing coverage '+m.id);
+const risk=fs.readFileSync(path.join(docs,'SYSTEM-RISK-REVIEW.md'),'utf8');for(let i=1;i<=40;i++)assert(risk.includes('| F'+String(i).padStart(2,'0')+' |'));
+assert(!fs.readFileSync(path.join(here,'board.css'),'utf8').includes('radial-gradient'));
+assert(!fs.readFileSync(path.join(docs,'SCHEDULE-AND-BRAND-RESEARCH.md'),'utf8').includes('#EDC826'));
+assert(!byId('brand-evidence').nodes.find(n=>n.id==='V6B02').detail.includes('амжилтын шар акцент'));
+const html=fs.readFileSync(path.join(docs,'SYSTEM-DESIGN.html'),'utf8');assert(html.indexOf('revision-v7.js')<html.indexOf('navigation.js'));
+const reader=fs.readFileSync(path.join(here,'research-library.js'),'utf8');for(const id of ['rdRisks','rdBackend','rdCoverage']){assert(reader.includes('id="'+id+'"'));assert(reader.includes("querySelector('#"+id+"').onclick"));}
+new vm.Script(reader);
+const research=ctx.window.PI_RESEARCH;assert.equal(research.length,72);
+for(const name of ['DESIGN-AND-SIMULATION-RESEARCH.md','FEATURE-PATTERN-COVERAGE.md','SYSTEM-RISK-REVIEW.md','BACKEND-PLANNING-HANDOFF.md'])assert.equal(research.find(d=>d.path==='docs/'+name).text,fs.readFileSync(path.join(docs,name),'utf8'));
+console.log('PASS v0.7: 82 maps/673 blocks; 8 new maps/40 blocks; full map coverage; 40 risk cases; release and operation/TODO boundaries; alternative payment branches; brand correction; offline research/shortcut bindings. Browser rendering and product workflows not tested.');
