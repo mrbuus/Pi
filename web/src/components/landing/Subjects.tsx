@@ -1,62 +1,47 @@
 "use client";
 
-import { Pi, Scale, ChevronUp, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
+import { useId, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { Meta } from "@/components/ui/Meta";
+import { SkeletonLine } from "@/components/ui/Skeleton";
+import { Button } from "@/components/ui/kit/button";
+import styles from "./sections.module.css";
 
-interface Book {
-  id: string;
-  code: string;
-  title: string;
-  _count: { chapters: number };
-}
-
-interface Chapter {
-  id: string;
-  title: string;
-  order: number;
-  freePreview: boolean;
-  _count: { problems: number; theories: number };
-}
-
-function splitChapterTitle(title: string) {
-  const [topic, ...rest] = title.split(" · ");
-  return {
-    topic: topic?.trim() || title,
-    label: rest.join(" · ").trim() || title,
-  };
-}
-
+interface Book { id: string; code: string; title: string; _count: { chapters: number } }
+interface Chapter { id: string; title: string; order: number; freePreview: boolean; _count: { problems: number; theories: number } }
 type SubjectKey = "MATH" | "SOCIAL_STUDIES";
+interface SubjectMeta { key: SubjectKey; title: string; description: string; topics: string[] }
 
-interface SubjectMeta {
-  key: SubjectKey;
-  icon: typeof Pi;
-  title: string;
-  description: string;
-}
-
-// Хоёр хичээл ЯМАГТ тусдаа карт байна — нэг ерөнхий блок болгож
-// нэгтгэхгүй (SPEC-ийн тодорхой шаардлага).
+// The two subjects stay separate, including their independently loaded book lists.
 const SUBJECTS: SubjectMeta[] = [
-  {
-    key: "MATH",
-    icon: Pi,
-    title: "Математик",
-    description:
-      "Алгебр, геометр, тригонометр, магадлал — ЭЕШ-ийн бүх сэдвийг бодлогын сангаар бэлддэг. Танхим болон онлайн, түвшин ахиулах ангиуд тусдаа.",
-  },
-  {
-    key: "SOCIAL_STUDIES",
-    icon: Scale,
-    title: "Нийгмийн ухаан",
-    description:
-      "Түүх, эрх зүй, эдийн засаг, философи — ЭЕШ-ийн нийгмийн ухааны хөтөлбөрт нийцсэн танхимын сургалт.",
-  },
+  { key: "MATH", title: "Математик", description: "ЭЕШ-ийн бэлтгэл, хоцрогдол арилгах, түвшин ахиулах танхимын сургалт. Цахим ном, бодлогоор бие даан давтах боломжтой.", topics: ["Алгебр", "Геометр", "Тригонометр", "Магадлал"] },
+  { key: "SOCIAL_STUDIES", title: "Нийгмийн ухаан", description: "ЭЕШ-ийн нийгмийн ухааны хөтөлбөрт нийцсэн танхимын сургалт. Сэдвээ ойлгож, холбоо хамаарлыг нь тайлбарлаж сурна.", topics: ["Түүх", "Эрх зүй", "Эдийн засаг", "Философи"] },
 ];
 
-function SubjectCard({ meta }: { meta: SubjectMeta }) {
+function SubjectSketch({ math }: { math: boolean }) {
+  return <svg className={styles.subjectSketch} viewBox="0 0 220 155" fill="none" aria-hidden="true">
+    {math ? <>
+      <path d="M25 126H199M43 141V15" className={styles.sketchGuide} />
+      <circle cx="121" cy="76" r="48" className={styles.sketchCircle} />
+      <path d="M73 76H169L121 28V124L73 76Z" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M43 126L169 28M121 76L169 28" className={styles.sketchGuide} />
+      <circle cx="121" cy="76" r="3" fill="currentColor" />
+      <text x="183" y="118" fill="currentColor" className={styles.mathLabel}>x</text>
+      <text x="51" y="23" fill="currentColor" className={styles.mathLabel}>y</text>
+      <text x="134" y="97" fill="currentColor" className={styles.mathLabel}>π</text>
+    </> : <>
+      <path d="M111 22V132M67 132H155M47 46L174 35" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="111" cy="41" r="6" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M58 45L33 92H83L58 45ZM161 36L136 83H186L161 36Z" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M33 92Q58 115 83 92M136 83Q161 106 186 83" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="111" cy="76" r="59" className={styles.sketchGuide} />
+      <path d="M19 132H202" className={styles.sketchGuide} />
+    </>}
+  </svg>;
+}
+
+function SubjectCard({ meta, index }: { meta: SubjectMeta; index: number }) {
   const [open, setOpen] = useState(false);
   const [books, setBooks] = useState<Book[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,173 +49,68 @@ function SubjectCard({ meta }: { meta: SubjectMeta }) {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [chaptersLoading, setChaptersLoading] = useState(false);
+  const [chaptersError, setChaptersError] = useState(false);
+  const chapterRequest = useRef(0);
+  const panelId = useId();
 
-  async function toggleOpen() {
-    const next = !open;
-    setOpen(next);
-    if (next && books === null) {
-      setLoading(true);
-      setLoadError(false);
-      try {
-        const result = await api<Book[]>(`/books?subject=${meta.key}`, {
-          auth: false,
-        });
-        setBooks(result);
-      } catch {
-        // Fallback хуурамч өгөгдөл ХЭЗЭЭ Ч харуулахгүй — зөвхөн чимээгүй
-        // алдааны төлөв. Нийтийн хуудсанд бодит бус мэдээлэл харуулж болохгүй.
-        setBooks([]);
-        setLoadError(true);
-      } finally {
-        setLoading(false);
-      }
-    }
+  async function loadBooks() {
+    setLoading(true); setLoadError(false);
+    try { setBooks(await api<Book[]>(`/books?subject=${meta.key}`, { auth: false })); }
+    catch { setLoadError(true); }
+    finally { setLoading(false); }
   }
-
+  function toggleOpen() {
+    setOpen(!open);
+    if (!open && books === null && !loading) void loadBooks();
+  }
   async function openBook(book: Book) {
-    setSelectedBook(book);
-    setChaptersLoading(true);
-    setChapters([]);
+    const request = ++chapterRequest.current;
+    setSelectedBook(book); setChaptersLoading(true); setChapters([]); setChaptersError(false);
     try {
-      const result = await api<Chapter[]>(`/chapters?bookId=${book.id}`, {
-        auth: false,
-      });
-      setChapters(result);
-    } catch {
-      setChapters([]);
-    } finally {
-      setChaptersLoading(false);
-    }
+      const result = await api<Chapter[]>(`/chapters?bookId=${book.id}`, { auth: false });
+      if (request === chapterRequest.current) setChapters(result);
+    } catch { if (request === chapterRequest.current) setChaptersError(true); }
+    finally { if (request === chapterRequest.current) setChaptersLoading(false); }
   }
 
-  return (
-    <div className="reveal chunky p-7">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-        <meta.icon aria-hidden size={28} strokeWidth={2.25} />
-      </div>
-      <h3 className="mt-5 text-xl font-extrabold text-ink">{meta.title}</h3>
-      <p className="mt-2.5 text-sm leading-relaxed text-ink-dim">
-        {meta.description}
-      </p>
-
-      <button
-        type="button"
-        onClick={() => void toggleOpen()}
-        aria-expanded={open}
-        className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition hover:underline"
-      >
-        {open ? (
-          <>
-            Нуух <ChevronUp className="h-4 w-4" aria-hidden />
-          </>
-        ) : (
-          <>
-            Бодлогын сан харах <ChevronRight className="h-4 w-4" aria-hidden />
-          </>
-        )}
-      </button>
-
-      {open && (
-        <div className="mt-4 rounded-xl border border-line bg-surface p-4">
-          {loading ? (
-            <p className="text-sm text-ink-dim">Ачаалж байна…</p>
-          ) : loadError ? (
-            <p className="text-sm text-error">
-              Мэдээлэл ачаалахад алдаа гарлаа. Дараа дахин оролдоно уу.
-            </p>
-          ) : books && books.length > 0 ? (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {books.map((b) => (
-                <button
-                  key={b.id}
-                  type="button"
-                  onClick={() => void openBook(b)}
-                  aria-pressed={selectedBook?.id === b.id}
-                  className={`rounded-lg border p-3 text-left text-sm transition ${
-                    selectedBook?.id === b.id
-                      ? "border-brand bg-brand/5"
-                      : "border-line hover:border-brand/40"
-                  }`}
-                >
-                  <span className="block font-bold text-ink">{b.code}</span>
-                  <span className="mt-0.5 block truncate text-xs text-ink-dim">
-                    <Meta items={[b.title, `${b._count.chapters} бүлэг`]} />
-                  </span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            // Бодит API хоосон буцаасан жинхэнэ төлөв — зохиомол сэдэв
-            // нэмэхгүйгээр үнэнч эмптиг харуулна.
-            <p className="text-sm text-ink-dim">
-              Энэ хичээлээр цахим бодлогын сан удахгүй нэмэгдэнэ.
-            </p>
-          )}
-
-          {selectedBook && (
-            <div className="mt-4 border-t border-line pt-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-brand">
-                <Meta items={[selectedBook.code, "бүлэг сэдэв"]} />
-              </p>
-              {chaptersLoading ? (
-                <p className="mt-2 text-sm text-ink-dim">
-                  Сэдвүүд ачаалж байна…
-                </p>
-              ) : chapters.length > 0 ? (
-                <ul className="mt-2 grid gap-1.5">
-                  {chapters.slice(0, 6).map((c, i) => {
-                    const { topic, label } = splitChapterTitle(c.title);
-                    return (
-                      <li key={c.id} className="flex items-center gap-2.5 text-sm">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand/10 text-xs font-bold text-brand">
-                          {i + 1}
-                        </span>
-                        <span className="min-w-0 truncate text-ink-dim">
-                          <Meta items={[
-                            <span key="label" className="text-ink">{label}</span>,
-                            topic,
-                            `${c._count.problems} бодлого`,
-                            c.freePreview && "үнэгүй"
-                          ]} />
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="mt-2 text-sm text-ink-dim">
-                  Энэ номд бүлэг сэдэв хараахан нэмэгдээгүй байна.
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  return <article className={`reveal ${styles.subjectCard}`}>
+    <div className={styles.subjectTop}><span className={styles.index}>0{index + 1} / Хичээл</span><ArrowUpRight size={20} aria-hidden /></div>
+    <SubjectSketch math={meta.key === "MATH"} />
+    <h3 className={`cyrillic-heading ${styles.subjectTitle}`}>{meta.title}</h3>
+    <p className={styles.subjectDescription}>{meta.description}</p>
+    <ul className={styles.topicList} aria-label={`${meta.title} сэдвүүд`}>{meta.topics.map(topic => <li key={topic}>{topic}</li>)}</ul>
+    <Button type="button" variant="link" className={styles.subjectToggle} onClick={toggleOpen} aria-expanded={open} aria-controls={panelId}>
+      {open ? "Бодлогын санг хураах" : "Бодлогын сан харах"}{open ? <ChevronUp aria-hidden /> : <ChevronDown aria-hidden />}
+    </Button>
+    {open && <div id={panelId} className={styles.bookPanel} aria-busy={loading || chaptersLoading}>
+      {loading ? <div role="status" className={styles.loading}><span className="sr-only">Номын сан ачаалж байна</span><SkeletonLine height={16} /><SkeletonLine width="75%" height={16} /><SkeletonLine width="85%" height={16} /></div>
+        : loadError ? <div><p className="text-sm text-error">Номын санг ачаалж чадсангүй.</p><Button variant="link" onClick={() => void loadBooks()}>Дахин оролдох</Button></div>
+          : books?.length ? <div className={styles.bookGrid}>{books.map(book => <button key={book.id} type="button" onClick={() => void openBook(book)} aria-pressed={selectedBook?.id === book.id} className={styles.bookChoice}>
+            <strong>{book.code}</strong><span><Meta items={[book.title, `${book._count.chapters} бүлэг`]} /></span>
+          </button>)}</div>
+            : <p className={styles.smallCopy}>Энэ хичээлийн цахим бодлогын сан хараахан нийтлэгдээгүй.</p>}
+      {selectedBook && <div className={styles.chapterPanel}>
+        <p className={styles.eyebrow}><Meta items={[selectedBook.code, "Бүлэг сэдэв"]} /></p>
+        {chaptersLoading ? <div role="status" className={styles.loading}><span className="sr-only">Сэдвүүд ачаалж байна</span><SkeletonLine /><SkeletonLine width="70%" /></div>
+          : chaptersError ? <div><p className="text-sm text-error">Сэдвүүдийг ачаалж чадсангүй.</p><Button variant="link" onClick={() => void openBook(selectedBook)}>Дахин оролдох</Button></div>
+            : chapters.length ? <ul className={styles.chapterList}>{chapters.slice(0, 6).map((chapter, i) => {
+              const [topic, ...rest] = chapter.title.split(" · ");
+              const label = rest.join(" — ").trim() || chapter.title;
+              return <li key={chapter.id}><span className={styles.chapterIndex}>{i + 1}</span><span><Meta items={[label, topic?.trim(), `${chapter._count.problems} бодлого`, chapter.freePreview && "үнэгүй"]} /></span></li>;
+            })}</ul> : <p className={styles.smallCopy}>Энэ номд бүлэг сэдэв хараахан нэмэгдээгүй.</p>}
+      </div>}
+    </div>}
+  </article>;
 }
 
 export default function Subjects() {
-  return (
-    <section id="subjects" className="relative scroll-mt-20 py-24">
-      <div className="mx-auto max-w-6xl px-5">
-        <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-brand">
-          Хичээлүүд
-        </p>
-        <h2 className="reveal mt-3 max-w-2xl text-3xl font-extrabold md:text-4xl">
-          Элсэлтийн шалгалтын бэлтгэл, мөн түвшин ахиулах сургалт
-        </h2>
-        <p className="reveal mt-4 max-w-2xl text-base leading-relaxed text-ink-dim">
-          Математик, нийгмийн ухааны хичээлээр элсэлтийн шалгалтад бэлддэгээс
-          гадна, математикийн хоцрогдол арилгаж түвшин ахиулах танхимын анги
-          тусдаа ажилладаг.
-        </p>
-        <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {SUBJECTS.map((meta) => (
-            <SubjectCard key={meta.key} meta={meta} />
-          ))}
-        </div>
+  return <section id="subjects" className={styles.section}>
+    <div className={styles.container}>
+      <div className={`reveal ${styles.sectionHeading}`}>
+        <div><p className={styles.eyebrow}>01 / Сурах чиглэл</p><h2 className={`cyrillic-heading ${styles.heading}`}>Ойлголтоос<br /><span className={styles.blue}>бодолт руу.</span></h2></div>
+        <p className={styles.headingAside}>Элсэлтийн шалгалтад бэлдэх, эсвэл сууриа бататгах. Өөрт тохирох хичээлээс эхлээрэй.</p>
       </div>
-    </section>
-  );
+      <div className={styles.subjectGrid}>{SUBJECTS.map((meta, index) => <SubjectCard key={meta.key} meta={meta} index={index} />)}</div>
+    </div>
+  </section>;
 }

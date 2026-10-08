@@ -1,78 +1,50 @@
-"use client";
-
-import dynamic from "next/dynamic";
+import Link from "next/link";
+import { ArrowDown, ArrowUpRight, BookOpen } from "lucide-react";
+import MathVisual from "./MathVisual";
 import MathText from "@/components/MathText";
-
-const Hero3D = dynamic(() => import("@/components/Hero3D"), { ssr: false });
-
-// Дэвсгэрт хөвж буй тэмдэглэгээнүүд — бэлэн текст тэмдэгт (жш: "π")
-// ХЭЗЭЭ Ч ашиглахгүй, KaTeX-ээр жинхэнэ математик тэмдэглэгээ болгож
-// рендерлэнэ (MathText).
-const FLOATING = [
-  { tex: "\\pi", top: "12%", left: "6%", size: 38, delay: "0s", rot: "-8deg" },
-  { tex: "\\int", top: "30%", left: "92%", size: 44, delay: "1.2s", rot: "6deg" },
-  { tex: "\\Sigma", top: "68%", left: "4%", size: 34, delay: "2.1s", rot: "10deg" },
-  { tex: "\\surd", top: "80%", left: "88%", size: 40, delay: "0.7s", rot: "-12deg" },
-  { tex: "\\theta", top: "8%", left: "78%", size: 30, delay: "1.8s", rot: "4deg" },
-  { tex: "\\infty", top: "55%", left: "95%", size: 36, delay: "2.6s", rot: "-5deg" },
-];
+import { Button } from "@/components/ui/kit/button";
+import { ORG } from "@/lib/orgInfo";
+import styles from "./landing.module.css";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-32 pb-20">
-      <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      {FLOATING.map((f) => (
-        <span
-          key={f.tex + f.top}
-          aria-hidden
-          className="float-sym pointer-events-none absolute select-none text-brand-soft/40"
-          style={{
-            top: f.top,
-            left: f.left,
-            fontSize: f.size,
-            ["--delay" as string]: f.delay,
-            ["--rot" as string]: f.rot,
-          }}
-        >
-          <MathText>{`$${f.tex}$`}</MathText>
-        </span>
-      ))}
-
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[1.15fr_1fr]">
-        {/* min-w-0: grid багана контентоосоо (ялангуяа canvas) томрохгүй */}
-        <div className="min-w-0">
-          <span className="reveal visible inline-flex items-center gap-2 rounded-full border border-brand-bright/30 bg-brand-bright/10 px-4 py-1.5 text-[13px] font-semibold text-brand">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-teal" />
-            Шинэ ирээдүйн эзэд сургалтын төв
-          </span>
-          <h1 className="mt-6 text-[32px] font-extrabold leading-[1.15] tracking-tight sm:text-[40px] md:text-[52px]">
-            Элсэлтийн шалгалтад бэлдэх{" "}
-            <span className="text-shine">хамгийн үр дүнтэй</span> арга
-          </h1>
-          <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink-dim">
-            Элсэлтийн шалгалтад бэлдэх + математикийн хоцрогдол арилгах
-            танхимын сургалт. Мөн онлайнаар суралцах боломжтой.
+    <section id="public-home" className={styles.hero} aria-labelledby="home-title">
+      <div aria-hidden className={styles.heroOrbit} />
+      <div className={styles.heroLayout}>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>
+            <span aria-hidden className={styles.brandLine} />{ORG.shortName}
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <a
-              href="/register"
-              className="btn-3d rounded-2xl bg-brand-bright px-7 py-3.5 text-center font-bold tracking-wide text-on-brand transition hover:brightness-105"
-            >
-              Одоо бүртгүүлэх
-            </a>
-            <a
-              href="#subjects"
-              className="chunky chunky-press rounded-2xl px-7 py-3.5 font-semibold text-ink"
-            >
-              Бодлогын сан үзэх
-            </a>
+          <h1 id="home-title" className={`cyrillic-heading ${styles.heroTitle}`}>
+            Бодож үз.
+            <br />
+            <span className={styles.heroAccent}>Өөрөөр хар.</span>
+          </h1>
+          <p className={styles.heroDescription}>
+            Математик, нийгмийн ухааны танхимын сургалт.
+            Цахим ном, бодлогын сангаар өөрийн хурдаар давт.
+            Ойлголтоос эхэлдэг амжилтын төлөө.
+          </p>
+          <div className={styles.heroActions}>
+            <Button asChild className={styles.primaryAction}>
+              <a href="#subjects">Хичээлүүдийг үзэх <ArrowUpRight aria-hidden /></a>
+            </Button>
+            <Button asChild variant="ghost" className={styles.secondaryAction}>
+              <Link href="/preview"><BookOpen aria-hidden /> Номоос бодож үзэх</Link>
+            </Button>
+          </div>
+          <div className={styles.heroFootnote}>
+            <div aria-hidden className={styles.ideaMark}>
+              <MathText>{"$x\\longrightarrow x+1$"}</MathText>
+            </div>
+            <p>Өнөөдрийн ойлголт.<br /><strong>Маргаашийн боломж.</strong></p>
           </div>
         </div>
-
-        <div className="relative min-w-0 h-[340px] md:h-[420px]">
-          <Hero3D />
-        </div>
+        <div className={styles.heroExhibit}><MathVisual /></div>
       </div>
+      <a href="#subjects" className={styles.scrollCue}>
+        <span>Цааш танилцах</span><ArrowDown aria-hidden size={16} />
+      </a>
     </section>
   );
 }

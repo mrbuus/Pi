@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import MathText from "@/components/MathText";
-import { fileUrl } from "@/lib/api";
+import AttachmentPreview from "@/components/homework/AttachmentPreview";
 
 /**
  * Онолын блокийн markdown-г СУРАГЧИД ХАРАГДАХТАЙ ЯГ АДИЛААР рендерлэнэ.
@@ -122,7 +122,8 @@ function InlineText({ text }: { text: string }) {
   // condition-той биш.
   for (const m of text.matchAll(BOLD_RE)) {
     const index = m.index ?? 0;
-    if (index > last) parts.push({ bold: false, text: text.slice(last, index) });
+    if (index > last)
+      parts.push({ bold: false, text: text.slice(last, index) });
     parts.push({ bold: true, text: m[1] });
     last = index + m[0].length;
   }
@@ -194,17 +195,26 @@ export default function TheoryContent({
         }
         if (b.type === "image") {
           return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={i}
-              src={fileUrl(b.imageKey)}
-              alt={b.alt}
-              className="my-3 max-w-full rounded-lg border border-line"
-            />
+            <figure key={i} className="my-3">
+              <AttachmentPreview
+                inline
+                fileKey={b.imageKey}
+                label={b.alt || "Онолын зураг"}
+              />
+              {b.alt && (
+                <figcaption className="mt-2 text-sm text-ink-dim">
+                  {b.alt}
+                </figcaption>
+              )}
+            </figure>
           );
         }
         return (
-          <p key={i} className="my-2 text-ink" style={{ whiteSpace: "pre-wrap" }}>
+          <p
+            key={i}
+            className="my-2 text-ink"
+            style={{ whiteSpace: "pre-wrap" }}
+          >
             <InlineText text={b.text} />
           </p>
         );
@@ -233,7 +243,11 @@ export function insertImageMarkdown(
   imageKey: string,
 ): string {
   const trimmed = (content ?? "").replace(/\s+$/, "");
-  const line = `![${alt}](${imageKey})`;
+  const safeAlt = alt
+    .replaceAll("[", "(")
+    .replaceAll("]", ")")
+    .replace(/\r?\n/g, " ");
+  const line = `![${safeAlt}](${imageKey})`;
   return trimmed ? `${trimmed}\n\n${line}\n` : `${line}\n`;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Plus } from "lucide-react";
 import type { TheoryBlock } from "./types";
 
 /**
@@ -32,13 +32,13 @@ export default function TheoryBlockList({
       <button
         type="button"
         onClick={onCreateNew}
-        className={`w-full rounded-lg px-3 py-2 text-sm font-bold transition ${
+        className={`min-h-11 w-full rounded-lg px-3 py-2 text-sm font-bold transition ${
           selectedId === "__new__"
             ? "bg-brand-bright text-on-brand"
             : "border border-line text-ink hover:border-brand"
         }`}
       >
-        + Шинэ блок нэмэх
+        <Plus className="mr-2 inline h-4 w-4" aria-hidden /> Шинэ блок нэмэх
       </button>
 
       <ol className="space-y-2">
@@ -48,7 +48,9 @@ export default function TheoryBlockList({
             <li
               key={b.id}
               className={`rounded-lg border p-2.5 transition ${
-                active ? "border-brand bg-brand-bright/10" : "border-line bg-surface"
+                active
+                  ? "border-brand bg-brand-bright/10"
+                  : "border-line bg-surface"
               }`}
             >
               <div className="flex items-start gap-2">
@@ -58,7 +60,8 @@ export default function TheoryBlockList({
                 <button
                   type="button"
                   onClick={() => onSelect(b.id)}
-                  className="min-w-0 flex-1 truncate text-left text-sm font-medium text-ink hover:underline"
+                  aria-current={active ? "true" : undefined}
+                  className="min-h-11 min-w-0 flex-1 break-words text-left text-sm font-medium text-ink hover:underline"
                   title={b.title}
                 >
                   {b.title || "(гарчиггүй блок)"}
@@ -71,7 +74,7 @@ export default function TheoryBlockList({
                     onClick={() => onMove(b.id, "up")}
                     disabled={i === 0 || reordering}
                     aria-label={`"${b.title}"-ийг дээш зөөх`}
-                    className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
+                    className="inline-flex min-h-11 items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
                   >
                     <ChevronUp className="h-3 w-3" aria-hidden />
                     дээш
@@ -81,7 +84,7 @@ export default function TheoryBlockList({
                     onClick={() => onMove(b.id, "down")}
                     disabled={i === blocks.length - 1 || reordering}
                     aria-label={`"${b.title}"-ийг доош зөөх`}
-                    className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
+                    className="inline-flex min-h-11 items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink disabled:opacity-30"
                   >
                     <ChevronDown className="h-3 w-3" aria-hidden />
                     доош
@@ -90,7 +93,7 @@ export default function TheoryBlockList({
                 <button
                   type="button"
                   onClick={() => onDelete(b)}
-                  className="rounded-md px-2 py-1 text-xs font-semibold text-error hover:underline"
+                  className="min-h-11 rounded-md px-2 py-1 text-xs font-semibold text-error hover:underline"
                 >
                   Устгах
                 </button>

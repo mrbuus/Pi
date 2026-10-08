@@ -2,13 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import {
+  LoadingState,
+  ErrorState,
+  EmptyState,
+} from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import HeatmapGrid, { HeatmapCell } from "./HeatmapGrid";
 import {
   ClassYearActivityResponse,
   HOLIDAY_HATCH_STYLE,
   LEVEL_CLASS,
+  todayIso,
 } from "./types";
 
 interface ClassActivityHeatmapProps {
@@ -26,11 +31,12 @@ export default function ClassActivityHeatmap({
   classroomId,
   year,
 }: ClassActivityHeatmapProps) {
-  const currentYear = new Date().getFullYear();
+  const currentYear = Number(todayIso().slice(0, 4));
   const [activeYear, setActiveYear] = useState(year ?? currentYear);
   const [data, setData] = useState<ClassYearActivityResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,7 +59,7 @@ export default function ClassActivityHeatmap({
     return () => {
       cancelled = true;
     };
-  }, [classroomId, activeYear]);
+  }, [classroomId, activeYear, retryTick]);
 
   const activeDaysCount = useMemo(
     () => data?.days.filter((d) => d.activeStudents > 0).length ?? 0,
@@ -85,14 +91,18 @@ export default function ClassActivityHeatmap({
     return (
       <section className="chunky p-4 md:p-6">
         <h2 className="mb-2 font-bold text-brand-soft">Ангийн идэвхийн түүх</h2>
-        <p className="text-sm text-error">{error}</p>
+        <ErrorState
+          message={error}
+          onRetry={() => setRetryTick((t) => t + 1)}
+        />
       </section>
     );
   }
 
-  if (!data) return null;
+  if (!data) return <EmptyState title="Идэвхийн мэдээлэл алга" hint="Өөр жил сонгох эсвэл дараа дахин шалгаарай." />;
 
-  const yearLabel = activeYear === currentYear ? "Энэ жил" : `${activeYear} онд`;
+  const yearLabel =
+    activeYear === currentYear ? "Энэ жил" : `${activeYear} онд`;
 
   return (
     <section className="chunky p-4 md:p-6">
@@ -101,7 +111,7 @@ export default function ClassActivityHeatmap({
         <div className="flex items-center gap-2 text-sm">
           <button
             onClick={() => setActiveYear((y) => y - 1)}
-            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink"
             aria-label="Өмнөх жил харах"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -110,7 +120,7 @@ export default function ClassActivityHeatmap({
           <button
             onClick={() => setActiveYear((y) => y + 1)}
             disabled={activeYear >= currentYear}
-            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
             aria-label="Дараагийн жил харах"
           >
             <ArrowRight className="h-4 w-4" aria-hidden />

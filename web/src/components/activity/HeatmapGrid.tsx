@@ -1,6 +1,7 @@
 "use client";
 
-import { HOLIDAY_HATCH_STYLE } from "./types";
+import { useId, useState } from "react";
+import { HOLIDAY_HATCH_STYLE, todayIso } from "./types";
 
 export interface HeatmapCell {
   date: string; // "YYYY-MM-DD"
@@ -42,7 +43,16 @@ const GAP = 3;
  * Cell бүр title/aria-label-тай тул дэлгэцийн уншигч, hover хоёулаа ойлгоно —
  * өнгө дангаараа утга илэрхийлдэггүй.
  */
-export default function HeatmapGrid({ cells, cellSize = 13 }: HeatmapGridProps) {
+export default function HeatmapGrid({
+  cells,
+  cellSize = 13,
+}: HeatmapGridProps) {
+  const id = useId();
+  const [selectedDate, setSelectedDate] = useState("");
+  const selected =
+    cells.find((cell) => cell.date === selectedDate) ??
+    [...cells].reverse().find((cell) => cell.date <= todayIso()) ??
+    cells[cells.length - 1];
   if (cells.length === 0) return null;
 
   const firstWeekday = new Date(`${cells[0].date}T00:00:00Z`).getUTCDay();
@@ -68,64 +78,83 @@ export default function HeatmapGrid({ cells, cellSize = 13 }: HeatmapGridProps) 
   }
 
   return (
-    <div className="inline-flex gap-2">
-      {/* Долоо хоногийн өдрийн шошго */}
-      <div className="flex flex-col gap-[3px] pt-[18px]" aria-hidden>
-        {WEEKDAY_LABELS.map((label, i) => (
-          <div
-            key={label + i}
-            className="text-[10px] text-ink-dim"
-            style={{ height: cellSize, lineHeight: `${cellSize}px` }}
-          >
-            {VISIBLE_WEEKDAY_ROWS.has(i) ? label : ""}
-          </div>
-        ))}
-      </div>
-
-      <div>
-        {/* Сарын шошго */}
-        <div
-          className="relative mb-1 h-[14px] text-[10px] text-ink-dim"
-          style={{ width: weekCount * colWidth }}
+    <div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <label htmlFor={id} className="text-sm font-semibold">
+          Өдрийн мэдээлэл
+        </label>
+        <select
+          id={id}
+          value={selected?.date ?? ""}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="min-h-11 rounded-lg border border-line bg-surface px-3 text-sm"
         >
-          {monthLabels.map((m) => (
-            <span
-              key={m.weekIndex}
-              className="absolute top-0 whitespace-nowrap"
-              style={{ left: m.weekIndex * colWidth }}
+          {cells.map((cell) => (
+            <option key={cell.date} value={cell.date}>
+              {cell.date}
+            </option>
+          ))}
+        </select>
+        <p className="w-full text-sm text-ink-dim" role="status">
+          {selected?.ariaLabel}
+        </p>
+      </div>
+      <div className="inline-flex gap-2" aria-hidden="true">
+        {/* Долоо хоногийн өдрийн шошго */}
+        <div className="flex flex-col gap-[3px] pt-[18px]" aria-hidden>
+          {WEEKDAY_LABELS.map((label, i) => (
+            <div
+              key={label + i}
+              className="text-[10px] text-ink-dim"
+              style={{ height: cellSize, lineHeight: `${cellSize}px` }}
             >
-              {m.label}
-            </span>
+              {VISIBLE_WEEKDAY_ROWS.has(i) ? label : ""}
+            </div>
           ))}
         </div>
 
-        {/* Тор — багана бүр 1 долоо хоног, мөр бүр 1 гараг */}
-        <div
-          className="grid"
-          style={{
-            gridTemplateRows: `repeat(7, ${cellSize}px)`,
-            gridAutoFlow: "column",
-            gridAutoColumns: `${cellSize}px`,
-            gap: `${GAP}px`,
-          }}
-        >
-          {padded.map((cell, i) =>
-            cell ? (
-              <div
-                key={cell.date}
-                role="img"
-                aria-label={cell.ariaLabel}
-                title={cell.ariaLabel}
-                tabIndex={0}
-                className={`rounded-[3px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${cell.colorClass} ${
-                  cell.isHoliday ? "border border-dashed border-line" : ""
-                }`}
-                style={cell.isHoliday ? HOLIDAY_HATCH_STYLE : undefined}
-              />
-            ) : (
-              <div key={`pad-${i}`} aria-hidden />
-            ),
-          )}
+        <div>
+          {/* Сарын шошго */}
+          <div
+            className="relative mb-1 h-[14px] text-[10px] text-ink-dim"
+            style={{ width: weekCount * colWidth }}
+          >
+            {monthLabels.map((m) => (
+              <span
+                key={m.weekIndex}
+                className="absolute top-0 whitespace-nowrap"
+                style={{ left: m.weekIndex * colWidth }}
+              >
+                {m.label}
+              </span>
+            ))}
+          </div>
+
+          {/* Тор — багана бүр 1 долоо хоног, мөр бүр 1 гараг */}
+          <div
+            className="grid"
+            style={{
+              gridTemplateRows: `repeat(7, ${cellSize}px)`,
+              gridAutoFlow: "column",
+              gridAutoColumns: `${cellSize}px`,
+              gap: `${GAP}px`,
+            }}
+          >
+            {padded.map((cell, i) =>
+              cell ? (
+                <div
+                  key={cell.date}
+                  title={cell.ariaLabel}
+                  className={`rounded-[3px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${cell.colorClass} ${
+                    cell.isHoliday ? "border border-dashed border-line" : ""
+                  }`}
+                  style={cell.isHoliday ? HOLIDAY_HATCH_STYLE : undefined}
+                />
+              ) : (
+                <div key={`pad-${i}`} aria-hidden />
+              ),
+            )}
+          </div>
         </div>
       </div>
     </div>

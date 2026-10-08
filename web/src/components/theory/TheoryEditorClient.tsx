@@ -56,9 +56,10 @@ export default function TheoryEditorClient() {
   const [selectedId, setSelectedId] = useState<string | null>(null); // "__new__" эсвэл блокийн id
   const [dirty, setDirty] = useState(false);
   const [reordering, setReordering] = useState(false);
-  const [toast, setToast] = useState<{ kind: "success" | "error"; text: string } | null>(
-    null,
-  );
+  const [toast, setToast] = useState<{
+    kind: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const [pendingNav, setPendingNav] = useState<null | (() => void)>(null);
   const [deleteTarget, setDeleteTarget] = useState<TheoryBlock | null>(null);
@@ -70,22 +71,38 @@ export default function TheoryEditorClient() {
     dirtyRef.current = dirty;
   }, [dirty]);
 
+  const loadVersions = useRef({ books: 0, chapters: 0, blocks: 0 });
+
   // --- Ном ---
   const loadBooks = useCallback(() => {
+    const version = ++loadVersions.current.books;
     setBooksLoading(true);
     setBooksError(null);
     api<Book[]>(`/books?subject=${subject}`)
       .then((bs) => {
+        if (version !== loadVersions.current.books) return;
         setBooks(bs);
-        setBookId((id) => (bs.some((b) => b.id === id) ? id : (bs[0]?.id ?? "")));
+        setBookId((id) =>
+          bs.some((b) => b.id === id) ? id : (bs[0]?.id ?? ""),
+        );
       })
-      .catch((e) => setBooksError(errMsg(e)))
-      .finally(() => setBooksLoading(false));
+      .catch((e) => {
+        if (version === loadVersions.current.books) setBooksError(errMsg(e));
+      })
+      .finally(() => {
+        if (version === loadVersions.current.books) setBooksLoading(false);
+      });
   }, [subject]);
-  useEffect(loadBooks, [loadBooks]);
+  useEffect(() => {
+    loadBooks();
+    return () => {
+      loadVersions.current.books++;
+    };
+  }, [loadBooks]);
 
   // --- Бүлэг сэдэв ---
   const loadChapters = useCallback(() => {
+    const version = ++loadVersions.current.chapters;
     if (!bookId) {
       setChapters([]);
       setChapterId("");
@@ -95,16 +112,31 @@ export default function TheoryEditorClient() {
     setChaptersError(null);
     api<Chapter[]>(`/chapters?bookId=${bookId}`)
       .then((cs) => {
+        if (version !== loadVersions.current.chapters) return;
         setChapters(cs);
-        setChapterId((id) => (cs.some((c) => c.id === id) ? id : (cs[0]?.id ?? "")));
+        setChapterId((id) =>
+          cs.some((c) => c.id === id) ? id : (cs[0]?.id ?? ""),
+        );
       })
-      .catch((e) => setChaptersError(errMsg(e)))
-      .finally(() => setChaptersLoading(false));
+      .catch((e) => {
+        if (version === loadVersions.current.chapters)
+          setChaptersError(errMsg(e));
+      })
+      .finally(() => {
+        if (version === loadVersions.current.chapters)
+          setChaptersLoading(false);
+      });
   }, [bookId]);
-  useEffect(loadChapters, [loadChapters]);
+  useEffect(() => {
+    loadChapters();
+    return () => {
+      loadVersions.current.chapters++;
+    };
+  }, [loadChapters]);
 
   // --- Онолын блокууд ---
   const loadBlocks = useCallback(() => {
+    const version = ++loadVersions.current.blocks;
     if (!chapterId) {
       setBlocks([]);
       return;
@@ -113,16 +145,26 @@ export default function TheoryEditorClient() {
     setBlocksError(null);
     api<unknown>(`/lessons/${chapterId}`)
       .then((res) => {
-        const list = normalizeTheories(res).slice().sort((a, b) => a.order - b.order);
+        if (version !== loadVersions.current.blocks) return;
+        const list = normalizeTheories(res)
+          .slice()
+          .sort((a, b) => a.order - b.order);
         setBlocks(list);
       })
-      .catch((e) => setBlocksError(errMsg(e)))
-      .finally(() => setBlocksLoading(false));
+      .catch((e) => {
+        if (version === loadVersions.current.blocks) setBlocksError(errMsg(e));
+      })
+      .finally(() => {
+        if (version === loadVersions.current.blocks) setBlocksLoading(false);
+      });
   }, [chapterId]);
   useEffect(() => {
     setSelectedId(null);
     setDirty(false);
     loadBlocks();
+    return () => {
+      loadVersions.current.blocks++;
+    };
   }, [loadBlocks]);
 
   // --- Хуудаснаас гарахад хадгалаагүй өөрчлөлтийн сэрэмжлүүлэг ---
@@ -209,243 +251,277 @@ export default function TheoryEditorClient() {
 
   return (
     <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href="/app/admin"
-          onClick={(e) => {
-            if (dirty) {
-              e.preventDefault();
-              guardedNavigate(() => {
-                window.location.href = "/app/admin";
-              });
-            }
-          }}
-          className="inline-flex items-center gap-1.5 text-sm text-ink-dim hover:text-ink"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Удирдлага
-        </Link>
-        <h1 className="text-2xl font-extrabold">Онолын агуулга удирдах</h1>
-        {toast && (
-          <span
-            role="status"
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm ${
-              toast.kind === "error" ? "bg-error/10 text-error" : "bg-success/10 text-success"
-            }`}
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/app/admin"
+            onClick={(e) => {
+              if (dirty) {
+                e.preventDefault();
+                guardedNavigate(() => {
+                  window.location.href = "/app/admin";
+                });
+              }
+            }}
+            className="inline-flex items-center gap-1.5 text-sm text-ink-dim hover:text-ink"
           >
-            {toast.kind === "error" ? (
-              <AlertTriangle size={14} aria-hidden="true" />
-            ) : (
-              <Check size={14} aria-hidden="true" />
-            )}
-            {toast.text}
-          </span>
-        )}
-      </div>
-
-      {/* Сэдэв / Ном / Бүлэг сэдэв сонгох */}
-      <section className="rounded-2xl border border-line bg-surface p-5">
-        <h2 className="mb-3 font-bold text-brand-soft">1. Бүлэг сэдэв сонгох</h2>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-1.5">
-            {SUBJECTS.map((s) => (
-              <button
-                key={s.v}
-                onClick={() => changeSubject(s.v)}
-                className={`rounded-full px-3 py-1 text-xs transition ${
-                  subject === s.v
-                    ? "bg-brand-bright text-on-brand"
-                    : "border border-line text-ink-dim hover:border-brand"
-                }`}
-              >
-                {s.t}
-              </button>
-            ))}
-          </div>
-
-          <label className="sr-only" htmlFor="theory-book-select">
-            Ном
-          </label>
-          <select
-            id="theory-book-select"
-            value={bookId}
-            onChange={(e) => changeBook(e.target.value)}
-            className={`bg-bg ${inputCls}`}
-          >
-            {books.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.title}
-              </option>
-            ))}
-          </select>
-
-          <label className="sr-only" htmlFor="theory-chapter-select">
-            Бүлэг сэдэв
-          </label>
-          <select
-            id="theory-chapter-select"
-            value={chapterId}
-            onChange={(e) => changeChapter(e.target.value)}
-            disabled={!chapters.length}
-            className={`bg-bg ${inputCls}`}
-          >
-            {chapters.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title}
-                {c._count?.theories !== undefined ? ` (${c._count.theories})` : ""}
-                {c.freePreview ? " — үнэгүй" : ""}
-              </option>
-            ))}
-          </select>
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Удирдлага
+          </Link>
+          <h1 className="text-2xl font-extrabold">Онолын агуулга удирдах</h1>
+          {toast && (
+            <span
+              role="status"
+              className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm ${
+                toast.kind === "error"
+                  ? "bg-error/10 text-error"
+                  : "bg-success/10 text-success"
+              }`}
+            >
+              {toast.kind === "error" ? (
+                <AlertTriangle size={14} aria-hidden="true" />
+              ) : (
+                <Check size={14} aria-hidden="true" />
+              )}
+              {toast.text}
+            </span>
+          )}
         </div>
 
-        {booksLoading && (
-          <p className="mt-2 animate-pulse text-sm text-ink-dim" role="status">
-            Номын жагсаалт ачаалж байна…
-          </p>
-        )}
-        {booksError && (
-          <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-            <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
-            <span>{booksError}</span>
-            <button
-              onClick={loadBooks}
-              className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
-            >
-              Дахин ачаалах
-            </button>
-          </div>
-        )}
-        {!booksLoading && !booksError && books.length === 0 && (
-          <p className="mt-2 text-sm text-ink-dim">
-            Энэ хичээлээр ном алга. Эхлээд{" "}
-            <Link href="/app/admin/content" className="text-brand hover:underline">
-              Контент удирдах
-            </Link>{" "}
-            хуудаснаас ном/бүлэг сэдэв үүсгэнэ үү.
-          </p>
-        )}
-        {chaptersLoading && (
-          <p className="mt-2 animate-pulse text-sm text-ink-dim" role="status">
-            Бүлэг сэдвийн жагсаалт ачаалж байна…
-          </p>
-        )}
-        {chaptersError && (
-          <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-            <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
-            <span>{chaptersError}</span>
-            <button
-              onClick={loadChapters}
-              className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
-            >
-              Дахин ачаалах
-            </button>
-          </div>
-        )}
-      </section>
-
-      {/* Онолын блокууд */}
-      {chapterId && (
+        {/* Сэдэв / Ном / Бүлэг сэдэв сонгох */}
         <section className="rounded-2xl border border-line bg-surface p-5">
-          <h2 className="mb-3 font-bold text-brand-soft">2. Онолын блокууд</h2>
+          <h2 className="mb-3 font-bold text-brand-soft">
+            1. Бүлэг сэдэв сонгох
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-1.5">
+              {SUBJECTS.map((s) => (
+                <button
+                  key={s.v}
+                  onClick={() => changeSubject(s.v)}
+                  className={`min-h-11 rounded-full px-3 py-1 text-xs transition ${
+                    subject === s.v
+                      ? "bg-brand-bright text-on-brand"
+                      : "border border-line text-ink-dim hover:border-brand"
+                  }`}
+                >
+                  {s.t}
+                </button>
+              ))}
+            </div>
 
-          {blocksLoading && (
-            <LoadingState rows={3} label="Ачаалж байна" />
+            <label className="sr-only" htmlFor="theory-book-select">
+              Ном
+            </label>
+            <select
+              id="theory-book-select"
+              value={bookId}
+              onChange={(e) => changeBook(e.target.value)}
+              className={`bg-bg ${inputCls}`}
+            >
+              {books.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.title}
+                </option>
+              ))}
+            </select>
+
+            <label className="sr-only" htmlFor="theory-chapter-select">
+              Бүлэг сэдэв
+            </label>
+            <select
+              id="theory-chapter-select"
+              value={chapterId}
+              onChange={(e) => changeChapter(e.target.value)}
+              disabled={!chapters.length}
+              className={`bg-bg ${inputCls}`}
+            >
+              {chapters.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                  {c._count?.theories !== undefined
+                    ? ` (${c._count.theories})`
+                    : ""}
+                  {c.freePreview ? " — үнэгүй" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {booksLoading && (
+            <p
+              className="mt-2 animate-pulse text-sm text-ink-dim"
+              role="status"
+            >
+              Номын жагсаалт ачаалж байна…
+            </p>
           )}
-          {blocksError && (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
-              <AlertTriangle size={16} className="shrink-0" aria-hidden="true" />
-              <span>{blocksError}</span>
+          {booksError && (
+            <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+              <AlertTriangle
+                size={16}
+                className="shrink-0"
+                aria-hidden="true"
+              />
+              <span>{booksError}</span>
               <button
-                onClick={loadBlocks}
-                className="rounded-lg border border-error/40 px-2 py-1 text-xs font-semibold transition hover:bg-error/10"
+                onClick={loadBooks}
+                className="min-h-11 rounded-lg border border-error/40 px-3 py-2 text-xs font-semibold transition hover:bg-error/10"
               >
                 Дахин ачаалах
               </button>
             </div>
           )}
-
-          {!blocksLoading && !blocksError && blocks.length === 0 && !editorOpen && (
-            <div className="rounded-lg border border-dashed border-line p-5 text-center">
-              <p className="font-semibold text-ink">Энэ бүлэгт онолын блок алга</p>
-              <p className="mx-auto mt-1 max-w-md text-sm text-ink-dim">
-                Онолын блок гэдэг нь сурагчид бүлэг сэдвийг судлахад унших
-                тайлбар, томьёо, жишээ агуулсан хэсэг юм — видео, бодлогын
-                өмнө сурагч эхлээд үүнийг уншина. Доорх товчоор эхний блокоо
-                нэмнэ үү.
-              </p>
-              <button
-                onClick={() => selectBlock("__new__")}
-                className="mt-4 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand"
+          {!booksLoading && !booksError && books.length === 0 && (
+            <p className="mt-2 text-sm text-ink-dim">
+              Энэ хичээлээр ном алга. Эхлээд{" "}
+              <Link
+                href="/app/admin/content"
+                className="text-brand hover:underline"
               >
-                + Эхний блокоо нэмэх
+                Контент удирдах
+              </Link>{" "}
+              хуудаснаас ном/бүлэг сэдэв үүсгэнэ үү.
+            </p>
+          )}
+          {chaptersLoading && (
+            <p
+              className="mt-2 animate-pulse text-sm text-ink-dim"
+              role="status"
+            >
+              Бүлэг сэдвийн жагсаалт ачаалж байна…
+            </p>
+          )}
+          {chaptersError && (
+            <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+              <AlertTriangle
+                size={16}
+                className="shrink-0"
+                aria-hidden="true"
+              />
+              <span>{chaptersError}</span>
+              <button
+                onClick={loadChapters}
+                className="min-h-11 rounded-lg border border-error/40 px-3 py-2 text-xs font-semibold transition hover:bg-error/10"
+              >
+                Дахин ачаалах
               </button>
             </div>
           )}
-
-          {!blocksLoading && !blocksError && (blocks.length > 0 || editorOpen) && (
-            <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
-              <TheoryBlockList
-                blocks={blocks}
-                selectedId={selectedId}
-                reordering={reordering}
-                onSelect={selectBlock}
-                onMove={handleMove}
-                onDelete={setDeleteTarget}
-                onCreateNew={() => selectBlock("__new__")}
-              />
-
-              <div>
-                {editorOpen ? (
-                  <TheoryBlockEditor
-                    key={selectedBlock?.id ?? "new"}
-                    chapterId={chapterId}
-                    block={selectedBlock}
-                    onSaved={handleSaved}
-                    onCancel={() => selectBlock(null)}
-                    onDirtyChange={setDirty}
-                  />
-                ) : (
-                  <p className="text-sm text-ink-dim">
-                    Зүүн талын жагсаалтаас блок сонгоно уу, эсвэл шинээр нэмнэ
-                    үү.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
         </section>
-      )}
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        title="Онолын блок устгах"
-        description={
-          deleteTarget
-            ? `"${deleteTarget.title}" блокийг устгах уу? Энэ үйлдлийг буцаах боломжгүй.`
-            : undefined
-        }
-        confirmLabel="Устгах"
-        danger
-        onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
-        onCancel={() => setDeleteTarget(null)}
-      />
+        {/* Онолын блокууд */}
+        {chapterId && (
+          <section className="rounded-2xl border border-line bg-surface p-5">
+            <h2 className="mb-3 font-bold text-brand-soft">
+              2. Онолын блокууд
+            </h2>
 
-      <ConfirmDialog
-        open={!!pendingNav}
-        title="Хадгалаагүй өөрчлөлт байна"
-        description="Одоо хийж буй өөрчлөлтөө хадгалаагүй байна. Гарвал өөрчлөлт устана."
-        confirmLabel="Хаяад гарах"
-        danger
-        onConfirm={() => {
-          setDirty(false);
-          pendingNav?.();
-          setPendingNav(null);
-        }}
-        onCancel={() => setPendingNav(null)}
-      />
-    </div>
+            {blocksLoading && <LoadingState rows={3} label="Ачаалж байна" />}
+            {blocksError && (
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+                <AlertTriangle
+                  size={16}
+                  className="shrink-0"
+                  aria-hidden="true"
+                />
+                <span>{blocksError}</span>
+                <button
+                  onClick={loadBlocks}
+                  className="min-h-11 rounded-lg border border-error/40 px-3 py-2 text-xs font-semibold transition hover:bg-error/10"
+                >
+                  Дахин ачаалах
+                </button>
+              </div>
+            )}
+
+            {!blocksLoading &&
+              !blocksError &&
+              blocks.length === 0 &&
+              !editorOpen && (
+                <div className="rounded-lg border border-dashed border-line p-5 text-center">
+                  <p className="font-semibold text-ink">
+                    Энэ бүлэгт онолын блок алга
+                  </p>
+                  <p className="mx-auto mt-1 max-w-md text-sm text-ink-dim">
+                    Онолын блок гэдэг нь сурагчид бүлэг сэдвийг судлахад унших
+                    тайлбар, томьёо, жишээ агуулсан хэсэг юм — видео, бодлогын
+                    өмнө сурагч эхлээд үүнийг уншина. Доорх товчоор эхний блокоо
+                    нэмнэ үү.
+                  </p>
+                  <button
+                    onClick={() => selectBlock("__new__")}
+                    className="mt-4 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand"
+                  >
+                    + Эхний блокоо нэмэх
+                  </button>
+                </div>
+              )}
+
+            {!blocksLoading &&
+              !blocksError &&
+              (blocks.length > 0 || editorOpen) && (
+                <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
+                  <TheoryBlockList
+                    blocks={blocks}
+                    selectedId={selectedId}
+                    reordering={reordering}
+                    onSelect={selectBlock}
+                    onMove={handleMove}
+                    onDelete={setDeleteTarget}
+                    onCreateNew={() => selectBlock("__new__")}
+                  />
+
+                  <div>
+                    {editorOpen ? (
+                      <TheoryBlockEditor
+                        key={selectedBlock?.id ?? "new"}
+                        chapterId={chapterId}
+                        block={selectedBlock}
+                        onSaved={handleSaved}
+                        onCancel={() => selectBlock(null)}
+                        onDirtyChange={setDirty}
+                      />
+                    ) : (
+                      <p className="text-sm text-ink-dim">
+                        Зүүн талын жагсаалтаас блок сонгоно уу, эсвэл шинээр
+                        нэмнэ үү.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+          </section>
+        )}
+
+        <ConfirmDialog
+          open={!!deleteTarget}
+          title="Онолын блок устгах"
+          description={
+            deleteTarget
+              ? `"${deleteTarget.title}" блокийг устгах уу? Энэ үйлдлийг буцаах боломжгүй.`
+              : undefined
+          }
+          confirmLabel="Устгах"
+          danger
+          onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+          onCancel={() => setDeleteTarget(null)}
+        />
+
+        <ConfirmDialog
+          open={!!pendingNav}
+          title="Хадгалаагүй өөрчлөлт байна"
+          description="Одоо хийж буй өөрчлөлтөө хадгалаагүй байна. Гарвал өөрчлөлт устана."
+          confirmLabel="Хаяад гарах"
+          danger
+          onConfirm={() => {
+            setDirty(false);
+            pendingNav?.();
+            setPendingNav(null);
+          }}
+          onCancel={() => setPendingNav(null)}
+        />
+      </div>
     </RequireRole>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Card } from '../ui/Surface';
 import InfoHint from '../ui/InfoHint';
 import { api } from '@/lib/api';
@@ -10,6 +10,7 @@ interface CreateGroupFormProps {
 }
 
 export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
+  const nameId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
     try {
       await api('/teacher-groups/create', {
         method: 'POST',
-        body: JSON.stringify({ name: groupName }),
+        body: { name: groupName },
       });
 
       setGroupName('');
@@ -40,8 +41,9 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
   if (!isOpen) {
     return (
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90"
+        className="min-h-11 px-4 py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90"
       >
         Шинэ ангийн бүлэг үүсгэх
       </button>
@@ -58,19 +60,21 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4 mt-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Ангийн бүлгийн нэр</label>
+          <label htmlFor={nameId} className="block text-sm font-medium mb-1">Ангийн бүлгийн нэр</label>
           <input
+            id={nameId}
             type="text"
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
             required
+            maxLength={255}
             placeholder="Жишээ: 12-2 анги"
-            className="w-full px-3 py-2 border border-line rounded"
+            className="min-h-11 w-full px-3 py-2 border border-line bg-surface rounded"
           />
         </div>
 
         {error && (
-          <div className="p-3 border border-error/30 bg-error/10 rounded text-error text-sm">
+          <div role="alert" className="p-3 border border-error/30 bg-error/10 rounded text-error text-sm">
             {error}
           </div>
         )}
@@ -79,7 +83,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex-1 py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90 disabled:opacity-50"
+            className="min-h-11 flex-1 py-2 bg-brand text-on-brand rounded font-medium hover:bg-brand/90 disabled:opacity-50"
           >
             {isLoading ? 'Үүсгэж байна...' : 'Үүсгэх'}
           </button>
@@ -90,7 +94,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
               setGroupName('');
               setError(null);
             }}
-            className="flex-1 py-2 bg-panel text-ink-dim rounded font-medium hover:bg-panel"
+            className="min-h-11 flex-1 py-2 bg-panel text-ink-dim rounded font-medium hover:bg-panel"
           >
             Болих
           </button>

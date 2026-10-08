@@ -2,9 +2,8 @@
  * Худалдан авагчийн (сурагч/эцэг эх) төлбөрийн UI-д зориулсан нийтлэг төрлүүд.
  *
  * Эдгээр нь бэкэнд багийн барьж буй `POST /payments` + `GET /payments/:id`
- * гэрээ (contract) дээр тулгуурлана. Бэкэнд хийгдэж дуусаагүй байгаа тул
- * энэ файлыг ганц эх сурвалж болгож, бусад компонентууд бүгд үүнээс
- * import хийнэ — ирээдүйд гэрээ өөрчлөгдвөл нэг л газар засна.
+ * гэрээнд тулгуурлана. Баримт нь хэрэглэгчийн өөрийнх байх ёстой;
+ * баталгаажсан төлбөр болон бүтээгдэхүүний эрх олголт тусдаа үр дүн.
  */
 
 /** Төлбөрийн арга — QPay нь автомат баталгаажилттай, бусад нь гараар */
@@ -37,6 +36,10 @@ export interface QpayInvoiceInfo {
 
 /** `POST /payments` руу илгээх хүсэлт */
 export interface CreatePaymentRequest {
+  /** UUIDv4 persisted before posting; stable through an unknown acknowledgement. */
+  clientRequestId: string;
+  /** Actor-owned pending store quote; server validates its saved price. */
+  purchaseId?: string;
   /** Төгрөгөөр, бүхэл тоо (сая биш, ₮) */
   amount: number;
   method: PaymentMethod;

@@ -1,16 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { LoadingState, ErrorState } from '@/components/ui/StateBlock';
+import ProblemVideoDisclosure from "@/components/lesson/ProblemVideoDisclosure";
+import { useEffect, useState } from "react";
+import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 
 import { api } from "@/lib/api";
 // Recommendation type
 type RecommendReason =
-  | 'RETRY_TOPIC'
-  | 'WEAK_TOPIC'
-  | 'RIGHT_LEVEL'
-  | 'NEW_TOPIC'
-  | 'CONFIDENCE';
+  "RETRY_TOPIC" | "WEAK_TOPIC" | "RIGHT_LEVEL" | "NEW_TOPIC" | "CONFIDENCE";
 
 interface Recommendation {
   problemId: string;
@@ -47,7 +44,7 @@ export default function AttemptModal({
   onSubmitSuccess,
 }: AttemptModalProps) {
   const [problem, setProblem] = useState<Problem | null>(null);
-  const [answer, setAnswer] = useState<string>('');
+  const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +56,7 @@ export default function AttemptModal({
         setLoading(true);
         setProblem(await api(`/problems/${recommendation.problemId}`));
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Алдаа гарлаа';
+        const msg = err instanceof Error ? err.message : "Алдаа гарлаа";
         setError(msg);
       } finally {
         setLoading(false);
@@ -72,7 +69,7 @@ export default function AttemptModal({
   // Оруулсан үр дүнг явуулна
   const handleSubmit = async () => {
     if (!answer.trim()) {
-      setError('Хариулт оруулна уу');
+      setError("Хариулт оруулна уу");
       return;
     }
 
@@ -80,8 +77,8 @@ export default function AttemptModal({
       setSubmitting(true);
       setError(null);
 
-      await api('/recommend/attempt', {
-        method: 'POST',
+      await api("/recommend/attempt", {
+        method: "POST",
         body: {
           problemId: recommendation.problemId,
           givenAnswer: answer, // ⚠️ ЗААВАЛ бөглөнө (ML-д үнэ цэнэтэй)
@@ -93,21 +90,23 @@ export default function AttemptModal({
       // Амжилтын мэдэгдэл 3 сек харуул
       onSubmitSuccess();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Алдаа гарлаа';
+      const msg = err instanceof Error ? err.message : "Алдаа гарлаа";
       setError(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <Modal onClose={onClose}><LoadingState /></Modal>;
+  if (loading)
+    return (
+      <Modal onClose={onClose}>
+        <LoadingState />
+      </Modal>
+    );
   if (error && !problem)
     return (
       <Modal onClose={onClose}>
-        <ErrorState
-          message={error}
-          onRetry={() => window.location.reload()}
-        />
+        <ErrorState message={error} onRetry={() => window.location.reload()} />
       </Modal>
     );
 
@@ -131,8 +130,9 @@ export default function AttemptModal({
         <div className="mb-6">
           <h3 className="font-semibold text-ink mb-3">Бодлого</h3>
           <p className="text-sm text-ink-dim bg-surface p-3 rounded">
-            {problem.statementText || '(Асуулт уншихыг сөрөгүүлэв)'}
+            {problem.statementText || "(Асуулт уншихыг сөрөгүүлэв)"}
           </p>
+          <ProblemVideoDisclosure problemId={problem.id} />
           <div className="text-xs font-mono text-ink-dim mt-2">
             Token: {problem.token}
           </div>
@@ -174,7 +174,7 @@ export default function AttemptModal({
             disabled={submitting || !answer.trim()}
             className="flex-1 py-2 px-4 bg-brand text-on-brand rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
           >
-            {submitting ? 'Оруулаж байна…' : 'Оруулах'}
+            {submitting ? "Оруулаж байна…" : "Оруулах"}
           </button>
         </div>
       </div>

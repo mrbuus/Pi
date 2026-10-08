@@ -1,0 +1,55 @@
+.exhibit {
+  width: 100%; min-width: 0; position: relative;
+  border: 1px solid var(--line); border-radius: 28px;
+  background: color-mix(in oklab, var(--bg) 75%, var(--surface));
+  color: var(--ink); overflow: hidden;
+  box-shadow: 0 24px 65px -40px color-mix(in oklab, var(--ink) 22%, transparent);
+}
+.topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 19px 0 26px; }
+.kicker { font-size: 10px; line-height: 1.5; font-weight: 600; letter-spacing: .12em; color: var(--ink-dim); }
+.reset { border-radius: 50%; }
+.stage { position: relative; height: 280px; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.stage[data-dragging] { cursor: grabbing; }
+.stage:focus-visible { outline: 2px solid var(--brand); outline-offset: -5px; border-radius: 16px; }
+.solid { position: absolute; width: 100%; height: 100%; inset: 0; overflow: visible; }
+.orbit { position: absolute; width: 78%; height: 55%; left: 11%; top: 23%; border-radius: 50%; border: 1px solid color-mix(in oklab, var(--ink) 10%, transparent); transform: rotate(-20deg); }
+.orbit::after { content: ""; position: absolute; inset: 20%; border-radius: 50%; border: 1px solid color-mix(in oklab, var(--ink) 5%, transparent); }
+.shadow { position: absolute; left: 28%; right: 28%; bottom: 35px; height: 16px; border-radius: 50%; background: color-mix(in oklab, var(--ink) 12%, transparent); filter: blur(12px); }
+.hiddenEdges { fill: none; stroke: var(--ink); stroke-width: .8; stroke-dasharray: 4 6; opacity: .14; }
+.shade0 { fill: color-mix(in oklab, var(--ink) 44%, var(--bg)); }
+.shade1 { fill: color-mix(in oklab, var(--ink) 39%, var(--bg)); }
+.shade2 { fill: color-mix(in oklab, var(--ink) 34%, var(--bg)); }
+.shade3 { fill: color-mix(in oklab, var(--ink) 29%, var(--bg)); }
+.shade4 { fill: color-mix(in oklab, var(--ink) 24%, var(--bg)); }
+.shade5 { fill: color-mix(in oklab, var(--ink) 19%, var(--bg)); }
+.shade6 { fill: color-mix(in oklab, var(--ink) 14%, var(--bg)); }
+.shade7 { fill: color-mix(in oklab, var(--ink) 9%, var(--bg)); }
+.edges { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; opacity: .7; }
+.curvedEdges { fill: none; stroke: var(--ink); stroke-width: .45; opacity: .15; }
+.dimension { fill: none; stroke: var(--brand); stroke-width: 2.3; stroke-linecap: round; stroke-dasharray: 5 4; }
+.dimensionLabel { color: var(--brand); font-size: 20px; overflow: visible; }
+.dimensionLabel > div { width: fit-content; padding: 0 5px; border-radius: 5px; background: color-mix(in oklab, var(--bg) 90%, transparent); }
+.dragHint { position: absolute; left: 0; right: 0; bottom: 3px; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--ink-dim); font-size: 11px; pointer-events: none; }
+.formulaRow { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 20px 26px 0; }
+.solidName { font-size: 19px; line-height: 1.3; font-weight: 600; letter-spacing: -.04em; }
+.dimensionNote { font-size: 11px; color: var(--ink-dim); margin-top: 4px; }
+.formula { flex-shrink: 0; font-size: 22px; }
+.selectors { display: flex; gap: 4px; margin: 22px 20px 20px; padding: 4px; border: 1px solid var(--line); border-radius: 14px; }
+.selector { flex: 1; min-width: 0; min-height: 44px; padding: 0 10px; gap: 7px; border-radius: 10px; font-size: 12px; font-weight: 500; letter-spacing: 0; box-shadow: none; }
+.selector[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.selector[aria-pressed="true"]:hover { background: var(--ink); color: var(--bg); }
+@media (max-width: 639px) {
+  .exhibit { border-radius: 22px; }
+  .topline { padding: 10px 12px 0 18px; }
+  .kicker { font-size: 9px; letter-spacing: .06em; }
+  .stage { height: 240px; }
+  .solid { width: 132%; left: -16%; }
+  .orbit { top: 22%; height: 57%; width: 92%; left: 4%; }
+  .shadow { bottom: 28px; }
+  .formulaRow { margin: 16px 18px 0; gap: 10px; }
+  .solidName { font-size: 17px; }
+  .formula { font-size: 18px; }
+  .dimensionNote { font-size: 10px; }
+  .selectors { margin: 17px 12px 12px; }
+  .selector { padding: 0 7px; font-size: 11px; gap: 5px; }
+}

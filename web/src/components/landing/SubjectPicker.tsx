@@ -5,15 +5,17 @@ import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
 import { api } from "@/lib/api";
 import { Meta } from "@/components/ui/Meta";
 
-// ============ Төрлүүд (сервертэй яг тохирсон байх ёстой) ============
+// ============ Нийтийн элсэлтэд санал болгох хичээлүүд ============
 //
 // GET /enrollment-windows →
 //   [{ subject, status, availability, note? }]
 //
-// Аль ч хичээл ЗӨВХӨН энэ өгөгдлөөр удирддаг — танхим/онлайн зөвшөөрлийн
-// дүрмийг энд hardcode хийхгүй (availability талбар нь эх сурвалж).
+// Subject availability and explicit centre-online opt-in come from the API.
+// Missing/legacy online-policy fields never enable new centre-led online enrollment.
 
-export type Subject = "MATH" | "SOCIAL_STUDIES" | "SAT";
+// The API can retain historical subjects; only the public options below are
+// selectable for new enquiries and registration.
+export type Subject = "MATH" | "SOCIAL_STUDIES";
 export type StudentType = "CLASSROOM" | "ONLINE";
 export type EnrollmentStatus = "OPEN" | "CLOSED" | "COMING_SOON";
 export type SubjectAvailability = "CLASSROOM_ONLY" | "ONLINE_ONLY" | "BOTH";
@@ -23,24 +25,24 @@ export interface EnrollmentWindow {
   status: EnrollmentStatus;
   availability: SubjectAvailability;
   note?: string | null;
+  centreOnlineClassEnabled?: boolean;
 }
 
 // UI-д харуулах дараалал, Монгол нэр — өгөгдөл биш, зөвхөн танилцуулга.
-export const SUBJECT_ORDER: Subject[] = ["MATH", "SOCIAL_STUDIES", "SAT"];
+export const SUBJECT_ORDER: Subject[] = ["MATH", "SOCIAL_STUDIES"];
 export const SUBJECT_LABELS: Record<Subject, string> = {
   MATH: "Математик",
   SOCIAL_STUDIES: "Нийгэм судлал",
-  SAT: "SAT",
 };
 
-// API амжилтгүй болвол хаалттай харагдуулахаас илүү нээлттэй гэж үзсэн нь
-// дээр — хаалттай дэлгүүр шиг харагдвал бодит лийд алдана, харин нээлттэй
-// гэж үзээд дараа нь татгалзах нь хямд алдаа. (5-р шаардлага)
+// Existing contact/classroom fallback remains selectable; final enrollment is
+// checked by the server. A failed request never enables centre-online admission.
 function fallbackOpenWindows(): EnrollmentWindow[] {
   return SUBJECT_ORDER.map((subject) => ({
     subject,
     status: "OPEN",
     availability: "BOTH",
+    centreOnlineClassEnabled: false,
   }));
 }
 
@@ -68,7 +70,7 @@ export function useEnrollmentWindows(enabled = true) {
       // Зориуд: хаалттай биш, нээлттэй fallback ашиглаж байгааг
       // мониторинг/консолд мэдэгдэнэ.
       console.error(
-        "GET /enrollment-windows амжилтгүй боллоо — бүх хичээлийг сонгох боломжтой гэж үзэв.",
+        "GET /enrollment-windows амжилтгүй боллоо — түр жагсаалт ашиглав; онлайн элсэлт нээгдэхгүй.",
         err,
       );
       const fallback = fallbackOpenWindows();
@@ -96,7 +98,7 @@ export function useEnrollmentWindows(enabled = true) {
         // Зориуд: хаалттай биш, нээлттэй fallback ашиглаж байгааг консолд
         // мэдэгдэнэ.
         console.error(
-          "GET /enrollment-windows амжилтгүй боллоо — бүх хичээлийг сонгох боломжтой гэж үзэв.",
+          "GET /enrollment-windows амжилтгүй боллоо — түр жагсаалт ашиглав; онлайн элсэлт нээгдэхгүй.",
           err,
         );
         setWindows(fallbackOpenWindows());
@@ -145,6 +147,12 @@ function lockStateFor(
   win: EnrollmentWindow,
   studentType: StudentType | undefined,
 ): LockState {
+  if (studentType === "ONLINE" && win.centreOnlineClassEnabled !== true) {
+    return {
+      locked: true,
+      reason: "Төвөөс удирдах онлайн анги одоогоор нээгдээгүй. Цахим ном, бодлого авах бол «Бие даан суралцах» төрлийг сонгоно уу.",
+    };
+  }
   if (win.status !== "OPEN") {
     const reason =
       win.status === "COMING_SOON"
@@ -289,7 +297,8 @@ export default function SubjectPicker({
                     </span>
                     <span className="mt-0.5 flex items-center gap-1 text-xs text-ink-dim">
                       <StatusIcon status={win.status} />
-                      {statusText(win.status)}
+                      {studentType === "ONLINE" && win.centreOnlineClassEnabled !== true
+                        ? "онлайн анги нээгдээгүй" : statusText(win.status)}
                     </span>
                   </span>
                 </label>

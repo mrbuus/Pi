@@ -134,3 +134,9 @@ function Checkout() {
   ч, бэкэнд талдаа ч rate-limit-той байвал сайн).
 - Дансаар/бэлнээр төлөх урсгалыг (гараар баталгаажуулах) энэ сан
   хамарахгүй — тэр хэсгийг buyer хуудсыг эзэмшигч тал өөрөө удирдана.
+
+## Store settlement boundary (v2)
+
+`StoreCheckout` uses the pending `/store/purchase` response price as the saved quote. The catalog price cannot overwrite that quote. `QpayCheckout.onCreated` reports an issued receipt; `onConfirmed` reports payment status, not delivery of a book, test or pass. Delivery requires a separate `/store/purchase` call with the same product and receipt, and a non-null returned `purchase.grantedAt`.
+
+A receipt ID is kept locally under the authenticated user and purchase ID, so a refresh can resume `GET /payments/:id` and retry fulfillment without creating another receipt. These are device-local references, not an offline payment ledger; the API remains authoritative. BANK_TRANSFER/CASH produce an owned pending notice, requiring staff confirmation. No bank account or provider credential is created by this UI. Provider503 remains visible and never silently switches payment method. Creation requests now carry a UUIDv4 persisted before posting under user/purchase/method. The same request and quote are replayed after an unknown acknowledgement or reload; an intentionally different method has its own UUID. Generic buyer notices retain their unfinished draft and UUID until acknowledgement. The server compares the normalized payload and actor, including purchaseId. An attempted QPay invoice with unresolved provider acknowledgement remains unresolved; do not infer success or issue a replacement automatically.

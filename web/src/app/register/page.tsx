@@ -26,7 +26,10 @@ function toLegacyRegisterSubject(subjects: Subject[]): LegacyRegisterSubject {
   return "BOTH";
 }
 
-const KINDS: { value: Kind; title: string; desc: string }[] = [
+// New centre-led online registration requires explicit frontend AND server opt-in.
+// Existing ONLINE accounts and independent BUYER access are unaffected.
+const CENTRE_ONLINE_CLASS_ENABLED = process.env.NEXT_PUBLIC_CENTRE_ONLINE_CLASS_ENABLED === "true";
+const KINDS: { value: Kind; title: string; desc: string; disabled?: boolean }[] = [
   {
     value: "CLASSROOM",
     title: "Танхимын сурагч",
@@ -34,13 +37,14 @@ const KINDS: { value: Kind; title: string; desc: string }[] = [
   },
   {
     value: "ONLINE",
-    title: "Онлайн сурагч",
-    desc: "Гэрээсээ өөрийн хурдаар — эрх аваад шууд суралцана",
+    title: "Төвөөс удирдах онлайн анги",
+    desc: CENTRE_ONLINE_CLASS_ENABLED ? "Хичээл, элсэлтийн боломжийг доороос шалгана" : "Одоогоор нээгдээгүй. Цахим ном, бодлого авах бол «Бие даан суралцах» төрлийг сонгоно",
+    disabled: !CENTRE_ONLINE_CLASS_ENABLED,
   },
   {
     value: "BUYER",
-    title: "Зүгээр үзэх",
-    desc: "Бодлого, ном, тестийг багцаар худалдаж авна",
+    title: "Бие даан суралцах",
+    desc: "Цахим ном, бодлого, тестээ сонгож бие даан давтана",
   },
   {
     value: "PARENT",
@@ -261,14 +265,16 @@ export default function RegisterPage() {
               {KINDS.map((k) => (
                 <label
                   key={k.value}
-                  className="block cursor-pointer rounded-xl border border-line p-3 transition hover:border-brand/50"
+                  className={`block rounded-xl border border-line p-3 transition ${k.disabled ? "cursor-not-allowed bg-panel text-ink-dim" : "cursor-pointer hover:border-brand/50"}`}
                 >
                   <input
                     type="radio"
                     name="kind"
                     value={k.value}
+                    disabled={k.disabled}
                     checked={kind === k.value}
                     onChange={() => {
+                      if (k.disabled) return;
                       setKind(k.value);
                       // Танхим/онлайн сонголт өөрчлөгдвөл өмнөх хичээлийн
                       // сонголт (шинэ төрөлд зөвшөөрөгдөхгүй байж болзошгүй

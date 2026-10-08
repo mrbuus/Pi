@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Check } from "lucide-react";
-import { api } from "@/lib/api";
+import { api, getRole } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
 import {
@@ -36,7 +36,12 @@ export default function VideosPanel({
   const [showDeleted, setShowDeleted] = useState(false);
 
   const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ title: "", url: "", chapterId: "" });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    url: "",
+    chapterId: "",
+    problemId: "",
+  });
   const [editBusy, setEditBusy] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<VideoItem | null>(null);
@@ -74,7 +79,12 @@ export default function VideosPanel({
 
   function startEdit(v: VideoItem) {
     setEditId(v.id);
-    setEditForm({ title: v.title, url: v.s3Key, chapterId: v.chapterId ?? "" });
+    setEditForm({
+      title: v.title,
+      url: v.s3Key,
+      chapterId: v.chapterId ?? "",
+      problemId: v.problemId ?? "",
+    });
   }
 
   async function saveEdit(v: VideoItem) {
@@ -86,6 +96,9 @@ export default function VideosPanel({
           title: editForm.title,
           url: editForm.url,
           chapterId: editForm.chapterId,
+          ...(["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "")
+            ? { problemId: editForm.problemId.trim() || null }
+            : {}),
         },
       });
       setMsg({ kind: "success", text: "Бичлэг шинэчлэгдлээ" });
@@ -211,7 +224,9 @@ export default function VideosPanel({
             Бичлэгүүд
           </label>
           {!chapterId ? (
-            <p className="text-sm text-ink-dim">Эхлээд бүлэг сэдэв сонгоно уу</p>
+            <p className="text-sm text-ink-dim">
+              Эхлээд бүлэг сэдэв сонгоно уу
+            </p>
           ) : videos.length === 0 ? (
             <p className="text-sm text-ink-dim">Энэ бүлэгт бичлэг алга байна</p>
           ) : (
@@ -222,7 +237,10 @@ export default function VideosPanel({
                     key={v.id}
                     className="space-y-2 rounded-lg border border-brand-bright bg-brand-bright/5 p-3"
                   >
-                    <label className="sr-only" htmlFor={`edit-video-title-${v.id}`}>
+                    <label
+                      className="sr-only"
+                      htmlFor={`edit-video-title-${v.id}`}
+                    >
                       Гарчиг
                     </label>
                     <input
@@ -234,7 +252,10 @@ export default function VideosPanel({
                       placeholder="Гарчиг"
                       className={`w-full ${inputCls}`}
                     />
-                    <label className="sr-only" htmlFor={`edit-video-url-${v.id}`}>
+                    <label
+                      className="sr-only"
+                      htmlFor={`edit-video-url-${v.id}`}
+                    >
                       Холбоос
                     </label>
                     <input
@@ -267,6 +288,30 @@ export default function VideosPanel({
                         </option>
                       ))}
                     </select>
+                    {["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "") && (
+                      <label
+                        className="block space-y-1 text-sm"
+                        htmlFor={`edit-video-problem-${v.id}`}
+                      >
+                        Бодлогын яг ID (хоосон бол бүлгийн бичлэг)
+                        <input
+                          id={`edit-video-problem-${v.id}`}
+                          value={editForm.problemId}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              problemId: e.target.value,
+                            })
+                          }
+                          className={`w-full ${inputCls}`}
+                          maxLength={200}
+                        />
+                        <span className="block text-xs text-ink-dim">
+                          Бодлого сонгосон бүлэг сэдэвт хамаарах ёстой. ID-г
+                          Бодлогын сангаас хуулна.
+                        </span>
+                      </label>
+                    )}
                     <div className="flex gap-2">
                       <button
                         onClick={() => saveEdit(v)}
@@ -288,7 +333,14 @@ export default function VideosPanel({
                     key={v.id}
                     className="flex items-center justify-between gap-2 rounded-lg border border-line px-3 py-2 text-sm"
                   >
-                    <span className="min-w-0 flex-1 truncate">{v.title}</span>
+                    <span className="min-w-0 flex-1 break-words">
+                      {v.title}
+                      {v.problemId && (
+                        <span className="block text-xs text-ink-dim">
+                          Бодлого: {v.problemId}
+                        </span>
+                      )}
+                    </span>
                     <div className="flex shrink-0 gap-1">
                       <button
                         onClick={() => startEdit(v)}
@@ -312,7 +364,10 @@ export default function VideosPanel({
       </div>
 
       {showDeleted && (
-        <DeletedList entries={deletedEntries} emptyText="Устгасан бичлэг алга" />
+        <DeletedList
+          entries={deletedEntries}
+          emptyText="Устгасан бичлэг алга"
+        />
       )}
 
       <ConfirmDialog
@@ -325,9 +380,8 @@ export default function VideosPanel({
         description={
           deleteTarget && (
             <p>
-              <strong>{deleteTarget.title}</strong> бичлэгийг устгах гэж
-              байна. Идэвхтэй жагсаалтаас нуугдана (өгөгдөл устахгүй, зөвхөн
-              нуугдана).
+              <strong>{deleteTarget.title}</strong> бичлэгийг устгах гэж байна.
+              Идэвхтэй жагсаалтаас нуугдана (өгөгдөл устахгүй, зөвхөн нуугдана).
             </p>
           )
         }

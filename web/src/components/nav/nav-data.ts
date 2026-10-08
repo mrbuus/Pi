@@ -30,13 +30,14 @@ export const GROUP_TONE: Record<GroupKey | "home", string> = {
   home: "bg-brand-bright/15 text-brand-soft",
   learn: "bg-accent-teal/15 text-accent-teal",
   class: "bg-accent-violet/15 text-accent-violet",
-  admin: "bg-accent-gold/15 text-accent-gold",
+  admin: "bg-brand-bright/15 text-brand-soft",
   personal: "bg-accent-sky/15 text-accent-sky",
 };
 
 // Role бүрийн НҮҮР (dashboard) холбоос — самбарын дээд хэсэгт бүлэглэлгүй,
 // тод байдлаар харагдана.
 export const HOME: Record<string, NavLink> = {
+  GROUP_TEACHER: { href: "/app/groups", label: "Анги удирдах", icon: "users" },
   STUDENT: { href: "/app/student", label: "Миний самбар", icon: "home" },
   TEACHER: { href: "/app/teacher", label: "Багшийн самбар", icon: "home" },
   TEACHER_PLUS: { href: "/app/teacher", label: "Багшийн самбар", icon: "home" },
@@ -47,8 +48,18 @@ export const HOME: Record<string, NavLink> = {
 
 // Бодит маршрутуудыг эрх, чиг үүргээр бүлэглэсэн бүрэн цэс.
 const NAV_BY_ROLE: Record<string, NavLink[]> = {
+  GROUP_TEACHER: [
+    HOME.GROUP_TEACHER,
+    { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
+    { href: "/app/videos", label: "Бодолтын бичлэг", icon: "play-circle" },
+    { href: "/app/store", label: "Дэлгүүр", icon: "store" },
+  ],
   STUDENT: [
     HOME.STUDENT,
+    { href: "/app/results-ranking", label: "Миний дүн, байр", icon: "chart" },
+    { href: "/app/lesson-flow/my", label: "Өдрийн хичээл", icon: "calendar" },
+    { href: "/app/study", label: "Суралцах", icon: "book-open" },
+    { href: "/app/study/history", label: "Давтлагын түүх", icon: "clock" },
     { href: "/app/learn", label: "Хичээл үзэх", icon: "book-open" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
@@ -66,12 +77,15 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
-    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
+    { href: "/app/teacher-hours", label: "Хуваарийн цаг", icon: "clock" },
+    { href: "/app/dismissal", label: "Анги тарах цаг", icon: "clock" },
+    { href: "/app/lesson-flow", label: "Өдрийн хичээл", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   TEACHER_PLUS: [
     HOME.TEACHER_PLUS,
+    { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
@@ -81,7 +95,9 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
-    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
+    { href: "/app/teacher-hours", label: "Хуваарийн цаг", icon: "clock" },
+    { href: "/app/dismissal", label: "Анги тарах цаг", icon: "clock" },
+    { href: "/app/lesson-flow", label: "Өдрийн хичээл", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
@@ -94,6 +110,9 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
   ],
   ADMIN: [
     HOME.ADMIN,
+    { href: "/app/admin/v2", label: "v2 ажлын хяналт", icon: "clipboard-list" },
+    { href: "/app/admin/capabilities", label: "Ажилтны нарийн эрх", icon: "shield-check" },
+    { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/teacher", label: "Багшийн самбар", icon: "teacher" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
@@ -103,7 +122,9 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
-    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
+    { href: "/app/teacher-hours", label: "Хуваарийн цаг", icon: "clock" },
+    { href: "/app/dismissal", label: "Анги тарах цаг", icon: "clock" },
+    { href: "/app/lesson-flow", label: "Өдрийн хичээл", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
@@ -118,6 +139,9 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
   ],
   BUYER: [
     HOME.BUYER,
+    { href: "/app/results-ranking", label: "Миний дүн, байр", icon: "chart" },
+    { href: "/app/study", label: "Суралцах", icon: "book-open" },
+    { href: "/app/study/history", label: "Давтлагын түүх", icon: "clock" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
@@ -131,6 +155,18 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 
 // Маршрут бүрийг аль бүлэгт харьяалагдахыг тодорхойлно (нүүр хуудсуудаас бусад).
 const ITEM_GROUP: Record<string, GroupKey> = {
+  "/app/study/history": "learn",
+  "/app/groups": "class",
+  "/app/study": "learn",
+  "/app/results-ranking": "learn",
+  "/app/admin/v2": "admin",
+  "/app/admin/capabilities": "admin",
+  "/app/import": "admin",
+  "/app/support": "personal",
+  "/app/feedback": "personal",
+  "/app/dismissal": "class",
+  "/app/lesson-flow": "class",
+  "/app/lesson-flow/my": "class",
   "/app/admin/classrooms": "admin",
   "/app/admin/finance": "admin",
   "/app/admin/passes": "admin",
@@ -170,6 +206,8 @@ const ITEM_GROUP: Record<string, GroupKey> = {
 const PROFILE_LINK: NavLink = { href: "/app/profile", label: "Миний мэдээлэл", icon: "user" };
 // Бүх role-д нийтлэг (Codex G27, G17): мэдэгдэл ба нууцлалын зөвшөөрөл.
 const COMMON_PERSONAL: NavLink[] = [
+  { href: "/app/support", label: "Тусламж", icon: "message-square" },
+  { href: "/app/feedback", label: "Санал хүсэлт", icon: "file-text" },
   { href: "/app/notifications", label: "Мэдэгдэл", icon: "bell" },
   { href: "/app/consent", label: "Нууцлал, зөвшөөрөл", icon: "shield-check" },
 ];
@@ -177,6 +215,7 @@ const COMMON_PERSONAL: NavLink[] = [
 // Гар утасны доод мөрөнд байнга харагдах гол цэс (нүүрний дараа, «Бусад»-аас өмнө).
 // Бусад бүх холбоос «Бусад» дотор хэвээр — нэг ч цэс хасагдахгүй.
 const PRIMARY_BY_ROLE: Record<string, string[]> = {
+  GROUP_TEACHER: ["/app/library", "/app/videos"],
   STUDENT: ["/app/learn", "/app/tests", "/app/schedule"],
   TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
   TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { House } from "lucide-react";
 import type { ReactNode } from "react";
 import { useSyncExternalStore } from "react";
 import LogoMark from "@/components/LogoMark";
@@ -93,6 +95,7 @@ export default function Sidebar({
           />
         </div>
         <div className="flex shrink-0 flex-col gap-2 border-t border-line p-2.5">
+          <Link href="/" aria-label="Нийтийн нүүр хуудас" title="Нийтийн нүүр хуудас" className={`flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-ink-dim hover:bg-panel hover:text-ink ${railCollapsed ? "justify-center" : ""}`}><House className="h-4 w-4 shrink-0" aria-hidden />{!railCollapsed && <span>Нийтийн нүүр хуудас</span>}</Link>
           {!railCollapsed && (
             <>
               <ThemeToggle className="w-full justify-center" />
@@ -141,7 +144,7 @@ export default function Sidebar({
               type="button"
               onClick={() => onMobileOpenChange(false)}
               aria-label="Цэсийг хаах"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink-dim transition hover:text-ink"
+              className="flex h-11 w-11 items-center justify-center rounded-lg border border-line text-ink-dim transition hover:text-ink"
             >
               <NavIcon name="x" />
             </button>
@@ -155,6 +158,7 @@ export default function Sidebar({
             />
           </div>
           <div className="flex shrink-0 flex-col gap-2 border-t border-line p-2.5">
+            <Link href="/" onClick={() => onMobileOpenChange(false)} className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-ink-dim hover:bg-panel hover:text-ink"><House className="h-4 w-4" aria-hidden />Нийтийн нүүр хуудас</Link>
             <ThemeToggle className="w-full justify-center" />
             <div className="px-0.5">{identity}</div>
             <button

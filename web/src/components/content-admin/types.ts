@@ -58,6 +58,8 @@ export interface Problem {
 }
 
 export interface VideoItem {
+  problemId?: string | null;
+  createdById?: string | null;
   id: string;
   title: string;
   s3Key: string;

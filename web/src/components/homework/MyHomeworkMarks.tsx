@@ -2,7 +2,11 @@
 
 import { ClipboardCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { HOMEWORK_MARK_OPTIONS, type HomeworkMark } from "./HomeworkMarkPills";
@@ -26,7 +30,15 @@ interface MarkRow {
 type Status = "loading" | "ready" | "error";
 
 // JS гараг (0 = Ням). Эзний дугаарлалт өөр боловч энд зөвхөн нэр харуулна.
-const WEEKDAY = ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"];
+const WEEKDAY = [
+  "Ням",
+  "Даваа",
+  "Мягмар",
+  "Лхагва",
+  "Пүрэв",
+  "Баасан",
+  "Бямба",
+];
 
 function dayLabel(iso: string): string {
   // @db.Date нь UTC шөнө дундаар ирдэг — UTC-ээр уншихгүй бол +08 бүсэд
@@ -34,7 +46,7 @@ function dayLabel(iso: string): string {
   const d = new Date(iso);
   const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(d.getUTCDate()).padStart(2, "0");
-  return `${mm}-${dd}, ${WEEKDAY[d.getUTCDay()]}`;
+  return `${d.getUTCFullYear()}-${mm}-${dd}, ${WEEKDAY[d.getUTCDay()]}`;
 }
 
 export default function MyHomeworkMarks() {
@@ -42,10 +54,21 @@ export default function MyHomeworkMarks() {
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState("");
   const [tick, setTick] = useState(0);
+  const [historyYear, setHistoryYear] = useState<number | null>(null);
+  const currentYear = Number(
+    new Intl.DateTimeFormat("en", {
+      timeZone: "Asia/Ulaanbaatar",
+      year: "numeric",
+    }).format(new Date()),
+  );
 
   useEffect(() => {
     let alive = true;
-    api<MarkRow[]>("/homework-marks/my")
+    api<MarkRow[]>(
+      historyYear
+        ? `/homework-marks/my?year=${historyYear}`
+        : "/homework-marks/my",
+    )
       .then((data) => {
         if (!alive) return;
         setRows(data);
@@ -59,7 +82,7 @@ export default function MyHomeworkMarks() {
     return () => {
       alive = false;
     };
-  }, [tick]);
+  }, [tick, historyYear]);
 
   function reload() {
     setStatus("loading");
@@ -74,10 +97,71 @@ export default function MyHomeworkMarks() {
 
   return (
     <section className="rounded-2xl border-2 border-line bg-panel p-4 sm:p-6">
-      <h2 className="mb-1 font-bold text-brand-soft">Гэрийн даалгавар</h2>
-      <p className="mb-4 text-sm text-ink-dim">Сүүлийн 14 хоногт багшийн тэмдэглэсэн байдал</p>
+      <h2 className="mb-1 font-bold text-brand-soft">Танхимын гэрийн даалгавар</h2>
+      <p className="mb-4 text-sm text-ink-dim">
+        {historyYear
+          ? `${historyYear} оны багшийн тэмдэглэгээ`
+          : "Сүүлийн 14 хоногт багшийн тэмдэглэсэн байдал"}
+      </p>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          aria-pressed={historyYear === null}
+          onClick={() => {
+            if (historyYear !== null) {
+              setStatus("loading");
+              setHistoryYear(null);
+            }
+          }}
+          className="min-h-11 rounded-lg border border-line px-3 text-sm"
+        >
+          Сүүлийн 14 хоног
+        </button>
+        <button
+          type="button"
+          aria-pressed={historyYear !== null}
+          onClick={() => {
+            if (historyYear !== currentYear) {
+              setStatus("loading");
+              setHistoryYear(currentYear);
+            }
+          }}
+          className="min-h-11 rounded-lg border border-line px-3 text-sm"
+        >
+          Жилийн түүх
+        </button>
+        {historyYear && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={historyYear <= 1900}
+              onClick={() => {
+                setStatus("loading");
+                setHistoryYear(historyYear - 1);
+              }}
+              className="min-h-11 rounded-lg border border-line px-3 text-sm"
+            >
+              Өмнөх он
+            </button>
+            <span className="text-sm font-semibold">{historyYear}</span>
+            <button
+              type="button"
+              disabled={historyYear >= currentYear}
+              onClick={() => {
+                setStatus("loading");
+                setHistoryYear(historyYear + 1);
+              }}
+              className="min-h-11 rounded-lg border border-line px-3 text-sm disabled:opacity-50"
+            >
+              Дараах он
+            </button>
+          </div>
+        )}
+      </div>
 
-      {status === "loading" && <LoadingState rows={4} label="Гэрийн даалгавар" />}
+      {status === "loading" && (
+        <LoadingState rows={4} label="Гэрийн даалгавар" />
+      )}
       {status === "error" && <ErrorState message={error} onRetry={reload} />}
 
       {status === "ready" && rows.length === 0 && (
@@ -104,11 +188,16 @@ export default function MyHomeworkMarks() {
           </div>
           <ul className="divide-y divide-line">
             {rows.map((r) => {
-              const opt = HOMEWORK_MARK_OPTIONS.find((o) => o.value === r.status);
+              const opt = HOMEWORK_MARK_OPTIONS.find(
+                (o) => o.value === r.status,
+              );
               if (!opt) return null;
               const Icon = opt.icon;
               return (
-                <li key={`${r.classroom.id}-${r.date}`} className="flex items-start gap-3 py-2.5">
+                <li
+                  key={`${r.classroom.id}-${r.date}`}
+                  className="flex items-start gap-3 py-2.5"
+                >
                   <span
                     className={`mt-0.5 inline-flex h-7 min-w-24 shrink-0 items-center justify-center gap-1 rounded-full px-2.5 text-xs font-semibold ${opt.selectedClass}`}
                   >
@@ -117,7 +206,9 @@ export default function MyHomeworkMarks() {
                   </span>
                   <div className="min-w-0 text-sm">
                     <Meta items={[dayLabel(r.date), r.classroom.name]} />
-                    {r.comment && <p className="mt-0.5 text-ink-dim">{r.comment}</p>}
+                    {r.comment && (
+                      <p className="mt-0.5 text-ink-dim">{r.comment}</p>
+                    )}
                   </div>
                 </li>
               );

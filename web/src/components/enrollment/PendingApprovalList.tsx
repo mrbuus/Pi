@@ -14,7 +14,7 @@ interface PendingStudent {
   phone: string | null;
   grade: number;
   registeredAt: string;
-  hasConfirmedPayment: boolean;
+  hasConfirmedPayment: boolean | null;
 }
 
 /**
@@ -114,9 +114,11 @@ export default function PendingApprovalList() {
                     student.phone || '(утас байхгүй)',
                     `${student.grade}-р анги`,
                     `Бүртгүүлсэн: ${registeredDate}`,
-                    student.hasConfirmedPayment
+                    student.hasConfirmedPayment == null
+                      ? <span className="text-ink-muted">Төлбөрийн эрх шаардлагатай</span>
+                      : student.hasConfirmedPayment
                       ? <span className="inline-flex items-center gap-1"><CheckCircle2 size={14} aria-hidden />Төлбөр баталгаажсан</span>
-                      : <span className="inline-flex items-center gap-1"><AlertTriangle size={14} aria-hidden />Төлбөргүй</span>,
+                      : <span className="inline-flex items-center gap-1"><AlertTriangle size={14} aria-hidden />Баталгаажсан төлбөр олдсонгүй</span>,
                   ]}
                 />
               </div>

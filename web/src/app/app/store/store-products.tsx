@@ -1,20 +1,27 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import { useSection } from "@/components/students/progress/useSection";
-import { api } from '@/lib/api';
-import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
+import { api } from "@/lib/api";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/ui/StateBlock";
 
-import { Card as Surface } from '@/components/ui/Surface';
+import { Card as Surface } from "@/components/ui/Surface";
 
-import { Button } from '@/components/ui/Button';
-import { ShoppingBag, Check } from 'lucide-react';
+import { Button } from "@/components/ui/Button";
+import { ShoppingBag, Check } from "lucide-react";
+import StoreCheckout, {
+  type QuotedPurchase,
+} from "@/components/checkout/StoreCheckout";
 
 interface Product {
   id: string;
-  kind: 'TEST' | 'BOOK' | 'PASS';
+  kind: "TEST" | "BOOK" | "PASS";
   refId: string;
   price: number;
   active: boolean;
@@ -25,7 +32,7 @@ interface Product {
 interface MyPurchase {
   id: string;
   productItemId: string;
-  kind: 'TEST' | 'BOOK' | 'PASS';
+  kind: "TEST" | "BOOK" | "PASS";
   price: number;
   grantedAt: string | null;
   expiresAt: string | null;
@@ -36,40 +43,70 @@ interface MyPurchase {
 export default function StoreProducts() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const [selected, setSelected] = useState<QuotedPurchase | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [purchaseError, setPurchaseError] = useState<{id: string, message: string} | null>(null);
+  const [purchaseError, setPurchaseError] = useState<{
+    id: string;
+    message: string;
+  } | null>(null);
 
-  const productsQuery = useSection<Product[]>('/store/products', []);
-  const purchasesQuery = useSection<MyPurchase[]>(user ? '/store/my-purchases' : null, []);
+  const identityQuery = useSection<{ id: string } | null>(
+    user ? "/auth/me" : null,
+    null,
+  );
+  const productsQuery = useSection<Product[]>("/store/products", []);
+  const purchasesQuery = useSection<MyPurchase[]>(
+    user ? "/store/my-purchases" : null,
+    [],
+  );
   const products = productsQuery.data;
-  const myPurchases = useMemo(() => new Map(purchasesQuery.data.map(p => [p.productItemId, p])), [purchasesQuery.data]);
-  const loading = authLoading || productsQuery.status === 'loading' || purchasesQuery.status === 'loading';
-  const error = productsQuery.error || purchasesQuery.error;
-  function loadData() { productsQuery.reload(); purchasesQuery.reload(); }
+  const myPurchases = useMemo(
+    () => new Map(purchasesQuery.data.map((p) => [p.productItemId, p])),
+    [purchasesQuery.data],
+  );
+  const loading =
+    authLoading ||
+    (user && identityQuery.status === "loading") ||
+    productsQuery.status === "loading" ||
+    purchasesQuery.status === "loading";
+  const error =
+    identityQuery.error || productsQuery.error || purchasesQuery.error;
+  function loadData() {
+    identityQuery.reload();
+    productsQuery.reload();
+    purchasesQuery.reload();
+  }
 
   async function handlePurchase(productId: string) {
     if (!user) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
     setPurchasing(productId);
     setPurchaseError(null);
     try {
-      const result = await api('/store/purchase', {
-        method: 'POST',
-        body: { productItemId: productId },
-      });
+      const result = await api<{ purchase: QuotedPurchase }>(
+        "/store/purchase",
+        {
+          method: "POST",
+          body: { productItemId: productId },
+        },
+      );
 
       if (result) {
+        if (!result.purchase.grantedAt) setSelected(result.purchase);
         // Миний худалдан авалтуудыг сэргээнэ
-        const purchasesRes = await api<MyPurchase[]>('/store/my-purchases');
+        const purchasesRes = await api<MyPurchase[]>("/store/my-purchases");
         if (Array.isArray(purchasesRes)) {
           purchasesQuery.setData(purchasesRes);
         }
       }
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Худалдан авалтад алдаа гарлаа';
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Худалдан авалтад алдаа гарлаа";
       setPurchaseError({ id: productId, message: msg });
     } finally {
       setPurchasing(null);
@@ -85,12 +122,7 @@ export default function StoreProducts() {
   }
 
   if (error) {
-    return (
-      <ErrorState
-        message={error}
-        onRetry={loadData}
-      />
-    );
+    return <ErrorState message={error} onRetry={loadData} />;
   }
 
   if (products.length === 0) {
@@ -103,10 +135,11 @@ export default function StoreProducts() {
     );
   }
 
-  // Тестүүд, номуудыг ялгаж бүлэглээ
-  const tests = products.filter((p) => p.kind === 'TEST');
-  const books = products.filter((p) => p.kind === 'BOOK');
-
+  const groups = [
+    { kind: "TEST", title: "Нэг удаагийн шалгалт" },
+    { kind: "BOOK", title: "Номын дэлгүүр" },
+    { kind: "PASS", title: "Сургалтын багц" },
+  ];
   return (
     <div className="space-y-8">
       {purchaseError && (
@@ -115,105 +148,85 @@ export default function StoreProducts() {
           onRetry={() => handlePurchase(purchaseError.id)}
         />
       )}
-      {/* Нэг удаагийн шалгалт */}
-      {tests.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Нэг удаагийн шалгалт</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {tests.map((product) => {
-              const isPurchased = myPurchases.has(product.id);
-              return (
-                <Surface
-                  key={product.id}
-                  className="p-4 space-y-3 hover:shadow-md transition-shadow"
-                >
-                  <div>
-                    <h3 className="font-medium text-sm line-clamp-2">
-                      {product.title || 'Шалгалт'}
-                    </h3>
-                    {product.description && (
-                      <p className="text-xs text-secondary mt-1">
-                        {product.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">
-                      {product.price.toLocaleString()}₮
-                    </span>
-                    {isPurchased ? (
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-success">
-                        <Check className="w-4 h-4" />
-                        Авсан
+      {groups.map((group) => {
+        const entries = products.filter(
+          (product) => product.kind === group.kind,
+        );
+        return (
+          entries.length > 0 && (
+            <section key={group.kind} className="space-y-4">
+              <h2 className="text-lg font-semibold">{group.title}</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {entries.map((product) => {
+                  const purchase = myPurchases.get(product.id);
+                  const accessible =
+                    !!purchase?.grantedAt &&
+                    (!purchase.expiresAt ||
+                      new Date(purchase.expiresAt) > new Date());
+                  return (
+                    <Surface key={product.id} className="min-w-0 space-y-3 p-4">
+                      <h3 className="text-sm font-medium">
+                        {product.title || group.title}
+                      </h3>
+                      {product.description && (
+                        <p className="text-xs text-ink-dim">
+                          {product.description}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <span className="text-lg font-semibold">
+                          {(purchase?.price ?? product.price).toLocaleString()}₮
+                        </span>
+                        {accessible ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success">
+                            <Check className="size-4" aria-hidden />
+                            Эрх олгогдсон
+                          </span>
+                        ) : purchase?.grantedAt ? (
+                          <span className="text-sm text-ink-dim">
+                            Хугацаа дууссан
+                          </span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => void handlePurchase(product.id)}
+                            disabled={!!purchasing}
+                            loading={purchasing === product.id}
+                          >
+                            {purchase
+                              ? "Хүлээгдэж буй төлбөрөө нээх"
+                              : "Худалдаж авах"}
+                          </Button>
+                        )}
                       </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => handlePurchase(product.id)}
-                        disabled={purchasing === product.id}
-                        loading={purchasing === product.id}
-                      >
-                        Худалдаж авах
-                      </Button>
-                    )}
-                  </div>
-                </Surface>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Номуудын зарах хэсэг */}
-      {books.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Номын дэлгүүр</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {books.map((product) => {
-              const isPurchased = myPurchases.has(product.id);
-              return (
-                <Surface
-                  key={product.id}
-                  className="p-4 space-y-3 hover:shadow-md transition-shadow"
-                >
-                  <div>
-                    <h3 className="font-medium text-sm line-clamp-2">
-                      {product.title || 'Ном'}
-                    </h3>
-                    {product.description && (
-                      <p className="text-xs text-secondary mt-1">
-                        {product.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">
-                      {product.price.toLocaleString()}₮
-                    </span>
-                    {isPurchased ? (
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-success">
-                        <Check className="w-4 h-4" />
-                        Авсан
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => handlePurchase(product.id)}
-                        disabled={purchasing === product.id}
-                        loading={purchasing === product.id}
-                      >
-                        Худалдаж авах
-                      </Button>
-                    )}
-                  </div>
-                </Surface>
-              );
-            })}
-          </div>
-        </div>
-      )}
+                      {purchase && !accessible && (
+                        <p className="text-sm text-ink-dim">
+                          {purchase.grantedAt
+                            ? "Өмнөх эрхийн хугацаа дууссан. Ажилтнаас сунгах боломжийг лавлана уу."
+                            : "Худалдан авалт хүлээгдэж байна; эрх хараахан олгогдоогүй."}
+                        </p>
+                      )}
+                      {selected?.productItemId === product.id &&
+                        identityQuery.data?.id && (
+                          <StoreCheckout
+                            key={`${identityQuery.data.id}:${selected.id}`}
+                            userId={identityQuery.data.id}
+                            purchase={selected}
+                            title={product.title || group.title}
+                            onGranted={() => {
+                              setSelected(null);
+                              purchasesQuery.reload();
+                            }}
+                          />
+                        )}
+                    </Surface>
+                  );
+                })}
+              </div>
+            </section>
+          )
+        );
+      })}
     </div>
   );
 }

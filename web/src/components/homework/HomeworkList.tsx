@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { LoadingState, EmptyState } from "@/components/ui/StateBlock";
 import HomeworkCard, { type Homework } from "./HomeworkCard";
 
 type Status = "loading" | "ready" | "error";
@@ -14,11 +15,12 @@ type Status = "loading" | "ready" | "error";
  * хавсаргах, optimistic update + rollback, loading/empty/error/retry.
  * ========================================================================== */
 
-export default function HomeworkList() {
+export default function HomeworkList({ hideWhenEmpty = false }: { hideWhenEmpty?: boolean }) {
   const [items, setItems] = useState<Homework[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState("");
   const [tick, setTick] = useState(0);
+  const [filter, setFilter] = useState<"pending" | "history">("pending");
 
   useEffect(() => {
     let alive = true;
@@ -27,7 +29,7 @@ export default function HomeworkList() {
     api<Homework[]>("/assignments/my")
       .then((data) => {
         if (!alive) return;
-        setItems(data);
+        setItems(data.filter((homework) => homework.classroom.type === "ONLINE"));
         setStatus("ready");
       })
       .catch((e) => {
@@ -53,18 +55,16 @@ export default function HomeworkList() {
     );
   }
 
+  if (hideWhenEmpty && status === "ready" && items.length === 0) return null;
+
   return (
     <section className="chunky p-4 sm:p-6">
-      <h2 className="mb-1 font-bold text-brand-soft">Гэрийн даалгавар</h2>
+      <h2 className="mb-1 font-bold text-brand-soft">Онлайн гэрийн даалгавар</h2>
       <p className="mb-4 text-sm text-ink-dim">
         Даалгавраа хийсний дараа энд тэмдэглээрэй — багш шалгаад баталгаажуулна.
       </p>
 
-      {status === "loading" && (
-        <p className="animate-pulse text-sm text-ink-dim" role="status">
-          Даалгаврууд ачаалж байна…
-        </p>
-      )}
+      {status === "loading" && <LoadingState rows={3} label="Даалгаврууд" />}
 
       {status === "error" && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
@@ -89,13 +89,79 @@ export default function HomeworkList() {
 
       {status === "ready" && items.length > 0 && (
         <div className="space-y-3">
-          {items.map((hw) => (
-            <HomeworkCard
-              key={hw.id}
-              homework={hw}
-              onUpdate={(patch) => updateItem(hw.id, patch)}
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Даалгавар шүүх"
+          >
+            <button
+              type="button"
+              aria-pressed={filter === "pending"}
+              onClick={() => setFilter("pending")}
+              className="min-h-11 rounded-lg border border-line px-3 text-sm"
+            >
+              Хийх, шалгуулах (
+              {
+                items.filter(
+                  (hw) =>
+                    hw.canSubmit !== false &&
+                    ["NOT_DONE", "RETURNED", "SUBMITTED"].includes(hw.myStatus),
+                ).length
+              }
+              )
+            </button>
+            <button
+              type="button"
+              aria-pressed={filter === "history"}
+              onClick={() => setFilter("history")}
+              className="min-h-11 rounded-lg border border-line px-3 text-sm"
+            >
+              Өмнөх түүх (
+              {
+                items.filter(
+                  (hw) =>
+                    hw.canSubmit === false ||
+                    ["DONE_ONLINE", "DONE_IN_CLASS"].includes(hw.myStatus),
+                ).length
+              }
+              )
+            </button>
+          </div>
+          {!items.some((hw) =>
+            filter === "pending"
+              ? hw.canSubmit !== false &&
+                ["NOT_DONE", "RETURNED", "SUBMITTED"].includes(hw.myStatus)
+              : hw.canSubmit === false ||
+                ["DONE_ONLINE", "DONE_IN_CLASS"].includes(hw.myStatus),
+          ) && (
+            <EmptyState
+              title={
+                filter === "pending"
+                  ? "Хийх, шалгуулах даалгавар алга"
+                  : "Өмнөх түүх хараахан алга"
+              }
+              hint={
+                filter === "pending"
+                  ? "Шалгасан болон өмнөх ангийн даалгаврыг түүхээс харж болно."
+                  : "Багш даалгаврыг шалгасны дараа энд хадгалагдана."
+              }
             />
-          ))}
+          )}
+          {items
+            .filter((hw) =>
+              filter === "pending"
+                ? hw.canSubmit !== false &&
+                  ["NOT_DONE", "RETURNED", "SUBMITTED"].includes(hw.myStatus)
+                : hw.canSubmit === false ||
+                  ["DONE_ONLINE", "DONE_IN_CLASS"].includes(hw.myStatus),
+            )
+            .map((hw) => (
+              <HomeworkCard
+                key={hw.id}
+                homework={hw}
+                onUpdate={(patch) => updateItem(hw.id, patch)}
+              />
+            ))}
         </div>
       )}
     </section>

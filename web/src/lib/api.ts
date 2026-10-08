@@ -11,11 +11,15 @@ export function getRole(): string | null {
 }
 
 export function setAuth(token: string, role: string) {
+  sessionVersion += 1;
+  inflight.clear();
   localStorage.setItem("pi_token", token);
   localStorage.setItem("pi_role", role);
 }
 
 export function clearAuth() {
+  sessionVersion += 1;
+  inflight.clear();
   localStorage.removeItem("pi_token");
   localStorage.removeItem("pi_role");
 }
@@ -100,6 +104,7 @@ async function fetchWithWakeRetry(
 
 /** In-flight GET хүсэлтийг dedupe хийх (ижил GET олон дор хийгдохыг сэргийл) */
 const inflight = new Map<string, Promise<unknown>>();
+let sessionVersion = 0;
 
 /**
  * Сервер алдааны мессеж монгол бол түүнийг буцаа, англи бол өөрөө орчуул.
@@ -160,15 +165,17 @@ export async function api<T = unknown>(
   const headers: Record<string, string> = {};
   const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
   if (opts.body !== undefined && !isFormData) headers["Content-Type"] = "application/json";
-  if (opts.auth !== false) {
-    const token = getToken();
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-  }
-  const method = opts.method ?? "GET";
+  const token = opts.auth === false ? null : getToken();
+  const requestSession = sessionVersion;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const method = (opts.method ?? "GET").toUpperCase();
+  // Keys stay in memory and include identity/representation; never persist or log them.
+  const requestKey = JSON.stringify([path, opts.responseType ?? "json", headers, requestSession]);
   const init: RequestInit = {
     method,
     headers,
-    body: opts.body === undefined ? undefined : isFormData ? opts.body as FormData : JSON.stringify(opts.body),
+    cache: "no-store",
+    body: opts.body === undefined ? undefined : isFormData ? opts.body as FormData : typeof opts.body === "string" ? opts.body : JSON.stringify(opts.body),
   };
 
   // In-flight dedupe: ижил GET зэрэг хийгдвэл нэг л хүсэлт явна.
@@ -181,8 +188,8 @@ export async function api<T = unknown>(
   // iterable…). Прод дээр ч нэг endpoint-ийг хоёр компонент зэрэг дуудвал
   // мөн адил унана. Одоо dedupe нь ЭЦСИЙН задалсан өгөгдлийн promise-ийг
   // хадгална — хэн ч авсан ижил, зөв үр дүн.
-  if (method === "GET" && inflight.has(path)) {
-    return (await inflight.get(path)) as T;
+  if (method === "GET" && inflight.has(requestKey)) {
+    return (await inflight.get(requestKey)) as T;
   }
 
   const resultPromise = (async () => {
@@ -202,6 +209,9 @@ export async function api<T = unknown>(
     const data = (opts.responseType === "text" ? await res.text().catch(() => "") : await res.json().catch(() => null)) as T & {
       message?: string | string[];
     };
+    if (opts.auth !== false && (requestSession !== sessionVersion || token !== getToken())) {
+      throw new ApiError("Нэвтрэх төлөв өөрчлөгдсөн. Хуудсаа дахин нээнэ үү.", 401);
+    }
     if (!res.ok) {
       const msg = Array.isArray(data?.message)
         ? data.message.join(", ")
@@ -213,12 +223,14 @@ export async function api<T = unknown>(
   })();
 
   if (method === "GET") {
-    inflight.set(path, resultPromise);
+    inflight.set(requestKey, resultPromise);
     // Дуусмагц (амжилт/алдаа аль аль нь) dedupe-ээс хасна. `.catch(() => {})`
     // нь энэ ТУСЛАХ гинжийг unhandled rejection болгохоос сэргийлнэ —
     // жинхэнэ алдаа нь доорх return-ээр дуудагч бүрт хэвээр очно.
     resultPromise
-      .finally(() => inflight.delete(path))
+      .finally(() => {
+        if (inflight.get(requestKey) === resultPromise) inflight.delete(requestKey);
+      })
       .catch(() => {});
   }
 
@@ -245,6 +257,7 @@ export async function uploadFile(
   form.append("file", file);
   const headers: Record<string, string> = {};
   const token = getToken();
+  const requestSession = sessionVersion;
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   try {
@@ -255,6 +268,9 @@ export async function uploadFile(
       signal: AbortSignal.timeout(30_000), // 30с file upload-д
     });
     const data = await res.json().catch(() => null);
+    if (requestSession !== sessionVersion || token !== getToken()) {
+      throw new ApiError("Нэвтрэх төлөв өөрчлөгдсөн. Хуудсаа дахин нээнэ үү.", 401);
+    }
     if (!res.ok) {
       const msg = data?.message;
       const formatted = formatErrorMessage(res.status, msg ?? null);
@@ -290,6 +306,7 @@ export function fileUrl(key?: string | null): string | undefined {
 }
 
 export function homeForRole(role: string): string {
+  if (role === "GROUP_TEACHER") return "/app/groups";
   if (role === "ADMIN") return "/app/admin";
   if (role === "TEACHER" || role === "TEACHER_PLUS") return "/app/teacher";
   if (role === "STUDENT") return "/app/student";

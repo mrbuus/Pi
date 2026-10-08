@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { api } from "@/lib/api";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import {
+  paymentAttempt,
+  pendingPaymentDraft,
+  acknowledgePaymentAttempt,
+} from "@/components/checkout/payment-attempt";
+import {
+  LoadingState,
+  ErrorState,
+  EmptyState,
+} from "@/components/ui/StateBlock";
 import { getBookMeta } from "@/lib/bookMeta";
 import { Meta } from "@/components/ui/Meta";
-import {
-  BANK,
-  TUITION,
-  bankAccountPlain,
-  formatMnt,
-} from "@/lib/orgInfo";
+import { BANK, TUITION, bankAccountPlain, formatMnt } from "@/lib/orgInfo";
 
 interface UserPass {
   id: string;
@@ -56,7 +60,9 @@ function useSection<T>(
       })
       .catch((e) => {
         if (!alive) return;
-        setError(e instanceof Error ? e.message : "Өгөгдөл ачаалахад алдаа гарлаа");
+        setError(
+          e instanceof Error ? e.message : "Өгөгдөл ачаалахад алдаа гарлаа",
+        );
         setStatus("error");
       });
     return () => {
@@ -75,7 +81,6 @@ function useSection<T>(
   return { data, status, error, reload };
 }
 
-
 function formatAmount(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   if (!digits) return "";
@@ -90,8 +95,11 @@ export default function BuyerDashboard() {
   const [selected, setSelected] = useState<Pass | null>(null);
   const [amount, setAmount] = useState(""); // форматтай харагдах утга
   const [desc, setDesc] = useState("");
-  const [method, setMethod] = useState<"BANK_TRANSFER" | "QPAY">("BANK_TRANSFER");
+  const [method, setMethod] = useState<"BANK_TRANSFER" | "QPAY">(
+    "BANK_TRANSFER",
+  );
   const [msg, setMsg] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [paying, setPaying] = useState(false);
 
@@ -121,31 +129,89 @@ export default function BuyerDashboard() {
     setMsg("");
   }
 
+  const paymentLock = useRef(false);
+  useEffect(() => {
+    let alive = true;
+    void api<{ id: string }>("/auth/me")
+      .then((me) => {
+        if (!alive) return;
+        try {
+          const saved = pendingPaymentDraft(me.id, "buyer-generic") as {
+            amount?: unknown;
+            method?: unknown;
+            description?: unknown;
+          } | null;
+          if (
+            saved &&
+            typeof saved.amount === "number" &&
+            Number.isSafeInteger(saved.amount) &&
+            saved.amount >= 1000 &&
+            typeof saved.description === "string" &&
+            saved.description.length <= 200 &&
+            ["QPAY", "BANK_TRANSFER"].includes(String(saved.method))
+          ) {
+            setAmount(saved.amount.toLocaleString("en-US"));
+            setDesc(saved.description);
+            setMethod(saved.method as typeof method);
+            setMsg(
+              "Өмнөх төлбөрийн хүсэлт хадгалагдсан. Дахин оролдохдоо ижил хүсэлтийн дугаарыг хэрэглэнэ; төлсөн эсэхийг тусад нь шалгана.",
+            );
+          }
+        } catch {
+          setMsg(
+            "Өмнөх хүсэлтийг уншиж чадсангүй. Төлбөр хийсэн бол дахин төлөхөөс өмнө ажилтанд хандаарай.",
+          );
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const numericAmount = parseInt(amount.replace(/\D/g, ""), 10) || 0;
   const canPay = numericAmount >= 1000;
 
   async function pay() {
     // Давхар дарахаас хамгаална — үгүй бол давхардсан төлбөрийн бичлэг үүснэ
-    if (paying) return;
+    if (paymentLock.current) return;
+    paymentLock.current = true;
     setPaying(true);
+    setMessageError(false);
     setMsg("");
     try {
+      const me = await api<{ id: string }>("/auth/me");
+      const paymentBody = { amount: numericAmount, method, description: desc };
+      const clientRequestId = paymentAttempt(
+        me.id,
+        "buyer-generic",
+        paymentBody,
+      );
       await api("/payments", {
         method: "POST",
-        body: { amount: numericAmount, method, description: desc },
+        body: { ...paymentBody, clientRequestId },
       });
+      try {
+        acknowledgePaymentAttempt(me.id, "buyer-generic");
+      } catch {
+        /* Receipt acknowledgment remains authoritative. */
+      }
       setMsg(
         method === "QPAY"
-          ? "QPay нэхэмжлэх үүсгэгдлээ — төлбөр хиймэгц эрх тань автоматаар нээгдэнэ"
-          : "Төлбөрийн мэдэгдэл илгээгдлээ — баталгаажмагц эрх тань нээгдэнэ",
+          ? "QPay нэхэмжлэх үүсгэгдлээ. Төлбөр баталгаажсан эсэх болон багцын эрхийг тусад нь шалгана уу."
+          : "Төлбөрийн мэдэгдэл хүлээгдэж байна. Энэ нь төлсөн эсвэл эрх олгогдсон гэсэн баталгаа биш; ажилтан баталгаажуулсны дараа төлвийг шалгана уу.",
       );
       setAmount("");
       setDesc("");
       setSelected(null);
       passesQ.reload();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Төлбөрийг илгээхэд алдаа гарлаа");
+      setMessageError(true);
+      setMsg(
+        e instanceof Error ? e.message : "Төлбөрийг илгээхэд алдаа гарлаа",
+      );
     } finally {
+      paymentLock.current = false;
       setPaying(false);
     }
   }
@@ -186,7 +252,12 @@ export default function BuyerDashboard() {
                         : "bg-error/15 text-error"
                     }`}
                   >
-                    <Meta items={[active ? "Хүчинтэй" : "Дууссан", up.expiresAt.slice(0, 10)]} />
+                    <Meta
+                      items={[
+                        active ? "Хүчинтэй" : "Дууссан",
+                        up.expiresAt.slice(0, 10),
+                      ]}
+                    />
                   </span>
                 </div>
               );
@@ -221,7 +292,10 @@ export default function BuyerDashboard() {
                 <div
                   key={b.id}
                   className="rounded-xl border p-4 text-center transition hover:-translate-y-0.5"
-                  style={{ borderColor: `${meta.accent}55`, background: meta.soft }}
+                  style={{
+                    borderColor: `${meta.accent}55`,
+                    background: meta.soft,
+                  }}
                 >
                   <p className="font-extrabold" style={{ color: meta.accent }}>
                     {meta.label}
@@ -276,7 +350,9 @@ export default function BuyerDashboard() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-2 text-sm text-ink-dim">{p.durationDays} хоног</p>
+                  <p className="mt-2 text-sm text-ink-dim">
+                    {p.durationDays} хоног
+                  </p>
                   {p.price ? (
                     <p className="mt-1 text-lg font-extrabold text-brand-soft">
                       {p.price.toLocaleString("en-US")}
@@ -339,8 +415,15 @@ export default function BuyerDashboard() {
               </ul>
 
               <p className="mt-3 rounded-lg bg-panel px-3 py-2 text-xs leading-relaxed text-ink-dim">
-                <span className="font-semibold text-ink">Хуваан төлөх нөхцөл:</span>{" "}
-                <Meta items={[`эхний төлөлт ${formatMnt(tier.installment.firstPayment)}`, `үлдэгдлийг ${tier.installment.deadline}-ноос өмнө барагдуулна`]} />
+                <span className="font-semibold text-ink">
+                  Хуваан төлөх нөхцөл:
+                </span>{" "}
+                <Meta
+                  items={[
+                    `эхний төлөлт ${formatMnt(tier.installment.firstPayment)}`,
+                    `үлдэгдлийг ${tier.installment.deadline}-ноос өмнө барагдуулна`,
+                  ]}
+                />
               </p>
             </div>
           ))}
@@ -389,7 +472,13 @@ export default function BuyerDashboard() {
                     onClick={copyAccount}
                     className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink"
                   >
-                    {copied ? <><Check className="h-3 w-3" aria-hidden /> Хууллаа</> : "Хуулах"}
+                    {copied ? (
+                      <>
+                        <Check className="h-3 w-3" aria-hidden /> Хууллаа
+                      </>
+                    ) : (
+                      "Хуулах"
+                    )}
                   </button>
                 </div>
               </div>
@@ -412,7 +501,10 @@ export default function BuyerDashboard() {
         {/* Дүн ба тайлбар */}
         <div className="mt-4 space-y-3">
           <div>
-            <label htmlFor="buyer-amount" className="mb-1.5 block text-sm text-ink-dim">
+            <label
+              htmlFor="buyer-amount"
+              className="mb-1.5 block text-sm text-ink-dim"
+            >
               Төлсөн дүн
             </label>
             <div className="relative">
@@ -435,7 +527,10 @@ export default function BuyerDashboard() {
             )}
           </div>
           <div>
-            <label htmlFor="buyer-desc" className="mb-1.5 block text-sm text-ink-dim">
+            <label
+              htmlFor="buyer-desc"
+              className="mb-1.5 block text-sm text-ink-dim"
+            >
               Тайлбар
             </label>
             <input
@@ -462,8 +557,11 @@ export default function BuyerDashboard() {
         </button>
 
         {msg && (
-          <p className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
-            <Check className="h-4 w-4" aria-hidden /> {msg}
+          <p
+            role={messageError ? "alert" : "status"}
+            className={`mt-3 rounded-lg px-3 py-2 text-sm ${messageError ? "bg-error/10 text-error" : "bg-panel text-ink-dim"}`}
+          >
+            {msg}
           </p>
         )}
       </section>

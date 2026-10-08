@@ -1,7 +1,11 @@
 "use client";
 
 import { Flame, Trophy, ArrowLeft, ArrowRight } from "lucide-react";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import {
+  LoadingState,
+  ErrorState,
+  EmptyState,
+} from "@/components/ui/StateBlock";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import HeatmapGrid, { HeatmapCell } from "./HeatmapGrid";
@@ -31,13 +35,17 @@ interface ActivityHeatmapProps {
  * харьцуулалт хоёулаа сул сурагчдын дотоод урам зоригийг унагаадаг гэдэг
  * судалгааны үр дүнд үндэслэсэн шийдвэр).
  */
-export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProps) {
-  const currentYear = new Date().getFullYear();
+export default function ActivityHeatmap({
+  studentId,
+  year,
+}: ActivityHeatmapProps) {
+  const currentYear = Number(todayIso().slice(0, 4));
   const [activeYear, setActiveYear] = useState(year ?? currentYear);
   const [data, setData] = useState<YearActivityResponse | null>(null);
   const [streak, setStreak] = useState<StreakResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
 
   const isSelf = !studentId;
 
@@ -55,7 +63,9 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
       // /activity/streak нь зөвхөн СУРАГЧ өөрөө дуудна (нэвтэрсэн хэрэглэгчийн
       // бүх түүхэн стрийкийг тооцно) — багшийн харах горимд доор жилийн
       // өгөгдлөөс ойролцоогоор тооцно.
-      isSelf ? api<StreakResponse>("/activity/streak") : Promise.resolve(null),
+      isSelf && activeYear === currentYear
+        ? api<StreakResponse>("/activity/streak").catch(() => null)
+        : Promise.resolve(null),
     ])
       .then(([yearData, streakData]) => {
         if (cancelled) return;
@@ -74,7 +84,7 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
     return () => {
       cancelled = true;
     };
-  }, [activeYear, studentId, isSelf]);
+  }, [activeYear, studentId, isSelf, retryTick, currentYear]);
 
   // Багшийн харах горимд backend /activity/streak дуудагдахгүй тул, тухайн
   // жилийн өгөгдлөөс ОЙРОЛЦОО стрийк тооцно.
@@ -98,7 +108,11 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
     return { currentStreak: run, longestStreak: longest };
   }, [data, isSelf]);
 
-  const stats = isSelf ? streak : approxStreak;
+  const stats = isSelf
+    ? activeYear === currentYear
+      ? streak
+      : null
+    : approxStreak;
 
   const cells: HeatmapCell[] = useMemo(() => {
     if (!data) return [];
@@ -135,14 +149,18 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
     return (
       <section className="chunky p-4 md:p-6">
         <h2 className="mb-2 font-bold text-brand-soft">Идэвхийн түүх</h2>
-        <p className="text-sm text-error">{error}</p>
+        <ErrorState
+          message={error}
+          onRetry={() => setRetryTick((t) => t + 1)}
+        />
       </section>
     );
   }
 
-  if (!data) return null;
+  if (!data) return <EmptyState title="Идэвхийн мэдээлэл алга" hint="Өөр жил сонгох эсвэл дараа дахин шалгаарай." />;
 
-  const yearLabel = activeYear === currentYear ? "Энэ жил" : `${activeYear} онд`;
+  const yearLabel =
+    activeYear === currentYear ? "Энэ жил" : `${activeYear} онд`;
 
   return (
     <section className="chunky p-4 md:p-6">
@@ -151,7 +169,7 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
         <div className="flex items-center gap-2 text-sm">
           <button
             onClick={() => setActiveYear((y) => y - 1)}
-            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink"
             aria-label="Өмнөх жил харах"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -160,7 +178,7 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
           <button
             onClick={() => setActiveYear((y) => y + 1)}
             disabled={activeYear >= currentYear}
-            className="rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-line p-1 text-ink-dim transition hover:text-ink disabled:opacity-40"
             aria-label="Дараагийн жил харах"
           >
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -180,14 +198,22 @@ export default function ActivityHeatmap({ studentId, year }: ActivityHeatmapProp
           <div className="flex items-center gap-2 rounded-lg bg-accent-teal/10 px-3 py-2">
             <Flame className="h-5 w-5 text-accent-teal" aria-hidden />
             <div>
-              <p className="text-xs text-ink-dim">Одоогийн стрийк</p>
+              <p className="text-xs text-ink-dim">
+                {isSelf
+                  ? "Одоогийн дараалсан идэвх"
+                  : "Жилийн эцсийн дараалсан идэвх (ойролцоо)"}
+              </p>
               <p className="font-bold text-ink">{stats.currentStreak} өдөр</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-accent-gold/10 px-3 py-2">
-            <Trophy className="h-5 w-5 text-accent-gold" aria-hidden />
+          <div className="flex items-center gap-2 rounded-lg bg-panel px-3 py-2">
+            <Trophy className="h-5 w-5 text-brand" aria-hidden />
             <div>
-              <p className="text-xs text-ink-dim">Хамгийн урт стрийк</p>
+              <p className="text-xs text-ink-dim">
+                {isSelf
+                  ? "Хамгийн урт дараалсан идэвх"
+                  : "Энэ жилийн урт дараалал (ойролцоо)"}
+              </p>
               <p className="font-bold text-ink">{stats.longestStreak} өдөр</p>
             </div>
           </div>

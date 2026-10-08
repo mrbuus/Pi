@@ -37,7 +37,7 @@ export function RegisterExternalTeacher() {
     setIsLoading(true);
 
     try {
-      await api("/teacher-groups/register", { method: "POST", body: formData });
+      await api("/teacher-groups/register", { method: "POST", body: formData, auth: false });
       setSuccess(true);
       setFormData({
         email: "",
@@ -61,17 +61,17 @@ export function RegisterExternalTeacher() {
     return (
       <Card className="w-full max-w-lg border border-success/30 bg-success/10">
         <h2 className="mb-2 text-lg font-bold text-success">
-          Хүсэлт хүлээн авлаа
+          Бүртгэл үүслээ
         </h2>
         <p className="mb-4 text-sm text-ink">
-          Таны хүсэлтийг хүлээн авлаа. Баталгаажсаны дараа нэвтэрч гадны багшийн
-          бүлгийг ашиглах боломжтой.
+          Бүртгүүлсэн имэйл, нууц үгээрээ нэвтэрч «Анги удирдах» хэсгээс
+          ангийн бүлгээ үүсгэнэ үү. Админы зөвшөөрөл хүлээх шаардлагагүй.
         </p>
         <Link
-          href="/"
+          href="/login"
           className="inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-4 text-sm font-medium text-ink hover:bg-bg"
         >
-          Нүүр хуудас руу буцах
+          Нэвтрэх
         </Link>
       </Card>
     );
@@ -79,11 +79,11 @@ export function RegisterExternalTeacher() {
 
   return (
     <Card className="w-full max-w-lg">
-      <h1 className="mb-4 text-xl font-bold">Гадны багшийн бүртгэл</h1>
+      <h2 className="mb-4 text-xl font-bold">Багшийн бүртгэл</h2>
 
       <InfoHint>
-        Баталгаажих хүртэл шинэ бүлэг үүсгэх боломжгүй. Сурагчид баталгаажаагүй
-        багшийн бүлэгт нэгдэх эрхгүй.
+        Бүртгүүлээд ангийн бүлэг үүсгэж, нэгдэх кодоо сурагчдадаа өгнө.
+        Энэ бүртгэл нь төвийн ажилтны эрх эсвэл мэргэжлийн баталгаажуулалт олгохгүй.
       </InfoHint>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -121,6 +121,8 @@ export function RegisterExternalTeacher() {
               value={formData.firstName}
               onChange={handleChange}
               autoComplete="given-name"
+              minLength={2}
+              maxLength={100}
               required
               className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
             />
@@ -139,6 +141,8 @@ export function RegisterExternalTeacher() {
               value={formData.lastName}
               onChange={handleChange}
               autoComplete="family-name"
+              minLength={2}
+              maxLength={100}
               required
               className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
             />
@@ -161,8 +165,10 @@ export function RegisterExternalTeacher() {
             autoComplete="new-password"
             required
             minLength={8}
+            aria-describedby="external-password-hint"
             className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
           />
+          <p id="external-password-hint" className="mt-1 text-xs text-ink-dim">8 ба түүнээс олон тэмдэгт.</p>
         </div>
 
         <div>
@@ -179,6 +185,7 @@ export function RegisterExternalTeacher() {
             value={formData.organization}
             onChange={handleChange}
             autoComplete="organization"
+            maxLength={255}
             className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
           />
         </div>

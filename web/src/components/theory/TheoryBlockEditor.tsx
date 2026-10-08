@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { AlertTriangle } from "lucide-react";
-import { api, fileUrl, uploadFile } from "@/lib/api";
+import { AlertTriangle, Plus } from "lucide-react";
+import AttachmentPreview from "@/components/homework/AttachmentPreview";
+import { api, uploadFile } from "@/lib/api";
 import MarkdownCheatsheet from "./MarkdownCheatsheet";
 import TheoryContent, {
   extractImageAlt,
@@ -12,7 +13,9 @@ import TheoryContent, {
 import type { TheoryBlock } from "./types";
 
 function errMsg(e: unknown): string {
-  return e instanceof Error ? e.message : "Алдаа гарлаа";
+  return e instanceof Error && /[\u0400-\u04ff]/.test(e.message)
+    ? e.message
+    : "Холболтоо шалгаад дахин оролдоорой. Бичсэн мэдээлэл хэвээр байна.";
 }
 
 const inputCls =
@@ -56,6 +59,11 @@ export default function TheoryBlockEditor({
   const [imgUploading, setImgUploading] = useState(false);
   const [imgError, setImgError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadLock = useRef(false);
+  const saveLock = useRef(false);
+  const createRequest = useRef<{ fingerprint: string; id: string } | null>(
+    null,
+  );
 
   const titleId = useId();
   const contentId = useId();
@@ -64,7 +72,10 @@ export default function TheoryBlockEditor({
   const dirty =
     title !== initialTitle ||
     content !== initialContent ||
-    JSON.stringify(imageKeys) !== JSON.stringify(initialImageKeys);
+    JSON.stringify(imageKeys) !== JSON.stringify(initialImageKeys) ||
+    !!imgFile ||
+    !!imgAlt.trim() ||
+    imgUploading;
 
   useEffect(() => {
     onDirtyChange(dirty);
@@ -74,15 +85,27 @@ export default function TheoryBlockEditor({
   }, [dirty]);
 
   async function handleAddImage() {
+    if (uploadLock.current || saveLock.current) return;
     setImgError(null);
     if (!imgFile) {
       setImgError("Зургийн файлаа сонгоно уу");
       return;
     }
     if (!imgAlt.trim()) {
-      setImgError("Зургийн тухай богино тайлбар (alt) заавал бичнэ үү — дэлгэцийн уншигчид болон интернэт удаан ачаалахад хэрэглэгдэнэ");
+      setImgError(
+        "Зургийн тухай богино тайлбар (alt) заавал бичнэ үү — дэлгэцийн уншигчид болон интернэт удаан ачаалахад хэрэглэгдэнэ",
+      );
       return;
     }
+    if (!/\.(jpe?g|png|gif|webp|heic)$/i.test(imgFile.name)) {
+      setImgError("JPG, PNG, GIF, WEBP эсвэл HEIC зураг сонгоорой.");
+      return;
+    }
+    if (imgFile.size > 25 * 1024 * 1024) {
+      setImgError("Зураг 25 МБ-аас их байна. Жижигрүүлээд дахин сонгоорой.");
+      return;
+    }
+    uploadLock.current = true;
     setImgUploading(true);
     try {
       const { key } = await uploadFile(imgFile);
@@ -94,6 +117,7 @@ export default function TheoryBlockEditor({
     } catch (e) {
       setImgError(errMsg(e));
     } finally {
+      uploadLock.current = false;
       setImgUploading(false);
     }
   }
@@ -104,6 +128,7 @@ export default function TheoryBlockEditor({
   }
 
   async function handleSave() {
+    if (saveLock.current || uploadLock.current || imgFile) return;
     setError(null);
     if (!title.trim()) {
       setError("Гарчиг оруулна уу");
@@ -113,6 +138,7 @@ export default function TheoryBlockEditor({
       setError("Онолын агуулга хоосон байна");
       return;
     }
+    saveLock.current = true;
     setSaving(true);
     try {
       if (isEdit && block) {
@@ -121,9 +147,23 @@ export default function TheoryBlockEditor({
           body: { title: title.trim(), content, imageKeys },
         });
       } else {
+        const fingerprint = JSON.stringify([
+          chapterId,
+          title.trim(),
+          content,
+          imageKeys,
+        ]);
+        if (createRequest.current?.fingerprint !== fingerprint) {
+          createRequest.current = { fingerprint, id: crypto.randomUUID() };
+        }
         await api(`/lessons/${chapterId}/theory`, {
           method: "POST",
-          body: { title: title.trim(), content, imageKeys },
+          body: {
+            title: title.trim(),
+            content,
+            imageKeys,
+            clientRequestId: createRequest.current.id,
+          },
         });
       }
       onDirtyChange(false);
@@ -131,6 +171,7 @@ export default function TheoryBlockEditor({
     } catch (e) {
       setError(errMsg(e));
     } finally {
+      saveLock.current = false;
       setSaving(false);
     }
   }
@@ -149,11 +190,15 @@ export default function TheoryBlockEditor({
       </div>
 
       <div>
-        <label htmlFor={titleId} className="mb-1 block text-sm font-semibold text-ink">
+        <label
+          htmlFor={titleId}
+          className="mb-1 block text-sm font-semibold text-ink"
+        >
           Гарчиг
         </label>
         <input
           id={titleId}
+          disabled={saving}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Жишээ: Квадрат тэгшитгэл ба ялгаварлагч"
@@ -164,12 +209,16 @@ export default function TheoryBlockEditor({
       <div className="grid gap-4 lg:grid-cols-2">
         <div>
           <div className="mb-1 flex items-center justify-between gap-2">
-            <label htmlFor={contentId} className="block text-sm font-semibold text-ink">
+            <label
+              htmlFor={contentId}
+              className="block text-sm font-semibold text-ink"
+            >
               Онолын агуулга (markdown)
             </label>
           </div>
           <textarea
             id={contentId}
+            disabled={saving}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={16}
@@ -190,7 +239,9 @@ export default function TheoryBlockEditor({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/gif,image/webp,image/heic,.heic"
+                aria-label="Онолын зураг сонгох"
+                disabled={imgUploading || saving}
                 onChange={(e) => setImgFile(e.target.files?.[0] ?? null)}
                 className="text-sm text-ink-dim"
               />
@@ -199,6 +250,7 @@ export default function TheoryBlockEditor({
               </label>
               <input
                 id={altId}
+                disabled={saving || imgUploading}
                 value={imgAlt}
                 onChange={(e) => setImgAlt(e.target.value)}
                 placeholder="Зургийн товч тайлбар (заавал)"
@@ -207,13 +259,47 @@ export default function TheoryBlockEditor({
               <button
                 type="button"
                 onClick={handleAddImage}
-                disabled={imgUploading}
-                className="shrink-0 rounded-lg border border-line px-3 py-2 text-sm font-semibold text-ink transition hover:border-brand disabled:opacity-50"
+                disabled={imgUploading || saving}
+                className="min-h-11 shrink-0 rounded-lg border border-line px-3 py-2 text-sm font-semibold text-ink transition hover:border-brand disabled:opacity-50"
               >
-                {imgUploading ? "Байршуулж байна…" : "+ Нэмэх"}
+                <Plus className="mr-1 inline h-4 w-4" aria-hidden />
+                {imgUploading
+                  ? "Байршуулж байна…"
+                  : imgError
+                    ? "Дахин байршуулах"
+                    : "Нэмэх"}
               </button>
             </div>
-            {imgError && <p className="mt-2 flex gap-2 text-sm text-error"><AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" /><span>{imgError}</span></p>}
+            {imgFile && (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="min-w-0 break-all text-xs text-ink-dim">
+                  {imgFile.name}
+                </span>
+                <button
+                  type="button"
+                  disabled={imgUploading || saving}
+                  onClick={() => {
+                    setImgFile(null);
+                    setImgAlt("");
+                    setImgError(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="min-h-11 px-2 text-xs font-semibold text-ink-dim"
+                >
+                  Сонгосон файлыг хасах
+                </button>
+              </div>
+            )}
+            {imgError && (
+              <p className="mt-2 flex gap-2 text-sm text-error">
+                <AlertTriangle
+                  size={14}
+                  className="shrink-0 mt-0.5"
+                  aria-hidden="true"
+                />
+                <span>{imgError}</span>
+              </p>
+            )}
 
             {imageKeys.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-3">
@@ -222,11 +308,9 @@ export default function TheoryBlockEditor({
                     key={key}
                     className="flex w-28 flex-col items-center gap-1 rounded-lg border border-line bg-surface p-1.5"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={fileUrl(key)}
-                      alt={extractImageAlt(content, key) || "Онолын зураг"}
-                      className="h-16 w-full rounded-md object-cover"
+                    <AttachmentPreview
+                      fileKey={key}
+                      label={extractImageAlt(content, key) || "Онолын зураг"}
                     />
                     <span className="line-clamp-1 w-full text-center text-[11px] text-ink-dim">
                       {extractImageAlt(content, key) || "(тайлбаргүй)"}
@@ -234,7 +318,8 @@ export default function TheoryBlockEditor({
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(key)}
-                      className="text-[11px] font-semibold text-error hover:underline"
+                      disabled={imgUploading || saving}
+                      className="min-h-11 text-[11px] font-semibold text-error hover:underline"
                     >
                       Хасах
                     </button>
@@ -264,24 +349,35 @@ export default function TheoryBlockEditor({
 
       {error && (
         <p role="alert" className="flex gap-2 text-sm text-error">
-          <AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
+          <AlertTriangle
+            size={14}
+            className="shrink-0 mt-0.5"
+            aria-hidden="true"
+          />
           <span>{error}</span>
         </p>
       )}
 
+      {imgFile && (
+        <p className="text-sm text-ink-dim">
+          Сонгосон зургаа эхлээд «Нэмэх» товчоор байршуулна. Амжилтгүй бол ижил
+          файлаа дахин байршуулах боломжтой.
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving}
-          className="rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition disabled:opacity-50"
+          disabled={saving || imgUploading || !!imgFile}
+          className="min-h-11 rounded-lg bg-brand-bright px-4 py-2 text-sm font-bold text-on-brand transition disabled:opacity-50"
         >
           {saving ? "Хадгалж байна…" : isEdit ? "Хадгалах" : "Үүсгэх"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-brand"
+          disabled={saving || imgUploading}
+          className="min-h-11 rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-brand"
         >
           Болих
         </button>

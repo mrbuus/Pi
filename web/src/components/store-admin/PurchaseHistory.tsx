@@ -34,9 +34,9 @@ export default function PurchaseHistory({ purchases }: PurchaseHistoryProps) {
   const stats = useMemo(() => {
     return {
       total: purchases.length,
-      totalRevenue: purchases.reduce((sum, p) => sum + p.price, 0),
+      totalOrderValue: purchases.reduce((sum, p) => sum + p.price, 0),
       confirmed: purchases.filter((p) => p.grantedAt !== null).length,
-      confirmedRevenue: purchases
+      grantedOrderValue: purchases
         .filter((p) => p.grantedAt !== null)
         .reduce((sum, p) => sum + p.price, 0),
       pending: purchases.filter((p) => p.grantedAt === null).length,
@@ -78,14 +78,14 @@ export default function PurchaseHistory({ purchases }: PurchaseHistoryProps) {
           <div className="text-sm text-ink-dim mb-1">Нийт худалдан авалт</div>
           <div className="text-2xl font-bold">{stats.total}</div>
           <div className="text-xs text-ink-dim mt-1">
-            {stats.totalRevenue.toLocaleString()}₮
+            Захиалгын дүн: {stats.totalOrderValue.toLocaleString()}₮
           </div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-ink-dim mb-1">Баталгаажсан</div>
+          <div className="text-sm text-ink-dim mb-1">Эрх олгосон</div>
           <div className="text-2xl font-bold text-success">{stats.confirmed}</div>
           <div className="text-xs text-ink-dim mt-1">
-            {stats.confirmedRevenue.toLocaleString()}₮
+            Захиалгын дүн: {stats.grantedOrderValue.toLocaleString()}₮
           </div>
         </Card>
       </div>
@@ -103,17 +103,18 @@ export default function PurchaseHistory({ purchases }: PurchaseHistoryProps) {
             return (
               <Card key={purchase.id} className="overflow-hidden">
                 <button
+                  aria-expanded={isExpanded}
                   onClick={() => toggleExpanded(purchase.id)}
                   className="w-full p-4 text-left hover:bg-panel transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <h3 className="font-medium truncate">
                           {purchase.productTitle}
                         </h3>
                         <span className="text-xs px-1.5 py-0.5 rounded bg-surface text-ink-dim whitespace-nowrap">
-                          {purchase.productKind === 'TEST' ? 'Шалгалт' : 'Ном'}
+                          {purchase.productKind === 'TEST' ? 'Шалгалт' : purchase.productKind === 'PASS' ? 'Багц эрх' : 'Ном'}
                         </span>
                         {!isConfirmed && (
                           <span className="text-xs px-1.5 py-0.5 rounded bg-warning bg-opacity-20 text-warning whitespace-nowrap">
@@ -121,7 +122,7 @@ export default function PurchaseHistory({ purchases }: PurchaseHistoryProps) {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-ink-dim">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-ink-dim">
                         <span className="truncate">{purchase.userName}</span>
                         <Dot />
                         <span>{formatDate(purchase.createdAt)}</span>
@@ -133,7 +134,7 @@ export default function PurchaseHistory({ purchases }: PurchaseHistoryProps) {
                           {purchase.price.toLocaleString()}₮
                         </div>
                         {isConfirmed && (
-                          <div className="text-xs text-success">Баталгаажсан</div>
+                          <div className="text-xs text-success">Эрх олгосон</div>
                         )}
                       </div>
                       {isExpanded ? (
@@ -162,7 +163,7 @@ export default function PurchaseHistory({ purchases }: PurchaseHistoryProps) {
                         <span>{purchase.userPhone || '—'}</span>
                       </div>
                       <div>
-                        <span className="text-ink-dim">Үнэ: </span>
+                        <span className="text-ink-dim">Захиалгын үнэ: </span>
                         <span className="font-semibold">{purchase.price.toLocaleString()}₮</span>
                       </div>
                       <div>

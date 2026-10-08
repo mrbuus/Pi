@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from "@/hooks/useAuth";
 import { useSection } from "@/components/students/progress/useSection";
-import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/ui/StateBlock";
 
-import { Card as Surface } from '@/components/ui/Surface';
-import { ShoppingBag } from 'lucide-react';
+import { Card as Surface } from "@/components/ui/Surface";
+import { ShoppingBag } from "lucide-react";
 
 interface MyPurchase {
   id: string;
   productItemId: string;
-  kind: 'TEST' | 'BOOK' | 'PASS';
+  kind: "TEST" | "BOOK" | "PASS";
   price: number;
   grantedAt: string | null;
   expiresAt: string | null;
@@ -20,9 +24,15 @@ interface MyPurchase {
 
 export default function MyPurchases() {
   const { user, loading: authLoading } = useAuth();
-  const { data: purchases, status, error, reload: loadPurchases } = useSection<MyPurchase[]>(user ? '/store/my-purchases' : null, []);
-  const loading = authLoading || status === 'loading';
-  if (authLoading) return <LoadingState rows={3} label="Миний худалдан авалтууд" />;
+  const {
+    data: purchases,
+    status,
+    error,
+    reload: loadPurchases,
+  } = useSection<MyPurchase[]>(user ? "/store/my-purchases" : null, []);
+  const loading = authLoading || status === "loading";
+  if (authLoading)
+    return <LoadingState rows={3} label="Миний худалдан авалтууд" />;
 
   if (!user) {
     return (
@@ -35,18 +45,11 @@ export default function MyPurchases() {
   }
 
   if (loading) {
-    return (
-      <LoadingState rows={3} label="Миний худалдан авалтууд" />
-    );
+    return <LoadingState rows={3} label="Миний худалдан авалтууд" />;
   }
 
   if (error) {
-    return (
-      <ErrorState
-        message={error}
-        onRetry={loadPurchases}
-      />
-    );
+    return <ErrorState message={error} onRetry={loadPurchases} />;
   }
 
   if (purchases.length === 0) {
@@ -54,15 +57,15 @@ export default function MyPurchases() {
       <EmptyState
         icon={ShoppingBag}
         title="Худалдан авалт байхгүй"
-        hint="Та өөрийн дэлгүүрээс ямар ч бүтээгдэхүүнийг худалдаж авааш байна"
+        hint="Таны худалдан авалт хараахан бүртгэгдээгүй байна."
       />
     );
   }
 
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '—';
+    if (!dateStr) return "—";
     try {
-      return new Date(dateStr).toLocaleDateString('mn-MN');
+      return new Date(dateStr).toLocaleDateString("mn-MN");
     } catch {
       return dateStr;
     }
@@ -70,24 +73,45 @@ export default function MyPurchases() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Миний авсан бүтээгдэхүүнүүд</h2>
+      <h2 className="text-lg font-semibold">Миний худалдан авалтын төлөв</h2>
       <div className="space-y-2">
         {purchases.map((purchase) => (
           <Surface key={purchase.id} className="p-4">
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 items-center text-sm">
               <div>
                 <p className="font-medium line-clamp-1">{purchase.title}</p>
-                <p className="text-xs text-secondary">{purchase.kind}</p>
+                <p className="text-xs text-ink-dim">
+                  {purchase.kind === "BOOK"
+                    ? "Ном"
+                    : purchase.kind === "TEST"
+                      ? "Шалгалт"
+                      : "Багц"}
+                </p>
+                <p className="mt-1 text-sm font-semibold">
+                  {purchase.price.toLocaleString()}₮
+                </p>
+                <p className="mt-1 text-xs text-ink-dim">
+                  {!purchase.grantedAt
+                    ? "Хүлээгдэж байна — эрх олгогдоогүй"
+                    : purchase.expiresAt &&
+                        new Date(purchase.expiresAt) <= new Date()
+                      ? "Эрхийн хугацаа дууссан"
+                      : "Эрх олгогдсон"}
+                </p>
               </div>
               <div className="hidden sm:block">
-                <p className="font-semibold">{purchase.price.toLocaleString()}₮</p>
+                <p className="font-semibold">
+                  {purchase.price.toLocaleString()}₮
+                </p>
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs">{formatDate(purchase.grantedAt)}</p>
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs">
-                  {purchase.expiresAt ? formatDate(purchase.expiresAt) : 'Байнгалай'}
+                  {purchase.expiresAt
+                    ? formatDate(purchase.expiresAt)
+                    : "Хугацаа заагаагүй"}
                 </p>
               </div>
               <div className="text-right">

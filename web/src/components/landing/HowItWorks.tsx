@@ -1,63 +1,27 @@
+import { ArrowUpRight } from "lucide-react";
+import styles from "./sections.module.css";
+
 const STEPS = [
-  {
-    n: "1",
-    title: "Мэдээллээ үлдээнэ",
-    text: "Нэр, утасны дугаар, хичээл, ангийн түвшнээ бөглөөд илгээнэ — 30 секунд л шаардана.",
-  },
-  {
-    n: "2",
-    title: "Бид тантай холбогдоно",
-    text: "Манай ажилтан утсаар эсвэл Messenger-ээр тантай ярьж, тохирох бүлгийг санал болгоно.",
-  },
-  {
-    n: "3",
-    title: "Түвшингээ тогтооно",
-    text: "Үнэгүй түвшин тогтоох тестээр одоогийн мэдлэгээ шалгуулж, аль хэсгээс эхлэхээ тодорхойлно.",
-  },
-  {
-    n: "4",
-    title: "Хичээлдээ ирнэ",
-    text: "Салбар, хуваарь, төлбөрийн хэлбэрээ сонгоод сургалтаа эхлүүлнэ.",
-  },
+  { title: "Төвтэй холбогдоно", text: "Сонирхож буй хичээл, ангийн түвшин, холбоо барих мэдээллээ үлдээж, элсэлтийн боломжийг лавлана." },
+  { title: "Түвшнээ шалгуулна", text: "Түвшин тогтоох үнэлгээ, бичгээр хийсэн ажлын зураг эсвэл PDF-ээ хэрхэн өгөхийг төвтэй тохирно." },
+  { title: "Багштай ярилцана", text: "Ажлаа багшид хянуулж, тохирох анги болон 1–2 удаагийн туршилтын ирэлтийг утсаар тохирно." },
+  { title: "Нөхцөлөө тодруулна", text: "Туршилтын дараа хуваарь, төлбөр, гэрээний нөхцөлийг төвтэй ярилцана." },
 ] as const;
 
-// Алхам бүр өөр өнгө (товгор хэв маяг) — дараалал нүдэнд тод.
-const STEP_TONES = [
-  "bg-accent-teal/15 text-accent-teal",
-  "bg-accent-violet/15 text-accent-violet",
-  "bg-accent-gold/15 text-accent-gold",
-  "bg-brand-bright/15 text-brand-soft",
-];
-
 export default function HowItWorks() {
-  return (
-    <section id="how" className="relative scroll-mt-20 py-24">
-      <div aria-hidden className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative mx-auto max-w-6xl px-5">
-        <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-brand">
-          Хэрхэн бүртгүүлэх вэ
-        </p>
-        <h2 className="reveal mt-3 max-w-2xl text-3xl font-extrabold md:text-4xl">
-          4 алхмаар элсэлтийн шалгалтын бэлтгэлээ эхлүүлнэ
-        </h2>
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => (
-            <div
-              key={s.n}
-              className="reveal chunky p-6"
-              style={{ transitionDelay: `${i * 90}ms` }}
-            >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl font-display text-lg font-bold ${STEP_TONES[i % STEP_TONES.length]}`}>
-                {s.n}
-              </div>
-              <p className="mt-4 text-base font-bold text-ink">{s.title}</p>
-              <p className="mt-2 text-sm leading-relaxed text-ink-dim">
-                {s.text}
-              </p>
-            </div>
-          ))}
-        </div>
+  return <section id="how" className={`${styles.section} ${styles.processSection}`}>
+    <div className={`${styles.container} ${styles.processLayout}`}>
+      <div className={`reveal ${styles.processIntro}`}>
+        <p className={styles.eyebrow}>03 / Эхлэх алхмууд</p>
+        <h2 className={`cyrillic-heading ${styles.heading}`}>Танд тохирох<br />ангиас эхэлье.</h2>
+        <p className={styles.introCopy}>Хичээл, түвшин, хуваарь. Эхлээд хамтдаа тодруулна.</p>
+        <a href="#branches" className={styles.textLink}>Төвтэй холбогдох <ArrowUpRight size={18} aria-hidden /></a>
+        <p className={styles.processNote}>Мэдээлэл үлдээх нь элсэлт баталгаажсан гэсэн үг биш.</p>
+        <svg viewBox="0 0 240 120" fill="none" className={styles.processSketch} aria-hidden="true"><path d="M14 99H225M30 113V12" className={styles.sketchGuide} /><path d="M31 98H78V75H125V50H172V24H215" stroke="currentColor" strokeWidth="1.5" /><path d="M202 13L215 24L202 35" stroke="currentColor" strokeWidth="1.5" /><circle cx="78" cy="75" r="4" fill="currentColor" /><circle cx="125" cy="50" r="4" fill="currentColor" /><circle cx="172" cy="24" r="4" fill="currentColor" /></svg>
       </div>
-    </section>
-  );
+      <ol className={styles.steps}>{STEPS.map((step, index) => <li key={step.title} className={`reveal ${styles.step}`}>
+        <span className={styles.stepNumber} aria-hidden>0{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div>
+      </li>)}</ol>
+    </div>
+  </section>;
 }

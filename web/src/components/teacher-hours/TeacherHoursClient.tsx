@@ -4,12 +4,16 @@ import { ChevronDown, Clock, Download, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/kit/button";
 import { Meta } from "@/components/ui/Meta";
-import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
 import { formatMnt } from "@/lib/orgInfo";
 
 /* ============================================================================
- * «Ажилласан цаг» — эзний шийдвэр (2026-09-26): ажилтны төлбөрт зүгээр цагийг
+ * «Хуваарийн тооцоолсон цаг» — эзний шийдвэр (2026-09-26): ажилтны төлбөрт зүгээр цагийг
  * нь тооцоход хангалттай. Эх сурвалж нь хичээлийн хуваарь (сервер цуцалсан
  * хичээл, амралтын өдрийг хасаж, зөөсөн хичээлийг шинэ цагт нь тоолно).
  * Цагийн хөлсийг ХАДГАЛАХГҮЙ — зөвхөн энд оруулж тооцоо харна (цалингийн
@@ -59,11 +63,30 @@ export default function TeacherHoursClient() {
     setStatus("loading");
   }
 
-  const isStaff = getRole() === "ADMIN" || getRole() === "TEACHER_PLUS";
+  const [isStaff, setIsStaff] = useState(() => getRole() === "ADMIN");
 
   useEffect(() => {
     let alive = true;
-    api<{ teachers: Row[] }>(`/teacher-hours${isStaff ? "" : "/me"}?month=${month}`)
+    const scope =
+      getRole() === "TEACHER_PLUS"
+        ? api<{
+            administrator: boolean;
+            grants: { capability: string; scopeKey: string }[];
+          }>("/staff-capabilities/me").then(
+            (r) =>
+              r.administrator ||
+              r.grants.some(
+                (g) => g.capability === "time.review" && !g.scopeKey,
+              ),
+          )
+        : Promise.resolve(getRole() === "ADMIN");
+    scope
+      .then((canReview) => {
+        if (alive) setIsStaff(canReview);
+        return api<{ teachers: Row[] }>(
+          `/teacher-hours${canReview ? "" : "/me"}?month=${month}`,
+        );
+      })
       .then((r) => {
         if (!alive) return;
         setRows(r.teachers);
@@ -77,7 +100,7 @@ export default function TeacherHoursClient() {
     return () => {
       alive = false;
     };
-  }, [month, tick, isStaff]);
+  }, [month, tick]);
 
   const rateNum = Number(rate.replace(/\D/g, "")) || 0;
   const totals = useMemo(
@@ -89,7 +112,14 @@ export default function TeacherHoursClient() {
   );
 
   function downloadCsv() {
-    const lines = [["Багш", "Хичээл", "Цаг", ...(rateNum ? ["Цагийн хөлс", "Дүн"] : [])].join(",")];
+    const lines = [
+      [
+        "Багш",
+        "Хичээл",
+        "Цаг",
+        ...(rateNum ? ["Цагийн хөлс", "Дүн"] : []),
+      ].join(","),
+    ];
     for (const r of rows) {
       const hours = (r.minutes / 60).toFixed(2);
       lines.push(
@@ -102,7 +132,9 @@ export default function TeacherHoursClient() {
       );
     }
     // UTF-8 BOM — Excel кирилл үсгийг зөв уншина.
-    const blob = new Blob(["﻿" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob(["﻿" + lines.join("\n")], {
+      type: "text/csv;charset=utf-8",
+    });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `bagshiin-tsag-${month}.csv`;
@@ -112,9 +144,13 @@ export default function TeacherHoursClient() {
 
   return (
     <div className="space-y-6">
-      <h1 className="sr-only">Ажилласан цаг</h1>
+      <h1 className="sr-only">Хуваарийн тооцоолсон цаг</h1>
 
       <section className="chunky p-4 sm:p-6">
+        <p className="mb-4 text-sm text-ink-dim">
+          Хичээлийн хуваарь, цуцлалт, шилжилтээс тооцсон хугацаа. Бодитоор
+          ажилласан цагийн баталгаажуулалт эсвэл батлагдсан цалин биш.
+        </p>
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
             Сар
@@ -156,13 +192,20 @@ export default function TeacherHoursClient() {
             </div>
             <div className="flex flex-col rounded-2xl bg-accent-violet/10 p-4">
               <dt className="order-last text-xs text-ink-dim">хичээл</dt>
-              <dd className="font-display text-2xl font-bold tabular-nums text-ink">{totals.lessons}</dd>
+              <dd className="font-display text-2xl font-bold tabular-nums text-ink">
+                {totals.lessons}
+              </dd>
             </div>
             {rateNum > 0 && (
               <div className="col-span-2 flex flex-col rounded-2xl bg-accent-gold/10 p-4 sm:col-span-1">
-                <dt className="order-last text-xs text-ink-dim">нийт цалин (тооцоо)</dt>
+                <dt className="order-last text-xs text-ink-dim">
+                  хөлсний урьдчилсан тооцоо
+                </dt>
                 <dd className="font-display text-2xl font-bold tabular-nums text-ink">
-                  <Wallet className="mb-1 h-5 w-5 text-accent-gold" aria-hidden />
+                  <Wallet
+                    className="mb-1 h-5 w-5 text-accent-gold"
+                    aria-hidden
+                  />
                   {formatMnt(Math.round((totals.minutes / 60) * rateNum))}
                 </dd>
               </div>
@@ -173,10 +216,12 @@ export default function TeacherHoursClient() {
 
       {status === "loading" && (
         <section className="chunky p-5">
-          <LoadingState rows={4} label="Ажилласан цаг" />
+          <LoadingState rows={4} label="Хуваарийн тооцоолсон цаг" />
         </section>
       )}
-      {status === "error" && <ErrorState message={error} onRetry={() => setTick((t) => t + 1)} />}
+      {status === "error" && (
+        <ErrorState message={error} onRetry={() => setTick((t) => t + 1)} />
+      )}
       {status === "ready" && rows.length === 0 && (
         <EmptyState
           icon={Clock}
@@ -201,9 +246,13 @@ export default function TeacherHoursClient() {
                     {r.teacherName.slice(0, 1)}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-bold text-ink">{r.teacherName}</span>
+                    <span className="block font-bold text-ink">
+                      {r.teacherName}
+                    </span>
                     <span className="block text-sm text-ink-dim">
-                      <Meta items={[`${r.lessons} хичээл`, hoursLabel(r.minutes)]} />
+                      <Meta
+                        items={[`${r.lessons} хичээл`, hoursLabel(r.minutes)]}
+                      />
                     </span>
                   </span>
                   {rateNum > 0 && (
@@ -219,9 +268,14 @@ export default function TeacherHoursClient() {
                 {expanded && (
                   <ul className="divide-y divide-line border-t-2 border-line">
                     {r.sessions.map((s) => (
-                      <li key={`${s.date}-${s.startMinute}-${s.classroomName}`} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                      <li
+                        key={`${s.date}-${s.startMinute}-${s.classroomName}`}
+                        className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+                      >
                         <span className="tabular-nums text-ink">{s.date}</span>
-                        <span className="min-w-0 flex-1 truncate text-ink-dim">{s.classroomName}</span>
+                        <span className="min-w-0 flex-1 truncate text-ink-dim">
+                          {s.classroomName}
+                        </span>
                         <span className="tabular-nums text-ink-dim">
                           {hm(s.startMinute)}–{hm(s.endMinute)}
                         </span>

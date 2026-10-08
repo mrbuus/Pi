@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { RegisterExternalTeacher } from "@/components/groups/RegisterExternalTeacher";
 
 export const metadata: Metadata = {
-  title: "Гадны багшийн бүртгэл | Шинэ Ирээдүйн Эзэд",
-  description: "Гадны багшийн бүлэг үүсгэх хүсэлт илгээх.",
+  title: "Анги удирдах | Шинэ Ирээдүйн Эзэд",
+  description: "Багшаар бүртгүүлж ангийн бүлэг үүсгэх.",
 };
 
 export default function TeacherRegisterPage() {
@@ -12,11 +12,11 @@ export default function TeacherRegisterPage() {
       <div className="mx-auto flex w-full max-w-lg flex-col items-center gap-5">
         <div className="text-center">
           <p className="text-sm font-semibold text-brand">
-            Гадны багшийн бүртгэл
+            Анги удирдах
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-ink">Бүлгийн хүсэлт</h1>
+          <h1 className="mt-2 text-2xl font-bold text-ink">Ангийн бүлгээ үүсгээрэй</h1>
           <p className="mt-2 text-sm text-ink-dim">
-            Мэдээллээ илгээж админы баталгаажуулалтыг хүлээнэ үү.
+            Багшаар бүртгүүлээд нэвтэрч ангиа удирдана.
           </p>
         </div>
         <RegisterExternalTeacher />

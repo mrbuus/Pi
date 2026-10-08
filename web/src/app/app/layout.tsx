@@ -1,14 +1,18 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import ContextNavigation from "@/components/layout/ContextNavigation";
 import BottomTabs from "@/components/nav/BottomTabs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import Sidebar from "@/components/nav/Sidebar";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
 import { Meta } from "@/components/ui/Meta";
+import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { api, clearAuth, fileUrl, getRole, getToken } from "@/lib/api";
+import { navigationRole } from "@/lib/navigation-role";
 
 // Role бүрийн монгол нэр — header identity badge-д ашиглана
 const ROLE_LABEL: Record<string, string> = {
@@ -18,6 +22,7 @@ const ROLE_LABEL: Record<string, string> = {
   STUDENT: "Сурагч",
   PARENT: "Эцэг эх",
   BUYER: "Худалдан авагч",
+  GROUP_TEACHER: "Анги удирдах",
 };
 
 interface Me {
@@ -25,6 +30,7 @@ interface Me {
   lastName: string;
   role: string;
   avatarUrl?: string | null;
+  externalTeacherProfile?: { verifiedAt: string | null } | null;
 }
 interface ChildLink {
   verified: boolean;
@@ -38,13 +44,8 @@ function initials(firstName: string, lastName: string): string {
 // Дээд буланд харагдах identity — нэвтэрсэн ямар ч role-той хүн өөрийн нэр
 // + role-оо, эцэг эх бол баталгаажсан хүүхдийнхээ нэрийг давхар харна.
 // Header дотор байрладаг тул БҮХ дотоод хуудсан дээр байнга харагдана.
-function IdentityBadge() {
-  const [me, setMe] = useState<Me | null>(null);
+function IdentityBadge({ me }: { me: Me | null }) {
   const [children, setChildren] = useState<ChildLink[]>([]);
-
-  useEffect(() => {
-    api<Me>("/auth/me").then(setMe).catch(() => {});
-  }, []);
   useEffect(() => {
     if (me?.role === "PARENT") {
       api<ChildLink[]>("/parent/children").then(setChildren).catch(() => {});
@@ -72,7 +73,7 @@ function IdentityBadge() {
       <span className="hidden text-sm leading-tight sm:block">
         <span className="block font-semibold">{me.firstName}</span>
         <span className="block text-[11px] text-ink-dim">
-          <Meta items={[ROLE_LABEL[me.role] ?? me.role, verifiedChild ? verifiedChild.firstName : ""]} />
+          <Meta items={[ROLE_LABEL[navigationRole(me)] ?? me.role, verifiedChild ? verifiedChild.firstName : ""]} />
         </span>
       </span>
     </div>
@@ -89,6 +90,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     () => null,
   );
   const [navOpen, setNavOpen] = useState(false);
+  const [identity, setIdentity] = useState<{ authRole: string; me: Me } | null>(null);
+  const [identityError, setIdentityError] = useState(false);
+  const [identityRetry, setIdentityRetry] = useState(0);
+  const me = identity?.authRole === role ? identity.me : null;
+  const needsStaffMode = role === "TEACHER" || role === "TEACHER_PLUS";
+  const displayRole = me ? navigationRole(me) : role;
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token || !role) return;
+    let active = true;
+    api<Me>("/auth/me").then((value) => {
+      if (active && getToken() === token) {
+        setIdentity({ authRole: role, me: value });
+        setIdentityError(false);
+      }
+    }).catch(() => { if (active && getToken() === token) setIdentityError(true); });
+    return () => { active = false; };
+  }, [role, identityRetry]);
+
+  useEffect(() => {
+    if (displayRole === "GROUP_TEACHER" && pathname === "/app/teacher") {
+      router.replace("/app/groups");
+    }
+  }, [displayRole, pathname, router]);
   // Шалгалтын fullscreen горимд header-ийг бүхэлд нь нуух ёстой (анти-чит горим
   // document.documentElement.requestFullscreen()-ийг exam хуудас дуудна).
   const [examFullscreen, setExamFullscreen] = useState(false);
@@ -133,8 +159,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!role) return null;
+  // Resolve the current user's group/staff mode before mounting a centre
+  // dashboard. Network failure has an explicit retry instead of a wrong menu.
+  if (needsStaffMode && !me) return <div className="mx-auto max-w-xl px-4 py-12">
+    {identityError
+      ? <ErrorState message="Таны хэсгийг нээхэд холболт тасарлаа." onRetry={() => { setIdentityError(false); setIdentityRetry((value) => value + 1); }} />
+      : <LoadingState label="Таны хэсгийг нээж байна…" />}
+    <Link href="/" className="mt-4 inline-flex min-h-11 items-center text-brand underline">Нийтийн нүүр хуудас</Link>
+  </div>;
 
-  const pageTitle = getPageTitle(role, pathname);
+  const pageTitle = getPageTitle(displayRole, pathname);
 
   return (
     <TopBarSlotProvider node={topBarSlotEl}>
@@ -147,11 +181,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen lg:flex">
         {!examFullscreen && (
           <Sidebar
-            role={role}
+            role={displayRole ?? role}
             pathname={pathname}
             mobileOpen={navOpen}
             onMobileOpenChange={setNavOpen}
-            identity={<IdentityBadge />}
+            identity={<IdentityBadge me={me} />}
             onLogout={() => {
               clearAuth();
               router.push("/login");
@@ -162,8 +196,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {!examFullscreen && (
             <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur">
               <div className="flex h-14 items-center gap-3 px-4">
+                <ContextNavigation role={displayRole ?? role} pathname={pathname} />
                 {pageTitle && (
-                  <span className="shrink-0 truncate text-sm font-semibold text-ink sm:text-base">
+                  <span className="min-w-0 max-w-[40vw] truncate text-sm font-semibold text-ink sm:max-w-none sm:text-base">
                     {pageTitle}
                   </span>
                 )}
@@ -187,13 +222,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               examFullscreen ? "pb-8" : "pb-28"
             }`}
           >
-            {children}
+            {displayRole === "GROUP_TEACHER" && pathname === "/app/teacher"
+              ? <LoadingState label="Анги удирдах хэсгийг нээж байна…" />
+              : children}
           </main>
         </div>
       </div>
       {!examFullscreen && (
         <BottomTabs
-          role={role}
+          role={displayRole ?? role}
           pathname={pathname}
           moreOpen={navOpen}
           onMore={() => setNavOpen((v) => !v)}

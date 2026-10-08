@@ -1,7 +1,8 @@
 "use client";
 
+import VideoPlayer from "@/components/lesson/LessonVideoPlayer";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Check, Video as VideoIcon } from "lucide-react";
+import { Check, Video as VideoIcon } from "lucide-react";
 import { api, getRole } from "@/lib/api";
 import { ErrorState, EmptyState } from "@/components/ui/StateBlock";
 
@@ -40,94 +41,14 @@ interface Chapter {
   book?: { code: string; title: string } | null;
 }
 
-// Шууд <video src>-ээр тоглуулахыг зөвшөөрсөн хостууд — зөвхөн төвийн эсвэл
-// найдвартай олон нийтийн видео сервер. Шинэ хост нэмэхэд зөвхөн энд нэмнэ.
-const ALLOWED_VIDEO_HOSTS = [
-  // Тухайн API-гийн өөрийн файл/байршуулалтын домэйн (NEXT_PUBLIC_API_URL-ийн host)
-  ...(() => {
-    try {
-      return [new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api").hostname];
-    } catch {
-      return [];
-    }
-  })(),
-  "localhost",
-];
-
-function youtubeEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes("youtu.be")) {
-      return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
-    }
-    if (u.hostname.includes("youtube.com")) {
-      const id = u.searchParams.get("v");
-      if (id) return `https://www.youtube.com/embed/${id}`;
-      if (u.pathname.startsWith("/embed/")) return url;
-    }
-  } catch {
-    /* буруу URL — доор нь хост шалгаж үзнэ */
-  }
-  return null;
-}
-
-// URL нь <video src>-ээр шууд тоглуулахад аюулгүй, мэдэгдэж буй хостоос эсэхийг шалгана
-function isAllowedDirectVideoUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    if (u.protocol !== "https:" && u.protocol !== "http:") return false;
-    return ALLOWED_VIDEO_HOSTS.some(
-      (host) => u.hostname === host || u.hostname.endsWith(`.${host}`),
-    );
-  } catch {
-    return false;
-  }
-}
-
-function VideoPlayer({ video }: { video: Video }) {
-  const embed = youtubeEmbedUrl(video.s3Key);
-  const directAllowed = !embed && isAllowedDirectVideoUrl(video.s3Key);
-  return (
-    <div className="overflow-hidden rounded-xl border border-line bg-brand-navy">
-      <div className="aspect-video w-full">
-        {embed ? (
-          <iframe
-            src={embed}
-            title={video.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="h-full w-full"
-          />
-        ) : directAllowed ? (
-          <video controls src={video.s3Key} className="h-full w-full" />
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 px-4 text-center text-brand-soft">
-            <AlertTriangle className="h-8 w-8" aria-hidden="true" />
-            <p className="text-sm font-semibold">Дэмжигдэхгүй холбоос</p>
-            <p className="text-xs text-brand-soft/80">
-              Энэ бичлэгийн эх сурвалж танигдаагүй тул аюулгүй байдлын үүднээс
-              шууд ачаалахгүй.
-            </p>
-          </div>
-        )}
-      </div>
-      <div className="p-3">
-        <p className="text-sm font-semibold">{video.title}</p>
-        {video.duration ? (
-          <p className="text-xs text-ink-dim">
-            {Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, "0")}
-          </p>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 export default function VideosPage() {
   const role = typeof window !== "undefined" ? getRole() : null;
-  const canManage = role === "ADMIN" || role === "TEACHER" || role === "TEACHER_PLUS";
+  const canManage =
+    role === "ADMIN" || role === "TEACHER" || role === "TEACHER_PLUS";
 
-  const [chaptersWithVideos, setChaptersWithVideos] = useState<ChapterOpt[]>([]);
+  const [chaptersWithVideos, setChaptersWithVideos] = useState<ChapterOpt[]>(
+    [],
+  );
   const [activeChapter, setActiveChapter] = useState("");
   const [videos, setVideos] = useState<Video[]>([]);
   const [error, setError] = useState("");
@@ -250,12 +171,7 @@ export default function VideosPage() {
         </section>
       )}
 
-      {error && (
-        <ErrorState
-          message={error}
-          onRetry={loadChaptersWithVideos}
-        />
-      )}
+      {error && <ErrorState message={error} onRetry={loadChaptersWithVideos} />}
 
       {chaptersWithVideos.length === 0 && !error && (
         <EmptyState

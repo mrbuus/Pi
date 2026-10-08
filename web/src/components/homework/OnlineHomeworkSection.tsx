@@ -1,11 +1,19 @@
 "use client";
 
 import { ImagePlus, Pencil, Plus, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/ui/StateBlock";
 import { api, uploadFile } from "@/lib/api";
-import TeacherHomeworkCalendar, { ubDateKey, ubToday } from "./TeacherHomeworkCalendar";
+import TeacherHomeworkCalendar, {
+  ubDateKey,
+  ubToday,
+} from "./TeacherHomeworkCalendar";
 import TeacherHomeworkFrequencyPanel from "./TeacherHomeworkFrequencyPanel";
+import { type SubmissionRecordData } from "./SubmissionRecord";
 import TeacherHomeworkTestCard from "./TeacherHomeworkTestCard";
 
 /* ============================================================================
@@ -27,10 +35,11 @@ interface Assignment {
   type: string;
   dueDate: string | null;
   createdAt: string;
+  imageKeys?: string[];
   _count?: { submissions: number };
 }
 
-interface RosterRow {
+interface RosterRow extends SubmissionRecordData {
   student: { id: string; firstName: string; lastName: string };
   state: string;
   note: string | null;
@@ -41,7 +50,11 @@ type Status = "loading" | "ready" | "error";
 const inputCls =
   "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-brand";
 
-export default function OnlineHomeworkSection({ classroomId }: { classroomId: string }) {
+export default function OnlineHomeworkSection({
+  classroomId,
+}: {
+  classroomId: string;
+}) {
   const [items, setItems] = useState<Assignment[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState("");
@@ -50,6 +63,8 @@ export default function OnlineHomeworkSection({ classroomId }: { classroomId: st
   const [openId, setOpenId] = useState<string | null>(null);
   const [rosters, setRosters] = useState<Record<string, RosterRow[]>>({});
   const [actionError, setActionError] = useState("");
+  const [rosterLoading, setRosterLoading] = useState<string | null>(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -87,24 +102,42 @@ export default function OnlineHomeworkSection({ classroomId }: { classroomId: st
       return;
     }
     setOpenId(id);
+    setRosterLoading(id);
     try {
       await loadRoster(id);
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "Илгээлтүүдийг ачаалж чадсангүй");
+      setActionError(
+        e instanceof Error ? e.message : "Илгээлтүүдийг ачаалж чадсангүй",
+      );
+    } finally {
+      setRosterLoading(null);
     }
   }
 
-  async function review(assignmentId: string, studentId: string, action: string) {
+  async function review(
+    assignmentId: string,
+    studentId: string,
+    action: string,
+    note?: string,
+  ) {
+    if (reviewBusy) return;
+    setReviewBusy(true);
     setActionError("");
     try {
       await api(`/assignments/${assignmentId}/review`, {
         method: "POST",
-        body: JSON.stringify({ studentId, action }),
+        body: {
+          studentId,
+          action,
+          note: note?.trim() || undefined,
+        },
       });
       await loadRoster(assignmentId);
       setTick((t) => t + 1); // «N илгээсэн» тоог шинэчилнэ
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Хадгалж чадсангүй");
+    } finally {
+      setReviewBusy(false);
     }
   }
 
@@ -135,7 +168,10 @@ export default function OnlineHomeworkSection({ classroomId }: { classroomId: st
           />
 
           {actionError && (
-            <p className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error" role="alert">
+            <p
+              className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error"
+              role="alert"
+            >
               {actionError}
             </p>
           )}
@@ -154,21 +190,43 @@ export default function OnlineHomeworkSection({ classroomId }: { classroomId: st
                     isOpen={openId === a.id}
                     submissions={rosters[a.id] ?? []}
                     onToggle={() => void toggle(a.id)}
-                    onReview={(studentId, action) => void review(a.id, studentId, action)}
+                    onReview={(studentId, action, note) =>
+                      void review(a.id, studentId, action, note)
+                    }
+                    loading={rosterLoading === a.id}
+                    busy={reviewBusy}
+                    error={openId === a.id ? actionError : undefined}
+                    onRetry={() => {
+                      setActionError("");
+                      setRosterLoading(a.id);
+                      void loadRoster(a.id)
+                        .catch(() =>
+                          setActionError("Илгээлтүүдийг ачаалж чадсангүй"),
+                        )
+                        .finally(() => setRosterLoading(null));
+                    }}
                   />
                   <AssignmentActions
                     assignment={a}
                     onChanged={(patch) =>
-                      setItems((list) => list.map((x) => (x.id === a.id ? { ...x, ...patch } : x)))
+                      setItems((list) =>
+                        list.map((x) =>
+                          x.id === a.id ? { ...x, ...patch } : x,
+                        ),
+                      )
                     }
-                    onDeleted={() => setItems((list) => list.filter((x) => x.id !== a.id))}
+                    onDeleted={() =>
+                      setItems((list) => list.filter((x) => x.id !== a.id))
+                    }
                   />
                 </div>
               ))}
             </div>
           )}
 
-          {items.length > 0 && <TeacherHomeworkFrequencyPanel assignments={items} />}
+          {items.length > 0 && (
+            <TeacherHomeworkFrequencyPanel assignments={items} />
+          )}
         </>
       )}
     </section>
@@ -188,6 +246,7 @@ function CreateAssignmentForm({
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const uploadedKeys = useRef(new Map<File, string>());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -196,6 +255,7 @@ function CreateAssignmentForm({
     setDescription("");
     setDueDate("");
     setFiles([]);
+    uploadedKeys.current.clear();
     setError("");
   }
 
@@ -209,16 +269,26 @@ function CreateAssignmentForm({
     setError("");
     try {
       const imageKeys: string[] = [];
-      for (const f of files) imageKeys.push((await uploadFile(f)).key);
-      const created = await api<Assignment>(`/classrooms/${classroomId}/assignments`, {
-        method: "POST",
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim() || undefined,
-          dueDate: dueDate || undefined,
-          imageKeys: imageKeys.length ? imageKeys : undefined,
-        }),
-      });
+      for (const f of files) {
+        let key = uploadedKeys.current.get(f);
+        if (!key) {
+          key = (await uploadFile(f)).key;
+          uploadedKeys.current.set(f, key);
+        }
+        imageKeys.push(key);
+      }
+      const created = await api<Assignment>(
+        `/classrooms/${classroomId}/assignments`,
+        {
+          method: "POST",
+          body: {
+            title: title.trim(),
+            description: description.trim() || undefined,
+            dueDate: dueDate || undefined,
+            imageKeys: imageKeys.length ? imageKeys : undefined,
+          },
+        },
+      );
       onCreated(created);
       reset();
       setOpen(false);
@@ -247,25 +317,43 @@ function CreateAssignmentForm({
       <h3 className="font-bold">Шинэ даалгавар</h3>
       <label className="block text-sm">
         <span className="mb-1 block font-medium">Гарчиг</span>
-        <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} required />
+        <input
+          className={inputCls}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={200}
+          required
+        />
       </label>
       <label className="block text-sm">
         <span className="mb-1 block font-medium">Тайлбар</span>
-        <textarea className={inputCls} rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+        <textarea
+          className={inputCls}
+          rows={3}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
       </label>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block text-sm">
           <span className="mb-1 block font-medium">Хугацаа</span>
-          <input type="date" className={inputCls} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <input
+            type="date"
+            className={inputCls}
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium">Зураг</span>
-          <span className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line px-3 text-ink-dim">
+          <span className="mb-1 block font-medium">Зураг, PDF</span>
+          <span className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line px-3 text-ink-dim">
             <ImagePlus className="h-4 w-4" aria-hidden />
-            {files.length ? `${files.length} зураг сонгосон` : "Зураг хавсаргах"}
+            {files.length
+              ? `${files.length} файл сонгосон`
+              : "Зураг, PDF хавсаргах"}
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif,image/webp,image/heic,application/pdf,.heic"
               multiple
               className="sr-only"
               onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
@@ -273,8 +361,20 @@ function CreateAssignmentForm({
           </span>
         </label>
       </div>
+      {files.length > 0 && (
+        <ul className="space-y-1 text-xs text-ink-dim">
+          {files.map((file, i) => (
+            <li key={`${file.name}-${i}`} className="break-all">
+              {file.name}
+            </li>
+          ))}
+        </ul>
+      )}
       {error && (
-        <p className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error" role="alert">
+        <p
+          className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -288,6 +388,7 @@ function CreateAssignmentForm({
         </button>
         <button
           type="button"
+          disabled={busy}
           onClick={() => {
             reset();
             setOpen(false);
@@ -327,9 +428,15 @@ function AssignmentActions({
     try {
       await api(`/assignments/${assignment.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ title: title.trim(), description: description.trim() || undefined }),
+        body: {
+          title: title.trim(),
+          description: description.trim() || undefined,
+        },
       });
-      onChanged({ title: title.trim(), description: description.trim() || null });
+      onChanged({
+        title: title.trim(),
+        description: description.trim() || null,
+      });
       setMode("idle");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Хадгалж чадсангүй");
@@ -357,11 +464,19 @@ function AssignmentActions({
     <div className="space-y-2 pl-1">
       {mode === "idle" && (
         <div className="flex gap-2">
-          <button type="button" className={smallBtn} onClick={() => setMode("edit")}>
+          <button
+            type="button"
+            className={smallBtn}
+            onClick={() => setMode("edit")}
+          >
             <Pencil className="h-3.5 w-3.5" aria-hidden />
             Засах
           </button>
-          <button type="button" className={smallBtn} onClick={() => setMode("delete")}>
+          <button
+            type="button"
+            className={smallBtn}
+            onClick={() => setMode("delete")}
+          >
             <Trash2 className="h-3.5 w-3.5" aria-hidden />
             Устгах
           </button>
@@ -370,13 +485,33 @@ function AssignmentActions({
 
       {mode === "edit" && (
         <div className="space-y-2 rounded-xl border border-line bg-surface p-3">
-          <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Гарчиг" />
-          <textarea className={inputCls} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} aria-label="Тайлбар" />
+          <input
+            className={inputCls}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            aria-label="Гарчиг"
+          />
+          <textarea
+            className={inputCls}
+            rows={2}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            aria-label="Тайлбар"
+          />
           <div className="flex gap-2">
-            <button type="button" disabled={busy} onClick={() => void save()} className="min-h-9 rounded-lg bg-brand-bright px-3 text-xs font-semibold text-on-brand disabled:opacity-60">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void save()}
+              className="min-h-9 rounded-lg bg-brand-bright px-3 text-xs font-semibold text-on-brand disabled:opacity-60"
+            >
               Хадгалах
             </button>
-            <button type="button" onClick={() => setMode("idle")} className={smallBtn}>
+            <button
+              type="button"
+              onClick={() => setMode("idle")}
+              className={smallBtn}
+            >
               <X className="h-3.5 w-3.5" aria-hidden />
               Болих
             </button>
@@ -386,11 +521,22 @@ function AssignmentActions({
 
       {mode === "delete" && (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-error/30 bg-error/5 p-3 text-sm">
-          <span className="text-error">Энэ даалгавар болон илгээлтүүдийг устгах уу?</span>
-          <button type="button" disabled={busy} onClick={() => void remove()} className="min-h-9 rounded-lg border border-error/40 px-3 text-xs font-semibold text-error disabled:opacity-60">
+          <span className="text-error">
+            Энэ даалгавар болон илгээлтүүдийг устгах уу?
+          </span>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void remove()}
+            className="min-h-9 rounded-lg border border-error/40 px-3 text-xs font-semibold text-error disabled:opacity-60"
+          >
             Тийм, устга
           </button>
-          <button type="button" onClick={() => setMode("idle")} className={smallBtn}>
+          <button
+            type="button"
+            onClick={() => setMode("idle")}
+            className={smallBtn}
+          >
             Үгүй
           </button>
         </div>

@@ -1,7 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, Hourglass, CheckCircle, Clock, AlertTriangle, Undo, Copy, Check, ArrowLeft, WifiOff } from "lucide-react";
+import {
+  Loader2,
+  Hourglass,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Undo,
+  Copy,
+  Check,
+  ArrowLeft,
+  WifiOff,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import type {
   CreatePaymentResponse,
@@ -57,6 +68,10 @@ export interface QpayCheckoutProps {
   auth?: boolean;
   /** Төлбөр амжилттай баталгаажихад дуудагдана */
   onConfirmed?: (payment: PaymentDetails) => void;
+  /** Preserve an issued receipt before payment or fulfillment finishes. */
+  onCreated?: (payment: CreatePaymentResponse) => void;
+  clientRequestId?: string;
+  purchaseId?: string;
   /** "Буцах" товч харуулах бол — жишээ нь өөр арга сонгох боломж өгөхөд */
   onCancel?: () => void;
   className?: string;
@@ -75,6 +90,9 @@ export default function QpayCheckout({
   forMonth,
   auth = true,
   onConfirmed,
+  onCreated,
+  clientRequestId,
+  purchaseId,
   onCancel,
   className = "",
 }: QpayCheckoutProps) {
@@ -88,7 +106,9 @@ export default function QpayCheckout({
   const [copied, setCopied] = useState(false);
   const [nonce, setNonce] = useState(0); // "Дахин оролдох" дарахад нэмэгдэж, дахин эхэлнэ
   const [successMounted, setSuccessMounted] = useState(false); // амжилтын дүрсний жижиг "pop" анимэйшнд
-  const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" && navigator.onLine);
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== "undefined" && navigator.onLine,
+  );
 
   // Онгойлгосон эсэхийг хадгалж, unmount дараа setState дуудахаас сэргийлнэ
   const aliveRef = useRef(true);
@@ -104,11 +124,17 @@ export default function QpayCheckout({
     function handleOnline() {
       if (aliveRef.current) {
         setIsOnline(true);
+        setState((current) =>
+          current === "pending-offline" ? "pending" : current,
+        );
       }
     }
     function handleOffline() {
       if (aliveRef.current) {
         setIsOnline(false);
+        setState((current) =>
+          current === "pending" ? "pending-offline" : current,
+        );
       }
     }
     window.addEventListener("online", handleOnline);
@@ -121,9 +147,11 @@ export default function QpayCheckout({
 
   // Хуудас нуугдсан үед polling зогсоох, буцах үед үргэлжлүүлэх
   const isHiddenRef = useRef(false);
+  const [visibilityVersion, setVisibilityVersion] = useState(0);
   useEffect(() => {
     function handleVisibilityChange() {
       isHiddenRef.current = document.hidden;
+      if (!document.hidden) setVisibilityVersion((value) => value + 1);
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
@@ -134,10 +162,20 @@ export default function QpayCheckout({
   // onConfirmed нь эцэг компонентоос ирэх inline callback байж болзошгүй тул
   // ref-ээр дамжуулна — эс тэгвэл render болгонд poll-ийн useEffect дахин
   // эхэлж, 3с→10с шатлал болон 10 минутын хугацааны тоолуур дахин 0-с эхэлнэ.
+  const onCreatedRef = useRef(onCreated);
+  useEffect(() => {
+    onCreatedRef.current = onCreated;
+  }, [onCreated]);
   const onConfirmedRef = useRef(onConfirmed);
   useEffect(() => {
     onConfirmedRef.current = onConfirmed;
   }, [onConfirmed]);
+
+  const attemptRef = useRef<{ key: string; id: string } | null>(null);
+  const createRequestRef = useRef<{
+    key: string;
+    request: Promise<CreatePaymentResponse>;
+  } | null>(null);
 
   /* ---------- 1) Нэхэмжлэх үүсгэх ---------- */
   useEffect(() => {
@@ -152,21 +190,57 @@ export default function QpayCheckout({
       setLastCheckedAt(null);
 
       try {
-        const res = await api<CreatePaymentResponse>("/payments", {
-          method: "POST",
-          body: {
-            amount,
-            method: "QPAY",
-            description,
-            ...(forMonth ? { forMonth } : {}),
-          },
+        const attemptKey = JSON.stringify([
+          amount,
+          description,
+          forMonth,
           auth,
-        });
+          purchaseId,
+          clientRequestId,
+        ]);
+        if (attemptRef.current?.key !== attemptKey)
+          attemptRef.current = {
+            key: attemptKey,
+            id: clientRequestId || crypto.randomUUID(),
+          };
+        const requestKey = JSON.stringify([
+          amount,
+          description,
+          forMonth,
+          auth,
+          nonce,
+          purchaseId,
+          clientRequestId,
+        ]);
+        if (createRequestRef.current?.key !== requestKey)
+          createRequestRef.current = {
+            key: requestKey,
+            request: api<CreatePaymentResponse>("/payments", {
+              method: "POST",
+              body: {
+                amount,
+                method: "QPAY",
+                clientRequestId: attemptRef.current!.id,
+                ...(purchaseId ? { purchaseId } : {}),
+                description,
+                ...(forMonth ? { forMonth } : {}),
+              },
+              auth,
+            }),
+          };
+        const res = await createRequestRef.current.request;
         if (cancelled || !aliveRef.current) return;
         setPaymentId(res.id);
+        onCreatedRef.current?.(res);
 
         if (res.status === "CONFIRMED") {
+          const details = await api<PaymentDetails>(`/payments/${res.id}`, {
+            auth,
+          });
+          if (cancelled || !aliveRef.current) return;
+          setPaidAt(details.paidAt);
           setState("success");
+          onConfirmedRef.current?.(details);
           return;
         }
         if (!res.qpay) {
@@ -180,7 +254,9 @@ export default function QpayCheckout({
         setState("pending");
       } catch (e) {
         if (cancelled || !aliveRef.current) return;
-        setErrorMsg(e instanceof Error ? e.message : "Нэхэмжлэх үүсгэхэд алдаа гарлаа");
+        setErrorMsg(
+          e instanceof Error ? e.message : "Нэхэмжлэх үүсгэхэд алдаа гарлаа",
+        );
         setState("error");
       }
     }
@@ -190,7 +266,7 @@ export default function QpayCheckout({
     return () => {
       cancelled = true;
     };
-  }, [amount, description, forMonth, auth, nonce]);
+  }, [amount, description, forMonth, auth, nonce, clientRequestId, purchaseId]);
 
   /* ---------- 2) Төлөв хянах нэг удаагийн шалгалт (poll болон гар шалгалт хоёуланд ашиглана) ---------- */
   const checkOnce = useCallback(async (): Promise<PaymentDetails | null> => {
@@ -215,7 +291,8 @@ export default function QpayCheckout({
         setState("expired");
         return;
       }
-      const interval = elapsedMs < FAST_WINDOW_MS ? FAST_INTERVAL_MS : SLOW_INTERVAL_MS;
+      const interval =
+        elapsedMs < FAST_WINDOW_MS ? FAST_INTERVAL_MS : SLOW_INTERVAL_MS;
       timer = setTimeout(() => void tick(elapsedMs + interval), interval);
     }
 
@@ -249,7 +326,7 @@ export default function QpayCheckout({
         }
       } catch {
         // Сүлжээний алдаа — pending-offline төлөв рүү шилжих
-        if (isOnline && state === "pending") {
+        if (state === "pending") {
           setState("pending-offline");
         }
       }
@@ -262,7 +339,7 @@ export default function QpayCheckout({
       stopped = true;
       if (timer) clearTimeout(timer);
     };
-  }, [state, paymentId, checkOnce, isOnline]);
+  }, [state, paymentId, checkOnce, isOnline, visibilityVersion]);
 
   /* ---------- Гар аргаар шалгах ("шалгах" товч, 10 минутын дараа) ---------- */
   async function handleManualCheck() {
@@ -314,7 +391,7 @@ export default function QpayCheckout({
     creating: "Нэхэмжлэх үүсгэж байна…",
     pending: "Төлбөрийг хүлээж байна…",
     "pending-offline": "Холболтыг сэргээх хүлээж байна…",
-    success: "Төлбөр амжилттай баталгаажлаа",
+    success: "Төлбөрийн баримт баталгаажлаа",
     expired: "Хугацаа дууссан — төлбөр харахан баталгаажаагүй байна",
     error: "Алдаа гарлаа",
     rejected: "Төлбөр татгалзагдсан",
@@ -332,7 +409,7 @@ export default function QpayCheckout({
         <button
           type="button"
           onClick={onCancel}
-          className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ink-dim underline-offset-2 hover:text-ink hover:underline"
+          className="mb-3 inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-ink-dim underline-offset-2 hover:text-ink hover:underline"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Буцах / өөр арга сонгох
@@ -341,9 +418,14 @@ export default function QpayCheckout({
 
       {state === "creating" && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <Loader2 className="h-9 w-9 animate-spin text-brand" aria-hidden="true" />
+          <Loader2
+            className="h-9 w-9 motion-safe:animate-spin text-brand"
+            aria-hidden="true"
+          />
           <p className="font-bold">Нэхэмжлэх үүсгэж байна…</p>
-          <p className="text-sm text-ink-dim">{formatMnt(amount)} — {description}</p>
+          <p className="text-sm text-ink-dim">
+            {formatMnt(amount)} — {description}
+          </p>
         </div>
       )}
 
@@ -410,8 +492,8 @@ export default function QpayCheckout({
               ) : (
                 <div className="w-full max-w-[320px] space-y-2 rounded-xl border border-line bg-surface p-3">
                   <p className="text-center text-xs text-ink-dim">
-                    QR зураг ачаалагдсангүй — доорх кодыг банкныхаа аппад
-                    гараар оруулна уу
+                    QR зураг ачаалагдсангүй — доорх кодыг банкныхаа аппад гараар
+                    оруулна уу
                   </p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 truncate rounded-lg bg-panel px-2.5 py-2 text-xs">
@@ -424,7 +506,10 @@ export default function QpayCheckout({
                       aria-label="Хуулах"
                     >
                       {copied ? (
-                        <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                        <Check
+                          className="h-4 w-4 text-success"
+                          aria-hidden="true"
+                        />
                       ) : (
                         <Copy className="h-4 w-4" aria-hidden="true" />
                       )}
@@ -454,7 +539,10 @@ export default function QpayCheckout({
 
           <div className="rounded-lg bg-error/10 p-4">
             <p className="text-center text-sm text-ink">
-              Интернетийн холболт сүтэрлээ. Аппаасаа төлбөр хийлээ гэдэгт итгээрэй — холболт сэргэхэд автоматаар баталгаажуулна. Сүлжээ сэргэхүүрийг шалгаж, дахин оролдоно уу.
+              Интернэт холболт тасарсан тул төлбөрийн төлөвийг шалгаж чадсангүй.
+              Төлбөр баталгаажсан эсэх одоогоор тодорхойгүй. Холболт сэргэхэд
+              дахин шалгана. Банкны апп дахь гүйлгээгээ шалгаад давхар төлөхөөс
+              зайлсхийх боломжтой.
             </p>
           </div>
 
@@ -507,8 +595,8 @@ export default function QpayCheckout({
               ) : (
                 <div className="w-full max-w-[320px] space-y-2 rounded-xl border border-line bg-surface p-3">
                   <p className="text-center text-xs text-ink-dim">
-                    QR зураг ачаалагдсангүй — доорх кодыг банкныхаа аппад
-                    гараар оруулна уу
+                    QR зураг ачаалагдсангүй — доорх кодыг банкныхаа аппад гараар
+                    оруулна уу
                   </p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 truncate rounded-lg bg-panel px-2.5 py-2 text-xs">
@@ -521,7 +609,10 @@ export default function QpayCheckout({
                       aria-label="Хуулах"
                     >
                       {copied ? (
-                        <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                        <Check
+                          className="h-4 w-4 text-success"
+                          aria-hidden="true"
+                        />
                       ) : (
                         <Copy className="h-4 w-4" aria-hidden="true" />
                       )}
@@ -541,19 +632,23 @@ export default function QpayCheckout({
       {state === "success" && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
           <span
-            className={`flex h-16 w-16 items-center justify-center rounded-full bg-success/15 transition-all duration-500 ease-out ${
+            className={`flex h-16 w-16 items-center justify-center rounded-full bg-success/15 motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-out ${
               successMounted ? "scale-100 opacity-100" : "scale-50 opacity-0"
             }`}
           >
             <CheckCircle className="h-9 w-9 text-success" aria-hidden="true" />
           </span>
-          <p className="text-lg font-extrabold text-success">Төлбөр амжилттай!</p>
+          <p className="text-lg font-extrabold text-success">
+            Төлбөрийн баримт баталгаажлаа
+          </p>
           <p className="text-sm text-ink-dim">
             {formatMnt(amount)}
             {paidAt ? ` — ${new Date(paidAt).toLocaleString("mn-MN")}` : ""}
           </p>
-          <p className="max-w-xs text-xs text-ink-dim">
-            Эрх тань автоматаар нээгдлээ. Хуудсаа шинэчилбэл (refresh) харагдана.
+          <p className="max-w-xs text-sm leading-relaxed text-ink-dim">
+            Энэ нь төлбөрийн баталгаажуулалт юм. Сургалтын эрх, багц идэвхжсэн
+            эсэхийг тухайн хэсгээс тусад нь шалгана уу. Эрх харагдахгүй байвал
+            төлбөрийн дугаартайгаа ажилтанд хандаарай.
           </p>
         </div>
       )}
@@ -563,8 +658,8 @@ export default function QpayCheckout({
           <Clock className="h-9 w-9 text-warning" aria-hidden="true" />
           <p className="font-bold">Хугацаа дууслаа</p>
           <p className="max-w-xs text-sm text-ink-dim">
-            5 минутын дотор төлбөр баталгаажсангүй. Хэрэв төлсөн бол доор
-            дарж шалгаарай.
+            5 минутын дотор төлбөр баталгаажсангүй. Хэрэв төлсөн бол доор дарж
+            шалгаарай.
           </p>
           <button
             type="button"
@@ -603,8 +698,8 @@ export default function QpayCheckout({
           <AlertTriangle className="h-9 w-9 text-error" aria-hidden="true" />
           <p className="font-bold">Төлбөр татгалзагдсан</p>
           <p className="max-w-xs text-sm text-ink-dim">
-            Ажилтан таны төлбөрийг баталгаажуулаагүй байна. Дэлгэрэнгүй
-            мэдээлэл авахыг хүсвэл төвтэй холбогдоно уу.
+            Ажилтан таны төлбөрийг баталгаажуулаагүй байна. Дэлгэрэнгүй мэдээлэл
+            авахыг хүсвэл төвтэй холбогдоно уу.
           </p>
         </div>
       )}

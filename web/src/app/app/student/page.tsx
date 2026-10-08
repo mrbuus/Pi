@@ -8,7 +8,6 @@ import EveningMarking from "@/components/EveningMarking";
 import HomeworkList from "@/components/homework/HomeworkList";
 import MyHomeworkMarks from "@/components/homework/MyHomeworkMarks";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
-import { SkeletonLine } from "@/components/ui/Skeleton";
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 
@@ -26,8 +25,10 @@ interface AttendanceRow {
   status: string;
   classroom: { name: string };
 }
-interface Me {
-  studentProfile?: { type?: "CLASSROOM" | "ONLINE" } | null;
+interface EnrolledClassroom {
+  id: string;
+  name: string;
+  type: "IN_PERSON" | "ONLINE";
 }
 interface Announcement {
   id: string;
@@ -89,10 +90,10 @@ export default function StudentDashboard() {
   const attendanceQ = useSection<AttendanceRow[]>("/attendance/my");
   // Зөвхөн танхимын сурагчид төвийн зар буцаана (онлайнд хоосон)
   const announcementsQ = useSection<Announcement[]>("/announcements");
-  // Гэрийн даалгавар 2 загвартай (эзний шийдвэр 2026-09-26): онлайн сурагч
-  // зураг илгээнэ, танхимын сурагч багшийн тэмдэглэгээг харна.
-  const meQ = useSection<Me>("/auth/me");
-  const isOnline = meQ.data?.studentProfile?.type === "ONLINE";
+  // A student can belong to both class types; the profile is not an enrollment list.
+  const classesQ = useSection<EnrolledClassroom[]>("/assignments/my-classrooms");
+  const hasClassroom = classesQ.data?.some((classroom) => classroom.type === "IN_PERSON");
+  const hasOnline = classesQ.data?.some((classroom) => classroom.type === "ONLINE");
 
   const announcements = announcementsQ.data ?? [];
   const results = resultsQ.data ?? [];
@@ -121,14 +122,19 @@ export default function StudentDashboard() {
         <AnnouncementsSection announcements={announcements} />
       )}
 
-      <div id="homework" className="scroll-mt-24">
-        {meQ.status === "loading" && (
+      <div id="homework" className="scroll-mt-24 space-y-6">
+        {classesQ.status === "loading" && (
           <section className="chunky p-6">
             <LoadingState rows={3} label="Гэрийн даалгавар" />
           </section>
         )}
-        {meQ.status === "error" && <ErrorState message={meQ.error} onRetry={meQ.reload} />}
-        {meQ.status === "ready" && (isOnline ? <HomeworkList /> : <MyHomeworkMarks />)}
+        {classesQ.status === "error" && <ErrorState message={classesQ.error} onRetry={classesQ.reload} />}
+        {classesQ.status === "ready" && (
+          <>
+            {hasClassroom && <MyHomeworkMarks />}
+            <HomeworkList hideWhenEmpty={!hasOnline} />
+          </>
+        )}
       </div>
 
       {/* Оройн тэмдэглэгээ — token-гүй, багшийн оруулсан тестээс (EveningMarking) */}

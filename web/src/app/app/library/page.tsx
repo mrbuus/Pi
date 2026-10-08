@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronUp, ChevronDown, Check, Pencil } from "lucide-react";
 import { ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import ProblemVideoDisclosure from "@/components/lesson/ProblemVideoDisclosure";
 import MathText from "@/components/MathText";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
 import { api, getRole, ApiError } from "@/lib/api";
@@ -175,7 +176,10 @@ function splitChapterTitle(title: string) {
 }
 
 function cleanBookCode(value: string) {
-  return value.toLowerCase().replaceAll("×", "x").replace(/[^a-zа-яөөгү0-9]/gi, "");
+  return value
+    .toLowerCase()
+    .replaceAll("×", "x")
+    .replace(/[^a-zа-яөөгү0-9]/gi, "");
 }
 
 function groupChapters(chapters: Chapter[]): TopicGroup[] {
@@ -212,10 +216,16 @@ class ChapterAccessDeniedError extends Error {}
 
 async function fetchChapterProblems(chapterId: string): Promise<Problem[]> {
   try {
-    return (await api<Problem[]>("/chapters/" + encodeURIComponent(chapterId) + "/problems")) ?? [];
+    return (
+      (await api<Problem[]>(
+        "/chapters/" + encodeURIComponent(chapterId) + "/problems",
+      )) ?? []
+    );
   } catch (error) {
     if (error instanceof ApiError && error.status === 403) {
-      throw new ChapterAccessDeniedError("Энэ бүлгийг үзэх эрхгүй байна — эрх худалдаж авах эсвэл ангид элсэх шаардлагатай");
+      throw new ChapterAccessDeniedError(
+        "Энэ бүлгийг үзэх эрхгүй байна — эрх худалдаж авах эсвэл ангид элсэх шаардлагатай",
+      );
     }
     throw error;
   }
@@ -247,7 +257,10 @@ export default function LibraryPage() {
   const activeGroup =
     topicGroups.find((group) => group.topic === activeTopic) ?? topicGroups[0];
   const currentBook = books.find((b) => b.id === bookId);
-  const totalProblems = topicGroups.reduce((sum, group) => sum + group.problems, 0);
+  const totalProblems = topicGroups.reduce(
+    (sum, group) => sum + group.problems,
+    0,
+  );
   const totalTests = topicGroups.reduce((sum, group) => sum + group.tests, 0);
 
   function selectSubject(next: SubjectKey) {
@@ -295,7 +308,9 @@ export default function LibraryPage() {
       })
       .catch((error) => {
         setCatalogError(
-          error instanceof Error ? error.message : "Номын сан ачаалахад алдаа гарлаа",
+          error instanceof Error
+            ? error.message
+            : "Номын сан ачаалахад алдаа гарлаа",
         );
       });
   }, [subject]);
@@ -307,7 +322,9 @@ export default function LibraryPage() {
       .catch((error) => {
         setChapters([]);
         setCatalogError(
-          error instanceof Error ? error.message : "Бүлэг сэдэв ачаалахад алдаа гарлаа",
+          error instanceof Error
+            ? error.message
+            : "Бүлэг сэдэв ачаалахад алдаа гарлаа",
         );
       });
   }, [bookId]);
@@ -386,7 +403,8 @@ export default function LibraryPage() {
                 : "border-line text-ink-dim hover:border-brand-bright/40"
             }`}
           >
-            <span className="font-mono">{b.code}</span> — {b.testCount ?? 0} тест
+            <span className="font-mono">{b.code}</span> — {b.testCount ?? 0}{" "}
+            тест
           </button>
         ))}
       </div>
@@ -410,7 +428,9 @@ export default function LibraryPage() {
               <p className="text-xs font-bold uppercase text-brand-soft">
                 Сонгосон ном
               </p>
-              <h2 className="mt-1 text-3xl font-extrabold">{currentBook.title}</h2>
+              <h2 className="mt-1 text-3xl font-extrabold">
+                {currentBook.title}
+              </h2>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <Metric label="Сэдэв" value={topicGroups.length} />
@@ -455,7 +475,9 @@ export default function LibraryPage() {
                       <MathText>{group.tone.symbol}</MathText>
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-bold">{group.topic}</span>
+                      <span className="block truncate font-bold">
+                        {group.topic}
+                      </span>
                       <span className="mt-0.5 block text-xs text-ink-dim">
                         {group.tests} тест — {group.problems} бодлого
                       </span>
@@ -475,10 +497,14 @@ export default function LibraryPage() {
           </aside>
 
           <section className="min-w-0 space-y-3">
-            <div className={`rounded-3xl border-2 border-b-4 p-5 ${activeGroup.tone.border} ${activeGroup.tone.bg}`}>
+            <div
+              className={`rounded-3xl border-2 border-b-4 p-5 ${activeGroup.tone.border} ${activeGroup.tone.bg}`}
+            >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className={`text-xs font-bold uppercase ${activeGroup.tone.text}`}>
+                  <p
+                    className={`text-xs font-bold uppercase ${activeGroup.tone.text}`}
+                  >
                     Алгебр | Анализ
                   </p>
                   <h2 className="mt-1 text-2xl font-extrabold">
@@ -498,7 +524,8 @@ export default function LibraryPage() {
                   </span>
                   {activeGroup.free > 0 && (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-3 py-1 font-semibold text-success">
-                      <Check className="h-3.5 w-3.5" aria-hidden /> {activeGroup.free} үнэгүй
+                      <Check className="h-3.5 w-3.5" aria-hidden />{" "}
+                      {activeGroup.free} үнэгүй
                     </span>
                   )}
                 </div>
@@ -518,7 +545,9 @@ export default function LibraryPage() {
                     <button
                       onClick={() => openChapter(ch)}
                       className={`flex w-full items-center gap-4 rounded-3xl border-2 border-b-4 bg-panel p-5 text-left transition active:translate-y-0.5 active:border-b-2 hover:border-brand-bright/40 ${
-                        isOpen ? `${activeGroup.tone.border} ${activeGroup.tone.bg}` : "border-line"
+                        isOpen
+                          ? `${activeGroup.tone.border} ${activeGroup.tone.bg}`
+                          : "border-line"
                       }`}
                     >
                       <div
@@ -540,9 +569,10 @@ export default function LibraryPage() {
                           )}
                         </div>
                         <p className="mt-0.5 text-sm text-ink-dim">
-                          {ch.book?.code} ном — {ch._count.tests} тест — {" "}
+                          {ch.book?.code} ном — {ch._count.tests} тест —{" "}
                           {ch._count.problems} бодлого
-                          {ch._count.theories > 0 && ` — ${ch._count.theories} онол`}
+                          {ch._count.theories > 0 &&
+                            ` — ${ch._count.theories} онол`}
                         </p>
                       </div>
                       <span className="text-ink-dim">
@@ -658,25 +688,30 @@ function ProblemList({
                 API-д ирж байсан ч render хийгээгүй) — одоо бүх сурагчид харна.
                 Зөв хариуны тэмдэг зөвхөн багш ролид (canEdit) ба backend-ээс
                 isCorrect ирсэн үед л гарна. */}
-            {p.format === "CHOICE" && p.choiceOptions && p.choiceOptions.length > 0 && (
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                {p.choiceOptions.map((o) => (
-                  <li key={o.label} className="flex items-start gap-2 text-sm">
-                    <span className="shrink-0 font-mono font-bold text-ink-dim">
-                      {o.label}.
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <MathText>{o.text}</MathText>
-                    </span>
-                    {canEdit && o.isCorrect && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
-                        <Check className="h-3 w-3" aria-hidden /> Зөв
+            {p.format === "CHOICE" &&
+              p.choiceOptions &&
+              p.choiceOptions.length > 0 && (
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  {p.choiceOptions.map((o) => (
+                    <li
+                      key={o.label}
+                      className="flex items-start gap-2 text-sm"
+                    >
+                      <span className="shrink-0 font-mono font-bold text-ink-dim">
+                        {o.label}.
                       </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <span className="min-w-0 flex-1">
+                        <MathText>{o.text}</MathText>
+                      </span>
+                      {canEdit && o.isCorrect && (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
+                          <Check className="h-3 w-3" aria-hidden /> Зөв
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
 
             <div className="mt-1.5 flex flex-wrap gap-2 text-[11px]">
               <span className="rounded bg-ink/5 px-2 py-0.5 font-mono text-ink-dim">
@@ -688,6 +723,11 @@ function ProblemList({
               <span className="rounded bg-ink/5 px-2 py-0.5 text-ink-dim">
                 {p.points} оноо
               </span>
+              <details className="mt-2 text-xs text-ink-dim">
+                <summary>Бодлогын ID</summary>
+                <code className="block break-all py-2">{p.id}</code>
+              </details>
+              <ProblemVideoDisclosure problemId={p.id} />
               {p.correctAnswer !== undefined && (
                 <span className="rounded bg-success/15 px-2 py-0.5 text-success">
                   Хариу: {formatAnswer(p.correctAnswer)}
@@ -717,15 +757,23 @@ function formatAnswer(answer: Problem["correctAnswer"]) {
     .join(", ");
 }
 
-function ProblemAnalysisDetails({ analysis }: { analysis: NonNullable<Problem["analysis"]> }) {
+function ProblemAnalysisDetails({
+  analysis,
+}: {
+  analysis: NonNullable<Problem["analysis"]>;
+}) {
   return (
     <details className="mt-3 rounded-xl border border-line bg-ink/[0.03] p-3 text-xs text-ink-dim">
       <summary className="cursor-pointer font-bold text-ink">
-        Шинжилгээ — {analysis.subtopic || analysis.topic} — {analysis.answerKeyStatus}
+        Шинжилгээ — {analysis.subtopic || analysis.topic} —{" "}
+        {analysis.answerKeyStatus}
       </summary>
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         {analysis.formulas.length > 0 && (
-          <AnalysisBlock title="Томьёо" items={analysis.formulas.map((f) => f.name)} />
+          <AnalysisBlock
+            title="Томьёо"
+            items={analysis.formulas.map((f) => f.name)}
+          />
         )}
         {analysis.methods.length > 0 && (
           <AnalysisBlock title="Арга" items={analysis.methods} />
@@ -737,10 +785,16 @@ function ProblemAnalysisDetails({ analysis }: { analysis: NonNullable<Problem["a
           <AnalysisBlock title="Тэмдгийн дүрэм" items={analysis.signRules} />
         )}
         {analysis.commonMistakes.length > 0 && (
-          <AnalysisBlock title="Түгээмэл алдаа" items={analysis.commonMistakes} />
+          <AnalysisBlock
+            title="Түгээмэл алдаа"
+            items={analysis.commonMistakes}
+          />
         )}
         {analysis.auditNotes.length > 0 && (
-          <AnalysisBlock title="Шалгах шаардлагатай" items={analysis.auditNotes} />
+          <AnalysisBlock
+            title="Шалгах шаардлагатай"
+            items={analysis.auditNotes}
+          />
         )}
       </div>
     </details>
