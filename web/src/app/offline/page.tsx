@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/kit/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/kit/card";
 import { LoadingState, EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 type Formula = { slug: string; title: string; latex: string; general: string; explanation: string; conditions: string[]; derivation: string[]; mnemonic: string; commonMistakes: string[]; eeshTip: string; savedAt: string; examples: { problem: string; steps: string[]; answer: string }[] };
 const cacheName = "pi-public-formulas-v1";
@@ -68,7 +69,7 @@ export default function OfflinePage() {
       {item.mnemonic && <div><MathText>{item.mnemonic}</MathText></div>}
       {item.commonMistakes.map((mistake, i) => <p key={i} className="text-sm text-ink-dim"><MathText>{mistake}</MathText></p>)}
       {item.eeshTip && <div><MathText>{item.eeshTip}</MathText></div>}
-      <p className="text-xs text-ink-dim">Хадгалсан: {new Date(item.savedAt).toLocaleString("mn-MN", { timeZone: "Asia/Ulaanbaatar" })}</p>
+      <p className="text-xs text-ink-dim">Хадгалсан: {formatMnDateTime(item.savedAt, { timeZone: "Asia/Ulaanbaatar" })}</p>
     </CardContent></Card>)}</div>}
     {items.length > 0 && <div className="flex flex-wrap items-center gap-3">{confirmClear ? <><p>Энэ төхөөрөмжийн томьёоны хуулбарыг цэвэрлэх үү?</p><Button onClick={clear} variant="danger" className="min-h-11">Тийм, цэвэрлэх</Button><Button variant="outline" onClick={() => setConfirmClear(false)} className="min-h-11">Болих</Button></> : <Button variant="outline" onClick={() => setConfirmClear(true)} className="min-h-11"><Trash2 aria-hidden />Хадгалалтыг цэвэрлэх</Button>}</div>}
   </main>;

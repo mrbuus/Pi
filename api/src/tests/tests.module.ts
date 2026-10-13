@@ -5,9 +5,10 @@ import { StudentTestResultsController, TestsController } from './tests.controlle
 import { TestsService } from './tests.service';
 import { ParentsModule } from '../parents/parents.module';
 import { MistakesModule } from '../mistakes/mistakes.module';
+import { ExamsModule } from '../exams/exams.module';
 
 @Module({
-  imports: [ParentsModule, MistakesModule],
+  imports: [ParentsModule, MistakesModule, ExamsModule],
   controllers: [TestsController, StudentTestResultsController, RankingController],
   providers: [TestsService, RankingService],
 })

@@ -27,7 +27,7 @@ export interface PaymentStatusLabel {
  * болино, дүрсний хэмжээ/өнгө нь бусад UI-тай нийцнэ.
  */
 export const STATUS_LABEL: Record<string, PaymentStatusLabel> = {
-  PENDING: { icon: Clock, text: "Хүлээгдэж буй", cls: "bg-warning/15 text-warning" },
+  PENDING: { icon: Clock, text: "Хүлээгдэж буй", cls: "bg-info/15 text-info" },
   CONFIRMED: { icon: Check, text: "Баталгаажсан", cls: "bg-success/15 text-ink" },
   REJECTED: { icon: X, text: "Цуцалсан", cls: "bg-error/15 text-error" },
   REVERSED: { icon: Undo2, text: "Буцаасан", cls: "bg-ink/10 text-ink-dim" },

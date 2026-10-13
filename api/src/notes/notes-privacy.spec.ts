@@ -4,21 +4,24 @@ describe('private pupil notes', () => {
   function setup(external = false, member = true) {
     const db: any = {
       user: {
-        findUnique: jest
-          .fn()
-          .mockImplementation(({ where }) =>
-            Promise.resolve(
-              where.id === 'pupil'
-                ? { id: 'pupil', role: Role.STUDENT }
-                : {
-                    role: Role.TEACHER_PLUS,
-                    archivedAt: null,
-                    externalTeacherProfile: external
-                      ? { verifiedAt: new Date() }
-                      : null,
-                  },
-            ),
+        findUnique: jest.fn().mockImplementation(({ where }) =>
+          Promise.resolve(
+            where.id === 'pupil'
+              ? { id: 'pupil', role: Role.STUDENT }
+              : {
+                  role: Role.TEACHER_PLUS,
+                  archivedAt: null,
+                  externalTeacherProfile: external
+                    ? { verifiedAt: new Date() }
+                    : null,
+                },
           ),
+        ),
+        findMany: jest
+          .fn()
+          .mockResolvedValue([
+            { id: 'private-staff', firstName: 'Болд', lastName: 'Бат' },
+          ]),
       },
       enrollment: {
         findFirst: jest
@@ -32,14 +35,12 @@ describe('private pupil notes', () => {
       },
       studentNote: {
         findMany: jest.fn().mockResolvedValue([]),
-        findUnique: jest
-          .fn()
-          .mockResolvedValue({
-            id: 'note',
-            studentId: 'pupil',
-            type: StudentNoteType.GENERAL,
-            createdById: 'private-staff',
-          }),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'note',
+          studentId: 'pupil',
+          type: StudentNoteType.GENERAL,
+          createdById: 'private-staff',
+        }),
         update: jest.fn(),
       },
     };
@@ -53,11 +54,27 @@ describe('private pupil notes', () => {
       service: new NotesService(db, { record: jest.fn() } as any, caps),
     };
   }
-  it('Plus does not get another class notes globally', async () => {
-    const { service } = setup(false, false);
+  it('эзний шийдвэр: төвийн ямар ч багш өөр ангийн сурагчийн тэмдэглэлийг уншина, зохиогчийн нэртэй', async () => {
+    const { db, service } = setup(false, false);
+    db.studentNote.findMany.mockResolvedValue([
+      { id: 'n1', createdById: 'private-staff', type: StudentNoteType.GENERAL },
+    ]);
     await expect(
       service.list('pupil', undefined, 'plus', Role.TEACHER_PLUS),
-    ).rejects.toThrow();
+    ).resolves.toEqual([
+      expect.objectContaining({
+        id: 'n1',
+        authorName: 'Б. Болд',
+        canEdit: false,
+      }),
+    ]);
+  });
+  it('бусдын тэмдэглэлийг засах/устгах — зөвхөн зохиогч эсвэл админ', async () => {
+    const { db, service } = setup(false, false);
+    await expect(
+      service.update('note', { body: 'x' }, 'plus', Role.TEACHER_PLUS),
+    ).rejects.toThrow('Зөвхөн өөрийн');
+    expect(db.studentNote.update).not.toHaveBeenCalled();
   });
   it('ordinary own-class staff never receive payment notes in an untyped list', async () => {
     const { db, service } = setup();

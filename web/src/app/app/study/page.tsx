@@ -28,6 +28,7 @@ import {
   independentCorrectRecords,
 } from "@/components/study/study-policy";
 import TheoryReader from "@/components/study/TheoryReader";
+import { formatMnDate } from "@/lib/dateMn";
 type RecordRow = {
   id: string;
   problemId: string;
@@ -541,7 +542,7 @@ export default function StudyPage() {
               {first.slice(0, 10).map((r) => (
                 <div key={r.id} className="border-t border-line pt-2">
                   <p className="text-sm">
-                    {new Date(r.at).toLocaleDateString("mn-MN")} —{" "}
+                    {formatMnDate(r.at)} —{" "}
                     {r.mode === "classroom"
                       ? "Дэвтрийн тэмдэглэгээ"
                       : r.mode === "probe"

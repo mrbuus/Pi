@@ -239,6 +239,7 @@ export class DocumentImportService {
             })),
           },
           userId,
+          { action: 'IMPORT', summary: 'Word файлаас импортоор нэмсэн' },
         );
         await tx.auditLog.create({
           data: {

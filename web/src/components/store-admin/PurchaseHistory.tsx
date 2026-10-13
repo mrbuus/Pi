@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/StateBlock';
 import { Dot } from '@/components/ui/Meta';
 
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { formatMnDate } from "@/lib/dateMn";
 
 interface Purchase {
   id: string;
@@ -61,7 +62,7 @@ export default function PurchaseHistory({ purchases }: PurchaseHistoryProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('mn-MN', {
+    return formatMnDate(date, {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',

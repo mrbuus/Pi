@@ -109,7 +109,7 @@ export interface ScheduleEntry {
   subject: string | null;
   effectiveFrom: string;
   effectiveTo: string | null;
-  classroom: { id: string; name: string };
+  classroom: { id: string; name: string; _count?: { enrollments: number } };
   teacher: TeacherLite | null;
 }
 
@@ -171,6 +171,9 @@ export interface WeekEntry {
   room: string | null;
   subject: string | null;
   topic: string | null;
+  /** Тухайн өдрийн ахлах/туслах багш (LessonStaffing) */
+  leadTeacher?: { id: string; name: string } | null;
+  assistantTeacher?: { id: string; name: string } | null;
   exception: ResolvedEntryException | null;
 }
 
@@ -181,10 +184,23 @@ export interface WeekDay {
   entries: WeekEntry[];
 }
 
+export type RosterMode = "FIXED" | "ALTERNATING";
+
 export interface TeacherRosterDay {
   date: string;
   weekday: number;
-  teachers: { id: string; name: string }[];
+  /** 1 = сондгой, 2 = тэгш 7 хоног (1-р сондгой = 2026-08-31-ний 7 хоног) */
+  parity?: 1 | 2;
+  mode?: RosterMode;
+  /** Хүснэгтийн хүчинтэй хугацаанд багтах эсэх */
+  inRange?: boolean;
+  teachers: { id: string; name: string; role?: string }[];
+}
+
+export interface TeacherRosterConfig {
+  mode: RosterMode;
+  validFrom: string | null;
+  validTo: string | null;
 }
 
 export interface WeekResponse {
@@ -197,6 +213,9 @@ export interface TeacherWorkDayRow {
   id: string;
   teacherId: string;
   weekday: number;
+  /** 0 = 7 хоног бүр, 1 = сондгой, 2 = тэгш */
+  parity?: number;
+  sortOrder?: number;
   note: string | null;
   teacher: TeacherLite;
 }
@@ -213,6 +232,8 @@ export interface TeacherWorkExceptionRow {
 export interface TeacherWorkDaysResponse {
   workDays: TeacherWorkDayRow[];
   exceptions: TeacherWorkExceptionRow[];
+  parityAnchor?: string;
+  config?: TeacherRosterConfig;
 }
 
 export interface BookLite {
@@ -255,24 +276,35 @@ export type RoomShapeKind =
   | "rect"
   | "pentagon"
   | "diamond"
+  | "hexagon"
+  | "star"
   | "online";
 
+// capacity: танхимын суудлын тоо (эзэн 2026-10-08). 
 export const ROOMS: readonly {
   value: string;
   branch: string;
   shape: RoomShapeKind | null;
+  capacity?: number | null;
 }[] = [
-  { value: "501", branch: "Баруун 4", shape: "circle" },
-  { value: "502", branch: "Баруун 4", shape: "triangle" },
-  { value: "503", branch: "Баруун 4", shape: "trapezoid" },
-  { value: "504", branch: "Баруун 4", shape: "square" },
-  { value: "403", branch: "Баруун 4", shape: "diamond" },
-  { value: "404", branch: "Баруун 4", shape: "pentagon" },
-  { value: "405", branch: "Баруун 4", shape: "rect" },
-  { value: "301", branch: "Зүүн 4", shape: null },
-  { value: "302", branch: "Зүүн 4", shape: null },
+  { value: "501", branch: "Баруун 4", shape: "circle", capacity: 42 },
+  { value: "502", branch: "Баруун 4", shape: "triangle", capacity: 32 },
+  { value: "503", branch: "Баруун 4", shape: "trapezoid", capacity: 32 },
+  { value: "504", branch: "Баруун 4", shape: "square", capacity: 24 },
+  { value: "403", branch: "Баруун 4", shape: "diamond", capacity: 32 },
+  { value: "404", branch: "Баруун 4", shape: "pentagon", capacity: 24 },
+  { value: "405", branch: "Баруун 4", shape: "rect", capacity: 12 },
+  // Эзний хүсэлт (2026-10-08): Зүүн 4-ийн танхимд ч өөрийн дүрс.
+  { value: "301", branch: "Зүүн 4", shape: "hexagon", capacity: 28 },
+  { value: "302", branch: "Зүүн 4", shape: "star", capacity: 32 },
   { value: "Онлайн", branch: "Зайнаас", shape: "online" },
 ] as const;
+
+/** Танхимын багтаамж — тодорхойгүй бол null */
+export function roomCapacityOf(room: string | null | undefined): number | null {
+  if (!room) return null;
+  return ROOMS.find((r) => r.value === room)?.capacity ?? null;
+}
 
 /** Танхимын дүрсийг олох — жагсаалтад байхгүй танхимд null */
 export function roomShapeOf(room: string | null | undefined): RoomShapeKind | null {

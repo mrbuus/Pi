@@ -198,6 +198,7 @@ export type AcademicCalendarDayWhereInput = {
   note?: Prisma.StringNullableFilter<"AcademicCalendarDay"> | string | null
   createdById?: Prisma.StringFilter<"AcademicCalendarDay"> | string
   createdAt?: Prisma.DateTimeFilter<"AcademicCalendarDay"> | Date | string
+  classrooms?: Prisma.AcademicCalendarDayClassroomListRelationFilter
 }
 
 export type AcademicCalendarDayOrderByWithRelationInput = {
@@ -208,20 +209,22 @@ export type AcademicCalendarDayOrderByWithRelationInput = {
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  classrooms?: Prisma.AcademicCalendarDayClassroomOrderByRelationAggregateInput
 }
 
 export type AcademicCalendarDayWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  date?: Date | string
   AND?: Prisma.AcademicCalendarDayWhereInput | Prisma.AcademicCalendarDayWhereInput[]
   OR?: Prisma.AcademicCalendarDayWhereInput[]
   NOT?: Prisma.AcademicCalendarDayWhereInput | Prisma.AcademicCalendarDayWhereInput[]
+  date?: Prisma.DateTimeFilter<"AcademicCalendarDay"> | Date | string
   type?: Prisma.EnumCalendarDayTypeFilter<"AcademicCalendarDay"> | $Enums.CalendarDayType
   title?: Prisma.StringFilter<"AcademicCalendarDay"> | string
   note?: Prisma.StringNullableFilter<"AcademicCalendarDay"> | string | null
   createdById?: Prisma.StringFilter<"AcademicCalendarDay"> | string
   createdAt?: Prisma.DateTimeFilter<"AcademicCalendarDay"> | Date | string
-}, "id" | "date">
+  classrooms?: Prisma.AcademicCalendarDayClassroomListRelationFilter
+}, "id">
 
 export type AcademicCalendarDayOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -257,6 +260,7 @@ export type AcademicCalendarDayCreateInput = {
   note?: string | null
   createdById: string
   createdAt?: Date | string
+  classrooms?: Prisma.AcademicCalendarDayClassroomCreateNestedManyWithoutCalendarDayInput
 }
 
 export type AcademicCalendarDayUncheckedCreateInput = {
@@ -267,6 +271,7 @@ export type AcademicCalendarDayUncheckedCreateInput = {
   note?: string | null
   createdById: string
   createdAt?: Date | string
+  classrooms?: Prisma.AcademicCalendarDayClassroomUncheckedCreateNestedManyWithoutCalendarDayInput
 }
 
 export type AcademicCalendarDayUpdateInput = {
@@ -277,6 +282,7 @@ export type AcademicCalendarDayUpdateInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  classrooms?: Prisma.AcademicCalendarDayClassroomUpdateManyWithoutCalendarDayNestedInput
 }
 
 export type AcademicCalendarDayUncheckedUpdateInput = {
@@ -287,6 +293,7 @@ export type AcademicCalendarDayUncheckedUpdateInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  classrooms?: Prisma.AcademicCalendarDayClassroomUncheckedUpdateManyWithoutCalendarDayNestedInput
 }
 
 export type AcademicCalendarDayCreateManyInput = {
@@ -349,10 +356,114 @@ export type AcademicCalendarDayMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
 }
 
+export type AcademicCalendarDayScalarRelationFilter = {
+  is?: Prisma.AcademicCalendarDayWhereInput
+  isNot?: Prisma.AcademicCalendarDayWhereInput
+}
+
 export type EnumCalendarDayTypeFieldUpdateOperationsInput = {
   set?: $Enums.CalendarDayType
 }
 
+export type AcademicCalendarDayCreateNestedOneWithoutClassroomsInput = {
+  create?: Prisma.XOR<Prisma.AcademicCalendarDayCreateWithoutClassroomsInput, Prisma.AcademicCalendarDayUncheckedCreateWithoutClassroomsInput>
+  connectOrCreate?: Prisma.AcademicCalendarDayCreateOrConnectWithoutClassroomsInput
+  connect?: Prisma.AcademicCalendarDayWhereUniqueInput
+}
+
+export type AcademicCalendarDayUpdateOneRequiredWithoutClassroomsNestedInput = {
+  create?: Prisma.XOR<Prisma.AcademicCalendarDayCreateWithoutClassroomsInput, Prisma.AcademicCalendarDayUncheckedCreateWithoutClassroomsInput>
+  connectOrCreate?: Prisma.AcademicCalendarDayCreateOrConnectWithoutClassroomsInput
+  upsert?: Prisma.AcademicCalendarDayUpsertWithoutClassroomsInput
+  connect?: Prisma.AcademicCalendarDayWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AcademicCalendarDayUpdateToOneWithWhereWithoutClassroomsInput, Prisma.AcademicCalendarDayUpdateWithoutClassroomsInput>, Prisma.AcademicCalendarDayUncheckedUpdateWithoutClassroomsInput>
+}
+
+export type AcademicCalendarDayCreateWithoutClassroomsInput = {
+  id?: string
+  date: Date | string
+  type: $Enums.CalendarDayType
+  title: string
+  note?: string | null
+  createdById: string
+  createdAt?: Date | string
+}
+
+export type AcademicCalendarDayUncheckedCreateWithoutClassroomsInput = {
+  id?: string
+  date: Date | string
+  type: $Enums.CalendarDayType
+  title: string
+  note?: string | null
+  createdById: string
+  createdAt?: Date | string
+}
+
+export type AcademicCalendarDayCreateOrConnectWithoutClassroomsInput = {
+  where: Prisma.AcademicCalendarDayWhereUniqueInput
+  create: Prisma.XOR<Prisma.AcademicCalendarDayCreateWithoutClassroomsInput, Prisma.AcademicCalendarDayUncheckedCreateWithoutClassroomsInput>
+}
+
+export type AcademicCalendarDayUpsertWithoutClassroomsInput = {
+  update: Prisma.XOR<Prisma.AcademicCalendarDayUpdateWithoutClassroomsInput, Prisma.AcademicCalendarDayUncheckedUpdateWithoutClassroomsInput>
+  create: Prisma.XOR<Prisma.AcademicCalendarDayCreateWithoutClassroomsInput, Prisma.AcademicCalendarDayUncheckedCreateWithoutClassroomsInput>
+  where?: Prisma.AcademicCalendarDayWhereInput
+}
+
+export type AcademicCalendarDayUpdateToOneWithWhereWithoutClassroomsInput = {
+  where?: Prisma.AcademicCalendarDayWhereInput
+  data: Prisma.XOR<Prisma.AcademicCalendarDayUpdateWithoutClassroomsInput, Prisma.AcademicCalendarDayUncheckedUpdateWithoutClassroomsInput>
+}
+
+export type AcademicCalendarDayUpdateWithoutClassroomsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  type?: Prisma.EnumCalendarDayTypeFieldUpdateOperationsInput | $Enums.CalendarDayType
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AcademicCalendarDayUncheckedUpdateWithoutClassroomsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  type?: Prisma.EnumCalendarDayTypeFieldUpdateOperationsInput | $Enums.CalendarDayType
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type AcademicCalendarDayCountOutputType
+ */
+
+export type AcademicCalendarDayCountOutputType = {
+  classrooms: number
+}
+
+export type AcademicCalendarDayCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  classrooms?: boolean | AcademicCalendarDayCountOutputTypeCountClassroomsArgs
+}
+
+/**
+ * AcademicCalendarDayCountOutputType without action
+ */
+export type AcademicCalendarDayCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AcademicCalendarDayCountOutputType
+   */
+  select?: Prisma.AcademicCalendarDayCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * AcademicCalendarDayCountOutputType without action
+ */
+export type AcademicCalendarDayCountOutputTypeCountClassroomsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AcademicCalendarDayClassroomWhereInput
+}
 
 
 export type AcademicCalendarDaySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -363,6 +474,8 @@ export type AcademicCalendarDaySelect<ExtArgs extends runtime.Types.Extensions.I
   note?: boolean
   createdById?: boolean
   createdAt?: boolean
+  classrooms?: boolean | Prisma.AcademicCalendarDay$classroomsArgs<ExtArgs>
+  _count?: boolean | Prisma.AcademicCalendarDayCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["academicCalendarDay"]>
 
 export type AcademicCalendarDaySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -396,10 +509,18 @@ export type AcademicCalendarDaySelectScalar = {
 }
 
 export type AcademicCalendarDayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "date" | "type" | "title" | "note" | "createdById" | "createdAt", ExtArgs["result"]["academicCalendarDay"]>
+export type AcademicCalendarDayInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  classrooms?: boolean | Prisma.AcademicCalendarDay$classroomsArgs<ExtArgs>
+  _count?: boolean | Prisma.AcademicCalendarDayCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type AcademicCalendarDayIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type AcademicCalendarDayIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $AcademicCalendarDayPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AcademicCalendarDay"
-  objects: {}
+  objects: {
+    classrooms: Prisma.$AcademicCalendarDayClassroomPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     date: Date
@@ -802,6 +923,7 @@ readonly fields: AcademicCalendarDayFieldRefs;
  */
 export interface Prisma__AcademicCalendarDayClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  classrooms<T extends Prisma.AcademicCalendarDay$classroomsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AcademicCalendarDay$classroomsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AcademicCalendarDayClassroomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -855,6 +977,10 @@ export type AcademicCalendarDayFindUniqueArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
+  /**
    * Filter, which AcademicCalendarDay to fetch.
    */
   where: Prisma.AcademicCalendarDayWhereUniqueInput
@@ -873,6 +999,10 @@ export type AcademicCalendarDayFindUniqueOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
+  /**
    * Filter, which AcademicCalendarDay to fetch.
    */
   where: Prisma.AcademicCalendarDayWhereUniqueInput
@@ -890,6 +1020,10 @@ export type AcademicCalendarDayFindFirstArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the AcademicCalendarDay
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
   /**
    * Filter, which AcademicCalendarDay to fetch.
    */
@@ -939,6 +1073,10 @@ export type AcademicCalendarDayFindFirstOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
+  /**
    * Filter, which AcademicCalendarDay to fetch.
    */
   where?: Prisma.AcademicCalendarDayWhereInput
@@ -986,6 +1124,10 @@ export type AcademicCalendarDayFindManyArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the AcademicCalendarDay
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
   /**
    * Filter, which AcademicCalendarDays to fetch.
    */
@@ -1035,6 +1177,10 @@ export type AcademicCalendarDayCreateArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
+  /**
    * The data needed to create a AcademicCalendarDay.
    */
   data: Prisma.XOR<Prisma.AcademicCalendarDayCreateInput, Prisma.AcademicCalendarDayUncheckedCreateInput>
@@ -1082,6 +1228,10 @@ export type AcademicCalendarDayUpdateArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the AcademicCalendarDay
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
   /**
    * The data needed to update a AcademicCalendarDay.
    */
@@ -1149,6 +1299,10 @@ export type AcademicCalendarDayUpsertArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
+  /**
    * The filter to search for the AcademicCalendarDay to update in case it exists.
    */
   where: Prisma.AcademicCalendarDayWhereUniqueInput
@@ -1175,6 +1329,10 @@ export type AcademicCalendarDayDeleteArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
+  /**
    * Filter which AcademicCalendarDay to delete.
    */
   where: Prisma.AcademicCalendarDayWhereUniqueInput
@@ -1195,6 +1353,30 @@ export type AcademicCalendarDayDeleteManyArgs<ExtArgs extends runtime.Types.Exte
 }
 
 /**
+ * AcademicCalendarDay.classrooms
+ */
+export type AcademicCalendarDay$classroomsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AcademicCalendarDayClassroom
+   */
+  select?: Prisma.AcademicCalendarDayClassroomSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AcademicCalendarDayClassroom
+   */
+  omit?: Prisma.AcademicCalendarDayClassroomOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayClassroomInclude<ExtArgs> | null
+  where?: Prisma.AcademicCalendarDayClassroomWhereInput
+  orderBy?: Prisma.AcademicCalendarDayClassroomOrderByWithRelationInput | Prisma.AcademicCalendarDayClassroomOrderByWithRelationInput[]
+  cursor?: Prisma.AcademicCalendarDayClassroomWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AcademicCalendarDayClassroomScalarFieldEnum | Prisma.AcademicCalendarDayClassroomScalarFieldEnum[]
+}
+
+/**
  * AcademicCalendarDay without action
  */
 export type AcademicCalendarDayDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1206,4 +1388,8 @@ export type AcademicCalendarDayDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the AcademicCalendarDay
    */
   omit?: Prisma.AcademicCalendarDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicCalendarDayInclude<ExtArgs> | null
 }

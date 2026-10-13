@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import { Card, CardContent } from "@/components/ui/kit/card";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 type HistoryItem = {
   id: string;
@@ -37,7 +38,7 @@ const states: Record<string, string> = {
 const currentUBYear = () => Number(new Intl.DateTimeFormat("en", {
   timeZone: "Asia/Ulaanbaatar", year: "numeric",
 }).format(new Date()));
-const date = (value: string) => new Date(value).toLocaleString("mn-MN", {
+const date = (value: string) => formatMnDateTime(value, {
   timeZone: "Asia/Ulaanbaatar", year: "numeric", month: "2-digit", day: "2-digit",
   hour: "2-digit", minute: "2-digit",
 });

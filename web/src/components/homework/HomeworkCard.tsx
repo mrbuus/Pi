@@ -16,6 +16,7 @@ import AttachmentPreview from "./AttachmentPreview";
 import SubmissionRecord, {
   type SubmissionRecordData,
 } from "./SubmissionRecord";
+import { formatMnDate } from "@/lib/dateMn";
 export type HomeworkSubmission = SubmissionRecordData;
 export interface Homework {
   canSubmit?: boolean;
@@ -44,7 +45,7 @@ function formatDue(dueDate: string | null | undefined, state: string) {
   const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const diffDays = Math.round((dueDay.getTime() - today.getTime()) / DAY_MS);
-  const dateStr = due.toLocaleDateString("mn-MN", {
+  const dateStr = formatMnDate(due, {
     month: "short",
     day: "numeric",
   });

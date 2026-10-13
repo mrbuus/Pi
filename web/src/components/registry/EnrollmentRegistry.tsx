@@ -16,6 +16,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock
 import { Card, PageHeader, SectionHeader } from "@/components/ui/Surface";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 interface Classroom {
   id: string;
@@ -70,11 +71,11 @@ function displayDate(value?: string | null) {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
-  }).format(date);
+  });
 }
 
 function errorMessage(error: unknown) {

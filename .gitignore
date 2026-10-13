@@ -22,6 +22,9 @@ api/prisma/reports/staff-roster.json
 # БҮХ хэрэглэгчийн нэвтрэх мэдээлэл (утас = нууц үг) — print-credentials.cjs
 # үүсгэдэг. НАСАНД ХҮРЭЭГҮЙ сурагчдын PII агуулдаг тул git-д ХЭЗЭЭ Ч орохгүй.
 api/prisma/reports/credentials.txt
+# Төлбөрийн 2027 импортын тайлан (import-payments-2027.cjs) — сурагчийн нэр,
+# утас, төлсөн дүн агуулна. Git-т ХЭЗЭЭ Ч оруулахгүй.
+api/prisma/reports/payment-import.json
 
 # Local load-test credentials and reports
 api/test/load/.synthetic-k6/
@@ -51,3 +54,7 @@ docs/v2/render/out/
 
 # Facebook-ийн зургууд — сурагчдын царайтай, зөвхөн лавлагаа
 docs/v2/brand/fb-private/
+
+# Сурагчдын амжилтын зураг (хувийн мэдээлэл, git-д оруулахгүй)
+docs/v2/hero/home/amjilt/
+web/public/amjilt/

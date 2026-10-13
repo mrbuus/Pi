@@ -1,5 +1,6 @@
 import { Ban, Check, NotebookPen, Play, X, type LucideIcon } from "lucide-react";
 import type { TaskPriority, TaskStatus, TaskSubject } from "./types";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 // Төлөв бүрийг ХЭЗЭЭ Ч зөвхөн өнгөөр ялгахгүй — дүрс (icon) + монгол нэрийг
 // үргэлж хамт ашиглана (өнгө хараагүй сурагч/ажилтанд ч ялгагдана).
@@ -91,10 +92,10 @@ export function fullName(u: { firstName: string; lastName: string }): string {
 
 export function formatDate(d?: string | null): string {
   if (!d) return "—";
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(new Date(d), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
     timeZone: "Asia/Ulaanbaatar",
-  }).format(new Date(d));
+  });
 }

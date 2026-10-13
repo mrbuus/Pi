@@ -22,6 +22,13 @@ export class ScheduleAccessService {
       classroomId,
     );
   }
+  // Багшийн ажлын өдрийн хүснэгт (сондгой/тэгш): Багш+ өдөр бүр хуваарь
+  // зохиодог тул (эзэн 2026-10-11) ADMIN, TEACHER_PLUS schedule.manage-гүйгээр
+  // уншиж, засна. Бусад нь schedule.manage тусгай эрхтэй байх ёстой.
+  async roster(actor: ScheduleActor) {
+    if (actor.role === Role.ADMIN || actor.role === Role.TEACHER_PLUS) return;
+    await this.manage(actor);
+  }
   async manageSchedule(
     actor: ScheduleActor,
     id: string,
@@ -46,8 +53,11 @@ export class ScheduleAccessService {
       },
     });
     if (!schedule) throw new NotFoundException('Хуваарь олдсонгүй');
+    // Багш+ өдрийн хуваарийн сэдвийг БҮХ ангид зооно (эзэн 2026-10-08) —
+    // танхим/цаг/давталт өөрчлөх нь schedule.manage-тэй хэвээр.
+    if (actor.role === Role.TEACHER_PLUS) return;
     if (
-      (actor.role === Role.TEACHER || actor.role === Role.TEACHER_PLUS) &&
+      actor.role === Role.TEACHER &&
       (schedule.teacherId ?? schedule.classroom.teacherId) === actor.userId
     )
       return;
@@ -57,6 +67,11 @@ export class ScheduleAccessService {
     actor: ScheduleActor,
   ): Promise<string[] | undefined> {
     if (await this.capabilities.has(actor.userId, 'schedule.manage'))
+      return undefined;
+    // Эзний шийдвэр (2026-10-08): ажилтан (Багш, Багш+) БҮХ ангийн хуваарийг
+    // ХАРНА — «аль анги хэдэн цагаас аль танхимд орох» ерөнхий зураг. Засах нь
+    // schedule.manage тусгай эрхтэй хэвээр (manage()).
+    if (actor.role === Role.TEACHER || actor.role === Role.TEACHER_PLUS)
       return undefined;
     if (actor.role === Role.STUDENT || actor.role === Role.PARENT) {
       const rows = await this.prisma.enrollment.findMany({
@@ -76,28 +91,6 @@ export class ScheduleAccessService {
         select: { classroomId: true },
       });
       return [...new Set(rows.map((r) => r.classroomId))];
-    }
-    if (actor.role === Role.TEACHER || actor.role === Role.TEACHER_PLUS) {
-      const rows = await this.prisma.classroom.findMany({
-        where: { archived: false },
-        select: {
-          id: true,
-          teacherId: true,
-          classSchedules: {
-            where: { teacherId: actor.userId },
-            select: { id: true },
-          },
-        },
-      });
-      const ids: string[] = [];
-      for (const row of rows)
-        if (
-          row.teacherId === actor.userId ||
-          row.classSchedules.length ||
-          (await this.capabilities.has(actor.userId, 'schedule.manage', row.id))
-        )
-          ids.push(row.id);
-      return ids;
     }
     return [];
   }

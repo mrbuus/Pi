@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { CalendarDayType } from '../../generated/prisma/enums';
 
 export class UpdateCalendarDayDto {
@@ -22,4 +29,14 @@ export class UpdateCalendarDayDto {
   @IsOptional()
   @IsString()
   note?: string | null;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Хамаарах ангиуд (өгвөл солигдоно). Хоосон = БҮХ анги.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(200)
+  @IsString({ each: true })
+  classroomIds?: string[];
 }

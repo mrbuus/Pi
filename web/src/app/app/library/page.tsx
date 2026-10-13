@@ -1,11 +1,15 @@
 "use client";
 
+import CodeReveal from "@/components/ui/CodeReveal";
+import { MetaTitle } from "@/components/ui/Meta";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronUp, ChevronDown, Check, Pencil } from "lucide-react";
 import { ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { SkeletonRows } from "@/components/ui/Skeleton";
 import ProblemVideoDisclosure from "@/components/lesson/ProblemVideoDisclosure";
 import MathText from "@/components/MathText";
+import ChoiceContent from "@/components/ChoiceContent";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
 import { api, getRole, ApiError } from "@/lib/api";
 
@@ -21,6 +25,7 @@ interface Chapter {
 interface ChoiceOption {
   label: string;
   text: string;
+  imageKey?: string | null;
   // Зөвхөн багш ролийн (ADMIN/TEACHER_PLUS/TEACHER) API хариунд ирнэ —
   // сурагчид зөвхөн {label, text} авна (backend-ээс шүүгдсэн).
   isCorrect?: boolean;
@@ -34,6 +39,8 @@ interface Problem {
   choiceOptions?: ChoiceOption[];
   correctAnswer?: string | Record<string, number>;
   points: number;
+  // Аль тестийн хувилбарт (A/B) харьяалагдах — сервер TestProblem-оос өгнө
+  variantLabel?: string | null;
   analysis?: {
     status: string;
     answerKeyStatus: string;
@@ -53,12 +60,13 @@ interface Book {
   id: string;
   code: string;
   title: string;
+  sourceLabel?: string | null;
   problemCount?: number;
   testCount?: number;
   _count: { chapters: number };
 }
 
-type ToneKey = "brand" | "teal" | "gold" | "rose" | "violet" | "sky";
+type ToneKey = "brand" | "teal" | "rose" | "violet" | "sky";
 
 interface TopicTone {
   symbol: string;
@@ -70,8 +78,7 @@ interface TopicTone {
   line: string;
 }
 
-// globals.css-ийн токенууд (brand-bright + 5 accent-*)-аар барьсан 6 өнгөний
-// давталт — ХЭЗЭЭ Ч шууд hex/rgba бичихгүй тул LIGHT/DARK хоёуланд зөв харагдана.
+// globals.css-ийн токенууд (brand-bright + 4 accent-*)-аар барьсан 5 өнгө — ХЭЗЭЭ Ч шууд hex/rgba бичихгүй тул LIGHT/DARK хоёуланд зөв харагдана.
 const TONE_STYLE: Record<ToneKey, Omit<TopicTone, "symbol">> = {
   brand: {
     border: "border-brand-bright/45",
@@ -88,14 +95,6 @@ const TONE_STYLE: Record<ToneKey, Omit<TopicTone, "symbol">> = {
     text: "text-accent-teal",
     solid: "bg-accent-teal",
     line: "bg-accent-teal/40",
-  },
-  gold: {
-    border: "border-accent-gold/45",
-    bg: "bg-accent-gold/10",
-    soft: "bg-accent-gold/18",
-    text: "text-accent-gold",
-    solid: "bg-accent-gold",
-    line: "bg-accent-gold/40",
   },
   rose: {
     border: "border-accent-rose/45",
@@ -123,20 +122,82 @@ const TONE_STYLE: Record<ToneKey, Omit<TopicTone, "symbol">> = {
   },
 };
 
-// Тэмдэг бүрийг LaTeX-ээр бичээд MathText-ээр рендерлэнэ (KaTeX) — бэлэн
-// unicode тэмдэгтийг (π, √ гэх мэт) шууд харуулахгүй.
-const TONE_ORDER: { key: ToneKey; symbol: string }[] = [
-  { key: "brand", symbol: "$\\sum$" },
-  { key: "teal", symbol: "$\\surd$" },
-  { key: "gold", symbol: "$\\pi$" },
-  { key: "rose", symbol: "$|x|$" },
-  { key: "violet", symbol: "$\\log$" },
-  { key: "sky", symbol: "$f$" },
+// Сэдвийн тэмдэг — СЭДВИЙН УТГААР (сурах бичгийн стандарт бичлэг), дарааллаар биш.
+// Тэгшитгэл «=», тэнцэтгэл биш «>/<» — хос сэдэв зөвхөн тэмдгээрээ ялгарна
+// (|x|=a / |x|<a). Нэг гэр бүлийн сэдэв ижил өнгөтэй. LaTeX-ээр (KaTeX) — бэлэн
+// unicode тэмдэгт биш. Шар/алтан өнгө хэрэглэхгүй (эзний дизайны дүрэм).
+// Дүрэм дарааллаар шалгагдана — тодорхой нь эхэнд.
+const TOPIC_SYMBOLS: { test: RegExp; symbol: string; tone: ToneKey }[] = [
+  // Тэгшитгэл / тэнцэтгэл биш — хос
+  { test: /модул.*тэнцэтгэл/i, symbol: "$|x|<a$", tone: "rose" },
+  { test: /модул/i, symbol: "$|x|=a$", tone: "rose" },
+  { test: /иррациональ.*тэнцэтгэл/i, symbol: "$\\sqrt{x}>a$", tone: "teal" },
+  { test: /иррациональ/i, symbol: "$\\sqrt{x}=a$", tone: "teal" },
+  { test: /рациональ.*тэнцэтгэл/i, symbol: "$\\frac{P}{Q}>0$", tone: "brand" },
+  { test: /рациональ/i, symbol: "$\\frac{P}{Q}=0$", tone: "brand" },
+  { test: /илтгэгч.*тэнцэтгэл/i, symbol: "$a^x>b$", tone: "sky" },
+  { test: /илтгэгч/i, symbol: "$a^x=b$", tone: "sky" },
+  { test: /логарифм.*тэнцэтгэл/i, symbol: "$\\log_a x>b$", tone: "violet" },
+  { test: /логарифм.*тэгшитгэл/i, symbol: "$\\log_a x=b$", tone: "violet" },
+  { test: /логарифм/i, symbol: "$\\log_a b$", tone: "violet" },
+  { test: /тригонометр.*тэгшитгэл/i, symbol: "$\\sin x=a$", tone: "teal" },
+  { test: /тригонометр.*урвуу/i, symbol: "$\\arcsin x$", tone: "teal" },
+  { test: /тригонометр.*график/i, symbol: "$y=\\sin x$", tone: "teal" },
+  { test: /тригонометр/i, symbol: "$\\sin\\alpha$", tone: "teal" },
+  { test: /квадрат тэгшитгэлийн шийд/i, symbol: "$x_1x_2$", tone: "brand" },
+  { test: /квадрат функц/i, symbol: "$y=x^2$", tone: "brand" },
+  { test: /квадрат тэгшитгэл/i, symbol: "$x^2=a$", tone: "brand" },
+  { test: /өндөр зэргийн/i, symbol: "$x^n=a$", tone: "brand" },
+  { test: /тойргийн тэгшитгэл/i, symbol: "$x^2+y^2=R^2$", tone: "sky" },
+  { test: /шүргэгч/i, symbol: "$y=kx+b$", tone: "violet" },
+  // Анализ
+  { test: /нугаралт/i, symbol: "$f''=0$", tone: "violet" },
+  { test: /экстремум/i, symbol: "$f'=0$", tone: "violet" },
+  { test: /өсөх|буурах/i, symbol: "$f'>0$", tone: "violet" },
+  { test: /их ба бага утга/i, symbol: "$\\max f$", tone: "violet" },
+  { test: /уламжлалын хэрэглээ/i, symbol: "$f'(x_0)$", tone: "violet" },
+  { test: /уламжлал/i, symbol: "$f'(x)$", tone: "violet" },
+  { test: /эзлэхүүн/i, symbol: "$V=\\pi\\!\\int y^2$", tone: "sky" },
+  { test: /интегралын хэрэглээ/i, symbol: "$\\int_a^b$", tone: "sky" },
+  { test: /интеграл/i, symbol: "$\\int x\\,dx$", tone: "sky" },
+  // Функц
+  { test: /урвуу функц/i, symbol: "$f^{-1}$", tone: "rose" },
+  { test: /тэгш сондгой/i, symbol: "$f(-x)$", tone: "rose" },
+  { test: /функцийн үе/i, symbol: "$f(x+T)$", tone: "rose" },
+  { test: /тодорхойлогдох муж/i, symbol: "$D(f)$", tone: "rose" },
+  { test: /утгын муж/i, symbol: "$E(f)$", tone: "rose" },
+  { test: /функц/i, symbol: "$f(x)$", tone: "rose" },
+  // Алгебр, тоо
+  { test: /бином/i, symbol: "$\\binom{n}{k}$", tone: "brand" },
+  { test: /полином задаргаа/i, symbol: "$(a+b)^n$", tone: "brand" },
+  { test: /олон гишүүнт/i, symbol: "$P(x)$", tone: "brand" },
+  { test: /комплекс/i, symbol: "$a+bi$", tone: "sky" },
+  { test: /матриц/i, symbol: "$\\det A$", tone: "sky" },
+  { test: /факториал/i, symbol: "$n!$", tone: "teal" },
+  { test: /комбинаторик/i, symbol: "$C_n^k$", tone: "teal" },
+  { test: /магадлал/i, symbol: "$P(A)$", tone: "teal" },
+  { test: /өгөгдл/i, symbol: "$\\bar{x}$", tone: "teal" },
+  { test: /арифметик прогресс/i, symbol: "$a_n+d$", tone: "brand" },
+  { test: /геометр прогресс/i, symbol: "$b_n\\cdot q$", tone: "brand" },
+  { test: /дараалал/i, symbol: "$\\{a_n\\}$", tone: "brand" },
+  { test: /тоо тоолол/i, symbol: "$\\mathbb{N}$", tone: "brand" },
+  // Геометр
+  { test: /вектор/i, symbol: "$\\vec{a}$", tone: "sky" },
+  { test: /аналитик геометр/i, symbol: "$(x;y)$", tone: "sky" },
+  { test: /хувиргалт/i, symbol: "$A\\to A'$", tone: "violet" },
+  { test: /талбай/i, symbol: "$S$", tone: "violet" },
+  { test: /огторгуй/i, symbol: "$V$", tone: "violet" },
+  { test: /геометр/i, symbol: "$\\triangle ABC$", tone: "violet" },
+  // Ерөнхий
+  { test: /тэнцэтгэл/i, symbol: "$x>a$", tone: "brand" },
+  { test: /тэгшитгэл/i, symbol: "$x=a$", tone: "brand" },
 ];
 
-function toneFor(index: number): TopicTone {
-  const { key, symbol } = TONE_ORDER[index % TONE_ORDER.length];
-  return { symbol, ...TONE_STYLE[key] };
+function toneFor(topic: string): TopicTone {
+  // Зарим нэрэнд «й» задарсан (и + ̆) — харагдах нь ижил ч регекс тохирохгүй
+  const name = topic.normalize("NFC");
+  const rule = TOPIC_SYMBOLS.find((r) => r.test.test(name));
+  return { symbol: rule?.symbol ?? "$\\sum$", ...TONE_STYLE[rule?.tone ?? "brand"] };
 }
 
 interface TopicGroup {
@@ -182,6 +243,14 @@ function cleanBookCode(value: string) {
     .replace(/[^a-zа-яөөгү0-9]/gi, "");
 }
 
+// Ижил нэртэй хоёр ном (100x100 V2 ба V3) ялгагдахаар номын товчны шошго.
+function bookLabel(book: Book, all: Book[]) {
+  const twin = all.some((b) => b.id !== book.id && b.title === book.title);
+  if (!twin) return book.title;
+  const version = /V\d+/i.exec(book.sourceLabel ?? book.code)?.[0]?.toUpperCase();
+  return version ? `${book.title} ${version}` : `${book.title} (${book.code})`;
+}
+
 function groupChapters(chapters: Chapter[]): TopicGroup[] {
   const groups = new Map<string, Omit<TopicGroup, "tone">>();
   for (const chapter of chapters) {
@@ -204,10 +273,10 @@ function groupChapters(chapters: Chapter[]): TopicGroup[] {
     groups.set(topic, current);
   }
 
-  return [...groups.values()].map((group, index) => ({
+  return [...groups.values()].map((group) => ({
     ...group,
     chapters: [...group.chapters].sort((a, b) => a.order - b.order),
-    tone: toneFor(index),
+    tone: toneFor(group.topic),
   }));
 }
 
@@ -303,7 +372,9 @@ export default function LibraryPage() {
                   cleanBookCode(book.title) === requestedKey,
               )
             : null;
-          setBookId((id) => id || (requestedBook ?? withProblems[0]).id);
+          // Анхдагч: хамгийн сүүлийн хувилбар (100x100 V3) — эзний хүсэлт 2026-10-08
+          const latest = withProblems.find((b) => /V3$/i.test(b.sourceLabel ?? ""));
+          setBookId((id) => id || (requestedBook ?? latest ?? withProblems[0]).id);
         }
       })
       .catch((error) => {
@@ -403,8 +474,8 @@ export default function LibraryPage() {
                 : "border-line text-ink-dim hover:border-brand-bright/40"
             }`}
           >
-            <span className="font-mono">{b.code}</span> — {b.testCount ?? 0}{" "}
-            тест
+            {bookLabel(b, books)}
+            <span className="ml-1.5 font-normal text-ink-dim">{b.testCount ?? 0} тест</span>
           </button>
         ))}
       </div>
@@ -429,7 +500,7 @@ export default function LibraryPage() {
                 Сонгосон ном
               </p>
               <h2 className="mt-1 text-3xl font-extrabold">
-                {currentBook.title}
+                <MetaTitle>{bookLabel(currentBook, books)}</MetaTitle>
               </h2>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
@@ -470,7 +541,7 @@ export default function LibraryPage() {
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${group.tone.soft} ${group.tone.text}`}
+                      className={`flex h-11 min-w-11 max-w-[7.5rem] shrink-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-xl px-2 text-[15px] font-extrabold ${group.tone.soft} ${group.tone.text}`}
                     >
                       <MathText>{group.tone.symbol}</MathText>
                     </span>
@@ -569,7 +640,7 @@ export default function LibraryPage() {
                           )}
                         </div>
                         <p className="mt-0.5 text-sm text-ink-dim">
-                          {ch.book?.code} ном — {ch._count.tests} тест —{" "}
+                          {ch._count.tests === 2 ? "A, B хувилбар" : `${ch._count.tests} тест`} —{" "}
                           {ch._count.problems} бодлого
                           {ch._count.theories > 0 &&
                             ` — ${ch._count.theories} онол`}
@@ -586,9 +657,7 @@ export default function LibraryPage() {
 
                     {isOpen && (
                       <div className="mt-2 chunky p-5">
-                        {loadingProblems && (
-                          <p className="text-sm text-ink-dim">Ачаалж байна…</p>
-                        )}
+                        {loadingProblems && <SkeletonRows rows={4} />}
                         {locked && (
                           <div className="text-center">
                             <p className="text-sm text-ink-dim">
@@ -609,7 +678,8 @@ export default function LibraryPage() {
                           />
                         )}
                         {!loadingProblems && !locked && !problemsError && (
-                          <ProblemList
+                          <VariantProblems
+                            key={ch.id}
                             problems={problems}
                             tone={activeGroup.tone}
                             canEdit={canEdit}
@@ -634,6 +704,54 @@ export default function LibraryPage() {
           canEditContent={canEditContent}
         />
       )}
+    </div>
+  );
+}
+
+// A ба B хувилбарыг НЭГТГЭХГҮЙ (эзэн 2026-10-08): нэг дор зөвхөн нэг хувилбар.
+function VariantProblems(props: {
+  problems: Problem[];
+  tone: TopicTone;
+  canEdit?: boolean;
+  onEdit?: (id: string) => void;
+}) {
+  const variants = [
+    ...new Set(props.problems.map((p) => p.variantLabel).filter((v): v is string => !!v)),
+  ].sort();
+  const [active, setActive] = useState<string | null>(variants[0] ?? null);
+  if (variants.length < 2) return <ProblemList {...props} />;
+  const current = active && variants.includes(active) ? active : variants[0];
+  const shown = props.problems.filter((p) => p.variantLabel === current);
+  return (
+    <div className="space-y-4">
+      <div
+        role="tablist"
+        aria-label="Тестийн хувилбар"
+        className="inline-flex rounded-2xl border border-line bg-bg p-1"
+      >
+        {variants.map((v) => {
+          const on = v === current;
+          const count = props.problems.filter((p) => p.variantLabel === v).length;
+          return (
+            <button
+              key={v}
+              role="tab"
+              type="button"
+              aria-selected={on}
+              onClick={() => setActive(v)}
+              className={`min-h-11 rounded-xl px-4 text-sm font-bold transition ${
+                on ? "bg-brand-bright text-on-brand shadow-sm" : "text-ink-dim hover:text-ink"
+              }`}
+            >
+              Хувилбар {v}
+              <span className={`ml-2 text-xs font-semibold ${on ? "text-on-brand/80" : "text-ink-dim"}`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <ProblemList {...props} problems={shown} />
     </div>
   );
 }
@@ -701,7 +819,7 @@ function ProblemList({
                         {o.label}.
                       </span>
                       <span className="min-w-0 flex-1">
-                        <MathText>{o.text}</MathText>
+                        <ChoiceContent text={o.text} image={o.imageKey} imageClassName="max-h-40" />
                       </span>
                       {canEdit && o.isCorrect && (
                         <span className="inline-flex shrink-0 items-center gap-1 rounded bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
@@ -714,9 +832,8 @@ function ProblemList({
               )}
 
             <div className="mt-1.5 flex flex-wrap gap-2 text-[11px]">
-              <span className="rounded bg-ink/5 px-2 py-0.5 font-mono text-ink-dim">
-                {p.token}
-              </span>
+              {/* Бодлогын код: сурагчид API огт өгөхгүй, ажилтан «#» дарж харна */}
+              <CodeReveal code={p.token} className="h-6 w-6" />
               <span className={`rounded px-2 py-0.5 ${tone.soft} ${tone.text}`}>
                 {FORMAT_LABEL[p.format] ?? p.format}
               </span>

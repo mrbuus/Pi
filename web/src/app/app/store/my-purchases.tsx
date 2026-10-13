@@ -10,6 +10,7 @@ import {
 
 import { Card as Surface } from "@/components/ui/Surface";
 import { ShoppingBag } from "lucide-react";
+import { formatMnDate } from "@/lib/dateMn";
 
 interface MyPurchase {
   id: string;
@@ -65,7 +66,7 @@ export default function MyPurchases() {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "—";
     try {
-      return new Date(dateStr).toLocaleDateString("mn-MN");
+      return formatMnDate(dateStr);
     } catch {
       return dateStr;
     }

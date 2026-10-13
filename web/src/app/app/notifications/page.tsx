@@ -8,6 +8,7 @@ import { Card, PageHeader } from "@/components/ui/Surface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import type { NotificationItem } from "@/components/notifications/NotificationBell";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 interface NotificationPage {
   notifications: NotificationItem[];
@@ -16,11 +17,11 @@ interface NotificationPage {
 type Filter = "all" | "unread" | "read";
 
 function dateLabel(value: string): string {
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(new Date(value), {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "Asia/Ulaanbaatar",
-  }).format(new Date(value));
+  });
 }
 
 function internalLink(value: string | null): string | null {

@@ -12,6 +12,7 @@ interface PrismaMock {
   scheduleException: { findMany: AsyncMock };
   academicCalendarDay: { findMany: AsyncMock };
   lessonTopic: { findMany: AsyncMock };
+  lessonStaffing: { findMany: AsyncMock };
 }
 
 function asyncMock(): AsyncMock {
@@ -33,6 +34,7 @@ describe('CalendarIcsService', () => {
       scheduleException: { findMany: asyncMock() },
       academicCalendarDay: { findMany: asyncMock() },
       lessonTopic: { findMany: asyncMock() },
+      lessonStaffing: { findMany: asyncMock().mockResolvedValue([]) },
     };
     service = new CalendarIcsService(prisma as unknown as PrismaService);
   });
@@ -214,8 +216,13 @@ describe('CalendarIcsService', () => {
       { teacherId: 'teacher-1' },
       {
         teacherId: null,
-        classroom: { teacherId: 'teacher-1', archived: false },
+        // ангийн багш ЭСВЭЛ туслах ангийн багш (2026-10-13)
+        classroom: {
+          OR: [{ teacherId: 'teacher-1' }, { assistantTeacherId: 'teacher-1' }],
+          archived: false,
+        },
       },
+      { id: { in: [] } },
     ]);
     expect(query.AND).toContainEqual({
       OR: [
@@ -231,5 +238,35 @@ describe('CalendarIcsService', () => {
     expect(result.ics).not.toContain('cancelled-class');
     expect(result.ics).not.toContain('Өрөө 2');
     expect(result.ics).not.toContain('teacher-1');
+  });
+
+  it('teacher feed follows the daily lead/assistant assignment (owner 2026-10-11)', async () => {
+    const base = {
+      classroomId: 'class-1',
+      startMinute: 900,
+      endMinute: 1020,
+      room: '501',
+      subject: 'MATH',
+      effectiveFrom: new Date('2026-09-01T00:00:00.000Z'),
+      effectiveTo: null,
+    };
+    prisma.lessonStaffing.findMany
+      .mockResolvedValueOnce([{ scheduleId: 'assist' }])
+      .mockResolvedValueOnce([
+        { scheduleId: 'assist', date: new Date('2026-09-28T00:00:00.000Z'), leadTeacherId: 'x', assistantTeacherId: 'teacher-1' },
+        { scheduleId: 'own', date: new Date('2026-09-28T00:00:00.000Z'), leadTeacherId: 'x', assistantTeacherId: null },
+      ]);
+    prisma.classSchedule.findMany.mockResolvedValue([
+      { ...base, id: 'assist', weekday: 1, teacherId: null, classroom: { id: 'class-1', name: '12-3', teacherId: null } },
+      { ...base, id: 'own', weekday: 1, teacherId: 'teacher-1', classroom: { id: 'class-1', name: '12-3', teacherId: null } },
+    ]);
+    prisma.scheduleException.findMany.mockResolvedValue([]);
+    prisma.academicCalendarDay.findMany.mockResolvedValue([]);
+    prisma.lessonTopic.findMany.mockResolvedValue([]);
+    const { ics } = await service.exportForUser('teacher-1', Role.TEACHER, '2026-09-28', '2026-09-28');
+    expect(ics).toContain('UID:assist-20260928@pi.mn');
+    expect(ics).toContain('туслах багш');
+    // Хуваарийн багш ч гэсэн тэр өдөр өөр хүнд оноосон бол орохгүй
+    expect(ics).not.toContain('UID:own-20260928@pi.mn');
   });
 });

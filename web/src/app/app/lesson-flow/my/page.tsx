@@ -6,6 +6,7 @@ import { api, fileUrl, uploadFile } from "@/lib/api";
 import MathText from "@/components/MathText";
 import { Button } from "@/components/ui/kit/button";
 import { Card, CardContent } from "@/components/ui/kit/card";
+import { formatMnDateTime } from "@/lib/dateMn";
 type Day = { id: string; date: string; chapter: { title: string } };
 type Evidence = {
   id: string;
@@ -258,7 +259,7 @@ export default function PupilLessonDay() {
                   <div key={r.id}>
                     <p>
                       {r.kind} ·{" "}
-                      {new Date(r.submittedAt).toLocaleString("mn-MN")}
+                      {formatMnDateTime(r.submittedAt)}
                     </p>
                     {r.imageKeys.map((k) => (
                       <a

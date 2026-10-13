@@ -32,6 +32,12 @@ export class FileAuthorizationService {
   }
   async allowed(actor: FileActor, key: string): Promise<boolean> {
     if (actor.role === Role.ADMIN) return true;
+    // Түвшин тогтоох шалгалтын бодолтын зураг — төвийн багш нар үзэж түвшин тогтооно
+    if (
+      staff(actor.role) &&
+      (await this.prisma.placementAttempt.count({ where: { photoKeys: { has: key } } })) > 0
+    )
+      return true;
     const stored = await this.prisma.storedFile.findUnique({
       where: { key },
       select: { ownerId: true },
@@ -192,8 +198,9 @@ export class FileAuthorizationService {
             chapter: { select: { id: true, bookId: true, freePreview: true } },
           },
         }),
+        // Бодлогын зураг эсвэл сонголтын зураг (график хариу)
         this.prisma.problem.findMany({
-          where: { imageKey: key },
+          where: { OR: [{ imageKey: key }, { choiceOptions: { some: { imageKey: key } } }] },
           select: {
             chapter: { select: { id: true, bookId: true, freePreview: true } },
           },
@@ -253,6 +260,32 @@ export class FileAuthorizationService {
           await canAccessChapter(this.prisma, viewer.id, viewer.role, chapter)
         )
           return true;
+
+    // Шалгалтын зураг: сурагч тухайн бодлоготой тестийг ЭХЛҮҮЛСЭН бол (session
+    // зөвхөн эрхтэй үед үүсдэг) зургийг харна — ном худалдаж аваагүй, зөвхөн
+    // тест/ангиар хамрагдсан (жиш: 1000 бодлогын шалгалт) сурагчид хэрэгтэй.
+    if (
+      problems.length > 0 &&
+      (actor.role === Role.STUDENT || actor.role === Role.BUYER)
+    ) {
+      const examSession = await this.prisma.testAttemptSession.findFirst({
+        where: {
+          studentId: actor.id,
+          test: {
+            deletedAt: null,
+            problems: {
+              some: {
+                problem: {
+                  OR: [{ imageKey: key }, { choiceOptions: { some: { imageKey: key } } }],
+                },
+              },
+            },
+          },
+        },
+        select: { id: true },
+      });
+      if (examSession) return true;
+    }
 
     for (const ref of videos)
       if (ref.chapter)

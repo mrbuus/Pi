@@ -9,6 +9,7 @@ import { SkeletonCard } from "@/components/ui/Skeleton";
 import { Meta } from "@/components/ui/Meta";
 
 import { api } from "@/lib/api";
+import { formatMnDate } from "@/lib/dateMn";
 interface FinanceReport {
   period: string;
   income: {
@@ -583,7 +584,7 @@ export default function FinanceDashboardClient() {
                     </p>
                   </div>
                   <time className="text-sm text-ink-dim">
-                    {new Date(exp.occurredOn).toLocaleDateString("mn-MN")}
+                    {formatMnDate(exp.occurredOn)}
                   </time>
                   <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
                     <span className="font-semibold tabular-nums">
@@ -642,9 +643,7 @@ export default function FinanceDashboardClient() {
                 <Meta
                   items={[
                     formatCurrency(deleteCandidate.amount),
-                    new Date(deleteCandidate.occurredOn).toLocaleDateString(
-                      "mn-MN",
-                    ),
+                    formatMnDate(deleteCandidate.occurredOn),
                   ]}
                 />
               </p>

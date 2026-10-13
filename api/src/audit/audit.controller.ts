@@ -10,8 +10,9 @@ import { AuditService } from './audit.service';
 export class AuditController {
   constructor(private audit: AuditService) {}
 
-  // Зөвхөн ADMIN: бүх системийн аудит лог, шүүлтүүртэй, хуудаслалттай
-  @Roles(Role.ADMIN)
+  // ADMIN + TEACHER_PLUS (зөвхөн унших, эзний шийдвэр 2026-10-08):
+  // бүх системийн аудит лог, шүүлтүүртэй, хуудаслалттай
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get()
   list(
     @Query('entity') entity?: string,

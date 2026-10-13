@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 // API-д "устгагдсан жагсаалт харах" endpoint одоогоор байхгүй (бүх устгалт
 // зөөлөн — deletedAt — гэхдээ listBooks/listChapters/listTopics/listProblems
@@ -78,7 +79,7 @@ export function useDeletedLog() {
 export function formatDeletedAt(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString("mn-MN", {
+  return formatMnDateTime(d, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

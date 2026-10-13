@@ -37,7 +37,7 @@ export default function SummarySection({ summary }: SummarySectionProps) {
           Өчигдрийн/өнөөдрийн дүгнэлт
         </h2>
         <p className="text-sm text-ink-dim">
-          Дүгнэлт араахан бодогдоогүй (шөнө 23:30-д автоматаар бодогдоно)
+          Дүгнэлт хараахан бодогдоогүй (шөнө 23:30-д автоматаар бодогдоно)
         </p>
       </section>
     );

@@ -7,6 +7,7 @@ import {
 import { createHash, randomBytes } from 'node:crypto';
 import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Role } from '../generated/prisma/enums';
+import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ResolvedDay,
@@ -121,6 +122,17 @@ export class CalendarIcsService {
     };
 
     let scheduleWhere: object;
+    // Багш: өдрийн хуваарьт ахлах/туслахаар оноогдсон хичээлүүд (эзэн 2026-10-11)
+    const myStaffing =
+      role === Role.STUDENT
+        ? []
+        : await this.prisma.lessonStaffing.findMany({
+            where: {
+              date: { gte: range.from, lte: range.to },
+              OR: [{ leadTeacherId: userId }, { assistantTeacherId: userId }],
+            },
+            select: { scheduleId: true },
+          });
     if (role === Role.STUDENT) {
       const enrollment = await this.prisma.enrollment.findFirst({
         where: { studentId: userId, leftAt: null },
@@ -145,15 +157,20 @@ export class CalendarIcsService {
           { teacherId: userId },
           {
             teacherId: null,
-            classroom: { teacherId: userId, archived: false },
+            classroom: { ...classTeacherWhere(userId), archived: false },
           },
+          { id: { in: [...new Set(myStaffing.map((s) => s.scheduleId))] } },
         ],
       };
     }
 
     const schedules = await this.prisma.classSchedule.findMany({
       where: scheduleWhere,
-      include: { classroom: { select: { id: true, name: true } } },
+      include: {
+        classroom: {
+          select: { id: true, name: true, teacherId: true, assistantTeacherId: true },
+        },
+      },
       orderBy: [{ weekday: 'asc' }, { startMinute: 'asc' }],
     });
     const scheduleIds = schedules.map((schedule) => schedule.id);
@@ -161,7 +178,7 @@ export class CalendarIcsService {
       return { filename: 'pi.mn-huvaari.ics', ics: buildIcs([]) };
     }
 
-    const [exceptions, holidays, topics] = await Promise.all([
+    const [exceptions, holidays, topics, staffing] = await Promise.all([
       this.prisma.scheduleException.findMany({
         where: {
           scheduleId: { in: scheduleIds },
@@ -173,11 +190,26 @@ export class CalendarIcsService {
       }),
       this.prisma.academicCalendarDay.findMany({
         where: { date: { gte: range.from, lte: range.to } },
+        include: { classrooms: { select: { classroomId: true } } },
       }),
       this.prisma.lessonTopic.findMany({
         where: { scheduleId: { in: scheduleIds } },
       }),
+      this.prisma.lessonStaffing.findMany({
+        where: {
+          scheduleId: { in: scheduleIds },
+          date: { gte: range.from, lte: range.to },
+        },
+      }),
     ]);
+    // Хуваарийн түвшинд энэ багшийнх (өдрийн оноолт байхгүй үед хүчинтэй)
+    const ownSchedule = new Set(
+      schedules
+        .filter((s) =>
+          s.teacherId ? s.teacherId === userId : isClassTeacher(s.classroom, userId),
+        )
+        .map((s) => s.id),
+    );
 
     const resolverSchedules: ResolverSchedule[] = schedules.map((schedule) => ({
       id: schedule.id,
@@ -214,6 +246,7 @@ export class CalendarIcsService {
       date: dateKey(holiday.date),
       type: holiday.type,
       title: holiday.title,
+      classroomIds: holiday.classrooms.map((c) => c.classroomId),
     }));
 
     const days: ResolvedDay[] = [];
@@ -229,9 +262,27 @@ export class CalendarIcsService {
           exceptions: resolverExceptions,
           topics: resolverTopics,
           holidays: resolverHolidays,
+          staffing: staffing.map((st) => ({
+            scheduleId: st.scheduleId,
+            date: dateKey(st.date),
+            lead: st.leadTeacherId ? { id: st.leadTeacherId, name: '' } : null,
+            assistant: st.assistantTeacherId
+              ? { id: st.assistantTeacherId, name: '' }
+              : null,
+          })),
         }),
       );
     }
+    // Багшид зөвхөн ӨӨРИЙН хичээл: өдрийн оноолт байвал түүгээр, үгүй бол хуваарийн багш
+    const mine = (entry: ResolvedDay['entries'][number]) => {
+      if (role === Role.STUDENT) return true;
+      if (entry.leadTeacher || entry.assistantTeacher)
+        return (
+          entry.leadTeacher?.id === userId ||
+          entry.assistantTeacher?.id === userId
+        );
+      return ownSchedule.has(entry.scheduleId);
+    };
 
     const events: CalendarEvent[] = days
       .filter(
@@ -241,7 +292,7 @@ export class CalendarIcsService {
           !day.isHoliday,
       )
       .flatMap((day) =>
-        day.entries.map((entry) => ({
+        day.entries.filter(mine).map((entry) => ({
           scheduleId: entry.scheduleId,
           date: day.date,
           startMinute: entry.startMinute,
@@ -253,6 +304,7 @@ export class CalendarIcsService {
                 ? (SUBJECT_LABEL[entry.subject] ?? entry.subject)
                 : null,
               entry.classroomName,
+              entry.assistantTeacher?.id === userId ? 'туслах багш' : null,
             ]
               .filter(Boolean)
               .join(' - ') || 'Хичээл',

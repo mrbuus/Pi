@@ -30,6 +30,7 @@ import type {
   ReviewStats,
 } from "./types";
 import styles from "./review.module.css";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 type Data = { due: DueResponse; stats: ReviewStats };
 type Submission = {
@@ -423,11 +424,11 @@ export default function ReviewClient() {
             )}
             <p className="mt-2 text-sm text-ink-dim">
               Дараагийн давталт:{" "}
-              {new Intl.DateTimeFormat("mn-MN", {
+              {formatMnDateTime(new Date(submission.receipt!.dueAt), {
                 timeZone: "Asia/Ulaanbaatar",
                 dateStyle: "medium",
                 timeStyle: "short",
-              }).format(new Date(submission.receipt!.dueAt))}
+              })}
             </p>
           </div>
           <Button onClick={next} className="w-full sm:w-auto">

@@ -237,8 +237,8 @@ export class ParentsService {
           selfState: true,
           givenAnswer: true,
           problem: {
+            // бодлогын код эцэг эхэд харагдахгүй (эзний дүрэм 2026-10-08)
             select: {
-              token: true,
               chapterId: true,
               chapter: { select: { title: true } },
             },

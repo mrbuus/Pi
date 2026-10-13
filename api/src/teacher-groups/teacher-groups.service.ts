@@ -550,7 +550,7 @@ export class TeacherGroupsService {
           where: {
             studentId: member.studentId,
             createdAt: { gte: member.joinedAt },
-            source: { in: ['ONLINE_TEST', 'CHAPTER_EXAM', 'OMR_IMPORT'] },
+            source: { in: ['ONLINE_TEST', 'CHAPTER_EXAM', 'OMR_IMPORT', 'MANUAL_ENTRY'] },
             test: {
               isDraft: false,
               deletedAt: null,

@@ -6,6 +6,7 @@ import { Bell, Check, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 export interface NotificationItem {
   id: string;
@@ -27,11 +28,11 @@ function internalLink(value: string | null): string | null {
 }
 
 function dateLabel(value: string): string {
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(new Date(value), {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "Asia/Ulaanbaatar",
-  }).format(new Date(value));
+  });
 }
 
 export function NotificationBell() {

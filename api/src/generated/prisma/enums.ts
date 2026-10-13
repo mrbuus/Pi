@@ -201,7 +201,8 @@ export const TestType = {
   CHAPTER_EXAM: 'CHAPTER_EXAM',
   EESH_MOCK: 'EESH_MOCK',
   CUSTOM: 'CUSTOM',
-  THEORY: 'THEORY'
+  THEORY: 'THEORY',
+  THOUSAND: 'THOUSAND'
 } as const
 
 export type TestType = (typeof TestType)[keyof typeof TestType]
@@ -215,12 +216,40 @@ export const TestGradingMode = {
 export type TestGradingMode = (typeof TestGradingMode)[keyof typeof TestGradingMode]
 
 
+export const ReviewLevel = {
+  NONE: 'NONE',
+  PROBLEMS: 'PROBLEMS',
+  FULL: 'FULL'
+} as const
+
+export type ReviewLevel = (typeof ReviewLevel)[keyof typeof ReviewLevel]
+
+
 export const AttemptSessionStatus = {
   IN_PROGRESS: 'IN_PROGRESS',
   SUBMITTED: 'SUBMITTED'
 } as const
 
 export type AttemptSessionStatus = (typeof AttemptSessionStatus)[keyof typeof AttemptSessionStatus]
+
+
+export const ItemMarkStatus = {
+  CORRECT: 'CORRECT',
+  WRONG: 'WRONG',
+  BLANK: 'BLANK'
+} as const
+
+export type ItemMarkStatus = (typeof ItemMarkStatus)[keyof typeof ItemMarkStatus]
+
+
+export const ItemMarkSource = {
+  ONLINE: 'ONLINE',
+  MANUAL: 'MANUAL',
+  EXCEL: 'EXCEL',
+  OMR: 'OMR'
+} as const
+
+export type ItemMarkSource = (typeof ItemMarkSource)[keyof typeof ItemMarkSource]
 
 
 export const SelfState = {
@@ -237,7 +266,8 @@ export const AttemptSource = {
   EVENING_SELF_REPORT: 'EVENING_SELF_REPORT',
   ONLINE_TEST: 'ONLINE_TEST',
   CHAPTER_EXAM: 'CHAPTER_EXAM',
-  OMR_IMPORT: 'OMR_IMPORT'
+  OMR_IMPORT: 'OMR_IMPORT',
+  MANUAL_ENTRY: 'MANUAL_ENTRY'
 } as const
 
 export type AttemptSource = (typeof AttemptSource)[keyof typeof AttemptSource]
@@ -257,6 +287,24 @@ export const StudentNoteType = {
 } as const
 
 export type StudentNoteType = (typeof StudentNoteType)[keyof typeof StudentNoteType]
+
+
+export const RevisionEntity = {
+  PROBLEM: 'PROBLEM',
+  TEST: 'TEST'
+} as const
+
+export type RevisionEntity = (typeof RevisionEntity)[keyof typeof RevisionEntity]
+
+
+export const RevisionAction = {
+  CREATE: 'CREATE',
+  UPDATE: 'UPDATE',
+  RESTORE: 'RESTORE',
+  IMPORT: 'IMPORT'
+} as const
+
+export type RevisionAction = (typeof RevisionAction)[keyof typeof RevisionAction]
 
 
 export const PaymentMethod = {
@@ -456,3 +504,12 @@ export const StudyReviewStatus = {
 } as const
 
 export type StudyReviewStatus = (typeof StudyReviewStatus)[keyof typeof StudyReviewStatus]
+
+
+export const PlacementStatus = {
+  NEW: 'NEW',
+  REVIEWED: 'REVIEWED',
+  CONTACTED: 'CONTACTED'
+} as const
+
+export type PlacementStatus = (typeof PlacementStatus)[keyof typeof PlacementStatus]

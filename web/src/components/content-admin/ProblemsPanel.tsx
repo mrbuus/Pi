@@ -659,9 +659,6 @@ export default function ProblemsPanel({
                 >
                   <span className="min-w-0 flex-1 truncate">
                     <span className="text-ink-dim">{i + 1}.</span>{" "}
-                    <span className="font-mono text-xs text-ink-dim">
-                      {p.token}
-                    </span>{" "}
                     {p.statementText?.slice(0, 30)}
                   </span>
                   <button

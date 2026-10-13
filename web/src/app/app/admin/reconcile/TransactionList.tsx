@@ -8,6 +8,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { ErrorState, EmptyState } from '@/components/ui/StateBlock';
 import { UserSearch } from './UserSearch';
 import { Loader2, X, Check } from 'lucide-react';
+import { formatMnDate } from "@/lib/dateMn";
 
 const STATUS_LABEL: Record<BankMatchStatus, string> = {
   UNMATCHED: 'Тулгаагүй',
@@ -172,7 +173,7 @@ export function TransactionList() {
                     <span className="font-mono">
                       {transaction.bankRef}
                     </span>{' '}
-                    — {new Date(transaction.bookedAt).toLocaleDateString('mn-MN')}
+                    — {formatMnDate(transaction.bookedAt)}
                   </p>
                 </div>
               </div>

@@ -14,6 +14,7 @@ interface Classroom {
   type: string;
   grade?: number | null;
   teacher?: { firstName: string; lastName: string } | null;
+  assistantTeacher?: { firstName: string; lastName: string } | null;
   _count?: { enrollments: number };
 }
 
@@ -85,6 +86,7 @@ export default function ClassroomsClient() {
               classroom.type === 'ONLINE' ? 'Онлайн' : 'Танхим',
               classroom.grade ? `${classroom.grade}-р анги` : null,
               classroom.teacher ? `${classroom.teacher.lastName} ${classroom.teacher.firstName}` : 'Багш сонгоогүй',
+              classroom.assistantTeacher ? `Туслах: ${classroom.assistantTeacher.lastName} ${classroom.assistantTeacher.firstName}` : null,
               `${classroom._count?.enrollments ?? 0} сурагч`,
             ]} /></div>
             <span className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand"><Pencil size={16} aria-hidden /> Дэлгэрэнгүй удирдах</span>

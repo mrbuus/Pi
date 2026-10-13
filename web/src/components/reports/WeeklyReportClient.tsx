@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Surface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 type ChildLink = { verified: boolean; student: { id: string; firstName: string; lastName: string } };
 type WeeklyReport = {
@@ -97,7 +98,7 @@ export default function WeeklyReportClient({ initialStudentId, initialWeek }: { 
       {loading && report && <LoadingState rows={2} label="Тайлан шинэчилж байна" />}
       {report && <>
         <p className="text-sm font-semibold text-ink-dim">{report.student.firstName} {report.student.lastName} · {report.week.start} – {report.week.end}</p>
-        <p className="text-xs text-ink-dim">Мэдээлэл {new Intl.DateTimeFormat("mn-MN", { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Ulaanbaatar" }).format(new Date(report.snapshotAt))} цагийн байдлаар.</p>
+        <p className="text-xs text-ink-dim">Мэдээлэл {formatMnDateTime(new Date(report.snapshotAt), { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Ulaanbaatar" })} цагийн байдлаар.</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card><p className="text-sm text-ink-dim">Ирц</p><p className="mt-2 text-xl font-extrabold">{report.attendance.present} ирсэн</p><p className="text-sm text-ink-dim">{report.attendance.absent} тасалсан · {report.attendance.excused} чөлөөтэй</p></Card>
           <Card><p className="text-sm text-ink-dim">Тест ба дасгал</p><p className="mt-2 text-xl font-extrabold">{report.tests.length} тест</p><p className="text-sm text-ink-dim">{report.practiceCount} дасгал</p></Card>

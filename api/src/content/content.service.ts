@@ -11,8 +11,15 @@ import {
   canAccessChapter,
   internalTeachingRole,
   assertInternalTeachingStaff,
+  TEACHER_ROLES,
 } from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  beginRevision,
+  commitRevision,
+  recordCreated,
+  runInTransaction,
+} from '../revisions/revision-store';
 import { CreateBookDto } from './dto/create-book.dto';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { CreateProblemDto } from './dto/create-problem.dto';
@@ -21,6 +28,59 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { UpdateProblemDto } from './dto/update-problem.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+
+interface ChoiceRowInput {
+  label: string;
+  text: string;
+  imageKey: string | null;
+  isCorrect: boolean;
+  mistakeType: MistakeType;
+  order: number;
+}
+
+/**
+ * «Агуулга засах» (PATCH /problems/:id) сонголтыг бүхэлд нь дахин үүсгэдэг тул
+ * багшийн ангиллын цонхонд тэмдэглэсэн алдааны шалтгаан (mistakeType/mistakeNote)
+ * ялгаагүй арчигддаг байв. Хуучин сонголттой эхлээд текстээр, дараа нь
+ * байрлалаар тулгаж шилжүүлнэ. Зөв сонголт → NONE (тайлбар хадгалагдана).
+ */
+export function carryChoiceMistakes(
+  existing: {
+    text: string;
+    mistakeType: MistakeType;
+    mistakeNote: string | null;
+  }[],
+  next: ChoiceRowInput[],
+): (ChoiceRowInput & { mistakeNote: string | null })[] {
+  const pool = existing.map((c) => ({ ...c, used: false }));
+  const match: ((typeof pool)[number] | undefined)[] = next.map(() => undefined);
+  next.forEach((c, i) => {
+    const hit = pool.find((p) => !p.used && p.text.trim() === c.text.trim());
+    if (hit) {
+      hit.used = true;
+      match[i] = hit;
+    }
+  });
+  next.forEach((_c, i) => {
+    if (match[i]) return;
+    const same = pool[i];
+    if (same && !same.used) {
+      same.used = true;
+      match[i] = same;
+    }
+  });
+  return next.map((c, i) => {
+    const old = match[i];
+    if (c.isCorrect)
+      return { ...c, mistakeType: MistakeType.NONE, mistakeNote: old?.mistakeNote ?? null };
+    return {
+      ...c,
+      mistakeType:
+        old && old.mistakeType !== MistakeType.NONE ? old.mistakeType : MistakeType.OTHER,
+      mistakeNote: old?.mistakeNote ?? null,
+    };
+  });
+}
 
 @Injectable()
 export class ContentService {
@@ -199,6 +259,58 @@ export class ContentService {
       },
       orderBy: [{ grade: 'asc' }, { order: 'asc' }],
     });
+  }
+
+  /**
+   * Бүлэг/сэдэв хайх (хуваарийн сэдэв сонгогч). Үг бүр (хоосон зайгаар
+   * тусгаарлагдсан) гарчигт агуулагдсан байх ёстой. Үндсэн ном (100V3) эхэнд,
+   * дараа нь 100/200/300 …, туршилтын ном хамгийн сүүлд.
+   */
+  async searchChapters(q: string, limit = 20) {
+    const words = q
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 6);
+    if (!words.length || q.length > 100) return [];
+    const take = Math.min(Math.max(Number.isFinite(limit) ? limit : 20, 1), 40);
+    const rows = await this.prisma.chapter.findMany({
+      where: {
+        deletedAt: null,
+        book: { archived: false, deletedAt: null, subject: Subject.MATH },
+        AND: words.map((w) => ({
+          title: { contains: w, mode: 'insensitive' as const },
+        })),
+      },
+      select: {
+        id: true,
+        title: true,
+        order: true,
+        book: {
+          select: { id: true, code: true, title: true, sourceLabel: true },
+        },
+      },
+      take: 300,
+    });
+    const rank = (code: string) =>
+      code === '100V3' ? 0 : code === '100-V3-LAB' ? 9 : code === '100' ? 1 : /^\d+$/.test(code) ? 2 : 3;
+    return rows
+      .sort(
+        (a, b) =>
+          rank(a.book!.code) - rank(b.book!.code) ||
+          a.book!.code.localeCompare(b.book!.code) ||
+          a.order - b.order,
+      )
+      .slice(0, take)
+      .map((c) => ({
+        id: c.id,
+        title: c.title,
+        bookId: c.book!.id,
+        bookCode: c.book!.code,
+        bookLabel: /^\S+x\S+( V\d+)?$/.test(c.book!.sourceLabel ?? '')
+          ? c.book!.sourceLabel
+          : c.book!.title,
+      }));
   }
 
   // Багш+/Админ бүлэг сэдвийг засна — өөр ном руу шилжүүлэх (bookId), БҮТ-ийн
@@ -434,8 +546,13 @@ export class ContentService {
     return { deleted: true, unlinkedChapters: linkedChapters.length };
   }
 
-  async createProblem(dto: CreateProblemDto, userId: string) {
-    await assertInternalTeachingStaff(this.prisma, userId);
+  // revision: импортоор үүссэн бол (DocumentImport) түүхэнд IMPORT гэж бичнэ.
+  async createProblem(
+    dto: CreateProblemDto,
+    userId: string,
+    revision: { action?: 'CREATE' | 'IMPORT'; summary?: string } = {},
+  ) {
+    const actorRole = await assertInternalTeachingStaff(this.prisma, userId);
     const chapter = await this.prisma.chapter.findUnique({
       where: { id: dto.chapterId },
       include: { book: true },
@@ -463,6 +580,7 @@ export class ContentService {
           create: {
             label: string;
             text: string;
+            imageKey: string | null;
             isCorrect: boolean;
             mistakeType: MistakeType;
             order: number;
@@ -485,6 +603,7 @@ export class ContentService {
         create: opts.map((o, i) => ({
           label: String.fromCharCode(65 + i), // дотоод нэр; харагдацын байрлал биш
           text: o.text,
+          imageKey: o.imageKey ?? null,
           isCorrect: o.isCorrect,
           mistakeType: o.isCorrect ? MistakeType.NONE : MistakeType.OTHER,
           order: i + 1,
@@ -501,50 +620,60 @@ export class ContentService {
     }
 
     try {
-      return await this.prisma.problem.create({
-        data: {
-          chapterId: dto.chapterId,
-          token,
-          page: dto.page,
-          number: dto.number,
-          format: dto.format,
-          statementText: dto.statementText,
-          imageKey: dto.imageKey,
-          choices: choices as Prisma.InputJsonValue,
-          correctAnswer: correctAnswer as Prisma.InputJsonValue,
-          choiceOptions: choiceOptionsCreate,
-          points: dto.points,
-          price: dto.price,
-          createdById: userId,
-          tags: dto.tags?.length
-            ? {
-                create: dto.tags.map((t) => ({
-                  tag: {
-                    connectOrCreate: {
-                      where: { type_name: { type: t.type, name: t.name } },
-                      create: { type: t.type, name: t.name },
+      // Бодлого + түүхийн хувилбар 0 нэг transaction-д (this.prisma нь DocumentImport-ийн
+      // transaction байж болно — тэр үед давхар transaction үүсгэхгүй).
+      return await runInTransaction(this.prisma, async (tx) => {
+        const created = await tx.problem.create({
+          data: {
+            chapterId: dto.chapterId,
+            token,
+            page: dto.page,
+            number: dto.number,
+            format: dto.format,
+            statementText: dto.statementText,
+            imageKey: dto.imageKey,
+            choices: choices as Prisma.InputJsonValue,
+            correctAnswer: correctAnswer as Prisma.InputJsonValue,
+            choiceOptions: choiceOptionsCreate,
+            points: dto.points,
+            price: dto.price,
+            createdById: userId,
+            tags: dto.tags?.length
+              ? {
+                  create: dto.tags.map((t) => ({
+                    tag: {
+                      connectOrCreate: {
+                        where: { type_name: { type: t.type, name: t.name } },
+                        create: { type: t.type, name: t.name },
+                      },
                     },
-                  },
-                })),
-              }
-            : undefined,
-          formulas: dto.formulas?.length
-            ? {
-                create: dto.formulas.map((name) => ({
-                  formula: {
-                    connectOrCreate: {
-                      where: { name },
-                      create: { name },
+                  })),
+                }
+              : undefined,
+            formulas: dto.formulas?.length
+              ? {
+                  create: dto.formulas.map((name) => ({
+                    formula: {
+                      connectOrCreate: {
+                        where: { name },
+                        create: { name },
+                      },
                     },
-                  },
-                })),
-              }
-            : undefined,
-        },
-        include: {
-          tags: { include: { tag: true } },
-          formulas: { include: { formula: true } },
-        },
+                  })),
+                }
+              : undefined,
+          },
+          include: {
+            tags: { include: { tag: true } },
+            formulas: { include: { formula: true } },
+          },
+        });
+        const rev = await recordCreated(tx, 'PROBLEM', created.id, {
+          actor: { id: userId, role: actorRole },
+          action: revision.action ?? 'CREATE',
+          ...(revision.summary ? { summary: revision.summary } : {}),
+        });
+        return { ...created, version: rev.version };
       });
     } catch (e) {
       if (
@@ -586,13 +715,7 @@ export class ContentService {
     // зарчмаар шалгаад ProblemChoice мөрүүдийг бүхэлд нь дахин үүсгэнэ.
     const opts = dto.choiceOptions;
     let choiceOptionsReplace:
-      | {
-          label: string;
-          text: string;
-          isCorrect: boolean;
-          mistakeType: MistakeType;
-          order: number;
-        }[]
+      | ChoiceRowInput[]
       | undefined;
     if (opts && opts.length > 0) {
       if (opts.length < 2) {
@@ -607,6 +730,7 @@ export class ContentService {
       choiceOptionsReplace = opts.map((o, i) => ({
         label: String.fromCharCode(65 + i),
         text: o.text,
+        imageKey: o.imageKey ?? null,
         isCorrect: o.isCorrect,
         mistakeType: o.isCorrect ? MistakeType.NONE : MistakeType.OTHER,
         order: i + 1,
@@ -627,22 +751,46 @@ export class ContentService {
       }
     }
 
-    const updated = await this.prisma.$transaction(async (tx) => {
+    const { updated, version, changed, mergedWith } = await this.prisma.$transaction(async (tx) => {
+      // Түүх: мөрийг түгжиж өмнөх төлөвийг авна; expectedVersion зөрвөл 409.
+      const rev = await beginRevision(tx, 'PROBLEM', problemId, {
+        expectedVersion: dto.expectedVersion,
+        overwrite: dto.overwrite,
+      });
+      if (rev.deletedAt) throw new NotFoundException('Бодлого олдсонгүй');
       if (choiceOptionsReplace) {
+        const existing = await tx.problemChoice.findMany({
+          where: { problemId },
+          orderBy: { order: 'asc' },
+          select: { text: true, mistakeType: true, mistakeNote: true },
+        });
         await tx.problemChoice.deleteMany({ where: { problemId } });
         await tx.problemChoice.createMany({
-          data: choiceOptionsReplace.map((c) => ({ ...c, problemId })),
+          data: carryChoiceMistakes(existing, choiceOptionsReplace).map(
+            (c) => ({ ...c, problemId }),
+          ),
         });
       }
-      return tx.problem.update({
-        where: { id: problemId },
-        data,
-        include: {
-          choiceOptions: { orderBy: { order: 'asc' } },
-          tags: { include: { tag: true } },
-          formulas: { include: { formula: true } },
-        },
+      const include = {
+        choiceOptions: { orderBy: { order: 'asc' } },
+        tags: { include: { tag: true } },
+        formulas: { include: { formula: true } },
+      } satisfies Prisma.ProblemInclude;
+      const row = await tx.problem.update({ where: { id: problemId }, data, include });
+      const committed = await commitRevision(tx, rev, {
+        actor: { id: actorId, role: actorRole },
+        action: 'UPDATE',
       });
+      // Бусдын өөрчлөлттэй нэгтгэсэн бол мөр өөрчлөгдсөн — шинэ төлөвийг буцаана
+      const fresh = committed.mergedWith
+        ? await tx.problem.findUniqueOrThrow({ where: { id: problemId }, include })
+        : row;
+      return {
+        updated: fresh,
+        version: committed.version,
+        changed: committed.changed,
+        mergedWith: committed.mergedWith,
+      };
     });
     await this.recordAudit(
       actorId,
@@ -653,7 +801,7 @@ export class ContentService {
       problem,
       updated,
     );
-    return updated;
+    return { ...updated, version, changed, mergedWith };
   }
 
   // Багш+/Админ бодлогыг зөөлөн устгана — Attempt/TestProblem зэрэг
@@ -721,8 +869,14 @@ export class ContentService {
         tags: { include: { tag: true } },
         formulas: { include: { formula: true } },
         analysis: true,
+        // A/B хувилбарыг UI-д тусад нь харуулахын тулд (эзэн 2026-10-08)
+        testItems: {
+          where: { test: { deletedAt: null } },
+          select: { order: true, test: { select: { variantLabel: true } } },
+          take: 1,
+        },
       },
-      orderBy: [{ page: 'asc' }, { number: 'asc' }],
+      orderBy: [{ page: 'asc' }, { number: 'asc' }, { token: 'asc' }],
       skip,
       take: Math.min(take, 100),
     });
@@ -731,13 +885,28 @@ export class ContentService {
     // CHOICE сонголтоос isCorrect/mistakeType-ийг ЗААВАЛ хасна — үгүй бол
     // сурагч хариуны түлхүүрийг choiceOptions-оос шууд харах болно.
     const withAnswers = !!(await internalTeachingRole(this.prisma, userId));
-    return problems.map((p) =>
+    const shaped = problems
+      .map(({ testItems, ...p }) => ({
+        ...p,
+        variantLabel: testItems[0]?.test.variantLabel ?? null,
+        testOrder: testItems[0]?.order ?? null,
+      }))
+      .sort(
+        (a, b) =>
+          (a.variantLabel ?? '').localeCompare(b.variantLabel ?? '') ||
+          (a.testOrder ?? 0) - (b.testOrder ?? 0),
+      );
+    return shaped.map((p) =>
       withAnswers
         ? p
         : {
             ...p,
             correctAnswer: undefined,
             analysis: undefined,
+            // Засварын түүхийн мэдээлэл сурагчид хэрэггүй (хэн зассан — ажилтны ID)
+            version: undefined,
+            updatedAt: undefined,
+            updatedById: undefined,
             choices:
               Array.isArray(p.choices) &&
               p.choices.every((c) => typeof c === 'string')
@@ -746,6 +915,7 @@ export class ContentService {
             choiceOptions: p.choiceOptions.map((o) => ({
               label: o.label,
               text: o.text,
+              imageKey: o.imageKey,
             })),
           },
     );
@@ -827,9 +997,9 @@ export class ContentService {
       }),
       this.prisma.problem.findMany({
         where: { chapterId, deletedAt: null },
+        // бодлогын код (token) нийтэд харагдахгүй (эзний дүрэм 2026-10-08)
         select: {
           id: true,
-          token: true,
           format: true,
           statementText: true,
           imageKey: true,
@@ -868,7 +1038,8 @@ export class ContentService {
     }
     const view = {
       id: problem.id,
-      token: problem.token,
+      // бодлогын код зөвхөн ажилтанд (эзний дүрэм 2026-10-08)
+      ...(TEACHER_ROLES.includes(role) ? { token: problem.token } : {}),
       format: problem.format,
       statementText: problem.statementText,
       imageKey: problem.imageKey,

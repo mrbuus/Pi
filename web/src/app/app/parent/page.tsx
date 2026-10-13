@@ -12,6 +12,7 @@ import {
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { AcknowledgeResultDialog } from "@/components/parent/AcknowledgeResultDialog";
 import ChildHistory from "@/components/parent/ChildHistory";
+import ExamResultCard from "@/components/parent/ExamResultCard";
 import PaidUntilCard from "@/components/payments/PaidUntilCard";
 import { formatMnt } from "@/lib/orgInfo";
 import { STATUS_LABEL } from "@/components/payments/paymentHelpers";
@@ -87,6 +88,7 @@ function ChildPanel({
 }) {
   const child = link.student;
   const [selected, setSelected] = useState<Result | null>(null);
+  const [cardVersion, setCardVersion] = useState(0);
   if (!link.verified)
     return (
       <Card>
@@ -133,21 +135,30 @@ function ChildPanel({
           удаагийн алдаа нь хүүхдийн чадварын дүгнэлт биш.
         </p>
         {results[0] && (
-          <div className="rounded-lg bg-panel p-3 space-y-2">
-            <h3 className="font-semibold">Хамгийн сүүлийн дүн</h3>
-            <p className="text-sm">
-              {results[0].test.title} — {results[0].totalScore}/
-              {results[0].maxScore} оноо
-            </p>
-            <p className="text-xs text-ink-dim">
-              {results[0].source === "CHAPTER_EXAM"
-                ? "Багшийн үнэлгээ"
-                : results[0].source === "EVENING_SELF_REPORT"
-                  ? "Сурагчийн өөрийн тэмдэглэгээ"
-                  : "Шалгалтын дүн"}{" "}
-              — {results[0].createdAt.slice(0, 10)}
-            </p>
-          </div>
+          // Дүнгийн карт: оноо, хувь, сул 2–3 сэдэв + «Дүнтэй танилцлаа»
+          <ExamResultCard
+            key={results[0].id}
+            testResultId={results[0].id}
+            version={cardVersion}
+            onAcknowledge={() => setSelected(results[0])}
+            fallback={
+              <div className="rounded-lg bg-panel p-3 space-y-2">
+                <h3 className="font-semibold">Хамгийн сүүлийн дүн</h3>
+                <p className="text-sm">
+                  {results[0].test.title} — {results[0].totalScore}/
+                  {results[0].maxScore} оноо
+                </p>
+                <p className="text-xs text-ink-dim">
+                  {results[0].source === "CHAPTER_EXAM"
+                    ? "Багшийн үнэлгээ"
+                    : results[0].source === "EVENING_SELF_REPORT"
+                      ? "Сурагчийн өөрийн тэмдэглэгээ"
+                      : "Шалгалтын дүн"}{" "}
+                  — {results[0].createdAt.slice(0, 10)}
+                </p>
+              </div>
+            }
+          />
         )}
         <ChildHistory studentId={child.id} />
         <details className="rounded-xl border border-line p-4">
@@ -245,6 +256,7 @@ function ChildPanel({
             onClose={() => setSelected(null)}
             onSuccess={() => {
               setSelected(null);
+              setCardVersion((v) => v + 1);
               onRefresh();
             }}
           />

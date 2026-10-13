@@ -317,11 +317,11 @@ export default function TheoryEditorClient() {
               id="theory-book-select"
               value={bookId}
               onChange={(e) => changeBook(e.target.value)}
-              className={`bg-bg ${inputCls}`}
+              className={`bg-bg w-full max-w-full sm:w-auto ${inputCls}`}
             >
               {books.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.title}
+                  {b.title.replace(/\s*·\s*/g, " — ")}
                 </option>
               ))}
             </select>
@@ -334,7 +334,7 @@ export default function TheoryEditorClient() {
               value={chapterId}
               onChange={(e) => changeChapter(e.target.value)}
               disabled={!chapters.length}
-              className={`bg-bg ${inputCls}`}
+              className={`bg-bg w-full max-w-full sm:w-auto ${inputCls}`}
             >
               {chapters.map((c) => (
                 <option key={c.id} value={c.id}>

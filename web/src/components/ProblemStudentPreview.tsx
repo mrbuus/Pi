@@ -1,6 +1,7 @@
 "use client";
 
 import MathText from "@/components/MathText";
+import ChoiceContent from "@/components/ChoiceContent";
 import ProblemFigure from "@/components/ProblemFigure";
 import { Check } from "lucide-react";
 import { Dot } from "@/components/ui/Meta";
@@ -26,6 +27,7 @@ import { Dot } from "@/components/ui/Meta";
 export interface PreviewChoice {
   text: string;
   isCorrect: boolean;
+  imageKey?: string | null;
 }
 
 export default function ProblemStudentPreview({
@@ -48,7 +50,7 @@ export default function ProblemStudentPreview({
   order?: number;
 }) {
   // Хоосон мөрүүд сурагчид очихгүй тул preview-д ч харуулахгүй
-  const visible = choices.filter((c) => c.text.trim() !== "");
+  const visible = choices.filter((c) => c.text.trim() !== "" || !!c.imageKey);
   const isChoice = format === "CHOICE" && visible.length > 0;
 
   return (
@@ -104,8 +106,12 @@ export default function ProblemStudentPreview({
                     c.isCorrect ? "border-success/70" : "border-line"
                   }`}
                 />
-                <span className="flex-1">
-                  <MathText showErrorInTeacherView>{c.text}</MathText>
+                <span className="min-w-0 flex-1">
+                  {c.imageKey ? (
+                    <ChoiceContent text={c.text} image={c.imageKey} />
+                  ) : (
+                    <MathText showErrorInTeacherView>{c.text}</MathText>
+                  )}
                 </span>
                 {c.isCorrect && (
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success/20">

@@ -16,7 +16,13 @@ import SubmitDialog from "@/components/exam/SubmitDialog";
 import LeaveWarningDialog from "@/components/exam/LeaveWarningDialog";
 import ExamIntro from "@/components/exam/ExamIntro";
 import ExamResult from "@/components/exam/ExamResult";
-import { parseFillSlots, slotsTotalLength } from "@/components/exam/fillSlots";
+import { isExamType } from "@/components/test-list/types";
+import {
+  backspaceSlot,
+  parseFillSlots,
+  slotsTotalLength,
+  typeSlotDigit,
+} from "@/components/exam/fillSlots";
 
 /* ============================================================================
  * Тест бодох хуудас — session-т суурилсан шалгалтын орчин (Шийдвэр 2, 3, 6)
@@ -45,12 +51,14 @@ interface ProblemView {
   points: number;
   choiceMode: "TEXT" | "LETTER" | null;
   choices: string[] | null;
+  choiceImages?: (string | null)[] | null;
 }
 interface Meta {
   id: string;
   title: string;
   variantLabel?: string | null;
   gradingMode?: string;
+  type?: string;
   timeLimitMin?: number | null;
   problemCount: number;
   totalPoints: number;
@@ -90,13 +98,12 @@ interface ReviewResp {
   leaveCount: number;
 }
 
-/* Шалгалтаас гарах хязгаар — эзний шийдвэр (2026-08-08):
-   «эхнийх дээр анхааруулга өгөөд, дараагийнх дээр шууд шалгалтыг
-   автоматаар дуусгадаг байхаар».
-   1 дэх гаралт → анхааруулга · 2 дахь гаралт → автоматаар илгээнэ.
-   ⚠️ ExamIntro дээр УРЬДЧИЛАН хэлнэ — гэнэтийн шийтгэл шударга бус. */
+/* Шалгалтаас гарах хязгаар — эзний АНХНЫ шийдвэр рүү буцаав
+   (SHALGALT-TOLOVLOGOO §8.5, 2026-10-10): 1, 2 дахь гаралт → анхааруулга,
+   3 дахь гаралт → автоматаар илгээнэ.
+   ExamIntro дээр УРЬДЧИЛАН хэлнэ — гэнэтийн шийтгэл шударга бус. */
 const LEAVE_WARN = 1;
-const LEAVE_MAX = 2;
+const LEAVE_MAX = 3;
 const SAVE_DEBOUNCE_MS = 1200;
 const HEARTBEAT_MS = 20_000;
 // ±20% jitter — 1000 сурагч ойролцоо мөчид шалгалт эхэлбэл heartbeat-ууд нь
@@ -506,8 +513,10 @@ export default function TakeTestPage() {
         const slotGroups = parseFillSlots(cur.statementText);
         if (slotGroups.length > 0) {
           const total = slotsTotalLength(slotGroups);
-          if (/^[0-9]$/.test(e.key) && prev.length < total) setAnswer(pid, prev + e.key);
-          else if (e.key === "Backspace") setAnswer(pid, prev.slice(0, -1));
+          // Эхний хоосон нүдэнд бичнэ / сүүлд бөглөсөн нүдийг арилгана — хоосон
+          // нүдний "_" байрлалыг хадгална (fillSlots.ts)
+          if (/^[0-9]$/.test(e.key)) setAnswer(pid, typeSlotDigit(prev, total, e.key));
+          else if (e.key === "Backspace") setAnswer(pid, backspaceSlot(prev, total));
           return;
         }
         if (/^[0-9]$/.test(e.key)) setAnswer(pid, prev + e.key);
@@ -606,6 +615,14 @@ export default function TakeTestPage() {
     setSubView("question");
   }
 
+  useEffect(() => {
+    // Шалгалтын төрөл (1000 бодлого, сэдвийн шалгалт, сорил): нэг хуудасны
+    // дүнгийн дэлгэц (/result) — эргэн харалтын хаалтыг сервер барина.
+    if (phase === "result" && meta?.type && isExamType(meta.type)) {
+      router.replace(`/app/tests/${params.id}/result`);
+    }
+  }, [phase, meta?.type, router, params.id]);
+
   // ---------- Ачаалал / алдаа ----------
   if (error && phase === "loading") {
     return (
@@ -617,6 +634,10 @@ export default function TakeTestPage() {
   if (phase === "loading" || !meta) return <p className="text-ink-dim">Ачаалж байна…</p>;
 
   const minutes = meta.timeLimitMin ?? 0;
+  // Шалгалтын төрлийн дүн нь /app/tests/:id/result (1000 бодлогын бүх
+  // бодлогын эргэн харалт нь /app/tests/:id/review).
+  const examResultPage = !!meta.type && isExamType(meta.type);
+  const listHref = "/app/tests";
 
   /* ====================== ИНТРО ====================== */
   if (phase === "intro") {
@@ -638,13 +659,18 @@ export default function TakeTestPage() {
         onStart={() => (resume ? void beginTest() : setConfirmStart(true))}
         onConfirmStart={() => void beginTest()}
         onCancelConfirm={() => setConfirmStart(false)}
-        onBack={() => router.push("/app/tests")}
+        onBack={() => router.push(listHref)}
       />
     );
   }
 
   /* ====================== ҮР ДҮН + REVIEW ====================== */
   if (phase === "result") {
+    if (examResultPage) {
+      // Бодлого бүрийн эргэн харалтыг багшийн нээсэн түвшнээр серверт хаадаг
+      // (дээрх effect шилжүүлнэ).
+      return <p className="text-ink-dim">Ачаалж байна…</p>;
+    }
     return (
       <ExamResult
         title={meta.title}

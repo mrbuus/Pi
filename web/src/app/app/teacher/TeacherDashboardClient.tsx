@@ -22,7 +22,7 @@ import {
   mnDayOrdinalLabel,
 } from "@/components/homework/homeworkDate";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
-import { api, getRole } from "@/lib/api";
+import { api, ApiError, getRole } from "@/lib/api";
 
 // ============================================================================
 // Type Definitions
@@ -273,7 +273,8 @@ export default function TeacherDashboardClient() {
       .then(setSummary)
       .catch((e) => {
         setSummary(null);
-        setSummaryError(errMsg(e));
+        // 400 = тухайн өдрийн дүгнэлт хараахан бодогдоогүй — алдаа биш, хоосон төлөв.
+        setSummaryError(e instanceof ApiError && e.status === 400 ? null : errMsg(e));
       })
       .finally(() => setSummaryLoading(false));
 

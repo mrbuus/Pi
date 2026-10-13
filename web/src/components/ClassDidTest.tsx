@@ -634,7 +634,6 @@ export default function ClassDidTest({ classroomId }: { classroomId: string }) {
                         <button
                           key={p.problemId}
                           onClick={() => toggleProblem(s, p.problemId)}
-                          title={p.token}
                           className={`h-7 w-7 rounded-lg border text-xs font-bold transition ${
                             p.included
                               ? "border-success/50 bg-success/15 text-success"

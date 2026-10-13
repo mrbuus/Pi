@@ -7,6 +7,7 @@ export interface ChoiceOptionRef {
   text: string;
   isCorrect: boolean;
   label?: string;
+  imageKey?: string | null;
 }
 
 export interface ProblemTagRef {

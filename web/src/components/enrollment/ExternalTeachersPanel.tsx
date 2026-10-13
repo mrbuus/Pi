@@ -11,6 +11,7 @@ import {
   LoadingState,
 } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
+import { formatMnDate } from "@/lib/dateMn";
 
 interface ExternalTeacher {
   id: string;
@@ -38,7 +39,7 @@ function displayName(teacher: ExternalTeacher) {
 }
 
 function localDate(value: string) {
-  return new Date(value).toLocaleDateString("mn-MN", {
+  return formatMnDate(value, {
     year: "numeric",
     month: "short",
     day: "numeric",

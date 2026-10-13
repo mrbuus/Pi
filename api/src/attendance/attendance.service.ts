@@ -7,6 +7,7 @@ import {
 import { AuditService } from '../audit/audit.service';
 import { addDateDays, dateKey, parseDateOnly } from '../common/date';
 import { AttendanceStatus, Role } from '../generated/prisma/enums';
+import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import { MarkAttendanceDto } from './dto/mark-attendance.dto';
@@ -50,7 +51,7 @@ export class AttendanceService {
       throw new NotFoundException('Анги олдсонгүй');
     }
     if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return classroom;
-    if (role === Role.TEACHER && classroom.teacherId === userId) {
+    if (role === Role.TEACHER && isClassTeacher(classroom, userId)) {
       return classroom;
     }
     throw new ForbiddenException('Энэ ангид хандах эрхгүй');
@@ -367,7 +368,7 @@ export class AttendanceService {
         where: {
           studentId,
           leftAt: null,
-          classroom: { teacherId: userId },
+          classroom: classTeacherWhere(userId),
         },
       });
       if (enrollment) return student;

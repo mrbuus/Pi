@@ -7,7 +7,9 @@ import PatternOverview from "./PatternOverview";
 import StaffScheduleBuilder from "./StaffScheduleBuilder";
 import UpcomingAgenda from "./UpcomingAgenda";
 import WeeklyGrid from "./WeeklyGrid";
-import CalendarSubscriptionCard from "./CalendarSubscriptionCard";
+import WeekBuilder from "./WeekBuilder";
+import StudentLessonDays from "@/components/lesson-records/StudentLessonDays";
+import StudentLessonHistory from "@/components/lesson-records/StudentLessonHistory";
 import {
   todayUBKey,
   type ClassroomLite,
@@ -46,14 +48,16 @@ function StudentSchedule() {
           Та одоогоор идэвхтэй ангид элсээгүй байгаа тул хуваарь харагдахгүй
           байна. Асуудалтай бол багштайгаа холбогдоно уу.
         </div>
-        <CalendarSubscriptionCard />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      <CalendarSubscriptionCard />
+      <section>
+        <h2 className="mb-3 font-bold text-brand-soft">Өдрийн хичээл</h2>
+        <StudentLessonDays />
+      </section>
       <section>
         <h2 className="mb-3 font-bold text-brand-soft">
           Миний ангийн долоо хоногийн хуваарь
@@ -63,6 +67,10 @@ function StudentSchedule() {
       <section>
         <h2 className="mb-3 font-bold text-brand-soft">Ойрын өдрүүд</h2>
         <UpcomingAgenda classroomId={data.classroomId} />
+      </section>
+      <section>
+        <h2 className="mb-3 font-bold text-brand-soft">Хийсэн хичээлүүд</h2>
+        <StudentLessonHistory />
       </section>
     </div>
   );
@@ -85,12 +93,14 @@ function TeacherSchedule({ role }: { role: string }) {
 
   return (
     <div className="space-y-8">
-      <CalendarSubscriptionCard />
       {/* Багш+ -ийн хувьд зохион байгуулах хэсэг нь ӨДӨР ТУТМЫН ажил тул
           хамгийн дээр байрлана — өөрийн хичээлийн жагсаалт доогуур орно. */}
       {role === "TEACHER_PLUS" && <StaffScheduleBuilder role={role} />}
       {/* Энгийн багшид ерөнхий давтамжийг ХАРУУЛНА (засахгүй) — "бүх багш
           ерөнхийг нь харж болно" гэсэн эзний дүрэм. */}
+      {/* Энгийн багш: өдрийн хуваарь — батлах, тарсан цаг, тайлбар (эзэн 2026-10-08).
+          Багш оноолтыг зөвхөн харна. */}
+      {role === "TEACHER" && <WeekBuilder />}
       {role === "TEACHER" && (
         <section>
           <h2 className="mb-3 font-bold text-brand-soft">Ерөнхий хуваарь</h2>

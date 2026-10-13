@@ -5,9 +5,16 @@ import { SmsSend } from "@/components/sms/SmsSend";
 import { SmsHistory } from "@/components/sms/SmsHistory";
 import { SmsTemplates } from "@/components/sms/SmsTemplates";
 import { PageHeader } from "@/components/ui/Surface";
+import { SMS_ENABLED } from "@/lib/features";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 
 export default function SmsPage() {
+  if (!SMS_ENABLED)
+    return (
+      <main className="space-y-6">
+        <PageHeader title="Дугаарлуу мессеж" description="Энэ хэсэг түр унтраастай байна." />
+      </main>
+    );
   return (
     <main className="space-y-6">
       <PageHeader

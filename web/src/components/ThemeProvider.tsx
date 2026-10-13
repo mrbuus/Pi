@@ -26,9 +26,9 @@ function isTheme(value: string | null): value is Theme {
    тул cascading render болон hydration mismatch үүсэхгүй. */
 const themeListeners = new Set<Listener>();
 
-// ӨГӨГДМӨЛ нь "light" — layout.tsx дахь inline скрипттэй ЯГ ижил байх ёстой,
-// эс бөгөөс эхний paint дээр нэг frame гялсхийнэ.
-const DEFAULT_THEME: Theme = "light";
+// ӨГӨГДМӨЛ нь "system" (эзэн 2026-10-13) — layout.tsx дахь inline скрипттэй ЯГ
+// ижил байх ёстой, эс бөгөөс эхний paint дээр нэг frame гялсхийнэ.
+const DEFAULT_THEME: Theme = "system";
 
 function readStoredTheme(): Theme {
   try {

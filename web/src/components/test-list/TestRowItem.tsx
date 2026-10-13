@@ -1,7 +1,7 @@
-import { Dot, Meta } from "@/components/ui/Meta";
+import { Dot, Meta, MetaTitle } from "@/components/ui/Meta";
 import StudentRowAction from "./StudentRowAction";
 import TeacherRowMeta from "./TeacherRowMeta";
-import type { TestRow } from "./types";
+import { thousandShortTitle, type TestRow } from "./types";
 
 export default function TestRowItem({
   test,
@@ -12,14 +12,18 @@ export default function TestRowItem({
   num: number | null;
   isTeacher: boolean;
 }) {
+  // 1000 бодлого: «Сорил 10-A» гэх мэт нэрээр (дугаар нь эрэмбэлэх түлхүүр)
+  const thousand = test.type === "THOUSAND";
+  const short = thousand ? thousandShortTitle(test.title) : null;
+  const badge = thousand ? (/(\d+)\s*-?\s*[A-ZА-Я]?\s*$/.exec(short ?? "")?.[1] ?? <Dot />) : num ?? <Dot />;
   return (
     <div className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-bright/10 text-sm font-bold text-brand-soft">
-        {num ?? <Dot />}
+        {badge}
       </span>
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-1.5 truncate text-sm font-semibold text-ink">
-          {num !== null ? `Тест ${num}` : test.title}
+          {thousand ? <MetaTitle>{short}</MetaTitle> : num !== null ? `Тест ${num}` : test.title}
           {/* А/Б хувилбар — багшид ХОЁУЛАНГ нь тодорхой пилл-ээр ялгаж
               харуулна (Дутагдал §1: сурагчид ЗӨВХӨН нэгийг харна). */}
           {test.variantLabel && isTeacher && (

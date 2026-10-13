@@ -50,9 +50,22 @@ export function bookColor(code?: string | null) {
   return key ? { key, ...BOOK_COLORS[key] } : null;
 }
 
-// Шалгалт = жинхэнэ шалгалтын төрлүүд; бусад нь энгийн дасгал ТЕСТ
+// Шалгалт = жинхэнэ шалгалтын төрлүүд (1000 бодлого орно); бусад нь энгийн дасгал ТЕСТ
 export function isExamType(type: string) {
-  return type === "CHAPTER_EXAM" || type === "EESH_MOCK";
+  return type === "CHAPTER_EXAM" || type === "EESH_MOCK" || type === "THOUSAND";
+}
+
+/** «1000 бодлого» бүлэг: Явцын 1-A…6-A, дараа нь Сорил 7-A…22-A. */
+export const THOUSAND_TOPIC = "1000 бодлого";
+export function thousandSortKey(t: Pick<TestRow, "groupKey" | "title">): number {
+  const m = /^1000:([A-Z]+)(\d+)$/.exec(t.groupKey ?? "");
+  if (m) return (m[1] === "Y" ? 0 : 1000) + Number(m[2]);
+  const n = /(\d+)\s*-?\s*[A-ZА-Я]?\s*$/.exec(t.title);
+  return 5000 + (n ? Number(n[1]) : 0);
+}
+/** «1000 бодлого · Сорил 10-A» → «Сорил 10-A» */
+export function thousandShortTitle(title: string): string {
+  return title.replace(/^1000\s*бодлого\s*[·:-]\s*/i, "").trim() || title;
 }
 
 // groupKey/chapter-ийн БОДИТ талбаруудыг эхэлж оролдоно; тэдгээр байхгүй үед
@@ -60,6 +73,7 @@ export function isExamType(type: string) {
 // салгана). API ирээдүйд chapter.title/topic-ийг буцаавал энэ fallback
 // шаардлагагүй болно — доорх мөр яг тэр л heuristic хэсэг.
 export function splitTopic(t: TestRow): { topic: string; num: number | null } {
+  if (t.type === "THOUSAND") return { topic: THOUSAND_TOPIC, num: thousandSortKey(t) };
   const key = (t.groupKey ?? t.chapter?.topic?.name ?? t.chapter?.title ?? t.title).trim();
   // heuristic fallback: "Илтгэгч тэгшитгэл 1" → { topic: "Илтгэгч тэгшитгэл", num: 1 }
   const m = key.match(/^(.*?)\s+(\d+)$/);

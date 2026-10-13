@@ -1,4 +1,5 @@
 import type { IconName } from "./icons";
+import { SMS_ENABLED } from "@/lib/features";
 
 export interface NavLink {
   href: string;
@@ -6,20 +7,24 @@ export interface NavLink {
   icon: IconName;
 }
 
-export type GroupKey = "learn" | "class" | "admin" | "personal";
+export type GroupKey = "learn" | "class" | "finance" | "admin" | "internal" | "personal";
 
 // Бүлгийн монгол шошго — эзний хүсэлтээр чиг үүргээр нь бүлэглэсэн.
 export const GROUP_LABEL: Record<GroupKey, string> = {
   learn: "Сургалт",
   class: "Анги",
+  finance: "Төлбөр",
   admin: "Удирдлага",
+  internal: "Дотоод",
   personal: "Хувийн",
 };
 
 export const GROUP_ICON: Record<GroupKey, IconName> = {
   learn: "book-open",
   class: "calendar",
+  finance: "wallet",
   admin: "shield",
+  internal: "pencil",
   personal: "user",
 };
 
@@ -30,7 +35,9 @@ export const GROUP_TONE: Record<GroupKey | "home", string> = {
   home: "bg-brand-bright/15 text-brand-soft",
   learn: "bg-accent-teal/15 text-accent-teal",
   class: "bg-accent-violet/15 text-accent-violet",
+  finance: "bg-success/15 text-success",
   admin: "bg-brand-bright/15 text-brand-soft",
+  internal: "bg-accent-sky/15 text-accent-sky",
   personal: "bg-accent-sky/15 text-accent-sky",
 };
 
@@ -47,6 +54,8 @@ export const HOME: Record<string, NavLink> = {
 };
 
 // Бодит маршрутуудыг эрх, чиг үүргээр бүлэглэсэн бүрэн цэс.
+// Ажилтны «Анги» хэсэг: Хуваарь нь Өдрийн хичээл, Тарах цаг, Хуваарийн цаг,
+// Төлөвлөгч, Дүн шинжилгээг нэгтгэнэ (nav/ClassHubTabs.tsx, эзэн 2026-10-08).
 const NAV_BY_ROLE: Record<string, NavLink[]> = {
   GROUP_TEACHER: [
     HOME.GROUP_TEACHER,
@@ -76,66 +85,51 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
-    { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
-    { href: "/app/teacher-hours", label: "Хуваарийн цаг", icon: "clock" },
-    { href: "/app/dismissal", label: "Анги тарах цаг", icon: "clock" },
-    { href: "/app/lesson-flow", label: "Өдрийн хичээл", icon: "calendar" },
+    { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
-    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   TEACHER_PLUS: [
     HOME.TEACHER_PLUS,
+    { href: "/app/internal", label: "Бодлогын ноорог", icon: "pencil" },
     { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/payments", label: "Төлбөр", icon: "credit-card" },
-    { href: "/app/admin/leads", label: "Хүсэлтүүд", icon: "user-plus" },
-    { href: "/app/admin/enrollment", label: "Элсэлтийн удирдлага", icon: "clipboard-list" },
+    // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
+    { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
-    { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
-    { href: "/app/teacher-hours", label: "Хуваарийн цаг", icon: "clock" },
-    { href: "/app/dismissal", label: "Анги тарах цаг", icon: "clock" },
-    { href: "/app/lesson-flow", label: "Өдрийн хичээл", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
-    { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
-    { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
+    { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
-    { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
-    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   ADMIN: [
     HOME.ADMIN,
     { href: "/app/admin/v2", label: "v2 ажлын хяналт", icon: "clipboard-list" },
     { href: "/app/admin/capabilities", label: "Ажилтны нарийн эрх", icon: "shield-check" },
+    { href: "/app/internal", label: "Бодлогын ноорог", icon: "pencil" },
     { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/teacher", label: "Багшийн самбар", icon: "teacher" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
-    { href: "/app/admin/leads", label: "Хүсэлтүүд", icon: "user-plus" },
-    { href: "/app/admin/enrollment", label: "Элсэлтийн удирдлага", icon: "clipboard-list" },
+    // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
+    { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
-    { href: "/app/planner", label: "Төлөвлөгч", icon: "list-checks" },
-    { href: "/app/teacher-hours", label: "Хуваарийн цаг", icon: "clock" },
-    { href: "/app/dismissal", label: "Анги тарах цаг", icon: "clock" },
-    { href: "/app/lesson-flow", label: "Өдрийн хичээл", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
-    { href: "/app/admin/classrooms", label: "Ангиуд", icon: "school" },
+    { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/finance", label: "Санхүү", icon: "wallet" },
     { href: "/app/admin/passes", label: "Эрхийн удирдлага", icon: "key" },
     { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
-    { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund" },
-    { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart" },
   ],
   BUYER: [
     HOME.BUYER,
@@ -144,6 +138,8 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/study/history", label: "Давтлагын түүх", icon: "clock" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
+    // Худалдаж авсан шалгалт (1000 бодлого орно) — «Шалгалт» хэсэгт
+    { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/store", label: "Дэлгүүр", icon: "store" },
   ],
@@ -155,25 +151,28 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 
 // Маршрут бүрийг аль бүлэгт харьяалагдахыг тодорхойлно (нүүр хуудсуудаас бусад).
 const ITEM_GROUP: Record<string, GroupKey> = {
+  "/app/internal": "internal",
   "/app/study/history": "learn",
   "/app/groups": "class",
   "/app/study": "learn",
   "/app/results-ranking": "learn",
   "/app/admin/v2": "admin",
   "/app/admin/capabilities": "admin",
-  "/app/import": "admin",
+  "/app/import": "internal",
   "/app/support": "personal",
   "/app/feedback": "personal",
   "/app/dismissal": "class",
   "/app/lesson-flow": "class",
   "/app/lesson-flow/my": "class",
   "/app/admin/classrooms": "admin",
-  "/app/admin/finance": "admin",
+  // «Анги» самбар (эзэн 2026-10-13); бүртгэлийн удирдлага /app/admin/classrooms хэвээр
+  "/app/classes": "class",
+  "/app/admin/finance": "finance",
   "/app/admin/passes": "admin",
   "/app/notifications": "personal",
   "/app/consent": "personal",
-  "/app/admin/store": "admin",
-  "/app/tuition": "admin",
+  "/app/admin/store": "finance",
+  "/app/tuition": "finance",
   "/app/insights": "class",
   "/app/practice": "learn",
   "/app/store": "personal",
@@ -188,12 +187,12 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/teacher-hours": "class",
   "/app/admin/leads": "admin",
   "/app/admin/enrollment": "admin",
-  "/app/admin/reconcile": "admin",
-  "/app/admin/theory": "admin",
+  "/app/admin/reconcile": "finance",
+  "/app/admin/theory": "internal",
   "/app/admin/students": "admin",
   "/app/admin/audit": "admin",
   "/app/admin/analytics": "admin",
-  "/app/payments": "admin",
+  "/app/payments": "finance",
   "/app/sms": "admin",
   "/app/goals": "personal",
   "/app/student/payments": "personal",
@@ -233,7 +232,7 @@ const SHORT_LABEL: Record<string, string> = {
   "/app/schedule": "Хуваарь",
   "/app/payments": "Төлбөр",
   "/app/admin/students": "Сурагчид",
-  "/app/admin/leads": "Хүсэлт",
+  "/app/admin/leads": "Элсэлт",
 };
 
 export interface BottomTab extends NavLink {
@@ -265,24 +264,27 @@ export interface RoleNav {
   groups: NavGroup[];
 }
 
-const GROUP_ORDER: GroupKey[] = ["learn", "class", "admin", "personal"];
+const GROUP_ORDER: GroupKey[] = ["learn", "class", "finance", "admin", "internal", "personal"];
 
 export function getRoleNav(role: string | null): RoleNav {
-  const items = role ? NAV_BY_ROLE[role] ?? [] : [];
+  const items = (role ? NAV_BY_ROLE[role] ?? [] : []).filter((i) => SMS_ENABLED || i.href !== "/app/sms");
   const home = items[0] ?? null;
   const rest = items.slice(1);
 
   const buckets: Record<GroupKey, NavLink[]> = {
     learn: [],
     class: [],
+    finance: [],
     admin: [],
+    internal: [],
     personal: [],
   };
   for (const item of rest) {
     const group = ITEM_GROUP[item.href] ?? "learn";
     buckets[group].push(item);
   }
-  buckets.personal.push(PROFILE_LINK, ...COMMON_PERSONAL);
+  // Миний мэдээлэл, тусламж, мэдэгдэл… баруун дээд булангийн хэрэглэгчийн цэст
+  // (nav/UserMenu.tsx) шилжсэн — зүүн цэсэнд давхардуулахгүй (эзэн 2026-10-13).
 
   const groups = GROUP_ORDER.filter((key) => buckets[key].length > 0).map((key) => ({
     key,
@@ -296,7 +298,23 @@ export function getRoleNav(role: string | null): RoleNav {
 
 // Дээд самбарт харуулах хуудасны гарчиг — идэвхтэй маршрутын шошгыг
 // цэсний өгөгдлөөс олж ашиглана (шинэ мэдээлэл зохиохгүй).
+// «Анги» хэсэгт нэгтгэгдсэн хуудсуудын гарчиг (цэснээс хасагдсан тул энд).
+const HUB_TITLE: Record<string, string> = {
+  "/app/classes": "Ангиуд",
+  "/app/lesson-flow": "Өдрийн хичээл",
+  "/app/dismissal": "Анги тарах цаг",
+  "/app/teacher-hours": "Хуваарийн цаг",
+  "/app/planner": "Төлөвлөгч",
+  "/app/insights": "Дүн шинжилгээ",
+  "/app/admin/enrollment": "Элсэлтийн удирдлага",
+};
+
+export const PERSONAL_LINKS: NavLink[] = [PROFILE_LINK, ...COMMON_PERSONAL];
+
 export function getPageTitle(role: string | null, pathname: string): string {
+  const personal = PERSONAL_LINKS.find((l) => l.href === pathname);
+  if (personal) return personal.label;
+  if (HUB_TITLE[pathname] && role && ["ADMIN", "TEACHER_PLUS", "TEACHER"].includes(role)) return HUB_TITLE[pathname];
   const { home, groups } = getRoleNav(role);
   if (home?.href === pathname) return home.label;
   for (const group of groups) {

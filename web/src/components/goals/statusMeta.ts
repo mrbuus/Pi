@@ -1,5 +1,6 @@
 import { Ban, Check, NotebookPen, Play, X, type LucideIcon } from "lucide-react";
 import type { GoalStatus, GoalSubject } from "./types";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 // Төлөв бүрийг ХЭЗЭЭ Ч зөвхөн өнгөөр ялгахгүй — дүрс (icon) + монгол нэрийг
 // үргэлж хамт ашиглана (өнгө хараагүй сурагчид ч ялгагдана).
@@ -63,12 +64,12 @@ export const SUBJECT_LABEL: Record<GoalSubject, string> = {
 
 export function formatDate(d?: string | null): string {
   if (!d) return "—";
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(new Date(d), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
     timeZone: "Asia/Ulaanbaatar",
-  }).format(new Date(d));
+  });
 }
 
 /** Өнөөдрөөс хойш үлдсэн хоног (сөрөг бол хугацаа өнгөрсөн). */

@@ -13,6 +13,7 @@ import {
   todayUB,
 } from '../common/date';
 import { EVENING_MARKING_WINDOW_DAYS } from '../common/marking';
+import { isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -35,7 +36,7 @@ export class ClassSessionsService {
       throw new NotFoundException('Анги олдсонгүй');
     }
     if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return;
-    if (role === Role.TEACHER && classroom.teacherId === userId) return;
+    if (role === Role.TEACHER && isClassTeacher(classroom, userId)) return;
     throw new ForbiddenException('Энэ ангид хандах эрхгүй');
   }
 
@@ -230,9 +231,9 @@ export class ClassSessionsService {
           orderBy: { order: 'asc' },
           include: {
             problem: {
+              // token (бодлогын код) сурагчид очихгүй — эзний дүрэм
               select: {
                 id: true,
-                token: true,
                 statementText: true,
                 imageKey: true,
               },
@@ -299,7 +300,6 @@ export class ClassSessionsService {
           problems: included.map((tp, i) => ({
             index: i + 1,
             problemId: tp.problemId,
-            token: tp.problem.token,
             statementText: tp.problem.statementText,
             imageKey: tp.problem.imageKey,
             myState: myState.get(stateKey(tp.problemId, s.date)) ?? null,

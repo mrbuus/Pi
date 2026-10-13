@@ -4,6 +4,7 @@ import {
   nextSevenDigitStudentCode,
   parseGrade,
   parseStudentWorkbook,
+  parseClassroomLabel,
 } from './student-import';
 
 describe('student import helpers', () => {
@@ -41,5 +42,19 @@ describe('student import helpers', () => {
     await expect(parseStudentWorkbook(Buffer.from('no'))).rejects.toThrow(
       BadRequestException,
     );
+  });
+});
+
+describe('parseClassroomLabel', () => {
+  it('ангийн нэрийн хаалтаас салбарыг авна', () => {
+    expect(parseClassroomLabel('12-1 (Баруун 4)')).toEqual({ section: '12-1', branch: 'Баруун 4' });
+    expect(parseClassroomLabel('НИЙГЭМ (Зүүн 4)')).toEqual({ section: 'НИЙГЭМ', branch: 'Зүүн 4' });
+  });
+  it('хаалтгүй бол импортын дүрмээр таана', () => {
+    expect(parseClassroomLabel('13-2')).toEqual({ section: '13-2', branch: 'Зүүн 4' });
+    expect(parseClassroomLabel('9-2')).toEqual({ section: '9-2', branch: 'Зүүн 4' });
+    expect(parseClassroomLabel('12-7')).toEqual({ section: '12-7', branch: 'Баруун 4' });
+    expect(parseClassroomLabel('Нийгэм')).toEqual({ section: 'Нийгэм', branch: 'Зүүн 4' });
+    expect(parseClassroomLabel('  ')).toEqual({ section: null, branch: null });
   });
 });

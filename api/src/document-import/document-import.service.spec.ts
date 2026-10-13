@@ -4,6 +4,7 @@ import { DocumentImportService } from './document-import.service';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfirmDocumentDto } from './confirm-document.dto';
+import { withRevisionFakes } from '../../test/fakes/revision-db';
 async function fixture(figure = false) {
   const zip = new JSZip();
   zip.file('[Content_Types].xml', '<Types/>');
@@ -32,7 +33,8 @@ interface StoredProblem extends ProblemData {
 }
 function setup() {
   const stored = new Map<string, StoredProblem>();
-  const tx = {
+  // createProblem түүхийн хувилбар 0-ийг ижил transaction-д бичнэ
+  const tx = withRevisionFakes({
     user: {
       findUnique: jest.fn().mockResolvedValue({
         id: 'teacher',
@@ -57,7 +59,7 @@ function setup() {
       }),
     },
     auditLog: { create: jest.fn().mockResolvedValue({}) },
-  };
+  });
   const prisma = {
     ...tx,
     $transaction: jest.fn(

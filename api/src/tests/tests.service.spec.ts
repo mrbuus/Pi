@@ -103,3 +103,56 @@ describe('TestsService session autosave', () => {
     ).toBe(true);
   });
 });
+
+describe('TestsService сурагчийн харагдац — сонголтын зураг', () => {
+  const service = new TestsService({} as never, {} as never);
+  const build = (
+    service as unknown as {
+      buildProblemViews: (
+        problems: unknown[],
+        session: unknown,
+      ) => { choices: string[] | null; choiceImages: (string | null)[] | null }[];
+    }
+  ).buildProblemViews.bind(service);
+  const row = (options: { order: number; text: string; isCorrect: boolean; imageKey?: string | null }[]) => ({
+    problemId: 'p1',
+    order: 1,
+    points: 1,
+    problem: {
+      id: 'p1',
+      format: 'CHOICE',
+      statementText: 'График аль нь вэ?',
+      imageKey: null,
+      choices: null,
+      correctAnswer: '',
+      attemptCount: 0,
+      correctRate: null,
+      choiceOptions: options,
+      chapter: { id: 'c', title: 'c' },
+    },
+  });
+
+  it('холилдсон дараалалд зураг текстийнхээ хамт шилжинэ', () => {
+    const [view] = build(
+      [
+        row([
+          { order: 1, text: '', isCorrect: false, imageKey: 'a.png' },
+          { order: 2, text: '', isCorrect: true, imageKey: 'b.png' },
+          { order: 3, text: 'x', isCorrect: false, imageKey: null },
+        ]),
+      ],
+      { problemOrder: ['p1'], choiceOrder: { p1: [2, 0, 1] } },
+    );
+    expect(view.choices).toEqual(['x', '', '']);
+    expect(view.choiceImages).toEqual([null, 'a.png', 'b.png']);
+    expect(JSON.stringify(view)).not.toMatch(/isCorrect/);
+  });
+
+  it('зураггүй бодлогод choiceImages null', () => {
+    const [view] = build(
+      [row([{ order: 1, text: '1', isCorrect: true }, { order: 2, text: '2', isCorrect: false }])],
+      { problemOrder: ['p1'], choiceOrder: {} },
+    );
+    expect(view.choiceImages).toBeNull();
+  });
+});

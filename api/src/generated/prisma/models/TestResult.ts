@@ -29,11 +29,13 @@ export type AggregateTestResult = {
 export type TestResultAvgAggregateOutputType = {
   totalScore: number | null
   maxScore: number | null
+  version: number | null
 }
 
 export type TestResultSumAggregateOutputType = {
   totalScore: number | null
   maxScore: number | null
+  version: number | null
 }
 
 export type TestResultMinAggregateOutputType = {
@@ -45,6 +47,9 @@ export type TestResultMinAggregateOutputType = {
   enteredById: string | null
   source: $Enums.AttemptSource | null
   createdAt: Date | null
+  version: number | null
+  regradeNote: string | null
+  updatedAt: Date | null
 }
 
 export type TestResultMaxAggregateOutputType = {
@@ -56,6 +61,9 @@ export type TestResultMaxAggregateOutputType = {
   enteredById: string | null
   source: $Enums.AttemptSource | null
   createdAt: Date | null
+  version: number | null
+  regradeNote: string | null
+  updatedAt: Date | null
 }
 
 export type TestResultCountAggregateOutputType = {
@@ -67,6 +75,9 @@ export type TestResultCountAggregateOutputType = {
   enteredById: number
   source: number
   createdAt: number
+  version: number
+  regradeNote: number
+  updatedAt: number
   _all: number
 }
 
@@ -74,11 +85,13 @@ export type TestResultCountAggregateOutputType = {
 export type TestResultAvgAggregateInputType = {
   totalScore?: true
   maxScore?: true
+  version?: true
 }
 
 export type TestResultSumAggregateInputType = {
   totalScore?: true
   maxScore?: true
+  version?: true
 }
 
 export type TestResultMinAggregateInputType = {
@@ -90,6 +103,9 @@ export type TestResultMinAggregateInputType = {
   enteredById?: true
   source?: true
   createdAt?: true
+  version?: true
+  regradeNote?: true
+  updatedAt?: true
 }
 
 export type TestResultMaxAggregateInputType = {
@@ -101,6 +117,9 @@ export type TestResultMaxAggregateInputType = {
   enteredById?: true
   source?: true
   createdAt?: true
+  version?: true
+  regradeNote?: true
+  updatedAt?: true
 }
 
 export type TestResultCountAggregateInputType = {
@@ -112,6 +131,9 @@ export type TestResultCountAggregateInputType = {
   enteredById?: true
   source?: true
   createdAt?: true
+  version?: true
+  regradeNote?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -210,6 +232,9 @@ export type TestResultGroupByOutputType = {
   enteredById: string | null
   source: $Enums.AttemptSource
   createdAt: Date
+  version: number
+  regradeNote: string | null
+  updatedAt: Date
   _count: TestResultCountAggregateOutputType | null
   _avg: TestResultAvgAggregateOutputType | null
   _sum: TestResultSumAggregateOutputType | null
@@ -244,6 +269,9 @@ export type TestResultWhereInput = {
   enteredById?: Prisma.StringNullableFilter<"TestResult"> | string | null
   source?: Prisma.EnumAttemptSourceFilter<"TestResult"> | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
+  version?: Prisma.IntFilter<"TestResult"> | number
+  regradeNote?: Prisma.StringNullableFilter<"TestResult"> | string | null
+  updatedAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   acknowledgements?: Prisma.ResultAcknowledgementListRelationFilter
@@ -258,6 +286,9 @@ export type TestResultOrderByWithRelationInput = {
   enteredById?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  regradeNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   test?: Prisma.TestOrderByWithRelationInput
   student?: Prisma.UserOrderByWithRelationInput
   acknowledgements?: Prisma.ResultAcknowledgementOrderByRelationAggregateInput
@@ -276,6 +307,9 @@ export type TestResultWhereUniqueInput = Prisma.AtLeast<{
   enteredById?: Prisma.StringNullableFilter<"TestResult"> | string | null
   source?: Prisma.EnumAttemptSourceFilter<"TestResult"> | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
+  version?: Prisma.IntFilter<"TestResult"> | number
+  regradeNote?: Prisma.StringNullableFilter<"TestResult"> | string | null
+  updatedAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   acknowledgements?: Prisma.ResultAcknowledgementListRelationFilter
@@ -290,6 +324,9 @@ export type TestResultOrderByWithAggregationInput = {
   enteredById?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  regradeNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.TestResultCountOrderByAggregateInput
   _avg?: Prisma.TestResultAvgOrderByAggregateInput
   _max?: Prisma.TestResultMaxOrderByAggregateInput
@@ -309,6 +346,9 @@ export type TestResultScalarWhereWithAggregatesInput = {
   enteredById?: Prisma.StringNullableWithAggregatesFilter<"TestResult"> | string | null
   source?: Prisma.EnumAttemptSourceWithAggregatesFilter<"TestResult"> | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TestResult"> | Date | string
+  version?: Prisma.IntWithAggregatesFilter<"TestResult"> | number
+  regradeNote?: Prisma.StringNullableWithAggregatesFilter<"TestResult"> | string | null
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TestResult"> | Date | string
 }
 
 export type TestResultCreateInput = {
@@ -318,6 +358,9 @@ export type TestResultCreateInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
   test: Prisma.TestCreateNestedOneWithoutResultsInput
   student: Prisma.UserCreateNestedOneWithoutTestResultsInput
   acknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutTestResultInput
@@ -332,6 +375,9 @@ export type TestResultUncheckedCreateInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
   acknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutTestResultInput
 }
 
@@ -342,6 +388,9 @@ export type TestResultUpdateInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   test?: Prisma.TestUpdateOneRequiredWithoutResultsNestedInput
   student?: Prisma.UserUpdateOneRequiredWithoutTestResultsNestedInput
   acknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutTestResultNestedInput
@@ -356,6 +405,9 @@ export type TestResultUncheckedUpdateInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutTestResultNestedInput
 }
 
@@ -368,6 +420,9 @@ export type TestResultCreateManyInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
 }
 
 export type TestResultUpdateManyMutationInput = {
@@ -377,6 +432,9 @@ export type TestResultUpdateManyMutationInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TestResultUncheckedUpdateManyInput = {
@@ -388,6 +446,9 @@ export type TestResultUncheckedUpdateManyInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TestResultListRelationFilter = {
@@ -414,11 +475,15 @@ export type TestResultCountOrderByAggregateInput = {
   enteredById?: Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  regradeNote?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type TestResultAvgOrderByAggregateInput = {
   totalScore?: Prisma.SortOrder
   maxScore?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type TestResultMaxOrderByAggregateInput = {
@@ -430,6 +495,9 @@ export type TestResultMaxOrderByAggregateInput = {
   enteredById?: Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  regradeNote?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type TestResultMinOrderByAggregateInput = {
@@ -441,11 +509,15 @@ export type TestResultMinOrderByAggregateInput = {
   enteredById?: Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  regradeNote?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type TestResultSumOrderByAggregateInput = {
   totalScore?: Prisma.SortOrder
   maxScore?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type TestResultScalarRelationFilter = {
@@ -562,6 +634,9 @@ export type TestResultCreateWithoutStudentInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
   test: Prisma.TestCreateNestedOneWithoutResultsInput
   acknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutTestResultInput
 }
@@ -574,6 +649,9 @@ export type TestResultUncheckedCreateWithoutStudentInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
   acknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutTestResultInput
 }
 
@@ -615,6 +693,9 @@ export type TestResultScalarWhereInput = {
   enteredById?: Prisma.StringNullableFilter<"TestResult"> | string | null
   source?: Prisma.EnumAttemptSourceFilter<"TestResult"> | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
+  version?: Prisma.IntFilter<"TestResult"> | number
+  regradeNote?: Prisma.StringNullableFilter<"TestResult"> | string | null
+  updatedAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
 }
 
 export type TestResultCreateWithoutTestInput = {
@@ -624,6 +705,9 @@ export type TestResultCreateWithoutTestInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
   student: Prisma.UserCreateNestedOneWithoutTestResultsInput
   acknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutTestResultInput
 }
@@ -636,6 +720,9 @@ export type TestResultUncheckedCreateWithoutTestInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
   acknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutTestResultInput
 }
 
@@ -672,6 +759,9 @@ export type TestResultCreateWithoutAcknowledgementsInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
   test: Prisma.TestCreateNestedOneWithoutResultsInput
   student: Prisma.UserCreateNestedOneWithoutTestResultsInput
 }
@@ -685,6 +775,9 @@ export type TestResultUncheckedCreateWithoutAcknowledgementsInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
 }
 
 export type TestResultCreateOrConnectWithoutAcknowledgementsInput = {
@@ -710,6 +803,9 @@ export type TestResultUpdateWithoutAcknowledgementsInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   test?: Prisma.TestUpdateOneRequiredWithoutResultsNestedInput
   student?: Prisma.UserUpdateOneRequiredWithoutTestResultsNestedInput
 }
@@ -723,6 +819,9 @@ export type TestResultUncheckedUpdateWithoutAcknowledgementsInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TestResultCreateManyStudentInput = {
@@ -733,6 +832,9 @@ export type TestResultCreateManyStudentInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
 }
 
 export type TestResultUpdateWithoutStudentInput = {
@@ -742,6 +844,9 @@ export type TestResultUpdateWithoutStudentInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   test?: Prisma.TestUpdateOneRequiredWithoutResultsNestedInput
   acknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutTestResultNestedInput
 }
@@ -754,6 +859,9 @@ export type TestResultUncheckedUpdateWithoutStudentInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutTestResultNestedInput
 }
 
@@ -765,6 +873,9 @@ export type TestResultUncheckedUpdateManyWithoutStudentInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TestResultCreateManyTestInput = {
@@ -775,6 +886,9 @@ export type TestResultCreateManyTestInput = {
   enteredById?: string | null
   source: $Enums.AttemptSource
   createdAt?: Date | string
+  version?: number
+  regradeNote?: string | null
+  updatedAt?: Date | string
 }
 
 export type TestResultUpdateWithoutTestInput = {
@@ -784,6 +898,9 @@ export type TestResultUpdateWithoutTestInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.UserUpdateOneRequiredWithoutTestResultsNestedInput
   acknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutTestResultNestedInput
 }
@@ -796,6 +913,9 @@ export type TestResultUncheckedUpdateWithoutTestInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutTestResultNestedInput
 }
 
@@ -807,6 +927,9 @@ export type TestResultUncheckedUpdateManyWithoutTestInput = {
   enteredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.EnumAttemptSourceFieldUpdateOperationsInput | $Enums.AttemptSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  regradeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -849,6 +972,9 @@ export type TestResultSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   enteredById?: boolean
   source?: boolean
   createdAt?: boolean
+  version?: boolean
+  regradeNote?: boolean
+  updatedAt?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   acknowledgements?: boolean | Prisma.TestResult$acknowledgementsArgs<ExtArgs>
@@ -864,6 +990,9 @@ export type TestResultSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   enteredById?: boolean
   source?: boolean
   createdAt?: boolean
+  version?: boolean
+  regradeNote?: boolean
+  updatedAt?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testResult"]>
@@ -877,6 +1006,9 @@ export type TestResultSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   enteredById?: boolean
   source?: boolean
   createdAt?: boolean
+  version?: boolean
+  regradeNote?: boolean
+  updatedAt?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testResult"]>
@@ -890,9 +1022,12 @@ export type TestResultSelectScalar = {
   enteredById?: boolean
   source?: boolean
   createdAt?: boolean
+  version?: boolean
+  regradeNote?: boolean
+  updatedAt?: boolean
 }
 
-export type TestResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "testId" | "studentId" | "totalScore" | "maxScore" | "enteredById" | "source" | "createdAt", ExtArgs["result"]["testResult"]>
+export type TestResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "testId" | "studentId" | "totalScore" | "maxScore" | "enteredById" | "source" | "createdAt" | "version" | "regradeNote" | "updatedAt", ExtArgs["result"]["testResult"]>
 export type TestResultInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -924,6 +1059,9 @@ export type $TestResultPayload<ExtArgs extends runtime.Types.Extensions.Internal
     enteredById: string | null
     source: $Enums.AttemptSource
     createdAt: Date
+    version: number
+    regradeNote: string | null
+    updatedAt: Date
   }, ExtArgs["result"]["testResult"]>
   composites: {}
 }
@@ -1358,6 +1496,9 @@ export interface TestResultFieldRefs {
   readonly enteredById: Prisma.FieldRef<"TestResult", 'String'>
   readonly source: Prisma.FieldRef<"TestResult", 'AttemptSource'>
   readonly createdAt: Prisma.FieldRef<"TestResult", 'DateTime'>
+  readonly version: Prisma.FieldRef<"TestResult", 'Int'>
+  readonly regradeNote: Prisma.FieldRef<"TestResult", 'String'>
+  readonly updatedAt: Prisma.FieldRef<"TestResult", 'DateTime'>
 }
     
 

@@ -459,7 +459,8 @@
     "method": "GET",
     "path": "/api/users",
     "roles": [
-      "ADMIN"
+      "ADMIN",
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -563,5 +564,497 @@
     "roles": [
       "ADMIN"
     ]
+  },
+  {
+    "gap": "LESSON-RECORDS",
+    "file": "lesson-records/lesson-records.controller",
+    "controller": "LessonRecordsController",
+    "method": "GET",
+    "path": "/api/lesson-records/me",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "LESSON-RECORDS",
+    "file": "lesson-records/lesson-records.controller",
+    "controller": "LessonRecordsController",
+    "method": "GET",
+    "path": "/api/lesson-records/day",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "LESSON-RECORDS",
+    "file": "lesson-records/lesson-records.controller",
+    "controller": "LessonRecordsController",
+    "method": "GET",
+    "path": "/api/lesson-records/classroom/:classroomId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "LESSON-RECORDS",
+    "file": "lesson-records/lesson-records.controller",
+    "controller": "LessonRecordsController",
+    "method": "GET",
+    "path": "/api/lesson-records/student/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "LESSON-RECORDS",
+    "file": "lesson-records/lesson-records.controller",
+    "controller": "LessonRecordsController",
+    "method": "PUT",
+    "path": "/api/lesson-records/:scheduleId/confirm",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "LESSON-RECORDS",
+    "file": "lesson-records/lesson-records.controller",
+    "controller": "LessonRecordsController",
+    "method": "DELETE",
+    "path": "/api/lesson-records/:scheduleId/confirm",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "LESSON-RECORDS",
+    "file": "lesson-records/lesson-records.controller",
+    "controller": "LessonRecordsController",
+    "method": "PUT",
+    "path": "/api/lesson-records/:scheduleId/note",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/:testId/settings",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/:testId/student-view",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "POST",
+    "path": "/api/exams/:testId/classes/:classroomId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "PATCH",
+    "path": "/api/exams/:testId/classes/:classroomId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "DELETE",
+    "path": "/api/exams/:testId/classes/:classroomId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "PATCH",
+    "path": "/api/exams/:testId/scoring-groups",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/:testId/gradebook",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "PUT",
+    "path": "/api/exams/:testId/gradebook",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/:testId/gradebook/excel",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "POST",
+    "path": "/api/exams/:testId/gradebook/excel",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/:testId/analytics",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/:testId/students/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exam-results.controller",
+    "controller": "ExamResultsController",
+    "method": "GET",
+    "path": "/api/exam-results/my",
+    "roles": [
+      "STUDENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exam-results.controller",
+    "controller": "ExamResultsController",
+    "method": "GET",
+    "path": "/api/exam-results/my/:testId",
+    "roles": [
+      "STUDENT",
+      "BUYER"
+    ]
+  },
+  {
+    "gap": "SHALGALT",
+    "file": "exams/exam-results.controller",
+    "controller": "ExamResultsController",
+    "method": "GET",
+    "path": "/api/exam-results/parent/:testResultId",
+    "roles": [
+      "PARENT"
+    ]
+  },
+  {
+    "gap": "BUTSAAH",
+    "file": "revisions/revisions.controller",
+    "controller": "RevisionsController",
+    "method": "GET",
+    "path": "/api/revisions/:entity/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "BUTSAAH",
+    "file": "revisions/revisions.controller",
+    "controller": "RevisionsController",
+    "method": "GET",
+    "path": "/api/revisions/:entity/:id/:version",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "BUTSAAH",
+    "file": "revisions/revisions.controller",
+    "controller": "RevisionsController",
+    "method": "POST",
+    "path": "/api/revisions/:entity/:id/restore/:version",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "BUTSAAH",
+    "file": "classification/classification.controller",
+    "controller": "ClassificationController",
+    "method": "PUT",
+    "path": "/api/classification/problems/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "ZEREG",
+    "file": "presence/presence.controller",
+    "controller": "PresenceController",
+    "method": "POST",
+    "path": "/api/presence",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "ANGI",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/classes/:classroomId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "ANGI",
+    "file": "exams/exams.controller",
+    "controller": "ExamsController",
+    "method": "GET",
+    "path": "/api/exams/classes/:classroomId/students/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "GET",
+    "path": "/api/class-dashboard",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "GET",
+    "path": "/api/class-dashboard/classes/:classroomId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "GET",
+    "path": "/api/class-dashboard/students/:studentId/competency",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "GET",
+    "path": "/api/class-dashboard/students/:studentId/flags",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "POST",
+    "path": "/api/class-dashboard/students/:studentId/flags",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "POST",
+    "path": "/api/class-dashboard/flags/:flagId/remove",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "GET",
+    "path": "/api/class-dashboard/classes/:classroomId/month",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CLASS-DASH",
+    "file": "classrooms/classrooms.controller",
+    "controller": "ClassroomsController",
+    "method": "PATCH",
+    "path": "/api/classrooms/:id/teachers",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "PAY-LEDGER",
+    "file": "payments/ledger.controller",
+    "controller": "PaymentsLedgerController",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ],
+    "method": "GET",
+    "path": "/api/payments/ledger/overview"
+  },
+  {
+    "gap": "PAY-LEDGER",
+    "file": "payments/ledger.controller",
+    "controller": "PaymentsLedgerController",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ],
+    "method": "GET",
+    "path": "/api/payments/ledger/board"
+  },
+  {
+    "gap": "PAY-LEDGER",
+    "file": "payments/ledger.controller",
+    "controller": "PaymentsLedgerController",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ],
+    "method": "GET",
+    "path": "/api/payments/ledger/student/:id"
+  },
+  {
+    "gap": "PAY-LEDGER",
+    "file": "payments/ledger.controller",
+    "controller": "PaymentsLedgerController",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ],
+    "method": "POST",
+    "path": "/api/payments/ledger/student/:id/pay"
   }
 ]

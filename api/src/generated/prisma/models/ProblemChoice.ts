@@ -42,6 +42,7 @@ export type ProblemChoiceMinAggregateOutputType = {
   isCorrect: boolean | null
   mistakeType: $Enums.MistakeType | null
   mistakeNote: string | null
+  imageKey: string | null
   order: number | null
 }
 
@@ -53,6 +54,7 @@ export type ProblemChoiceMaxAggregateOutputType = {
   isCorrect: boolean | null
   mistakeType: $Enums.MistakeType | null
   mistakeNote: string | null
+  imageKey: string | null
   order: number | null
 }
 
@@ -64,6 +66,7 @@ export type ProblemChoiceCountAggregateOutputType = {
   isCorrect: number
   mistakeType: number
   mistakeNote: number
+  imageKey: number
   order: number
   _all: number
 }
@@ -85,6 +88,7 @@ export type ProblemChoiceMinAggregateInputType = {
   isCorrect?: true
   mistakeType?: true
   mistakeNote?: true
+  imageKey?: true
   order?: true
 }
 
@@ -96,6 +100,7 @@ export type ProblemChoiceMaxAggregateInputType = {
   isCorrect?: true
   mistakeType?: true
   mistakeNote?: true
+  imageKey?: true
   order?: true
 }
 
@@ -107,6 +112,7 @@ export type ProblemChoiceCountAggregateInputType = {
   isCorrect?: true
   mistakeType?: true
   mistakeNote?: true
+  imageKey?: true
   order?: true
   _all?: true
 }
@@ -205,6 +211,7 @@ export type ProblemChoiceGroupByOutputType = {
   isCorrect: boolean
   mistakeType: $Enums.MistakeType
   mistakeNote: string | null
+  imageKey: string | null
   order: number
   _count: ProblemChoiceCountAggregateOutputType | null
   _avg: ProblemChoiceAvgAggregateOutputType | null
@@ -239,6 +246,7 @@ export type ProblemChoiceWhereInput = {
   isCorrect?: Prisma.BoolFilter<"ProblemChoice"> | boolean
   mistakeType?: Prisma.EnumMistakeTypeFilter<"ProblemChoice"> | $Enums.MistakeType
   mistakeNote?: Prisma.StringNullableFilter<"ProblemChoice"> | string | null
+  imageKey?: Prisma.StringNullableFilter<"ProblemChoice"> | string | null
   order?: Prisma.IntFilter<"ProblemChoice"> | number
   problem?: Prisma.XOR<Prisma.ProblemScalarRelationFilter, Prisma.ProblemWhereInput>
 }
@@ -251,6 +259,7 @@ export type ProblemChoiceOrderByWithRelationInput = {
   isCorrect?: Prisma.SortOrder
   mistakeType?: Prisma.SortOrder
   mistakeNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
   problem?: Prisma.ProblemOrderByWithRelationInput
 }
@@ -267,6 +276,7 @@ export type ProblemChoiceWhereUniqueInput = Prisma.AtLeast<{
   isCorrect?: Prisma.BoolFilter<"ProblemChoice"> | boolean
   mistakeType?: Prisma.EnumMistakeTypeFilter<"ProblemChoice"> | $Enums.MistakeType
   mistakeNote?: Prisma.StringNullableFilter<"ProblemChoice"> | string | null
+  imageKey?: Prisma.StringNullableFilter<"ProblemChoice"> | string | null
   order?: Prisma.IntFilter<"ProblemChoice"> | number
   problem?: Prisma.XOR<Prisma.ProblemScalarRelationFilter, Prisma.ProblemWhereInput>
 }, "id" | "problemId_label">
@@ -279,6 +289,7 @@ export type ProblemChoiceOrderByWithAggregationInput = {
   isCorrect?: Prisma.SortOrder
   mistakeType?: Prisma.SortOrder
   mistakeNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
   _count?: Prisma.ProblemChoiceCountOrderByAggregateInput
   _avg?: Prisma.ProblemChoiceAvgOrderByAggregateInput
@@ -298,6 +309,7 @@ export type ProblemChoiceScalarWhereWithAggregatesInput = {
   isCorrect?: Prisma.BoolWithAggregatesFilter<"ProblemChoice"> | boolean
   mistakeType?: Prisma.EnumMistakeTypeWithAggregatesFilter<"ProblemChoice"> | $Enums.MistakeType
   mistakeNote?: Prisma.StringNullableWithAggregatesFilter<"ProblemChoice"> | string | null
+  imageKey?: Prisma.StringNullableWithAggregatesFilter<"ProblemChoice"> | string | null
   order?: Prisma.IntWithAggregatesFilter<"ProblemChoice"> | number
 }
 
@@ -308,6 +320,7 @@ export type ProblemChoiceCreateInput = {
   isCorrect?: boolean
   mistakeType?: $Enums.MistakeType
   mistakeNote?: string | null
+  imageKey?: string | null
   order: number
   problem: Prisma.ProblemCreateNestedOneWithoutChoiceOptionsInput
 }
@@ -320,6 +333,7 @@ export type ProblemChoiceUncheckedCreateInput = {
   isCorrect?: boolean
   mistakeType?: $Enums.MistakeType
   mistakeNote?: string | null
+  imageKey?: string | null
   order: number
 }
 
@@ -330,6 +344,7 @@ export type ProblemChoiceUpdateInput = {
   isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mistakeType?: Prisma.EnumMistakeTypeFieldUpdateOperationsInput | $Enums.MistakeType
   mistakeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   problem?: Prisma.ProblemUpdateOneRequiredWithoutChoiceOptionsNestedInput
 }
@@ -342,6 +357,7 @@ export type ProblemChoiceUncheckedUpdateInput = {
   isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mistakeType?: Prisma.EnumMistakeTypeFieldUpdateOperationsInput | $Enums.MistakeType
   mistakeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -353,6 +369,7 @@ export type ProblemChoiceCreateManyInput = {
   isCorrect?: boolean
   mistakeType?: $Enums.MistakeType
   mistakeNote?: string | null
+  imageKey?: string | null
   order: number
 }
 
@@ -363,6 +380,7 @@ export type ProblemChoiceUpdateManyMutationInput = {
   isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mistakeType?: Prisma.EnumMistakeTypeFieldUpdateOperationsInput | $Enums.MistakeType
   mistakeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -374,6 +392,7 @@ export type ProblemChoiceUncheckedUpdateManyInput = {
   isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mistakeType?: Prisma.EnumMistakeTypeFieldUpdateOperationsInput | $Enums.MistakeType
   mistakeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -390,6 +409,7 @@ export type ProblemChoiceCountOrderByAggregateInput = {
   isCorrect?: Prisma.SortOrder
   mistakeType?: Prisma.SortOrder
   mistakeNote?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
@@ -405,6 +425,7 @@ export type ProblemChoiceMaxOrderByAggregateInput = {
   isCorrect?: Prisma.SortOrder
   mistakeType?: Prisma.SortOrder
   mistakeNote?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
@@ -416,6 +437,7 @@ export type ProblemChoiceMinOrderByAggregateInput = {
   isCorrect?: Prisma.SortOrder
   mistakeType?: Prisma.SortOrder
   mistakeNote?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
@@ -486,6 +508,7 @@ export type ProblemChoiceCreateWithoutProblemInput = {
   isCorrect?: boolean
   mistakeType?: $Enums.MistakeType
   mistakeNote?: string | null
+  imageKey?: string | null
   order: number
 }
 
@@ -496,6 +519,7 @@ export type ProblemChoiceUncheckedCreateWithoutProblemInput = {
   isCorrect?: boolean
   mistakeType?: $Enums.MistakeType
   mistakeNote?: string | null
+  imageKey?: string | null
   order: number
 }
 
@@ -536,6 +560,7 @@ export type ProblemChoiceScalarWhereInput = {
   isCorrect?: Prisma.BoolFilter<"ProblemChoice"> | boolean
   mistakeType?: Prisma.EnumMistakeTypeFilter<"ProblemChoice"> | $Enums.MistakeType
   mistakeNote?: Prisma.StringNullableFilter<"ProblemChoice"> | string | null
+  imageKey?: Prisma.StringNullableFilter<"ProblemChoice"> | string | null
   order?: Prisma.IntFilter<"ProblemChoice"> | number
 }
 
@@ -546,6 +571,7 @@ export type ProblemChoiceCreateManyProblemInput = {
   isCorrect?: boolean
   mistakeType?: $Enums.MistakeType
   mistakeNote?: string | null
+  imageKey?: string | null
   order: number
 }
 
@@ -556,6 +582,7 @@ export type ProblemChoiceUpdateWithoutProblemInput = {
   isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mistakeType?: Prisma.EnumMistakeTypeFieldUpdateOperationsInput | $Enums.MistakeType
   mistakeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -566,6 +593,7 @@ export type ProblemChoiceUncheckedUpdateWithoutProblemInput = {
   isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mistakeType?: Prisma.EnumMistakeTypeFieldUpdateOperationsInput | $Enums.MistakeType
   mistakeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -576,6 +604,7 @@ export type ProblemChoiceUncheckedUpdateManyWithoutProblemInput = {
   isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mistakeType?: Prisma.EnumMistakeTypeFieldUpdateOperationsInput | $Enums.MistakeType
   mistakeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -589,6 +618,7 @@ export type ProblemChoiceSelect<ExtArgs extends runtime.Types.Extensions.Interna
   isCorrect?: boolean
   mistakeType?: boolean
   mistakeNote?: boolean
+  imageKey?: boolean
   order?: boolean
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problemChoice"]>
@@ -601,6 +631,7 @@ export type ProblemChoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   isCorrect?: boolean
   mistakeType?: boolean
   mistakeNote?: boolean
+  imageKey?: boolean
   order?: boolean
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problemChoice"]>
@@ -613,6 +644,7 @@ export type ProblemChoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   isCorrect?: boolean
   mistakeType?: boolean
   mistakeNote?: boolean
+  imageKey?: boolean
   order?: boolean
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problemChoice"]>
@@ -625,10 +657,11 @@ export type ProblemChoiceSelectScalar = {
   isCorrect?: boolean
   mistakeType?: boolean
   mistakeNote?: boolean
+  imageKey?: boolean
   order?: boolean
 }
 
-export type ProblemChoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "problemId" | "label" | "text" | "isCorrect" | "mistakeType" | "mistakeNote" | "order", ExtArgs["result"]["problemChoice"]>
+export type ProblemChoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "problemId" | "label" | "text" | "isCorrect" | "mistakeType" | "mistakeNote" | "imageKey" | "order", ExtArgs["result"]["problemChoice"]>
 export type ProblemChoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
 }
@@ -652,6 +685,7 @@ export type $ProblemChoicePayload<ExtArgs extends runtime.Types.Extensions.Inter
     isCorrect: boolean
     mistakeType: $Enums.MistakeType
     mistakeNote: string | null
+    imageKey: string | null
     order: number
   }, ExtArgs["result"]["problemChoice"]>
   composites: {}
@@ -1084,6 +1118,7 @@ export interface ProblemChoiceFieldRefs {
   readonly isCorrect: Prisma.FieldRef<"ProblemChoice", 'Boolean'>
   readonly mistakeType: Prisma.FieldRef<"ProblemChoice", 'MistakeType'>
   readonly mistakeNote: Prisma.FieldRef<"ProblemChoice", 'String'>
+  readonly imageKey: Prisma.FieldRef<"ProblemChoice", 'String'>
   readonly order: Prisma.FieldRef<"ProblemChoice", 'Int'>
 }
     

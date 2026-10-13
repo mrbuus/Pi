@@ -1,5 +1,6 @@
 "use client";
 
+import CodeReveal from "@/components/ui/CodeReveal";
 import { useEffect, useMemo, useState } from "react";
 import InfoHint from "@/components/ui/InfoHint";
 import { api } from "@/lib/api";
@@ -42,11 +43,11 @@ export default function ProblemQualityPanel() {
       {!loading && !error && rows.length > 0 && (
         <div className="space-y-3">
           {defectiveCount > 0 && <div role="status" className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-ink">Сөрөг ялгах үзүүлэлттэй {defectiveCount} бодлого байна. Хариуны түлхүүр болон найруулгыг гараар нягтална уу.</div>}
-          {sorted.map((row) => (
+          {sorted.map((row, index) => (
             <Card key={row.problemId} padding="tight" className={row.isDefective ? "border-warning/50" : ""}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="break-all font-semibold text-ink">{row.problemToken}</h3>
+                  <h3 className="flex items-center gap-1 font-semibold text-ink">{index + 1}-р бодлого <CodeReveal code={row.problemToken} className="h-6 w-6" /></h3>
                   <div className="mt-1 text-sm text-ink-dim"><Meta items={[`${row.attemptCount} оролдлого`, `${row.correctCount} зөв хариулт`]} /></div>
                 </div>
                 {row.isDefective && <span className="rounded-full bg-warning/15 px-3 py-1 text-sm font-semibold text-ink">Гараар нягтална</span>}

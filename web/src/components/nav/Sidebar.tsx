@@ -1,17 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { House } from "lucide-react";
-import type { ReactNode } from "react";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/kit/drawer";
-import ThemeToggle from "@/components/ThemeToggle";
 import { NavIcon } from "./icons";
 import NavList from "./NavList";
 import { getRoleNav } from "./nav-data";
 
 const RAIL_STORAGE_KEY = "app-sidebar-rail-collapsed";
+// 24px өндөр = 54px өргөн бүтэн лого — 72px баганын дотор (px-2) бүтнээрээ багтана
+const RAIL_LOGO_SIZE = 24;
 
 /* ---- Rail-ийн хумигдсан төлөвийн гадаад дэлгэц (localStorage) ----
    ThemeProvider-тэй ЯГ ижил хэлбэр: useSyncExternalStore ашигласнаар
@@ -47,99 +47,75 @@ interface SidebarProps {
   pathname: string;
   mobileOpen: boolean;
   onMobileOpenChange: (open: boolean) => void;
-  identity: ReactNode;
-  onLogout: () => void;
 }
 
-// Зүүн самбар — desktop дээр байнга харагдах багана, mobile дээр off-canvas
-// slide-in drawer. Хоёулаа ижил NAV_DATA-г ашигладаг ч тусдаа markup-тай
-// (desktop нь sticky+scroll, mobile нь fixed+transform+backdrop).
-export default function Sidebar({
-  role,
-  pathname,
-  mobileOpen,
-  onMobileOpenChange,
-  identity,
-  onLogout,
-}: SidebarProps) {
+// Зүүн самбар — desktop дээр байнга харагдах багана, mobile дээр «Бусад» drawer.
+// Хувийн цэс, гарах, цагаан/хар нь баруун дээд булангийн хэрэглэгчийн цэст
+// (nav/UserMenu.tsx) шилжсэн (эзэн 2026-10-13).
+export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange }: SidebarProps) {
   const { home, groups } = getRoleNav(role);
-  const railCollapsed = useSyncExternalStore(
-    subscribeRail,
-    readRailCollapsed,
-    getServerRailCollapsed,
-  );
-
-  function toggleRail() {
-    writeRailCollapsed(!railCollapsed);
-  }
-
+  const railCollapsed = useSyncExternalStore(subscribeRail, readRailCollapsed, getServerRailCollapsed);
+  // Хумигдсан үед хулгана (эсвэл гарын фокус) ирэхэд түр дэлгэгдэж, гарахад хумигдана
+  const [peek, setPeek] = useState(false);
+  const expanded = !railCollapsed || peek;
 
   return (
     <>
-      {/* ── DESKTOP: байнга харагдах, өөрөө гүйлгэдэг багана ── */}
+      {/* ── DESKTOP ── багана нь үргэлж ижил өргөнтэй зай эзэлнэ; түр дэлгэгдэхдээ
+          агуулгын дээгүүр давхарлана (хуудас хөдлөхгүй). */}
       <aside
         aria-label="Үндсэн навигац"
-        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
+        className={`sticky top-0 z-40 hidden h-screen shrink-0 transition-[width] duration-200 motion-reduce:transition-none lg:block ${
           railCollapsed ? "w-[72px]" : "w-64"
         }`}
       >
-        <div className="flex h-14 shrink-0 items-center border-b border-line px-3">
-          <LogoMark variant={railCollapsed ? "mark" : "full"} size={30} />
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
-          <NavList
-            home={home}
-            groups={groups}
-            pathname={pathname}
-            collapsedRail={railCollapsed}
-          />
-        </div>
-        <div className="flex shrink-0 flex-col gap-2 border-t border-line p-2.5">
-          <Link href="/" aria-label="Нийтийн нүүр хуудас" title="Нийтийн нүүр хуудас" className={`flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-ink-dim hover:bg-panel hover:text-ink ${railCollapsed ? "justify-center" : ""}`}><House className="h-4 w-4 shrink-0" aria-hidden />{!railCollapsed && <span>Нийтийн нүүр хуудас</span>}</Link>
-          {!railCollapsed && (
-            <>
-              <ThemeToggle className="w-full justify-center" />
-              <div className="px-0.5">{identity}</div>
-            </>
-          )}
-          <button
-            type="button"
-            onClick={onLogout}
-            title="Гарах"
-            className={`row-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink ${
-              railCollapsed ? "justify-center px-2" : ""
-            }`}
-          >
-            <NavIcon name="logout" />
-            {!railCollapsed && <span>Гарах</span>}
-          </button>
-          <button
-            type="button"
-            onClick={toggleRail}
-            aria-pressed={railCollapsed}
-            title={railCollapsed ? "Самбарыг дэлгэх" : "Самбарыг хумих"}
-            className={`row-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink ${
-              railCollapsed ? "justify-center px-2" : ""
-            }`}
-          >
-            <NavIcon
-              name="panel-left"
-              className={`transition-transform motion-reduce:transition-none ${
-                railCollapsed ? "rotate-180" : ""
-              }`}
-            />
-            {!railCollapsed && <span>Самбарыг хумих</span>}
-          </button>
+        <div
+          onMouseEnter={() => railCollapsed && setPeek(true)}
+          onMouseLeave={() => setPeek(false)}
+          onFocus={() => railCollapsed && setPeek(true)}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPeek(false);
+          }}
+          className={`absolute inset-y-0 left-0 flex flex-col border-r border-line bg-surface transition-[width] duration-200 motion-reduce:transition-none ${
+            expanded ? "w-64" : "w-[72px]"
+          } ${railCollapsed && peek ? "elev-3 z-40" : ""}`}
+        >
+          {/* Лого нэг л хэмжээтэй, нэг л байрлалтай: хумигдсан 72px баганад бүтнээрээ
+              багтаж, дэлгэхэд томорч/жижгэрч, үсэрч хөдлөхгүй (эзэн 2026-10-13). */}
+          <div className="flex h-14 shrink-0 items-center border-b border-line px-2">
+            <Link href="/" aria-label="Нүүр хуудас" title="Нүүр хуудас" className="flex min-h-11 items-center">
+              <LogoMark variant="full" size={RAIL_LOGO_SIZE} />
+            </Link>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
+            <NavList home={home} groups={groups} pathname={pathname} collapsedRail={!expanded} />
+          </div>
+          <div className={`flex shrink-0 border-t border-line p-2 ${expanded ? "justify-end" : "justify-center"}`}>
+            <button
+              type="button"
+              onClick={() => {
+                writeRailCollapsed(!railCollapsed);
+                setPeek(false);
+              }}
+              aria-pressed={railCollapsed}
+              aria-label={railCollapsed ? "Самбарыг тогтмол дэлгэх" : "Самбарыг хумих"}
+              title={railCollapsed ? "Самбарыг тогтмол дэлгэх" : "Самбарыг хумих"}
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-ink-dim transition hover:bg-panel hover:text-ink"
+            >
+              {railCollapsed ? <ChevronsRight className="h-5 w-5" aria-hidden /> : <ChevronsLeft className="h-5 w-5" aria-hidden />}
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* ── MOBILE: «Бусад» — доороос гарч ирэх, хуруугаар доош чирч хаадаг хуудас
-          (shadcn/ui Drawer = vaul). Фокус занга, Escape, дэвсгэр дарж хаах,
-          body гүйлгэлт түгжих бүгд vaul дотор. Бүрэн цэс энд — юу ч хасагдаагүй. ── */}
+      {/* ── MOBILE: «Бусад» — доороос гарч ирэх хуудас (vaul). ── */}
       <Drawer open={mobileOpen} onOpenChange={onMobileOpenChange}>
         <DrawerContent id="app-mobile-nav" aria-describedby={undefined} className="lg:hidden">
           <div className="flex h-12 shrink-0 items-center justify-between border-b border-line px-4">
-            <DrawerTitle className="text-base font-bold text-ink">Бүх цэс</DrawerTitle>
+            <Link href="/" onClick={() => onMobileOpenChange(false)} aria-label="Нүүр хуудас" className="flex min-h-11 items-center">
+              <LogoMark variant="full" size={26} />
+            </Link>
+            <DrawerTitle className="sr-only">Бүх цэс</DrawerTitle>
             <button
               type="button"
               onClick={() => onMobileOpenChange(false)}
@@ -150,25 +126,7 @@ export default function Sidebar({
             </button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3" data-vaul-no-drag>
-            <NavList
-              home={home}
-              groups={groups}
-              pathname={pathname}
-              onNavigate={() => onMobileOpenChange(false)}
-            />
-          </div>
-          <div className="flex shrink-0 flex-col gap-2 border-t border-line p-2.5">
-            <Link href="/" onClick={() => onMobileOpenChange(false)} className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-ink-dim hover:bg-panel hover:text-ink"><House className="h-4 w-4" aria-hidden />Нийтийн нүүр хуудас</Link>
-            <ThemeToggle className="w-full justify-center" />
-            <div className="px-0.5">{identity}</div>
-            <button
-              type="button"
-              onClick={onLogout}
-              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-dim transition hover:bg-panel hover:text-ink"
-            >
-              <NavIcon name="logout" />
-              <span>Гарах</span>
-            </button>
+            <NavList home={home} groups={groups} pathname={pathname} onNavigate={() => onMobileOpenChange(false)} />
           </div>
         </DrawerContent>
       </Drawer>

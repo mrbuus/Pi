@@ -3,7 +3,13 @@
 import { useMemo, useRef, useState } from "react";
 import NumericKeypad from "@/components/NumericKeypad";
 import { Dot } from "@/components/ui/Meta";
-import { parseFillSlots, slotsTotalLength, type FillSlotGroup } from "./fillSlots";
+import {
+  decodeSlotValue,
+  encodeSlotDigits,
+  parseFillSlots,
+  slotsTotalLength,
+  type FillSlotGroup,
+} from "./fillSlots";
 
 /* ============================================================================
  * FillNumberAnswer — "тоо нөхөх" (ЭЕШ Хэсэг II) бодлогын хариу оруулагч.
@@ -20,9 +26,9 @@ import { parseFillSlots, slotsTotalLength, type FillSlotGroup } from "./fillSlot
  *   2) ЧӨЛӨӨТ ТАЛБАР (FreeformFill) — тэмдэглэгээгүй бол өмнөх шигээ л НЭГ
  *      талбар (зөвхөн keypad-аар бичигдэнэ) — хуучин бодлогуудад зохицно.
  *
- * ЧУХАЛ: гадагш харагдах `value`/`onChange` гэрээ ХЭВЭЭРЭЭ — нэг шулуун
- * стринг ("354"). Нүднүүд бол зөвхөн ХАРАГДАЦЫН давхарга; сервер рүү
- * илгээгдэх өгөгдлийн хэлбэр огт өөрчлөгдөөгүй тул дүн бодолтод зөрчилдөхгүй.
+ * ЧУХАЛ: гадагш харагдах `value`/`onChange` гэрээ — нэг шулуун стринг ("354").
+ * Дунд нүд хоосон бол байрлалыг "_"-ээр хадгална ("3_4"); сервер үүнийг хоосон
+ * нүд гэж уншина (api/src/tests/grading.ts FILL_EMPTY).
  * ========================================================================== */
 
 export default function FillNumberAnswer({
@@ -119,15 +125,14 @@ function SlotFill({
   // digits нь `value` prop-оос ШУУД гаргаж авсан (дотоод давхар state биш) —
   // физик гарын товчлуур (page.tsx-ийн global keydown) шууд `value`-г
   // өөрчилсөн ч энд ЯЛГААГҮЙ шинэчлэгдэнэ (эх сурвалж ганц — divergence-гүй).
-  const digits = useMemo(
-    () => Array.from({ length: total }, (_, i) => value[i] ?? ""),
-    [value, total],
-  );
+  const digits = useMemo(() => decodeSlotValue(value, total), [value, total]);
   const [activeIndex, setActiveIndex] = useState(() => firstEmptyOrLast(digits));
   const boxRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Хоосон нүдийг "_"-ээр хадгална — `join("")` хийвэл дараагийн цифрүүд зүүн
+  // тийш шилжиж буруу нүдэнд очно (fillSlots.ts-ийн тайлбарыг үз).
   function commit(next: string[]) {
-    onChange(() => next.join(""));
+    onChange(() => encodeSlotDigits(next));
   }
   function setDigitAt(idx: number, ch: string) {
     const next = [...digits];

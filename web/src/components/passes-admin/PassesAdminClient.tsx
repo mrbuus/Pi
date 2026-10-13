@@ -27,6 +27,7 @@ import {
   ErrorState,
   LoadingState,
 } from "@/components/ui/StateBlock";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 type PassScope = {
   all?: boolean;
@@ -145,11 +146,11 @@ function scopeSummary(scope: PassScope) {
 }
 
 function dateLabel(value: string) {
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(new Date(value), {
     year: "numeric",
     month: "short",
     day: "numeric",
-  }).format(new Date(value));
+  });
 }
 
 function moneyLabel(value: number | null) {

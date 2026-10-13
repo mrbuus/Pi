@@ -86,6 +86,9 @@ describe('ClassroomsService.get — ангийн дэлгэрэнгүй', () => 
       where: { id: 'class-1' },
       include: {
         teacher: { select: { id: true, firstName: true, lastName: true } },
+        assistantTeacher: {
+          select: { id: true, firstName: true, lastName: true },
+        },
         enrollments: {
           where: { leftAt: null, student: { archivedAt: null } },
           orderBy: { joinedAt: 'asc' },
@@ -114,6 +117,16 @@ describe('ClassroomsService.get — ангийн дэлгэрэнгүй', () => 
       },
       students: [{ ...activeClassroom.enrollments[0].student, joinedAt: activeClassroom.enrollments[0].joinedAt }],
       permissions: { canManageStudents: false },
+    });
+  });
+
+  it('туслах ангийн багш (энгийн Багш) ангиа харна', async () => {
+    const service = new ClassroomsService(
+      makePrisma({ ...activeClassroom, assistantTeacherId: 'assistant-1' } as typeof activeClassroom),
+      makeDisbandAudit(),
+    );
+    await expect(service.get('class-1', 'assistant-1', Role.TEACHER)).resolves.toMatchObject({
+      classroom: { id: 'class-1', assistantTeacherId: 'assistant-1' },
     });
   });
 

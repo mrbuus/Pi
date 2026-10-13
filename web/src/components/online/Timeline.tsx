@@ -65,7 +65,7 @@ function eventLine(e: TimelineEvent): { icon: LucideIcon; text: string } {
     const icon = SELF_STATE_ICON[e.selfState ?? ""] ?? Paperclip;
     return {
       icon,
-      text: `${e.problemToken} — ${selfStateLabel(e.selfState)} — ${e.chapterTitle}`,
+      text: `${e.chapterTitle} — ${selfStateLabel(e.selfState)}`,
     };
   }
   const meta = EVENT_META[e.type] ?? { icon: Circle, label: e.type };
@@ -196,7 +196,7 @@ function TimelineContent({
                       setEditing(e);
                     }}
                     className="rounded-md border border-line px-2 py-1 text-xs font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
-                    aria-label={`${e.kind === "ATTEMPT" ? e.problemToken : ""}-г засах`}
+                    aria-label={`${e.kind === "ATTEMPT" ? e.chapterTitle : ""} — оролдлогыг засах`}
                   >
                     Засах
                   </button>
@@ -204,7 +204,7 @@ function TimelineContent({
                     type="button"
                     onClick={() => setDeleting(e)}
                     className="rounded-md border border-line px-2 py-1 text-xs font-semibold text-ink-dim transition hover:border-error hover:text-error"
-                    aria-label={`${e.kind === "ATTEMPT" ? e.problemToken : ""}-г устгах`}
+                    aria-label={`${e.kind === "ATTEMPT" ? e.chapterTitle : ""} — оролдлогыг устгах`}
                   >
                     Устгах
                   </button>
@@ -217,7 +217,7 @@ function TimelineContent({
 
       <AttemptEditDialog
         open={!!editing}
-        problemToken={editing?.kind === "ATTEMPT" ? editing.problemToken : "?"}
+        problemToken={editing?.kind === "ATTEMPT" ? editing.chapterTitle : "?"}
         initialSelfState={editing?.kind === "ATTEMPT" ? editing.selfState : null}
         saving={saving}
         error={saveError}
@@ -226,7 +226,7 @@ function TimelineContent({
       />
       <ConfirmDialog
         open={!!deleting}
-        title={`«${deleting?.kind === "ATTEMPT" ? deleting.problemToken : "?"}» бодлогын оролдлогыг устгах уу?`}
+        title={`«${deleting?.kind === "ATTEMPT" ? deleting.chapterTitle : "?"}» сэдвийн оролдлогыг устгах уу?`}
         description="Энэ үйлдлийг буцаах боломжгүй."
         confirmLabel="Устгах"
         danger

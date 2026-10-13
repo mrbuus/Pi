@@ -3,24 +3,18 @@
 import { LoadingState } from "@/components/ui/StateBlock";
 
 import { useCallback, useMemo, useState } from "react";
-import {
-  CalendarOff,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  CircleAlert,
-  UserCheck,
-} from "lucide-react";
+import { CalendarOff, ChevronLeft, ChevronRight, CircleAlert, TriangleAlert, UserCheck } from "lucide-react";
 import { useAsyncSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import InfoHint from "@/components/ui/InfoHint";
+import RosterGrid from "./roster/RosterGrid";
+import RosterSettings from "./roster/RosterSettings";
+import { PARITY_LABEL, weekParityOf } from "./roster/parity";
 import {
   addDaysToKey,
   todayUBKey,
-  WEEKDAY_LABELS,
-  WEEKDAY_SHORT,
-  WORKWEEK_ORDER,
   type TeacherLite,
+  type TeacherRosterConfig,
   type TeacherWorkDaysResponse,
   type TeacherWorkExceptionRow,
 } from "./types";
@@ -29,10 +23,12 @@ function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";
 }
 
-const inputCls =
-  "w-full rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand";
+const inputCls = "w-full rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand";
 const outlineBtn =
   "rounded-lg border border-line px-3 py-1.5 text-sm font-semibold text-ink transition hover:border-brand disabled:opacity-50";
+
+// Seed-ээр сондгойгоос хуулсан, эзэн шалгаагүй тэгш 7 хоногийн мөр
+const UNCHECKED_NOTE = "тэгш долоо хоног — эзэн шалгах";
 
 function mondayOf(dateKey: string): string {
   const d = new Date(`${dateKey}T00:00:00.000Z`);
@@ -45,23 +41,28 @@ function shortDate(dateKey: string): string {
   return `${month}.${day}`;
 }
 
+type Parity = 0 | 1 | 2;
+const DEFAULT_CONFIG: TeacherRosterConfig = { mode: "ALTERNATING", validFrom: null, validTo: null };
+
 /**
- * Багшийн ажлын өдрийн хуваарь — Excel дээрх "багш × гараг" тортой ижил.
+ * Багшийн ажлын өдрийн хүснэгт — эзний Excel «багш × гараг» тор.
  *
- * Хоёр давхарга:
- *  1. ТОГТМОЛ хэв маяг (TeacherWorkDay) — 7 хоног бүр давтагдана. Нүд дээр
- *     товшиход тухайн багшийн БҮХ гарагийн жагсаалтыг дахин илгээнэ
- *     (PUT нь бүхэлд нь солино), тул хэсэгчилсэн зөрүү үүсэхгүй.
- *  2. ОНЦГОЙ өдөр (TeacherWorkException) — зөвхөн тухайн НЭГ огноонд
- *     "ажиллана / ажиллахгүй" гэж тогтмол хэв маягийг дарж бичнэ.
+ *  1. Горим: «Тогтмол» (7 хоног бүр ижил, parity 0) эсвэл «Сондгой / Тэгш»
+ *     (ээлжит, parity 1/2; 1-р сондгой 7 хоног = 2026-08-31). Хүчинтэй хугацаа
+ *     (жишээ нь оны эцэс хүртэл) — түүнээс гадуур хүснэгт хэрэгжихгүй.
+ *  2. Нүд товшиход тухайн багшийн тэр ээлжийн БҮХ гарагийг PUT-оор солино.
+ *  3. ОНЦГОЙ өдөр (TeacherWorkException) — ганц огноонд хүснэгтийг дарна.
+ * Багш+ өдөр бүр хуваарь зохиодог тул schedule.manage-гүйгээр засна (эзэн 2026-10-11).
  */
 export default function TeacherWorkDays() {
-  const [weekStart, setWeekStart] = useState(() => mondayOf(todayUBKey()));
-  const [actionError, setActionError] = useState<{ key: string; text: string } | null>(null);
+  const today = todayUBKey();
+  const [weekStart, setWeekStart] = useState(() => mondayOf(today));
+  const [actionError, setActionError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  const [tabParity, setTabParity] = useState<1 | 2>(() => weekParityOf(today));
 
   const [exTeacherId, setExTeacherId] = useState("");
-  const [exDate, setExDate] = useState(todayUBKey());
+  const [exDate, setExDate] = useState(today);
   const [exWorking, setExWorking] = useState(false);
   const [exNote, setExNote] = useState("");
   const [exSaving, setExSaving] = useState(false);
@@ -70,43 +71,99 @@ export default function TeacherWorkDays() {
   const weekEnd = useMemo(() => addDaysToKey(weekStart, 6), [weekStart]);
 
   const fetchWorkDays = useCallback(async () => {
-    const [teachers, data] = await Promise.all([
-      api<TeacherLite[]>("/schedule/teachers"),
+    const [options, data] = await Promise.all([
+      api<(TeacherLite & { displayName?: string })[]>("/schedule/teachers"),
       api<TeacherWorkDaysResponse>(`/schedule/teacher-workdays?from=${weekStart}&to=${weekEnd}`),
     ]);
-    const workDays = new Map<string, Set<number>>();
+    // key = `${teacherId}|${parity}` → гарагууд
+    const cells = new Map<string, Set<number>>();
+    const order = new Map<string, number>();
+    const unchecked = new Set<string>();
+    const names = new Map<string, string>();
     for (const row of data.workDays) {
-      const days = workDays.get(row.teacherId) ?? new Set<number>();
+      const key = `${row.teacherId}|${row.parity ?? 0}`;
+      const days = cells.get(key) ?? new Set<number>();
       days.add(row.weekday);
-      workDays.set(row.teacherId, days);
+      cells.set(key, days);
+      const o = row.sortOrder ?? 0;
+      if (!order.has(row.teacherId) || o < order.get(row.teacherId)!) order.set(row.teacherId, o);
+      if (row.note === UNCHECKED_NOTE) unchecked.add(key);
+      names.set(row.teacherId, row.teacher.firstName);
     }
-    return { teachers, workDays, exceptions: data.exceptions };
+    for (const t of options) names.set(t.id, t.displayName ?? t.firstName);
+    // Хүснэгтийн мөрийн дараалал, дараа нь хүснэгтэд ороогүй багш нэрээр
+    const ids = [...new Set([...options.map((t) => t.id), ...order.keys()])];
+    const teachers = ids
+      .map((id) => ({ id, name: names.get(id) ?? "—" }))
+      .sort(
+        (a, b) =>
+          (order.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (order.get(b.id) ?? Number.MAX_SAFE_INTEGER) ||
+          a.name.localeCompare(b.name, "mn"),
+      );
+    return {
+      teachers,
+      options,
+      cells,
+      unchecked,
+      order,
+      config: data.config ?? DEFAULT_CONFIG,
+      exceptions: data.exceptions,
+    };
   }, [weekStart, weekEnd]);
-  const query = useAsyncSection(`${weekStart}:${weekEnd}`, fetchWorkDays, { teachers: [] as TeacherLite[], workDays: new Map<string, Set<number>>(), exceptions: [] as TeacherWorkExceptionRow[] });
-  const { teachers, workDays, exceptions } = query.data;
+  const query = useAsyncSection(`${weekStart}:${weekEnd}`, fetchWorkDays, {
+    teachers: [] as { id: string; name: string }[],
+    options: [] as TeacherLite[],
+    cells: new Map<string, Set<number>>(),
+    unchecked: new Set<string>(),
+    order: new Map<string, number>(),
+    config: DEFAULT_CONFIG,
+    exceptions: [] as TeacherWorkExceptionRow[],
+  });
+  const { teachers, cells, unchecked, order, config, exceptions } = query.data;
   const loading = query.status === "loading";
-  const error = (actionError?.key === weekStart ? actionError.text : null) || query.error;
-  function setError(text: string | null) { setActionError(text ? { key: weekStart, text } : null); }
-  function load() { setError(null); query.reload(); }
+  const error = actionError || query.error;
+  function load() {
+    setActionError(null);
+    query.reload();
+  }
+
+  const parity: Parity = config.mode === "FIXED" ? 0 : tabParity;
+  const isOn = (teacherId: string, weekday: number) => cells.get(`${teacherId}|${parity}`)?.has(weekday) ?? false;
+  const uncheckedCount = teachers.filter((t) => unchecked.has(`${t.id}|${parity}`)).length;
 
   async function toggle(teacherId: string, weekday: number) {
-    const current = workDays.get(teacherId) ?? new Set<number>();
+    const key = `${teacherId}|${parity}`;
+    const current = cells.get(key) ?? new Set<number>();
     const next = new Set(current);
     if (next.has(weekday)) next.delete(weekday);
     else next.add(weekday);
+    const wasUnchecked = unchecked.has(key);
 
     // Оптимист шинэчлэл — сүлжээ удаан байхад ч нүд шууд хариу өгнө.
-    query.setData(prev => ({ ...prev, workDays: new Map(prev.workDays).set(teacherId, next) }));
-    setPending(`${teacherId}:${weekday}`);
-    setError(null);
+    query.setData((prev) => {
+      const u = new Set(prev.unchecked);
+      u.delete(key);
+      return { ...prev, cells: new Map(prev.cells).set(key, next), unchecked: u };
+    });
+    setPending(teacherId);
+    setActionError(null);
     try {
       await api("/schedule/teacher-workdays", {
         method: "PUT",
-        body: { teacherId, weekdays: [...next] },
+        body: {
+          teacherId,
+          weekdays: [...next],
+          parity,
+          ...(order.has(teacherId) ? { sortOrder: order.get(teacherId) } : {}),
+        },
       });
     } catch (e) {
-      query.setData(prev => ({ ...prev, workDays: new Map(prev.workDays).set(teacherId, current) }));
-      setError(errMsg(e));
+      query.setData((prev) => {
+        const u = new Set(prev.unchecked);
+        if (wasUnchecked) u.add(key);
+        return { ...prev, cells: new Map(prev.cells).set(key, current), unchecked: u };
+      });
+      setActionError(errMsg(e));
     } finally {
       setPending(null);
     }
@@ -138,50 +195,24 @@ export default function TeacherWorkDays() {
     }
   }
 
-  const todayMonday = mondayOf(todayUBKey());
-  const weekDates = WORKWEEK_ORDER.map((weekday, i) => ({
-    weekday,
-    date: addDaysToKey(weekStart, i),
-  }));
+  const todayMonday = mondayOf(today);
+  const currentParity = weekParityOf(today);
+  const outOfRange = (config.validFrom && today < config.validFrom) || (config.validTo && today > config.validTo);
 
   return (
-    <section className="chunky p-6">
+    <section className="chunky p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <UserCheck className="h-5 w-5 text-brand-soft" aria-hidden />
           <h2 className="font-bold text-brand-soft">Багшийн ажлын өдөр</h2>
           <InfoHint label="Ажлын өдрийн тухай">
-            Нүд дээр товшиж багшийн 7 хоног бүр давтагддаг ажлын өдрийг
-            тогтооно. Зөвхөн нэг өдрийн өөрчлөлтийг доорх &laquo;Онцгой
-            өдөр&raquo; хэсгээр бүртгэнэ.
+            Нүд дээр товшиж багшийн ажлын өдрийг тогтооно. «Сондгой / Тэгш» горимд 1-р (сондгой) долоо хоног
+            2026-08-31-нд эхэлж, ээлжилнэ. Зөвхөн нэг өдрийн өөрчлөлтийг доорх «Онцгой өдөр» хэсгээр бүртгэнэ.
           </InfoHint>
         </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setWeekStart((w) => addDaysToKey(w, -7))}
-            aria-label="Өмнөх долоо хоног"
-            className="rounded-lg border border-line p-1.5 transition hover:border-brand"
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden />
-          </button>
-          <button
-            type="button"
-            onClick={() => setWeekStart(todayMonday)}
-            disabled={weekStart === todayMonday}
-            className={outlineBtn}
-          >
-            Энэ долоо хоног
-          </button>
-          <button
-            type="button"
-            onClick={() => setWeekStart((w) => addDaysToKey(w, 7))}
-            aria-label="Дараагийн долоо хоног"
-            className="rounded-lg border border-line p-1.5 transition hover:border-brand"
-          >
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </button>
-        </div>
+        <span className="rounded-full bg-ink/5 px-2.5 py-1 text-xs font-semibold text-ink">
+          Энэ долоо хоног: {PARITY_LABEL[currentParity]}
+        </span>
       </div>
 
       {error && (
@@ -190,88 +221,101 @@ export default function TeacherWorkDays() {
           {error}
         </div>
       )}
-      {loading && (
-        <LoadingState rows={3} />
-      )}
+      {loading && <LoadingState rows={3} />}
 
-      {!loading && teachers.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] border-collapse text-sm">
-            <thead>
-              <tr>
-                <th className="border-b border-line px-2 py-2 text-left text-xs font-semibold text-ink-dim">
-                  Багш
-                </th>
-                {weekDates.map(({ weekday, date }) => (
-                  <th
-                    key={weekday}
-                    className="border-b border-line px-1 py-2 text-center text-xs font-semibold text-ink-dim"
-                  >
-                    <span className="block">{WEEKDAY_SHORT[weekday]}</span>
-                    <span className="block font-normal">{shortDate(date)}</span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {teachers.map((teacher) => {
-                const set = workDays.get(teacher.id) ?? new Set<number>();
-                return (
-                  <tr key={teacher.id} className="border-b border-line/60">
-                    <td className="px-2 py-1.5 font-semibold">
-                      {teacher.lastName} {teacher.firstName}
-                    </td>
-                    {weekDates.map(({ weekday, date }) => {
-                      const on = set.has(weekday);
-                      const exception = exceptions.find(
-                        (x) =>
-                          x.teacherId === teacher.id && x.date.slice(0, 10) === date,
-                      );
-                      const busy = pending === `${teacher.id}:${weekday}`;
-                      return (
-                        <td key={weekday} className="px-1 py-1.5 text-center">
-                          <button
-                            type="button"
-                            aria-pressed={on}
-                            aria-label={`${teacher.lastName} ${teacher.firstName} — ${WEEKDAY_LABELS[weekday]}`}
-                            disabled={busy}
-                            onClick={() => toggle(teacher.id, weekday)}
-                            className={`relative inline-flex h-8 w-full min-w-9 items-center justify-center rounded-lg border transition disabled:opacity-50 ${
-                              on
-                                ? "border-success/40 bg-success/15 text-success"
-                                : "border-line bg-surface text-ink-dim hover:border-brand"
-                            }`}
-                          >
-                            {on && <Check className="h-4 w-4" aria-hidden />}
-                            {exception && (
-                              <span
-                                className={`absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full ${
-                                  exception.working ? "bg-info" : "bg-warning"
-                                }`}
-                                aria-hidden
-                              />
-                            )}
-                          </button>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {!loading && (
+        <div className="space-y-3">
+          <RosterSettings
+            key={`${config.mode}|${config.validFrom}|${config.validTo}`}
+            config={config}
+            onSaved={(c) => query.setData((prev) => ({ ...prev, config: c }))}
+          />
+          {outOfRange && (
+            <p className="flex items-center gap-1.5 rounded-lg bg-warning/15 px-3 py-2 text-sm font-semibold text-warning">
+              <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+              Хүснэгтийн хүчинтэй хугацаа өнөөдрийг хамрахгүй байна — хугацааг шинэчилнэ үү.
+            </p>
+          )}
+
+          {config.mode === "ALTERNATING" && (
+            <div role="tablist" aria-label="Долоо хоногийн ээлж" className="flex gap-1.5">
+              {([1, 2] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  role="tab"
+                  aria-selected={tabParity === p}
+                  onClick={() => setTabParity(p)}
+                  className={`min-h-11 rounded-xl border px-4 text-sm font-semibold transition ${
+                    tabParity === p
+                      ? "border-brand-bright bg-brand-bright text-on-brand"
+                      : "border-line bg-panel text-ink hover:border-brand"
+                  }`}
+                >
+                  {PARITY_LABEL[p]} долоо хоног
+                  {p === currentParity && <span className="ml-1.5 font-normal opacity-80">(энэ долоо хоног)</span>}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {uncheckedCount > 0 && (
+            <p className="flex items-start gap-1.5 rounded-lg bg-warning/15 px-3 py-2 text-sm text-warning">
+              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              <span>
+                <b>Тэгш долоо хоногийг сондгойгоос түр хуулсан</b> ({uncheckedCount} багш) — эзний хүснэгтээр шалгаж
+                засна уу. Багшийн мөрийг засахад тэмдэглэл арилна.
+              </span>
+            </p>
+          )}
+
+          {teachers.length > 0 ? (
+            <RosterGrid
+              teachers={teachers}
+              isOn={isOn}
+              isPending={(id) => pending === id}
+              onToggle={toggle}
+              caption={`Багшийн ажлын өдөр — ${PARITY_LABEL[parity]}`}
+            />
+          ) : (
+            !error && <p className="text-sm text-ink-dim">Багшийн бүртгэл алга байна</p>
+          )}
         </div>
-      )}
-
-      {!loading && teachers.length === 0 && !error && (
-        <p className="text-sm text-ink-dim">Багшийн бүртгэл алга байна</p>
       )}
 
       {/* ---- Онцгой өдөр ---- */}
       <div className="mt-6 rounded-xl border border-line bg-surface p-4">
-        <div className="mb-3 flex items-center gap-2">
-          <CalendarOff className="h-4 w-4 text-brand-soft" aria-hidden />
-          <h3 className="text-sm font-bold">Онцгой өдөр</h3>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <CalendarOff className="h-4 w-4 text-brand-soft" aria-hidden />
+            <h3 className="text-sm font-bold">Онцгой өдөр</h3>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setWeekStart((w) => addDaysToKey(w, -7))}
+              aria-label="Өмнөх долоо хоног"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:border-brand"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => setWeekStart(todayMonday)}
+              disabled={weekStart === todayMonday}
+              className={`${outlineBtn} min-h-11`}
+            >
+              {shortDate(weekStart)} — {shortDate(weekEnd)}
+            </button>
+            <button
+              type="button"
+              onClick={() => setWeekStart((w) => addDaysToKey(w, 7))}
+              aria-label="Дараагийн долоо хоног"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:border-brand"
+            >
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col gap-1">
@@ -287,7 +331,7 @@ export default function TeacherWorkDays() {
               <option value="">— сонгох —</option>
               {teachers.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.lastName} {t.firstName}
+                  {t.name}
                 </option>
               ))}
             </select>
@@ -372,9 +416,7 @@ export default function TeacherWorkDays() {
                 </span>
                 <span
                   className={`rounded-full px-2 py-0.5 font-semibold ${
-                    x.working
-                      ? "bg-info/15 text-info"
-                      : "bg-warning/15 text-warning"
+                    x.working ? "bg-info/15 text-info" : "bg-warning/15 text-warning"
                   }`}
                 >
                   {x.working ? "Ажиллана" : "Ажиллахгүй"}

@@ -86,7 +86,78 @@ export interface GradableProblem {
   format: ProblemFormat;
   choices: unknown; // Problem.choices JSON
   correctAnswer: unknown; // Problem.correctAnswer JSON
-  choiceOptions?: { order: number; text: string; isCorrect: boolean }[];
+  choiceOptions?: { order: number; text: string; isCorrect: boolean; imageKey?: string | null }[];
+  // FILL_NUMBER: нүдний ([a], [bc]) дараалал — объект түлхүүрийг ({a:'3'})
+  // хөдөлгүүрийн нэг стринг хариутай ("35") тулгахад хэрэгтэй.
+  statementText?: string | null;
+}
+
+// ============ Нөхөх бодлогын нүд ============
+
+// Нүдний тэмдэглэгээ: [a], [bc] эсвэл Word-оос орсон \lbrack a\rbrack.
+// web/src/components/exam/fillSlots.ts-тэй ИЖИЛ дүрэм.
+const FILL_SLOT_RE =
+  /\[([a-zA-Zа-яА-ЯёЁ]{1,8})\]|\\lbrack\s*([a-zA-Zа-яА-ЯёЁ]{1,8})\s*\\rbrack/g;
+
+// Хөдөлгүүрийн стринг доторх ХООСОН нүд. Хоосныг алгасвал дараагийн цифрүүд
+// зүүн тийш шилжиж буруу нүдэнд очдог (2026-10-10-нд илэрсэн) — тиймээс
+// байрлалыг энэ тэмдэгтээр хадгална ("3_5" = a:3, b:хоосон, c:5).
+export const FILL_EMPTY = '_';
+
+/** Нүдний бүлгүүд гарсан дарааллаар, давхардлыг нэг удаа ("a", "bc"…). */
+export function fillSlotKeys(statement: string | null | undefined): string[] {
+  const seen = new Set<string>();
+  const keys: string[] = [];
+  for (const m of String(statement ?? '').matchAll(FILL_SLOT_RE)) {
+    const key = m[1] ?? m[2];
+    if (seen.has(key)) continue;
+    seen.add(key);
+    keys.push(key);
+  }
+  return keys;
+}
+
+/**
+ * Хөдөлгүүрийн стринг хариуг ("3_5") түлхүүрийн объектын хэлбэрт ({a:'3',
+ * c:'5'}) буулгана. Өмнө нь объект түлхүүртэй бодлогыг стринг хариутай шууд
+ * харьцуулж ХЭЗЭЭ Ч зөв гэж дүгнэдэггүй байв (100V3, Сорил 1-A — 101 бодлого).
+ * Буулгах боломжгүй бол хариуг өөрчлөхгүй буцаана.
+ */
+function alignFillAnswer(p: GradableProblem, raw: unknown): unknown {
+  const c = p.correctAnswer;
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return raw;
+  if (typeof raw !== 'string' && typeof raw !== 'number') return raw;
+  const letters = fillSlotKeys(p.statementText).flatMap((k) => k.split(''));
+  if (letters.length === 0) return raw;
+  const text = String(raw).trim();
+  const at = (letter: string): string => {
+    const i = letters.indexOf(letter);
+    const ch = i >= 0 && i < text.length ? text[i] : '';
+    return ch === FILL_EMPTY ? '' : ch;
+  };
+  const out: Record<string, string> = {};
+  for (const key of Object.keys(c as Record<string, unknown>)) {
+    // { a: '3' } эсвэл бүлгээр { bc: '54' } — үсэг бүрийн цифрийг нийлүүлнэ
+    const chars = key.split('').map(at);
+    out[key] = chars.some((ch) => ch === '') ? '' : chars.join('');
+  }
+  return out;
+}
+
+/**
+ * Нүдтэй бодлогын стринг түлхүүр ("0812600") — нүд бүрийг ЯГ тулгана.
+ * tokensMatch нь тоогоор харьцуулдаг тул "812600"-г "0812600"-тэй тэнцүү гэж
+ * үзэх байсан (цифрүүд шилжсэн атлаа «зөв»). Хамаарахгүй бол null.
+ */
+function slotStringCorrect(p: GradableProblem, raw: unknown): boolean | null {
+  const c = p.correctAnswer;
+  if (typeof c !== 'string' && typeof c !== 'number') return null;
+  const total = fillSlotKeys(p.statementText).reduce((s, k) => s + k.length, 0);
+  const want = String(c).trim();
+  // Түлхүүрийн урт нүдний тоотой таарахгүй (ж: «-3» гэх мэт) — хуучин дүрэм
+  if (total === 0 || want.length !== total || !/^\d+$/.test(want)) return null;
+  if (typeof raw !== 'string' && typeof raw !== 'number') return false;
+  return String(raw).trim() === want;
 }
 
 // Бодлого ямар горимоор харагдахыг тодорхойлно:
@@ -110,6 +181,13 @@ export function choiceTextsOf(p: GradableProblem): string[] {
   }
   if (Array.isArray(p.choices)) return p.choices.map((c) => String(c));
   return [];
+}
+
+/** Сонголтын зургууд эх дарааллаар (choiceTextsOf-той ижил); нэг ч зураггүй бол null. */
+export function choiceImagesOf(p: Pick<GradableProblem, 'choiceOptions'>): (string | null)[] | null {
+  const opts = p.choiceOptions ?? [];
+  if (!opts.some((o) => o.imageKey)) return null;
+  return [...opts].sort((a, b) => a.order - b.order).map((o) => o.imageKey ?? null);
 }
 
 // ============ Детерминистик shuffle ============
@@ -195,8 +273,18 @@ export function gradeAnswer(
   }
 
   // LETTER / FILL_NUMBER / OPEN — стринг/объект харьцуулалт хэвээр
+  if (p.format === ProblemFormat.FILL_NUMBER) {
+    const exact = slotStringCorrect(p, rawAnswer);
+    if (exact !== null) {
+      return { correct: exact, canonicalAnswer: rawAnswer ?? null };
+    }
+  }
+  const given =
+    p.format === ProblemFormat.FILL_NUMBER
+      ? alignFillAnswer(p, rawAnswer)
+      : rawAnswer;
   return {
-    correct: answersEqual(p.correctAnswer, rawAnswer),
+    correct: answersEqual(p.correctAnswer, given),
     canonicalAnswer: rawAnswer ?? null,
   };
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { TriangleAlert, Check } from "lucide-react";
+import { TriangleAlert, Check, Info } from "lucide-react";
 import { LoadingState } from "@/components/ui/StateBlock";
 import { useSection } from "@/components/students/progress/useSection";
 import { api } from "@/lib/api";
 import { StudentNote, StudentNoteType, errMsg } from "./types";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 const TABS: { type: StudentNoteType; label: string }[] = [
   { type: "GENERAL", label: "Сурагчийн тэмдэглэл" },
@@ -14,7 +15,7 @@ const TABS: { type: StudentNoteType; label: string }[] = [
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleString("mn-MN", {
+  return formatMnDateTime(d, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -65,7 +66,7 @@ function StudentNotesPanelContent({
         method: "POST",
         body: { type: tab, body },
       });
-      setNotes((prev) => [note, ...(prev ?? [])]);
+      setNotes((prev) => [{ ...note, authorName: "Та", canEdit: true }, ...(prev ?? [])]);
       setDraft("");
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });
@@ -91,7 +92,7 @@ function StudentNotesPanelContent({
         method: "PATCH",
         body: { resolvedAt: resolving ? new Date().toISOString() : null },
       });
-      setNotes((cur) => cur?.map((n) => (n.id === note.id ? updated : n)) ?? cur);
+      setNotes((cur) => cur?.map((n) => (n.id === note.id ? { ...n, ...updated } : n)) ?? cur);
     } catch (e) {
       setNotes(prev ?? null);
       setMsg({ kind: "error", text: errMsg(e) });
@@ -114,7 +115,7 @@ function StudentNotesPanelContent({
         method: "PATCH",
         body: { body },
       });
-      setNotes((cur) => cur?.map((n) => (n.id === note.id ? updated : n)) ?? cur);
+      setNotes((cur) => cur?.map((n) => (n.id === note.id ? { ...n, ...updated } : n)) ?? cur);
     } catch (e) {
       setNotes(prev ?? null);
       setMsg({ kind: "error", text: errMsg(e) });
@@ -175,8 +176,9 @@ function StudentNotesPanelContent({
         <>
           {/* Бичих хэсэг */}
           {composeBlocked ? (
-            <div className="mb-4 rounded-xl border border-line bg-ink/[0.03] px-4 py-3 text-sm text-ink-dim">
-              ℹ️ {paymentNotesBlockedReason}
+            <div className="mb-4 flex items-start gap-2 rounded-xl border border-line bg-ink/[0.03] px-4 py-3 text-sm text-ink-dim">
+              <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              {paymentNotesBlockedReason}
             </div>
           ) : (
             <div className="mb-4">
@@ -259,6 +261,7 @@ function StudentNotesPanelContent({
                     <>
                       <p className="whitespace-pre-wrap text-ink">{n.body}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-ink-dim">
+                        {n.authorName && <span className="font-semibold text-ink">{n.authorName}</span>}
                         <span>{formatDateTime(n.createdAt)}</span>
                         {n.resolvedAt && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 font-semibold text-success">
@@ -266,24 +269,29 @@ function StudentNotesPanelContent({
                             Шийдэгдсэн
                           </span>
                         )}
-                        <button
-                          onClick={() => toggleResolve(n)}
-                          className="font-semibold text-brand-soft hover:underline"
-                        >
-                          {n.resolvedAt ? "Дахин нээх" : "Шийдэгдсэн гэж тэмдэглэх"}
-                        </button>
-                        <button
-                          onClick={() => startEdit(n)}
-                          className="text-ink-dim hover:text-ink"
-                        >
-                          Засах
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(n.id)}
-                          className="text-error hover:underline"
-                        >
-                          Устгах
-                        </button>
+                        {/* Бүх багш уншина; засах/устгах — зохиогч эсвэл админ */}
+                        {n.canEdit !== false && (
+                          <>
+                            <button
+                              onClick={() => toggleResolve(n)}
+                              className="font-semibold text-brand-soft hover:underline"
+                            >
+                              {n.resolvedAt ? "Дахин нээх" : "Шийдэгдсэн гэж тэмдэглэх"}
+                            </button>
+                            <button
+                              onClick={() => startEdit(n)}
+                              className="text-ink-dim hover:text-ink"
+                            >
+                              Засах
+                            </button>
+                            <button
+                              onClick={() => setDeleteTarget(n.id)}
+                              className="text-error hover:underline"
+                            >
+                              Устгах
+                            </button>
+                          </>
+                        )}
                       </div>
                     </>
                   )}

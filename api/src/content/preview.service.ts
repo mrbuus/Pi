@@ -36,7 +36,7 @@ export class PreviewService {
           where: { deletedAt: null },
           orderBy: [{ page: 'asc' }, { number: 'asc' }, { id: 'asc' }],
           take: 3,
-          select: { id: true, token: true, statementText: true },
+          select: { id: true, statementText: true },
         },
       },
     });
@@ -51,7 +51,6 @@ export class PreviewService {
         : null,
       problems: chapter.problems.map((p) => ({
         id: p.id,
-        token: p.token,
         statementText: p.statementText,
       })),
     };

@@ -4,7 +4,24 @@ import { toast } from "sonner";
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
 export default function RegisterSW() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator) || !window.isSecureContext) return;
+    if (!("serviceWorker" in navigator)) return;
+    // Хөгжүүлэлтийн горимд (next dev) өмнө нь production build-ээс суусан
+    // service worker хуучин JS-ийг кэшээс өгсөөр байж, засвар хөтөчид огт
+    // харагдахгүй байв (2026-10-08). Тиймээс dev-д SW-г устгаж, кэшийг цэвэрлээд
+    // нэг удаа дахин ачаална.
+    if (process.env.NODE_ENV !== "production") {
+      void (async () => {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          const keys = "caches" in window ? await caches.keys() : [];
+          const stale = keys.filter((k) => k.startsWith("pi-"));
+          await Promise.all([...regs.map((r) => r.unregister()), ...stale.map((k) => caches.delete(k))]);
+          if ((regs.length || stale.length) && navigator.serviceWorker.controller) window.location.reload();
+        } catch { /* хөгжүүлэлтийн туслах — алдаа гарвал алгасна */ }
+      })();
+      return;
+    }
+    if (!window.isSecureContext) return;
     let cancelled = false;
     let refreshing = false;
     let announced = false;

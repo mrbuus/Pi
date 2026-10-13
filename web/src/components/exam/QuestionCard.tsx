@@ -22,6 +22,8 @@ export interface QuestionCardProblem {
   points: number;
   choiceMode: "TEXT" | "LETTER" | null;
   choices: string[] | null;
+  /** Сонголтын зургууд (choices-тэй ижил дараалал); зураггүй бол null */
+  choiceImages?: (string | null)[] | null;
 }
 
 export default function QuestionCard({
@@ -65,6 +67,7 @@ export default function QuestionCard({
           <ChoiceList
             mode="TEXT"
             choices={problem.choices}
+            images={problem.choiceImages}
             selected={answer}
             onSelect={onAnswer}
             problemNumber={problemNumber}

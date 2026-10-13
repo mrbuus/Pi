@@ -12,7 +12,13 @@ const apiBase = (() => {
     return url.protocol === 'https:' || (url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname)) ? url : null;
   } catch { return null; }
 })();
+// Локал хөгжүүлэлт (localhost/127.0.0.1): SW ажиллах ёсгүй. Өмнө production
+// build-ээс суусан SW нь dev-ийн хэшгүй chunk-уудыг кэшээс өгч, засвар хөтөчид
+// харагдахгүй байв (2026-10-08). Энэ хувилбар суумагц өөрийгөө устгаж,
+// кэшийг цэвэрлээд нээлттэй цонхнуудыг дахин ачаална.
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(self.location.hostname);
 self.addEventListener('install', event => {
+  if (IS_LOCAL) { event.waitUntil(self.skipWaiting()); return; }
   event.waitUntil(caches.open(CACHE).then(async cache => {
     // Both fallbacks are generic public pages, never an authenticated app shell.
     await cache.add('/offline.html');
@@ -41,6 +47,14 @@ self.addEventListener('install', event => {
   // Never interrupt an active examination with automatic skipWaiting.
 });
 self.addEventListener('activate', event => {
+  if (IS_LOCAL) {
+    event.waitUntil((async () => {
+      for (const key of await caches.keys()) if (key.startsWith('pi-')) await caches.delete(key);
+      await self.registration.unregister();
+      for (const client of await self.clients.matchAll({ type: 'window' })) client.navigate(client.url);
+    })());
+    return;
+  }
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE).map(key => caches.delete(key)))));
 });
 self.addEventListener('message', event => {
@@ -105,6 +119,7 @@ async function remember(request, response) {
   } catch { /* best-effort public asset caching */ }
 }
 self.addEventListener('fetch', event => {
+  if (IS_LOCAL) return;
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== 'GET') return;

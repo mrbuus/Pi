@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   Length,
+  Matches,
 } from 'class-validator';
 import { StudentNoteType } from '../../generated/prisma/enums';
 
@@ -17,6 +18,12 @@ export class CreateNoteDto {
   @IsString()
   @Length(1, 4000, { message: 'Тэмдэглэл 1–4000 тэмдэгт байх ёстой' })
   body: string;
+
+  // Зөвхөн төлбөрийн тэмдэглэлд: эцэг эх төлөхөөр амласан өдөр
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна' })
+  promisedOn?: string;
 }
 
 export class UpdateNoteDto {
@@ -31,4 +38,10 @@ export class UpdateNoteDto {
   @IsOptional()
   @IsDateString()
   resolvedAt?: string | null;
+
+  // Амласан өдрийг өөрчлөх; null бол арилгана
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна' })
+  promisedOn?: string | null;
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/kit/card";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
+import { formatMnDate } from "@/lib/dateMn";
 type Rank = { rank: number | null; participants: number; tied: number; label?: string; id?: string };
 type Ranking = { classes: Rank[]; school: Rank | null; exam: Rank };
 type Result = { id: string; totalScore: number; maxScore: number; createdAt: string; test: { id: string; title: string } };
@@ -28,7 +29,7 @@ function ResultCard({ result }: { result: Result }) {
     finally { setBusy(false); }
   }
   return <Card className="min-w-0"><CardHeader><CardTitle className="break-words text-lg">{result.test.title}</CardTitle></CardHeader><CardContent className="space-y-4">
-    <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xl font-semibold">{result.totalScore} / {result.maxScore}</p><time className="text-sm text-ink-dim">{new Date(result.createdAt).toLocaleDateString("mn-MN")}</time></div>
+    <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xl font-semibold">{result.totalScore} / {result.maxScore}</p><time className="text-sm text-ink-dim">{formatMnDate(result.createdAt)}</time></div>
     <details onToggle={e => void load(e.currentTarget.open)}><summary className="min-h-11 cursor-pointer rounded-lg py-3 font-medium focus-visible:outline-2 focus-visible:outline-brand">Миний эрэмбэ</summary>
       {busy ? <LoadingState rows={3} /> : error ? <ErrorState message={error} onRetry={() => void load(true)} /> : ranking ? <div className="space-y-3 pt-2">
         {[...ranking.classes, ...(ranking.school ? [ranking.school] : []), { ...ranking.exam, label: "Энэ шалгалт" }].map((scope, i) => <div key={scope.id ?? i} className="flex flex-wrap justify-between gap-2 rounded-lg bg-panel p-3"><span className="break-words">{scope.label}</span><strong>{scope.rank === null ? "Эрэмбэ тооцохгүй" : `${scope.rank} / ${scope.participants}`}{scope.tied > 1 ? ` (${scope.tied} ижил дүн)` : ""}</strong></div>)}

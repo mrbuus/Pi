@@ -44,12 +44,9 @@ const THEME_INIT_SCRIPT = `(function(){
   try {
     var KEY = "pi_theme";
     var stored = localStorage.getItem(KEY);
-    // ӨГӨГДМӨЛ нь "light" — "system" БИШ. Хэрэглэгчийн үйлдлийн систем
-    // харанхуй байсан ч манай сайт цайвраар нээгдэнэ. Шалтгаан: цайвар
-    // дэвсгэр дээрх бараан текст нь математикийн жижиг тэмдэгт уншихад
-    // хэмжигдэхүйц дээр бөгөөд энэ нь бүтээгдэхүүний үндсэн харагдац.
-    // Хэрэглэгч толгой хэсгийн сэлгэгчээр харанхуй/систем рүү сольж болно.
-    var theme = (stored === "light" || stored === "dark" || stored === "system") ? stored : "light";
+    // ӨГӨГДМӨЛ нь "system" (эзэн 2026-10-13): эхлээд төхөөрөмжийн өнгөөр,
+    // хэрэглэгч нар/сар товч дарвал тэр сонголт тогтмол хадгалагдана.
+    var theme = (stored === "light" || stored === "dark" || stored === "system") ? stored : "system";
     var resolved = theme === "system"
       ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
       : theme;

@@ -17,6 +17,7 @@ import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { Meta } from "@/components/ui/Meta";
 import RoomShape from "./RoomShape";
+import TopicPicker from "./topic-picker/TopicPicker";
 import { formatMinutes, ROOMS, SUBJECT_LABEL, timeToMinutes, WEEKDAY_LABELS, WORKWEEK_ORDER, type BookLite, type ChapterLite, type TeacherLite, type WeekEntry } from "./types";
 
 /**
@@ -493,24 +494,21 @@ function EntryActionPanelContent({
         {/* ---- Сэдэв маягт (товч дарахад задарна) ---- */}
         {topicOpen && (
           <div className="mb-3 space-y-2 rounded-lg border border-line bg-panel p-3">
-            <label htmlFor="panel-topic-title" className="sr-only">
-              Сэдвийн нэр
-            </label>
-            <input
-              id="panel-topic-title"
-              value={topicTitle}
-              onChange={(e) => setTopicTitle(e.target.value)}
-              placeholder="Жишээ: Квадрат тэгшитгэл"
-              className={inputCls}
+            <TopicPicker
+              title={topicTitle}
+              onTitleChange={setTopicTitle}
+              chapterId={chapterId}
+              onChapterIdChange={setChapterId}
+              onSubmit={saveTopic}
               autoFocus
             />
             {!showChapterPicker ? (
               <button
                 type="button"
                 onClick={() => setShowChapterPicker(true)}
-                className="text-xs font-semibold text-brand-soft hover:underline"
+                className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-soft hover:underline"
               >
-                Ном/бүлэгтэй холбох (заавал биш)
+                Ном, бүлгийг гараар сонгох
               </button>
             ) : (
               <div className="grid gap-2 grid-cols-3">
@@ -545,7 +543,11 @@ function EntryActionPanelContent({
                 </select>
                 <select
                   value={chapterId}
-                  onChange={(e) => setChapterId(e.target.value)}
+                  onChange={(e) => {
+                    setChapterId(e.target.value);
+                    const picked = chapters.find((c) => c.id === e.target.value);
+                    if (picked && !topicTitle.trim()) setTopicTitle(picked.title);
+                  }}
                   disabled={!bookId}
                   className={inputCls}
                 >
@@ -569,7 +571,7 @@ function EntryActionPanelContent({
                 type="button"
                 onClick={saveTopic}
                 disabled={topicSaving}
-                className={primaryBtn}
+                className={`${primaryBtn} min-h-11 px-4`}
               >
                 {topicSaving ? "…" : "Хадгалах"}
               </button>
@@ -577,7 +579,7 @@ function EntryActionPanelContent({
                 type="button"
                 onClick={clearTopic}
                 disabled={topicSaving || !entry.topic}
-                className="rounded-lg border border-error/40 px-2.5 py-1.5 text-xs font-semibold text-error transition hover:bg-error/10 disabled:opacity-50"
+                className="min-h-11 rounded-lg border border-error/40 px-3 text-xs font-semibold text-error transition hover:bg-error/10 disabled:opacity-50"
               >
                 Хасах
               </button>

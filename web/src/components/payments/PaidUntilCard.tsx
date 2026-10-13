@@ -87,7 +87,7 @@ export default function PaidUntilCard({ studentId, compact = false, studentName,
           }
         : left < 7
           ? {
-              tone: "bg-warning/10 text-warning",
+              tone: "bg-info/10 text-info",
               icon: CalendarClock,
               title: left === 0 ? "Өнөөдөр дуусна" : `${left} хоногийн дараа дуусна`,
               hint: "Удахгүй дуусах гэж байна — дараагийн сарын төлбөрөө бэлдээрэй.",

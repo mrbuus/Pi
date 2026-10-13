@@ -3,6 +3,7 @@
 import { Card } from '../ui/Surface';
 import { SkeletonLine } from '../ui/Skeleton';
 import Link from 'next/link';
+import { formatMnDate } from "@/lib/dateMn";
 
 interface Group {
   id: string;
@@ -51,7 +52,7 @@ export function GroupsList({ groups, isLoading = false }: GroupsListProps) {
                 <div className="flex gap-4 mt-2 text-xs text-ink-dim">
                   <span>Сурагч: {group.memberCount}</span>
                   <span>
-                    {new Date(group.createdAt).toLocaleDateString('mn-MN')}
+                    {formatMnDate(group.createdAt)}
                   </span>
                 </div>
               </div>

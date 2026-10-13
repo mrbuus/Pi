@@ -25,6 +25,7 @@ export interface ClassroomOption {
 
 const SOURCE_LABEL: Record<string, string> = {
   CHAPTER_EXAM: "Цаасан (гараар)",
+  MANUAL_ENTRY: "Цаасан (гараар)",
   ONLINE_TEST: "Онлайн",
   OMR_IMPORT: "Онлайн (OMR)",
   EVENING_SELF_REPORT: "Өөрөө мэдүүлсэн",

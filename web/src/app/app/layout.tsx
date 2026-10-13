@@ -7,11 +7,13 @@ import ContextNavigation from "@/components/layout/ContextNavigation";
 import BottomTabs from "@/components/nav/BottomTabs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import Sidebar from "@/components/nav/Sidebar";
+import ClassHubTabs, { hubFor } from "@/components/nav/ClassHubTabs";
+import UserMenu from "@/components/nav/UserMenu";
+import ThemeToggle from "@/components/ThemeToggle";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
-import { Meta } from "@/components/ui/Meta";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
-import { api, clearAuth, fileUrl, getRole, getToken } from "@/lib/api";
+import { api, clearAuth, getRole, getToken } from "@/lib/api";
 import { navigationRole } from "@/lib/navigation-role";
 
 // Role бүрийн монгол нэр — header identity badge-д ашиглана
@@ -30,6 +32,8 @@ interface Me {
   lastName: string;
   role: string;
   avatarUrl?: string | null;
+  studentCode?: string | null;
+  teacherCode?: string | null;
   externalTeacherProfile?: { verifiedAt: string | null } | null;
 }
 interface ChildLink {
@@ -37,49 +41,14 @@ interface ChildLink {
   student: { firstName: string; lastName: string };
 }
 
-function initials(firstName: string, lastName: string): string {
-  return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
-}
-
-// Дээд буланд харагдах identity — нэвтэрсэн ямар ч role-той хүн өөрийн нэр
-// + role-оо, эцэг эх бол баталгаажсан хүүхдийнхээ нэрийг давхар харна.
-// Header дотор байрладаг тул БҮХ дотоод хуудсан дээр байнга харагдана.
-function IdentityBadge({ me }: { me: Me | null }) {
+// Эцэг эхэд баталгаажсан хүүхдийн нэрийг хэрэглэгчийн цэст давхар харуулна.
+function useVerifiedChildName(role: string | undefined): string {
   const [children, setChildren] = useState<ChildLink[]>([]);
   useEffect(() => {
-    if (me?.role === "PARENT") {
-      api<ChildLink[]>("/parent/children").then(setChildren).catch(() => {});
-    }
-  }, [me?.role]);
-
-  if (!me) return null;
-  const verifiedChild = children.find((c) => c.verified)?.student;
-  const fullName = `${me.firstName} ${me.lastName}`;
-
-  return (
-    <div className="flex shrink-0 items-center gap-2 rounded-lg border border-line px-2 py-1">
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-bright/20 text-[11px] font-bold text-brand-soft">
-        {me.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={fileUrl(me.avatarUrl)}
-            alt={`${fullName} профайл зураг`}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          initials(me.firstName, me.lastName)
-        )}
-      </span>
-      <span className="hidden text-sm leading-tight sm:block">
-        <span className="block font-semibold">{me.firstName}</span>
-        <span className="block text-[11px] text-ink-dim">
-          <Meta items={[ROLE_LABEL[navigationRole(me)] ?? me.role, verifiedChild ? verifiedChild.firstName : ""]} />
-        </span>
-      </span>
-    </div>
-  );
+    if (role === "PARENT") api<ChildLink[]>("/parent/children").then(setChildren).catch(() => {});
+  }, [role]);
+  return children.find((c) => c.verified)?.student.firstName ?? "";
 }
-
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -96,6 +65,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const me = identity?.authRole === role ? identity.me : null;
   const needsStaffMode = role === "TEACHER" || role === "TEACHER_PLUS";
   const displayRole = me ? navigationRole(me) : role;
+  const childName = useVerifiedChildName(me?.role);
 
   useEffect(() => {
     const token = getToken();
@@ -165,10 +135,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     {identityError
       ? <ErrorState message="Таны хэсгийг нээхэд холболт тасарлаа." onRetry={() => { setIdentityError(false); setIdentityRetry((value) => value + 1); }} />
       : <LoadingState label="Таны хэсгийг нээж байна…" />}
-    <Link href="/" className="mt-4 inline-flex min-h-11 items-center text-brand underline">Нийтийн нүүр хуудас</Link>
+    <Link href="/" className="mt-4 inline-flex min-h-11 items-center text-brand underline">Нүүр хуудас</Link>
   </div>;
 
   const pageTitle = getPageTitle(displayRole, pathname);
+  // Дэд хуудсууд цэсэнд эх хэсгээ идэвхтэй харуулна: табтай хэсгүүд (Хуваарь,
+  // Элсэлт) → эх мөр, анги/сурагч/ноорогийн дэлгэрэнгүй → жагсаалт.
+  const hub = hubFor(displayRole, pathname);
+  const navPathname = hub
+    ? hub.navHref
+    : pathname.startsWith("/app/classes/")
+      ? "/app/classes"
+      : pathname.startsWith("/app/students/")
+        ? "/app/admin/students"
+        : pathname.startsWith("/app/internal/")
+          ? "/app/internal"
+          : pathname;
+  const logout = () => {
+    clearAuth();
+    router.push("/login");
+  };
 
   return (
     <TopBarSlotProvider node={topBarSlotEl}>
@@ -182,14 +168,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {!examFullscreen && (
           <Sidebar
             role={displayRole ?? role}
-            pathname={pathname}
+            pathname={navPathname}
             mobileOpen={navOpen}
             onMobileOpenChange={setNavOpen}
-            identity={<IdentityBadge me={me} />}
-            onLogout={() => {
-              clearAuth();
-              router.push("/login");
-            }}
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col">
@@ -208,9 +189,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   ref={setTopBarSlotEl}
                   className="ml-2 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 />
-                {/* Мэдэгдлийн хонх (G27) — 60 сек тутам уншаагүй тоог шалгана */}
-                <div className="shrink-0">
+                {/* Баруун дээд: цагаан/хар, мэдэгдлийн хонх (G27), хэрэглэгчийн цэс */}
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <ThemeToggle />
                   <NotificationBell />
+                  <UserMenu
+                    me={me}
+                    roleLabel={ROLE_LABEL[displayRole ?? ""] ?? displayRole ?? ""}
+                    extra={childName}
+                    onLogout={logout}
+                  />
                 </div>
               </div>
             </header>
@@ -224,14 +212,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           >
             {displayRole === "GROUP_TEACHER" && pathname === "/app/teacher"
               ? <LoadingState label="Анги удирдах хэсгийг нээж байна…" />
-              : children}
+              : <>
+                  {hub && <ClassHubTabs pathname={pathname} tabs={hub.tabs} label={hub.label} />}
+                  {children}
+                </>}
           </main>
         </div>
       </div>
       {!examFullscreen && (
         <BottomTabs
           role={displayRole ?? role}
-          pathname={pathname}
+          pathname={navPathname}
           moreOpen={navOpen}
           onMore={() => setNavOpen((v) => !v)}
         />

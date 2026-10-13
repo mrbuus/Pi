@@ -124,8 +124,11 @@ function formatErrorMessage(status: number, serverMsg: string | null): string {
   if (status === 429) {
     return "Хэт олон оролдлога. Хэсэг хугацаа хүлээсэний дараа дахин оролдоно уу.";
   }
-  if (status === 401 || status === 403) {
-    return "Эрх хүрэхгүй. Сэргээхэд нэвтрэх дахин оролдоно уу.";
+  if (status === 401) {
+    return "Нэвтрэлт дууссан байна. Дахин нэвтэрнэ үү.";
+  }
+  if (status === 403) {
+    return "Энэ хэсэгт таны эрх хүрэхгүй байна. Шаардлагатай бол админаас эрх хүснэ үү.";
   }
   if (status === 404) {
     return "Хайж байгаа өгөгдөл олдсонгүй.";
@@ -152,7 +155,8 @@ function formatErrorMessage(status: number, serverMsg: string | null): string {
 
 /** HTTP failures retain their status without changing existing Error/message callers. */
 export class ApiError extends Error {
-  constructor(message: string, public readonly status: number) {
+  /** body — серверийн задалсан хариу (ж: 409 VERSION_CONFLICT-ийн changedBy, currentVersion). */
+  constructor(message: string, public readonly status: number, public readonly body?: unknown) {
     super(message);
     this.name = "ApiError";
   }
@@ -217,7 +221,7 @@ export async function api<T = unknown>(
         ? data.message.join(", ")
         : data?.message;
       const formatted = formatErrorMessage(res.status, msg ?? null);
-      throw new ApiError(formatted, res.status);
+      throw new ApiError(formatted, res.status, data);
     }
     return data;
   })();

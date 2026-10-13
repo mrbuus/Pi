@@ -3,6 +3,7 @@
 import { Card, SectionHeader } from "@/components/ui/Surface";
 import { Meta } from "@/components/ui/Meta";
 import type { TestStats } from "./legacy-types";
+import { formatMnDate } from "@/lib/dateMn";
 
 interface TestReportCardProps {
   stats: TestStats;
@@ -25,7 +26,7 @@ export default function TestReportCard({
         title={testTitle}
         hint={
           <span className="text-xs text-ink-dim ml-auto">
-            {new Date(conductedAt).toLocaleDateString("mn-MN")}
+            {formatMnDate(conductedAt)}
           </span>
         }
       />

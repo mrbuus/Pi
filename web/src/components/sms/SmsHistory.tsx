@@ -7,6 +7,7 @@ import { api, getRole } from "@/lib/api";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { Button } from "@/components/ui/Button";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 interface SmsMessage {
   id: string;
@@ -145,7 +146,7 @@ export function SmsHistory() {
                 <Meta
                   items={[
                     <span key="phone" className="font-mono text-sm">{msg.toPhone}</span>,
-                    new Date(msg.createdAt).toLocaleString("mn-MN"),
+                    formatMnDateTime(msg.createdAt),
                     `${msg.segments} хэсэг`,
                   ]}
                   className="text-xs text-ink-dim"

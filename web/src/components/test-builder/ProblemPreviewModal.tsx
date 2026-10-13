@@ -1,5 +1,6 @@
 "use client";
 
+import CodeReveal from "@/components/ui/CodeReveal";
 import { AlertTriangle, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import ProblemStudentPreview from "@/components/ProblemStudentPreview";
@@ -55,7 +56,7 @@ export default function ProblemPreviewModal({
   const choices = (problem.choiceOptions ?? [])
     .slice()
     .sort((a, b) => a.order - b.order)
-    .map((o) => ({ text: o.text, isCorrect: o.isCorrect }));
+    .map((o) => ({ text: o.text, isCorrect: o.isCorrect, imageKey: o.imageKey ?? null }));
 
   const known = hasKnownAnswer(problem);
   const reviewNeeded =
@@ -76,7 +77,7 @@ export default function ProblemPreviewModal({
       >
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-sm text-ink-dim">{problem.token}</p>
+            <CodeReveal code={problem.token} className="h-6 w-6" />
             <h2
               id="problem-preview-title"
               className="text-base font-bold text-ink"

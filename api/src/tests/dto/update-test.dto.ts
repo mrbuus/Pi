@@ -12,6 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { TestGradingMode, TestType } from '../../generated/prisma/enums';
+import { ExpectedVersionDto } from '../../revisions/revisions.dto';
 
 export class UpdateTestProblemDto {
   @ApiProperty({ type: String })
@@ -31,7 +32,8 @@ export class UpdateTestProblemDto {
   points?: number;
 }
 
-export class UpdateTestDto {
+// expectedVersion — засварлагч ачаалсан хувилбар (зөрвөл 409, ExpectedVersionDto).
+export class UpdateTestDto extends ExpectedVersionDto {
   @ApiPropertyOptional({ type: String })
   @ValidateIf((_object, value) => value !== undefined)
   @IsString()

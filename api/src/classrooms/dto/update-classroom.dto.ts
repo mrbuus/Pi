@@ -35,4 +35,10 @@ export class UpdateClassroomDto {
   @IsOptional()
   @IsString()
   teacherId?: string | null;
+
+  // Туслах ангийн багш (2026-10-13) — хоосон стринг бол чөлөөлнө
+  @ApiPropertyOptional({ type: String, nullable: true })
+  @IsOptional()
+  @IsString()
+  assistantTeacherId?: string | null;
 }

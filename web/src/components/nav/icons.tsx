@@ -30,8 +30,7 @@ import {
   UserPlus,
   Users,
   X,
-  type LucideIcon,
-} from "lucide-react";
+  type LucideIcon, PencilRuler } from "lucide-react";
 
 // Зүүн самбарын шугаман дүрсний нэгдсэн сан — lucide-react ашигладаг тул
 // tree-shake хийгддэг (зөвхөн доор жагсаасан icon-ууд bundle-д орно). Бүгд
@@ -67,9 +66,11 @@ export type IconName =
   | "message-square"
   | "grid"
   | "clock"
-  | "bell";
+  | "bell"
+  | "pencil";
 
 const ICONS: Record<IconName, LucideIcon> = {
+  pencil: PencilRuler,
   school: School, wallet: Wallet, store: Store, chart: ChartNoAxesCombined, refund: Undo2, practice: Dumbbell,
   "message-square": MessageSquare,
   home: Home,

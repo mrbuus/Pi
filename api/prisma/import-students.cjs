@@ -215,6 +215,16 @@ function normalizeBranch(rawValue) {
   return /баруун/i.test(text) ? 'Баруун 4' : 'Зүүн 4';
 }
 
+// Эзний дүрэм (2026-10-08): салбарыг АНГИ тодорхойлно. 13-х, 11-3, 9-2 ба
+// Нийгмийн анги = Зүүн 4, бусад = Баруун 4. Excel-ийн салбарын багана
+// хоосон/зөрүүтэй байсан ч ангиас нь гаргана.
+function branchForSection(section, sheetName) {
+  if (/нийгэм/i.test(sheetName || '')) return 'Зүүн 4';
+  if (!section) return null;
+  if (/^(13-\d+|11-3|9-2)$/.test(String(section).trim())) return 'Зүүн 4';
+  return 'Баруун 4';
+}
+
 // COL.BRANCH баганад "Баруун 4"/"Зүүн 4" эсвэл чөлөөт тэмдэглэл (ж: "50к
 // шилжүүлнэ", "Намар нэг мөсөн үлдсэнийг Бүтнээр нь хийе") аль аль нь
 // байж болно (баталгаажуулсан: header "нэмэлт тайлбар", мержсэн cell биш,
@@ -660,7 +670,7 @@ function buildImportPlan(sourcePath) {
         tuitionPlan,
         tuitionNote,
         branchRaw: branchRaw === null || branchRaw === undefined ? null : String(branchRaw),
-        branchNormalized,
+        branchNormalized: branchForSection(sectionValid ? section : null, config.name) ?? branchNormalized,
         guardianNote,
         joinedOn: joinedOnParsed.value,
         joinedOnRawUnparseable: joinedOnParsed.value ? null : joinedOnParsed.raw,

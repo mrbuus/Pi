@@ -2,6 +2,7 @@
 
 import { Card } from '../ui/Surface';
 import { SkeletonLine } from '../ui/Skeleton';
+import { formatMnDate } from "@/lib/dateMn";
 
 interface TestResult {
   id: string;
@@ -65,7 +66,7 @@ export function GroupMembersCard({
                 {member.student.firstName} {member.student.lastName}
               </div>
               <div className="text-xs text-ink-dim mt-1">
-                Нэгдсэн: {new Date(member.joinedAt).toLocaleDateString('mn-MN')}
+                Нэгдсэн: {formatMnDate(member.joinedAt)}
               </div>
 
               {member.testResults.length > 0 && (

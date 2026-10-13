@@ -7,14 +7,17 @@ import {
   IsOptional,
   IsString,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { ProblemFormat } from '../../generated/prisma/enums';
+import { ExpectedVersionDto } from '../../revisions/revisions.dto';
 import { ChoiceOptionInputDto } from './create-problem.dto';
 
 // Багш+/Админ бодлогын АГУУЛГА (статемент/сонголт/хариу/зураг)-ыг гараар
 // шууд засах DTO. Бүх талбар optional — зөвхөн ирсэн талбарыг л шинэчилнэ.
-export class UpdateProblemDto {
+// expectedVersion — засварлагч ачаалсан хувилбар (зөрвөл 409, ExpectedVersionDto).
+export class UpdateProblemDto extends ExpectedVersionDto {
   @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
@@ -41,10 +44,12 @@ export class UpdateProblemDto {
   @Type(() => ChoiceOptionInputDto)
   choiceOptions?: ChoiceOptionInputDto[];
 
-  @ApiPropertyOptional({ type: String })
+  // null — зургийг хасна (тест засах блокийн «Зураг устгах»)
+  @ApiPropertyOptional({ type: String, nullable: true })
   @IsOptional()
+  @ValidateIf((_o, v) => v !== null)
   @IsString()
-  imageKey?: string;
+  imageKey?: string | null;
 
   @ApiPropertyOptional({ type: Number, minimum: 1 })
   @IsOptional()

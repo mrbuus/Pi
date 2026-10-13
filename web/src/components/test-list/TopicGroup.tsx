@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import TestRowItem from "./TestRowItem";
-import { bookColor, type GroupRow } from "./types";
+import { bookColor, THOUSAND_TOPIC, type GroupRow } from "./types";
 
 export default function TopicGroup({
   topic,
@@ -36,7 +36,8 @@ export default function TopicGroup({
           <ChevronRight className="h-4 w-4" aria-hidden />
         </span>
         <span className="min-w-0 flex-1 truncate font-bold text-ink">{topic}</span>
-        {book && (
+        {/* «1000 бодлого» бүлгийн нэрэнд ном аль хэдийн бий — давхар чип хэрэггүй */}
+        {book && topic !== THOUSAND_TOPIC && (
           <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${book.chip}`}>
             {book.key}
           </span>

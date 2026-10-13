@@ -28,6 +28,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { ArchiveStudentDto, CommitStudentImportDto } from './students.dto';
@@ -70,9 +71,18 @@ export class UsersController {
     private passwordReset: PasswordResetService,
   ) {}
 
+  // Эзний шийдвэр (2026-10-08): Багш+ сурагчийн жагсаалтыг УНШИНА.
+  // Засах, архивлах, эрх солих нь ADMIN хэвээр (класс дээрх @Roles).
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get()
-  listUsers(@Query('archived') archived?: string) {
-    return this.users.listUsers(archived === 'true');
+  listUsers(
+    @Query('archived') archived?: string,
+    @Query('role') role?: string,
+  ) {
+    const wanted = Object.values(Role).includes(role as Role)
+      ? (role as Role)
+      : undefined;
+    return this.users.listUsers(archived === 'true', wanted);
   }
 
   @Post('students/import/preview')
@@ -128,6 +138,17 @@ export class UsersController {
       req.user.role,
       true,
     );
+  }
+
+  // Танхимын сурагчийг гараар бүртгэх — Багш+/Админ (эзэн 2026-10-13).
+  // Live эрхийг service дотор дахин шалгана (гадны багшийн бүртгэлд хаалттай).
+  @Post('students')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  createClassroomStudent(
+    @Body() dto: CreateClassroomStudentDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.createClassroomStudent(dto, req.user.userId);
   }
 
   // Шинэ хэрэглэгчийг эрхийг нь шууд сонгож нэг дороос үүсгэнэ

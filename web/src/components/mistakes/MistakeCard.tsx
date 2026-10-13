@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/kit/button";
 import { Card, CardContent } from "@/components/ui/kit/card";
 import { api } from "@/lib/api";
 import { STATUS_LABELS, type Mistake, type RetryResult } from "./types";
+import { formatMnDate } from "@/lib/dateMn";
 
 const REASONS = [
   ["CALC", "Бодолтын алдаа"], ["CONCEPT", "Ойлголт"],
@@ -165,7 +166,7 @@ export default function MistakeCard({ item, onChange, onRetried, sessionMode = f
           <div className="flex flex-wrap gap-2"><span className="font-semibold">Зөв хариу:</span><AnswerValue value={shownAnswer} /></div>
           {outline && <div className="min-w-0 overflow-x-auto border-t border-line pt-2"><MathText>{outline}</MathText></div>}
         </div>}
-        {item.nextRetryAt && <p className="text-sm text-ink-dim">Дараагийн давтлага: {new Date(item.nextRetryAt).toLocaleDateString("mn-MN", { timeZone: "Asia/Ulaanbaatar" })}</p>}
+        {item.nextRetryAt && <p className="text-sm text-ink-dim">Дараагийн давтлага: {formatMnDate(item.nextRetryAt, { timeZone: "Asia/Ulaanbaatar" })}</p>}
         {item.formulas.length > 0 && <div>
           <p className="text-sm font-bold">Хэрэгтэй томьёо</p>
           <div className="mt-2 space-y-2">{item.formulas.map(formula => (

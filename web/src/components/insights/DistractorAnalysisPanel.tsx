@@ -1,5 +1,6 @@
 "use client";
 
+import CodeReveal from "@/components/ui/CodeReveal";
 import { useEffect, useMemo, useState } from "react";
 import MathText from "@/components/MathText";
 import { api } from "@/lib/api";
@@ -38,10 +39,10 @@ export default function DistractorAnalysisPanel() {
       {!loading && error && <ErrorState message="Сонголтын статистик ачаалсангүй. Дахин оролдоно уу." onRetry={() => { setError(false); setLoading(true); setRetry((value) => value + 1); }} />}
       {!loading && !error && rows.length === 0 && <EmptyState title="Одоогоор оролдлогын өгөгдөл алга" hint="Сурагчид тест бөглөсний дараа энд гарна." />}
       {!loading && !error && rows.length > 0 && choices.length === 0 && <EmptyState title="Сонголтын мэдээлэл бүртгэгдээгүй байна" hint="Сурагчид тест бөглөж сонголтоо илгээсний дараа энд гарна." />}
-      {!loading && !error && choices.length > 0 && choices.map((row) => (
+      {!loading && !error && choices.length > 0 && choices.map((row, index) => (
         <Card key={row.problemId} padding="tight">
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <h2 className="break-all font-semibold text-ink">{row.problemToken}</h2>
+            <h2 className="flex items-center gap-1 font-semibold text-ink">{index + 1}-р бодлого <CodeReveal code={row.problemToken} className="h-6 w-6" /></h2>
             <span className="text-sm text-ink-dim"><Meta items={[`${row.totalAttempts} оролдлого`]} /></span>
           </div>
           {row.totalAttempts < 10 ? (

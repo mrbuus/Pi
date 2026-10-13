@@ -242,6 +242,16 @@ export type TestAttemptSession = Prisma.TestAttemptSessionModel
  */
 export type TestResult = Prisma.TestResultModel
 /**
+ * Model TestItemMark
+ * 
+ */
+export type TestItemMark = Prisma.TestItemMarkModel
+/**
+ * Model TestAbsence
+ * 
+ */
+export type TestAbsence = Prisma.TestAbsenceModel
+/**
  * Model ResultAcknowledgement
  * 
  */
@@ -286,6 +296,11 @@ export type StudentNote = Prisma.StudentNoteModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model ContentRevision
+ * 
+ */
+export type ContentRevision = Prisma.ContentRevisionModel
 /**
  * Model Pass
  * 
@@ -407,10 +422,25 @@ export type ScheduleException = Prisma.ScheduleExceptionModel
  */
 export type LessonTopic = Prisma.LessonTopicModel
 /**
+ * Model SchedulePublication
+ * 
+ */
+export type SchedulePublication = Prisma.SchedulePublicationModel
+/**
+ * Model LessonStaffing
+ * 
+ */
+export type LessonStaffing = Prisma.LessonStaffingModel
+/**
  * Model TeacherWorkDay
  * 
  */
 export type TeacherWorkDay = Prisma.TeacherWorkDayModel
+/**
+ * Model TeacherRosterConfig
+ * 
+ */
+export type TeacherRosterConfig = Prisma.TeacherRosterConfigModel
 /**
  * Model TeacherWorkException
  * 
@@ -421,6 +451,11 @@ export type TeacherWorkException = Prisma.TeacherWorkExceptionModel
  * 
  */
 export type AcademicCalendarDay = Prisma.AcademicCalendarDayModel
+/**
+ * Model AcademicCalendarDayClassroom
+ * 
+ */
+export type AcademicCalendarDayClassroom = Prisma.AcademicCalendarDayClassroomModel
 /**
  * Model StudentGoal
  * 
@@ -516,3 +551,48 @@ export type StudyReviewItem = Prisma.StudyReviewItemModel
  * 
  */
 export type StudyReviewResponse = Prisma.StudyReviewResponseModel
+/**
+ * Model LessonRecord
+ * 
+ */
+export type LessonRecord = Prisma.LessonRecordModel
+/**
+ * Model LessonRecordStudent
+ * 
+ */
+export type LessonRecordStudent = Prisma.LessonRecordStudentModel
+/**
+ * Model LessonNote
+ * 
+ */
+export type LessonNote = Prisma.LessonNoteModel
+/**
+ * Model StudentBehaviorFlag
+ * 
+ */
+export type StudentBehaviorFlag = Prisma.StudentBehaviorFlagModel
+/**
+ * Model DraftSet
+ * 
+ */
+export type DraftSet = Prisma.DraftSetModel
+/**
+ * Model DraftBlock
+ * 
+ */
+export type DraftBlock = Prisma.DraftBlockModel
+/**
+ * Model DraftEvent
+ * 
+ */
+export type DraftEvent = Prisma.DraftEventModel
+/**
+ * Model PlacementAttempt
+ * 
+ */
+export type PlacementAttempt = Prisma.PlacementAttemptModel
+/**
+ * Model PlacementTestConfig
+ * 
+ */
+export type PlacementTestConfig = Prisma.PlacementTestConfigModel

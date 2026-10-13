@@ -1,5 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 // Сэдвийн бүлгийн шалгалтын дүнг багш гараар оруулна (SPEC §9.2 — 3-р суваг)
 export class EnterResultDto {
@@ -17,4 +24,11 @@ export class EnterResultDto {
   @IsNumber()
   @Min(1)
   maxScore: number;
+
+  // Онлайнаар өгсөн дүнг Багш+/Админ засахад заавал (AuditLog-д бичигдэнэ)
+  @ApiPropertyOptional({ type: String, maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
 }

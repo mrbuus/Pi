@@ -28,13 +28,20 @@ describe('file authorization boundaries', () => {
       'purchase',
       'userPass',
       'studentProfile',
+      'placementAttempt',
     ])
       db[model] = {
         findUnique: jest.fn(async () => null),
         findFirst: jest.fn(async () => null),
         findMany: jest.fn(async () => []),
+        count: jest.fn(async () => 0),
       };
     service = new FileAuthorizationService(db as PrismaService);
+  });
+  it('lets centre teachers see placement-test work photos, not students', async () => {
+    db.placementAttempt.count.mockResolvedValue(1);
+    await expect(service.allowed({ id: 't', role: 'TEACHER' } as never, 'w.jpg')).resolves.toBe(true);
+    await expect(service.allowed({ id: 's', role: 'STUDENT' } as never, 'w.jpg')).resolves.toBe(false);
   });
   it('uses only owned server-frozen bank references and retains private attachment precedence', async () => {
     db.studyReviewItem.findMany.mockImplementation(async (args: any) =>

@@ -9,6 +9,7 @@ import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { Role, TestType } from '../generated/prisma/enums';
 import { TestsController } from './tests.controller';
 import { TestsService } from './tests.service';
+import { withRevisionFakes } from '../../test/fakes/revision-db';
 
 describe('TestsService duplicate and server-side draft behavior', () => {
   let prisma: any;
@@ -58,6 +59,7 @@ describe('TestsService duplicate and server-side draft behavior', () => {
       auditLog: { create: jest.fn().mockResolvedValue({}) },
     };
     prisma.$transaction = jest.fn((callback) => callback(prisma));
+    withRevisionFakes(prisma);
     service = new TestsService(prisma, { retryPending: jest.fn() } as any);
   });
 
@@ -218,7 +220,9 @@ function setup(src: Record<string, unknown> | null) {
       }),
     },
     auditLog: { create: jest.fn(async () => ({})) },
+    $transaction: (callback: (tx: unknown) => unknown) => callback(prisma),
   };
+  withRevisionFakes(prisma);
   // T12 adds the collector constructor dependency. Reflect.construct keeps
   // this cloning fixture usable both before and after that additive PR merges.
   const svc = Reflect.construct(TestsService, [prisma, { retryPending: jest.fn() }]) as TestsService;

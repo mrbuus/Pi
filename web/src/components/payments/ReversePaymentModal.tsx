@@ -121,14 +121,14 @@ export default function ReversePaymentModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:text-ink"
+              className="min-h-11 rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:text-ink"
             >
               Болих
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-error px-4 py-2 text-sm font-bold text-on-error transition disabled:opacity-60"
+              className="min-h-11 rounded-lg bg-error px-4 py-2 text-sm font-bold text-on-error transition disabled:opacity-60"
             >
               {saving ? "Буцааж байна…" : "Тийм, буцаах"}
             </button>

@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { ProblemFormat, TagType } from '../../generated/prisma/enums';
@@ -27,10 +28,18 @@ export class TagInputDto {
 // Шинэ загвар: сонголтын ТЕКСТ + аль нь зөв (isCorrect flag).
 // Багш үсэг ("C") биш, бодит хариултын текстийг оруулна.
 export class ChoiceOptionInputDto {
+  // Зурагтай сонголтод текст хоосон байж болно (imageKey заавал)
   @ApiProperty({ type: String })
   @IsString()
+  @ValidateIf((o: ChoiceOptionInputDto) => !o.imageKey)
   @IsNotEmpty()
   text: string;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  @IsOptional()
+  @ValidateIf((_o, v) => v !== null)
+  @IsString()
+  imageKey?: string | null;
 
   @ApiProperty({ type: Boolean })
   @IsBoolean()

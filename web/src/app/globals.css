@@ -717,3 +717,13 @@ textarea:focus-visible,
 }
 .flame-flicker { transform-origin: 50% 90%; animation: flameFlicker 2.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .flame-flicker { animation: none; } }
+
+/* Бүтэн лого: харанхуй горимд бичвэр нь цагаан хувилбар (logo-full-dark.png) —
+   components/LogoMark.tsx. Цагаан хайрцаг ТАВИХГҮЙ (эзэн 2026-10-13). */
+.logo-on-dark { display: none; }
+:root[data-theme="dark"] .logo-on-light { display: none; }
+:root[data-theme="dark"] .logo-on-dark { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-on-light { display: none; }
+  :root:not([data-theme="light"]) .logo-on-dark { display: block; }
+}

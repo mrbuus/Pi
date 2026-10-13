@@ -130,7 +130,7 @@ export default function PaymentEditModal({
           </button>
         </div>
 
-        <div className="mb-4 flex gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
+        <div className="mb-4 flex gap-2 rounded-lg border border-info/30 bg-info/10 px-3 py-2 text-sm text-ink">
           <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden="true" />
           <span>
             Мөнгөтэй холбоотой засвар — өөрчлөлт бүр хуучин/шинэ утгын хамт
@@ -261,14 +261,14 @@ export default function PaymentEditModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:text-ink"
+              className="min-h-11 rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-dim transition hover:text-ink"
             >
               Цуцлах
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-bold text-on-brand transition disabled:opacity-60"
+              className="min-h-11 rounded-lg bg-brand px-4 py-2 text-sm font-bold text-on-brand transition disabled:opacity-60"
             >
               {saving ? "Хадгалж байна…" : "Хадгалах"}
             </button>

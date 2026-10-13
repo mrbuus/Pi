@@ -1,26 +1,27 @@
+import { formatMnDateTime } from "@/lib/dateMn";
 // online багц дотор ашиглах формат хэрэгслүүд — бусад feature-ийн
 // dependency болгохгүйн тулд тусад нь.
 
 export function formatDate(d?: string | null): string {
   if (!d) return "—";
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(new Date(d), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
     timeZone: "Asia/Ulaanbaatar",
-  }).format(new Date(d));
+  });
 }
 
 export function formatDateTime(d?: string | null): string {
   if (!d) return "—";
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(new Date(d), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
     timeZone: "Asia/Ulaanbaatar",
-  }).format(new Date(d));
+  });
 }
 
 // "3 өдрийн өмнө", "Дөнгөж сая" гэх мэт харьцангуй хугацаа — сүүлд идэвхтэй

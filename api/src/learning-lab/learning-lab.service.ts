@@ -22,6 +22,8 @@ export interface ResponseInput {
     hiddenMs?: number;
     unknownMs?: number;
     buttons?: number;
+    /** Бодож байхдаа сайтаас гарсан (таб сольсон/цонх орхисон) тоо — эзэн 2026-10-13 */
+    leaves?: number;
   };
 }
 const FLAGS = ['unsure', 'guessed', 'could-not', 'help'];
@@ -59,10 +61,12 @@ export class LearningLabService {
       body.timing &&
       Object.entries(body.timing).some(
         ([key, value]) =>
-          !['focusedMs', 'hiddenMs', 'unknownMs', 'buttons'].includes(key) ||
+          !['focusedMs', 'hiddenMs', 'unknownMs', 'buttons', 'leaves'].includes(
+            key,
+          ) ||
           !Number.isSafeInteger(value) ||
           value < 0 ||
-          value > (key === 'buttons' ? 100 : 1800000),
+          value > (key === 'buttons' || key === 'leaves' ? 100 : 1800000),
       )
     )
       throw new BadRequestException('Хугацааны мэдээлэл буруу байна.');

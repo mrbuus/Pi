@@ -371,14 +371,6 @@ export default function ReviewPage() {
           {item && (
             <Card>
               <CardContent className="min-w-0 space-y-4 pt-5">
-                <details>
-                  <summary className="cursor-pointer text-sm text-ink-dim">
-                    Бодлогын тогтмол дугаар
-                  </summary>
-                  <p className="break-all text-sm">
-                    {item.source.token} — {item.problemId}
-                  </p>
-                </details>
                 {item.source.statement && (
                   <MathText>{item.source.statement}</MathText>
                 )}{" "}

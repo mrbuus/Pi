@@ -13,6 +13,20 @@ import { pingApi } from "@/lib/api";
  * 3. confirmStart — сүүлд "Бэлэн үү?" сальвар
  * ========================================================================== */
 
+// Дэс тоон нөхцөл — эгшиг зохицол: нэг дэх, хоёр дахь, гурав дахь, дөрөв дэх, ес дэх …
+function ordinalSuffix(n: number): string {
+  const last = n % 10;
+  if (n % 100 === 0 || n % 10 === 0) return "дахь";
+  return last === 1 || last === 4 || last === 9 ? "дэх" : "дахь";
+}
+
+/** «1, 2 дахь» — анхааруулга өгөх гаралтууд (автоматаар илгээхийн өмнөх). */
+function warnTimes(from: number, max: number): string {
+  const list = Array.from({ length: Math.max(0, max - from) }, (_, i) => from + i);
+  if (list.length === 0) return "";
+  return `${list.join(", ")} ${ordinalSuffix(list[list.length - 1])}`;
+}
+
 export default function ExamIntro({
   title,
   variantLabel,
@@ -138,7 +152,7 @@ export default function ExamIntro({
               <ul className="list-disc pl-5 mt-6 space-y-2 text-left text-sm text-ink-dim">
                 <li>Хариулт бүр шууд хадгалагдана — сүлжээ тасарсан ч үргэлжлүүлж болно.</li>
                 <li><b className="text-ink">Шударга байдлын хяналт:</b>Хөтчөө нээлттэй байлга. Таб солих,
-                  дэлгэцээс гарах, бүтэн дэлгэцээс гарах, хэмжээлэх гэх мэт оролдлого <b className="text-ink">{leaveWarn} дэх удаа</b> анхаарлыг сүрдүүлнэ, <b className="text-ink">{leaveMax} дэх удаа</b>-д шалгалт автоматаар дуусна.
+                  дэлгэцээс гарах, бүтэн дэлгэцээс гарах, хэмжээлэх гэх мэт оролдлого <b className="text-ink">{warnTimes(leaveWarn, leaveMax)} удаа</b> анхааруулга өгч, <b className="text-ink">{leaveMax} {ordinalSuffix(leaveMax)} удаад</b> шалгалт автоматаар дуусна.
                 </li>
                 {minutes > 0 && <li>Цагийг сервер тоолно — цаг дуусахад автоматаар илгээгдэнэ.</li>}
               </ul>

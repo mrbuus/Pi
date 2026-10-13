@@ -1,39 +1,49 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Library, ListPlus } from "lucide-react";
 import { toast } from "sonner";
-import { Copy } from "lucide-react";
-import { Button } from "@/components/ui/kit/button";
-import { use, useCallback, useEffect, useMemo, useState } from "react";
-import { Check, TriangleAlert } from "lucide-react";
-import { api, getRole, uploadFile } from "@/lib/api";
+import { api, ApiError, getRole, uploadFile } from "@/lib/api";
+import { useUndoable, useUnsavedGuard } from "@/hooks/useUndoable";
+import { usePresence } from "@/hooks/usePresence";
+import { versionConflictOf, type VersionConflict } from "@/lib/revisions";
+import ConflictDialog from "@/components/history/ConflictDialog";
+import TestHistoryDialog from "@/components/history/TestHistoryDialog";
+import { mergedNotice, showSavedToast } from "@/components/history/saveToast";
 import RequireRole from "@/components/nav/RequireRole";
-import ProblemPicker from "@/components/test-builder/ProblemPicker";
 import ProblemPreviewModal from "@/components/test-builder/ProblemPreviewModal";
-import SelectedProblemsList, {
-  type SelectedItem,
-} from "@/components/test-builder/SelectedProblemsList";
-import StepHeader from "@/components/test-builder/StepHeader";
-import SummaryRail from "@/components/test-builder/SummaryRail";
-import { hasKnownAnswer, type Problem } from "@/components/test-builder/types";
+import type { Problem } from "@/components/test-builder/types";
+import BankDialog from "@/components/test-editor/BankDialog";
+import EditorToolbar, { type NavChip } from "@/components/test-editor/EditorToolbar";
+import ProblemBlock, { type InsertKind } from "@/components/test-editor/ProblemBlock";
+import SettingsCard, { type Chapter, type Classroom } from "@/components/test-editor/SettingsCard";
+import {
+  contentOf,
+  contentPatch,
+  insertItems,
+  moveItem,
+  newContent,
+  planSave,
+  removeItem,
+  statsOf,
+  tokenPrefix,
+  validateContent,
+  type BlockContent,
+  type BlockItem,
+  type EditorState,
+  type ServerProblem,
+  type TestSettings,
+} from "@/components/test-editor/model";
+import { Button } from "@/components/ui/kit/button";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 
-interface Classroom {
-  id: string;
-  name: string;
-  grade?: number | null;
-  _count: { enrollments: number };
-}
-
-interface Chapter {
-  id: string;
-  title: string;
-  order: number;
-  grade?: number | null;
-  book?: { code: string; title: string; subject?: string } | null;
-  _count: { problems: number; theories: number };
-}
+/* ============================================================================
+ * Тест засах — 40 блок (docs/v2/TEST-ZASAH-BLOK.md, эзний хүсэлт 2026-10-11):
+ * бодлогууд эхэнд блок болж харагдана, блок бүрээс LaTeX, хариу, оноо, зураг,
+ * байрлал, дээр/доор нэмэх, хасах. Дээр үргэлж харагдах мөрөнд ↶ ↷, Хадгалах,
+ * дугаараар үсрэх. Бүх засвар нэг буцаах стект (Cmd+Z), нэг «Хадгалах».
+ * ========================================================================== */
 
 interface TestDetails {
   id: string;
@@ -46,56 +56,271 @@ interface TestDetails {
   variantLabel: string | null;
   pdfKey: string | null;
   price: number | null;
-  createdById: string;
+  version?: number;
   chapter?: { book?: { subject?: string | null } | null } | null;
-  problems: Array<{
-    problemId: string;
-    order: number;
-    points: number;
-    problem: Problem;
-  }>;
-  access: Array<{ classroomId: string }>;
+  problems: { problemId: string; order: number; points: number; problem: ServerProblem }[];
+  access: { classroomId: string }[];
 }
 
 type EditInfo = { mode: "FULL" | "LIMITED"; reason: string };
 
-const TYPES = [
-  { value: "DAILY", label: "Өдрийн тест" },
-  { value: "CHAPTER_EXAM", label: "Сэдвийн шалгалт" },
-  { value: "EESH_MOCK", label: "ЭЕШ сорил" },
-  { value: "CUSTOM", label: "Бусад" },
-  { value: "THEORY", label: "Онолын тест" },
-];
+const EMPTY_SETTINGS: TestSettings = {
+  title: "",
+  type: "DAILY",
+  gradingMode: "AUTO",
+  chapterId: "",
+  subject: "",
+  timeLimit: "",
+  groupKey: "",
+  variantLabel: "",
+  pdfKey: "",
+  price: "",
+};
+const EMPTY: EditorState = { settings: EMPTY_SETTINGS, items: [], classes: [], drafts: {} };
+const NEW_FALLBACK = newContent("CHOICE");
 
-const SUBJECTS = [
-  { value: "", label: "Бүх хичээл" },
-  { value: "MATH", label: "Математик" },
-  { value: "SOCIAL_STUDIES", label: "Нийгмийн ухаан" },
-  { value: "SAT", label: "SAT" },
-];
-
-function positiveInt(value: string): number | null {
-  if (!value.trim()) return null;
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+function stateFrom(d: TestDetails): EditorState {
+  return {
+    settings: {
+      title: d.title,
+      type: d.type,
+      gradingMode: d.gradingMode,
+      chapterId: d.chapterId ?? "",
+      subject: d.chapter?.book?.subject ?? "",
+      timeLimit: d.timeLimitMin?.toString() ?? "",
+      groupKey: d.groupKey ?? "",
+      variantLabel: d.variantLabel ?? "",
+      pdfKey: d.pdfKey ?? "",
+      price: d.price?.toString() ?? "",
+    },
+    items: d.problems.map((p) => ({ key: p.problemId, problemId: p.problemId, points: p.points })),
+    classes: d.access.map((a) => a.classroomId),
+    drafts: {},
+  };
 }
 
-function mergeProblems(first: Problem[], second: Problem[]) {
-  const byId = new Map<string, Problem>();
-  for (const problem of [...first, ...second]) byId.set(problem.id, problem);
-  return [...byId.values()];
+function rand4(): string {
+  return Math.random().toString(36).slice(2, 6).toUpperCase();
 }
 
-export default function EditTestPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+function isChanged(item: BlockItem, drafts: Record<string, BlockContent>, original: BlockContent | undefined) {
+  if (!item.problemId) return true;
+  const draft = drafts[item.key];
+  if (!draft || !original) return false;
+  return Object.keys(contentPatch(original, draft)).length > 0;
+}
+
+export default function EditTestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const [duplicating, setDuplicating] = useState(false);
+  const role = getRole();
+  const isAdmin = role === "ADMIN";
+  const canEditContent = role === "ADMIN" || role === "TEACHER_PLUS";
 
-  // Тест хуулах (G36): хуулбар нь ямар ч ангид харагдахгүй — засаад анги сонгоно.
+  const [test, setTest] = useState<TestDetails | null>(null);
+  const [editInfo, setEditInfo] = useState<EditInfo | null>(null);
+  const [originals, setOriginals] = useState<Record<string, ServerProblem>>({});
+  const [pageLoading, setPageLoading] = useState(true);
+  const [pageError, setPageError] = useState("");
+  const [version, setVersion] = useState(0);
+  const [active, setActive] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [conflict, setConflict] = useState<VersionConflict | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [previewKey, setPreviewKey] = useState<string | null>(null);
+  const [bankAt, setBankAt] = useState<number | null>(null);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const newSeq = useRef(0);
+
+  const form = useUndoable<EditorState>(EMPTY, {
+    shortcuts: !conflict && !historyOpen && previewKey === null && bankAt === null,
+  });
+  const resetForm = form.reset;
+  const setForm = form.set;
+  const { settings, items, classes, drafts } = form.value;
+  useUnsavedGuard(form.dirty, "test-editor");
+  const presence = usePresence([`test-edit:${id}`]);
+
+  const loadPage = useCallback(() => {
+    setPageLoading(true);
+    setPageError("");
+    Promise.all([api<TestDetails>(`/tests/${id}`), api<EditInfo>(`/tests/${id}/edit-info`)])
+      .then(([details, info]) => {
+        setTest(details);
+        setEditInfo(info);
+        setVersion(details.version ?? 0);
+        setOriginals(Object.fromEntries(details.problems.map((p) => [p.problemId, p.problem])));
+        resetForm(stateFrom(details));
+        setErrors({});
+        setActive(null);
+      })
+      .catch((e: unknown) => setPageError(e instanceof Error ? e.message : "Тестийн мэдээлэл ачаалж чадсангүй"))
+      .finally(() => setPageLoading(false));
+  }, [id, resetForm]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (!cancelled) loadPage();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadPage]);
+
+  // Анги, бүлгийн жагсаалт — тохиргоог нээхэд л (бодлого засахад хэрэггүй)
+  const loadCatalog = useCallback(() => {
+    if (catalogLoading) return;
+    setCatalogLoading(true);
+    Promise.all([
+      api<Classroom[]>("/classrooms"),
+      api<Chapter[]>(`/chapters${settings.subject ? `?subject=${encodeURIComponent(settings.subject)}` : ""}`),
+    ])
+      .then(([c, ch]) => {
+        setClassrooms(c);
+        setChapters(ch);
+      })
+      .catch((e: unknown) => toast.error(e instanceof Error ? e.message : "Жагсаалт ачаалж чадсангүй"))
+      .finally(() => setCatalogLoading(false));
+  }, [catalogLoading, settings.subject]);
+
+  const originalContents = useMemo(
+    () => Object.fromEntries(Object.entries(originals).map(([pid, p]) => [pid, contentOf(p)])),
+    [originals],
+  ) as Record<string, BlockContent>;
+  const contentOfItem = useCallback(
+    (item: BlockItem, d: Record<string, BlockContent>): BlockContent =>
+      d[item.key] ?? (item.problemId ? originalContents[item.problemId] : undefined) ?? NEW_FALLBACK,
+    [originalContents],
+  );
+
+  const thousand = test?.type === "THOUSAND";
+  const limited = editInfo?.mode === "LIMITED";
+  const saveCtx = useMemo(
+    () => ({
+      originals,
+      mode: (editInfo?.mode ?? "FULL") as "FULL" | "LIMITED",
+      isAdmin,
+      thousand,
+      chapterId: settings.chapterId || test?.chapterId || null,
+      makeToken: () => "",
+    }),
+    [originals, editInfo?.mode, isAdmin, thousand, settings.chapterId, test?.chapterId],
+  );
+  const plan = useMemo(() => planSave(form.value, form.baseline, saveCtx), [form.value, form.baseline, saveCtx]);
+  const dirtyCount = plan.creates.length + plan.updates.length + (plan.test ? 1 : 0);
+
+  const stats = useMemo(
+    () => statsOf(items, (item) => contentOfItem(item, drafts).format),
+    [items, drafts, contentOfItem],
+  );
+  const chips: NavChip[] = useMemo(
+    () =>
+      items.map((item) => ({
+        key: item.key,
+        changed: isChanged(item, drafts, item.problemId ? originalContents[item.problemId] : undefined),
+        error: !!errors[item.key],
+      })),
+    [items, drafts, originalContents, errors],
+  );
+
+  // ---------------- Блокийн үйлдлүүд (тогтвортой — блок memo) ----------------
+  const jump = useCallback((key: string) => {
+    setActive(key);
+    requestAnimationFrame(() =>
+      document.getElementById(`block-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  }, []);
+  const toggleActive = useCallback((key: string) => setActive((prev) => (prev === key ? null : key)), []);
+  const onContent = useCallback(
+    (key: string, patch: Partial<BlockContent>, coalesceKey?: string) => {
+      setForm(
+        (prev) => {
+          const item = prev.items.find((i) => i.key === key);
+          if (!item) return prev;
+          const current = contentOfItem(item, prev.drafts);
+          return { ...prev, drafts: { ...prev.drafts, [key]: { ...current, ...patch } } };
+        },
+        { coalesceKey },
+      );
+      setErrors((prev) => {
+        if (!prev[key]) return prev;
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    },
+    [setForm, contentOfItem],
+  );
+  const onCommit = form.commitGroup;
+  const onPoints = useCallback(
+    (key: string, points: number) =>
+      setForm(
+        (prev) => ({ ...prev, items: prev.items.map((i) => (i.key === key ? { ...i, points } : i)) }),
+        { coalesceKey: `pts-${key}` },
+      ),
+    [setForm],
+  );
+  const onMove = useCallback(
+    (key: string, to: number) => {
+      setForm((prev) => ({ ...prev, items: moveItem(prev.items, key, to) }));
+      requestAnimationFrame(() =>
+        document.getElementById(`block-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    },
+    [setForm],
+  );
+  const onRemove = useCallback(
+    (key: string) => {
+      setForm((prev) => {
+        const nextDrafts = { ...prev.drafts };
+        delete nextDrafts[key];
+        return { ...prev, items: removeItem(prev.items, key), drafts: nextDrafts };
+      });
+      setActive(null);
+      toast("Тестээс хаслаа", { description: "Буцаах бол Cmd+Z эсвэл ↶" });
+    },
+    [setForm],
+  );
+  const onInsert = useCallback(
+    (index: number, kind: InsertKind) => {
+      if (kind === "BANK") {
+        setBankAt(index);
+        return;
+      }
+      newSeq.current += 1;
+      const key = `new-${newSeq.current}-${Date.now().toString(36)}`;
+      setForm((prev) => ({
+        ...prev,
+        items: insertItems(prev.items, index, [{ key, problemId: null, points: 1 }]),
+        drafts: { ...prev.drafts, [key]: newContent(kind) },
+      }));
+      jump(key);
+    },
+    [setForm, jump],
+  );
+  const onPreview = useCallback((key: string) => setPreviewKey(key), []);
+
+  function addFromBank(index: number, problems: ServerProblem[]) {
+    if (problems.length === 0) return;
+    setOriginals((prev) => ({ ...prev, ...Object.fromEntries(problems.map((p) => [p.id, p])) }));
+    setForm((prev) => ({
+      ...prev,
+      items: insertItems(
+        prev.items,
+        index,
+        problems.map((p) => ({ key: p.id, problemId: p.id, points: p.points ?? 1 })),
+      ),
+    }));
+    toast.success(`${problems.length} бодлого нэмлээ`);
+    jump(problems[0].id);
+  }
+
   async function duplicateTest() {
     setDuplicating(true);
     try {
@@ -108,771 +333,325 @@ export default function EditTestPage({
       setDuplicating(false);
     }
   }
-  const role = getRole();
-  const isAdmin = role === "ADMIN";
-  const [test, setTest] = useState<TestDetails | null>(null);
-  const [editInfo, setEditInfo] = useState<EditInfo | null>(null);
-  const [pageLoading, setPageLoading] = useState(true);
-  const [pageError, setPageError] = useState("");
-  const [catalogError, setCatalogError] = useState("");
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [catalogLoading, setCatalogLoading] = useState(false);
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [loadingProblems, setLoadingProblems] = useState(false);
-  const [problemsError, setProblemsError] = useState("");
-  const [subject, setSubject] = useState("");
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("CHAPTER_EXAM");
-  const [gradingMode, setGradingMode] = useState("AUTO");
-  const [chapterId, setChapterId] = useState("");
-  const [timeLimit, setTimeLimit] = useState("");
-  const [groupKey, setGroupKey] = useState("");
-  const [variantLabel, setVariantLabel] = useState("");
-  const [pdfKey, setPdfKey] = useState("");
-  const [price, setPrice] = useState("");
-  const [uploadingPdf, setUploadingPdf] = useState(false);
-  const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
-  const [pointOverrides, setPointOverrides] = useState<Record<string, number>>(
-    {},
-  );
-  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
-  const [previewProblem, setPreviewProblem] = useState<Problem | null>(null);
-  const [formError, setFormError] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
-  const loadPage = useCallback(() => {
-    setPageLoading(true);
-    setPageError("");
-    Promise.all([
-      api<TestDetails>(`/tests/${id}`),
-      api<EditInfo>(`/tests/${id}/edit-info`),
-    ])
-      .then(([details, info]) => {
-        setTest(details);
-        setEditInfo(info);
-        setTitle(details.title);
-        setType(details.type);
-        setGradingMode(details.gradingMode);
-        setChapterId(details.chapterId ?? "");
-        setSubject(details.chapter?.book?.subject ?? "");
-        setTimeLimit(details.timeLimitMin?.toString() ?? "");
-        setGroupKey(details.groupKey ?? "");
-        setVariantLabel(details.variantLabel ?? "");
-        setPdfKey(details.pdfKey ?? "");
-        setPrice(details.price?.toString() ?? "");
-        setSelectedClasses(details.access.map((access) => access.classroomId));
-        setSelectedProblems(details.problems.map((item) => item.problemId));
-        setPointOverrides(
-          Object.fromEntries(
-            details.problems.map((item) => [item.problemId, item.points]),
-          ),
-        );
-        setProblems(
-          details.problems.map((item) => ({
-            ...item.problem,
-            points: item.points,
-          })),
-        );
-      })
-      .catch((error: unknown) => {
-        setPageError(
-          error instanceof Error
-            ? error.message
-            : "Тестийн мэдээлэл ачаалж чадсангүй",
-        );
-      })
-      .finally(() => setPageLoading(false));
-  }, [id]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void Promise.resolve().then(() => {
-      if (!cancelled) loadPage();
-    });
-    return () => { cancelled = true; };
-  }, [loadPage]);
-
-  const loadCatalog = useCallback(() => {
-    if (!test || editInfo?.mode !== "FULL") return;
-    let cancelled = false;
-    setCatalogLoading(true);
-    setCatalogError("");
-    Promise.all([
-      api<Classroom[]>("/classrooms"),
-      api<Chapter[]>(`/chapters${subject ? `?subject=${subject}` : ""}`),
-    ])
-      .then(([classRows, chapterRows]) => {
-        if (cancelled) return;
-        setClassrooms(classRows);
-        setChapters(chapterRows);
-      })
-      .catch((error: unknown) => {
-        if (!cancelled)
-          setCatalogError(
-            error instanceof Error
-              ? error.message
-              : "Сонголтын мэдээлэл ачаалж чадсангүй",
-          );
-      })
-      .finally(() => {
-        if (!cancelled) setCatalogLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [test, editInfo, subject]);
-
-  useEffect(() => {
-    let cancelled = false;
-    let cancelRequest: (() => void) | undefined;
-    void Promise.resolve().then(() => {
-      if (!cancelled) cancelRequest = loadCatalog();
-    });
-    return () => {
-      cancelled = true;
-      cancelRequest?.();
-    };
-  }, [loadCatalog]);
-
-  const loadChapterProblems = useCallback(() => {
-    if (!chapterId || editInfo?.mode !== "FULL") {
-      setLoadingProblems(false);
-      return;
-    }
-    let cancelled = false;
-    setLoadingProblems(true);
-    setProblemsError("");
-    api<Problem[]>(`/chapters/${chapterId}/problems?take=100`)
-      .then((rows) => {
-        if (!cancelled) setProblems((current) => mergeProblems(current, rows));
-      })
-      .catch((error: unknown) => {
-        if (!cancelled)
-          setProblemsError(
-            error instanceof Error ? error.message : "Бодлого ачаалж чадсангүй",
-          );
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingProblems(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [chapterId, editInfo?.mode]);
-
-  useEffect(() => {
-    let cancelled = false;
-    let cancelRequest: (() => void) | undefined;
-    void Promise.resolve().then(() => {
-      if (!cancelled) cancelRequest = loadChapterProblems();
-    });
-    return () => {
-      cancelled = true;
-      cancelRequest?.();
-    };
-  }, [loadChapterProblems]);
-
-  const selectedProblemObjects = useMemo(() => {
-    const byId = new Map(problems.map((problem) => [problem.id, problem]));
-    return selectedProblems
-      .map((problemId) => byId.get(problemId))
-      .filter(Boolean) as Problem[];
-  }, [problems, selectedProblems]);
-  const selectedItems: SelectedItem[] = useMemo(
-    () =>
-      selectedProblemObjects.map((problem) => ({
-        problem,
-        points: pointOverrides[problem.id] ?? problem.points,
-      })),
-    [selectedProblemObjects, pointOverrides],
-  );
-  const choiceCount = selectedProblemObjects.filter(
-    (problem) => problem.format === "CHOICE",
-  ).length;
-  const fillCount = selectedProblemObjects.filter(
-    (problem) => problem.format === "FILL_NUMBER",
-  ).length;
-  const openCount = selectedProblemObjects.filter(
-    (problem) => problem.format === "OPEN",
-  ).length;
-  const totalPoints = selectedItems.reduce((sum, item) => sum + item.points, 0);
-  const missingAnswerCount = selectedProblemObjects.filter(
-    (problem) => !hasKnownAnswer(problem),
-  ).length;
-  const reviewNeededCount = selectedProblemObjects.filter(
-    (problem) =>
-      hasKnownAnswer(problem) &&
-      problem.analysis?.answerKeyStatus === "REVIEW_REQUIRED",
-  ).length;
-
-  function toggleProblem(problemId: string) {
-    setSelectedProblems((current) => {
-      if (current.includes(problemId)) {
-        setPointOverrides((previous) => {
-          const next = { ...previous };
-          delete next[problemId];
-          return next;
-        });
-        return current.filter((idValue) => idValue !== problemId);
-      }
-      return [...current, problemId];
-    });
-  }
-
-  function moveProblem(problemId: string, direction: -1 | 1) {
-    setSelectedProblems((current) => {
-      const index = current.indexOf(problemId);
-      const nextIndex = index + direction;
-      if (index < 0 || nextIndex < 0 || nextIndex >= current.length)
-        return current;
-      const next = [...current];
-      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
-      return next;
-    });
-  }
-
-  function changePoints(problemId: string, pointsValue: number) {
-    setPointOverrides((current) => ({ ...current, [problemId]: pointsValue }));
-  }
-
-  function toggleClass(classroomId: string) {
-    setSelectedClasses((current) =>
-      current.includes(classroomId)
-        ? current.filter((idValue) => idValue !== classroomId)
-        : [...current, classroomId],
-    );
-  }
-
-  async function handlePdfUpload(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  async function uploadPdf(file: File) {
     setUploadingPdf(true);
-    setFormError("");
     try {
-      const uploaded = await uploadFile(file);
-      setPdfKey(uploaded.key);
-    } catch (error) {
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "Файл байршуулахад алдаа гарлаа",
-      );
+      const { key } = await uploadFile(file);
+      setForm((prev) => ({ ...prev, settings: { ...prev.settings, pdfKey: key } }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Файл байршуулахад алдаа гарлаа");
     } finally {
       setUploadingPdf(false);
-      event.target.value = "";
     }
   }
 
-  async function saveChanges() {
-    if (!title.trim()) {
-      setFormError("Тестийн нэр оруулна уу");
+  // ---------------- Хадгалах ----------------
+  async function save(overwrite = false) {
+    if (!test || !editInfo) return;
+    const state = form.value;
+    if (!state.settings.title.trim()) {
+      toast.error("Тестийн нэр оруулна уу");
       return;
     }
-    if (timeLimit.trim() && positiveInt(timeLimit) === null) {
-      setFormError("Хугацааг бүхэл минутаар оруулна уу");
+    // Өөрчилсөн болон шинэ блокийг шалгана
+    const errs: Record<string, string> = {};
+    for (const item of state.items) {
+      if (!isChanged(item, state.drafts, item.problemId ? originalContents[item.problemId] : undefined)) continue;
+      const msg = validateContent(contentOfItem(item, state.drafts));
+      if (msg) errs[item.key] = msg;
+    }
+    setErrors(errs);
+    const firstError = state.items.find((i) => errs[i.key]);
+    if (firstError) {
+      toast.error(`${Object.keys(errs).length} бодлогод засах зүйл байна`);
+      jump(firstError.key);
       return;
     }
-    if (isAdmin && price.trim() && !/^\d+$/.test(price)) {
-      setFormError("Төлбөрийг бүхэл тоогоор оруулна уу");
+    if (state.items.some((i) => !i.problemId) && !(state.settings.chapterId || test.chapterId)) {
+      toast.error("Шинэ бодлого нэмэхэд тестийн бүлэг сэдэв хэрэгтэй («Тохиргоо»)");
       return;
     }
+
+    const prefix = tokenPrefix(
+      state.items.map((i) => (i.problemId ? originals[i.problemId]?.token : undefined)).filter(Boolean) as string[],
+    );
+    const p = planSave(state, form.baseline, { ...saveCtx, makeToken: () => `${prefix}-N${rand4()}` });
+    if (!p.creates.length && !p.updates.length && !p.test) return;
+
     setSaving(true);
-    setFormError("");
+    const created: Record<string, ServerProblem> = {};
+    const merged = new Set<string>();
+    let step: string | null = null;
     try {
-      await api(`/tests/${id}`, {
-        method: "PATCH",
-        body:
-          editInfo?.mode === "LIMITED"
-            ? { title: title.trim(), timeLimitMin: positiveInt(timeLimit) }
-            : {
-                title: title.trim(),
-                type,
-                gradingMode,
-                chapterId: chapterId || null,
-                timeLimitMin: positiveInt(timeLimit),
-                groupKey: groupKey.trim() || null,
-                variantLabel: variantLabel.trim() || null,
-                pdfKey: pdfKey.trim() || null,
-                ...(isAdmin
-                  ? { price: price.trim() ? Number(price) : null }
-                  : {}),
-                classroomIds: selectedClasses,
-                problems: selectedItems.map(({ problem, points }, index) => ({
-                  problemId: problem.id,
-                  order: index + 1,
-                  points,
-                })),
-              },
-      });
-      setSaved(true);
-    } catch (error) {
-      setFormError(
-        error instanceof Error ? error.message : "Тест хадгалж чадсангүй",
-      );
+      for (const c of p.creates) {
+        step = c.key;
+        const draft = state.drafts[c.key];
+        let res: ServerProblem;
+        try {
+          res = await api<ServerProblem>("/problems", { method: "POST", body: c.body });
+        } catch (e) {
+          // token давхардсан (маш ховор) — шинэ token-оор нэг удаа дахин
+          if (!(e instanceof ApiError && e.status === 409)) throw e;
+          res = await api<ServerProblem>("/problems", {
+            method: "POST",
+            body: { ...c.body, token: `${prefix}-N${rand4()}` },
+          });
+        }
+        created[c.key] = {
+          ...res,
+          statementText: draft.statement,
+          imageKey: draft.imageKey,
+          choiceOptions: draft.choices.map((ch, i) => ({ order: i + 1, text: ch.text, isCorrect: ch.isCorrect })),
+          correctAnswer: draft.format === "CHOICE" ? undefined : draft.fill,
+          version: 0,
+        };
+      }
+      for (const u of p.updates) {
+        step = u.key;
+        const res = await api<{ mergedWith?: string[] | null }>(`/problems/${u.problemId}`, {
+          method: "PATCH",
+          body: {
+            ...u.body,
+            ...(u.expectedVersion !== undefined ? { expectedVersion: u.expectedVersion } : {}),
+            ...(overwrite ? { overwrite: true } : {}),
+          },
+        });
+        res.mergedWith?.forEach((n) => merged.add(n));
+      }
+      let testRes: { version?: number; changed?: boolean; mergedWith?: string[] | null } | null = null;
+      if (p.test) {
+        step = null;
+        const body: Record<string, unknown> = { ...p.test };
+        if (Array.isArray(body.problems)) {
+          body.problems = (body.problems as { problemId: string; order: number; points: number }[]).map((row) => ({
+            ...row,
+            problemId: created[row.problemId]?.id ?? row.problemId,
+          }));
+        }
+        testRes = await api(`/tests/${id}`, {
+          method: "PATCH",
+          body: { ...body, expectedVersion: version, ...(overwrite ? { overwrite: true } : {}) },
+        });
+        testRes?.mergedWith?.forEach((n) => merged.add(n));
+      }
+      setConflict(null);
+      const notice = mergedNotice(merged.size ? [...merged] : null);
+      const parts = [
+        p.creates.length && `${p.creates.length} шинэ бодлого`,
+        p.updates.length && `${p.updates.length} бодлого засагдлаа`,
+      ].filter(Boolean);
+      if (testRes && testRes.version !== undefined) {
+        showSavedToast({
+          entity: "TEST",
+          id,
+          previousVersion: version,
+          savedVersion: testRes.version,
+          changed: testRes.changed,
+          mergedWith: testRes.mergedWith,
+          onUndone: () => loadPage(),
+        });
+        if (parts.length) toast.success(parts.join(", "));
+      } else {
+        toast.success("Хадгаллаа", { description: [parts.join(", "), notice].filter(Boolean).join(". ") });
+      }
+      loadPage();
+    } catch (e) {
+      // Хэсэгчлэн амжсан: үүссэн бодлогыг дахин үүсгэхгүй — блокыг тэр бодлого руу холбоно
+      if (Object.keys(created).length) {
+        setOriginals((prev) => ({
+          ...prev,
+          ...Object.fromEntries(Object.values(created).map((c) => [c.id, c])),
+        }));
+        form.replace((prev) => {
+          const nextDrafts = { ...prev.drafts };
+          for (const key of Object.keys(created)) delete nextDrafts[key];
+          return {
+            ...prev,
+            items: prev.items.map((i) => (created[i.key] ? { ...i, key: created[i.key].id, problemId: created[i.key].id } : i)),
+            drafts: nextDrafts,
+          };
+        });
+      }
+      const info = versionConflictOf(e);
+      const message = info?.message ?? (e instanceof Error ? e.message : "Хадгалж чадсангүй");
+      if (step) {
+        setErrors((prev) => ({ ...prev, [step as string]: message }));
+        jump(step);
+      }
+      if (info) setConflict(info);
+      else toast.error(message);
     } finally {
       setSaving(false);
     }
   }
 
-  const inputClass =
-    "min-h-11 w-full rounded-xl border border-line bg-bg px-4 py-3 text-base text-ink transition focus:border-brand";
-
-  if (pageLoading)
+  // ---------------- Харагдац ----------------
+  if (pageLoading && !test)
     return (
       <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
-        <LoadingState rows={6} label="Тестийн мэдээлэл ачаалж байна" />
+        <LoadingState rows={6} label="Тестийг ачаалж байна" />
       </RequireRole>
     );
   if (pageError || !test || !editInfo)
     return (
       <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
-        <ErrorState
-          message={pageError || "Тестийн мэдээлэл олдсонгүй"}
-          onRetry={loadPage}
-        />
+        <ErrorState message={pageError || "Тест олдсонгүй"} onRetry={loadPage} />
       </RequireRole>
     );
 
+  const previewItem = previewKey ? items.find((i) => i.key === previewKey) : undefined;
+  const previewContent = previewItem ? contentOfItem(previewItem, drafts) : null;
+  const previewProblem: Problem | null =
+    previewItem && previewContent
+      ? {
+          id: previewItem.problemId ?? previewItem.key,
+          token: previewItem.problemId ? (originals[previewItem.problemId]?.token ?? "") : "",
+          format: previewContent.format,
+          statementText: previewContent.statement,
+          imageKey: previewContent.imageKey,
+          choiceOptions: previewContent.choices.map((c, i) => ({ order: i + 1, text: c.text, isCorrect: c.isCorrect })),
+          correctAnswer: previewContent.format === "CHOICE" ? undefined : previewContent.fill,
+          points: previewItem.points,
+        }
+      : null;
+
   return (
     <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-extrabold text-ink">Тест засах</h1>
-            <p className="mt-1 text-base text-ink-dim">{test.title}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={duplicateTest} disabled={duplicating}>
-              <Copy aria-hidden />
-              {duplicating ? "Хуулж байна…" : "Хуулах"}
-            </Button>
-            <Link
-              href="/app/tests"
-              className="inline-flex min-h-11 items-center rounded-lg border border-line px-4 py-2 text-base transition hover:border-brand"
-            >
-              Жагсаалт руу буцах
-            </Link>
-          </div>
-        </header>
+      <div className="mx-auto max-w-5xl space-y-4">
+        <h1 className="sr-only">Тест засах</h1>
+        <EditorToolbar
+          title={settings.title}
+          stats={stats}
+          timeLimit={Number(settings.timeLimit) || null}
+          editors={presence[`test-edit:${id}`]}
+          canUndo={form.canUndo}
+          canRedo={form.canRedo}
+          onUndo={form.undo}
+          onRedo={form.redo}
+          dirtyCount={dirtyCount}
+          saving={saving}
+          onSave={() => void save()}
+          onHistory={() => setHistoryOpen(true)}
+          onDuplicate={() => void duplicateTest()}
+          duplicating={duplicating}
+          chips={chips}
+          activeKey={active}
+          onJump={jump}
+        />
 
-        {saved ? (
-          <section
-            role="status"
-            className="rounded-2xl border border-success/30 bg-success/10 p-6"
-          >
-            <p className="flex items-center gap-2 text-lg font-bold text-success">
-              <Check aria-hidden /> Өөрчлөлт амжилттай хадгалагдлаа
-            </p>
-            <p className="mt-2 text-base text-ink">{title.trim()}</p>
-            <Link
-              href="/app/tests"
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 py-2 text-base font-bold text-on-brand"
-            >
-              Тестийн жагсаалт руу очих
-            </Link>
-          </section>
-        ) : (
-          <>
-            <p className="rounded-xl border border-info/30 bg-info/10 px-4 py-3 text-base text-info">
-              {editInfo.reason}
-            </p>
-
-            {editInfo.mode === "LIMITED" ? (
-              <section className="space-y-4 rounded-2xl border border-line bg-surface p-5 sm:p-6">
-                <div>
-                  <label
-                    htmlFor="test-title"
-                    className="mb-1.5 block text-sm text-ink-dim"
-                  >
-                    Тестийн нэр
-                  </label>
-                  <input
-                    id="test-title"
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="test-time"
-                    className="mb-1.5 block text-sm text-ink-dim"
-                  >
-                    Хугацаа, минут
-                  </label>
-                  <input
-                    id="test-time"
-                    inputMode="numeric"
-                    value={timeLimit}
-                    onChange={(event) => setTimeLimit(event.target.value)}
-                    placeholder="Хугацаагүй"
-                    className={inputClass}
-                  />
-                </div>
-              </section>
-            ) : (
-              <>
-                {catalogError && (
-                  <ErrorState
-                    message={catalogError}
-                    onRetry={() => {
-                      void loadCatalog();
-                    }}
-                  />
-                )}
-                <SummaryRail
-                  steps={[
-                    { label: "Үндсэн мэдээлэл", done: !!title.trim() },
-                    {
-                      label: "Бодлого сонгох",
-                      done: selectedProblems.length > 0,
-                    },
-                    {
-                      label: "Оноо, дараалал",
-                      done: selectedProblems.length > 0,
-                    },
-                    { label: "Хэн үзэх вэ", done: true },
-                  ]}
-                  choiceCount={choiceCount}
-                  fillCount={fillCount}
-                  openCount={openCount}
-                  totalPoints={totalPoints}
-                  timeLimitMin={positiveInt(timeLimit) ?? undefined}
-                  testType={type}
-                  missingAnswerCount={missingAnswerCount}
-                  reviewNeededCount={reviewNeededCount}
-                />
-
-                <section className="space-y-4 rounded-2xl border border-line bg-surface p-5 sm:p-6">
-                  <StepHeader n={1} title="Үндсэн мэдээлэл" />
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div>
-                      <label
-                        htmlFor="test-title"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Тестийн нэр
-                      </label>
-                      <input
-                        id="test-title"
-                        value={title}
-                        onChange={(event) => setTitle(event.target.value)}
-                        className={inputClass}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="test-type"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Төрөл
-                      </label>
-                      <select
-                        id="test-type"
-                        value={type}
-                        onChange={(event) => setType(event.target.value)}
-                        className={inputClass}
-                      >
-                        {TYPES.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="test-grading"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Дүгнэх горим
-                      </label>
-                      <select
-                        id="test-grading"
-                        value={gradingMode}
-                        onChange={(event) => setGradingMode(event.target.value)}
-                        className={inputClass}
-                      >
-                        <option value="AUTO">Авто дүн</option>
-                        <option value="MANUAL">Багшийн дүн</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="test-subject"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Хичээл
-                      </label>
-                      <select
-                        id="test-subject"
-                        value={subject}
-                        onChange={(event) => {
-                          setSubject(event.target.value);
-                          setChapterId("");
-                        }}
-                        className={inputClass}
-                      >
-                        {SUBJECTS.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="test-chapter"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Бүлэг сэдэв
-                      </label>
-                      <select
-                        id="test-chapter"
-                        value={chapterId}
-                        onChange={(event) => setChapterId(event.target.value)}
-                        className={inputClass}
-                      >
-                        <option value="">Бүлэг сонгохгүй</option>
-                        {chapters.map((chapter) => (
-                          <option key={chapter.id} value={chapter.id}>
-                            {chapter.book?.code
-                              ? `${chapter.book.code} — `
-                              : ""}
-                            {chapter.title}
-                            {chapter.grade ? ` — ${chapter.grade}-р анги` : ""}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="test-time"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Хугацаа, минут
-                      </label>
-                      <input
-                        id="test-time"
-                        inputMode="numeric"
-                        value={timeLimit}
-                        onChange={(event) => setTimeLimit(event.target.value)}
-                        placeholder="Хугацаагүй"
-                        className={inputClass}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="test-group"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Хувилбарын бүлэг
-                      </label>
-                      <input
-                        id="test-group"
-                        value={groupKey}
-                        onChange={(event) => setGroupKey(event.target.value)}
-                        className={inputClass}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="test-variant"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        Хувилбар
-                      </label>
-                      <input
-                        id="test-variant"
-                        value={variantLabel}
-                        onChange={(event) =>
-                          setVariantLabel(event.target.value)
-                        }
-                        className={inputClass}
-                      />
-                    </div>
-                    {isAdmin && (
-                      <div>
-                        <label
-                          htmlFor="test-price"
-                          className="mb-1.5 block text-sm text-ink-dim"
-                        >
-                          Төлбөр
-                        </label>
-                        <input
-                          id="test-price"
-                          inputMode="numeric"
-                          value={price}
-                          onChange={(event) => setPrice(event.target.value)}
-                          className={inputClass}
-                        />
-                      </div>
-                    )}
-                    <div className="md:col-span-2">
-                      <label
-                        htmlFor="test-pdf"
-                        className="mb-1.5 block text-sm text-ink-dim"
-                      >
-                        PDF/эх сурвалжийн key
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        <input
-                          id="test-pdf"
-                          value={pdfKey}
-                          onChange={(event) => setPdfKey(event.target.value)}
-                          className={`${inputClass} min-w-0 flex-1`}
-                        />
-                        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-xl border border-line px-4 py-2 text-base hover:border-brand">
-                          {uploadingPdf ? "Байршуулж байна" : "Файл сонгох"}
-                          <input
-                            type="file"
-                            accept="application/pdf"
-                            disabled={uploadingPdf}
-                            onChange={handlePdfUpload}
-                            className="sr-only"
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="space-y-4 rounded-2xl border border-line bg-surface p-5 sm:p-6">
-                  <StepHeader
-                    n={2}
-                    title="Бодлого сонгох"
-                    hint={`Одоогоор ${selectedProblems.length} бодлого сонгосон.`}
-                  />
-                  {problemsError ? (
-                    <ErrorState
-                      message={problemsError}
-                      onRetry={loadChapterProblems}
-                    />
-                  ) : (
-                    <ProblemPicker
-                      problems={problems}
-                      loading={loadingProblems}
-                      error=""
-                      chapterChosen={!!chapterId}
-                      selectedIds={selectedProblems}
-                      onToggle={toggleProblem}
-                      onPreview={setPreviewProblem}
-                      onSelectFirst={(count) =>
-                        setSelectedProblems(
-                          problems.slice(0, count).map((problem) => problem.id),
-                        )
-                      }
-                      onClearSelection={() => setSelectedProblems([])}
-                    />
-                  )}
-                </section>
-
-                <section className="space-y-4 rounded-2xl border border-line bg-surface p-5 sm:p-6">
-                  <StepHeader
-                    n={3}
-                    title="Оноо, дараалал"
-                    hint="Сонгосон дарааллаар тестэд орно."
-                  />
-                  <SelectedProblemsList
-                    items={selectedItems}
-                    onMoveUp={(problemId) => moveProblem(problemId, -1)}
-                    onMoveDown={(problemId) => moveProblem(problemId, 1)}
-                    onRemove={toggleProblem}
-                    onPointsChange={changePoints}
-                    onBulkSetPoints={(pointsValue) =>
-                      setPointOverrides((current) =>
-                        Object.fromEntries(
-                          selectedProblems
-                            .map((problemId) => [problemId, pointsValue])
-                            .concat(
-                              Object.entries(current).filter(
-                                ([problemId]) =>
-                                  !selectedProblems.includes(problemId),
-                              ),
-                            ),
-                        ),
-                      )
-                    }
-                    onPreview={setPreviewProblem}
-                  />
-                </section>
-
-                <section className="space-y-3 rounded-2xl border border-line bg-surface p-5 sm:p-6">
-                  <StepHeader
-                    n={4}
-                    title="Хэн үзэх вэ"
-                    hint="Сонгосон ангиудад л харагдана."
-                  />
-                  {catalogLoading ? (
-                    <LoadingState rows={2} label="Ангиудыг ачаалж байна" />
-                  ) : classrooms.length === 0 ? (
-                    <p className="text-base text-ink-dim">
-                      Ангийн жагсаалт хоосон байна.
-                    </p>
-                  ) : (
-                    classrooms.map((classroom) => (
-                      <label
-                        key={classroom.id}
-                        className="flex min-h-11 items-center gap-3 rounded-lg border border-line px-3 py-2 text-base text-ink"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedClasses.includes(classroom.id)}
-                          onChange={() => toggleClass(classroom.id)}
-                          className="h-5 w-5 accent-brand"
-                        />
-                        <span className="min-w-0 flex-1">{classroom.name}</span>
-                        <span className="text-sm text-ink-dim">
-                          {classroom._count.enrollments} сурагч
-                        </span>
-                      </label>
-                    ))
-                  )}
-                  {missingAnswerCount > 0 && (
-                    <p
-                      role="status"
-                      className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning"
-                    >
-                      <TriangleAlert
-                        className="mr-1 inline h-4 w-4"
-                        aria-hidden
-                      />
-                      {missingAnswerCount} бодлогод хариуны түлхүүр алга.
-                    </p>
-                  )}
-                </section>
-              </>
-            )}
-
-            {formError && (
-              <p
-                role="alert"
-                className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-base text-error"
-              >
-                {formError}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={saveChanges}
-              disabled={saving || uploadingPdf}
-              aria-busy={saving}
-              className="min-h-12 w-full rounded-xl bg-brand px-5 py-3 text-lg font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
-            >
-              {saving ? "Хадгалж байна" : "Өөрчлөлтийг хадгалах"}
-            </button>
-          </>
+        {limited && (
+          <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+            Сурагч өгсөн тест — дараалал, оноо, нэмэх/хасах түгжээтэй. Нэр, хугацаа, бодлогын агуулгыг засна.
+          </p>
         )}
-        {previewProblem && (
-          <ProblemPreviewModal
-            problem={previewProblem}
-            points={pointOverrides[previewProblem.id] ?? previewProblem.points}
-            onClose={() => setPreviewProblem(null)}
-          />
-        )}
+
+        <SettingsCard
+          settings={settings}
+          limited={limited}
+          thousand={thousand}
+          isAdmin={isAdmin}
+          classrooms={classrooms}
+          chapters={chapters}
+          classes={classes}
+          catalogLoading={catalogLoading}
+          onOpen={() => {
+            if (classrooms.length === 0 && chapters.length === 0) loadCatalog();
+          }}
+          onChange={(patch, coalesceKey) =>
+            setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...patch } }), {
+              coalesceKey: coalesceKey ? `set-${coalesceKey}` : undefined,
+            })
+          }
+          onCommit={form.commitGroup}
+          onToggleClass={(cid) =>
+            setForm((prev) => ({
+              ...prev,
+              classes: prev.classes.includes(cid) ? prev.classes.filter((x) => x !== cid) : [...prev.classes, cid],
+            }))
+          }
+          uploadingPdf={uploadingPdf}
+          onUploadPdf={(file) => void uploadPdf(file)}
+        />
+
+        <section aria-label="Бодлогууд" className="space-y-3">
+          {items.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-line p-6 text-center text-ink-dim">
+              Энэ тестэд бодлого алга — доороос нэмнэ үү.
+            </p>
+          )}
+          {items.map((item, index) => (
+            <ProblemBlock
+              key={item.key}
+              index={index}
+              total={items.length}
+              item={item}
+              problem={item.problemId ? (originals[item.problemId] ?? null) : null}
+              content={contentOfItem(item, drafts)}
+              changed={chips[index]?.changed ?? false}
+              active={active === item.key}
+              canEditContent={canEditContent}
+              structureLocked={limited}
+              answerLocked={limited}
+              error={errors[item.key]}
+              onActivate={toggleActive}
+              onContent={onContent}
+              onCommit={onCommit}
+              onPoints={onPoints}
+              onMove={onMove}
+              onInsert={onInsert}
+              onRemove={onRemove}
+              onPreview={onPreview}
+            />
+          ))}
+          {!limited && (
+            <div className="flex flex-wrap gap-2 rounded-2xl border border-dashed border-line p-3">
+              <span className="w-full text-sm font-semibold text-ink-dim">Төгсгөлд нэмэх</span>
+              <Button variant="outline" size="sm" type="button" onClick={() => onInsert(items.length, "CHOICE")}>
+                <ListPlus aria-hidden /> Шинэ сонгох
+              </Button>
+              <Button variant="outline" size="sm" type="button" onClick={() => onInsert(items.length, "FILL_NUMBER")}>
+                <ListPlus aria-hidden /> Шинэ нөхөх
+              </Button>
+              <Button variant="outline" size="sm" type="button" onClick={() => onInsert(items.length, "BANK")}>
+                <Library aria-hidden /> Сангаас
+              </Button>
+            </div>
+          )}
+        </section>
       </div>
+
+      {previewProblem && (
+        <ProblemPreviewModal problem={previewProblem} points={previewProblem.points} onClose={() => setPreviewKey(null)} />
+      )}
+      {bankAt !== null && (
+        <BankDialog
+          open
+          onOpenChange={(o) => !o && setBankAt(null)}
+          subject={settings.subject}
+          defaultChapterId={settings.chapterId}
+          excludeIds={new Set(items.map((i) => i.problemId).filter(Boolean) as string[])}
+          onAdd={(problems) => addFromBank(bankAt, problems)}
+        />
+      )}
+      <ConflictDialog
+        conflict={conflict}
+        busy={saving}
+        onClose={() => setConflict(null)}
+        onReload={() => {
+          setConflict(null);
+          loadPage();
+        }}
+        onOverwrite={() => void save(true)}
+      />
+      <TestHistoryDialog
+        testId={id}
+        title={test.title}
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        dirty={form.dirty}
+        onRestored={() => loadPage()}
+      />
     </RequireRole>
   );
 }

@@ -42,8 +42,21 @@ export interface StudentListItem {
   email?: string | null;
   role: string;
   archivedAt?: string | null;
+  /** Сайтад сүүлд орсон (JwtStrategy 5 мин тутам шинэчилнэ) */
+  lastSeenAt?: string | null;
   studentProfile?: StudentProfileLite | null;
   currentClassroom?: ClassroomLite | null;
+}
+
+/** Бодож байхдаа сайтаас гарсан тоо (users.service.studentFocus) */
+export interface StudentFocus {
+  tests: {
+    sessions: number;
+    sessionsWithLeaves: number;
+    leaves: number;
+    recent: { testId: string; title: string; startedAt: string; leaveCount: number }[];
+  };
+  practice: { days: number; problems: number; leaves: number };
 }
 
 // Дэлгэрэнгүй хуудас (GET /users/:id → users.service.getUserDetail)
@@ -58,7 +71,9 @@ export interface StudentDetailData {
   avatarUrl?: string | null;
   studentCode?: string | null;
   createdAt?: string;
+  lastSeenAt?: string | null;
   archivedAt?: string | null;
+  focus?: StudentFocus | null;
   studentProfile: StudentProfileLite | null;
   currentClassroom: ClassroomLite | null;
   counts: {
@@ -102,6 +117,10 @@ export interface StudentNote {
   updatedAt: string;
   resolvedAt?: string | null;
   resolvedById?: string | null;
+  /** Хэн бичсэн («Б. Болд») — бүх багш уншдаг */
+  authorName?: string | null;
+  /** Засах/устгах эрх: зохиогч эсвэл админ */
+  canEdit?: boolean;
 }
 
 export function fullName(s: { firstName: string; lastName: string }): string {

@@ -31,6 +31,18 @@ describe('schedule capability and classroom boundaries', () => {
       capabilities as unknown as StaffCapabilityService,
     );
   });
+  it('Teacher+ sets the daily topic on any class without schedule.manage (owner 2026-10-08)', async () => {
+    prisma.classSchedule.findUnique.mockResolvedValue({
+      classroomId: 'other',
+      teacherId: 'x',
+      classroom: { teacherId: 'y' },
+    });
+    capabilities.assert.mockRejectedValue(new Error('denied'));
+    await expect(access.topic(actor, 'sched')).resolves.toBeUndefined();
+    await expect(
+      access.topic({ userId: 'staff', role: Role.TEACHER }, 'sched'),
+    ).rejects.toThrow('denied');
+  });
   it('requires both original and destination grants and stops before moving', async () => {
     prisma.classSchedule.findUnique.mockResolvedValue({ classroomId: 'own' });
     capabilities.assert.mockImplementation((_id, _cap, scope) =>
@@ -52,17 +64,18 @@ describe('schedule capability and classroom boundaries', () => {
     ]);
     expect(update).not.toHaveBeenCalled();
   });
-  it('preserves own assigned lesson topic but rejects random plus teacher', async () => {
+  it('plain teacher keeps own assigned lesson topic but a random teacher needs a grant', async () => {
+    const teacher = { userId: 'staff', role: Role.TEACHER };
     prisma.classSchedule.findUnique.mockResolvedValue({
       classroomId: 'own',
       teacherId: 'staff',
       classroom: { teacherId: 'other' },
     });
-    await access.topic(actor, 'lesson');
+    await access.topic(teacher, 'lesson');
     expect(capabilities.assert).not.toHaveBeenCalled();
     capabilities.assert.mockRejectedValue(new Error('no grant'));
     await expect(
-      access.topic({ ...actor, userId: 'random' }, 'lesson'),
+      access.topic({ ...teacher, userId: 'random' }, 'lesson'),
     ).rejects.toThrow('no grant');
   });
   it('queries parent only through verified linked pupils and denies buyer', async () => {
@@ -84,21 +97,10 @@ describe('schedule capability and classroom boundaries', () => {
       access.readClassroom({ userId: 'pupil', role: Role.STUDENT }, 'other'),
     ).rejects.toThrow();
   });
-  it('teacher reads own/assigned and specifically granted classes, no general plus bypass', async () => {
-    prisma.classroom.findMany.mockResolvedValue([
-      { id: 'own', teacherId: 'staff', classSchedules: [] },
-      { id: 'assigned', teacherId: 'x', classSchedules: [{ id: 's' }] },
-      { id: 'granted', teacherId: 'x', classSchedules: [] },
-      { id: 'other', teacherId: 'x', classSchedules: [] },
-    ]);
-    capabilities.has.mockImplementation((_id, _cap, scope) =>
-      Promise.resolve(scope === 'granted'),
-    );
-    expect(await access.readableClassrooms(actor)).toEqual([
-      'own',
-      'assigned',
-      'granted',
-    ]);
+  it('staff read every class timetable (owner decision 2026-10-08); editing stays capability-gated', async () => {
+    capabilities.has.mockResolvedValue(false);
+    expect(await access.readableClassrooms(actor)).toBeUndefined();
+    expect(prisma.classroom.findMany).not.toHaveBeenCalled();
   });
   it('all hours requires time.review while own hours stays separate', async () => {
     const forMonth = jest.fn().mockResolvedValue({ teachers: [] });
@@ -123,6 +125,7 @@ describe('scoped schedule queries omit global staff work patterns', () => {
       scheduleException: { findMany: jest.fn().mockResolvedValue([]) },
       academicCalendarDay: { findMany: jest.fn().mockResolvedValue([]) },
       lessonTopic: { findMany: jest.fn().mockResolvedValue([]) },
+      lessonStaffing: { findMany: jest.fn().mockResolvedValue([]) },
       teacherWorkDay: { findMany: jest.fn() },
       teacherWorkException: { findMany: jest.fn() },
       user: { findMany: jest.fn() },
@@ -151,6 +154,41 @@ describe('scoped schedule queries omit global staff work patterns', () => {
     expect(prisma.user.findMany).not.toHaveBeenCalled();
     expect(result.teacherRoster.every((day) => day.teachers.length === 0)).toBe(
       true,
+    );
+  });
+});
+
+describe('teacher work roster access (owner 2026-10-11)', () => {
+  const make = () => {
+    const capabilities = {
+      assert: jest.fn().mockRejectedValue(new Error('denied')),
+      has: jest.fn().mockResolvedValue(false),
+    };
+    const access = new ScheduleAccessService(
+      {} as unknown as PrismaService,
+      capabilities as unknown as StaffCapabilityService,
+    );
+    return { access, capabilities };
+  };
+  it('Teacher+ and Admin read/edit the roster without schedule.manage', async () => {
+    const { access, capabilities } = make();
+    await expect(
+      access.roster({ userId: 'tp', role: Role.TEACHER_PLUS }),
+    ).resolves.toBeUndefined();
+    await expect(
+      access.roster({ userId: 'ad', role: Role.ADMIN }),
+    ).resolves.toBeUndefined();
+    expect(capabilities.assert).not.toHaveBeenCalled();
+  });
+  it('plain Teacher still needs schedule.manage', async () => {
+    const { access, capabilities } = make();
+    await expect(
+      access.roster({ userId: 't', role: Role.TEACHER }),
+    ).rejects.toThrow('denied');
+    expect(capabilities.assert).toHaveBeenCalledWith(
+      't',
+      'schedule.manage',
+      undefined,
     );
   });
 });

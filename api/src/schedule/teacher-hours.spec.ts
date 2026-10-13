@@ -46,6 +46,18 @@ describe('teacher hours', () => {
     expect(rows[0].sessions.map((s) => s.date)).toEqual(['2026-09-15', '2026-09-28']);
   });
 
+  it('зөвхөн нэг ангийн онцгой өдөр тэр ангийн багшийн цагийг хасна, бусад ангийнхыг хасахгүй', () => {
+    const other = { ...base, id: 's2', classroomId: 'c2', classroomName: 'Анги 2', teacherId: 't2', teacherName: 'Багш Дорж' };
+    const rows = computeTeacherHours('2026-09', {
+      schedules: [base, other],
+      exceptions: [],
+      topics: [],
+      holidays: [{ date: '2026-09-21', type: 'EXAM_DAY', title: 'Шалгалт', classroomIds: [base.classroomId] }],
+    });
+    expect(rows.find((r) => r.teacherId === 't1')!.lessons).toBe(3);
+    expect(rows.find((r) => r.teacherId === 't2')!.lessons).toBe(4);
+  });
+
   it('багшгүй хуваарийг алгасна', () => {
     const rows = computeTeacherHours('2026-09', {
       schedules: [{ ...base, teacherId: null, teacherName: null }],

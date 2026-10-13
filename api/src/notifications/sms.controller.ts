@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { SmsEnabledGuard } from './sms-enabled.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -31,7 +32,7 @@ import { SmsManagementService } from './sms-management.service';
  * (TEACHER_PLUS) зөвхөн ТҮҮХИЙГ харна — юу явсныг мэдэх нь ажилдаа хэрэгтэй.
  */
 @Controller('sms')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, SmsEnabledGuard)
 export class SmsController {
   constructor(private readonly sms: SmsManagementService) {}
 

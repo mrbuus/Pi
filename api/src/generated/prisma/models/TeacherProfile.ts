@@ -27,16 +27,19 @@ export type AggregateTeacherProfile = {
 export type TeacherProfileMinAggregateOutputType = {
   userId: string | null
   canManageStudents: boolean | null
+  teachesLessons: boolean | null
 }
 
 export type TeacherProfileMaxAggregateOutputType = {
   userId: string | null
   canManageStudents: boolean | null
+  teachesLessons: boolean | null
 }
 
 export type TeacherProfileCountAggregateOutputType = {
   userId: number
   canManageStudents: number
+  teachesLessons: number
   _all: number
 }
 
@@ -44,16 +47,19 @@ export type TeacherProfileCountAggregateOutputType = {
 export type TeacherProfileMinAggregateInputType = {
   userId?: true
   canManageStudents?: true
+  teachesLessons?: true
 }
 
 export type TeacherProfileMaxAggregateInputType = {
   userId?: true
   canManageStudents?: true
+  teachesLessons?: true
 }
 
 export type TeacherProfileCountAggregateInputType = {
   userId?: true
   canManageStudents?: true
+  teachesLessons?: true
   _all?: true
 }
 
@@ -132,6 +138,7 @@ export type TeacherProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type TeacherProfileGroupByOutputType = {
   userId: string
   canManageStudents: boolean
+  teachesLessons: boolean
   _count: TeacherProfileCountAggregateOutputType | null
   _min: TeacherProfileMinAggregateOutputType | null
   _max: TeacherProfileMaxAggregateOutputType | null
@@ -158,12 +165,14 @@ export type TeacherProfileWhereInput = {
   NOT?: Prisma.TeacherProfileWhereInput | Prisma.TeacherProfileWhereInput[]
   userId?: Prisma.StringFilter<"TeacherProfile"> | string
   canManageStudents?: Prisma.BoolFilter<"TeacherProfile"> | boolean
+  teachesLessons?: Prisma.BoolFilter<"TeacherProfile"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type TeacherProfileOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   canManageStudents?: Prisma.SortOrder
+  teachesLessons?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -173,12 +182,14 @@ export type TeacherProfileWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.TeacherProfileWhereInput[]
   NOT?: Prisma.TeacherProfileWhereInput | Prisma.TeacherProfileWhereInput[]
   canManageStudents?: Prisma.BoolFilter<"TeacherProfile"> | boolean
+  teachesLessons?: Prisma.BoolFilter<"TeacherProfile"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "userId">
 
 export type TeacherProfileOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   canManageStudents?: Prisma.SortOrder
+  teachesLessons?: Prisma.SortOrder
   _count?: Prisma.TeacherProfileCountOrderByAggregateInput
   _max?: Prisma.TeacherProfileMaxOrderByAggregateInput
   _min?: Prisma.TeacherProfileMinOrderByAggregateInput
@@ -190,40 +201,48 @@ export type TeacherProfileScalarWhereWithAggregatesInput = {
   NOT?: Prisma.TeacherProfileScalarWhereWithAggregatesInput | Prisma.TeacherProfileScalarWhereWithAggregatesInput[]
   userId?: Prisma.StringWithAggregatesFilter<"TeacherProfile"> | string
   canManageStudents?: Prisma.BoolWithAggregatesFilter<"TeacherProfile"> | boolean
+  teachesLessons?: Prisma.BoolWithAggregatesFilter<"TeacherProfile"> | boolean
 }
 
 export type TeacherProfileCreateInput = {
   canManageStudents?: boolean
+  teachesLessons?: boolean
   user: Prisma.UserCreateNestedOneWithoutTeacherProfileInput
 }
 
 export type TeacherProfileUncheckedCreateInput = {
   userId: string
   canManageStudents?: boolean
+  teachesLessons?: boolean
 }
 
 export type TeacherProfileUpdateInput = {
   canManageStudents?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  teachesLessons?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutTeacherProfileNestedInput
 }
 
 export type TeacherProfileUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   canManageStudents?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  teachesLessons?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TeacherProfileCreateManyInput = {
   userId: string
   canManageStudents?: boolean
+  teachesLessons?: boolean
 }
 
 export type TeacherProfileUpdateManyMutationInput = {
   canManageStudents?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  teachesLessons?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TeacherProfileUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   canManageStudents?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  teachesLessons?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TeacherProfileNullableScalarRelationFilter = {
@@ -234,16 +253,19 @@ export type TeacherProfileNullableScalarRelationFilter = {
 export type TeacherProfileCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   canManageStudents?: Prisma.SortOrder
+  teachesLessons?: Prisma.SortOrder
 }
 
 export type TeacherProfileMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   canManageStudents?: Prisma.SortOrder
+  teachesLessons?: Prisma.SortOrder
 }
 
 export type TeacherProfileMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   canManageStudents?: Prisma.SortOrder
+  teachesLessons?: Prisma.SortOrder
 }
 
 export type TeacherProfileCreateNestedOneWithoutUserInput = {
@@ -280,10 +302,12 @@ export type TeacherProfileUncheckedUpdateOneWithoutUserNestedInput = {
 
 export type TeacherProfileCreateWithoutUserInput = {
   canManageStudents?: boolean
+  teachesLessons?: boolean
 }
 
 export type TeacherProfileUncheckedCreateWithoutUserInput = {
   canManageStudents?: boolean
+  teachesLessons?: boolean
 }
 
 export type TeacherProfileCreateOrConnectWithoutUserInput = {
@@ -304,10 +328,12 @@ export type TeacherProfileUpdateToOneWithWhereWithoutUserInput = {
 
 export type TeacherProfileUpdateWithoutUserInput = {
   canManageStudents?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  teachesLessons?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TeacherProfileUncheckedUpdateWithoutUserInput = {
   canManageStudents?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  teachesLessons?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -315,27 +341,31 @@ export type TeacherProfileUncheckedUpdateWithoutUserInput = {
 export type TeacherProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   canManageStudents?: boolean
+  teachesLessons?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teacherProfile"]>
 
 export type TeacherProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   canManageStudents?: boolean
+  teachesLessons?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teacherProfile"]>
 
 export type TeacherProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   canManageStudents?: boolean
+  teachesLessons?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teacherProfile"]>
 
 export type TeacherProfileSelectScalar = {
   userId?: boolean
   canManageStudents?: boolean
+  teachesLessons?: boolean
 }
 
-export type TeacherProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "canManageStudents", ExtArgs["result"]["teacherProfile"]>
+export type TeacherProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "canManageStudents" | "teachesLessons", ExtArgs["result"]["teacherProfile"]>
 export type TeacherProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -354,6 +384,7 @@ export type $TeacherProfilePayload<ExtArgs extends runtime.Types.Extensions.Inte
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     userId: string
     canManageStudents: boolean
+    teachesLessons: boolean
   }, ExtArgs["result"]["teacherProfile"]>
   composites: {}
 }
@@ -780,6 +811,7 @@ export interface Prisma__TeacherProfileClient<T, Null = never, ExtArgs extends r
 export interface TeacherProfileFieldRefs {
   readonly userId: Prisma.FieldRef<"TeacherProfile", 'String'>
   readonly canManageStudents: Prisma.FieldRef<"TeacherProfile", 'Boolean'>
+  readonly teachesLessons: Prisma.FieldRef<"TeacherProfile", 'Boolean'>
 }
     
 

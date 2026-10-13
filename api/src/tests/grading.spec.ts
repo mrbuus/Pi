@@ -2,6 +2,7 @@ import { ProblemFormat } from '../generated/prisma/enums';
 import {
   answersEqual,
   buildChoiceOrder,
+  choiceImagesOf,
   choiceModeOf,
   choiceTextsOf,
   gradeAnswer,
@@ -267,5 +268,87 @@ describe('hasKnownAnswer — импортын хариуны түлхүүр ил
       false,
     );
     expect(hasKnownAnswer(p({ format: FILL, correctAnswer: '' }))).toBe(false);
+  });
+});
+
+describe('Нөхөх бодлого — нүдний дараалал (2026-10-10 засвар)', () => {
+  // Сорил 1-A маягийн объект түлхүүр + хөдөлгүүрийн нэг стринг хариу
+  const keyed = p({
+    format: FILL,
+    correctAnswer: { a: '3', b: '2', c: '8' },
+    statementText: '$x=[a]$, $y=[b][c]$',
+  });
+  it('объект түлхүүрийг стринг хариутай нүдний дарааллаар тулгана', () => {
+    expect(gradeAnswer(keyed, '328').correct).toBe(true);
+    expect(gradeAnswer(keyed, '329').correct).toBe(false);
+  });
+  it('хоосон нүд («_») — байрлал хадгалагдаж, бодлого зөв биш', () => {
+    expect(gradeAnswer(keyed, '3_8').correct).toBe(false);
+  });
+  it('Word-ийн \\lbrack a\\rbrack тэмдэглэгээг нүд гэж танина (100V3)', () => {
+    const word = p({
+      format: FILL,
+      correctAnswer: { a: '2', b: '8' },
+      statementText: '$t^{2} - \\lbrack a\\rbrack t - \\lbrack b\\rbrack \\geq 0$',
+    });
+    expect(gradeAnswer(word, '28').correct).toBe(true);
+    expect(gradeAnswer(word, '82').correct).toBe(false);
+  });
+  it('бүлгийн түлхүүр ({ bc: "54" })-ийг ч задална', () => {
+    const grouped = p({
+      format: FILL,
+      correctAnswer: { a: '3', bc: '54' },
+      statementText: '$[a]$ ба $[bc]$',
+    });
+    expect(gradeAnswer(grouped, '354').correct).toBe(true);
+    expect(gradeAnswer(grouped, '3_4').correct).toBe(false);
+  });
+  it('стринг түлхүүр — «812600»-г «0812600»-тэй тоогоор андуурахгүй', () => {
+    const str = p({
+      format: FILL,
+      correctAnswer: '0812600',
+      statementText: '$[a][b][c][d]$ ба $[efg]$',
+    });
+    expect(gradeAnswer(str, '0812600').correct).toBe(true);
+    expect(gradeAnswer(str, '812600').correct).toBe(false);
+    expect(gradeAnswer(str, '08_2600').correct).toBe(false);
+  });
+  it('нүдгүй бодлого — хуучин дүрэм хэвээр (тоон каноник)', () => {
+    const free = p({ format: FILL, correctAnswer: '4', statementText: 'x=?' });
+    expect(gradeAnswer(free, '4.0').correct).toBe(true);
+  });
+});
+
+describe('choiceImagesOf — сонголтын зураг', () => {
+  it('зураггүй бол null (хуучин payload өөрчлөгдөхгүй)', () => {
+    expect(
+      choiceImagesOf({ choiceOptions: [{ order: 1, text: '1', isCorrect: true }] }),
+    ).toBeNull();
+  });
+
+  it('order-оор эрэмбэлж, текстийн дараалалтай таарна', () => {
+    const p = {
+      choiceOptions: [
+        { order: 2, text: '', isCorrect: false, imageKey: 'b.png' },
+        { order: 1, text: '', isCorrect: true, imageKey: 'a.png' },
+        { order: 3, text: 'x', isCorrect: false, imageKey: null },
+      ],
+    };
+    expect(choiceImagesOf(p)).toEqual(['a.png', 'b.png', null]);
+  });
+
+  it('зөвхөн зурагтай (текст хоосон) сонголтыг isCorrect-оор дүгнэнэ', () => {
+    const p: GradableProblem = {
+      id: 'p',
+      format: ProblemFormat.CHOICE,
+      choices: null,
+      correctAnswer: '',
+      choiceOptions: [
+        { order: 1, text: '', isCorrect: false, imageKey: 'a.png' },
+        { order: 2, text: '', isCorrect: true, imageKey: 'b.png' },
+      ],
+    };
+    expect(gradeAnswer(p, 1).correct).toBe(true);
+    expect(gradeAnswer(p, 0).correct).toBe(false);
   });
 });

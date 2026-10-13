@@ -95,6 +95,15 @@ export class ContentController {
     );
   }
 
+  // Хуваарийн сэдэв сонгогч: бүлэг/сэдвийг нэрээр хайна (Багш+/Багш/Админ).
+  // ':id'-тэй зам зөрчихгүйн тулд 'chapters/:id'-ээс ӨМНӨ тодорхойлно.
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('chapters/search')
+  searchChapters(@Query('q') q?: string, @Query('limit') limit?: string) {
+    return this.content.searchChapters(q ?? '', limit ? parseInt(limit, 10) : 20);
+  }
+
   // Гараар эрэмбэлэх (drag-reorder UI) — заавал 'chapters/:id'-ээс ӨМНӨ
   // тодорхойлно, эс тэгвэл "reorder" ':id' болж алдаа өгнө.
   @UseGuards(JwtAuthGuard, RolesGuard)

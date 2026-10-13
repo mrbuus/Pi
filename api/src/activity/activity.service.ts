@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { addDateDays, dateKey, todayUB } from '../common/date';
 import { Role } from '../generated/prisma/enums';
+import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   computeActivityLevel,
@@ -55,7 +56,7 @@ export class ActivityService {
       throw new NotFoundException('Анги олдсонгүй');
     }
     if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return classroom;
-    if (role === Role.TEACHER && classroom.teacherId === userId) {
+    if (role === Role.TEACHER && isClassTeacher(classroom, userId)) {
       return classroom;
     }
     throw new ForbiddenException('Энэ ангид хандах эрхгүй');
@@ -80,7 +81,7 @@ export class ActivityService {
         where: {
           studentId,
           leftAt: null,
-          classroom: { teacherId: userId },
+          classroom: classTeacherWhere(userId),
         },
       });
       if (enrollment) return student;
@@ -109,7 +110,7 @@ export class ActivityService {
         _count: { _all: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES } },
+        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
         select: { date: true },
       }),
     ]);
@@ -168,7 +169,7 @@ export class ActivityService {
         select: { date: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { type: { in: NON_CLASS_DAY_TYPES } },
+        where: { type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
         select: { date: true },
       }),
     ]);
@@ -255,7 +256,7 @@ export class ActivityService {
     }
 
     const calendarDays = await this.prisma.academicCalendarDay.findMany({
-      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES } },
+      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
       select: { date: true },
     });
     const nonClassDates = new Set(calendarDays.map((c) => dateKey(c.date)));

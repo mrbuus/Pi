@@ -1,6 +1,7 @@
 "use client";
 import AttachmentPreview from "./AttachmentPreview";
 import { StatusBadge } from "./StatusBadge";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 export interface SubmissionRevision {
   id: string;
@@ -23,7 +24,7 @@ export interface SubmissionRecordData {
   revisions?: SubmissionRevision[];
 }
 const dateLabel = (value: string) =>
-  new Date(value).toLocaleString("mn-MN", { timeZone: "Asia/Ulaanbaatar" });
+  formatMnDateTime(value, { timeZone: "Asia/Ulaanbaatar" });
 export default function SubmissionRecord({
   submission,
 }: {

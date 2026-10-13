@@ -36,7 +36,7 @@ export default function AttemptEditDialog({
         className="w-full max-w-sm rounded-2xl border border-line bg-surface p-5"
       >
         <h2 id={titleId} className="text-base font-bold text-ink">
-          «{problemToken}» бодлогын тэмдэглэгээг засах
+          «{problemToken}» — бодлогын тэмдэглэгээг засах
         </h2>
         <label className="mt-4 block text-sm font-semibold text-ink" htmlFor="self-state-select">
           Шинэ тэмдэглэгээ

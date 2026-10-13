@@ -17,6 +17,7 @@ import { Role } from '../generated/prisma/enums';
 import { ClassroomsService } from './classrooms.service';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
+import { UpdateClassTeachersDto } from './dto/update-class-teachers.dto';
 import { UpdateClassroomDto } from './dto/update-classroom.dto';
 
 interface AuthedRequest {
@@ -90,6 +91,22 @@ export class ClassroomsController {
     @Req() req: AuthedRequest,
   ) {
     return this.classrooms.update(id, dto, req.user.userId, req.user.role);
+  }
+
+  // Ангийн багш + туслах багш (эзэн 2026-10-13) — ангийн самбараас Багш+/Админ
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Patch(':id/teachers')
+  setTeachers(
+    @Param('id') id: string,
+    @Body() dto: UpdateClassTeachersDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.classrooms.setTeachers(
+      id,
+      dto,
+      req.user.userId,
+      req.user.role,
+    );
   }
 
   @Roles(Role.ADMIN)

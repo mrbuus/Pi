@@ -1,4 +1,5 @@
 "use client";
+import CodeReveal from "@/components/ui/CodeReveal";
 import Link from "next/link";
 import { useSyncExternalStore, useState, type ReactNode } from "react";
 import {
@@ -286,8 +287,9 @@ export default function FormulaDetailClient({ slug }: { slug: string }) {
                 key={problem.problemId}
                 className="min-w-0 rounded-xl border border-line p-4"
               >
-                <h3 className="mb-2 text-sm font-semibold">
-                  {problem.chapterTitle} — {problem.token}
+                <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                  {problem.chapterTitle}
+                  <CodeReveal code={problem.token} className="h-6 w-6" />
                 </h3>
                 <FormulaMath
                   text={

@@ -8,6 +8,7 @@ import {
 import type { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { beginRevision, commitRevision } from '../revisions/revision-store';
 import { dismissalDate } from '../learning-lab/dismissal';
 import { packetInput, receiptInput, turnInput } from './input';
 import { choosePhotoTurn, homeworkPrefill, RotationPupil } from './rotation';
@@ -367,12 +368,20 @@ export class LessonFlowService {
       }
       for (const testId of [body.testId, body.makeupTestId].filter(
         (id): id is string => typeof id === 'string',
-      ))
+      )) {
+        // Ангид шинээр оноогдвол тестийн өөрчлөлтийн түүхэд бичигдэнэ
+        // (аль хэдийн оноогдсон бол өөрчлөлтгүй — юу ч бичихгүй).
+        const rev = await beginRevision(tx, 'TEST', testId);
         await tx.testAccess.upsert({
           where: { testId_classroomId: { testId, classroomId } },
           create: { testId, classroomId },
           update: {},
         });
+        await commitRevision(tx, rev, {
+          actor: { id: userId, role },
+          action: 'UPDATE',
+        });
+      }
       if (old && old.chapterId !== chapter.id)
         throw new ConflictException(
           'Өдрийн хадгалсан сэдвийг сольж болохгүй; шинэ өдөр / тусдаа нөхөх багц сонгоно.',

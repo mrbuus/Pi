@@ -10,10 +10,12 @@ import { Prisma } from '../generated/prisma/client';
 import {
   AttemptSessionStatus,
   AttemptSource,
+  ItemMarkSource,
   Role,
   SelfState,
   Subject,
   TestGradingMode,
+  TestType,
 } from '../generated/prisma/enums';
 import {
   collectPassScope,
@@ -24,6 +26,11 @@ import {
 } from '../common/access';
 import { todayUB } from '../common/date';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  beginRevision,
+  commitRevision,
+  recordCreated,
+} from '../revisions/revision-store';
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
@@ -37,12 +44,19 @@ import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import {
   answerToken,
   buildChoiceOrder,
+  choiceImagesOf,
   choiceModeOf,
   choiceTextsOf,
   gradeAnswer,
   GradableProblem,
   hasKnownAnswer,
 } from './grading';
+import { buildExamItems, ExamItem, gradeProblemItems } from './exam-items';
+import {
+  manualResultSource,
+  overrideError,
+  resultLock,
+} from './result-policy';
 
 // Хугацаа дууссаны дараах уужим байдал: сүлжээний саатал, эцсийн autosave-д
 const GRACE_MS = 30_000;
@@ -60,9 +74,10 @@ type TestProblemRow = {
     imageKey: string | null;
     choices: unknown;
     correctAnswer: unknown;
+    scoringGroups?: unknown;
     attemptCount: number;
     correctRate: number | null;
-    choiceOptions: { order: number; text: string; isCorrect: boolean }[];
+    choiceOptions: { order: number; text: string; isCorrect: boolean; imageKey?: string | null }[];
     analysis?: { status: string; solutionOutline: string | null } | null;
     chapter: { id: string; title: string };
   };
@@ -231,26 +246,35 @@ export class TestsService {
     const source = await this.findEditableTest(testId, actorId, actorRole);
     // Access, learner results and attempt sessions are intentionally not copied.
     // A copy remains a private draft until its owner edits and assigns it.
-    const duplicate = await this.prisma.test.create({
-      data: {
-        title: `${source.title} (хуулбар)`.slice(0, 200),
-        type: source.type,
-        gradingMode: source.gradingMode,
-        timeLimitMin: source.timeLimitMin,
-        chapterId: source.chapterId,
-        pdfKey: source.pdfKey,
-        price: actorRole === Role.ADMIN ? source.price : null,
-        createdById: actorId,
-        isDraft: true,
-        problems: {
-          create: source.problems.map(({ problemId, order, points }) => ({
-            problemId,
-            order,
-            points,
-          })),
+    // Хуулбар + түүхийн хувилбар 0 нэг transaction-д.
+    const duplicate = await this.prisma.$transaction(async (tx) => {
+      const row = await tx.test.create({
+        data: {
+          title: `${source.title} (хуулбар)`.slice(0, 200),
+          type: source.type,
+          gradingMode: source.gradingMode,
+          timeLimitMin: source.timeLimitMin,
+          chapterId: source.chapterId,
+          pdfKey: source.pdfKey,
+          price: actorRole === Role.ADMIN ? source.price : null,
+          createdById: actorId,
+          isDraft: true,
+          problems: {
+            create: source.problems.map(({ problemId, order, points }) => ({
+              problemId,
+              order,
+              points,
+            })),
+          },
         },
-      },
-      include: { problems: { orderBy: { order: 'asc' } }, access: true },
+        include: { problems: { orderBy: { order: 'asc' } }, access: true },
+      });
+      const rev = await recordCreated(tx, 'TEST', row.id, {
+        actor: { id: actorId, role: actorRole },
+        action: 'CREATE',
+        summary: 'Хуулбараар үүсгэсэн',
+      });
+      return { ...row, version: rev.version };
     });
     await this.recordAudit(
       actorId,
@@ -282,6 +306,7 @@ export class TestsService {
     before: unknown,
     after: unknown,
     db: TestDatabase = this.prisma,
+    reason?: string,
   ) {
     await db.auditLog.create({
       data: {
@@ -292,6 +317,7 @@ export class TestsService {
         entityId,
         before: this.toAuditJson(before),
         after: this.toAuditJson(after),
+        ...(reason ? { reason: reason.trim().slice(0, 500) } : {}),
       },
     });
   }
@@ -386,8 +412,12 @@ export class TestsService {
   ) {
     actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
     await this.assertAssignedClassrooms(actorId, dto.classroomIds);
+    // expectedVersion, overwrite — зөвхөн зэрэг засварын тохиргоо, өөрчлөх талбар биш.
     const changedFields = Object.keys(dto).filter(
-      (field) => dto[field as keyof UpdateTestDto] !== undefined,
+      (field) =>
+        field !== 'expectedVersion' &&
+        field !== 'overwrite' &&
+        dto[field as keyof UpdateTestDto] !== undefined,
     );
     if (changedFields.length === 0) {
       throw new BadRequestException('Өөрчлөх мэдээллээ оруулна уу');
@@ -421,7 +451,7 @@ export class TestsService {
     if (dto.variantLabel !== undefined) data.variantLabel = dto.variantLabel;
     if (dto.price !== undefined) data.price = dto.price;
 
-    const { updated, answerWarning } = await this.prisma.$transaction(
+    const { updated, answerWarning, version, changed, mergedWith } = await this.prisma.$transaction(
       async (tx) => {
         await this.lockTestRow(tx, testId);
         const test = await this.findEditableTest(
@@ -430,6 +460,22 @@ export class TestsService {
           actorRole,
           tx,
         );
+        // Өөрчлөлтийн түүх (эрх шалгасны дараа): өмнөх төлөв; expectedVersion
+        // зөрвөл 409 — хэн, хэзээ өөрчилснийг хэлнэ.
+        const rev = await beginRevision(tx, 'TEST', testId, {
+          expectedVersion: dto.expectedVersion,
+          overwrite: dto.overwrite,
+        });
+        if (
+          test.type === TestType.THOUSAND &&
+          dto.classroomIds !== undefined
+        ) {
+          // Энгийн засвар TestAccess-ийг бүхэлд нь дахин үүсгэдэг тул ангийн
+          // эргэн харалтын тохиргоо (reviewLevel/assignedAt) устна.
+          throw new BadRequestException(
+            '1000 бодлогын шалгалтыг «Шалгалт» хэсгийн «Тохиргоо» табаас ангид онооно',
+          );
+        }
         const taken = await this.hasBeenTaken(testId, tx);
         if (
           taken &&
@@ -494,6 +540,18 @@ export class TestsService {
             access: true,
           },
         });
+        const committed = await commitRevision(tx, rev, {
+          actor: { id: actorId, role: actorRole },
+          action: 'UPDATE',
+        });
+        // Бусдын өөрчлөлттэй нэгтгэсэн бол мөр өөрчлөгдсөн — шинэ төлөвийг буцаана
+        const fresh = committed.mergedWith
+          ? await tx.test.findUniqueOrThrow({
+              where: { id: testId },
+              include: { problems: { orderBy: { order: 'asc' } }, access: true },
+            })
+          : updated;
+        // Аудит — нэгтгэлийн ДАРААХ (бодитоор хадгалагдсан) төлөв
         await this.recordAudit(
           actorId,
           actorRole,
@@ -501,13 +559,20 @@ export class TestsService {
           'Test',
           testId,
           test,
-          updated,
+          fresh,
           tx,
         );
-        return { updated, answerWarning };
+        return {
+          updated: fresh,
+          answerWarning,
+          version: committed.version,
+          changed: committed.changed,
+          mergedWith: committed.mergedWith,
+        };
       },
     );
-    return answerWarning ? { ...updated, answerWarning } : updated;
+    const result = { ...updated, version, changed, mergedWith };
+    return answerWarning ? { ...result, answerWarning } : result;
   }
 
   // Ангид оноож байгаа (classroomIds ирсэн) тестийг хариуны түлхүүргүй
@@ -555,13 +620,14 @@ export class TestsService {
     };
   }
 
+  // Багш зөвхөн өөрийн ангид; Багш+/Админ бүх ангид онооно (SHALGALT §8.4).
   private async assertAssignedClassrooms(actorId: string, ids?: string[]) {
     const role = await assertInternalTeachingStaff(this.prisma, actorId);
     if (!ids?.length || role === Role.ADMIN) return;
     const count = await this.prisma.classroom.count({
       where: {
         id: { in: [...new Set(ids)] },
-        teacherId: actorId,
+        ...(role === Role.TEACHER_PLUS ? {} : { teacherId: actorId }),
         archived: false,
       },
     });
@@ -570,7 +636,7 @@ export class TestsService {
   }
 
   async create(dto: CreateTestDto, userId: string) {
-    await assertInternalTeachingStaff(this.prisma, userId);
+    const actorRole = await assertInternalTeachingStaff(this.prisma, userId);
     await this.assertAssignedClassrooms(userId, dto.classroomIds);
     // Зөвхөн ангид ШУУД оноож байгаа үед л шалгана (TestAccess бичигдэх цорын
     // ганц зам) — эс тэгвээс ангид оноогдоогүй ноорог тестэд саад болно.
@@ -578,37 +644,45 @@ export class TestsService {
       ? await this.checkAnswerCoverage(dto.problems ?? [])
       : undefined;
 
-    const test = await this.prisma.test.create({
-      data: {
-        title: dto.title,
-        type: dto.type,
-        gradingMode: dto.gradingMode ?? TestGradingMode.AUTO,
-        chapterId: dto.chapterId,
-        timeLimitMin: dto.timeLimitMin,
-        pdfKey: dto.pdfKey,
-        groupKey: dto.groupKey,
-        variantLabel: dto.variantLabel,
-        price: dto.price,
-        createdById: userId,
-        problems: dto.problems?.length
-          ? {
-              create: dto.problems.map((p) => ({
-                problemId: p.problemId,
-                order: p.order,
-                points: p.points ?? 1,
-              })),
-            }
-          : undefined,
-        access: dto.classroomIds?.length
-          ? {
-              create: dto.classroomIds.map((classroomId) => ({ classroomId })),
-            }
-          : undefined,
-      },
-      include: {
-        problems: { orderBy: { order: 'asc' } },
-        access: true,
-      },
+    // Тест + түүхийн хувилбар 0 нэг transaction-д.
+    const test = await this.prisma.$transaction(async (tx) => {
+      const row = await tx.test.create({
+        data: {
+          title: dto.title,
+          type: dto.type,
+          gradingMode: dto.gradingMode ?? TestGradingMode.AUTO,
+          chapterId: dto.chapterId,
+          timeLimitMin: dto.timeLimitMin,
+          pdfKey: dto.pdfKey,
+          groupKey: dto.groupKey,
+          variantLabel: dto.variantLabel,
+          price: dto.price,
+          createdById: userId,
+          problems: dto.problems?.length
+            ? {
+                create: dto.problems.map((p) => ({
+                  problemId: p.problemId,
+                  order: p.order,
+                  points: p.points ?? 1,
+                })),
+              }
+            : undefined,
+          access: dto.classroomIds?.length
+            ? {
+                create: dto.classroomIds.map((classroomId) => ({ classroomId })),
+              }
+            : undefined,
+        },
+        include: {
+          problems: { orderBy: { order: 'asc' } },
+          access: true,
+        },
+      });
+      const rev = await recordCreated(tx, 'TEST', row.id, {
+        actor: { id: userId, role: actorRole },
+        action: 'CREATE',
+      });
+      return { ...row, version: rev.version };
     });
 
     return answerWarning ? { ...test, answerWarning } : test;
@@ -616,10 +690,18 @@ export class TestsService {
 
   // Багш бүгдийг, сурагч ангидаа оноогдсон ЭСВЭЛ хүчинтэй эрхийнхээ (pass)
   // хамрах хүрээнд орсон тестүүдийг харна (Bug 2 fix — SPEC §11)
-  async list(userId: string, role: Role, subject?: Subject) {
-    const subjectFilter: Prisma.TestWhereInput = subject
-      ? { chapter: { book: { subject } } }
-      : {};
+  // «1000 бодлого» (THOUSAND) — зөвхөн includeThousand үед (/app/tests «Шалгалт»
+  // таб, дэлгүүрийн удирдлага); бусад жагсаалтад (тест сонгогч г.м.) орохгүй.
+  async list(
+    userId: string,
+    role: Role,
+    subject?: Subject,
+    includeThousand = false,
+  ) {
+    const subjectFilter: Prisma.TestWhereInput = {
+      ...(subject ? { chapter: { book: { subject } } } : {}),
+      ...(includeThousand ? {} : { type: { not: TestType.THOUSAND } }),
+    };
 
     if (
       TEACHER_ROLES.includes(role) &&
@@ -750,9 +832,19 @@ export class TestsService {
                   imageKey: true,
                   choices: true,
                   correctAnswer: true,
+                  points: true,
+                  chapterId: true,
+                  // Тест засах блок: агуулгын засварт expectedVersion (зэрэг засвар)
+                  version: true,
                   choiceOptions: {
                     orderBy: { order: 'asc' },
-                    select: { order: true, text: true, isCorrect: true },
+                    select: {
+                      order: true,
+                      text: true,
+                      isCorrect: true,
+                      label: true,
+                      imageKey: true,
+                    },
                   },
                   tags: { include: { tag: true } },
                   analysis: {
@@ -1093,7 +1185,12 @@ export class TestsService {
     }
 
     const merged = this.mergeDrafts(test.problems, session, dto);
-    return this.finalize(test, session, userId, merged);
+    const finalized = await this.finalize(test, session, userId, merged);
+    // 1000 бодлого: бодлого бүрийн зөв/буруу ч багшийн нээсэн түвшнээр л
+    // харагдана — илгээлтийн хариунд задлахгүй.
+    return test.type === TestType.THOUSAND
+      ? { result: finalized.result }
+      : finalized;
   }
 
   // Дууссан шалгалтын эргэн харах дэлгэц: бодлого бүрийн зөв/буруу төлөв + өөрийн хариулт.
@@ -1110,6 +1207,16 @@ export class TestsService {
       where: { testId_studentId: { testId, studentId: userId } },
       select: { totalScore: true, maxScore: true, createdAt: true },
     });
+    // 1000 бодлогын шалгалт: бодлого бүрийн зөв/буруу ч гэсэн багшийн нээсэн
+    // түвшнээр л харагдана — /thousand/tests/:id/review (сервер талын хаалт).
+    if (test.type === TestType.THOUSAND) {
+      return {
+        result,
+        items: [],
+        leaveCount: session.leaveCount,
+        gatedReview: true,
+      };
+    }
 
     const byId = new Map(test.problems.map((tp) => [tp.problemId, tp]));
     const orderIds = (session.problemOrder as string[]).filter((id) =>
@@ -1180,7 +1287,8 @@ export class TestsService {
       dto.maxScore <= 0
     )
       throw new BadRequestException('Дүнгийн хязгаар буруу');
-    if (role !== Role.ADMIN) {
+    // Багш зөвхөн өөрийн ангийн; Багш+/Админ бүх ангийн сурагчийн дүнг оруулна.
+    if (role === Role.TEACHER) {
       const assigned = await this.prisma.testAccess.findFirst({
         where: {
           testId,
@@ -1203,24 +1311,68 @@ export class TestsService {
       const current = await tx.test.findUnique({ where: { id: testId } });
       if (!current || current.deletedAt)
         throw new NotFoundException('Тест олдсонгүй');
-      return tx.testResult.upsert({
-        where: {
-          testId_studentId: { testId, studentId: dto.studentId },
-        },
+      const where = {
+        testId_studentId: { testId, studentId: dto.studentId },
+      };
+      const [existing, session] = await Promise.all([
+        tx.testResult.findUnique({ where }),
+        tx.testAttemptSession.findUnique({ where, select: { status: true } }),
+      ]);
+      // Онлайнаар өгсөн дүнг зөвхөн Багш+/Админ шалтгаантайгаар дарна.
+      const lock = resultLock(existing, session);
+      const blocked = overrideError(lock, role, dto.reason);
+      if (blocked) {
+        throw lock === 'IN_PROGRESS'
+          ? new ConflictException(blocked)
+          : new ForbiddenException(blocked);
+      }
+      const source =
+        existing?.source === AttemptSource.ONLINE_TEST
+          ? AttemptSource.ONLINE_TEST
+          : manualResultSource(current.type);
+      const saved = await tx.testResult.upsert({
+        where,
         create: {
           testId,
           studentId: dto.studentId,
           totalScore: dto.totalScore,
           maxScore: dto.maxScore,
           enteredById: userId,
-          source: AttemptSource.CHAPTER_EXAM,
+          source,
         },
         update: {
           totalScore: dto.totalScore,
           maxScore: dto.maxScore,
           enteredById: userId,
+          source,
+          version: { increment: 1 },
+          regradeNote: lock
+            ? 'Онлайн дүнг Багш+ зассан (нийт оноо)'
+            : 'Нийт оноо гараар',
         },
       });
+      // Зөвхөн нийт оноо ирсэн тул бодлого бүрийн тэмдэглэгээ хуучирна;
+      // дүн орсон сурагч «ирээгүй» байж болохгүй.
+      await tx.testItemMark.deleteMany({
+        where: { testId, studentId: dto.studentId },
+      });
+      await tx.testAbsence.deleteMany({
+        where: { testId, studentId: dto.studentId },
+      });
+      if (lock) {
+        await this.recordAudit(
+          userId,
+          role,
+          'OVERRIDE_ONLINE_RESULT',
+          'TestResult',
+          saved.id,
+          existing,
+          saved,
+          tx,
+          dto.reason,
+        );
+      }
+      return saved;
     });
   }
 
@@ -1231,9 +1383,9 @@ export class TestsService {
       where: { id: testId, deletedAt: null },
     });
     if (!test) throw new NotFoundException('Тест олдсонгүй');
-    // Content curation permission does not grant access to pupils in other classes.
+    // Багш зөвхөн өөрийн ангийн сурагчдыг; Багш+/Админ бүгдийг (SHALGALT §8.4).
     const studentScope =
-      role === Role.ADMIN
+      role === Role.ADMIN || role === Role.TEACHER_PLUS
         ? {}
         : {
             student: {
@@ -1245,7 +1397,7 @@ export class TestsService {
               },
             },
           };
-    if (role !== Role.ADMIN) {
+    if (role === Role.TEACHER) {
       const assigned = await this.prisma.testAccess.findFirst({
         where: { testId, classroom: { teacherId: userId, archived: false } },
       });
@@ -1343,10 +1495,11 @@ export class TestsService {
                 imageKey: true,
                 choices: true,
                 correctAnswer: true,
+                scoringGroups: true,
                 attemptCount: true,
                 correctRate: true,
                 choiceOptions: {
-                  select: { order: true, text: true, isCorrect: true },
+                  select: { order: true, text: true, isCorrect: true, imageKey: true },
                 },
                 // Бодолт: зөвхөн багш баталгаажуулсныг review-д үзүүлнэ (Шийдвэр Д)
                 analysis: {
@@ -1475,10 +1628,14 @@ export class TestsService {
       const g = toGradable(tp);
       const mode = choiceModeOf(g);
       let choices: string[] | null = null;
+      let choiceImages: (string | null)[] | null = null;
       if (mode === 'TEXT') {
         const texts = choiceTextsOf(g);
         const perm = choiceOrder[pid];
         choices = perm ? perm.map((origIdx) => texts[origIdx]) : texts;
+        // Зурагтай сонголт: текстийн дараалалтай ижил (shuffle) — нэг ч зураггүй бол null
+        const images = choiceImagesOf(g);
+        if (images) choiceImages = perm ? perm.map((origIdx) => images[origIdx] ?? null) : images;
       } else if (mode === 'LETTER') {
         choices = choiceTextsOf(g); // үсгүүд, байрлал хөдлөхгүй
       }
@@ -1490,6 +1647,7 @@ export class TestsService {
         points: tp.points,
         choiceMode: mode,
         choices,
+        choiceImages,
       };
     });
   }
@@ -1610,10 +1768,16 @@ export class TestsService {
     // Хариу тодорхойгүй (импортын явцад ANSWER_KEY_MISSING) бодлогыг дүнгийн
     // хуваарьт оруулахгүй — эс тэгвээс сурагч зөв бичсэн ч "буруу" гэж
     // тооцогдож, дүнгийн хувь шударга бус болно.
-    const maxScore = test.problems.reduce(
-      (s, tp) => (hasKnownAnswer(toGradable(tp)) ? s + tp.points : s),
-      0,
-    );
+    let maxScore = 0;
+    // Дүнгийн хүснэгтийн зүйлс (сонгох бодлого / 2-р хэсгийн алхмын багц) —
+    // гар шивэлт, Excel-тэй ИЖИЛ түлхүүрээр TestItemMark бичнэ.
+    const itemsByProblem = new Map<string, ExamItem[]>();
+    for (const item of buildExamItems(test.problems)) {
+      const list = itemsByProblem.get(item.problemId) ?? [];
+      list.push(item);
+      itemsByProblem.set(item.problemId, list);
+    }
+    const marks: Prisma.TestItemMarkCreateManyInput[] = [];
     const graded: { problemId: string; correct: boolean; points: number }[] =
       [];
     const attempts: Prisma.AttemptCreateManyInput[] = [];
@@ -1624,20 +1788,33 @@ export class TestsService {
       const pid = tp.problemId;
       const raw = m.answers[pid];
       const selfState = m.states[pid] as SelfState | undefined;
-      const answered =
-        raw !== undefined && raw !== null && answerToken(raw) !== '';
 
-      const gradable = toGradable(tp);
-      const known = hasKnownAnswer(gradable);
       // canonicalAnswer — сурагчийн сонгосон ЖИНХЭНЭ утга (сонголтын текст
       // эсвэл тоон хариу). Холилтын дараалалаас ҮЛ ХАМААРНА тул дараа нь
       // сессийн choiceOrder байхгүй ч тайлагдана.
-      const { correct, canonicalAnswer } = gradeAnswer(
-        gradable,
+      // 2-р хэсэгт алхмын багц бүр тусдаа: багцын бүх нүд зөв → багцын оноо.
+      const problemItems = itemsByProblem.get(pid) ?? [];
+      const scored = gradeProblemItems(
+        { ...toGradable(tp), statementText: tp.problem.statementText },
+        problemItems,
         raw,
         choiceOrder[pid],
       );
-      if (answered && correct && known) totalScore += tp.points;
+      const { known, answered, correct, canonicalAnswer } = scored;
+      if (known) {
+        for (const item of problemItems) {
+          const status = scored.statuses.get(item.key) ?? 'BLANK';
+          maxScore += item.points;
+          if (status === 'CORRECT') totalScore += item.points;
+          marks.push({
+            testId: test.id,
+            studentId,
+            itemKey: item.key,
+            status,
+            source: ItemMarkSource.ONLINE,
+          });
+        }
+      }
       graded.push({
         problemId: pid,
         correct: answered && correct && known,
@@ -1675,8 +1852,14 @@ export class TestsService {
     }
 
     const now = new Date();
+    // Цаасан (гар) дүн аль хэдийн орсон бол түүнийг дарахгүй — тэр үед онлайн
+    // зүйлсийн тэмдэглэгээг ч бичихгүй (дүн, тэмдэглэгээ зөрөхгүй).
+    const priorResult = await this.prisma.testResult.findUnique({
+      where: { testId_studentId: { testId: test.id, studentId } },
+      select: { id: true },
+    });
 
-    // АТОМИК хэсэг: TestResult, Attempt, Session нэг transaction-д
+    // АТОМИК хэсэг: TestResult, Attempt, Session (+ зүйлсийн тэмдэглэгээ) нэг transaction-д
     const [result, createdAttempts] = await this.prisma.$transaction([
       this.prisma.testResult.upsert({
         where: {
@@ -1708,6 +1891,14 @@ export class TestsService {
           events: m.events as Prisma.InputJsonValue,
         },
       }),
+      ...(priorResult || marks.length === 0
+        ? []
+        : [
+            this.prisma.testItemMark.createMany({
+              data: marks,
+              skipDuplicates: true,
+            }),
+          ]),
     ]);
 
     // Collect only this submission's wrong attempts; failure leaves them pending

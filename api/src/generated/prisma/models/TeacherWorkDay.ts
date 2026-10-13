@@ -28,16 +28,22 @@ export type AggregateTeacherWorkDay = {
 
 export type TeacherWorkDayAvgAggregateOutputType = {
   weekday: number | null
+  parity: number | null
+  sortOrder: number | null
 }
 
 export type TeacherWorkDaySumAggregateOutputType = {
   weekday: number | null
+  parity: number | null
+  sortOrder: number | null
 }
 
 export type TeacherWorkDayMinAggregateOutputType = {
   id: string | null
   teacherId: string | null
   weekday: number | null
+  parity: number | null
+  sortOrder: number | null
   note: string | null
 }
 
@@ -45,6 +51,8 @@ export type TeacherWorkDayMaxAggregateOutputType = {
   id: string | null
   teacherId: string | null
   weekday: number | null
+  parity: number | null
+  sortOrder: number | null
   note: string | null
 }
 
@@ -52,6 +60,8 @@ export type TeacherWorkDayCountAggregateOutputType = {
   id: number
   teacherId: number
   weekday: number
+  parity: number
+  sortOrder: number
   note: number
   _all: number
 }
@@ -59,16 +69,22 @@ export type TeacherWorkDayCountAggregateOutputType = {
 
 export type TeacherWorkDayAvgAggregateInputType = {
   weekday?: true
+  parity?: true
+  sortOrder?: true
 }
 
 export type TeacherWorkDaySumAggregateInputType = {
   weekday?: true
+  parity?: true
+  sortOrder?: true
 }
 
 export type TeacherWorkDayMinAggregateInputType = {
   id?: true
   teacherId?: true
   weekday?: true
+  parity?: true
+  sortOrder?: true
   note?: true
 }
 
@@ -76,6 +92,8 @@ export type TeacherWorkDayMaxAggregateInputType = {
   id?: true
   teacherId?: true
   weekday?: true
+  parity?: true
+  sortOrder?: true
   note?: true
 }
 
@@ -83,6 +101,8 @@ export type TeacherWorkDayCountAggregateInputType = {
   id?: true
   teacherId?: true
   weekday?: true
+  parity?: true
+  sortOrder?: true
   note?: true
   _all?: true
 }
@@ -177,6 +197,8 @@ export type TeacherWorkDayGroupByOutputType = {
   id: string
   teacherId: string
   weekday: number
+  parity: number
+  sortOrder: number
   note: string | null
   _count: TeacherWorkDayCountAggregateOutputType | null
   _avg: TeacherWorkDayAvgAggregateOutputType | null
@@ -207,6 +229,8 @@ export type TeacherWorkDayWhereInput = {
   id?: Prisma.StringFilter<"TeacherWorkDay"> | string
   teacherId?: Prisma.StringFilter<"TeacherWorkDay"> | string
   weekday?: Prisma.IntFilter<"TeacherWorkDay"> | number
+  parity?: Prisma.IntFilter<"TeacherWorkDay"> | number
+  sortOrder?: Prisma.IntFilter<"TeacherWorkDay"> | number
   note?: Prisma.StringNullableFilter<"TeacherWorkDay"> | string | null
   teacher?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -215,26 +239,32 @@ export type TeacherWorkDayOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   weekday?: Prisma.SortOrder
+  parity?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   teacher?: Prisma.UserOrderByWithRelationInput
 }
 
 export type TeacherWorkDayWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  teacherId_weekday?: Prisma.TeacherWorkDayTeacherIdWeekdayCompoundUniqueInput
+  teacherId_weekday_parity?: Prisma.TeacherWorkDayTeacherIdWeekdayParityCompoundUniqueInput
   AND?: Prisma.TeacherWorkDayWhereInput | Prisma.TeacherWorkDayWhereInput[]
   OR?: Prisma.TeacherWorkDayWhereInput[]
   NOT?: Prisma.TeacherWorkDayWhereInput | Prisma.TeacherWorkDayWhereInput[]
   teacherId?: Prisma.StringFilter<"TeacherWorkDay"> | string
   weekday?: Prisma.IntFilter<"TeacherWorkDay"> | number
+  parity?: Prisma.IntFilter<"TeacherWorkDay"> | number
+  sortOrder?: Prisma.IntFilter<"TeacherWorkDay"> | number
   note?: Prisma.StringNullableFilter<"TeacherWorkDay"> | string | null
   teacher?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "teacherId_weekday">
+}, "id" | "teacherId_weekday_parity">
 
 export type TeacherWorkDayOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   weekday?: Prisma.SortOrder
+  parity?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TeacherWorkDayCountOrderByAggregateInput
   _avg?: Prisma.TeacherWorkDayAvgOrderByAggregateInput
@@ -250,12 +280,16 @@ export type TeacherWorkDayScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"TeacherWorkDay"> | string
   teacherId?: Prisma.StringWithAggregatesFilter<"TeacherWorkDay"> | string
   weekday?: Prisma.IntWithAggregatesFilter<"TeacherWorkDay"> | number
+  parity?: Prisma.IntWithAggregatesFilter<"TeacherWorkDay"> | number
+  sortOrder?: Prisma.IntWithAggregatesFilter<"TeacherWorkDay"> | number
   note?: Prisma.StringNullableWithAggregatesFilter<"TeacherWorkDay"> | string | null
 }
 
 export type TeacherWorkDayCreateInput = {
   id?: string
   weekday: number
+  parity?: number
+  sortOrder?: number
   note?: string | null
   teacher: Prisma.UserCreateNestedOneWithoutTeacherWorkDaysInput
 }
@@ -264,12 +298,16 @@ export type TeacherWorkDayUncheckedCreateInput = {
   id?: string
   teacherId: string
   weekday: number
+  parity?: number
+  sortOrder?: number
   note?: string | null
 }
 
 export type TeacherWorkDayUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   weekday?: Prisma.IntFieldUpdateOperationsInput | number
+  parity?: Prisma.IntFieldUpdateOperationsInput | number
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacher?: Prisma.UserUpdateOneRequiredWithoutTeacherWorkDaysNestedInput
 }
@@ -278,6 +316,8 @@ export type TeacherWorkDayUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   weekday?: Prisma.IntFieldUpdateOperationsInput | number
+  parity?: Prisma.IntFieldUpdateOperationsInput | number
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -285,12 +325,16 @@ export type TeacherWorkDayCreateManyInput = {
   id?: string
   teacherId: string
   weekday: number
+  parity?: number
+  sortOrder?: number
   note?: string | null
 }
 
 export type TeacherWorkDayUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   weekday?: Prisma.IntFieldUpdateOperationsInput | number
+  parity?: Prisma.IntFieldUpdateOperationsInput | number
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -298,6 +342,8 @@ export type TeacherWorkDayUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   weekday?: Prisma.IntFieldUpdateOperationsInput | number
+  parity?: Prisma.IntFieldUpdateOperationsInput | number
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -311,26 +357,33 @@ export type TeacherWorkDayOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type TeacherWorkDayTeacherIdWeekdayCompoundUniqueInput = {
+export type TeacherWorkDayTeacherIdWeekdayParityCompoundUniqueInput = {
   teacherId: string
   weekday: number
+  parity: number
 }
 
 export type TeacherWorkDayCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   weekday?: Prisma.SortOrder
+  parity?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   note?: Prisma.SortOrder
 }
 
 export type TeacherWorkDayAvgOrderByAggregateInput = {
   weekday?: Prisma.SortOrder
+  parity?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
 }
 
 export type TeacherWorkDayMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   weekday?: Prisma.SortOrder
+  parity?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   note?: Prisma.SortOrder
 }
 
@@ -338,11 +391,15 @@ export type TeacherWorkDayMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   weekday?: Prisma.SortOrder
+  parity?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   note?: Prisma.SortOrder
 }
 
 export type TeacherWorkDaySumOrderByAggregateInput = {
   weekday?: Prisma.SortOrder
+  parity?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
 }
 
 export type TeacherWorkDayCreateNestedManyWithoutTeacherInput = {
@@ -390,12 +447,16 @@ export type TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput = {
 export type TeacherWorkDayCreateWithoutTeacherInput = {
   id?: string
   weekday: number
+  parity?: number
+  sortOrder?: number
   note?: string | null
 }
 
 export type TeacherWorkDayUncheckedCreateWithoutTeacherInput = {
   id?: string
   weekday: number
+  parity?: number
+  sortOrder?: number
   note?: string | null
 }
 
@@ -432,30 +493,40 @@ export type TeacherWorkDayScalarWhereInput = {
   id?: Prisma.StringFilter<"TeacherWorkDay"> | string
   teacherId?: Prisma.StringFilter<"TeacherWorkDay"> | string
   weekday?: Prisma.IntFilter<"TeacherWorkDay"> | number
+  parity?: Prisma.IntFilter<"TeacherWorkDay"> | number
+  sortOrder?: Prisma.IntFilter<"TeacherWorkDay"> | number
   note?: Prisma.StringNullableFilter<"TeacherWorkDay"> | string | null
 }
 
 export type TeacherWorkDayCreateManyTeacherInput = {
   id?: string
   weekday: number
+  parity?: number
+  sortOrder?: number
   note?: string | null
 }
 
 export type TeacherWorkDayUpdateWithoutTeacherInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   weekday?: Prisma.IntFieldUpdateOperationsInput | number
+  parity?: Prisma.IntFieldUpdateOperationsInput | number
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TeacherWorkDayUncheckedUpdateWithoutTeacherInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   weekday?: Prisma.IntFieldUpdateOperationsInput | number
+  parity?: Prisma.IntFieldUpdateOperationsInput | number
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TeacherWorkDayUncheckedUpdateManyWithoutTeacherInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   weekday?: Prisma.IntFieldUpdateOperationsInput | number
+  parity?: Prisma.IntFieldUpdateOperationsInput | number
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -465,6 +536,8 @@ export type TeacherWorkDaySelect<ExtArgs extends runtime.Types.Extensions.Intern
   id?: boolean
   teacherId?: boolean
   weekday?: boolean
+  parity?: boolean
+  sortOrder?: boolean
   note?: boolean
   teacher?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teacherWorkDay"]>
@@ -473,6 +546,8 @@ export type TeacherWorkDaySelectCreateManyAndReturn<ExtArgs extends runtime.Type
   id?: boolean
   teacherId?: boolean
   weekday?: boolean
+  parity?: boolean
+  sortOrder?: boolean
   note?: boolean
   teacher?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teacherWorkDay"]>
@@ -481,6 +556,8 @@ export type TeacherWorkDaySelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   id?: boolean
   teacherId?: boolean
   weekday?: boolean
+  parity?: boolean
+  sortOrder?: boolean
   note?: boolean
   teacher?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teacherWorkDay"]>
@@ -489,10 +566,12 @@ export type TeacherWorkDaySelectScalar = {
   id?: boolean
   teacherId?: boolean
   weekday?: boolean
+  parity?: boolean
+  sortOrder?: boolean
   note?: boolean
 }
 
-export type TeacherWorkDayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teacherId" | "weekday" | "note", ExtArgs["result"]["teacherWorkDay"]>
+export type TeacherWorkDayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teacherId" | "weekday" | "parity" | "sortOrder" | "note", ExtArgs["result"]["teacherWorkDay"]>
 export type TeacherWorkDayInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teacher?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -512,6 +591,8 @@ export type $TeacherWorkDayPayload<ExtArgs extends runtime.Types.Extensions.Inte
     id: string
     teacherId: string
     weekday: number
+    parity: number
+    sortOrder: number
     note: string | null
   }, ExtArgs["result"]["teacherWorkDay"]>
   composites: {}
@@ -940,6 +1021,8 @@ export interface TeacherWorkDayFieldRefs {
   readonly id: Prisma.FieldRef<"TeacherWorkDay", 'String'>
   readonly teacherId: Prisma.FieldRef<"TeacherWorkDay", 'String'>
   readonly weekday: Prisma.FieldRef<"TeacherWorkDay", 'Int'>
+  readonly parity: Prisma.FieldRef<"TeacherWorkDay", 'Int'>
+  readonly sortOrder: Prisma.FieldRef<"TeacherWorkDay", 'Int'>
   readonly note: Prisma.FieldRef<"TeacherWorkDay", 'String'>
 }
     

@@ -6,6 +6,7 @@ import MathText from "@/components/MathText";
 import { ChildReviewHistory } from "@/components/study/ReviewHistory";
 import { Button } from "@/components/ui/kit/button";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
+import { formatMnDate, formatMnDateTime } from "@/lib/dateMn";
 export type PageRows<T> = { rows: T[]; hasMore: boolean };
 type Submission = {
   id: string;
@@ -34,7 +35,7 @@ type Attempt = {
   autoCorrect: boolean | null;
   selfState: string | null;
   givenAnswer: unknown;
-  problem: { token: string; chapterId: string; chapter: { title: string } };
+  problem: { chapterId: string; chapter: { title: string } };
 };
 type Result = {
   id: string;
@@ -132,6 +133,7 @@ const SOURCE: Record<string, string> = {
   EVENING_SELF_REPORT: "Сурагчийн өөрийн тэмдэглэгээ",
   ONLINE_TEST: "Онлайн шалгалтын дүн",
   CHAPTER_EXAM: "Багшийн үнэлгээ",
+  MANUAL_ENTRY: "Багшийн үнэлгээ",
   OMR_IMPORT: "Хариултын хуудасны дүн",
 };
 const KIND: Record<string, string> = {
@@ -141,7 +143,7 @@ const KIND: Record<string, string> = {
   "solution-viewed": "Бодолт үзсэн",
 };
 const date = (value: string) =>
-  new Date(value).toLocaleDateString("mn-MN", { timeZone: "Asia/Ulaanbaatar" });
+  formatMnDate(value, { timeZone: "Asia/Ulaanbaatar" });
 function readableAnswer(value: unknown) {
   if (value === null || value === undefined) return "Хариулт хадгалаагүй";
   if (typeof value === "object")
@@ -371,7 +373,7 @@ export default function ChildHistory({ studentId }: { studentId: string }) {
                     className="border-t border-line py-3 text-sm space-y-2"
                   >
                     <p>
-                      {date(a.occurredOn)} — {a.problem.token} —{" "}
+                      {date(a.occurredOn)} — {a.problem.chapter?.title ?? "Бодлого"} —{" "}
                       {SOURCE[a.source] ?? "Оролдлого"}
                     </p>
                     <MathText>{readableAnswer(a.givenAnswer)}</MathText>
@@ -412,7 +414,7 @@ export default function ChildHistory({ studentId }: { studentId: string }) {
                       <div key={r.id}>
                         <p>
                           {r.kind} ·{" "}
-                          {new Date(r.submittedAt).toLocaleString("mn-MN")}
+                          {formatMnDateTime(r.submittedAt)}
                         </p>
                         {r.imageKeys.map((k) => (
                           <a

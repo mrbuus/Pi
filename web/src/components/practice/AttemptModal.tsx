@@ -3,6 +3,7 @@
 import ProblemVideoDisclosure from "@/components/lesson/ProblemVideoDisclosure";
 import { useEffect, useState } from "react";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
+import MathText from "@/components/MathText";
 
 import { api } from "@/lib/api";
 // Recommendation type
@@ -31,10 +32,9 @@ interface AttemptModalProps {
 
 interface Problem {
   id: string;
-  token: string;
-  statementText?: string;
-  correctAnswer: unknown;
+  statementText?: string | null;
   format: string;
+  choices?: { label: string; text: string }[] | null;
 }
 
 export default function AttemptModal({
@@ -65,6 +65,15 @@ export default function AttemptModal({
 
     fetchProblem();
   }, [recommendation.problemId]);
+
+  // Esc дарахад хаана
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !submitting) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, submitting]);
 
   // Оруулсан үр дүнг явуулна
   const handleSubmit = async () => {
@@ -116,7 +125,7 @@ export default function AttemptModal({
     return (
       <Modal onClose={onClose}>
         <div className="text-center py-12">
-          <p className="text-lg font-semibold text-success mb-2">Баялалаа!</p>
+          <p className="text-lg font-semibold text-success mb-2">Баярлалаа!</p>
           <p className="text-sm text-ink-dim">Таны хариулт хадгалагдлаа</p>
         </div>
       </Modal>
@@ -129,13 +138,14 @@ export default function AttemptModal({
         {/* Бодлогын асуулт */}
         <div className="mb-6">
           <h3 className="font-semibold text-ink mb-3">Бодлого</h3>
-          <p className="text-sm text-ink-dim bg-surface p-3 rounded">
-            {problem.statementText || "(Асуулт уншихыг сөрөгүүлэв)"}
-          </p>
-          <ProblemVideoDisclosure problemId={problem.id} />
-          <div className="text-xs font-mono text-ink-dim mt-2">
-            Token: {problem.token}
+          <div className="text-sm text-ink bg-surface p-3 rounded">
+            {problem.statementText ? (
+              <MathText>{problem.statementText}</MathText>
+            ) : (
+              "Бодлогын текст алга — зургаас уншина уу."
+            )}
           </div>
+          <ProblemVideoDisclosure problemId={problem.id} />
         </div>
 
         {/* Хариулт оруулах */}
@@ -143,6 +153,27 @@ export default function AttemptModal({
           <label className="block text-sm font-medium text-ink mb-2">
             Таны хариулт
           </label>
+          {problem.choices?.length ? (
+            <div className="grid gap-2" role="radiogroup" aria-label="Сонголтууд">
+              {problem.choices.map((c) => (
+                <button
+                  key={c.label}
+                  type="button"
+                  role="radio"
+                  aria-checked={answer === c.label}
+                  disabled={submitting}
+                  onClick={() => setAnswer(c.label)}
+                  className={`w-full rounded-lg border p-3 text-left text-sm text-ink ${
+                    answer === c.label
+                      ? "border-brand ring-2 ring-brand"
+                      : "border-line hover:bg-panel"
+                  }`}
+                >
+                  <MathText>{c.text}</MathText>
+                </button>
+              ))}
+            </div>
+          ) : (
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
@@ -151,6 +182,7 @@ export default function AttemptModal({
             className="w-full p-3 border border-line rounded-lg text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-brand text-sm"
             rows={4}
           />
+          )}
         </div>
 
         {/* Алдаа */}
@@ -193,8 +225,13 @@ function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
       <div
+        role="dialog"
+        aria-modal="true"
         className="bg-bg rounded-lg shadow-lg max-w-lg w-full p-6"
         onClick={(e) => e.stopPropagation()}
       >

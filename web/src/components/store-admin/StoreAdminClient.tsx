@@ -76,7 +76,7 @@ export default function StoreAdminClient() {
         api<Product[]>('/store/admin/products'),
         api<Purchase[]>('/store/admin/purchases'),
         api<RevenueSummary>('/store/admin/revenue'),
-        api<Test[]>('/tests'),
+        api<Test[]>('/tests?includeThousand=1'),
         api<Book[]>('/books'),
       ]);
 

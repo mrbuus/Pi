@@ -23,9 +23,10 @@ export class NotesService {
     private capabilities: StaffCapabilityService,
   ) {}
 
-  // TEACHER зөвхөн ӨӨРИЙН ангийн (идэвхтэй бүртгэлтэй) сурагчид; TEACHER_PLUS/ADMIN
-  // бүх сурагчид (SPEC: assertClassAccess-ийн сурагч-төвтэй хувилбар — ирц/
-  // даалгаврын модультай ижил зарчим).
+  // Эзний шийдвэр (2026-10-11): төвийн ямар ч багш (Багш, Багш+, Админ) ЯМАР Ч
+  // сурагчид ерөнхий тэмдэглэл бичиж, бүгдийг уншина. Засах/устгах — зохиогч эсвэл
+  // Админ. Гадны багш — өөрийн бүлгийн сурагч, өөрийн тэмдэглэл л. Төлбөрийн
+  // тэмдэглэл — finance.manage эрхтэй.
   private async assertStudentAccess(
     studentId: string,
     userId: string,
@@ -59,6 +60,7 @@ export class NotesService {
     )
       throw new ForbiddenException('Энэ сурагчид хандах эрхгүй');
     if (actor.externalTeacherProfile) {
+      // Гадны багш: зөвхөн өөрийн бүлгийн сурагч
       if (!actor.externalTeacherProfile.verifiedAt)
         throw new ForbiddenException('Баталгаажсан багш шаардлагатай');
       const member = await this.prisma.teacherGroupMember.findFirst({
@@ -71,15 +73,7 @@ export class NotesService {
       });
       if (member) return { external: true };
     } else {
-      const enrollment = await this.prisma.enrollment.findFirst({
-        where: {
-          studentId,
-          leftAt: null,
-          classroom: { teacherId: userId, archived: false },
-        },
-        select: { id: true },
-      });
-      if (enrollment) return { external: false };
+      return { external: false };
     }
     throw new ForbiddenException('Энэ сурагчид хандах эрхгүй');
   }
@@ -94,10 +88,22 @@ export class NotesService {
     });
     if (profile?.tuitionPlan !== TuitionPlan.FULL_YEAR) return;
 
-    const confirmedPayment = await this.prisma.payment.findFirst({
-      where: { userId: studentId, status: PaymentStatus.CONFIRMED },
+    // «Бүтэн төлсөн» = баталгаажсан сургалтын төлбөрийн нийлбэр жилийн дүнд
+    // хүрсэн. Зөвхөн урьдчилгаа төлсөн бүтэн жилийн сурагчид үлдэгдлийн
+    // амлалтын тэмдэглэл хэрэгтэй (2026-10-13, бодит Excel-ийн өгөгдөл).
+    const paid = await this.prisma.payment.aggregate({
+      where: {
+        userId: studentId,
+        status: PaymentStatus.CONFIRMED,
+        storePurchaseId: null,
+      },
+      _sum: { amount: true },
+      _count: true,
     });
-    if (confirmedPayment) {
+    const required = profile.tuitionAmount ?? 0;
+    const fullyPaid =
+      required > 0 ? (paid._sum.amount ?? 0) >= required : paid._count > 0;
+    if (fullyPaid) {
       throw new BadRequestException(
         'Жилийн төлбөрөө бүтэн төлсөн сурагчид төлбөрийн тэмдэглэл үүсгэх шаардлагагүй.',
       );
@@ -120,12 +126,19 @@ export class NotesService {
       await this.assertPaymentNoteAllowed(studentId);
     }
 
+    if (dto.promisedOn && dto.type !== StudentNoteType.PAYMENT)
+      throw new BadRequestException(
+        'Амласан өдөр зөвхөн төлбөрийн тэмдэглэлд байна',
+      );
     const note = await this.prisma.studentNote.create({
       data: {
         studentId,
         type: dto.type,
         body: dto.body,
         createdById: userId,
+        ...(dto.promisedOn
+          ? { promisedOn: new Date(`${dto.promisedOn}T00:00:00Z`) }
+          : {}),
       },
     });
 
@@ -154,7 +167,7 @@ export class NotesService {
       type === StudentNoteType.PAYMENT,
     );
     const financial = await this.capabilities.has(userId, 'finance.manage');
-    return this.prisma.studentNote.findMany({
+    const notes = await this.prisma.studentNote.findMany({
       where: {
         studentId,
         ...(type
@@ -166,6 +179,22 @@ export class NotesService {
       },
       orderBy: { createdAt: 'desc' },
     });
+    // Хэн бичсэн (бүх багш уншдаг тул) + засах эрх
+    const authors = await this.prisma.user.findMany({
+      where: { id: { in: [...new Set(notes.map((n) => n.createdById))] } },
+      select: { id: true, firstName: true, lastName: true },
+    });
+    const nameOf = new Map(
+      authors.map((a) => [
+        a.id,
+        `${a.lastName ? `${a.lastName.charAt(0)}. ` : ''}${a.firstName}`.trim(),
+      ]),
+    );
+    return notes.map((n) => ({
+      ...n,
+      authorName: nameOf.get(n.createdById) ?? null,
+      canEdit: role === Role.ADMIN || n.createdById === userId,
+    }));
   }
 
   async update(id: string, dto: UpdateNoteDto, userId: string, role: Role) {
@@ -181,6 +210,8 @@ export class NotesService {
     );
     if (scope.external && before.createdById !== userId)
       throw new ForbiddenException('Хувийн ажилтны тэмдэглэлд хандахгүй');
+    if (role !== Role.ADMIN && before.createdById !== userId)
+      throw new ForbiddenException('Зөвхөн өөрийн бичсэн тэмдэглэлийг засна');
     if (before.type === StudentNoteType.PAYMENT) {
       await this.assertPaymentNoteAllowed(before.studentId);
     }
@@ -190,6 +221,14 @@ export class NotesService {
       where: { id },
       data: {
         ...(dto.body !== undefined ? { body: dto.body } : {}),
+        ...(dto.promisedOn !== undefined &&
+        before.type === StudentNoteType.PAYMENT
+          ? {
+              promisedOn: dto.promisedOn
+                ? new Date(`${dto.promisedOn}T00:00:00Z`)
+                : null,
+            }
+          : {}),
         ...(resolving
           ? {
               resolvedAt: dto.resolvedAt ? new Date(dto.resolvedAt) : null,
@@ -223,6 +262,8 @@ export class NotesService {
     );
     if (scope.external && note.createdById !== userId)
       throw new ForbiddenException('Хувийн ажилтны тэмдэглэлд хандахгүй');
+    if (role !== Role.ADMIN && note.createdById !== userId)
+      throw new ForbiddenException('Зөвхөн өөрийн бичсэн тэмдэглэлийг устгана');
 
     await this.prisma.studentNote.delete({ where: { id } });
 

@@ -34,7 +34,7 @@ export class RankingService {
       where: {
         testId,
         studentId,
-        source: { in: ['ONLINE_TEST', 'CHAPTER_EXAM', 'OMR_IMPORT'] },
+        source: { in: ['ONLINE_TEST', 'CHAPTER_EXAM', 'OMR_IMPORT', 'MANUAL_ENTRY'] },
         test: { deletedAt: null, isDraft: false },
       },
       select: {

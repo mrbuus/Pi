@@ -34,10 +34,20 @@ export interface ResolverTopic {
   title: string;
 }
 
+/** Тухайн өдрийн ахлах/туслах багш (LessonStaffing) — нэр нь аль хэдийн нийлүүлэгдсэн. */
+export interface ResolverStaffing {
+  scheduleId: string;
+  date: string;
+  lead: { id: string; name: string } | null;
+  assistant: { id: string; name: string } | null;
+}
+
 export interface ResolverHoliday {
   date: string;
   type: string;
   title: string;
+  /** Аль ангид хамаарах вэ. Хоосон эсвэл заагаагүй = БҮХ анги. */
+  classroomIds?: string[];
 }
 
 export interface ResolvedEntry {
@@ -51,13 +61,32 @@ export interface ResolvedEntry {
   room: string | null;
   subject: string | null;
   topic: string | null;
+  /** Өдрийн ахлах багш — оноогоогүй бол null (UI хуваарийн үндсэн багшийг санал болгоно) */
+  leadTeacher: { id: string; name: string } | null;
+  assistantTeacher: { id: string; name: string } | null;
   exception: { kind: 'MOVED'; note: string | null; originalDate: string } | null;
+}
+
+/** Зөвхөн сонгосон ангид хамаарсан онцгой өдрөөр хасагдсан анги. */
+export interface RestingClass {
+  classroomId: string;
+  classroomName: string;
+  type: string;
+  title: string;
 }
 
 export interface ResolvedDay {
   date: string;
   weekday: number;
+  /** БҮХ ангид хамаарах онцгой өдөр байвал true (entries хасагдахгүй, тэмдэглэгдэнэ). */
   isHoliday: boolean;
+  /** Бүх ангид хамаарах онцгой өдрийн мэдээлэл */
+  holiday: { type: string; title: string } | null;
+  /**
+   * Зөвхөн зарим ангид хамаарах онцгой өдөр. Эдгээр ангийн хичээл entries-ээс
+   * ХАСАГДСАН — энд л бүртгэлтэй үлдэнэ (UI «амарна» гэж харуулахад).
+   */
+  restingClasses: RestingClass[];
   entries: ResolvedEntry[];
 }
 
@@ -103,12 +132,28 @@ export function resolveWeek(params: {
   exceptions: ResolverException[]; // зөвхөн эдгээр schedule-үүдтэй холбоотой, ямар ч огнооны
   topics: ResolverTopic[];
   holidays: ResolverHoliday[];
+  staffing?: ResolverStaffing[];
 }): ResolvedDay[] {
   const { weekStart, schedules, exceptions, topics, holidays } = params;
+  const staffByKey = new Map(
+    (params.staffing ?? []).map((st) => [`${st.scheduleId}|${st.date}`, st]),
+  );
   const days = sevenDaysFrom(weekStart);
   const daySet = new Set(days);
 
-  const holidayByDate = new Map(holidays.map((h) => [h.date, h]));
+  // Бүх ангид хамаарах (classroomIds хоосон) өдрүүд — day.isHoliday
+  const holidayByDate = new Map<string, ResolverHoliday>();
+  // Зарим ангид хамаарах өдрүүд: огноо -> анги -> онцгой өдөр
+  const scopedByDate = new Map<string, Map<string, ResolverHoliday>>();
+  for (const h of holidays) {
+    if (!h.classroomIds || h.classroomIds.length === 0) {
+      if (!holidayByDate.has(h.date)) holidayByDate.set(h.date, h);
+      continue;
+    }
+    const perClass = scopedByDate.get(h.date) ?? new Map<string, ResolverHoliday>();
+    for (const id of h.classroomIds) if (!perClass.has(id)) perClass.set(id, h);
+    scopedByDate.set(h.date, perClass);
+  }
   const topicByKey = new Map(topics.map((t) => [`${t.scheduleId}|${t.date}`, t.title]));
 
   // exceptions indexed by scheduleId|date(original)
@@ -120,6 +165,10 @@ export function resolveWeek(params: {
     date,
     weekday: weekdayOf(date),
     isHoliday: holidayByDate.has(date),
+    holiday: holidayByDate.has(date)
+      ? { type: holidayByDate.get(date)!.type, title: holidayByDate.get(date)!.title }
+      : null,
+    restingClasses: [],
     entries: [],
   }));
   const resultByDate = new Map(result.map((d) => [d.date, d]));
@@ -148,6 +197,9 @@ export function resolveWeek(params: {
       room: overrides.room,
       subject: s.subject,
       topic: topicByKey.get(`${s.id}|${overrides.topicDate}`) ?? null,
+      leadTeacher: staffByKey.get(`${s.id}|${overrides.topicDate}`)?.lead ?? null,
+      assistantTeacher:
+        staffByKey.get(`${s.id}|${overrides.topicDate}`)?.assistant ?? null,
       exception: overrides.exception,
     });
   };
@@ -214,6 +266,26 @@ export function resolveWeek(params: {
   }
 
   for (const day of result) {
+    // Зарим ангид хамаарах онцгой өдөр: тэр ангийн хичээлийг (зөөгдөж ирсэн
+    // хичээлийг ч) өдрийн жагсаалтаас хасна.
+    const scoped = scopedByDate.get(day.date);
+    if (scoped) {
+      const seen = new Set<string>();
+      day.entries = day.entries.filter((e) => {
+        const h = scoped.get(e.classroomId);
+        if (!h) return true;
+        if (!seen.has(e.classroomId)) {
+          seen.add(e.classroomId);
+          day.restingClasses.push({
+            classroomId: e.classroomId,
+            classroomName: e.classroomName,
+            type: h.type,
+            title: h.title,
+          });
+        }
+        return false;
+      });
+    }
     day.entries.sort((a, b) => a.startMinute - b.startMinute);
   }
 
@@ -223,11 +295,15 @@ export function resolveWeek(params: {
 export interface ResolverTeacher {
   id: string;
   name: string;
+  role?: string;
 }
 
 export interface ResolverWorkDay {
   teacherId: string;
   weekday: number;
+  // 0 = 7 хоног бүр (анхдагч), 1 = сондгой, 2 = тэгш 7 хоног
+  parity?: number;
+  sortOrder?: number;
 }
 
 export interface ResolverWorkException {
@@ -236,39 +312,98 @@ export interface ResolverWorkException {
   working: boolean;
 }
 
-// Багшийн 7 хоногийн ажлын өдрийн roster: TeacherWorkDay (давтагддаг) дээр
-// TeacherWorkException (тухайн өдрийн override)-ийг тавьж эцсийн жагсаалтыг
+// Төвийн багшийн хүснэгт СОНДГОЙ/ТЭГШ 7 хоногоор ээлжилдэг (эзэн 2026-10-11).
+// 1-р (сондгой) 7 хоног = 2026-09-01-ний 7 хоног, Даваа 2026-08-31-ээс.
+// Түүнээс өмнөх огноо ч математик modulo-гоор ижил ээлжээ үргэлжлүүлнэ.
+export const PARITY_ANCHOR_MONDAY = '2026-08-31';
+export const PARITY_EVERY = 0;
+export const PARITY_ODD = 1;
+export const PARITY_EVEN = 2;
+
+// Хүснэгтийн горим: FIXED = 7 хоног бүр ижил (parity 0 мөр),
+// ALTERNATING = сондгой/тэгш ээлж (parity 1/2 мөр). validFrom..validTo-гаас
+// гадуур хүснэгт хэрэгжихгүй — зөвхөн онцгой өдөр (TeacherWorkException).
+export type RosterMode = 'FIXED' | 'ALTERNATING';
+export interface ResolverRosterConfig {
+  mode: RosterMode;
+  validFrom: string | null;
+  validTo: string | null;
+}
+export const DEFAULT_ROSTER_CONFIG: ResolverRosterConfig = {
+  mode: 'ALTERNATING',
+  validFrom: null,
+  validTo: null,
+};
+
+/** Огнооны 7 хоногийн ээлж: 1 = сондгой, 2 = тэгш. Даваа-Ням нэг 7 хоног. */
+export function weekParityOf(dateStr: string): 1 | 2 {
+  const day = Date.parse(`${dateStr}T00:00:00.000Z`);
+  const anchor = Date.parse(`${PARITY_ANCHOR_MONDAY}T00:00:00.000Z`);
+  const days = Math.round((day - anchor) / 86_400_000);
+  const week = Math.floor(days / 7);
+  return ((week % 2) + 2) % 2 === 0 ? 1 : 2;
+}
+
+// Багшийн 7 хоногийн ажлын өдрийн roster: TeacherWorkDay (давтагддаг, сондгой/
+// тэгш ээлжтэй) дээр TeacherWorkException (тухайн өдрийн override)-ийг тавьж
+// эцсийн жагсаалтыг хүснэгтийн мөрийн дарааллаар (sortOrder, дараа нь нэр)
 // гаргана.
 export function resolveTeacherRoster(params: {
   weekStart: string;
   teachers: ResolverTeacher[];
   workDays: ResolverWorkDay[];
   exceptions: ResolverWorkException[];
-}): { date: string; weekday: number; teachers: ResolverTeacher[] }[] {
+  config?: ResolverRosterConfig;
+}): {
+  date: string;
+  weekday: number;
+  parity: 1 | 2;
+  mode: RosterMode;
+  inRange: boolean;
+  teachers: ResolverTeacher[];
+}[] {
   const { weekStart, teachers, workDays, exceptions } = params;
-  const teacherById = new Map(teachers.map((t) => [t.id, t]));
+  const config = params.config ?? DEFAULT_ROSTER_CONFIG;
   const days = sevenDaysFrom(weekStart);
 
-  const workDaySet = new Set(workDays.map((w) => `${w.teacherId}|${w.weekday}`));
+  const workDaySet = new Set(
+    workDays.map((w) => `${w.teacherId}|${w.weekday}|${w.parity ?? 0}`),
+  );
+  const orderOf = new Map<string, number>();
+  for (const w of workDays) {
+    const cur = orderOf.get(w.teacherId);
+    const o = w.sortOrder ?? 0;
+    if (cur === undefined || o < cur) orderOf.set(w.teacherId, o);
+  }
+  const ordered = [...teachers].sort(
+    (a, b) =>
+      (orderOf.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+        (orderOf.get(b.id) ?? Number.MAX_SAFE_INTEGER) ||
+      a.name.localeCompare(b.name, 'mn'),
+  );
   const exceptionByKey = new Map(
     exceptions.map((e) => [`${e.teacherId}|${e.date}`, e.working]),
   );
 
   return days.map((date) => {
     const weekday = weekdayOf(date);
-    const workingTeacherIds = teachers
-      .map((t) => t.id)
-      .filter((teacherId) => {
-        const exc = exceptionByKey.get(`${teacherId}|${date}`);
-        if (exc !== undefined) return exc;
-        return workDaySet.has(`${teacherId}|${weekday}`);
-      });
+    const parity = weekParityOf(date);
+    const inRange =
+      (!config.validFrom || date >= config.validFrom) &&
+      (!config.validTo || date <= config.validTo);
+    // Горимд таарах мөр л хэрэгжинэ: Тогтмол → parity 0, Ээлжит → тухайн 7 хоногийн
+    const activeParity = config.mode === 'FIXED' ? 0 : parity;
     return {
       date,
       weekday,
-      teachers: workingTeacherIds
-        .map((id) => teacherById.get(id))
-        .filter((t): t is ResolverTeacher => !!t),
+      parity,
+      mode: config.mode,
+      inRange,
+      teachers: ordered.filter((t) => {
+        const exc = exceptionByKey.get(`${t.id}|${date}`);
+        if (exc !== undefined) return exc;
+        return inRange && workDaySet.has(`${t.id}|${weekday}|${activeParity}`);
+      }),
     };
   });
 }

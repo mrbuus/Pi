@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, getRole } from "@/lib/api";
 import ContinueBanner from "@/components/test-list/ContinueBanner";
+import ClassBoard from "@/components/exams/ClassBoard";
+import ExamsBoard from "@/components/exams/ExamsBoard";
+import StudentExamLists from "@/components/exams/StudentExamLists";
 import TopicGroup from "@/components/test-list/TopicGroup";
 import {
   collapseVariants,
@@ -41,12 +44,18 @@ const PAGE_SIZE = 20;
 export default function TestsPage() {
   const role = typeof window !== "undefined" ? getRole() : null;
   const isTeacher = role === "ADMIN" || role === "TEACHER" || role === "TEACHER_PLUS";
-
+  // «Шалгалт» табыг тусад нь харуулдаг (ажилтан — ExamsBoard, сурагч — Өгөх/Өгсөн)
+  const isLearner = role === "STUDENT" || role === "BUYER";
   const [tests, setTests] = useState<TestRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [subject, setSubject] = useState("");
-  const [tab, setTab] = useState<Tab>("TEST");
+  // «Анги» — ажилтанд л (ангийн бүх шалгалтын дүн, ирц, явц)
+  const [tab, setTab] = useState<Tab | "CLASS">("TEST");
+  // Ажилтан ХОЁР табд хоёуланд нь ExamsBoard (мөр дэлгэрэх самбар) — эзэн
+  // 2026-10-11: «Тест» таб ч мөн адил хялбар байх ёстой. Хуучин бүлгийн
+  // жагсаалт зөвхөн сурагчийн «Тест» табд үлдэнэ.
+  const ownView = isTeacher || (isLearner && tab === "EXAM");
   const [query, setQuery] = useState("");
   const [topicFilter, setTopicFilter] = useState("");
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -58,7 +67,8 @@ export default function TestsPage() {
   const loadTests = useCallback(() => {
     setLoading(true);
     setError("");
-    api<TestRow[]>(`/tests${subject ? `?subject=${subject}` : ""}`)
+    // 1000 бодлогын шалгалт ч «Шалгалт» табд (тусдаа хэсэг байхгүй — эзэн 2026-10-10)
+    api<TestRow[]>(`/tests?includeThousand=1${subject ? `&subject=${subject}` : ""}`)
       .then(setTests)
       .catch((e) => {
         setError(e instanceof Error ? e.message : "Тестийн жагсаалт ачаалахад алдаа гарлаа");
@@ -184,8 +194,9 @@ export default function TestsPage() {
               </option>
             ))}
           </select>
-          {/* Сэдвийн шүүлт — ялангуяа багшид олон зуун тест дундаас хайхад */}
-          {allGroups.length > 1 && (
+          {/* Сэдвийн шүүлт — ялангуяа багшид олон зуун тест дундаас хайхад.
+              Ажилтны «Шалгалт» табд оронд нь Цуврал/Анги/Төлөв (ExamsBoard). */}
+          {allGroups.length > 1 && !ownView && (
             <>
               <label htmlFor="test-topic" className="sr-only">
                 Сэдэв шүүх
@@ -257,6 +268,7 @@ export default function TestsPage() {
           [
             { key: "TEST", label: "Тест", count: testCount, hint: "сэдвийн дасгал" },
             { key: "EXAM", label: "Шалгалт", count: examCount, hint: "сэдвийн шалгалт, сорил" },
+            ...(isTeacher ? ([{ key: "CLASS", label: "Анги", count: null, hint: "дүн, ирц, явц" }] as const) : []),
           ] as const
         ).map((tb) => (
           <button
@@ -274,16 +286,27 @@ export default function TestsPage() {
             }`}
           >
             <span className="font-bold">{tb.label}</span>
-            <span className="ml-1.5 rounded-full bg-line/40 px-2 py-0.5 text-xs text-ink">
-              {tb.count}
-            </span>
+            {/* Сурагчийн шалгалтын тоо Өгөх/Өгсөн жагсаалтад (дүнтэй бүх шалгалт орно) */}
+            {tb.count !== null && !(isLearner && tb.key === "EXAM") && (
+              <span className="ml-1.5 rounded-full bg-line/40 px-2 py-0.5 text-xs text-ink">
+                {tb.count}
+              </span>
+            )}
             <span className="ml-2 hidden text-xs opacity-70 sm:inline">{tb.hint}</span>
           </button>
         ))}
       </div>
 
+      {/* Ажилтны «Шалгалт» таб: бүлэг, 3 шүүлтүүр, мөр дэлгэрэхэд Тойм/Дүн/Бодлого/Тохиргоо */}
+      {/* key={tab}: таб солигдоход шүүлтүүр, нээлттэй мөр шинээр эхэлнэ */}
+      {isTeacher && tab !== "CLASS" && <ExamsBoard key={tab} kind={tab} query={query} subject={subject} />}
+      {isTeacher && tab === "CLASS" && <ClassBoard />}
+
+      {/* Сурагчийн «Шалгалт»: Өгөх (оноогдсон/худалдаж авсан) · Өгсөн (оноо) */}
+      {isLearner && tab === "EXAM" && <StudentExamLists studentId={studentId} query={query} />}
+
       {/* Ачаалж байгаа төлөв — скелетон, "тест алга" мессежээс тодорхой ялгаатай */}
-      {loading && (
+      {!ownView && loading && (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
             <div
@@ -300,7 +323,7 @@ export default function TestsPage() {
 
       {/* Алдааны төлөв — жинхэнэ алдаа, дахин оролдох боломжтой (.catch(()=>{})-той
           андуурагдахгүй, ялгаатай харагдана) */}
-      {!loading && error && (
+      {!ownView && !loading && error && (
         <div
           role="alert"
           className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error"
@@ -316,7 +339,7 @@ export default function TestsPage() {
       )}
 
       {/* Хоосон төлөв — зөвхөн алдаагүй үед; хайлт vs бодит хоосон ялгана */}
-      {!loading && !error && groups.length === 0 && (
+      {!ownView && !loading && !error && groups.length === 0 && (
         <p className="chunky p-6 text-center text-sm text-ink-dim">
           {q || topicFilter
             ? `«${query || topicFilter}» гэсэн шүүлтэд таарах зүйл алга`
@@ -327,7 +350,7 @@ export default function TestsPage() {
       )}
 
       {/* Сэдвийн бүлгүүд */}
-      {!loading && !error && groups.length > 0 && (
+      {!ownView && !loading && !error && groups.length > 0 && (
         <div className="space-y-3">
           {visibleGroups.map(([topic, rows], idx) => (
             <TopicGroup

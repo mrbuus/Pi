@@ -3,7 +3,7 @@
 import katex from "katex";
 import type { TrustContext } from "katex";
 import "katex/dist/katex.min.css";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 
 /**
@@ -267,6 +267,30 @@ export function getTeXErrors(): TexRenderError[] {
   return [...texErrors];
 }
 
+/**
+ * Энгийн текст доторх markdown тод бичгийг (**I.**) тод болгоно. Импортын бодлогод
+ * «**I.** Бодолт…» мэт тэмдэглэгээ бий — сурагч/багшид од харагдах ёсгүй. Хосгүй
+ * үлдсэн «**» (жиш: томьёог тойрсон) зүгээр арилна.
+ */
+const BOLD_RE = /\*\*([^*\n]+?)\*\*/g;
+function renderInlineText(text: string): ReactNode {
+  if (!text.includes("**")) return text;
+  const out: ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(BOLD_RE)) {
+    const at = m.index ?? 0;
+    if (at > last) out.push(text.slice(last, at).replaceAll("**", ""));
+    out.push(
+      <strong key={at} className="font-bold">
+        {m[1]}
+      </strong>,
+    );
+    last = at + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last).replaceAll("**", ""));
+  return out;
+}
+
 export default function MathText({
   children,
   className,
@@ -309,7 +333,7 @@ export default function MathText({
     <span className={className} style={{ whiteSpace: "pre-wrap" }}>
       {rendered.map((seg) =>
         seg.kind === "text" ? (
-          <span key={seg.key}>{seg.value}</span>
+          <span key={seg.key}>{renderInlineText(seg.value)}</span>
         ) : (
           <span key={seg.key}>
             {/* Багшийн урьдчилан харах дотор алдаа байвал анхааруулга харуулна */}

@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { Card, SectionHeader } from '@/components/ui/Surface';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StateBlock';
 import { Meta } from '@/components/ui/Meta';
+import { formatMnDate } from "@/lib/dateMn";
 
 interface PendingStudent {
   id: string;
@@ -92,10 +93,11 @@ export default function PendingApprovalList() {
 
       <div className="space-y-3">
         {students.map((student) => {
-          const registeredDate = new Date(student.registeredAt).toLocaleDateString(
-            'mn-MN',
-            { year: 'numeric', month: '2-digit', day: '2-digit' },
-          );
+          const registeredDate = formatMnDate(student.registeredAt, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          });
 
           return (
             <Card

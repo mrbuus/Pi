@@ -34,6 +34,7 @@ export type ProblemAvgAggregateOutputType = {
   eloRating: number | null
   attemptCount: number | null
   correctRate: number | null
+  version: number | null
 }
 
 export type ProblemSumAggregateOutputType = {
@@ -44,6 +45,7 @@ export type ProblemSumAggregateOutputType = {
   eloRating: number | null
   attemptCount: number | null
   correctRate: number | null
+  version: number | null
 }
 
 export type ProblemMinAggregateOutputType = {
@@ -62,6 +64,10 @@ export type ProblemMinAggregateOutputType = {
   eloRating: number | null
   attemptCount: number | null
   correctRate: number | null
+  youtubeUrl: string | null
+  version: number | null
+  updatedAt: Date | null
+  updatedById: string | null
   deletedAt: Date | null
 }
 
@@ -81,6 +87,10 @@ export type ProblemMaxAggregateOutputType = {
   eloRating: number | null
   attemptCount: number | null
   correctRate: number | null
+  youtubeUrl: string | null
+  version: number | null
+  updatedAt: Date | null
+  updatedById: string | null
   deletedAt: Date | null
 }
 
@@ -102,6 +112,11 @@ export type ProblemCountAggregateOutputType = {
   eloRating: number
   attemptCount: number
   correctRate: number
+  youtubeUrl: number
+  scoringGroups: number
+  version: number
+  updatedAt: number
+  updatedById: number
   deletedAt: number
   _all: number
 }
@@ -115,6 +130,7 @@ export type ProblemAvgAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  version?: true
 }
 
 export type ProblemSumAggregateInputType = {
@@ -125,6 +141,7 @@ export type ProblemSumAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  version?: true
 }
 
 export type ProblemMinAggregateInputType = {
@@ -143,6 +160,10 @@ export type ProblemMinAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  youtubeUrl?: true
+  version?: true
+  updatedAt?: true
+  updatedById?: true
   deletedAt?: true
 }
 
@@ -162,6 +183,10 @@ export type ProblemMaxAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  youtubeUrl?: true
+  version?: true
+  updatedAt?: true
+  updatedById?: true
   deletedAt?: true
 }
 
@@ -183,6 +208,11 @@ export type ProblemCountAggregateInputType = {
   eloRating?: true
   attemptCount?: true
   correctRate?: true
+  youtubeUrl?: true
+  scoringGroups?: true
+  version?: true
+  updatedAt?: true
+  updatedById?: true
   deletedAt?: true
   _all?: true
 }
@@ -291,6 +321,11 @@ export type ProblemGroupByOutputType = {
   eloRating: number
   attemptCount: number
   correctRate: number | null
+  youtubeUrl: string | null
+  scoringGroups: runtime.JsonValue | null
+  version: number
+  updatedAt: Date | null
+  updatedById: string | null
   deletedAt: Date | null
   _count: ProblemCountAggregateOutputType | null
   _avg: ProblemAvgAggregateOutputType | null
@@ -335,6 +370,11 @@ export type ProblemWhereInput = {
   eloRating?: Prisma.FloatFilter<"Problem"> | number
   attemptCount?: Prisma.IntFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableFilter<"Problem"> | number | null
+  youtubeUrl?: Prisma.StringNullableFilter<"Problem"> | string | null
+  scoringGroups?: Prisma.JsonNullableFilter<"Problem">
+  version?: Prisma.IntFilter<"Problem"> | number
+  updatedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
+  updatedById?: Prisma.StringNullableFilter<"Problem"> | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterScalarRelationFilter, Prisma.ChapterWhereInput>
   tags?: Prisma.ProblemTagListRelationFilter
@@ -366,6 +406,11 @@ export type ProblemOrderByWithRelationInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  scoringGroups?: Prisma.SortOrderInput | Prisma.SortOrder
+  version?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedById?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chapter?: Prisma.ChapterOrderByWithRelationInput
   tags?: Prisma.ProblemTagOrderByRelationAggregateInput
@@ -400,6 +445,11 @@ export type ProblemWhereUniqueInput = Prisma.AtLeast<{
   eloRating?: Prisma.FloatFilter<"Problem"> | number
   attemptCount?: Prisma.IntFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableFilter<"Problem"> | number | null
+  youtubeUrl?: Prisma.StringNullableFilter<"Problem"> | string | null
+  scoringGroups?: Prisma.JsonNullableFilter<"Problem">
+  version?: Prisma.IntFilter<"Problem"> | number
+  updatedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
+  updatedById?: Prisma.StringNullableFilter<"Problem"> | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
   chapter?: Prisma.XOR<Prisma.ChapterScalarRelationFilter, Prisma.ChapterWhereInput>
   tags?: Prisma.ProblemTagListRelationFilter
@@ -431,6 +481,11 @@ export type ProblemOrderByWithAggregationInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  scoringGroups?: Prisma.SortOrderInput | Prisma.SortOrder
+  version?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedById?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ProblemCountOrderByAggregateInput
   _avg?: Prisma.ProblemAvgOrderByAggregateInput
@@ -460,6 +515,11 @@ export type ProblemScalarWhereWithAggregatesInput = {
   eloRating?: Prisma.FloatWithAggregatesFilter<"Problem"> | number
   attemptCount?: Prisma.IntWithAggregatesFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableWithAggregatesFilter<"Problem"> | number | null
+  youtubeUrl?: Prisma.StringNullableWithAggregatesFilter<"Problem"> | string | null
+  scoringGroups?: Prisma.JsonNullableWithAggregatesFilter<"Problem">
+  version?: Prisma.IntWithAggregatesFilter<"Problem"> | number
+  updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Problem"> | Date | string | null
+  updatedById?: Prisma.StringNullableWithAggregatesFilter<"Problem"> | string | null
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Problem"> | Date | string | null
 }
 
@@ -480,6 +540,11 @@ export type ProblemCreateInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -511,6 +576,11 @@ export type ProblemUncheckedCreateInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -540,6 +610,11 @@ export type ProblemUpdateInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -571,6 +646,11 @@ export type ProblemUncheckedUpdateInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -601,6 +681,11 @@ export type ProblemCreateManyInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
 }
 
@@ -621,6 +706,11 @@ export type ProblemUpdateManyMutationInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -642,6 +732,11 @@ export type ProblemUncheckedUpdateManyInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -683,6 +778,11 @@ export type ProblemCountOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrder
+  scoringGroups?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
 }
 
@@ -694,6 +794,7 @@ export type ProblemAvgOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type ProblemMaxOrderByAggregateInput = {
@@ -712,6 +813,10 @@ export type ProblemMaxOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
 }
 
@@ -731,6 +836,10 @@ export type ProblemMinOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  youtubeUrl?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  updatedById?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
 }
 
@@ -742,6 +851,7 @@ export type ProblemSumOrderByAggregateInput = {
   eloRating?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   correctRate?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type ProblemCreateNestedManyWithoutChapterInput = {
@@ -951,6 +1061,11 @@ export type ProblemCreateWithoutChapterInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
@@ -980,6 +1095,11 @@ export type ProblemUncheckedCreateWithoutChapterInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -1039,6 +1159,11 @@ export type ProblemScalarWhereInput = {
   eloRating?: Prisma.FloatFilter<"Problem"> | number
   attemptCount?: Prisma.IntFilter<"Problem"> | number
   correctRate?: Prisma.FloatNullableFilter<"Problem"> | number | null
+  youtubeUrl?: Prisma.StringNullableFilter<"Problem"> | string | null
+  scoringGroups?: Prisma.JsonNullableFilter<"Problem">
+  version?: Prisma.IntFilter<"Problem"> | number
+  updatedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
+  updatedById?: Prisma.StringNullableFilter<"Problem"> | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Problem"> | Date | string | null
 }
 
@@ -1059,6 +1184,11 @@ export type ProblemCreateWithoutVideosInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -1089,6 +1219,11 @@ export type ProblemUncheckedCreateWithoutVideosInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -1133,6 +1268,11 @@ export type ProblemUpdateWithoutVideosInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -1163,6 +1303,11 @@ export type ProblemUncheckedUpdateWithoutVideosInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -1191,6 +1336,11 @@ export type ProblemCreateWithoutChoiceOptionsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -1221,6 +1371,11 @@ export type ProblemUncheckedCreateWithoutChoiceOptionsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -1265,6 +1420,11 @@ export type ProblemUpdateWithoutChoiceOptionsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -1295,6 +1455,11 @@ export type ProblemUncheckedUpdateWithoutChoiceOptionsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -1323,6 +1488,11 @@ export type ProblemCreateWithoutTagsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
@@ -1353,6 +1523,11 @@ export type ProblemUncheckedCreateWithoutTagsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
@@ -1397,6 +1572,11 @@ export type ProblemUpdateWithoutTagsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
@@ -1427,6 +1607,11 @@ export type ProblemUncheckedUpdateWithoutTagsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
@@ -1455,6 +1640,11 @@ export type ProblemCreateWithoutFormulasInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -1485,6 +1675,11 @@ export type ProblemUncheckedCreateWithoutFormulasInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
@@ -1529,6 +1724,11 @@ export type ProblemUpdateWithoutFormulasInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -1559,6 +1759,11 @@ export type ProblemUncheckedUpdateWithoutFormulasInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
@@ -1587,6 +1792,11 @@ export type ProblemCreateWithoutAnalysisInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -1617,6 +1827,11 @@ export type ProblemUncheckedCreateWithoutAnalysisInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -1661,6 +1876,11 @@ export type ProblemUpdateWithoutAnalysisInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -1691,6 +1911,11 @@ export type ProblemUncheckedUpdateWithoutAnalysisInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -1719,6 +1944,11 @@ export type ProblemCreateWithoutTestItemsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -1749,6 +1979,11 @@ export type ProblemUncheckedCreateWithoutTestItemsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -1793,6 +2028,11 @@ export type ProblemUpdateWithoutTestItemsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -1823,6 +2063,11 @@ export type ProblemUncheckedUpdateWithoutTestItemsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -1851,6 +2096,11 @@ export type ProblemCreateWithoutAttemptsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -1881,6 +2131,11 @@ export type ProblemUncheckedCreateWithoutAttemptsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -1925,6 +2180,11 @@ export type ProblemUpdateWithoutAttemptsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -1955,6 +2215,11 @@ export type ProblemUncheckedUpdateWithoutAttemptsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -1983,6 +2248,11 @@ export type ProblemCreateWithoutMistakeEntriesInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -2013,6 +2283,11 @@ export type ProblemUncheckedCreateWithoutMistakeEntriesInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -2057,6 +2332,11 @@ export type ProblemUpdateWithoutMistakeEntriesInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -2087,6 +2367,11 @@ export type ProblemUncheckedUpdateWithoutMistakeEntriesInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -2115,6 +2400,11 @@ export type ProblemCreateWithoutStudyReviewItemsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
   tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
@@ -2145,6 +2435,11 @@ export type ProblemUncheckedCreateWithoutStudyReviewItemsInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
   tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
   formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
@@ -2189,6 +2484,11 @@ export type ProblemUpdateWithoutStudyReviewItemsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
@@ -2219,6 +2519,11 @@ export type ProblemUncheckedUpdateWithoutStudyReviewItemsInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -2247,6 +2552,11 @@ export type ProblemCreateManyChapterInput = {
   eloRating?: number
   attemptCount?: number
   correctRate?: number | null
+  youtubeUrl?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
   deletedAt?: Date | string | null
 }
 
@@ -2267,6 +2577,11 @@ export type ProblemUpdateWithoutChapterInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
@@ -2296,6 +2611,11 @@ export type ProblemUncheckedUpdateWithoutChapterInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
   formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
@@ -2325,6 +2645,11 @@ export type ProblemUncheckedUpdateManyWithoutChapterInput = {
   eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -2440,6 +2765,11 @@ export type ProblemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  youtubeUrl?: boolean
+  scoringGroups?: boolean
+  version?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
   deletedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
   tags?: boolean | Prisma.Problem$tagsArgs<ExtArgs>
@@ -2472,6 +2802,11 @@ export type ProblemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  youtubeUrl?: boolean
+  scoringGroups?: boolean
+  version?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
   deletedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problem"]>
@@ -2494,6 +2829,11 @@ export type ProblemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  youtubeUrl?: boolean
+  scoringGroups?: boolean
+  version?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
   deletedAt?: boolean
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problem"]>
@@ -2516,10 +2856,15 @@ export type ProblemSelectScalar = {
   eloRating?: boolean
   attemptCount?: boolean
   correctRate?: boolean
+  youtubeUrl?: boolean
+  scoringGroups?: boolean
+  version?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
   deletedAt?: boolean
 }
 
-export type ProblemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "chapterId" | "page" | "number" | "format" | "statementText" | "imageKey" | "choices" | "correctAnswer" | "points" | "price" | "createdById" | "createdAt" | "eloRating" | "attemptCount" | "correctRate" | "deletedAt", ExtArgs["result"]["problem"]>
+export type ProblemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "chapterId" | "page" | "number" | "format" | "statementText" | "imageKey" | "choices" | "correctAnswer" | "points" | "price" | "createdById" | "createdAt" | "eloRating" | "attemptCount" | "correctRate" | "youtubeUrl" | "scoringGroups" | "version" | "updatedAt" | "updatedById" | "deletedAt", ExtArgs["result"]["problem"]>
 export type ProblemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapter?: boolean | Prisma.ChapterDefaultArgs<ExtArgs>
   tags?: boolean | Prisma.Problem$tagsArgs<ExtArgs>
@@ -2572,6 +2917,11 @@ export type $ProblemPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     eloRating: number
     attemptCount: number
     correctRate: number | null
+    youtubeUrl: string | null
+    scoringGroups: runtime.JsonValue | null
+    version: number
+    updatedAt: Date | null
+    updatedById: string | null
     deletedAt: Date | null
   }, ExtArgs["result"]["problem"]>
   composites: {}
@@ -3023,6 +3373,11 @@ export interface ProblemFieldRefs {
   readonly eloRating: Prisma.FieldRef<"Problem", 'Float'>
   readonly attemptCount: Prisma.FieldRef<"Problem", 'Int'>
   readonly correctRate: Prisma.FieldRef<"Problem", 'Float'>
+  readonly youtubeUrl: Prisma.FieldRef<"Problem", 'String'>
+  readonly scoringGroups: Prisma.FieldRef<"Problem", 'Json'>
+  readonly version: Prisma.FieldRef<"Problem", 'Int'>
+  readonly updatedAt: Prisma.FieldRef<"Problem", 'DateTime'>
+  readonly updatedById: Prisma.FieldRef<"Problem", 'String'>
   readonly deletedAt: Prisma.FieldRef<"Problem", 'DateTime'>
 }
     

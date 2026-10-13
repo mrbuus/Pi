@@ -20,6 +20,7 @@ import type {
   QpayInvoiceInfo,
 } from "./types";
 import { getBankColor, getBankInitials } from "./lib";
+import { formatMnDateTime, formatMnTime } from "@/lib/dateMn";
 
 /* ============================================================
    ТОГТМОЛУУД — poll-той холбоотой хугацаанууд
@@ -643,7 +644,7 @@ export default function QpayCheckout({
           </p>
           <p className="text-sm text-ink-dim">
             {formatMnt(amount)}
-            {paidAt ? ` — ${new Date(paidAt).toLocaleString("mn-MN")}` : ""}
+            {paidAt ? ` — ${formatMnDateTime(paidAt)}` : ""}
           </p>
           <p className="max-w-xs text-sm leading-relaxed text-ink-dim">
             Энэ нь төлбөрийн баталгаажуулалт юм. Сургалтын эрх, багц идэвхжсэн
@@ -672,7 +673,7 @@ export default function QpayCheckout({
           </button>
           {lastCheckedAt && (
             <p className="text-[11px] text-ink-dim">
-              Сүүлд шалгасан: {lastCheckedAt.toLocaleTimeString("mn-MN")}
+              Сүүлд шалгасан: {formatMnTime(lastCheckedAt)}
             </p>
           )}
         </div>

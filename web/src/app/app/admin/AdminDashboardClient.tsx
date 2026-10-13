@@ -1,5 +1,6 @@
 "use client";
 
+import { SMS_ENABLED } from "@/lib/features";
 import Link from "next/link";
 import { NavIcon, type IconName } from "@/components/nav/icons";
 import { useCallback, useEffect, useState } from "react";
@@ -89,7 +90,9 @@ const ADMIN_TILES: {
   { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund", tone: "bg-accent-rose/15 text-accent-rose" },
   { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart", tone: "bg-accent-fuchsia/15 text-accent-fuchsia" },
   { href: "/app/admin/store", label: "Дэлгүүр", icon: "store", tone: "bg-accent-teal/15 text-accent-teal" },
-  { href: "/app/sms", label: "Мессеж", icon: "message-square", tone: "bg-accent-sky/15 text-accent-sky" },
+  ...(SMS_ENABLED
+    ? [{ href: "/app/sms", label: "Мессеж", icon: "message-square" as const, tone: "bg-accent-sky/15 text-accent-sky" }]
+    : []),
 ];
 
 function errMsg(e: unknown): string {

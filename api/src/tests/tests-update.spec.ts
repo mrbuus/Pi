@@ -9,6 +9,7 @@ import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateTestDto } from './dto/update-test.dto';
 import { TestsService } from './tests.service';
+import { withRevisionFakes } from '../../test/fakes/revision-db';
 
 function setup(
   options: {
@@ -134,6 +135,8 @@ function setup(
       }),
     },
   };
+  // updateTest өөрчлөлтийн түүхийг ижил transaction-д бичнэ (revision-store)
+  withRevisionFakes(tx);
   const prisma = {
     classroom: { count: jest.fn(({ where }: { where: { id: { in: string[] } } }) => where.id.in.length) },
     user: { findUnique: jest.fn(({ where }: { where: { id: string } }) => ({ role: where.id.startsWith('admin') ? Role.ADMIN : where.id === 'student' ? Role.STUDENT : Role.TEACHER, archivedAt: null, externalTeacherProfile: null })) },

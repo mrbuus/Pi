@@ -2,7 +2,7 @@
 export class StudyClock {
   private last: number;
   private state: "focusedMs" | "hiddenMs" | "unknownMs";
-  private totals = { focusedMs: 0, hiddenMs: 0, unknownMs: 0, buttons: 0 };
+  private totals = { focusedMs: 0, hiddenMs: 0, unknownMs: 0, buttons: 0, leaves: 0 };
   constructor(now: number, visible: boolean, focused: boolean) {
     this.last = now;
     this.state = !visible ? "hiddenMs" : focused ? "focusedMs" : "unknownMs";
@@ -18,7 +18,12 @@ export class StudyClock {
     const key = delta > 15000 ? "unknownMs" : this.state;
     this.totals[key] = Math.min(1800000, this.totals[key] + delta);
     this.last = now;
-    this.state = !visible ? "hiddenMs" : focused ? "focusedMs" : "unknownMs";
+    const next = !visible ? "hiddenMs" : focused ? "focusedMs" : "unknownMs";
+    // Бодож байхдаа сайтаас гарсан (таб солих, өөр цонх руу шилжих) — эзэн 2026-10-13.
+    // document.hasFocus() хуудас доторх iframe (видео)-д true хэвээр тул тооцохгүй.
+    if (this.state === "focusedMs" && next !== "focusedMs")
+      this.totals.leaves = Math.min(100, this.totals.leaves + 1);
+    this.state = next;
   }
   button() {
     this.totals.buttons = Math.min(100, this.totals.buttons + 1);
@@ -31,6 +36,7 @@ export class StudyClock {
       hiddenMs: Math.floor(this.totals.hiddenMs),
       unknownMs: Math.floor(this.totals.unknownMs),
       buttons: this.totals.buttons,
+      leaves: this.totals.leaves,
     };
   }
 }

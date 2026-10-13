@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
+import { formatMnDateTime } from "@/lib/dateMn";
 
 /* ============================================================================
  * Огнооны туслах функцууд — Улаанбаатарын цагийн бүсэд суурилсан.
@@ -52,30 +53,30 @@ function daysInMonth(year: number, month0: number): number {
 export function ubWeekdayFull(dateKey: string): string {
   const [y, m, d] = dateKey.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d, 12));
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(dt, {
     weekday: "long",
     timeZone: "UTC",
-  }).format(dt);
+  });
 }
 
 export function formatMnDate(dateKey: string): string {
   const [y, m, d] = dateKey.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d, 12));
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(dt, {
     year: "numeric",
     month: "long",
     day: "numeric",
     timeZone: "UTC",
-  }).format(dt);
+  });
 }
 
 function monthLabel(year: number, month0: number): string {
   const dt = new Date(Date.UTC(year, month0, 1, 12));
-  return new Intl.DateTimeFormat("mn-MN", {
+  return formatMnDateTime(dt, {
     year: "numeric",
     month: "long",
     timeZone: "UTC",
-  }).format(dt);
+  });
 }
 
 const WEEKDAY_SHORT = ["Да", "Мя", "Лх", "Пү", "Ба", "Бя", "Ня"];

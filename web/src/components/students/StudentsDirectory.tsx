@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertCircle, ArrowLeft, ArrowRight, TriangleAlert, Archive, RotateCcw, Download } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, TriangleAlert, Archive, RotateCcw, Download, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/kit/button";
+import { relativeTimeMn } from "@/lib/relativeTimeMn";
+import NewStudentDialog from "./NewStudentDialog";
 import { Dot, MetaTitle } from "@/components/ui/Meta";
 import { LoadingState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
@@ -45,7 +49,11 @@ function paymentStatusOf(
 
 export default function StudentsDirectory() {
   const role = getRole();
+  const router = useRouter();
   const canSeeMoney = role === "ADMIN" || role === "TEACHER_PLUS";
+  // Гараар бүртгэх эрх = элсэлт хариуцсан ажилтан (POST /users/students)
+  const canRegister = canSeeMoney;
+  const [registering, setRegistering] = useState(false);
 
   const [showArchived, setShowArchived] = useState(false);
   const [students, setStudents] = useState<StudentListItem[] | null>(null);
@@ -169,7 +177,14 @@ export default function StudentsDirectory() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-extrabold text-ink">Сурагчийн жагсаалт</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-extrabold text-ink">Сурагчийн жагсаалт</h1>
+          {canRegister && !showArchived && (
+            <Button type="button" onClick={() => setRegistering(true)} className="min-h-11">
+              <UserPlus aria-hidden /> Шинэ сурагч
+            </Button>
+          )}
+        </div>
         <p className="mt-1 text-sm text-ink-dim">
           {students ? `Нийт ${students.length} сурагч` : "Сурагчдын жагсаалт"}
           {role === "ADMIN" && <span className="ml-2 inline-flex flex-wrap gap-2"><button type="button" onClick={() => setShowArchived(v => !v)} className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold">{showArchived ? "Идэвхтэй" : "Архив"}</button><Link href="/app/admin/students/import" className="inline-flex min-h-10 items-center rounded-lg border border-line px-3 text-sm font-semibold">Excel импорт</Link></span>}
@@ -344,6 +359,9 @@ export default function StudentsDirectory() {
                     <th scope="col" className="px-3 py-2 font-semibold">
                       Салбар
                     </th>
+                    <th scope="col" className="px-3 py-2 font-semibold">
+                      Сүүлд орсон
+                    </th>
                     {canSeeMoney && <th scope="col" className="px-3 py-2 font-semibold">Төлбөрийн төлөв</th>}
                     {role === "ADMIN" && <th scope="col" className="px-3 py-2 font-semibold">Үйлдэл</th>}
                   </tr>
@@ -365,7 +383,7 @@ export default function StudentsDirectory() {
                         </td>
                         <td className="px-3 py-2">
                           <Link
-                            href={`/app/admin/students/${s.id}`}
+                            href={`/app/students/${s.id}`}
                             className="font-semibold text-brand transition hover:text-brand-soft hover:underline"
                           >
                             {fullName(s)}
@@ -386,6 +404,9 @@ export default function StudentsDirectory() {
                         </td>
                         <td className="px-3 py-2 text-ink-dim">
                           {s.studentProfile?.branch ?? "—"}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-xs text-ink-dim">
+                          {s.lastSeenAt ? relativeTimeMn(s.lastSeenAt) : "Ороогүй"}
                         </td>
                         {canSeeMoney && (
                           <td className="px-3 py-2">
@@ -457,6 +478,15 @@ export default function StudentsDirectory() {
             </div>
           </div>
         </>
+      )}
+      {registering && (
+        <NewStudentDialog
+          onClose={() => setRegistering(false)}
+          onCreated={(created) => {
+            setRegistering(false);
+            router.push(`/app/students/${created.id}`);
+          }}
+        />
       )}
     </div>
   );

@@ -61,14 +61,17 @@ function GroupSection({
   pathname,
   collapsedRail,
   onNavigate,
+  open,
+  onToggle,
 }: {
   group: NavGroup;
   pathname: string;
   collapsedRail: boolean;
   onNavigate?: () => void;
+  open: boolean;
+  onToggle: () => void;
 }) {
   const containsActive = group.items.some((i) => i.href === pathname);
-  const [open, setOpen] = useState(true);
   const listId = `nav-group-${group.key}`;
 
   if (collapsedRail) {
@@ -93,7 +96,7 @@ function GroupSection({
     <div className="pt-1">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={onToggle}
         aria-expanded={open}
         aria-controls={listId}
         className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-ink-dim/80 transition hover:text-ink"
@@ -141,6 +144,14 @@ export default function NavList({
   collapsedRail?: boolean;
   onNavigate?: () => void;
 }) {
+  // Бүлгүүд ҮРГЭЛЖ хумигдсан эхэлнэ (эзэн 2026-10-13); нэг удаад нэг бүлэг
+  // нээгдэнэ, хуудас солигдоход дахин хумигдана. Идэвхтэй бүлэгт цэг харагдана.
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    setOpenKey(null);
+  }
   return (
     <nav aria-label="Үндсэн цэс" className="flex flex-col gap-3">
       {home && (
@@ -162,6 +173,8 @@ export default function NavList({
             pathname={pathname}
             collapsedRail={collapsedRail}
             onNavigate={onNavigate}
+            open={openKey === group.key}
+            onToggle={() => setOpenKey((k) => (k === group.key ? null : group.key))}
           />
         ))}
       </div>

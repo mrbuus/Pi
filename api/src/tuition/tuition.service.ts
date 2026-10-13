@@ -7,15 +7,16 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
-import {
-  prorateTuition,
-  explainProration,
-  type ProrationInput,
-  type ProrationResult,
-  type DateKey,
-} from './proration';
+import { type DateKey } from './proration';
 import { computePaidUntil } from './paid-until';
-import { todayUB } from '../common/date';
+import {
+  ACADEMIC_YEAR,
+  computeLedger,
+  cycleDay,
+  tierFor,
+  todayKeyUB,
+} from '../payments/ledger';
+import { computePlanRefund, contractRange } from './plan-refund';
 
 @Injectable()
 export class TuitionService {
@@ -58,36 +59,58 @@ export class TuitionService {
       );
     }
 
-    const joinedOn = enrollment.joinedAt.toISOString().slice(0, 10) as DateKey;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(leftOnStr ?? ''))
+      throw new BadRequestException('Огноо ЖЖЖЖ-СС-ӨӨ хэлбэртэй байна');
     const leftOn = leftOnStr as DateKey;
+    const profile = student.studentProfile;
+    const dateKey = (d: Date | null | undefined) =>
+      d ? (d.toISOString().slice(0, 10) as DateKey) : null;
+    // Бодит эхэлсэн өдөр: бүртгэлийн joinedOn (Enrollment.joinedAt нь импортын өдөр байж болно)
+    const startDate = dateKey(profile.joinedOn) ?? dateKey(enrollment.joinedAt);
 
-    // Гэрээний хугацаанаас хичээлийн өдрүүдийг авна
-    const expandedDays = await this.scheduleService.expandDays(
-      joinedOn,
-      leftOn,
-      classroomId,
-    );
-    const lessonDays = expandedDays
-      .filter((d) => d.holiday === null && d.classes.length > 0)
-      .map((d) => d.date as DateKey);
-
-    // Төлсөн дүнг Payment-ээс авна (CONFIRMED төлбөр л)
+    // Багцаас хамаарсан гэрээ (plan-refund.ts) — сар бүр бол гарсан мөчлөг л
+    // өдрөөр, бүтэн/хуваан бол жилийн гэрээ бүхэлдээ өдрөөр хуваагдана.
     const payments = await this.prisma.payment.findMany({
-      where: { userId: studentId, status: 'CONFIRMED' },
+      where: {
+        userId: studentId,
+        status: 'CONFIRMED',
+        storePurchaseId: null,
+      },
+      select: { amount: true, forMonth: true, paidAt: true },
     });
-    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
-
-    // Тооцоо хий
-    const totalTuition = student.studentProfile.tuitionAmount || 0;
-    const input: ProrationInput = {
-      lessonDays,
-      totalTuition,
-      joinedOn,
-      leftOn,
-      totalPaid,
+    const ledgerInput = {
+      plan: profile.tuitionPlan,
+      tuitionAmount: profile.tuitionAmount,
+      tier: tierFor(profile.grade, classroom.name).tier,
+      startDate,
+      leftOn: null,
+      payments: payments.map((p) => ({
+        amount: p.amount,
+        forMonth: p.forMonth,
+        paidOn: dateKey(p.paidAt),
+      })),
+      today: todayKeyUB(),
     };
-    const result = prorateTuition(input);
-    const explanation = explainProration(result);
+    const ledger = computeLedger(ledgerInput);
+    const day = cycleDay(startDate, ACADEMIC_YEAR);
+    const range = contractRange(ledger, day);
+    let lessonDays: DateKey[] = [];
+    if (range) {
+      const expandedDays = await this.scheduleService.expandDays(
+        range.start,
+        range.end,
+        classroomId,
+      );
+      lessonDays = expandedDays
+        .filter((d) => d.holiday === null && d.classes.length > 0)
+        .map((d) => d.date as DateKey);
+    }
+    const { breakdown, ...result } = computePlanRefund({
+      ledger,
+      cycleDay: day,
+      lessonDays,
+      leftOn,
+    });
 
     return {
       student: {
@@ -96,10 +119,11 @@ export class TuitionService {
         lastName: student.lastName,
       },
       classroom: { id: classroom.id, name: classroom.name },
-      joinedOn,
+      joinedOn: range?.start ?? startDate,
       leftOn,
+      plan: ledger.plan,
       calculation: result,
-      explanation,
+      explanation: breakdown,
     };
   }
 
@@ -436,6 +460,8 @@ export class TuitionService {
     const calendars = await this.prisma.academicCalendarDay.findMany({
       where: {
         type: 'HOLIDAY',
+        // Зөвхөн БҮХ ангид хамаарах амралт (зарим ангийн онцгой өдөр биш)
+        classrooms: { none: {} },
         // Төлбөр хугацаанд
         date: { gte: fromDate },
       },

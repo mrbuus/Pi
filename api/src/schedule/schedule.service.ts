@@ -11,14 +11,17 @@ import {
   Role,
   ScheduleExceptionKind,
 } from '../generated/prisma/enums';
+import { classTeacherWhere } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationCenterService } from '../notification-center/notification-center.service';
+import { buildPublishBodies, publishTitle } from './publish-day';
 import { BulkCreateScheduleDto } from './dto/bulk-create-schedule.dto';
 import { ClearTopicDto } from './dto/clear-topic.dto';
 import { CreateCalendarDayDto } from './dto/create-calendar-day.dto';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { PutTeacherWorkDaysDto } from './dto/put-teacher-workdays.dto';
 import { TeacherWorkDayExceptionDto } from './dto/teacher-workday-exception.dto';
+import { PutRosterConfigDto } from './dto/put-roster-config.dto';
 import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { SplitSeriesDto } from './dto/split-series.dto';
@@ -27,6 +30,9 @@ import { UpsertTopicDto } from './dto/upsert-topic.dto';
 import { SplitOutOfRangeError, SplitPlan, planSplit } from './split-series';
 import {
   resolveTeacherRoster,
+  PARITY_ANCHOR_MONDAY,
+  DEFAULT_ROSTER_CONFIG,
+  type ResolverRosterConfig,
   resolveWeek,
   ResolverException,
   ResolverSchedule,
@@ -40,7 +46,14 @@ const FAR_FUTURE = new Date('9999-12-31');
 // сангийн түүх) шаардаж сервер ачаалахаас сэргийлнэ.
 const MAX_DAYS_RANGE = 370;
 
-const CLASSROOM_SELECT = { select: { id: true, name: true } } as const;
+// _count: хуваарийн зурагт хуудсанд «танхимд хэдэн хүүхэд орох» (эзэн 2026-10-08)
+const CLASSROOM_SELECT = {
+  select: {
+    id: true,
+    name: true,
+    _count: { select: { enrollments: { where: { leftAt: null } } } },
+  },
+} as const;
 const TEACHER_SELECT = {
   select: { id: true, firstName: true, lastName: true },
 } as const;
@@ -68,7 +81,7 @@ export class ScheduleService {
         }),
         this.prisma.classroom.findMany({
           where: { id: { in: ids }, archived: false },
-          select: { teacherId: true },
+          select: { teacherId: true, assistantTeacherId: true },
         }),
       ]);
       await this.notifications.notify(
@@ -76,7 +89,10 @@ export class ScheduleService {
           ...new Set(
             [
               ...enrollments.map((enrollment) => enrollment.studentId),
-              ...classrooms.map((classroom) => classroom.teacherId),
+              ...classrooms.flatMap((classroom) => [
+                classroom.teacherId,
+                classroom.assistantTeacherId,
+              ]),
               ...teacherIds,
             ].filter((userId): userId is string => Boolean(userId)),
           ),
@@ -493,7 +509,7 @@ export class ScheduleService {
             {
               OR: [
                 { teacherId: userId },
-                { teacherId: null, classroom: { teacherId: userId } },
+                { teacherId: null, classroom: classTeacherWhere(userId) },
               ],
             },
           ],
@@ -550,7 +566,7 @@ export class ScheduleService {
                   {
                     OR: [
                       { teacherId },
-                      { teacherId: null, classroom: { teacherId } },
+                      { teacherId: null, classroom: classTeacherWhere(teacherId) },
                     ],
                   },
                 ]
@@ -561,16 +577,38 @@ export class ScheduleService {
       }),
       this.prisma.academicCalendarDay.findMany({
         where: { date: { gte: from, lte: to } },
+        include: { classrooms: { select: { classroomId: true } } },
       }),
     ]);
-    const holidayByKey = new Map(
-      calendarDays.map((c) => [c.date.toISOString().slice(0, 10), c]),
-    );
+    // Бүх ангид хамаарах өдөр ба зөвхөн зарим ангид хамаарах өдрийг тусгаарлана
+    const holidayByKey = new Map<string, (typeof calendarDays)[number]>();
+    const scopedByKey = new Map<
+      string,
+      Map<string, (typeof calendarDays)[number]>
+    >();
+    for (const c of calendarDays) {
+      const key = c.date.toISOString().slice(0, 10);
+      if (c.classrooms.length === 0) {
+        if (!holidayByKey.has(key)) holidayByKey.set(key, c);
+        continue;
+      }
+      const perClass = scopedByKey.get(key) ?? new Map();
+      for (const link of c.classrooms)
+        if (!perClass.has(link.classroomId)) perClass.set(link.classroomId, c);
+      scopedByKey.set(key, perClass);
+    }
 
     const days: {
       date: string;
       weekday: number;
       holiday: { type: string; title: string; note: string | null } | null;
+      /** Зөвхөн зарим ангид хамаарсан онцгой өдрөөр хасагдсан ангиуд */
+      restingClasses: {
+        classroomId: string;
+        classroomName: string;
+        type: string;
+        title: string;
+      }[];
       classes: {
         id: string;
         classroomId: string;
@@ -587,7 +625,14 @@ export class ScheduleService {
     for (let cursor = from; cursor <= to; cursor = addDateDays(cursor, 1)) {
       const key = cursor.toISOString().slice(0, 10);
       const weekday = cursor.getUTCDay();
-      const holiday = holidayByKey.get(key) ?? null;
+      let holiday = holidayByKey.get(key) ?? null;
+      const scoped = scopedByKey.get(key);
+      const restingClasses: {
+        classroomId: string;
+        classroomName: string;
+        type: string;
+        title: string;
+      }[] = [];
       const classes = holiday
         ? []
         : schedules
@@ -597,6 +642,18 @@ export class ScheduleService {
                 s.effectiveFrom <= cursor &&
                 (!s.effectiveTo || s.effectiveTo >= cursor),
             )
+            .filter((s) => {
+              const h = scoped?.get(s.classroomId);
+              if (!h) return true;
+              if (!restingClasses.some((r) => r.classroomId === s.classroomId))
+                restingClasses.push({
+                  classroomId: s.classroomId,
+                  classroomName: s.classroom.name,
+                  type: h.type,
+                  title: h.title,
+                });
+              return false;
+            })
             .sort((a, b) => a.startMinute - b.startMinute)
             .map((s) => ({
               id: s.id,
@@ -611,12 +668,19 @@ export class ScheduleService {
               room: s.room,
               subject: s.subject,
             }));
+      // Нэг ангийн сурагч/эцэг эхэд өдрийн бүх хичээл нь онцгой өдрөөр
+      // хасагдсан бол «амралт» гэж харуулна (хоосон өдөр биш).
+      if (!holiday && classes.length === 0 && restingClasses.length > 0) {
+        const h = scoped!.get(restingClasses[0].classroomId)!;
+        holiday = h;
+      }
       days.push({
         date: key,
         weekday,
         holiday: holiday
           ? { type: holiday.type, title: holiday.title, note: holiday.note }
           : null,
+        restingClasses,
         classes,
       });
     }
@@ -625,31 +689,91 @@ export class ScheduleService {
 
   // ============ Сургалтын хуанли (AcademicCalendarDay) ============
 
+  private static readonly CALENDAR_INCLUDE = {
+    classrooms: {
+      select: { classroom: { select: { id: true, name: true } } },
+    },
+  } as const;
+
+  /** Хариуд классын жагсаалтыг нэг хэлбэрт оруулна (classroomIds хоосон = бүх анги). */
+  private shapeCalendarDay<
+    T extends {
+      classrooms: { classroom: { id: string; name: string } }[];
+    },
+  >(day: T) {
+    const { classrooms, ...rest } = day;
+    const list = classrooms
+      .map((c) => c.classroom)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    return {
+      ...rest,
+      classroomIds: list.map((c) => c.id),
+      classrooms: list,
+    };
+  }
+
+  private async assertClassroomsExist(ids: string[]) {
+    if (ids.length === 0) return;
+    const found = await this.prisma.classroom.count({
+      where: { id: { in: ids } },
+    });
+    if (found !== ids.length) {
+      throw new BadRequestException('Сонгосон анги олдсонгүй');
+    }
+  }
+
+  /**
+   * Нэг өдөрт хэд хэдэн онцгой өдөр байж болох ч ижил ангид хоёр удаа
+   * хамаарах (эсвэл «бүх анги» + өөр бичлэг) давхцал БОЛОХГҮЙ.
+   */
+  private async assertNoCalendarOverlap(
+    date: Date,
+    classroomIds: string[],
+    excludeId?: string,
+  ) {
+    const others = await this.prisma.academicCalendarDay.findMany({
+      where: { date, ...(excludeId ? { id: { not: excludeId } } : {}) },
+      include: { classrooms: { select: { classroomId: true } } },
+    });
+    for (const o of others) {
+      const otherIds = o.classrooms.map((c) => c.classroomId);
+      const clash =
+        classroomIds.length === 0 ||
+        otherIds.length === 0 ||
+        otherIds.some((id) => classroomIds.includes(id));
+      if (clash) {
+        throw new BadRequestException(
+          `Энэ огноонд аль хэдийн «${o.title}» бүртгэлтэй байна (нэг ангид давхар бүртгэх боломжгүй)`,
+        );
+      }
+    }
+  }
+
   async createCalendarDay(dto: CreateCalendarDayDto, createdById: string) {
     const date = this.parseDate(dto.date);
-    const existing = await this.prisma.academicCalendarDay.findUnique({
-      where: { date },
-    });
-    if (existing) {
-      throw new BadRequestException(
-        'Энэ огноонд аль хэдийн бичлэг үүссэн байна',
-      );
-    }
-    return this.prisma.academicCalendarDay.create({
+    const classroomIds = [...new Set(dto.classroomIds ?? [])];
+    await this.assertClassroomsExist(classroomIds);
+    await this.assertNoCalendarOverlap(date, classroomIds);
+    const created = await this.prisma.academicCalendarDay.create({
       data: {
         date,
         type: dto.type,
         title: dto.title,
         note: dto.note,
         createdById,
+        classrooms: {
+          create: classroomIds.map((classroomId) => ({ classroomId })),
+        },
       },
+      include: ScheduleService.CALENDAR_INCLUDE,
     });
+    return this.shapeCalendarDay(created);
   }
 
-  listCalendarDays(fromStr?: string, toStr?: string) {
+  async listCalendarDays(fromStr?: string, toStr?: string) {
     const from = fromStr ? this.parseDate(fromStr) : undefined;
     const to = toStr ? this.parseDate(toStr) : undefined;
-    return this.prisma.academicCalendarDay.findMany({
+    const rows = await this.prisma.academicCalendarDay.findMany({
       where:
         from || to
           ? {
@@ -660,42 +784,63 @@ export class ScheduleService {
             }
           : undefined,
       orderBy: { date: 'asc' },
+      include: ScheduleService.CALENDAR_INCLUDE,
     });
+    return rows.map((r) => this.shapeCalendarDay(r));
   }
 
   async findCalendarDay(id: string) {
     const day = await this.prisma.academicCalendarDay.findUnique({
       where: { id },
+      include: ScheduleService.CALENDAR_INCLUDE,
     });
     if (!day) throw new NotFoundException('Хуанлийн бичлэг олдсонгүй');
-    return day;
+    return this.shapeCalendarDay(day);
   }
 
   async updateCalendarDay(id: string, dto: UpdateCalendarDayDto) {
-    const existing = await this.prisma.academicCalendarDay.findUnique({
-      where: { id },
-    });
-    if (!existing) throw new NotFoundException('Хуанлийн бичлэг олдсонгүй');
+    const existing = await this.findCalendarDay(id);
     const date = dto.date ? this.parseDate(dto.date) : undefined;
-    if (date) {
-      const clash = await this.prisma.academicCalendarDay.findUnique({
-        where: { date },
-      });
-      if (clash && clash.id !== id) {
-        throw new BadRequestException(
-          'Энэ огноонд аль хэдийн өөр бичлэг үүссэн байна',
-        );
-      }
+    const nextClassroomIds =
+      dto.classroomIds === undefined
+        ? existing.classroomIds
+        : [...new Set(dto.classroomIds)];
+    if (dto.classroomIds !== undefined) {
+      await this.assertClassroomsExist(nextClassroomIds);
     }
-    return this.prisma.academicCalendarDay.update({
-      where: { id },
-      data: {
-        date,
-        type: dto.type,
-        title: dto.title,
-        note: dto.note === undefined ? undefined : dto.note,
-      },
+    if (date || dto.classroomIds !== undefined) {
+      await this.assertNoCalendarOverlap(
+        date ?? existing.date,
+        nextClassroomIds,
+        id,
+      );
+    }
+    const updated = await this.prisma.$transaction(async (tx) => {
+      if (dto.classroomIds !== undefined) {
+        await tx.academicCalendarDayClassroom.deleteMany({
+          where: { calendarDayId: id },
+        });
+        if (nextClassroomIds.length > 0) {
+          await tx.academicCalendarDayClassroom.createMany({
+            data: nextClassroomIds.map((classroomId) => ({
+              calendarDayId: id,
+              classroomId,
+            })),
+          });
+        }
+      }
+      return tx.academicCalendarDay.update({
+        where: { id },
+        data: {
+          date,
+          type: dto.type,
+          title: dto.title,
+          note: dto.note === undefined ? undefined : dto.note,
+        },
+        include: ScheduleService.CALENDAR_INCLUDE,
+      });
     });
+    return this.shapeCalendarDay(updated);
   }
 
   async removeCalendarDay(id: string) {
@@ -847,9 +992,17 @@ export class ScheduleService {
       }),
       this.prisma.academicCalendarDay.findMany({
         where: { date: { gte: start, lte: end } },
+        include: { classrooms: { select: { classroomId: true } } },
       }),
       readableClassroomIds
-        ? Promise.resolve<{ teacherId: string; weekday: number }[]>([])
+        ? Promise.resolve<
+            {
+              teacherId: string;
+              weekday: number;
+              parity: number;
+              sortOrder: number;
+            }[]
+          >([])
         : this.prisma.teacherWorkDay.findMany(),
       readableClassroomIds
         ? Promise.resolve<
@@ -860,11 +1013,15 @@ export class ScheduleService {
           }),
       readableClassroomIds
         ? Promise.resolve<
-            { id: string; firstName: string; lastName: string }[]
+            { id: string; firstName: string; lastName: string; role: Role }[]
           >([])
         : this.prisma.user.findMany({
-            where: { role: { in: [Role.TEACHER, Role.TEACHER_PLUS] } },
-            select: { id: true, firstName: true, lastName: true },
+            // ADMIN ч хичээл ордог (ж: Өсөхбаяр) — ажлын өдөртэй бол л гарна.
+            where: {
+              role: { in: [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN] },
+              archivedAt: null,
+            },
+            select: { id: true, firstName: true, lastName: true, role: true },
           }),
     ]);
 
@@ -911,27 +1068,74 @@ export class ScheduleService {
       title: t.title,
     }));
 
+    // Өдрийн ахлах/туслах багш — нэрийг нэг дуудлагаар нийлүүлнэ
+    const staffRows = await this.prisma.lessonStaffing.findMany({
+      where: { scheduleId: { in: [...scheduleIds] } },
+    });
+    const staffIds = [
+      ...new Set(
+        staffRows.flatMap((r) =>
+          [r.leadTeacherId, r.assistantTeacherId].filter(
+            (v): v is string => !!v,
+          ),
+        ),
+      ),
+    ];
+    const staffUsers = staffIds.length
+      ? await this.prisma.user.findMany({
+          where: { id: { in: staffIds } },
+          select: { id: true, firstName: true, lastName: true },
+        })
+      : [];
+    const staffName = staffUsers.length
+      ? teacherDisplayNames(
+          staffUsers,
+          await this.prisma.user.findMany({
+            where: { role: { in: [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN] } },
+            select: { firstName: true },
+          }),
+        )
+      : new Map<string, string>();
+    const person = (id: string | null) =>
+      id ? { id, name: staffName.get(id) ?? '—' } : null;
+
     const days = resolveWeek({
       weekStart: startKey,
       schedules: resolverSchedules,
       exceptions: resolverExceptions,
       topics: resolverTopics,
+      staffing: staffRows.map((r) => ({
+        scheduleId: r.scheduleId,
+        date: dateKey(r.date),
+        lead: person(r.leadTeacherId),
+        assistant: person(r.assistantTeacherId),
+      })),
       holidays: holidays.map((h) => ({
         date: dateKey(h.date),
         type: h.type,
         title: h.title,
+        classroomIds: h.classrooms.map((c) => c.classroomId),
       })),
     });
 
+    // Сонгох жагсаалттай (/schedule/teachers) ижил нэр — «Б. Марал-Эрдэнэ»
+    const rosterNames = teacherDisplayNames(teachers);
+    const rosterConfig = readableClassroomIds
+      ? DEFAULT_ROSTER_CONFIG
+      : await this.getRosterConfig();
     const rosters = resolveTeacherRoster({
       weekStart: startKey,
+      config: rosterConfig,
       teachers: teachers.map((t) => ({
         id: t.id,
-        name: `${t.firstName} ${t.lastName}`,
+        name: rosterNames.get(t.id) ?? t.firstName,
+        role: t.role,
       })),
       workDays: workDays.map((w) => ({
         teacherId: w.teacherId,
         weekday: w.weekday,
+        parity: w.parity,
+        sortOrder: w.sortOrder,
       })),
       exceptions: workExceptions.map((e) => ({
         teacherId: e.teacherId,
@@ -1103,6 +1307,118 @@ export class ScheduleService {
     }
   }
 
+  // Өдрийн хуваарийг нийтлэх (эзэн 2026-10-11): тэр өдөр хичээлтэй багш, сурагч
+  // бүрт зөвхөн өөрийн хичээлийн мэдэгдэл. Дахин нийтлэвэл «өөрчлөгдлөө».
+  async publishDay(dateStr: string, actorId: string, actorRole: Role) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr ?? ''))
+      throw new BadRequestException('Огноо буруу байна');
+    const date = this.parseDate(dateStr);
+    const weekday = date.getUTCDay();
+    const monday = new Date(date);
+    monday.setUTCDate(date.getUTCDate() - (weekday === 0 ? 6 : weekday - 1));
+    const week = await this.getWeek(dateKey(monday));
+    const day = week.days.find((d) => d.date === dateStr);
+    if (!day || day.isHoliday || day.entries.length === 0)
+      throw new BadRequestException('Энэ өдөр нийтлэх хичээл алга');
+
+    const classroomIds = [...new Set(day.entries.map((e) => e.classroomId))];
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        classroomId: { in: classroomIds },
+        leftAt: null,
+        student: { archivedAt: null },
+      },
+      select: { classroomId: true, studentId: true },
+    });
+    const studentsByClass = new Map<string, string[]>();
+    for (const r of enrollments)
+      studentsByClass.set(r.classroomId, [...(studentsByClass.get(r.classroomId) ?? []), r.studentId]);
+
+    const bodies = buildPublishBodies(day.entries, studentsByClass);
+    const previous = await this.prisma.schedulePublication.findUnique({ where: { date } });
+    const title = publishTitle(dateStr, !!previous);
+    // Ижил агуулгатайг нэг дор илгээнэ (нэг ангийн сурагчид ижил мессеж авна)
+    const byBody = new Map<string, string[]>();
+    for (const [userId, body] of bodies) byBody.set(body, [...(byBody.get(body) ?? []), userId]);
+    for (const [body, userIds] of byBody)
+      await this.notifications.notify(userIds, {
+        kind: 'SCHEDULE_CHANGE',
+        title,
+        body,
+        link: '/app/schedule',
+      });
+
+    const row = await this.prisma.schedulePublication.upsert({
+      where: { date },
+      update: { publishedAt: new Date(), publishedById: actorId, recipients: bodies.size },
+      create: { date, publishedAt: new Date(), publishedById: actorId, recipients: bodies.size },
+    });
+    await this.recordAudit(actorId, actorRole, previous ? 'UPDATE' : 'CREATE', 'SchedulePublication', dateStr, null, {
+      date: dateStr,
+      recipients: bodies.size,
+    });
+    return { date: dateStr, publishedAt: row.publishedAt, recipients: row.recipients, again: !!previous };
+  }
+
+  async getPublication(dateStr: string) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr ?? ''))
+      throw new BadRequestException('Огноо буруу байна');
+    const row = await this.prisma.schedulePublication.findUnique({
+      where: { date: this.parseDate(dateStr) },
+    });
+    if (!row) return { date: dateStr, publishedAt: null, recipients: 0, publishedBy: null };
+    const by = await this.prisma.user.findUnique({
+      where: { id: row.publishedById },
+      select: { firstName: true },
+    });
+    return { date: dateStr, publishedAt: row.publishedAt, recipients: row.recipients, publishedBy: by?.firstName ?? null };
+  }
+
+  // Тухайн өдрийн ахлах/туслах багшийг оноох (эзэн 2026-10-08). Хоёулаа null
+  // бол бичлэгийг устгана. Зөвхөн идэвхтэй ажилтныг (TEACHER/TEACHER_PLUS/ADMIN).
+  async setStaffing(
+    scheduleId: string,
+    dto: { date: string; leadTeacherId?: string | null; assistantTeacherId?: string | null },
+    actorId: string,
+    actorRole: Role,
+  ) {
+    await this.assertScheduleExists(scheduleId);
+    const date = this.parseDate(dto.date);
+    const lead = dto.leadTeacherId || null;
+    const assistant = dto.assistantTeacherId || null;
+    if (lead && lead === assistant)
+      throw new BadRequestException('Ахлах ба туслах багш нэг хүн байж болохгүй');
+    const ids = [lead, assistant].filter((v): v is string => !!v);
+    if (ids.length) {
+      const ok = await this.prisma.user.count({
+        where: {
+          id: { in: ids },
+          archivedAt: null,
+          role: { in: [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN] },
+        },
+      });
+      if (ok !== ids.length)
+        throw new BadRequestException('Сонгосон багш олдсонгүй эсвэл идэвхгүй');
+    }
+    const key = { scheduleId_date: { scheduleId, date } };
+    if (!lead && !assistant) {
+      await this.prisma.lessonStaffing.deleteMany({ where: { scheduleId, date } });
+      await this.recordAudit(actorId, actorRole, 'DELETE', 'LessonStaffing', scheduleId, { date: dto.date }, null);
+      return { scheduleId, date: dto.date, leadTeacherId: null, assistantTeacherId: null };
+    }
+    const row = await this.prisma.lessonStaffing.upsert({
+      where: key,
+      update: { leadTeacherId: lead, assistantTeacherId: assistant, updatedById: actorId },
+      create: { scheduleId, date, leadTeacherId: lead, assistantTeacherId: assistant, updatedById: actorId },
+    });
+    await this.recordAudit(actorId, actorRole, 'UPDATE', 'LessonStaffing', row.id, null, {
+      date: dto.date,
+      leadTeacherId: lead,
+      assistantTeacherId: assistant,
+    });
+    return row;
+  }
+
   async upsertTopic(
     scheduleId: string,
     dto: UpsertTopicDto,
@@ -1173,12 +1489,21 @@ export class ScheduleService {
 
   // Хуваарийн маягтуудад хэрэглэх багшийн ХАМГИЙН БАГА жагсаалт — зөвхөн
   // id ба нэр. Утас/эрх зэрэг хувийн талбар огт буцаахгүй.
-  listTeacherOptions() {
-    return this.prisma.user.findMany({
-      where: { role: { in: [Role.TEACHER, Role.TEACHER_PLUS] } },
-      select: { id: true, firstName: true, lastName: true },
-      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+  // Хуваарьт оногддог багш (TeacherProfile.teachesLessons) — нэрийг төвийн
+  // хүснэгтийн хэлбэрээр: зөвхөн нэр, ижил нэртэй бол «Б. Марал-Эрдэнэ».
+  async listTeacherOptions() {
+    const rows = await this.prisma.user.findMany({
+      where: {
+        role: { in: [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN] },
+        archivedAt: null,
+        teacherProfile: { teachesLessons: true },
+      },
+      // role — өдрийн хуваарьт Багш / Багш+ ялгах (утас зэрэг хувийн талбаргүй)
+      select: { id: true, firstName: true, lastName: true, role: true },
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
     });
+    const names = teacherDisplayNames(rows);
+    return rows.map((r) => ({ ...r, displayName: names.get(r.id)! }));
   }
 
   async listTeacherWorkDays(fromStr?: string, toStr?: string) {
@@ -1187,7 +1512,12 @@ export class ScheduleService {
     const [workDays, exceptions] = await Promise.all([
       this.prisma.teacherWorkDay.findMany({
         include: { teacher: TEACHER_SELECT },
-        orderBy: [{ teacherId: 'asc' }, { weekday: 'asc' }],
+        orderBy: [
+          { sortOrder: 'asc' },
+          { teacherId: 'asc' },
+          { parity: 'asc' },
+          { weekday: 'asc' },
+        ],
       }),
       this.prisma.teacherWorkException.findMany({
         where:
@@ -1203,7 +1533,54 @@ export class ScheduleService {
         orderBy: { date: 'asc' },
       }),
     ]);
-    return { workDays, exceptions };
+    return {
+      workDays,
+      exceptions,
+      parityAnchor: PARITY_ANCHOR_MONDAY,
+      config: await this.getRosterConfig(),
+    };
+  }
+
+  // Хүснэгтийн горим/хугацаа — мөр байхгүй бол анхдагч (ээлжит, хязгааргүй).
+  async getRosterConfig(): Promise<ResolverRosterConfig> {
+    const row = await this.prisma.teacherRosterConfig.findUnique({
+      where: { id: 'default' },
+    });
+    if (!row) return DEFAULT_ROSTER_CONFIG;
+    return {
+      mode: row.mode === 'FIXED' ? 'FIXED' : 'ALTERNATING',
+      validFrom: row.validFrom ? dateKey(row.validFrom) : null,
+      validTo: row.validTo ? dateKey(row.validTo) : null,
+    };
+  }
+
+  async putRosterConfig(
+    dto: PutRosterConfigDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    const validFrom = dto.validFrom ? this.parseDate(dto.validFrom) : null;
+    const validTo = dto.validTo ? this.parseDate(dto.validTo) : null;
+    if (validFrom && validTo && validFrom > validTo)
+      throw new BadRequestException('Эхлэх огноо дуусахаас хойш байна');
+    const before = await this.getRosterConfig();
+    const data = { mode: dto.mode, validFrom, validTo, updatedById: actorId };
+    await this.prisma.teacherRosterConfig.upsert({
+      where: { id: 'default' },
+      create: { id: 'default', ...data },
+      update: data,
+    });
+    const after = await this.getRosterConfig();
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'UPDATE',
+      'TeacherRosterConfig',
+      'default',
+      before,
+      after,
+    );
+    return after;
   }
 
   async putTeacherWorkDays(
@@ -1216,24 +1593,42 @@ export class ScheduleService {
     });
     if (!teacher) throw new NotFoundException('Багш олдсонгүй');
     const uniqueWeekdays = [...new Set(dto.weekdays)];
+    // Зөвхөн тухайн ээлжийн (7 хоног бүр / сондгой / тэгш) мөрүүдийг солино.
+    const parity = dto.parity ?? 0;
 
     const before = await this.prisma.teacherWorkDay.findMany({
-      where: { teacherId: dto.teacherId },
+      where: { teacherId: dto.teacherId, parity },
     });
+    // Хүснэгтийн мөрийн дараалал: багшийн өмнөх мөрөөс, эсвэл хамгийн сүүлд.
+    const existingOrder = await this.prisma.teacherWorkDay.findFirst({
+      where: { teacherId: dto.teacherId },
+      orderBy: { sortOrder: 'asc' },
+      select: { sortOrder: true },
+    });
+    const sortOrder =
+      dto.sortOrder ??
+      existingOrder?.sortOrder ??
+      ((
+        await this.prisma.teacherWorkDay.aggregate({
+          _max: { sortOrder: true },
+        })
+      )._max.sortOrder ?? 0) + 1;
 
     const result = await this.prisma.$transaction(async (tx) => {
       await tx.teacherWorkDay.deleteMany({
-        where: { teacherId: dto.teacherId },
+        where: { teacherId: dto.teacherId, parity },
       });
       if (uniqueWeekdays.length === 0) return [];
       await tx.teacherWorkDay.createMany({
         data: uniqueWeekdays.map((weekday) => ({
           teacherId: dto.teacherId,
           weekday,
+          parity,
+          sortOrder,
         })),
       });
       return tx.teacherWorkDay.findMany({
-        where: { teacherId: dto.teacherId },
+        where: { teacherId: dto.teacherId, parity },
       });
     });
 
@@ -1288,4 +1683,24 @@ export class ScheduleService {
     );
     return result;
   }
+}
+
+/**
+ * Багшийн харагдах нэр — төвийн хүснэгтийн хэлбэр: зөвхөн нэр; ижил нэртэй
+ * өөр ажилтан байвал овгийн үсгийг урд нь («Б. Марал-Эрдэнэ», «У. Эмүжин»).
+ * `pool` — давхардлыг шалгах бүх ажилтан (өгөхгүй бол `users` өөрөө).
+ */
+export function teacherDisplayNames(
+  users: { id: string; firstName: string; lastName: string }[],
+  pool: { firstName: string }[] = users,
+): Map<string, string> {
+  const count = new Map<string, number>();
+  for (const p of pool) count.set(p.firstName.trim(), (count.get(p.firstName.trim()) ?? 0) + 1);
+  return new Map(
+    users.map((u) => {
+      const first = u.firstName.trim();
+      const initial = u.lastName.trim().charAt(0);
+      return [u.id, (count.get(first) ?? 0) > 1 && initial ? `${initial}. ${first}` : first];
+    }),
+  );
 }

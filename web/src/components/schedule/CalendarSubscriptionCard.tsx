@@ -99,7 +99,7 @@ export default function CalendarSubscriptionCard() {
       <SectionHeader
         icon={CalendarPlus}
         title="Утасны хуанлид нэмэх"
-        hint={<span className="text-xs font-normal text-ink-dim">Ойрын 12 долоо хоногийн хичээл</span>}
+        hint={<span className="text-xs font-normal text-ink-dim">Зөвхөн өөрийн хичээл, ойрын 12 долоо хоног</span>}
       />
       <p className="mb-4 text-sm text-ink-dim">
         Хувийн холбоосоо iPhone-ийн Calendar эсвэл Android-ийн календарийн аппд нэмбэл хуваарь шинэчлэгдэхэд автоматаар татагдана.

@@ -60,6 +60,11 @@ GET /api/catalog/preview/books
 GET /api/catalog/preview/chapters/:id
 GET /api/chapters
 GET /api/chapters/:id/problems
+GET /api/class-dashboard
+GET /api/class-dashboard/classes/:classroomId
+GET /api/class-dashboard/classes/:classroomId/month
+GET /api/class-dashboard/students/:studentId/competency
+GET /api/class-dashboard/students/:studentId/flags
 GET /api/classification/categories
 GET /api/classification/problems/:id
 GET /api/classrooms
@@ -183,6 +188,7 @@ PATCH /api/chapters/reorder
 PATCH /api/classification/categories/:id
 PATCH /api/classrooms/:id
 PATCH /api/classrooms/:id/homework-marks/:studentId
+PATCH /api/classrooms/:id/teachers
 PATCH /api/enrollment-windows/:subject
 PATCH /api/finance/expenses/:id
 PATCH /api/formulas/:slug
@@ -223,6 +229,8 @@ POST /api/auth/reset-password
 POST /api/books
 POST /api/calendar
 POST /api/chapters
+POST /api/class-dashboard/flags/:flagId/remove
+POST /api/class-dashboard/students/:studentId/flags
 POST /api/classification/categories
 POST /api/classrooms
 POST /api/classrooms/:id/assignments
@@ -310,6 +318,7 @@ POST /api/videos
 PUT /api/classification/problems/:id/choices
 PUT /api/classification/problems/:id/tags
 PUT /api/schedule/teacher-workdays
+PUT /api/schedule/teacher-workdays/config
 PUT /api/students/:id/color-tag
 PUT /api/teacher-groups/:groupId/archive
 PUT /api/teacher-groups/reconsider/:userId

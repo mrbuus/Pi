@@ -25,6 +25,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { MistakeType, Role, TagType } from '../generated/prisma/enums';
+import { ExpectedVersionDto } from '../revisions/revisions.dto';
 import { ClassificationService } from './classification.service';
 
 class CategoryDto {
@@ -70,7 +71,7 @@ class ChoiceDto {
   mistakeNote?: string;
 }
 
-class SetChoicesDto {
+class SetChoicesDto extends ExpectedVersionDto {
   @ApiProperty({ type: () => [ChoiceDto] })
   @IsArray()
   @ValidateNested({ each: true })
@@ -78,11 +79,27 @@ class SetChoicesDto {
   choices: ChoiceDto[];
 }
 
-class SetTagsDto {
+class SetTagsDto extends ExpectedVersionDto {
   @ApiProperty({ type: [String] })
   @IsArray()
   @IsString({ each: true })
   tagIds: string[];
+}
+
+// «Ангилал» цонхны нэг хадгалалт: сонголт + ангилал атомаар (нэг хувилбар).
+class SaveClassificationDto extends ExpectedVersionDto {
+  @ApiPropertyOptional({ type: () => [ChoiceDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ChoiceDto)
+  choices?: ChoiceDto[];
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tagIds?: string[];
 }
 
 interface AuthedRequest {
@@ -117,13 +134,39 @@ export class ClassificationController {
     return this.classification.getProblemForEdit(id);
   }
 
+  // Сонголт + ангилал нэг transaction-д (засварлагчийн «Хадгалах»).
+  @Put('problems/:id')
+  saveProblem(
+    @Param('id') id: string,
+    @Body() dto: SaveClassificationDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.classification.saveProblem(
+      id,
+      {
+        choices: dto.choices,
+        tagIds: dto.tagIds,
+        expectedVersion: dto.expectedVersion,
+        overwrite: dto.overwrite,
+      },
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
   @Put('problems/:id/choices')
   setChoices(
     @Param('id') id: string,
     @Body() dto: SetChoicesDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.classification.setChoices(id, dto.choices, req.user.role);
+    return this.classification.setChoices(
+      id,
+      dto.choices,
+      req.user.userId,
+      req.user.role,
+      dto.expectedVersion,
+    );
   }
 
   @Put('problems/:id/tags')
@@ -132,6 +175,12 @@ export class ClassificationController {
     @Body() dto: SetTagsDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.classification.setProblemTags(id, dto.tagIds, req.user.role);
+    return this.classification.setProblemTags(
+      id,
+      dto.tagIds,
+      req.user.userId,
+      req.user.role,
+      dto.expectedVersion,
+    );
   }
 }

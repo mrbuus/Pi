@@ -7,7 +7,7 @@ const compiled = ts.transpileModule(source,{ compilerOptions:{module:ts.ModuleKi
 const { StudyClock } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
 test('visible focused elapsed, hidden elapsed, blurred unknown remain separate',()=>{
  const c=new StudyClock(0,true,true);c.tick(5000,false,false);c.tick(8000,true,false);c.tick(10000,true,true);
- assert.deepEqual(c.summary(),{focusedMs:5000,hiddenMs:3000,unknownMs:2000,buttons:0});
+ assert.deepEqual(c.summary(),{focusedMs:5000,hiddenMs:3000,unknownMs:2000,buttons:0,leaves:1});
 });
 test('long suspension never becomes focused attention; bounded totals/buttons',()=>{
  const c=new StudyClock(0,true,true);c.tick(999999999,true,true);for(let i=0;i<300;i++) c.button();
@@ -19,12 +19,22 @@ test('backward timer contributes no negative duration',()=>{
 
 test('regression or invalid time cannot double count subsequent elapsed',()=>{
  const c=new StudyClock(100,true,true);c.tick(200,true,true);c.tick(50,true,true);c.tick(NaN,true,true);c.tick(300,true,true);
- assert.deepEqual(c.summary(),{focusedMs:100,hiddenMs:0,unknownMs:100,buttons:0});
+ assert.deepEqual(c.summary(),{focusedMs:100,hiddenMs:0,unknownMs:100,buttons:0,leaves:0});
 });
 
 test('fractional performance clock emits bounded whole milliseconds without losing accumulated fractions',()=>{
  const c=new StudyClock(10.25,true,true);c.tick(10.75,true,true);assert.equal(c.summary().focusedMs,0);c.tick(12.9,false,false);c.tick(14.7,true,false);c.tick(17.2,true,true);
- assert.deepEqual(c.summary(),{focusedMs:2,hiddenMs:1,unknownMs:2,buttons:0});
+ assert.deepEqual(c.summary(),{focusedMs:2,hiddenMs:1,unknownMs:2,buttons:0,leaves:1});
  for(const value of Object.values(c.summary()))assert(Number.isSafeInteger(value)&&value>=0&&value<=1800000);
  assert.equal(c.summary().focusedMs,2); // summary is a projection, not a counter reset.
+});
+
+test('each focused-to-away transition counts one leave; blur then hide is a single leave',()=>{
+ const c=new StudyClock(0,true,true);
+ c.tick(1000,true,false);c.tick(1500,false,false); // цонх орхиод таб нуусан = 1
+ c.tick(3000,true,true);c.tick(4000,false,false);  // буцаж ирээд дахин гарсан = 2
+ c.tick(5000,true,true);c.tick(6000,true,true);     // бодож байна
+ assert.equal(c.summary().leaves,2);
+ for(let i=0;i<150;i++){c.tick(7000+i*2,false,false);c.tick(7001+i*2,true,true);}
+ assert.equal(c.summary().leaves,100);
 });

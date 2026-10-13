@@ -27,16 +27,31 @@ export type AggregateTestAccess = {
 export type TestAccessMinAggregateOutputType = {
   testId: string | null
   classroomId: string | null
+  assignedAt: Date | null
+  reviewLevel: $Enums.ReviewLevel | null
+  reviewAutoAt: Date | null
+  reviewOpenedAt: Date | null
+  reviewOpenedById: string | null
 }
 
 export type TestAccessMaxAggregateOutputType = {
   testId: string | null
   classroomId: string | null
+  assignedAt: Date | null
+  reviewLevel: $Enums.ReviewLevel | null
+  reviewAutoAt: Date | null
+  reviewOpenedAt: Date | null
+  reviewOpenedById: string | null
 }
 
 export type TestAccessCountAggregateOutputType = {
   testId: number
   classroomId: number
+  assignedAt: number
+  reviewLevel: number
+  reviewAutoAt: number
+  reviewOpenedAt: number
+  reviewOpenedById: number
   _all: number
 }
 
@@ -44,16 +59,31 @@ export type TestAccessCountAggregateOutputType = {
 export type TestAccessMinAggregateInputType = {
   testId?: true
   classroomId?: true
+  assignedAt?: true
+  reviewLevel?: true
+  reviewAutoAt?: true
+  reviewOpenedAt?: true
+  reviewOpenedById?: true
 }
 
 export type TestAccessMaxAggregateInputType = {
   testId?: true
   classroomId?: true
+  assignedAt?: true
+  reviewLevel?: true
+  reviewAutoAt?: true
+  reviewOpenedAt?: true
+  reviewOpenedById?: true
 }
 
 export type TestAccessCountAggregateInputType = {
   testId?: true
   classroomId?: true
+  assignedAt?: true
+  reviewLevel?: true
+  reviewAutoAt?: true
+  reviewOpenedAt?: true
+  reviewOpenedById?: true
   _all?: true
 }
 
@@ -132,6 +162,11 @@ export type TestAccessGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type TestAccessGroupByOutputType = {
   testId: string
   classroomId: string
+  assignedAt: Date
+  reviewLevel: $Enums.ReviewLevel
+  reviewAutoAt: Date | null
+  reviewOpenedAt: Date | null
+  reviewOpenedById: string | null
   _count: TestAccessCountAggregateOutputType | null
   _min: TestAccessMinAggregateOutputType | null
   _max: TestAccessMaxAggregateOutputType | null
@@ -158,15 +193,27 @@ export type TestAccessWhereInput = {
   NOT?: Prisma.TestAccessWhereInput | Prisma.TestAccessWhereInput[]
   testId?: Prisma.StringFilter<"TestAccess"> | string
   classroomId?: Prisma.StringFilter<"TestAccess"> | string
+  assignedAt?: Prisma.DateTimeFilter<"TestAccess"> | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFilter<"TestAccess"> | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.DateTimeNullableFilter<"TestAccess"> | Date | string | null
+  reviewOpenedAt?: Prisma.DateTimeNullableFilter<"TestAccess"> | Date | string | null
+  reviewOpenedById?: Prisma.StringNullableFilter<"TestAccess"> | string | null
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   classroom?: Prisma.XOR<Prisma.ClassroomScalarRelationFilter, Prisma.ClassroomWhereInput>
+  reviewOpenedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type TestAccessOrderByWithRelationInput = {
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  assignedAt?: Prisma.SortOrder
+  reviewLevel?: Prisma.SortOrder
+  reviewAutoAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewOpenedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewOpenedById?: Prisma.SortOrderInput | Prisma.SortOrder
   test?: Prisma.TestOrderByWithRelationInput
   classroom?: Prisma.ClassroomOrderByWithRelationInput
+  reviewOpenedBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type TestAccessWhereUniqueInput = Prisma.AtLeast<{
@@ -176,13 +223,24 @@ export type TestAccessWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TestAccessWhereInput | Prisma.TestAccessWhereInput[]
   testId?: Prisma.StringFilter<"TestAccess"> | string
   classroomId?: Prisma.StringFilter<"TestAccess"> | string
+  assignedAt?: Prisma.DateTimeFilter<"TestAccess"> | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFilter<"TestAccess"> | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.DateTimeNullableFilter<"TestAccess"> | Date | string | null
+  reviewOpenedAt?: Prisma.DateTimeNullableFilter<"TestAccess"> | Date | string | null
+  reviewOpenedById?: Prisma.StringNullableFilter<"TestAccess"> | string | null
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   classroom?: Prisma.XOR<Prisma.ClassroomScalarRelationFilter, Prisma.ClassroomWhereInput>
+  reviewOpenedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "testId_classroomId">
 
 export type TestAccessOrderByWithAggregationInput = {
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  assignedAt?: Prisma.SortOrder
+  reviewLevel?: Prisma.SortOrder
+  reviewAutoAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewOpenedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewOpenedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TestAccessCountOrderByAggregateInput
   _max?: Prisma.TestAccessMaxOrderByAggregateInput
   _min?: Prisma.TestAccessMinOrderByAggregateInput
@@ -194,40 +252,78 @@ export type TestAccessScalarWhereWithAggregatesInput = {
   NOT?: Prisma.TestAccessScalarWhereWithAggregatesInput | Prisma.TestAccessScalarWhereWithAggregatesInput[]
   testId?: Prisma.StringWithAggregatesFilter<"TestAccess"> | string
   classroomId?: Prisma.StringWithAggregatesFilter<"TestAccess"> | string
+  assignedAt?: Prisma.DateTimeWithAggregatesFilter<"TestAccess"> | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelWithAggregatesFilter<"TestAccess"> | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TestAccess"> | Date | string | null
+  reviewOpenedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TestAccess"> | Date | string | null
+  reviewOpenedById?: Prisma.StringNullableWithAggregatesFilter<"TestAccess"> | string | null
 }
 
 export type TestAccessCreateInput = {
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
   test: Prisma.TestCreateNestedOneWithoutAccessInput
   classroom: Prisma.ClassroomCreateNestedOneWithoutTestAccessInput
+  reviewOpenedBy?: Prisma.UserCreateNestedOneWithoutTestAccessesReviewOpenedInput
 }
 
 export type TestAccessUncheckedCreateInput = {
   testId: string
   classroomId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+  reviewOpenedById?: string | null
 }
 
 export type TestAccessUpdateInput = {
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   test?: Prisma.TestUpdateOneRequiredWithoutAccessNestedInput
   classroom?: Prisma.ClassroomUpdateOneRequiredWithoutTestAccessNestedInput
+  reviewOpenedBy?: Prisma.UserUpdateOneWithoutTestAccessesReviewOpenedNestedInput
 }
 
 export type TestAccessUncheckedUpdateInput = {
   testId?: Prisma.StringFieldUpdateOperationsInput | string
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestAccessCreateManyInput = {
   testId: string
   classroomId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+  reviewOpenedById?: string | null
 }
 
 export type TestAccessUpdateManyMutationInput = {
-
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestAccessUncheckedUpdateManyInput = {
   testId?: Prisma.StringFieldUpdateOperationsInput | string
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestAccessListRelationFilter = {
@@ -248,16 +344,73 @@ export type TestAccessTestIdClassroomIdCompoundUniqueInput = {
 export type TestAccessCountOrderByAggregateInput = {
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  assignedAt?: Prisma.SortOrder
+  reviewLevel?: Prisma.SortOrder
+  reviewAutoAt?: Prisma.SortOrder
+  reviewOpenedAt?: Prisma.SortOrder
+  reviewOpenedById?: Prisma.SortOrder
 }
 
 export type TestAccessMaxOrderByAggregateInput = {
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  assignedAt?: Prisma.SortOrder
+  reviewLevel?: Prisma.SortOrder
+  reviewAutoAt?: Prisma.SortOrder
+  reviewOpenedAt?: Prisma.SortOrder
+  reviewOpenedById?: Prisma.SortOrder
 }
 
 export type TestAccessMinOrderByAggregateInput = {
   testId?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  assignedAt?: Prisma.SortOrder
+  reviewLevel?: Prisma.SortOrder
+  reviewAutoAt?: Prisma.SortOrder
+  reviewOpenedAt?: Prisma.SortOrder
+  reviewOpenedById?: Prisma.SortOrder
+}
+
+export type TestAccessCreateNestedManyWithoutReviewOpenedByInput = {
+  create?: Prisma.XOR<Prisma.TestAccessCreateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput> | Prisma.TestAccessCreateWithoutReviewOpenedByInput[] | Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput[]
+  connectOrCreate?: Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput | Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput[]
+  createMany?: Prisma.TestAccessCreateManyReviewOpenedByInputEnvelope
+  connect?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+}
+
+export type TestAccessUncheckedCreateNestedManyWithoutReviewOpenedByInput = {
+  create?: Prisma.XOR<Prisma.TestAccessCreateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput> | Prisma.TestAccessCreateWithoutReviewOpenedByInput[] | Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput[]
+  connectOrCreate?: Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput | Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput[]
+  createMany?: Prisma.TestAccessCreateManyReviewOpenedByInputEnvelope
+  connect?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+}
+
+export type TestAccessUpdateManyWithoutReviewOpenedByNestedInput = {
+  create?: Prisma.XOR<Prisma.TestAccessCreateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput> | Prisma.TestAccessCreateWithoutReviewOpenedByInput[] | Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput[]
+  connectOrCreate?: Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput | Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput[]
+  upsert?: Prisma.TestAccessUpsertWithWhereUniqueWithoutReviewOpenedByInput | Prisma.TestAccessUpsertWithWhereUniqueWithoutReviewOpenedByInput[]
+  createMany?: Prisma.TestAccessCreateManyReviewOpenedByInputEnvelope
+  set?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  disconnect?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  delete?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  connect?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  update?: Prisma.TestAccessUpdateWithWhereUniqueWithoutReviewOpenedByInput | Prisma.TestAccessUpdateWithWhereUniqueWithoutReviewOpenedByInput[]
+  updateMany?: Prisma.TestAccessUpdateManyWithWhereWithoutReviewOpenedByInput | Prisma.TestAccessUpdateManyWithWhereWithoutReviewOpenedByInput[]
+  deleteMany?: Prisma.TestAccessScalarWhereInput | Prisma.TestAccessScalarWhereInput[]
+}
+
+export type TestAccessUncheckedUpdateManyWithoutReviewOpenedByNestedInput = {
+  create?: Prisma.XOR<Prisma.TestAccessCreateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput> | Prisma.TestAccessCreateWithoutReviewOpenedByInput[] | Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput[]
+  connectOrCreate?: Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput | Prisma.TestAccessCreateOrConnectWithoutReviewOpenedByInput[]
+  upsert?: Prisma.TestAccessUpsertWithWhereUniqueWithoutReviewOpenedByInput | Prisma.TestAccessUpsertWithWhereUniqueWithoutReviewOpenedByInput[]
+  createMany?: Prisma.TestAccessCreateManyReviewOpenedByInputEnvelope
+  set?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  disconnect?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  delete?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  connect?: Prisma.TestAccessWhereUniqueInput | Prisma.TestAccessWhereUniqueInput[]
+  update?: Prisma.TestAccessUpdateWithWhereUniqueWithoutReviewOpenedByInput | Prisma.TestAccessUpdateWithWhereUniqueWithoutReviewOpenedByInput[]
+  updateMany?: Prisma.TestAccessUpdateManyWithWhereWithoutReviewOpenedByInput | Prisma.TestAccessUpdateManyWithWhereWithoutReviewOpenedByInput[]
+  deleteMany?: Prisma.TestAccessScalarWhereInput | Prisma.TestAccessScalarWhereInput[]
 }
 
 export type TestAccessCreateNestedManyWithoutClassroomInput = {
@@ -344,12 +497,83 @@ export type TestAccessUncheckedUpdateManyWithoutTestNestedInput = {
   deleteMany?: Prisma.TestAccessScalarWhereInput | Prisma.TestAccessScalarWhereInput[]
 }
 
-export type TestAccessCreateWithoutClassroomInput = {
+export type EnumReviewLevelFieldUpdateOperationsInput = {
+  set?: $Enums.ReviewLevel
+}
+
+export type TestAccessCreateWithoutReviewOpenedByInput = {
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
   test: Prisma.TestCreateNestedOneWithoutAccessInput
+  classroom: Prisma.ClassroomCreateNestedOneWithoutTestAccessInput
+}
+
+export type TestAccessUncheckedCreateWithoutReviewOpenedByInput = {
+  testId: string
+  classroomId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+}
+
+export type TestAccessCreateOrConnectWithoutReviewOpenedByInput = {
+  where: Prisma.TestAccessWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestAccessCreateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput>
+}
+
+export type TestAccessCreateManyReviewOpenedByInputEnvelope = {
+  data: Prisma.TestAccessCreateManyReviewOpenedByInput | Prisma.TestAccessCreateManyReviewOpenedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type TestAccessUpsertWithWhereUniqueWithoutReviewOpenedByInput = {
+  where: Prisma.TestAccessWhereUniqueInput
+  update: Prisma.XOR<Prisma.TestAccessUpdateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedUpdateWithoutReviewOpenedByInput>
+  create: Prisma.XOR<Prisma.TestAccessCreateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedCreateWithoutReviewOpenedByInput>
+}
+
+export type TestAccessUpdateWithWhereUniqueWithoutReviewOpenedByInput = {
+  where: Prisma.TestAccessWhereUniqueInput
+  data: Prisma.XOR<Prisma.TestAccessUpdateWithoutReviewOpenedByInput, Prisma.TestAccessUncheckedUpdateWithoutReviewOpenedByInput>
+}
+
+export type TestAccessUpdateManyWithWhereWithoutReviewOpenedByInput = {
+  where: Prisma.TestAccessScalarWhereInput
+  data: Prisma.XOR<Prisma.TestAccessUpdateManyMutationInput, Prisma.TestAccessUncheckedUpdateManyWithoutReviewOpenedByInput>
+}
+
+export type TestAccessScalarWhereInput = {
+  AND?: Prisma.TestAccessScalarWhereInput | Prisma.TestAccessScalarWhereInput[]
+  OR?: Prisma.TestAccessScalarWhereInput[]
+  NOT?: Prisma.TestAccessScalarWhereInput | Prisma.TestAccessScalarWhereInput[]
+  testId?: Prisma.StringFilter<"TestAccess"> | string
+  classroomId?: Prisma.StringFilter<"TestAccess"> | string
+  assignedAt?: Prisma.DateTimeFilter<"TestAccess"> | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFilter<"TestAccess"> | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.DateTimeNullableFilter<"TestAccess"> | Date | string | null
+  reviewOpenedAt?: Prisma.DateTimeNullableFilter<"TestAccess"> | Date | string | null
+  reviewOpenedById?: Prisma.StringNullableFilter<"TestAccess"> | string | null
+}
+
+export type TestAccessCreateWithoutClassroomInput = {
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+  test: Prisma.TestCreateNestedOneWithoutAccessInput
+  reviewOpenedBy?: Prisma.UserCreateNestedOneWithoutTestAccessesReviewOpenedInput
 }
 
 export type TestAccessUncheckedCreateWithoutClassroomInput = {
   testId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+  reviewOpenedById?: string | null
 }
 
 export type TestAccessCreateOrConnectWithoutClassroomInput = {
@@ -378,20 +602,22 @@ export type TestAccessUpdateManyWithWhereWithoutClassroomInput = {
   data: Prisma.XOR<Prisma.TestAccessUpdateManyMutationInput, Prisma.TestAccessUncheckedUpdateManyWithoutClassroomInput>
 }
 
-export type TestAccessScalarWhereInput = {
-  AND?: Prisma.TestAccessScalarWhereInput | Prisma.TestAccessScalarWhereInput[]
-  OR?: Prisma.TestAccessScalarWhereInput[]
-  NOT?: Prisma.TestAccessScalarWhereInput | Prisma.TestAccessScalarWhereInput[]
-  testId?: Prisma.StringFilter<"TestAccess"> | string
-  classroomId?: Prisma.StringFilter<"TestAccess"> | string
-}
-
 export type TestAccessCreateWithoutTestInput = {
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
   classroom: Prisma.ClassroomCreateNestedOneWithoutTestAccessInput
+  reviewOpenedBy?: Prisma.UserCreateNestedOneWithoutTestAccessesReviewOpenedInput
 }
 
 export type TestAccessUncheckedCreateWithoutTestInput = {
   classroomId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+  reviewOpenedById?: string | null
 }
 
 export type TestAccessCreateOrConnectWithoutTestInput = {
@@ -420,36 +646,112 @@ export type TestAccessUpdateManyWithWhereWithoutTestInput = {
   data: Prisma.XOR<Prisma.TestAccessUpdateManyMutationInput, Prisma.TestAccessUncheckedUpdateManyWithoutTestInput>
 }
 
+export type TestAccessCreateManyReviewOpenedByInput = {
+  testId: string
+  classroomId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+}
+
+export type TestAccessUpdateWithoutReviewOpenedByInput = {
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  test?: Prisma.TestUpdateOneRequiredWithoutAccessNestedInput
+  classroom?: Prisma.ClassroomUpdateOneRequiredWithoutTestAccessNestedInput
+}
+
+export type TestAccessUncheckedUpdateWithoutReviewOpenedByInput = {
+  testId?: Prisma.StringFieldUpdateOperationsInput | string
+  classroomId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type TestAccessUncheckedUpdateManyWithoutReviewOpenedByInput = {
+  testId?: Prisma.StringFieldUpdateOperationsInput | string
+  classroomId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 export type TestAccessCreateManyClassroomInput = {
   testId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+  reviewOpenedById?: string | null
 }
 
 export type TestAccessUpdateWithoutClassroomInput = {
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   test?: Prisma.TestUpdateOneRequiredWithoutAccessNestedInput
+  reviewOpenedBy?: Prisma.UserUpdateOneWithoutTestAccessesReviewOpenedNestedInput
 }
 
 export type TestAccessUncheckedUpdateWithoutClassroomInput = {
   testId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestAccessUncheckedUpdateManyWithoutClassroomInput = {
   testId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestAccessCreateManyTestInput = {
   classroomId: string
+  assignedAt?: Date | string
+  reviewLevel?: $Enums.ReviewLevel
+  reviewAutoAt?: Date | string | null
+  reviewOpenedAt?: Date | string | null
+  reviewOpenedById?: string | null
 }
 
 export type TestAccessUpdateWithoutTestInput = {
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   classroom?: Prisma.ClassroomUpdateOneRequiredWithoutTestAccessNestedInput
+  reviewOpenedBy?: Prisma.UserUpdateOneWithoutTestAccessesReviewOpenedNestedInput
 }
 
 export type TestAccessUncheckedUpdateWithoutTestInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestAccessUncheckedUpdateManyWithoutTestInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewLevel?: Prisma.EnumReviewLevelFieldUpdateOperationsInput | $Enums.ReviewLevel
+  reviewAutoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewOpenedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -457,41 +759,67 @@ export type TestAccessUncheckedUpdateManyWithoutTestInput = {
 export type TestAccessSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   testId?: boolean
   classroomId?: boolean
+  assignedAt?: boolean
+  reviewLevel?: boolean
+  reviewAutoAt?: boolean
+  reviewOpenedAt?: boolean
+  reviewOpenedById?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
+  reviewOpenedBy?: boolean | Prisma.TestAccess$reviewOpenedByArgs<ExtArgs>
 }, ExtArgs["result"]["testAccess"]>
 
 export type TestAccessSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   testId?: boolean
   classroomId?: boolean
+  assignedAt?: boolean
+  reviewLevel?: boolean
+  reviewAutoAt?: boolean
+  reviewOpenedAt?: boolean
+  reviewOpenedById?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
+  reviewOpenedBy?: boolean | Prisma.TestAccess$reviewOpenedByArgs<ExtArgs>
 }, ExtArgs["result"]["testAccess"]>
 
 export type TestAccessSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   testId?: boolean
   classroomId?: boolean
+  assignedAt?: boolean
+  reviewLevel?: boolean
+  reviewAutoAt?: boolean
+  reviewOpenedAt?: boolean
+  reviewOpenedById?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
+  reviewOpenedBy?: boolean | Prisma.TestAccess$reviewOpenedByArgs<ExtArgs>
 }, ExtArgs["result"]["testAccess"]>
 
 export type TestAccessSelectScalar = {
   testId?: boolean
   classroomId?: boolean
+  assignedAt?: boolean
+  reviewLevel?: boolean
+  reviewAutoAt?: boolean
+  reviewOpenedAt?: boolean
+  reviewOpenedById?: boolean
 }
 
-export type TestAccessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"testId" | "classroomId", ExtArgs["result"]["testAccess"]>
+export type TestAccessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"testId" | "classroomId" | "assignedAt" | "reviewLevel" | "reviewAutoAt" | "reviewOpenedAt" | "reviewOpenedById", ExtArgs["result"]["testAccess"]>
 export type TestAccessInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
+  reviewOpenedBy?: boolean | Prisma.TestAccess$reviewOpenedByArgs<ExtArgs>
 }
 export type TestAccessIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
+  reviewOpenedBy?: boolean | Prisma.TestAccess$reviewOpenedByArgs<ExtArgs>
 }
 export type TestAccessIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.ClassroomDefaultArgs<ExtArgs>
+  reviewOpenedBy?: boolean | Prisma.TestAccess$reviewOpenedByArgs<ExtArgs>
 }
 
 export type $TestAccessPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -499,10 +827,16 @@ export type $TestAccessPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     test: Prisma.$TestPayload<ExtArgs>
     classroom: Prisma.$ClassroomPayload<ExtArgs>
+    reviewOpenedBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     testId: string
     classroomId: string
+    assignedAt: Date
+    reviewLevel: $Enums.ReviewLevel
+    reviewAutoAt: Date | null
+    reviewOpenedAt: Date | null
+    reviewOpenedById: string | null
   }, ExtArgs["result"]["testAccess"]>
   composites: {}
 }
@@ -899,6 +1233,7 @@ export interface Prisma__TestAccessClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   test<T extends Prisma.TestDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestDefaultArgs<ExtArgs>>): Prisma.Prisma__TestClient<runtime.Types.Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   classroom<T extends Prisma.ClassroomDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClassroomDefaultArgs<ExtArgs>>): Prisma.Prisma__ClassroomClient<runtime.Types.Result.GetResult<Prisma.$ClassroomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  reviewOpenedBy<T extends Prisma.TestAccess$reviewOpenedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestAccess$reviewOpenedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -930,6 +1265,11 @@ export interface Prisma__TestAccessClient<T, Null = never, ExtArgs extends runti
 export interface TestAccessFieldRefs {
   readonly testId: Prisma.FieldRef<"TestAccess", 'String'>
   readonly classroomId: Prisma.FieldRef<"TestAccess", 'String'>
+  readonly assignedAt: Prisma.FieldRef<"TestAccess", 'DateTime'>
+  readonly reviewLevel: Prisma.FieldRef<"TestAccess", 'ReviewLevel'>
+  readonly reviewAutoAt: Prisma.FieldRef<"TestAccess", 'DateTime'>
+  readonly reviewOpenedAt: Prisma.FieldRef<"TestAccess", 'DateTime'>
+  readonly reviewOpenedById: Prisma.FieldRef<"TestAccess", 'String'>
 }
     
 
@@ -1328,6 +1668,25 @@ export type TestAccessDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many TestAccesses to delete.
    */
   limit?: number
+}
+
+/**
+ * TestAccess.reviewOpenedBy
+ */
+export type TestAccess$reviewOpenedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

@@ -1,0 +1,51 @@
+[
+  {
+    "token": "100V3-EXPEQ-01-A-05",
+    "field": "statementText",
+    "before": "Өгөгдсөн: $a=2$, $b=3$ гэе. $\\left[ -3;7 \\right[ \\cup \\left] 10;\\infty\\right[$ үеэр илэрхийлэ.",
+    "after": "Өгөгдсөн: $a=2$, $b=3$ гэе. $\\left[ -3;7 \\right[ \\cup \\left] 10;\\infty \\right[$ үеэр илэрхийлэ.",
+    "reason": "Broken interval notation - missing space before \\right[ on second interval"
+  },
+  {
+    "token": "100V3-RATINEQ-12-A-01",
+    "field": "choice:B",
+    "before": "$\\left\\rbrack - \\infty; - 3 \\right\\lbrack \\cup \\left\\rbrack 7;\\infty \\right\\lbrack$Амжилт хүсье!",
+    "after": "$\\left\\rbrack - \\infty; - 3 \\right\\lbrack \\cup \\left\\rbrack 7;\\infty \\right\\lbrack$",
+    "reason": "Success message text appended to choice"
+  },
+  {
+    "token": "100V3-IRRINEQ-02-B-03",
+    "field": "statementText",
+    "before": "Тэгшитгэл: $x^2 + 5x + 6 \\leqx$",
+    "after": "Тэгшитгэл: $x^2 + 5x + 6 \\leq x$",
+    "reason": "Missing space - \\leqx should be \\leq x"
+  },
+  {
+    "token": "100V3-LOGINEQ-03-A-07",
+    "field": "statementText",
+    "before": "Интервал: $\\left( -1; 2 \\right) \\cup \\left( 5; \\infty \\right)$ нь шийдэл. \\",
+    "after": "Интервал: $\\left( -1; 2 \\right) \\cup \\left( 5; \\infty \\right)$ нь шийдэл.",
+    "reason": "Stray trailing backslash at end of statement"
+  },
+  {
+    "token": "100V3-ABSINEQ-05-B-06",
+    "field": "statementText",
+    "before": "Олонлог: $\\{ x | x > 1 \\}$ гэж бич",
+    "after": "Олонлог: $\\{ x | x > 1 \\}$ гэж бич",
+    "reason": "Unescaped braces issue - but this is inside LaTeX so OK"
+  },
+  {
+    "token": "100V3-RATINEQ-08-A-02",
+    "field": "statementText",
+    "before": "$\\left[ -3; -1 \\right]$ эсвэл $\\left[ 2; 5 \\right]$ гэх мэтээр үеэр хандуулан асуулт шалгана. Яаж хэлэлцэхдээ ⤇ тэмдэгт ашигласан байх хэрэгтэй.",
+    "after": "$\\left[ -3; -1 \\right]$ эсвэл $\\left[ 2; 5 \\right]$ гэх мэтээр үеэр хандуулан асуулт шалгана. Яаж хэлэлцэхдээ $\\Rightarrow$ тэмдэгт ашигласан байх хэрэгтэй.",
+    "reason": "Unicode ⤇ should be LaTeX \\Rightarrow"
+  },
+  {
+    "token": "100V3-IRREQ-04-B-08",
+    "field": "choice:D",
+    "before": "- 5",
+    "after": "$-5$",
+    "reason": "Negative number as text, should be LaTeX to avoid being parsed as list"
+  }
+]

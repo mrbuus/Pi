@@ -16,14 +16,21 @@ import { Role, StudentType, PaymentStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
+import { isClassTeacher } from '../common/class-teachers';
+import { parseDateOnly, todayUB } from '../common/date';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
 import {
   nextSevenDigitStudentCode,
+  parseClassroomLabel,
   parseGrade,
   parseStudentWorkbook,
   RawStudentImportRow,
 } from './student-import';
+
+// «Бие даан бодохдоо гарсан тоо»-г харуулах цонх (хоног)
+const FOCUS_PRACTICE_DAYS = 30;
 
 type StudentImportPreviewRow = RawStudentImportRow & {
   status: 'NEW' | 'UPDATE' | 'ERROR';
@@ -146,6 +153,161 @@ export class UsersService {
     });
 
     return { user, tempPassword: dto.phone ? undefined : tempPassword };
+  }
+
+  /**
+   * Багш+/Админ танхимын сурагчийг гараар бүртгэнэ (эзэн 2026-10-13: «багш өөрөө
+   * шинэ хүүхэд бүртгэж чаддаггүй нь сул тал»). Excel импорттой ижил дүрэм:
+   * 7 оронтой код (2027xxx), нууц үг = утас, CLASSROOM төрөл, зөвшөөрлийн урсгал
+   * алгасна. Анги сонговол тэр өдрөөс эхлэх Enrollment нэг дор үүснэ.
+   */
+  async createClassroomStudent(
+    dto: CreateClassroomStudentDto,
+    actorId: string,
+  ) {
+    await this.assertCentreAdmissionsStaff(actorId);
+    const phone = toNationalMn(dto.phone);
+    if (!phone)
+      throw new BadRequestException('Утасны дугаар 8 оронтой байх ёстой');
+    const firstName = dto.firstName.trim();
+    const lastName = dto.lastName.trim();
+    if (!firstName || !lastName)
+      throw new BadRequestException('Овог, нэр хоёулаа заавал');
+
+    const existing = await this.prisma.user.findUnique({
+      where: { phone },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        archivedAt: true,
+      },
+    });
+    if (existing)
+      throw new ConflictException(
+        existing.role === Role.STUDENT
+          ? `Энэ утас ${existing.lastName} ${existing.firstName}-д бүртгэлтэй байна${existing.archivedAt ? ' (архивт)' : ''}`
+          : 'Энэ утас өөр хэрэглэгчид бүртгэлтэй байна',
+      );
+
+    const classroom = dto.classroomId
+      ? await this.prisma.classroom.findFirst({
+          where: { id: dto.classroomId, archived: false },
+          select: { id: true, name: true, grade: true },
+        })
+      : null;
+    if (dto.classroomId && !classroom)
+      throw new NotFoundException('Анги олдсонгүй');
+    const label = classroom
+      ? parseClassroomLabel(classroom.name)
+      : { section: null, branch: null };
+    const grade =
+      dto.grade ?? (classroom?.grade ? Math.min(classroom.grade, 12) : null);
+
+    let joinedOn: Date;
+    try {
+      joinedOn = dto.joinedOn ? parseDateOnly(dto.joinedOn) : todayUB();
+    } catch {
+      throw new BadRequestException('Эхэлсэн огноо буруу байна');
+    }
+    const now = new Date();
+    // Enrollment.joinedAt-аас хойших ангийн мэдээлэл сурагчид харагдана —
+    // өмнө нь суурьж эхэлсэн бол тэр өдрөөс, ирээдүйд бол өнөөдрөөс.
+    const enrolledAt = new Date(
+      Math.min(joinedOn.getTime() - 8 * 3600_000, now.getTime()),
+    );
+
+    const passwordHash = await bcrypt.hash(phone, 10);
+    const username = await resolveUniqueUsername(
+      this.prisma,
+      firstName,
+      lastName,
+    );
+
+    let created: { id: string; studentCode: string | null } | null = null;
+    for (let attempt = 0; attempt < 3 && !created; attempt += 1) {
+      try {
+        created = await this.prisma.$transaction(async (tx) => {
+          const codes = (
+            await tx.user.findMany({
+              where: { studentCode: { startsWith: '2027' } },
+              select: { studentCode: true },
+            })
+          ).map((r) => r.studentCode);
+          const user = await tx.user.create({
+            data: {
+              role: Role.STUDENT,
+              phone,
+              username,
+              firstName,
+              lastName,
+              passwordHash,
+              studentCode: nextSevenDigitStudentCode(codes),
+              studentProfile: {
+                create: {
+                  type: StudentType.CLASSROOM,
+                  grade,
+                  school: dto.school?.trim() || null,
+                  section: label.section,
+                  branch: label.branch,
+                  fatherPhone: toNationalMn(dto.fatherPhone) ?? null,
+                  motherPhone: toNationalMn(dto.motherPhone) ?? null,
+                  guardianNote: dto.note?.trim() || null,
+                  tuitionPlan: dto.tuitionPlan ?? null,
+                  joinedOn,
+                  approvalPending: false,
+                  approvedAt: now,
+                  approvedById: actorId,
+                },
+              },
+              ...(classroom
+                ? {
+                    enrollments: {
+                      create: {
+                        classroomId: classroom.id,
+                        joinedAt: enrolledAt,
+                        movedById: actorId,
+                      },
+                    },
+                  }
+                : {}),
+            },
+            select: { id: true, studentCode: true },
+          });
+          return user;
+        });
+      } catch (error) {
+        // Зэрэг бүртгэлд код давхцвал (P2002) дахин оролдоно
+        const code = (error as { code?: string }).code;
+        if (code !== 'P2002' || attempt === 2) throw error;
+      }
+    }
+    if (!created) throw new ConflictException('Код олгож чадсангүй');
+
+    await this.audit.record({
+      actorId,
+      actorRole: 'ADMIN/TEACHER_PLUS',
+      action: 'CREATE_STUDENT',
+      entity: 'User',
+      entityId: created.id,
+      after: {
+        studentCode: created.studentCode,
+        firstName,
+        lastName,
+        classroomId: classroom?.id ?? null,
+        joinedOn: joinedOn.toISOString().slice(0, 10),
+      },
+    });
+
+    return {
+      id: created.id,
+      studentCode: created.studentCode,
+      firstName,
+      lastName,
+      phone,
+      classroom: classroom ? { id: classroom.id, name: classroom.name } : null,
+    };
   }
 
   // Сурагч хайх — гар аргаар cuid бичихийн оронд код/нэрээр хайж сонгоно
@@ -559,11 +721,16 @@ export class UsersService {
     return '\uFEFF' + csv.map((row) => row.map(field).join(',')).join('\r\n');
   }
 
-  listUsers(includeArchived = false) {
-    return this.prisma.user.findMany({
-      where: includeArchived
-        ? { role: Role.STUDENT, archivedAt: { not: null } }
-        : { archivedAt: null },
+  // role=STUDENT үед бүртгэлийн бүх талбар + одоогийн анги. Өмнө нь 500-аар
+  // тасардаг байсан тул ~700 сурагчийн 219 нь жагсаалтад харагддаггүй байв (2026-10-08).
+  async listUsers(includeArchived = false, role?: Role) {
+    const users = await this.prisma.user.findMany({
+      where: {
+        ...(includeArchived
+          ? { role: Role.STUDENT, archivedAt: { not: null } }
+          : { archivedAt: null }),
+        ...(role ? { role } : {}),
+      },
       select: {
         id: true,
         studentCode: true,
@@ -575,18 +742,40 @@ export class UsersService {
         username: true,
         role: true,
         createdAt: true,
+        lastSeenAt: true,
         studentProfile: {
-          select: { type: true, grade: true, school: true },
+          select: {
+            type: true,
+            grade: true,
+            school: true,
+            branch: true,
+            section: true,
+            tuitionPlan: true,
+            tuitionAmount: true,
+            fatherPhone: true,
+            motherPhone: true,
+            joinedOn: true,
+          },
         },
         teacherProfile: { select: { canManageStudents: true } },
         ownedClassrooms: {
           where: { archived: false },
           select: { id: true, name: true },
         },
+        enrollments: {
+          where: { leftAt: null },
+          orderBy: { joinedAt: 'desc' },
+          take: 1,
+          select: { classroom: { select: { id: true, name: true, grade: true } } },
+        },
       },
       orderBy: [{ role: 'asc' }, { firstName: 'asc' }],
-      take: 500,
+      take: 5000,
     });
+    return users.map(({ enrollments, ...u }) => ({
+      ...u,
+      currentClassroom: enrollments[0]?.classroom ?? null,
+    }));
   }
 
   async setUserRole(userId: string, role: Role, actorId: string) {
@@ -906,6 +1095,7 @@ export class UsersService {
         studentCode: true,
         teacherCode: true,
         createdAt: true,
+        lastSeenAt: true,
         studentProfile: true,
         teacherProfile: { select: { canManageStudents: true } },
       },
@@ -916,14 +1106,23 @@ export class UsersService {
       where: { studentId: targetId, leftAt: null },
       include: {
         classroom: {
-          select: { id: true, name: true, grade: true, teacherId: true },
+          select: {
+            id: true,
+            name: true,
+            grade: true,
+            teacherId: true,
+            assistantTeacherId: true,
+          },
         },
       },
     });
 
     if (requesterRole === Role.TEACHER) {
-      const ownsClassroom =
-        activeEnrollment?.classroom.teacherId === requesterId;
+      // Үндсэн ба туслах ангийн багш хоёулаа (common/class-teachers.ts)
+      const ownsClassroom = isClassTeacher(
+        activeEnrollment?.classroom,
+        requesterId,
+      );
       if (!ownsClassroom) {
         throw new ForbiddenException(
           'Зөвхөн өөрийн ангийн сурагчийг харах эрхтэй',
@@ -931,18 +1130,26 @@ export class UsersService {
       }
     }
 
-    const [assignmentsCompleted, testResults, attendanceRecords, attempts] =
-      await Promise.all([
-        this.prisma.submission.count({
-          where: {
-            studentId: targetId,
-            state: { not: 'NOT_DONE' },
-          },
-        }),
-        this.prisma.testResult.count({ where: { studentId: targetId } }),
-        this.prisma.attendance.count({ where: { studentId: targetId } }),
-        this.prisma.attempt.count({ where: { studentId: targetId } }),
-      ]);
+    const [
+      assignmentsCompleted,
+      testResults,
+      attendanceRecords,
+      attempts,
+      focus,
+    ] = await Promise.all([
+      this.prisma.submission.count({
+        where: {
+          studentId: targetId,
+          state: { not: 'NOT_DONE' },
+        },
+      }),
+      this.prisma.testResult.count({ where: { studentId: targetId } }),
+      this.prisma.attendance.count({ where: { studentId: targetId } }),
+      this.prisma.attempt.count({ where: { studentId: targetId } }),
+      user.role === Role.STUDENT
+        ? this.studentFocus(targetId)
+        : Promise.resolve(null),
+    ]);
 
     const canSeePhones =
       requesterRole === Role.ADMIN || requesterRole === Role.TEACHER_PLUS;
@@ -974,6 +1181,55 @@ export class UsersService {
         testResults,
         attendanceRecords,
         attempts,
+      },
+      focus,
+    };
+  }
+
+  /**
+   * Бодож байхдаа сайтаас гарсан тоо (эзэн 2026-10-13: «маш чухал»).
+   * - Шалгалт: TestAttemptSession.leaveCount (таб солих, цонх орхих, бүтэн дэлгэцээс гарах)
+   * - Бие даан бодох (learning-lab): LearningEvent.meta.timing.leaves, сүүлийн 30 хоног
+   * Сурагч тутам хоёр жижиг уншилт — индекстэй ([studentId,status], [userId,occurredAt]).
+   */
+  private async studentFocus(studentId: string) {
+    const since = new Date(Date.now() - FOCUS_PRACTICE_DAYS * 86_400_000);
+    const [sessions, practice] = await Promise.all([
+      this.prisma.testAttemptSession.findMany({
+        where: { studentId },
+        orderBy: { startedAt: 'desc' },
+        take: 200,
+        select: {
+          leaveCount: true,
+          startedAt: true,
+          test: { select: { id: true, title: true } },
+        },
+      }),
+      this.prisma.$queryRaw<{ problems: bigint; leaves: bigint | null }[]>`
+        SELECT COUNT(*) AS problems,
+               SUM(COALESCE(NULLIF(meta->'timing'->>'leaves', '')::int, 0)) AS leaves
+        FROM "LearningEvent"
+        WHERE "userId" = ${studentId}
+          AND "occurredAt" >= ${since}
+          AND meta->>'lab' = 'v1'`,
+    ]);
+    const withLeaves = sessions.filter((x) => x.leaveCount > 0);
+    return {
+      tests: {
+        sessions: sessions.length,
+        sessionsWithLeaves: withLeaves.length,
+        leaves: sessions.reduce((sum, x) => sum + x.leaveCount, 0),
+        recent: withLeaves.slice(0, 5).map((x) => ({
+          testId: x.test.id,
+          title: x.test.title,
+          startedAt: x.startedAt,
+          leaveCount: x.leaveCount,
+        })),
+      },
+      practice: {
+        days: FOCUS_PRACTICE_DAYS,
+        problems: Number(practice[0]?.problems ?? 0),
+        leaves: Number(practice[0]?.leaves ?? 0),
       },
     };
   }

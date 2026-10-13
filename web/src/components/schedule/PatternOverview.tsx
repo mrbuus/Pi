@@ -4,11 +4,13 @@ import { useMemo, useState } from "react";
 import { useSection } from "@/components/students/progress/useSection";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
 import { getClassroomColor } from "@/lib/classroomColor";
+import { Users } from "lucide-react";
 import EntryActionPanel from "./EntryActionPanel";
 import RoomShape from "./RoomShape";
 import {
   addDaysToKey,
   formatMinutes,
+  roomCapacityOf,
   roomOrderOf,
   todayUBKey,
   WEEKDAY_SHORT,
@@ -55,6 +57,8 @@ interface PatternGroup {
   startMinute: number;
   endMinute: number;
   room: string | null;
+  /** Ангид одоо суралцаж буй хүүхдийн тоо */
+  students: number | null;
   days: number[];
   /** Гараг бүрийн эх мөр — самбар нээхэд аль нэгийг нь ашиглана */
   members: Map<number, ScheduleEntry>;
@@ -129,6 +133,7 @@ export default function PatternOverview({ readOnly = false }: { readOnly?: boole
               startMinute: row.startMinute,
               endMinute: row.endMinute,
               room: row.room,
+              students: row.classroom._count?.enrollments ?? null,
               days: [row.weekday],
               members: new Map([[row.weekday, row]]),
             });
@@ -243,7 +248,7 @@ export default function PatternOverview({ readOnly = false }: { readOnly?: boole
                                 {g.classLabel}
                               </span>
                               {partial && (
-                                <span className="ml-auto flex gap-0.5">
+                                <span className="flex gap-0.5">
                                   {g.days.map((d) => (
                                     <span
                                       key={d}
@@ -254,6 +259,7 @@ export default function PatternOverview({ readOnly = false }: { readOnly?: boole
                                   ))}
                                 </span>
                               )}
+                              <Occupancy students={g.students} capacity={roomCapacityOf(g.room)} />
                             </RowTag>
                           </div>
                         );
@@ -281,5 +287,31 @@ export default function PatternOverview({ readOnly = false }: { readOnly?: boole
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Мөрийн баруун талд: ангийн хүүхдийн тоо / танхимын багтаамж (эзэн 2026-10-08).
+ * Багтаамж хэтэрвэл улаан + «хэтэрсэн» гэсэн бичиг (өнгө дангаараа утга
+ * илэрхийлэхгүй — STATUS §6.9).
+ */
+function Occupancy({ students, capacity }: { students: number | null; capacity: number | null }) {
+  if (students == null) return null;
+  const over = capacity != null && students > capacity;
+  const label = capacity != null
+    ? `${students} хүүхэд, танхимын багтаамж ${capacity}${over ? " — хэтэрсэн" : ""}`
+    : `${students} хүүхэд`;
+  return (
+    <span
+      title={label}
+      aria-label={label}
+      className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums ${
+        over ? "bg-error/12 text-error" : "bg-bg text-ink-dim"
+      }`}
+    >
+      <Users className="h-3 w-3" aria-hidden />
+      {students}
+      {capacity != null && <span className="font-normal">/{capacity}</span>}
+    </span>
   );
 }

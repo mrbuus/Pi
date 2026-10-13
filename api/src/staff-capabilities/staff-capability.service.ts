@@ -38,6 +38,9 @@ export class StaffCapabilityService {
     const actor = await this.actor(userId);
     if (actor.role === Role.ADMIN) return true;
     if (actor.role !== Role.TEACHER_PLUS) return false;
+    // Эзний шийдвэр (2026-10-08): Багш+ төлбөрийн хэсгийг БАЙНГА удирдана —
+    // тусгай эрх олгох шаардлагагүй. Хуваарь/цаг/цалин нь тусгай эрхтэй хэвээр.
+    if (capability === 'finance.manage') return true;
     return !!(await this.prisma.staffCapabilityGrant.findFirst({
       where: {
         userId,

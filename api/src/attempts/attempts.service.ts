@@ -179,8 +179,8 @@ export class AttemptsService {
       },
       include: {
         problem: {
+          // бодлогын код сурагчид очихгүй (эзний дүрэм 2026-10-08)
           select: {
-            token: true,
             chapter: { select: { title: true } },
           },
         },

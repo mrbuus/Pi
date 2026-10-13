@@ -50,6 +50,9 @@ model User {
   passwordChangedAt  DateTime?
   role               Role
   avatarUrl          String?
+  // Сайтад хамгийн сүүлд орсон мөч (эзэн 2026-10-13). JwtStrategy 5 минут
+  // тутамд нэг л удаа raw UPDATE-аар шинэчилнэ — updatedAt-ыг хөндөхгүй.
+  lastSeenAt         DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -79,6 +82,7 @@ model User {
   predictions             Prediction[]
   colorTags               StudentColorTag[]    @relation("TaggedStudent")
   ownedClassrooms         Classroom[]          @relation("ClassroomTeacher")
+  assistedClassrooms      Classroom[]          @relation("ClassroomAssistantTeacher")
   enrollments             Enrollment[]
   attemptSessions         TestAttemptSession[]
   learningEvents          LearningEvent[]
@@ -138,6 +142,13 @@ model User {
   archivedAt    DateTime?
   archivedById  String?
   archiveReason String?
+
+  // 1000 бодлогын шалгалтын эргэн харалтыг гараар нээсэн ажилтан
+  testAccessesReviewOpened TestAccess[] @relation("TestAccessReviewOpenedBy")
+
+  // Шалгалтын бодлого/алхам бүрийн зөв-буруу ба ирээгүй тэмдэглэгээ (сурагч талаас)
+  testItemMarks TestItemMark[] @relation("TestItemMarkStudent")
+  testAbsences  TestAbsence[]  @relation("TestAbsenceStudent")
 
   @@index([archivedAt])
 }
@@ -344,6 +355,9 @@ model TeacherProfile {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   // Админ олгодог эрх: сурагч нэмэх/хасах/анги солих (зөвхөн TEACHER_PLUS-д утгатай)
   canManageStudents Boolean @default(false)
+  // Хуваарьт багш болж оногддог эсэх (эзэн 2026-10-08): удирдлагын ажилтан,
+  // туршилтын бүртгэл false — өдрийн хуваарийн багшийн жагсаалтад гарахгүй.
+  teachesLessons    Boolean @default(true)
 }
 
 // Гадны багш (манай төвийн бус). Баталгаажаагүй багш сурагчийн мэдээлэл ХАРАХГҮЙ.
@@ -385,6 +399,11 @@ model Classroom {
   grade             Int?
   teacherId         String?
   teacher           User?         @relation("ClassroomTeacher", fields: [teacherId], references: [id])
+  // Туслах ангийн багш (эзэн 2026-10-13): анги дээд тал нь ХОЁР ангийн багштай —
+  // үндсэн (teacherId) ба туслах. Энгийн Багшийн ангийн эрхэд ижил тооцогдоно
+  // (common/class-teachers.ts).
+  assistantTeacherId String?
+  assistantTeacher   User?        @relation("ClassroomAssistantTeacher", fields: [assistantTeacherId], references: [id])
   archived          Boolean       @default(false)
   createdAt         DateTime      @default(now())
   // Хөтөлбөрийн түгжээний гараар override (Шийдвэр 5). null = ClassTestSession-ээс
@@ -402,12 +421,15 @@ model Classroom {
   // Wave 3: ажилтны төлөвлөгч / хичээлийн хуваарь
   staffTasks     StaffTask[]
   classSchedules ClassSchedule[]
+  calendarDayLinks AcademicCalendarDayClassroom[]
 
   // Түнш хөрөнгө — ТӨВИЙН ангийн буцаалт
   tuitionRefunds TuitionRefund[]
   dismissals     ClassDismissal[]
   lessonPackets  LessonPacket[]
   lessonRotation LessonRotation?
+
+  @@index([assistantTeacherId])
 }
 
 // ============ Гадны багшийн анги ============
@@ -751,10 +773,12 @@ model ProblemChoice {
   isCorrect   Boolean     @default(false)
   mistakeType MistakeType @default(NONE) // буруу бол алдааны төрөл
   mistakeNote String? // багшийн тайлбар: яагаад энэ хариу руу хүрдэг вэ
+  imageKey    String? // сонголтын зураг (StoredFile key) — график/зурган хариу
   order       Int
 
   @@unique([problemId, label])
   @@index([problemId])
+  @@index([imageKey])
 }
 
 model Problem {
@@ -778,6 +802,22 @@ model Problem {
   eloRating    Float  @default(1000)
   attemptCount Int    @default(0)
   correctRate  Float?
+
+  // YouTube бодолтын бичлэг (1000 бодлого) — youtube.com/watch, youtu.be, youtube.com/shorts
+  youtubeUrl   String?
+
+  // 2-р хэсгийн (FILL_NUMBER) алхмын багц: [{ label: "1-1", boxes: ["a","b"], points: 3 }].
+  // Багцын бүх нүд зөв → багцын оноо, нэг нь буруу → 0; 0 оноотой багц тооцогдохгүй.
+  // Хоосон бол бодлого бүхэлдээ нэг зүйл (tests/exam-items.ts).
+  scoringGroups Json?
+
+  // Буцаах ба өөрчлөлтийн түүх (ContentRevision): засвар бүрд +1. Засварлагч
+  // ачаалсан хувилбараа expectedVersion болгон илгээнэ — зөрвөл 409 (зэрэг
+  // засахад сүүлд хадгалсан нь чимээгүй дарахгүй). updatedAt-ийг @updatedAt
+  // болгохгүй: статистик (attemptCount…) шинэчлэх нь засвар биш.
+  version     Int       @default(0)
+  updatedAt   DateTime?
+  updatedById String?
 
   // Зөөлөн устгал: hard DELETE хийвэл Attempt зэрэг аналитикийн түүхэн
   // бичлэгүүд орфон үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
@@ -931,11 +971,18 @@ enum TestType {
   EESH_MOCK // ЭЕШ сорил
   CUSTOM
   THEORY // онолын асуулт-хариултын модуль (Шийдвэр 8)
+  THOUSAND // «1000 бодлого» — «Шалгалт» хэсэгт (/tests?includeThousand=1), эргэн харалт /thousand/tests/:id/review
 }
 
 enum TestGradingMode {
   AUTO // зөв хариу баталгаатай, систем шууд оноо бодно
   MANUAL // PDF/source орсон ч хариу баталгаажаагүй эсвэл багш гараар дүн оруулна
+}
+
+enum ReviewLevel {
+  NONE // огт нээхгүй
+  PROBLEMS // бодлого + зураг + сурагчийн өөрийн хариу
+  FULL // + зөв хариу, бодолт, YouTube видео
 }
 
 model Test {
@@ -960,10 +1007,17 @@ model Test {
   // Нийтэд харагдахгүй түр хуулбар. Ангиудад оноосон үед засварын замаар ил тод нийтэлнэ.
   isDraft Boolean @default(false)
 
+  // Буцаах ба өөрчлөлтийн түүх (ContentRevision) — Problem-ийнхтэй ижил утгатай.
+  version     Int       @default(0)
+  updatedAt   DateTime?
+  updatedById String?
+
   problems        TestProblem[]
   access          TestAccess[]
   results         TestResult[]
   attemptSessions TestAttemptSession[]
+  itemMarks       TestItemMark[]
+  absences        TestAbsence[]
 
   @@index([deletedAt])
   @@index([isDraft, deletedAt])
@@ -998,6 +1052,16 @@ model TestAccess {
   test        Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
   classroomId String
   classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  // 1000 бодлогын шалгалт: ангид оноосон огноо ба эргэн харалтын түвшин.
+  // Гараар нээгээгүй (NONE) бол reviewAutoAt (өгөгдмөл assignedAt + 7 хоног)
+  // хүрэхэд FULL болж нээгдэнэ — серверт тооцно (thousand/review-gate.ts).
+  assignedAt    DateTime    @default(now())
+  reviewLevel   ReviewLevel @default(NONE)
+  reviewAutoAt  DateTime?
+  reviewOpenedAt DateTime?
+  reviewOpenedById String?
+  reviewOpenedBy User?     @relation("TestAccessReviewOpenedBy", fields: [reviewOpenedById], references: [id], onDelete: SetNull)
 
   @@id([testId, classroomId])
 }
@@ -1047,10 +1111,66 @@ model TestResult {
   enteredById String? // CHAPTER_EXAM үед багш гараар оруулна
   source      AttemptSource
   createdAt   DateTime      @default(now())
+  // Дүн өөрчлөгдөх бүрт +1 (гар засвар, онлайн дүнг Багш+ засах). regradeNote —
+  // системийн товч тэмдэглэл; ажилтны бичсэн шалтгаан зөвхөн AuditLog-д.
+  version     Int           @default(1)
+  regradeNote String?
+  updatedAt   DateTime      @default(now()) @updatedAt
 
   acknowledgements ResultAcknowledgement[]
 
   @@unique([testId, studentId])
+  @@index([studentId])
+}
+
+// ============================================================================
+// Шалгалтын бодлого/алхам бүрийн зөв-буруу — онлайн, гар шивэлт, Excel, OMR
+// бүгд ЭНЭ нэг хүснэгтэд бичигдэнэ (анализ нэг эх сурвалжтай).
+// itemKey: "p:<problemId>" — сонгох эсвэл бүхэл бодлого;
+//          "g:<problemId>:<label>" — 2-р хэсгийн алхмын багц (Problem.scoringGroups).
+// Оноог энд хадгалахгүй — TestProblem.points / scoringGroups-оос бодно.
+// ============================================================================
+enum ItemMarkStatus {
+  CORRECT
+  WRONG
+  BLANK // хариулаагүй (онлайн)
+}
+
+enum ItemMarkSource {
+  ONLINE
+  MANUAL
+  EXCEL
+  OMR
+}
+
+model TestItemMark {
+  id          String         @id @default(cuid())
+  testId      String
+  test        Test           @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     User           @relation("TestItemMarkStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  itemKey     String
+  status      ItemMarkStatus
+  source      ItemMarkSource
+  enteredById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([testId, studentId, itemKey])
+  @@index([studentId])
+}
+
+// Шалгалтад ирээгүй сурагч — дүн, дундажид тооцогдохгүй. TestResult-аас тусдаа
+// (TestResult-ийг уншдаг бүх газар 0 оноо гэж андуурахгүйн тулд).
+model TestAbsence {
+  testId     String
+  test       Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User     @relation("TestAbsenceStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  markedById String?
+  createdAt  DateTime @default(now())
+
+  @@id([testId, studentId])
   @@index([studentId])
 }
 
@@ -1106,6 +1226,7 @@ enum AttemptSource {
   ONLINE_TEST // системийн авто шалгалт
   CHAPTER_EXAM // 36+4 шалгалт, багш оруулсан
   OMR_IMPORT // хариултын хуудас уншигч машин
+  MANUAL_ENTRY // бусад төрлийн (ЭЕШ сорил, 1000 бодлого …) цаасан дүн — гар/Excel
 }
 
 model Attempt {
@@ -1245,6 +1366,9 @@ model StudentNote {
   updatedAt    DateTime        @updatedAt
   resolvedAt   DateTime?
   resolvedById String?
+  // Төлбөрийн тэмдэглэл: эцэг эх «хэзээ төлнө» гэж амласан өдөр. Энэ өдөр
+  // өнгөрөөд тэмдэглэлээс хойш баталгаажсан төлбөр ирээгүй бол «амлалт тасарсан».
+  promisedOn   DateTime?       @db.Date
 
   @@index([studentId, type])
   @@index([createdAt])
@@ -1270,6 +1394,42 @@ model AuditLog {
   @@index([at])
   @@index([entity, entityId])
   @@index([actorId, at])
+}
+
+// ============ Контентын хувилбар — буцаах ба өөрчлөлтийн түүх ============
+// docs/v2/BUTSAAH-TUUKH-TOLOVLOGOO.md. Бодлого/тестийн засвар бүр БҮРЭН
+// хуулбартай (snapshot) энд бичигдэнэ: хэн, хэзээ, юу өөрчилсөн (товч), шалтгаан.
+// Сэргээх нь өөрөө шинэ хувилбар (RESTORE) — түүх устахгүй. Хувилбар 0 = анхны
+// төлөв; хуучин мөрд анх засахад залхуугаар үүснэ (8000 мөрийг backfill хийхгүй).
+// Засварын transaction дотор бичигдэнэ (api/src/revisions/revision-store.ts).
+// AuditLog хэвээр бичигдсээр — энэ нь түүнийг орлохгүй, нэмэлт.
+enum RevisionEntity {
+  PROBLEM
+  TEST
+}
+
+enum RevisionAction {
+  CREATE
+  UPDATE
+  RESTORE
+  IMPORT
+}
+
+model ContentRevision {
+  id        String         @id @default(cuid())
+  entity    RevisionEntity
+  entityId  String
+  version   Int
+  snapshot  Json // сэргээж болох бүрэн төлөв (revisions/revision-snapshot.ts)
+  summary   String // монгол товч: «B сонголтыг зөв болгосон»
+  action    RevisionAction
+  actorId   String
+  actorRole String
+  reason    String?
+  createdAt DateTime       @default(now())
+
+  @@unique([entity, entityId, version])
+  @@index([entity, entityId, createdAt])
 }
 
 // ============ Эрх (named pass) ба Төлбөр ============
@@ -1868,6 +2028,7 @@ model ClassSchedule {
 
   exceptions ScheduleException[]
   topics     LessonTopic[]
+  staffing   LessonStaffing[]
 
   @@unique([classroomId, weekday, startMinute, effectiveFrom])
   @@index([classroomId, weekday])
@@ -1913,6 +2074,32 @@ model LessonTopic {
   @@unique([scheduleId, date])
 }
 
+// Өдрийн хуваарийг нийтэлсэн тэмдэг (эзэн 2026-10-11): Багш+ «Нийтлэх» дарахад
+// тэр өдөр хичээлтэй багш, сурагчдад мэдэгдэл очно; дахин дарвал «өөрчлөгдсөн».
+model SchedulePublication {
+  date          DateTime @id @db.Date
+  publishedAt   DateTime
+  publishedById String
+  recipients    Int
+}
+
+// Тухайн өдрийн хичээлд орох АХЛАХ ба ТУСЛАХ багш (эзэн 2026-10-08).
+// Төв хуваариа өдөр өдрөөр гаргадаг тул багшийг огноогоор оноодог; хоёулаа
+// хоосон байж болно. Багшийн id-г энгийн мөр болгож хадгална (LessonTopic-ийн
+// createdById-тэй ижил конвенц) — багш архивлагдсан ч түүх үлдэнэ.
+model LessonStaffing {
+  id                 String        @id @default(cuid())
+  scheduleId         String
+  schedule           ClassSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  date               DateTime      @db.Date
+  leadTeacherId      String?
+  assistantTeacherId String?
+  updatedById        String
+  updatedAt          DateTime      @updatedAt
+
+  @@unique([scheduleId, date])
+}
+
 // ============ Багшийн долоо хоногийн ажлын өдрийн бүртгэл ============
 // Багш бүр өөрийн гэсэн ажлын өдрийн хэв маягтай (ж: Даваа/Мягмар ирдэггүй)
 // — энэ нь ClassSchedule-ээс тусдаа, зөвхөн "энэ багш тухайн өдөр
@@ -1922,9 +2109,27 @@ model TeacherWorkDay {
   teacherId String
   teacher   User    @relation("TeacherWorkDayTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
   weekday   Int // 0=Ням … 6=Бямба
+  // Төвийн хүснэгт СОНДГОЙ/ТЭГШ 7 хоногоор ээлжилдэг (эзэн 2026-10-11):
+  // 0 = 7 хоног бүр, 1 = сондгой, 2 = тэгш. 1-р (сондгой) 7 хоног нь
+  // 2026-08-31 (Даваа)-аас эхэлнэ — week-resolver.ts `weekParityOf`.
+  parity    Int     @default(0)
+  // Хүснэгтийн мөрийн дараалал — «Энэ өдөр ажиллах багш» жагсаалтын эрэмбэ.
+  sortOrder Int     @default(0)
   note      String?
 
-  @@unique([teacherId, weekday])
+  @@unique([teacherId, weekday, parity])
+}
+
+// Багшийн ажлын өдрийн хүснэгтийн горим ба хүчинтэй хугацаа (ганц мөр, id="default").
+// mode: FIXED = 7 хоног бүр ижил (parity 0), ALTERNATING = сондгой/тэгш (1/2).
+// validFrom..validTo-гаас гадуурх өдөрт хүснэгт хэрэгжихгүй (онцгой өдөр л).
+model TeacherRosterConfig {
+  id          String    @id @default("default")
+  mode        String    @default("ALTERNATING")
+  validFrom   DateTime? @db.Date
+  validTo     DateTime? @db.Date
+  updatedAt   DateTime  @updatedAt
+  updatedById String?
 }
 
 // Тухайн ганц огноон дээрх давхардлын override — жирийн бол амардаг өдөр
@@ -1954,12 +2159,30 @@ enum CalendarDayType {
 
 model AcademicCalendarDay {
   id          String          @id @default(cuid())
-  date        DateTime        @unique @db.Date
+  // Нэг өдөр хэд хэдэн бичлэгтэй байж болно (өөр өөр ангид) — давхцлыг
+  // сервис шалгана. classrooms хоосон = БҮХ анги хамаарна.
+  date        DateTime        @db.Date
   type        CalendarDayType
   title       String
   note        String?
   createdById String
   createdAt   DateTime        @default(now())
+
+  classrooms AcademicCalendarDayClassroom[]
+
+  @@index([date])
+}
+
+// Онцгой өдөр (амралт/шалгалт) аль ангид хамаарахыг заана. Мөр байхгүй бол
+// тухайн өдөр БҮХ ангид хамаарна.
+model AcademicCalendarDayClassroom {
+  calendarDayId String
+  classroomId   String
+  calendarDay   AcademicCalendarDay @relation(fields: [calendarDayId], references: [id], onDelete: Cascade)
+  classroom     Classroom           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@id([calendarDayId, classroomId])
+  @@index([classroomId])
 }
 
 // ============ Сурагчийн зорилго (Student Goals) ============
@@ -2280,4 +2503,225 @@ model StudyReviewResponse {
 
   @@unique([itemId, userId, clientRequestId])
   @@index([userId, occurredAt])
+}
+
+// ============ Батлагдсан хичээлийн түүх (эзэн 2026-10-08) ============
+// Өдрийн хичээл дууссаны дараа багш «Батлах» дарахад тухайн хуваарь+огнооны
+// бодит баримтыг (сэдэв, ахлах/туслах багш, тест, ирц) ХУУЛБАРЛАЖ хадгална —
+// дараа нь хуваарь/нэр засагдсан ч түүх өөрчлөгдөхгүй. Хуваарь/анги устсан ч
+// түүх үлдэх ёстой тул FK-гүй (LessonStaffing-ийн мөрийн id конвенц).
+model LessonRecord {
+  id                   String   @id @default(cuid())
+  scheduleId           String
+  classroomId          String
+  date                 DateTime @db.Date
+  classroomName        String
+  startMinute          Int
+  endMinute            Int
+  room                 String?
+  topic                String?
+  leadTeacherId        String?
+  leadTeacherName      String?
+  assistantTeacherId   String?
+  assistantTeacherName String?
+  // [{ id, testId, title }] — тухайн өдөр анги хийсэн тест (ClassTestSession)
+  tests                Json     @default("[]")
+  testCount            Int      @default(0)
+  enrolledCount        Int      @default(0)
+  presentCount         Int      @default(0)
+  absentCount          Int      @default(0)
+  attendanceMarked     Int      @default(0)
+  confirmedById        String
+  confirmedByName      String
+  confirmedAt          DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  students LessonRecordStudent[]
+
+  @@unique([scheduleId, date])
+  @@index([classroomId, date])
+  @@index([date])
+}
+
+// Тухайн өдөр ангид элссэн байсан сурагч бүр — «энэ хүүхэд энэ өдөр энэ
+// хичээлийг хийсэн» сургалтын мөчлөгийн түүх. attendance = Attendance.status
+// (тэмдэглээгүй бол null).
+model LessonRecordStudent {
+  id          String       @id @default(cuid())
+  recordId    String
+  record      LessonRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  studentId   String
+  studentName String
+  attendance  String?
+
+  @@unique([recordId, studentId])
+  @@index([studentId])
+}
+
+// Багшийн нэмэлт тайлбар — ЗӨВХӨН ажилтанд. Сурагч/эцэг эхэд хэзээ ч
+// буцаахгүй (lesson-records модуль л уншина). Хоосон бол мөр байхгүй.
+model LessonNote {
+  id            String   @id @default(cuid())
+  scheduleId    String
+  date          DateTime @db.Date
+  body          String   @db.VarChar(500)
+  updatedById   String
+  updatedByName String
+  updatedAt     DateTime @updatedAt
+
+  @@unique([scheduleId, date])
+}
+
+// Сурагчийн зан төлөвийн шошго (эзэн 2026-10-13, «Анги» самбар): «Буудаж
+// боддог», «Хуулдаг», «Анхаарал», «Сайжирсан» гэх мэт. Багш бүр нэмж/хасна,
+// ТҮҮХ ХАДГАЛАГДАНА — хасахад мөр устахгүй, removedAt бөглөгдөнө. kind нь
+// чөлөөт мөр (жагсаалт нь class-dashboard/behavior-flags.ts-д) — шинэ төрөл
+// нэмэхэд миграци хэрэггүй. LessonRecord-ийн адил FK-гүй (түүх найдвартай).
+model StudentBehaviorFlag {
+  id            String    @id @default(cuid())
+  studentId     String
+  classroomId   String?
+  kind          String    @db.VarChar(40)
+  note          String?   @db.VarChar(300)
+  createdById   String
+  createdByName String
+  createdAt     DateTime  @default(now())
+  removedAt     DateTime?
+  removedById   String?
+  removedByName String?
+  removeNote    String?   @db.VarChar(300)
+
+  @@index([studentId, removedAt])
+  @@index([classroomId, removedAt])
+}
+
+// ============ «Дотоод» ноорог (эзэн 2026-10-13) ============
+// Ажилтан бодлогыг НИЙТЛЭХЭЭС ӨМНӨ бичиж, бодож, засна (web /app/internal,
+// api/src/internal-drafts). Problem/Test-ийг ноорогоор бохирдуулахгүйн тулд
+// тусдаа хүснэгт: нийтлэх үед л Problem (+Test) үүснэ. Сурагч, эцэг эхэд ХЭЗЭЭ Ч
+// харагдахгүй — зөвхөн Багш+/Админ. User-т FK-гүй, нэрийг хадгална
+// (StudentBehaviorFlag-ийн адил — түүх найдвартай).
+model DraftSet {
+  id              String       @id @default(cuid())
+  title           String       @db.VarChar(200)
+  subject         Subject      @default(MATH)
+  // Нийтлэх бүлгийн шошго (заавал биш) — нийтлэх цонхонд урьдчилан сонгогдоно
+  chapterId       String?
+  topic           String?      @db.VarChar(120)
+  createdById     String
+  createdByName   String
+  updatedById     String
+  updatedByName   String
+  createdAt       DateTime     @default(now())
+  // Блокийн засвар ч энэ огноог шинэчилнэ (жагсаалтын «сүүлд зассан»)
+  updatedAt       DateTime     @default(now())
+  publishCount    Int          @default(0)
+  publishedAt     DateTime?
+  publishedTestId String?
+  deletedAt       DateTime?
+  blocks          DraftBlock[]
+
+  @@index([deletedAt, updatedAt])
+}
+
+// Нэг бодлого = нэг блок. kind: CHOICE (A–E) | NUMERIC (тоон хариу).
+// answer: CHOICE-д үсэг ("B"), NUMERIC-т утга ("12.5"). Сонголтын текст бүгд
+// хоосон бол сонголт зурагт байна гэж үзнэ (нийтлэхэд үсгээр дүгнэнэ).
+model DraftBlock {
+  id                 String   @id @default(cuid())
+  setId              String
+  set                DraftSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  order              Int
+  kind               String   @default("CHOICE") @db.VarChar(16)
+  statement          String   @default("")
+  choices            String[] @default([])
+  answer             String?  @db.VarChar(100)
+  solution           String?
+  imageKey           String?
+  tag                String?  @db.VarChar(120)
+  points             Int      @default(1)
+  // Зэрэг засвар: хадгалах бүрд +1, хуучин хувилбараас хадгалбал 409
+  version            Int      @default(0)
+  publishedProblemId String?
+  updatedById        String
+  updatedByName      String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+
+  @@index([setId, order])
+  @@index([imageKey])
+}
+
+// Хэн юуг өөрчилсөн — ноорогийн түүх (автосейв нэг хүний нэг блок дээр 10 мин
+// дотор нэг мөрөнд нэгтгэгдэнэ). Нийтлэх/устгах нь AuditLog-д давхар бичигдэнэ.
+model DraftEvent {
+  id        String   @id @default(cuid())
+  setId     String
+  blockId   String?
+  actorId   String
+  actorName String
+  action    String   @db.VarChar(32)
+  summary   String   @db.VarChar(300)
+  at        DateTime @default(now())
+
+  @@index([setId, at])
+}
+
+// Түвшин тогтоох шалгалт (нийтэд нээлттэй, нэвтрэлтгүй). Хүүхэд мэдээллээ
+// бөглөөд цагтай тест бодно, бодлого бүрийн бодолтын ЗУРГИЙГ илгээнэ; багш
+// зургийг харж түвшинг тогтоогоод холбогдоно. Бодлого ба хариуны түлхүүр нь
+// кодонд (api/src/placement/placement-tests.ts), энд зөвхөн хүүхдийн өгөгдөл.
+enum PlacementStatus {
+  NEW
+  REVIEWED
+  CONTACTED
+}
+
+model PlacementAttempt {
+  id            String          @id @default(cuid())
+  /// Зочны эрхийн нууц түлхүүрийн sha256 (түлхүүр өөрөө хадгалагдахгүй)
+  secretHash    String
+  testKey       String
+  /// Эхлэх үеийн бодлогууд (хариутай) — тест засагдсан ч дүн өөрчлөгдөхгүй
+  testSnapshot  Json?
+  name          String
+  phone         String
+  grade         Int
+  school        String?
+  parentPhone   String?
+  /// { "1": "E", "10": { "a": "6", ... } }
+  answers       Json            @default("{}")
+  /// { "1": ["uuid.jpg"] } — бодлого бүрийн бодолтын зураг
+  photos        Json            @default("{}")
+  /// photos-ийн бүх key — файлын эрх шалгахад (`has`)
+  photoKeys     String[]        @default([])
+  autoScore     Int?
+  maxScore      Int?
+  startedAt     DateTime        @default(now())
+  deadlineAt    DateTime
+  submittedAt   DateTime?
+  autoSubmitted Boolean         @default(false)
+  status        PlacementStatus @default(NEW)
+  level         String?
+  teacherNote   String?
+  reviewedById  String?
+  reviewedAt    DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([status, createdAt])
+  @@index([phone])
+}
+
+// Түвшин тогтоох шалгалтын агуулга — «Удирдлага»-аас засварлана. Анхны агуулга
+// api/src/placement/placement-tests.ts (эзний PDF). problems = PlacementProblem[]
+model PlacementTestConfig {
+  key          String   @id
+  title        String
+  minutes      Int
+  instructions String?
+  problems     Json
+  updatedById  String?
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
 }

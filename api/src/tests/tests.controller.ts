@@ -71,11 +71,16 @@ export class TestsController {
   }
 
   @Get()
-  list(@Req() req: AuthedRequest, @Query('subject') subject?: string) {
+  list(
+    @Req() req: AuthedRequest,
+    @Query('subject') subject?: string,
+    @Query('includeThousand') includeThousand?: string,
+  ) {
     return this.tests.list(
       req.user.userId,
       req.user.role,
       parseSubjectQuery(subject),
+      includeThousand === '1' || includeThousand === 'true',
     );
   }
 

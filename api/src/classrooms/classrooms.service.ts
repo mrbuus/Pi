@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
 import { todayCodeUB } from '../auth/auth.service';
+import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
@@ -38,14 +39,18 @@ export class ClassroomsService {
   }
 
   async list(userId: string, role: Role) {
+    // Энгийн багш: үндсэн эсвэл туслах ангийн багш болсон анги (2026-10-13)
     const where =
       role === Role.TEACHER
-        ? { teacherId: userId, archived: false }
+        ? { ...classTeacherWhere(userId), archived: false }
         : { archived: false };
     return this.prisma.classroom.findMany({
       where,
       include: {
         teacher: {
+          select: { id: true, firstName: true, lastName: true },
+        },
+        assistantTeacher: {
           select: { id: true, firstName: true, lastName: true },
         },
         _count: {
@@ -65,6 +70,9 @@ export class ClassroomsService {
       where: { id },
       include: {
         teacher: { select: { id: true, firstName: true, lastName: true } },
+        assistantTeacher: {
+          select: { id: true, firstName: true, lastName: true },
+        },
         enrollments: {
           where: { leftAt: null, student: { archivedAt: null } },
           orderBy: { joinedAt: 'asc' },
@@ -86,7 +94,7 @@ export class ClassroomsService {
     if (!classroom || classroom.archived) {
       throw new NotFoundException('Анги олдсонгүй');
     }
-    if (role === Role.TEACHER && classroom.teacherId !== userId) {
+    if (role === Role.TEACHER && !isClassTeacher(classroom, userId)) {
       throw new ForbiddenException('Энэ ангид хандах эрхгүй');
     }
     const canManageStudents =
@@ -107,6 +115,8 @@ export class ClassroomsService {
         grade: classroom.grade,
         teacherId: classroom.teacherId,
         teacher: classroom.teacher,
+        assistantTeacherId: classroom.assistantTeacherId,
+        assistantTeacher: classroom.assistantTeacher,
       },
       students: classroom.enrollments.map((enrollment) => ({
         ...enrollment.student,
@@ -170,7 +180,10 @@ export class ClassroomsService {
     byUserId: string,
     byRole: Role,
   ) {
-    await this.assertCanManageStudents(byUserId, byRole);
+    // Анги солих/оноох — Админ, Багш+ (эзний шийдвэр 2026-10-11: тусгай эрхгүйгээр).
+    // Ангиас гаргах (removeStudent) нь canManageStudents эрхтэй хэвээр.
+    if (byRole !== Role.ADMIN && byRole !== Role.TEACHER_PLUS)
+      throw new ForbiddenException('Анги солихыг Багш+ эсвэл админ хийнэ');
 
     const classroom = await this.prisma.classroom.findUnique({
       where: { id: classroomId },
@@ -231,9 +244,10 @@ export class ClassroomsService {
     });
     if (!classroom) throw new NotFoundException('Анги олдсонгүй');
 
-    if (dto.teacherId) {
+    for (const teacherId of [dto.teacherId, dto.assistantTeacherId]) {
+      if (!teacherId) continue;
       const teacher = await this.prisma.user.findUnique({
-        where: { id: dto.teacherId },
+        where: { id: teacherId },
       });
       if (
         !teacher ||
@@ -242,6 +256,7 @@ export class ClassroomsService {
         throw new BadRequestException('Заасан хэрэглэгч багшийн эрхгүй байна');
       }
     }
+    const next = ClassroomsService.nextTeachers(classroom, dto);
 
     const updated = await this.prisma.classroom.update({
       where: { id },
@@ -249,8 +264,9 @@ export class ClassroomsService {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
         ...(dto.type !== undefined ? { type: dto.type } : {}),
         ...(dto.grade !== undefined ? { grade: dto.grade } : {}),
-        ...(dto.teacherId !== undefined
-          ? { teacherId: dto.teacherId || null }
+        ...(dto.teacherId !== undefined ? { teacherId: next.teacherId } : {}),
+        ...(dto.assistantTeacherId !== undefined
+          ? { assistantTeacherId: next.assistantTeacherId }
           : {}),
       },
     });
@@ -265,6 +281,101 @@ export class ClassroomsService {
       after: updated,
     });
 
+    return updated;
+  }
+
+  /**
+   * Хоёр багшийн дүрэм (эзэн 2026-10-13): хүсэлтийн дараах эцсийн төлөв —
+   * илгээгээгүй талбар хэвээр, хоосон бол чөлөөлнө. Нэг хүн хоёр үүрэгт
+   * давхар байж болохгүй (дээд тал нь ХОЁР өөр багш).
+   */
+  static nextTeachers(
+    current: { teacherId: string | null; assistantTeacherId: string | null },
+    dto: { teacherId?: string | null; assistantTeacherId?: string | null },
+  ): { teacherId: string | null; assistantTeacherId: string | null } {
+    const teacherId =
+      dto.teacherId === undefined ? current.teacherId : dto.teacherId || null;
+    const assistantTeacherId =
+      dto.assistantTeacherId === undefined
+        ? current.assistantTeacherId
+        : dto.assistantTeacherId || null;
+    if (teacherId && teacherId === assistantTeacherId)
+      throw new BadRequestException(
+        'Ангийн багш ба туслах багш өөр хүн байх ёстой',
+      );
+    return { teacherId, assistantTeacherId };
+  }
+
+  /**
+   * Ангийн самбараас ангийн багш / туслах багшийг солих — Багш+/Админ.
+   * Сонголт нь хуваарьт оногддог багш (TeacherProfile.teachesLessons). Аудитад
+   * бичигдэнэ.
+   */
+  async setTeachers(
+    id: string,
+    dto: { teacherId?: string | null; assistantTeacherId?: string | null },
+    actorId: string,
+    actorRole: Role,
+  ) {
+    if (actorRole !== Role.ADMIN && actorRole !== Role.TEACHER_PLUS)
+      throw new ForbiddenException('Ангийн багшийг Багш+ эсвэл админ солино');
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        archived: true,
+        teacherId: true,
+        assistantTeacherId: true,
+      },
+    });
+    if (!classroom || classroom.archived)
+      throw new NotFoundException('Анги олдсонгүй');
+    const next = ClassroomsService.nextTeachers(classroom, dto);
+    const ids = [next.teacherId, next.assistantTeacherId].filter(
+      (v): v is string => !!v,
+    );
+    const changedIds = ids.filter(
+      (v) => v !== classroom.teacherId && v !== classroom.assistantTeacherId,
+    );
+    if (changedIds.length) {
+      const ok = await this.prisma.user.findMany({
+        where: {
+          id: { in: changedIds },
+          archivedAt: null,
+          role: { in: [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN] },
+          teacherProfile: { teachesLessons: true },
+        },
+        select: { id: true },
+      });
+      if (ok.length !== new Set(changedIds).size)
+        throw new BadRequestException(
+          'Сонгосон хүн хичээл заадаг багшийн жагсаалтад алга',
+        );
+    }
+    const person = { select: { id: true, firstName: true, lastName: true } };
+    const updated = await this.prisma.classroom.update({
+      where: { id },
+      data: next,
+      select: {
+        id: true,
+        teacherId: true,
+        assistantTeacherId: true,
+        teacher: person,
+        assistantTeacher: person,
+      },
+    });
+    await this.audit.record({
+      actorId,
+      actorRole,
+      action: 'UPDATE',
+      entity: 'Classroom',
+      entityId: id,
+      before: {
+        teacherId: classroom.teacherId,
+        assistantTeacherId: classroom.assistantTeacherId,
+      },
+      after: next,
+    });
     return updated;
   }
 

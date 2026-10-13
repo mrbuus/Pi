@@ -2,13 +2,15 @@ import { StaffCapabilityModule } from './staff-capabilities/staff-capability.mod
 import { HealthController } from './health.controller';
 import { StudyReviewModule } from './study-review/study-review.module';
 import { LessonFlowModule } from './lesson-flow/lesson-flow.module';
+import { LessonRecordsModule } from './lesson-records/lesson-records.module';
 import { CentreHelpModule } from './centre-help/centre-help.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { DocumentImportModule } from './document-import/document-import.module';
 import { LearningLabModule } from './learning-lab/learning-lab.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { StripProblemTokenInterceptor } from './common/strip-problem-token.interceptor';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -37,6 +39,7 @@ import { FinanceModule } from './finance/finance.module';
 import { GoalsModule } from './goals/goals.module';
 import { InsightsModule } from './insights/insights.module';
 import { LeadsModule } from './leads/leads.module';
+import { PlacementModule } from './placement/placement.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { NotesModule } from './notes/notes.module';
@@ -51,6 +54,7 @@ import { ScheduleModule as ClassScheduleModule } from './schedule/schedule.modul
 import { StorageModule } from './storage/storage.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TestsModule } from './tests/tests.module';
+import { ThousandModule } from './thousand/thousand.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
@@ -59,6 +63,10 @@ import { FormulasModule } from './formulas/formulas.module';
 import { ReadinessModule } from './readiness/readiness.module';
 import { MistakesModule } from './mistakes/mistakes.module';
 import { JobsModule } from './jobs/jobs.module';
+import { RevisionsModule } from './revisions/revisions.module';
+import { PresenceModule } from './presence/presence.module';
+import { ClassDashboardModule } from './class-dashboard/class-dashboard.module';
+import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
 
 @Module({
   imports: [
@@ -120,6 +128,7 @@ import { JobsModule } from './jobs/jobs.module';
     AssignmentsModule,
     ContentModule,
     TestsModule,
+    ThousandModule,
     AttemptsModule,
     StorageModule,
     PassesModule,
@@ -136,6 +145,7 @@ import { JobsModule } from './jobs/jobs.module';
     FinanceModule,
     EnrollmentWindowsModule,
     LeadsModule,
+    PlacementModule,
     LessonsModule,
     GatewaysModule,
     ProgressModule,
@@ -163,8 +173,21 @@ import { JobsModule } from './jobs/jobs.module';
     FeedbackModule,
     CentreHelpModule,
     LessonFlowModule,
+    LessonRecordsModule,
+    // Буцаах ба өөрчлөлтийн түүх (docs/v2/BUTSAAH-TUUKH-TOLOVLOGOO.md)
+    RevisionsModule,
+    PresenceModule,
+    // «Анги» самбар (эзэн 2026-10-13)
+    ClassDashboardModule,
+    // «Дотоод» — нийтлэхээс өмнөх бодлого/тестийн ноорог (эзэн 2026-10-13)
+    InternalDraftsModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Сурагч/эцэг эх/нэвтрээгүйд бодлогын код (token) хэзээ ч очихгүй.
+    { provide: APP_INTERCEPTOR, useClass: StripProblemTokenInterceptor },
+  ],
 })
 export class AppModule {}

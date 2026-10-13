@@ -14,7 +14,8 @@ export default function StudentRowAction({ test }: { test: TestRow }) {
   if (done) {
     return (
       <Link
-        href={`/app/tests/${test.id}`}
+        // 1000 бодлого: эргэн харалт багшийн нээсэн түвшнээр (сервер хаана)
+        href={test.type === "THOUSAND" ? `/app/tests/${test.id}/review` : `/app/tests/${test.id}`}
         className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-success/15 px-3 py-1.5 text-xs font-bold text-success"
       >
         <Check className="h-3.5 w-3.5" aria-hidden="true" />

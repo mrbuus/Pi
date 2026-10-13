@@ -28,6 +28,17 @@ describe('staff capability decision boundaries', () => {
       service.assert('plus', 'schedule.manage', 'class'),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
+  it('TEACHER_PLUS manages payments by role (owner decision 2026-10-08), but nothing else', async () => {
+    expect(await service.has('plus', 'finance.manage')).toBe(true);
+    expect(await service.has('plus', 'payroll.view')).toBe(false);
+    expect(await service.has('plus', 'time.review')).toBe(false);
+    prisma.user.findUnique.mockResolvedValue({
+      id: 't',
+      role: Role.TEACHER,
+      archivedAt: null,
+    });
+    expect(await service.has('t', 'finance.manage')).toBe(false);
+  });
   it('checks current database role; administrator bypass is explicit', async () => {
     prisma.user.findUnique.mockResolvedValue({
       id: 'admin',

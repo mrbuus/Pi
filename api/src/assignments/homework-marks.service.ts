@@ -7,6 +7,7 @@ import {
 import { AuditService } from '../audit/audit.service';
 import { parseDateOnly } from '../common/date';
 import { Role } from '../generated/prisma/enums';
+import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetHomeworkMarkDto } from './dto/set-homework-mark.dto';
 
@@ -47,7 +48,7 @@ export class HomeworkMarksService {
       throw new NotFoundException('Анги олдсонгүй');
     }
     if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return classroom;
-    if (role === Role.TEACHER && classroom.teacherId === userId) {
+    if (role === Role.TEACHER && isClassTeacher(classroom, userId)) {
       return classroom;
     }
     throw new ForbiddenException('Энэ ангид хандах эрхгүй');
@@ -119,7 +120,7 @@ export class HomeworkMarksService {
         where: {
           studentId,
           leftAt: null,
-          classroom: { teacherId: userId },
+          classroom: classTeacherWhere(userId),
         },
       });
       if (enrollment) return student;

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import MathText from "@/components/MathText";
+import ChoiceContent from "@/components/ChoiceContent";
 
 /* ============================================================================
  * ChoiceList — CHOICE бодлогын сонголтуудыг ХОЁР горимоор харуулна:
@@ -16,12 +16,15 @@ import MathText from "@/components/MathText";
 export default function ChoiceList({
   mode,
   choices,
+  images,
   selected,
   onSelect,
   problemNumber,
 }: {
   mode: "TEXT" | "LETTER";
   choices: string[];
+  /** TEXT горимд сонголт бүрийн зураг (choices-тэй ижил дараалал) */
+  images?: (string | null)[] | null;
   selected: number | string | undefined;
   onSelect: (value: number | string) => void;
   problemNumber: number;
@@ -82,8 +85,8 @@ export default function ChoiceList({
             >
               {sel ? <Check size={16} /> : ci + 1}
             </span>
-            <span className="flex-1">
-              <MathText>{c}</MathText>
+            <span className="min-w-0 flex-1">
+              <ChoiceContent text={c} image={images?.[ci]} />
             </span>
           </button>
         );

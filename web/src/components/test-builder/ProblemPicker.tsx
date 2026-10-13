@@ -231,8 +231,8 @@ export default function ProblemPicker({
                 aria-pressed={selected}
                 aria-label={
                   selected
-                    ? `${p.token} бодлогыг тестээс хасах`
-                    : `${p.token} бодлогыг тестэд нэмэх`
+                    ? "Бодлогыг тестээс хасах"
+                    : "Бодлогыг тестэд нэмэх"
                 }
                 className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition ${
                   selected ? "bg-brand text-on-brand" : "bg-line/30 text-ink-dim"
@@ -241,23 +241,17 @@ export default function ProblemPicker({
                 {selected ? order : "+"}
               </button>
 
-              <button
-                type="button"
-                onClick={() => onToggle(p.id)}
-                aria-pressed={selected}
-                className="min-w-0 flex-1 text-left"
-              >
+              {/* Зөвхөн дугаарын товч идэвхжүүлнэ — бичвэр дээр дарах/сонгоход
+                  бодлого санамсаргүй хасагдаж, төгсгөлд дахин нэмэгдэхгүй */}
+              <div className="min-w-0 flex-1 text-left">
                 <span className="block text-base leading-snug text-ink">
                   {p.statementText ? (
                     <MathText>{p.statementText}</MathText>
                   ) : (
-                    <span className="italic text-ink-dim">(текстгүй — токенгоор л таних)</span>
+                    <span className="italic text-ink-dim">(текстгүй бодлого)</span>
                   )}
                 </span>
                 <span className="mt-1.5 flex flex-wrap items-center gap-1.5 text-sm">
-                  <span className="rounded bg-line/30 px-2 py-0.5 font-mono text-ink-dim">
-                    {p.token}
-                  </span>
                   <span className="rounded bg-brand-bright/15 px-2 py-0.5 text-brand-soft">
                     {FORMAT_LABEL[p.format] ?? p.format}
                   </span>
@@ -287,7 +281,7 @@ export default function ProblemPicker({
                     </span>
                   )}
                 </span>
-              </button>
+              </div>
 
               <button
                 type="button"

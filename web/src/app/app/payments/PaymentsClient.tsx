@@ -1,574 +1,257 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  BookOpen,
-  CalendarRange,
-  Check,
-  Clock,
-  History,
-  Search,
-  Users,
-  Wallet,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { CircleAlert, Clock, History, LayoutGrid, Search, X, type LucideIcon } from "lucide-react";
 import { api } from "@/lib/api";
-import { formatMnt, TUITION } from "@/lib/orgInfo";
-import { Meta } from "@/components/ui/Meta";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/kit/button";
-import { Progress } from "@/components/ui/kit/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
-import OutstandingPanel from "@/components/payments/OutstandingPanel";
-import PaymentEditModal from "@/components/payments/PaymentEditModal";
-import ReversePaymentModal from "@/components/payments/ReversePaymentModal";
-import StudentHistoryPanel from "@/components/payments/StudentHistoryPanel";
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
-import {
-  METHOD_LABEL,
-  STATUS_LABEL,
-  errMsg,
-  matchTuitionPlan,
-} from "@/components/payments/paymentHelpers";
-import type {
-  MonthRow,
-  Pass,
-  Payment,
-} from "@/components/payments/types";
-
-/** Хэсэг бүрийн ачаалж буй / алдаатай / хоосон төлвийг ялгаж харуулна. */
-function SectionStatus({
-  loading,
-  error,
-  onRetry,
-  empty,
-  emptyText,
-}: {
-  loading: boolean;
-  error: string | null;
-  onRetry: () => void;
-  empty: boolean;
-  emptyText: string;
-}) {
-  if (loading) {
-    return <LoadingState rows={3} label={emptyText} />;
-  }
-  if (error) {
-    return <ErrorState message={error} onRetry={onRetry} />;
-  }
-  if (empty) {
-    return <EmptyState title={emptyText} />;
-  }
-  return null;
-}
+import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
+import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
+import ClassOverview from "@/components/payments/ClassOverview";
+import LedgerList from "@/components/payments/LedgerList";
+import PendingPanel from "@/components/payments/PendingPanel";
+import PriceReference from "@/components/payments/PriceReference";
+import RecentPanel from "@/components/payments/RecentPanel";
+import { millions } from "@/components/payments/ledgerFormat";
+import { errMsg } from "@/components/payments/paymentHelpers";
+import type { LedgerBoard, LedgerOverview, LedgerRow } from "@/components/payments/ledgerTypes";
 
 /* ============================================================================
- * Ажилтны «Төлбөр» (шинэ дизайн, 2026-09-26).
+ * «Төлбөр» (2026-10-13, эзний шаардлага).
  *
- * Өмнө нь 7 хэсэг нэг урт хуудсанд давхарласан — утсан дээр «Батлах» товч
- * хүртэл 3 дэлгэц гүйлгэх шаардлагатай байв. Одоо дээд талд өнгөт тоон
- * картууд (дарахад тухайн таб нээгдэнэ) + 5 таб. Нэг ч функц хасагдаагүй:
- * батлах/цуцлах/засах/буцаах, сарын төлөлт, дутуу төлөлт, сурагчийн түүх,
- * сүүлийн төлбөрүүд, төлбөрийн лавлагаа бүгд хэвээр.
+ * Ажилтны өдөр тутмын урсгал: анги → сурагчдын сарын блок → сурагч.
+ * Төвийн «Асуудалтай» жагсаалт хамгийн их өртэйг эхэнд гаргана.
+ * Өмнөх функц бүгд хэвээр: батлах/цуцлах/засах (Батлах), сүүлийн төлбөр +
+ * буцаах (Түүх), сарын төлөлт (блок), сурагч хайх, үнийн лавлагаа (Үнэ).
  * ========================================================================== */
 
-type TabKey = "pending" | "month" | "student" | "recent" | "reference";
-
+type TabKey = "classes" | "problems" | "pending" | "history";
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
+  { key: "classes", label: "Ангиуд", icon: LayoutGrid },
+  { key: "problems", label: "Асуудалтай", icon: CircleAlert },
   { key: "pending", label: "Батлах", icon: Clock },
-  { key: "month", label: "Сарын төлөлт", icon: CalendarRange },
-  { key: "student", label: "Сурагч", icon: Search },
-  { key: "recent", label: "Түүх", icon: History },
-  { key: "reference", label: "Лавлагаа", icon: BookOpen },
+  { key: "history", label: "Түүх", icon: History },
 ];
+const isTab = (v: string | null): v is TabKey => TABS.some((t) => t.key === v);
+const PAGE = 40;
+
+function ListSkeleton() {
+  return (
+    <div className="space-y-3" role="status" aria-label="Ачаалж байна">
+      <SkeletonRows rows={6} />
+    </div>
+  );
+}
+
+type ProblemView = "problems" | "promises";
+
+function Problems({ view, onPaid }: { view: ProblemView; onPaid: () => void }) {
+  const [data, setData] = useState<LedgerBoard | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [more, setMore] = useState(false);
+
+  const load = useCallback((offset = 0) => {
+    api<LedgerBoard>(`/payments/ledger/board?view=${view}&offset=${offset}&limit=${PAGE}`)
+      .then((d) => {
+        setData((prev) => (offset && prev ? { ...d, rows: [...prev.rows, ...d.rows] } : d));
+        setError(null);
+      })
+      .catch((e) => setError(errMsg(e)))
+      .finally(() => setMore(false));
+  }, [view]);
+  useEffect(() => load(0), [load]);
+
+  if (error && !data) return <ErrorState message={error} onRetry={() => load(0)} />;
+  if (!data) return <ListSkeleton />;
+  if (!data.rows.length)
+    return view === "promises" ? (
+      <EmptyState title="Амлалт алга" hint="Төлбөрийн тэмдэглэлд амласан өдөр бичихэд энд гарна" />
+    ) : (
+      <EmptyState title="Асуудалтай сурагч алга" hint="Хугацаа нь болсон өр, тасарсан амлалт алга" />
+    );
+  const replace = (row: LedgerRow) => {
+    setData((d) => (d ? { ...d, rows: d.rows.map((r) => (r.id === row.id ? row : r)) } : d));
+    onPaid();
+  };
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-ink-dim">
+        <span className="font-bold tabular-nums text-ink">{data.total}</span> сурагч, нийт өр{" "}
+        <span className="font-bold tabular-nums text-error">{millions(data.owedNow ?? 0)}</span>
+      </p>
+      <LedgerList rows={data.rows} year={data.year} current={data.month} showClass onPaid={replace} />
+      {data.rows.length < data.total && (
+        <Button variant="outline" className="w-full" disabled={more} onClick={() => {
+            setMore(true);
+            load(data.rows.length);
+          }}>
+          {more ? "Ачаалж байна" : `Цааш ${Math.min(PAGE, data.total - data.rows.length)}`}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function SearchResults({ q }: { q: string }) {
+  const [data, setData] = useState<LedgerBoard | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const t = setTimeout(() => {
+      setError(null);
+      api<LedgerBoard>(`/payments/ledger/board?q=${encodeURIComponent(q)}`)
+        .then((d) => alive && setData(d))
+        .catch((e) => alive && setError(errMsg(e)));
+    }, 300);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [q]);
+  if (error) return <ErrorState message={error} />;
+  if (!data) return <ListSkeleton />;
+  if (!data.rows.length) return <EmptyState icon={Search} title="Сурагч олдсонгүй" hint="Нэр, утас эсвэл кодоор хайна" />;
+  const replace = (row: LedgerRow) =>
+    setData((d) => (d ? { ...d, rows: d.rows.map((r) => (r.id === row.id ? row : r)) } : d));
+  return <LedgerList rows={data.rows} year={data.year} current={data.month} showClass onPaid={replace} />;
+}
 
 export default function PaymentsClient() {
-  // Орон нутгийн сар (toISOString нь UTC тул сарын 1-нд 08:00-оос өмнө өмнөх сар гарна).
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const [tab, setTab] = useState<TabKey>("pending");
-  const [onlyUnpaid, setOnlyUnpaid] = useState(false);
-  const [month, setMonth] = useState(currentMonth);
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const tabParam = params.get("tab");
+  const tab: TabKey = isTab(tabParam) ? tabParam : "classes";
+  const problemView: ProblemView = params.get("view") === "promises" ? "promises" : "problems";
+  const [q, setQ] = useState("");
+  const [overview, setOverview] = useState<LedgerOverview | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [pending, setPending] = useState<Payment[]>([]);
-  const [pendingLoading, setPendingLoading] = useState(true);
-  const [pendingError, setPendingError] = useState<string | null>(null);
+  const loadOverview = useCallback(() => {
+    api<LedgerOverview>("/payments/ledger/overview")
+      .then((d) => {
+        setOverview(d);
+        setError(null);
+      })
+      .catch((e) => setError(errMsg(e)));
+  }, []);
+  useEffect(loadOverview, [loadOverview]);
 
-  const [recent, setRecent] = useState<Payment[]>([]);
-  const [recentLoading, setRecentLoading] = useState(true);
-  const [recentError, setRecentError] = useState<string | null>(null);
-
-  const [passes, setPasses] = useState<Pass[]>([]);
-  const [passesError, setPassesError] = useState<string | null>(null);
-
-  const [monthRows, setMonthRows] = useState<MonthRow[]>([]);
-  const [monthRowsLoading, setMonthRowsLoading] = useState(true);
-  const [monthRowsError, setMonthRowsError] = useState<string | null>(null);
-
-  const [passPick, setPassPick] = useState<Record<string, string>>({});
-  const [notes, setNotes] = useState<Record<string, string>>({});
-
-  // Багш+ бүрэн эрхийн засах/буцаах цонхнууд — хаана ч байгаа мөрөөс нээгдэнэ
-  const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
-  const [reversingPayment, setReversingPayment] = useState<Payment | null>(null);
-  // Сурагчийн түүхийн хэсгийг засвар/буцаалтын дараа шинэчлэхэд ашиглана
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const load = useCallback(() => {
-    setPendingLoading(true);
-    setPendingError(null);
-    api<Payment[]>("/payments?status=PENDING")
-      .then(setPending)
-      .catch((e) => setPendingError(errMsg(e)))
-      .finally(() => setPendingLoading(false));
-
-    setRecentLoading(true);
-    setRecentError(null);
-    api<Payment[]>("/payments")
-      .then(setRecent)
-      .catch((e) => setRecentError(errMsg(e)))
-      .finally(() => setRecentLoading(false));
-
-    setPassesError(null);
-    api<Pass[]>("/catalog/passes", { auth: false })
-      .then(setPasses)
-      .catch((e) => setPassesError(errMsg(e)));
-
-    setMonthRowsLoading(true);
-    setMonthRowsError(null);
-    api<MonthRow[]>(`/payments/months/${month}`)
-      .then(setMonthRows)
-      .catch((e) => setMonthRowsError(errMsg(e)))
-      .finally(() => setMonthRowsLoading(false));
-
-    setRefreshKey((k) => k + 1);
-  }, [month]);
-
-  useEffect(load, [load]);
-
-  const totals = useMemo(() => {
-    const pendingAmount = pending.reduce((sum, p) => sum + p.amount, 0);
-    const unpaid = monthRows.filter((r) => !r.paid).length;
-    const paid = monthRows.length - unpaid;
-    return { pendingAmount, unpaid, paid };
-  }, [pending, monthRows]);
-
-  async function confirm(id: string) {
-        try {
-      await api(`/payments/${id}/confirm`, {
-        method: "POST",
-        body: {
-          ...(passPick[id] ? { passId: passPick[id] } : {}),
-          ...(notes[id]?.trim() ? { note: notes[id].trim() } : {}),
-        },
-      });
-      setPassPick((m) => ({ ...m, [id]: "" }));
-      setNotes((m) => ({ ...m, [id]: "" }));
-      toast.success("Төлбөр баталгаажлаа");
-      load();
-    } catch (e) {
-      toast.error(errMsg(e));
-    }
-  }
-
-  async function reject(id: string) {
-        try {
-      await api(`/payments/${id}/reject`, { method: "POST" });
-      toast.success("Төлбөр цуцлагдлаа");
-      load();
-    } catch (e) {
-      toast.error(errMsg(e));
-    }
-  }
-
-  function handleEdited() {
-    toast.success("Төлбөр засагдлаа");
-    load();
-  }
-
-  function handleReversed() {
-    toast.success("Төлбөр буцаагдаж, эрх цуцлагдлаа");
-    load();
-  }
-
-  const selectCls =
-    "min-h-11 rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand";
-  const inputCls =
-    "min-h-11 rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand";
-
-  const visibleMonthRows = onlyUnpaid ? monthRows.filter((r) => !r.paid) : monthRows;
-  const paidPct = monthRows.length ? Math.round((totals.paid / monthRows.length) * 100) : 0;
-
-  const statCards: { tab: TabKey; value: string; label: string; icon: LucideIcon; tone: string }[] = [
-    { tab: "pending", value: String(pending.length), label: "батлах төлбөр", icon: Clock, tone: "bg-warning/10 text-warning" },
-    { tab: "pending", value: formatMnt(totals.pendingAmount), label: "баталгаажаагүй дүн", icon: Wallet, tone: "bg-accent-violet/10 text-accent-violet" },
-    { tab: "month", value: String(totals.unpaid), label: `${month} сард төлөөгүй`, icon: Users, tone: "bg-error/10 text-error" },
-  ];
+  const setTab = (t: TabKey, view?: ProblemView) =>
+    router.replace(
+      t === "classes" ? pathname : `${pathname}?tab=${t}${view === "promises" ? "&view=promises" : ""}`,
+      { scroll: false },
+    );
+  const searching = q.trim().length >= 2;
+  const count: Partial<Record<TabKey, number>> = {
+    problems: overview?.totals.problems,
+    pending: overview?.totals.pending.count,
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="sr-only">Төлбөрийн хяналт</h1>
-          <p className="text-sm text-ink-dim">
-            Данс, бэлэн, QPay төлбөрийг баталгаажуулж эрх олгоно — дүн, огноо,
-            сар бүрийг ч засах/буцаах бүрэн эрхтэй.
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <h1 className="cyrillic-heading mr-auto text-2xl font-extrabold text-ink">Төлбөр</h1>
+        <PriceReference />
       </div>
 
-      {/* Өнгөт тоон картууд — дарахад холбогдох таб нээгдэнэ */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {statCards.map((c, i) => (
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" aria-hidden />
+        <label htmlFor="pay-search" className="sr-only">
+          Сурагч хайх
+        </label>
+        <input
+          id="pay-search"
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Сурагч хайх: нэр, утас, код"
+          autoComplete="off"
+          className="min-h-12 w-full rounded-2xl border border-line bg-surface pl-10 pr-12 text-base text-ink outline-none focus:border-brand sm:text-sm"
+        />
+        {q && (
           <button
-            key={c.label}
             type="button"
-            onClick={() => setTab(c.tab)}
-            className={`chunky chunky-press flex min-w-0 items-center gap-3 p-3 text-left sm:p-4 hover:border-brand-bright/40 ${
-              i === 2 ? "col-span-2 sm:col-span-1" : ""
-            }`}
+            onClick={() => setQ("")}
+            aria-label="Хайлт цэвэрлэх"
+            className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-xl text-ink-dim hover:text-ink"
           >
-            <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${c.tone}`}>
-              <c.icon className="h-5 w-5" aria-hidden />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-lg font-extrabold leading-tight tabular-nums text-ink sm:text-xl">{c.value}</span>
-              <span className="block text-xs text-ink-dim [overflow-wrap:anywhere]">{c.label}</span>
-            </span>
+            <X className="h-4 w-4" aria-hidden />
           </button>
-        ))}
+        )}
       </div>
 
-      {/* Табууд (shadcn/ui Tabs = Radix): сумаар шилжинэ, утсан дээр хажуу тийш гүйлгэнэ */}
-      <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="space-y-6">
-      <TabsList aria-label="Төлбөрийн хэсгүүд">
-        {TABS.map((t) => (
-          <TabsTrigger key={t.key} value={t.key} className="group">
-            <t.icon aria-hidden />
-            {t.label}
-            {t.key === "pending" && pending.length > 0 && (
-              <span className="rounded-full bg-warning/15 px-1.5 text-xs tabular-nums text-warning group-data-[state=active]:bg-on-brand/20 group-data-[state=active]:text-on-brand">
-                {pending.length}
-              </span>
-            )}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-
-      <TabsContent value="pending">
-      <section className="chunky p-4 sm:p-6">
-        <h2 className="mb-4 font-bold text-ink">Баталгаажуулах төлбөрүүд</h2>
-        <SectionStatus
-          loading={pendingLoading}
-          error={pendingError}
-          onRetry={load}
-          empty={!pendingLoading && !pendingError && pending.length === 0}
-          emptyText="Хүлээгдэж буй төлбөр алга"
-        />
-        {passesError && (
-          <p className="mb-2 flex items-center gap-1.5 text-xs text-error">
-            <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Эрхийн жагсаалт ачаалагдсангүй: {passesError}
-          </p>
-        )}
-        {!pendingLoading && !pendingError && pending.length > 0 && (
-          <div className="space-y-3">
-            {pending.map((p) => {
-              const match = matchTuitionPlan(p.amount);
-              return (
-                <div key={p.id} className="rounded-2xl border-2 border-line p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
-                      <Clock className="h-5 w-5" aria-hidden />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold text-ink">
-                        {p.user?.firstName} {p.user?.lastName}
-                      </p>
-                      <p className="text-sm text-ink-dim">
-                        <Meta items={[p.user?.phone, p.forMonth]} />
-                      </p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="text-lg font-extrabold tabular-nums text-ink">{formatMnt(p.amount)}</p>
-                      <p className="text-xs text-ink-dim">{METHOD_LABEL[p.method] ?? p.method}</p>
-                    </div>
-                  </div>
-                  <p
-                    className={`mt-3 flex items-start gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ${
-                      match ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                    }`}
-                  >
-                    {match ? <Check className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden /> : <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden />}
-                    <span>
-                      {match
-                        ? `Багцтай тохирч байна: ${match.tier.label}, ${match.plan.label}`
-                        : "Мэдэгдэж буй ямар ч сургалтын төлбөрийн багцтай тохирохгүй байна — шалгана уу"}
-                    </span>
-                  </p>
-                  {p.description && (
-                    <p className="mt-2 text-sm text-ink-dim">{p.description}</p>
-                  )}
-                  <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-[1fr_1fr_auto_auto_auto]">
-                    <label className="sr-only" htmlFor={`pass-${p.id}`}>
-                      Олгох эрх
-                    </label>
-                    <select
-                      id={`pass-${p.id}`}
-                      value={passPick[p.id] ?? ""}
-                      onChange={(e) =>
-                        setPassPick((m) => ({ ...m, [p.id]: e.target.value }))
-                      }
-                      className={`${selectCls} col-span-2 lg:col-span-1`}
-                    >
-                      <option value="">Эрх олгохгүй</option>
-                      {passes.map((pass) => (
-                        <option key={pass.id} value={pass.id}>
-                          {pass.name} — {pass.durationDays} хоног
-                        </option>
-                      ))}
-                    </select>
-                    <label className="sr-only" htmlFor={`note-${p.id}`}>
-                      Баталгаажуулалтын тайлбар
-                    </label>
-                    <input
-                      id={`note-${p.id}`}
-                      value={notes[p.id] ?? ""}
-                      onChange={(e) =>
-                        setNotes((m) => ({ ...m, [p.id]: e.target.value }))
-                      }
-                      placeholder="Баталгаажуулалтын тайлбар"
-                      className={`${inputCls} col-span-2 lg:col-span-1`}
-                    />
-                    <Button onClick={() => confirm(p.id)}>
-                      <Check aria-hidden />
-                      Батлах
-                    </Button>
-                    <Button variant="danger" onClick={() => reject(p.id)}>
-                      <X aria-hidden />
-                      Цуцлах
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setEditingPayment(p)}
-                      className="col-span-2 lg:col-span-1"
-                    >
-                      Засах
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-      </TabsContent>
-
-      <TabsContent value="month" className="space-y-6">
-      <section className="chunky p-4 sm:p-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-bold text-ink">Сарын төлөлт</h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-line px-3 text-sm">
-              <input
-                type="checkbox"
-                checked={onlyUnpaid}
-                onChange={(e) => setOnlyUnpaid(e.target.checked)}
-                className="h-4 w-4 accent-[var(--brand)]"
+      {searching ? (
+        <SearchResults q={q.trim()} />
+      ) : (
+        <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="space-y-5">
+          <TabsList aria-label="Төлбөрийн хэсгүүд">
+            {TABS.map((t) => (
+              <TabsTrigger key={t.key} value={t.key} className="group">
+                <t.icon aria-hidden />
+                {t.label}
+                {!!count[t.key] && (
+                  <span className="rounded-full bg-ink/10 px-1.5 text-xs tabular-nums group-data-[state=active]:bg-on-brand/20">
+                    {count[t.key]}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <TabsContent value="classes">
+            {error && !overview ? (
+              <ErrorState message={error} onRetry={loadOverview} />
+            ) : !overview ? (
+              <div className="space-y-3" role="status" aria-label="Ачаалж байна">
+                <SkeletonCard className="h-48" />
+                <SkeletonRows rows={8} />
+              </div>
+            ) : (
+              <ClassOverview
+                data={overview}
+                onShowProblems={() => setTab("problems")}
+                onShowPromises={() => setTab("problems", "promises")}
+                onShowPending={() => setTab("pending")}
               />
-              Зөвхөн төлөөгүй
-            </label>
-            <label className="sr-only" htmlFor="month-picker">
-              Сар сонгох
-            </label>
-            <input
-              id="month-picker"
-              type="month"
-              value={month}
-              onChange={(e) => setMonth(e.target.value || currentMonth)}
-              className={inputCls}
-            />
-          </div>
-        </div>
-        {!monthRowsLoading && !monthRowsError && monthRows.length > 0 && (
-          <div className="mb-4">
-            <div className="mb-1 flex justify-between text-sm">
-              <span className="font-semibold text-ink">
-                {totals.paid}/{monthRows.length} сурагч төлсөн
-              </span>
-              <span className="font-bold tabular-nums text-success">{paidPct}%</span>
-            </div>
-            <Progress
-              value={paidPct}
-              aria-label="Төлсөн сурагчийн хувь"
-              className="bg-error/15"
-              indicatorClassName="bg-success"
-            />
-          </div>
-        )}
-        <SectionStatus
-          loading={monthRowsLoading}
-          error={monthRowsError}
-          onRetry={load}
-          empty={!monthRowsLoading && !monthRowsError && monthRows.length === 0}
-          emptyText="Энэ сард танхимын сурагч алга байна"
-        />
-        {!monthRowsLoading && !monthRowsError && monthRows.length > 0 && visibleMonthRows.length === 0 && (
-          <EmptyState icon={Check} title="Бүгд төлсөн байна" hint="Энэ сард төлөөгүй сурагч алга." />
-        )}
-        {!monthRowsLoading && !monthRowsError && visibleMonthRows.length > 0 && (
-          <ul className="space-y-2">
-            {visibleMonthRows.map((r, i) => (
-              <li
-                key={`${r.student.phone}-${i}`}
-                className="flex items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
-              >
-                <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-                    r.paid ? "bg-success/15 text-success" : "bg-error/15 text-error"
+            )}
+          </TabsContent>
+          <TabsContent value="problems" className="space-y-3">
+            <div role="radiogroup" aria-label="Асуудалтай жагсаалт" className="flex flex-wrap gap-1.5">
+              {(
+                [
+                  { key: "problems", label: "Өртэй", n: overview?.totals.problems },
+                  {
+                    key: "promises",
+                    label: "Амлалт",
+                    n: overview ? overview.totals.brokenPromises + overview.totals.upcomingPromises : undefined,
+                  },
+                ] as const
+              ).map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={problemView === c.key}
+                  onClick={() => setTab("problems", c.key)}
+                  className={`min-h-11 rounded-xl border px-3 text-sm font-semibold transition ${
+                    problemView === c.key ? "border-brand bg-brand-tint text-ink" : "border-line text-ink-dim hover:text-ink"
                   }`}
                 >
-                  {r.paid ? <Check className="h-4 w-4" aria-hidden /> : <X className="h-4 w-4" aria-hidden />}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-ink">
-                    {r.student.firstName} {r.student.lastName}
-                  </span>
-                  <span className="block text-xs text-ink-dim">
-                    <Meta items={[r.classroom.name, r.student.phone]} />
-                  </span>
-                </span>
-                <span className={`shrink-0 text-xs font-bold ${r.paid ? "text-success" : "text-error"}`}>
-                  {r.paid ? "Төлсөн" : "Төлөөгүй"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Тухайн сард дутуу төлсөн бүх сурагч — хамгийн их зөрүүтэй нь эхэндээ */}
-      <OutstandingPanel month={month} />
-      </TabsContent>
-
-      {/* Нэг сурагчийн ёстой/төлсөн/үлдэгдэл, бүх түүх — хайж сонгоод шууд удирдана.
-          Табаас гарсан ч сонголт хадгалагдахын тулд нуух (hidden), unmount хийхгүй. */}
-      <TabsContent value="student" forceMount hidden={tab !== "student"}>
-        <StudentHistoryPanel
-          onEdit={setEditingPayment}
-          onReverse={setReversingPayment}
-          refreshKey={refreshKey}
-        />
-      </TabsContent>
-
-      <TabsContent value="recent">
-      <section className="chunky p-4 sm:p-6">
-        <h2 className="mb-4 font-bold text-ink">Сүүлийн төлбөрүүд</h2>
-        <SectionStatus
-          loading={recentLoading}
-          error={recentError}
-          onRetry={load}
-          empty={!recentLoading && !recentError && recent.length === 0}
-          emptyText="Төлбөрийн түүх алга"
-        />
-        {!recentLoading && !recentError && recent.length > 0 && (
-          <ul className="space-y-2">
-            {recent.slice(0, 30).map((p) => {
-              const st = STATUS_LABEL[p.status] ?? STATUS_LABEL.PENDING;
-              return (
-                <li
-                  key={p.id}
-                  className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 text-sm"
-                >
-                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}>
-                    <st.icon className="h-4 w-4" aria-hidden />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-semibold text-ink">
-                      {p.user?.firstName} {p.user?.lastName}
-                    </span>
-                    <span className="block text-xs text-ink-dim">
-                      <Meta items={[formatMnt(p.amount), METHOD_LABEL[p.method] ?? p.method, st.text]} />
-                    </span>
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setEditingPayment(p)}
-                      className="min-h-11 rounded-lg border border-line px-3 text-xs font-semibold transition hover:border-brand"
-                    >
-                      Засах
-                    </button>
-                    {p.status === "CONFIRMED" && (
-                      <button
-                        type="button"
-                        onClick={() => setReversingPayment(p)}
-                        className="min-h-11 rounded-lg border border-error/30 px-3 text-xs font-semibold text-error transition hover:bg-error/10"
-                      >
-                        Буцаах
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-      </TabsContent>
-
-      {/* Лавлагаа: сурагч ЮУ төлөх ЁСТОЙ вэ — бодит төлбөртэй харьцуулж харах */}
-      <TabsContent value="reference">
-      <section className="chunky p-4 sm:p-6">
-        <h2 className="mb-1 font-bold text-ink">
-          Сургалтын төлбөрийн лавлагаа
-        </h2>
-        <p className="mb-4 text-xs text-ink-dim">
-          2026-2027 оны хичээлийн жил — сурагч аль ангид, ямар багцаар төлөх ёстойг
-          бодит төлбөрүүдтэй харьцуулж шалгана.
-        </p>
-        <div className="grid gap-4 md:grid-cols-2">
-          {TUITION.map((tier) => (
-            <div key={tier.id} className="rounded-2xl border-2 border-line p-4">
-              <p className="mb-2 text-sm font-semibold">{tier.label}</p>
-              <div className="space-y-1.5">
-                {tier.plans.map((plan) => (
-                  <div
-                    key={plan.kind}
-                    className="flex items-center justify-between gap-3 text-sm"
-                  >
-                    <span className="text-ink-dim">
-                      {plan.label}
-                      {plan.note ? ` (${plan.note})` : ""}
-                    </span>
-                    <span className="font-semibold tabular-nums">{formatMnt(plan.amount)}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-2 text-xs text-ink-dim">
-                Хуваан төлөх: <Meta items={[`эхний ${formatMnt(tier.installment.firstPayment)}`, `үлдэгдлийг ${tier.installment.deadline}-ны дотор барагдуулна`]} />
-              </p>
+                  {c.label} {c.n != null && <span className="tabular-nums">{c.n}</span>}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
-      </TabsContent>
-      </Tabs>
-
-      <PaymentEditModal
-        open={!!editingPayment}
-        payment={editingPayment}
-        onClose={() => setEditingPayment(null)}
-        onSaved={handleEdited}
-      />
-      <ReversePaymentModal
-        open={!!reversingPayment}
-        payment={reversingPayment}
-        onClose={() => setReversingPayment(null)}
-        onReversed={handleReversed}
-      />
+            <Problems key={problemView} view={problemView} onPaid={loadOverview} />
+          </TabsContent>
+          <TabsContent value="pending">
+            <PendingPanel onChanged={loadOverview} />
+          </TabsContent>
+          <TabsContent value="history">
+            <RecentPanel />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }

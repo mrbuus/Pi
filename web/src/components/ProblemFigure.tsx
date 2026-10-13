@@ -48,6 +48,10 @@ export default function ProblemFigure({
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
+  // Зургийн жинхэнэ харьцаа: өргөн зураг (тоон шулуун, хүснэгт — 1000 бодлогод 6:1
+  // хүртэл) хажуугийн 42%-ийн баганад уншигдахгүй жижгэрдэг тул бүтэн өргөнөөр.
+  const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
+  const wide = !!natural && natural.w / natural.h >= 1.6;
   const url = fileUrl(imageKey);
   const hasAlt = !!alt && alt.trim() !== "";
   const effectiveAlt = hasAlt ? alt! : "Бодлогын зураг";
@@ -58,8 +62,8 @@ export default function ProblemFigure({
   }
 
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-center">
-      <div className="order-1 md:order-none md:w-[42%] md:shrink-0">
+    <div className={`flex flex-col gap-4 ${wide ? "" : "md:flex-row md:items-center"}`}>
+      <div className={`order-1 ${wide ? "w-full" : "md:order-none md:w-[42%] md:shrink-0"}`}>
         <button
           type="button"
           onClick={() => !imageError && setLightboxOpen(true)}
@@ -83,8 +87,15 @@ export default function ProblemFigure({
                 // цагийг зэрлэгээр иддэг тул энэ логикийг бүү өөрчил.
                 loading={isCurrent ? "eager" : "lazy"}
                 fetchPriority={isCurrent ? "high" : "auto"}
-                className="max-h-72 w-auto max-w-full rounded-lg transition group-hover:opacity-90"
-                style={CONTAIN_STYLE}
+                // Дэлгэцэнд багтана (утас ч гэсэн): өндөр нь дэлгэцийн хувиар, өргөн зураг
+                // бүтэн өргөнөөр — жижиг зургийг 2 дахин хүртэл л томруулна (бүдгэрэхгүй)
+                className={`rounded-lg transition group-hover:opacity-90 ${
+                  wide ? "h-auto w-full max-h-[50vh]" : "max-h-[60vh] w-auto max-w-full"
+                }`}
+                style={natural ? { ...CONTAIN_STYLE, maxWidth: `min(100%, ${natural.w * 2}px)` } : CONTAIN_STYLE}
+                onLoad={(e) =>
+                  setNatural({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight || 1 })
+                }
                 onError={() => setImageError(true)}
               />
               <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-panel/90 px-2 py-1 text-[11px] font-medium text-ink-dim shadow-sm">
@@ -102,7 +113,7 @@ export default function ProblemFigure({
         )}
       </div>
 
-      <div className="order-2 min-w-0 flex-1 md:order-none">{children}</div>
+      <div className={`order-2 min-w-0 flex-1 ${wide ? "" : "md:order-none"}`}>{children}</div>
 
       {lightboxOpen && (
         <FigureLightbox url={url} alt={effectiveAlt} onClose={() => setLightboxOpen(false)} />

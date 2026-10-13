@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, MessageSquare, CheckCircle2, Clock, XCircle, HelpCircle } from "lucide-react";
+import { ChevronRight, MessageSquare, CheckCircle2, Clock, XCircle, HelpCircle, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -47,7 +47,8 @@ function errMsg(e: unknown): string {
  *  - date: Сонгосон өдрийн огноо (YYYY-MM-DD хэлбэр)
  *
  * Рендэр:
- *  - Дээр нь легенд + дүн мөр
+ *  - Дээр нь дүн мөр; тэмдэглэгээний тайлбар ХАМГИЙН ДООР (эзэн 2026-10-13:
+ *    олон удаа хэрэглэхэд цээжлэгддэг тул нэрсийн жагсаалтыг дээр нь харуулна)
  *  - Оюутан бүр НЭГЖ мөрөнд: Нэр (линк) | Ирцийн chip | Даалгаврын chip | Комментын icon (байвал)
  *  - Мөрүүд py-1.5, text-sm хэмжээтэй, зөвхөн нарийн зураасаар тусгаарлагдана
  *  - Loading/error төлвүүд: бусад section-уудтай адил
@@ -118,65 +119,6 @@ export default function MonitoringSection({
   return (
     <Card>
       <SectionHeader title="Хяналт" />
-
-      {/* Legend */}
-      <div className="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-line/30 bg-surface/50 p-3 text-xs md:grid-cols-4 md:gap-3 md:p-4">
-        {/* Ирцийн өнгөнүүд */}
-        <div className="space-y-1">
-          <div className="font-semibold text-ink-dim">Ирц</div>
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3 text-success" aria-hidden />
-            <span className="text-ink-dim">Ирсэн</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3 text-warning" aria-hidden />
-            <span className="text-ink-dim">Хоцорсон</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <XCircle className="h-3 w-3 text-error" aria-hidden />
-            <span className="text-ink-dim">Тасалсан</span>
-          </div>
-        </div>
-
-        {/* Чөлөөтэй / тэмдэглээгүй */}
-        <div className="space-y-1">
-          <div className="font-semibold text-ink-dim" />
-          <div className="flex items-center gap-1">
-            <HelpCircle className="h-3 w-3 text-info" aria-hidden />
-            <span className="text-ink-dim">Чөлөөтэй</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="h-3 w-3 rounded-full border border-line/50" aria-hidden />
-            <span className="text-ink-dim">Тэмдэглээгүй</span>
-          </div>
-        </div>
-
-        {/* Даалгаврын өнгөнүүд */}
-        <div className="space-y-1">
-          <div className="font-semibold text-ink-dim">Даалгавар</div>
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3 text-success" aria-hidden />
-            <span className="text-ink-dim">Хийсэн</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3 text-warning" aria-hidden />
-            <span className="text-ink-dim">Дутуу</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <XCircle className="h-3 w-3 text-error" aria-hidden />
-            <span className="text-ink-dim">Хийгээгүй</span>
-          </div>
-        </div>
-
-        {/* Даалгаврын тэмдэглээгүй */}
-        <div className="space-y-1">
-          <div className="font-semibold text-ink-dim" />
-          <div className="flex items-center gap-1">
-            <div className="h-3 w-3 rounded-full border border-line/50" aria-hidden />
-            <span className="text-ink-dim">Тэмдэглээгүй</span>
-          </div>
-        </div>
-      </div>
 
       {/* Summary Stats */}
       <div className="mb-4 rounded-lg border border-line/30 bg-surface/50 px-3 py-2 text-sm text-ink-dim md:px-4 md:py-3">
@@ -297,6 +239,49 @@ export default function MonitoringSection({
           })}
         </div>
       )}
+
+      {/* Тэмдэглэгээний тайлбар — бүх нэрсийн доор, нэг нягт мөрөнд */}
+      {!error && !loading && studentIds.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-line/30 pt-3 text-xs text-ink-dim" aria-label="Тэмдэглэгээний тайлбар">
+          <LegendGroup
+            title="Ирц"
+            items={[
+              [CheckCircle2, "text-success", "Ирсэн"],
+              [Clock, "text-warning", "Хоцорсон"],
+              [XCircle, "text-error", "Тасалсан"],
+              [HelpCircle, "text-info", "Чөлөөтэй"],
+              [null, "", "Тэмдэглээгүй"],
+            ]}
+          />
+          <LegendGroup
+            title="Даалгавар"
+            items={[
+              [CheckCircle2, "text-success", "Хийсэн"],
+              [Clock, "text-warning", "Дутуу"],
+              [XCircle, "text-error", "Хийгээгүй"],
+              [null, "", "Тэмдэглээгүй"],
+            ]}
+          />
+        </div>
+      )}
     </Card>
+  );
+}
+
+function LegendGroup({ title, items }: { title: string; items: [LucideIcon | null, string, string][] }) {
+  return (
+    <ul className="flex flex-wrap items-center gap-x-3 gap-y-1" aria-label={title}>
+      <li className="font-semibold">{title}</li>
+      {items.map(([Icon, tone, label]) => (
+        <li key={label} className="inline-flex items-center gap-1">
+          {Icon ? (
+            <Icon className={`h-3 w-3 ${tone}`} aria-hidden />
+          ) : (
+            <span className="h-3 w-3 rounded-full border border-line" aria-hidden />
+          )}
+          {label}
+        </li>
+      ))}
+    </ul>
   );
 }

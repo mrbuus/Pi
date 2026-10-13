@@ -197,3 +197,22 @@ export function parseGrade(value: string): {
     throw new BadRequestException('Анги/түвшин 1–12 хооронд байна.');
   return { grade, section: match[2] ? `${grade}-${match[2]}` : null };
 }
+
+/**
+ * Ангийн нэрээс секц ба салбарыг салгана: «12-1 (Баруун 4)» → {12-1, Баруун 4},
+ * «НИЙГЭМ (Зүүн 4)» → {НИЙГЭМ, Зүүн 4}. Хаалтгүй нэрэнд салбарыг импортын
+ * дүрмээр таана (13-x, 11-3, 9-2, Нийгэм = Зүүн 4; бусад нь Баруун 4).
+ */
+export function parseClassroomLabel(name: string): {
+  section: string | null;
+  branch: string | null;
+} {
+  const text = name.trim();
+  const match = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(text);
+  const section = (match ? match[1] : text).trim() || null;
+  const explicit = match ? match[2].trim() : null;
+  if (explicit) return { section, branch: explicit };
+  if (!section) return { section: null, branch: null };
+  const east = /^(13-\d+|11-3|9-2)$/.test(section) || /нийгэм/i.test(section);
+  return { section, branch: east ? 'Зүүн 4' : 'Баруун 4' };
+}

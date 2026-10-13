@@ -1,0 +1,331 @@
+// ⚠️ АВТОМАТААР ҮҮСГЭСЭН — docs/v2/hero/port_home.py. Гараар бүү зас, мокапаа засаад дахин ажиллуул.
+/* eslint-disable */
+// @ts-nocheck
+import katex from 'katex';
+import Lenis from 'lenis';
+import { createIcons, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, Info, MapPin, Menu, Minus, Phone, Plus, RotateCcw, Scissors, Users, Wifi, X } from 'lucide';
+
+const ICONS = { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, Info, MapPin, Menu, Minus, Phone, Plus, RotateCcw, Scissors, Users, Wifi, X };
+
+export function mountDom(root) {
+  let dead = false, rafId = 0;
+  const offs = [];
+  const on = (t, ev, f, o) => { t.addEventListener(ev, f, o); offs.push(() => t.removeEventListener(ev, f, o)); };
+const $=s=>root.querySelector(s), $$=s=>[...root.querySelectorAll(s)];
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const range=(p,a,b)=>clamp((p-a)/(b-a));
+const ease=t=>1-Math.pow(1-t,3), easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const tex=(el,s)=>{ if(katex) katex.render(s,el,{throwOnError:false}); else el.textContent=s; };
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const S={hero:0,idea:0,globe:0,club:0,vLab:false,vHero:true,vIdea:false,vGlobe:false,vClub:false,nearGlobe:false,nearClub:false,mx:0,my:0,vel:0,go:null};
+window.S=S;
+
+let lenis=null;
+if(!RM){ lenis=new Lenis({lerp:.09,smoothWheel:true}); }
+const goTo=y=>{ lenis? lenis.scrollTo(y,{duration:1.4,force:true}) : scrollTo({top:y,behavior:'smooth'}); };
+$$('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+  const id=a.getAttribute('href'); if(id.length<2||id[0]!=='#') return; const t=$(id); if(!t) return;
+  e.preventDefault();
+  if(sheet.classList.contains('open')) toggleMenu(false);
+  let y=t.getBoundingClientRect().top+scrollY;
+  if(id==='#enter'){ const h=$('#hero'); y=h.offsetTop+(h.offsetHeight-innerHeight)*.92; }
+  goTo(y);
+}));
+
+const sheet=$('#sheet'), menuBtn=$('#menuBtn');
+function toggleMenu(o){
+  sheet.classList.toggle('open',o); sheet.setAttribute('aria-hidden',!o); menuBtn.setAttribute('aria-expanded',o);
+  menuBtn.querySelector('span').textContent=o?'Хаах':'Цэс';
+  $$('.sheet .it').forEach((a,i)=>a.style.transitionDelay=o?(80+i*45)+'ms':'0ms');
+  if(lenis) o? lenis.stop() : lenis.start();
+}
+menuBtn.addEventListener('click',()=>toggleMenu(!sheet.classList.contains('open')));
+
+
+/* Огтлолын лаборатори */
+const LAB=window.LAB={solid:-1,h:.55,tilt:0,labels:true,away:false};
+const LAB_N=['Куб','Параллелепипед','Призм','Тетраэдр','Пирамид','Цилиндр','Конус','Бөмбөрцөг'];
+const solBox=$('#labSol');
+solBox.innerHTML=LAB_N.map((n,i)=>`<button role="radio" aria-checked="false" data-i="${i}">${n}</button>`).join('');
+function labPick(i){ LAB.solid=i; $$('#labSol button').forEach(b=>b.setAttribute('aria-checked',String(+b.dataset.i===i))); }
+window.labPick=labPick;
+solBox.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) labPick(+b.dataset.i); });
+const rH=$('#rH'), rT=$('#rT');
+function syncR(){ LAB.h=rH.value/100; LAB.tilt=+rT.value; $('#oH').textContent=rH.value+'%'; tex($('#oT'),rT.value+'^\\circ');
+  rH.style.setProperty('--v',rH.value+'%'); rT.style.setProperty('--v',((+rT.value+90)/180*100)+'%'); }
+rH.addEventListener('input',syncR); rT.addEventListener('input',syncR); syncR();
+$('#tgLab').addEventListener('click',e=>{ LAB.labels=!LAB.labels; e.currentTarget.setAttribute('aria-pressed',String(LAB.labels)); });
+$('#tgCut').addEventListener('click',e=>{ LAB.away=!LAB.away; e.currentTarget.setAttribute('aria-pressed',String(LAB.away)); });
+
+/* Сургуулиуд (ЭШ-2026, 700+, эзний зургаас) */
+const SCHOOLS=['33-р сургууль','Хөгжил сургууль','Ирээдүй сургууль','Өнөр сургууль','1-р сургууль','31-р сургууль','44-р сургууль','141-р сургууль','Мандах лицей','МУИС лицей','Монгени','Оюуны Ундраа','Эрдмийн Өргөө','96-р сургууль','77-р сургууль','48-р сургууль','50-р сургууль','18-р сургууль','Шинэ Монгол','Оюуны Тулга'];
+$('#schools').innerHTML=[...SCHOOLS,...SCHOOLS].map(s=>`<span>${s}</span>`).join('');
+
+const say=$('#say');
+say.innerHTML=say.textContent.trim().split(/\s+/).map((w,i,a)=>w==='|'?'<br>':`<span class="w${i>=a.length-4?' gw':''}">${w}</span>`).join(' ');
+const sayW=$$('#say .w');
+
+/* Номууд */
+const BOOKS=[
+  {n:'Математикийн тестүүд I',s:'12 бүлэг сэдэв',d:'12 бүлэг сэдвээр тест, бодлого бүр бодолттой',img:'/home/100x100-front.jpg',tags:['Тест','ЭЕШ','Бодолттой']},
+  {n:'Математикийн тестүүд II',s:'Тестийн цуврал',d:'Тестийн цувралын хоёр дахь дэвтэр, хавтас бэлтгэгдэж байна',sh:'grid',tags:['Тест','ЭЕШ']},
+  {n:'Математикийн тестүүд III',s:'Тестийн цуврал',d:'Тестийн цувралын гурав дахь дэвтэр, хавтас бэлтгэгдэж байна',sh:'grid',tags:['Тест','ЭЕШ']},
+  {n:'Хавтгайн геометр 1',s:'Планиметр',d:'Гурвалжин, тойрог, тэдгээрийн шинж чанар',sh:'tri',tags:['Геометр','Гурвалжин','Тойрог']},
+  {n:'Хавтгайн геометр 2',s:'Планиметр',d:'Планиметрийн үргэлжлэл: олон өнцөгт, талбай',sh:'circ',tags:['Геометр','Олон өнцөгт']},
+  {n:'Огторгуйн геометр',s:'Стереометр',d:'Огторгуйн биет, огтлол, эзлэхүүн',sh:'cube',tags:['Геометр','Биет','Эзлэхүүн']},
+  {n:'<tex>\\pi</tex> тест',s:'Давтлагын тест',d:'Шалгалтын бүтэцтэй давтлагын тест',sh:'pi',tags:['Тест','Сорил']}
+];
+const A1='#B8CBEF', W1='#FFFFFF';
+const SH={
+ grid:'<svg viewBox="0 0 100 100"><g fill="none" stroke="'+A1+'" stroke-width="1.6">'+Array.from({length:16},(_,i)=>`<rect x="${10+(i%4)*21}" y="${10+Math.floor(i/4)*21}" width="16" height="16" rx="3"/>`).join('')+'</g></svg>',
+ tri:'<svg viewBox="0 0 100 100"><polygon points="12,86 88,86 34,16" fill="none" stroke="'+W1+'" stroke-width="2"/><circle cx="47" cy="62" r="20" fill="none" stroke="'+A1+'" stroke-width="1.6"/></svg>',
+ circ:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="none" stroke="'+W1+'" stroke-width="2"/><path d="M50 50 L88 50 A38 38 0 0 0 69 17 Z" fill="rgba(184,203,239,.18)" stroke="'+A1+'" stroke-width="1.6"/><line x1="16" y1="68" x2="84" y2="68" stroke="'+A1+'" stroke-width="1.6"/></svg>',
+ cube:'<svg viewBox="0 0 100 100"><g fill="none" stroke="'+W1+'" stroke-width="2"><rect x="18" y="34" width="46" height="46"/><rect x="36" y="18" width="46" height="46"/><path d="M18 34 L36 18 M64 34 L82 18 M64 80 L82 64 M18 80 L36 64"/></g><line x1="18" y1="80" x2="82" y2="18" stroke="'+A1+'" stroke-width="1.8" stroke-dasharray="5 4"/></svg>',
+ pi:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="'+W1+'" stroke-width="2"/><line x1="14" y1="50" x2="86" y2="50" stroke="'+A1+'" stroke-width="1.8"/><circle cx="50" cy="50" r="3.5" fill="'+A1+'"/></svg>'
+};
+const texify=s=>s.replace(/<tex>(.*?)<\/tex>/g,(_,t)=>`<span data-t="${t}"></span>`);
+const rot=$('#rot');
+BOOKS.forEach((b,i)=>{
+  const el=document.createElement('div'); el.className='bk';
+  el.innerHTML=`<div class="face"><div class="hd"><span>${String(i+1).padStart(2,'0')}</span><span>/ 07</span></div>
+    <div class="cv">${b.img?`<img src="${b.img}" alt="">`:`${SH[b.sh]}<div class="slot">3D загварын зай</div>`}</div>
+    <div class="t">${texify(b.n)}</div><div class="d">${b.s}</div></div>`;
+  rot.appendChild(el);
+});
+const bks=$$('.bk');
+$('#bProg').innerHTML=BOOKS.map(()=>'<i></i>').join('');
+const dashes=$$('#bProg i');
+let bkCur=-1;
+function bookMeta(i,force){ if(i===bkCur&&!force) return; bkCur=i; const b=BOOKS[i];
+  $('#bIdx').textContent=String(i+1).padStart(2,'0')+' / 07';
+  $('#bName').innerHTML=texify(b.n); $$('#bName [data-t]').forEach(e=>tex(e,e.dataset.t));
+  $('#bDesc').textContent=b.d; $('#bChips').innerHTML=b.tags.map(t=>`<span>${t}</span>`).join('');
+  dashes.forEach((d,k)=>d.classList.toggle('on',k===i));
+}
+bookMeta(0);
+
+/* Амжилтын сувгууд — бүгд бодит тоо */
+const CH=[
+  {sm:'ЭШ-2026, математик',big:'800',cap:'6 сурагч дээд оноо авсан',t:'Дээд оноо, ЭШ-2026',tags:['математик','6 сурагч','800 оноо'],d:'Математикаар 800 оноо авсан манай 6 сурагч',ppl:{y:2026,f:d=>d.s==='mat'&&d.o===800}},
+  {sm:'ЭШ-2026, математик',big:'94',cap:'сурагч 700-аас дээш оноо авсан',t:'700+ оноо, ЭШ-2026',tags:['353 сурагчаас','600+ нь 73%','дундаж 647'],d:'12-р ангийн 11 бүлгийн 353 сурагчийн 259 нь 600–800 оноо авсан, 94 нь 700-аас дээш',ppl:{y:2026,f:d=>d.s==='mat'&&d.o>=700&&d.o<800,max:9}},
+  {sm:'12-1 анги, багш О. Баасанжав',big:'767',cap:'34 сурагчийн дундаж оноо',t:'12-1 анги',tags:['34 сурагч','бүгд 700+','4 нь 800'],d:'Ангийн гүйцэтгэл 84.7%, бүх сурагч 700-аас дээш оноо авсан'},
+  {sm:'ЭШ-2026, нийгэм судлал',big:'684',cap:'анхны жилийн дундаж оноо',t:'Нийгэм судлал',tags:['анхны жил','2 нь 800','багш Болортуяа'],d:'Нийгэм судлалын анги анх удаа нээгдсэн жилдээ 2 сурагч 800 оноо авсан',ppl:{y:2026,f:d=>d.s==='soc'}},
+  {sm:'SAT анги, багш Б. Дуламсүрэн',big:'3',cap:'сарын сургалтаар ЭШ дүйцүүлсэн',t:'SAT анги',tags:['SAT','2026'],d:'Гурван сарын хичээл зүтгэлээр SAT-ын оноогоо ЭШ-д дүйцүүлсэн'},
+  {sm:'ЭЕШ-2023, математик',big:'45',cap:'сурагч 700-аас дээш оноо',t:'ЭЕШ-2023',tags:['190+ сурагч','2 нь 800','130+ нь 600+'],d:'190 гаруй сурагчаас 2 нь 800, 45 нь 700-аас дээш оноо авсан'},
+  {sm:'ЭЕШ-2022, математик',big:'24',cap:'сурагч 700-аас дээш оноо',t:'ЭЕШ-2022',tags:['2 нь 800','11, 33, 81, 96-р сургууль'],d:'2021–2022 оны хичээлийн жилийн амжилт'}
+];
+const pplOf=c=>{ const Wd=window.__W&&window.__W.data; if(!c.ppl||!Wd||!Wd[c.ppl.y]) return {list:[],all:[]}; const all=Wd[c.ppl.y].filter(c.ppl.f); return {all,list:c.ppl.max?all.slice(0,c.ppl.max):all}; };
+function fillPpl(c){
+  const box=$('#chPpl'), nms=$('#chNms'); box.replaceChildren(); nms.textContent='';
+  const {list,all}=pplOf(c); if(!list.length) return;
+  list.forEach(d=>{ const b=document.createElement('button'); b.title=capOf(d); b.setAttribute('aria-label',capOf(d)); const im=new Image(); im.src=d.a||d.t; im.alt=''; im.loading='lazy'; b.appendChild(im); b.addEventListener('click',()=>lbOpen(all.indexOf(d),all)); box.appendChild(b); });
+  if(all.length>list.length){ const m=document.createElement('button'); m.className='more'; m.textContent='+'+(all.length-list.length); m.setAttribute('aria-label','Бүх сурагчийг харах'); m.addEventListener('click',()=>{ const w=$('#wall'); goTo(w.getBoundingClientRect().top+scrollY); }); box.appendChild(m); }
+  if(all.length<=7) nms.textContent=all.map(d=>d.n).join(', ');
+}
+let ch=0;
+const pad2=n=>String(n+1).padStart(2,'0');
+function showCh(i,anim){ ch=(i+CH.length)%CH.length; const c=CH[ch], li=(ch-1+CH.length)%CH.length, ri=(ch+1)%CH.length, inn=$('#chIn');
+  const put=()=>{ $('#chSm').textContent=c.sm; $('#chBig').textContent=c.big; $('#chCap').textContent=c.cap; $('#chNo').textContent='CH '+pad2(ch);
+    $('#chIdx').textContent='['+pad2(ch)+' / '+String(CH.length).padStart(2,'0')+']'; $('#chTitle').textContent=c.t;
+    $('#chTags').innerHTML=c.tags.map(t=>`<span>[${t}]</span>`).join(''); $('#chDesc').textContent=c.d;
+    $('#lBig').textContent=CH[li].big; $('#rBig').textContent=CH[ri].big; $('#lNo').textContent='CH '+pad2(li); $('#rNo').textContent='CH '+pad2(ri);
+    fillPpl(c); inn.classList.remove('gl'); };
+  if(anim){ inn.classList.add('gl'); setTimeout(put,170); } else put();
+}
+showCh(0);
+$('#chPrev').onclick=$('#tvL').onclick=()=>showCh(ch-1,true);
+$('#chNext').onclick=$('#tvR').onclick=()=>showCh(ch+1,true);
+
+const polIO=new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:.25}); polIO.observe($('#pol'));
+$$('#pol .pc').forEach((c,i)=>c.style.transitionDelay=(i*110)+'ms');
+
+
+/* Он оноор: сурагч бүрийн амжилт (зураг: amjilt/<он>.json) */
+let WALL_YEARS=[2026];
+const W={data:{},year:null,subj:'all',shown:0,list:[]}; window.__W=W;
+const wGrid=$('#wGrid'), wYears=$('#wYears'), wSubj=$('#wSubj'), wCnt=$('#wCnt'), wMore=$('#wMore'), wLess=$('#wLess');
+const SUBJ={all:'Бүгд',mat:'Математик',soc:'Нийгэм судлал'};
+const capOf=d=>[d.n,d.o?d.o+' оноо':'',d.sc].filter(Boolean).join(', ');
+async function wallInit(){
+  try{ const r=await fetch('/amjilt/index.json'); if(r.ok){ const ys=await r.json(); if(Array.isArray(ys)&&ys.length) WALL_YEARS=ys; } }catch(e){}
+  for(const y of WALL_YEARS){ try{ const r=await fetch('/amjilt/'+y+'.json'); W.data[y]=r.ok?await r.json():[]; }catch(e){ W.data[y]=[]; } }
+  wYears.innerHTML=WALL_YEARS.map(y=>`<button role="tab" data-y="${y}">${y}<small>${W.data[y].length}</small></button>`).join('');
+  wYears.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) wallYear(+b.dataset.y); });
+  wSubj.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ W.subj=b.dataset.s; wallRender(); } });
+  wallYear(WALL_YEARS[0]);
+  showCh(ch); heroFaces();
+}
+function wallYear(y){
+  W.year=y; W.subj='all'; const subs=[...new Set(W.data[y].map(d=>d.s))];
+  wSubj.innerHTML=subs.length>1?['all',...subs].map(k=>`<button role="tab" data-s="${k}">${SUBJ[k]||k}</button>`).join(''):'';
+  $$('#wYears button').forEach(b=>b.setAttribute('aria-selected',String(+b.dataset.y===y)));
+  wallRender();
+}
+function wallRender(){
+  $$('#wSubj button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.s===W.subj)));
+  W.list=W.data[W.year].filter(d=>W.subj==='all'||d.s===W.subj);
+  if(W.subj==='all') W.list=[...W.list].sort((a,b)=>(b.o||0)-(a.o||0)||(a.s===b.s?0:a.s==='mat'?-1:1)); W.shown=0; wGrid.replaceChildren();
+  if(!W.list.length){ const e=document.createElement('div'); e.className='wempty'; e.textContent='Энэ оны зураг одоогоор алга'; wGrid.appendChild(e); }
+  wallMore();
+}
+function wallMore(){
+  const step=innerWidth<700?12:20, next=W.list.slice(W.shown,W.shown+step);
+  next.forEach((d,k)=>{ const i=W.shown+k, b=document.createElement('button'); b.className='it'+(d.group?' wide':''); b.setAttribute('aria-label',capOf(d));
+    const im=new Image(); im.loading='lazy'; im.decoding='async'; im.alt=capOf(d); if(d.w){ im.width=d.w; im.height=d.h; } im.onload=()=>im.classList.add('ld'); im.src=d.t;
+    b.appendChild(im); b.addEventListener('click',()=>lbOpen(i,W.list)); wGrid.appendChild(b); });
+  W.shown+=next.length; wMore.hidden=W.shown>=W.list.length; wLess.hidden=W.shown<=step;
+  wCnt.textContent=W.list.length?`${W.year} он: ${W.list.length} зураг, ${W.shown} нь харагдаж байна`:'';
+}
+wMore.addEventListener('click',wallMore);
+wLess.addEventListener('click',()=>{ wallRender(); goTo($('#wall').getBoundingClientRect().top+scrollY); });
+function heroFaces(){ const top=(W.data[2026]||[]).filter(d=>d.s==='mat'&&d.o===800).slice(0,3); const bs=$$('.trust .av b');
+  top.forEach((d,k)=>{ if(!bs[k]) return; const im=new Image(); im.src=d.a; im.alt=d.n; bs[k].replaceChildren(im); }); }
+const lb=$('#lb'), lbImg=$('#lbImg'), lbCap=$('#lbCap'); let lbI=0, lbL=[];
+function lbOpen(i,list){ if(list) lbL=list; if(!lbL.length) lbL=W.list; if(!lbL.length) return; lbI=(i+lbL.length)%lbL.length; const d=lbL[lbI];
+  lbImg.src=d.f; lbImg.alt=capOf(d);
+  const b=document.createElement('b'); b.textContent=d.n||''; lbCap.replaceChildren(b,document.createTextNode([d.o?d.o+' оноо':'',d.sc].filter(Boolean).map(x=>', '+x).join('')));
+  lb.hidden=false; lenis&&lenis.stop(); $('#lbX').focus(); }
+function lbClose(){ lb.hidden=true; lenis&&lenis.start(); }
+$('#lbX').addEventListener('click',lbClose); $('#lbP').addEventListener('click',()=>lbOpen(lbI-1)); $('#lbN').addEventListener('click',()=>lbOpen(lbI+1));
+lb.addEventListener('click',e=>{ if(e.target===lb) lbClose(); });
+on(window,'keydown',e=>{ if(lb.hidden) return; if(e.key==='Escape') lbClose(); if(e.key==='ArrowLeft') lbOpen(lbI-1); if(e.key==='ArrowRight') lbOpen(lbI+1); });
+wallInit();
+
+const wmk=$('#wmk'); let wmHover=false;
+wmk.addEventListener('pointermove',e=>{ const r=wmk.getBoundingClientRect(); wmHover=true; wmk.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%'); wmk.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%'); });
+wmk.addEventListener('pointerleave',()=>wmHover=false);
+
+const clockEl=$('#clock');
+const tickClock=()=>{ clockEl.textContent='Улаанбаатар, '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Ulaanbaatar'})+' (GMT+8)'; };
+tickClock(); const clockTimer=setInterval(tickClock,15000);
+
+const cur=$('#cur'); let cx=innerWidth/2, cy=innerHeight/2, tx=cx, ty=cy;
+on(window,'pointermove',e=>{ tx=e.clientX; ty=e.clientY; S.mx=e.clientX/innerWidth-.5; S.my=e.clientY/innerHeight-.5; cur.classList.toggle('big',!!e.target.closest('a,button,.chip,.tv.side,.tag')); },{passive:true});
+
+const EL={lab:$('#labView'),hero:$('#hero'),idea:$('#idea'),ring:$('#books'),tvrow:$('#tvrow'),slide:$('#slide'),glb:$('#branches'),notew:$('#notew'),wmk:wmk};
+const heroView=$('#heroView'), shade=$('#heroShade'), fly=$('#fly'), b1=$('#b1'), b2=$('#b2'), out=$('#out'), tag=$('#tag'), b2li=$$('#b2 li');
+const w1=$('#w1'), w2=$('#w2'), bigA=$('#bigA'), bigB=$('#bigB');
+const tvM=$('#tvM'), tvL=$('#tvL'), tvR=$('#tvR');
+const sl1=$('#sl1'), sl2=$('#sl2');
+const gv=$('#gv'), gl=$('#gl'), gr=$('#gr'), glt=$('#glt'), glbl=$('#glb'), gt=$('#gt');
+const logoFix=$('#logoFix');
+let swing=0;
+const pinP=r=>clamp(-r.top/(r.height-innerHeight));
+const seen=r=>r.bottom>-60 && r.top<innerHeight+60;
+
+function frame(now){
+  if(dead) return;
+  lenis && lenis.raf(now);
+  const vh=innerHeight, vw=innerWidth, desk=vw>=900, t=now/1000;
+  S.vel=lenis? lenis.velocity : 0;
+  const R={}; for(const k in EL) R[k]=EL[k].getBoundingClientRect();
+
+  cx+=(tx-cx)*.2; cy+=(ty-cy)*.2; cur.style.transform=`translate3d(${cx}px,${cy}px,0)`;
+  logoFix.classList.toggle('light',R.ring.top<=46&&R.ring.bottom>=46);
+  const past=R.hero.bottom<vh*.5; logoFix.classList.toggle('off',past); root.classList.toggle('past',past);
+
+  /* 1. HERO */
+  S.vHero=seen(R.hero);
+  if(S.vHero){
+    const p=S.hero=pinP(R.hero);
+    const fo=range(p,0,.09);
+    fly.style.opacity=1-fo; fly.style.transform=`translate3d(0,${-ease(fo)*90}px,0)`; fly.style.pointerEvents=fo>.5?'none':'auto';
+    const o1=range(p,.11,.15)*(1-range(p,.34,.38)); b1.style.opacity=o1;
+    const fill=Math.round(range(p,.15,.31)*sayW.length); sayW.forEach((w,i)=>w.classList.toggle('on',i<fill));
+    const o2=range(p,.39,.43)*(1-range(p,.65,.69)); b2.style.opacity=o2;
+    b2li.forEach((li,i)=>{ const c=ease(range(p,.43+i*.035,.48+i*.035)); li.style.opacity=c; li.style.transform=`translate3d(0,${(1-c)*30}px,0)`; });
+    const k=easeIO(range(p,.72,.9));
+    const top=k*(desk?.12:.1)*vh, bot=k*(desk?.14:.16)*vh, side=k*(desk?64:16), rad=k*28;
+    heroView.style.clipPath=k>0?`inset(${top}px ${side}px ${bot}px ${side}px round ${rad}px)`:'none';
+    const q=ease(range(p,.8,.9)); out.style.opacity=q; out.style.transform=`translate3d(0,${(1-q)*40}px,0)`; out.style.pointerEvents=q>.6?'auto':'none';
+    shade.style.opacity=clamp(.85+.15*Math.max(o1,o2)-.55*k);
+    tag.style.opacity=desk? clamp(1-range(p,.06,.1)*.35+range(p,.86,.92)) : clamp(1-range(p,.06,.1))*(1-range(p,.7,.78));
+  }
+
+  S.vLab=seen(R.lab);
+
+  /* 3. Бөөмс */
+  S.vIdea=seen(R.idea);
+  if(S.vIdea){
+    const p=S.idea=pinP(R.idea);
+    w1.style.transform=`translate3d(${-p*(desk?22:30)}vw,0,0)`;
+    w2.style.transform=`translate3d(${p*(desk?22:30)}vw,0,0)`;
+  }
+
+  /* 4. Номын цилиндр */
+  if(seen(R.ring)){
+    const p=pinP(R.ring), n=BOOKS.length, pos=p*(n-1), step=desk?36:40;
+    const cw=desk?Math.min(300,vw*.22):Math.min(230,vw*.56), Rr=cw*(desk?1.55:1.3);
+    rot.style.setProperty('--cw',cw+'px');
+    rot.style.transform=`translate3d(0,0,${-Rr}px)`;
+    bks.forEach((el,i)=>{ const a=(i-pos)*step, d=Math.abs(i-pos);
+      el.style.transform=`rotateY(${a}deg) translateZ(${Rr}px)`;
+      el.style.opacity=d>2.4?0:1; el.style.filter=d>.5?`brightness(${1-Math.min(d-.5,1.5)*.25}) blur(${Math.min(d-.5,1.5)}px)`:'none'; });
+    bookMeta(Math.round(pos));
+    bigA.style.transform=`translate3d(${10-p*130}vw,0,0)`;
+    bigB.style.transform=`translate3d(${-120+p*120}vw,0,0)`;
+  }
+
+  /* 6. Зурагт */
+  if(seen(R.tvrow)){
+    const e=ease(range(vh-R.tvrow.top,0,vh*.75));
+    tvM.style.transform=`translate3d(0,${(1-e)*80}px,0) scale(${.86+.14*e})`;
+    const off=Math.min(560,vw*.36);
+    tvL.style.transform=`translate3d(${-off-(1-e)*120}px,40px,-200px) rotateY(28deg) scale(.62)`;
+    tvR.style.transform=`translate3d(${off+(1-e)*120}px,40px,-200px) rotateY(-28deg) scale(.62)`;
+  }
+
+  /* 7. Хоёр мөр */
+  if(seen(R.slide)){
+    const q=clamp((vh-R.slide.top)/(vh+R.slide.height));
+    sl1.style.transform=`translate3d(${10-q*70}vw,0,0)`; sl2.style.transform=`translate3d(${-80+q*70}vw,0,0)`;
+  }
+
+  /* 8. Дэлхий: тойрог томорно */
+  S.nearGlobe=R.glb.top<vh*3;
+  S.vGlobe=seen(R.glb);
+  if(S.vGlobe){
+    const p=S.globe=pinP(R.glb), k=easeIO(range(p,.03,.3));
+    const s0=desk?340:vw*.64, rad=lerpN(s0/2,Math.hypot(vw,vh)/2+2,k);
+    S.globeR=rad; S.globeS0=s0;
+    gv.style.clipPath=k<1?`circle(${rad}px at 50% 50%)`:'none';
+    const so=range(p,.05,.26);
+    if(desk){ gl.style.transform=`translate3d(${-so*30}vw,-50%,0)`; gr.style.transform=`translate3d(${so*30}vw,-50%,0)`; }
+    else { gl.style.transform=`translate3d(${-so*40}vw,${-so*8}vh,0)`; gr.style.transform=`translate3d(${so*40}vw,${so*8}vh,0)`; }
+    gl.style.opacity=gr.style.opacity=1-range(p,.14,.28); glt.style.opacity=glbl.style.opacity=1-range(p,.03,.14);
+    const g=ease(range(p,.7,.8)); gt.style.opacity=g; gt.style.transform=desk?`translate3d(${(1-g)*-40}px,-50%,0)`:`translate3d(0,${(1-g)*40}px,0)`; gt.classList.toggle('on',g>.5);
+  }
+
+  /* 11. Өлгөөтэй тэмдэглэл */
+  if(seen(R.notew)){ swing+=(clamp(S.vel*.5,-10,10)-swing)*.06; EL.notew.style.transform=`rotate(${Math.sin(t*1.3)*1.4+swing}deg)`; }
+
+  if(!wmHover && seen(R.wmk)){ wmk.style.setProperty('--mx',(50+42*Math.sin(t*.45))+'%'); wmk.style.setProperty('--my','55%'); }
+
+  window.__three && window.__three(S,t);
+  rafId=requestAnimationFrame(frame);
+}
+function lerpN(a,b,t){ return a+(b-a)*t; }
+rafId=requestAnimationFrame(frame);
+
+$$('.chip').forEach(c=>{
+  const set=v=>{ S.go=v; $$('.chip').forEach(x=>x.classList.toggle('on',!!v&&x===c)); };
+  c.addEventListener('pointerenter',e=>{ if(e.pointerType==='mouse') set(c.dataset.go); });
+  c.addEventListener('pointerleave',e=>{ if(e.pointerType==='mouse') set(null); });
+  c.addEventListener('click',()=>set(S.go===c.dataset.go&&c.classList.contains('on')?null:c.dataset.go));
+});
+
+(()=>{
+  createIcons({icons:ICONS,attrs:{'stroke-width':1.75}});
+  const go=()=>{ if(!katex) return setTimeout(go,80);
+    $$('[data-tex]').forEach(e=>tex(e,e.dataset.tex)); $$('[data-t]').forEach(e=>tex(e,e.dataset.t)); bookMeta(bkCur<0?0:bkCur,true); syncR(); };
+  go();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('ready')));
+})();
+
+  return () => {
+    dead = true; cancelAnimationFrame(rafId); clearInterval(clockTimer); polIO.disconnect();
+    offs.forEach((f) => f()); if (lenis) lenis.destroy();
+    delete window.S; delete window.LAB; delete window.labPick; delete window.__W;
+  };
+}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 import ProblemCard from './ProblemCard';
 import AttemptModal from './AttemptModal';
 
@@ -38,6 +39,24 @@ interface PracticeListProps {
 export default function PracticeList({ recommendations }: PracticeListProps) {
   const [selectedProblem, setSelectedProblem] = useState<Recommendation | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  // Картад харуулах бодлогын текст (problemId → statementText)
+  const [previews, setPreviews] = useState<Record<string, string | null>>({});
+
+  useEffect(() => {
+    let alive = true;
+    Promise.all(
+      recommendations.map((rec) =>
+        api<{ statementText?: string | null }>(`/problems/${rec.problemId}`)
+          .then((p) => [rec.problemId, p.statementText ?? null] as const)
+          .catch(() => [rec.problemId, null] as const),
+      ),
+    ).then((rows) => {
+      if (alive) setPreviews(Object.fromEntries(rows));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [recommendations]);
 
   const handleSelect = (rec: Recommendation) => {
     setSelectedProblem(rec);
@@ -62,6 +81,7 @@ export default function PracticeList({ recommendations }: PracticeListProps) {
             key={rec.problemId}
             recommendation={rec}
             reasonText={REASON_TEXT[rec.reason]}
+            statement={previews[rec.problemId]}
             selected={selectedProblem?.problemId === rec.problemId}
             onSelect={handleSelect}
           />

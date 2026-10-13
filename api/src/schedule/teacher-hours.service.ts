@@ -36,7 +36,10 @@ export class TeacherHoursService {
     const ids = schedules.map((s) => s.id);
     const [exceptions, holidays] = await Promise.all([
       this.prisma.scheduleException.findMany({ where: { scheduleId: { in: ids } } }),
-      this.prisma.academicCalendarDay.findMany({ where: { date: { gte: start, lte: end } } }),
+      this.prisma.academicCalendarDay.findMany({
+        where: { date: { gte: start, lte: end } },
+        include: { classrooms: { select: { classroomId: true } } },
+      }),
     ]);
 
     const teachers = computeTeacherHours(month, {
@@ -65,7 +68,12 @@ export class TeacherHoursService {
         note: e.note,
       })),
       topics: [],
-      holidays: holidays.map((h) => ({ date: dateKey(h.date), type: h.type, title: h.title })),
+      holidays: holidays.map((h) => ({
+        date: dateKey(h.date),
+        type: h.type,
+        title: h.title,
+        classroomIds: h.classrooms.map((c) => c.classroomId),
+      })),
     });
     return { month, teachers };
   }

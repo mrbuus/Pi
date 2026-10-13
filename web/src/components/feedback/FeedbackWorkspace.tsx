@@ -10,6 +10,7 @@ import {
   LoadingState,
 } from "@/components/ui/StateBlock";
 import AttachmentPreview from "@/components/homework/AttachmentPreview";
+import { formatMnDate } from "@/lib/dateMn";
 interface Ticket {
   id: string;
   kind: string;
@@ -413,7 +414,7 @@ export default function FeedbackWorkspace() {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-ink-dim">
-                  {new Date(ticket.createdAt).toLocaleDateString("mn-MN", {
+                  {formatMnDate(ticket.createdAt, {
                     timeZone: "Asia/Ulaanbaatar",
                   })}
                   {all &&

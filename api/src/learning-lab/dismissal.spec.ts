@@ -66,7 +66,7 @@ describe('teacher-issued class dismissal', () => {
       } as any),
     ).toThrow();
   });
-  it('teacher and teacher-plus require ownership; archived/random classes denied', async () => {
+  it('teacher requires ownership or date staffing; teacher-plus any active class; archived denied', async () => {
     const prisma: any = {
       classroom: {
         findUnique: jest.fn(async () => ({
@@ -75,28 +75,42 @@ describe('teacher-issued class dismissal', () => {
           archived: false,
         })),
       },
+      lessonStaffing: { count: jest.fn(async () => 0) },
+      classSchedule: { count: jest.fn(async () => 0) },
       classDismissal: {
         upsert: jest.fn(async ({ create }) => create),
         findUnique: jest.fn(async () => null),
       },
     };
     const service = new DismissalService(prisma as PrismaService);
-    for (const role of [Role.TEACHER, Role.TEACHER_PLUS])
-      await expect(
-        service.save('other', role, 'own', '2026-10-07', {
-          approximateTime: '18:30',
-        }),
-      ).rejects.toThrow();
+    await expect(
+      service.save('other', Role.TEACHER, 'own', '2026-10-07', {
+        approximateTime: '18:30',
+      }),
+    ).rejects.toThrow();
     for (const role of [Role.PARENT, Role.STUDENT])
       await expect(
         service.get('teacher', role, 'own', '2026-10-07'),
       ).rejects.toThrow();
     expect(prisma.classDismissal.upsert).not.toHaveBeenCalled();
-    await service.save('teacher', Role.TEACHER_PLUS, 'own', '2026-10-07', {
+    // Тухайн өдрийн ахлах/туслах багш болсон энгийн багш тэмдэглэнэ
+    prisma.lessonStaffing.count.mockResolvedValueOnce(1);
+    await service.save('other', Role.TEACHER, 'own', '2026-10-07', {
+      approximateTime: '18:30',
+    });
+    expect(prisma.lessonStaffing.count.mock.calls[0][0].where.OR).toEqual([
+      { leadTeacherId: 'other' },
+      { assistantTeacherId: 'other' },
+    ]);
+    // Багш+ — өдрийн хуваарийг зохион байгуулагч, бүх идэвхтэй анги
+    await service.save('other', Role.TEACHER_PLUS, 'own', '2026-10-07', {
+      approximateTime: '18:30',
+    });
+    await service.save('teacher', Role.TEACHER, 'own', '2026-10-07', {
       approximateTime: '18:30',
     });
     expect(
-      prisma.classDismissal.upsert.mock.calls[0][0].create.issuedById,
+      prisma.classDismissal.upsert.mock.calls[2][0].create.issuedById,
     ).toBe('teacher');
     prisma.classroom.findUnique.mockResolvedValue({
       id: 'own',
@@ -105,6 +119,9 @@ describe('teacher-issued class dismissal', () => {
     });
     await expect(
       service.get('teacher', Role.TEACHER, 'own', '2026-10-07'),
+    ).rejects.toThrow();
+    await expect(
+      service.get('x', Role.TEACHER_PLUS, 'own', '2026-10-07'),
     ).rejects.toThrow();
   });
   it('teacher controller has no parent/student role bypass', () => {

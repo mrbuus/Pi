@@ -21,6 +21,10 @@ export function requireJwtSecret(): string {
   return secret;
 }
 
+const LAST_SEEN_THROTTLE_MS = 5 * 60 * 1000;
+// Хуудас ачаалахад зэрэг ирэх олон хүсэлт нэг л UPDATE үүсгэнэ (процессын санах ой)
+const lastTouched = new Map<string, number>();
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private prisma: PrismaService) {
@@ -38,6 +42,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         role: true,
         passwordChangedAt: true,
         archivedAt: true,
+        lastSeenAt: true,
       },
     });
     if (!user) throw new UnauthorizedException();
@@ -60,6 +65,27 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
+    this.touchLastSeen(user.id, user.lastSeenAt);
     return { userId: user.id, role: user.role };
+  }
+
+  // «Сайтад сүүлд орсон» (эзэн 2026-10-13). Хүсэлт бүрт бичвэл ачаалал болох
+  // тул хэрэглэгч тутам 5 минутад нэг л удаа, хариуг хүлээлгүй шинэчилнэ.
+  // Raw UPDATE — Prisma-ийн @updatedAt-ыг (профайл зассан огноо) хөндөхгүй.
+  private touchLastSeen(userId: string, lastSeenAt: Date | null | undefined) {
+    const now = Date.now();
+    if (lastSeenAt && now - lastSeenAt.getTime() < LAST_SEEN_THROTTLE_MS)
+      return;
+    if (now - (lastTouched.get(userId) ?? 0) < LAST_SEEN_THROTTLE_MS) return;
+    lastTouched.set(userId, now);
+    try {
+      void this.prisma
+        // TIMESTAMP(3) багана UTC-ээр хадгалдаг (Prisma) — NOW() сессийн цагийн
+        // бүсээр (УБ +8) бичигдэхээс сэргийлж UTC руу хөрвүүлнэ
+        .$executeRaw`UPDATE "User" SET "lastSeenAt" = (NOW() AT TIME ZONE 'UTC') WHERE "id" = ${userId}`
+        .catch(() => undefined);
+    } catch {
+      // Тест орчны mock-д $executeRaw байхгүй байж болно — нэвтрэлтэд саад болохгүй
+    }
   }
 }
