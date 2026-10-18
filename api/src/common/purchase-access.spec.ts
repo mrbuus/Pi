@@ -36,6 +36,7 @@ function fixture(purchases: Purchase[]) {
   return {
     userPass: { findMany: jest.fn().mockResolvedValue([]) },
     studentProfile: { findUnique: jest.fn().mockResolvedValue(null) },
+    book: { findUnique: jest.fn().mockResolvedValue({ subject: 'MATH' }) },
     purchase: {
       findFirst: jest.fn(({ where }: { where: Where }) =>
         Promise.resolve(visible(where)[0] ?? null),

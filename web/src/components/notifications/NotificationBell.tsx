@@ -121,23 +121,24 @@ export function NotificationBell() {
 
   return (
     <div className="relative shrink-0">
-      <Button
+      {/* Толгойн 3 товч (ThemeToggle, хонх, UserMenu) ижил 44px талбайтай, дүрс голдоо —
+          өмнө нь Button-ий дотоод загвараар хонх зүүн тийш хазайж, зай тэгш бус байв */}
+      <button
         type="button"
-        variant="secondary"
         aria-label={accessibleLabel}
         aria-expanded={open}
         aria-controls="notification-recent-panel"
         onClick={toggle}
         title="Мэдэгдэл"
-        className="relative h-11 w-11 shrink-0 justify-center whitespace-nowrap !px-0"
+        className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-dim transition hover:bg-panel hover:text-ink"
       >
         <Bell className="h-5 w-5" aria-hidden />
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold leading-none text-on-error" aria-hidden="true">
+          <span className="absolute right-1 top-1 rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold leading-none text-on-error" aria-hidden="true">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </Button>
+      </button>
 
       {open && (
         <section

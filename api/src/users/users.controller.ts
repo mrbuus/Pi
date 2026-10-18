@@ -31,7 +31,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { ArchiveStudentDto, CommitStudentImportDto } from './students.dto';
+import {
+  ArchiveStudentDto,
+  CommitStudentImportDto,
+  UnarchiveStudentDto,
+} from './students.dto';
 import { UsersService } from './users.service';
 
 class SetTeacherStatusDto {
@@ -110,7 +114,9 @@ export class UsersController {
     );
   }
 
+  // Сургалтаас хасах / сэргээх — Багш+ ба Админ (эзэн 2026-10-18)
   @Post(':id/archive')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   archiveStudent(
     @Param('id') id: string,
     @Body() dto: ArchiveStudentDto,
@@ -125,18 +131,20 @@ export class UsersController {
   }
 
   @Post(':id/unarchive')
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @HttpCode(HttpStatus.OK)
   unarchiveStudent(
     @Param('id') id: string,
-    @Body() dto: ArchiveStudentDto,
+    @Body() dto: UnarchiveStudentDto,
     @Req() req: AuthedRequest,
   ) {
     return this.users.archiveStudent(
       id,
       req.user.userId,
-      dto.reason,
+      dto.reason ?? '',
       req.user.role,
       true,
+      dto.classroomId || undefined,
     );
   }
 

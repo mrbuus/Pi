@@ -53,14 +53,12 @@ export class ScheduleAccessService {
       },
     });
     if (!schedule) throw new NotFoundException('Хуваарь олдсонгүй');
-    // Багш+ өдрийн хуваарийн сэдвийг БҮХ ангид зооно (эзэн 2026-10-08) —
-    // танхим/цаг/давталт өөрчлөх нь schedule.manage-тэй хэвээр.
+    // Багш+ өдрийн хуваарийн сэдэв/төлөвлөгөөг БҮХ ангид зооно (эзэн 2026-10-08) —
+    // танхим/цаг/давталт өөрчлөх нь schedule.manage-тэй хэвээр. Энгийн Багш
+    // төлөвлөгөөг зөвхөн ХАРНА (эзэн 2026-10-18) — бичихгүй.
     if (actor.role === Role.TEACHER_PLUS) return;
-    if (
-      actor.role === Role.TEACHER &&
-      (schedule.teacherId ?? schedule.classroom.teacherId) === actor.userId
-    )
-      return;
+    if (actor.role !== Role.ADMIN)
+      throw new ForbiddenException('Төлөвлөгөөг Багш+ тавина');
     await this.manage(actor, schedule.classroomId);
   }
   async readableClassrooms(

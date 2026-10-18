@@ -88,7 +88,7 @@ const ADMIN_TILES: {
   { href: "/app/admin/enrollment", label: "Элсэлт", icon: "clipboard-list", tone: "bg-accent-sky/15 text-accent-sky" },
   { href: "/app/admin/finance", label: "Санхүү", icon: "wallet", tone: "bg-accent-gold/15 text-accent-gold", adminOnly: true },
   { href: "/app/tuition", label: "Төлбөрийн буцаалт", icon: "refund", tone: "bg-accent-rose/15 text-accent-rose" },
-  { href: "/app/insights", label: "Дүн шинжилгээ", icon: "chart", tone: "bg-accent-fuchsia/15 text-accent-fuchsia" },
+  // «Дүн шинжилгээ» — одоохондоо харуулахгүй (эзэн 2026-10-18)
   { href: "/app/admin/store", label: "Дэлгүүр", icon: "store", tone: "bg-accent-teal/15 text-accent-teal" },
   ...(SMS_ENABLED
     ? [{ href: "/app/sms", label: "Мессеж", icon: "message-square" as const, tone: "bg-accent-sky/15 text-accent-sky" }]

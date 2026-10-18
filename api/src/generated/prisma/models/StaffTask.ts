@@ -727,10 +727,6 @@ export type EnumTaskPriorityFieldUpdateOperationsInput = {
   set?: $Enums.TaskPriority
 }
 
-export type NullableEnumSubjectFieldUpdateOperationsInput = {
-  set?: $Enums.Subject | null
-}
-
 export type StaffTaskUpdateOneWithoutSubtasksNestedInput = {
   create?: Prisma.XOR<Prisma.StaffTaskCreateWithoutSubtasksInput, Prisma.StaffTaskUncheckedCreateWithoutSubtasksInput>
   connectOrCreate?: Prisma.StaffTaskCreateOrConnectWithoutSubtasksInput

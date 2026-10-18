@@ -31,6 +31,7 @@ export default function ExamDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[70] bg-ink/40 backdrop-blur-[2px]" />
         <DialogPrimitive.Content
+          aria-modal="true"
           className={cn(
             "elev-3 fixed inset-x-2 bottom-2 top-auto z-[71] flex max-h-[88dvh] flex-col rounded-2xl border border-line bg-surface outline-none sm:inset-x-auto sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:-translate-x-1/2 sm:-translate-y-1/2",
             wide ? "sm:w-[min(56rem,calc(100vw-2rem))]" : "sm:w-[min(32rem,calc(100vw-2rem))]",

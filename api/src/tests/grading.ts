@@ -297,7 +297,21 @@ export function gradeAnswer(
 export function hasKnownAnswer(p: GradableProblem): boolean {
   const mode = choiceModeOf(p);
   if (mode === 'TEXT') {
-    return (p.choiceOptions ?? []).some((o) => o.isCorrect);
+    // Шинэ загвар: ProblemChoice мөрүүд — isCorrect туг
+    if (p.choiceOptions && p.choiceOptions.length > 0) {
+      return p.choiceOptions.some((o) => o.isCorrect);
+    }
+    // Хуучин загвар (100x100/200x200 V3 импорт, 2026-10-13): choices массив +
+    // correctAnswer = үсэг («B»). gradeAnswer энэ замыг аль хэдийн дүгнэдэг тул
+    // энд ч «хариутай» гэж үзнэ — эс тэгвээс тэр тестүүд maxScore 0 болж
+    // сурагч 0/0 авна (2026-10-14-нд илэрсэн). ANSWER_KEY_MISSING объект → false.
+    const c = p.correctAnswer;
+    const texts = choiceTextsOf(p);
+    if (typeof c === 'string') {
+      const letter = c.trim().toUpperCase();
+      return /^[A-Z]$/.test(letter) && letter.charCodeAt(0) - 65 < texts.length;
+    }
+    return typeof c === 'number' && Number.isInteger(c) && c >= 0 && c < texts.length;
   }
   const c = p.correctAnswer;
   if (isBlankAnswer(c)) return false;

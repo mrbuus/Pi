@@ -8,7 +8,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { ClassroomType } from '../../generated/prisma/enums';
+import { ClassroomType, Subject } from '../../generated/prisma/enums';
 
 // Ангийн мэдээлэл засах — Админ. Бүх талбар optional (partial patch).
 export class UpdateClassroomDto {
@@ -23,11 +23,11 @@ export class UpdateClassroomDto {
   @IsEnum(ClassroomType)
   type?: ClassroomType;
 
-  @ApiPropertyOptional({ type: Number, minimum: 1, maximum: 12 })
+  @ApiPropertyOptional({ type: Number, minimum: 1, maximum: 13 })
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Max(12)
+  @Max(13)
   grade?: number;
 
   // Хоосон стринг явуулбал багшгүй болгоно (teacherId цэвэрлэнэ)
@@ -41,4 +41,10 @@ export class UpdateClassroomDto {
   @IsOptional()
   @IsString()
   assistantTeacherId?: string | null;
+
+  // Хичээлийн сэдэв (null = MATH, анхдагч)
+  @ApiPropertyOptional({ enum: Subject, nullable: true })
+  @IsOptional()
+  @IsEnum(Subject)
+  subject?: Subject | null;
 }

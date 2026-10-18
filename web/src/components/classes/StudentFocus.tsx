@@ -7,8 +7,9 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle } fr
 import { Meta } from "@/components/ui/Meta";
 import { cn } from "@/lib/cn";
 import { formatMnDate } from "@/lib/dateMn";
-import { DeltaText } from "./MonthGrids";
-import { ATTENDANCE_META, dayLabel, HOMEWORK_META, monthLabel, WEEKDAY_SHORT } from "./meta";
+import { ATTENDANCE_MARKS, HOMEWORK_MARKS, type MarkMeta } from "@/components/attendance/marks";
+import { DeltaText, MarkBox } from "./MonthGrids";
+import { dayLabel, monthLabel, WEEKDAY_SHORT } from "./meta";
 import type { MonthData } from "./types";
 
 /**
@@ -150,8 +151,8 @@ function FocusBody({ data, studentId, name, code }: { data: MonthData; studentId
                   </tr>
                 </thead>
                 <tbody>
-                  <StripRow label="Ирц" days={lessonDays.map((d) => d.date)} get={(d) => att[d]} meta={ATTENDANCE_META} />
-                  <StripRow label="Даалгавар" days={lessonDays.map((d) => d.date)} get={(d) => hw[d]} meta={HOMEWORK_META} />
+                  <StripRow label="Ирц" days={lessonDays.map((d) => d.date)} get={(d) => att[d]} meta={ATTENDANCE_MARKS as Record<string, MarkMeta>} />
+                  <StripRow label="Даалгавар" days={lessonDays.map((d) => d.date)} get={(d) => hw[d]} meta={HOMEWORK_MARKS as Record<string, MarkMeta>} />
                 </tbody>
               </table>
             </div>
@@ -285,7 +286,7 @@ function Compare({
   );
 }
 
-function StripRow<S extends string>({
+function StripRow({
   label,
   days,
   get,
@@ -293,8 +294,8 @@ function StripRow<S extends string>({
 }: {
   label: string;
   days: string[];
-  get: (d: string) => S | undefined;
-  meta: Record<S, { label: string; icon: typeof BookOpen; cell: string }>;
+  get: (d: string) => string | undefined;
+  meta: Record<string, MarkMeta>;
 }) {
   return (
     <tr>
@@ -304,12 +305,9 @@ function StripRow<S extends string>({
       {days.map((d) => {
         const st = get(d);
         if (!st) return <td key={d} className="h-8 w-8 rounded-md border border-dashed border-line" title={`${label}: тэмдэглээгүй`} />;
-        const m = meta[st];
-        const I = m.icon;
         return (
-          <td key={d} className={cn("h-8 w-8 rounded-md", m.cell)} title={`${label}: ${m.label}`}>
-            <I className="mx-auto h-4 w-4" aria-hidden />
-            <span className="sr-only">{m.label}</span>
+          <td key={d} className="h-8 w-8" title={`${label}: ${meta[st]?.label ?? ""}`}>
+            <MarkBox status={st} meta={meta} />
           </td>
         );
       })}

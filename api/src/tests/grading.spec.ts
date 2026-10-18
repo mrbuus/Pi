@@ -93,6 +93,24 @@ describe('hasKnownAnswer — answersEqual-тай нийцтэй байх', () =>
     ).toBe(true);
   });
 
+  // 100x100/200x200 V3 импорт: ProblemChoice мөргүй, choices массив + үсэг түлхүүр
+  // (1748/1768 бодлого). gradeAnswer энэ хэлбэрийг дүгнэдэг тул «хариутай» байх ёстой —
+  // эс тэгвээс онлайн тест бүр 0/0 (2026-10-14-нд илэрсэн).
+  it('хуучин загвар: choices + үсэг түлхүүр бол "хариутай", gradeAnswer-тай нийцнэ', () => {
+    const legacy = p({ format: CHOICE, choices: ['8', '7', '10', '9', '11'], correctAnswer: 'B', choiceOptions: [] });
+    expect(hasKnownAnswer(legacy)).toBe(true);
+    expect(gradeAnswer(legacy, 1).correct).toBe(true);
+    expect(gradeAnswer(legacy, 0).correct).toBe(false);
+    expect(hasKnownAnswer(p({ format: CHOICE, choices: ['8', '7'], correctAnswer: 'E', choiceOptions: [] }))).toBe(false);
+  });
+
+  it('хуучин загвар: түлхүүр дутуу (ANSWER_KEY_MISSING) бол "хариугүй" хэвээр', () => {
+    expect(
+      hasKnownAnswer(p({ format: CHOICE, choices: ['1', '2', '3'], correctAnswer: { reason: 'ANSWER_KEY_MISSING' }, choiceOptions: [] })),
+    ).toBe(false);
+    expect(hasKnownAnswer(p({ format: CHOICE, choices: ['1', '2'], correctAnswer: '', choiceOptions: [] }))).toBe(false);
+  });
+
   it('энгийн хоосон болон manualReview-г урьдын адил хасна', () => {
     expect(hasKnownAnswer(p({ format: FILL, correctAnswer: null }))).toBe(false);
     expect(hasKnownAnswer(p({ format: FILL, correctAnswer: '' }))).toBe(false);

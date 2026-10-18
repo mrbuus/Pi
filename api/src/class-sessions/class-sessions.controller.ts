@@ -6,11 +6,14 @@ import {
   Get,
   Param,
   Post,
+  Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import {
   IsArray,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -60,6 +63,14 @@ class SetExcludedDto {
   @IsArray()
   @IsString({ each: true })
   excludedProblemIds: string[];
+}
+
+class TestStatusDto {
+  // 'REMOVED' = энэ ангиас хассан; null = буцаах
+  @ApiPropertyOptional({ enum: ['REMOVED'], nullable: true })
+  @IsOptional()
+  @IsIn(['REMOVED'])
+  status?: 'REMOVED' | null;
 }
 
 interface AuthedRequest {
@@ -119,6 +130,41 @@ export class ClassSessionsController {
   @Delete('test-sessions/:id')
   remove(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.sessions.remove(id, req.user.userId, req.user.role);
+  }
+
+  // Номын дарааллын замын зураг (эзэн 2026-10-18): хийсэн/хассан/үлдсэн тест,
+  // дараагийн санал. ?date= — тэр өдрөөс өмнөх хичээлд төлөвлөснийг алгасаж санал болгоно.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/roadmap')
+  roadmap(
+    @Param('id') classroomId: string,
+    @Req() req: AuthedRequest,
+    @Query('date') date?: string,
+  ) {
+    return this.sessions.roadmap(
+      classroomId,
+      req.user.userId,
+      req.user.role,
+      date,
+    );
+  }
+
+  // «Энэ ангиас хасах» / буцаах — зөвхөн Багш+, Админ
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Put('classrooms/:id/tests/:testId/status')
+  setTestStatus(
+    @Param('id') classroomId: string,
+    @Param('testId') testId: string,
+    @Body() dto: TestStatusDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.sessions.setTestStatus(
+      classroomId,
+      testId,
+      dto.status ?? null,
+      req.user.userId,
+      req.user.role,
+    );
   }
 
   // Сурагч: оройн тэмдэглэгээний todo (token мэдэхгүйгээр)

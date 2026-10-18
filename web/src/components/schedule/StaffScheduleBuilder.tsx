@@ -1,89 +1,79 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
-import { CalendarDays, LayoutGrid, Repeat, UserCheck } from "lucide-react";
-import PatternBuilder from "./PatternBuilder";
+import { useRef, useState, type KeyboardEvent } from "react";
+import { CalendarDays, LayoutGrid, UserCheck } from "lucide-react";
+import { canManageAny } from "./pattern/model";
+import { useScheduleAccess } from "./pattern/access";
 import PatternOverview from "./PatternOverview";
-import ScheduleAdmin from "./ScheduleAdmin";
 import SpecialDaysButton from "./special-days/SpecialDaysButton";
 import TeacherWorkDays from "./TeacherWorkDays";
 import WeekBuilder from "./WeekBuilder";
 
-type TabKey = "overview" | "week" | "pattern" | "teachers";
+type TabKey = "overview" | "week" | "teachers";
 
 const TABS: { key: TabKey; label: string; icon: typeof CalendarDays }[] = [
-  // "Ерөнхий" нэгдүгээрт — бүтэн жилийн давтамжийг нэг дэлгэцэд харуулдаг
-  // үндсэн харагдац (эзний загвар). "Долоо хоног" нь огноот төлөвлөгөө:
-  // тухайн 7 хоногт сэдэв зоох, зөөх, цуцлах.
+  // Дараалал эзний дассанаар: тогтмол 7 хоног → өдрийн хуваарь → багшийн ажлын өдөр.
+  // Хуучин «Хуваарь зохиох» таб (бөөнөөр үүсгэх маягт + мөрийн жагсаалт) нь
+  // тогтмол хуваарийн торонд шингэсэн: «Шинэ цаг нэмэх» товч, хичээл дээр дарж засах,
+  // доор «Төлөвлөсөн өөрчлөлт» (2026-10-18).
   { key: "overview", label: "Ерөнхий хуваарь", icon: LayoutGrid },
   { key: "week", label: "Өдрийн хуваарь", icon: CalendarDays },
-  { key: "pattern", label: "Хуваарь зохиох", icon: Repeat },
   { key: "teachers", label: "Багшийн ажлын өдөр", icon: UserCheck },
 ];
 
 /**
  * ADMIN / TEACHER_PLUS-ын хуваарийн ажлын талбар.
  *
- * Табууд нь ХИЙХ АЖЛААР нь тусгаарлагдсан: байнга хардаг ерөнхий давтамж,
- * долоо хоногийн сэдэв төлөвлөлт, ховор хийдэг хуваарь зохиох, багшийн
- * ажлын өдөр. Амралт/шалгалтын өдөр (жилд 1-2 удаа) таб биш, баруун
- * буланд «Онцгой өдөр» товчоор цонх нээнэ. Идэвхгүй табыг DOM-д огт үлдээхгүй
- * (нөхцөлт render) тул буцаж ирэхэд өгөгдөл нь өөрөө шинэчлэгддэг.
+ * Засах эрх: ADMIN бүгд; Багш+ `schedule.manage` тусгай эрхээр (анги тус бүрээр
+ * олгогдсон байж болно). Эрхгүй бол тогтмол хуваарийг зөвхөн харна. Амралт/шалгалтын
+ * өдөр (жилд 1-2 удаа) таб биш, баруун буланд «Онцгой өдөр» товчоор. Идэвхгүй табыг
+ * DOM-д үлдээхгүй тул буцаж ирэхэд өгөгдөл нь шинэчлэгдэнэ.
  */
 export default function StaffScheduleBuilder({ role }: { role: string }) {
   const [tab, setTab] = useState<TabKey>("overview");
-  // PatternBuilder хуваарь үүсгэсний дараа доорх жагсаалт хуучирдаггүй байх
-  // энгийн арга: түлхүүрийг нь сольж дахин mount хийлгэнэ.
-  const [version, setVersion] = useState(0);
-  // Багш+ хуваарь засах нь `schedule.manage` тусгай эрхтэй (админ олгоно).
-  // Эрхгүй бол засах табуудыг харуулахгүй — сервер хадгалахад 403 өгдөг.
-  const [canEdit, setCanEdit] = useState(role === "ADMIN");
-  useEffect(() => {
-    if (role === "ADMIN") return;
-    api<{ administrator: boolean; grants: { capability: string }[] }>(
-      "/staff-capabilities/me",
-    )
-      .then((r) =>
-        setCanEdit(
-          r.administrator ||
-            r.grants.some((g) => g.capability === "schedule.manage"),
-        ),
-      )
-      .catch(() => setCanEdit(false));
-  }, [role]);
-  // Багшийн ажлын өдрийн хүснэгтийг Багш+ schedule.manage-гүйгээр засна —
-  // өдөр бүр хуваарь зохиодог (эзэн 2026-10-11).
+  const access = useScheduleAccess(role);
+  const canEdit = canManageAny(access);
+  // Багшийн ажлын өдрийн хүснэгтийг Багш+ schedule.manage-гүйгээр засна (эзэн 2026-10-11)
   const canRoster = canEdit || role === "TEACHER_PLUS";
-  const tabs = TABS.filter(
-    (t) =>
-      t.key === "overview" ||
-      t.key === "week" ||
-      (t.key === "teachers" && canRoster) ||
-      (t.key === "pattern" && canEdit),
-  );
+  const tabs = TABS.filter((t) => t.key !== "teachers" || canRoster);
+  const refs = useRef<Partial<Record<TabKey, HTMLButtonElement | null>>>({});
+
+  function onKey(e: KeyboardEvent) {
+    const i = tabs.findIndex((t) => t.key === tab);
+    const next =
+      e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : null;
+    if (next === null) return;
+    e.preventDefault();
+    const target = tabs[(next + tabs.length) % tabs.length].key;
+    setTab(target);
+    refs.current[target]?.focus();
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div
-          role="tablist"
-          aria-label="Хуваарийн хэсгүүд"
-          className="flex flex-wrap gap-2"
-        >
+      {/* НЭГ мөр (эзэн 2026-10-18): багтвал нэг мөрөнд, багтахгүй бол баруун-зүүн тийш гүйлгэнэ */}
+      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div role="tablist" aria-label="Хуваарийн хэсгүүд" className="flex shrink-0 gap-2" onKeyDown={onKey}>
           {tabs.map(({ key, label, icon: Icon }) => {
             const active = tab === key;
             return (
               <button
                 key={key}
+                ref={(el) => {
+                  refs.current[key] = el;
+                }}
+                id={`sched-tab-${key}`}
                 role="tab"
                 type="button"
                 aria-selected={active}
-                onClick={() => setTab(key)}
-                className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-                  active
-                    ? "border-brand-bright bg-brand-bright text-on-brand"
-                    : "border-line bg-panel text-ink hover:border-brand"
+                aria-controls={`sched-panel-${key}`}
+                tabIndex={active ? 0 : -1}
+                onClick={(e) => {
+                  setTab(key);
+                  e.currentTarget.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+                }}
+                className={`inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border px-4 py-2 text-sm font-semibold transition ${
+                  active ? "border-brand-bright bg-brand-bright text-on-brand" : "border-line bg-panel text-ink hover:border-brand"
                 }`}
               >
                 <Icon className="h-4 w-4" aria-hidden />
@@ -92,24 +82,16 @@ export default function StaffScheduleBuilder({ role }: { role: string }) {
             );
           })}
         </div>
-        <SpecialDaysButton canEdit={canEdit} />
+        <div className="ml-auto shrink-0 whitespace-nowrap">
+          <SpecialDaysButton canEdit={canEdit} />
+        </div>
       </div>
 
-      {tab === "overview" && <PatternOverview />}
-
-      {tab === "week" && <WeekBuilder />}
-
-      {tab === "pattern" && (
-        <div className="space-y-6">
-          <PatternBuilder
-            role={role}
-            onCreated={() => setVersion((v) => v + 1)}
-          />
-          <ScheduleAdmin key={version} role={role} />
-        </div>
-      )}
-
-      {tab === "teachers" && <TeacherWorkDays />}
+      <div id={`sched-panel-${tab}`} role="tabpanel" aria-labelledby={`sched-tab-${tab}`} className="min-w-0">
+        {tab === "overview" && <PatternOverview access={access} />}
+        {tab === "week" && <WeekBuilder />}
+        {tab === "teachers" && <TeacherWorkDays />}
+      </div>
     </div>
   );
 }

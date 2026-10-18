@@ -5,9 +5,11 @@ import { CatalogController } from './catalog.controller';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 import { TopicsController } from './topics.controller';
+import { BooksCatalogService } from './books-catalog.service';
+import { TryService } from './try.service';
 
 @Module({
   controllers: [PreviewController, ContentController, CatalogController, TopicsController],
-  providers: [PreviewService, ContentService],
+  providers: [PreviewService, ContentService, BooksCatalogService, TryService],
 })
 export class ContentModule {}

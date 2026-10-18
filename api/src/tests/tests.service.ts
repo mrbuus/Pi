@@ -18,6 +18,8 @@ import {
   TestType,
 } from '../generated/prisma/enums';
 import {
+  activeClassSubjects,
+  blockedSubjects,
   collectPassScope,
   hasCoveringPass,
   TEACHER_ROLES,
@@ -697,10 +699,12 @@ export class TestsService {
     role: Role,
     subject?: Subject,
     includeThousand = false,
+    chapterId?: string,
   ) {
     const subjectFilter: Prisma.TestWhereInput = {
       ...(subject ? { chapter: { book: { subject } } } : {}),
       ...(includeThousand ? {} : { type: { not: TestType.THOUSAND } }),
+      ...(chapterId ? { chapterId } : {}),
     };
 
     if (
@@ -729,6 +733,7 @@ export class TestsService {
           leftAt: null,
           classroom: { archived: false },
         },
+        include: { classroom: { select: { subject: true } } },
       }),
       collectPassScope(this.prisma, userId),
       this.prisma.purchase.findMany({
@@ -769,14 +774,25 @@ export class TestsService {
       if (scope.bookIds.length) {
         accessOr.push({ chapter: { bookId: { in: scope.bookIds } } });
       }
+      // Жишиг сорилд бүртгүүлсэн тест — цонх хаагдсан ч дүн, эргэн харалтад үлдэнэ
+      accessOr.push({ mockEvents: { some: { published: true, registrations: { some: { userId } } } } });
       if (accessOr.length === 0) return [];
       accessFilter = { OR: accessOr };
     }
 
+    // Хичээлээр хаалттай (эзэн 2026-10-18): өөрийн ангид байхгүй хичээлийн
+    // (Нийгмийн ухаан г.м.) тест ямар ч эрхээр жагсаалтад орохгүй. Бүлэггүй/
+    // номгүй тест = MATH тул NOT шүүлтэд унахгүй.
+    const blocked = blockedSubjects(
+      enrollments.map((e) => e.classroom.subject ?? Subject.MATH),
+    );
     const rows = await this.prisma.test.findMany({
       where: {
         ...subjectFilter,
         ...accessFilter,
+        ...(blocked.length
+          ? { NOT: { chapter: { book: { subject: { in: blocked } } } } }
+          : {}),
         deletedAt: null,
         isDraft: false,
       },
@@ -1535,6 +1551,22 @@ export class TestsService {
   ): Promise<void> {
     if (test.isDraft)
       throw new ForbiddenException('Ноорог тестэд сурагч нэвтрэх боломжгүй');
+    // Хичээлээр хаалттай (эзэн 2026-10-18): MATH-аас бусад хичээлийн тестийг
+    // зөвхөн тухайн хичээлийн идэвхтэй ангийн сурагч бодно
+    if (test.chapterId) {
+      const owner = await db.chapter.findUnique({
+        where: { id: test.chapterId },
+        select: { book: { select: { subject: true } } },
+      });
+      const subject = owner?.book?.subject ?? Subject.MATH;
+      if (
+        subject !== Subject.MATH &&
+        !(await activeClassSubjects(db as PrismaService, userId)).has(subject)
+      )
+        throw new ForbiddenException(
+          'Энэ тест таны ангийн хичээлд хамаарахгүй байна',
+        );
+    }
     const enrollment = await db.enrollment.findFirst({
       where: {
         studentId: userId,
@@ -1581,6 +1613,22 @@ export class TestsService {
     });
     if (purchase) {
       return;
+    }
+
+    // Жишиг сорил (MockExamEvent): бүртгүүлсэн хэрэглэгч цонхны дотор эхэлнэ;
+    // эхэлчихсэн бол (session бий) цонх хаагдсан ч дуусгах, илгээх, эргэн харах эрхтэй.
+    const reg = await db.mockExamRegistration.findFirst({
+      where: { userId, event: { testId: test.id, published: true, startsAt: { lte: now } } },
+      orderBy: { event: { startsAt: 'desc' } },
+      select: { event: { select: { endsAt: true } } },
+    });
+    if (reg) {
+      if (reg.event.endsAt >= now) return;
+      const session = await db.testAttemptSession.findUnique({
+        where: { testId_studentId: { testId: test.id, studentId: userId } },
+        select: { id: true },
+      });
+      if (session) return;
     }
 
     throw new ForbiddenException(

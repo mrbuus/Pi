@@ -101,9 +101,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!getToken()) {
-      router.replace("/login");
+      // Нэвтэрсний дараа яг энэ хуудас руу буцна (ж: жишиг сорилын бүртгэл)
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [router]);
+  }, [router, pathname]);
 
   // Нууцлалын нөхцөлийг (G17) хараахан зөвшөөрөөгүй хэрэглэгчийг нэг удаа
   // /app/consent руу чиглүүлнэ. Сервер алдаа өгвөл ажлыг ХААХГҮЙ (шалгалт
@@ -164,7 +165,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         Агуулга руу шилжих
       </a>
-      <div className="min-h-screen lg:flex">
+      <div className="min-h-screen md:flex">
         {!examFullscreen && (
           <Sidebar
             role={displayRole ?? role}
@@ -206,7 +207,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Утсан дээр доод таб мөрөнд агуулга дарагдахгүйн тулд доод зай нэмэгдэнэ. */}
           <main
             id="main-content"
-            className={`mx-auto w-full max-w-6xl px-4 pt-6 lg:pb-8 lg:pt-8 ${
+            className={`mx-auto w-full max-w-6xl px-4 pt-6 md:pb-8 lg:pt-8 ${
               examFullscreen ? "pb-8" : "pb-28"
             }`}
           >

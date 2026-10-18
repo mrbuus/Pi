@@ -33,6 +33,14 @@ export default function GoogleSignInButton({ label = "Google-ээр нэвтрэ
   }, []);
 
   useEffect(() => {
+    // Google руу шилжээд «Буцах» дарахад хөтөч хуудсыг кэшээс (bfcache) сэргээдэг тул
+    // busy төлөв хэвээр үлдэж товч «шилжиж байна…» дээр гацдаг. Сэргэхэд нь буцаана.
+    const reset = (e: PageTransitionEvent) => e.persisted && setBusy(false);
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
+
+  useEffect(() => {
     api<{ enabled: boolean }>("/auth/google/config", { auth: false })
       .then((r) => setEnabled(r.enabled))
       .catch(() => setEnabled(false));

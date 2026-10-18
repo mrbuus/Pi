@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -9,6 +10,7 @@ import { todayCodeUB } from '../auth/auth.service';
 import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { findNotAttending } from './attention.logic';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { UpdateClassroomDto } from './dto/update-classroom.dto';
 
@@ -34,8 +36,73 @@ export class ClassroomsService {
     throw new ForbiddenException('Энэ үйлдэл хийх эрхгүй');
   }
 
-  create(dto: CreateClassroomDto) {
-    return this.prisma.classroom.create({ data: dto });
+  /**
+   * Шинэ анги — Багш+/Админ. Нэр өвөрмөц (идэвхтэй ангиудын дунд, том жижгийг
+   * ялгахгүй); багш нар хуваарьт оногддог (teachesLessons) хүн байх ёстой.
+   * Аудитад бичигдэнэ.
+   */
+  async create(dto: CreateClassroomDto, actorId: string, actorRole: Role) {
+    if (actorRole !== Role.ADMIN && actorRole !== Role.TEACHER_PLUS)
+      throw new ForbiddenException('Шинэ ангийг Багш+ эсвэл админ үүсгэнэ');
+    const name = (dto.name ?? '').trim().replace(/\s+/g, ' ');
+    if (!name) throw new BadRequestException('Ангийн нэр оруулна уу');
+    const dup = await this.prisma.classroom.findFirst({
+      where: { archived: false, name: { equals: name, mode: 'insensitive' } },
+      select: { id: true },
+    });
+    if (dup) throw new ConflictException('Ийм нэртэй анги аль хэдийн байна');
+    const next = ClassroomsService.nextTeachers(
+      { teacherId: null, assistantTeacherId: null },
+      dto,
+    );
+    await this.assertTeachable(
+      [next.teacherId, next.assistantTeacherId].filter((v): v is string => !!v),
+    );
+    const created = await this.prisma.classroom.create({
+      data: {
+        name,
+        type: dto.type,
+        grade: dto.grade ?? null,
+        teacherId: next.teacherId,
+        assistantTeacherId: next.assistantTeacherId,
+        // Хичээл (эзэн 2026-10-18): null/MATH = анхдагч математик
+        subject: dto.subject ?? null,
+      },
+    });
+    await this.audit.record({
+      actorId,
+      actorRole,
+      action: 'CREATE',
+      entity: 'Classroom',
+      entityId: created.id,
+      after: {
+        name: created.name,
+        type: created.type,
+        grade: created.grade,
+        teacherId: created.teacherId,
+        assistantTeacherId: created.assistantTeacherId,
+        subject: created.subject,
+      },
+    });
+    return created;
+  }
+
+  // Ангийн багшаар оноож болох хүн: идэвхтэй, багш/Багш+/Админ, хичээл заадаг
+  private async assertTeachable(ids: string[]) {
+    if (!ids.length) return;
+    const ok = await this.prisma.user.findMany({
+      where: {
+        id: { in: ids },
+        archivedAt: null,
+        role: { in: [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN] },
+        teacherProfile: { teachesLessons: true },
+      },
+      select: { id: true },
+    });
+    if (ok.length !== new Set(ids).size)
+      throw new BadRequestException(
+        'Сонгосон хүн хичээл заадаг багшийн жагсаалтад алга',
+      );
   }
 
   async list(userId: string, role: Role) {
@@ -174,6 +241,119 @@ export class ClassroomsService {
     }));
   }
 
+  /**
+   * Анхаарах сурагчид (эзэн 2026-10-18): ангигүй бүртгэлтэй танхимын сурагч +
+   * ангид байгаа ч хичээлдээ ирэхгүй байгаа сурагч. Тооцоо: attention.logic.ts
+   */
+  async attentionStudents() {
+    const UB = 8 * 3_600_000;
+    const day = (d: Date) => d.toISOString().slice(0, 10);
+    const [unassignedRows, enrollRows] = await Promise.all([
+      this.prisma.user.findMany({
+        where: {
+          role: Role.STUDENT,
+          archivedAt: null,
+          studentProfile: { is: { type: StudentType.CLASSROOM } },
+          enrollments: { none: { leftAt: null } },
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          studentCode: true,
+          phone: true,
+          createdAt: true,
+          studentProfile: { select: { joinedOn: true } },
+          enrollments: {
+            select: { leftAt: true },
+            orderBy: { leftAt: 'desc' },
+            take: 1,
+          },
+        },
+      }),
+      this.prisma.enrollment.findMany({
+        where: {
+          leftAt: null,
+          student: { role: Role.STUDENT, archivedAt: null },
+          classroom: { archived: false },
+        },
+        select: {
+          studentId: true,
+          classroomId: true,
+          joinedAt: true,
+          classroom: { select: { name: true } },
+          student: {
+            select: {
+              firstName: true,
+              lastName: true,
+              studentCode: true,
+              studentProfile: { select: { joinedOn: true } },
+            },
+          },
+        },
+      }),
+    ]);
+
+    const unassigned = unassignedRows
+      .map((u) => ({
+        id: u.id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        studentCode: u.studentCode,
+        phone: u.phone,
+        registered: u.createdAt,
+        joinedOn: u.studentProfile?.joinedOn ?? null,
+        waitingSince: u.enrollments[0]?.leftAt ?? u.createdAt,
+      }))
+      .sort((a, b) => a.waitingSince.getTime() - b.waitingSince.getTime());
+
+    // Нэгдсэн өдөр = ангид орсон өдөр ба бүртгэлийн «сурч эхэлсэн» өдрийн хожим нь
+    const starts = enrollRows.map((e) => {
+      const joined = day(new Date(e.joinedAt.getTime() + UB));
+      const on = e.student.studentProfile?.joinedOn;
+      const start = on && day(on) > joined ? day(on) : joined;
+      return { e, start };
+    });
+    const classIds = [...new Set(enrollRows.map((e) => e.classroomId))];
+    const earliest = starts.reduce((m, x) => (x.start < m ? x.start : m), '9999-12-31');
+    const marks = classIds.length
+      ? await this.prisma.attendance.findMany({
+          where: {
+            classroomId: { in: classIds },
+            date: { gte: new Date(`${earliest}T00:00:00.000Z`) },
+          },
+          select: { classroomId: true, studentId: true, date: true, status: true },
+        })
+      : [];
+    const hits = findNotAttending(
+      starts.map(({ e, start }) => ({
+        studentId: e.studentId,
+        classroomId: e.classroomId,
+        start,
+      })),
+      marks.map((m) => ({ ...m, date: day(m.date) })),
+    );
+    const byKey = new Map(
+      enrollRows.map((e) => [`${e.classroomId}|${e.studentId}`, e]),
+    );
+    const notAttending = hits
+      .map((h) => {
+        const e = byKey.get(`${h.classroomId}|${h.studentId}`)!;
+        return {
+          id: h.studentId,
+          firstName: e.student.firstName,
+          lastName: e.student.lastName,
+          studentCode: e.student.studentCode,
+          classroomId: h.classroomId,
+          classroomName: e.classroom.name,
+          lastAttended: h.lastAttended,
+          missedCount: h.missedCount,
+        };
+      })
+      .sort((a, b) => b.missedCount - a.missedCount);
+    return { unassigned, notAttending };
+  }
+
   async enroll(
     classroomId: string,
     studentId: string,
@@ -268,6 +448,8 @@ export class ClassroomsService {
         ...(dto.assistantTeacherId !== undefined
           ? { assistantTeacherId: next.assistantTeacherId }
           : {}),
+        // null = MATH (анхдагч) руу буцаана
+        ...(dto.subject !== undefined ? { subject: dto.subject ?? null } : {}),
       },
     });
 
@@ -337,21 +519,7 @@ export class ClassroomsService {
     const changedIds = ids.filter(
       (v) => v !== classroom.teacherId && v !== classroom.assistantTeacherId,
     );
-    if (changedIds.length) {
-      const ok = await this.prisma.user.findMany({
-        where: {
-          id: { in: changedIds },
-          archivedAt: null,
-          role: { in: [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN] },
-          teacherProfile: { teachesLessons: true },
-        },
-        select: { id: true },
-      });
-      if (ok.length !== new Set(changedIds).size)
-        throw new BadRequestException(
-          'Сонгосон хүн хичээл заадаг багшийн жагсаалтад алга',
-        );
-    }
+    await this.assertTeachable(changedIds);
     const person = { select: { id: true, firstName: true, lastName: true } };
     const updated = await this.prisma.classroom.update({
       where: { id },

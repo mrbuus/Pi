@@ -7,7 +7,7 @@ import { Check } from "lucide-react";
 import ConsentFields, { EMPTY_CONSENT, PRIVACY_VERSION, consentReady } from "@/components/consent/ConsentFields";
 import LogoMark from "@/components/LogoMark";
 import InfoHint from "@/components/ui/InfoHint";
-import { api, homeForRole, setAuth } from "@/lib/api";
+import { api, homeForRole, nextFromLocation, setAuth } from "@/lib/api";
 import SubjectPicker, { type Subject } from "@/components/landing/SubjectPicker";
 
 type Kind = "CLASSROOM" | "ONLINE" | "PARENT" | "BUYER";
@@ -154,7 +154,7 @@ export default function RegisterPage() {
         // яг үүсгэсэн мөчид (энэ бол кодыг чухалчилж харуулах цорын ганц мөч)
         setResult({ role: res.role, studentCode: res.studentCode });
       } else {
-        router.push(homeForRole(res.role));
+        router.push(nextFromLocation() ?? homeForRole(res.role));
       }
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Алдаа гарлаа");
@@ -214,7 +214,7 @@ export default function RegisterPage() {
 
           <button
             type="button"
-            onClick={() => router.push(homeForRole(result.role))}
+            onClick={() => router.push(nextFromLocation() ?? homeForRole(result.role))}
             className="mt-3 btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105"
           >
             Үргэлжлүүлэх

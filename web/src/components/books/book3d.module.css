@@ -1,0 +1,79 @@
+/* CSS 3D ном — docs/v2/mockup/books.html-ийн студи, бараан хувилбар */
+.studio {
+  --h: calc(var(--w) * 1.431);
+  --t: calc(var(--w) * 0.1);
+  --ry: 28deg;
+  --rx: -6deg;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: calc(var(--h) + var(--w) * .5);
+  perspective: 1500px;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: visible;
+}
+.book {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  transform-style: preserve-3d;
+  transform: translateY(-4%) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform .6s cubic-bezier(.2, .7, .2, 1);
+}
+/* Аяархан эргэлдэнэ; хулгана дээр нь очиход зогсоно (studio-гийн --ry өөрчлөгдөнө) */
+.spin .book { animation: turn 22s ease-in-out infinite; }
+.spin:hover .book { animation-play-state: paused; }
+@keyframes turn {
+  0% { transform: translateY(-4%) rotateX(-6deg) rotateY(18deg); }
+  50% { transform: translateY(-4%) rotateX(-9deg) rotateY(52deg); }
+  100% { transform: translateY(-4%) rotateX(-6deg) rotateY(18deg); }
+}
+.spin:hover .book, .studio:not(.spin) .book { transform: translateY(-4%) rotateX(var(--rx)) rotateY(var(--ry)); }
+.face { position: absolute; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
+.face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.front { inset: 0; transform: translateZ(calc(var(--t) / 2)); border-radius: 2px 5px 5px 2px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }
+.front::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, .06) 1.4%, rgba(255, 255, 255, .16) 2.4%, rgba(0, 0, 0, .05) 3.8%, rgba(0, 0, 0, 0) 5%),
+    linear-gradient(112deg, rgba(255, 255, 255, 0) 24%, rgba(255, 255, 255, .22) 40%, rgba(255, 255, 255, 0) 54%),
+    linear-gradient(100deg, rgba(255, 255, 255, .08), rgba(0, 0, 0, .10));
+}
+.back { inset: 0; transform: rotateY(180deg) translateZ(calc(var(--t) / 2)); border-radius: 5px 2px 2px 5px; }
+.backArt { width: 100%; height: 100%; background: linear-gradient(170deg, var(--cover), var(--cover-2)); }
+.spine {
+  top: 0; left: calc(50% - var(--t) / 2); width: var(--t); height: var(--h);
+  transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+  background: linear-gradient(180deg, var(--cover), var(--cover-2));
+  display: grid; place-items: center;
+}
+.spine::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0, 0, 0, .22), rgba(255, 255, 255, .10) 45%, rgba(0, 0, 0, .16)); pointer-events: none; }
+.spineText { writing-mode: vertical-rl; transform: rotate(180deg); color: #fff; font-size: calc(var(--t) * .42); font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+.pages { background: repeating-linear-gradient(90deg, #FBF9F4 0 1px, #E3DED3 1px 2px); }
+.edge { top: 2px; left: calc(50% - var(--t) / 2 + 1px); width: calc(var(--t) - 2px); height: calc(var(--h) - 4px); transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 2px)); }
+.top, .bottom { left: 2px; width: calc(var(--w) - 4px); height: calc(var(--t) - 2px); top: calc(50% - var(--t) / 2 + 1px); background: repeating-linear-gradient(0deg, #FBF9F4 0 1px, #E3DED3 1px 2px); }
+.top { transform: rotateX(90deg) translateZ(calc(var(--h) / 2 - 2px)); }
+.bottom { transform: rotateX(-90deg) translateZ(calc(var(--h) / 2 - 2px)); }
+.floor {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--w) * 1.3); height: calc(var(--w) * .3); pointer-events: none;
+  transform: translate(calc(-50% + 14px), calc(var(--w) * .62));
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0));
+  filter: blur(10px);
+}
+/* Зурагтай хавтасгүй номын хавтас */
+.coverArt {
+  position: relative; width: 100%; height: 100%; color: #fff;
+  background: radial-gradient(120% 80% at 20% 0%, rgba(255, 255, 255, .14), transparent 55%), linear-gradient(170deg, var(--cover), var(--cover-2));
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 9% 10%;
+}
+.motif { position: absolute; left: 50%; top: 30%; width: 52%; transform: translate(-50%, -50%); opacity: .95; }
+.coverText { display: grid; gap: .3em; }
+.coverSub { font-size: calc(var(--w) * .045); letter-spacing: .12em; text-transform: uppercase; color: rgba(184, 203, 239, .85); font-weight: 500; }
+.coverName { font-size: calc(var(--w) * .085); font-weight: 800; letter-spacing: -.02em; line-height: 1.08; }
+.coverBrand { position: absolute; left: 10%; top: 7%; font-size: calc(var(--w) * .04); letter-spacing: .08em; color: rgba(255, 255, 255, .7); }
+@media (prefers-reduced-motion: reduce) {
+  .spin .book { animation: none; }
+  .book { transition: none; }
+}

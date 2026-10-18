@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertCircle, ArrowLeft, ArrowRight, TriangleAlert, Archive, RotateCcw, Download, UserPlus } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, Download, School, TriangleAlert, UserMinus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
 import { relativeTimeMn } from "@/lib/relativeTimeMn";
+import { Segmented } from "@/components/classes/parts";
+import AttentionBanner, { useAttentionStudents, type AttentionKind } from "./AttentionBanner";
+import NewClassDialog, { announceCreated } from "./NewClassDialog";
 import NewStudentDialog from "./NewStudentDialog";
-import { Dot, MetaTitle } from "@/components/ui/Meta";
+import { StudentActionsMenu } from "./StudentActions";
+import { Meta, MetaTitle } from "@/components/ui/Meta";
 import { LoadingState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
 import {
@@ -19,9 +23,6 @@ import {
   subjectFromCode,
 } from "./types";
 
-interface UnassignedRow {
-  id: string;
-}
 interface OutstandingRow {
   studentId: string;
   shortfall: number;
@@ -54,13 +55,15 @@ export default function StudentsDirectory() {
   // Гараар бүртгэх эрх = элсэлт хариуцсан ажилтан (POST /users/students)
   const canRegister = canSeeMoney;
   const [registering, setRegistering] = useState(false);
+  const [creatingClass, setCreatingClass] = useState(false);
+  // Анги солих, сургалтаас хасах, сэргээх, шинэ анги — Багш+ ба Админ
+  const canManage = canSeeMoney;
 
   const [showArchived, setShowArchived] = useState(false);
   const [students, setStudents] = useState<StudentListItem[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [unassignedIds, setUnassignedIds] = useState<Set<string>>(new Set());
   const [outstandingMap, setOutstandingMap] = useState<Map<string, number>>(new Map());
 
   const [search, setSearch] = useState("");
@@ -68,7 +71,8 @@ export default function StudentsDirectory() {
   const [gradeFilter, setGradeFilter] = useState("ALL");
   const [branchFilter, setBranchFilter] = useState("ALL");
   const [subjectFilter, setSubjectFilter] = useState("ALL");
-  const [unassignedOnly, setUnassignedOnly] = useState(false);
+  // Анхаарах шүүлтүүр: ангигүй / ирэхгүй (GET /classrooms/attention-students)
+  const [attention, setAttention] = useState<AttentionKind | null>(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(25);
 
@@ -84,12 +88,6 @@ export default function StudentsDirectory() {
       .finally(() => setLoading(false));
 
     if (canSeeMoney) {
-      api<UnassignedRow[]>("/classrooms/unassigned-students")
-        .then((rows) => setUnassignedIds(new Set(rows.map((r) => r.id))))
-        .catch(() => {
-          /* заавал биш дэд өгөгдөл — алдвал зүгээр л онцлохгүй */
-        });
-
       const month = new Date().toISOString().slice(0, 7);
       api<OutstandingRow[]>(`/payments/outstanding?month=${month}`)
         .then((rows) =>
@@ -104,6 +102,14 @@ export default function StudentsDirectory() {
   useEffect(() => {
     void Promise.resolve().then(load);
   }, [load]);
+
+  const attn = useAttentionStudents(canManage);
+  const unassignedIds = useMemo(() => new Set((attn.data?.unassigned ?? []).map((u) => u.id)), [attn.data]);
+  const absentIds = useMemo(() => new Set((attn.data?.notAttending ?? []).map((u) => u.id)), [attn.data]);
+  const reloadAll = () => {
+    load();
+    attn.reload();
+  };
 
   // ---- Шүүлтүүрийн сонголтуудыг АЧААЛСАН ДАТААС ГАРГАНА — тусдаа endpoint-оос
   // хамааралгүй, backend-ийн select ямар ч байсан ажиллана.
@@ -126,7 +132,8 @@ export default function StudentsDirectory() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return (students ?? []).filter((s) => {
-      if (unassignedOnly && !unassignedIds.has(s.id)) return false;
+      if (attention === "unassigned" && !unassignedIds.has(s.id)) return false;
+      if (attention === "absent" && !absentIds.has(s.id)) return false;
       if (classroomFilter !== "ALL" && s.currentClassroom?.id !== classroomFilter) return false;
       if (gradeFilter !== "ALL" && String(s.studentProfile?.grade ?? "") !== gradeFilter)
         return false;
@@ -147,12 +154,13 @@ export default function StudentsDirectory() {
     gradeFilter,
     branchFilter,
     subjectFilter,
-    unassignedOnly,
+    attention,
     unassignedIds,
+    absentIds,
   ]);
 
   // Шүүлтүүр өөрчлөгдөх бүрт хуудаслалтыг эхэнд нь буцаана.
-  const filterKey = `${search}|${classroomFilter}|${gradeFilter}|${branchFilter}|${subjectFilter}|${unassignedOnly}`;
+  const filterKey = `${search}|${classroomFilter}|${gradeFilter}|${branchFilter}|${subjectFilter}|${attention}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey);
@@ -171,7 +179,7 @@ export default function StudentsDirectory() {
     setGradeFilter("ALL");
     setBranchFilter("ALL");
     setSubjectFilter("ALL");
-    setUnassignedOnly(false);
+    setAttention(null);
   }
 
   return (
@@ -179,33 +187,81 @@ export default function StudentsDirectory() {
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-extrabold text-ink">Сурагчийн жагсаалт</h1>
-          {canRegister && !showArchived && (
-            <Button type="button" onClick={() => setRegistering(true)} className="min-h-11">
-              <UserPlus aria-hidden /> Шинэ сурагч
-            </Button>
+          {canRegister && (
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" onClick={() => setCreatingClass(true)} className="min-h-11">
+                <School aria-hidden /> Шинэ анги
+              </Button>
+              {!showArchived && (
+                <Button type="button" onClick={() => setRegistering(true)} className="min-h-11">
+                  <UserPlus aria-hidden /> Шинэ сурагч
+                </Button>
+              )}
+            </div>
           )}
         </div>
-        <p className="mt-1 text-sm text-ink-dim">
-          {students ? `Нийт ${students.length} сурагч` : "Сурагчдын жагсаалт"}
-          {role === "ADMIN" && <span className="ml-2 inline-flex flex-wrap gap-2"><button type="button" onClick={() => setShowArchived(v => !v)} className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold">{showArchived ? "Идэвхтэй" : "Архив"}</button><Link href="/app/admin/students/import" className="inline-flex min-h-10 items-center rounded-lg border border-line px-3 text-sm font-semibold">Excel импорт</Link></span>}
-          {canSeeMoney && <button type="button" onClick={async () => { try { const csv = await api<string>("/students/export.csv", { responseType: "text" }); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); const a = document.createElement("a"); a.href = url; a.download = "students.csv"; a.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); } catch (e) { setError(errMsg(e)); } }} className="ml-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold"><Download size={15} aria-hidden/>CSV татах</button>}
-          {unassignedIds.size > 0 && !showArchived && (
-            <>
-              <Dot />
-              <button
-                type="button"
-                onClick={() => setUnassignedOnly(true)}
-                className="font-semibold text-warning underline decoration-dotted underline-offset-2"
-              >
-                {unassignedIds.size} ангид хуваарилагдаагүй
-              </button>
-            </>
+        <div className="mt-1 flex flex-wrap items-center gap-x-1 gap-y-1 text-sm text-ink-dim">
+          <span>{students ? `${showArchived ? "Архивт" : "Нийт"} ${students.length} сурагч` : "Сурагчдын жагсаалт"}</span>
+          {role === "ADMIN" && (
+            <Link
+              href="/app/admin/students/import"
+              className="ml-2 inline-flex min-h-10 items-center rounded-lg border border-line px-3 text-sm font-semibold text-ink"
+            >
+              Excel импорт
+            </Link>
           )}
-        </p>
+          {canSeeMoney && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const csv = await api<string>("/students/export.csv", { responseType: "text" });
+                  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "students.csv";
+                  a.click();
+                  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                } catch (e) {
+                  setError(errMsg(e));
+                }
+              }}
+              className="ml-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold text-ink"
+            >
+              <Download size={15} aria-hidden />
+              CSV татах
+            </button>
+          )}
+        </div>
       </div>
+
+      {canManage && !showArchived && (
+        <AttentionBanner
+          data={attn.data}
+          onChanged={reloadAll}
+          onShow={(k) => {
+            setAttention(k);
+            document.getElementById("student-search")?.scrollIntoView({ block: "center", behavior: "smooth" });
+          }}
+        />
+      )}
 
       {/* Хайлт + шүүлтүүр */}
       <div className="flex flex-col gap-3 chunky p-4">
+        {canManage && (
+          <Segmented
+            label="Сурагчийн төлөв"
+            value={showArchived ? "archive" : "active"}
+            onChange={(v) => {
+              setShowArchived(v === "archive");
+              setPage(0);
+            }}
+            options={[
+              { value: "active", label: "Идэвхтэй" },
+              { value: "archive", label: "Архив" },
+            ]}
+          />
+        )}
         <label className="sr-only" htmlFor="student-search">
           Код, нэр, утасны дугаараар хайх
         </label>
@@ -286,26 +342,37 @@ export default function StudentsDirectory() {
             ))}
           </select>
 
-          <button
-            type="button"
-            onClick={() => setUnassignedOnly((v) => !v)}
-            aria-pressed={unassignedOnly}
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-              unassignedOnly
-                ? "border-warning bg-warning/15 text-warning"
-                : "border-line text-ink-dim hover:text-ink"
-            }`}
-          >
-            <AlertCircle size={16} aria-hidden />
-            Зөвхөн хуваарилагдаагүй
-          </button>
+          {!showArchived &&
+            (
+              [
+                { kind: "unassigned", label: "Ангигүй", n: unassignedIds.size, icon: AlertCircle },
+                { kind: "absent", label: "Ирэхгүй", n: absentIds.size, icon: UserMinus },
+              ] as const
+            )
+              .filter((c) => c.n > 0)
+              .map((c) => (
+                <button
+                  key={c.kind}
+                  type="button"
+                  onClick={() => setAttention((v) => (v === c.kind ? null : c.kind))}
+                  aria-pressed={attention === c.kind}
+                  className={`inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                    attention === c.kind
+                      ? "border-error bg-error/10 text-error"
+                      : "border-line text-ink-dim hover:text-ink"
+                  }`}
+                >
+                  <c.icon size={16} aria-hidden />
+                  {c.label} ({c.n})
+                </button>
+              ))}
 
           {(search ||
             classroomFilter !== "ALL" ||
             gradeFilter !== "ALL" ||
             branchFilter !== "ALL" ||
             subjectFilter !== "ALL" ||
-            unassignedOnly) && (
+            attention) && (
             <button
               type="button"
               onClick={resetFilters}
@@ -340,94 +407,143 @@ export default function StudentsDirectory() {
               Тохирох сурагч олдсонгүй
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-line">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-line bg-panel text-xs text-ink-dim" style={{ height: 28 }}>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      Код
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      Нэр
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      Анги
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      Секц
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      Салбар
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      Сүүлд орсон
-                    </th>
-                    {canSeeMoney && <th scope="col" className="px-3 py-2 font-semibold">Төлбөрийн төлөв</th>}
-                    {role === "ADMIN" && <th scope="col" className="px-3 py-2 font-semibold">Үйлдэл</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {pageRows.map((s) => {
-                    const isUnassigned = unassignedIds.has(s.id);
-                    const status = canSeeMoney ? paymentStatusOf(s, outstandingMap) : null;
-                    return (
-                      <tr
-                        key={s.id}
-                        className={`row-interactive border-b border-line last:border-0 transition ${
-                          isUnassigned ? "bg-warning/[0.06]" : ""
-                        }`}
-                        style={{ height: 28 }}
-                      >
-                        <td className="px-3 py-2 font-mono text-xs text-ink-dim">
-                          {s.studentCode ?? "—"}
-                        </td>
-                        <td className="px-3 py-2">
-                          <Link
-                            href={`/app/students/${s.id}`}
-                            className="font-semibold text-brand transition hover:text-brand-soft hover:underline"
-                          >
-                            {fullName(s)}
-                          </Link>
-                          {isUnassigned && (
-                            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-bold text-warning">
-                              <AlertCircle size={10} aria-hidden />
-                              Хуваарилаагүй
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-ink-dim">
-                          {s.currentClassroom?.name ??
-                            (s.studentProfile?.grade ? `${s.studentProfile.grade}-р анги` : "—")}
-                        </td>
-                        <td className="px-3 py-2 text-ink-dim">
-                          {s.studentProfile?.section ?? "—"}
-                        </td>
-                        <td className="px-3 py-2 text-ink-dim">
-                          {s.studentProfile?.branch ?? "—"}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-2 text-xs text-ink-dim">
-                          {s.lastSeenAt ? relativeTimeMn(s.lastSeenAt) : "Ороогүй"}
-                        </td>
-                        {canSeeMoney && (
+            <>
+              <div className="hidden overflow-x-auto rounded-2xl border border-line md:block">
+                <table className="w-full min-w-[720px] text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-line bg-panel text-xs text-ink-dim" style={{ height: 28 }}>
+                      <th scope="col" className="px-3 py-2 font-semibold">Код</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">Нэр</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">{showArchived ? "Сүүлийн анги" : "Анги"}</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">Секц</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">Салбар</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">{showArchived ? "Хасагдсан шалтгаан" : "Сүүлд орсон"}</th>
+                      {canSeeMoney && !showArchived && <th scope="col" className="px-3 py-2 font-semibold">Төлбөрийн төлөв</th>}
+                      {canManage && (
+                        <th scope="col" className="w-12 px-1 py-2">
+                          <span className="sr-only">Үйлдэл</span>
+                        </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageRows.map((s) => {
+                      const isUnassigned = !showArchived && unassignedIds.has(s.id);
+                      const status = canSeeMoney && !showArchived ? paymentStatusOf(s, outstandingMap) : null;
+                      const cls = showArchived ? s.lastClassroom : s.currentClassroom;
+                      return (
+                        <tr
+                          key={s.id}
+                          className={`row-interactive border-b border-line last:border-0 transition ${
+                            isUnassigned ? "bg-warning/[0.06]" : ""
+                          }`}
+                          style={{ height: 28 }}
+                        >
+                          <td className="px-3 py-2 font-mono text-xs text-ink-dim">{s.studentCode ?? "—"}</td>
                           <td className="px-3 py-2">
-                            {status ? (
-                              <span
-                                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.cls}`}
-                              >
-                                <MetaTitle>{status.text}</MetaTitle>
+                            <Link
+                              href={`/app/students/${s.id}`}
+                              className="font-semibold text-brand transition hover:text-brand-soft hover:underline"
+                            >
+                              {fullName(s)}
+                            </Link>
+                            {isUnassigned && (
+                              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-bold text-warning">
+                                <AlertCircle size={10} aria-hidden />
+                                Хуваарилаагүй
                               </span>
-                            ) : (
-                              <span className="text-ink-dim">—</span>
+                            )}
+                            {!showArchived && absentIds.has(s.id) && (
+                              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-error/10 px-2 py-0.5 text-[11px] font-bold text-error">
+                                <UserMinus size={10} aria-hidden />
+                                Ирэхгүй
+                              </span>
                             )}
                           </td>
+                          <td className="px-3 py-2 text-ink-dim">
+                            {cls?.name ?? (s.studentProfile?.grade ? `${s.studentProfile.grade}-р анги` : "—")}
+                          </td>
+                          <td className="px-3 py-2 text-ink-dim">{s.studentProfile?.section ?? "—"}</td>
+                          <td className="px-3 py-2 text-ink-dim">{s.studentProfile?.branch ?? "—"}</td>
+                          <td className="px-3 py-2 text-xs text-ink-dim">
+                            {showArchived ? (
+                              <span className="line-clamp-1 max-w-[16rem]" title={s.archiveReason ?? undefined}>
+                                {s.archiveReason ?? "—"}
+                              </span>
+                            ) : (
+                              <span className="whitespace-nowrap">{s.lastSeenAt ? relativeTimeMn(s.lastSeenAt) : "Ороогүй"}</span>
+                            )}
+                          </td>
+                          {canSeeMoney && !showArchived && (
+                            <td className="px-3 py-2">
+                              {status ? (
+                                <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.cls}`}>
+                                  <MetaTitle>{status.text}</MetaTitle>
+                                </span>
+                              ) : (
+                                <span className="text-ink-dim">—</span>
+                              )}
+                            </td>
+                          )}
+                          {canManage && (
+                            <td className="px-1 py-0 text-right">
+                              <StudentActionsMenu
+                                student={{ id: s.id, name: fullName(s) }}
+                                archived={!!s.archivedAt}
+                                currentClassId={s.currentClassroom?.id ?? null}
+                                lastClassId={s.lastClassroom?.id ?? null}
+                                onChanged={reloadAll}
+                              />
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Утас: хүснэгтийн оронд нягт жагсаалт, «⋯» үргэлж харагдана */}
+              <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface md:hidden">
+                {pageRows.map((s) => {
+                  const cls = showArchived ? s.lastClassroom : s.currentClassroom;
+                  const isUnassigned = !showArchived && unassignedIds.has(s.id);
+                  const status = canSeeMoney && !showArchived ? paymentStatusOf(s, outstandingMap) : null;
+                  return (
+                    <li key={s.id} className="flex items-center gap-1 py-1 pl-3 pr-1">
+                      <div className="min-w-0 flex-1 py-1">
+                        <Link href={`/app/students/${s.id}`} className="block truncate font-semibold text-brand">
+                          {fullName(s)}
+                        </Link>
+                        <Meta
+                          className="text-xs text-ink-dim"
+                          items={[
+                            s.studentCode && <span key="c" className="font-mono">{s.studentCode}</span>,
+                            cls?.name ?? (isUnassigned ? "Хуваарилаагүй" : null),
+                            !showArchived && absentIds.has(s.id) ? "Ирэхгүй" : null,
+                            showArchived ? s.archiveReason : null,
+                          ]}
+                        />
+                        {status && (
+                          <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${status.cls}`}>
+                            <MetaTitle>{status.text}</MetaTitle>
+                          </span>
                         )}
-                        {role === "ADMIN" && <td className="px-3 py-2"><button type="button" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-line px-2 text-xs font-semibold" onClick={async () => { const reason = window.prompt(s.archivedAt ? "Сэргээх шалтгаан" : "Архивлах шалтгаан"); if (reason === null || !reason.trim()) return; try { await api(`/users/${s.id}/${s.archivedAt ? "unarchive" : "archive"}`, { method: "POST", body: { reason } }); load(); } catch (e) { setError(errMsg(e)); } }}>{s.archivedAt ? <><RotateCcw size={14}/>Сэргээх</> : <><Archive size={14}/>Архивлах</>}</button></td>}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                      {canManage && (
+                        <StudentActionsMenu
+                          student={{ id: s.id, name: fullName(s) }}
+                          archived={!!s.archivedAt}
+                          currentClassId={s.currentClassroom?.id ?? null}
+                          lastClassId={s.lastClassroom?.id ?? null}
+                          onChanged={reloadAll}
+                        />
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           )}
 
           {/* Хуудаслалт — 359 мөрийг НЭГ дор буулгахгүй байхын гол механизм */}
@@ -478,6 +594,15 @@ export default function StudentsDirectory() {
             </div>
           </div>
         </>
+      )}
+      {creatingClass && (
+        <NewClassDialog
+          onClose={() => setCreatingClass(false)}
+          onCreated={(created) => {
+            setCreatingClass(false);
+            announceCreated(created, () => router.push(`/app/classes/${created.id}`));
+          }}
+        />
       )}
       {registering && (
         <NewStudentDialog

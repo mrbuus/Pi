@@ -5,6 +5,7 @@ import {
   ArrayUnique,
   IsArray,
   IsInt,
+  IsOptional,
   IsString,
   IsUUID,
   MaxLength,
@@ -20,6 +21,21 @@ export class ArchiveStudentDto {
   @MinLength(3)
   @MaxLength(500)
   reason!: string;
+}
+/** Сэргээх: шалтгаан заавал биш; `classroomId` өгвөл тэр ангид буцаана */
+export class UnarchiveStudentDto {
+  @Transform((params: TransformFnParams): unknown =>
+    typeof params.value === 'string' ? params.value.trim() : params.value,
+  )
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  classroomId?: string;
 }
 export class CommitStudentImportDto {
   @IsUUID() previewId!: string;

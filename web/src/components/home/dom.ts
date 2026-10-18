@@ -68,13 +68,13 @@ const sayW=$$('#say .w');
 
 /* Номууд */
 const BOOKS=[
-  {n:'Математикийн тестүүд I',s:'12 бүлэг сэдэв',d:'12 бүлэг сэдвээр тест, бодлого бүр бодолттой',img:'/home/100x100-front.jpg',tags:['Тест','ЭЕШ','Бодолттой']},
-  {n:'Математикийн тестүүд II',s:'Тестийн цуврал',d:'Тестийн цувралын хоёр дахь дэвтэр, хавтас бэлтгэгдэж байна',sh:'grid',tags:['Тест','ЭЕШ']},
-  {n:'Математикийн тестүүд III',s:'Тестийн цуврал',d:'Тестийн цувралын гурав дахь дэвтэр, хавтас бэлтгэгдэж байна',sh:'grid',tags:['Тест','ЭЕШ']},
-  {n:'Хавтгайн геометр 1',s:'Планиметр',d:'Гурвалжин, тойрог, тэдгээрийн шинж чанар',sh:'tri',tags:['Геометр','Гурвалжин','Тойрог']},
-  {n:'Хавтгайн геометр 2',s:'Планиметр',d:'Планиметрийн үргэлжлэл: олон өнцөгт, талбай',sh:'circ',tags:['Геометр','Олон өнцөгт']},
-  {n:'Огторгуйн геометр',s:'Стереометр',d:'Огторгуйн биет, огтлол, эзлэхүүн',sh:'cube',tags:['Геометр','Биет','Эзлэхүүн']},
-  {n:'<tex>\\pi</tex> тест',s:'Давтлагын тест',d:'Шалгалтын бүтэцтэй давтлагын тест',sh:'pi',tags:['Тест','Сорил']}
+  {n:'Математикийн тестүүд I',href:'/books/100V3',s:'12 бүлэг сэдэв',d:'12 бүлэг сэдвээр тест, бодлого бүр бодолттой',img:'/home/100x100-front.jpg',tags:['Тест','ЭЕШ','Бодолттой']},
+  {n:'Математикийн тестүүд II',href:'/books/200V3',s:'Тестийн цуврал',d:'Тестийн цувралын хоёр дахь дэвтэр, хавтас бэлтгэгдэж байна',sh:'grid',tags:['Тест','ЭЕШ']},
+  {n:'Математикийн тестүүд III',href:'/books/300',s:'Тестийн цуврал',d:'Тестийн цувралын гурав дахь дэвтэр, хавтас бэлтгэгдэж байна',sh:'grid',tags:['Тест','ЭЕШ']},
+  {n:'Хавтгайн геометр 1',href:'/books/HAV',s:'Планиметр',d:'Гурвалжин, тойрог, тэдгээрийн шинж чанар',sh:'tri',tags:['Геометр','Гурвалжин','Тойрог']},
+  {n:'Хавтгайн геометр 2',href:'/books/HAV',s:'Планиметр',d:'Планиметрийн үргэлжлэл: олон өнцөгт, талбай',sh:'circ',tags:['Геометр','Олон өнцөгт']},
+  {n:'Огторгуйн геометр',href:'/books/OGT',s:'Стереометр',d:'Огторгуйн биет, огтлол, эзлэхүүн',sh:'cube',tags:['Геометр','Биет','Эзлэхүүн']},
+  {n:'<tex>\\pi</tex> тест',href:'/books/PI',s:'Давтлагын тест',d:'Шалгалтын бүтэцтэй давтлагын тест',sh:'pi',tags:['Тест','Сорил']}
 ];
 const A1='#B8CBEF', W1='#FFFFFF';
 const SH={
@@ -101,6 +101,7 @@ function bookMeta(i,force){ if(i===bkCur&&!force) return; bkCur=i; const b=BOOKS
   $('#bIdx').textContent=String(i+1).padStart(2,'0')+' / 07';
   $('#bName').innerHTML=texify(b.n); $$('#bName [data-t]').forEach(e=>tex(e,e.dataset.t));
   $('#bDesc').textContent=b.d; $('#bChips').innerHTML=b.tags.map(t=>`<span>${t}</span>`).join('');
+  $('#bOpen').href=b.href||'/books';
   dashes.forEach((d,k)=>d.classList.toggle('on',k===i));
 }
 bookMeta(0);
@@ -145,11 +146,14 @@ $$('#pol .pc').forEach((c,i)=>c.style.transitionDelay=(i*110)+'ms');
 let WALL_YEARS=[2026];
 const W={data:{},year:null,subj:'all',shown:0,list:[]}; window.__W=W;
 const wGrid=$('#wGrid'), wYears=$('#wYears'), wSubj=$('#wSubj'), wCnt=$('#wCnt'), wMore=$('#wMore'), wLess=$('#wLess');
-const SUBJ={all:'Бүгд',mat:'Математик',soc:'Нийгэм судлал'};
+const SUBJ={all:'Бүгд',mat:'Математик',soc:'Нийгэм судлал',sat:'SAT',cls:'Анги'};
+// Оны товч дүн (эх: эзний Facebook нийтлэл, амжилтын суваг)
+const YNOTE={2026:'353 сурагч, 73% нь 600-аас дээш',2025:'331 сурагч, дундаж 632 оноо, Улаанбаатарын дундаж 497',2024:'10 ангийн 285 сурагч, 72% нь 600-аас дээш',2023:'190 гаруй сурагч, 45 нь 700-аас дээш'};
+const wNote=$('#wNote');
 const capOf=d=>[d.n,d.o?d.o+' оноо':'',d.sc].filter(Boolean).join(', ');
 async function wallInit(){
   try{ const r=await fetch('/amjilt/index.json'); if(r.ok){ const ys=await r.json(); if(Array.isArray(ys)&&ys.length) WALL_YEARS=ys; } }catch(e){}
-  for(const y of WALL_YEARS){ try{ const r=await fetch('/amjilt/'+y+'.json'); W.data[y]=r.ok?await r.json():[]; }catch(e){ W.data[y]=[]; } }
+  for(const y of WALL_YEARS){ try{ const r=await fetch('/amjilt/'+y+'.json'); W.data[y]=r.ok?(await r.json()).map(d=>{ for(const k of ['t','f','a']) if(d[k]&&d[k][0]!=='/') d[k]='/'+d[k]; return d; }):[]; }catch(e){ W.data[y]=[]; } }
   wYears.innerHTML=WALL_YEARS.map(y=>`<button role="tab" data-y="${y}">${y}<small>${W.data[y].length}</small></button>`).join('');
   wYears.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) wallYear(+b.dataset.y); });
   wSubj.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ W.subj=b.dataset.s; wallRender(); } });
@@ -158,13 +162,15 @@ async function wallInit(){
 }
 function wallYear(y){
   W.year=y; W.subj='all'; const subs=[...new Set(W.data[y].map(d=>d.s))];
+  wNote.textContent=YNOTE[y]||'';
   wSubj.innerHTML=subs.length>1?['all',...subs].map(k=>`<button role="tab" data-s="${k}">${SUBJ[k]||k}</button>`).join(''):'';
   $$('#wYears button').forEach(b=>b.setAttribute('aria-selected',String(+b.dataset.y===y)));
   wallRender();
 }
 function wallRender(){
   $$('#wSubj button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.s===W.subj)));
-  W.list=W.data[W.year].filter(d=>W.subj==='all'||d.s===W.subj);
+  wGrid.classList.toggle('cls',W.subj==='cls');
+  W.list=W.data[W.year].filter(d=>W.subj==='all'?(d.s!=='cls'&&d.s!=='sat'):d.s===W.subj); // SAT, анги — өөрийн табд
   if(W.subj==='all') W.list=[...W.list].sort((a,b)=>(b.o||0)-(a.o||0)||(a.s===b.s?0:a.s==='mat'?-1:1)); W.shown=0; wGrid.replaceChildren();
   if(!W.list.length){ const e=document.createElement('div'); e.className='wempty'; e.textContent='Энэ оны зураг одоогоор алга'; wGrid.appendChild(e); }
   wallMore();
@@ -172,6 +178,7 @@ function wallRender(){
 function wallMore(){
   const step=innerWidth<700?12:20, next=W.list.slice(W.shown,W.shown+step);
   next.forEach((d,k)=>{ const i=W.shown+k, b=document.createElement('button'); b.className='it'+(d.group?' wide':''); b.setAttribute('aria-label',capOf(d));
+    if(d.s==='cls'){ const c=document.createElement('span'); c.className='cap2'; const bb=document.createElement('b'); bb.textContent=d.n; c.append(bb,document.createTextNode(d.sc||'')); b.appendChild(c); }
     const im=new Image(); im.loading='lazy'; im.decoding='async'; im.alt=capOf(d); if(d.w){ im.width=d.w; im.height=d.h; } im.onload=()=>im.classList.add('ld'); im.src=d.t;
     b.appendChild(im); b.addEventListener('click',()=>lbOpen(i,W.list)); wGrid.appendChild(b); });
   W.shown+=next.length; wMore.hidden=W.shown>=W.list.length; wLess.hidden=W.shown<=step;
@@ -193,6 +200,10 @@ on(window,'keydown',e=>{ if(lb.hidden) return; if(e.key==='Escape') lbClose(); i
 wallInit();
 
 const wmk=$('#wmk'); let wmHover=false;
+// Нэр бүтнээрээ («Шинэ Ирээдүйн Эзэд») өргөнд багтана — фонт ачаалагдсаны дараа, цонх өөрчлөгдөхөд дахин
+function fitWmk(){ wmk.style.fontSize=''; const rg=document.createRange(); rg.selectNodeContents(wmk); const tw=rg.getBoundingClientRect().width, cw=wmk.clientWidth;
+  if(tw>0&&cw>0){ const fs=parseFloat(getComputedStyle(wmk).fontSize); wmk.style.fontSize=Math.min(fs*cw/tw*.97,220)+'px'; } }
+fitWmk(); on(window,'resize',fitWmk); if(document.fonts) document.fonts.ready.then(fitWmk);
 wmk.addEventListener('pointermove',e=>{ const r=wmk.getBoundingClientRect(); wmHover=true; wmk.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%'); wmk.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%'); });
 wmk.addEventListener('pointerleave',()=>wmHover=false);
 
@@ -210,6 +221,8 @@ const tvM=$('#tvM'), tvL=$('#tvL'), tvR=$('#tvR');
 const sl1=$('#sl1'), sl2=$('#sl2');
 const gv=$('#gv'), gl=$('#gl'), gr=$('#gr'), glt=$('#glt'), glbl=$('#glb'), gt=$('#gt');
 const logoFix=$('#logoFix');
+let logoY=-1;
+function logoTone(){ const L=!!logoFix.closest('.light'); if(L!==logoY){ logoY=L; logoFix.classList.toggle('light',L); } }
 let swing=0;
 const pinP=r=>clamp(-r.top/(r.height-innerHeight));
 const seen=r=>r.bottom>-60 && r.top<innerHeight+60;
@@ -222,8 +235,7 @@ function frame(now){
   const R={}; for(const k in EL) R[k]=EL[k].getBoundingClientRect();
 
   cx+=(tx-cx)*.2; cy+=(ty-cy)*.2; cur.style.transform=`translate3d(${cx}px,${cy}px,0)`;
-  logoFix.classList.toggle('light',R.ring.top<=46&&R.ring.bottom>=46);
-  const past=R.hero.bottom<vh*.5; logoFix.classList.toggle('off',past); root.classList.toggle('past',past);
+  const past=R.hero.bottom<vh*.5; root.classList.toggle('past',past); logoTone();
 
   /* 1. HERO */
   S.vHero=seen(R.hero);
@@ -240,7 +252,8 @@ function frame(now){
     heroView.style.clipPath=k>0?`inset(${top}px ${side}px ${bot}px ${side}px round ${rad}px)`:'none';
     const q=ease(range(p,.8,.9)); out.style.opacity=q; out.style.transform=`translate3d(0,${(1-q)*40}px,0)`; out.style.pointerEvents=q>.6?'auto':'none';
     shade.style.opacity=clamp(.85+.15*Math.max(o1,o2)-.55*k);
-    tag.style.opacity=desk? clamp(1-range(p,.06,.1)*.35+range(p,.86,.92)) : clamp(1-range(p,.06,.1))*(1-range(p,.7,.78));
+    const tagOff=1-range(p,.36,.4)*(1-range(p,.66,.7)); // 4 алхамтай давхцахгүй
+    tag.style.opacity=(desk? clamp(1-range(p,.06,.1)*.35+range(p,.86,.92)) : clamp(1-range(p,.06,.1))*(1-range(p,.7,.78)))*tagOff; tag.style.pointerEvents=tagOff<.5?'none':'auto';
   }
 
   S.vLab=seen(R.lab);
@@ -292,7 +305,7 @@ function frame(now){
     gv.style.clipPath=k<1?`circle(${rad}px at 50% 50%)`:'none';
     const so=range(p,.05,.26);
     if(desk){ gl.style.transform=`translate3d(${-so*30}vw,-50%,0)`; gr.style.transform=`translate3d(${so*30}vw,-50%,0)`; }
-    else { gl.style.transform=`translate3d(${-so*40}vw,${-so*8}vh,0)`; gr.style.transform=`translate3d(${so*40}vw,${so*8}vh,0)`; }
+    else { gl.style.transform=`translate3d(${-so*40}vw,0,0)`; gr.style.transform=`translate3d(${so*40}vw,0,0)`; }
     gl.style.opacity=gr.style.opacity=1-range(p,.14,.28); glt.style.opacity=glbl.style.opacity=1-range(p,.03,.14);
     const g=ease(range(p,.7,.8)); gt.style.opacity=g; gt.style.transform=desk?`translate3d(${(1-g)*-40}px,-50%,0)`:`translate3d(0,${(1-g)*40}px,0)`; gt.classList.toggle('on',g>.5);
   }

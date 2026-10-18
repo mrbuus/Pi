@@ -9,6 +9,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock
 import { getRole } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import ChangeClassDialog from "../ChangeClassDialog";
+import { RemoveFromTrainingDialog, RestoreStudentDialog } from "../StudentActions";
 import StudentNotesPanel from "../StudentNotesPanel";
 import RequireRole from "@/components/nav/RequireRole";
 import { useSection } from "./useSection";
@@ -74,6 +75,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
     window.history.replaceState({}, "", url);
   }, []);
   const [moving, setMoving] = useState(false);
+  const [dialog, setDialog] = useState<"remove" | "restore" | null>(null);
 
   // Жилийн төлбөрөө бүтэн төлсөн сурагчид PAYMENT тэмдэглэл шаардлагагүй
   // (notes.service assertPaymentNoteAllowed-тэй ижил). Мэдэхгүй бол хаахгүй — сервер хэлнэ.
@@ -107,6 +109,8 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
             detail={detail}
             canMove={canMove}
             onMove={() => setMoving(true)}
+            onRemove={() => setDialog("remove")}
+            onRestore={() => setDialog("restore")}
             canSeeMoney={canSeeMoney}
             payments={{ status: paymentsQ.status, data: paymentsQ.data }}
             summary={{ status: summaryQ.status, data: summaryQ.data }}
@@ -179,6 +183,21 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
             status === "loading" && <LoadingState rows={6} label="Мэдээлэл" />
           ))}
 
+        {dialog === "remove" && detail && (
+          <RemoveFromTrainingDialog
+            student={{ id: studentId, name: fullName(detail) }}
+            onClose={() => setDialog(null)}
+            onDone={load}
+          />
+        )}
+        {dialog === "restore" && detail && (
+          <RestoreStudentDialog
+            student={{ id: studentId, name: fullName(detail) }}
+            lastClassId={detail.lastClassroom?.id ?? null}
+            onClose={() => setDialog(null)}
+            onDone={load}
+          />
+        )}
         {moving && detail && (
           <ChangeClassDialog
             studentId={studentId}

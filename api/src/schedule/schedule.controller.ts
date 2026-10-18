@@ -30,6 +30,8 @@ import { UpsertTopicDto } from './dto/upsert-topic.dto';
 import { SetStaffingDto } from './dto/set-staffing.dto';
 import { ScheduleAccessService } from './schedule-access.service';
 import { ScheduleService } from './schedule.service';
+import { LessonPlanService } from './lesson-plan.service';
+import { PutLessonPlanDto } from './dto/lesson-plan.dto';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -44,6 +46,7 @@ export class ScheduleController {
   constructor(
     private schedule: ScheduleService,
     private access: ScheduleAccessService,
+    private plans: LessonPlanService,
   ) {}
 
   // ---------- /schedule ----------
@@ -147,7 +150,8 @@ export class ScheduleController {
     );
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  // Сэдэв/төлөвлөгөө бичих — Багш+, Админ л (эзэн 2026-10-18)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('schedule/:id/topic')
   async upsertTopic(
     @Param('id') id: string,
@@ -182,7 +186,7 @@ export class ScheduleController {
     return this.schedule.setStaffing(id, dto, req.user.userId, req.user.role);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('schedule/:id/topic')
   async clearTopic(
     @Param('id') id: string,
@@ -273,6 +277,44 @@ export class ScheduleController {
       teacherId,
       await this.access.readableClassrooms(req.user),
     );
+  }
+
+  // Өдрийн хуваарийн мөр бүрийн төлөвлөгөө, өмнөх/хийсэн тест, тэмдэглэл,
+  // батламж — нэг дуудлагаар (эзэн 2026-10-18). Зөвхөн ажилтан.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('schedule/day-plan')
+  dayPlan(@Query('date') date: string, @Req() req: AuthedRequest) {
+    return this.plans.dayPlan(req.user, date);
+  }
+
+  // Батлахад нэмсэн тестийн бодлогын дараалал (хассан дугаар тэмдэглэхэд)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('schedule/plan-tests')
+  planTests(@Query('ids') ids: string, @Req() req: AuthedRequest) {
+    return this.plans.planTests(req.user, ids);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Get('schedule/:id/plan')
+  async getPlan(
+    @Param('id') id: string,
+    @Query('date') date: string,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.topic(req.user, id);
+    return this.plans.getPlan(req.user, id, date);
+  }
+
+  // Хичээлийн төлөвлөгөө: тестүүд (номын дарааллаар), тарах/үлдэх, онолын зураг
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Put('schedule/:id/plan')
+  async putPlan(
+    @Param('id') id: string,
+    @Body() dto: PutLessonPlanDto,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.topic(req.user, id);
+    return this.plans.putPlan(req.user, id, dto);
   }
 
   @Get('schedule/:id')

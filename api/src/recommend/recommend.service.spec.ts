@@ -5,7 +5,10 @@ import { Role } from '../generated/prisma/enums';
 function fixture() {
   return {
     attempt: { findMany: jest.fn().mockResolvedValue([]) },
-    enrollment: { findFirst: jest.fn().mockResolvedValue(null) },
+    enrollment: {
+      findFirst: jest.fn().mockResolvedValue(null),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
     learningEvent: { findMany: jest.fn().mockResolvedValue([]) },
     studentProfile: { findUnique: jest.fn().mockResolvedValue(null) },
     userPass: { findMany: jest.fn().mockResolvedValue([]) },
@@ -55,6 +58,8 @@ describe('recommendation evidence and entitlement contract', () => {
       ),
     ).toEqual(first.map((r) => r.problemId));
     expect(db.chapter.findMany.mock.calls[0][0].where.AND[0]).toEqual({
+      // Ангигүй худалдан авагчид ангиар хаалттай хичээл (Нийгмийн ухаан г.м.) санал болгохгүй
+      NOT: { book: { subject: { in: ['SOCIAL_STUDIES', 'SAT'] } } },
       OR: [{ freePreview: true }, { id: { in: [] } }, { bookId: { in: [] } }],
     });
   });

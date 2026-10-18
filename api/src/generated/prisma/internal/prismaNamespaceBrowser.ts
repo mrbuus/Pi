@@ -158,7 +158,12 @@ export const ModelName = {
   DraftBlock: 'DraftBlock',
   DraftEvent: 'DraftEvent',
   PlacementAttempt: 'PlacementAttempt',
-  PlacementTestConfig: 'PlacementTestConfig'
+  PlacementTestConfig: 'PlacementTestConfig',
+  MockExamEvent: 'MockExamEvent',
+  MockExamRegistration: 'MockExamRegistration',
+  ClassTestStatus: 'ClassTestStatus',
+  LessonPhoto: 'LessonPhoto',
+  LessonMakeup: 'LessonMakeup'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -337,9 +342,11 @@ export const ClassroomScalarFieldEnum = {
   grade: 'grade',
   teacherId: 'teacherId',
   assistantTeacherId: 'assistantTeacherId',
+  riskCriteria: 'riskCriteria',
   archived: 'archived',
   createdAt: 'createdAt',
-  progressChapterId: 'progressChapterId'
+  progressChapterId: 'progressChapterId',
+  subject: 'subject'
 } as const
 
 export type ClassroomScalarFieldEnum = (typeof ClassroomScalarFieldEnum)[keyof typeof ClassroomScalarFieldEnum]
@@ -1295,7 +1302,10 @@ export const LessonTopicScalarFieldEnum = {
   title: 'title',
   chapterId: 'chapterId',
   createdById: 'createdById',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  testIds: 'testIds',
+  dismissMode: 'dismissMode',
+  photoStudentId: 'photoStudentId'
 } as const
 
 export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
@@ -1823,6 +1833,76 @@ export const PlacementTestConfigScalarFieldEnum = {
 } as const
 
 export type PlacementTestConfigScalarFieldEnum = (typeof PlacementTestConfigScalarFieldEnum)[keyof typeof PlacementTestConfigScalarFieldEnum]
+
+
+export const MockExamEventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  testId: 'testId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  note: 'note',
+  published: 'published',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MockExamEventScalarFieldEnum = (typeof MockExamEventScalarFieldEnum)[keyof typeof MockExamEventScalarFieldEnum]
+
+
+export const MockExamRegistrationScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type MockExamRegistrationScalarFieldEnum = (typeof MockExamRegistrationScalarFieldEnum)[keyof typeof MockExamRegistrationScalarFieldEnum]
+
+
+export const ClassTestStatusScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  testId: 'testId',
+  status: 'status',
+  note: 'note',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClassTestStatusScalarFieldEnum = (typeof ClassTestStatusScalarFieldEnum)[keyof typeof ClassTestStatusScalarFieldEnum]
+
+
+export const LessonPhotoScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  studentId: 'studentId',
+  imageKeys: 'imageKeys',
+  testIds: 'testIds',
+  createdAt: 'createdAt'
+} as const
+
+export type LessonPhotoScalarFieldEnum = (typeof LessonPhotoScalarFieldEnum)[keyof typeof LessonPhotoScalarFieldEnum]
+
+
+export const LessonMakeupScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  studentId: 'studentId',
+  date: 'date',
+  imageKeys: 'imageKeys',
+  submittedAt: 'submittedAt',
+  confirmedById: 'confirmedById',
+  confirmedAt: 'confirmedAt',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonMakeupScalarFieldEnum = (typeof LessonMakeupScalarFieldEnum)[keyof typeof LessonMakeupScalarFieldEnum]
 
 
 export const SortOrder = {

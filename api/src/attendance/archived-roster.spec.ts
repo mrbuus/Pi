@@ -35,6 +35,7 @@ function setup() {
       groupBy: jest.fn().mockResolvedValue([]),
     },
     classSchedule: { count: jest.fn().mockResolvedValue(0) },
+    lessonStaffing: { count: jest.fn().mockResolvedValue(0) },
     user: {
       findUnique: jest
         .fn()

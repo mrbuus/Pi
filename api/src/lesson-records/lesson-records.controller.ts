@@ -67,17 +67,18 @@ export class LessonRecordsController {
     );
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  // Батлах/буцаах — Багш+, Админ л (эзэн 2026-10-18)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put(':scheduleId/confirm')
   confirm(
     @Req() req: AuthedRequest,
     @Param('scheduleId') scheduleId: string,
     @Body() dto: ConfirmLessonDto,
   ) {
-    return this.records.confirm(req.user, scheduleId, dto.date);
+    return this.records.confirm(req.user, scheduleId, dto.date, dto.tests);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete(':scheduleId/confirm')
   unconfirm(
     @Req() req: AuthedRequest,

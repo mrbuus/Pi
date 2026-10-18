@@ -14,6 +14,11 @@ export const STAFF_CAPABILITIES = [
   'finance.manage',
 ] as const;
 export type StaffCapability = (typeof STAFF_CAPABILITIES)[number];
+/** Багш+ олголтгүйгээр БАЙНГА эзэмших эрхүүд (бүх анги) */
+export const TEACHER_PLUS_IMPLICIT: readonly StaffCapability[] = [
+  'finance.manage',
+  'schedule.manage',
+];
 
 @Injectable()
 export class StaffCapabilityService {
@@ -39,8 +44,9 @@ export class StaffCapabilityService {
     if (actor.role === Role.ADMIN) return true;
     if (actor.role !== Role.TEACHER_PLUS) return false;
     // Эзний шийдвэр (2026-10-08): Багш+ төлбөрийн хэсгийг БАЙНГА удирдана —
-    // тусгай эрх олгох шаардлагагүй. Хуваарь/цаг/цалин нь тусгай эрхтэй хэвээр.
-    if (capability === 'finance.manage') return true;
+    // тусгай эрх олгох шаардлагагүй. Хуваарь мөн адил (эзэн 2026-10-18: «Багш+-д
+    // хуваарь засах эрх өгчих»). Цаг/цалин нь тусгай эрхтэй хэвээр.
+    if (TEACHER_PLUS_IMPLICIT.includes(capability)) return true;
     return !!(await this.prisma.staffCapabilityGrant.findFirst({
       where: {
         userId,
@@ -87,6 +93,16 @@ export class StaffCapabilityService {
             orderBy: { capability: 'asc' },
           })
         : [];
+    // Байнгын эрхүүдийг вэб ч мэдэх ёстой (засах товч харуулах эсэх) — бүх ангид
+    if (actor.role === Role.TEACHER_PLUS)
+      for (const capability of TEACHER_PLUS_IMPLICIT)
+        if (!grants.some((g) => g.capability === capability && !g.scopeKey))
+          grants.push({
+            id: `implicit:${capability}`,
+            capability,
+            scopeKey: '',
+            expiresAt: null,
+          });
     return { administrator: actor.role === Role.ADMIN, grants };
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, CalendarDays, ClipboardList, Clock, GraduationCap, Inbox, ListChecks, Settings2, Timer } from "lucide-react";
+import { CalendarDays, GraduationCap, Inbox, ListChecks, Settings2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 /**
@@ -11,11 +11,10 @@ import type { LucideIcon } from "lucide-react";
  */
 export const CLASS_HUB: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/app/schedule", label: "Хуваарь", icon: CalendarDays },
-  { href: "/app/lesson-flow", label: "Өдрийн хичээл", icon: ClipboardList },
-  { href: "/app/dismissal", label: "Тарах цаг", icon: Timer },
-  { href: "/app/teacher-hours", label: "Хуваарийн цаг", icon: Clock },
+  // Өдрийн хичээл, Тарах цаг, Хуваарийн цаг — шаардлагагүй (эзэн 2026-10-18):
+  // тарах/үлдэх, өдрийн төлөвлөгөө өдрийн хуваарь дотор орсон. Дүн шинжилгээг
+  // одоохондоо харуулахгүй. Хуудсууд нь устаагүй, зөвхөн табаас хасагдсан.
   { href: "/app/planner", label: "Төлөвлөгч", icon: ListChecks },
-  { href: "/app/insights", label: "Дүн шинжилгээ", icon: BarChart3 },
 ];
 
 // «Элсэлт» = Хүсэлтүүд + Элсэлтийн удирдлага (эзэн 2026-10-13)

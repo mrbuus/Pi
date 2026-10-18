@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -28,6 +29,13 @@ import { SplitSeriesDto } from './dto/split-series.dto';
 import { UpsertExceptionDto } from './dto/upsert-exception.dto';
 import { UpsertTopicDto } from './dto/upsert-topic.dto';
 import { SplitOutOfRangeError, SplitPlan, planSplit } from './split-series';
+import { resolveOccurrence } from './lesson-plan.logic';
+import {
+  findRoomConflict,
+  roomConflictMessage,
+  roomCounts,
+  type RoomSlot,
+} from './room-overlap';
 import {
   resolveTeacherRoster,
   PARITY_ANCHOR_MONDAY,
@@ -151,6 +159,33 @@ export class ScheduleService {
     }
   }
 
+  /** Өөр ангитай нэг танхимд давхцвал 409 (tx өгвөл тэр транзакц дотор шалгана). */
+  private async assertRoomFree(
+    candidate: RoomSlot,
+    db: Pick<PrismaService, 'classSchedule'> = this.prisma,
+    excludeIds: string[] = [],
+  ) {
+    if (!roomCounts(candidate.room)) return;
+    const others = await db.classSchedule.findMany({
+      where: {
+        room: candidate.room,
+        weekday: candidate.weekday,
+        classroomId: { not: candidate.classroomId },
+        ...(excludeIds.length ? { id: { notIn: excludeIds } } : {}),
+      },
+      include: { classroom: { select: { name: true } } },
+    });
+    const hit = findRoomConflict(candidate, others);
+    if (hit)
+      throw new ConflictException(
+        roomConflictMessage(
+          candidate.room!,
+          hit,
+          hit.classroom.name.replace(/\s*\([^)]*\)\s*$/, ''),
+        ),
+      );
+  }
+
   // parseDateOnly plain Error шидвэл HTTP 500 болчихно — энд эргүүлж 400
   // болгож, хэрэглэгчид ойлгомжтой монгол мессеж өгнө.
   private parseDate(value: string): Date {
@@ -193,6 +228,15 @@ export class ScheduleService {
     }
     await this.assertNoOverlap({
       classroomId: dto.classroomId,
+      weekday: dto.weekday,
+      startMinute: dto.startMinute,
+      endMinute: dto.endMinute,
+      effectiveFrom,
+      effectiveTo,
+    });
+    await this.assertRoomFree({
+      classroomId: dto.classroomId,
+      room: dto.room ?? null,
       weekday: dto.weekday,
       startMinute: dto.startMinute,
       endMinute: dto.endMinute,
@@ -286,6 +330,16 @@ export class ScheduleService {
     const teacherId =
       dto.teacherId === undefined ? existing.teacherId : dto.teacherId;
     const room = dto.room === undefined ? existing.room : dto.room;
+    await this.assertRoomFree({
+      id,
+      classroomId,
+      room,
+      weekday,
+      startMinute,
+      endMinute,
+      effectiveFrom,
+      effectiveTo,
+    });
     const subject = dto.subject === undefined ? existing.subject : dto.subject;
     const changed =
       classroomId !== existing.classroomId ||
@@ -367,9 +421,10 @@ export class ScheduleService {
         weekday: dto.weekday,
         startMinute: dto.startMinute,
         endMinute: dto.endMinute,
-        teacherId: dto.teacherId ?? undefined,
-        room: dto.room ?? undefined,
-        subject: dto.subject ?? undefined,
+        // null = арилгах, undefined = хэвээр (split-ийн үндсэн замтай ижил)
+        teacherId: dto.teacherId,
+        room: dto.room,
+        subject: dto.subject,
       });
       return { mode: 'REPLACED_ALL' as const, schedule: updated };
     }
@@ -403,6 +458,20 @@ export class ScheduleService {
           `Энэ ангид ${toTime(conflict.startMinute)}–${toTime(conflict.endMinute)} хугацаанд өөр хуваарь давхцаж байна`,
         );
       }
+
+      await this.assertRoomFree(
+        {
+          id,
+          classroomId: existing.classroomId,
+          room: dto.room === undefined ? existing.room : dto.room,
+          weekday,
+          startMinute,
+          endMinute,
+          effectiveFrom: plan.newEffectiveFrom,
+          effectiveTo: plan.newEffectiveTo,
+        },
+        tx,
+      );
 
       // 1. Хуучин мөрийг заасан огнооны өмнөх өдөр дуусгана.
       await tx.classSchedule.update({
@@ -438,6 +507,15 @@ export class ScheduleService {
         where: { scheduleId: id, date: { gte: plan.newEffectiveFrom } },
         data: { scheduleId: created.id },
       });
+
+      // Өдрийн багш, тэмдэглэл, батламж ч мөн шинэ мөр рүү (эс бөгөөс алга болно)
+      const moveFrom = {
+        where: { scheduleId: id, date: { gte: plan.newEffectiveFrom } },
+        data: { scheduleId: created.id },
+      };
+      await tx.lessonStaffing.updateMany(moveFrom);
+      await tx.lessonNote.updateMany(moveFrom);
+      await tx.lessonRecord.updateMany(moveFrom);
 
       return {
         mode: 'SPLIT' as const,
@@ -935,6 +1013,18 @@ export class ScheduleService {
             `${weekday}-р гарагт ${toTime(dto.startMinute)}–${toTime(dto.endMinute)} хугацаанд өөр хуваарь давхцаж байна — бүх багц цуцлагдлаа`,
           );
         }
+        await this.assertRoomFree(
+          {
+            classroomId: dto.classroomId,
+            room: dto.room ?? null,
+            weekday,
+            startMinute: dto.startMinute,
+            endMinute: dto.endMinute,
+            effectiveFrom,
+            effectiveTo,
+          },
+          tx,
+        );
         const row = await tx.classSchedule.create({
           data: {
             classroomId: dto.classroomId,
@@ -1161,6 +1251,51 @@ export class ScheduleService {
     return schedule;
   }
 
+  /**
+   * Тохиолдлын ТҮЛХҮҮР огноо (төлөвлөгөө, багшийн оноолт анхны огноогоор
+   * хадгалагдана — week-resolver-ийн topicDate). Клиент зөөгдсөн хичээлийн
+   * харагдах огноог илгээсэн ч зөв мөрөнд бичигдэнэ (2026-10-18 засвар:
+   * оноолт харагдах огноогоор бичигдэж, анхны огноогоор уншигддаг байсан).
+   * strict=false бол тодорхойгүй огноог хэвээр буцаана (хуучин зан төлөв).
+   */
+  async occurrenceKey(scheduleId: string, key: string, strict: boolean) {
+    const schedule = await this.prisma.classSchedule.findUnique({
+      where: { id: scheduleId },
+      select: {
+        id: true,
+        classroomId: true,
+        teacherId: true,
+        weekday: true,
+        effectiveFrom: true,
+        effectiveTo: true,
+        exceptions: { select: { date: true, kind: true, newDate: true } },
+      },
+    });
+    if (!schedule) throw new NotFoundException('Хуваарь олдсонгүй');
+    const resolved = resolveOccurrence(
+      {
+        weekday: schedule.weekday,
+        effectiveFrom: dateKey(schedule.effectiveFrom),
+        effectiveTo: schedule.effectiveTo ? dateKey(schedule.effectiveTo) : null,
+      },
+      schedule.exceptions.map((e) => ({
+        date: dateKey(e.date),
+        kind: e.kind,
+        newDate: e.newDate ? dateKey(e.newDate) : null,
+      })),
+      key,
+    );
+    if ('error' in resolved) {
+      if (!strict) return { schedule, key };
+      throw new BadRequestException(
+        resolved.error === 'CANCELLED'
+          ? 'Энэ өдрийн хичээл цуцлагдсан байна'
+          : 'Энэ өдөр энэ хичээл товлогдоогүй байна',
+      );
+    }
+    return { schedule, key: resolved.key };
+  }
+
   async upsertException(
     scheduleId: string,
     dto: UpsertExceptionDto,
@@ -1382,8 +1517,13 @@ export class ScheduleService {
     actorId: string,
     actorRole: Role,
   ) {
-    await this.assertScheduleExists(scheduleId);
-    const date = this.parseDate(dto.date);
+    this.parseDate(dto.date);
+    const { key: occurrence } = await this.occurrenceKey(
+      scheduleId,
+      dto.date.slice(0, 10),
+      false,
+    );
+    const date = this.parseDate(occurrence);
     const lead = dto.leadTeacherId || null;
     const assistant = dto.assistantTeacherId || null;
     if (lead && lead === assistant)
@@ -1404,7 +1544,7 @@ export class ScheduleService {
     if (!lead && !assistant) {
       await this.prisma.lessonStaffing.deleteMany({ where: { scheduleId, date } });
       await this.recordAudit(actorId, actorRole, 'DELETE', 'LessonStaffing', scheduleId, { date: dto.date }, null);
-      return { scheduleId, date: dto.date, leadTeacherId: null, assistantTeacherId: null };
+      return { scheduleId, date: occurrence, leadTeacherId: null, assistantTeacherId: null };
     }
     const row = await this.prisma.lessonStaffing.upsert({
       where: key,
@@ -1427,7 +1567,10 @@ export class ScheduleService {
   ) {
     const schedule = await this.assertScheduleExists(scheduleId);
     await this.assertTeacherOwnsSchedule(schedule, actorId, actorRole);
-    const date = this.parseDate(dto.date);
+    this.parseDate(dto.date);
+    const date = this.parseDate(
+      (await this.occurrenceKey(scheduleId, dto.date.slice(0, 10), false)).key,
+    );
 
     const existing = await this.prisma.lessonTopic.findUnique({
       where: { scheduleId_date: { scheduleId, date } },
@@ -1467,11 +1610,32 @@ export class ScheduleService {
   ) {
     const schedule = await this.assertScheduleExists(scheduleId);
     await this.assertTeacherOwnsSchedule(schedule, actorId, actorRole);
-    const date = this.parseDate(dto.date);
+    this.parseDate(dto.date);
+    const date = this.parseDate(
+      (await this.occurrenceKey(scheduleId, dto.date.slice(0, 10), false)).key,
+    );
     const existing = await this.prisma.lessonTopic.findUnique({
       where: { scheduleId_date: { scheduleId, date } },
     });
     if (!existing) return { removed: false };
+    // Төлөвлөгөөтэй (тест, тарах/үлдэх, зураг) бол зөвхөн гараар бичсэн гарчгийг
+    // арилгана — тестүүдийн нэрээс дахин үүснэ (PUT /schedule/:id/plan-тай нэг дүрэм).
+    if (existing.testIds.length || existing.dismissMode || existing.photoStudentId) {
+      const tests = existing.testIds.length
+        ? await this.prisma.test.findMany({
+            where: { id: { in: existing.testIds } },
+            select: { id: true, title: true },
+          })
+        : [];
+      const byId = new Map(tests.map((t) => [t.id, t.title.replace(/\s+/g, ' ').trim()]));
+      const title = existing.testIds.map((id) => byId.get(id) ?? '').filter(Boolean).join(', ');
+      const updated = await this.prisma.lessonTopic.update({
+        where: { id: existing.id },
+        data: { title },
+      });
+      await this.recordAudit(actorId, actorRole, 'UPDATE', 'LessonTopic', existing.id, existing, updated);
+      return { removed: true };
+    }
     await this.prisma.lessonTopic.delete({ where: { id: existing.id } });
     await this.recordAudit(
       actorId,

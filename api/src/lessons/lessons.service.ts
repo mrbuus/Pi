@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  activeClassSubjects,
   canAccessChapter,
   canAccessVideoChapter,
   collectContentScope,
@@ -182,18 +183,24 @@ export class LessonsService {
 
     let accessible = chapters;
     if (!(await internalTeachingRole(this.prisma, userId))) {
-      const [enrolled, scope] = await Promise.all([
+      const [enrolled, scope, own] = await Promise.all([
         hasActiveClassroomEnrollment(this.prisma, userId, role),
         collectContentScope(this.prisma, userId),
+        activeClassSubjects(this.prisma, userId, role),
       ]);
-      accessible = chapters.filter(
-        (c) =>
+      // common/access.ts chapterGrant-тэй ижил: MATH-аас бусад хичээл зөвхөн
+      // тухайн хичээлийн ангид; анги нь зөвхөн өөрийн хичээлийг нээнэ
+      accessible = chapters.filter((c) => {
+        const subject = c.book?.subject ?? Subject.MATH;
+        if (subject !== Subject.MATH && !own.has(subject)) return false;
+        return (
           c.freePreview ||
-          enrolled ||
+          (enrolled && own.has(subject)) ||
           scope.all ||
           scope.chapterIds.includes(c.id) ||
-          (c.bookId !== null && scope.bookIds.includes(c.bookId)),
-      );
+          (c.bookId !== null && scope.bookIds.includes(c.bookId))
+        );
+      });
     }
 
     if (accessible.length === 0) return [];

@@ -7,7 +7,7 @@ import { Eye, EyeOff, KeyRound, TriangleAlert } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import InfoHint from "@/components/ui/InfoHint";
-import { api, homeForRole, setAuth } from "@/lib/api";
+import { api, homeForRole, nextFromLocation, setAuth } from "@/lib/api";
 
 /**
  * Нэвтрэх хуудас.
@@ -103,7 +103,7 @@ export default function LoginPage() {
         localStorage.setItem("login_identifier", identifier);
       }
       setAuth(res.accessToken, res.role);
-      router.push(homeForRole(res.role));
+      router.push(nextFromLocation() ?? homeForRole(res.role));
     } catch (err) {
       // Backend нь аль талбар буруу болохыг ЗОРИУДААР хэлдэггүй (хэрэглэгч
       // байгаа эсэхийг илчлэхгүйн тулд). Тиймээс алдааг маягтын ЁРОНХИЙ

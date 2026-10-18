@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import MakeupNavBadge from "@/components/makeup/MakeupNavBadge";
 import { NavIcon } from "./icons";
 import { GROUP_TONE, type NavGroup, type NavLink as NavLinkType } from "./nav-data";
 
@@ -51,6 +52,7 @@ function ItemRow({
         <span className={collapsedRail ? "sr-only" : "truncate text-sm"}>
           {item.label}
         </span>
+        {item.badge === "makeup" && !collapsedRail && <MakeupNavBadge />}
       </Link>
     </li>
   );
@@ -74,20 +76,27 @@ function GroupSection({
   const containsActive = group.items.some((i) => i.href === pathname);
   const listId = `nav-group-${group.key}`;
 
+  // Хумигдсан үед дэлгэсэнтэй ЯГ ижил бүтэц: бүлэг бүр нэг дүрс (эзэн 2026-10-17 —
+  // доторх бүх зүйлийн дүрс зэрэгцэн гарвал ойлгомжгүй). Дарахад тэр бүлэг нээгдэнэ.
   if (collapsedRail) {
     return (
-      <div className="flex flex-col gap-1 border-t border-line/70 pt-2 first:border-t-0 first:pt-0">
-        {group.items.map((item) => (
-          <ul key={item.href}>
-            <ItemRow
-              item={item}
-              active={item.href === pathname}
-              collapsedRail
-              tone={GROUP_TONE[group.key]}
-              onNavigate={onNavigate}
-            />
-          </ul>
-        ))}
+      <div className="relative">
+        {containsActive && (
+          <span aria-hidden className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-brand-bright" />
+        )}
+        <button
+          type="button"
+          onClick={onToggle}
+          title={group.label}
+          aria-label={group.label}
+          className={`row-interactive flex w-full items-center justify-center rounded-lg px-2 py-1 transition-colors ${
+            containsActive ? "bg-brand-bright/10 text-brand-soft" : "text-ink-dim hover:bg-panel hover:text-ink"
+          }`}
+        >
+          <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-xl">
+            <NavIcon name={group.icon} className="h-[18px] w-[18px]" />
+          </span>
+        </button>
       </div>
     );
   }
@@ -136,21 +145,25 @@ export default function NavList({
   groups,
   pathname,
   collapsedRail = false,
+  openActive = false,
   onNavigate,
 }: {
   home: NavLinkType | null;
   groups: NavGroup[];
   pathname: string;
   collapsedRail?: boolean;
+  /** Утасны «Бусад» цэс: одоогийн хуудасны бүлэг нээлттэй эхэлнэ — нэг товшилт хэмнэнэ */
+  openActive?: boolean;
   onNavigate?: () => void;
 }) {
   // Бүлгүүд ҮРГЭЛЖ хумигдсан эхэлнэ (эзэн 2026-10-13); нэг удаад нэг бүлэг
   // нээгдэнэ, хуудас солигдоход дахин хумигдана. Идэвхтэй бүлэгт цэг харагдана.
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  const activeKey = openActive ? (groups.find((g) => g.items.some((i) => i.href === pathname))?.key ?? null) : null;
+  const [openKey, setOpenKey] = useState<string | null>(activeKey);
   const [lastPath, setLastPath] = useState(pathname);
   if (pathname !== lastPath) {
     setLastPath(pathname);
-    setOpenKey(null);
+    setOpenKey(activeKey);
   }
   return (
     <nav aria-label="Үндсэн цэс" className="flex flex-col gap-3">
@@ -165,7 +178,7 @@ export default function NavList({
           />
         </ul>
       )}
-      <div className="flex flex-col gap-2">
+      <div className={`flex flex-col ${collapsedRail ? "gap-1" : "gap-2"}`}>
         {groups.map((group) => (
           <GroupSection
             key={group.key}

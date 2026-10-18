@@ -237,3 +237,77 @@ describe('ClassroomsService.disband — анги тараах', () => {
     expect(teacherResult.disbanded).toBe(true);
   });
 });
+
+describe('ClassroomsService.create — шинэ анги', () => {
+  function make(opts: { dup?: boolean; teachers?: string[] } = {}) {
+    const audit = { record: jest.fn().mockResolvedValue(undefined) };
+    const prisma = {
+      classroom: {
+        findFirst: jest.fn().mockResolvedValue(opts.dup ? { id: 'x' } : null),
+        create: jest.fn(async ({ data }: any) => ({ id: 'new', ...data })),
+      },
+      user: {
+        findMany: jest
+          .fn()
+          .mockResolvedValue((opts.teachers ?? []).map((id) => ({ id }))),
+      },
+    } as any;
+    return { prisma, audit, service: new ClassroomsService(prisma, audit as any) };
+  }
+  const dto = { name: '  12-13   (Баруун 4) ', type: 'IN_PERSON', grade: 12 } as any;
+
+  it('нэрийг цэвэрлээд үүсгэж, аудитад бичнэ', async () => {
+    const { service, prisma, audit } = make();
+    const res = await service.create(dto, 'tp-1', Role.TEACHER_PLUS);
+    expect(prisma.classroom.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ name: '12-13 (Баруун 4)', grade: 12 }),
+    });
+    expect(res.id).toBe('new');
+    expect(audit.record).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'CREATE', entity: 'Classroom', actorRole: Role.TEACHER_PLUS }),
+    );
+  });
+
+  it('давхар нэртэй идэвхтэй анги үүсгэхгүй', async () => {
+    const { service, prisma } = make({ dup: true });
+    await expect(service.create(dto, 'a', Role.ADMIN)).rejects.toThrow('нэртэй анги');
+    expect(prisma.classroom.create).not.toHaveBeenCalled();
+  });
+
+  it('багш ба туслах нь өөр хүн, хичээл заадаг байх ёстой', async () => {
+    const same = make({ teachers: ['t1'] });
+    await expect(
+      same.service.create({ ...dto, teacherId: 't1', assistantTeacherId: 't1' }, 'a', Role.ADMIN),
+    ).rejects.toThrow('өөр хүн');
+    const unknown = make({ teachers: [] });
+    await expect(
+      unknown.service.create({ ...dto, teacherId: 't9' }, 'a', Role.ADMIN),
+    ).rejects.toThrow('жагсаалтад алга');
+    const ok = make({ teachers: ['t1', 't2'] });
+    await ok.service.create({ ...dto, teacherId: 't1', assistantTeacherId: 't2' }, 'a', Role.ADMIN);
+    expect(ok.prisma.classroom.create).toHaveBeenCalled();
+  });
+
+  it('Багш болон бусад эрхгүй', async () => {
+    const { service } = make();
+    await expect(service.create(dto, 'u', Role.TEACHER)).rejects.toThrow('Багш+');
+  });
+
+  it('POST /classrooms нь зөвхөн Админ ба Багш+', () => {
+    const { RolesGuard } = require('../auth/guards/roles.guard');
+    const { Reflector } = require('@nestjs/core');
+    const { ClassroomsController } = require('./classrooms.controller');
+    const guard = new RolesGuard(new Reflector());
+    const handler = ClassroomsController.prototype.create;
+    const ctx = (role: Role) =>
+      ({
+        getHandler: () => handler,
+        getClass: () => ClassroomsController,
+        switchToHttp: () => ({ getRequest: () => ({ user: { role } }) }),
+      }) as any;
+    expect(guard.canActivate(ctx(Role.ADMIN))).toBe(true);
+    expect(guard.canActivate(ctx(Role.TEACHER_PLUS))).toBe(true);
+    expect(guard.canActivate(ctx(Role.TEACHER))).toBe(false);
+    expect(guard.canActivate(ctx(Role.STUDENT))).toBe(false);
+  });
+});

@@ -42,6 +42,18 @@ function writeRailCollapsed(next: boolean) {
   railListeners.forEach((listener) => listener());
 }
 
+/* ---- Дэлгэцийн өргөн: 768–1023px (томруулсан зөөврийн компьютер, таблет) дээр
+   зүүн цэс ХУМИГДСАН rail байдлаар л гарна (эзэн 2026-10-18: «жижиг дэлгэц дээр
+   ч өмнөхтэйгээ адил хэдхэн үйлдлээр»). Утсан (<768) дээр доод таб мөр. ---- */
+const WIDE_QUERY = "(min-width: 1024px)";
+function subscribeWide(onChange: () => void) {
+  const mq = window.matchMedia(WIDE_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+const readWide = () => window.matchMedia(WIDE_QUERY).matches;
+const getServerWide = () => true;
+
 interface SidebarProps {
   role: string;
   pathname: string;
@@ -54,7 +66,9 @@ interface SidebarProps {
 // (nav/UserMenu.tsx) шилжсэн (эзэн 2026-10-13).
 export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange }: SidebarProps) {
   const { home, groups } = getRoleNav(role);
-  const railCollapsed = useSyncExternalStore(subscribeRail, readRailCollapsed, getServerRailCollapsed);
+  const railPreference = useSyncExternalStore(subscribeRail, readRailCollapsed, getServerRailCollapsed);
+  const wide = useSyncExternalStore(subscribeWide, readWide, getServerWide);
+  const railCollapsed = railPreference || !wide;
   // Хумигдсан үед хулгана (эсвэл гарын фокус) ирэхэд түр дэлгэгдэж, гарахад хумигдана
   const [peek, setPeek] = useState(false);
   const expanded = !railCollapsed || peek;
@@ -65,7 +79,7 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
           агуулгын дээгүүр давхарлана (хуудас хөдлөхгүй). */}
       <aside
         aria-label="Үндсэн навигац"
-        className={`sticky top-0 z-40 hidden h-screen shrink-0 transition-[width] duration-200 motion-reduce:transition-none lg:block ${
+        className={`sticky top-0 z-40 hidden h-screen shrink-0 transition-[width] duration-200 motion-reduce:transition-none md:block ${
           railCollapsed ? "w-[72px]" : "w-64"
         }`}
       >
@@ -90,7 +104,8 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
           <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
             <NavList home={home} groups={groups} pathname={pathname} collapsedRail={!expanded} />
           </div>
-          <div className={`flex shrink-0 border-t border-line p-2 ${expanded ? "justify-end" : "justify-center"}`}>
+          {/* Нарийн дэлгэц дээр rail байнга хумигдсан — тогтоох товч хэрэггүй */}
+          <div className={`shrink-0 border-t border-line p-2 ${wide ? "flex" : "hidden"} ${expanded ? "justify-end" : "justify-center"}`}>
             <button
               type="button"
               onClick={() => {
@@ -110,7 +125,7 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
 
       {/* ── MOBILE: «Бусад» — доороос гарч ирэх хуудас (vaul). ── */}
       <Drawer open={mobileOpen} onOpenChange={onMobileOpenChange}>
-        <DrawerContent id="app-mobile-nav" aria-describedby={undefined} className="lg:hidden">
+        <DrawerContent id="app-mobile-nav" aria-describedby={undefined} className="md:hidden">
           <div className="flex h-12 shrink-0 items-center justify-between border-b border-line px-4">
             <Link href="/" onClick={() => onMobileOpenChange(false)} aria-label="Нүүр хуудас" className="flex min-h-11 items-center">
               <LogoMark variant="full" size={26} />
@@ -126,7 +141,7 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
             </button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3" data-vaul-no-drag>
-            <NavList home={home} groups={groups} pathname={pathname} onNavigate={() => onMobileOpenChange(false)} />
+            <NavList home={home} groups={groups} pathname={pathname} openActive onNavigate={() => onMobileOpenChange(false)} />
           </div>
         </DrawerContent>
       </Drawer>

@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Subject } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+// Нийтийн урьдчилсан харагдац зөвхөн MATH — бусад хичээл ангиар хаалттай (эзэн 2026-10-18)
 @Injectable()
 export class PreviewService {
   constructor(private readonly prisma: PrismaService) {}
   async books() {
     return this.prisma.book.findMany({
-      where: { archived: false, deletedAt: null },
+      where: { archived: false, deletedAt: null, subject: Subject.MATH },
       orderBy: [{ code: 'asc' }, { id: 'asc' }],
       take: 100,
       select: {
@@ -26,7 +28,7 @@ export class PreviewService {
       where: {
         id,
         deletedAt: null,
-        book: { archived: false, deletedAt: null },
+        book: { archived: false, deletedAt: null, subject: Subject.MATH },
       },
       select: {
         id: true,

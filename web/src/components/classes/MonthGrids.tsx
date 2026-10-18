@@ -6,7 +6,8 @@ import { Meta } from "@/components/ui/Meta";
 import { cn } from "@/lib/cn";
 import { formatMnDate } from "@/lib/dateMn";
 import { Distribution, ExamResultList } from "./ExamParts";
-import { ATTENDANCE_META, dayLabel, deltaOf, HOMEWORK_META, rateTone, WEEKDAY_SHORT } from "./meta";
+import { ATTENDANCE_MARKS, HOMEWORK_MARKS, TONE_SELECTED, TONE_TEXT, type MarkMeta } from "@/components/attendance/marks";
+import { dayLabel, deltaOf, rateTone, WEEKDAY_SHORT } from "./meta";
 import type { MonthData, MonthDay, MonthStudent } from "./types";
 
 /**
@@ -152,31 +153,56 @@ function DayHeader({ d, today }: { d: MonthDay; today: string }) {
   );
 }
 
-function StatusCell<S extends string>({
+/** Ирц/даалгаврын нэг тэмдэг — самбартай ижил дүрс (marks.tsx). Ирсэн/хийсэн нь намуухан, бусад нь хүрээтэй. */
+export function MarkBox({ status, meta }: { status: string; meta: Record<string, MarkMeta> }) {
+  const m = meta[status];
+  if (!m) return null;
+  const Icon = m.icon;
+  const quiet = status === "PRESENT" || status === "DONE";
+  return (
+    <span
+      className={cn(
+        "mx-auto flex size-6 items-center justify-center rounded-md",
+        quiet ? cn(TONE_TEXT[m.tone], "opacity-60") : cn("border", TONE_SELECTED[m.tone]),
+      )}
+      title={m.label}
+    >
+      <Icon className="size-3.5" aria-hidden />
+      <span className="sr-only">{m.label}</span>
+    </span>
+  );
+}
+
+function StatusCell({
   status,
   meta,
   holiday,
+  upcoming,
 }: {
-  status: S | undefined;
-  meta: Record<S, { label: string; icon: typeof UserX; cell: string }>;
+  status: string | undefined;
+  meta: Record<string, MarkMeta>;
   holiday: boolean;
+  upcoming: boolean;
 }) {
   if (holiday)
     return <td className="border-b border-line bg-ink/[0.03] p-0" aria-label="Хичээлгүй" />;
   if (!status)
     return (
       <td className="border-b border-line p-0.5 text-center">
-        <span className="sr-only">Тэмдэглээгүй</span>
+        {upcoming ? (
+          <span title="Хичээл болоогүй" className="mx-auto block size-1.5 rounded-full bg-line">
+            <span className="sr-only">Хичээл болоогүй</span>
+          </span>
+        ) : (
+          <span title="Тэмдэглээгүй" className="mx-auto block h-0.5 w-2.5 rounded-full bg-ink-dim/40">
+            <span className="sr-only">Тэмдэглээгүй</span>
+          </span>
+        )}
       </td>
     );
-  const m = meta[status];
-  const Icon = m.icon;
   return (
-    <td className="border-b border-line p-0.5 text-center" title={m.label}>
-      <span className={cn("mx-auto flex h-7 w-7 items-center justify-center rounded-md", m.cell)}>
-        <Icon className="h-4 w-4" aria-hidden />
-        <span className="sr-only">{m.label}</span>
-      </span>
+    <td className="border-b border-line p-0.5 text-center">
+      <MarkBox status={status} meta={meta} />
     </td>
   );
 }
@@ -191,7 +217,7 @@ export function MarkGrid({
   onFocus: (id: string) => void;
 }) {
   const grid = kind === "attendance" ? data.attendance : data.homework;
-  const meta = (kind === "attendance" ? ATTENDANCE_META : HOMEWORK_META) as Record<string, { label: string; icon: typeof UserX; cell: string }>;
+  const meta = (kind === "attendance" ? ATTENDANCE_MARKS : HOMEWORK_MARKS) as Record<string, MarkMeta>;
   const rate = (id: string) => (kind === "attendance" ? data.stats.students[id]?.attendance.rate : data.stats.students[id]?.homework.rate) ?? null;
   const classAvg = kind === "attendance" ? data.stats.class.attendance : data.stats.class.homework;
   const { rows, dir, cycle } = useSorted(data.students, rate);
@@ -251,7 +277,7 @@ export function MarkGrid({
               <NameCell s={s} onFocus={onFocus} />
               <RateSummary value={rate(s.id)} avg={classAvg} />
               {data.days.map((d) => (
-                <StatusCell key={d.date} status={grid[s.id]?.[d.date]} meta={meta} holiday={!!d.holiday} />
+                <StatusCell key={d.date} status={grid[s.id]?.[d.date]} meta={meta} holiday={!!d.holiday} upcoming={d.date > data.today} />
               ))}
               <Fill />
             </tr>
@@ -263,20 +289,27 @@ export function MarkGrid({
   );
 }
 
-function Legend({ meta }: { meta: Record<string, { label: string; icon: typeof UserX; cell: string }> }) {
+/** Тайлбар (legend) — хамгийн доор; самбартай ижил дүрс */
+function Legend({ meta }: { meta: Record<string, MarkMeta> }) {
   return (
     <ul className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-dim" aria-label="Тэмдэглэгээний тайлбар">
       {Object.entries(meta).map(([k, m]) => {
         const Icon = m.icon;
         return (
           <li key={k} className="inline-flex items-center gap-1">
-            <span className={cn("flex h-5 w-5 items-center justify-center rounded", m.cell)}>
-              <Icon className="h-3.5 w-3.5" aria-hidden />
-            </span>
+            <Icon className={cn("size-3.5", TONE_TEXT[m.tone])} aria-hidden />
             {m.label}
           </li>
         );
       })}
+      <li className="inline-flex items-center gap-1">
+        <span aria-hidden className="block h-0.5 w-2.5 rounded-full bg-ink-dim/40" />
+        Тэмдэглээгүй
+      </li>
+      <li className="inline-flex items-center gap-1">
+        <span aria-hidden className="block size-1.5 rounded-full bg-line" />
+        Хичээл болоогүй
+      </li>
     </ul>
   );
 }

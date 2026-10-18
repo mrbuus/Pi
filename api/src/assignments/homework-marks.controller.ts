@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   UseGuards,
@@ -12,7 +13,10 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
-import { SetHomeworkMarkDto } from './dto/set-homework-mark.dto';
+import {
+  BulkHomeworkMarksDto,
+  PatchHomeworkMarkDto,
+} from './homework-marks.dto';
 import { HomeworkMarksService } from './homework-marks.service';
 
 interface AuthedRequest {
@@ -34,6 +38,39 @@ export class HomeworkMarksController {
     return this.homeworkMarks.listForClass(
       classroomId,
       date,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
+  // Тухайн хичээлийн гэрийн даалгаврын онлайн дүн: өмнөх хичээлд ангид хийсэн
+  // тестийн нөгөө хувилбар (A → B) — самбарын «Онлайн» нүд (эзэн 2026-10-18)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/homework-marks/online')
+  online(
+    @Param('id') classroomId: string,
+    @Query('date') date: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.online(
+      classroomId,
+      date,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
+  // «Бүгд хийсэн» / «Буцаах» — зөвхөн өөрчлөх нүд, нөхцөлтэй (onlyIf)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Post('classrooms/:id/homework-marks/bulk')
+  bulk(
+    @Param('id') classroomId: string,
+    @Body() dto: BulkHomeworkMarksDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.bulk(
+      classroomId,
+      dto,
       req.user.userId,
       req.user.role,
     );
@@ -71,7 +108,7 @@ export class HomeworkMarksController {
   setMark(
     @Param('id') classroomId: string,
     @Param('studentId') studentId: string,
-    @Body() dto: SetHomeworkMarkDto,
+    @Body() dto: PatchHomeworkMarkDto,
     @Req() req: AuthedRequest,
   ) {
     return this.homeworkMarks.setMark(

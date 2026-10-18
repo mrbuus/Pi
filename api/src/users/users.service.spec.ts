@@ -65,6 +65,10 @@ function setup(initialRow = row()) {
       update: jest.fn().mockResolvedValue({}),
     },
     studentProfile: { upsert: jest.fn().mockResolvedValue({}) },
+    enrollment: {
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      create: jest.fn().mockResolvedValue({}),
+    },
     auditLog: { create: jest.fn().mockResolvedValue({}) },
   };
   const transaction = jest.fn(
@@ -301,13 +305,13 @@ describe('student import service', () => {
   });
 
   it('passes the actual archive actor role into the audit record', async () => {
-    const { service, archiveFindUnique, archiveUpdate, auditRecord } = setup();
+    const { service, archiveFindUnique, tx, auditRecord } = setup();
     archiveFindUnique.mockResolvedValue({
       id: studentId,
       role: Role.STUDENT,
       archivedAt: null,
     });
-    archiveUpdate.mockResolvedValue({
+    tx.user.update.mockResolvedValue({
       id: studentId,
       archivedAt: new Date('2026-01-01T00:00:00.000Z'),
     });
@@ -320,5 +324,87 @@ describe('student import service', () => {
     expect(auditRecord).toHaveBeenCalledWith(
       expect.objectContaining({ actorRole: Role.TEACHER_PLUS }),
     );
+  });
+
+  it('archiving closes the active enrollment (history kept, no delete)', async () => {
+    const { service, archiveFindUnique, tx } = setup();
+    archiveFindUnique.mockResolvedValue({
+      id: studentId,
+      role: Role.STUDENT,
+      archivedAt: null,
+    });
+    tx.user.update.mockResolvedValue({ id: studentId, archivedAt: new Date() });
+    const res = await service.archiveStudent(
+      studentId,
+      ownerId,
+      'left the centre',
+      Role.TEACHER_PLUS,
+    );
+    expect(tx.enrollment.updateMany).toHaveBeenCalledWith({
+      where: { studentId, leftAt: null },
+      data: { leftAt: expect.any(Date), movedById: ownerId },
+    });
+    expect(tx.enrollment.create).not.toHaveBeenCalled();
+    expect(res.enrollmentsClosed).toBe(1);
+  });
+
+  it('archiving requires a reason', async () => {
+    const { service, archiveFindUnique, tx } = setup();
+    archiveFindUnique.mockResolvedValue({
+      id: studentId,
+      role: Role.STUDENT,
+      archivedAt: null,
+    });
+    await expect(
+      service.archiveStudent(studentId, ownerId, '   ', Role.ADMIN),
+    ).rejects.toThrow('шалтгаан');
+    expect(tx.user.update).not.toHaveBeenCalled();
+  });
+
+  it('restoring with a classroom re-enrolls; without one just restores', async () => {
+    const { service, archiveFindUnique, tx, prisma } = setup();
+    archiveFindUnique.mockResolvedValue({
+      id: studentId,
+      role: Role.STUDENT,
+      archivedAt: new Date(),
+    });
+    tx.user.update.mockResolvedValue({ id: studentId, archivedAt: null });
+    (prisma as unknown as { classroom: unknown }).classroom = {
+      findFirst: jest.fn().mockResolvedValue({ id: 'c1', name: '12-1' }),
+    };
+    const withClass = await service.archiveStudent(
+      studentId,
+      ownerId,
+      '',
+      Role.TEACHER_PLUS,
+      true,
+      'c1',
+    );
+    expect(tx.enrollment.create).toHaveBeenCalledWith({
+      data: { studentId, classroomId: 'c1', movedById: ownerId },
+    });
+    expect(withClass.classroom).toEqual({ id: 'c1', name: '12-1' });
+
+    tx.enrollment.create.mockClear();
+    tx.enrollment.updateMany.mockClear();
+    await service.archiveStudent(studentId, ownerId, '', Role.ADMIN, true);
+    expect(tx.enrollment.create).not.toHaveBeenCalled();
+    expect(tx.enrollment.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('restoring into a missing or archived classroom is rejected', async () => {
+    const { service, archiveFindUnique, tx, prisma } = setup();
+    archiveFindUnique.mockResolvedValue({
+      id: studentId,
+      role: Role.STUDENT,
+      archivedAt: new Date(),
+    });
+    (prisma as unknown as { classroom: unknown }).classroom = {
+      findFirst: jest.fn().mockResolvedValue(null),
+    };
+    await expect(
+      service.archiveStudent(studentId, ownerId, '', Role.ADMIN, true, 'nope'),
+    ).rejects.toThrow('Анги олдсонгүй');
+    expect(tx.user.update).not.toHaveBeenCalled();
   });
 });

@@ -63,6 +63,7 @@ model User {
   staffCapabilities      StaffCapabilityGrant[]
   feedback               Feedback[]
   studentProfile         StudentProfile?
+  mockRegistrations      MockExamRegistration[]
   teacherProfile         TeacherProfile?
   externalTeacherProfile ExternalTeacherProfile?
 
@@ -404,11 +405,19 @@ model Classroom {
   // (common/class-teachers.ts).
   assistantTeacherId String?
   assistantTeacher   User?        @relation("ClassroomAssistantTeacher", fields: [assistantTeacherId], references: [id])
+  // Асуудалтай хүүхдийн шалгуур (эзэн 2026-10-18) — Багш+ тавина, бүх багш хуваалцана:
+  // { windowDays, minAttendance, maxAbsences, maxLates, minHomework, missingStreak }; null = анхдагч
+  riskCriteria       Json?
   archived          Boolean       @default(false)
   createdAt         DateTime      @default(now())
   // Хөтөлбөрийн түгжээний гараар override (Шийдвэр 5). null = ClassTestSession-ээс
   // автоматаар тооцно; багш гараар урагшлуулж/буцаах бол энд Chapter.id тавина.
   progressChapterId String?
+  // Ангийн хичээл (эзэн 2026-10-18): null = MATH (анхдагч). MATH-аас бусад хичээлийн
+  // контентыг (ном, бүлэг, тест) зөвхөн тухайн хичээлийн идэвхтэй ангийн сурагч
+  // харна; ангитай сурагчийн номын сан өөрийн ангиудын хичээлээр шүүгдэнэ.
+  // Төвийн ажилтан бүгдийг харна (common/access.ts — catalogSubjectsFor).
+  subject           Subject?
 
   enrollments         Enrollment[]
   attendances         Attendance[]
@@ -1018,6 +1027,7 @@ model Test {
   attemptSessions TestAttemptSession[]
   itemMarks       TestItemMark[]
   absences        TestAbsence[]
+  mockEvents      MockExamEvent[]
 
   @@index([deletedAt])
   @@index([isDraft, deletedAt])
@@ -2070,6 +2080,13 @@ model LessonTopic {
   chapterId   String?
   createdById String
   updatedAt   DateTime      @updatedAt
+  // ── Хичээлийн төлөвлөгөө (эзэн 2026-10-18; Багш+ өмнөх өдөр нь тавина) ──
+  // Тухайн хичээлд хийх тестүүд, номын дарааллаар (Test.id). Хийсэн нь ClassTestSession.
+  testIds        String[] @default([])
+  // «DISMISS» = тарах, «STAY» = үлдэнэ — зөвхөн багш нарт харагдана, сурагчид ХЭЗЭЭ Ч үгүй
+  dismissMode    String?
+  // Онолын зургийг илгээх сурагч (User.id) — ангийнхан хэн болохыг урьдчилж харна
+  photoStudentId String?
 
   @@unique([scheduleId, date])
 }
@@ -2724,4 +2741,92 @@ model PlacementTestConfig {
   updatedById  String?
   updatedAt    DateTime @updatedAt
   createdAt    DateTime @default(now())
+}
+
+// Долоо хоног бүрийн онлайн ЖИШИГ СОРИЛ (эзэн 2026-10-14). Нийтэд цаг, бүртгэлийн
+// тоо харагдана; бүртгүүлэхэд нэвтэрсэн STUDENT/BUYER байх ёстой. Цонхны
+// (startsAt..endsAt) дотор бүртгүүлсэн хэрэглэгч тестэд assertStudentAccess-ээр
+// нэвтэрнэ; шалгалтын хугацааг Test.timeLimitMin тогтооно.
+model MockExamEvent {
+  id            String                 @id @default(cuid())
+  title         String
+  testId        String
+  test          Test                   @relation(fields: [testId], references: [id])
+  startsAt      DateTime
+  /// Шалгалтыг эхлүүлж болох сүүлийн мөч (хоцорч орох зөвшөөрөл)
+  endsAt        DateTime
+  note          String?
+  published     Boolean                @default(true)
+  createdById   String
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  registrations MockExamRegistration[]
+
+  @@index([startsAt])
+  @@index([testId])
+}
+
+model MockExamRegistration {
+  id        String        @id @default(cuid())
+  eventId   String
+  event     MockExamEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@unique([eventId, userId])
+  @@index([userId])
+}
+
+/// Ангид тест «хассан» (эзэн 2026-10-18): REMOVED = энэ ангид дахиж санал болгохгүй.
+/// «Хийсэн» = ClassTestSession, «үлдсэн» (алгассан) = номын дарааллаас тооцоолно — энд хадгалахгүй.
+model ClassTestStatus {
+  id          String   @id @default(cuid())
+  classroomId String
+  testId      String
+  status      String
+  note        String?
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([classroomId, testId])
+  @@index([classroomId])
+}
+
+/// Онолын зураг (эзэн 2026-10-18): тухайн өдрийн хичээлийн онолыг томилогдсон сурагч
+/// илгээнэ; тэр өдрийн тестүүдэд (testIds) холбогдож хадгалагдана — хэдэн сарын
+/// дараа ч тухайн тестийн онолын зургийг олно. Ангийн сурагчид, багш нар харна.
+model LessonPhoto {
+  id          String   @id @default(cuid())
+  classroomId String
+  date        DateTime @db.Date
+  studentId   String
+  imageKeys   String[] @default([])
+  testIds     String[] @default([])
+  createdAt   DateTime @default(now())
+
+  @@index([classroomId, date])
+  @@index([studentId])
+}
+
+/// Нөхөх хичээл (эзэн 2026-10-18): тасалсан/чөлөөтэй/хоцорсон сурагч тухайн өдрийн
+/// хичээлийг нөхөнө — тэмдэглэлийн зургаа илгээж, тестийн A, B хувилбарыг
+/// шалгалтын горимоор хийнэ (ангид A хийсэн бол A тооцогдоно). Үүрэг нь ирц +
+/// ClassTestSession-оос тооцоологдоно; энд зөвхөн илгээсэн зураг ба багшийн баталгаа.
+model LessonMakeup {
+  id            String    @id @default(cuid())
+  classroomId   String
+  studentId     String
+  date          DateTime  @db.Date
+  imageKeys     String[]  @default([])
+  submittedAt   DateTime?
+  confirmedById String?
+  confirmedAt   DateTime?
+  note          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([studentId, classroomId, date])
+  @@index([classroomId, date])
 }

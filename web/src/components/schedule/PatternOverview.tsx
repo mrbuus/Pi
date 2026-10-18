@@ -1,317 +1,245 @@
 "use client";
 
+import { CalendarClock, CalendarPlus, CalendarX2, TriangleAlert } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useSection } from "@/components/students/progress/useSection";
-import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
-import { getClassroomColor } from "@/lib/classroomColor";
-import { Users } from "lucide-react";
-import EntryActionPanel from "./EntryActionPanel";
-import RoomShape from "./RoomShape";
+import InfoHint from "@/components/ui/InfoHint";
+import { Button } from "@/components/ui/kit/button";
+import { Meta } from "@/components/ui/Meta";
+import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
+import AddSlotDialog from "./pattern/AddSlotDialog";
 import {
-  addDaysToKey,
-  formatMinutes,
-  roomCapacityOf,
-  roomOrderOf,
-  todayUBKey,
-  WEEKDAY_SHORT,
-  type ScheduleEntry,
-  type WeekEntry,
-} from "./types";
+  canManageAny,
+  canManageClass,
+  chainOf,
+  isEffectiveOn,
+  personName,
+  plannedChanges,
+  toSlot,
+  weekdayOf,
+  type ClassInfo,
+  type Planned,
+  type ScheduleAccess,
+  type Slot,
+  type TeacherOption,
+} from "./pattern/model";
+import PatternGrid from "./pattern/PatternGrid";
+import PlannedChanges from "./pattern/PlannedChanges";
+import SlotDialog from "./pattern/SlotDialog";
+import { todayUBKey, type ScheduleEntry } from "./types";
+
+interface ClassroomRow {
+  id: string;
+  name: string;
+  teacher: { id: string; firstName: string; lastName: string } | null;
+  _count?: { enrollments: number };
+}
+
+type Open = { kind: "slot"; slot: Slot; planned: Planned | null } | { kind: "add" } | null;
 
 /**
- * БҮТЭН ЖИЛИЙН давтагдах хуваарийн "зурагт хуудас" — эзний загвар:
+ * 7 хоногийн ТОГТМОЛ хуваарь (эзэн 2026-10-18): аль анги аль гарагт хэдэн цагаас
+ * аль танхимд орох нь 7 хоног бүр ижил тул ОГНООГҮЙ, нэг л тор — мөр = танхим
+ * (Баруун 4 дээр, Зүүн 4 доор), багана = Да…Ня. Нүд = анги, цаг, сурагч/суудал.
  *
- *   Мөр (босоо 2 бүс):  Баруун 4 · Зүүн 4
- *   Багана (давтамж):   Да·Лх·Ба (1,3,5) · Мя·Пү (2,4) · Бямба · Ням
- *   Багана доторх бүлэг: цагийн бүс (ажлын өдөр 2, Бямба 3 бүс аяндаа гарна)
- *   Бүлэг доторх эрэмбэ: танхим ТОГТМОЛ дараалалтай (501,502,503,504,403,404,405)
+ * Зөвхөн өнөөдөр мөрдөгдөж буй мөрүүд торонд; ирээдүйн өөрчлөлт доорх
+ * «Төлөвлөсөн өөрчлөлт»-д. `schedule.manage` эрхтэй (access) бол хичээл дээр
+ * дарж засна, «Шинэ цаг нэмэх»; эрхгүй бол зөвхөн харна.
  *
- * Долоо хоногийн 7 багана биш ийм бүтэц сонгосон шалтгаан: хуваарь нь өдөр
- * бүр өөр биш, ДАВТАМЖААР ижил (1,3,5-д яг ижил, 2,4-т яг ижил). Ижил
- * зүйлийг гурав давтахын оронд нэг удаа харуулбал бүтэн жилийн дүр зураг
- * нэг дэлгэцэд багтана.
- *
- * Хэн харах: бүх багш, админ. Хэн засах: Багш+/Админ (мөр товшиход самбар).
+ * access өгөөгүй (жишээ нь энгийн багшийн хуудас) эсвэл readOnly бол засах
+ * боломж огт гарахгүй.
  */
+export default function PatternOverview({
+  readOnly = false,
+  access,
+}: {
+  readOnly?: boolean;
+  access?: ScheduleAccess | null;
+}) {
+  const manage = readOnly ? null : (access ?? null);
+  const staffView = access !== undefined;
+  const manager = canManageAny(manage);
+  const [open, setOpen] = useState<Open>(null);
 
-const COLUMNS: readonly { key: string; title: string; days: readonly number[] }[] = [
-  { key: "odd", title: "Даваа — Лхагва — Баасан", days: [1, 3, 5] },
-  { key: "even", title: "Мягмар — Пүрэв", days: [2, 4] },
-  { key: "sat", title: "Бямба", days: [6] },
-  { key: "sun", title: "Ням", days: [0] },
-];
-
-const BRANCHES = ["Баруун 4", "Зүүн 4"] as const;
-
-/** "12-1 (Баруун 4)" → { label: "12-1", branch: "Баруун 4" } */
-function splitName(full: string): { label: string; branch: string | null } {
-  const m = full.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
-  return m ? { label: m[1], branch: m[2] } : { label: full, branch: null };
-}
-
-/** Давтамжийн бүлэг: нэг анги, нэг цаг, нэг танхим — хэд хэдэн гарагт */
-interface PatternGroup {
-  key: string;
-  classroomId: string;
-  classLabel: string;
-  startMinute: number;
-  endMinute: number;
-  room: string | null;
-  /** Ангид одоо суралцаж буй хүүхдийн тоо */
-  students: number | null;
-  days: number[];
-  /** Гараг бүрийн эх мөр — самбар нээхэд аль нэгийг нь ашиглана */
-  members: Map<number, ScheduleEntry>;
-}
-
-function synthWeekEntry(row: ScheduleEntry): WeekEntry {
-  return {
-    scheduleId: row.id,
-    classroomId: row.classroomId,
-    classroomName: row.classroom.name,
-    teacherId: row.teacherId,
-    teacherName: row.teacher
-      ? `${row.teacher.lastName} ${row.teacher.firstName}`
-      : null,
-    startMinute: row.startMinute,
-    endMinute: row.endMinute,
-    room: row.room,
-    subject: row.subject,
-    topic: null,
-    exception: null,
-  };
-}
-
-/** Өнөөдрөөс хойших хамгийн ойрын тухайн гарагийн огноо */
-function nextDateFor(weekday: number): string {
+  const rowsQ = useSection<ScheduleEntry[]>("/schedule");
+  const classesQ = useSection<ClassroomRow[]>("/classrooms");
+  const teachersQ = useSection<TeacherOption[]>(manager ? "/schedule/teachers" : null, []);
   const today = todayUBKey();
-  for (let i = 0; i < 7; i += 1) {
-    const d = addDaysToKey(today, i);
-    if (new Date(`${d}T00:00:00.000Z`).getUTCDay() === weekday) return d;
-  }
-  return today;
-}
 
-export default function PatternOverview({ readOnly = false }: { readOnly?: boolean }) {
-  const [selected, setSelected] = useState<{
-    entry: WeekEntry;
-    date: string;
-    dayEntries: WeekEntry[];
-  } | null>(null);
-
-  const { data: rows, status, error, reload: load } = useSection<ScheduleEntry[]>("/schedule", []);
-  const loading = status === "loading";
-
-  // Хугацаа нь дууссан (effectiveTo өнгөрсөн) мөрийг зурагт хуудаснаас нуана —
-  // энэ бол "одоо мөрдөгдөж буй" хуваарийн харагдац.
-  const active = useMemo(() => {
-    const today = todayUBKey();
-    return rows.filter((r) => !r.effectiveTo || r.effectiveTo.slice(0, 10) >= today);
-  }, [rows]);
-
-  /** branch → column.key → PatternGroup[] (аль хэдийн эрэмбэлэгдсэн) */
-  const grid = useMemo(() => {
-    const out = new Map<string, Map<string, PatternGroup[]>>();
-    for (const branch of BRANCHES) {
-      const cols = new Map<string, PatternGroup[]>();
-      for (const col of COLUMNS) {
-        const groups = new Map<string, PatternGroup>();
-        for (const row of active) {
-          if (!col.days.includes(row.weekday)) continue;
-          const { label, branch: rowBranch } = splitName(row.classroom.name);
-          if (rowBranch !== branch) continue;
-          const key = `${row.classroomId}|${row.startMinute}|${row.endMinute}|${row.room ?? ""}|${row.teacherId ?? ""}`;
-          const g = groups.get(key);
-          if (g) {
-            g.days.push(row.weekday);
-            g.members.set(row.weekday, row);
-          } else {
-            groups.set(key, {
-              key,
-              classroomId: row.classroomId,
-              classLabel: label,
-              startMinute: row.startMinute,
-              endMinute: row.endMinute,
-              room: row.room,
-              students: row.classroom._count?.enrollments ?? null,
-              days: [row.weekday],
-              members: new Map([[row.weekday, row]]),
-            });
-          }
-        }
-        const sorted = [...groups.values()].sort(
-          (a, b) =>
-            a.startMinute - b.startMinute ||
-            roomOrderOf(a.room) - roomOrderOf(b.room) ||
-            a.classLabel.localeCompare(b.classLabel),
-        );
-        cols.set(col.key, sorted);
-      }
-      out.set(branch, cols);
+  const classes = useMemo(() => {
+    const m = new Map<string, ClassInfo>();
+    for (const c of classesQ.data ?? []) {
+      m.set(c.id, {
+        id: c.id,
+        name: c.name,
+        students: c._count?.enrollments ?? null,
+        teacherId: c.teacher?.id ?? null,
+        teacherName: personName(c.teacher),
+      });
     }
-    return out;
-  }, [active]);
+    return m;
+  }, [classesQ.data]);
 
-  function openGroup(group: PatternGroup, columnDays: readonly number[]) {
-    if (readOnly) return;
-    // Бүлгийн гаргуудаас хамгийн ойрын ирэх өдрийг сонгоно
-    const soonest = [...group.members.keys()]
-      .map((wd) => ({ wd, date: nextDateFor(wd) }))
-      .sort((a, b) => a.date.localeCompare(b.date))[0];
-    const row = group.members.get(soonest.wd);
-    if (!row) return;
-    const dayEntries = active
-      .filter((r) => r.weekday === soonest.wd)
-      .map(synthWeekEntry);
-    setSelected({ entry: synthWeekEntry(row), date: soonest.date, dayEntries });
-    void columnDays;
+  const all = useMemo(() => {
+    const rows = rowsQ.data ?? [];
+    // Ажилтны харагдацад /classrooms нь архивлаагүй БҮХ ангийг өгдөг — архивын
+    // ангийн мөрийг нууна. Энгийн багшид зөвхөн өөрийн анги ирдэг тул шүүхгүй.
+    const filter = staffView && classesQ.status === "ready" && classes.size > 0;
+    return rows.filter((r) => !filter || classes.has(r.classroomId)).map((r) => toSlot(r, classes));
+  }, [rowsQ.data, staffView, classesQ.status, classes]);
+
+  // seriesTo: «Өөрчлөлтийг цуцлах»-ын дараа цуврал ижил хоёр мөр болдог — дуусах огноог цувралаар
+  const current = useMemo(
+    () =>
+      all
+        .filter((s) => isEffectiveOn(s, today))
+        .map((s) => (s.to ? { ...s, seriesTo: chainOf(s, all).at(-1)!.to } : s)),
+    [all, today],
+  );
+  const planned = useMemo(() => plannedChanges(all, today), [all, today]);
+
+  const canSelect = (s: Slot) => canManageClass(manage, s.classroomId);
+  const classOptions = useMemo(
+    () =>
+      [...classes.values()]
+        .filter((c) => canManageClass(manage, c.id))
+        .sort((a, b) => a.name.localeCompare(b.name, "mn", { numeric: true })),
+    [classes, manage],
+  );
+
+  function saved() {
+    setOpen(null);
+    rowsQ.reload();
   }
 
-  if (loading) {
-    return <LoadingState rows={6} />;
+  if (rowsQ.data === undefined) {
+    if (rowsQ.status === "error") return <ErrorState message={rowsQ.error} onRetry={rowsQ.reload} />;
+    return <GridSkeleton />;
   }
-  if (error) {
-    return <ErrorState message={error} onRetry={load} />;
-  }
+
+  const classCount = new Set(current.map((s) => s.classroomId)).size;
+  const hasEnding = current.some((s) => s.to);
 
   return (
-    <div className="space-y-5">
-      {BRANCHES.map((branch) => {
-        const cols = grid.get(branch);
-        const empty = COLUMNS.every((c) => (cols?.get(c.key) ?? []).length === 0);
-        if (empty) return null;
-        return (
-          <section key={branch}>
-            {/* Бүсийн толгой — хоёр бүсийг нэг харцаар ялгах босоо бүтэц */}
-            <div className="mb-2 flex items-center gap-2.5">
-              <h3 className="text-sm font-extrabold tracking-wide">{branch}</h3>
-              <div className="h-px flex-1 bg-line" aria-hidden />
-            </div>
+    <div className="space-y-4">
+      <section aria-labelledby="pattern-title" className="rounded-xl border border-line bg-surface">
+        <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-line px-3 py-2">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <h2 id="pattern-title" className="cyrillic-heading text-sm font-bold text-ink">
+              Танхимын 7 хоног
+            </h2>
+            <InfoHint label="Тогтмол хуваарийн тухай">
+              7 хоног бүр ижил давтагддаг хуваарь. Тухайн өдрийн өөрчлөлт, сэдэв, багшийн оноолтыг «Өдрийн хуваарь»-аас харна
+            </InfoHint>
+            <span className="text-xs text-ink-dim">
+              <Meta items={[`${current.length} хичээл`, `${classCount} анги`]} />
+            </span>
+          </div>
+          {manager && (
+            <Button size="sm" type="button" onClick={() => setOpen({ kind: "add" })}>
+              <CalendarPlus aria-hidden />
+              Шинэ цаг нэмэх
+            </Button>
+          )}
+        </header>
 
-            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-              {COLUMNS.map((col) => {
-                const groups = cols?.get(col.key) ?? [];
-                return (
-                  <div
-                    key={col.key}
-                    className="rounded-2xl border border-line bg-panel p-3"
-                  >
-                    <p className="px-1 pb-1 text-xs font-bold text-ink-dim">
-                      {col.title}
-                    </p>
-                    {groups.length === 0 ? (
-                      <p className="px-1 py-2 text-xs text-ink-dim">—</p>
-                    ) : (
-                      groups.map((g, i) => {
-                        const prev = groups[i - 1];
-                        const newBand = !prev || prev.startMinute !== g.startMinute;
-                        const color = getClassroomColor(g.classroomId);
-                        const partial = g.days.length < col.days.length;
-                        const RowTag = readOnly ? "div" : "button";
-                        return (
-                          <div key={g.key}>
-                            {/* Цагийн бүсийн толгой — ажлын багана 2, Бямба 3
-                                бүсэд аяндаа хуваагдана (эзний загвар) */}
-                            {newBand && (
-                              <p
-                                className={`flex items-center gap-2 px-1 pb-1 ${i === 0 ? "pt-1" : "pt-3"}`}
-                              >
-                                <span className="font-mono text-[11px] font-bold text-brand-soft">
-                                  {formatMinutes(g.startMinute)}–{formatMinutes(g.endMinute)}
-                                </span>
-                                <span className="h-px flex-1 bg-line/70" aria-hidden />
-                              </p>
-                            )}
-                            {/* Ангийн өнгө = ЗҮҮН ЗУРВАС + (hover үед) зөөлөн
-                                дэвсгэр. Текст болон дүрс дээр өнгө ОРОХГҮЙ —
-                                эзний дүрэм, мөн ангийн палитр текстэд
-                                хангалтгүй контрасттай (globals.css .class-row
-                                тайлбар харна уу).
-                                rounded-r-lg: зүүн талыг мурийлгавал зурвас
-                                тасарч харагдана. */}
-                            <RowTag
-                              {...(readOnly
-                                ? {}
-                                : { type: "button" as const, onClick: () => openGroup(g, col.days) })}
-                              style={{ "--cls": color } as React.CSSProperties}
-                              className={`class-row flex w-full items-center gap-2 rounded-r-lg py-1 pr-1.5 pl-2 text-left ${
-                                readOnly ? "" : "class-row-interactive"
-                              }`}
-                            >
-                              <span className="flex w-13 shrink-0 items-center gap-1.5 text-ink">
-                                <RoomShape room={g.room} size={16} />
-                                <span className="font-mono text-xs text-ink-dim">
-                                  {g.room ?? "—"}
-                                </span>
-                              </span>
-                              <span className="truncate text-sm font-semibold text-ink">
-                                {g.classLabel}
-                              </span>
-                              {partial && (
-                                <span className="flex gap-0.5">
-                                  {g.days.map((d) => (
-                                    <span
-                                      key={d}
-                                      className="rounded bg-bg px-1 text-[10px] font-semibold text-ink-dim"
-                                    >
-                                      {WEEKDAY_SHORT[d]}
-                                    </span>
-                                  ))}
-                                </span>
-                              )}
-                              <Occupancy students={g.students} capacity={roomCapacityOf(g.room)} />
-                            </RowTag>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        );
-      })}
+        {rowsQ.status === "error" && (
+          <div className="p-2">
+            <ErrorState message={rowsQ.error} onRetry={rowsQ.reload} />
+          </div>
+        )}
 
-      {!readOnly && (
-        <EntryActionPanel
-          open={selected !== null}
-          entry={selected?.entry ?? null}
-          date={selected?.date ?? ""}
-          dayEntries={selected?.dayEntries ?? []}
-          onClose={() => setSelected(null)}
-          onChanged={() => {
-            setSelected(null);
-            load();
-          }}
+        {current.length === 0 ? (
+          <div className="p-3">
+            <EmptyState
+              icon={CalendarX2}
+              title="Мөрдөгдөж буй хуваарь алга"
+              hint={manager ? "Анги бүрийн 7 хоногийн цагийг нэмбэл энд танхим, гарагаар харагдана" : "Хуваарь оруулсны дараа энд харагдана"}
+            />
+          </div>
+        ) : (
+          <PatternGrid
+            slots={current}
+            caption="Танхим бүрийн 7 хоногийн тогтмол хуваарь: анги, цаг, сурагч ба суудлын харьцаа"
+            todayWeekday={weekdayOf(today)}
+            showDayCounts
+            today={today}
+            onSelect={manager ? (slot) => setOpen({ kind: "slot", slot, planned: null }) : undefined}
+            canSelect={canSelect}
+          />
+        )}
+
+        {/* Тайлбар — хамгийн доор (эзний дүрэм) */}
+        <footer className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line px-3 py-2 text-xs text-ink-dim">
+          <span>Нүд: цаг, анги, сурагч/суудал</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 font-semibold text-warning">
+            <TriangleAlert className="size-3.5" aria-hidden />
+            Суудал дутсан
+          </span>
+          {hasEnding && (
+            <span className="inline-flex items-center gap-1">
+              <CalendarClock className="size-3.5" aria-hidden />
+              Дуусах огноотой
+            </span>
+          )}
+          {manager && <span>Хичээл дээр дарж засна</span>}
+        </footer>
+      </section>
+
+      <PlannedChanges
+        items={planned}
+        today={today}
+        canSelect={(s) => manager && canSelect(s)}
+        onSelect={(p) => setOpen({ kind: "slot", slot: p.slot, planned: p })}
+      />
+
+      {open?.kind === "slot" && (
+        <SlotDialog
+          key={open.slot.id}
+          slot={open.slot}
+          planned={open.planned}
+          slots={all}
+          classes={classes}
+          teachers={teachersQ.data}
+          today={today}
+          onClose={() => setOpen(null)}
+          onSaved={saved}
+        />
+      )}
+      {open?.kind === "add" && (
+        <AddSlotDialog
+          classOptions={classOptions}
+          slots={all}
+          classes={classes}
+          teachers={teachersQ.data}
+          today={today}
+          onClose={() => setOpen(null)}
+          onSaved={saved}
         />
       )}
     </div>
   );
 }
 
-/**
- * Мөрийн баруун талд: ангийн хүүхдийн тоо / танхимын багтаамж (эзэн 2026-10-08).
- * Багтаамж хэтэрвэл улаан + «хэтэрсэн» гэсэн бичиг (өнгө дангаараа утга
- * илэрхийлэхгүй — STATUS §6.9).
- */
-function Occupancy({ students, capacity }: { students: number | null; capacity: number | null }) {
-  if (students == null) return null;
-  const over = capacity != null && students > capacity;
-  const label = capacity != null
-    ? `${students} хүүхэд, танхимын багтаамж ${capacity}${over ? " — хэтэрсэн" : ""}`
-    : `${students} хүүхэд`;
+/** Ачаалж байх үеийн бодит бүтэц: толгой + танхим × 7 гараг */
+function GridSkeleton() {
   return (
-    <span
-      title={label}
-      aria-label={label}
-      className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums ${
-        over ? "bg-error/12 text-error" : "bg-bg text-ink-dim"
-      }`}
-    >
-      <Users className="h-3 w-3" aria-hidden />
-      {students}
-      {capacity != null && <span className="font-normal">/{capacity}</span>}
-    </span>
+    <div role="status" aria-label="Хуваарь ачаалж байна" className="rounded-xl border border-line bg-surface">
+      <div className="flex items-center justify-between border-b border-line px-3 py-2.5">
+        <div className="skeleton h-4 w-40" />
+        <div className="skeleton h-8 w-32 rounded-xl" />
+      </div>
+      <div className="space-y-2 p-3">
+        {Array.from({ length: 6 }, (_, r) => (
+          <div key={r} className="grid grid-cols-[4.5rem_repeat(7,minmax(0,1fr))] gap-2">
+            <div className="skeleton h-12" />
+            {Array.from({ length: 7 }, (_, c) => (
+              <div key={c} className="skeleton h-12" />
+            ))}
+          </div>
+        ))}
+      </div>
+      <span className="sr-only">Ачаалж байна</span>
+    </div>
   );
 }

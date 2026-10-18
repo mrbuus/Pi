@@ -345,12 +345,19 @@ export class UsersService {
   private importCommits = new Map<string, Promise<StudentImportResult>>();
   private importQueues = new Map<string, Promise<void>>();
 
+  /**
+   * Сургалтаас хасах / сэргээх (Багш+/Админ, эзэн 2026-10-18).
+   * Хасахад идэвхтэй Enrollment хаагдана (leftAt = одоо, түүх хэвээр) — тиймээс
+   * сурагч жагсаалт, самбараас алга болно. Сэргээхэд `classroomId` өгвөл тэр
+   * ангид шинэ бичилт нээгдэнэ; өгөөгүй бол ангигүй (хуваарилагдаагүй) болно.
+   */
   async archiveStudent(
     id: string,
     actorId: string,
     reason: string,
     actorRole: Role,
     restore = false,
+    classroomId?: string,
   ) {
     const user = await this.prisma.user.findUnique({
       where: { id },
@@ -362,18 +369,44 @@ export class UsersService {
       throw new BadRequestException(
         'Сурагчийн архивын төлөв өөрчлөгдсөн байна.',
       );
-    if (!restore && !reason.trim())
+    const cleanReason = (reason ?? '').trim();
+    if (!restore && !cleanReason)
       throw new BadRequestException('Архивлах шалтгаан оруулна уу.');
-    const updated = await this.prisma.user.update({
-      where: { id },
-      data: restore
-        ? { archivedAt: null, archivedById: null, archiveReason: null }
-        : {
-            archivedAt: new Date(),
-            archivedById: actorId,
-            archiveReason: reason.trim(),
-          },
-      select: { id: true, archivedAt: true },
+    let classroom: { id: string; name: string } | null = null;
+    if (restore && classroomId) {
+      classroom = await this.prisma.classroom.findFirst({
+        where: { id: classroomId, archived: false },
+        select: { id: true, name: true },
+      });
+      if (!classroom) throw new NotFoundException('Анги олдсонгүй');
+    }
+    const now = new Date();
+    const { updated, closed } = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id },
+        data: restore
+          ? { archivedAt: null, archivedById: null, archiveReason: null }
+          : {
+              archivedAt: now,
+              archivedById: actorId,
+              archiveReason: cleanReason,
+            },
+        select: { id: true, archivedAt: true },
+      });
+      let closed = 0;
+      if (!restore || classroom) {
+        // Идэвхтэй бичилтийг хаана (түүх устахгүй)
+        const res = await tx.enrollment.updateMany({
+          where: { studentId: id, leftAt: null },
+          data: { leftAt: now, movedById: actorId },
+        });
+        closed = res?.count ?? 0;
+      }
+      if (restore && classroom)
+        await tx.enrollment.create({
+          data: { studentId: id, classroomId: classroom.id, movedById: actorId },
+        });
+      return { updated, closed };
     });
     await this.audit.record({
       actorId,
@@ -382,10 +415,19 @@ export class UsersService {
       entity: 'User',
       entityId: id,
       before: { archivedAt: user.archivedAt?.toISOString() ?? null },
-      after: { archivedAt: updated.archivedAt?.toISOString() ?? null },
-      reason: reason.trim(),
+      after: {
+        archivedAt: updated.archivedAt?.toISOString() ?? null,
+        enrollmentsClosed: closed,
+        classroomId: classroom?.id ?? null,
+      },
+      reason: cleanReason || undefined,
     });
-    return updated;
+    return {
+      id: updated.id,
+      archivedAt: updated.archivedAt,
+      enrollmentsClosed: closed,
+      classroom,
+    };
   }
 
   async previewStudentImport(buffer: Buffer, ownerId: string) {
@@ -762,8 +804,9 @@ export class UsersService {
           where: { archived: false },
           select: { id: true, name: true },
         },
+        ...(includeArchived ? { archiveReason: true } : {}),
         enrollments: {
-          where: { leftAt: null },
+          where: includeArchived ? {} : { leftAt: null },
           orderBy: { joinedAt: 'desc' },
           take: 1,
           select: { classroom: { select: { id: true, name: true, grade: true } } },
@@ -772,10 +815,13 @@ export class UsersService {
       orderBy: [{ role: 'asc' }, { firstName: 'asc' }],
       take: 5000,
     });
-    return users.map(({ enrollments, ...u }) => ({
-      ...u,
-      currentClassroom: enrollments[0]?.classroom ?? null,
-    }));
+    return users.map(({ enrollments, ...u }) => {
+      const latest = enrollments[0]?.classroom ?? null;
+      // Архивын жагсаалтад: сүүлийн анги (сэргээхэд урьдчилан сонгоно)
+      if (includeArchived)
+        return { ...u, currentClassroom: null, lastClassroom: latest };
+      return { ...u, currentClassroom: latest };
+    });
   }
 
   async setUserRole(userId: string, role: Role, actorId: string) {
@@ -1096,6 +1142,8 @@ export class UsersService {
         teacherCode: true,
         createdAt: true,
         lastSeenAt: true,
+        archivedAt: true,
+        archiveReason: true,
         studentProfile: true,
         teacherProfile: { select: { canManageStudents: true } },
       },
@@ -1129,6 +1177,16 @@ export class UsersService {
         );
       }
     }
+
+    // Архивлагдсан сурагчийн сүүлийн анги — сэргээхэд урьдчилан сонгоно
+    const lastEnrollment =
+      user.archivedAt && !activeEnrollment
+        ? await this.prisma.enrollment.findFirst({
+            where: { studentId: targetId },
+            orderBy: { joinedAt: 'desc' },
+            select: { classroom: { select: { id: true, name: true, grade: true } } },
+          })
+        : null;
 
     const [
       assignmentsCompleted,
@@ -1176,6 +1234,7 @@ export class UsersService {
             grade: activeEnrollment.classroom.grade,
           }
         : null,
+      lastClassroom: lastEnrollment?.classroom ?? null,
       counts: {
         assignmentsCompleted,
         testResults,

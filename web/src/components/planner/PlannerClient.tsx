@@ -135,10 +135,6 @@ export default function PlannerClient() {
     <div>
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-ink">Ажилтны жилийн төлөвлөгч</h1>
-        <p className="mt-1 text-sm text-ink-dim">
-          Жилийн ажлаа жижиг даалгавар болгон хуваан, хариуцагчаа оноож,
-          ачааллыг тэнцвэржүүлээрэй.
-        </p>
       </header>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

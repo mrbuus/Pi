@@ -14,12 +14,17 @@ CDN огт үлдэхгүй: three/lenis/lucide/katex npm-ээс, зураг/х�
 import json
 import os
 import re
+import sys
 
+# `--demo`: туршилтын нүүр (demo/index.html → components/home-demo, хамрах хүрээ `.sied`)
+DEMO = '--demo' in sys.argv
+NAME = 'demo' if DEMO else 'home'
+SCOPE = 'sied' if DEMO else 'sie'
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, 'home', 'index.html')
-OUT = os.path.join(HERE, '..', '..', '..', 'web', 'src', 'components', 'home')
+SRC = os.path.join(HERE, NAME, 'index.html')
+OUT = os.path.join(HERE, '..', '..', '..', 'web', 'src', 'components', 'home-demo' if DEMO else 'home')
 html = open(SRC, encoding='utf-8').read()
-HEADER = '// ⚠️ АВТОМАТААР ҮҮСГЭСЭН — docs/v2/hero/port_home.py. Гараар бүү зас, мокапаа засаад дахин ажиллуул.\n'
+HEADER = '// ⚠️ АВТОМАТААР ҮҮСГЭСЭН — docs/v2/hero/port_home.py' + (' --demo' if DEMO else '') + '. Гараар бүү зас, мокапаа засаад дахин ажиллуул.\n'
 
 
 def sub1(s, old, new, count=1):
@@ -33,6 +38,10 @@ def sub1(s, old, new, count=1):
 def between(s, a, b):
     i = s.index(a) + len(a)
     return s[i:s.index(b, i)]
+
+
+def sub_opt(s, old, new):
+    return s.replace(old, new, 1) if old in s else s
 
 
 def cut(s, a, b):
@@ -56,13 +65,13 @@ def scope_sel(sel):
         if p.startswith('html.lenis') or p.startswith('.lenis'):
             out.append(p)
         elif p in (':root', 'html', 'body'):
-            out.append('.sie')
+            out.append('.'+SCOPE)
         elif p.startswith('body'):
-            out.append('.sie' + p[4:])
+            out.append('.'+SCOPE + p[4:])
         elif p == '*':
-            out += ['.sie', '.sie *']
+            out += ['.'+SCOPE, '.'+SCOPE+' *']
         else:
-            out.append('.sie ' + p)
+            out.append('.'+SCOPE+' ' + p)
     return ','.join(out)
 
 
@@ -87,7 +96,7 @@ def parse(s, i=0, depth=0):
             while d:
                 d += {'{': 1, '}': -1}.get(s[m], 0)
                 m += 1
-            res.append(f'@keyframes sie-{name}' + s[j:m])
+            res.append(f'@keyframes {SCOPE}-{name}' + s[j:m])
             i = m
         elif pre.startswith('@'):
             inner, i = parse(s, j + 1, depth + 1)
@@ -106,28 +115,31 @@ def parse(s, i=0, depth=0):
 
 
 css_out, _ = parse(css)
-css_out = re.sub(r'animation:mq\b', 'animation:sie-mq', css_out)
+css_out = re.sub(r'animation:mq\b', 'animation:'+SCOPE+'-mq', css_out)
 css_out = ('/* ⚠️ АВТОМАТААР ҮҮСГЭСЭН — docs/v2/hero/port_home.py. Гараар бүү зас. */\n'
-           'body:has(.sie){background:#0B1834}\n'
-           '.sie{min-height:100vh}\n' + css_out)
+           'body:has(.'+SCOPE+'){background:#0B1834}\n'
+           'body:has(.'+SCOPE+'.light){background:#FFFFFF}\n'
+           '.'+SCOPE+'{min-height:100vh}\n' + css_out)
 
 # ---------------------------------------------------------------- MARKUP
 body = between(html, '<body>', '<script type="importmap">').strip()
 body = cut(body, '<!-- 10. Хамт олон', '<!-- 11.')
 for a, b in [('src="logo-white.png"', 'src="/home/logo-white.png"'),
              ('src="logo-navy.png"', 'src="/home/logo-navy.png"'),
-             ('src="mark-white.png"', 'src="/home/mark-white.png"')]:
+             ('src="mark-white.png"', 'src="/home/mark-white.png"'),
+             ('src="logo-full-dark.png"', 'src="/logo-full-dark.png"'),
+             ('src="logo-full.png"', 'src="/logo-full.png"')]:
     body = body.replace(a, b)
+body = body.replace('src="amjilt/', 'src="/amjilt/')
 body = sub1(body, '<a class="btn" href="#">Нэвтрэх', '<a class="btn" href="/login">Нэвтрэх')
 body = sub1(body, '<a class="tlink" href="#">Бүртгүүлэх</a>', '<a class="tlink" href="/register">Бүртгүүлэх</a>')
-body = sub1(body, '<a class="btn ink" href="#">Номоос бодож үзэх', '<a class="btn ink" href="/preview">Номоос бодож үзэх')
-body = sub1(body, '<a class="tlink" href="#">Төлбөр</a>', '<a class="tlink" href="#plan">Төлбөр</a>')
 # Мокапад «Нэвтрэх/Бүртгүүлэх» нь hero-гийн карт руу гүйлгэдэг — жинхэнэ вэбд шууд хуудас руу
 body = sub1(body, '<a class="btn sm cta" href="#enter">Нэвтрэх', '<a class="btn sm cta" href="/login">Нэвтрэх')
 body = sub1(body, '<a class="go" href="#enter" aria-label="Нэвтрэх">', '<a class="go" href="/login" aria-label="Нэвтрэх">')
 body = sub1(body, '<a class="btn" href="#enter">Бүртгүүлэх', '<a class="btn" href="/register">Бүртгүүлэх')
 body = sub1(body, '<a href="#enter">Нэвтрэх', '<a href="/login">Нэвтрэх')
 body = sub1(body, '<span>Нэвтрэх, Бүртгүүлэх</span>', '<a href="/login">Нэвтрэх</a><a href="/register">Бүртгүүлэх</a>')
+body = sub_opt(body, '<a class="tlink" href="#">Төлбөр</a>', '<a class="tlink" href="#plan">Төлбөр</a>')
 body = sub1(body, '<a class="it" href="#foot"><small>07</small>Тусламж</a>', '<a class="it" href="/help"><small>07</small>Тусламж</a>')
 if 'href="#enter"' in body:
     raise SystemExit('href="#enter" үлдлээ')
@@ -147,20 +159,26 @@ dom = sub1(dom, "const id=a.getAttribute('href'); if(id.length<2) return;",
            "const id=a.getAttribute('href'); if(id.length<2||id[0]!=='#') return;")
 dom = sub1(dom, "fetch('amjilt/index.json')", "fetch('/amjilt/index.json')")
 dom = sub1(dom, "fetch('amjilt/'+y+'.json')", "fetch('/amjilt/'+y+'.json')")
+# Зургийн зам JSON-д харьцангуй (мокап /home/ дотор) — вэбд ямар ч хуудаснаас (/demo/home) зөв ачаалагдахаар үндсээс
+dom = sub1(dom, "W.data[y]=r.ok?await r.json():[];",
+           "W.data[y]=r.ok?(await r.json()).map(d=>{ for(const k of ['t','f','a']) if(d[k]&&d[k][0]!=='/') d[k]='/'+d[k]; return d; }):[];")
 dom = sub1(dom, "img:'100x100-front.jpg'", "img:'/home/100x100-front.jpg'")
+dom = sub_opt(dom, "const AMJ='amjilt/';", "const AMJ='/amjilt/';")  # амжилтын нүүрний атлас (демо)
 dom = sub1(dom, "club:$('#club'),", "")
 dom = sub1(dom, "const clubNums=$$('.club .cs b'), logoFix=$('#logoFix');", "const logoFix=$('#logoFix');")
 dom = cut(dom, '  /* 10. Хамт олон */', '  /* 11. Өлгөөтэй')
 dom = sub1(dom, 'function frame(now){\n', 'function frame(now){\n  if(dead) return;\n')
 dom = dom.replace('requestAnimationFrame(frame);', 'rafId=requestAnimationFrame(frame);')
 dom = sub1(dom, 'setInterval(tickClock,15000);', 'const clockTimer=setInterval(tickClock,15000);')
-dom = sub1(dom, "new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:.25}).observe($('#pol'));",
-           "const polIO=new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:.25}); polIO.observe($('#pol'));")
+HAS_POL = "$('#pol')" in dom
+dom = sub_opt(dom, "new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:.25}).observe($('#pol'));",
+              "const polIO=new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:.25}); polIO.observe($('#pol'));")
 dom = sub1(dom, "addEventListener('DOMContentLoaded',()=>{\n  lucide.createIcons({attrs:{'stroke-width':1.75}});",
            "(()=>{\n  createIcons({icons:ICONS,attrs:{'stroke-width':1.75}});")
 dom = sub1(dom, "requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));\n});",
            "requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('ready')));\n})();")
 dom = sub1(dom, "document.body.classList.toggle('past',past);", "root.classList.toggle('past',past);")
+dom = sub_opt(dom, "const THEME_EL=document.body,", "const THEME_EL=root,")
 if 'document.body' in dom:
     raise SystemExit('dom.ts-д document.body үлдлээ (root руу шилжүүл)')
 dom = re.sub(r'(?<![.\w])addEventListener\(', 'on(window,', dom)
@@ -176,7 +194,7 @@ dom_ts = (HEADER + '/* eslint-disable */\n// @ts-nocheck\n'
           '  const on = (t, ev, f, o) => { t.addEventListener(ev, f, o); offs.push(() => t.removeEventListener(ev, f, o)); };\n'
           + dom +
           '\n  return () => {\n'
-          '    dead = true; cancelAnimationFrame(rafId); clearInterval(clockTimer); polIO.disconnect();\n'
+          '    dead = true; cancelAnimationFrame(rafId); clearInterval(clockTimer);' + (' polIO.disconnect();' if HAS_POL else '') + (' tvIO.disconnect();' if 'const tvIO=' in dom else '') + '\n'
           '    offs.forEach((f) => f()); if (lenis) lenis.destroy();\n'
           '    delete window.S; delete window.LAB; delete window.labPick; delete window.__W;\n'
           '  };\n}\n')
@@ -219,8 +237,11 @@ three_ts = (HEADER + '/* eslint-disable */\n// @ts-nocheck\n'
             '  const on = (t, ev, f, o) => { t.addEventListener(ev, f, o); offs.push(() => t.removeEventListener(ev, f, o)); };\n'
             + three +
             '\n  return () => {\n'
-            '    dead = true; delete window.__three; offs.forEach((f) => f()); controls.dispose();\n'
-            '    [heroStage.r, labStage.r, ir, gr2].forEach((r) => { r.dispose(); r.forceContextLoss(); });\n'
+            '    dead = true; delete window.__three; offs.forEach((f) => f());'
+            + (' controls.dispose();' if 'new OrbitControls(' in three else '') + '\n'
+            '    [' + ', '.join(['heroStage.r'] + (['labStage.r'] if 'const labStage' in three else [])
+                            + (['ir'] if 'const ir=' in three else []) + ['gr2'])
+            + '].forEach((r) => { r.dispose(); r.forceContextLoss(); });\n'
             '  };\n}\n')
 open(os.path.join(OUT, 'three.ts'), 'w', encoding='utf-8').write(three_ts)
 open(os.path.join(OUT, 'home.css'), 'w', encoding='utf-8').write(css_out)

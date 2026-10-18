@@ -29,16 +29,25 @@ interface AuthedRequest {
 export class ClassroomsController {
   constructor(private classrooms: ClassroomsService) {}
 
-  @Roles(Role.ADMIN)
+  // Шинэ анги — Багш+ ба Админ (эзэн 2026-10-18, «Сурагчид» хэсгээс)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post()
-  create(@Body() dto: CreateClassroomDto) {
-    return this.classrooms.create(dto);
+  create(@Body() dto: CreateClassroomDto, @Req() req: AuthedRequest) {
+    return this.classrooms.create(dto, req.user.userId, req.user.role);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get()
   list(@Req() req: AuthedRequest) {
     return this.classrooms.list(req.user.userId, req.user.role);
+  }
+
+  // Бүртгэлтэй ч ангигүй / ангид байгаа ч ирэхгүй сурагчид (эзэн 2026-10-18).
+  // `:id`-ээс ӨМНӨ байх ёстой.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Get('attention-students')
+  attention() {
+    return this.classrooms.attentionStudents();
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)

@@ -30,7 +30,9 @@ export default function CodeReveal({ code, className = "" }: { code?: string | n
     );
   }
   return (
-    <span className={`inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2 py-1 font-mono text-xs text-ink ${className}`}>
+    // className нь зөвхөн хаалттай «#» товчны хэмжээ — нээлттэй кодод хэрэглэвэл (h-6 w-6)
+    // код босоо тасарч хөрш элементтэй давхцдаг байв (2026-10-18)
+    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border border-line bg-panel px-2 py-0.5 font-mono text-xs text-ink">
       {code}
       <button
         type="button"

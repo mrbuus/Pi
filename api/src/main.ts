@@ -55,7 +55,14 @@ async function bootstrap() {
   // Prisma-гийн алдааг зөв HTTP код руу буулгана (500 → 400/404/409/503).
   // Дэлгэрэнгүй шалтгааныг prisma-exception.filter.ts-ийн толгойгоос үз.
   app.useGlobalFilters(new PrismaExceptionFilter());
-  app.enableCors({ origin: process.env.WEB_ORIGIN ?? 'http://localhost:3001' });
+  // WEB_ORIGIN таслалаар хэд хэдэн хаяг байж болно (ж: localhost + утаснаас LAN IP)
+  const webOrigins = (process.env.WEB_ORIGIN ?? 'http://localhost:3001')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  app.enableCors({
+    origin: webOrigins.length === 1 ? webOrigins[0] : webOrigins,
+  });
 
   // ── Аюулгүй унтралт ──────────────────────────────────────────────────
   // Render нь deploy бүрд ажиллаж буй instance рүү SIGTERM илгээдэг. Ямар ч

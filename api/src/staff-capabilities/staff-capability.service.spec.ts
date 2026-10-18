@@ -23,9 +23,18 @@ describe('staff capability decision boundaries', () => {
     };
     service = new StaffCapabilityService(prisma);
   });
-  it('never infers privilege from a TEACHER_PLUS role alone', async () => {
+  it('TEACHER_PLUS edits the schedule by role (owner decision 2026-10-18)', async () => {
     await expect(
       service.assert('plus', 'schedule.manage', 'class'),
+    ).resolves.toBeUndefined();
+    expect(prisma.staffCapabilityGrant.findFirst).not.toHaveBeenCalled();
+    prisma.user.findUnique.mockResolvedValue({
+      id: 't',
+      role: Role.TEACHER,
+      archivedAt: null,
+    });
+    await expect(
+      service.assert('t', 'schedule.manage', 'class'),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
   it('TEACHER_PLUS manages payments by role (owner decision 2026-10-08), but nothing else', async () => {
@@ -72,7 +81,7 @@ describe('staff capability decision boundaries', () => {
   });
   it('only matches global or requested class; expired and revoked grants are excluded', async () => {
     prisma.staffCapabilityGrant.findFirst.mockResolvedValue({ id: 'grant' });
-    expect(await service.has('plus', 'schedule.manage', 'class-A')).toBe(true);
+    expect(await service.has('plus', 'time.review', 'class-A')).toBe(true);
     const where = prisma.staffCapabilityGrant.findFirst.mock.calls[0][0].where;
     expect(where.revokedAt).toBeNull();
     expect(where.AND[0].OR[1].expiresAt.gt).toBeInstanceOf(Date);

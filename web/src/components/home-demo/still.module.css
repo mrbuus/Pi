@@ -1,0 +1,7 @@
+/* WebGL-гүй, удаан сүлжээнд hero-д харагдах сурах бичгийн статик куб.
+   Өнгө нь .sie (home.css)-ийн хувьсагч. */
+.still { position: absolute; left: 50%; top: 11%; width: min(74vw, 340px); transform: translateX(-50%); pointer-events: none; }
+.still svg { display: block; width: 100%; height: auto; overflow: visible; }
+.lb { position: absolute; transform: translate(-50%, -50%); font-size: 15px; color: #E7EBF3; white-space: nowrap; }
+.lb[data-kind="em"] { color: var(--accent); }
+@media (min-width: 900px) { .still { left: auto; right: 9%; top: 20%; width: min(36vw, 470px); transform: none; } .lb { font-size: 17px; } }

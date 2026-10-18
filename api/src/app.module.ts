@@ -2,6 +2,7 @@ import { StaffCapabilityModule } from './staff-capabilities/staff-capability.mod
 import { HealthController } from './health.controller';
 import { StudyReviewModule } from './study-review/study-review.module';
 import { LessonFlowModule } from './lesson-flow/lesson-flow.module';
+import { LessonDayModule } from './lesson-day/lesson-day.module';
 import { LessonRecordsModule } from './lesson-records/lesson-records.module';
 import { CentreHelpModule } from './centre-help/centre-help.module';
 import { FeedbackModule } from './feedback/feedback.module';
@@ -40,6 +41,7 @@ import { GoalsModule } from './goals/goals.module';
 import { InsightsModule } from './insights/insights.module';
 import { LeadsModule } from './leads/leads.module';
 import { PlacementModule } from './placement/placement.module';
+import { MockExamsModule } from './mock-exams/mock-exams.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { NotesModule } from './notes/notes.module';
@@ -146,6 +148,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     EnrollmentWindowsModule,
     LeadsModule,
     PlacementModule,
+    MockExamsModule,
     LessonsModule,
     GatewaysModule,
     ProgressModule,
@@ -173,6 +176,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     FeedbackModule,
     CentreHelpModule,
     LessonFlowModule,
+    LessonDayModule,
     LessonRecordsModule,
     // Буцаах ба өөрчлөлтийн түүх (docs/v2/BUTSAAH-TUUKH-TOLOVLOGOO.md)
     RevisionsModule,

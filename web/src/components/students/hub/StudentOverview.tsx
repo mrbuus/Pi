@@ -6,6 +6,8 @@ import {
   CalendarDays,
   ClipboardList,
   LogOut,
+  RotateCcw,
+  UserMinus,
   MonitorSmartphone,
   Phone,
   School,
@@ -47,6 +49,8 @@ export default function StudentOverview({
   detail,
   canMove,
   onMove,
+  onRemove,
+  onRestore,
   canSeeMoney,
   payments,
   summary,
@@ -54,6 +58,9 @@ export default function StudentOverview({
   detail: StudentDetailData;
   canMove: boolean;
   onMove: () => void;
+  /** Сургалтаас хасах / сэргээх — Багш+ ба Админ (canMove-той ижил эрх) */
+  onRemove: () => void;
+  onRestore: () => void;
   canSeeMoney: boolean;
   payments: Loadable<StudentPaymentHistory>;
   summary: Loadable<ClassSummary>;
@@ -83,20 +90,51 @@ export default function StudentOverview({
                   {detail.studentCode}
                 </span>
               ),
-              p?.leftOn && (
-                <Badge key="left" tone="warning">
-                  Гарсан
+              detail.archivedAt ? (
+                <Badge key="arch" tone="warning">
+                  Сургалтаас хасагдсан
                 </Badge>
+              ) : (
+                p?.leftOn && (
+                  <Badge key="left" tone="warning">
+                    Гарсан
+                  </Badge>
+                )
               ),
             ]}
           />
         </div>
         {canMove && (
-          <Button size="sm" variant="outline" type="button" onClick={onMove} className="min-h-11">
-            <ArrowRightLeft aria-hidden /> Анги солих
-          </Button>
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            {detail.archivedAt ? (
+              <Button size="sm" type="button" onClick={onRestore} className="min-h-11 flex-1 sm:flex-none">
+                <RotateCcw aria-hidden /> Сэргээх
+              </Button>
+            ) : (
+              <>
+                <Button size="sm" variant="outline" type="button" onClick={onMove} className="min-h-11 flex-1 sm:flex-none">
+                  <ArrowRightLeft aria-hidden /> Анги солих
+                </Button>
+                <Button size="sm" variant="danger" type="button" onClick={onRemove} className="min-h-11 flex-1 sm:flex-none">
+                  <UserMinus aria-hidden /> Сургалтаас хасах
+                </Button>
+              </>
+            )}
+          </div>
         )}
       </div>
+
+      {detail.archivedAt && (
+        <p className="mt-3 rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-ink">
+          <Meta
+            items={[
+              `${formatMnDate(detail.archivedAt)}-нд хасагдсан`,
+              detail.lastClassroom ? `Сүүлд ${detail.lastClassroom.name}` : null,
+              detail.archiveReason,
+            ]}
+          />
+        </p>
+      )}
 
       <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
         <Fact icon={School} label="Сургууль">

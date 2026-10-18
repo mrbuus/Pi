@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, Flag, Search, SlidersHorizontal, Users, X } from "lucide-react";
+import { ArrowDownUp, ChevronDown, Flag, Search, SlidersHorizontal, Users, X } from "lucide-react";
 import { Badge } from "@/components/ui/kit/badge";
 import InfoHint from "@/components/ui/InfoHint";
 import { Meta } from "@/components/ui/Meta";
 import { EmptyState } from "@/components/ui/StateBlock";
+import { StudentActionsMenu } from "@/components/students/StudentActions";
 import { cn } from "@/lib/cn";
+import { byFirstName, rosterNames } from "@/lib/personName";
 import { FLAG_KINDS, FLAG_META, flagMeta, PAYMENT_META, RISK_META } from "./meta";
 import { CompetencyHint, CompetencyValue, FlagChip, RateCell, RiskChip, Segmented } from "./parts";
 import StudentDialog from "./StudentDialog";
@@ -99,6 +101,7 @@ export default function StudentsTab({
   const [openId, setOpenId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
   const money = data.permissions.money;
+  const canManage = !!data.permissions.manageClass;
   const current: QuickView = view ?? "all";
 
   // Хадгалсан шүүлтүүрийг сэргээнэ (энэ төхөөрөмж дээр л)
@@ -123,6 +126,9 @@ export default function StudentsTab({
       /* хадгалах боломжгүй — асуудалгүй */
     }
   }, [restored, current, sort, flag, risk]);
+
+  // «Б. Нэр» — ижил нэр + ижил овгийн үсэгтэй бол овог бүтнээрээ (эзэн 2026-10-18)
+  const names = useMemo(() => rosterNames(data.students), [data.students]);
 
   const topics = useMemo(() => {
     const set = new Set<string>();
@@ -160,7 +166,8 @@ export default function StudentsTab({
         return false;
       return true;
     });
-    const byName = (a: StudentRow, b: StudentRow) => a.lastName.localeCompare(b.lastName, "mn") || a.firstName.localeCompare(b.firstName, "mn");
+    // Нэрийн эхний үсгээр (овгоор биш) — эзэн 2026-10-18
+    const byName = byFirstName;
     return [...list].sort((a, b) => {
       switch (sort) {
         case "competency_desc":
@@ -291,12 +298,12 @@ export default function StudentsTab({
         />
       ) : (
         <>
-          <DesktopTable rows={rows} money={money} onOpen={setOpenId} avg={avg} />
+          <DesktopTable rows={rows} names={names} money={money} onOpen={setOpenId} avg={avg} classId={data.classroom.id} onChanged={canManage ? onChanged : undefined} />
           <ClassAverageCard avg={avg} />
           <ul className="space-y-2 md:hidden">
             {rows.map((s) => (
               <li key={s.id}>
-                <StudentCard s={s} money={money} onOpen={() => setOpenId(s.id)} />
+                <StudentCard s={s} name={names.get(s.id) ?? fullName(s)} money={money} onOpen={() => setOpenId(s.id)} classId={data.classroom.id} onChanged={canManage ? onChanged : undefined} />
               </li>
             ))}
           </ul>
@@ -340,12 +347,15 @@ function Select({
         onChange={(e) => onChange(e.target.value)}
         aria-label={label}
         className={cn(
-          "min-h-11 w-full min-w-0 truncate rounded-xl border bg-bg py-2 pl-9 pr-8 text-sm font-semibold text-ink focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50 md:w-auto",
+          // appearance-none: Safari нь энгийн <select>-ийн pl-9-г тоохгүй тул дүрс
+          // бичвэр дээр давхарддаг байв (эзэн 2026-10-18) — сумыг өөрсдөө зурна.
+          "min-h-11 w-full min-w-0 appearance-none truncate rounded-xl border bg-bg py-2 pl-9 pr-8 text-sm font-semibold text-ink focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50 md:w-auto",
           value !== "ALL" && value !== "name" ? "border-brand-bright" : "border-line",
         )}
       >
         {children}
       </select>
+      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" aria-hidden />
     </label>
   );
 }
@@ -386,7 +396,27 @@ function Chips({ s, onOpen }: { s: StudentRow; onOpen: () => void }) {
   );
 }
 
-function DesktopTable({ rows, money, onOpen, avg }: { rows: StudentRow[]; money: boolean; onOpen: (id: string) => void; avg: ClassAvg }) {
+function RowMenu({ s, classId, onChanged }: { s: StudentRow; classId: string; onChanged: () => void }) {
+  return <StudentActionsMenu student={{ id: s.id, name: fullName(s) }} currentClassId={classId} onChanged={onChanged} />;
+}
+
+function DesktopTable({
+  rows,
+  names,
+  money,
+  onOpen,
+  avg,
+  classId,
+  onChanged,
+}: {
+  rows: StudentRow[];
+  names: Map<string, string>;
+  money: boolean;
+  onOpen: (id: string) => void;
+  avg: ClassAvg;
+  classId: string;
+  onChanged?: () => void;
+}) {
   return (
     <div className="hidden overflow-x-auto rounded-2xl border border-line bg-surface md:block">
       <table className="w-full min-w-[860px] text-left">
@@ -414,6 +444,11 @@ function DesktopTable({ rows, money, onOpen, avg }: { rows: StudentRow[]; money:
             </th>
             <th scope="col" className="px-3 py-2">Шошго, дохио</th>
             {money && <th scope="col" className="px-3 py-2">Төлбөр</th>}
+            {onChanged && (
+              <th scope="col" className="sticky right-0 z-10 w-12 bg-panel px-1 py-2">
+                <span className="sr-only">Үйлдэл</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
@@ -434,6 +469,7 @@ function DesktopTable({ rows, money, onOpen, avg }: { rows: StudentRow[]; money:
             <td className="px-2.5 py-1.5 font-display text-lg font-bold tabular-nums text-ink">{avg.competency ?? "—"}</td>
             <td className="px-2.5 py-1.5" />
             {money && <td className="px-2.5 py-1.5" />}
+            {onChanged && <td className="sticky right-0 z-10 bg-panel" />}
           </tr>
           {rows.map((s) => (
             <tr key={s.id} className="row-interactive align-middle">
@@ -443,7 +479,7 @@ function DesktopTable({ rows, money, onOpen, avg }: { rows: StudentRow[]; money:
                   onClick={() => onOpen(s.id)}
                   className="flex min-h-11 max-w-[11rem] flex-col justify-center text-left focus-visible:outline-2 focus-visible:outline-brand"
                 >
-                  <span className="block truncate font-semibold text-ink hover:text-brand">{fullName(s)}</span>
+                  <span className="block truncate font-semibold text-ink hover:text-brand">{names.get(s.id) ?? fullName(s)}</span>
                   {s.studentCode && <span className="block font-mono text-xs text-ink-dim">{s.studentCode}</span>}
                 </button>
               </th>
@@ -482,6 +518,11 @@ function DesktopTable({ rows, money, onOpen, avg }: { rows: StudentRow[]; money:
                   {s.payment ? <Badge tone={PAYMENT_META[s.payment.state].tone}>{PAYMENT_META[s.payment.state].label}</Badge> : null}
                 </td>
               )}
+              {onChanged && (
+                <td className="sticky right-0 z-10 bg-surface px-1 text-right">
+                  <RowMenu s={s} classId={classId} onChanged={onChanged} />
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -490,13 +531,27 @@ function DesktopTable({ rows, money, onOpen, avg }: { rows: StudentRow[]; money:
   );
 }
 
-function StudentCard({ s, money, onOpen }: { s: StudentRow; money: boolean; onOpen: () => void }) {
+function StudentCard({
+  s,
+  name,
+  money,
+  onOpen,
+  classId,
+  onChanged,
+}: {
+  s: StudentRow;
+  name: string;
+  money: boolean;
+  onOpen: () => void;
+  classId: string;
+  onChanged?: () => void;
+}) {
   return (
     <div className="rounded-2xl border border-line bg-surface p-3">
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-1">
         <div className="min-w-0 flex-1">
           <Link href={`/app/students/${encodeURIComponent(s.id)}`} className="block truncate font-semibold text-ink hover:text-brand">
-            {fullName(s)}
+            {name}
           </Link>
           {s.studentCode && <span className="font-mono text-xs text-ink-dim">{s.studentCode}</span>}
         </div>
@@ -504,6 +559,7 @@ function StudentCard({ s, money, onOpen }: { s: StudentRow; money: boolean; onOp
           <span className="block text-[11px] font-semibold text-ink-dim">Чадамж v0</span>
           <CompetencyValue c={s.competency} compact />
         </div>
+        {onChanged && <RowMenu s={s} classId={classId} onChanged={onChanged} />}
       </div>
       {(s.flags.length > 0 || s.risk.length > 0) && (
         <div className="mt-2">

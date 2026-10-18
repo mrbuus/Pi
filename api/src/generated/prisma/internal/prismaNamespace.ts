@@ -504,7 +504,12 @@ export const ModelName = {
   DraftBlock: 'DraftBlock',
   DraftEvent: 'DraftEvent',
   PlacementAttempt: 'PlacementAttempt',
-  PlacementTestConfig: 'PlacementTestConfig'
+  PlacementTestConfig: 'PlacementTestConfig',
+  MockExamEvent: 'MockExamEvent',
+  MockExamRegistration: 'MockExamRegistration',
+  ClassTestStatus: 'ClassTestStatus',
+  LessonPhoto: 'LessonPhoto',
+  LessonMakeup: 'LessonMakeup'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -520,7 +525,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "lessonPhoto" | "lessonMakeup"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -8516,6 +8521,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MockExamEvent: {
+      payload: Prisma.$MockExamEventPayload<ExtArgs>
+      fields: Prisma.MockExamEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MockExamEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MockExamEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>
+        }
+        findFirst: {
+          args: Prisma.MockExamEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MockExamEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>
+        }
+        findMany: {
+          args: Prisma.MockExamEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>[]
+        }
+        create: {
+          args: Prisma.MockExamEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>
+        }
+        createMany: {
+          args: Prisma.MockExamEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MockExamEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>[]
+        }
+        delete: {
+          args: Prisma.MockExamEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>
+        }
+        update: {
+          args: Prisma.MockExamEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.MockExamEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MockExamEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MockExamEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.MockExamEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamEventPayload>
+        }
+        aggregate: {
+          args: Prisma.MockExamEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMockExamEvent>
+        }
+        groupBy: {
+          args: Prisma.MockExamEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MockExamEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MockExamEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MockExamEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    MockExamRegistration: {
+      payload: Prisma.$MockExamRegistrationPayload<ExtArgs>
+      fields: Prisma.MockExamRegistrationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MockExamRegistrationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MockExamRegistrationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>
+        }
+        findFirst: {
+          args: Prisma.MockExamRegistrationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MockExamRegistrationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>
+        }
+        findMany: {
+          args: Prisma.MockExamRegistrationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>[]
+        }
+        create: {
+          args: Prisma.MockExamRegistrationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>
+        }
+        createMany: {
+          args: Prisma.MockExamRegistrationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MockExamRegistrationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>[]
+        }
+        delete: {
+          args: Prisma.MockExamRegistrationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>
+        }
+        update: {
+          args: Prisma.MockExamRegistrationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>
+        }
+        deleteMany: {
+          args: Prisma.MockExamRegistrationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MockExamRegistrationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MockExamRegistrationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>[]
+        }
+        upsert: {
+          args: Prisma.MockExamRegistrationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MockExamRegistrationPayload>
+        }
+        aggregate: {
+          args: Prisma.MockExamRegistrationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMockExamRegistration>
+        }
+        groupBy: {
+          args: Prisma.MockExamRegistrationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MockExamRegistrationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MockExamRegistrationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MockExamRegistrationCountAggregateOutputType> | number
+        }
+      }
+    }
+    ClassTestStatus: {
+      payload: Prisma.$ClassTestStatusPayload<ExtArgs>
+      fields: Prisma.ClassTestStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClassTestStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClassTestStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.ClassTestStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClassTestStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>
+        }
+        findMany: {
+          args: Prisma.ClassTestStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>[]
+        }
+        create: {
+          args: Prisma.ClassTestStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>
+        }
+        createMany: {
+          args: Prisma.ClassTestStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClassTestStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.ClassTestStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>
+        }
+        update: {
+          args: Prisma.ClassTestStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClassTestStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClassTestStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClassTestStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClassTestStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassTestStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.ClassTestStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClassTestStatus>
+        }
+        groupBy: {
+          args: Prisma.ClassTestStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassTestStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClassTestStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassTestStatusCountAggregateOutputType> | number
+        }
+      }
+    }
+    LessonPhoto: {
+      payload: Prisma.$LessonPhotoPayload<ExtArgs>
+      fields: Prisma.LessonPhotoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LessonPhotoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LessonPhotoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>
+        }
+        findFirst: {
+          args: Prisma.LessonPhotoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LessonPhotoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>
+        }
+        findMany: {
+          args: Prisma.LessonPhotoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>[]
+        }
+        create: {
+          args: Prisma.LessonPhotoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>
+        }
+        createMany: {
+          args: Prisma.LessonPhotoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LessonPhotoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>[]
+        }
+        delete: {
+          args: Prisma.LessonPhotoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>
+        }
+        update: {
+          args: Prisma.LessonPhotoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>
+        }
+        deleteMany: {
+          args: Prisma.LessonPhotoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LessonPhotoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LessonPhotoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>[]
+        }
+        upsert: {
+          args: Prisma.LessonPhotoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPhotoPayload>
+        }
+        aggregate: {
+          args: Prisma.LessonPhotoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLessonPhoto>
+        }
+        groupBy: {
+          args: Prisma.LessonPhotoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonPhotoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LessonPhotoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonPhotoCountAggregateOutputType> | number
+        }
+      }
+    }
+    LessonMakeup: {
+      payload: Prisma.$LessonMakeupPayload<ExtArgs>
+      fields: Prisma.LessonMakeupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LessonMakeupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LessonMakeupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>
+        }
+        findFirst: {
+          args: Prisma.LessonMakeupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LessonMakeupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>
+        }
+        findMany: {
+          args: Prisma.LessonMakeupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>[]
+        }
+        create: {
+          args: Prisma.LessonMakeupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>
+        }
+        createMany: {
+          args: Prisma.LessonMakeupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LessonMakeupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>[]
+        }
+        delete: {
+          args: Prisma.LessonMakeupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>
+        }
+        update: {
+          args: Prisma.LessonMakeupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>
+        }
+        deleteMany: {
+          args: Prisma.LessonMakeupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LessonMakeupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LessonMakeupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>[]
+        }
+        upsert: {
+          args: Prisma.LessonMakeupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonMakeupPayload>
+        }
+        aggregate: {
+          args: Prisma.LessonMakeupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLessonMakeup>
+        }
+        groupBy: {
+          args: Prisma.LessonMakeupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonMakeupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LessonMakeupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonMakeupCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -8715,9 +9090,11 @@ export const ClassroomScalarFieldEnum = {
   grade: 'grade',
   teacherId: 'teacherId',
   assistantTeacherId: 'assistantTeacherId',
+  riskCriteria: 'riskCriteria',
   archived: 'archived',
   createdAt: 'createdAt',
-  progressChapterId: 'progressChapterId'
+  progressChapterId: 'progressChapterId',
+  subject: 'subject'
 } as const
 
 export type ClassroomScalarFieldEnum = (typeof ClassroomScalarFieldEnum)[keyof typeof ClassroomScalarFieldEnum]
@@ -9673,7 +10050,10 @@ export const LessonTopicScalarFieldEnum = {
   title: 'title',
   chapterId: 'chapterId',
   createdById: 'createdById',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  testIds: 'testIds',
+  dismissMode: 'dismissMode',
+  photoStudentId: 'photoStudentId'
 } as const
 
 export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
@@ -10203,6 +10583,76 @@ export const PlacementTestConfigScalarFieldEnum = {
 export type PlacementTestConfigScalarFieldEnum = (typeof PlacementTestConfigScalarFieldEnum)[keyof typeof PlacementTestConfigScalarFieldEnum]
 
 
+export const MockExamEventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  testId: 'testId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  note: 'note',
+  published: 'published',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MockExamEventScalarFieldEnum = (typeof MockExamEventScalarFieldEnum)[keyof typeof MockExamEventScalarFieldEnum]
+
+
+export const MockExamRegistrationScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type MockExamRegistrationScalarFieldEnum = (typeof MockExamRegistrationScalarFieldEnum)[keyof typeof MockExamRegistrationScalarFieldEnum]
+
+
+export const ClassTestStatusScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  testId: 'testId',
+  status: 'status',
+  note: 'note',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClassTestStatusScalarFieldEnum = (typeof ClassTestStatusScalarFieldEnum)[keyof typeof ClassTestStatusScalarFieldEnum]
+
+
+export const LessonPhotoScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  studentId: 'studentId',
+  imageKeys: 'imageKeys',
+  testIds: 'testIds',
+  createdAt: 'createdAt'
+} as const
+
+export type LessonPhotoScalarFieldEnum = (typeof LessonPhotoScalarFieldEnum)[keyof typeof LessonPhotoScalarFieldEnum]
+
+
+export const LessonMakeupScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  studentId: 'studentId',
+  date: 'date',
+  imageKeys: 'imageKeys',
+  submittedAt: 'submittedAt',
+  confirmedById: 'confirmedById',
+  confirmedAt: 'confirmedAt',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonMakeupScalarFieldEnum = (typeof LessonMakeupScalarFieldEnum)[keyof typeof LessonMakeupScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -10419,6 +10869,34 @@ export type ListEnumClassroomTypeFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Subject'
+ */
+export type EnumSubjectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Subject'>
+    
+
+
+/**
+ * Reference to a field of type 'Subject[]'
+ */
+export type ListEnumSubjectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Subject[]'>
+    
+
+
+/**
  * Reference to a field of type 'AttendanceStatus'
  */
 export type EnumAttendanceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceStatus'>
@@ -10489,20 +10967,6 @@ export type ListEnumHomeworkMarkStatusFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
- * Reference to a field of type 'Subject'
- */
-export type EnumSubjectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Subject'>
-    
-
-
-/**
- * Reference to a field of type 'Subject[]'
- */
-export type ListEnumSubjectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Subject[]'>
-    
-
-
-/**
  * Reference to a field of type 'MistakeType'
  */
 export type EnumMistakeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MistakeType'>
@@ -10527,20 +10991,6 @@ export type EnumProblemFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'ProblemFormat[]'
  */
 export type ListEnumProblemFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProblemFormat[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -11320,6 +11770,11 @@ export type GlobalOmitConfig = {
   draftEvent?: Prisma.DraftEventOmit
   placementAttempt?: Prisma.PlacementAttemptOmit
   placementTestConfig?: Prisma.PlacementTestConfigOmit
+  mockExamEvent?: Prisma.MockExamEventOmit
+  mockExamRegistration?: Prisma.MockExamRegistrationOmit
+  classTestStatus?: Prisma.ClassTestStatusOmit
+  lessonPhoto?: Prisma.LessonPhotoOmit
+  lessonMakeup?: Prisma.LessonMakeupOmit
 }
 
 /* Types for Logging */

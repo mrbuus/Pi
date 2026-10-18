@@ -15,6 +15,8 @@ import {
 import { EVENING_MARKING_WINDOW_DAYS } from '../common/marking';
 import { isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '../generated/prisma/client';
+import { ROADMAP_BOOK_CODES, buildRoadmap } from './roadmap.logic';
 
 /**
  * Анги тухайн өдөр ямар тест хийснийг багш бүртгэдэг, сурагч түүнийгээ оройн
@@ -307,5 +309,139 @@ export class ClassSessionsService {
         };
       })
       .filter(Boolean);
+  }
+
+  // ---------- Замын зураг (эзэн 2026-10-18) ----------
+
+  /**
+   * Ангийн номын дарааллын замын зураг: 100V3 → 200V3. `date` өгвөл тэр өдрөөс
+   * ӨМНӨХ хичээлүүдэд төлөвлөсөн (хараахан батлаагүй) тестийн дараахаас санал болгоно.
+   */
+  async roadmap(classroomId: string, userId: string, role: Role, dateStr?: string) {
+    await this.assertClassAccess(classroomId, userId, role);
+    let before: Date | null = null;
+    if (dateStr) {
+      try {
+        before = parseDateOnly(dateStr);
+      } catch {
+        throw new BadRequestException('Огноо буруу байна');
+      }
+    }
+    const books = await this.prisma.book.findMany({
+      where: { code: { in: [...ROADMAP_BOOK_CODES] }, deletedAt: null },
+      select: { id: true, code: true, title: true },
+    });
+    const chapters = await this.prisma.chapter.findMany({
+      where: { bookId: { in: books.map((b) => b.id) }, deletedAt: null },
+      select: { id: true, bookId: true, order: true, title: true },
+    });
+    const tests = await this.prisma.test.findMany({
+      where: {
+        chapterId: { in: chapters.map((c) => c.id) },
+        deletedAt: null,
+        isDraft: false,
+      },
+      select: {
+        id: true,
+        chapterId: true,
+        title: true,
+        variantLabel: true,
+        problems: { orderBy: { order: 'asc' }, select: { problemId: true } },
+      },
+    });
+    const testIds = tests.map((t) => t.id);
+    const [sessions, statuses, plans] = await Promise.all([
+      this.prisma.classTestSession.findMany({
+        where: { classroomId, testId: { in: testIds } },
+        select: { testId: true, date: true, excludedProblemIds: true },
+      }),
+      this.prisma.classTestStatus.findMany({
+        where: { classroomId, status: 'REMOVED' },
+        select: { testId: true },
+      }),
+      before
+        ? this.prisma.lessonTopic.findMany({
+            where: {
+              schedule: { classroomId },
+              date: { lt: before, gte: addDateDays(before, -60) },
+              NOT: { testIds: { isEmpty: true } },
+            },
+            select: { testIds: true, date: true },
+          })
+        : Promise.resolve([] as { testIds: string[]; date: Date }[]),
+    ]);
+    return buildRoadmap({
+      books,
+      chapters: chapters.map((c) => ({ ...c, bookId: c.bookId ?? '' })),
+      tests: tests.map((t) => ({
+        id: t.id,
+        chapterId: t.chapterId ?? '',
+        title: t.title,
+        variantLabel: t.variantLabel,
+        problemIds: t.problems.map((p) => p.problemId),
+      })),
+      sessions: sessions.flatMap((s) =>
+        s.testId
+          ? [{ testId: s.testId, date: dateKey(s.date), excludedProblemIds: s.excludedProblemIds }]
+          : [],
+      ),
+      removedTestIds: statuses.map((s) => s.testId),
+      plans: plans.map((p) => ({ testIds: p.testIds, date: dateKey(p.date) })),
+    });
+  }
+
+  /**
+   * «Энэ ангиас хасах» — REMOVED; null бол буцаана (бүлгийн бүх хувилбараас).
+   * Зөвхөн Багш+, Админ (controller-ийн @Roles).
+   */
+  async setTestStatus(
+    classroomId: string,
+    testId: string,
+    status: 'REMOVED' | null,
+    userId: string,
+    role: Role,
+  ) {
+    await this.assertClassAccess(classroomId, userId, role);
+    const test = await this.prisma.test.findFirst({
+      where: { id: testId, deletedAt: null },
+      select: { id: true, chapterId: true },
+    });
+    if (!test) throw new NotFoundException('Тест олдсонгүй');
+    const siblings = test.chapterId
+      ? (
+          await this.prisma.test.findMany({
+            where: { chapterId: test.chapterId },
+            select: { id: true },
+          })
+        ).map((t) => t.id)
+      : [testId];
+    const before = await this.prisma.classTestStatus.findMany({
+      where: { classroomId, testId: { in: siblings } },
+    });
+    if (status === 'REMOVED') {
+      await this.prisma.classTestStatus.upsert({
+        where: { classroomId_testId: { classroomId, testId } },
+        create: { classroomId, testId, status, updatedById: userId },
+        update: { status, updatedById: userId },
+      });
+    } else {
+      await this.prisma.classTestStatus.deleteMany({
+        where: { classroomId, testId: { in: siblings } },
+      });
+    }
+    await this.prisma.auditLog.create({
+      data: {
+        actorId: userId,
+        actorRole: role,
+        action: status ? 'UPDATE' : 'DELETE',
+        entity: 'ClassTestStatus',
+        entityId: `${classroomId}:${testId}`,
+        before: before.length
+          ? (JSON.parse(JSON.stringify(before)) as Prisma.InputJsonValue)
+          : Prisma.JsonNull,
+        after: status ? { classroomId, testId, status } : Prisma.JsonNull,
+      },
+    });
+    return { classroomId, testId, status };
   }
 }

@@ -3,6 +3,21 @@
 Хоёулаа **үнэгүй**. Код бэлэн болсон (PR #9). Эзэн Google Cloud-оос 2 түлхүүр аваад Render-т оруулахад л ажиллана.
 Түлхүүр оруулаагүй үед «Google-ээр нэвтрэх» товч харагдахгүй, сайт хэвийн ажилласаар байна.
 
+**Аль Gmail-ээр?** Google Cloud төслийг сургалтын төвийн `shineireedui.pi@gmail.com`-оор үүсгэнэ
+(AWS-тэй ижил төвийн account, хувийн Gmail биш). Энэ нь зөвхөн «апп эзэмшигч». Сурагч, багш
+бүр өөрийн Gmail-ээ «Миний мэдээлэл → Google бүртгэл холбох»-оор Pi.mn account-тайгаа холбоно.
+
+**Локал (v2, Mac) туршилт:** 3-р алхамд мөн `http://localhost:3380/api/auth/google/callback`
+redirect URI нэмнэ. Дараа нь `api/.env` файлд (чатад бүү бич) гурван мөр нэмж сервер дахин асаана:
+
+```dotenv
+GOOGLE_CLIENT_ID="...apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="..."
+GOOGLE_REDIRECT_URI="http://localhost:3380/api/auth/google/callback"
+```
+
+Шалгах: `curl -s http://localhost:3380/api/auth/google/config` → `{"enabled":true}`.
+
 ---
 
 ## А. Google-ээр нэвтрэх (≈10 минут)

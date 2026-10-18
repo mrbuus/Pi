@@ -5,6 +5,8 @@ export interface NavLink {
   href: string;
   label: string;
   icon: IconName;
+  /** Мөрийн баруун талын тоо — "makeup" = components/makeup/MakeupNavBadge (нөхөөгүй хичээл) */
+  badge?: "makeup";
 }
 
 export type GroupKey = "learn" | "class" | "finance" | "admin" | "internal" | "personal";
@@ -54,8 +56,8 @@ export const HOME: Record<string, NavLink> = {
 };
 
 // Бодит маршрутуудыг эрх, чиг үүргээр бүлэглэсэн бүрэн цэс.
-// Ажилтны «Анги» хэсэг: Хуваарь нь Өдрийн хичээл, Тарах цаг, Хуваарийн цаг,
-// Төлөвлөгч, Дүн шинжилгээг нэгтгэнэ (nav/ClassHubTabs.tsx, эзэн 2026-10-08).
+// Ажилтны «Хуваарь» хэсэг: Хуваарь + Төлөвлөгч табууд (nav/ClassHubTabs.tsx;
+// эзэн 2026-10-08, 2026-10-18-нд бусад табыг хассан).
 const NAV_BY_ROLE: Record<string, NavLink[]> = {
   GROUP_TEACHER: [
     HOME.GROUP_TEACHER,
@@ -67,6 +69,8 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     HOME.STUDENT,
     { href: "/app/results-ranking", label: "Миний дүн, байр", icon: "chart" },
     { href: "/app/lesson-flow/my", label: "Өдрийн хичээл", icon: "calendar" },
+    // Тасалсан/хоцорсон өдрийн хичээлээ нөхөх + онолын зураг (эзэн 2026-10-18)
+    { href: "/app/makeup", label: "Нөхөх хичээл", icon: "list-checks", badge: "makeup" },
     { href: "/app/study", label: "Суралцах", icon: "book-open" },
     { href: "/app/study/history", label: "Давтлагын түүх", icon: "clock" },
     { href: "/app/learn", label: "Хичээл үзэх", icon: "book-open" },
@@ -98,6 +102,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/payments", label: "Төлбөр", icon: "credit-card" },
     // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
     { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
+    { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
@@ -119,6 +124,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
     { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
+    { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
@@ -164,6 +170,7 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/dismissal": "class",
   "/app/lesson-flow": "class",
   "/app/lesson-flow/my": "class",
+  "/app/makeup": "class",
   "/app/admin/classrooms": "admin",
   // «Анги» самбар (эзэн 2026-10-13); бүртгэлийн удирдлага /app/admin/classrooms хэвээр
   "/app/classes": "class",
@@ -186,6 +193,7 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/planner": "class",
   "/app/teacher-hours": "class",
   "/app/admin/leads": "admin",
+  "/app/admin/sorils": "admin",
   "/app/admin/enrollment": "admin",
   "/app/admin/reconcile": "finance",
   "/app/admin/theory": "internal",
@@ -265,6 +273,9 @@ export interface RoleNav {
 }
 
 const GROUP_ORDER: GroupKey[] = ["learn", "class", "finance", "admin", "internal", "personal"];
+// Ажилтанд «Анги» хамгийн дээр (эзэн 2026-10-18: «Анги нь Сургалтаас дээр байх»)
+const STAFF_GROUP_ORDER: GroupKey[] = ["class", "learn", "finance", "admin", "internal", "personal"];
+const STAFF_ROLES = new Set(["ADMIN", "TEACHER_PLUS", "TEACHER"]);
 
 export function getRoleNav(role: string | null): RoleNav {
   const items = (role ? NAV_BY_ROLE[role] ?? [] : []).filter((i) => SMS_ENABLED || i.href !== "/app/sms");
@@ -286,7 +297,8 @@ export function getRoleNav(role: string | null): RoleNav {
   // Миний мэдээлэл, тусламж, мэдэгдэл… баруун дээд булангийн хэрэглэгчийн цэст
   // (nav/UserMenu.tsx) шилжсэн — зүүн цэсэнд давхардуулахгүй (эзэн 2026-10-13).
 
-  const groups = GROUP_ORDER.filter((key) => buckets[key].length > 0).map((key) => ({
+  const order = role && STAFF_ROLES.has(role) ? STAFF_GROUP_ORDER : GROUP_ORDER;
+  const groups = order.filter((key) => buckets[key].length > 0).map((key) => ({
     key,
     label: GROUP_LABEL[key],
     icon: GROUP_ICON[key],

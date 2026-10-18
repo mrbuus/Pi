@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Video, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
@@ -7,10 +7,18 @@ import LessonVideoPlayer, { type LessonVideo } from "./LessonVideoPlayer";
 type VideoSummary = { id: string; title: string; duration: number | null };
 export default function ProblemVideoDisclosure({
   problemId,
+  autoOpen = false,
+  onClose,
 }: {
   problemId: string;
+  /**
+   * Бодлогын сан: гох (дүрс товч) нь гадна талд, энэ компонент зөвхөн нээлттэй
+   * самбарыг харуулна — гурван дүрс нэг мөрөнд хамт үлдэнэ (эзний хүсэлт 2026-10-18)
+   */
+  autoOpen?: boolean;
+  onClose?: () => void;
 }) {
-  const [open, setOpen] = useState(false),
+  const [open, setOpen] = useState(autoOpen),
     [rows, setRows] = useState<VideoSummary[]>([]),
     [selected, setSelected] = useState<LessonVideo | null>(null),
     [busy, setBusy] = useState(false),
@@ -31,6 +39,11 @@ export default function ProblemVideoDisclosure({
       setBusy(false);
     }
   }
+  // autoOpen үед жагсаалтыг mount-ийн дараа ачаална (render дотор state шууд өөрчлөхгүй)
+  useEffect(() => {
+    if (autoOpen) void Promise.resolve().then(reveal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   async function select(id: string) {
     setBusy(true);
     setError("");
@@ -62,6 +75,7 @@ export default function ProblemVideoDisclosure({
               onClick={() => {
                 setOpen(false);
                 setSelected(null);
+                onClose?.();
               }}
             >
               <X aria-hidden /> Бодлогод буцах

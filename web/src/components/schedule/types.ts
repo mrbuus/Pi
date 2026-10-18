@@ -277,7 +277,7 @@ export type RoomShapeKind =
   | "pentagon"
   | "diamond"
   | "hexagon"
-  | "star"
+  | "parallelogram"
   | "online";
 
 // capacity: танхимын суудлын тоо (эзэн 2026-10-08). 
@@ -296,7 +296,7 @@ export const ROOMS: readonly {
   { value: "405", branch: "Баруун 4", shape: "rect", capacity: 12 },
   // Эзний хүсэлт (2026-10-08): Зүүн 4-ийн танхимд ч өөрийн дүрс.
   { value: "301", branch: "Зүүн 4", shape: "hexagon", capacity: 28 },
-  { value: "302", branch: "Зүүн 4", shape: "star", capacity: 32 },
+  { value: "302", branch: "Зүүн 4", shape: "parallelogram", capacity: 32 },
   { value: "Онлайн", branch: "Зайнаас", shape: "online" },
 ] as const;
 

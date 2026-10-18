@@ -29,6 +29,11 @@ describe('file authorization boundaries', () => {
       'userPass',
       'studentProfile',
       'placementAttempt',
+      'lessonMakeup',
+      'lessonPhoto',
+      'classroom',
+      'classSchedule',
+      'lessonStaffing',
     ])
       db[model] = {
         findUnique: jest.fn(async () => null),
@@ -37,6 +42,70 @@ describe('file authorization boundaries', () => {
         count: jest.fn(async () => 0),
       };
     service = new FileAuthorizationService(db as PrismaService);
+  });
+  const day = new Date('2026-10-10T00:00:00Z');
+  /** Мөрүүд: [uploaderId, kind] — mock нь where.studentId-аар шүүнэ (жинхэнэ query шиг) */
+  function refs(makeup: string[], photo: string[]) {
+    db.lessonMakeup.findMany.mockImplementation(async (a: any) =>
+      makeup.filter((u) => u === a.where.studentId).map(() => ({ classroomId: 'c1', date: day })),
+    );
+    db.lessonPhoto.findMany.mockImplementation(async (a: any) =>
+      photo.filter((u) => u === a.where.studentId).map(() => ({ classroomId: 'c1', date: day })),
+    );
+  }
+  it('make-up note photos: owner student and that class/day staff only — private precedence', async () => {
+    db.storedFile.findUnique.mockResolvedValue({ ownerId: 'owner' });
+    refs(['owner'], ['owner']); // also copied into a theory photo — still private
+    db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+    db.classroom.findUnique.mockResolvedValue({ id: 'c1', teacherId: 'ct', assistantTeacherId: 'at' });
+    const ok = (id: string, role: string) => service.allowed({ id, role } as never, 'm.jpg');
+    await expect(ok('owner', 'STUDENT')).resolves.toBe(true);
+    await expect(ok('mate', 'STUDENT')).resolves.toBe(false);
+    await expect(ok('parent', 'PARENT')).resolves.toBe(false);
+    await expect(ok('ct', 'TEACHER')).resolves.toBe(true);
+    await expect(ok('at', 'TEACHER')).resolves.toBe(true);
+    await expect(ok('other', 'TEACHER')).resolves.toBe(false);
+    await expect(ok('plus', 'TEACHER_PLUS')).resolves.toBe(true);
+    await expect(ok('admin', 'ADMIN')).resolves.toBe(true);
+  });
+  it('theory photos: staff of that class/day and that class students, not outsiders', async () => {
+    db.storedFile.findUnique.mockResolvedValue({ ownerId: 'up' });
+    refs([], ['up']);
+    db.classroom.findUnique.mockResolvedValue({ id: 'c1', teacherId: 'ct', assistantTeacherId: null });
+    db.enrollment.findFirst.mockImplementation(async (args: any) =>
+      args.where.studentId === 'mate' ? { id: 'e' } : null,
+    );
+    db.lessonStaffing.findMany.mockImplementation(async (args: any) =>
+      args.where.OR[0].leadTeacherId === 'sub' ? [{ date: day }] : [],
+    );
+    const ok = (id: string, role: string) => service.allowed({ id, role } as never, 't.jpg');
+    await expect(ok('mate', 'STUDENT')).resolves.toBe(true);
+    await expect(ok('outsider', 'STUDENT')).resolves.toBe(false);
+    await expect(ok('ct', 'TEACHER')).resolves.toBe(true);
+    await expect(ok('sub', 'TEACHER')).resolves.toBe(true);
+    await expect(ok('other', 'TEACHER')).resolves.toBe(false);
+    await expect(ok('buyer', 'BUYER')).resolves.toBe(false);
+  });
+  it('a foreign key attached to someone else\'s make-up/theory photo grants nothing', async () => {
+    // victim's file; attacker listed it in their own LessonMakeup and LessonPhoto rows
+    db.storedFile.findUnique.mockResolvedValue({ ownerId: 'victim' });
+    refs(['attacker'], ['attacker']);
+    db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+    db.classroom.findUnique.mockResolvedValue({ id: 'c1', teacherId: 'ct', assistantTeacherId: null });
+    await expect(service.allowed({ id: 'attacker', role: 'STUDENT' } as never, 'v.jpg')).resolves.toBe(false);
+    await expect(service.allowed({ id: 'mate', role: 'STUDENT' } as never, 'v.jpg')).resolves.toBe(false);
+    expect(db.lessonMakeup.findMany.mock.calls[0][0].where.studentId).toBe('victim');
+    // legacy ownerless files are never granted through these references
+    db.storedFile.findUnique.mockResolvedValue({ ownerId: null });
+    refs(['attacker'], ['attacker']);
+    await expect(service.allowed({ id: 'attacker', role: 'STUDENT' } as never, 'v.jpg')).resolves.toBe(false);
+  });
+  it('a private homework photo stays private even if its owner lists it as a theory photo', async () => {
+    db.storedFile.findUnique.mockResolvedValue({ ownerId: 'up' });
+    refs([], ['up']);
+    db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+    db.submission.findFirst.mockImplementation(async (a: any) => (a.where.AND ? null : { id: 'sub' }));
+    await expect(service.allowed({ id: 'mate', role: 'STUDENT' } as never, 'hw.jpg')).resolves.toBe(false);
   });
   it('lets centre teachers see placement-test work photos, not students', async () => {
     db.placementAttempt.count.mockResolvedValue(1);

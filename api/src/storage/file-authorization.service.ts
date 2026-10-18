@@ -7,6 +7,7 @@ import {
   canAccessVideoChapter,
   hasCoveringPass,
 } from '../common/access';
+import { canStaffClassDay } from '../lesson-day/staff-access';
 export interface FileActor {
   id: string;
   role: Role;
@@ -43,6 +44,56 @@ export class FileAuthorizationService {
       select: { ownerId: true },
     });
     if (stored?.ownerId === actor.id) return true; // own draft uploads; ownership is never guessed for legacy rows
+    // Нөхөх хичээлийн тэмдэглэл (LessonMakeup) ба онолын зураг (LessonPhoto), эзэн 2026-10-18.
+    // Лавлагаа нь зөвхөн файлын эзэн (StoredFile.ownerId) = илгээгч (studentId) үед хүчинтэй —
+    // бусдын түлхүүрийг өөрийн мөрөнд хавсаргаад уншиж чадахгүй. Эрх олгох нь доор,
+    // хувийн илгээлт/тэмдэглэл/санал хүсэлтийн ХОРИГЛОЛТЫН ДАРАА шалгагдана.
+    const uploader = stored?.ownerId ?? null;
+    const [makeupRefs, theoryPhotoRefs] = uploader
+      ? await Promise.all([
+          this.prisma.lessonMakeup.findMany({
+            where: { imageKeys: { has: key }, studentId: uploader },
+            select: { classroomId: true, date: true },
+          }),
+          this.prisma.lessonPhoto.findMany({
+            where: { imageKeys: { has: key }, studentId: uploader },
+            select: { classroomId: true, date: true },
+          }),
+        ])
+      : [[], []];
+    // Нөхөх тэмдэглэл ХУВИЙН: эзэн (дээр) ба тэр анги/өдрийн ажилтнаас бусдад хаалттай.
+    if (makeupRefs.length && !staff(actor.role)) return false;
+    const lessonDayGrant = async (): Promise<boolean> => {
+      const who = { userId: actor.id, role: actor.role };
+      if (staff(actor.role)) {
+        for (const ref of [...makeupRefs, ...theoryPhotoRefs])
+          if (await canStaffClassDay(this.prisma, who, ref.classroomId, ref.date))
+            return true;
+        return false;
+      }
+      if (actor.role !== Role.STUDENT) return false;
+      for (const ref of theoryPhotoRefs) {
+        const end = new Date(
+          `${ref.date.toISOString().slice(0, 10)}T00:00:00+08:00`,
+        );
+        end.setTime(end.getTime() + 86400000);
+        if (
+          await this.prisma.enrollment.findFirst({
+            where: {
+              classroomId: ref.classroomId,
+              studentId: actor.id,
+              OR: [
+                { leftAt: null, classroom: { archived: false } },
+                { joinedAt: { lt: end }, leftAt: { gte: end } },
+              ],
+            },
+            select: { id: true },
+          })
+        )
+          return true;
+      }
+      return false;
+    };
     const lessonReceipts = await this.prisma.lessonReceipt.findMany({
       where: { imageKeys: { has: key } },
       select: {
@@ -143,6 +194,13 @@ export class FileAuthorizationService {
     // A private photo cannot gain public/content access merely by being copied into another reference.
     if (privateSubmission || privateRevision || privateFeedback) return false;
     if (lessonGrant) return true;
+    if (
+      (makeupRefs.length || theoryPhotoRefs.length) &&
+      (await lessonDayGrant())
+    )
+      return true;
+    // Нөхөх тэмдэглэлийг өөр лавлагаагаар (агуулга, даалгавар…) ч нээхгүй.
+    if (makeupRefs.length) return false;
 
     const parentChildren =
       actor.role === Role.PARENT

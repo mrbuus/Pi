@@ -65,9 +65,12 @@ export default function RootLayout({
     // <html>-д "js" класс, data-theme, color-scheme нэмдэг тул сервер болон
     // клиентийн атрибут санаатайгаар зөрнө. Үүнгүйгээр React консол дээр
     // хуудас бүр дээр hydration mismatch алдаа хэвлэдэг байв.
+    // data-scroll-behavior: хуудас солигдоход Next зөөлөн гүйлгээг түр унтрааж шууд
+    // дээш үсэрнэ (Next 16 дээр анхдагчаар хийхээ больсон — version-16.md).
     <html
       lang="mn"
       className="h-full antialiased"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>

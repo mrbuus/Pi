@@ -14,18 +14,19 @@ import {
   enrolledOn,
   normalizeNote,
   ubDayBounds,
-  type SnapshotEntry,
 } from './lesson-records.logic';
 
 export type Actor = { userId: string; role: Role };
 
 const STAFF: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
+/** Батлах/буцаах эрх (эзэн 2026-10-18) */
+const CONFIRMERS: Role[] = [Role.ADMIN, Role.TEACHER_PLUS];
 
 /**
  * Батлагдсан хичээлийн түүх (эзэн 2026-10-08).
  *
- * - Батлах: ADMIN/TEACHER_PLUS — бүх анги; TEACHER — зөвхөн тухайн өдрийн
- *   ахлах/туслах багш эсвэл хуваарийн/ангийн багш байгаа хичээл.
+ * - Батлах/буцаах: зөвхөн ADMIN/TEACHER_PLUS (эзэн 2026-10-18) — батлахдаа
+ *   ангийн бодитоор хийсэн тест, хассан бодлогыг хамт бичнэ (ClassTestSession).
  * - Тайлбар: бүх ажилтан бичнэ; сурагч/эцэг эх ХЭЗЭЭ Ч авахгүй (энд л уншина).
  * - Өөрчлөлт бүр AuditLog-д (schedule.service-ийн recordAudit загвар).
  */
@@ -103,32 +104,78 @@ export class LessonRecordsService {
     return { schedule, entry };
   }
 
-  private assertCanConfirm(
+  private assertCanConfirm(actor: Actor) {
+    if (!CONFIRMERS.includes(actor.role))
+      throw new ForbiddenException('Хичээлийг Багш+ батална.');
+  }
+
+  /**
+   * Тухайн өдрийн ангийн сангийн тестийн бүртгэлийг `tests`-ээр солино:
+   * жагсаалтад байгааг upsert (хассан бодлоготой), байхгүйг устгана. Гараар
+   * бичсэн (testId-гүй) бүртгэлд хүрэхгүй.
+   */
+  private async syncTests(
+    classroomId: string,
+    date: Date,
+    tests: { testId: string; excludedProblemIds: string[] }[],
     actor: Actor,
-    schedule: { teacherId: string | null; classroom: { teacherId: string | null } },
-    entry: SnapshotEntry,
   ) {
-    this.assertStaff(actor);
-    if (actor.role !== Role.TEACHER) return;
-    const mine = [
-      entry.leadTeacher?.id,
-      entry.assistantTeacher?.id,
-      schedule.teacherId ?? schedule.classroom.teacherId,
-    ].includes(actor.userId);
-    if (!mine)
-      throw new ForbiddenException(
-        'Зөвхөн энэ өдөр орсон багш (ахлах/туслах) батална.',
-      );
+    const byId = new Map<string, string[]>();
+    for (const t of tests) byId.set(t.testId, [...new Set(t.excludedProblemIds ?? [])]);
+    const ids = [...byId.keys()];
+    const rows = ids.length
+      ? await this.prisma.test.findMany({
+          where: { id: { in: ids }, deletedAt: null },
+          select: { id: true, problems: { select: { problemId: true } } },
+        })
+      : [];
+    if (rows.length !== ids.length)
+      throw new BadRequestException('Сонгосон тест олдсонгүй.');
+    for (const r of rows) {
+      const own = new Set(r.problems.map((p) => p.problemId));
+      if (byId.get(r.id)!.some((p) => !own.has(p)))
+        throw new BadRequestException('Хассан бодлого энэ тестэд алга.');
+    }
+    const before = await this.prisma.classTestSession.findMany({
+      where: { classroomId, date, testId: { not: null } },
+      select: { id: true, testId: true, excludedProblemIds: true },
+    });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.classTestSession.deleteMany({
+        where: { classroomId, date, testId: { not: null, notIn: ids } },
+      });
+      for (const testId of ids)
+        await tx.classTestSession.upsert({
+          where: { classroomId_testId_date: { classroomId, testId, date } },
+          create: {
+            classroomId,
+            testId,
+            date,
+            createdById: actor.userId,
+            excludedProblemIds: byId.get(testId)!,
+          },
+          update: { excludedProblemIds: byId.get(testId)! },
+        });
+    });
+    await this.audit(actor, 'UPDATE', 'ClassTestSession', `${classroomId}:${dateKey(date)}`, before, {
+      tests: ids.map((id) => ({ testId: id, excludedProblemIds: byId.get(id) })),
+    });
   }
 
   // ---------- Батлах ----------
 
-  async confirm(actor: Actor, scheduleId: string, dateStr: string) {
+  async confirm(
+    actor: Actor,
+    scheduleId: string,
+    dateStr: string,
+    tests?: { testId: string; excludedProblemIds: string[] }[],
+  ) {
+    this.assertCanConfirm(actor);
     const { date, key } = this.parseDate(dateStr);
     if (date > todayUB())
       throw new BadRequestException('Ирээдүйн хичээлийг батлах боломжгүй.');
-    const { schedule, entry } = await this.resolveEntry(scheduleId, key);
-    this.assertCanConfirm(actor, schedule, entry);
+    const { entry } = await this.resolveEntry(scheduleId, key);
+    if (tests) await this.syncTests(entry.classroomId, date, tests, actor);
 
     const { start, end } = ubDayBounds(key);
     const [enrollments, attendance, sessions] = await Promise.all([
@@ -246,17 +293,7 @@ export class LessonRecordsService {
       include: { students: true },
     });
     if (!row) throw new NotFoundException('Батлагдсан бичлэг олдсонгүй.');
-    this.assertStaff(actor);
-    // Энгийн багш: зөвхөн өөрийн баталсан эсвэл тэр өдөр орсон хичээлээ буцаана.
-    if (
-      actor.role === Role.TEACHER &&
-      ![row.confirmedById, row.leadTeacherId, row.assistantTeacherId].includes(
-        actor.userId,
-      )
-    )
-      throw new ForbiddenException(
-        'Зөвхөн энэ өдөр орсон багш (ахлах/туслах) батламжийг буцаана.',
-      );
+    this.assertCanConfirm(actor);
     await this.prisma.lessonRecord.delete({ where: { id: row.id } });
     await this.audit(actor, 'REVERSE', 'LessonRecord', row.id, row, null);
     return { scheduleId, date: key, confirmed: false };

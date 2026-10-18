@@ -1,51 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Palmtree, Plus } from "lucide-react";
-import { api, getRole } from "@/lib/api";
+import { useEffect, useMemo, useState } from "react";
+import { Building2, CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Palmtree } from "lucide-react";
+import { api } from "@/lib/api";
+import { cn } from "@/lib/cn";
 import { useSection } from "@/components/students/progress/useSection";
-import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
-import { getClassroomColor } from "@/lib/classroomColor";
-import RoomShape from "./RoomShape";
+import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
+import InfoHint from "@/components/ui/InfoHint";
+import ClassroomLessonHistory from "@/components/lesson-records/ClassroomLessonHistory";
 import PublishDayButton from "./PublishDayButton";
 import EntryActionPanel from "./EntryActionPanel";
-import DayRosterPanel, { type RosterChip } from "./roster/DayRosterPanel";
-import LessonRowActions from "@/components/lesson-records/LessonRowActions";
-import ClassroomLessonHistory from "@/components/lesson-records/ClassroomLessonHistory";
-import type { LessonDay } from "@/components/lesson-records/types";
-import {
-  addDaysToKey,
-  formatMinutes,
-  roomOrderOf,
-  todayUBKey,
-  WEEKDAY_LABELS,
-  type WeekEntry,
-  type WeekResponse,
-} from "./types";
+import RoomBadge from "./RoomBadge";
+import { addDaysToKey, formatMinutes, roomOrderOf, todayUBKey, WEEKDAY_LABELS, WEEKDAY_SHORT, type WeekEntry } from "./types";
+import LessonRow, { type TeacherOption } from "./day/LessonRow";
+import PlanDialog from "./day/PlanDialog";
+import ConfirmDialog from "./day/ConfirmDialog";
+import DayTeachers, { type TeacherLoad } from "./day/DayTeachers";
+import ExportImage from "./day/ExportImage";
+import { Excluded } from "./day/RoadMap";
+import { branchOf, type DayEntry, type DayPlanResponse } from "./day/types";
 
 /**
- * ӨДРИЙН ХУВААРЬ (эзний шийдвэр 2026-10-08).
+ * ӨДРИЙН ХУВААРЬ (эзэн 2026-10-08, дахин бүтээсэн 2026-10-18).
  *
- * Төв хичээлийн төлөвлөгөөгөө өдөр өдрөөр гаргадаг: маргаашийн хуваарийг
- * өнөө орой эсвэл маргааш өглөө, хааяа 2–3 хоногийн өмнө. Тиймээс 7 баганат
- * долоо хоногийн самбарын оронд НЭГ өдрийг томоор харуулна: цаг бүрд аль анги,
- * аль танхимд, ямар онол, хэн багш орох — төвийн өдрийн Excel хүснэгтийн
- * дараалал (Цаг | Анги | Онол | Багш). Мөр дээр дарахад тухайн өдрийн сэдэв, танхим,
- * цагийг өөрчлөх самбар нээгдэнэ (өмнөх функц хэвээр).
+ * Эзний өдрийн Excel: мөр бүр = цаг, танхим, анги, тест (өмнөх → өнөөдөр),
+ * ахлах, туслах. Багш+ маргаашийн төлөвлөгөөг өмнөх орой тавьдаг тул анхдагч
+ * нь үдээс хойш маргааш. Мөр дээр дарахад төлөвлөгөөний цонх (Багш — зөвхөн
+ * харна). Танхим/цаг/зөөх/цуцлах нь «⋯» дотор (EntryActionPanel).
  *
- * Өгөгдөл: GET /schedule/week?start=<Даваа> — сонгосон өдрийн 7 хоногийг авна.
+ * Өгөгдөл: GET /schedule/day-plan?date= — нэг дуудлага.
  */
-
-function mondayOf(dateKey: string): string {
-  const d = new Date(`${dateKey}T00:00:00.000Z`);
-  const weekday = d.getUTCDay();
-  return addDaysToKey(dateKey, weekday === 0 ? -6 : 1 - weekday);
-}
-
-function shortDate(dateKey: string): string {
-  const [, month, day] = dateKey.split("-");
-  return `${month}.${day}`;
-}
 
 function weekdayOf(dateKey: string): number {
   return new Date(`${dateKey}T00:00:00.000Z`).getUTCDay();
@@ -58,117 +42,53 @@ function defaultDay(): string {
   return hourUB >= 12 ? addDaysToKey(today, 1) : today;
 }
 
+const BRANCHES = ["Баруун 4", "Зүүн 4", "Бусад"] as const;
+
 export default function WeekBuilder() {
-  const today = todayUBKey();
+  const [today] = useState(todayUBKey);
   const [day, setDay] = useState(defaultDay);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [planOf, setPlanOf] = useState<string | null>(null);
+  const [confirmOf, setConfirmOf] = useState<string | null>(null);
+  const [moreOf, setMoreOf] = useState<string | null>(null);
+  const [historyOf, setHistoryOf] = useState<{ id: string; name: string } | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [historyOf, setHistoryOf] = useState<{ id: string; name: string } | null>(null);
-  // Чип дээр дарж «сонгосон» багш — хоосон Ахлах/Туслах нүдэнд нэг товшилтоор оноох
   const [armedId, setArmedId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!armedId) return;
     const onKey = (ev: KeyboardEvent) => ev.key === "Escape" && setArmedId(null);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [armedId]);
-  // Энгийн багш багш оноохгүй (зөвхөн нэрийг харна) — /schedule/teachers нь Багш+/Админд л.
-  const role = useSyncExternalStore(
-    () => () => {},
-    getRole,
-    () => null,
-  );
-  const canAssign = role === "ADMIN" || role === "TEACHER_PLUS";
-  const { data: teacherRows } = useSection<
-    { id: string; firstName: string; lastName: string; displayName?: string; role?: string }[]
-  >(canAssign ? "/schedule/teachers" : null, []);
-  const teachers = useMemo(
-    () =>
-      teacherRows
-        .map((t) => ({ id: t.id, name: t.displayName ?? t.firstName }))
-        .sort((a, b) => a.name.localeCompare(b.name, "mn")),
-    [teacherRows],
-  );
 
-  const {
-    data,
-    status,
-    error,
-    reload: load,
-    setData,
-  } = useSection<WeekResponse | null>(`/schedule/week?start=${mondayOf(day)}`, null);
-  const loading = status === "loading";
-
-  // Батламж, багшийн тайлбар, тарсан цаг — зөвхөн ажилтанд (сурагчид хэзээ ч ирэхгүй)
-  const { data: lessonDay, setData: setLessonDay } = useSection<LessonDay | null>(
-    `/lesson-records/day?date=${day}`,
+  const { data, status, error, reload, setData } = useSection<DayPlanResponse | null>(
+    `/schedule/day-plan?date=${day}`,
     null,
   );
-  const recordOf = (id: string) => lessonDay?.records.find((r) => r.scheduleId === id) ?? null;
-  const noteOf = (id: string) => lessonDay?.notes.find((n) => n.scheduleId === id) ?? null;
-  const dismissalOf = (cid: string) => lessonDay?.dismissals.find((d) => d.classroomId === cid)?.approximateAt ?? null;
-  const patchDay = (fn: (d: LessonDay) => LessonDay) =>
-    setLessonDay((prev) => fn(prev ?? { date: day, records: [], notes: [], dismissals: [] }));
+  const canPlan = !!data?.viewer.canPlan;
+  const canConfirm = !!data?.viewer.canConfirm;
+  const { data: teacherRows } = useSection<{ id: string; displayName?: string; firstName: string; role?: string }[]>(
+    canPlan ? "/schedule/teachers" : null,
+    [],
+  );
+  const rosterTeachers = useMemo(() => data?.roster?.teachers ?? [], [data]);
+  const working = useMemo(() => new Set(rosterTeachers.map((t) => t.id)), [rosterTeachers]);
+  const isPlus = (role?: string | null) => role === "TEACHER_PLUS" || role === "ADMIN";
+  // Сонголт: хуваарьт ордог багш + ажлын хүснэгтэд байгаа бүх багш
+  const teachers: TeacherOption[] = useMemo(() => {
+    const map = new Map<string, TeacherOption>();
+    for (const t of teacherRows) map.set(t.id, { id: t.id, name: t.displayName ?? t.firstName, plus: isPlus(t.role) });
+    for (const t of rosterTeachers) if (!map.has(t.id)) map.set(t.id, { id: t.id, name: t.name, plus: isPlus(t.role) });
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "mn"));
+  }, [teacherRows, rosterTeachers]);
+  const rosterOrder = useMemo(() => new Map(rosterTeachers.map((t, i) => [t.id, i])), [rosterTeachers]);
+  const entries = useMemo(() => data?.entries ?? [], [data]);
+  const tests = data?.tests ?? {};
 
-  const dayData = data?.days.find((d) => d.date === day) ?? null;
-  // Тухайн өдөр амрах ангиуд (ангийн тусгай өдөр) — гарчгаар бүлэглэнэ
-  const resting = useMemo(() => {
-    const rows =
-      (dayData as { restingClasses?: { classroomName: string; title: string }[] } | null)?.restingClasses ?? [];
-    const byTitle = new Map<string, string[]>();
-    for (const r of rows) {
-      const names = byTitle.get(r.title) ?? [];
-      names.push(r.classroomName.replace(/\s*\([^)]*\)$/, ""));
-      byTitle.set(r.title, names);
-    }
-    return [...byTitle.entries()];
-  }, [dayData]);
-  const rosterDay = data?.teacherRoster.find((r) => r.date === day) ?? null;
-
-  // Багш бүр энэ өдөр хэдэн хичээлд ахлах/туслахаар оноогдсон
-  const { chips, extraChips, workingIds } = useMemo(() => {
-    const lead = new Map<string, number>();
-    const asst = new Map<string, number>();
-    const assignedNames = new Map<string, string>();
-    for (const e of dayData?.entries ?? []) {
-      if (e.leadTeacher) {
-        lead.set(e.leadTeacher.id, (lead.get(e.leadTeacher.id) ?? 0) + 1);
-        assignedNames.set(e.leadTeacher.id, e.leadTeacher.name);
-      }
-      if (e.assistantTeacher) {
-        asst.set(e.assistantTeacher.id, (asst.get(e.assistantTeacher.id) ?? 0) + 1);
-        assignedNames.set(e.assistantTeacher.id, e.assistantTeacher.name);
-      }
-    }
-    const working = rosterDay?.teachers ?? [];
-    const ids = new Set(working.map((t) => t.id));
-    const chip = (id: string, name: string, role?: string): RosterChip => ({
-      id,
-      name,
-      plus: role ? role === "TEACHER_PLUS" || role === "ADMIN" : null,
-      lead: lead.get(id) ?? 0,
-      assistant: asst.get(id) ?? 0,
-    });
-    return {
-      workingIds: ids,
-      chips: working.map((t) => chip(t.id, t.name, t.role)),
-      extraChips: [...assignedNames.entries()]
-        .filter(([id]) => !ids.has(id))
-        .map(([id, name]) => chip(id, name, teacherRows.find((t) => t.id === id)?.role)),
-    };
-  }, [dayData, rosterDay, teacherRows]);
-  const armedName = armedId
-    ? (chips.find((c) => c.id === armedId)?.name ?? teachers.find((t) => t.id === armedId)?.name ?? null)
-    : null;
-
-  // Цагийн бүсээр бүлэглэж, бүс дотор танхимын тогтмол дарааллаар.
-  // Салбараар (Баруун 4 дээр, Зүүн 4 доор — эзэн 2026-10-08), дотор нь цагийн
-  // бүсээр, бүс дотор танхимын тогтмол дарааллаар.
-  // Нэг багш ДАВХАР цагт хоёр ангид оноогдсон эсэх (эзэн 2026-10-11): цаг давхцвал
-  // тухайн багшийн сонголт улаанаар анхааруулна.
+  // Нэг багш ДАВХАР цагт хоёр ангид — анхааруулга
   const clashes = useMemo(() => {
-    const list = (dayData?.entries ?? []).flatMap((e) =>
+    const list = entries.flatMap((e) =>
       [e.leadTeacher?.id, e.assistantTeacher?.id]
         .filter((id): id is string => !!id)
         .map((id) => ({ id, start: e.startMinute, end: e.endMinute, sid: e.scheduleId })),
@@ -178,54 +98,84 @@ export default function WeekBuilder() {
       for (const b of list)
         if (a !== b && a.id === b.id && a.sid !== b.sid && a.start < b.end && b.start < a.end) out.add(`${a.sid}|${a.id}`);
     return out;
-  }, [dayData]);
+  }, [entries]);
 
-  const bands = useMemo(() => {
-    const branchOf = (name: string) => (/Зүүн/.test(name) ? "Зүүн 4" : /Баруун/.test(name) ? "Баруун 4" : "Бусад");
-    const rank: Record<string, number> = { "Баруун 4": 0, "Зүүн 4": 1, Бусад: 2 };
-    const out = new Map<string, { branch: string; time: string; entries: WeekEntry[] }>();
-    const entries = [...(dayData?.entries ?? [])].sort(
-      (a, b) =>
-        rank[branchOf(a.classroomName)] - rank[branchOf(b.classroomName)] ||
-        a.startMinute - b.startMinute ||
-        roomOrderOf(a.room) - roomOrderOf(b.room),
-    );
-    for (const e of entries) {
-      const branch = branchOf(e.classroomName);
-      const time = `${formatMinutes(e.startMinute)}–${formatMinutes(e.endMinute)}`;
-      const key = `${branch}|${time}`;
-      const band = out.get(key) ?? { branch, time, entries: [] };
-      band.entries.push(e);
-      out.set(key, band);
-    }
-    return [...out.values()];
-  }, [dayData]);
+  // «Ажиллах багш нар» = ЗӨВХӨН «Багшийн ажлын өдөр» хүснэгт (тухайн огноо); хүснэгтэд
+  // ороогүй ч оноогдсон багш тусдаа
+  const { loads, extraLoads } = useMemo(() => {
+    const count = new Map<string, { lead: number; assistant: number; clash: boolean; name: string; role: string | null }>();
+    for (const e of entries)
+      for (const [who, slot] of [
+        [e.leadTeacher, "lead"],
+        [e.assistantTeacher, "assistant"],
+      ] as const) {
+        if (!who) continue;
+        const c = count.get(who.id) ?? { lead: 0, assistant: 0, clash: false, name: who.name, role: who.role };
+        c[slot] += 1;
+        if (clashes.has(`${e.scheduleId}|${who.id}`)) c.clash = true;
+        count.set(who.id, c);
+      }
+    const load = (id: string, name: string, role: string | null | undefined): TeacherLoad => {
+      const c = count.get(id);
+      return { id, name, plus: isPlus(role), lead: c?.lead ?? 0, assistant: c?.assistant ?? 0, clash: c?.clash ?? false };
+    };
+    return {
+      loads: rosterTeachers.map((t) => load(t.id, t.name, t.role)),
+      extraLoads: [...count.entries()].filter(([id]) => !working.has(id)).map(([id, c]) => load(id, c.name, c.role)),
+    };
+  }, [entries, clashes, rosterTeachers, working]);
+  const armedName = armedId
+    ? ([...loads, ...extraLoads].find((l) => l.id === armedId)?.name ?? teachers.find((t) => t.id === armedId)?.name ?? null)
+    : null;
 
-  async function saveStaff(e: WeekEntry, leadTeacherId: string, assistantTeacherId: string) {
+  const sections = useMemo(
+    () =>
+      BRANCHES.map((branch) => ({
+        branch,
+        rows: entries
+          .filter((e) => branchOf(e.classroomName) === branch)
+          .sort((a, b) => a.startMinute - b.startMinute || roomOrderOf(a.room) - roomOrderOf(b.room)),
+      }))
+        .filter((s) => s.rows.length)
+        .map((s) => {
+          // Яг ижил цагт эхлэх хичээлүүд НЭГ блок (эзэн 2026-10-18); блокийн
+          // дуусах цаг = хамгийн олон давтагдсан нь, ялгаатай мөр жижгээр харуулна
+          const blocks: { start: number; end: number; rows: DayEntry[] }[] = [];
+          for (const e of s.rows) {
+            const last = blocks.at(-1);
+            if (last?.start === e.startMinute) last.rows.push(e);
+            else blocks.push({ start: e.startMinute, end: e.endMinute, rows: [e] });
+          }
+          for (const b of blocks) {
+            const count = new Map<number, number>();
+            for (const e of b.rows) count.set(e.endMinute, (count.get(e.endMinute) ?? 0) + 1);
+            b.end = [...count.entries()].sort((x, y) => y[1] - x[1] || x[0] - y[0])[0][0];
+          }
+          return { ...s, blocks };
+        }),
+    [entries],
+  );
+
+  async function saveStaff(e: DayEntry, lead: string, assistant: string) {
     setSaving(e.scheduleId);
     setSaveError(null);
     try {
+      // Зөөгдсөн хичээлийн оноолт АНХНЫ огноогоор (week-resolver-тэй нэг түлхүүр)
       await api(`/schedule/${e.scheduleId}/staffing`, {
         method: "PUT",
-        body: { date: day, leadTeacherId: leadTeacherId || null, assistantTeacherId: assistantTeacherId || null },
+        body: { date: e.occurrenceDate, leadTeacherId: lead || null, assistantTeacherId: assistant || null },
       });
-      // Бүтэн жагсаалтыг дахин ачаалбал анивчина — зөвхөн энэ мөрийг шинэчилнэ.
-      const who = (id: string) => (id ? { id, name: teachers.find((t) => t.id === id)?.name ?? "—" } : null);
+      const who = (id: string) => {
+        if (!id) return null;
+        const t = teachers.find((x) => x.id === id);
+        return { id, name: t?.name ?? "—", role: t ? (t.plus ? "TEACHER_PLUS" : "TEACHER") : null };
+      };
       setData(
         (prev) =>
           prev && {
             ...prev,
-            days: prev.days.map((d) =>
-              d.date !== day
-                ? d
-                : {
-                    ...d,
-                    entries: d.entries.map((x) =>
-                      x.scheduleId === e.scheduleId
-                        ? { ...x, leadTeacher: who(leadTeacherId), assistantTeacher: who(assistantTeacherId) }
-                        : x,
-                    ),
-                  },
+            entries: prev.entries.map((x) =>
+              x.scheduleId === e.scheduleId ? { ...x, leadTeacher: who(lead), assistantTeacher: who(assistant) } : x,
             ),
           },
       );
@@ -236,381 +186,290 @@ export default function WeekBuilder() {
     }
   }
 
-  const withTopic = dayData?.entries.filter((e) => e.topic).length ?? 0;
-  const confirmed = dayData?.entries.filter((e) => recordOf(e.scheduleId)).length ?? 0;
-  const total = dayData?.entries.length ?? 0;
-  const selectedEntry = dayData?.entries.find((e) => e.scheduleId === selectedId) ?? null;
+  const planned = entries.filter((e) => e.plan?.testIds.length || e.done.length || e.topic).length;
+  const confirmed = entries.filter((e) => e.record).length;
+  const total = entries.length;
+  const find = (id: string | null) => entries.find((e) => e.scheduleId === id) ?? null;
+  const moreEntry = find(moreOf);
 
-  function quickAssign(e: WeekEntry, slot: "lead" | "assistant") {
-    if (!armedId) return;
-    const lead = slot === "lead" ? armedId : (e.leadTeacher?.id ?? "");
-    const assistant = slot === "assistant" ? armedId : (e.assistantTeacher?.id ?? "");
-    setArmedId(null);
-    void saveStaff(e, lead, assistant);
-  }
-
-  const quick = [
-    { key: addDaysToKey(today, -1), label: "Өчигдөр" },
-    { key: today, label: "Өнөөдөр" },
-    { key: addDaysToKey(today, 1), label: "Маргааш" },
-    { key: addDaysToKey(today, 2), label: WEEKDAY_LABELS[weekdayOf(addDaysToKey(today, 2))] },
-    { key: addDaysToKey(today, 3), label: WEEKDAY_LABELS[weekdayOf(addDaysToKey(today, 3))] },
-  ];
+  const strip = Array.from({ length: 7 }, (_, i) => addDaysToKey(today, i - 1));
+  const rel = (k: string) => (k === today ? "Өнөөдөр" : k === addDaysToKey(today, 1) ? "Маргааш" : k === addDaysToKey(today, -1) ? "Өчигдөр" : null);
 
   return (
-    <section className="chunky p-4 sm:p-6">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-brand-soft" aria-hidden />
-          <h2 className="font-bold text-brand-soft">
-            {WEEKDAY_LABELS[weekdayOf(day)]}, {shortDate(day)}
-          </h2>
-          {total > 0 && (
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                withTopic === total ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
-              }`}
-            >
-              Сэдэвтэй {withTopic}/{total}
-            </span>
-          )}
-          {total > 0 && day <= today && (
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                confirmed === total ? "bg-success/15 text-success" : "bg-ink/5 text-ink-dim"
-              }`}
-            >
-              Батлагдсан {confirmed}/{total}
-            </span>
-          )}
+    <section className="chunky space-y-4 p-3 sm:p-5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <CalendarDays className="size-5 text-brand-soft" aria-hidden />
+        <h2 className="cyrillic-heading text-lg font-bold text-ink">
+          {WEEKDAY_LABELS[weekdayOf(day)]}, {day.slice(5).replace("-", ".")}
+        </h2>
+        {rel(day) && <span className="rounded-full bg-brand-bright/15 px-2.5 py-0.5 text-xs font-semibold text-brand-soft">{rel(day)}</span>}
+        {total > 0 && (
+          <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums", planned === total ? "bg-success/15 text-success" : "bg-ink/8 text-ink-dim")}>
+            Төлөвлөсөн {planned}/{total}
+          </span>
+        )}
+        {total > 0 && day <= today && (
+          <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums", confirmed === total ? "bg-success/15 text-success" : "bg-ink/8 text-ink-dim")}>
+            Батлагдсан {confirmed}/{total}
+          </span>
+        )}
+      </div>
+
+      <nav aria-label="Өдөр сонгох" className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
+        <button
+          type="button"
+          onClick={() => setDay((d) => addDaysToKey(d, -1))}
+          aria-label="Өмнөх өдөр"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5 hover:text-ink"
+        >
+          <ChevronLeft className="size-5" aria-hidden />
+        </button>
+        <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto [scrollbar-width:none]">
+          {strip.map((k) => {
+            const on = k === day;
+            const isToday = k === today;
+            return (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={on}
+                aria-current={isToday ? "date" : undefined}
+                aria-label={`${WEEKDAY_LABELS[weekdayOf(k)]}, ${k.slice(5).replace("-", ".")}${rel(k) ? `, ${rel(k)}` : ""}`}
+                onClick={() => setDay(k)}
+                className={cn(
+                  "flex min-h-14 min-w-11 flex-1 flex-col items-center justify-center rounded-lg px-1.5 text-xs transition",
+                  on ? "bg-brand-bright text-on-brand" : "text-ink hover:bg-ink/5",
+                  isToday && "min-w-14",
+                  isToday && !on && "ring-2 ring-inset ring-brand-bright/60",
+                )}
+              >
+                <span className={cn("font-semibold", !on && "text-ink-dim")}>{WEEKDAY_SHORT[weekdayOf(k)]}</span>
+                <span className="text-sm font-bold tabular-nums">{Number(k.slice(8))}</span>
+                {isToday && (
+                  <span className={cn("text-[10px] font-semibold leading-none", on ? "text-on-brand" : "text-brand-soft")}>Өнөөдөр</span>
+                )}
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setDay((d) => addDaysToKey(d, -1))}
-            aria-label="Өмнөх өдөр"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:border-brand"
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden />
-          </button>
+        <button
+          type="button"
+          onClick={() => setDay((d) => addDaysToKey(d, 1))}
+          aria-label="Дараагийн өдөр"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5 hover:text-ink"
+        >
+          <ChevronRight className="size-5" aria-hidden />
+        </button>
+        <label className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5">
+          <CalendarDays className="size-5" aria-hidden />
+          <span className="sr-only">Өдөр сонгох</span>
           <input
             type="date"
             value={day}
             onChange={(e) => e.target.value && setDay(e.target.value)}
-            aria-label="Өдөр сонгох"
-            className="min-h-11 rounded-lg border border-line bg-bg px-2 text-sm"
+            className="absolute inset-0 cursor-pointer opacity-0"
           />
-          <button
-            type="button"
-            onClick={() => setDay((d) => addDaysToKey(d, 1))}
-            aria-label="Дараагийн өдөр"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line transition hover:border-brand"
-          >
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </button>
+        </label>
+      </nav>
+
+      {data && total > 0 && (
+        <div className="flex flex-wrap items-center gap-2 [&>div]:mb-0">
+          {canPlan && day >= today && !data.isHoliday && <PublishDayButton key={day} date={day} />}
+          <ExportImage date={day} entries={entries} tests={tests} />
         </div>
-      </div>
+      )}
 
-      <div role="tablist" aria-label="Өдөр" className="mb-4 flex flex-wrap gap-2">
-        {quick.map((q) => (
-          <button
-            key={q.key}
-            role="tab"
-            type="button"
-            aria-selected={q.key === day}
-            onClick={() => setDay(q.key)}
-            className={`min-h-11 rounded-xl border px-4 text-sm font-semibold transition ${
-              q.key === day
-                ? "border-brand-bright bg-brand-bright text-on-brand"
-                : "border-line bg-panel text-ink hover:border-brand"
-            }`}
-          >
-            {q.label}
-            <span className="ml-1.5 font-normal opacity-75">{shortDate(q.key)}</span>
-          </button>
-        ))}
-      </div>
+      {status === "loading" && !data && <DaySkeleton />}
+      {status === "error" && !data && <ErrorState message={error} onRetry={reload} />}
 
-      {canAssign && total > 0 && day >= today && !dayData?.isHoliday && <PublishDayButton key={day} date={day} />}
-
-      {loading && <LoadingState rows={6} />}
-      {error && <ErrorState message={error} onRetry={load} />}
-
-      {!loading && !error && dayData && (
+      {data && (
         <>
-          {dayData.isHoliday && (
-            <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-warning/15 px-3 py-2 text-sm font-semibold text-warning">
-              <Palmtree className="h-4 w-4 shrink-0" aria-hidden /> Амралтын өдөр
+          {data.isHoliday && (
+            <p className="flex items-center gap-1.5 rounded-lg bg-warning/15 px-3 py-2 text-sm font-semibold text-warning">
+              <Palmtree className="size-4 shrink-0" aria-hidden />
+              {data.holiday?.title || "Амралтын өдөр"}
+            </p>
+          )}
+          {data.restingClasses.length > 0 && (
+            <p className="flex flex-wrap items-center gap-1.5 rounded-lg bg-warning/10 px-3 py-2 text-xs font-semibold text-warning">
+              <Palmtree className="size-3.5 shrink-0" aria-hidden />
+              Амарна: {[...new Set(data.restingClasses.map((r) => r.classroomName.replace(/\s*\([^)]*\)$/, "")))].join(", ")}
+            </p>
+          )}
+          {saveError && (
+            <p role="alert" className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
+              {saveError}
             </p>
           )}
 
-          {resting.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {resting.map(([title, names]) => (
-                <p
-                  key={title}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1 text-xs font-semibold text-warning"
+          {total === 0 ? (
+            <EmptyState
+              icon={CalendarOff}
+              title="Энэ өдөр хичээл алга"
+              hint="Өөр өдөр сонгоно уу"
+              action={
+                <button
+                  type="button"
+                  onClick={() => setDay(addDaysToKey(today, 1))}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 text-sm font-semibold"
                 >
-                  <Palmtree className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                  Амарна: {names.join(", ")}
-                  {title && <span className="font-normal">— {title}</span>}
-                </p>
-              ))}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_14rem] xl:items-start xl:gap-5">
-            <div className="xl:sticky xl:top-4 xl:order-2">
-              <DayRosterPanel
-                rosterDay={rosterDay}
-                chips={chips}
-                extra={extraChips}
+                  Маргааш руу очих
+                </button>
+              }
+            />
+          ) : (
+            <div className={cn("grid gap-4 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start", status === "loading" && "opacity-60")}>
+              <div className="min-w-0 space-y-7">
+                {sections.map((s, si) => (
+                  <section key={s.branch} aria-labelledby={`day-branch-${si}`} className="@container">
+                    <h3 id={`day-branch-${si}`} className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
+                      <Building2 className="size-4 text-ink-dim" aria-hidden />
+                      {s.branch}
+                      <span className="text-xs font-medium tabular-nums text-ink-dim">{s.rows.length} хичээл</span>
+                    </h3>
+                    <div className="space-y-4">
+                      {s.blocks.map((blk) => (
+                        <div key={blk.start} role="group" aria-label={`${formatMinutes(blk.start)}–${formatMinutes(blk.end)}`}>
+                          <p className="mb-1.5 flex items-center gap-2 px-1">
+                            <span className="text-base font-bold tabular-nums text-ink">
+                              {formatMinutes(blk.start)}–{formatMinutes(blk.end)}
+                            </span>
+                            <span className="text-xs tabular-nums text-ink-dim">{blk.rows.length} анги</span>
+                          </p>
+                          <p aria-hidden className="hidden grid-cols-[12rem_minmax(0,1fr)_9rem_9rem_7rem] gap-x-3 px-3 pb-1 text-[11px] font-semibold text-ink-dim @4xl:grid">
+                            <span>Анги</span>
+                            <span>Тест</span>
+                            <span>Ахлах багш</span>
+                            <span>Туслах багш</span>
+                            <span className="text-right">Батлах</span>
+                          </p>
+                          <ul className="divide-y divide-line/60 overflow-hidden rounded-xl border border-line/70 bg-surface">
+                            {blk.rows.map((e) => (
+                              <LessonRow
+                                key={`${e.scheduleId}-${e.startMinute}`}
+                                entry={e}
+                                date={day}
+                                blockEnd={blk.end}
+                                tests={tests}
+                                canPlan={canPlan}
+                                canConfirm={canConfirm}
+                                past={day <= today}
+                                teachers={teachers}
+                                working={working}
+                                rosterOrder={rosterOrder}
+                                workingLabel={day === today ? "Өнөөдөр ажиллах" : "Энэ өдөр ажиллах"}
+                                saving={saving === e.scheduleId}
+                                clash={(id) => clashes.has(`${e.scheduleId}|${id}`)}
+                                armedId={armedId}
+                                armedName={armedName}
+                                onQuickAssign={(slot) => {
+                                  if (!armedId) return;
+                                  const lead = slot === "lead" ? armedId : (e.leadTeacher?.id ?? "");
+                                  const assistant = slot === "assistant" ? armedId : (e.assistantTeacher?.id ?? "");
+                                  setArmedId(null);
+                                  void saveStaff(e, lead, assistant);
+                                }}
+                                onStaff={(lead, assistant) => saveStaff(e, lead, assistant)}
+                                onOpen={() => setPlanOf(e.scheduleId)}
+                                onConfirm={() => setConfirmOf(e.scheduleId)}
+                              />
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+              <DayTeachers
+                loads={loads}
+                extra={extraLoads}
+                inRange={data.roster?.inRange ?? true}
                 armedId={armedId}
-                onArm={canAssign ? setArmedId : null}
+                onArm={canPlan ? setArmedId : null}
+                className="lg:sticky lg:top-4"
               />
             </div>
-            <div className="min-w-0 xl:order-1">
-              {bands.length === 0 ? (
-                <p className="py-6 text-center text-sm text-ink-dim">Энэ өдөр хичээл товлоогдоогүй.</p>
-              ) : (
-                <div className="space-y-5">
-                  {saveError && (
-                    <p role="alert" className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
-                      {saveError}
-                    </p>
-                  )}
-                  <p className="hidden grid-cols-[minmax(0,1fr)_8.75rem_8.75rem_auto] gap-x-3 px-3 text-xs font-semibold text-ink-dim sm:grid">
-                    <span>Танхим, анги, онол</span>
-                    <span>Ахлах багш</span>
-                    <span>Туслах багш</span>
-                    <span className="text-right">Батлах</span>
-                  </p>
-                  {bands.map(({ branch, time, entries }, bi) => (
-                    <div key={`${branch}|${time}`}>
-                      {(bi === 0 || bands[bi - 1].branch !== branch) && (
-                        <h3
-                          className={`mb-2 text-sm font-bold text-ink ${bi === 0 ? "" : "mt-7 border-t border-line pt-5"}`}
-                        >
-                          {branch}
-                        </h3>
-                      )}
-                      <p className="mb-1.5 flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-brand-soft">{time}</span>
-                        <span className="h-px flex-1 bg-line/70" aria-hidden />
-                      </p>
-                      <div className="divide-y divide-line/60 overflow-hidden rounded-xl border border-line">
-                        {entries.map((e) => (
-                          <div
-                            key={`${e.scheduleId}-${e.startMinute}`}
-                            style={{ "--cls": getClassroomColor(e.classroomId) } as React.CSSProperties}
-                            className={`class-row grid w-full grid-cols-2 items-center gap-x-3 gap-y-1.5 py-2 pr-3 pl-3 sm:grid-cols-[minmax(0,1fr)_8.75rem_8.75rem_auto] ${
-                              dayData.isHoliday ? "opacity-60" : ""
-                            }`}
-                          >
-                            {/* Анги + онол — дарахад сэдэв/танхим/цаг солих самбар */}
-                            <button
-                              type="button"
-                              onClick={() => setSelectedId(e.scheduleId)}
-                              className="col-span-2 grid min-h-11 min-w-0 grid-cols-[4.5rem_3.5rem_1fr] items-center gap-x-3 rounded-lg text-left hover:bg-ink/[0.03] sm:col-span-1"
-                            >
-                              <span className="flex items-center gap-1.5 text-ink">
-                                <RoomShape room={e.room} size={16} />
-                                <span className="font-mono text-xs text-ink-dim">{e.room ?? "—"}</span>
-                              </span>
-                              <span className="font-semibold text-ink">
-                                {e.classroomName.replace(/\s*\([^)]*\)$/, "")}
-                              </span>
-                              <span className="line-clamp-2 min-w-0 text-sm">
-                                {e.exception?.kind === "MOVED" && (
-                                  <span className="mr-1.5 rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-bold text-warning">
-                                    {e.exception.originalDate !== day ? "Зөөгдсөн" : "Өөрчилсөн"}
-                                  </span>
-                                )}
-                                {e.topic ? (
-                                  <span className="font-medium">{e.topic}</span>
-                                ) : (
-                                  <span className="italic text-ink-dim">Сэдэв зоогоогүй</span>
-                                )}
-                              </span>
-                            </button>
-                            {canAssign ? (
-                              <>
-                                <TeacherPick
-                                  label="Ахлах багш"
-                                  clash={!!e.leadTeacher && clashes.has(`${e.scheduleId}|${e.leadTeacher.id}`)}
-                                  value={e.leadTeacher?.id ?? ""}
-                                  other={e.assistantTeacher?.id ?? ""}
-                                  teachers={teachers}
-                                  working={workingIds}
-                                  disabled={saving === e.scheduleId}
-                                  armedName={armedId && armedId !== e.assistantTeacher?.id ? armedName : null}
-                                  onQuickAssign={() => quickAssign(e, "lead")}
-                                  onChange={(id) => saveStaff(e, id, e.assistantTeacher?.id ?? "")}
-                                />
-                                <TeacherPick
-                                  label="Туслах багш"
-                                  clash={!!e.assistantTeacher && clashes.has(`${e.scheduleId}|${e.assistantTeacher.id}`)}
-                                  value={e.assistantTeacher?.id ?? ""}
-                                  other={e.leadTeacher?.id ?? ""}
-                                  teachers={teachers}
-                                  working={workingIds}
-                                  disabled={saving === e.scheduleId}
-                                  armedName={armedId && armedId !== e.leadTeacher?.id ? armedName : null}
-                                  onQuickAssign={() => quickAssign(e, "assistant")}
-                                  onChange={(id) => saveStaff(e, e.leadTeacher?.id ?? "", id)}
-                                />
-                              </>
-                            ) : (
-                              <>
-                                <TeacherName label="Ахлах багш" name={e.leadTeacher?.name} />
-                                <TeacherName label="Туслах багш" name={e.assistantTeacher?.name} />
-                              </>
-                            )}
-                            <LessonRowActions
-                              entry={e}
-                              date={day}
-                              today={today}
-                              record={recordOf(e.scheduleId)}
-                              note={noteOf(e.scheduleId)}
-                              dismissalAt={dismissalOf(e.classroomId)}
-                              onRecord={(r) =>
-                                patchDay((d) => ({
-                                  ...d,
-                                  records: [
-                                    ...d.records.filter((x) => x.scheduleId !== e.scheduleId),
-                                    ...(r ? [r] : []),
-                                  ],
-                                }))
-                              }
-                              onNote={(n) =>
-                                patchDay((d) => ({
-                                  ...d,
-                                  notes: [...d.notes.filter((x) => x.scheduleId !== e.scheduleId), ...(n ? [n] : [])],
-                                }))
-                              }
-                              onDismissal={(cid, iso) =>
-                                patchDay((d) => ({
-                                  ...d,
-                                  dismissals: [
-                                    ...d.dismissals.filter((x) => x.classroomId !== cid),
-                                    { classroomId: cid, approximateAt: iso },
-                                  ],
-                                }))
-                              }
-                              onHistory={() => setHistoryOf({ id: e.classroomId, name: e.classroomName })}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          )}
+          <Legend canPlan={canPlan} />
         </>
       )}
 
-      <EntryActionPanel
-        open={selectedEntry !== null}
-        entry={selectedEntry}
+      <PlanDialog
+        entry={find(planOf)}
         date={day}
-        dayEntries={dayData?.entries ?? []}
-        onClose={() => setSelectedId(null)}
-        onChanged={load}
+        today={today}
+        tests={tests}
+        canPlan={canPlan}
+        canConfirm={canConfirm}
+        onClose={() => setPlanOf(null)}
+        onSaved={reload}
+        onMore={() => {
+          setMoreOf(planOf);
+          setPlanOf(null);
+        }}
+        onHistory={() => {
+          const e = find(planOf);
+          if (e) setHistoryOf({ id: e.classroomId, name: e.classroomName });
+          setPlanOf(null);
+        }}
+        onConfirm={() => {
+          setConfirmOf(planOf);
+          setPlanOf(null);
+        }}
+      />
+      <ConfirmDialog entry={find(confirmOf)} date={day} tests={tests} onClose={() => setConfirmOf(null)} onDone={reload} />
+      <EntryActionPanel
+        open={moreEntry !== null}
+        entry={moreEntry as unknown as WeekEntry | null}
+        date={day}
+        dayEntries={entries as unknown as WeekEntry[]}
+        onClose={() => setMoreOf(null)}
+        onChanged={reload}
       />
       <ClassroomLessonHistory classroom={historyOf} onClose={() => setHistoryOf(null)} />
     </section>
   );
 }
 
-/** Энгийн багшид — оноосон багшийн нэрийг зөвхөн харуулна. */
-function TeacherName({ label, name }: { label: string; name?: string | null }) {
+function DaySkeleton() {
   return (
-    <p className="flex min-h-10 min-w-0 flex-col justify-center gap-0.5">
-      <span className="text-[11px] font-semibold text-ink-dim sm:sr-only">{label}</span>
-      <span className={`truncate text-sm ${name ? "text-ink" : "text-ink-dim"}`}>{name ?? "—"}</span>
-    </p>
+    <div aria-busy="true" aria-label="Ачаалж байна" className="space-y-2">
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} className="skeleton h-20 rounded-xl" />
+      ))}
+    </div>
   );
 }
 
-/**
- * Багш сонгох — хоосон байж болно; нөгөө баганад сонгосон багш энд идэвхгүй.
- * Тухайн өдөр ажиллах багш эхэнд («Энэ өдөр ажиллана»), бусад нь доор.
- * Чип «сонгосон» үед хоосон нүд нь нэг товшилтоор оноох товч болно.
- */
-function TeacherPick({
-  label,
-  value,
-  other,
-  teachers,
-  working,
-  disabled,
-  armedName,
-  onQuickAssign,
-  onChange,
-  clash,
-}: {
-  clash?: boolean;
-  label: string;
-  value: string;
-  other: string;
-  teachers: { id: string; name: string }[];
-  working: Set<string>;
-  disabled?: boolean;
-  armedName?: string | null;
-  onQuickAssign?: () => void;
-  onChange: (id: string) => void;
-}) {
-  const today = teachers.filter((t) => working.has(t.id));
-  const rest = teachers.filter((t) => !working.has(t.id));
-  const option = (t: { id: string; name: string }) => (
-    <option key={t.id} value={t.id} disabled={t.id === other}>
-      {t.name}
-    </option>
-  );
-  if (!value && armedName && onQuickAssign) {
-    return (
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[11px] font-semibold text-ink-dim sm:sr-only">{label}</span>
-        <button
-          type="button"
-          onClick={onQuickAssign}
-          disabled={disabled}
-          aria-label={`${label}: ${armedName} оноох`}
-          className="inline-flex min-h-11 w-full min-w-0 items-center gap-1 rounded-lg border border-dashed border-brand bg-brand-bright/10 px-2 text-sm font-semibold text-brand-soft disabled:opacity-50"
-        >
-          <Plus className="h-4 w-4 shrink-0" aria-hidden />
-          <span className="truncate">{armedName}</span>
-        </button>
-      </div>
-    );
-  }
+/** Тэмдэглэгээ — хамгийн доор */
+function Legend({ canPlan }: { canPlan: boolean }) {
   return (
-    <label className="flex min-w-0 flex-col gap-0.5">
-      <span className="text-[11px] font-semibold text-ink-dim sm:sr-only">{label}</span>
-      <select
-        aria-label={label}
-        aria-invalid={clash || undefined}
-        title={clash ? "Энэ багш энэ цагт өөр ангид давхар оноогдсон" : undefined}
-        value={value}
-        disabled={disabled}
-        onChange={(ev) => onChange(ev.target.value)}
-        className={`min-h-11 w-full min-w-0 rounded-lg border bg-bg px-2 text-sm ${
-          clash ? "border-error bg-error/8 text-error" : `border-line ${value ? "text-ink" : "text-ink-dim"}`
-        }`}
-      >
-        <option value="">—</option>
-        {today.length > 0 ? (
-          <>
-            <optgroup label="Энэ өдөр ажиллана">{today.map(option)}</optgroup>
-            {rest.length > 0 && <optgroup label="Бусад">{rest.map(option)}</optgroup>}
-          </>
-        ) : (
-          teachers.map(option)
-        )}
-      </select>
-      {clash && <span className="text-[11px] font-semibold text-error">Энэ цагт давхар</span>}
-    </label>
+    <section aria-labelledby="day-legend" className="rounded-xl border border-line bg-surface px-3 py-2.5">
+      <h3 id="day-legend" className="mb-1.5 flex items-center gap-1 text-xs font-bold text-ink-dim">
+        Тэмдэглэгээ
+        <InfoHint label="Тэмдэглэгээний тайлбар">
+          <span className="block space-y-1.5">
+            <span className="block">Тест: өмнөх хичээл, сум, өнөөдрийнх</span>
+            <span className="block">Тестийн нэр дээр удаан дарвал бүтэн нэр гарна</span>
+            {canPlan && <span className="block">Мөр дээр дарж тест, тарах эсэх, тэмдэглэл, онолын зураг тавина</span>}
+          </span>
+        </InfoHint>
+      </h3>
+      <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-ink-dim">
+        <li className="inline-flex items-center gap-1.5">
+          <RoomBadge room="501" />
+          Танхим
+        </li>
+        <li>
+          Тоолол 3
+          <Excluded numbers={[2, 5]} /> — улаан тоо: хассан бодлого
+        </li>
+        <li className="inline-flex items-center gap-1.5">
+          <span className="size-3 rounded-sm bg-info/20" aria-hidden />
+          Тарах хичээл
+        </li>
+      </ul>
+    </section>
   );
 }

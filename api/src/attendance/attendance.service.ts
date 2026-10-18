@@ -5,12 +5,27 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
-import { addDateDays, dateKey, parseDateOnly } from '../common/date';
+import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
+import { Prisma } from '../generated/prisma/client';
 import { AttendanceStatus, Role } from '../generated/prisma/enums';
 import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
+import { shortName } from '../revisions/revision-snapshot';
 import { ScheduleService } from '../schedule/schedule.service';
+import {
+  DEFAULT_CRITERIA,
+  addDaysKey,
+  computeRisk,
+  criteriaToStore,
+  lessonAssignmentIds,
+  normalizeCriteria,
+  submittedStudentIds,
+  ubDateKey,
+} from './board-logic';
+import { loadPreviousLesson } from './lesson-dates';
 import { MarkAttendanceDto } from './dto/mark-attendance.dto';
+import { RiskCriteriaDto } from './dto/risk-criteria.dto';
+import { assertMarkAccess } from './marking-access';
 
 // /schedule/days-аас "бодит хичээлтэй өдөр" хайхад хэтэрхий нарийн цонхоор
 // эхлээд олдохгүй бол улам өргөтгөж дахин хайна (жишээ нь ангийн хуваарь
@@ -38,33 +53,32 @@ export class AttendanceService {
     }
   }
 
-  // TEACHER зөвхөн өөрийн ангид, TEACHER_PLUS/ADMIN бүх ангид (SPEC §13)
-  private async assertClassAccess(
+  // ADMIN/TEACHER_PLUS — бүх анги; TEACHER — ангийн/хуваарийн багш эсвэл тэр
+  // өдрийн ахлах/туслах багш (marking-access.ts, D9).
+  private assertClassAccess(
     classroomId: string,
     userId: string,
     role: Role,
+    when: { date?: Date; from?: Date; to?: Date } = {},
   ) {
-    const classroom = await this.prisma.classroom.findUnique({
-      where: { id: classroomId },
-    });
-    if (!classroom || classroom.archived) {
-      throw new NotFoundException('Анги олдсонгүй');
-    }
-    if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return classroom;
-    if (role === Role.TEACHER && isClassTeacher(classroom, userId)) {
-      return classroom;
-    }
-    throw new ForbiddenException('Энэ ангид хандах эрхгүй');
+    return assertMarkAccess(this.prisma, classroomId, userId, role, when);
   }
 
+  /**
+   * НЭГ товшилт = НЭГ сурагчийн upsert (D8). Мөр бүрийн утга:
+   * - status: утга → upsert; null → тэмдэглэгээ цэвэрлэх (мөр устна); ирүүлээгүй → зөвхөн тэмдэглэл/хугацаа
+   * - note: ирүүлээгүй → ХУУЧНААРАА (устахгүй); null/"" → цэвэрлэнэ
+   * - lateRange: LATE-ээс өөр төлөвт үргэлж null; ирүүлээгүй → хуучнаараа
+   * - onlyIf: серверийн одоогийн төлөв ийм байвал л бичнэ (бөөнөөр, буцаах — өөр багшийнхыг дарахгүй)
+   */
   async mark(
     classroomId: string,
     dto: MarkAttendanceDto,
     userId: string,
     role: Role,
   ) {
-    await this.assertClassAccess(classroomId, userId, role);
-    const date = new Date(dto.date);
+    const date = this.parseDate(dto.date);
+    await this.assertClassAccess(classroomId, userId, role, { date });
 
     const activeStudentIds = new Set(
       (
@@ -83,76 +97,662 @@ export class AttendanceService {
       );
     }
 
-    // Audit-д зориулж өмнөх төлвийг олж авна (before/after харьцуулалт).
-    const beforeRows = await this.prisma.attendance.findMany({
-      where: {
-        classroomId,
-        date,
-        studentId: { in: dto.entries.map((e) => e.studentId) },
-      },
-    });
-    const beforeByStudent = new Map(beforeRows.map((r) => [r.studentId, r]));
+    // Нэг сурагч хоёр удаа ирвэл сүүлийнх нь хүчинтэй
+    const entries = [
+      ...new Map(dto.entries.map((e) => [e.studentId, e])).values(),
+    ];
+    const ids = entries.map((e) => e.studentId);
 
-    const afterRows = await this.prisma.$transaction(
-      dto.entries.map((entry) =>
-        this.prisma.attendance.upsert({
-          where: {
-            classroomId_studentId_date: {
-              classroomId,
-              studentId: entry.studentId,
-              date,
-            },
+    const result = await this.prisma.$transaction(async (tx) => {
+      const beforeRows = await tx.attendance.findMany({
+        where: { classroomId, date, studentId: { in: ids } },
+      });
+      const before = new Map(beforeRows.map((r) => [r.studentId, r]));
+      const applied: string[] = [];
+      const skipped: string[] = [];
+      const changes: {
+        action: 'CREATE' | 'UPDATE' | 'DELETE';
+        before: (typeof beforeRows)[number] | null;
+        after: (typeof beforeRows)[number] | null;
+      }[] = [];
+
+      for (const entry of entries) {
+        const cur = before.get(entry.studentId) ?? null;
+        if (entry.onlyIf) {
+          const ok =
+            entry.onlyIf === 'UNMARKED'
+              ? cur === null
+              : cur?.status === entry.onlyIf;
+          if (!ok) {
+            skipped.push(entry.studentId);
+            continue;
+          }
+        }
+        const note =
+          entry.note === undefined
+            ? undefined
+            : entry.note === null || entry.note.trim() === ''
+              ? null
+              : entry.note.trim();
+        const where = {
+          classroomId_studentId_date: {
+            classroomId,
+            studentId: entry.studentId,
+            date,
           },
+        };
+
+        if (entry.status === null) {
+          if (cur) {
+            await tx.attendance.delete({ where });
+            changes.push({ action: 'DELETE', before: cur, after: null });
+          }
+          applied.push(entry.studentId);
+          continue;
+        }
+
+        if (entry.status === undefined) {
+          // Зөвхөн тэмдэглэл/хугацаа: мөргүй бол бичих зүйлгүй
+          if (!cur) {
+            skipped.push(entry.studentId);
+            continue;
+          }
+          const after = await tx.attendance.update({
+            where,
+            data: {
+              markedById: userId,
+              ...(note !== undefined ? { note } : {}),
+              ...(entry.lateRange !== undefined &&
+              cur.status === AttendanceStatus.LATE
+                ? { lateRange: entry.lateRange }
+                : {}),
+            },
+          });
+          changes.push({ action: 'UPDATE', before: cur, after });
+          applied.push(entry.studentId);
+          continue;
+        }
+
+        const isLate = entry.status === AttendanceStatus.LATE;
+        const lateRange = !isLate
+          ? null
+          : entry.lateRange !== undefined
+            ? entry.lateRange
+            : undefined;
+        const after = await tx.attendance.upsert({
+          where,
           create: {
             classroomId,
             studentId: entry.studentId,
             date,
             status: entry.status,
             markedById: userId,
-            note: entry.note ?? null,
-            // LATE-аас өөр статусын үед хугацааны интервал утгагүй тул
-            // хэзээ ч хадгалахгүй.
-            lateRange:
-              entry.status === AttendanceStatus.LATE
-                ? (entry.lateRange ?? null)
-                : null,
+            note: note ?? null,
+            lateRange: lateRange ?? null,
           },
           update: {
             status: entry.status,
             markedById: userId,
-            note: entry.note ?? null,
-            // Статус LATE-ээс өөр болж өөрчлөгдвөл өмнөх хугацааны
-            // интервалыг заавал цэвэрлэнэ (SPEC: "cleared if the status is
-            // later changed away from LATE").
-            lateRange:
-              entry.status === AttendanceStatus.LATE
-                ? (entry.lateRange ?? null)
-                : null,
+            ...(note !== undefined ? { note } : {}),
+            ...(lateRange !== undefined ? { lateRange } : {}),
           },
+        });
+        changes.push({ action: cur ? 'UPDATE' : 'CREATE', before: cur, after });
+        applied.push(entry.studentId);
+      }
+      return { applied, skipped, changes };
+    });
+
+    // Аудит (AuditService алдааг өөрөө залгина)
+    await Promise.all(
+      result.changes.map((c) =>
+        this.audit.record({
+          actorId: userId,
+          actorRole: role,
+          action: c.action,
+          entity: 'Attendance',
+          entityId: (c.after ?? c.before)!.id,
+          before: c.before,
+          after: c.after,
         }),
       ),
     );
 
-    // Аудит: сурагч тус бүрийн ирцийн CREATE/UPDATE-ийг тэмдэглэнэ. Ирц
-    // тэмдэглэх нь нэг дор олон сурагчид хамаарах тул алдаа бүрд бус,
-    // амжилттай upsert бүрд record()-ийг дуудна (AuditService дотроо алдааг
-    // залгидаг тул энд throw хийхгүй).
-    await Promise.all(
-      afterRows.map((after) => {
-        const before = beforeByStudent.get(after.studentId) ?? null;
-        return this.audit.record({
-          actorId: userId,
-          actorRole: role,
-          action: before ? 'UPDATE' : 'CREATE',
-          entity: 'Attendance',
-          entityId: after.id,
-          before,
-          after,
-        });
-      }),
-    );
+    const rows = await this.attendanceRows(classroomId, date, ids);
+    return {
+      marked: result.applied.length,
+      date: dateKey(date),
+      applied: result.applied,
+      skipped: result.skipped,
+      rows,
+    };
+  }
 
-    return { marked: dto.entries.length, date: dto.date };
+  /* ───────── Самбар (эзэн 2026-10-18) ───────── */
+
+  private async markerNames(ids: string[]) {
+    const unique = [...new Set(ids)];
+    if (!unique.length) return new Map<string, string>();
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: unique } },
+      select: { id: true, firstName: true, lastName: true },
+    });
+    return new Map(users.map((u) => [u.id, shortName(u)]));
+  }
+
+  private async attendanceRows(
+    classroomId: string,
+    date: Date,
+    studentIds?: string[],
+  ) {
+    const rows = await this.prisma.attendance.findMany({
+      where: {
+        classroomId,
+        date,
+        ...(studentIds ? { studentId: { in: studentIds } } : {}),
+      },
+      select: {
+        studentId: true,
+        status: true,
+        note: true,
+        lateRange: true,
+        markedById: true,
+      },
+    });
+    const names = await this.markerNames(rows.map((r) => r.markedById));
+    return rows.map((r) => ({
+      studentId: r.studentId,
+      status: r.status,
+      note: r.note,
+      lateRange: r.lateRange,
+      markedBy: names.get(r.markedById) ?? null,
+    }));
+  }
+
+  private async homeworkRows(classroomId: string, date: Date) {
+    const rows = await this.prisma.dailyHomeworkMark.findMany({
+      where: { classroomId, date },
+      select: {
+        studentId: true,
+        status: true,
+        comment: true,
+        markedById: true,
+        updatedAt: true,
+      },
+    });
+    const names = await this.markerNames(rows.map((r) => r.markedById));
+    return rows.map((r) => ({
+      studentId: r.studentId,
+      status: r.status,
+      comment: r.comment,
+      markedBy: names.get(r.markedById) ?? null,
+      updatedAt: r.updatedAt,
+    }));
+  }
+
+  /** Шалгуур + эрсдэлийн тэмдэг: [min(өдөр, өнөөдөр) − windowDays, min(өдөр, өнөөдөр)] */
+  private async riskFor(
+    classroomId: string,
+    key: string,
+    studentIds: string[],
+    rawCriteria: unknown,
+  ) {
+    const criteria = normalizeCriteria(rawCriteria);
+    const today = dateKey(todayUB());
+    const upTo = key < today ? key : today;
+    const from = addDaysKey(upTo, -criteria.windowDays);
+    const range = { gte: this.parseDate(from), lte: this.parseDate(upTo) };
+    const [att, hw] = await Promise.all([
+      this.prisma.attendance.findMany({
+        where: { classroomId, date: range, studentId: { in: studentIds } },
+        select: { studentId: true, date: true, status: true },
+      }),
+      this.prisma.dailyHomeworkMark.findMany({
+        where: {
+          classroomId,
+          date: range,
+          studentId: { in: studentIds },
+          status: { not: null },
+        },
+        select: { studentId: true, date: true, status: true },
+      }),
+    ]);
+    const flags = computeRisk(
+      studentIds,
+      att.map((r) => ({ ...r, date: dateKey(r.date) })),
+      hw.map((r) => ({ ...r, date: dateKey(r.date) })),
+      criteria,
+    );
+    return { criteria, flags };
+  }
+
+  /**
+   * «Илгээсэн»: тухайн хичээлийн даалгаврыг (Assignment/Submission) илгээсэн одоогийн
+   * сурагчид. Даалгавар сонгох дүрэм — board-logic.lessonAssignmentIds.
+   */
+  private async sentFor(classroomId: string, key: string, studentIds: string[]) {
+    const dayStart = new Date(`${key}T00:00:00+08:00`);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    const createdFrom = new Date(`${addDaysKey(key, -35)}T00:00:00+08:00`);
+    const assignments = await this.prisma.assignment.findMany({
+      where: {
+        classroomId,
+        deletedAt: null,
+        OR: [
+          { dueDate: { gte: dayStart, lt: dayEnd } },
+          { createdAt: { gte: createdFrom, lt: dayEnd } },
+        ],
+      },
+      select: { id: true, dueDate: true, createdAt: true },
+    });
+    if (!assignments.length || !studentIds.length)
+      return { assignmentIds: [] as string[], students: [] as string[] };
+    const hasDue = assignments.some(
+      (a) => a.dueDate && ubDateKey(a.dueDate) === key,
+    );
+    const prev = hasDue
+      ? null
+      : (await loadPreviousLesson(this.prisma, classroomId, key)).prev;
+    const ids = lessonAssignmentIds(assignments, key, prev);
+    if (!ids.length) return { assignmentIds: [], students: [] };
+    const subs = await this.prisma.submission.findMany({
+      where: {
+        assignmentId: { in: ids },
+        studentId: { in: studentIds },
+        OR: [{ submittedAt: { not: null } }, { imageKeys: { isEmpty: false } }],
+      },
+      select: { studentId: true, submittedAt: true, imageKeys: true },
+    });
+    return { assignmentIds: ids, students: submittedStudentIds(subs, studentIds) };
+  }
+
+  /** Тухайн өдөр хичээлтэй, хэрэглэгчийн тэмдэглэж болох ангиуд (D9) */
+  async boardClasses(
+    dateStr: string,
+    userId: string,
+    role: Role,
+    selectedId?: string,
+  ) {
+    const key = dateKey(this.parseDate(dateStr));
+    const selected = selectedId
+      ? await this.selectedClass(selectedId, userId, role)
+      : null;
+    const classrooms = await this.prisma.classroom.findMany({
+      where: { archived: false },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        grade: true,
+        teacherId: true,
+        assistantTeacherId: true,
+        _count: {
+          select: {
+            enrollments: {
+              where: { leftAt: null, student: { archivedAt: null } },
+            },
+          },
+        },
+      },
+    });
+    if (!classrooms.length) return { date: key, classes: [], selected };
+    const week = await this.schedule.getWeek(
+      key,
+      classrooms.map((c) => c.id),
+    );
+    const day = week.days.find((d) => d.date === key);
+    const entries = day && !day.isHoliday ? day.entries : [];
+
+    const isStaffAll = role === Role.ADMIN || role === Role.TEACHER_PLUS;
+    const ownSchedules = isStaffAll
+      ? new Set<string>()
+      : new Set(
+          (
+            await this.prisma.classSchedule.findMany({
+              where: { teacherId: userId },
+              select: { classroomId: true },
+            })
+          ).map((s) => s.classroomId),
+        );
+    const byId = new Map(classrooms.map((c) => [c.id, c]));
+    const grouped = new Map<string, typeof entries>();
+    for (const e of entries) {
+      const cls = byId.get(e.classroomId);
+      if (!cls) continue;
+      const allowed =
+        isStaffAll ||
+        (role === Role.TEACHER &&
+          (isClassTeacher(cls, userId) ||
+            ownSchedules.has(cls.id) ||
+            e.leadTeacher?.id === userId ||
+            e.assistantTeacher?.id === userId));
+      if (!allowed) continue;
+      grouped.set(cls.id, [...(grouped.get(cls.id) ?? []), e]);
+    }
+    const classes = [...grouped.entries()].map(([id, list]) => {
+      const cls = byId.get(id)!;
+      return {
+        id,
+        name: cls.name,
+        type: cls.type,
+        grade: cls.grade,
+        studentCount: cls._count.enrollments,
+        lessons: list
+          .sort((a, b) => a.startMinute - b.startMinute)
+          .map((e) => ({
+            scheduleId: e.scheduleId,
+            startMinute: e.startMinute,
+            endMinute: e.endMinute,
+            room: e.room,
+            topic: e.topic,
+            teacherName: e.teacherName,
+            leadTeacher: e.leadTeacher?.name ?? null,
+            assistantTeacher: e.assistantTeacher?.name ?? null,
+          })),
+      };
+    });
+    classes.sort(
+      (a, b) =>
+        a.lessons[0].startMinute - b.lessons[0].startMinute ||
+        a.name.localeCompare(b.name, 'mn'),
+    );
+    return { date: key, classes, selected };
+  }
+
+  /** Сонгосон анги тэр өдөр хичээлгүй байсан ч нэр, сурагчийн тоо (огнооны зурваст) — эрхтэй бол */
+  private async selectedClass(classroomId: string, userId: string, role: Role) {
+    try {
+      // Багш: ангийн/хуваарийн багш эсвэл сүүлийн/ойрын 60 хоногт тэр ангид орсон
+      const today = todayUB();
+      await this.assertClassAccess(classroomId, userId, role, {
+        from: addDateDays(today, -60),
+        to: addDateDays(today, 60),
+      });
+    } catch {
+      return null;
+    }
+    const c = await this.prisma.classroom.findUnique({
+      where: { id: classroomId },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        _count: {
+          select: {
+            enrollments: {
+              where: { leftAt: null, student: { archivedAt: null } },
+            },
+          },
+        },
+      },
+    });
+    return c
+      ? { id: c.id, name: c.name, type: c.type, studentCount: c._count.enrollments }
+      : null;
+  }
+
+  /** Самбарын бүтэн өгөгдөл: хичээл, сурагчид, тэр өдрийн тэмдэглэгээ, шалгуур, эрсдэл */
+  async board(classroomId: string, dateStr: string, userId: string, role: Role) {
+    const date = this.parseDate(dateStr);
+    const key = dateKey(date);
+    const classroom = await this.assertClassAccess(classroomId, userId, role, {
+      date,
+    });
+    const [enrollments, week, attendance, homework] = await Promise.all([
+      this.prisma.enrollment.findMany({
+        where: { classroomId, leftAt: null, student: { archivedAt: null } },
+        select: {
+          joinedAt: true,
+          student: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              studentCode: true,
+            },
+          },
+        },
+        orderBy: [
+          { student: { firstName: 'asc' } },
+          { student: { lastName: 'asc' } },
+        ],
+      }),
+      this.schedule.getWeek(key, [classroomId]),
+      this.attendanceRows(classroomId, date),
+      this.homeworkRows(classroomId, date),
+    ]);
+    const day = week.days.find((d) => d.date === key);
+    const lessons = (day && !day.isHoliday ? day.entries : [])
+      .filter((e) => e.classroomId === classroomId)
+      .sort((a, b) => a.startMinute - b.startMinute)
+      .map((e) => ({
+        scheduleId: e.scheduleId,
+        startMinute: e.startMinute,
+        endMinute: e.endMinute,
+        room: e.room,
+        topic: e.topic,
+        teacherName: e.teacherName,
+        leadTeacher: e.leadTeacher?.name ?? null,
+        assistantTeacher: e.assistantTeacher?.name ?? null,
+      }));
+    const students = enrollments.map((e) => ({
+      id: e.student.id,
+      firstName: e.student.firstName,
+      lastName: e.student.lastName,
+      code: e.student.studentCode,
+      joinedAt: e.joinedAt,
+    }));
+    const ids = students.map((s) => s.id);
+    const [risk, sent] = await Promise.all([
+      this.riskFor(classroomId, key, ids, classroom.riskCriteria),
+      this.sentFor(classroomId, key, ids),
+    ]);
+    return {
+      date: key,
+      today: dateKey(todayUB()),
+      classroom: {
+        id: classroom.id,
+        name: classroom.name,
+        type: classroom.type,
+        grade: classroom.grade,
+      },
+      holiday: day?.isHoliday ? (day.holiday?.title ?? null) : null,
+      lessons,
+      students,
+      attendance,
+      homework,
+      criteria: risk.criteria,
+      risk: risk.flags,
+      sent,
+      canEditCriteria: role === Role.ADMIN || role === Role.TEACHER_PLUS,
+    };
+  }
+
+  /** 15 сек тутмын хөнгөн шинэчлэл: тэр өдрийн тэмдэглэгээ + эрсдэл */
+  async marks(classroomId: string, dateStr: string, userId: string, role: Role) {
+    const date = this.parseDate(dateStr);
+    const classroom = await this.assertClassAccess(classroomId, userId, role, {
+      date,
+    });
+    const studentIds = (
+      await this.prisma.enrollment.findMany({
+        where: { classroomId, leftAt: null, student: { archivedAt: null } },
+        select: { studentId: true },
+      })
+    ).map((e) => e.studentId);
+    const [attendance, homework, risk, sent] = await Promise.all([
+      this.attendanceRows(classroomId, date),
+      this.homeworkRows(classroomId, date),
+      this.riskFor(classroomId, dateKey(date), studentIds, classroom.riskCriteria),
+      this.sentFor(classroomId, dateKey(date), studentIds),
+    ]);
+    return {
+      date: dateKey(date),
+      attendance,
+      homework,
+      criteria: risk.criteria,
+      risk: risk.flags,
+      sent,
+    };
+  }
+
+  async getCriteria(
+    classroomId: string,
+    userId: string,
+    role: Role,
+    dateStr?: string,
+  ) {
+    const classroom = await this.assertClassAccess(
+      classroomId,
+      userId,
+      role,
+      dateStr ? { date: this.parseDate(dateStr) } : {},
+    );
+    return {
+      criteria: normalizeCriteria(classroom.riskCriteria),
+      isDefault: classroom.riskCriteria === null,
+      defaults: DEFAULT_CRITERIA,
+    };
+  }
+
+  /** Багш+ / Админ л (controller-ийн @Roles) — анхдагчтай тэнцүү бол null хадгална */
+  async setCriteria(
+    classroomId: string,
+    dto: RiskCriteriaDto,
+    userId: string,
+    role: Role,
+  ) {
+    const classroom = await this.assertClassAccess(classroomId, userId, role);
+    const parsed = criteriaToStore({ ...dto });
+    if (!parsed.ok) throw new BadRequestException(parsed.error);
+    const updated = await this.prisma.classroom.update({
+      where: { id: classroomId },
+      data: {
+        riskCriteria:
+          parsed.value === null
+            ? Prisma.DbNull
+            : (parsed.value as unknown as Prisma.InputJsonValue),
+      },
+      select: { riskCriteria: true },
+    });
+    await this.audit.record({
+      actorId: userId,
+      actorRole: role,
+      action: 'UPDATE',
+      entity: 'ClassroomRiskCriteria',
+      entityId: classroomId,
+      before: { riskCriteria: classroom.riskCriteria ?? null },
+      after: { riskCriteria: updated.riskCriteria ?? null },
+    });
+    return {
+      criteria: normalizeCriteria(updated.riskCriteria),
+      isDefault: updated.riskCriteria === null,
+      defaults: DEFAULT_CRITERIA,
+    };
+  }
+
+  /** Сурагчийн товч мэдээлэл (самбарын drawer): утас, сургууль, сарын ирц, сүүлийн даалгавар */
+  async studentCard(
+    classroomId: string,
+    studentId: string,
+    dateStr: string,
+    userId: string,
+    role: Role,
+  ) {
+    const date = this.parseDate(dateStr);
+    const key = dateKey(date);
+    await this.assertClassAccess(classroomId, userId, role, { date });
+    const enrollment = await this.prisma.enrollment.findFirst({
+      where: { classroomId, studentId, leftAt: null },
+      select: { joinedAt: true },
+    });
+    if (!enrollment) throw new NotFoundException('Сурагч энэ ангид алга байна');
+
+    const monthFrom = `${key.slice(0, 8)}01`;
+    const monthTo = addDaysKey(
+      `${addDaysKey(monthFrom, 32).slice(0, 8)}01`,
+      -1,
+    );
+    const [user, days, monthAtt, recentHw, recentNotes] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: studentId },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          studentCode: true,
+          phone: true,
+          createdAt: true,
+          lastSeenAt: true,
+          studentProfile: {
+            select: {
+              school: true,
+              grade: true,
+              fatherPhone: true,
+              motherPhone: true,
+              joinedOn: true,
+            },
+          },
+        },
+      }),
+      this.schedule.expandDays(monthFrom, monthTo, classroomId),
+      this.prisma.attendance.findMany({
+        where: {
+          classroomId,
+          studentId,
+          date: {
+            gte: this.parseDate(monthFrom),
+            lte: this.parseDate(monthTo),
+          },
+        },
+        select: { date: true, status: true, lateRange: true, note: true },
+      }),
+      this.prisma.dailyHomeworkMark.findMany({
+        where: {
+          classroomId,
+          studentId,
+          date: { lte: date },
+          OR: [{ status: { not: null } }, { comment: { not: null } }],
+        },
+        select: { date: true, status: true, comment: true },
+        orderBy: { date: 'desc' },
+        take: 10,
+      }),
+      this.prisma.attendance.findMany({
+        where: { classroomId, studentId, date: { lte: date }, note: { not: null } },
+        select: { date: true, status: true, note: true },
+        orderBy: { date: 'desc' },
+        take: 6,
+      }),
+    ]);
+    if (!user) throw new NotFoundException('Сурагч олдсонгүй');
+    const p = user.studentProfile;
+    return {
+      student: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        code: user.studentCode,
+        phone: user.phone,
+        fatherPhone: p?.fatherPhone ?? null,
+        motherPhone: p?.motherPhone ?? null,
+        school: p?.school ?? null,
+        grade: p?.grade ?? null,
+        joinedOn: p?.joinedOn
+          ? dateKey(p.joinedOn)
+          : dateKey(enrollment.joinedAt),
+        registeredAt: user.createdAt,
+        lastSeenAt: user.lastSeenAt,
+      },
+      month: {
+        from: monthFrom,
+        to: monthTo,
+        lessonDays: days.filter((d) => d.classes.length > 0).map((d) => d.date),
+        attendance: monthAtt.map((r) => ({ ...r, date: dateKey(r.date) })),
+      },
+      homework: recentHw.map((r) => ({ ...r, date: dateKey(r.date) })),
+      notes: recentNotes.map((r) => ({ ...r, date: dateKey(r.date) })),
+    };
   }
 
   // Ангийн сүүлийн 2 БОДИТ хичээлтэй өдрийг тогтооно (beforeDate-ээс өмнөх).
@@ -208,8 +808,10 @@ export class AttendanceService {
     userId: string,
     role: Role,
   ) {
-    await this.assertClassAccess(classroomId, userId, role);
     const parsedDate = this.parseDate(date);
+    await this.assertClassAccess(classroomId, userId, role, {
+      date: parsedDate,
+    });
 
     // Тухайн өдөр идэвхтэй байсан бүх сурагчийг ирцтэй нь хамт буцаана —
     // ирц тэмдэглээгүй сурагч null статустай харагдана
@@ -290,7 +892,6 @@ export class AttendanceService {
     userId: string,
     role: Role,
   ) {
-    await this.assertClassAccess(classroomId, userId, role);
     if (!from || !to) {
       throw new BadRequestException(
         '"from" болон "to" огноо заавал шаардлагатай',
@@ -303,6 +904,10 @@ export class AttendanceService {
         '"from" огноо "to" огнооноос өмнө байх ёстой',
       );
     }
+    await this.assertClassAccess(classroomId, userId, role, {
+      from: fromDate,
+      to: toDate,
+    });
 
     const [enrollments, counts] = await Promise.all([
       this.prisma.enrollment.findMany({
@@ -420,8 +1025,8 @@ export class AttendanceService {
         ...(from || to
           ? {
               date: {
-                ...(from ? { gte: new Date(from) } : {}),
-                ...(to ? { lte: new Date(to) } : {}),
+                ...(from ? { gte: this.parseDate(from) } : {}),
+                ...(to ? { lte: this.parseDate(to) } : {}),
               },
             }
           : {}),

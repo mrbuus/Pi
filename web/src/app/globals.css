@@ -61,6 +61,7 @@
      --brand-soft #1E3A8A. Нэг өнгөний өнцөг, гэрэлтэлт нь л өөр.
      #1E3A8A нь #FAF9F6 дээр 9.87:1 — гарчигт тод, нүд цочроохгүй. */
   --brand-soft: #1E3A8A;
+  --logo: #273F74;      /* логоны хар хөх — танхимын дүрс г.м. (9.7:1) */
   /* Цайвар цэнхэр ДЭВСГЭРИЙН тон (bg-brand-tint). Текстэд ХЭЗЭЭ Ч
      хэрэглэхгүй — энэ нь зөвхөн зөөлөн дэвсгэрийн угаалт. */
   --brand-tint: #DCE6FB;
@@ -128,6 +129,7 @@
 
     --brand-bright: #4F7FE6;
     --brand-soft: #9DB8F5;
+    --logo: #9AB7F2;      /* логоны өнгө аяс, харанхуйд цайвар (8.3:1) */
     --brand-tint: #1B2A4A;
     --teal: #34D6A8;
     --gold: #E8C468;
@@ -173,6 +175,7 @@
 
   --brand-bright: #4F7FE6;
   --brand-soft: #9DB8F5;
+  --logo: #9AB7F2;      /* логоны өнгө аяс, харанхуйд цайвар (8.3:1) */
   --brand-tint: #1B2A4A;
   --teal: #34D6A8;
   --gold: #E8C468;
@@ -201,6 +204,7 @@
   --color-brand: var(--brand);
   --color-brand-bright: var(--brand-bright);
   --color-brand-soft: var(--brand-soft);
+  --color-logo: var(--logo);
   --color-brand-tint: var(--brand-tint);
   --color-brand-navy: var(--brand-navy);
   --color-brand-navy-soft: var(--brand-navy-soft);
@@ -727,3 +731,4 @@ textarea:focus-visible,
   :root:not([data-theme="light"]) .logo-on-light { display: none; }
   :root:not([data-theme="light"]) .logo-on-dark { display: block; }
 }
+

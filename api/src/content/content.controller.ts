@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { parseSubjectQuery } from '../common/subject';
 import { Role } from '../generated/prisma/enums';
@@ -22,12 +23,18 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { CreateProblemDto } from './dto/create-problem.dto';
 import { ReorderChaptersDto } from './dto/reorder-chapters.dto';
+import { SubjectChapterDto } from './dto/subject-chapter.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { UpdateProblemDto } from './dto/update-problem.dto';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
+}
+
+// OptionalJwtAuthGuard-тай нийтийн маршрут: нэвтрээгүй бол user байхгүй
+interface MaybeAuthedRequest {
+  user?: { userId: string; role: Role };
 }
 
 @Controller()
@@ -41,9 +48,15 @@ export class ContentController {
     return this.content.createBook(dto, req.user.userId);
   }
 
+  // Нийтийн (нэвтрэлтгүй) хэвээр. Нэвтэрсэн бол хичээлээр шүүнэ: нэвтрээгүй →
+  // зөвхөн MATH; сурагч → өөрийн ангиудын хичээл; ажилтан → бүгд.
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('books')
-  listBooks(@Query('subject') subject?: string) {
-    return this.content.listBooks(parseSubjectQuery(subject));
+  listBooks(
+    @Req() req: MaybeAuthedRequest,
+    @Query('subject') subject?: string,
+  ) {
+    return this.content.listBooks(parseSubjectQuery(subject), req.user);
   }
 
   // Номын мета мэдээлэл засах — Багш+ (эрхийн матрицаар шинээр нээгдсэн).
@@ -82,8 +95,11 @@ export class ContentController {
     return this.content.createChapter(dto, req.user.userId);
   }
 
+  // GET /books-тэй ижил хичээлийн шүүлт (OptionalJwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('chapters')
   listChapters(
+    @Req() req: MaybeAuthedRequest,
     @Query('grade') grade?: string,
     @Query('bookId') bookId?: string,
     @Query('subject') subject?: string,
@@ -92,7 +108,18 @@ export class ContentController {
       grade ? parseInt(grade, 10) : undefined,
       bookId,
       parseSubjectQuery(subject),
+      req.user,
     );
+  }
+
+  // Номгүй хичээлд (Нийгмийн ухаан г.м.) тест үүсгэх бүлэг — хичээлийн ном
+  // байхгүй бол үүсгэнэ, ижил нэртэй бүлэг байвал түүнийг буцаана (давтан дарахад
+  // давхардахгүй). MATH-д ашиглахгүй — математикийн бүтэц номын сангаас.
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Post('chapters/for-subject')
+  subjectChapter(@Body() dto: SubjectChapterDto, @Req() req: AuthedRequest) {
+    return this.content.ensureSubjectChapter(dto, req.user.userId);
   }
 
   // Хуваарийн сэдэв сонгогч: бүлэг/сэдвийг нэрээр хайна (Багш+/Багш/Админ).

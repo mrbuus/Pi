@@ -41,7 +41,7 @@ describe('schedule capability and classroom boundaries', () => {
     await expect(access.topic(actor, 'sched')).resolves.toBeUndefined();
     await expect(
       access.topic({ userId: 'staff', role: Role.TEACHER }, 'sched'),
-    ).rejects.toThrow('denied');
+    ).rejects.toThrow('Багш+');
   });
   it('requires both original and destination grants and stops before moving', async () => {
     prisma.classSchedule.findUnique.mockResolvedValue({ classroomId: 'own' });
@@ -54,6 +54,7 @@ describe('schedule capability and classroom boundaries', () => {
     const controller = new ScheduleController(
       { update } as unknown as ScheduleService,
       access,
+      {} as never,
     );
     await expect(
       controller.update('lesson', { classroomId: 'other' }, { user: actor }),
@@ -64,19 +65,18 @@ describe('schedule capability and classroom boundaries', () => {
     ]);
     expect(update).not.toHaveBeenCalled();
   });
-  it('plain teacher keeps own assigned lesson topic but a random teacher needs a grant', async () => {
+  it('plain teacher only READS the plan — even own lesson cannot be written (owner 2026-10-18)', async () => {
     const teacher = { userId: 'staff', role: Role.TEACHER };
     prisma.classSchedule.findUnique.mockResolvedValue({
       classroomId: 'own',
       teacherId: 'staff',
-      classroom: { teacherId: 'other' },
+      classroom: { teacherId: 'staff' },
     });
-    await access.topic(teacher, 'lesson');
+    await expect(access.topic(teacher, 'lesson')).rejects.toThrow('Багш+');
     expect(capabilities.assert).not.toHaveBeenCalled();
-    capabilities.assert.mockRejectedValue(new Error('no grant'));
-    await expect(
-      access.topic({ ...teacher, userId: 'random' }, 'lesson'),
-    ).rejects.toThrow('no grant');
+    // Админ — schedule.manage (админд үргэлж үнэн)
+    await access.topic({ userId: 'adm', role: Role.ADMIN }, 'lesson');
+    expect(capabilities.assert).toHaveBeenCalledWith('adm', 'schedule.manage', 'own');
   });
   it('queries parent only through verified linked pupils and denies buyer', async () => {
     prisma.enrollment.findMany.mockResolvedValue([{ classroomId: 'own' }]);

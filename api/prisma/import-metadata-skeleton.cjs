@@ -106,8 +106,10 @@ async function main() {
   const chapterCache = new Map();
 
   // ---------- Хавтгайн геометр (HAV): Хавтгай-1 → I, Хавтгай-2 → II ----------
+  // 2026-10-18 эзэн: хоосон HAV ном устгагдсан (deletedAt) — «Хавтгайн геометр 1» (HG1) орлоно, дахин бүү үүсгэ
   const hav = await prisma.book.findUnique({ where: { code: 'HAV' } });
-  if (hav) {
+  if (hav?.deletedAt) stats.skipped.push('Book HAV устгагдсан — алгасав');
+  else if (hav) {
     const parts = [
       { dir: path.join(ROOT, 'Хавтгай-1'), title: 'Хавтгай геометр I', order: 1 },
       { dir: path.join(ROOT, 'Хавтгай-2'), title: 'Хавтгай геометр II', order: 2 },

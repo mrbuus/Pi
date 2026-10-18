@@ -21,7 +21,9 @@ function config() {
   if (url.hostname !== '127.0.0.1' || url.port !== '5544' || url.pathname !== '/pimn_v2' || url.username !== 'pi_v2') throw Error('Зөвхөн pi_v2@127.0.0.1:5544/pimn_v2 сан зөвшөөрнө.');
   if (values.PORT !== '3380' || values.WEB_ORIGIN !== 'http://localhost:3381') throw Error('v2 API3380 / вэб3381 тохиргоо шаардлагатай.');
   if (!values.JWT_SECRET || values.JWT_SECRET.length < 32) throw Error('JWT тохиргоо дутуу.');
-  for (const key of ['QPAY_CLIENT_ID', 'QPAY_CLIENT_SECRET', 'EMAIL_SMTP_PASS', 'GOOGLE_CLIENT_SECRET']) if (values[key]) throw Error('Локал launcher гаднын үйлчилгээний credential ашиглахгүй.');
+  // Google нэвтрэлт зөвхөн хэн болохыг шалгана (төлбөр, мессеж илгээхгүй) тул локалд зөвшөөрнө — зөвхөн localhost callback-тай.
+  for (const key of ['QPAY_CLIENT_ID', 'QPAY_CLIENT_SECRET', 'EMAIL_SMTP_PASS']) if (values[key]) throw Error('Локал launcher гаднын үйлчилгээний credential ашиглахгүй.');
+  if (values.GOOGLE_REDIRECT_URI && values.GOOGLE_REDIRECT_URI !== 'http://localhost:3380/api/auth/google/callback') throw Error('Локал Google callback зөвхөн http://localhost:3380/api/auth/google/callback.');
   return { values, dbEnv: { ...process.env, PGPASSWORD: decodeURIComponent(url.password) } };
 }
 function pg(name) {

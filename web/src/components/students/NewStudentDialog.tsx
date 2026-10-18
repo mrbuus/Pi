@@ -155,7 +155,7 @@ export default function NewStudentDialog({
             ))}
           </select>
         </Field>
-        <Field label="Суурьж эхэлсэн">
+        <Field label="Сурч эхэлсэн">
           <input type="date" value={form.joinedOn} onChange={(e) => set("joinedOn")(e.target.value)} className={FIELD} />
         </Field>
         <Field label="Сургуулийн анги">

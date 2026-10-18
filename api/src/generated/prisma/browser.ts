@@ -574,3 +574,34 @@ export type PlacementAttempt = Prisma.PlacementAttemptModel
  * 
  */
 export type PlacementTestConfig = Prisma.PlacementTestConfigModel
+/**
+ * Model MockExamEvent
+ * 
+ */
+export type MockExamEvent = Prisma.MockExamEventModel
+/**
+ * Model MockExamRegistration
+ * 
+ */
+export type MockExamRegistration = Prisma.MockExamRegistrationModel
+/**
+ * Model ClassTestStatus
+ * Ангид тест «хассан» (эзэн 2026-10-18): REMOVED = энэ ангид дахиж санал болгохгүй.
+ * «Хийсэн» = ClassTestSession, «үлдсэн» (алгассан) = номын дарааллаас тооцоолно — энд хадгалахгүй.
+ */
+export type ClassTestStatus = Prisma.ClassTestStatusModel
+/**
+ * Model LessonPhoto
+ * Онолын зураг (эзэн 2026-10-18): тухайн өдрийн хичээлийн онолыг томилогдсон сурагч
+ * илгээнэ; тэр өдрийн тестүүдэд (testIds) холбогдож хадгалагдана — хэдэн сарын
+ * дараа ч тухайн тестийн онолын зургийг олно. Ангийн сурагчид, багш нар харна.
+ */
+export type LessonPhoto = Prisma.LessonPhotoModel
+/**
+ * Model LessonMakeup
+ * Нөхөх хичээл (эзэн 2026-10-18): тасалсан/чөлөөтэй/хоцорсон сурагч тухайн өдрийн
+ * хичээлийг нөхөнө — тэмдэглэлийн зургаа илгээж, тестийн A, B хувилбарыг
+ * шалгалтын горимоор хийнэ (ангид A хийсэн бол A тооцогдоно). Үүрэг нь ирц +
+ * ClassTestSession-оос тооцоологдоно; энд зөвхөн илгээсэн зураг ба багшийн баталгаа.
+ */
+export type LessonMakeup = Prisma.LessonMakeupModel

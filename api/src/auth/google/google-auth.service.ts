@@ -116,7 +116,8 @@ export class GoogleAuthService {
       clientId,
       clientSecret,
       redirectUri,
-      webOrigin: process.env.WEB_ORIGIN ?? 'http://localhost:3001',
+      // WEB_ORIGIN нь CORS-д зориулж таслалаар хэд хэдэн хаяг агуулж болно — redirect-д эхнийхийг.
+      webOrigin: (process.env.WEB_ORIGIN ?? 'http://localhost:3001').split(',')[0].trim(),
     };
   }
 
@@ -174,7 +175,14 @@ export class GoogleAuthService {
     const web = (path: string, params: Record<string, string>) =>
       `${cfg.webOrigin}${path}?${new URLSearchParams(params).toString()}`;
 
-    if (query.error) return web('/login', { google: 'cancelled' });
+    if (query.error) {
+      // Профайлаас холбож байгаад цуцалсан хүнийг /login биш профайл руу нь буцаана.
+      const row = query.state
+        ? await this.prisma.googleOAuthState.findUnique({ where: { stateHash: sha256(query.state) } })
+        : null;
+      const path = row?.purpose === GoogleOAuthPurpose.LINK ? '/app/profile' : '/login';
+      return web(path, { google: 'cancelled' });
+    }
     if (!query.code || !query.state) return web('/login', { google: 'error' });
 
     // state-ийг нэг удаа, атомаар хэрэглэнэ (давхар callback-аас хамгаална).

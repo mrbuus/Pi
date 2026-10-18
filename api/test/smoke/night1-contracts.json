@@ -239,7 +239,8 @@
     "method": "POST",
     "path": "/api/users/:id/archive",
     "roles": [
-      "ADMIN"
+      "ADMIN",
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -249,7 +250,8 @@
     "method": "POST",
     "path": "/api/users/:id/unarchive",
     "roles": [
-      "ADMIN"
+      "ADMIN",
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -619,8 +621,7 @@
     "path": "/api/lesson-records/:scheduleId/confirm",
     "roles": [
       "ADMIN",
-      "TEACHER_PLUS",
-      "TEACHER"
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -631,8 +632,7 @@
     "path": "/api/lesson-records/:scheduleId/confirm",
     "roles": [
       "ADMIN",
-      "TEACHER_PLUS",
-      "TEACHER"
+      "TEACHER_PLUS"
     ]
   },
   {
@@ -1056,5 +1056,316 @@
     ],
     "method": "POST",
     "path": "/api/payments/ledger/student/:id/pay"
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "classrooms/classrooms.controller",
+    "controller": "ClassroomsController",
+    "method": "POST",
+    "path": "/api/classrooms",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "classrooms/classrooms.controller",
+    "controller": "ClassroomsController",
+    "method": "POST",
+    "path": "/api/classrooms/:id/disband",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "GET",
+    "path": "/api/makeup/classrooms/:classroomId",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "GET",
+    "path": "/api/makeup/me",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "POST",
+    "path": "/api/makeup/me/:classroomId/:date/photos",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "POST",
+    "path": "/api/makeup/me/:classroomId/:date/tests/:testId/open",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "PUT",
+    "path": "/api/makeup/:classroomId/:studentId/:date",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "GET",
+    "path": "/api/lesson-day/me/photos",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "GET",
+    "path": "/api/lesson-day/:classroomId/:date/photos",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS",
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "POST",
+    "path": "/api/lesson-day/:classroomId/:date/photos",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS",
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "class-sessions/class-sessions.controller",
+    "controller": "ClassSessionsController",
+    "method": "GET",
+    "path": "/api/classrooms/:id/roadmap",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "class-sessions/class-sessions.controller",
+    "controller": "ClassSessionsController",
+    "method": "PUT",
+    "path": "/api/classrooms/:id/tests/:testId/status",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "schedule/schedule.controller",
+    "controller": "ScheduleController",
+    "method": "GET",
+    "path": "/api/schedule/day-plan",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "schedule/schedule.controller",
+    "controller": "ScheduleController",
+    "method": "GET",
+    "path": "/api/schedule/plan-tests",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "schedule/schedule.controller",
+    "controller": "ScheduleController",
+    "method": "GET",
+    "path": "/api/schedule/:id/plan",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "schedule/schedule.controller",
+    "controller": "ScheduleController",
+    "method": "PUT",
+    "path": "/api/schedule/:id/plan",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "attendance/attendance.controller",
+    "controller": "AttendanceController",
+    "method": "GET",
+    "path": "/api/attendance/board",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "attendance/attendance.controller",
+    "controller": "AttendanceController",
+    "method": "GET",
+    "path": "/api/attendance/classrooms/:id/board",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "attendance/attendance.controller",
+    "controller": "AttendanceController",
+    "method": "GET",
+    "path": "/api/attendance/classrooms/:id/marks",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "attendance/attendance.controller",
+    "controller": "AttendanceController",
+    "method": "GET",
+    "path": "/api/attendance/classrooms/:id/criteria",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "attendance/attendance.controller",
+    "controller": "AttendanceController",
+    "method": "PUT",
+    "path": "/api/attendance/classrooms/:id/criteria",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "attendance/attendance.controller",
+    "controller": "AttendanceController",
+    "method": "GET",
+    "path": "/api/attendance/classrooms/:id/students/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "attendance/attendance.controller",
+    "controller": "AttendanceController",
+    "method": "POST",
+    "path": "/api/classrooms/:id/attendance",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "assignments/homework-marks.controller",
+    "controller": "HomeworkMarksController",
+    "method": "GET",
+    "path": "/api/classrooms/:id/homework-marks/online",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "assignments/homework-marks.controller",
+    "controller": "HomeworkMarksController",
+    "method": "POST",
+    "path": "/api/classrooms/:id/homework-marks/bulk",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "assignments/homework-marks.controller",
+    "controller": "HomeworkMarksController",
+    "method": "PATCH",
+    "path": "/api/classrooms/:id/homework-marks/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
+    "file": "classrooms/classrooms.controller",
+    "controller": "ClassroomsController",
+    "method": "GET",
+    "path": "/api/classrooms/attention-students",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
   }
 ]

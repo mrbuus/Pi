@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
-import { Role, StudentType } from '../generated/prisma/enums';
+import { Role, StudentType, Subject } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 
 // Багш эрхтэй роль бүлэг — контент/тест/бичлэгийн эрхийн шалгалт бүрт ижил
@@ -184,6 +184,107 @@ export interface ChapterAccessTarget {
   freePreview: boolean;
 }
 
+// ============ Хичээлээр хаалттай контент (эзэн 2026-10-18) ============
+// MATH = анхдагч, нийтийн хичээл. Бусад хичээл (SOCIAL_STUDIES, SAT) зөвхөн
+// тухайн хичээлтэй ИДЭВХТЭЙ ангийн хэрэглэгчид харагдана (эцэг эх — баталгаажсан
+// холбоотой хүүхдийнх). Classroom.subject null = MATH. Төвийн ажилтан бүгдийг харна.
+// Номгүй бүлэг, бүлэггүй тест = MATH.
+
+/** Ангиар хаалттай хичээлүүд (MATH-аас бусад) */
+export const GATED_SUBJECTS: Subject[] = Object.values(Subject).filter(
+  (s) => s !== Subject.MATH,
+);
+
+/**
+ * Хэрэглэгчийн идэвхтэй (leftAt: null, архивлаагүй) ангиудын хичээл. PARENT бол
+ * баталгаажсан холбоотой хүүхдүүдийн ангиудынх ч орно.
+ */
+export async function activeClassSubjects(
+  prisma: PrismaService,
+  userId: string,
+  role?: Role,
+): Promise<Set<Subject>> {
+  const studentIds = [userId];
+  if (role === Role.PARENT) {
+    const links = await prisma.parentLink.findMany({
+      where: { parentId: userId, verifiedAt: { not: null } },
+      select: { studentId: true },
+    });
+    studentIds.push(...links.map((l) => l.studentId));
+  }
+  const rows = await prisma.enrollment.findMany({
+    where: {
+      studentId: { in: studentIds },
+      leftAt: null,
+      classroom: { archived: false },
+    },
+    select: { classroom: { select: { subject: true } } },
+  });
+  return new Set(rows.map((r) => r.classroom.subject ?? Subject.MATH));
+}
+
+/** Хэрэглэгчид ХААЛТТАЙ үлдэх хичээлүүд (өөрийн ангид байхгүй gated хичээл) */
+export function blockedSubjects(classSubjects: Iterable<Subject>): Subject[] {
+  const own = new Set(classSubjects);
+  return GATED_SUBJECTS.filter((s) => !own.has(s));
+}
+
+/**
+ * Номын сангийн КАТАЛОГТ (номын жагсаалт, бүлгийн жагсаалт) харагдах хичээлүүд.
+ * null = хязгааргүй (төвийн ажилтан). Нэвтрээгүй → зөвхөн MATH. Ангитай сурагч →
+ * зөвхөн өөрийн ангиудын хичээл (Нийгмийн ухааны ангийн сурагчид математикийн
+ * ном харуулахгүй). Бусад (BUYER, PARENT, ангигүй сурагч) → MATH + ангийн хичээл.
+ */
+export async function catalogSubjectsFor(
+  prisma: PrismaService,
+  user: { userId: string; role: Role } | null | undefined,
+): Promise<Subject[] | null> {
+  if (!user?.userId) return [Subject.MATH];
+  if (
+    TEACHER_ROLES.includes(user.role) &&
+    (await internalTeachingRole(prisma, user.userId))
+  )
+    return null;
+  const own = await activeClassSubjects(prisma, user.userId, user.role);
+  if (user.role === Role.STUDENT && own.size > 0) return [...own];
+  return [...new Set([Subject.MATH, ...own])];
+}
+
+/** Бүлгийн жагсаалтын WHERE: номгүй бүлэг MATH-д тооцогдоно */
+export function chapterSubjectWhere(
+  subjects: Subject[],
+): Prisma.ChapterWhereInput {
+  return {
+    OR: [
+      ...(subjects.includes(Subject.MATH) ? [{ bookId: null }] : []),
+      { book: { subject: { in: subjects } } },
+    ],
+  };
+}
+
+/** Бүлгийн хичээл — дуудагч `book.subject`-ийг сонгосон бол нэмэлт query хийхгүй */
+async function chapterSubjectOf(
+  prisma: PrismaService,
+  chapter: ChapterAccessTarget,
+): Promise<Subject> {
+  if ('book' in chapter) {
+    const book = chapter.book;
+    if (
+      book &&
+      typeof book === 'object' &&
+      'subject' in book &&
+      typeof book.subject === 'string'
+    )
+      return book.subject as Subject;
+  }
+  if (!chapter.bookId) return Subject.MATH;
+  const book = await prisma.book.findUnique({
+    where: { id: chapter.bookId },
+    select: { subject: true },
+  });
+  return book?.subject ?? Subject.MATH;
+}
+
 /** A cleared grantedAt revokes/refunds a purchase; there is no separate refund status in Purchase. */
 export function activePurchaseWhere(
   userId: string,
@@ -234,13 +335,27 @@ async function chapterGrant(
   chapter: ChapterAccessTarget,
   requiresVideo: boolean,
 ): Promise<boolean> {
-  if (chapter.freePreview) return true;
+  const subject = await chapterSubjectOf(prisma, chapter);
+  const gated = subject !== Subject.MATH;
+  if (chapter.freePreview && !gated) return true;
   if (
     TEACHER_ROLES.includes(role) &&
     (await internalTeachingRole(prisma, userId))
   )
     return true;
-  if (await hasActiveClassroomEnrollment(prisma, userId, role)) return true;
+  // Хаалттай хичээл: тухайн хичээлийн идэвхтэй ангигүй бол ямар ч эрх (pass,
+  // худалдан авалт, freePreview) хүрэхгүй
+  let own: Set<Subject> | null = null;
+  if (gated) {
+    own = await activeClassSubjects(prisma, userId, role);
+    if (!own.has(subject)) return false;
+    if (chapter.freePreview) return true;
+  }
+  // Танхимын анги нь зөвхөн өөрийн хичээлийн бүлгүүдийг нээнэ (null = MATH)
+  if (await hasActiveClassroomEnrollment(prisma, userId, role)) {
+    own ??= await activeClassSubjects(prisma, userId, role);
+    if (own.has(subject)) return true;
+  }
   if (
     await hasCoveringPass(prisma, userId, {
       chapterId: chapter.id,

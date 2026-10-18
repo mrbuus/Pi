@@ -58,3 +58,9 @@ docs/v2/brand/fb-private/
 # Сурагчдын амжилтын зураг (хувийн мэдээлэл, git-д оруулахгүй)
 docs/v2/hero/home/amjilt/
 web/public/amjilt/
+
+# AWS нууц — SSH түлхүүр, IAM-ийн нууц үг/access key CSV
+*.pem
+*_credentials.csv
+*_accessKeys.csv
+infra/aws/**/.env

@@ -6,6 +6,7 @@ import { NotificationCenterModule } from '../notification-center/notification-ce
 import { ScheduleController } from './schedule.controller';
 import { ScheduleAccessService } from './schedule-access.service';
 import { ScheduleService } from './schedule.service';
+import { LessonPlanService } from './lesson-plan.service';
 import { TeacherHoursController } from './teacher-hours.controller';
 import { TeacherHoursService } from './teacher-hours.service';
 
@@ -22,6 +23,7 @@ import { TeacherHoursService } from './teacher-hours.service';
   providers: [
     ScheduleAccessService,
     ScheduleService,
+    LessonPlanService,
     CalendarIcsService,
     TeacherHoursService,
   ],

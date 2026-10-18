@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
   },
   // Хөгжүүлэлтийн "N" индикаторыг нуух (хэрэглэгчийн хүсэлтээр)
   devIndicators: false,
+  // Утаснаас LAN хаягаар dev серверт орох (эс бөгөөс JS хаагдаж нэвтрэх, анимаци ажиллахгүй)
+  // + Cloudflare түр холбоос (гаднаас демо үзүүлэх, .runtime/demo-proxy.cjs-ээр зөвхөн /demo/* нээлттэй)
+  allowedDevOrigins: ["172.20.10.3", "192.168.*.*", "10.*.*.*", "172.*.*.*", "*.trycloudflare.com"],
 };
 
 export default nextConfig;

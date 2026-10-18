@@ -9,10 +9,13 @@ import { Prisma } from '../generated/prisma/client';
 import { MistakeType, Role, Subject } from '../generated/prisma/enums';
 import {
   canAccessChapter,
+  catalogSubjectsFor,
+  chapterSubjectWhere,
   internalTeachingRole,
   assertInternalTeachingStaff,
   TEACHER_ROLES,
 } from '../common/access';
+import { SubjectChapterDto } from './dto/subject-chapter.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   beginRevision,
@@ -28,6 +31,15 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { UpdateProblemDto } from './dto/update-problem.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+
+// Номгүй хичээлийн үндсэн ном (POST /chapters/for-subject үүсгэнэ). Код нь
+// номын сангийн ?book= холбоос болон бодлогын token-д харагдах тул латин, богино.
+const SUBJECT_BOOK_DEFAULTS: Record<Subject, { code: string; title: string }> =
+  {
+    [Subject.MATH]: { code: 'MATH', title: 'Математик' },
+    [Subject.SOCIAL_STUDIES]: { code: 'SOCIAL', title: 'Нийгмийн ухаан' },
+    [Subject.SAT]: { code: 'SAT', title: 'SAT' },
+  };
 
 interface ChoiceRowInput {
   label: string;
@@ -127,15 +139,28 @@ export class ContentService {
   // Архивласан (хуучин V2 биш) номыг каталогт харуулахгүй.
   // problemCount нь library UI-д хоосон shell номыг нуухад хэрэгтэй; admin талд
   // номын үндсэн жагсаалт хэвээр буцна.
-  async listBooks(subject?: Subject) {
+  //
+  // Хичээлийн шүүлт (эзэн 2026-10-18): нэвтрээгүй → MATH, сурагч → өөрийн
+  // ангиудын хичээл, ажилтан → бүгд (common/access.ts catalogSubjectsFor).
+  async listBooks(
+    subject?: Subject,
+    viewer?: { userId: string; role: Role } | null,
+  ) {
+    const visible = await catalogSubjectsFor(this.prisma, viewer);
+    if (subject && visible && !visible.includes(subject)) return [];
     const books = await this.prisma.book.findMany({
       where: {
         archived: false,
         deletedAt: null,
-        ...(subject ? { subject } : {}),
+        ...(subject
+          ? { subject }
+          : visible
+            ? { subject: { in: visible } }
+            : {}),
       },
       include: {
-        _count: { select: { chapters: true } },
+        // Зөөлөн устгасан бүлэг тоологдвол хоосон ном номын санд харагдана
+        _count: { select: { chapters: { where: { deletedAt: null } } } },
         chapters: {
           select: {
             _count: { select: { problems: true, tests: true } },
@@ -230,12 +255,132 @@ export class ContentService {
     return { deleted: true, cascadedChapters: activeChapters.length };
   }
 
+  /**
+   * Номгүй хичээлийн тестийн бүлэг (эзэн 2026-10-18: «Нийгмийн ухаан» таб хоосон).
+   * Тухайн хичээлийн идэвхтэй ном байхгүй бол үндсэн номыг үүсгэнэ (жишээ нь
+   * SOCIAL — «Нийгмийн ухаан»), дотор нь тестийн нэртэй бүлэг үүсгэнэ. Ижил
+   * нэртэй идэвхтэй бүлэг байвал түүнийг буцаана (давтан хүсэлт давхардуулахгүй).
+   * MATH-ийн бүтэц номын сангаас удирдагддаг тул энд үүсгэхгүй.
+   */
+  async ensureSubjectChapter(dto: SubjectChapterDto, actorId: string) {
+    const actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
+    if (dto.subject === Subject.MATH)
+      throw new BadRequestException(
+        'Математикийн бүлгийг номын сангаас сонгоно уу',
+      );
+    const title = dto.title.trim().replace(/\s+/g, ' ');
+    if (!title) throw new BadRequestException('Тестийн нэр оруулна уу');
+
+    const defaults = SUBJECT_BOOK_DEFAULTS[dto.subject];
+    const bookSelect = { id: true, code: true, title: true, subject: true };
+    const activeBook = {
+      archived: false,
+      deletedAt: null,
+      subject: dto.subject,
+    };
+    let createdBook = false;
+    let book =
+      (await this.prisma.book.findFirst({
+        where: { ...activeBook, code: defaults.code },
+        select: bookSelect,
+      })) ??
+      (await this.prisma.book.findFirst({
+        where: activeBook,
+        select: bookSelect,
+        orderBy: { code: 'asc' },
+      }));
+    if (!book) {
+      // Үндсэн код (SOCIAL) өөр/устгасан номд эзлэгдсэн бол дагавартай код
+      const taken = await this.prisma.book.findUnique({
+        where: { code: defaults.code },
+        select: { id: true },
+      });
+      try {
+        book = await this.prisma.book.create({
+          data: {
+            code: taken
+              ? `${defaults.code}-${Date.now().toString(36).toUpperCase()}`
+              : defaults.code,
+            title: defaults.title,
+            subject: dto.subject,
+          },
+          select: bookSelect,
+        });
+        createdBook = true;
+      } catch (e) {
+        // Зэрэг хүсэлт: нөгөө нь түрүүлж үүсгэсэн бол түүнийг ашиглана
+        if (
+          !(e instanceof Prisma.PrismaClientKnownRequestError) ||
+          e.code !== 'P2002'
+        )
+          throw e;
+        book = await this.prisma.book.findFirst({
+          where: activeBook,
+          select: bookSelect,
+          orderBy: { code: 'asc' },
+        });
+        if (!book) throw e;
+      }
+      if (createdBook)
+        await this.recordAudit(
+          actorId,
+          actorRole,
+          'CREATE',
+          'Book',
+          book.id,
+          null,
+          book,
+        );
+    }
+
+    const chapterSelect = {
+      id: true,
+      title: true,
+      order: true,
+      grade: true,
+      bookId: true,
+      book: { select: bookSelect },
+    };
+    const existing = await this.prisma.chapter.findFirst({
+      where: { bookId: book.id, deletedAt: null, title },
+      select: chapterSelect,
+    });
+    if (existing) return { ...existing, created: false };
+
+    const last = await this.prisma.chapter.findFirst({
+      where: { bookId: book.id },
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    });
+    const chapter = await this.prisma.chapter.create({
+      data: { bookId: book.id, title, order: (last?.order ?? 0) + 1 },
+      select: chapterSelect,
+    });
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'CREATE',
+      'Chapter',
+      chapter.id,
+      null,
+      chapter,
+    );
+    return { ...chapter, created: true };
+  }
+
   async createChapter(dto: CreateChapterDto, actorId: string) {
     await assertInternalTeachingStaff(this.prisma, actorId);
     return this.prisma.chapter.create({ data: dto });
   }
 
-  listChapters(grade?: number, bookId?: string, subject?: Subject) {
+  async listChapters(
+    grade?: number,
+    bookId?: string,
+    subject?: Subject,
+    viewer?: { userId: string; role: Role } | null,
+  ) {
+    const visible = await catalogSubjectsFor(this.prisma, viewer);
+    if (subject && visible && !visible.includes(subject)) return [];
     return this.prisma.chapter.findMany({
       where: {
         ...(grade ? { grade } : {}),
@@ -246,6 +391,8 @@ export class ContentService {
         deletedAt: null,
         // Архивласан/устгасан номын бүлгүүдийг харуулахгүй
         OR: [{ bookId: null }, { book: { archived: false, deletedAt: null } }],
+        // Хичээлээр хаалттай контент (нэвтрээгүй → MATH, сурагч → ангийн хичээл)
+        ...(visible ? { AND: [chapterSubjectWhere(visible)] } : {}),
       },
       include: {
         book: { select: { code: true, title: true } },
@@ -946,6 +1093,8 @@ export class ContentService {
         ...(subject ? { book: { subject } } : {}),
         deletedAt: null,
         OR: [{ bookId: null }, { book: { archived: false, deletedAt: null } }],
+        // Нийтийн каталог зөвхөн MATH (бусад хичээл ангиар хаалттай)
+        AND: [chapterSubjectWhere([Subject.MATH])],
       },
       select: {
         id: true,
@@ -967,6 +1116,8 @@ export class ContentService {
         id: chapterId,
         deletedAt: null,
         OR: [{ bookId: null }, { book: { archived: false, deletedAt: null } }],
+        // Нийтийн каталог зөвхөн MATH (бусад хичээл ангиар хаалттай)
+        AND: [chapterSubjectWhere([Subject.MATH])],
       },
       select: {
         id: true,

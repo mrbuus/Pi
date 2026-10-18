@@ -50,17 +50,34 @@ describe('daily classroom preview', () => {
     };
     service = new LessonFlowService(db as PrismaService);
   });
-  it('denies random teacher-plus before reading pupil data', async () => {
+  it('denies a random teacher before reading pupil data', async () => {
     await expect(
-      service.preview(
-        'class',
-        '2026-10-07',
-        'chapter',
-        'random',
-        Role.TEACHER_PLUS,
-      ),
+      service.preview('class', '2026-10-07', 'chapter', 'random', Role.TEACHER),
     ).rejects.toMatchObject({ status: 403 });
     expect(db.enrollment.findMany).not.toHaveBeenCalled();
+  });
+  it('denies students and parents', async () => {
+    for (const role of [Role.STUDENT, Role.PARENT])
+      await expect(
+        service.preview('class', '2026-10-07', 'chapter', 'owner', role),
+      ).rejects.toMatchObject({ status: 403 });
+  });
+  it('lets teacher-plus, admin and the assistant class teacher run any/own class', async () => {
+    db.classroom.findUnique.mockResolvedValue({
+      id: 'class',
+      teacherId: 'owner',
+      assistantTeacherId: 'helper',
+      name: 'Class',
+      archived: false,
+    });
+    for (const [user, role] of [
+      ['random', Role.TEACHER_PLUS],
+      ['random', Role.ADMIN],
+      ['helper', Role.TEACHER],
+    ] as const)
+      await expect(
+        service.preview('class', '2026-10-07', 'chapter', user, role),
+      ).resolves.toMatchObject({ counters: { classSize: 2 } });
   });
   it('uses real distinct pupil denominators, unknown theory and attendance-aware suggestions', async () => {
     const p = await service.preview(

@@ -19,6 +19,7 @@ function fixture(user = actor(Role.TEACHER, true)) {
   return {
     user: { findUnique: jest.fn().mockResolvedValue(user) },
     enrollment: { findFirst: jest.fn().mockResolvedValue(null) },
+    book: { findUnique: jest.fn().mockResolvedValue({ subject: 'MATH' }) },
     userPass: { findMany: jest.fn().mockResolvedValue([]) },
     purchase: { findFirst: jest.fn().mockResolvedValue(null) },
     problem: { findUnique: jest.fn() },

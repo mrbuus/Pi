@@ -42,6 +42,9 @@ export interface StudentListItem {
   email?: string | null;
   role: string;
   archivedAt?: string | null;
+  /** Архивласан шалтгаан, сүүлийн анги (зөвхөн архивын жагсаалтад) */
+  archiveReason?: string | null;
+  lastClassroom?: ClassroomLite | null;
   /** Сайтад сүүлд орсон (JwtStrategy 5 мин тутам шинэчилнэ) */
   lastSeenAt?: string | null;
   studentProfile?: StudentProfileLite | null;
@@ -73,6 +76,9 @@ export interface StudentDetailData {
   createdAt?: string;
   lastSeenAt?: string | null;
   archivedAt?: string | null;
+  archiveReason?: string | null;
+  /** Архивлагдсан сурагчийн сүүлийн анги */
+  lastClassroom?: ClassroomLite | null;
   focus?: StudentFocus | null;
   studentProfile: StudentProfileLite | null;
   currentClassroom: ClassroomLite | null;

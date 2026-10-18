@@ -302,11 +302,32 @@ export async function uploadFile(
 // хэдийн байгаа access token-оо ?token= query параметраар хавсаргана —
 // сервер тал үүнийг Bearer header-тэй яг адилхан баталгаажуулна
 // (api/src/storage/files-auth.guard.ts-ийг үз).
+/** API-ийн бүтэн хаяг — нийтийн (токенгүй) зурагт, ж: үнэгүй тестийн бодлогын зураг */
+export function apiUrl(path: string): string {
+  return `${API_URL}${path}`;
+}
+
 export function fileUrl(key?: string | null): string | undefined {
   if (!key) return undefined;
   const token = getToken();
   const query = token ? `?token=${encodeURIComponent(token)}` : "";
   return `${API_URL}/files/${key}${query}`;
+}
+
+/**
+ * Нэвтэрсний дараа буцах зам (?next=). Зөвхөн сайтын дотоод, «/»-ээр эхэлсэн зам —
+ * «//evil.com», «http://…», «/login» зэргийг хүлээж авахгүй (open redirect-ээс сэргийлнэ).
+ */
+export function safeNext(raw: string | null | undefined): string | null {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || /[\\\s]/.test(raw)) return null;
+  if (/^\/(login|register|forgot-password)(\/|\?|#|$)/.test(raw)) return null;
+  return raw;
+}
+
+/** Одоогийн хаягийн ?next= утгыг аюулгүй уншина (нэвтрэх/бүртгүүлэх хуудас) */
+export function nextFromLocation(): string | null {
+  if (typeof window === "undefined") return null;
+  return safeNext(new URLSearchParams(window.location.search).get("next"));
 }
 
 export function homeForRole(role: string): string {

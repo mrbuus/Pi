@@ -12,6 +12,21 @@ import { beginRevision, commitRevision } from '../revisions/revision-store';
 import { dismissalDate } from '../learning-lab/dismissal';
 import { packetInput, receiptInput, turnInput } from './input';
 import { choosePhotoTurn, homeworkPrefill, RotationPupil } from './rotation';
+import { isClassTeacher } from '../common/class-teachers';
+
+/**
+ * Өдрийн багцын ажилтны эрх (засвар 2026-10-18): ADMIN, TEACHER_PLUS — бүх анги;
+ * TEACHER — ангийн үндсэн эсвэл туслах багш (common/class-teachers.ts).
+ * Өмнө нь зөвхөн Classroom.teacherId байсан тул Багш+ ба туслах багш ордоггүй байв.
+ */
+export function canRunClass(
+  classroom: { teacherId: string | null; assistantTeacherId?: string | null },
+  userId: string,
+  role: Role,
+): boolean {
+  if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return true;
+  return role === Role.TEACHER && isClassTeacher(classroom, userId);
+}
 @Injectable()
 export class LessonFlowService {
   constructor(private readonly prisma: PrismaService) {}
@@ -27,15 +42,17 @@ export class LessonFlowService {
       end = new Date(start.getTime() + 86400000);
     const classroom = await this.prisma.classroom.findUnique({
       where: { id: classroomId },
-      select: { id: true, teacherId: true, archived: true, name: true },
+      select: {
+        id: true,
+        teacherId: true,
+        assistantTeacherId: true,
+        archived: true,
+        name: true,
+      },
     });
     if (!classroom || classroom.archived)
       throw new NotFoundException('Анги олдсонгүй');
-    if (
-      role !== Role.ADMIN &&
-      (!(role === Role.TEACHER || role === Role.TEACHER_PLUS) ||
-        classroom.teacherId !== userId)
-    )
+    if (!canRunClass(classroom, userId, role))
       throw new ForbiddenException('Өөрийн ангийг сонгоно уу.');
     const chapter = await this.prisma.chapter.findFirst({
       where: { id: chapterId, deletedAt: null },
@@ -261,15 +278,16 @@ export class LessonFlowService {
   ) {
     const c = await db.classroom.findUnique({
       where: { id: classroomId },
-      select: { id: true, teacherId: true, archived: true },
+      select: {
+        id: true,
+        teacherId: true,
+        assistantTeacherId: true,
+        archived: true,
+      },
     });
     if (!c || (c.archived && !allowArchived))
       throw new NotFoundException('Анги олдсонгүй');
-    if (
-      role !== Role.ADMIN &&
-      (!(role === Role.TEACHER || role === Role.TEACHER_PLUS) ||
-        c.teacherId !== userId)
-    )
+    if (!canRunClass(c, userId, role))
       throw new ForbiddenException('Өөрийн ангийг сонгоно уу.');
     return c;
   }

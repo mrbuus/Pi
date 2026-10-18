@@ -10,7 +10,7 @@ import { getBottomTabs } from "./nav-data";
  * Эзэн хажуугийн цэсэнд дургүй байсан — утсан дээр hamburger-ийн оронд
  * эрхий хуруунд ойр доод мөр: Нүүр + 3 гол цэс + «Бусад». «Бусад» нь
  * хуучин бүрэн цэсийг (Sidebar-ийн drawer) нээнэ тул нэг ч холбоос хасагдаагүй.
- * Компьютер (lg+) дээр харагдахгүй — тэнд зүүн самбар хэвээр.
+ * 768px-ээс өргөн дэлгэц дээр харагдахгүй — тэнд зүүн самбар (эзэн 2026-10-18).
  * ========================================================================== */
 
 export default function BottomTabs({
@@ -35,7 +35,7 @@ export default function BottomTabs({
   return (
     <nav
       aria-label="Гол цэс"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
       <ul className="mx-auto grid max-w-lg auto-cols-fr grid-flow-col gap-1 px-2 py-1.5">
         {tabs.map((t) => {

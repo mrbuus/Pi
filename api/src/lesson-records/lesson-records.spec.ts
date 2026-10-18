@@ -216,19 +216,66 @@ describe('LessonRecordsService.confirm', () => {
     expect(out.date).toBe(DATE);
   });
 
-  it('эрх: энгийн багш зөвхөн тэр өдөр орсон бол; сурагч/эцэг эх хэзээ ч үгүй', async () => {
+  it('эрх: зөвхөн Багш+, Админ батална (эзэн 2026-10-18); Багш — тэр өдөр орсон ч үгүй', async () => {
     const { service, prisma } = makeService();
-    await expect(
-      service.confirm({ userId: 'other', role: Role.TEACHER }, 's1', DATE),
-    ).rejects.toThrow('ахлах/туслах');
-    for (const role of [Role.STUDENT, Role.PARENT, Role.BUYER])
+    for (const role of [Role.TEACHER, Role.STUDENT, Role.PARENT, Role.BUYER])
       await expect(
         service.confirm({ userId: 'lead', role }, 's1', DATE),
       ).rejects.toThrow();
     expect(prisma.lessonRecord.upsert).not.toHaveBeenCalled();
-    await service.confirm({ userId: 'asst', role: Role.TEACHER }, 's1', DATE);
+    await service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE);
     await service.confirm({ userId: 'adm', role: Role.ADMIN }, 's1', DATE);
     expect(prisma.lessonRecord.upsert).toHaveBeenCalledTimes(2);
+  });
+
+  it('батлахдаа хийсэн тест + хассан бодлогыг ClassTestSession-д бичнэ, бусдыг устгана', async () => {
+    const { service, prisma } = makeService();
+    prisma.test.findMany = jest.fn(async ({ select }: any) =>
+      select?.problems
+        ? [
+            { id: 't1', problems: [{ problemId: 'p1' }, { problemId: 'p2' }] },
+            { id: 't2', problems: [{ problemId: 'q1' }] },
+          ]
+        : [{ id: 't1', title: 'Тест 18' }],
+    );
+    prisma.classTestSession.findMany = jest.fn(async ({ where }: any) =>
+      where.testId ? [{ id: 'old', testId: 't9', excludedProblemIds: [] }] : [],
+    );
+    prisma.classTestSession.deleteMany = jest.fn(async () => ({ count: 1 }));
+    prisma.classTestSession.upsert = jest.fn(async () => ({}));
+    await service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE, [
+      { testId: 't1', excludedProblemIds: ['p2', 'p2'] },
+      { testId: 't2', excludedProblemIds: [] },
+    ]);
+    const del = prisma.classTestSession.deleteMany.mock.calls[0][0].where;
+    expect(del).toMatchObject({ classroomId: 'c1', testId: { not: null, notIn: ['t1', 't2'] } });
+    const ups = prisma.classTestSession.upsert.mock.calls.map((c: any) => c[0]);
+    expect(ups[0].where.classroomId_testId_date).toMatchObject({ classroomId: 'c1', testId: 't1' });
+    expect(ups[0].create.excludedProblemIds).toEqual(['p2']);
+    expect(ups[0].update).toEqual({ excludedProblemIds: ['p2'] });
+    expect(ups[1].create.excludedProblemIds).toEqual([]);
+    expect(prisma.lessonRecord.upsert).toHaveBeenCalled();
+  });
+
+  it('өөр тестийн бодлогыг хасах, байхгүй тест — 400, юу ч бичихгүй', async () => {
+    const { service, prisma } = makeService();
+    prisma.test.findMany = jest.fn(async () => [
+      { id: 't1', problems: [{ problemId: 'p1' }] },
+    ]);
+    prisma.classTestSession.upsert = jest.fn();
+    await expect(
+      service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE, [
+        { testId: 't1', excludedProblemIds: ['zzz'] },
+      ]),
+    ).rejects.toThrow('Хассан бодлого');
+    await expect(
+      service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE, [
+        { testId: 't1', excludedProblemIds: [] },
+        { testId: 'missing', excludedProblemIds: [] },
+      ]),
+    ).rejects.toThrow('олдсонгүй');
+    expect(prisma.classTestSession.upsert).not.toHaveBeenCalled();
+    expect(prisma.lessonRecord.upsert).not.toHaveBeenCalled();
   });
 
   it('ирээдүйн огноо болон тэр өдөр товлогдоогүй хичээлийг батлахгүй', async () => {
@@ -242,7 +289,7 @@ describe('LessonRecordsService.confirm', () => {
     ).rejects.toThrow('товлогдоогүй');
   });
 
-  it('буцаахад аудит REVERSE бичнэ; энгийн багш зөвхөн өөрийнхөө', async () => {
+  it('буцаахад аудит REVERSE бичнэ; энгийн багш буцаахгүй', async () => {
     const { service, prisma } = makeService();
     prisma.lessonRecord.findUnique.mockResolvedValue({
       id: 'r1',
@@ -252,9 +299,9 @@ describe('LessonRecordsService.confirm', () => {
       students: [],
     });
     await expect(
-      service.unconfirm({ userId: 'other', role: Role.TEACHER }, 's1', DATE),
+      service.unconfirm({ userId: 'lead', role: Role.TEACHER }, 's1', DATE),
     ).rejects.toThrow();
-    await service.unconfirm({ userId: 'lead', role: Role.TEACHER }, 's1', DATE);
+    await service.unconfirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE);
     expect(prisma.lessonRecord.delete).toHaveBeenCalledWith({ where: { id: 'r1' } });
     expect(prisma.auditLog.create.mock.calls[0][0].data.action).toBe('REVERSE');
   });
@@ -390,8 +437,10 @@ describe('Сурагчийн хичээлийн түүх (ажилтан)', () =
 describe('LessonRecordsController маршрутын эрх', () => {
   const roles = (name: keyof LessonRecordsController) =>
     Reflect.getMetadata(ROLES_KEY, LessonRecordsController.prototype[name]);
-  it('батлах/тайлбар/өдөр/анги — зөвхөн ажилтан; /me — зөвхөн сурагч', () => {
-    for (const name of ['confirm', 'unconfirm', 'note', 'day', 'classroom', 'student'] as const)
+  it('батлах/буцаах — Багш+, Админ; тайлбар/өдөр/анги — ажилтан; /me — сурагч', () => {
+    for (const name of ['confirm', 'unconfirm'] as const)
+      expect([...roles(name)].sort()).toEqual([Role.ADMIN, Role.TEACHER_PLUS].sort());
+    for (const name of ['note', 'day', 'classroom', 'student'] as const)
       expect([...roles(name)].sort()).toEqual(
         [Role.ADMIN, Role.TEACHER, Role.TEACHER_PLUS].sort(),
       );

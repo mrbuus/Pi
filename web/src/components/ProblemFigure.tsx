@@ -30,6 +30,7 @@ export default function ProblemFigure({
   alt,
   isCurrent = false,
   isStaffView = false,
+  variant = "adaptive",
   children,
 }: {
   imageKey?: string | null;
@@ -44,6 +45,12 @@ export default function ProblemFigure({
   isCurrent?: boolean;
   /** Багш/админ харагдацад alt дутуу бол анхааруулга үзүүлнэ (сурагчид үзүүлэхгүй, бодохыг нь блоклохгүй) */
   isStaffView?: boolean;
+  /**
+   * "adaptive" — зургийн харьцаагаар хажуу/дээр (шалгалтын дэлгэц).
+   * "stacked" — бодлого бүр НЭГ загвар: нөхцөл → тогтмол өндөртэй зургийн хүрээ
+   * (бодлогын сан, эзний хүсэлт 2026-10-18).
+   */
+  variant?: "adaptive" | "stacked";
   children: React.ReactNode;
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -59,6 +66,59 @@ export default function ProblemFigure({
   if (!url) {
     // Зураггүй бодлого — энгийн текст layout, багана хуваахгүй
     return <>{children}</>;
+  }
+
+  const stacked = variant === "stacked";
+
+  if (stacked) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">{children}</div>
+        <div>
+          <button
+            type="button"
+            onClick={() => !imageError && setLightboxOpen(true)}
+            className="group relative flex h-56 w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-xl border border-line bg-white p-2 focus-visible:outline-none sm:h-64"
+            aria-label={`${effectiveAlt} — томруулж харах`}
+            disabled={imageError}
+          >
+            {imageError ? (
+              <div className="flex flex-col items-center justify-center gap-2 text-center">
+                <ImageOff size={32} className="text-ink-dim" aria-hidden />
+                <span className="text-sm text-ink-dim">Зураг ачаалагдахгүй байна</span>
+              </div>
+            ) : (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={effectiveAlt}
+                  loading={isCurrent ? "eager" : "lazy"}
+                  fetchPriority={isCurrent ? "high" : "auto"}
+                  // Хүрээ бүх бодлогод ижил өндөртэй; зураг дотроо голлож багтана,
+                  // жижиг зургийг 2 дахин хүртэл л томруулна (бүдгэрэхгүй)
+                  className="h-full w-auto max-w-full rounded-lg transition group-hover:opacity-90"
+                  style={natural ? { ...CONTAIN_STYLE, maxHeight: `min(100%, ${natural.h * 2}px)` } : CONTAIN_STYLE}
+                  onLoad={(e) =>
+                    setNatural({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight || 1 })
+                  }
+                  onError={() => setImageError(true)}
+                />
+              </>
+            )}
+          </button>
+          {isStaffView && !hasAlt && (
+            <p className="mt-2 flex items-center gap-1.5 rounded-lg border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
+              <AlertTriangle size={14} className="shrink-0" aria-hidden="true" />
+              Alt текст оруулаагүй байна — дэлгэцний уншигчид энэ зураг тайлбаргүй харагдана
+            </p>
+          )}
+        </div>
+        {lightboxOpen && (
+          <FigureLightbox url={url} alt={effectiveAlt} onClose={() => setLightboxOpen(false)} />
+        )}
+      </div>
+    );
   }
 
   return (

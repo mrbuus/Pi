@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, TriangleAlert } from "lucide-react";
+import { Check, PencilLine, TriangleAlert } from "lucide-react";
 import { ApiError, api, getRole, uploadFile } from "@/lib/api";
 import RequireRole from "@/components/nav/RequireRole";
 import { Meta } from "@/components/ui/Meta";
@@ -23,6 +24,8 @@ interface Classroom {
   id: string;
   name: string;
   grade?: number | null;
+  /** null = MATH (анхдагч) */
+  subject?: string | null;
   _count: { enrollments: number };
 }
 
@@ -71,6 +74,19 @@ const SUBJECTS = [
   { value: "SOCIAL_STUDIES", label: "Нийгмийн ухаан" },
 ];
 
+// Номын сангаас ирэх холбоос: /app/tests/new?subject=SOCIAL_STUDIES (эзэн 2026-10-18)
+function subjectFromUrl(): string {
+  if (typeof window === "undefined") return "";
+  const q = new URLSearchParams(window.location.search).get("subject") ?? "";
+  return SUBJECTS.some((s) => s.value === q) ? q : "";
+}
+
+// Математикаас бусад хичээл ангиар хаалттай бөгөөд ном/бүлэггүй байж болно —
+// бүлэг сонгоогүй бол тестийн нэрээр шинэ бүлэг үүснэ (POST /chapters/for-subject)
+function isGatedSubject(subject: string): boolean {
+  return subject !== "" && subject !== "MATH";
+}
+
 function parsePositiveInt(value: string): number | undefined {
   const parsed = parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
@@ -79,12 +95,13 @@ function parsePositiveInt(value: string): number | undefined {
 const UNSAVED_WARNING = "Хадгалаагүй өөрчлөлт байна — энэ хуудаснаас гарах уу?";
 
 export default function NewTestPage() {
+  const router = useRouter();
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [problems, setProblems] = useState<Problem[]>([]);
   const [catalogError, setCatalogError] = useState("");
 
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(subjectFromUrl);
   const [title, setTitle] = useState("");
   const [type, setType] = useState("CHAPTER_EXAM");
   const [gradingMode, setGradingMode] = useState("AUTO");
@@ -434,6 +451,17 @@ export default function NewTestPage() {
       hasKnownAnswer(p) && p.analysis?.answerKeyStatus === "REVIEW_REQUIRED",
   ).length;
 
+  // Нийгмийн ухаан г.м.: бодлогогүй бол тестийг үүсгээд «Тест засах» хуудсанд
+  // бодлогоо шууд бичнэ, анги тэнд сонгоно (хоосон тест сурагчид харагдахгүй)
+  const gated = isGatedSubject(subject);
+  const writeLater = gated && selectedProblems.length === 0;
+  const subjectLabel = SUBJECTS.find((s) => s.value === subject)?.label ?? "";
+  const mismatchedClasses = gated
+    ? classrooms.filter(
+        (c) => selectedClasses.includes(c.id) && (c.subject ?? "MATH") !== subject,
+      )
+    : [];
+
   const step1Done = title.trim() !== "";
   const step2Done = selectedProblems.length > 0;
   const step4Done = selectedClasses.length > 0;
@@ -597,14 +625,15 @@ export default function NewTestPage() {
   }
 
   const titleMissing = attemptedSubmit && !title.trim();
-  const classesMissing = attemptedSubmit && selectedClasses.length === 0;
+  const classesMissing =
+    attemptedSubmit && !writeLater && selectedClasses.length === 0;
 
   async function createTest() {
     setFormError("");
     setAttemptedSubmit(true);
     const missing: string[] = [];
     if (!title.trim()) missing.push("Тестийн нэр");
-    if (selectedClasses.length === 0) missing.push("Харагдах анги");
+    if (!writeLater && selectedClasses.length === 0) missing.push("Харагдах анги");
     if (missing.length > 0) {
       setFormError(`Дараах талбарууд дутуу байна: ${missing.join(", ")}`);
       return;
@@ -627,6 +656,15 @@ export default function NewTestPage() {
     saveBlockedRef.current = true;
     try {
       await saveQueueRef.current;
+      // Ном/бүлэггүй хичээл: тестийн нэрээр бүлэг үүсгэнэ (ижил нэртэй бол түүнийг)
+      let targetChapterId = chapterId;
+      if (gated && !targetChapterId) {
+        const chapter = await api<{ id: string }>("/chapters/for-subject", {
+          method: "POST",
+          body: { subject, title: title.trim() },
+        });
+        targetChapterId = chapter.id;
+      }
       const created = await api<{
         id: string;
         answerWarning?: {
@@ -640,14 +678,14 @@ export default function NewTestPage() {
           title: title.trim(),
           type,
           gradingMode,
-          ...(chapterId ? { chapterId } : {}),
+          ...(targetChapterId ? { chapterId: targetChapterId } : {}),
           ...(parsePositiveInt(timeLimit)
             ? { timeLimitMin: parsePositiveInt(timeLimit) }
             : {}),
           ...(groupKey.trim() ? { groupKey: groupKey.trim() } : {}),
           ...(variantLabel.trim() ? { variantLabel: variantLabel.trim() } : {}),
           ...(pdfKey.trim() ? { pdfKey: pdfKey.trim() } : {}),
-          classroomIds: selectedClasses,
+          classroomIds: writeLater ? [] : selectedClasses,
           problems: selectedItems.map(({ problem, points }, index) => ({
             problemId: problem.id,
             order: index + 1,
@@ -655,8 +693,6 @@ export default function NewTestPage() {
           })),
         },
       });
-      setCreatedAnswerWarning(created.answerWarning?.message ?? "");
-      setCreatedTest({ id: created.id, title: title.trim() });
       const savedDraftId = draftIdRef.current;
       draftIdRef.current = "";
       revisionRef.current = 0;
@@ -675,6 +711,13 @@ export default function NewTestPage() {
           /* published test remains successful */
         }
       }
+      if (writeLater) {
+        // Бодлогогүй тест: блок засварлагч дээр бодлого, анги нэмнэ
+        router.push(`/app/tests/${encodeURIComponent(created.id)}/edit`);
+        return;
+      }
+      setCreatedAnswerWarning(created.answerWarning?.message ?? "");
+      setCreatedTest({ id: created.id, title: title.trim() });
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Алдаа гарлаа");
       saveBlockedRef.current = false;
@@ -685,7 +728,7 @@ export default function NewTestPage() {
   }
 
   function resetForm() {
-    setSubject("");
+    setSubject(subjectFromUrl());
     setTitle("");
     setType("CHAPTER_EXAM");
     setGradingMode("AUTO");
@@ -1146,7 +1189,9 @@ export default function NewTestPage() {
                 onChange={(e) => setChapterId(e.target.value)}
                 className={`${inputCls} border-line`}
               >
-                <option value="">Бүлэг сэдэв сонгохгүй</option>
+                <option value="">
+                  {gated ? "Шинэ бүлэг — тестийн нэрээр" : "Бүлэг сэдэв сонгохгүй"}
+                </option>
                 {chapters.map((chapter) => (
                   <option key={chapter.id} value={chapter.id}>
                     {chapter.book?.code ? `${chapter.book.code} — ` : ""}
@@ -1242,17 +1287,27 @@ export default function NewTestPage() {
             title="Бодлого сонгох"
             hint={`Одоогоор ${selectedProblems.length} бодлого сонгосон.`}
           />
-          <ProblemPicker
-            problems={problems}
-            loading={loadingProblems}
-            error={problemsError}
-            chapterChosen={!!chapterId}
-            selectedIds={selectedProblems}
-            onToggle={toggleProblem}
-            onPreview={setPreviewProblem}
-            onSelectFirst={selectFirst}
-            onClearSelection={clearSelection}
-          />
+          {gated && (!chapterId || (!loadingProblems && !problemsError && problems.length === 0)) ? (
+            <div className="flex items-start gap-3 rounded-xl border border-dashed border-line p-4">
+              <PencilLine className="mt-0.5 h-5 w-5 shrink-0 text-brand-soft" aria-hidden />
+              <p className="text-base text-ink-dim">
+                {subjectLabel} тестийн бодлогыг тест үүссэний дараа нээгдэх засварлагчид шууд
+                бичнэ — асуулт, сонголт, зөв хариу, оноо
+              </p>
+            </div>
+          ) : (
+            <ProblemPicker
+              problems={problems}
+              loading={loadingProblems}
+              error={problemsError}
+              chapterChosen={!!chapterId}
+              selectedIds={selectedProblems}
+              onToggle={toggleProblem}
+              onPreview={setPreviewProblem}
+              onSelectFirst={selectFirst}
+              onClearSelection={clearSelection}
+            />
+          )}
         </section>
 
         <section className="rounded-2xl border border-line bg-surface p-6">
@@ -1304,10 +1359,26 @@ export default function NewTestPage() {
               )}
             </p>
           )}
-          {classrooms.length === 0 && !catalogError && (
+          {writeLater && (
+            <p className="text-base text-ink-dim">
+              Бодлогоо бичсэний дараа засварлагчийн «Тохиргоо» хэсэгт анги сонгоно — хоосон
+              тест сурагчид харагдахгүй
+            </p>
+          )}
+          {!writeLater && classrooms.length === 0 && !catalogError && (
             <p className="text-base text-ink-dim">Анги үүсгээгүй байна</p>
           )}
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {!writeLater && mismatchedClasses.length > 0 && (
+            <p
+              role="alert"
+              className="mb-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm font-semibold text-warning"
+            >
+              <TriangleAlert className="h-4 w-4 inline" aria-hidden />{" "}
+              {mismatchedClasses.map((c) => c.name).join(", ")} — {subjectLabel} анги биш тул
+              сурагчид нь энэ тестийг харахгүй
+            </p>
+          )}
+          <div className={`grid gap-2 sm:grid-cols-2 lg:grid-cols-3 ${writeLater ? "hidden" : ""}`}>
             {classrooms.map((c) => {
               const selected = selectedClasses.includes(c.id);
               return (
@@ -1328,6 +1399,9 @@ export default function NewTestPage() {
                       items={[
                         `${c._count.enrollments} сурагч`,
                         c.grade ? `${c.grade}-р анги` : "",
+                        c.subject && c.subject !== "MATH"
+                          ? SUBJECTS.find((s) => s.value === c.subject)?.label ?? ""
+                          : "",
                       ]}
                     />
                   </p>
@@ -1356,7 +1430,11 @@ export default function NewTestPage() {
           aria-busy={submitting}
           className="w-full min-h-11 rounded-xl bg-brand py-4 text-lg font-bold text-on-brand transition hover:opacity-90 disabled:opacity-50"
         >
-          {submitting ? "Үүсгэж байна…" : "Тест үүсгэх"}
+          {submitting
+            ? "Үүсгэж байна…"
+            : writeLater
+              ? "Тест үүсгээд бодлого бичих"
+              : "Тест үүсгэх"}
         </button>
 
         {previewProblem && (

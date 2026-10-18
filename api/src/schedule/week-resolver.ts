@@ -186,6 +186,14 @@ export function resolveWeek(params: {
   ) => {
     const day = resultByDate.get(date);
     if (!day) return;
+    // Оноолт анхны огноогоор; 2026-10-18-ний засвараас өмнө зөөгдсөн хичээлийн
+    // оноолт ХАРАГДАХ огноогоор бичигдсэн байж болно — тэр огноо энэ хуваарийн
+    // жирийн өдөр биш үед л нөөцөөр уншина (давхцахгүй).
+    const staff =
+      staffByKey.get(`${s.id}|${overrides.topicDate}`) ??
+      (date !== overrides.topicDate && !isScheduleActiveOn(s, date)
+        ? staffByKey.get(`${s.id}|${date}`)
+        : undefined);
     day.entries.push({
       scheduleId: s.id,
       classroomId: s.classroomId,
@@ -197,9 +205,8 @@ export function resolveWeek(params: {
       room: overrides.room,
       subject: s.subject,
       topic: topicByKey.get(`${s.id}|${overrides.topicDate}`) ?? null,
-      leadTeacher: staffByKey.get(`${s.id}|${overrides.topicDate}`)?.lead ?? null,
-      assistantTeacher:
-        staffByKey.get(`${s.id}|${overrides.topicDate}`)?.assistant ?? null,
+      leadTeacher: staff?.lead ?? null,
+      assistantTeacher: staff?.assistant ?? null,
       exception: overrides.exception,
     });
   };

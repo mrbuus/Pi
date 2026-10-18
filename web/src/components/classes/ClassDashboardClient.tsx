@@ -1,8 +1,11 @@
 "use client";
 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, CalendarDays, LayoutDashboard, Pencil, Settings2, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarDays, LayoutDashboard, ListChecks, MoreHorizontal, Pencil, Settings2, Trash2, UserPlus, Users } from "lucide-react";
+import MakeupPanel from "@/components/makeup/MakeupPanel";
 import RequireRole from "@/components/nav/RequireRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import { Meta } from "@/components/ui/Meta";
@@ -10,6 +13,7 @@ import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
+import DisbandClassDialog from "./DisbandClassDialog";
 import MonthView, { METRICS } from "./MonthView";
 import OverviewTab from "./OverviewTab";
 import StudentsTab, { type QuickView } from "./StudentsTab";
@@ -17,13 +21,21 @@ import TeacherPicker from "./TeacherPicker";
 import TopicsTab from "./TopicsTab";
 import type { ClassDashboard, MonthMetric, PersonRef } from "./types";
 
-type TabKey = "overview" | "month" | "students" | "topics";
+type TabKey = "overview" | "month" | "students" | "makeup" | "topics";
 const TABS: { key: TabKey; label: string; icon: typeof Users }[] = [
   { key: "overview", label: "Тойм", icon: LayoutDashboard },
   { key: "month", label: "Сарын явц", icon: CalendarDays },
   { key: "students", label: "Сурагчид", icon: Users },
+  { key: "makeup", label: "Нөхөх", icon: ListChecks },
   { key: "topics", label: "Сэдэв, хөтөлбөр", icon: BookOpen },
 ];
+
+/** Нөхөх хичээлийн цонх: сүүлийн 60 хоног (Улаанбаатарын цагаар) */
+function makeupRange(): { from: string; to: string } {
+  const ub = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ulaanbaatar" }).format(d);
+  const now = new Date();
+  return { from: ub(new Date(now.getTime() - 60 * 86_400_000)), to: ub(now) };
+}
 
 /** Хэш: #overview, #students, #topics эсвэл сарын хэмжүүр (#attendance, #homework, #exams, #independent) */
 function readHash(): { tab: TabKey; metric: MonthMetric | null } {
@@ -54,6 +66,8 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
   const [metric, setMetric] = useState<MonthMetric>("attendance");
   const [view, setView] = useState<QuickView | null>(null);
   const [picking, setPicking] = useState(false);
+  const [disbanding, setDisbanding] = useState(false);
+  const router = useRouter();
 
   const load = useCallback(async () => {
     setError("");
@@ -134,14 +148,38 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                 />
               </div>
               {data.permissions.manageClass && (
-                <Link
-                  href={`/app/admin/classrooms/${encodeURIComponent(data.classroom.id)}`}
-                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
-                  aria-label="Ангийн бүртгэл удирдах"
-                  title="Ангийн бүртгэл удирдах"
-                >
-                  <Settings2 className="h-5 w-5" aria-hidden />
-                </Link>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Link
+                    href={`/app/admin/classrooms/${encodeURIComponent(data.classroom.id)}`}
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
+                    aria-label="Ангийн бүртгэл удирдах"
+                    title="Ангийн бүртгэл удирдах"
+                  >
+                    <Settings2 className="h-5 w-5" aria-hidden />
+                  </Link>
+                  {/* Анги тараах — зориуд нууцалсан (аюулын бүс) */}
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Ангийн нэмэлт үйлдэл"
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
+                      >
+                        <MoreHorizontal className="h-5 w-5" aria-hidden />
+                      </button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content align="end" sideOffset={4} className="elev-2 z-[65] w-52 rounded-xl border border-line bg-surface p-1">
+                        <DropdownMenu.Item
+                          onSelect={() => setDisbanding(true)}
+                          className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-semibold text-error outline-none data-[highlighted]:bg-error/10"
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden /> Анги тараах
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
+                </div>
               )}
             </header>
             {error && <ErrorState message={error} onRetry={() => void load()} />}
@@ -167,11 +205,22 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
               <TabsContent value="students" className="mt-4">
                 <StudentsTab data={data} view={view} onViewChange={setView} onChanged={() => void load()} />
               </TabsContent>
+              <TabsContent value="makeup" className="mt-4">
+                <MakeupPanel classroomId={data.classroom.id} {...makeupRange()} />
+              </TabsContent>
               <TabsContent value="topics" className="mt-4">
                 <TopicsTab data={data} />
               </TabsContent>
             </Tabs>
 
+            {disbanding && (
+              <DisbandClassDialog
+                classroom={data.classroom}
+                students={data.summary.students}
+                onClose={() => setDisbanding(false)}
+                onDone={() => router.push("/app/classes")}
+              />
+            )}
             {picking && (
               <TeacherPicker
                 classroom={data.classroom}

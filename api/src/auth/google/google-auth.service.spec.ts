@@ -198,4 +198,16 @@ describe('GoogleAuthService', () => {
   it('хэрэглэгч Google дээр цуцалбал cancelled', async () => {
     expect(await svc.handleCallback({ error: 'access_denied' })).toContain('google=cancelled');
   });
+
+  it('WEB_ORIGIN таслалтай жагсаалт бол эхний хаяг руу буцаана', async () => {
+    process.env.WEB_ORIGIN = 'https://web.example, http://192.168.0.5:3381';
+    expect(await svc.handleCallback({ error: 'access_denied' })).toBe('https://web.example/login?google=cancelled');
+  });
+
+  it('профайлаас холбохыг цуцалбал профайл руу буцна', async () => {
+    const state = stateFrom(await svc.authorizationUrl(GoogleOAuthPurpose.LINK, 'u-other'));
+    expect(await svc.handleCallback({ error: 'access_denied', state })).toBe(
+      'https://web.example/app/profile?google=cancelled',
+    );
+  });
 });

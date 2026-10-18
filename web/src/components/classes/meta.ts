@@ -1,21 +1,16 @@
 import {
   CalendarX2,
-  Check,
   ClipboardX,
-  Clock3,
-  Contrast,
   Copy,
   Eye,
   FileX2,
-  Minus,
   Target,
   TrendingDown,
   TrendingUp,
   TriangleAlert,
-  X,
   type LucideIcon,
 } from "lucide-react";
-import type { AttendanceStatus, HomeworkStatus, PaymentState, RiskFlag } from "./types";
+import type { PaymentState, RiskFlag } from "./types";
 
 /**
  * Зан төлөвийн шошго — api/src/class-dashboard/behavior-flags.ts-тэй ижил
@@ -63,23 +58,6 @@ export const TEACHER_ROLE_LABEL: Record<string, string> = {
   SCHEDULE: "Хуваарийн багш",
   LEAD: "Хичээлийн ахлах",
   ASSISTANT: "Хичээлийн туслах",
-};
-
-/**
- * Ирц/даалгаврын нүд — өнгө дангаараа утга илэрхийлэхгүй (STATUS §6.9):
- * дүрс + шошго. Шар/алтан хэрэглэхгүй.
- */
-export const ATTENDANCE_META: Record<AttendanceStatus, { label: string; icon: LucideIcon; cell: string }> = {
-  PRESENT: { label: "Ирсэн", icon: Check, cell: "bg-success/15 text-success" },
-  LATE: { label: "Хоцорсон", icon: Clock3, cell: "bg-info/15 text-info" },
-  ABSENT: { label: "Тасалсан", icon: X, cell: "bg-error/15 text-error" },
-  EXCUSED: { label: "Чөлөөтэй", icon: Minus, cell: "bg-ink/8 text-ink-dim" },
-};
-
-export const HOMEWORK_META: Record<HomeworkStatus, { label: string; icon: LucideIcon; cell: string }> = {
-  DONE: { label: "Хийсэн", icon: Check, cell: "bg-success/15 text-success" },
-  PARTIAL: { label: "Дутуу", icon: Contrast, cell: "bg-brand-bright/15 text-brand-soft" },
-  NOT_DONE: { label: "Хийгээгүй", icon: X, cell: "bg-error/15 text-error" },
 };
 
 /** "2026-10" → «2026 оны 10-р сар» */

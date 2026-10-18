@@ -67,7 +67,9 @@ const SOLIDS=[
 const PERIOD=10*60*1000;
 const qs=new URLSearchParams(location.search);
 let preview=qs.has('solid')? (+qs.get('solid'))%SOLIDS.length : null;
-const currentIdx=()=> preview!==null? preview : Math.floor(Date.now()/PERIOD)%SOLIDS.length;
+// Эзэн 2026-10-17: цаг зогсоосон — хуудас нээх бүрт нэг дүрс, явцад солигдохгүй, тоолуургүй
+const FIXED_IDX=Math.floor(Date.now()/PERIOD)%SOLIDS.length;
+const currentIdx=()=> preview!==null? preview : FIXED_IDX;
 
 function buildPoly(def){
   const P=def.poly, V3=k=>V(...P.v[k]), keys=Object.keys(P.v);
@@ -388,7 +390,7 @@ const ll=(lat,lon,r=ER)=>{ const phi=(90-lat)*D2R, th=(lon+180)*D2R; return V(-r
 function face(lat,lon,tilt=0){ const d=ll(lat,lon).normalize(), h=V(d.x,0,d.z).normalize();
   const q1=new THREE.Quaternion().setFromUnitVectors(h,V(0,0,1)), d1=d.clone().applyQuaternion(q1);
   return new THREE.Quaternion().setFromAxisAngle(V(1,0,0),Math.atan2(d1.y,d1.z)-tilt).multiply(q1); }
-const Q={start:face(28,72,.35), mn:face(46.9,103.6)};
+const Q={mn:face(46.9,103.6)};
 
 const UB=[47.918,106.917];
 const AIMAGS=[['Архангай',47.475,101.454],['Баян-Өлгий',48.968,89.962],['Баянхонгор',46.194,100.718],['Булган',48.812,103.534],['Говь-Алтай',46.372,96.258],['Говьсүмбэр',46.360,108.360],['Дархан-Уул',49.465,105.974],['Дорноговь',44.892,110.141],['Дорнод',48.067,114.536],['Дундговь',45.763,106.271],['Завхан',47.741,96.845],['Орхон',49.028,104.047],['Өвөрхангай',46.264,102.775],['Өмнөговь',43.571,104.425],['Сүхбаатар',46.681,113.280],['Сэлэнгэ',50.232,106.208],['Төв',47.707,106.953],['Увс',49.981,92.067],['Ховд',48.006,91.641],['Хөвсгөл',49.638,100.162],['Хэнтий',47.320,110.656]];
@@ -472,7 +474,6 @@ const SXM=[[0,-.55],[.12,0],[1,0]];
 window.__three=(S,t)=>{
   const dt=Math.min(.1,clock.getDelta()), now=performance.now();
   const idx=currentIdx(); if(idx!==shown) applySolid(idx);
-  const sec=Math.floor(Date.now()/1000); if(sec!==lastSec){ lastSec=sec; $('#tNext').textContent= preview!==null? 'Урьдчилан харж байна' : 'Дараагийн дүрс '+fmt(PERIOD-(Date.now()%PERIOD)); }
 
   /* ---- HERO ---- */
   if(S.vHero){
@@ -515,9 +516,11 @@ window.__three=(S,t)=>{
     const p=S.globe, w=gc.clientWidth, h=gc.clientHeight, asp=w/h, mob=asp<.9;
     const rotK=easeIO(range(p,.2,.45)), zk=easeIO(range(p,.36,.6));
     const mnK=ease(range(p,.46,.6)), labK=ease(range(p,.62,.72)), flowK=ease(range(p,.68,.76));
-    qCur.copy(Q.start).slerp(Q.mn,rotK);
+    qCur.copy(Q.mn);
     if(dragging===null){ dragX+=dragV; dragV*=.92; if(zk>.5) dragX*=.95; }
-    qSpin.setFromAxisAngle(Yax,dragX+(1-rotK)*t*.05);
+    // Эзэн 2026-10-17: дэлхий дээш доош хөдлөхгүй (хазайлт байхгүй) — гүйлгэхэд байрандаа
+    // нэг бүтэн эргээд шууд Монгол дээр зогсож, газрын зураг гарна.
+    qSpin.setFromAxisAngle(Yax,dragX-(1-rotK)*Math.PI*2);
     earth.quaternion.copy(qSpin).multiply(qCur);
     // тойрог доторх дэлхийн хэмжээ: тойргийн 84%-ийг эзэлнэ
     const r=S.globeR||170, Dfit=ER*h/(TAN*1.68*r), Dmid=mob? ER*h/(TAN*.94*w) : ER/(TAN*.86);

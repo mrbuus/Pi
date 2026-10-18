@@ -327,6 +327,7 @@ export type TestWhereInput = {
   attemptSessions?: Prisma.TestAttemptSessionListRelationFilter
   itemMarks?: Prisma.TestItemMarkListRelationFilter
   absences?: Prisma.TestAbsenceListRelationFilter
+  mockEvents?: Prisma.MockExamEventListRelationFilter
 }
 
 export type TestOrderByWithRelationInput = {
@@ -354,6 +355,7 @@ export type TestOrderByWithRelationInput = {
   attemptSessions?: Prisma.TestAttemptSessionOrderByRelationAggregateInput
   itemMarks?: Prisma.TestItemMarkOrderByRelationAggregateInput
   absences?: Prisma.TestAbsenceOrderByRelationAggregateInput
+  mockEvents?: Prisma.MockExamEventOrderByRelationAggregateInput
 }
 
 export type TestWhereUniqueInput = Prisma.AtLeast<{
@@ -384,6 +386,7 @@ export type TestWhereUniqueInput = Prisma.AtLeast<{
   attemptSessions?: Prisma.TestAttemptSessionListRelationFilter
   itemMarks?: Prisma.TestItemMarkListRelationFilter
   absences?: Prisma.TestAbsenceListRelationFilter
+  mockEvents?: Prisma.MockExamEventListRelationFilter
 }, "id">
 
 export type TestOrderByWithAggregationInput = {
@@ -458,6 +461,7 @@ export type TestCreateInput = {
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateInput = {
@@ -484,6 +488,7 @@ export type TestUncheckedCreateInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestUpdateInput = {
@@ -510,6 +515,7 @@ export type TestUpdateInput = {
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateInput = {
@@ -536,6 +542,7 @@ export type TestUncheckedUpdateInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestCreateManyInput = {
@@ -818,6 +825,20 @@ export type TestUpdateOneRequiredWithoutAbsencesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TestUpdateToOneWithWhereWithoutAbsencesInput, Prisma.TestUpdateWithoutAbsencesInput>, Prisma.TestUncheckedUpdateWithoutAbsencesInput>
 }
 
+export type TestCreateNestedOneWithoutMockEventsInput = {
+  create?: Prisma.XOR<Prisma.TestCreateWithoutMockEventsInput, Prisma.TestUncheckedCreateWithoutMockEventsInput>
+  connectOrCreate?: Prisma.TestCreateOrConnectWithoutMockEventsInput
+  connect?: Prisma.TestWhereUniqueInput
+}
+
+export type TestUpdateOneRequiredWithoutMockEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.TestCreateWithoutMockEventsInput, Prisma.TestUncheckedCreateWithoutMockEventsInput>
+  connectOrCreate?: Prisma.TestCreateOrConnectWithoutMockEventsInput
+  upsert?: Prisma.TestUpsertWithoutMockEventsInput
+  connect?: Prisma.TestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TestUpdateToOneWithWhereWithoutMockEventsInput, Prisma.TestUpdateWithoutMockEventsInput>, Prisma.TestUncheckedUpdateWithoutMockEventsInput>
+}
+
 export type TestCreateWithoutChapterInput = {
   id?: string
   title: string
@@ -841,6 +862,7 @@ export type TestCreateWithoutChapterInput = {
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateWithoutChapterInput = {
@@ -866,6 +888,7 @@ export type TestUncheckedCreateWithoutChapterInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestCreateOrConnectWithoutChapterInput = {
@@ -940,6 +963,7 @@ export type TestCreateWithoutProblemsInput = {
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateWithoutProblemsInput = {
@@ -965,6 +989,7 @@ export type TestUncheckedCreateWithoutProblemsInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestCreateOrConnectWithoutProblemsInput = {
@@ -1006,6 +1031,7 @@ export type TestUpdateWithoutProblemsInput = {
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateWithoutProblemsInput = {
@@ -1031,6 +1057,7 @@ export type TestUncheckedUpdateWithoutProblemsInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestCreateWithoutAccessInput = {
@@ -1056,6 +1083,7 @@ export type TestCreateWithoutAccessInput = {
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateWithoutAccessInput = {
@@ -1081,6 +1109,7 @@ export type TestUncheckedCreateWithoutAccessInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestCreateOrConnectWithoutAccessInput = {
@@ -1122,6 +1151,7 @@ export type TestUpdateWithoutAccessInput = {
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateWithoutAccessInput = {
@@ -1147,6 +1177,7 @@ export type TestUncheckedUpdateWithoutAccessInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestCreateWithoutAttemptSessionsInput = {
@@ -1172,6 +1203,7 @@ export type TestCreateWithoutAttemptSessionsInput = {
   results?: Prisma.TestResultCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateWithoutAttemptSessionsInput = {
@@ -1197,6 +1229,7 @@ export type TestUncheckedCreateWithoutAttemptSessionsInput = {
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestCreateOrConnectWithoutAttemptSessionsInput = {
@@ -1238,6 +1271,7 @@ export type TestUpdateWithoutAttemptSessionsInput = {
   results?: Prisma.TestResultUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateWithoutAttemptSessionsInput = {
@@ -1263,6 +1297,7 @@ export type TestUncheckedUpdateWithoutAttemptSessionsInput = {
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestCreateWithoutResultsInput = {
@@ -1288,6 +1323,7 @@ export type TestCreateWithoutResultsInput = {
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateWithoutResultsInput = {
@@ -1313,6 +1349,7 @@ export type TestUncheckedCreateWithoutResultsInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestCreateOrConnectWithoutResultsInput = {
@@ -1354,6 +1391,7 @@ export type TestUpdateWithoutResultsInput = {
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateWithoutResultsInput = {
@@ -1379,6 +1417,7 @@ export type TestUncheckedUpdateWithoutResultsInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestCreateWithoutItemMarksInput = {
@@ -1404,6 +1443,7 @@ export type TestCreateWithoutItemMarksInput = {
   results?: Prisma.TestResultCreateNestedManyWithoutTestInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateWithoutItemMarksInput = {
@@ -1429,6 +1469,7 @@ export type TestUncheckedCreateWithoutItemMarksInput = {
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
   absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestCreateOrConnectWithoutItemMarksInput = {
@@ -1470,6 +1511,7 @@ export type TestUpdateWithoutItemMarksInput = {
   results?: Prisma.TestResultUpdateManyWithoutTestNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateWithoutItemMarksInput = {
@@ -1495,6 +1537,7 @@ export type TestUncheckedUpdateWithoutItemMarksInput = {
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestCreateWithoutAbsencesInput = {
@@ -1520,6 +1563,7 @@ export type TestCreateWithoutAbsencesInput = {
   results?: Prisma.TestResultCreateNestedManyWithoutTestInput
   attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventCreateNestedManyWithoutTestInput
 }
 
 export type TestUncheckedCreateWithoutAbsencesInput = {
@@ -1545,6 +1589,7 @@ export type TestUncheckedCreateWithoutAbsencesInput = {
   results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
   itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
+  mockEvents?: Prisma.MockExamEventUncheckedCreateNestedManyWithoutTestInput
 }
 
 export type TestCreateOrConnectWithoutAbsencesInput = {
@@ -1586,6 +1631,7 @@ export type TestUpdateWithoutAbsencesInput = {
   results?: Prisma.TestResultUpdateManyWithoutTestNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateWithoutAbsencesInput = {
@@ -1611,6 +1657,127 @@ export type TestUncheckedUpdateWithoutAbsencesInput = {
   results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
+}
+
+export type TestCreateWithoutMockEventsInput = {
+  id?: string
+  title: string
+  type: $Enums.TestType
+  gradingMode?: $Enums.TestGradingMode
+  timeLimitMin?: number | null
+  pdfKey?: string | null
+  price?: number | null
+  groupKey?: string | null
+  variantLabel?: string | null
+  createdById: string
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  isDraft?: boolean
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
+  chapter?: Prisma.ChapterCreateNestedOneWithoutTestsInput
+  problems?: Prisma.TestProblemCreateNestedManyWithoutTestInput
+  access?: Prisma.TestAccessCreateNestedManyWithoutTestInput
+  results?: Prisma.TestResultCreateNestedManyWithoutTestInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutTestInput
+  itemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutTestInput
+  absences?: Prisma.TestAbsenceCreateNestedManyWithoutTestInput
+}
+
+export type TestUncheckedCreateWithoutMockEventsInput = {
+  id?: string
+  title: string
+  type: $Enums.TestType
+  gradingMode?: $Enums.TestGradingMode
+  chapterId?: string | null
+  timeLimitMin?: number | null
+  pdfKey?: string | null
+  price?: number | null
+  groupKey?: string | null
+  variantLabel?: string | null
+  createdById: string
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  isDraft?: boolean
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
+  problems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutTestInput
+  access?: Prisma.TestAccessUncheckedCreateNestedManyWithoutTestInput
+  results?: Prisma.TestResultUncheckedCreateNestedManyWithoutTestInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutTestInput
+  itemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutTestInput
+  absences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutTestInput
+}
+
+export type TestCreateOrConnectWithoutMockEventsInput = {
+  where: Prisma.TestWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestCreateWithoutMockEventsInput, Prisma.TestUncheckedCreateWithoutMockEventsInput>
+}
+
+export type TestUpsertWithoutMockEventsInput = {
+  update: Prisma.XOR<Prisma.TestUpdateWithoutMockEventsInput, Prisma.TestUncheckedUpdateWithoutMockEventsInput>
+  create: Prisma.XOR<Prisma.TestCreateWithoutMockEventsInput, Prisma.TestUncheckedCreateWithoutMockEventsInput>
+  where?: Prisma.TestWhereInput
+}
+
+export type TestUpdateToOneWithWhereWithoutMockEventsInput = {
+  where?: Prisma.TestWhereInput
+  data: Prisma.XOR<Prisma.TestUpdateWithoutMockEventsInput, Prisma.TestUncheckedUpdateWithoutMockEventsInput>
+}
+
+export type TestUpdateWithoutMockEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
+  gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDraft?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chapter?: Prisma.ChapterUpdateOneWithoutTestsNestedInput
+  problems?: Prisma.TestProblemUpdateManyWithoutTestNestedInput
+  access?: Prisma.TestAccessUpdateManyWithoutTestNestedInput
+  results?: Prisma.TestResultUpdateManyWithoutTestNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
+  itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
+  absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+}
+
+export type TestUncheckedUpdateWithoutMockEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
+  gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
+  chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variantLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDraft?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problems?: Prisma.TestProblemUncheckedUpdateManyWithoutTestNestedInput
+  access?: Prisma.TestAccessUncheckedUpdateManyWithoutTestNestedInput
+  results?: Prisma.TestResultUncheckedUpdateManyWithoutTestNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
+  itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
+  absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestCreateManyChapterInput = {
@@ -1655,6 +1822,7 @@ export type TestUpdateWithoutChapterInput = {
   attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateWithoutChapterInput = {
@@ -1680,6 +1848,7 @@ export type TestUncheckedUpdateWithoutChapterInput = {
   attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutTestNestedInput
   itemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutTestNestedInput
   absences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutTestNestedInput
+  mockEvents?: Prisma.MockExamEventUncheckedUpdateManyWithoutTestNestedInput
 }
 
 export type TestUncheckedUpdateManyWithoutChapterInput = {
@@ -1713,6 +1882,7 @@ export type TestCountOutputType = {
   attemptSessions: number
   itemMarks: number
   absences: number
+  mockEvents: number
 }
 
 export type TestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1722,6 +1892,7 @@ export type TestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   attemptSessions?: boolean | TestCountOutputTypeCountAttemptSessionsArgs
   itemMarks?: boolean | TestCountOutputTypeCountItemMarksArgs
   absences?: boolean | TestCountOutputTypeCountAbsencesArgs
+  mockEvents?: boolean | TestCountOutputTypeCountMockEventsArgs
 }
 
 /**
@@ -1776,6 +1947,13 @@ export type TestCountOutputTypeCountAbsencesArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.TestAbsenceWhereInput
 }
 
+/**
+ * TestCountOutputType without action
+ */
+export type TestCountOutputTypeCountMockEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MockExamEventWhereInput
+}
+
 
 export type TestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1802,6 +1980,7 @@ export type TestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   attemptSessions?: boolean | Prisma.Test$attemptSessionsArgs<ExtArgs>
   itemMarks?: boolean | Prisma.Test$itemMarksArgs<ExtArgs>
   absences?: boolean | Prisma.Test$absencesArgs<ExtArgs>
+  mockEvents?: boolean | Prisma.Test$mockEventsArgs<ExtArgs>
   _count?: boolean | Prisma.TestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["test"]>
 
@@ -1876,6 +2055,7 @@ export type TestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   attemptSessions?: boolean | Prisma.Test$attemptSessionsArgs<ExtArgs>
   itemMarks?: boolean | Prisma.Test$itemMarksArgs<ExtArgs>
   absences?: boolean | Prisma.Test$absencesArgs<ExtArgs>
+  mockEvents?: boolean | Prisma.Test$mockEventsArgs<ExtArgs>
   _count?: boolean | Prisma.TestCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1895,6 +2075,7 @@ export type $TestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     attemptSessions: Prisma.$TestAttemptSessionPayload<ExtArgs>[]
     itemMarks: Prisma.$TestItemMarkPayload<ExtArgs>[]
     absences: Prisma.$TestAbsencePayload<ExtArgs>[]
+    mockEvents: Prisma.$MockExamEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2315,6 +2496,7 @@ export interface Prisma__TestClient<T, Null = never, ExtArgs extends runtime.Typ
   attemptSessions<T extends Prisma.Test$attemptSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Test$attemptSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestAttemptSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   itemMarks<T extends Prisma.Test$itemMarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Test$itemMarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestItemMarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   absences<T extends Prisma.Test$absencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Test$absencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mockEvents<T extends Prisma.Test$mockEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Test$mockEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MockExamEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2922,6 +3104,30 @@ export type Test$absencesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.TestAbsenceScalarFieldEnum | Prisma.TestAbsenceScalarFieldEnum[]
+}
+
+/**
+ * Test.mockEvents
+ */
+export type Test$mockEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MockExamEvent
+   */
+  select?: Prisma.MockExamEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MockExamEvent
+   */
+  omit?: Prisma.MockExamEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MockExamEventInclude<ExtArgs> | null
+  where?: Prisma.MockExamEventWhereInput
+  orderBy?: Prisma.MockExamEventOrderByWithRelationInput | Prisma.MockExamEventOrderByWithRelationInput[]
+  cursor?: Prisma.MockExamEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MockExamEventScalarFieldEnum | Prisma.MockExamEventScalarFieldEnum[]
 }
 
 /**

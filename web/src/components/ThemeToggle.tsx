@@ -23,7 +23,7 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
       title={label}
       className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-dim transition hover:bg-panel hover:text-ink ${className}`}
     >
-      {dark ? <Sun className="h-[18px] w-[18px]" aria-hidden /> : <Moon className="h-[18px] w-[18px]" aria-hidden />}
+      {dark ? <Sun className="h-5 w-5" aria-hidden /> : <Moon className="h-5 w-5" aria-hidden />}
     </button>
   );
 }

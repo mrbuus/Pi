@@ -41,6 +41,14 @@ export default function GoogleLinkSection() {
   }, []);
 
   useEffect(() => {
+    // Google руу шилжээд «Буцах» дарахад хөтөч хуудсыг кэшээс (bfcache) сэргээдэг тул
+    // busy төлөв хэвээр үлдэж товч «шилжиж байна…» дээр гацдаг. Сэргэхэд нь буцаана.
+    const reset = (e: PageTransitionEvent) => e.persisted && setBusy(false);
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
+
+  useEffect(() => {
     let alive = true;
     api<Status>("/auth/google/status")
       .then((s) => alive && setStatus(s))

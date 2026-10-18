@@ -75,12 +75,16 @@ export class TestsController {
     @Req() req: AuthedRequest,
     @Query('subject') subject?: string,
     @Query('includeThousand') includeThousand?: string,
+    // Бодлогын сангийн «⋯» цэс: нэг сэдвийн (бүлгийн) A/B хувилбарыг л авна —
+    // 900+ тестийн жагсаалтыг (≈0.5 МБ) утсанд татахгүй.
+    @Query('chapterId') chapterId?: string,
   ) {
     return this.tests.list(
       req.user.userId,
       req.user.role,
       parseSubjectQuery(subject),
       includeThousand === '1' || includeThousand === 'true',
+      chapterId?.trim() || undefined,
     );
   }
 

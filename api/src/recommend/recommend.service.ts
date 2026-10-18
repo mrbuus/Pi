@@ -9,6 +9,8 @@ import { Role } from '../generated/prisma/enums';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  activeClassSubjects,
+  blockedSubjects,
   canAccessChapter,
   activePurchaseWhere,
   collectPassScope,
@@ -168,7 +170,7 @@ export class RecommendService {
         .filter((x): x is typeof x & { problemId: string } => !!x.problemId)
         .map((x) => ({ problemId: x.problemId, at: x.occurredAt })),
     );
-    const [scope, activeClass, purchases] = await Promise.all([
+    const [scope, activeClass, purchases, own] = await Promise.all([
       collectPassScope(this.prisma, studentId),
       hasActiveClassroomEnrollment(this.prisma, studentId, role),
       this.prisma.purchase.findMany({
@@ -178,15 +180,22 @@ export class RecommendService {
         },
         select: { productItem: { select: { refId: true } } },
       }),
+      activeClassSubjects(this.prisma, studentId, role),
     ]);
     const bookIds = [
       ...scope.bookIds,
       ...purchases.map((p) => p.productItem.refId),
     ];
+    // Ангидаа байхгүй хичээлийн (Нийгмийн ухаан г.м.) бүлгийг санал болгохгүй
+    const blocked = blockedSubjects(own);
+    const subjectGate: Prisma.ChapterWhereInput = blocked.length
+      ? { NOT: { book: { subject: { in: blocked } } } }
+      : {};
     const entitlement: Prisma.ChapterWhereInput =
       activeClass || scope.all
-        ? {}
+        ? subjectGate
         : {
+            ...subjectGate,
             OR: [
               { freePreview: true },
               { id: { in: scope.chapterIds } },
