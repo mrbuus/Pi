@@ -2,8 +2,11 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 export async function renderIcon(size: number, maskable = false) {
-  const logo = await readFile(path.join(process.cwd(), "public/logo-mark.png"));
-  const edge = Math.round(size * (maskable ? 0.64 : 0.84));
+  // БҮТЭН лого (нэртэй) — эзэн 2026-10-18: «албан сайтад тасархай лого хэзээ ч байж болохгүй».
+  // 1686×746 (2.26:1). Maskable: 80%-ийн аюулгүй тойрогт диагональ нь багтана (≈0.72).
+  const logo = await readFile(path.join(process.cwd(), "public/logo-full.png"));
+  const width = Math.round(size * (maskable ? 0.72 : 0.9));
+  const height = Math.round(width * (746 / 1686));
   return new ImageResponse(
     <div
       style={{
@@ -20,8 +23,8 @@ export async function renderIcon(size: number, maskable = false) {
       <img
         alt=""
         src={`data:image/png;base64,${logo.toString("base64")}`}
-        width={edge}
-        height={edge}
+        width={width}
+        height={height}
       />
     </div>,
     { width: size, height: size },

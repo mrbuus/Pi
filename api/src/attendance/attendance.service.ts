@@ -25,7 +25,7 @@ import {
 import { loadPreviousLesson } from './lesson-dates';
 import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 import { RiskCriteriaDto } from './dto/risk-criteria.dto';
-import { assertMarkAccess } from './marking-access';
+import { TEACHER_SEES_ALL, assertMarkAccess } from './marking-access';
 
 // /schedule/days-аас "бодит хичээлтэй өдөр" хайхад хэтэрхий нарийн цонхоор
 // эхлээд олдохгүй бол улам өргөтгөж дахин хайна (жишээ нь ангийн хуваарь
@@ -421,6 +421,7 @@ export class AttendanceService {
       if (!cls) continue;
       const allowed =
         isStaffAll ||
+        (role === Role.TEACHER && TEACHER_SEES_ALL) ||
         (role === Role.TEACHER &&
           (isClassTeacher(cls, userId) ||
             ownSchedules.has(cls.id) ||
@@ -973,7 +974,7 @@ export class AttendanceService {
         where: {
           studentId,
           leftAt: null,
-          classroom: classTeacherWhere(userId),
+          ...(TEACHER_SEES_ALL ? {} : { classroom: classTeacherWhere(userId) }),
         },
       });
       if (enrollment) return student;

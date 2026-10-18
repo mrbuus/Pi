@@ -3,6 +3,9 @@ import { isClassTeacher } from '../common/class-teachers';
 import { Role } from '../generated/prisma/enums';
 import type { PrismaService } from '../prisma/prisma.service';
 
+/** Багш бүх ангийн ирц/даалгаврыг харж тэмдэглэнэ (эзэн 2026-10-19) */
+export const TEACHER_SEES_ALL = true;
+
 /**
  * Ирц/даалгавар тэмдэглэх, самбарыг харах эрх (эзэн 2026-10-18, D9) — ирц ба
  * гэрийн даалгаврын сервис ХОЁУЛАА энийг ашиглана (дүрэм нэг газар):
@@ -31,6 +34,10 @@ export async function assertMarkAccess(
   if (role !== Role.TEACHER) {
     throw new ForbiddenException('Энэ ангид хандах эрхгүй');
   }
+  // Эзэн 2026-10-19: Багш тухайн өдрийн хуваарьт нэр нь бичигдээгүй (орлож орсон
+  // гэх мэт) байсан ч БҮХ анги, бүх хичээлийг харж, тэмдэглэж чадна. Хэн тэмдэглэсэн
+  // нь аудитад үлдэнэ. Хуваарь засах эрх Багш+-д л хэвээр.
+  if (TEACHER_SEES_ALL) return classroom;
   if (isClassTeacher(classroom, userId)) return classroom;
 
   const ownsSchedule = await prisma.classSchedule.count({

@@ -82,10 +82,10 @@ describe('active attendance roster and preserved history', () => {
     expect(db.attendance.upsert).not.toHaveBeenCalled();
     expect(db.$transaction).not.toHaveBeenCalled();
   });
-  it('still prevents unrelated teachers reading the roster', async () => {
+  it('students cannot read the roster (teachers may, owner 2026-10-19)', async () => {
     const { db, service } = setup();
     await expect(
-      service.byClassAndDate('class', '2026-09-01', 'stranger', Role.TEACHER),
+      service.byClassAndDate('class', '2026-09-01', 'kid', Role.STUDENT),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(db.enrollment.findMany).not.toHaveBeenCalled();
   });

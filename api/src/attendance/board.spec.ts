@@ -211,24 +211,11 @@ describe('Ирц тэмдэглэх — нэг товшилт, тэмдэглэ�
 
 describe('Тэмдэглэх эрх — Багш (marking-access, D9)', () => {
   const date = new Date('2026-10-18');
-  it('ангийн туслах багш, хуваарийн багш, тэр өдрийн ахлах/туслах багш — болно', async () => {
-    const { db } = setup();
-    await expect(assertMarkAccess(db, 'class', 'assistant', Role.TEACHER, { date })).resolves.toBeTruthy();
-    db.classSchedule.count.mockResolvedValueOnce(1);
-    await expect(assertMarkAccess(db, 'class', 'sched', Role.TEACHER, { date })).resolves.toBeTruthy();
-    db.lessonStaffing.count.mockResolvedValueOnce(1);
-    await expect(assertMarkAccess(db, 'class', 'lead', Role.TEACHER, { date })).resolves.toBeTruthy();
-    expect(db.lessonStaffing.count.mock.calls[0][0].where).toMatchObject({
-      date,
-      schedule: { classroomId: 'class' },
-      OR: [{ leadTeacherId: 'lead' }, { assistantTeacherId: 'lead' }],
-    });
-  });
-  it('холбоогүй багш, сурагч — хориотой; Багш+ — бүх анги', async () => {
+  it('Багш — тухайн өдөр хуваарьт нэр нь байгаагүй ч бүх идэвхтэй ангийг тэмдэглэнэ (эзэн 2026-10-19)', async () => {
     const { db, service } = setup();
-    await expect(assertMarkAccess(db, 'class', 'stranger', Role.TEACHER, { date })).rejects.toBeInstanceOf(ForbiddenException);
-    await expect(assertMarkAccess(db, 'class', 'kid', Role.STUDENT, { date })).rejects.toBeInstanceOf(ForbiddenException);
-    await expect(assertMarkAccess(db, 'class', 'plus', Role.TEACHER_PLUS, { date })).resolves.toBeTruthy();
+    await expect(assertMarkAccess(db, 'class', 'assistant', Role.TEACHER, { date })).resolves.toBeTruthy();
+    await expect(assertMarkAccess(db, 'class', 'stranger', Role.TEACHER, { date })).resolves.toBeTruthy();
+    expect(db.lessonStaffing.count).not.toHaveBeenCalled();
     await expect(
       service.mark(
         'class',
@@ -236,8 +223,12 @@ describe('Тэмдэглэх эрх — Багш (marking-access, D9)', () => {
         'stranger',
         Role.TEACHER,
       ),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(db.attendance.upsert).not.toHaveBeenCalled();
+    ).resolves.toBeTruthy();
+  });
+  it('сурагч — хориотой; Багш+ — бүх анги', async () => {
+    const { db } = setup();
+    await expect(assertMarkAccess(db, 'class', 'kid', Role.STUDENT, { date })).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(assertMarkAccess(db, 'class', 'plus', Role.TEACHER_PLUS, { date })).resolves.toBeTruthy();
   });
 });
 
