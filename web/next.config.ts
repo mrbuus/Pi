@@ -12,6 +12,19 @@ const nextConfig: NextConfig = {
       { key: "X-Frame-Options", value: "DENY" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+    ] },
+    // Нүүрний амжилтын зураг (эзэн 2026-10-22: «орох болгонд татаж серверийн төлбөр өсгөхгүй»):
+    // хөтөч 30 хоног хадгална, CDN (Vercel/Cloudflare) дахин татахгүй. Ижил нэрээр зураг солих бол
+    // 30 хоног хуучин нь харагдаж магадгүй — шинэ нэр өгнө.
+    { source: "/amjilt/:path*", headers: [
+      { key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=604800" },
+    ] },
+    // Жагсаалт (он бүрийн JSON) шинэ амжилт нэмэгдэхэд шинэчлэгдэх ёстой — 1 цаг, ар талд шинэчилнэ
+    { source: "/amjilt/:file.json", headers: [
+      { key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" },
+    ] },
+    { source: "/home/:path*", headers: [
+      { key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=604800" },
     ] }];
   },
   turbopack: {

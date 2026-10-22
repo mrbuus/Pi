@@ -198,11 +198,11 @@ class SolidStage{
     const tint=new THREE.Mesh(g,this.tintM); tint.renderOrder=1.5; this.root.add(tint);
     this.root.add(this.Lv,this.Lh,this.secFill,this.secLine,this.dotsV,this.dotsH);
     this.P={}; if(def.poly) for(const k in def.poly.v) this.P[k]=V(...def.poly.v[k]); if(def.pts) for(const k in def.pts) this.P[k]=V(...def.pts[k]);
-    const em=[],aux=[],rt=[],dim=[], cen=this.pd?this.pd.cen:V(0,0,0), hero=!!this.o.hero, mob=!!this.o.mobile;
+    const em=[],aux=[],rt=[],dim=[], cen=this.pd?this.pd.cen:V(0,0,0), hero=!!this.o.hero, mob=!!this.o.mobile; this.rtN=[];
     (def.ann||[]).forEach(a=>{
       if(a.t==='em'||a.t==='aux'){ const A=this.P[a.a],B=this.P[a.b]; (a.t==='em'?em:aux).push(A,B); if(a.lab) this.addLabel(a.lab,A.clone().add(B).multiplyScalar(.5),'em',{perp:[A,B]}); }
       else if(a.t==='right'){ const O=this.P[a.at], u=this.P[a.a].clone().sub(O).normalize().multiplyScalar(.14), w=this.P[a.b].clone().sub(O).normalize().multiplyScalar(.14);
-        const p1=O.clone().add(u), p2=O.clone().add(u).add(w), p3=O.clone().add(w); rt.push(p1,p2,p2,p3); }
+        const p1=O.clone().add(u), p2=O.clone().add(u).add(w), p3=O.clone().add(w); rt.push(p1,p2,p2,p3); this.rtN.push({O,n:u.clone().cross(w).normalize()}); }
       else if(a.t==='dim'){ const A=this.P[a.a],B=this.P[a.b], d=B.clone().sub(A).normalize(), m=A.clone().add(B).multiplyScalar(.5), out=m.clone().sub(cen);
         out.sub(d.clone().multiplyScalar(out.dot(d))).normalize();
         const o1=out.clone().multiplyScalar(.26), e0=out.clone().multiplyScalar(.06), e1=out.clone().multiplyScalar(.32), tk=d.clone().add(out).normalize().multiplyScalar(.045);
@@ -276,6 +276,8 @@ class SolidStage{
     setL(this.Lv,vis); setL(this.Lh,hid,true);
     this.dotsV.geometry.setAttribute('position',new THREE.Float32BufferAttribute(dv,3)); this.dotsH.geometry.setAttribute('position',new THREE.Float32BufferAttribute(dh,3));
     this.updateCut(s.cut);
+    // тэгш өнцгийн тэмдэг камер руу хажуугаараа харвал (|cos| бага) бүдгэрнэ — эс бөгөөс тасархай зураас мэт гацаж харагддаг
+    if(this.rtN&&this.rtN.length){ let f=1; this.rtN.forEach(r=>{ const c=Math.abs(_st.copy(this.camL).sub(r.O).normalize().dot(r.n)); f=Math.min(f,clamp((c-.18)/.22)); }); this.M.rt.opacity=f; this.M.rt.visible=f>.02; }
     const bbm=this.bb, by=bbm.min.y*sc, sz=Math.max(bbm.max.x-bbm.min.x,bbm.max.z-bbm.min.z)*sc;
     this.shadow.position.set(s.rootPos.x,s.rootPos.y+by-.012,s.rootPos.z); this.shadow.scale.set(sz*1.9,sz*1.9,1);
     this.placeLabels(w,h,s.labels!==false,s.labelOpacity??1);
@@ -291,8 +293,10 @@ class SolidStage{
       if(L.kind==='v'){ const dx=x-cx0, dy=y-cy0, d=Math.hypot(dx,dy); if(d<4){ oy=-17; } else { ox=dx/d*17; oy=dy/d*17; } L.el.style.opacity=this.vvis[L.vtx]===false?.42:1; }
       else if(L.perp){ _sq1.copy(L.perp[0]).applyMatrix4(this.root.matrixWorld).project(this.cam); _sq2.copy(L.perp[1]).applyMatrix4(this.root.matrixWorld).project(this.cam);
         let sx=(_sq2.x-_sq1.x)*w, sy=-(_sq2.y-_sq1.y)*h; const sl=Math.hypot(sx,sy)||1; let nx=-sy/sl, ny=sx/sl;
-        if(nx*(x-cx0)+ny*(y-cy0)<0){ nx=-nx; ny=-ny; } ox=nx*15; oy=ny*15; }
-      L.X=x+ox; L.Y=y+oy; L.on=true;
+        // өндөр шиг төвөөр гарах шугамд тал нь кадр бүр солигдож «h» үсэрдэг байсан — 20px-ээс хэтрэхэд л солигдоно
+        const side=nx*(x-cx0)+ny*(y-cy0); if(!L.side) L.side=side<0?-1:1; else if(Math.abs(side)>20) L.side=side<0?-1:1;
+        ox=nx*15*L.side; oy=ny*15*L.side; }
+      L.ax=x; L.ay=y; L.X=x+ox; L.Y=y+oy; L.on=true;
     });
     // давхцал: оройн нэр эхэлж байрлана, бусад нь тэднээс түлхэгдэнэ; дэлгэцээс гарахгүй
     const placed=[], order=[...this.labels].sort((a,b)=>(a.kind==='v'?0:1)-(b.kind==='v'?0:1));
@@ -300,9 +304,11 @@ class SolidStage{
       const bw=Math.max(14,L.el.offsetWidth||14), bh=Math.max(14,L.el.offsetHeight||16);
       for(let k=0;k<8;k++){ const hit=placed.find(o=>Math.abs(o.X-L.X)<(o.w+bw)/2+2&&Math.abs(o.Y-L.Y)<(o.h+bh)/2+1); if(!hit) break;
         let dx=L.X-hit.X, dy=L.Y-hit.Y, d=Math.hypot(dx,dy); if(d<1){ dx=1; dy=-1; d=1.42; } L.X+=dx/d*7; L.Y+=dy/d*7; }
-      L.X=Math.min(w-bw/2-4,Math.max(bw/2+4,L.X)); L.Y=Math.min(h-bh/2-4,Math.max(bh/2+4,L.Y));
       placed.push({X:L.X,Y:L.Y,w:bw,h:bh});
-      L.el.style.transform=`translate3d(${L.X}px,${L.Y}px,0) translate(-50%,-50%)`;
+      // цэгээс хол байх зай (offset) кадр хооронд зөөлөн өөрчлөгдөнө — давхцлаас түлхэгдэхэд үсрэхгүй
+      const tx=L.X-L.ax, ty=L.Y-L.ay; if(L.ox==null||Math.hypot(tx-L.ox,ty-L.oy)>80){ L.ox=tx; L.oy=ty; } else { L.ox+=(tx-L.ox)*.22; L.oy+=(ty-L.oy)*.22; }
+      const X=Math.min(w-bw/2-4,Math.max(bw/2+4,L.ax+L.ox)), Y=Math.min(h-bh/2-4,Math.max(bh/2+4,L.ay+L.oy));
+      L.el.style.transform=`translate3d(${X}px,${Y}px,0) translate(-50%,-50%)`;
     });
   }
 }
@@ -477,9 +483,9 @@ const tHl=$('#tHl'), HC=V(0,0,0), HT=V(0,0,0), HR=V(0,0,0), V0=V(0,0,0);
 const ZD=[[0,10],[.12,9],[.36,8.2],[.42,8.8],[.66,8.8],[.82,12],[1,13]];
 const SXD=[[0,1.95],[.14,1.3],[.36,1.3],[.42,.7],[.66,.7],[.82,0],[1,0]];
 const SYD=[[0,.2],[.12,.25],[.36,.25],[.42,.75],[.66,.75],[.82,.25],[1,.25]];
-const ZM=[[0,17],[.12,15],[.36,12.5],[.42,15],[.66,15],[.82,19],[1,20]];
-const FYM=[[0,.25],[.12,.18],[.36,.2],[.42,.3],[.66,.3],[.8,.05],[1,.05]];
-const SXM=[[0,-.55],[.12,0],[1,0]];
+const ZM=[[0,18.5],[.12,15],[.36,12.5],[.42,15.5],[.66,15.5],[.82,19],[1,20]];
+const FYM=[[0,.24],[.12,.18],[.36,.2],[.42,.22],[.66,.22],[.8,.05],[1,.05]]; // утас: гарчиг, 4 алхамын дээрх хоосон зайн голд
+const SXM=[[0,0],[1,0]];
 
 window.__three=(S,t)=>{
   const dt=Math.min(.1,clock.getDelta()), now=performance.now();
