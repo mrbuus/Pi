@@ -135,6 +135,18 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
     expect(db.storedFile.updateMany.mock.calls[1][0].data).toEqual({ expiresAt: null });
   });
 
+  it('шинээр илгээхэд солигдсон хуучин тэмдэглэл 14 хоногийн дараа устахаар тэмдэглэгдэнэ', async () => {
+    db.attendance.findMany.mockResolvedValue([
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+    ]);
+    db.lessonMakeup.findUnique.mockResolvedValue({ imageKeys: ['old.pdf'] });
+    db.storedFile.findMany.mockResolvedValue([{ key: 'new.pdf', mime: 'application/pdf', pages: 2 }]);
+    await service.submitMakeupPhotos('s1', 'c1', '2026-10-10', ['new.pdf']).catch(() => undefined);
+    const call = db.storedFile.updateMany.mock.calls.find((c: any) => c[0].where.key.in.includes('old.pdf'));
+    expect(call?.[0].where).toEqual({ key: { in: ['old.pdf'] }, ownerId: 's1', expiresAt: null });
+    expect(call?.[0].data.expiresAt).toBeInstanceOf(Date);
+  });
+
   it('сурагчид ажилтны тэмдэглэл, шийдвэр гаргагч очихгүй; зөвхөн өөрийнх нь асуулга', async () => {
     const mine = await service.myMakeups('s2');
     expect(db.attendance.findMany.mock.calls[0][0].where.studentId).toBe('s2');

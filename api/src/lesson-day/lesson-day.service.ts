@@ -510,6 +510,14 @@ export class LessonDayService {
         create: { classroomId, studentId, date, ...data },
         update: data,
       });
+      // Солигдсон хуучин тэмдэглэл (дахин нээгээд шинээр илгээсэн) хаанаас ч ашиглагдахгүй —
+      // байнга хадгалахгүй, ижил 14 хоногийн дараа устгана.
+      const replaced = (existing?.imageKeys ?? []).filter((k) => !imageKeys.includes(k));
+      if (replaced.length)
+        await tx.storedFile.updateMany({
+          where: { key: { in: replaced }, ownerId: studentId, expiresAt: null },
+          data: { expiresAt: new Date(Date.now() + MAKEUP_KEEP_DAYS_AFTER_DECISION * 86400000) },
+        });
     });
     const items = await this.myMakeups(studentId);
     const updated = items.find((i) => i.classroomId === classroomId && i.date === dateKey(date));

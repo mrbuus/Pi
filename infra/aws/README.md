@@ -1,6 +1,6 @@
 # Pi.mn — AWS дэд бүтэц
 
-Албан хостинг: **AWS, Hong Kong (`ap-east-1`)**. Одоогийн прод (Vercel + Render + Supabase)-оос энд шилжинэ.
+Албан хостинг: **AWS, Hong Kong (`ap-east-1`)** — 2026-10-23-ноос **вэб, API, ӨС, файл бүгд энд** (Vercel/Render/Supabase ашиглахаа больсон).
 
 ## Зорилтот бүтэц
 
@@ -58,7 +58,7 @@
 | 3 | **EC2** (Ubuntu) | `pimath-api`, жижиг класс + **Elastic IP** | Node 22 + pm2 + nginx + certbot (HTTPS) |
 | 4 | **IAM Role** | `pimath-ec2-role` → EC2-д оноох (S3 эрх) | Кодонд түлхүүр хэрэггүй |
 | 5 | **S3 bucket** | `pimath-media`, public access хаалттай | Одоо файл дискэнд (`UPLOAD_DIR`) — S3 адаптер код **дараа** |
-| 6 | **DNS** (домэйн бүртгэгч дээр) | `api` A-record → Elastic IP · `@` → Vercel | — |
+| 6 | **DNS** (Datacom, ns1-4.dns.mn) | `@`, `www`, `api` A → 18.167.227.21 (TTL 7200) | — |
 
 **API-ийн env (EC2 дээр `api/.env`)** — одоо Render-д байгаатай ижил, утга нь өөрчлөгдөнө:
 
@@ -71,7 +71,7 @@ UPLOAD_DIR=/var/data/uploads
 JWT_SECRET, RESET_TOKEN_SECRET, CRON_SECRET, GOOGLE_CLIENT_*, DB_POOL_*  ← Render-ээс хуулна
 ```
 
-**Вэб (Vercel хэвээр):** `NEXT_PUBLIC_API_URL=https://api.pimath.mn/api`, Vercel-д `pimath.mn` домэйн нэмнэ.
+**Вэб (EC2 дээр, 2026-10-22):** `NEXT_PUBLIC_API_URL=/api` (нэг домэйн) — nginx `pimath.mn`: `/api/` → :3380, бусад → :3381 (pm2 `pimath-web`).
 
 **Шилжих дараалал:** RDS → Supabase-ээс `pg_dump` / `pg_restore` → EC2 дээр API асааж `api.pimath.mn`-ээр шалгах → вэбийн `NEXT_PUBLIC_API_URL` солих → Google OAuth консолд шинэ redirect URI нэмэх → Render-ийг унтраах.
 
@@ -84,14 +84,17 @@ JWT_SECRET, RESET_TOKEN_SECRET, CRON_SECRET, GOOGLE_CLIENT_*, DB_POOL_*  ← Ren
 - [x] Elastic IP `18.167.227.21` → `pimath-api`
 - [x] Локал v2 өгөгдөл RDS-д (2026-10-19 02:02 dump: User 731, Problem 12816, migration 76). Нээлтийн дараа бүтэн restore ХОРИОТОЙ — SSH tunnel (15432) + скрипт эсвэл psql-ээр л засна
 - [x] API EC2 дээр ажиллаж байна: ~/pimath (branch pi-mn-v2-test, deploy key github_deploy), api/.env (JWT шинээр), pm2 pimath-api + startup, nginx + HTTPS https://api.pimath.mn (certbot, 2027-01-16 хүртэл авто шинэчлэл), DNS Datacom дээр api A 18.167.227.21. Шинэчлэх: ssh pimath "cd ~/pimath && git pull && cd api && npm ci && npm run build && pm2 restart pimath-api"
-- [~] DNS: Cloudflare (shineireedui.pi@gmail.com, Free). `api` A 18.167.227.21 DNS-only нэмэгдсэн. Datacom дээр NS → dalary.ns.cloudflare.com, porter.ns.cloudflare.com (ns1-4.dns.mn-ийг устгана). Хуучин: A → 18.167.227.21; серверт Node 22 + pm2 + nginx + certbot
+- [x] DNS Datacom дээр (Cloudflare бүртгэл үүссэн ч ашиглаагүй, NS солиогүй): `@`, `www`, `api` A → 18.167.227.21
+- [x] Вэб EC2 дээр: pm2 `pimath-web` (:3381, `NEXT_PUBLIC_API_URL=/api`), nginx `/etc/nginx/sites-available/pimath-web` (pimath.mn + www), certbot HTTPS (авто шинэчлэл), http → https
+- [x] Google нэвтрэлт (2026-10-23): client «PieMath.mn», redirect `https://pimath.mn/api/auth/google/callback`, Publish = In production, `.env`-д GOOGLE_*
+- [x] S3 (2026-10-23): доорх хэсэг; хуучин 1755 файл зөөгдсөн (`api/scripts/migrate-files-to-s3.cjs`)
 - [ ] Албан нээлтийн өмнө: Paid plan → RDS Modify → Multi-AZ
 
 Mac-аас RDS 18 руу `pg_dump`/`psql` ажиллуулахад `brew install postgresql@18` хэрэгтэй.
 
 **Зардал (ойролцоо):** EC2 + RDS жижиг класс ≈ $40–50/сар → $120 кредит ≈ 2–3 сар. Free plan зарим том классыг хаадаг тул зөвхөн жижиг класс сонгоно.
 
-## S3 — зураг, PDF (код бэлэн 2026-10-22, AWS тохиргоо хүлээгдэж байна)
+## S3 — зураг, PDF (ПРОД ДЭЭР АСААЛТТАЙ 2026-10-23: bucket pimath-media, CORS, incoming-1day, pimath-ec2-role)
 
 Код: `api/src/storage/file-store.ts`. `S3_BUCKET` тохируулаагүй бол хуучнаараа өгөгдлийн санд хадгална — тохируулмагц шинэ файл S3 руу.
 
@@ -118,3 +121,19 @@ Mac-аас RDS 18 руу `pg_dump`/`psql` ажиллуулахад `brew install
 6. Серверт: `api/.env`-д `S3_BUCKET=pimath-media` нэмээд `npx prisma migrate deploy && npm run build && pm2 restart pimath-api`
 
 Хуучин файлууд (`storage = 'db'`) хэвээр ажиллана; дараа нь S3 руу зөөх скрипт бичнэ.
+
+## Шинэчлэх (deploy)
+
+Deploy бүрийн ӨМНӨ RDS нөөц (CLAUDE.md-ийн дүрэм):
+
+```bash
+ssh pimath 'cd ~/pimath/api && U=$(grep ^DATABASE_URL= .env | cut -d= -f2- | tr -d \" | sed "s/?.*//"); pg_dump "$U?sslmode=require" -Fc -f ~/backups/pre-$(date +%F-%H%M).dump'
+```
+
+Дараа нь код татаж, API + вэб барьж дахин асаана:
+
+```bash
+ssh pimath 'cd ~/pimath && git pull && cd api && npm ci && npx prisma migrate deploy && npm run build && pm2 restart pimath-api && cd ../web && npm ci && NEXT_PUBLIC_API_URL=/api npm run build && pm2 restart pimath-web'
+```
+
+SSH «timed out» бол эзний IP солигдсон — EC2 → `pimath-api-sg` → SSH дүрмийн Source = **My IP**.
