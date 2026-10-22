@@ -97,7 +97,7 @@ export class UsersController {
   // бусад role, архив нь Багш+/Админд л.
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get()
-  listUsers(
+  async listUsers(
     @Req() req: AuthedRequest,
     @Query('archived') archived?: string,
     @Query('role') role?: string,
@@ -107,7 +107,14 @@ export class UsersController {
         throw new ForbiddenException(
           'Багш зөвхөн идэвхтэй сурагчдын жагсаалтыг харна',
         );
-      return this.users.listUsers(false, Role.STUDENT);
+      // Эзэн 2026-10-22: Багш бүх сурагчийг харна, гэхдээ төлбөрийн мэдээлэлгүй (санхүү = Багш+)
+      const rows = await this.users.listUsers(false, Role.STUDENT);
+      return rows.map((u) => ({
+        ...u,
+        studentProfile: u.studentProfile
+          ? { ...u.studentProfile, tuitionPlan: null, tuitionAmount: null }
+          : u.studentProfile,
+      }));
     }
     const wanted = Object.values(Role).includes(role as Role)
       ? (role as Role)
