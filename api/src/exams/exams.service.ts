@@ -17,6 +17,7 @@ import {
 import { assertInternalTeachingStaff } from '../common/access';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { withPlus } from '../revisions/revision-snapshot';
 import { beginRevision, commitRevision } from '../revisions/revision-store';
 import { choiceImagesOf, choiceModeOf, choiceTextsOf, hasKnownAnswer } from '../tests/grading';
 import {
@@ -304,7 +305,7 @@ export class ExamsService {
           reviewLevel: true,
           reviewAutoAt: true,
           reviewOpenedAt: true,
-          reviewOpenedBy: { select: { firstName: true, lastName: true } },
+          reviewOpenedBy: { select: { firstName: true, lastName: true, role: true } },
         },
       }),
       this.prisma.testResult.count({ where: { testId } }),
@@ -375,7 +376,7 @@ export class ExamsService {
                 reviewLevel: effectiveLevel(a, now),
                 reviewAutoAt: autoOpenAt(a),
                 reviewOpenedBy: a.reviewOpenedBy
-                  ? `${a.reviewOpenedBy.lastName} ${a.reviewOpenedBy.firstName}`
+                  ? withPlus(`${a.reviewOpenedBy.lastName} ${a.reviewOpenedBy.firstName}`, a.reviewOpenedBy.role)
                   : null,
                 studentCount: students.length,
                 submittedCount: students.filter((id) => resultSet.has(id))

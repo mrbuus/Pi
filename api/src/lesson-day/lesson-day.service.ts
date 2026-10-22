@@ -410,7 +410,7 @@ export class LessonDayService {
           (
             await this.prisma.user.findMany({
               where: { id: { in: deciders } },
-              select: { id: true, firstName: true, lastName: true },
+              select: { id: true, firstName: true, lastName: true, role: true },
             })
           ).map((u) => [u.id, shortName(u)]),
         )
@@ -458,7 +458,7 @@ export class LessonDayService {
     const name = shortName(
       await this.prisma.user.findUnique({
         where: { id: actor.userId },
-        select: { firstName: true, lastName: true },
+        select: { firstName: true, lastName: true, role: true },
       }),
     );
     return staffView(item, new Map([[actor.userId, name]]));
@@ -592,7 +592,7 @@ export class LessonDayService {
     if (!unique.length) return new Map<string, string>();
     const users = await this.prisma.user.findMany({
       where: { id: { in: unique } },
-      select: { id: true, firstName: true, lastName: true },
+      select: { id: true, firstName: true, lastName: true, role: true },
     });
     return new Map(users.map((u) => [u.id, shortName(u)]));
   }

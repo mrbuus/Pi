@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/cn";
 import {
   ABSENCE_REASONS,
+  EXCUSED_REASONS,
   HOMEWORK_REASONS,
   LATE_RANGES,
   LATE_RANGE_LABEL,
@@ -500,7 +501,7 @@ function NoteDetail({
             <ReasonCombo
               label={`Шалтгаан, ${name}`}
               value={rec.attNote}
-              options={ABSENCE_REASONS}
+              options={rec.att === "EXCUSED" ? EXCUSED_REASONS : ABSENCE_REASONS}
               placeholder="Шалтгаан сонгох эсвэл бичих"
               onChange={onAttNote}
             />

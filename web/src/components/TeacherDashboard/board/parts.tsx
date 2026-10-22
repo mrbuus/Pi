@@ -56,10 +56,8 @@ export interface CountDef {
   value: number;
   /** «12/15» хэлбэрээр */
   total?: number;
-  /** Тэг үед: утсан дээр нууна, компьютер дээр бүдэг (давхардал, хэвтээ гүйлгээгүй) */
-  hideZero?: boolean;
-  /** Тэг үед бүр мөсөн нууна (ж: тэмдэглээгүй сурагчгүй) */
-  dropZero?: boolean;
+  /** Нийт-төрлийн зүйл («Ирсэн N/M», «Хийсэн», «Илгээсэн»): тэг байсан ч харагдана. Бусад төлөв тэг үед ҮЗЭГДЭХГҮЙ */
+  keepZero?: boolean;
 }
 
 const toneIcon = (t: CountDef["tone"]) => (t === "neutral" ? "text-ink-dim" : t === "brand" ? "text-brand" : TONE_TEXT[t]);
@@ -73,10 +71,10 @@ export function attendanceCounts(c: StatusCounts, opts: { total?: number; unmark
       icon: ATTENDANCE_MARKS[a].icon,
       tone: ATTENDANCE_MARKS[a].tone,
       value: c.attendance[a],
-      ...(i === 0 ? { total: opts.total } : { hideZero: true }),
+      ...(i === 0 ? { total: opts.total, keepZero: true } : {}),
     })),
     ...(opts.unmarked
-      ? [{ key: "att-none", label: "Тэмдэглээгүй", icon: Minus, tone: "neutral" as const, value: c.attendance.unmarked, dropZero: true }]
+      ? [{ key: "att-none", label: "Тэмдэглээгүй", icon: Minus, tone: "neutral" as const, value: c.attendance.unmarked }]
       : []),
   ];
 }
@@ -95,15 +93,15 @@ export function homeworkCounts(
         icon: HOMEWORK_MARKS[h].icon,
         tone: HOMEWORK_MARKS[h].tone,
         value: c.homework[h],
-        ...(i === 0 ? { total: opts.total } : { hideZero: true }),
+        ...(i === 0 ? { total: opts.total, keepZero: true } : {}),
       })),
     );
-    if (opts.unmarked) out.push({ key: "hw-none", label: "Тэмдэглээгүй", icon: Minus, tone: "neutral", value: c.homework.unmarked, dropZero: true });
+    if (opts.unmarked) out.push({ key: "hw-none", label: "Тэмдэглээгүй", icon: Minus, tone: "neutral", value: c.homework.unmarked });
   }
   if (opts.sent !== undefined && opts.sent !== null)
-    out.push({ key: "sent", label: "Илгээсэн", icon: HwSentIcon, tone: "brand", value: opts.sent, total: opts.total });
+    out.push({ key: "sent", label: "Илгээсэн", icon: HwSentIcon, tone: "brand", value: opts.sent, total: opts.total, keepZero: true });
   if (opts.online !== undefined && opts.online !== null)
-    out.push({ key: "online", label: "Онлайн", icon: Laptop, tone: "brand", value: opts.online, total: opts.total });
+    out.push({ key: "online", label: "Онлайн", icon: Laptop, tone: "brand", value: opts.online, total: opts.total, keepZero: true });
   return out;
 }
 
@@ -112,7 +110,7 @@ export function homeworkCounts(
  * 390px утсан дээр хэвтээ гүйлгээ гарахгүй. `CountGrid` дотор шошгонууд нэг баганад тэгширнэ.
  */
 export function CountRow({ label, items, className = "" }: { label: string; items: CountDef[]; className?: string }) {
-  const shown = items.filter((i) => !(i.dropZero && i.value === 0));
+  const shown = items.filter((i) => i.keepZero || i.value !== 0);
   if (!shown.length) return null;
   return (
     <div role="group" aria-label={label} className={cn("contents", className)}>
@@ -120,16 +118,12 @@ export function CountRow({ label, items, className = "" }: { label: string; item
       <ul className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-0.5 sm:gap-x-3.5">
         {shown.map((i) => {
           const Icon = i.icon;
-          const zero = i.value === 0;
           const text = `${i.label} ${i.value}${i.total !== undefined ? `/${i.total}` : ""}`;
           return (
             <li
               key={i.key}
               title={text}
-              className={cn(
-                "inline-flex items-center gap-1 whitespace-nowrap leading-5",
-                zero && i.hideZero && "hidden opacity-55 sm:inline-flex",
-              )}
+              className="inline-flex items-center gap-1 whitespace-nowrap leading-5"
             >
               <Icon className={cn("size-3.5 shrink-0", toneIcon(i.tone))} aria-hidden />
               <span className="text-ink-dim">{i.label}</span>

@@ -173,7 +173,7 @@ export class NotesService {
     // Жагсаалттай ижил хэлбэр: зохиогч «Б. Нэр» (drawer шууд дээр нь нэмнэ)
     const author = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { firstName: true, lastName: true },
+      select: { firstName: true, lastName: true, role: true },
     });
     return {
       ...note,
@@ -210,7 +210,7 @@ export class NotesService {
     // Хэн бичсэн (бүх багш уншдаг тул) + засах эрх
     const authors = await this.prisma.user.findMany({
       where: { id: { in: [...new Set(notes.map((n) => n.createdById))] } },
-      select: { id: true, firstName: true, lastName: true },
+      select: { id: true, firstName: true, lastName: true, role: true },
     });
     const nameOf = new Map(authors.map((a) => [a.id, shortName(a)]));
     return notes.map((n) => ({

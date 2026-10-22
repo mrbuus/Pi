@@ -11,7 +11,7 @@ import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/kit/drawer";
 import { Meta } from "@/components/ui/Meta";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Card } from "@/components/ui/Surface";
-import { byFirstName, rosterNames } from "@/lib/personName";
+import { byFirstName, staffNames, withPlus } from "@/lib/personName";
 
 /* ============================================================================
  * «Эрхийн матриц» (эзэн 2026-10-22) — ЗӨВХӨН ADMIN.
@@ -125,7 +125,7 @@ export default function CapabilityAdmin() {
   }, []);
 
   const rows = useMemo(() => [...(data?.staff ?? [])].sort(byFirstName), [data]);
-  const names = useMemo(() => rosterNames(rows), [rows]);
+  const names = useMemo(() => staffNames(rows), [rows]);
   const implicit = useMemo(() => new Set(data?.teacherPlusImplicit ?? FALLBACK_IMPLICIT), [data]);
 
   function activeGrant(userId: string, cap: CapabilityId): Grant | undefined {
@@ -146,7 +146,7 @@ export default function CapabilityAdmin() {
 
   const plusCount = rows.filter((u) => u.role === "TEACHER_PLUS").length;
   const teacherCount = rows.filter((u) => u.role === "TEACHER").length;
-  const nameOf = (u: StaffUser) => names.get(u.id) ?? u.firstName;
+  const nameOf = (u: StaffUser) => names.get(u.id) ?? withPlus(u.firstName, u.role);
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">

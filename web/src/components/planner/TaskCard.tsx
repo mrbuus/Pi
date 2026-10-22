@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, Puzzle, Timer } from "lucide-react";
-import { PRIORITY_META, STATUS_META, SUBJECT_LABEL, formatDate, initials } from "./statusMeta";
+import { PRIORITY_META, STATUS_META, SUBJECT_LABEL, formatDate, fullName, initials } from "./statusMeta";
 import type { SubTask, Task, TaskStatus } from "./types";
 
 const STATUS_OPTIONS: TaskStatus[] = [
@@ -90,7 +90,7 @@ export default function TaskCard({
           {task.assignees.map((a) => (
             <span
               key={a.userId}
-              title={`${a.user.lastName} ${a.user.firstName}`}
+              title={fullName(a.user)}
               className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-bright/20 text-[10px] font-bold text-brand-soft"
             >
               {initials(a.user.firstName, a.user.lastName)}

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { addDateDays, dateKey, parseDateOnly } from '../common/date';
 import { PrismaService } from '../prisma/prisma.service';
+import { withPlus } from '../revisions/revision-snapshot';
 import { computeTeacherHours, monthRange, type TeacherHoursRow } from './teacher-hours';
 
 @Injectable()
@@ -30,7 +31,7 @@ export class TeacherHoursService {
       },
       include: {
         classroom: { select: { name: true } },
-        teacher: { select: { id: true, firstName: true, lastName: true } },
+        teacher: { select: { id: true, firstName: true, lastName: true, role: true } },
       },
     });
     const ids = schedules.map((s) => s.id);
@@ -51,7 +52,10 @@ export class TeacherHoursService {
         startMinute: s.startMinute,
         endMinute: s.endMinute,
         teacherId: s.teacher?.id ?? null,
-        teacherName: s.teacher ? `${s.teacher.firstName} ${s.teacher.lastName}` : null,
+        // Багш+ бол «+» (эзэн 2026-10-23)
+        teacherName: s.teacher
+          ? withPlus(`${s.teacher.firstName} ${s.teacher.lastName}`, s.teacher.role)
+          : null,
         room: s.room,
         subject: s.subject,
         effectiveFrom: dateKey(s.effectiveFrom),

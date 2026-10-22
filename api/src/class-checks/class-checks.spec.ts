@@ -1,6 +1,11 @@
-import { GUARDS_METADATA } from '@nestjs/common/constants';
+import {
+  GUARDS_METADATA,
+  METHOD_METADATA,
+  PATH_METADATA,
+} from '@nestjs/common/constants';
 import {
   BadRequestException,
+  RequestMethod,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -69,6 +74,24 @@ describe('ClassChecksController — эрх', () => {
   });
 });
 
+describe('ClassChecksController — устгах маршрут', () => {
+  it('DELETE /classrooms/:classroomId/checks/:checkId — классын эрхийг өвлөнө', () => {
+    const handler = Object.getOwnPropertyDescriptor(
+      ClassChecksController.prototype,
+      'remove',
+    )!.value as object;
+    expect(Reflect.getMetadata(PATH_METADATA, ClassChecksController)).toBe(
+      'classrooms/:classroomId/checks',
+    );
+    expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(':checkId');
+    expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
+      RequestMethod.DELETE,
+    );
+    // Маршрут дээр тусдаа @Roles байхгүй — классын ADMIN/TEACHER_PLUS/TEACHER хүчинтэй
+    expect(Reflect.getMetadata(ROLES_KEY, handler)).toBeUndefined();
+  });
+});
+
 describe('ClassChecksService', () => {
   const ROLE_OF: Record<string, Role> = {
     admin: Role.ADMIN,
@@ -93,7 +116,11 @@ describe('ClassChecksService', () => {
         ),
         findMany: jest.fn(({ where }: { where: { id: { in: string[] } } }) =>
           Promise.resolve(
-            where.id.in.map((id) => ({ id, firstName: `Нэр-${id}`, lastName: 'Бат' })),
+            where.id.in.map((id) => ({
+              id,
+              firstName: `Нэр-${id}`,
+              lastName: 'Бат',
+            })),
           ),
         ),
       },
@@ -110,6 +137,7 @@ describe('ClassChecksService', () => {
         count: jest.fn().mockResolvedValue(0),
         create: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       classCheckMark: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -171,7 +199,10 @@ describe('ClassChecksService', () => {
       const { service, prisma } = setup();
       await expect(service.list('c9', 'plus')).resolves.toBeTruthy();
       await expect(service.list('c9', 'admin')).resolves.toBeTruthy();
-      prisma.classroom.findUnique.mockResolvedValueOnce({ id: 'c1', archived: true });
+      prisma.classroom.findUnique.mockResolvedValueOnce({
+        id: 'c1',
+        archived: true,
+      });
       await expect(service.list('c1', 'admin')).rejects.toBeInstanceOf(
         NotFoundException,
       );
@@ -189,9 +220,24 @@ describe('ClassChecksService', () => {
         .mockResolvedValueOnce([
           checkRow({
             marks: [
-              { studentId: 's1', checked: true, updatedById: 'plus', updatedAt: now },
-              { studentId: 'gone', checked: true, updatedById: 'plus', updatedAt: now },
-              { studentId: 'gone2', checked: false, updatedById: 'plus', updatedAt: now },
+              {
+                studentId: 's1',
+                checked: true,
+                updatedById: 'plus',
+                updatedAt: now,
+              },
+              {
+                studentId: 'gone',
+                checked: true,
+                updatedById: 'plus',
+                updatedAt: now,
+              },
+              {
+                studentId: 'gone2',
+                checked: false,
+                updatedById: 'plus',
+                updatedAt: now,
+              },
             ],
           }),
         ])
@@ -204,7 +250,11 @@ describe('ClassChecksService', () => {
       // Хаагдсан нь тусдаа, дээд тал нь 50
       expect(prisma.classCheck.findMany).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          where: { classroomId: 'c1', archivedAt: { not: null } },
+          where: {
+            classroomId: 'c1',
+            archivedAt: { not: null },
+            deletedAt: null,
+          },
           take: 50,
         }),
       );
@@ -214,7 +264,9 @@ describe('ClassChecksService', () => {
   describe('үүсгэх', () => {
     it('нэрийг цэвэрлэж, дүнтэй үүсгээд аудит бичнэ', async () => {
       const { service, prisma, audit } = setup();
-      prisma.classCheck.create.mockResolvedValue(checkRow({ createdById: 'teacher' }));
+      prisma.classCheck.create.mockResolvedValue(
+        checkRow({ createdById: 'teacher' }),
+      );
       const res = await service.create(
         'c1',
         { title: '  Номны  мөнгө ', amount: 25000 },
@@ -232,22 +284,26 @@ describe('ClassChecksService', () => {
       );
       expect(res.createdBy).toMatchObject({ id: 'teacher' });
       expect(audit.record).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'CREATE', entity: 'ClassCheck', actorRole: Role.TEACHER }),
+        expect.objectContaining({
+          action: 'CREATE',
+          entity: 'ClassCheck',
+          actorRole: Role.TEACHER,
+        }),
       );
     });
 
     it('хоосон нэр, буруу дүн, хэт олон нээлттэй чек → BadRequest', async () => {
       const { service, prisma } = setup();
-      await expect(service.create('c1', { title: '  ' }, 'teacher')).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.create('c1', { title: '  ' }, 'teacher'),
+      ).rejects.toBeInstanceOf(BadRequestException);
       await expect(
         service.create('c1', { title: 'А', amount: -5 }, 'teacher'),
       ).rejects.toBeInstanceOf(BadRequestException);
       prisma.classCheck.count.mockResolvedValueOnce(OPEN_CHECKS_MAX);
-      await expect(service.create('c1', { title: 'А' }, 'teacher')).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.create('c1', { title: 'А' }, 'teacher'),
+      ).rejects.toBeInstanceOf(BadRequestException);
       expect(prisma.classCheck.create).not.toHaveBeenCalled();
     });
   });
@@ -256,10 +312,16 @@ describe('ClassChecksService', () => {
     it('хаах = зөөлөн (archivedAt + хэн), түүх үлдэнэ, аудит ARCHIVE', async () => {
       const { service, prisma, audit } = setup();
       prisma.classCheck.findFirst.mockResolvedValue(checkRow());
-      prisma.classCheck.update.mockImplementation(({ data }: { data: Record<string, unknown> }) =>
-        Promise.resolve(checkRow(data)),
+      prisma.classCheck.update.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
       );
-      const res = await service.update('c1', 'k1', { archived: true }, 'teacher');
+      const res = await service.update(
+        'c1',
+        'k1',
+        { archived: true },
+        'teacher',
+      );
       const call = prisma.classCheck.update.mock.calls[0][0];
       expect(call.where).toEqual({ id: 'k1' });
       expect(call.data.archivedAt).toBeInstanceOf(Date);
@@ -275,10 +337,16 @@ describe('ClassChecksService', () => {
       prisma.classCheck.findFirst.mockResolvedValue(
         checkRow({ archivedAt: now, archivedById: 'plus' }),
       );
-      prisma.classCheck.update.mockImplementation(({ data }: { data: Record<string, unknown> }) =>
-        Promise.resolve(checkRow(data)),
+      prisma.classCheck.update.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
       );
-      await service.update('c1', 'k1', { archived: false, title: 'Шалгалтын цаас' }, 'teacher');
+      await service.update(
+        'c1',
+        'k1',
+        { archived: false, title: 'Шалгалтын цаас' },
+        'teacher',
+      );
       expect(prisma.classCheck.update.mock.calls[0][0].data).toEqual({
         title: 'Шалгалтын цаас',
         archivedAt: null,
@@ -296,10 +364,17 @@ describe('ClassChecksService', () => {
         service.update('c1', 'other', { title: 'x' }, 'teacher'),
       ).rejects.toBeInstanceOf(NotFoundException);
       expect(prisma.classCheck.findFirst).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: 'other', classroomId: 'c1' } }),
+        expect.objectContaining({
+          where: { id: 'other', classroomId: 'c1', deletedAt: null },
+        }),
       );
       prisma.classCheck.findFirst.mockResolvedValueOnce(checkRow());
-      await service.update('c1', 'k1', { title: 'Номны мөнгө', amount: 25000 }, 'teacher');
+      await service.update(
+        'c1',
+        'k1',
+        { title: 'Номны мөнгө', amount: 25000 },
+        'teacher',
+      );
       expect(prisma.classCheck.update).not.toHaveBeenCalled();
     });
   });
@@ -307,7 +382,10 @@ describe('ClassChecksService', () => {
   describe('сурагч тэмдэглэх', () => {
     it('ангид бүртгэлгүй сурагч → BadRequest, бичихгүй', async () => {
       const { service, prisma } = setup();
-      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k1', archivedAt: null });
+      prisma.classCheck.findFirst.mockResolvedValue({
+        id: 'k1',
+        archivedAt: null,
+      });
       prisma.enrollment.findFirst.mockResolvedValueOnce(null);
       await expect(
         service.setMark('c1', 'k1', 'outsider', { checked: true }, 'teacher'),
@@ -327,7 +405,10 @@ describe('ClassChecksService', () => {
 
     it('хаагдсан чек → BadRequest', async () => {
       const { service, prisma } = setup();
-      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k1', archivedAt: now });
+      prisma.classCheck.findFirst.mockResolvedValue({
+        id: 'k1',
+        archivedAt: now,
+      });
       await expect(
         service.setMark('c1', 'k1', 's1', { checked: true }, 'teacher'),
       ).rejects.toBeInstanceOf(BadRequestException);
@@ -336,18 +417,32 @@ describe('ClassChecksService', () => {
 
     it('(checkId, studentId)-аар upsert, хэн дарсныг буцаана, аудит', async () => {
       const { service, prisma, audit } = setup();
-      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k1', archivedAt: null });
+      prisma.classCheck.findFirst.mockResolvedValue({
+        id: 'k1',
+        archivedAt: null,
+      });
       prisma.classCheckMark.upsert.mockResolvedValue({
         studentId: 's1',
         checked: true,
         updatedById: 'teacher',
         updatedAt: now,
       });
-      const res = await service.setMark('c1', 'k1', 's1', { checked: true }, 'teacher');
+      const res = await service.setMark(
+        'c1',
+        'k1',
+        's1',
+        { checked: true },
+        'teacher',
+      );
       expect(prisma.classCheckMark.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { checkId_studentId: { checkId: 'k1', studentId: 's1' } },
-          create: { checkId: 'k1', studentId: 's1', checked: true, updatedById: 'teacher' },
+          create: {
+            checkId: 'k1',
+            studentId: 's1',
+            checked: true,
+            updatedById: 'teacher',
+          },
           update: { checked: true, updatedById: 'teacher' },
         }),
       );
@@ -364,7 +459,10 @@ describe('ClassChecksService', () => {
 
     it('хоёр багш зэрэг: P2002 → update-ээр дахин бичнэ (сүүлд бичсэн ялна)', async () => {
       const { service, prisma } = setup();
-      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k1', archivedAt: null });
+      prisma.classCheck.findFirst.mockResolvedValue({
+        id: 'k1',
+        archivedAt: null,
+      });
       prisma.classCheckMark.upsert.mockRejectedValueOnce(
         Object.assign(new Error('Unique constraint failed'), { code: 'P2002' }),
       );
@@ -374,7 +472,13 @@ describe('ClassChecksService', () => {
         updatedById: 'plus',
         updatedAt: now,
       });
-      const res = await service.setMark('c1', 'k1', 's1', { checked: false }, 'plus');
+      const res = await service.setMark(
+        'c1',
+        'k1',
+        's1',
+        { checked: false },
+        'plus',
+      );
       expect(prisma.classCheckMark.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { checkId_studentId: { checkId: 'k1', studentId: 's1' } },
@@ -387,7 +491,10 @@ describe('ClassChecksService', () => {
 
     it('бусад DB алдааг залгихгүй', async () => {
       const { service, prisma } = setup();
-      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k1', archivedAt: null });
+      prisma.classCheck.findFirst.mockResolvedValue({
+        id: 'k1',
+        archivedAt: null,
+      });
       prisma.classCheckMark.upsert.mockRejectedValueOnce(new Error('db down'));
       await expect(
         service.setMark('c1', 'k1', 's1', { checked: true }, 'teacher'),
@@ -397,7 +504,10 @@ describe('ClassChecksService', () => {
 
     it('утга өөрчлөгдөөгүй бол аудит бичихгүй', async () => {
       const { service, prisma, audit } = setup();
-      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k1', archivedAt: null });
+      prisma.classCheck.findFirst.mockResolvedValue({
+        id: 'k1',
+        archivedAt: null,
+      });
       prisma.classCheckMark.findUnique.mockResolvedValue({
         studentId: 's1',
         checked: true,
@@ -412,6 +522,128 @@ describe('ClassChecksService', () => {
       });
       await service.setMark('c1', 'k1', 's1', { checked: true }, 'teacher');
       expect(audit.record).not.toHaveBeenCalled();
+    });
+  });
+  describe('устгах (зөөлөн)', () => {
+    it('deletedAt + хэн бичнэ, мөрийг устгахгүй, аудит DELETE', async () => {
+      const { service, prisma, audit } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(
+        checkRow({
+          marks: [
+            {
+              studentId: 's1',
+              checked: true,
+              updatedById: 'plus',
+              updatedAt: now,
+            },
+            {
+              studentId: 's2',
+              checked: false,
+              updatedById: 'plus',
+              updatedAt: now,
+            },
+          ],
+        }),
+      );
+      const res = await service.remove('c1', 'k1', 'teacher');
+      expect(res).toEqual({ id: 'k1', deleted: true });
+      expect(prisma.classCheck.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'k1', classroomId: 'c1', deletedAt: null },
+        }),
+      );
+      const call = (
+        prisma.classCheck.updateMany.mock.calls as unknown as [
+          {
+            where: Record<string, unknown>;
+            data: { deletedAt: unknown; deletedById: string };
+          },
+        ][]
+      )[0][0];
+      expect(call.where).toEqual({ id: 'k1', deletedAt: null });
+      expect(call.data.deletedAt).toBeInstanceOf(Date);
+      expect(call.data.deletedById).toBe('teacher');
+      // Хатуу устгал хэзээ ч дуудагдахгүй
+      expect(
+        (prisma.classCheck as Record<string, unknown>).delete,
+      ).toBeUndefined();
+      expect(audit.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'DELETE',
+          entity: 'ClassCheck',
+          entityId: 'k1',
+          actorRole: Role.TEACHER,
+          before: expect.objectContaining({
+            title: 'Номны мөнгө',
+            checkedCount: 1,
+          }),
+        }),
+      );
+    });
+
+    it('Багш+/Админ мөн устгана; хаасан чекийг ч устгана', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(
+        checkRow({ archivedAt: now, archivedById: 'plus' }),
+      );
+      await expect(service.remove('c1', 'k1', 'plus')).resolves.toMatchObject({
+        deleted: true,
+      });
+      await expect(service.remove('c9', 'k1', 'admin')).resolves.toMatchObject({
+        deleted: true,
+      });
+      expect(prisma.classCheck.updateMany).toHaveBeenCalledTimes(2);
+    });
+
+    it('сурагч → Forbidden; Багш харах эрхгүй анги → Forbidden; бичихгүй', async () => {
+      const { service, prisma } = setup();
+      await expect(
+        service.remove('c1', 'k1', 'student'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        service.remove('c2', 'k1', 'teacher'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.classCheck.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('өөр анги / аль хэдийн устгасан → NotFound; зэрэг устгалд хоёр дахь нь NotFound', async () => {
+      const { service, prisma, audit } = setup();
+      prisma.classCheck.findFirst.mockResolvedValueOnce(null);
+      await expect(
+        service.remove('c1', 'gone', 'teacher'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.classCheck.updateMany).not.toHaveBeenCalled();
+      prisma.classCheck.findFirst.mockResolvedValueOnce(checkRow());
+      prisma.classCheck.updateMany.mockResolvedValueOnce({ count: 0 });
+      await expect(
+        service.remove('c1', 'k1', 'teacher'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(audit.record).not.toHaveBeenCalled();
+    });
+
+    it('устгасан чек жагсаалт, тоолол, тэмдэглэгээнд орохгүй', async () => {
+      const { service, prisma } = setup();
+      await service.list('c1', 'teacher');
+      const listCalls = prisma.classCheck.findMany.mock.calls as unknown as [
+        { where: Record<string, unknown> },
+      ][];
+      for (const [arg] of listCalls)
+        expect(arg.where).toMatchObject({ deletedAt: null });
+      await service
+        .create('c1', { title: 'А' }, 'teacher')
+        .catch(() => undefined);
+      expect(prisma.classCheck.count).toHaveBeenCalledWith({
+        where: { classroomId: 'c1', archivedAt: null, deletedAt: null },
+      });
+      prisma.classCheck.findFirst.mockResolvedValueOnce(null);
+      await expect(
+        service.setMark('c1', 'k1', 's1', { checked: true }, 'teacher'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.classCheck.findFirst).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          where: { id: 'k1', classroomId: 'c1', deletedAt: null },
+        }),
+      );
     });
   });
 });

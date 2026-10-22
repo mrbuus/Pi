@@ -15,6 +15,7 @@ import {
   TEACHER_SEES_ALL,
   assertMarkAccess,
 } from '../attendance/marking-access';
+import { withPlus } from '../revisions/revision-snapshot';
 import { SetHomeworkMarkDto } from './dto/set-homework-mark.dto';
 import type {
   BulkHomeworkMarksDto,
@@ -88,7 +89,7 @@ export class HomeworkMarksService {
     const markers = markerIds.length
       ? await this.prisma.user.findMany({
           where: { id: { in: markerIds } },
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         })
       : [];
     const markerById = new Map(markers.map((m) => [m.id, m]));
@@ -228,12 +229,13 @@ export class HomeworkMarksService {
   private async markerName(userId: string) {
     const u = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { firstName: true, lastName: true },
+      select: { firstName: true, lastName: true, role: true },
     });
     if (!u) return null;
     const first = u.firstName.trim();
     const last = u.lastName.trim();
-    return last ? `${last.charAt(0).toUpperCase()}. ${first}` : first;
+    // Багш+ бол «+» (эзэн 2026-10-23)
+    return withPlus(last ? `${last.charAt(0).toUpperCase()}. ${first}` : first, u.role);
   }
 
   private static passes(

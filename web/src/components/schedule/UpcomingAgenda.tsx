@@ -14,6 +14,7 @@ import {
   WEEKDAY_LABELS,
   type DayExpansion,
 } from "./types";
+import { withPlus } from "@/lib/personName";
 
 interface Props {
   classroomId?: string;
@@ -108,7 +109,7 @@ export default function UpcomingAgenda({
                   </span>
                   <span className="font-semibold">{c.classroomName}</span>
                   <span className="text-ink-dim">
-                    {c.teacherName ?? "Багш товлогдоогүй"}
+                    {withPlus(c.teacherName, c.teacherRole) ?? "Багш товлогдоогүй"}
                   </span>
                   {c.room && (
                     <span className="inline-flex items-center gap-1 text-ink-dim">

@@ -238,7 +238,7 @@ export class AttendanceService {
     if (!unique.length) return new Map<string, string>();
     const users = await this.prisma.user.findMany({
       where: { id: { in: unique } },
-      select: { id: true, firstName: true, lastName: true },
+      select: { id: true, firstName: true, lastName: true, role: true },
     });
     return new Map(users.map((u) => [u.id, shortName(u)]));
   }
@@ -501,9 +501,9 @@ export class AttendanceService {
             room: e.room,
             topic: e.topic,
             teacherName: e.teacherName,
-            leadTeacher: e.leadTeacher?.name ?? null,
-            assistantTeacher: e.assistantTeacher?.name ?? null,
-          })),
+                leadTeacher: e.leadTeacher?.name ?? null,
+                assistantTeacher: e.assistantTeacher?.name ?? null,
+              })),
       };
     });
     classes.sort(
@@ -984,7 +984,7 @@ export class AttendanceService {
     const markers = markerIds.length
       ? await this.prisma.user.findMany({
           where: { id: { in: markerIds } },
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         })
       : [];
     const markerById = new Map(markers.map((m) => [m.id, m]));

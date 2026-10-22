@@ -85,9 +85,11 @@ describe('ClassroomsService.get — ангийн дэлгэрэнгүй', () => 
     expect(prisma.classroom.findUnique).toHaveBeenCalledWith({
       where: { id: 'class-1' },
       include: {
-        teacher: { select: { id: true, firstName: true, lastName: true } },
+        teacher: {
+          select: { id: true, firstName: true, lastName: true, role: true },
+        },
         assistantTeacher: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
         enrollments: {
           where: { leftAt: null, student: { archivedAt: null } },

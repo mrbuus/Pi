@@ -23,6 +23,7 @@ import {
   type MonthKey,
   type PromiseState,
 } from './ledger';
+import { withPlus } from '../revisions/revision-snapshot';
 import { PaymentsService, type PaymentActor } from './payments.service';
 import type { CreatePaymentDto } from './dto/payment.dto';
 import type { LedgerPayDto } from './dto/ledger.dto';
@@ -74,8 +75,9 @@ const STUDENT_SELECT = {
 
 const dateKey = (d: Date | null | undefined): DateKey | null =>
   d ? d.toISOString().slice(0, 10) : null;
-const authorLabel = (a: { firstName: string; lastName: string | null }) =>
-  `${a.lastName ? `${a.lastName.charAt(0)}. ` : ''}${a.firstName}`.trim();
+// Багш+ бол «+» (эзэн 2026-10-23)
+const authorLabel = (a: { firstName: string; lastName: string | null; role?: string | null }) =>
+  withPlus(`${a.lastName ? `${a.lastName.charAt(0)}. ` : ''}${a.firstName}`.trim(), a.role);
 
 /** Хамгийн асуудалтай нь эхэнд: өртэй сар → өрийн дүн → тасарсан амлалт. */
 export function problemOrder(a: LedgerRow, b: LedgerRow): number {
@@ -145,7 +147,7 @@ export class PaymentsLedgerService {
       (
         await this.prisma.user.findMany({
           where: { id: { in: [...new Set(notes.map((n) => n.createdById))] } },
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         })
       ).map((a) => [a.id, authorLabel(a)]),
     );
@@ -478,7 +480,7 @@ export class PaymentsLedgerService {
               ],
             },
           },
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         })
       ).map((a) => [a.id, authorLabel(a)]),
     );

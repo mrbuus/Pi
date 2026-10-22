@@ -11,10 +11,12 @@ const NOTE_LIMIT = 500;
 
 /** «Баасанжав О.» → «О. Баасанжав» (аппын бусад газартай ижил хэлбэр) */
 function initialFirst(name: string): string {
-  const parts = name.trim().split(/\s+/);
+  // Сервер Багш+ бол ард нь «+» залгадаг — хөрвүүлэхдээ хадгална
+  const plus = name.trimEnd().endsWith("+");
+  const parts = name.trim().replace(/\+$/, "").split(/\s+/);
   if (parts.length !== 2) return name;
   const [first, last] = parts;
-  return `${last.charAt(0).toUpperCase()}. ${first}`;
+  return `${last.charAt(0).toUpperCase()}. ${first}${plus ? "+" : ""}`;
 }
 const TYPE_MS = 900;
 

@@ -201,7 +201,7 @@ export const LATE_RANGE_SHORT: Record<LateRange, string> = {
   OVER_ONE_HOUR: "1 ц+",
 };
 /** = components/attendance/NoteAutocomplete NOTE_SUGGESTIONS (бодит апп) */
-export const ABSENCE_REASONS = ["өвчтэй", "тэмцээн", "олимпиад", "гэр бүлийн шалтгаан", "эмнэлэг", "хичээлийн бус ажил"] as const;
+export const ABSENCE_REASONS = ["тэмцээн", "олимпиад", "гэр бүлийн шалтгаан", "эмнэлэг", "хичээлийн бус ажил"] as const;
 export const HOMEWORK_REASONS = ["дэвтрээ мартсан", "ойлгоогүй", "хагас хийсэн"] as const;
 
 export const TUITION_PLAN_LABEL: Record<TuitionPlan, string> = {

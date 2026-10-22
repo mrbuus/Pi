@@ -367,10 +367,12 @@ export class FinanceService {
           in: records.map((r) => r.createdById),
         },
       },
+      // role — Багш+ хүний нэрийн ард «+» (эзэн 2026-10-23)
       select: {
         id: true,
         firstName: true,
         lastName: true,
+        role: true,
       },
     });
 

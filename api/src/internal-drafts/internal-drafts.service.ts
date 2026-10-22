@@ -8,6 +8,7 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import type { DraftBlock, DraftSet } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
+import { markPlus, teacherPlusIds } from '../common/teacher-plus';
 import { PrismaService } from '../prisma/prisma.service';
 import { ContentService } from '../content/content.service';
 import type { CreateProblemDto } from '../content/dto/create-problem.dto';
@@ -136,6 +137,8 @@ type ChapterInfo = {
 function setView(
   set: DraftSet & { _count?: { blocks: number } },
   chapter: ChapterInfo | null,
+  // Багш+ хүмүүсийн id — snapshot нэрийн ард «+» (эзэн 2026-10-23)
+  plus: Set<string> = new Set(),
 ) {
   return {
     id: set.id,
@@ -158,9 +161,9 @@ function setView(
     publishedTestId: set.publishedTestId,
     changedSincePublish:
       !!set.publishedAt && set.updatedAt.getTime() > set.publishedAt.getTime(),
-    createdByName: set.createdByName,
+    createdByName: markPlus(set.createdByName, set.createdById, plus),
     createdAt: set.createdAt,
-    updatedByName: set.updatedByName,
+    updatedByName: markPlus(set.updatedByName, set.updatedById, plus),
     updatedAt: set.updatedAt,
   };
 }
@@ -343,8 +346,12 @@ export class InternalDraftsService {
       include: { _count: { select: { blocks: true } } },
     });
     const chapters = await this.chapterMap(sets.map((s) => s.chapterId));
+    const plus = await teacherPlusIds(
+      this.prisma,
+      sets.flatMap((s) => [s.createdById, s.updatedById]),
+    );
     return sets.map((s) =>
-      setView(s, s.chapterId ? (chapters.get(s.chapterId) ?? null) : null),
+      setView(s, s.chapterId ? (chapters.get(s.chapterId) ?? null) : null, plus),
     );
   }
 

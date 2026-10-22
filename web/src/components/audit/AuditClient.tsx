@@ -14,6 +14,7 @@ import type {
   AuditListResponse,
   StaffUser,
 } from "./types";
+import { withPlus } from "@/lib/personName";
 
 const ROLE_LABEL: Record<string, string> = {
   ADMIN: "Админ",
@@ -66,7 +67,7 @@ export default function AuditClient() {
     return (id: string) => {
       const u = map.get(id);
       if (!u) return `${id.slice(0, 10)}…`;
-      return `${u.firstName} ${u.lastName}`;
+      return withPlus(`${u.firstName} ${u.lastName}`, u.role);
     };
   }, [staff]);
 

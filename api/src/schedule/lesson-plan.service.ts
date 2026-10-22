@@ -11,6 +11,7 @@ import {
   parseDateOnly,
   todayUB,
 } from '../common/date';
+import { markPlus, teacherPlusIds } from '../common/teacher-plus';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   compareBookOrder,
@@ -396,6 +397,11 @@ export class LessonPlanService {
         select: { id: true, teacherId: true, assistantTeacherId: true },
       }),
     ]);
+    // Snapshot нэрэнд Багш+ тэмдэг (эзэн 2026-10-23)
+    const plusIds = await teacherPlusIds(this.prisma, [
+      ...notes.map((n) => n.updatedById),
+      ...records.map((r) => r.confirmedById),
+    ]);
 
     const staffIds = [
       ...new Set(
@@ -526,13 +532,13 @@ export class LessonPlanService {
           note: note
             ? {
                 body: note.body,
-                updatedByName: note.updatedByName,
+                updatedByName: markPlus(note.updatedByName, note.updatedById, plusIds),
                 updatedAt: note.updatedAt,
               }
             : null,
           record: record
             ? {
-                confirmedByName: record.confirmedByName,
+                confirmedByName: markPlus(record.confirmedByName, record.confirmedById, plusIds),
                 confirmedAt: record.confirmedAt,
                 testCount: record.testCount,
                 enrolledCount: record.enrolledCount,

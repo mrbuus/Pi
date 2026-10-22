@@ -48,6 +48,8 @@ export type ClassCheckMinAggregateOutputType = {
   createdAt: Date | null
   archivedAt: Date | null
   archivedById: string | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type ClassCheckMaxAggregateOutputType = {
@@ -59,6 +61,8 @@ export type ClassCheckMaxAggregateOutputType = {
   createdAt: Date | null
   archivedAt: Date | null
   archivedById: string | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type ClassCheckCountAggregateOutputType = {
@@ -70,6 +74,8 @@ export type ClassCheckCountAggregateOutputType = {
   createdAt: number
   archivedAt: number
   archivedById: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -91,6 +97,8 @@ export type ClassCheckMinAggregateInputType = {
   createdAt?: true
   archivedAt?: true
   archivedById?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type ClassCheckMaxAggregateInputType = {
@@ -102,6 +110,8 @@ export type ClassCheckMaxAggregateInputType = {
   createdAt?: true
   archivedAt?: true
   archivedById?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type ClassCheckCountAggregateInputType = {
@@ -113,6 +123,8 @@ export type ClassCheckCountAggregateInputType = {
   createdAt?: true
   archivedAt?: true
   archivedById?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -211,6 +223,8 @@ export type ClassCheckGroupByOutputType = {
   createdAt: Date
   archivedAt: Date | null
   archivedById: string | null
+  deletedAt: Date | null
+  deletedById: string | null
   _count: ClassCheckCountAggregateOutputType | null
   _avg: ClassCheckAvgAggregateOutputType | null
   _sum: ClassCheckSumAggregateOutputType | null
@@ -245,6 +259,8 @@ export type ClassCheckWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"ClassCheck"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"ClassCheck"> | Date | string | null
   archivedById?: Prisma.StringNullableFilter<"ClassCheck"> | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"ClassCheck"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"ClassCheck"> | string | null
   marks?: Prisma.ClassCheckMarkListRelationFilter
 }
 
@@ -257,6 +273,8 @@ export type ClassCheckOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   marks?: Prisma.ClassCheckMarkOrderByRelationAggregateInput
 }
 
@@ -272,6 +290,8 @@ export type ClassCheckWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"ClassCheck"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"ClassCheck"> | Date | string | null
   archivedById?: Prisma.StringNullableFilter<"ClassCheck"> | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"ClassCheck"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"ClassCheck"> | string | null
   marks?: Prisma.ClassCheckMarkListRelationFilter
 }, "id">
 
@@ -284,6 +304,8 @@ export type ClassCheckOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ClassCheckCountOrderByAggregateInput
   _avg?: Prisma.ClassCheckAvgOrderByAggregateInput
   _max?: Prisma.ClassCheckMaxOrderByAggregateInput
@@ -303,6 +325,8 @@ export type ClassCheckScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ClassCheck"> | Date | string
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ClassCheck"> | Date | string | null
   archivedById?: Prisma.StringNullableWithAggregatesFilter<"ClassCheck"> | string | null
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ClassCheck"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"ClassCheck"> | string | null
 }
 
 export type ClassCheckCreateInput = {
@@ -314,6 +338,8 @@ export type ClassCheckCreateInput = {
   createdAt?: Date | string
   archivedAt?: Date | string | null
   archivedById?: string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   marks?: Prisma.ClassCheckMarkCreateNestedManyWithoutCheckInput
 }
 
@@ -326,6 +352,8 @@ export type ClassCheckUncheckedCreateInput = {
   createdAt?: Date | string
   archivedAt?: Date | string | null
   archivedById?: string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   marks?: Prisma.ClassCheckMarkUncheckedCreateNestedManyWithoutCheckInput
 }
 
@@ -338,6 +366,8 @@ export type ClassCheckUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   marks?: Prisma.ClassCheckMarkUpdateManyWithoutCheckNestedInput
 }
 
@@ -350,6 +380,8 @@ export type ClassCheckUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   marks?: Prisma.ClassCheckMarkUncheckedUpdateManyWithoutCheckNestedInput
 }
 
@@ -362,6 +394,8 @@ export type ClassCheckCreateManyInput = {
   createdAt?: Date | string
   archivedAt?: Date | string | null
   archivedById?: string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ClassCheckUpdateManyMutationInput = {
@@ -373,6 +407,8 @@ export type ClassCheckUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClassCheckUncheckedUpdateManyInput = {
@@ -384,6 +420,8 @@ export type ClassCheckUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClassCheckCountOrderByAggregateInput = {
@@ -395,6 +433,8 @@ export type ClassCheckCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   archivedById?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ClassCheckAvgOrderByAggregateInput = {
@@ -410,6 +450,8 @@ export type ClassCheckMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   archivedById?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ClassCheckMinOrderByAggregateInput = {
@@ -421,6 +463,8 @@ export type ClassCheckMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   archivedById?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ClassCheckSumOrderByAggregateInput = {
@@ -455,6 +499,8 @@ export type ClassCheckCreateWithoutMarksInput = {
   createdAt?: Date | string
   archivedAt?: Date | string | null
   archivedById?: string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ClassCheckUncheckedCreateWithoutMarksInput = {
@@ -466,6 +512,8 @@ export type ClassCheckUncheckedCreateWithoutMarksInput = {
   createdAt?: Date | string
   archivedAt?: Date | string | null
   archivedById?: string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ClassCheckCreateOrConnectWithoutMarksInput = {
@@ -493,6 +541,8 @@ export type ClassCheckUpdateWithoutMarksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClassCheckUncheckedUpdateWithoutMarksInput = {
@@ -504,6 +554,8 @@ export type ClassCheckUncheckedUpdateWithoutMarksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -546,6 +598,8 @@ export type ClassCheckSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   createdAt?: boolean
   archivedAt?: boolean
   archivedById?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   marks?: boolean | Prisma.ClassCheck$marksArgs<ExtArgs>
   _count?: boolean | Prisma.ClassCheckCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["classCheck"]>
@@ -559,6 +613,8 @@ export type ClassCheckSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   createdAt?: boolean
   archivedAt?: boolean
   archivedById?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["classCheck"]>
 
 export type ClassCheckSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -570,6 +626,8 @@ export type ClassCheckSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   createdAt?: boolean
   archivedAt?: boolean
   archivedById?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["classCheck"]>
 
 export type ClassCheckSelectScalar = {
@@ -581,9 +639,11 @@ export type ClassCheckSelectScalar = {
   createdAt?: boolean
   archivedAt?: boolean
   archivedById?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type ClassCheckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "title" | "amount" | "createdById" | "createdAt" | "archivedAt" | "archivedById", ExtArgs["result"]["classCheck"]>
+export type ClassCheckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "title" | "amount" | "createdById" | "createdAt" | "archivedAt" | "archivedById" | "deletedAt" | "deletedById", ExtArgs["result"]["classCheck"]>
 export type ClassCheckInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   marks?: boolean | Prisma.ClassCheck$marksArgs<ExtArgs>
   _count?: boolean | Prisma.ClassCheckCountOutputTypeDefaultArgs<ExtArgs>
@@ -608,6 +668,11 @@ export type $ClassCheckPayload<ExtArgs extends runtime.Types.Extensions.Internal
     createdAt: Date
     archivedAt: Date | null
     archivedById: string | null
+    /**
+     * Зөөлөн устгал (эзэн 2026-10-23: өгөгдөл алга болохгүй) — жагсаалтаас нуугдана, DB-д үлдэнэ
+     */
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["classCheck"]>
   composites: {}
 }
@@ -1040,6 +1105,8 @@ export interface ClassCheckFieldRefs {
   readonly createdAt: Prisma.FieldRef<"ClassCheck", 'DateTime'>
   readonly archivedAt: Prisma.FieldRef<"ClassCheck", 'DateTime'>
   readonly archivedById: Prisma.FieldRef<"ClassCheck", 'String'>
+  readonly deletedAt: Prisma.FieldRef<"ClassCheck", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"ClassCheck", 'String'>
 }
     
 

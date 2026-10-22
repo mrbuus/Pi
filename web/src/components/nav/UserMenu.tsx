@@ -4,13 +4,15 @@ import Link from "next/link";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { LogOut } from "lucide-react";
 import { fileUrl } from "@/lib/api";
-import { shortName } from "@/lib/personName";
+import { staffName } from "@/lib/personName";
 import { NavIcon } from "./icons";
 import { PERSONAL_LINKS } from "./nav-data";
 
 export interface UserMenuMe {
   firstName: string;
   lastName: string;
+  /** Багш+ бол нэрийн ард «+» */
+  role?: string | null;
   avatarUrl?: string | null;
   studentCode?: string | null;
   teacherCode?: string | null;
@@ -31,7 +33,7 @@ export default function UserMenu({
   extra?: string;
   onLogout: () => void;
 }) {
-  const name = me ? shortName(me.firstName, me.lastName) : "";
+  const name = me ? staffName(me) : "";
   const initials = me ? `${me.lastName?.trim()[0] ?? ""}${me.firstName?.trim()[0] ?? ""}`.toUpperCase() : "";
   const code = me?.studentCode || me?.teacherCode;
   return (

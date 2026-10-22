@@ -14,6 +14,7 @@ import {
 } from '../generated/prisma/enums';
 import { classTeacherWhere } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
+import { withPlus } from '../revisions/revision-snapshot';
 import { NotificationCenterService } from '../notification-center/notification-center.service';
 import { buildPublishBodies, publishTitle } from './publish-day';
 import { BulkCreateScheduleDto } from './dto/bulk-create-schedule.dto';
@@ -65,7 +66,8 @@ const CLASSROOM_SELECT = {
   },
 } as const;
 const TEACHER_SELECT = {
-  select: { id: true, firstName: true, lastName: true },
+  // role — Багш+ хүний нэрийн ард «+» (эзэн 2026-10-23)
+  select: { id: true, firstName: true, lastName: true, role: true },
 } as const;
 
 @Injectable()
@@ -906,6 +908,7 @@ export class ScheduleService {
         endMinute: number;
         teacherId: string | null;
         teacherName: string | null;
+        teacherRole: string | null;
         room: string | null;
         subject: string | null;
       }[];
@@ -954,6 +957,7 @@ export class ScheduleService {
               teacherName: s.teacher
                 ? `${s.teacher.firstName} ${s.teacher.lastName}`
                 : null,
+              teacherRole: s.teacher?.role ?? null,
               room: s.room,
               subject: s.subject,
             }));
@@ -1346,6 +1350,7 @@ export class ScheduleService {
       teacherName: s.teacher
         ? `${s.teacher.firstName} ${s.teacher.lastName}`
         : null,
+      teacherRole: s.teacher?.role ?? null,
       room: s.room,
       subject: s.subject,
       effectiveFrom: dateKey(s.effectiveFrom),
@@ -1385,7 +1390,7 @@ export class ScheduleService {
     const staffUsers = staffIds.length
       ? await this.prisma.user.findMany({
           where: { id: { in: staffIds } },
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         })
       : [];
     const staffName = staffUsers.length
@@ -1397,8 +1402,11 @@ export class ScheduleService {
           }),
         )
       : new Map<string, string>();
+    const staffRole = new Map(staffUsers.map((u) => [u.id, u.role as string]));
     const person = (id: string | null) =>
-      id ? { id, name: staffName.get(id) ?? '—' } : null;
+      id
+        ? { id, name: staffName.get(id) ?? '—', role: staffRole.get(id) ?? null }
+        : null;
 
     const days = resolveWeek({
       weekStart: startKey,
@@ -1715,9 +1723,11 @@ export class ScheduleService {
     if (!row) return { date: dateStr, publishedAt: null, recipients: 0, publishedBy: null };
     const by = await this.prisma.user.findUnique({
       where: { id: row.publishedById },
-      select: { firstName: true },
+      select: { firstName: true, role: true },
     });
-    return { date: dateStr, publishedAt: row.publishedAt, recipients: row.recipients, publishedBy: by?.firstName ?? null };
+    // Багш+ бол «+» (эзэн 2026-10-23)
+    const publishedBy = by ? withPlus(by.firstName, by.role) : null;
+    return { date: dateStr, publishedAt: row.publishedAt, recipients: row.recipients, publishedBy };
   }
 
   // Тухайн өдрийн ахлах/туслах багшийг оноох (эзэн 2026-10-08). Хоёулаа null

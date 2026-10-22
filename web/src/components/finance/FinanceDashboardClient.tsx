@@ -10,6 +10,7 @@ import { Meta } from "@/components/ui/Meta";
 
 import { api } from "@/lib/api";
 import { formatMnDate } from "@/lib/dateMn";
+import { withPlus } from "@/lib/personName";
 interface FinanceReport {
   period: string;
   income: {
@@ -46,6 +47,7 @@ interface ExpenseRecord {
     id: string;
     firstName: string;
     lastName: string;
+    role?: string | null;
   };
   createdAt: string;
 }
@@ -579,8 +581,7 @@ export default function FinanceDashboardClient() {
                       </p>
                     )}
                     <p className="mt-1 text-xs text-ink-dim">
-                      Бүртгэсэн: {exp.createdBy.firstName}{" "}
-                      {exp.createdBy.lastName}
+                      Бүртгэсэн: {withPlus(`${exp.createdBy.firstName} ${exp.createdBy.lastName}`, exp.createdBy.role)}
                     </p>
                   </div>
                   <time className="text-sm text-ink-dim">

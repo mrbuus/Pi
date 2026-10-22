@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import {
   ABSENCE_REASONS,
+  EXCUSED_REASONS,
   EMPTY_REC,
   HOMEWORK_REASONS,
   isReason,
@@ -401,7 +402,7 @@ export function useBoard(classId: string | null, date: string) {
       const entry: Record<string, unknown> = { studentId: sid, status: v };
       // Тасалсан/чөлөөтэй биш болбол сонгосон шалтгааны чипийг цэвэрлэнэ (гараар бичсэнийг үлдээнэ);
       // тэмдэглэгээг арилгавал мөр устах тул тэмдэглэл ч хамт арилна
-      const clearNote = v === null ? cur.attNote !== "" : v !== "ABSENT" && v !== "EXCUSED" && isReason(cur.attNote, ABSENCE_REASONS);
+      const clearNote = v === null ? cur.attNote !== "" : v !== "ABSENT" && v !== "EXCUSED" && (isReason(cur.attNote, ABSENCE_REASONS) || isReason(cur.attNote, EXCUSED_REASONS));
       if (clearNote) {
         setOverride(sid, { cell: "attNote", text: "" });
         keys.push(ck(sid, "attNote"));

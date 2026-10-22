@@ -8,6 +8,7 @@ import { ErrorState, LoadingState } from '@/components/ui/StateBlock';
 import { formatDate, formatDateTime, formatMoney } from './format';
 import RefundStatusBadge from './RefundStatusBadge';
 import { REFUND_WARNING_TEXT, type RefundDetail as RefundRecord } from './types';
+import { withPlus } from "@/lib/personName";
 
 type Action = 'pending' | 'approve' | 'paid' | 'cancel';
 
@@ -228,8 +229,8 @@ function DetailValue({ label, value, emphasis }: { label: string; value: string;
   return <div className="min-w-0 rounded-xl border border-line bg-surface p-3"><dt className="text-xs text-ink-dim">{label}</dt><dd className={`mt-1 break-words text-sm font-semibold ${cls}`}>{value}</dd></div>;
 }
 
-function Audit({ label, person, date }: { label: string; person?: { firstName: string; lastName: string } | null; date: string }) {
-  return <li className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-line pb-2 last:border-0 last:pb-0"><span className="font-medium text-ink">{label}</span><span className="text-ink-dim">{person ? `${person.lastName} ${person.firstName}` : '—'} <span className="mx-1" aria-hidden>—</span> {formatDateTime(date)}</span></li>;
+function Audit({ label, person, date }: { label: string; person?: { firstName: string; lastName: string; role?: string | null } | null; date: string }) {
+  return <li className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-line pb-2 last:border-0 last:pb-0"><span className="font-medium text-ink">{label}</span><span className="text-ink-dim">{person ? withPlus(`${person.lastName} ${person.firstName}`, person.role) : '—'} <span className="mx-1" aria-hidden>—</span> {formatDateTime(date)}</span></li>;
 }
 
 function ActionButton({ icon: Icon, children, onClick, danger = false, disabled = false }: { icon: typeof Check; children: string; onClick: (event: React.MouseEvent<HTMLButtonElement>) => void; danger?: boolean; disabled?: boolean }) {

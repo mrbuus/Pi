@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -58,6 +59,19 @@ export class ClassChecksController {
     @Body() dto: UpdateClassCheckDto,
   ) {
     return this.checks.update(classroomId, checkId, dto, req.user.userId);
+  }
+
+  /**
+   * Устгах (эзэн 2026-10-23) — зөөлөн: deletedAt/deletedById, мөр DB-д үлдэнэ,
+   * бүх жагсаалтаас алга болно. Эрх нь бусад чекийн маршруттай ижил.
+   */
+  @Delete(':checkId')
+  remove(
+    @Req() req: AuthedRequest,
+    @Param('classroomId') classroomId: string,
+    @Param('checkId') checkId: string,
+  ) {
+    return this.checks.remove(classroomId, checkId, req.user.userId);
   }
 
   @Put(':checkId/students/:studentId')

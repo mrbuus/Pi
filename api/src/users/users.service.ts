@@ -1295,6 +1295,14 @@ export class UsersService {
         strippedStudentProfile.motherPhone = null;
       }
     }
+    // Төлбөрийн нууцлал (эзэн 2026-10-23): Багш (TEACHER) сурагчийн төлбөрийн
+    // багц/дүн/тайлбарыг харахгүй — жагсаалтын (GET /users) дүрэмтэй ижил.
+    // Санхүү = Багш+/Админ (finance.manage).
+    if (requesterRole === Role.TEACHER && strippedStudentProfile) {
+      strippedStudentProfile.tuitionPlan = null;
+      strippedStudentProfile.tuitionAmount = null;
+      strippedStudentProfile.tuitionNote = null;
+    }
 
     return {
       ...strippedUser,

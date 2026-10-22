@@ -19,6 +19,7 @@ import { Meta } from "@/components/ui/Meta";
 import RoomShape from "./RoomShape";
 import TopicPicker from "./topic-picker/TopicPicker";
 import { formatMinutes, ROOMS, SUBJECT_LABEL, timeToMinutes, WEEKDAY_LABELS, WORKWEEK_ORDER, type BookLite, type ChapterLite, type TeacherLite, type WeekEntry } from "./types";
+import { staffName, withPlus } from "@/lib/personName";
 
 /**
  * Танхимын сонголт — чөлөөт текст биш тогтмол жагсаалт (types.ts дахь ROOMS).
@@ -433,7 +434,7 @@ function EntryActionPanelContent({
           )}
           <p className="mt-1 text-xs text-ink-dim">
             <Meta items={[
-              entry.teacherName ?? "Багш товлогдоогүй",
+              withPlus(entry.teacherName, entry.teacherRole) ?? "Багш товлогдоогүй",
               entry.subject && (SUBJECT_LABEL[entry.subject] ?? entry.subject)
             ]} />
           </p>
@@ -854,7 +855,7 @@ function EntryActionPanelContent({
                         <option value="">— ангийн үндсэн багш —</option>
                         {teachers.map((t) => (
                           <option key={t.id} value={t.id}>
-                            {t.lastName} {t.firstName}
+                            {staffName(t)}
                           </option>
                         ))}
                       </select>

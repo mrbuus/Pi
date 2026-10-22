@@ -189,8 +189,10 @@ export const LATE_RANGE_SHORT: Record<LateRangeValue, string> = {
   THIRTY_TO_SIXTY: "30–60 мин",
   OVER_ONE_HOUR: "1 ц+",
 };
-export const ABSENCE_REASONS: readonly string[] = NOTE_SUGGESTIONS;
-export const HOMEWORK_REASONS: readonly string[] = ["дэвтрээ мартсан", "ойлгоогүй", "хагас хийсэн"];
+// Тасалсан: «өвчтэй» болон өвчний ямар ч сонголт ХОРИОТОЙ (эзний шийдвэр)
+export const ABSENCE_REASONS: readonly string[] = NOTE_SUGGESTIONS.filter((s) => !s.includes("өвч"));
+export const EXCUSED_REASONS: readonly string[] = ["өөр давтлагатай", ...ABSENCE_REASONS];
+export const HOMEWORK_REASONS: readonly string[] = ["ойлгоогүй", "дутуу хийсэн", "өмнөх хичээлдээ суугаагүй"];
 export const NOTE_MAX = 200;
 
 export const MAKEUP_LABEL: Record<MakeupStatus, string> = {

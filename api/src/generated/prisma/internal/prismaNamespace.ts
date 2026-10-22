@@ -10889,7 +10889,9 @@ export const ClassCheckScalarFieldEnum = {
   createdById: 'createdById',
   createdAt: 'createdAt',
   archivedAt: 'archivedAt',
-  archivedById: 'archivedById'
+  archivedById: 'archivedById',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ClassCheckScalarFieldEnum = (typeof ClassCheckScalarFieldEnum)[keyof typeof ClassCheckScalarFieldEnum]

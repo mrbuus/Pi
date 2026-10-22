@@ -19,6 +19,7 @@ import DayTeachers, { type TeacherLoad } from "./day/DayTeachers";
 import ExportImage from "./day/ExportImage";
 import { Excluded } from "./day/RoadMap";
 import { branchOf, type DayEntry, type DayPlanResponse } from "./day/types";
+import { withPlus } from "@/lib/personName";
 
 /**
  * ӨДРИЙН ХУВААРЬ (эзэн 2026-10-08, дахин бүтээсэн 2026-10-18).
@@ -78,8 +79,10 @@ export default function WeekBuilder() {
   // Сонголт: хуваарьт ордог багш + ажлын хүснэгтэд байгаа бүх багш
   const teachers: TeacherOption[] = useMemo(() => {
     const map = new Map<string, TeacherOption>();
-    for (const t of teacherRows) map.set(t.id, { id: t.id, name: t.displayName ?? t.firstName, plus: isPlus(t.role) });
-    for (const t of rosterTeachers) if (!map.has(t.id)) map.set(t.id, { id: t.id, name: t.name, plus: isPlus(t.role) });
+    for (const t of teacherRows)
+      map.set(t.id, { id: t.id, name: withPlus(t.displayName ?? t.firstName, t.role), plus: isPlus(t.role), role: t.role ?? null });
+    for (const t of rosterTeachers)
+      if (!map.has(t.id)) map.set(t.id, { id: t.id, name: withPlus(t.name, t.role), plus: isPlus(t.role), role: t.role ?? null });
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "mn"));
   }, [teacherRows, rosterTeachers]);
   const rosterOrder = useMemo(() => new Map(rosterTeachers.map((t, i) => [t.id, i])), [rosterTeachers]);
@@ -110,7 +113,7 @@ export default function WeekBuilder() {
         [e.assistantTeacher, "assistant"],
       ] as const) {
         if (!who) continue;
-        const c = count.get(who.id) ?? { lead: 0, assistant: 0, clash: false, name: who.name, role: who.role };
+        const c = count.get(who.id) ?? { lead: 0, assistant: 0, clash: false, name: withPlus(who.name, who.role), role: who.role };
         c[slot] += 1;
         if (clashes.has(`${e.scheduleId}|${who.id}`)) c.clash = true;
         count.set(who.id, c);
@@ -120,7 +123,7 @@ export default function WeekBuilder() {
       return { id, name, plus: isPlus(role), lead: c?.lead ?? 0, assistant: c?.assistant ?? 0, clash: c?.clash ?? false };
     };
     return {
-      loads: rosterTeachers.map((t) => load(t.id, t.name, t.role)),
+      loads: rosterTeachers.map((t) => load(t.id, withPlus(t.name, t.role), t.role)),
       extraLoads: [...count.entries()].filter(([id]) => !working.has(id)).map(([id, c]) => load(id, c.name, c.role)),
     };
   }, [entries, clashes, rosterTeachers, working]);
@@ -168,7 +171,7 @@ export default function WeekBuilder() {
       const who = (id: string) => {
         if (!id) return null;
         const t = teachers.find((x) => x.id === id);
-        return { id, name: t?.name ?? "—", role: t ? (t.plus ? "TEACHER_PLUS" : "TEACHER") : null };
+        return { id, name: t?.name ?? "—", role: t?.role ?? null };
       };
       setData(
         (prev) =>

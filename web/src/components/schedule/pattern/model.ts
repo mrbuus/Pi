@@ -5,6 +5,7 @@
 // өдөр) — split нь хуучин мөрийг «from − 1» өдрөөр хаадаг тул «өнөөдөр хүчинтэй»
 // = effectiveFrom ≤ өнөөдөр ≤ effectiveTo (эсвэл null).
 
+import { staffName, withPlus } from "@/lib/personName";
 import { addDaysToKey, formatMinutes, ROOMS, WEEKDAY_LABELS, type ScheduleEntry } from "../types";
 
 export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
@@ -37,6 +38,7 @@ export interface TeacherOption {
   firstName: string;
   lastName: string;
   displayName?: string;
+  role?: string | null;
 }
 
 /** Нэг давтагддаг цаг (ClassSchedule-ийн нэг мөр) */
@@ -65,10 +67,13 @@ export function classLabelOf(full: string): string {
   return m ? m[1] : full;
 }
 
-export function personName(t: { firstName: string; lastName: string; displayName?: string } | null | undefined): string | null {
+/** Багшийн нэр: сонгох жагсаалтын displayName эсвэл «Б. Нэр»; Багш+ бол «+» (эзэн 2026-10-23) */
+export function personName(
+  t: { firstName: string; lastName: string; displayName?: string; role?: string | null } | null | undefined,
+): string | null {
   if (!t) return null;
-  if (t.displayName) return t.displayName;
-  return `${t.lastName} ${t.firstName}`.trim();
+  if (t.displayName) return withPlus(t.displayName, t.role);
+  return staffName(t);
 }
 
 export function toSlot(row: ScheduleEntry, classes?: Map<string, ClassInfo>): Slot {

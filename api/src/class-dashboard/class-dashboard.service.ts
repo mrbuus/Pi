@@ -9,6 +9,8 @@ import { Role } from '../generated/prisma/enums';
 import { assertInternalTeachingStaff } from '../common/access';
 import { classTeacherWhere } from '../common/class-teachers';
 import { addDateDays, dateKey, parseDateOnly } from '../common/date';
+import { markPlus, teacherPlusIds } from '../common/teacher-plus';
+import { withPlus } from '../revisions/revision-snapshot';
 import { mean, percentOf } from '../exams/exam-analytics';
 import {
   classOverview,
@@ -87,8 +89,9 @@ function daysAgo(days: number): Date {
   return new Date(d.getTime() - days * DAY);
 }
 
-const fullName = (u: { firstName: string; lastName: string } | null) =>
-  u ? `${u.lastName} ${u.firstName}`.trim() : null;
+// role өгсөн бөгөөд Багш+ бол «+» (эзэн 2026-10-23). actorName-ийн snapshot-д role өгөхгүй.
+const fullName = (u: { firstName: string; lastName: string; role?: string | null } | null) =>
+  u ? withPlus(`${u.lastName} ${u.firstName}`.trim(), u.role) : null;
 
 type Actor = { userId: string; role: Role };
 
@@ -162,9 +165,11 @@ export class ClassDashboardService {
         grade: true,
         archived: true,
         progressChapterId: true,
-        teacher: { select: { id: true, firstName: true, lastName: true } },
+        teacher: {
+          select: { id: true, firstName: true, lastName: true, role: true },
+        },
         assistantTeacher: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
       },
     });
@@ -262,10 +267,16 @@ export class ClassDashboardService {
         grade: true,
         // avatarUrl = багшийн ӨӨРИЙН профайл зураг (нүүрний/маркетингийн зураг биш)
         teacher: {
-          select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            role: true,
+          },
         },
         assistantTeacher: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
       },
       orderBy: { name: 'asc' },
@@ -320,7 +331,7 @@ export class ClassDashboardService {
         },
         select: {
           classroomId: true,
-          teacher: { select: { firstName: true, lastName: true } },
+          teacher: { select: { firstName: true, lastName: true, role: true } },
         },
       }),
     ]);
@@ -687,7 +698,7 @@ export class ClassDashboardService {
     const ids = roster.map((s) => s.id);
     // «Чек» товчны тоо (api/src/class-checks) — нээлттэй чекүүд
     const openChecks = await this.prisma.classCheck.count({
-      where: { classroomId, archivedAt: null },
+      where: { classroomId, archivedAt: null, deletedAt: null },
     });
     const now = new Date();
     const historyFrom = daysAgo(HISTORY_DAYS);
@@ -742,6 +753,7 @@ export class ClassDashboardService {
           kind: true,
           note: true,
           createdAt: true,
+          createdById: true,
           createdByName: true,
         },
       }),
@@ -774,7 +786,9 @@ export class ClassDashboardService {
           endMinute: true,
           room: true,
           subject: true,
-          teacher: { select: { id: true, firstName: true, lastName: true } },
+          teacher: {
+            select: { id: true, firstName: true, lastName: true, role: true },
+          },
         },
       }),
       this.prisma.lessonStaffing.findMany({
@@ -842,12 +856,12 @@ export class ClassDashboardService {
     const staffUsers = staffIds.size
       ? await this.prisma.user.findMany({
           where: { id: { in: [...staffIds] } },
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         })
       : [];
     const teacherMap = new Map<string, { id: string; name: string; roles: Set<string> }>();
     const addTeacher = (
-      u: { id: string; firstName: string; lastName: string } | null,
+      u: { id: string; firstName: string; lastName: string; role?: string | null } | null,
       role: string,
     ) => {
       if (!u) return;
@@ -888,6 +902,10 @@ export class ClassDashboardService {
     const hwBy = group(homework);
     const practiceBy = group(practice);
     const flagsBy = group(flags);
+    const flagPlus = await teacherPlusIds(
+      this.prisma,
+      flags.map((f) => f.createdById),
+    );
     const codeBy = new Map(users.map((u) => [u.id, u.studentCode]));
     const lessonStudentsBy = new Map<string, { attendance: string | null }[]>();
     for (const l of lessons)
@@ -977,7 +995,7 @@ export class ClassDashboardService {
           kind: f.kind,
           note: f.note,
           createdAt: f.createdAt.toISOString(),
-          createdByName: f.createdByName,
+          createdByName: markPlus(f.createdByName, f.createdById, flagPlus),
         })),
         payment: pay
           ? { state: pay.state, tuitionAmount: pay.tuitionAmount, paidThisMonth: pay.paidThisMonth }
@@ -1458,6 +1476,10 @@ export class ClassDashboardService {
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
+    const plus = await teacherPlusIds(
+      this.prisma,
+      rows.flatMap((f) => [f.createdById, f.removedById]),
+    );
     return rows.map((f) => ({
       id: f.id,
       kind: f.kind,
@@ -1465,9 +1487,9 @@ export class ClassDashboardService {
       note: f.note,
       classroomId: f.classroomId,
       createdAt: f.createdAt.toISOString(),
-      createdByName: f.createdByName,
+      createdByName: markPlus(f.createdByName, f.createdById, plus),
       removedAt: f.removedAt?.toISOString() ?? null,
-      removedByName: f.removedByName,
+      removedByName: markPlus(f.removedByName, f.removedById, plus),
       removeNote: f.removeNote,
     }));
   }
@@ -1510,7 +1532,11 @@ export class ClassDashboardService {
       kind: row.kind,
       note: row.note,
       createdAt: row.createdAt.toISOString(),
-      createdByName: row.createdByName,
+      createdByName: markPlus(
+        row.createdByName,
+        row.createdById,
+        await teacherPlusIds(this.prisma, [row.createdById]),
+      ),
     };
   }
 

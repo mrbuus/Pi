@@ -306,6 +306,8 @@ export interface CheckPerson {
   id: string;
   firstName: string;
   lastName: string;
+  /** Ажилтан (нээсэн/хаасан/тэмдэглэсэн) бол — Багш+ нэрийн ард «+» */
+  role?: string | null;
 }
 
 export interface CheckMark {

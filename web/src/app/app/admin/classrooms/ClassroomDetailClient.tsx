@@ -9,12 +9,13 @@ import RequireRole from '@/components/nav/RequireRole';
 import { Meta } from '@/components/ui/Meta';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
 import { Dialog } from './ClassroomsClient';
+import { staffName } from "@/lib/personName";
 
 type ClassroomType = 'IN_PERSON' | 'ONLINE';
 // Хичээл (эзэн 2026-10-18): null = Математик. Нийгмийн ухааны контент зөвхөн тэр ангийнханд
 type ClassroomSubject = 'MATH' | 'SOCIAL_STUDIES';
 const SUBJECT_LABEL: Record<ClassroomSubject, string> = { MATH: 'Математик', SOCIAL_STUDIES: 'Нийгмийн ухаан' };
-interface Teacher { id: string; firstName: string; lastName: string; }
+interface Teacher { id: string; firstName: string; lastName: string; role?: string | null; }
 interface Student { id: string; firstName: string; lastName: string; studentCode: string | null; joinedAt: string; }
 interface Classroom { id: string; name: string; type: ClassroomType; grade: number | null; subject?: ClassroomSubject | null; teacherId: string | null; teacher: Teacher | null; assistantTeacherId?: string | null; assistantTeacher?: Teacher | null; }
 interface ClassroomDetail { classroom: Classroom; students: Student[]; permissions: { canManageStudents: boolean }; }
@@ -273,8 +274,8 @@ export default function ClassroomDetailClient({ classroomId }: { classroomId: st
             classroom.type === 'ONLINE' ? 'Онлайн' : 'Танхим',
             classroom.grade ? `${classroom.grade}-р анги` : null,
             classroom.subject && classroom.subject !== 'MATH' ? SUBJECT_LABEL[classroom.subject] : null,
-            classroom.teacher ? `${classroom.teacher.lastName} ${classroom.teacher.firstName}` : 'Багш сонгоогүй',
-            classroom.assistantTeacher ? `Туслах: ${classroom.assistantTeacher.lastName} ${classroom.assistantTeacher.firstName}` : null,
+            classroom.teacher ? staffName(classroom.teacher) : 'Багш сонгоогүй',
+            classroom.assistantTeacher ? `Туслах: ${staffName(classroom.assistantTeacher)}` : null,
             `${detail.students.length} сурагч`,
           ]} /></div>
         </div>
@@ -290,8 +291,8 @@ export default function ClassroomDetailClient({ classroomId }: { classroomId: st
           <Field label="Төрөл" htmlFor="class-type"><select id="class-type" value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as ClassroomType })} className={inputClass}><option value="IN_PERSON">Танхим</option><option value="ONLINE">Онлайн</option></select></Field>
           <Field label="Анги" htmlFor="class-grade"><select id="class-grade" value={form.grade} onChange={(event) => setForm({ ...form, grade: event.target.value })} className={inputClass}><option value="">Анги сонгоогүй</option>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={String(index + 1)}>{index + 1}-р анги</option>)}</select></Field>
           <Field label="Хичээл" htmlFor="class-subject"><select id="class-subject" value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value as ClassroomSubject })} className={inputClass}>{(Object.keys(SUBJECT_LABEL) as ClassroomSubject[]).map((value) => <option key={value} value={value}>{SUBJECT_LABEL[value]}</option>)}</select></Field>
-          <Field label="Ангийн багш" htmlFor="class-teacher"><select id="class-teacher" value={form.teacherId} onChange={(event) => setForm({ ...form, teacherId: event.target.value })} className={inputClass}><option value="">Багшгүй</option>{teachers.map((teacher) => <option key={teacher.id} value={teacher.id} disabled={teacher.id === form.assistantTeacherId}>{teacher.lastName} {teacher.firstName}{teacher.role === 'TEACHER_PLUS' ? ' — Багш+' : ''}</option>)}</select></Field>
-          <Field label="Туслах ангийн багш" htmlFor="class-assistant"><select id="class-assistant" value={form.assistantTeacherId} onChange={(event) => setForm({ ...form, assistantTeacherId: event.target.value })} className={inputClass}><option value="">Багшгүй</option>{teachers.map((teacher) => <option key={teacher.id} value={teacher.id} disabled={teacher.id === form.teacherId}>{teacher.lastName} {teacher.firstName}{teacher.role === 'TEACHER_PLUS' ? ' — Багш+' : ''}</option>)}</select></Field>
+          <Field label="Ангийн багш" htmlFor="class-teacher"><select id="class-teacher" value={form.teacherId} onChange={(event) => setForm({ ...form, teacherId: event.target.value })} className={inputClass}><option value="">Багшгүй</option>{teachers.map((teacher) => <option key={teacher.id} value={teacher.id} disabled={teacher.id === form.assistantTeacherId}>{staffName(teacher)}</option>)}</select></Field>
+          <Field label="Туслах ангийн багш" htmlFor="class-assistant"><select id="class-assistant" value={form.assistantTeacherId} onChange={(event) => setForm({ ...form, assistantTeacherId: event.target.value })} className={inputClass}><option value="">Багшгүй</option>{teachers.map((teacher) => <option key={teacher.id} value={teacher.id} disabled={teacher.id === form.teacherId}>{staffName(teacher)}</option>)}</select></Field>
         </div>
         {actionError && <ErrorState message={actionError} onRetry={() => void saveClassroom()} />}
         <button type="button" onClick={() => void saveClassroom()} disabled={busy || !form.name.trim()} className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 font-semibold text-on-brand hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50"><Check size={16} aria-hidden /> {busy ? 'Хадгалж байна...' : 'Өөрчлөлтийг хадгалах'}</button>

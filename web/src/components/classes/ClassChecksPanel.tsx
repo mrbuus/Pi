@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Archive, ArchiveRestore, Check, ChevronLeft, ChevronRight, ClipboardCheck, Pencil, Plus, X } from "lucide-react";
+import { Archive, ArchiveRestore, Check, ChevronLeft, ChevronRight, ClipboardCheck, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
 import { Meta } from "@/components/ui/Meta";
 import { SkeletonRows } from "@/components/ui/Skeleton";
@@ -10,7 +10,7 @@ import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatMnDate, formatMnDateTime } from "@/lib/dateMn";
-import { byFirstName, rosterNames, shortName } from "@/lib/personName";
+import { byFirstName, rosterNames, shortName, staffName } from "@/lib/personName";
 import { Segmented } from "./parts";
 import type { CheckMark, CheckPerson, ClassCheck, ClassChecksResponse } from "./types";
 
@@ -19,7 +19,6 @@ type Filter = "all" | "left" | "done";
 const mnt = (n: number) => `${n.toLocaleString("en-US")}₮`;
 const md = (iso: string) => formatMnDate(iso, { month: "2-digit", day: "2-digit" });
 const mdhm = (iso: string) => formatMnDateTime(iso, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-const staffName = (p: CheckPerson | null) => (p ? shortName(p.firstName, p.lastName) : null);
 
 function withMark(c: ClassCheck, studentId: string, mark: CheckMark | null): ClassCheck {
   const rest = c.marks.filter((m) => m.studentId !== studentId);
@@ -185,6 +184,14 @@ export default function ClassChecksPanel({
     return updated;
   }
 
+  /** Устгах — сервер дээр зөөлөн (deletedAt): мөр, тэмдэглэгээ хадгалагдана, жагсаалтаас алга болно */
+  async function remove(id: string) {
+    await api(`${base}/${encodeURIComponent(id)}`, { method: "DELETE" });
+    setData((d) => d && { ...d, checks: d.checks.filter((c) => c.id !== id), archived: d.archived.filter((c) => c.id !== id) });
+    setSelectedId(null);
+    toast.success("Чекийг устгалаа");
+  }
+
   const roster = useMemo(() => (data ? [...data.students].sort(byFirstName) : []), [data]);
   const rosterIds = useMemo(() => new Set(roster.map((s) => s.id)), [roster]);
   const names = useMemo(() => rosterNames([...(data?.students ?? []), ...(data?.former ?? [])]), [data]);
@@ -225,6 +232,7 @@ export default function ClassChecksPanel({
             onBack={() => setSelectedId(null)}
             onToggle={(sid) => toggle(selected, sid)}
             onPatch={(body) => patch(selected.id, body)}
+            onDelete={() => remove(selected.id)}
           />
         )}
         {data && !selected && (
@@ -368,6 +376,7 @@ function CheckDetail({
   onBack,
   onToggle,
   onPatch,
+  onDelete,
 }: {
   check: ClassCheck;
   roster: CheckPerson[];
@@ -378,10 +387,11 @@ function CheckDetail({
   onBack: () => void;
   onToggle: (studentId: string) => void;
   onPatch: (body: { title?: string; amount?: number | null; archived?: boolean }) => Promise<ClassCheck>;
+  onDelete: () => Promise<void>;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [editing, setEditing] = useState(false);
-  const [confirmArchive, setConfirmArchive] = useState(false);
+  const [confirm, setConfirm] = useState<"archive" | "delete" | null>(null);
   const [busy, setBusy] = useState(false);
   const archived = !!check.archivedAt;
   const s = summary(check, rosterIds);
@@ -397,7 +407,7 @@ function CheckDetail({
     try {
       await onPatch({ archived: value });
       toast.success(value ? "Чекийг хаалаа" : "Чекийг сэргээлээ");
-      setConfirmArchive(false);
+      setConfirm(null);
       if (value) onBack();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Хадгалж чадсангүй");
@@ -405,6 +415,19 @@ function CheckDetail({
       setBusy(false);
     }
   }
+
+  async function remove() {
+    setBusy(true);
+    try {
+      await onDelete();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Устгаж чадсангүй");
+      setBusy(false);
+    }
+  }
+
+  const actionClass =
+    "-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand";
 
   return (
     <div className="space-y-4">
@@ -527,26 +550,40 @@ function CheckDetail({
         </div>
       )}
 
-      {!archived &&
-        (confirmArchive ? (
-          <div role="group" aria-label="Чекийг хаах уу" className="flex flex-wrap items-center gap-2 rounded-xl border border-line px-3 py-2">
-            <p className="min-w-0 flex-1 text-sm text-ink">Хаасан чек «Хаагдсан» хэсэгт түүхтэйгээ үлдэнэ</p>
-            <Button variant="danger" size="sm" disabled={busy} onClick={() => void setArchived(true)}>
-              Тийм, хаах
-            </Button>
-            <Button variant="ghost" size="sm" disabled={busy} onClick={() => setConfirmArchive(false)}>
-              Болих
-            </Button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setConfirmArchive(true)}
-            className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
-          >
-            <Archive className="h-4 w-4" aria-hidden /> Чекийг хаах
+      {confirm === "archive" ? (
+        <div role="group" aria-label="Чекийг хаах уу" className="flex flex-wrap items-center gap-2 rounded-xl border border-line px-3 py-2">
+          <p className="min-w-0 flex-1 text-sm text-ink">Хаасан чек «Хаагдсан» хэсэгт түүхтэйгээ үлдэнэ</p>
+          <Button variant="danger" size="sm" disabled={busy} onClick={() => void setArchived(true)}>
+            Тийм, хаах
+          </Button>
+          <Button variant="ghost" size="sm" disabled={busy} onClick={() => setConfirm(null)}>
+            Болих
+          </Button>
+        </div>
+      ) : confirm === "delete" ? (
+        <div role="group" aria-label="Чекийг устгах уу" className="flex flex-wrap items-center gap-2 rounded-xl border border-error/40 bg-error/5 px-3 py-2">
+          <p className="min-w-0 flex-1 text-sm text-ink">
+            «{check.title}» чек бүх жагсаалтаас алга болно. Тэмдэглэгээ нь системд хадгалагдан үлдэнэ
+          </p>
+          <Button variant="danger" size="sm" disabled={busy} onClick={() => void remove()}>
+            Тийм, устгах
+          </Button>
+          <Button variant="ghost" size="sm" disabled={busy} onClick={() => setConfirm(null)}>
+            Болих
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-x-4">
+          {!archived && (
+            <button type="button" onClick={() => setConfirm("archive")} className={actionClass}>
+              <Archive className="h-4 w-4" aria-hidden /> Чекийг хаах
+            </button>
+          )}
+          <button type="button" onClick={() => setConfirm("delete")} className={cn(actionClass, "hover:text-error")}>
+            <Trash2 className="h-4 w-4" aria-hidden /> Устгах
           </button>
-        ))}
+        </div>
+      )}
     </div>
   );
 }

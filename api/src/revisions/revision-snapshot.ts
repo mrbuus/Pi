@@ -368,15 +368,25 @@ export const GRADING_LABEL: Record<string, string> = {
   MANUAL: 'Багшийн дүн',
 };
 
-/** «Б. Баасанжав» — овгийн эхний үсэг + нэр. */
-export function shortName(user: { firstName?: string | null; lastName?: string | null } | null | undefined): string {
+/**
+ * «Б. Баасанжав» — овгийн эхний үсэг + нэр. `role` сонгосон бөгөөд Багш+ бол
+ * нэрийн ард «+» (эзэн 2026-10-23; вэбийн lib/personName.withPlus-тэй ижил дүрэм).
+ * ӨС-д ХАДГАЛАХ snapshot нэрэнд role бүү дамжуул — эрх өөрчлөгдөхөд хуучирна.
+ */
+export function shortName(
+  user: { firstName?: string | null; lastName?: string | null; role?: string | null } | null | undefined,
+): string {
   if (!user) return 'Тодорхойгүй хэрэглэгч';
   const first = (user.firstName ?? '').trim();
   const last = (user.lastName ?? '').trim();
   if (!first && !last) return 'Тодорхойгүй хэрэглэгч';
-  if (!last) return first;
-  if (!first) return last;
-  return `${last.charAt(0).toUpperCase()}. ${first}`;
+  const base = !last ? first : !first ? last : `${last.charAt(0).toUpperCase()}. ${first}`;
+  return withPlus(base, user.role);
+}
+
+/** Багш+ бол нэрийн ард «+» (давхар тавихгүй). Багш, Админд үгүй. */
+export function withPlus(name: string, role?: string | null): string {
+  return role === 'TEACHER_PLUS' && name && !name.endsWith('+') ? `${name}+` : name;
 }
 
 /** Хариуг хүн уншихуйц мөр болгоно (JSON объект → «a = 1, b = 2»). */

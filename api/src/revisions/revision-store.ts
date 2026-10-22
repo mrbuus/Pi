@@ -244,7 +244,7 @@ export async function versionConflict(
   const user = last
     ? await db.user.findUnique({
         where: { id: last.actorId },
-        select: { firstName: true, lastName: true },
+        select: { firstName: true, lastName: true, role: true },
       })
     : null;
   const name = user ? shortName(user) : null;
@@ -366,7 +366,7 @@ async function editorsSince(
   if (rows.length === 0) return [];
   const users = await db.user.findMany({
     where: { id: { in: rows.map((r) => r.actorId) } },
-    select: { firstName: true, lastName: true },
+    select: { firstName: true, lastName: true, role: true },
   });
   return users.map((u) => shortName(u));
 }

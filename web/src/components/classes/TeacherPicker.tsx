@@ -7,10 +7,12 @@ import { SkeletonRows } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import type { PersonRef } from "./types";
+import { withPlus } from "@/lib/personName";
 
 interface TeacherOption {
   id: string;
   displayName: string;
+  role?: string | null;
   firstName: string;
   lastName: string;
 }
@@ -52,7 +54,7 @@ export default function TeacherPicker({
 
   // Одоогийн багш хуваарийн жагсаалтад байхгүй (хичээл заадаггүй болсон) бол ч харагдана
   const list = useMemo(() => {
-    const rows = (options ?? []).map((o) => ({ id: o.id, name: o.displayName }));
+    const rows = (options ?? []).map((o) => ({ id: o.id, name: withPlus(o.displayName, o.role) }));
     for (const p of [classroom.classTeacher, classroom.assistantTeacher])
       if (p && !rows.some((r) => r.id === p.id)) rows.unshift({ id: p.id, name: p.name });
     return rows;

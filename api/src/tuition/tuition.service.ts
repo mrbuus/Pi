@@ -309,16 +309,16 @@ export class TuitionService {
           select: { id: true, name: true },
         },
         createdBy: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
         approvedBy: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
         paidBy: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
         cancelledBy: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
       },
     });

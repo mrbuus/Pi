@@ -43,7 +43,12 @@ export function checkSummary(
   rosterIds: readonly string[],
   marks: readonly MarkLike[],
   amount: number | null,
-): { checked: number; total: number; formerChecked: number; collected: number | null } {
+): {
+  checked: number;
+  total: number;
+  formerChecked: number;
+  collected: number | null;
+} {
   const roster = new Set(rosterIds);
   let checked = 0;
   let formerChecked = 0;

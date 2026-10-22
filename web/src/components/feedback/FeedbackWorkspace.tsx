@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/StateBlock";
 import AttachmentPreview from "@/components/homework/AttachmentPreview";
 import { formatMnDate } from "@/lib/dateMn";
+import { withPlus } from "@/lib/personName";
 interface Ticket {
   id: string;
   kind: string;
@@ -419,7 +420,7 @@ export default function FeedbackWorkspace() {
                   })}
                   {all &&
                     ticket.author &&
-                    ` — ${ticket.author.firstName} ${ticket.author.lastName}`}
+                    ` — ${withPlus(`${ticket.author.firstName} ${ticket.author.lastName}`, ticket.author.role)}`}
                 </p>
                 {ticket.response && (
                   <p className="mt-2 text-xs text-success">Хариу ирсэн</p>

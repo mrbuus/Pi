@@ -17,11 +17,14 @@ import RoomBadge from "../RoomBadge";
 import { formatMinutes, roomCapacityOf } from "../types";
 import RoadMap from "./RoadMap";
 import { DISMISS_LABEL, shortClass, type DayEntry, type StaffRef, type TestInfo } from "./types";
+import { withPlus } from "@/lib/personName";
 
 export interface TeacherOption {
   id: string;
   name: string;
   plus: boolean;
+  /** Жинхэнэ эрх — «+» тэмдэг зөвхөн Багш+-д (Админд биш) */
+  role?: string | null;
 }
 
 interface Props {
@@ -210,7 +213,7 @@ export function TeacherTag({ who, clash }: { who: StaffRef; clash?: boolean }) {
       >
         {initials(who.name)}
       </span>
-      <span className="min-w-0 truncate text-sm font-medium text-ink">{who.name}</span>
+      <span className="min-w-0 truncate text-sm font-medium text-ink">{withPlus(who.name, who.role)}</span>
       {clash && (
         <span title="Энэ цагт өөр ангид давхар" className="inline-flex shrink-0 text-warning">
           <TriangleAlert className="size-3.5" aria-hidden />
@@ -269,7 +272,7 @@ function Staff({
   const rest = p.teachers.filter((t) => !p.working.has(t.id));
   const option = (t: TeacherOption) => (
     <option key={t.id} value={t.id} disabled={t.id === other}>
-      {t.plus ? `${t.name} (Багш+)` : t.name}
+      {t.name}
     </option>
   );
   return (
@@ -288,7 +291,7 @@ function Staff({
         )}
       >
         <option value="">—</option>
-        {value && !p.teachers.some((t) => t.id === value.id) && <option value={value.id}>{value.name}</option>}
+        {value && !p.teachers.some((t) => t.id === value.id) && <option value={value.id}>{withPlus(value.name, value.role)}</option>}
         {today.length > 0 && <optgroup label={p.workingLabel}>{today.map(option)}</optgroup>}
         {rest.length > 0 && <optgroup label="Бусад багш">{rest.map(option)}</optgroup>}
       </select>

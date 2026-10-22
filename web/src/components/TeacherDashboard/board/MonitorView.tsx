@@ -142,13 +142,14 @@ export default function MonitorView({
   const chip = (c: ChipDef) => {
     const n = count(c.key);
     const on = filter === c.key;
+    // Тэг тоотой чипийг огт үзүүлэхгүй (идэвхтэй шүүлтүүрийг л үлдээнэ — гацахгүйн тулд)
+    if (n === 0 && !on) return null;
     const Icon = c.icon;
     return (
       <button
         key={c.key}
         type="button"
         aria-pressed={on}
-        disabled={n === 0 && !on}
         onClick={() => onFilter(on ? null : c.key)}
         className={cn(
           "inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[13px] font-medium transition-colors disabled:opacity-40 sm:min-h-8 sm:px-2.5",
@@ -213,20 +214,21 @@ export default function MonitorView({
       {/* Тоотой шүүлтүүр: дарвал шүүнэ, дахин дарвал арилна */}
       <section aria-label="Шүүлтүүр" className="space-y-1.5">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            aria-pressed={riskOn}
-            disabled={riskN === 0 && !riskOn}
-            onClick={() => onFilter(riskOn ? null : "risk")}
-            className={cn(
-              "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors disabled:opacity-40 sm:min-h-8 sm:px-2.5",
-              riskOn ? TONE_SELECTED.error : "border-line bg-surface text-ink hover:border-error/50",
-            )}
-          >
-            <RiskDot />
-            Асуудалтай
-            <span className="font-bold tabular-nums text-error">{riskN}</span>
-          </button>
+          {(riskN > 0 || riskOn) && (
+            <button
+              type="button"
+              aria-pressed={riskOn}
+              onClick={() => onFilter(riskOn ? null : "risk")}
+              className={cn(
+                "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors sm:min-h-8 sm:px-2.5",
+                riskOn ? TONE_SELECTED.error : "border-line bg-surface text-ink hover:border-error/50",
+              )}
+            >
+              <RiskDot />
+              Асуудалтай
+              <span className="font-bold tabular-nums text-error">{riskN}</span>
+            </button>
+          )}
           <p className="ml-auto text-xs text-ink-dim" aria-live="polite">
             {filter ? (
               <span className="inline-flex items-center gap-1">

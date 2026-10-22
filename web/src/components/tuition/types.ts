@@ -59,10 +59,10 @@ export interface RefundRow {
 }
 
 export interface RefundDetail extends RefundRow {
-  createdBy?: { id: string; firstName: string; lastName: string } | null;
-  approvedBy?: { id: string; firstName: string; lastName: string } | null;
-  paidBy?: { id: string; firstName: string; lastName: string } | null;
-  cancelledBy?: { id: string; firstName: string; lastName: string } | null;
+  createdBy?: { id: string; firstName: string; lastName: string; role?: string | null } | null;
+  approvedBy?: { id: string; firstName: string; lastName: string; role?: string | null } | null;
+  paidBy?: { id: string; firstName: string; lastName: string; role?: string | null } | null;
+  cancelledBy?: { id: string; firstName: string; lastName: string; role?: string | null } | null;
   warnings: RefundWarning[];
 }
 

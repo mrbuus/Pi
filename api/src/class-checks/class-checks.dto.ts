@@ -17,7 +17,12 @@ export class CreateClassCheckDto {
   @MaxLength(CHECK_TITLE_MAX + 40) // илүү зайг cleanCheckTitle шахна
   title: string;
 
-  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: CHECK_AMOUNT_MAX })
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+    minimum: 0,
+    maximum: CHECK_AMOUNT_MAX,
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -33,7 +38,12 @@ export class UpdateClassCheckDto {
   @MaxLength(CHECK_TITLE_MAX + 40)
   title?: string;
 
-  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: CHECK_AMOUNT_MAX })
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+    minimum: 0,
+    maximum: CHECK_AMOUNT_MAX,
+  })
   @IsOptional()
   @IsInt()
   @Min(0)

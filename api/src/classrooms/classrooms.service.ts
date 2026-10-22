@@ -111,11 +111,12 @@ export class ClassroomsService {
     return this.prisma.classroom.findMany({
       where: { archived: false },
       include: {
+        // role — Багш+ хүний нэрийн ард «+» (эзэн 2026-10-23)
         teacher: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
         assistantTeacher: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
         _count: {
           select: {
@@ -133,9 +134,11 @@ export class ClassroomsService {
     const classroom = await this.prisma.classroom.findUnique({
       where: { id },
       include: {
-        teacher: { select: { id: true, firstName: true, lastName: true } },
+        teacher: {
+          select: { id: true, firstName: true, lastName: true, role: true },
+        },
         assistantTeacher: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, role: true },
         },
         enrollments: {
           where: { leftAt: null, student: { archivedAt: null } },
@@ -514,7 +517,9 @@ export class ClassroomsService {
       (v) => v !== classroom.teacherId && v !== classroom.assistantTeacherId,
     );
     await this.assertTeachable(changedIds);
-    const person = { select: { id: true, firstName: true, lastName: true } };
+    const person = {
+      select: { id: true, firstName: true, lastName: true, role: true },
+    };
     const updated = await this.prisma.classroom.update({
       where: { id },
       data: next,

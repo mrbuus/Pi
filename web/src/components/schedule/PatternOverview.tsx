@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/kit/button";
 import { Meta } from "@/components/ui/Meta";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import AddSlotDialog from "./pattern/AddSlotDialog";
+import ClassWeekGrid from "./pattern/ClassWeekGrid";
 import {
   canManageAny,
   canManageClass,
@@ -31,7 +32,7 @@ import { todayUBKey, type ScheduleEntry } from "./types";
 interface ClassroomRow {
   id: string;
   name: string;
-  teacher: { id: string; firstName: string; lastName: string } | null;
+  teacher: { id: string; firstName: string; lastName: string; role?: string | null } | null;
   _count?: { enrollments: number };
 }
 
@@ -122,6 +123,31 @@ export default function PatternOverview({
 
   return (
     <div className="space-y-4">
+      {/* Анги × гараг (эзэн 2026-10-23): танхимын торын ДЭЭР, ижил эрхээр засна */}
+      {current.length > 0 && (
+        <section aria-labelledby="class-pattern-title" className="rounded-xl border border-line bg-surface">
+          <header className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-line px-3 py-2">
+            <h2 id="class-pattern-title" className="cyrillic-heading text-sm font-bold text-ink">
+              Ангийн 7 хоног
+            </h2>
+            <InfoHint label="Ангийн хуваарийн тухай">
+              Анги бүр аль гарагт аль танхимд хэдэн цагаас орохыг харуулна. Хичээлгүй өдөр хоосон
+            </InfoHint>
+          </header>
+          <ClassWeekGrid
+            slots={current}
+            caption="Анги бүрийн 7 хоногийн тогтмол хуваарь: гараг, танхим, эхлэх цаг"
+            todayWeekday={weekdayOf(today)}
+            onSelect={manager ? (slot) => setOpen({ kind: "slot", slot, planned: null }) : undefined}
+            canSelect={canSelect}
+          />
+          <footer className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line px-3 py-2 text-xs text-ink-dim">
+            <span>Нүд: танхим, эхлэх цаг</span>
+            {manager && <span>Хичээл дээр дарж засна</span>}
+          </footer>
+        </section>
+      )}
+
       <section aria-labelledby="pattern-title" className="rounded-xl border border-line bg-surface">
         <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-line px-3 py-2">
           <div className="flex min-w-0 items-center gap-1.5">

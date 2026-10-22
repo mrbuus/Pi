@@ -11,6 +11,8 @@ export interface ResolverSchedule {
   endMinute: number;
   teacherId: string | null;
   teacherName: string | null;
+  /** Багш+ бол UI нэрийн ард «+» тавина */
+  teacherRole?: string | null;
   room: string | null;
   subject: string | null;
   effectiveFrom: string; // YYYY-MM-DD
@@ -38,8 +40,15 @@ export interface ResolverTopic {
 export interface ResolverStaffing {
   scheduleId: string;
   date: string;
-  lead: { id: string; name: string } | null;
-  assistant: { id: string; name: string } | null;
+  lead: StaffPerson | null;
+  assistant: StaffPerson | null;
+}
+
+/** role — Багш+ бол UI нэрийн ард «+» */
+export interface StaffPerson {
+  id: string;
+  name: string;
+  role?: string | null;
 }
 
 export interface ResolverHoliday {
@@ -56,14 +65,15 @@ export interface ResolvedEntry {
   classroomName: string;
   teacherId: string | null;
   teacherName: string | null;
+  teacherRole: string | null;
   startMinute: number;
   endMinute: number;
   room: string | null;
   subject: string | null;
   topic: string | null;
   /** Өдрийн ахлах багш — оноогоогүй бол null (UI хуваарийн үндсэн багшийг санал болгоно) */
-  leadTeacher: { id: string; name: string } | null;
-  assistantTeacher: { id: string; name: string } | null;
+  leadTeacher: StaffPerson | null;
+  assistantTeacher: StaffPerson | null;
   exception: { kind: 'MOVED'; note: string | null; originalDate: string } | null;
 }
 
@@ -200,6 +210,7 @@ export function resolveWeek(params: {
       classroomName: s.classroomName,
       teacherId: s.teacherId,
       teacherName: s.teacherName,
+      teacherRole: s.teacherRole ?? null,
       startMinute: overrides.startMinute,
       endMinute: overrides.endMinute,
       room: overrides.room,

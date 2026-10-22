@@ -1,6 +1,7 @@
 import { Ban, Check, NotebookPen, Play, X, type LucideIcon } from "lucide-react";
 import type { TaskPriority, TaskStatus, TaskSubject } from "./types";
 import { formatMnDateTime } from "@/lib/dateMn";
+import { withPlus } from "@/lib/personName";
 
 // Төлөв бүрийг ХЭЗЭЭ Ч зөвхөн өнгөөр ялгахгүй — дүрс (icon) + монгол нэрийг
 // үргэлж хамт ашиглана (өнгө хараагүй сурагч/ажилтанд ч ялгагдана).
@@ -86,8 +87,9 @@ export function initials(firstName: string, lastName: string): string {
   return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
 }
 
-export function fullName(u: { firstName: string; lastName: string }): string {
-  return `${u.lastName} ${u.firstName}`;
+/** Багш+ бол нэрийн ард «+» (эзэн 2026-10-23) */
+export function fullName(u: { firstName: string; lastName: string; role?: string | null }): string {
+  return withPlus(`${u.lastName} ${u.firstName}`, u.role);
 }
 
 export function formatDate(d?: string | null): string {

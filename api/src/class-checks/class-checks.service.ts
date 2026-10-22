@@ -22,7 +22,13 @@ import type {
   UpdateClassCheckDto,
 } from './class-checks.dto';
 
-type Person = { id: string; firstName: string; lastName: string };
+// role — Багш+ хүний нэрийн ард «+» (вэб lib/personName.staffName)
+type Person = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
+};
 
 const MARK_SELECT = {
   studentId: true,
@@ -91,7 +97,7 @@ export class ClassChecksService {
 
   private async findCheck(classroomId: string, checkId: string) {
     const check = await this.prisma.classCheck.findFirst({
-      where: { id: checkId, classroomId },
+      where: { id: checkId, classroomId, deletedAt: null },
       select: CHECK_SELECT,
     });
     if (!check) throw new NotFoundException('Чек олдсонгүй');
@@ -105,7 +111,7 @@ export class ClassChecksService {
     if (unique.length === 0) return new Map();
     const rows = await this.prisma.user.findMany({
       where: { id: { in: unique } },
-      select: { id: true, firstName: true, lastName: true },
+      select: { id: true, firstName: true, lastName: true, role: true },
     });
     return new Map(rows.map((u) => [u.id, u]));
   }
@@ -137,7 +143,10 @@ export class ClassChecksService {
   }
 
   private async shapeOne(c: CheckRow) {
-    return ClassChecksService.shape(c, await this.people(ClassChecksService.staffIds([c])));
+    return ClassChecksService.shape(
+      c,
+      await this.people(ClassChecksService.staffIds([c])),
+    );
   }
 
   /**
@@ -154,12 +163,12 @@ export class ClassChecksService {
         },
       }),
       this.prisma.classCheck.findMany({
-        where: { classroomId, archivedAt: null },
+        where: { classroomId, archivedAt: null, deletedAt: null },
         orderBy: { createdAt: 'desc' },
         select: CHECK_SELECT,
       }),
       this.prisma.classCheck.findMany({
-        where: { classroomId, archivedAt: { not: null } },
+        where: { classroomId, archivedAt: { not: null }, deletedAt: null },
         orderBy: { archivedAt: 'desc' },
         take: ARCHIVED_LIST_MAX,
         select: CHECK_SELECT,
@@ -199,7 +208,7 @@ export class ClassChecksService {
     const amount = cleanCheckAmount(dto.amount ?? null);
     if (Number.isNaN(amount)) throw new BadRequestException('Дүн буруу байна');
     const openCount = await this.prisma.classCheck.count({
-      where: { classroomId, archivedAt: null },
+      where: { classroomId, archivedAt: null, deletedAt: null },
     });
     if (openCount >= OPEN_CHECKS_MAX)
       throw new BadRequestException(
@@ -241,7 +250,8 @@ export class ClassChecksService {
     }
     if (dto.amount !== undefined) {
       const amount = cleanCheckAmount(dto.amount);
-      if (Number.isNaN(amount)) throw new BadRequestException('Дүн буруу байна');
+      if (Number.isNaN(amount))
+        throw new BadRequestException('Дүн буруу байна');
       if (amount !== before.amount) data.amount = amount;
     }
     if (dto.archived === true && !before.archivedAt) {
@@ -249,7 +259,7 @@ export class ClassChecksService {
       data.archivedById = userId;
     } else if (dto.archived === false && before.archivedAt) {
       const openCount = await this.prisma.classCheck.count({
-        where: { classroomId, archivedAt: null },
+        where: { classroomId, archivedAt: null, deletedAt: null },
       });
       if (openCount >= OPEN_CHECKS_MAX)
         throw new BadRequestException(
@@ -290,6 +300,39 @@ export class ClassChecksService {
   }
 
   /**
+   * Устгах (эзэн 2026-10-23) — ЗӨӨЛӨН: «өгөгдөл хэзээ ч алга болохгүй». Мөр ба
+   * сурагчийн тэмдэглэгээ DB-д үлдэнэ (deletedAt + хэн), харин ямар ч жагсаалт,
+   * тоонд орохгүй. Хаасан (archived) чекийг ч устгаж болно. Дахин устгавал NotFound.
+   */
+  async remove(classroomId: string, checkId: string, userId: string) {
+    const role = await this.access(classroomId, userId);
+    const before = await this.findCheck(classroomId, checkId);
+    const deletedAt = new Date();
+    // deletedAt: null нөхцөлтэй — хоёр багш зэрэг дарвал анхных нь л бичигдэнэ
+    const { count } = await this.prisma.classCheck.updateMany({
+      where: { id: before.id, deletedAt: null },
+      data: { deletedAt, deletedById: userId },
+    });
+    if (count === 0) throw new NotFoundException('Чек олдсонгүй');
+    await this.audit.record({
+      actorId: userId,
+      actorRole: role,
+      action: 'DELETE',
+      entity: 'ClassCheck',
+      entityId: before.id,
+      before: {
+        classroomId,
+        title: before.title,
+        amount: before.amount,
+        archivedAt: before.archivedAt,
+        checkedCount: before.marks.filter((m) => m.checked).length,
+      },
+      after: { deletedAt },
+    });
+    return { id: before.id, deleted: true as const };
+  }
+
+  /**
    * Нэг сурагчийг тэмдэглэх/болиулах — тодорхой утга (toggle биш), (checkId,
    * studentId)-аар upsert. Хоёр багш зэрэг анх удаа дарвал нэг нь P2002 авч
    * магадгүй — тэр үед update-ээр дахин бичнэ (сүүлд бичсэн нь ялна).
@@ -303,12 +346,14 @@ export class ClassChecksService {
   ) {
     const role = await this.access(classroomId, userId);
     const check = await this.prisma.classCheck.findFirst({
-      where: { id: checkId, classroomId },
+      where: { id: checkId, classroomId, deletedAt: null },
       select: { id: true, archivedAt: true },
     });
     if (!check) throw new NotFoundException('Чек олдсонгүй');
     if (check.archivedAt)
-      throw new BadRequestException('Хаагдсан чекийг засахгүй — эхлээд сэргээнэ үү');
+      throw new BadRequestException(
+        'Хаагдсан чекийг засахгүй — эхлээд сэргээнэ үү',
+      );
     const enrolled = await this.prisma.enrollment.findFirst({
       where: {
         classroomId,
@@ -330,7 +375,12 @@ export class ClassChecksService {
     try {
       mark = await this.prisma.classCheckMark.upsert({
         where,
-        create: { checkId, studentId, checked: dto.checked, updatedById: userId },
+        create: {
+          checkId,
+          studentId,
+          checked: dto.checked,
+          updatedById: userId,
+        },
         update: { checked: dto.checked, updatedById: userId },
         select: MARK_SELECT,
       });

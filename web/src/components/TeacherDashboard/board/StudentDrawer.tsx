@@ -556,9 +556,7 @@ function NotesSection({ studentId, today }: { studentId: string; today: string }
         <div aria-busy="true" aria-label="Ачаалж байна" className="mt-2 space-y-2">
           <div className="skeleton h-16 rounded-lg" />
         </div>
-      ) : notes.length === 0 ? (
-        <p className="mt-1 text-sm text-ink-dim">Тэмдэглэл алга, дээр бичээд «Нэмэх» дарна</p>
-      ) : (
+      ) : notes.length === 0 ? null : (
         <ul className="mt-2 space-y-2" aria-label="Тэмдэглэлүүд, шинэ нь дээр">
           {notes.map((n) => (
             <li key={n.id} className="rounded-lg border border-line bg-bg/50 px-3 py-2.5">

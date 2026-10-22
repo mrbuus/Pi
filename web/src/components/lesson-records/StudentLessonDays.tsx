@@ -13,6 +13,7 @@ import {
   WEEKDAY_LABELS,
   type WeekResponse,
 } from "@/components/schedule/types";
+import { withPlus } from "@/lib/personName";
 
 function mondayOf(key: string): string {
   const wd = new Date(`${key}T00:00:00.000Z`).getUTCDay();
@@ -84,7 +85,13 @@ export default function StudentLessonDays() {
                 </p>
                 <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-dim">
                   <RoomShape room={e.room} size={14} />
-                  <Meta items={[e.room, e.leadTeacher?.name ?? e.teacherName, e.assistantTeacher?.name]} />
+                  <Meta
+                    items={[
+                      e.room,
+                      e.leadTeacher ? withPlus(e.leadTeacher.name, e.leadTeacher.role) : withPlus(e.teacherName, e.teacherRole),
+                      withPlus(e.assistantTeacher?.name, e.assistantTeacher?.role),
+                    ]}
+                  />
                 </p>
               </div>
             </li>

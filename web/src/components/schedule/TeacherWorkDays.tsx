@@ -18,6 +18,7 @@ import {
   type TeacherWorkDaysResponse,
   type TeacherWorkExceptionRow,
 } from "./types";
+import { staffName, withPlus } from "@/lib/personName";
 
 function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : "Алдаа гарлаа";
@@ -89,9 +90,9 @@ export default function TeacherWorkDays({ readOnly = false }: { readOnly?: boole
       const o = row.sortOrder ?? 0;
       if (!order.has(row.teacherId) || o < order.get(row.teacherId)!) order.set(row.teacherId, o);
       if (row.note === UNCHECKED_NOTE) unchecked.add(key);
-      names.set(row.teacherId, row.teacher.firstName);
+      names.set(row.teacherId, withPlus(row.teacher.firstName, row.teacher.role));
     }
-    for (const t of options) names.set(t.id, t.displayName ?? t.firstName);
+    for (const t of options) names.set(t.id, withPlus(t.displayName ?? t.firstName, t.role));
     // Хүснэгтийн мөрийн дараалал, дараа нь хүснэгтэд ороогүй багш нэрээр
     const ids = [...new Set([...options.map((t) => t.id), ...order.keys()])];
     const teachers = ids
@@ -425,7 +426,7 @@ export default function TeacherWorkDays({ readOnly = false }: { readOnly?: boole
               >
                 <span className="font-mono">{x.date.slice(0, 10)}</span>
                 <span className="font-semibold">
-                  {x.teacher.lastName} {x.teacher.firstName}
+                  {staffName(x.teacher)}
                 </span>
                 <span
                   className={`rounded-full px-2 py-0.5 font-semibold ${

@@ -10,6 +10,7 @@ import RoomBadge from "../RoomBadge";
 import { formatMinutes, roomOrderOf, WEEKDAY_LABELS } from "../types";
 import { roadOf } from "./RoadMap";
 import { branchOf, shortClass, type DayEntry, type TestInfo } from "./types";
+import { withPlus } from "@/lib/personName";
 
 /**
  * Зураг ҮРГЭЛЖ цагаан хуудас шиг (хэрэглэгчийн хар горимоос үл хамаарна): энэ
@@ -182,8 +183,8 @@ export default function ExportImage({
                       </span>
                       <span className="font-bold">{shortClass(e.classroomName)}</span>
                       <span className="font-medium">{testText}</span>
-                      <span>{e.leadTeacher?.name ?? ""}</span>
-                      <span className="text-ink-dim">{e.assistantTeacher?.name ?? ""}</span>
+                      <span>{withPlus(e.leadTeacher?.name, e.leadTeacher?.role) ?? ""}</span>
+                      <span className="text-ink-dim">{withPlus(e.assistantTeacher?.name, e.assistantTeacher?.role) ?? ""}</span>
                     </div>
                   );
                 })}

@@ -89,13 +89,15 @@ export interface ClassroomLite {
   name: string;
   type?: string;
   grade?: number | null;
-  teacher?: { id: string; firstName: string; lastName: string } | null;
+  teacher?: { id: string; firstName: string; lastName: string; role?: string | null } | null;
 }
 
 export interface TeacherLite {
   id: string;
   firstName: string;
   lastName: string;
+  /** Багш+ бол нэрийн ард «+» (lib/personName.staffName) */
+  role?: string | null;
 }
 
 export interface ScheduleEntry {
@@ -126,6 +128,7 @@ export interface DayClass {
   endMinute: number;
   teacherId: string | null;
   teacherName: string | null;
+  teacherRole?: string | null;
   room: string | null;
   subject: string | null;
 }
@@ -166,14 +169,15 @@ export interface WeekEntry {
   classroomName: string;
   teacherId: string | null;
   teacherName: string | null;
+  teacherRole?: string | null;
   startMinute: number;
   endMinute: number;
   room: string | null;
   subject: string | null;
   topic: string | null;
   /** Тухайн өдрийн ахлах/туслах багш (LessonStaffing) */
-  leadTeacher?: { id: string; name: string } | null;
-  assistantTeacher?: { id: string; name: string } | null;
+  leadTeacher?: { id: string; name: string; role?: string | null } | null;
+  assistantTeacher?: { id: string; name: string; role?: string | null } | null;
   exception: ResolvedEntryException | null;
 }
 

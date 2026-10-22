@@ -93,8 +93,8 @@ describe('revision-store — засварын transaction дотор хувил�
       response: {
         code: 'VERSION_CONFLICT',
         currentVersion: 1,
-        changedBy: 'У. Эмүжин',
-        message: 'Таныг засаж байх хооронд У. Эмүжин өөрчилсөн',
+        changedBy: 'У. Эмүжин+',
+        message: 'Таныг засаж байх хооронд У. Эмүжин+ өөрчилсөн',
       },
     };
     await expect(beginRevision(tx(db), 'PROBLEM', 'p1', { expectedVersion: 0, merge: false })).rejects.toMatchObject(conflict);
@@ -335,7 +335,7 @@ describe('Зэрэг засвар — хуучирсан хадгалалтыг 
     const tags = db.problemTags.filter((pt) => pt.problemId === 'p1').map((pt) => pt.tagId);
     await new ContentService(db as never).updateProblem('p1', { statementText: '$x^2=16$' }, TPLUS, Role.TEACHER_PLUS);
     const res = await staleSave(db, 'C', { tagIds: tags });
-    expect(res).toMatchObject({ version: 2, changed: true, mergedWith: ['У. Эмүжин'] });
+    expect(res).toMatchObject({ version: 2, changed: true, mergedWith: ['У. Эмүжин+'] });
     expect(db.problems.find((p) => p.id === 'p1')!.statementText).toBe('$x^2=16$');
     expect(choices(db)).toEqual(['A:', 'B:', 'C*:тэмдэг']);
     // Түүхийн тайлбарт зөвхөн энэ багшийн өөрчлөлт
@@ -361,7 +361,7 @@ describe('Зэрэг засвар — хуучирсан хадгалалтыг 
       response: {
         code: 'VERSION_CONFLICT',
         fields: ['Зөв хариу'],
-        message: 'Таныг засаж байх хооронд У. Эмүжин ижил хэсгийг өөрчилсөн: Зөв хариу',
+        message: 'Таныг засаж байх хооронд У. Эмүжин+ ижил хэсгийг өөрчилсөн: Зөв хариу',
       },
     });
     expect(choices(db)).toEqual(['A*:', 'B:', 'C:тэмдэг']);
@@ -385,7 +385,7 @@ describe('Зэрэг засвар — хуучирсан хадгалалтыг 
     await new ContentService(db as never).updateProblem('p1', { statementText: '$x^2=25$' }, TPLUS, Role.TEACHER_PLUS);
     await expect(staleSave(db, 'C')).rejects.toMatchObject({ status: 409, response: { fields: ['Зөв хариу'] } });
     const res = await staleSave(db, 'C', { overwrite: true });
-    expect(res).toMatchObject({ version: 3, changed: true, mergedWith: ['У. Эмүжин'] });
+    expect(res).toMatchObject({ version: 3, changed: true, mergedWith: ['У. Эмүжин+'] });
     expect(choices(db)).toEqual(['A:', 'B:', 'C*:тэмдэг']);
     expect(db.problems.find((p) => p.id === 'p1')!.statementText).toBe('$x^2=25$');
   });
@@ -440,7 +440,7 @@ describe('Зэрэг засвар — хуучирсан хадгалалтыг 
       TEACHER,
       Role.TEACHER,
     );
-    expect(res).toMatchObject({ version: 2, timeLimitMin: 50, mergedWith: ['У. Эмүжин'] });
+    expect(res).toMatchObject({ version: 2, timeLimitMin: 50, mergedWith: ['У. Эмүжин+'] });
     expect(db.testProblems.filter((tp) => tp.testId === 't1').map((tp) => [tp.problemId, tp.points])).toEqual([
       ['p1', 2],
       ['p2', 4],
@@ -468,11 +468,11 @@ describe('RevisionsService — эрх, ялгаа, сэргээх', () => {
     return { db, svc: new RevisionsService(db as never) };
   }
 
-  it('Багш+: бүгдийг харна; нэр «У. Эмүжин», хэрэглэгчийн ID хариунд алга', async () => {
+  it('Багш+: бүгдийг харна; нэр «У. Эмүжин+» (Багш+ тэмдэгтэй), хэрэглэгчийн ID хариунд алга', async () => {
     const { svc } = await editedProblem();
     const list = await svc.list('problem', 'p1', TPLUS);
     expect(list.items.map((i) => [i.version, i.actorName, i.summary, i.current])).toEqual([
-      [1, 'У. Эмүжин', 'Бодлогын текст засварласан', true],
+      [1, 'У. Эмүжин+', 'Бодлогын текст засварласан', true],
       [0, 'С. Импорт', 'Анхны хувилбар', false],
     ]);
     expect(JSON.stringify(list)).not.toMatch(new RegExp(`${TPLUS}|creator`));

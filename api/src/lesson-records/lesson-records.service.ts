@@ -7,6 +7,7 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
+import { markPlus, teacherPlusIds } from '../common/teacher-plus';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import {
@@ -283,7 +284,7 @@ export class LessonRecordsService {
       before,
       { ...snap.record, date: key, students: snap.students.length },
     );
-    return this.present(record);
+    return this.present(record, await this.plusOf([record]));
   }
 
   async unconfirm(actor: Actor, scheduleId: string, dateStr: string) {
@@ -335,7 +336,11 @@ export class LessonRecordsService {
       date: key,
       note: {
         body: row.body,
-        updatedByName: row.updatedByName,
+        updatedByName: markPlus(
+          row.updatedByName,
+          row.updatedById,
+          await teacherPlusIds(this.prisma, [row.updatedById]),
+        ),
         updatedAt: row.updatedAt,
       },
     };
@@ -355,13 +360,17 @@ export class LessonRecordsService {
         select: { classroomId: true, approximateAt: true },
       }),
     ]);
+    const plus = await teacherPlusIds(this.prisma, [
+      ...records.flatMap((r) => [r.leadTeacherId, r.assistantTeacherId, r.confirmedById]),
+      ...notes.map((n) => n.updatedById),
+    ]);
     return {
       date: key,
-      records: records.map((r) => this.present(r)),
+      records: records.map((r) => this.present(r, plus)),
       notes: notes.map((n) => ({
         scheduleId: n.scheduleId,
         body: n.body,
-        updatedByName: n.updatedByName,
+        updatedByName: markPlus(n.updatedByName, n.updatedById, plus),
         updatedAt: n.updatedAt,
       })),
       dismissals: dismissals.map((d) => ({
@@ -379,7 +388,8 @@ export class LessonRecordsService {
       orderBy: [{ date: 'desc' }, { startMinute: 'asc' }],
       take: Math.min(Math.max(1, Number(limit) || 60), 200),
     });
-    return rows.map((r) => this.present(r));
+    const plus = await this.plusOf(rows);
+    return rows.map((r) => this.present(r, plus));
   }
 
   /** Сурагч: ЗӨВХӨН өөрийн оролцсон батлагдсан хичээлүүд. Тайлбар, ангийн тоо БАЙХГҮЙ. */
@@ -392,6 +402,7 @@ export class LessonRecordsService {
       orderBy: { record: { date: 'desc' } },
       take: Math.min(Math.max(1, Number(limit) || 60), 200),
     });
+    const plus = await this.plusOf(rows.map((x) => x.record));
     return rows.map(({ record: r, attendance }) => ({
       id: r.id,
       date: dateKey(r.date),
@@ -400,8 +411,8 @@ export class LessonRecordsService {
       endMinute: r.endMinute,
       room: r.room,
       topic: r.topic,
-      leadTeacherName: r.leadTeacherName,
-      assistantTeacherName: r.assistantTeacherName,
+      leadTeacherName: markPlus(r.leadTeacherName, r.leadTeacherId, plus),
+      assistantTeacherName: markPlus(r.assistantTeacherName, r.assistantTeacherId, plus),
       attendance,
     }));
   }
@@ -429,6 +440,7 @@ export class LessonRecordsService {
       orderBy: { record: { date: 'desc' } },
       take: Math.min(Math.max(1, Number(limit) || 60), 200),
     });
+    const plus = await this.plusOf(rows.map((x) => x.record));
     return rows.map(({ record: r, attendance }) => ({
       id: r.id,
       date: dateKey(r.date),
@@ -437,13 +449,23 @@ export class LessonRecordsService {
       endMinute: r.endMinute,
       room: r.room,
       topic: r.topic,
-      leadTeacherName: r.leadTeacherName,
-      assistantTeacherName: r.assistantTeacherName,
+      leadTeacherName: markPlus(r.leadTeacherName, r.leadTeacherId, plus),
+      assistantTeacherName: markPlus(r.assistantTeacherName, r.assistantTeacherId, plus),
       testCount: r.testCount,
       presentCount: r.presentCount,
       enrolledCount: r.enrolledCount,
       attendance,
     }));
+  }
+
+  /** Snapshot нэрсийн Багш+ тэмдэг (ахлах, туслах, баталсан) */
+  private plusOf(
+    rows: { leadTeacherId: string | null; assistantTeacherId: string | null; confirmedById: string }[],
+  ) {
+    return teacherPlusIds(
+      this.prisma,
+      rows.flatMap((r) => [r.leadTeacherId, r.assistantTeacherId, r.confirmedById]),
+    );
   }
 
   private present(r: {
@@ -456,7 +478,9 @@ export class LessonRecordsService {
     endMinute: number;
     room: string | null;
     topic: string | null;
+    leadTeacherId: string | null;
     leadTeacherName: string | null;
+    assistantTeacherId: string | null;
     assistantTeacherName: string | null;
     tests: Prisma.JsonValue;
     testCount: number;
@@ -464,9 +488,10 @@ export class LessonRecordsService {
     presentCount: number;
     absentCount: number;
     attendanceMarked: number;
+    confirmedById: string;
     confirmedByName: string;
     confirmedAt: Date;
-  }) {
+  }, plus: Set<string> = new Set()) {
     return {
       id: r.id,
       scheduleId: r.scheduleId,
@@ -477,15 +502,15 @@ export class LessonRecordsService {
       endMinute: r.endMinute,
       room: r.room,
       topic: r.topic,
-      leadTeacherName: r.leadTeacherName,
-      assistantTeacherName: r.assistantTeacherName,
+      leadTeacherName: markPlus(r.leadTeacherName, r.leadTeacherId, plus),
+      assistantTeacherName: markPlus(r.assistantTeacherName, r.assistantTeacherId, plus),
       tests: Array.isArray(r.tests) ? r.tests : [],
       testCount: r.testCount,
       enrolledCount: r.enrolledCount,
       presentCount: r.presentCount,
       absentCount: r.absentCount,
       attendanceMarked: r.attendanceMarked,
-      confirmedByName: r.confirmedByName,
+      confirmedByName: markPlus(r.confirmedByName, r.confirmedById, plus),
       confirmedAt: r.confirmedAt,
     };
   }

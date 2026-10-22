@@ -74,6 +74,8 @@ function makePrisma() {
     test: { findMany: jest.fn(async () => [{ id: 't1', title: 'Тест 18' }]) },
     user: {
       findUnique: jest.fn(async () => ({ firstName: 'Ажилтан', lastName: 'А' })),
+      // Багш+ тэмдэг (common/teacher-plus) — энд Багш+ хэн ч үгүй
+      findMany: jest.fn(async () => []),
     },
     lessonRecord: {
       findUnique: jest.fn(async () => null),

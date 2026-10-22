@@ -2852,6 +2852,9 @@ model ClassCheck {
   createdAt    DateTime         @default(now())
   archivedAt   DateTime?
   archivedById String?
+  /// Зөөлөн устгал (эзэн 2026-10-23: өгөгдөл алга болохгүй) — жагсаалтаас нуугдана, DB-д үлдэнэ
+  deletedAt    DateTime?
+  deletedById  String?
   marks        ClassCheckMark[]
 
   @@index([classroomId, archivedAt])

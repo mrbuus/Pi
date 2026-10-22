@@ -15,6 +15,7 @@ import {
 } from '../generated/prisma/enums';
 import { assertInternalTeachingStaff, collectContentScope } from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
+import { withPlus } from '../revisions/revision-snapshot';
 import {
   beginRevision,
   beginRevisions,
@@ -524,7 +525,7 @@ export class ThousandService {
       where: { classroomId, test: { type: TestType.THOUSAND, deletedAt: null } },
       select: {
         ...ACCESS_REVIEW_SELECT,
-        reviewOpenedBy: { select: { firstName: true, lastName: true } },
+        reviewOpenedBy: { select: { firstName: true, lastName: true, role: true } },
         test: {
           select: {
             id: true,
@@ -585,7 +586,7 @@ export class ThousandService {
         reviewAutoAt: autoOpenAt(r),
         reviewOpenedAt: r.reviewOpenedAt,
         reviewOpenedBy: r.reviewOpenedBy
-          ? `${r.reviewOpenedBy.lastName} ${r.reviewOpenedBy.firstName}`
+          ? withPlus(`${r.reviewOpenedBy.lastName} ${r.reviewOpenedBy.firstName}`, r.reviewOpenedBy.role)
           : null,
       })),
       assignable,

@@ -10,6 +10,7 @@ import RequireRole from "@/components/nav/RequireRole";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { api, getRole } from "@/lib/api";
+import { withPlus } from "@/lib/personName";
 
 interface Payment {
   id: string;
@@ -522,7 +523,7 @@ export default function AdminDashboardClient() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">
-                      {u.firstName} {u.lastName}
+                      {withPlus(`${u.firstName} ${u.lastName}`, u.role)}
                     </span>
                     <span className="rounded-full bg-bg px-2 py-0.5 text-[11px] text-ink-dim">
                       {ROLE_LABEL[u.role] ?? u.role}
@@ -602,7 +603,7 @@ export default function AdminDashboardClient() {
                 >
                   <div>
                     <span className="font-medium">
-                      {t.firstName} {t.lastName}
+                      {withPlus(`${t.firstName} ${t.lastName}`, t.role)}
                     </span>
                     <span className="ml-2 text-ink-dim">{t.phone}</span>
                     {t.ownedClassrooms.length > 0 && (

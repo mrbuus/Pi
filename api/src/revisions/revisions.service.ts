@@ -126,7 +126,7 @@ export class RevisionsService {
     if (unique.length === 0) return new Map();
     const users = await this.prisma.user.findMany({
       where: { id: { in: unique } },
-      select: { id: true, firstName: true, lastName: true },
+      select: { id: true, firstName: true, lastName: true, role: true },
     });
     return new Map(users.map((u) => [u.id, shortName(u)]));
   }
