@@ -133,7 +133,9 @@ ssh pimath 'cd ~/pimath/api && U=$(grep ^DATABASE_URL= .env | cut -d= -f2- | tr 
 Дараа нь код татаж, API + вэб барьж дахин асаана:
 
 ```bash
-ssh pimath 'cd ~/pimath && git pull && cd api && npm ci && npx prisma migrate deploy && npm run build && pm2 restart pimath-api && cd ../web && npm ci && NEXT_PUBLIC_API_URL=/api npm run build && pm2 restart pimath-web'
+ssh pimath 'cd ~/pimath && git pull && export NODE_OPTIONS=--max-old-space-size=3072 && cd api && npm ci && npx prisma migrate deploy && npm run build && pm2 restart pimath-api && cd ../web && npm ci && NEXT_PUBLIC_API_URL=/api npm run build && pm2 restart pimath-web'
 ```
 
 SSH «timed out» бол эзний IP солигдсон — EC2 → `pimath-api-sg` → SSH дүрмийн Source = **My IP**.
+
+t4g.small (2 GB) дээр build санах ой хүрэлцэхгүй (heap out of memory) — `NODE_OPTIONS=--max-old-space-size=3072` заавал (2 GB swap ашиглана).
