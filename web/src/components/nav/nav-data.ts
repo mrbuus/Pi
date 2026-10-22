@@ -58,6 +58,8 @@ export const HOME: Record<string, NavLink> = {
 // Бодит маршрутуудыг эрх, чиг үүргээр бүлэглэсэн бүрэн цэс.
 // Ажилтны «Хуваарь» хэсэг: Хуваарь + Төлөвлөгч табууд (nav/ClassHubTabs.tsx;
 // эзэн 2026-10-08, 2026-10-18-нд бусад табыг хассан).
+// Хэрэглэгдэхүүн: график, дүрс, биет, томьёо, бодогч, тор цаас (бүх role)
+
 const NAV_BY_ROLE: Record<string, NavLink[]> = {
   GROUP_TEACHER: [
     HOME.GROUP_TEACHER,
@@ -89,7 +91,9 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
+    // Багш бүх анги, сурагчийг Багш+-тай адил ХАРНА (эзэн 2026-10-22); төлбөр, удирдлага нээгдэхгүй
     { href: "/app/classes", label: "Ангиуд", icon: "school" },
+    { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
   ],
   TEACHER_PLUS: [
@@ -115,7 +119,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
   ADMIN: [
     HOME.ADMIN,
     { href: "/app/admin/v2", label: "v2 ажлын хяналт", icon: "clipboard-list" },
-    { href: "/app/admin/capabilities", label: "Ажилтны нарийн эрх", icon: "shield-check" },
+    { href: "/app/admin/capabilities", label: "Эрхийн матриц", icon: "shield-check" },
     { href: "/app/internal", label: "Бодлогын ноорог", icon: "pencil" },
     { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/teacher", label: "Багшийн самбар", icon: "teacher" },
@@ -206,6 +210,12 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/student/payments": "personal",
 };
 
+// Role-ийн онцгой бүлэглэл: энгийн Багшид «Сурагчид» ганцаараа «Удирдлага» бүлэгт
+// орох нь төөрөгдүүлэх тул «Анги» бүлэгт (Багш+/Админд ITEM_GROUP хэвээр).
+const ITEM_GROUP_BY_ROLE: Partial<Record<string, Record<string, GroupKey>>> = {
+  TEACHER: { "/app/admin/students": "class" },
+};
+
 // Өмнө нь "Нууц үг солих" тусдаа, гарцаагүй тод цэсийн зүйл байсан — эзний
 // хүсэлтээр /app/profile дотор нэг хэсэг болгон шилжүүлж, оронд нь энд зөвхөн
 // "Миний мэдээлэл"-руу орох ганц холбоос үлдээв. Role бүрт нийтлэг тул
@@ -291,7 +301,7 @@ export function getRoleNav(role: string | null): RoleNav {
     personal: [],
   };
   for (const item of rest) {
-    const group = ITEM_GROUP[item.href] ?? "learn";
+    const group = (role ? ITEM_GROUP_BY_ROLE[role]?.[item.href] : undefined) ?? ITEM_GROUP[item.href] ?? "learn";
     buckets[group].push(item);
   }
   // Миний мэдээлэл, тусламж, мэдэгдэл… баруун дээд булангийн хэрэглэгчийн цэст

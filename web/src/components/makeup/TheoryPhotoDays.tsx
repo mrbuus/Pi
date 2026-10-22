@@ -99,6 +99,7 @@ function DayCard({ day, onChange }: { day: TheoryDay; onChange: (next: TheoryDay
             pages={mine?.pages ?? 0}
             onSave={save}
             fileName={`onol-${day.date}.pdf`}
+            purpose="theory"
             addLabel="Онолын зураг"
           />
         </div>

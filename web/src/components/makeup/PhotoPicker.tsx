@@ -2,11 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  Camera,
   ChevronLeft,
+  CircleCheck,
   ChevronRight,
   ExternalLink,
   FileText,
   ImagePlus,
+  Images,
   LoaderCircle,
   RefreshCw,
   RotateCw,
@@ -15,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
-import { fileUrl, uploadFile } from "@/lib/api";
+import { fileUrl, uploadFile, type UploadPurpose } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { PDF_MAX_PAGES, photosToPdf, type Rotation } from "@/lib/photosToPdf";
 
@@ -41,6 +44,7 @@ export default function PhotoPicker({
   addLabel = "Зураг нэмэх",
   fileName = "zurag.pdf",
   highlight = false,
+  purpose = "general",
 }: {
   /** Одоо хавсаргасан түлхүүрүүд (ихэвчлэн ганц PDF) */
   current: string[];
@@ -52,6 +56,8 @@ export default function PhotoPicker({
   fileName?: string;
   /** Илгээх шаардлагатайг тодруулна (ж: багш дахин илгээхийг хүссэн) */
   highlight?: boolean;
+  /** Хадгалах хугацаа: `theory` байнга, `homework` 7 хоног */
+  purpose?: UploadPurpose;
 }) {
   const [editing, setEditing] = useState(current.length === 0);
   const [picked, setPicked] = useState<Picked[]>([]);
@@ -59,6 +65,8 @@ export default function PhotoPicker({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const [justSent, setJustSent] = useState(false);
   const urls = useRef<string[]>([]);
 
   useEffect(() => {
@@ -71,6 +79,7 @@ export default function PhotoPicker({
   function add(files: FileList | null) {
     if (!files?.length) return;
     setError("");
+    setJustSent(false);
     const room = PDF_MAX_PAGES - picked.length;
     const chosen = Array.from(files).slice(0, Math.max(0, room));
     if (chosen.length < files.length) setError(`${PDF_MAX_PAGES} хүртэл зураг сонгоно`);
@@ -108,11 +117,12 @@ export default function PhotoPicker({
         { fileName, onProgress: (d, t) => setProgress(Math.round((d / t) * 100)) },
       );
       setPhase("upload");
-      const { key } = await uploadFile(file);
+      const { key } = await uploadFile(file, { purpose });
       setPhase("save");
       await onSave([key]);
       setPicked([]);
       setEditing(false);
+      setJustSent(true);
     } catch (e) {
       setError(e instanceof Error && e.message ? e.message : "Илгээж чадсангүй. Дахин оролдоно уу");
     } finally {
@@ -133,7 +143,7 @@ export default function PhotoPicker({
         >
           <FileText className="size-5 shrink-0 text-brand-soft" aria-hidden />
           <span className="min-w-0 flex-1 whitespace-nowrap text-sm">
-            <span className="font-semibold text-ink">PDF</span>
+            <span className="font-semibold text-ink">Илгээсэн</span>
             <span className="ml-2 tabular-nums text-ink-dim">{pages} хуудас</span>
           </span>
           {current.map((key, i) => (
@@ -157,7 +167,42 @@ export default function PhotoPicker({
         </div>
       )}
 
-      {editing && (
+      {justSent && !editing && (
+        <p role="status" className="flex items-center gap-1.5 text-sm font-semibold text-success">
+          <CircleCheck className="size-5 shrink-0" aria-hidden />
+          Илгээгдлээ. Багш шалгана
+        </p>
+      )}
+
+      {editing && picked.length === 0 && (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => cameraRef.current?.click()}
+              className="btn-3d flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl bg-brand-bright px-2 text-on-brand transition hover:brightness-105 focus-visible:ring-2 focus-visible:ring-brand-bright focus-visible:ring-offset-2"
+            >
+              <Camera className="size-8" aria-hidden />
+              <span className="text-base font-bold">Зураг авах</span>
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => inputRef.current?.click()}
+              className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-line bg-panel px-2 text-ink transition hover:border-brand-bright focus-visible:ring-2 focus-visible:ring-brand-bright"
+            >
+              <Images className="size-8 text-brand-soft" aria-hidden />
+              <span className="text-base font-bold">Зургаас сонгох</span>
+            </button>
+          </div>
+          <p className="cyrillic-tight text-sm text-ink-dim">
+            Дэвтрийн хуудас бүрийг гэрэлтэй газар, бүтнээр нь зураарай. {PDF_MAX_PAGES} хүртэл зураг
+          </p>
+        </div>
+      )}
+
+      {editing && picked.length > 0 && (
         <>
           <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {picked.map((p, i) => (
@@ -202,10 +247,7 @@ export default function PhotoPicker({
                   type="button"
                   disabled={busy}
                   onClick={() => inputRef.current?.click()}
-                  className={cn(
-                    "flex w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-line text-ink-dim transition hover:border-brand-bright hover:text-brand-soft focus-visible:ring-2 focus-visible:ring-brand-bright",
-                    picked.length ? "aspect-[3/4]" : "min-h-24",
-                  )}
+                  className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-line text-ink-dim transition hover:border-brand-bright hover:text-brand-soft focus-visible:ring-2 focus-visible:ring-brand-bright"
                 >
                   <ImagePlus className="size-6" aria-hidden />
                   <span className="cyrillic-tight px-1 text-center text-xs font-semibold">{addLabel}</span>
@@ -213,25 +255,12 @@ export default function PhotoPicker({
               </li>
             )}
           </ul>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden
-            onChange={(e) => {
-              add(e.target.files);
-              e.target.value = "";
-            }}
-          />
           <div className="flex flex-wrap items-center gap-2">
             {picked.length > 0 && (
-              <Button size="sm" onClick={send} disabled={busy}>
+              <Button size="lg" className="w-full sm:w-auto" onClick={send} disabled={busy}>
                 {busy ? <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden /> : <Send aria-hidden />}
                 {phase === "build"
-                  ? `PDF бэлдэж байна ${progress}%`
+                  ? `Бэлдэж байна ${progress}%`
                   : phase === "upload" || phase === "save"
                     ? "Илгээж байна"
                     : sent
@@ -239,14 +268,14 @@ export default function PhotoPicker({
                       : saveLabel}
               </Button>
             )}
-            {sent && (
+            {(sent || picked.length > 0) && (
               <Button
                 size="sm"
                 variant="ghost"
                 disabled={busy}
                 onClick={() => {
                   setPicked([]);
-                  setEditing(false);
+                  setEditing(!sent); // илгээгээгүй бол сонгох товчнууд руу буцна
                   setError("");
                 }}
               >
@@ -259,6 +288,34 @@ export default function PhotoPicker({
           </div>
         </>
       )}
+
+      {/* Утасны камер шууд нээгдэнэ (capture) ба зургийн сан — хоёр тусдаа оролт */}
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(e) => {
+          add(e.target.files);
+          e.target.value = "";
+        }}
+      />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(e) => {
+          add(e.target.files);
+          e.target.value = "";
+        }}
+      />
 
       {error && (
         <p role="alert" className="flex items-center gap-1.5 text-sm text-error">

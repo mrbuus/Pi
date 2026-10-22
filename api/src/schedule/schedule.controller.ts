@@ -21,6 +21,7 @@ import { CreateCalendarDayDto } from './dto/create-calendar-day.dto';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { PutTeacherWorkDaysDto } from './dto/put-teacher-workdays.dto';
 import { SplitSeriesDto } from './dto/split-series.dto';
+import { SwapRoomDto } from './dto/swap-room.dto';
 import { TeacherWorkDayExceptionDto } from './dto/teacher-workday-exception.dto';
 import { PutRosterConfigDto } from './dto/put-roster-config.dto';
 import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
@@ -118,6 +119,20 @@ export class ScheduleController {
     return this.schedule.splitSeries(id, dto);
   }
 
+  // «Танхим солих»: давхцсан хоёр ангийн танхимыг `from` огнооноос солино (атомар).
+  // Хоёр ангид schedule.manage шаардана.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post('schedule/:id/swap-room')
+  async swapRoom(
+    @Param('id') id: string,
+    @Body() dto: SwapRoomDto,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.manageSchedule(req.user, id);
+    await this.access.manageSchedule(req.user, dto.otherId);
+    return this.schedule.swapRooms(id, dto);
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/:id/exceptions')
   async upsertException(
@@ -202,10 +217,11 @@ export class ScheduleController {
   // ангиудыг буцаадаг тул TEACHER_PLUS-д түүнийг нээх нь хамт ажиллагсдын
   // утасны дугаарыг шаардлагагүйгээр ил гаргана. Тиймээс энд зөвхөн
   // id/нэр буцаах тусдаа маршрут үүсгэв.
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('schedule/teachers')
   // Багш+ өдрийн хичээлд багш оноодог тул (эзэн 2026-10-08) schedule.manage
-  // шаардахгүй — зөвхөн id/нэр буцаана, @Roles нь ADMIN/TEACHER_PLUS.
+  // шаардахгүй — зөвхөн id/нэр буцаана. Энгийн Багш багшийн ажлын өдрийн
+  // хүснэгтийг ХАРАХДАА ашиглана (эзэн 2026-10-22); утас зэрэг хувийн талбаргүй.
   listTeacherOptions() {
     return this.schedule.listTeacherOptions();
   }
@@ -216,7 +232,7 @@ export class ScheduleController {
     @Query('from') from?: string,
     @Query('to') to?: string,
   ) {
-    await this.access.roster(req.user);
+    await this.access.rosterRead(req.user);
     return this.schedule.listTeacherWorkDays(from, to);
   }
 

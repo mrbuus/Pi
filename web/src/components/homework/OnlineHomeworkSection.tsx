@@ -272,7 +272,7 @@ function CreateAssignmentForm({
       for (const f of files) {
         let key = uploadedKeys.current.get(f);
         if (!key) {
-          key = (await uploadFile(f)).key;
+          key = (await uploadFile(f, { purpose: "homework" })).key;
           uploadedKeys.current.set(f, key);
         }
         imageKeys.push(key);

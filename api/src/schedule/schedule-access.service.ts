@@ -29,6 +29,12 @@ export class ScheduleAccessService {
     if (actor.role === Role.ADMIN || actor.role === Role.TEACHER_PLUS) return;
     await this.manage(actor);
   }
+  // Уншихад: энгийн Багш ч Багш+-тай адил бүх багшийн ажлын өдрийг ХАРНА (эзэн
+  // 2026-10-22). Засах нь roster() — Багш+/Админ л.
+  async rosterRead(actor: ScheduleActor) {
+    if (actor.role === Role.TEACHER) return;
+    await this.roster(actor);
+  }
   async manageSchedule(
     actor: ScheduleActor,
     id: string,

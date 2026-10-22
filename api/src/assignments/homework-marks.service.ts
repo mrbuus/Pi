@@ -11,7 +11,10 @@ import { classTeacherWhere } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import { homeworkVariants, normalizeVariant } from '../attendance/board-logic';
 import { loadPreviousLesson } from '../attendance/lesson-dates';
-import { assertMarkAccess } from '../attendance/marking-access';
+import {
+  TEACHER_SEES_ALL,
+  assertMarkAccess,
+} from '../attendance/marking-access';
 import { SetHomeworkMarkDto } from './dto/set-homework-mark.dto';
 import type {
   BulkHomeworkMarksDto,
@@ -122,7 +125,8 @@ export class HomeworkMarksService {
         where: {
           studentId,
           leftAt: null,
-          classroom: classTeacherWhere(userId),
+          // Эзэн 2026-10-19: багш бүх сурагчийн түүхийг УНШИНА (бичих зам өөрчлөгдөөгүй)
+          ...(TEACHER_SEES_ALL ? {} : { classroom: classTeacherWhere(userId) }),
         },
       });
       if (enrollment) return student;

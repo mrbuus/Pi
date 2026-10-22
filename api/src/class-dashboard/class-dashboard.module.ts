@@ -6,5 +6,7 @@ import { ClassDashboardService } from './class-dashboard.service';
 @Module({
   controllers: [ClassDashboardController],
   providers: [ClassDashboardService],
+  // «Чек» (class-checks) ангийн харагдах эрхийг эндээс авна
+  exports: [ClassDashboardService],
 })
 export class ClassDashboardModule {}

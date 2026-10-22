@@ -10,7 +10,8 @@ function model() {
     findFirst: jest.fn(async (): Promise<any> => null),
     findMany: jest.fn(async (): Promise<any[]> => []),
     count: jest.fn(async () => 0),
-    upsert: jest.fn(async () => ({})),
+    upsert: jest.fn(async (): Promise<any> => ({ imageKeys: [] })),
+    updateMany: jest.fn(async () => ({ count: 0 })),
     create: jest.fn(async () => ({})),
     update: jest.fn(async () => ({})),
     delete: jest.fn(async () => ({})),
@@ -114,6 +115,24 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       confirmedById: 'owner',
       note: 'CONFIRMED\nЦаасаар хийсэн',
     });
+  });
+
+  it('батлахад нөхөх зураг 14 хоногийн дараа устахаар, дахин нээхэд хугацаагүй болно', async () => {
+    db.attendance.findMany.mockImplementation(async (args: any) =>
+      [
+        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+      ].filter((a) => !args.where.studentId || a.studentId === args.where.studentId),
+    );
+    db.lessonMakeup.upsert.mockResolvedValue({ imageKeys: ['n.pdf'] });
+    const before = Date.now();
+    await service.decide(staff('owner', Role.TEACHER), 'c1', 's1', '2026-10-10', 'CONFIRM');
+    const set = db.storedFile.updateMany.mock.calls[0][0];
+    expect(set.where).toEqual({ key: { in: ['n.pdf'] }, ownerId: 's1' });
+    const days = (set.data.expiresAt.getTime() - before) / 86400000;
+    expect(days).toBeGreaterThan(13.99);
+    expect(days).toBeLessThan(14.01);
+    await service.decide(staff('owner', Role.TEACHER), 'c1', 's1', '2026-10-10', 'REOPEN');
+    expect(db.storedFile.updateMany.mock.calls[1][0].data).toEqual({ expiresAt: null });
   });
 
   it('сурагчид ажилтны тэмдэглэл, шийдвэр гаргагч очихгүй; зөвхөн өөрийнх нь асуулга', async () => {

@@ -148,11 +148,21 @@ describe('ClassroomsService.get — ангийн дэлгэрэнгүй', () => 
     });
   });
 
-  it('TEACHER зөвхөн өөрийн ангийг харна', async () => {
+  it('энгийн Багш бусдын ангийг ч УНШИНА, сурагч удирдах эрхгүй (эзэн 2026-10-22)', async () => {
     const service = new ClassroomsService(makePrisma(activeClassroom), makeDisbandAudit());
-    await expect(service.get('class-1', 'other-teacher', Role.TEACHER)).rejects.toThrow(
-      'Энэ ангид хандах эрхгүй',
-    );
+    await expect(service.get('class-1', 'other-teacher', Role.TEACHER)).resolves.toMatchObject({
+      classroom: { id: 'class-1' },
+      permissions: { canManageStudents: false },
+    });
+  });
+
+  it('энгийн Багшийн ангийн жагсаалт өөрийн ангиар шүүгдэхгүй — бүх идэвхтэй анги', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const prisma = { classroom: { findMany } } as any;
+    const service = new ClassroomsService(prisma, makeDisbandAudit());
+    await service.list('other-teacher', Role.TEACHER);
+    expect(findMany).toHaveBeenCalledTimes(1);
+    expect(findMany.mock.calls[0][0].where).toEqual({ archived: false });
   });
 
   it('архивласан эсвэл олдоогүй ангийг нээхгүй', async () => {

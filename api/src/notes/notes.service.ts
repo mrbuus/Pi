@@ -13,7 +13,25 @@ import {
   TuitionPlan,
 } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { shortName } from '../revisions/revision-snapshot';
 import { CreateNoteDto, UpdateNoteDto } from './dto/note.dto';
+
+/** Тэмдэглэлийн урт (DTO-той ижил) — захын хоосон зайг хассаны дараа шалгана */
+export const NOTE_BODY_MAX = 4000;
+
+/**
+ * Тэмдэглэлийн бичвэр: агуулга нь ямар ч байж болно (эзэн 2026-10-22), зөвхөн захын
+ * хоосон зайг хасна; хоосон эсвэл 4000-аас урт бол 400.
+ */
+export function cleanNoteBody(body: unknown): string {
+  const text = typeof body === 'string' ? body.trim() : '';
+  if (text.length < 1 || text.length > NOTE_BODY_MAX) {
+    throw new BadRequestException(
+      `Тэмдэглэл 1–${NOTE_BODY_MAX} тэмдэгт байх ёстой`,
+    );
+  }
+  return text;
+}
 
 @Injectable()
 export class NotesService {
@@ -130,11 +148,12 @@ export class NotesService {
       throw new BadRequestException(
         'Амласан өдөр зөвхөн төлбөрийн тэмдэглэлд байна',
       );
+    const body = cleanNoteBody(dto.body);
     const note = await this.prisma.studentNote.create({
       data: {
         studentId,
         type: dto.type,
-        body: dto.body,
+        body,
         createdById: userId,
         ...(dto.promisedOn
           ? { promisedOn: new Date(`${dto.promisedOn}T00:00:00Z`) }
@@ -151,7 +170,16 @@ export class NotesService {
       after: note,
     });
 
-    return note;
+    // Жагсаалттай ижил хэлбэр: зохиогч «Б. Нэр» (drawer шууд дээр нь нэмнэ)
+    const author = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { firstName: true, lastName: true },
+    });
+    return {
+      ...note,
+      authorName: author ? shortName(author) : null,
+      canEdit: true,
+    };
   }
 
   async list(
@@ -184,12 +212,7 @@ export class NotesService {
       where: { id: { in: [...new Set(notes.map((n) => n.createdById))] } },
       select: { id: true, firstName: true, lastName: true },
     });
-    const nameOf = new Map(
-      authors.map((a) => [
-        a.id,
-        `${a.lastName ? `${a.lastName.charAt(0)}. ` : ''}${a.firstName}`.trim(),
-      ]),
-    );
+    const nameOf = new Map(authors.map((a) => [a.id, shortName(a)]));
     return notes.map((n) => ({
       ...n,
       authorName: nameOf.get(n.createdById) ?? null,
@@ -217,10 +240,11 @@ export class NotesService {
     }
 
     const resolving = dto.resolvedAt !== undefined;
+    const body = dto.body !== undefined ? cleanNoteBody(dto.body) : undefined;
     const updated = await this.prisma.studentNote.update({
       where: { id },
       data: {
-        ...(dto.body !== undefined ? { body: dto.body } : {}),
+        ...(body !== undefined ? { body } : {}),
         ...(dto.promisedOn !== undefined &&
         before.type === StudentNoteType.PAYMENT
           ? {

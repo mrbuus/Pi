@@ -1,4 +1,4 @@
-import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { toNationalMn } from '../notifications/phone';
 
 /**
@@ -15,6 +15,25 @@ export const CODE_TTL_MS = 10 * 60 * 1000;
 
 /** Нэг код дээр зөвшөөрөх БУРУУ оролдлогын дээд тоо */
 export const MAX_VERIFY_ATTEMPTS = 5;
+
+/**
+ * Имэйлээр очих нэг удаагийн сэргээх холбоосын хугацаа (эзэн 2026-10-22: ~30 минут).
+ * SMS кодоос урт: имэйл хүргэлт удаан, хэрэглэгч Gmail-ээ нээх хугацаа хэрэгтэй.
+ * 32 байт санамсаргүй токен тул 6 оронтой код шиг таах эрсдэлгүй.
+ */
+export const EMAIL_LINK_TTL_MS = 30 * 60 * 1000;
+
+/** Холбоосны токен — 256 бит, URL-д аюулгүй (base64url). ӨС-д зөвхөн HMAC. */
+export function generateLinkToken(): string {
+  return randomBytes(32).toString('base64url');
+}
+
+/** Имэйлийг харуулахдаа далдлах: "student@gmail.com" → "st*****@gmail.com" */
+export function maskEmail(email: string): string {
+  const [name, domain] = email.trim().split('@');
+  if (!domain) return '****';
+  return `${name.slice(0, 2)}${'*'.repeat(Math.max(1, name.length - 2))}@${domain}`;
+}
 
 /** Нэг хэрэглэгч энэ цонхонд хамгийн ихдээ хэдэн код хүсэж болох */
 export const REQUEST_WINDOW_MS = 15 * 60 * 1000;

@@ -10,6 +10,8 @@ import { JwtStrategy, requireJwtSecret } from './jwt.strategy';
 import { PasswordResetService } from './password-reset.service';
 import { GoogleAuthController } from './google/google-auth.controller';
 import { GoogleAuthService } from './google/google-auth.service';
+import { LoginTextController } from './login-text.controller';
+import { LoginTextService } from './login-text.service';
 
 @Module({
   imports: [
@@ -24,13 +26,19 @@ import { GoogleAuthService } from './google/google-auth.service';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  controllers: [AuthController, GoogleAuthController, ConsentController],
+  controllers: [
+    AuthController,
+    GoogleAuthController,
+    ConsentController,
+    LoginTextController,
+  ],
   providers: [
     AuthService,
     JwtStrategy,
     PasswordResetService,
     GoogleAuthService,
     ConsentService,
+    LoginTextService,
   ],
   // PasswordResetService-ийг UsersModule мөн ашиглана (ажилтан сурагчийн
   // өмнөөс код илгээх).

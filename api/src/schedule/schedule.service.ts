@@ -26,6 +26,8 @@ import { PutRosterConfigDto } from './dto/put-roster-config.dto';
 import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { SplitSeriesDto } from './dto/split-series.dto';
+import { SwapRoomDto } from './dto/swap-room.dto';
+import { assertCanSwap, RoomSwapError, swappedRooms } from './room-swap';
 import { UpsertExceptionDto } from './dto/upsert-exception.dto';
 import { UpsertTopicDto } from './dto/upsert-topic.dto';
 import { SplitOutOfRangeError, SplitPlan, planSplit } from './split-series';
@@ -530,6 +532,215 @@ export class ScheduleService {
       [existing.teacherId, result.schedule.teacherId],
     );
     return result;
+  }
+
+  /**
+   * Мөрийг `from` огнооноос эхлэн өөрчилнө (транзакц дотор): цувралын эхлэл дээр
+   * буюу өмнө бол шууд шинэчилнэ, эс бөгөөс хуваана (түүх хэвээр, сэдэв/тэмдэглэл
+   * шинэ мөр рүү). splitSeries-тэй ижил дүрэм.
+   */
+  private async applyFromDate(
+    tx: Pick<
+      PrismaService,
+      | 'classSchedule'
+      | 'lessonTopic'
+      | 'scheduleException'
+      | 'lessonStaffing'
+      | 'lessonNote'
+      | 'lessonRecord'
+    >,
+    existing: {
+      id: string;
+      classroomId: string;
+      weekday: number;
+      startMinute: number;
+      endMinute: number;
+      teacherId: string | null;
+      room: string | null;
+      subject: Prisma.ClassScheduleGetPayload<object>['subject'];
+      effectiveFrom: Date;
+      effectiveTo: Date | null;
+    },
+    from: Date,
+    data: {
+      weekday?: number;
+      startMinute?: number;
+      endMinute?: number;
+      teacherId?: string | null;
+      room?: string | null;
+    },
+  ) {
+    let plan: SplitPlan;
+    try {
+      plan = planSplit(existing, from);
+    } catch (err) {
+      if (err instanceof SplitOutOfRangeError)
+        throw new BadRequestException(err.message);
+      throw err;
+    }
+    if (plan.kind === 'REPLACE_ALL') {
+      return tx.classSchedule.update({ where: { id: existing.id }, data });
+    }
+    await tx.classSchedule.update({
+      where: { id: existing.id },
+      data: { effectiveTo: plan.oldEffectiveTo },
+    });
+    const created = await tx.classSchedule.create({
+      data: {
+        classroomId: existing.classroomId,
+        weekday: data.weekday ?? existing.weekday,
+        startMinute: data.startMinute ?? existing.startMinute,
+        endMinute: data.endMinute ?? existing.endMinute,
+        teacherId:
+          data.teacherId === undefined ? existing.teacherId : data.teacherId,
+        room: data.room === undefined ? existing.room : data.room,
+        subject: existing.subject,
+        effectiveFrom: plan.newEffectiveFrom,
+        effectiveTo: plan.newEffectiveTo,
+      },
+    });
+    const moveFrom = {
+      where: { scheduleId: existing.id, date: { gte: plan.newEffectiveFrom } },
+      data: { scheduleId: created.id },
+    };
+    await tx.lessonTopic.updateMany(moveFrom);
+    await tx.scheduleException.updateMany(moveFrom);
+    await tx.lessonStaffing.updateMany(moveFrom);
+    await tx.lessonNote.updateMany(moveFrom);
+    await tx.lessonRecord.updateMany(moveFrom);
+    return created;
+  }
+
+  /**
+   * «Танхим солих» (эзэн 2026-10-22): `id` мөрийн анги `otherId` мөрийн ангитай
+   * танхимаа `from` огнооноос эхлэн СОЛЬЖ өгнө — НЭГ транзакцаар (хоёулаа эсвэл
+   * огт үгүй). Хоёр ангид ижил мэдэгдэл (notifyScheduleChange) очно.
+   */
+  async swapRooms(id: string, dto: SwapRoomDto) {
+    const [a, b] = await Promise.all([
+      this.prisma.classSchedule.findUnique({ where: { id } }),
+      this.prisma.classSchedule.findUnique({ where: { id: dto.otherId } }),
+    ]);
+    if (!a || !b) throw new NotFoundException('Хуваарь олдсонгүй');
+    const weekday = dto.weekday ?? a.weekday;
+    const startMinute = dto.startMinute ?? a.startMinute;
+    const endMinute = dto.endMinute ?? a.endMinute;
+    if (startMinute >= endMinute)
+      throw new BadRequestException('Дуусах цаг эхлэх цагаас хойш байх ёстой');
+    if (dto.teacherId) {
+      const teacher = await this.prisma.user.findUnique({
+        where: { id: dto.teacherId },
+      });
+      if (!teacher) throw new NotFoundException('Багш олдсонгүй');
+    }
+    const from = this.parseDate(dto.from);
+    try {
+      assertCanSwap(
+        {
+          id: a.id,
+          classroomId: a.classroomId,
+          room: b.room,
+          weekday,
+          startMinute,
+          endMinute,
+          effectiveFrom: from > a.effectiveFrom ? from : a.effectiveFrom,
+          effectiveTo: a.effectiveTo,
+        },
+        a.room,
+        b,
+      );
+    } catch (err) {
+      if (err instanceof RoomSwapError) throw new BadRequestException(err.message);
+      throw err;
+    }
+    const { aRoom, bRoom } = swappedRooms(a.room!, b.room!);
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const sameSeries = (row: typeof a) => ({
+        classroomId: row.classroomId,
+        weekday: row.weekday,
+        startMinute: row.startMinute,
+        endMinute: row.endMinute,
+        room: row.room,
+        id: { not: row.id },
+        effectiveFrom: { gt: from },
+      });
+      // Хоёр ангийн «дараа нь эхлэх» залгаа хэсгүүдийг (цуврал) өмнө нь авна
+      const [aLater, bLater] = await Promise.all([
+        tx.classSchedule.findMany({ where: sameSeries(a) }),
+        tx.classSchedule.findMany({ where: sameSeries(b) }),
+      ]);
+      const aNew = await this.applyFromDate(tx, a, from, {
+        weekday: dto.weekday,
+        startMinute: dto.startMinute,
+        endMinute: dto.endMinute,
+        teacherId: dto.teacherId,
+        room: aRoom,
+      });
+      const bNew = await this.applyFromDate(tx, b, from, { room: bRoom });
+      for (const row of aLater)
+        await tx.classSchedule.update({
+          where: { id: row.id },
+          data: {
+            weekday: dto.weekday,
+            startMinute: dto.startMinute,
+            endMinute: dto.endMinute,
+            teacherId: dto.teacherId,
+            room: aRoom,
+          },
+        });
+      for (const row of bLater)
+        await tx.classSchedule.update({
+          where: { id: row.id },
+          data: { room: bRoom },
+        });
+
+      // Ижил ангийн өөр хичээлтэй цаг давхцахгүй байх (гараг/цаг солигдсон үед)
+      const siblings = await tx.classSchedule.findMany({
+        where: { classroomId: a.classroomId, weekday, id: { not: aNew.id } },
+      });
+      const aEnd = aNew.effectiveTo ?? FAR_FUTURE;
+      if (
+        siblings.some(
+          (x) =>
+            startMinute < x.endMinute &&
+            x.startMinute < endMinute &&
+            aNew.effectiveFrom <= (x.effectiveTo ?? FAR_FUTURE) &&
+            x.effectiveFrom <= aEnd &&
+            !aLater.some((l) => l.id === x.id),
+        )
+      )
+        throw new BadRequestException(
+          'Энэ ангид сонгосон цагт өөр хуваарь давхцаж байна',
+        );
+
+      // Эцсийн төлөвт танхимын давхар захиалга үлдсэн бол бүгдийг буцаана (409)
+      for (const row of [aNew, bNew, ...aLater, ...bLater]) {
+        const fresh = await tx.classSchedule.findUnique({
+          where: { id: row.id },
+        });
+        if (fresh)
+          await this.assertRoomFree(
+            {
+              id: fresh.id,
+              classroomId: fresh.classroomId,
+              room: fresh.room,
+              weekday: fresh.weekday,
+              startMinute: fresh.startMinute,
+              endMinute: fresh.endMinute,
+              effectiveFrom: fresh.effectiveFrom,
+              effectiveTo: fresh.effectiveTo,
+            },
+            tx,
+          );
+      }
+      return { a: aNew, b: bNew };
+    });
+    await this.notifyScheduleChange(
+      [a.classroomId, b.classroomId],
+      [a.teacherId, b.teacherId, result.a.teacherId, result.b.teacherId],
+    );
+    return { mode: 'SWAPPED' as const, ...result };
   }
 
   async remove(id: string) {

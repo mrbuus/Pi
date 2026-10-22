@@ -10,49 +10,50 @@ import {
   CircleCheck,
   Eye,
   EyeOff,
+  MailCheck,
   TriangleAlert,
 } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import PasswordChecklist from "@/components/auth/PasswordChecklist";
+import InfoHint from "@/components/ui/InfoHint";
 import { api } from "@/lib/api";
 import { PASSWORD_MIN_LENGTH, isPasswordStrong } from "@/lib/passwordPolicy";
 
 /**
  * Нууц үг сэргээх — 2 алхам.
  *
+ * ── Хоёр зам (эзэн 2026-10-22) ─────────────────────────────────────────────
+ * 1. ИМЭЙЛ ХОЛБООС. Бүртгэлд имэйл эсвэл холбосон Gmail байвал сервер тэр
+ *    хаяг руу 30 минутын, нэг удаагийн холбоос илгээнэ. Холбоос энэ хуудсыг
+ *    `#t=<токен>`-той нээнэ (fragment нь серверт ч Referer-т ч очдоггүй);
+ *    токеныг хаягийн мөрөөс шууд арилгаад шинэ нууц үгийг асууна.
+ * 2. SMS КОД (хуучин зам). Имэйлгүй, зөвхөн утастай бүртгэлд — SMS
+ *    тохируулагдсан үед л. Тохируулаагүй бол «сургалтын төвд хандана уу».
+ *
+ * Сервер бүртгэл байгаа эсэхийг ИЛЧЛЭХГҮЙ: хариу үргэлж ижил, `channels` нь
+ * хэрэглэгчийн биш СИСТЕМИЙН тохиргоо. Тиймээс энд «хэрэв … бол» гэж тайлбарлана.
+ *
  * ── Яагаад 3 биш 2 алхам вэ ────────────────────────────────────────────────
- * "Кодоо оруул" болон "шинэ нууц үгээ бич" гэсэн хоёрыг салгавал сервер рүү
- * нэмэлт дуудлага (код зөв эсэхийг урьдчилж шалгах) хэрэгтэй болно. Тэр
- * endpoint нь өөрөө брутфорсын нэмэлт гадаргуу үүсгэнэ. Тиймээс кодоо болон
- * шинэ нууц үгээ нэг дор авч, НЭГ л удаа шалгуулна.
+ * Кодоо болон шинэ нууц үгээ нэг дор авч НЭГ л удаа шалгуулна — код урьдчилж
+ * шалгах endpoint нь брутфорсын нэмэлт гадаргуу үүсгэнэ.
  *
  * ── Дизайны шийдэл (2026-08-07) ────────────────────────────────────────────
- *
- * 1. АЛХМЫН ЗААЛТ. Хэрэглэгч хаана явааг, хэдэн алхам үлдсэнийг үргэлж мэднэ.
- *    Тодорхойгүй байдал бол сэргээх урсгал дээр хаягдах хамгийн том шалтгаан.
- *
- * 2. КОД ИРЭХГҮЙ БОЛ ЯАХ ВЭ. Энэ бол OTP урсгалын хамгийн том нүх. Хэрэглэгч
- *    SMS хүлээгээд ирэхгүй бол ЮУ Ч ХИЙХГҮЙ орхиод явдаг. Тиймээс бодит
- *    шалтгаан бүр (саатал, буруу дугаар, бүртгэлгүй дугаар) болон АЖИЛЛАДАГ
- *    өөр зам (багш/админаас код авах) тодорхой бичигдсэн.
- *
- * 3. SMS ТОХИРУУЛААГҮЙ ҮЕИЙН ЗАМ. STATUS.md §6.2 — SMS нийлүүлэгч сонгогдтол
- *    сервер 503 буцаана. Тэр үед хэрэглэгч бүтэн хаалттай хана мөргөх ёсгүй:
- *    ажилтан сурагчийн хуудаснаас код илгээж чадна гэдгийг ЭНД хэлнэ.
- *    Илгээх бүтэлгүйтмэгц тусламжийн хэсэг ӨӨРӨӨ нээгдэнэ.
- *
- * 4. КОДЫН ХУГАЦАА ХАРАГДАНА. Сервер талд 10 минут. Хэрэглэгч SMS хайж
- *    байгаад буцаж ирэхэд код амьд эсэхийг таамаглах ёсгүй.
- *
- * 5. НУУЦ ҮГИЙН ТӨЛӨВ ШУУД. Урт хүрсэн эсэх, хоёр нь таарч байгаа эсэхийг
- *    илгээхээс ӨМНӨ харуулна — илгээгээд буцаж алдаа авах нь цаг алдуулна.
+ * Алхмын заалт; «Код/имэйл ирэхгүй бол» тусламж бүтэлгүйтмэгц өөрөө нээгдэнэ;
+ * кодын хугацаа харагдана; нууц үгийн шаардлага илгээхээс ӨМНӨ шалгагдана.
  */
 
 const CODE_LENGTH = 6;
-/** Дахин код хүсэх хүртэлх хүлээлт (сервер талд ч 15 минутад 3 удаа гэсэн хязгаартай) */
+/** Дахин илгээх хүртэлх хүлээлт (сервер талд ч 15 минутад 3 удаа гэсэн хязгаартай) */
 const RESEND_COOLDOWN_SEC = 60;
-/** Кодын амьдрах хугацаа — сервер талтай (password-reset.service.ts) ижил байх ЁСТОЙ */
-const CODE_TTL_SEC = 10 * 60;
+
+type Step = "identify" | "sent" | "verify" | "link" | "done";
+
+interface ForgotResponse {
+  maskedTo: string;
+  expiresInSeconds: number;
+  linkExpiresInSeconds?: number;
+  channels?: { sms: boolean; email: boolean };
+}
 
 const inputCls =
   "w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none transition placeholder:text-ink-dim/70 focus:border-brand";
@@ -68,12 +69,21 @@ function mmss(total: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+/** Имэйлийн холбоосоор нээгдсэн бол `#t=<токен>`-ийг уншиж хаягаас арилгана */
+function takeLinkToken(): string | null {
+  const match = /(?:^#|&)t=([A-Za-z0-9_-]{20,200})(?:&|$)/.exec(window.location.hash);
+  if (!match) return null;
+  window.history.replaceState(null, "", window.location.pathname);
+  return match[1];
+}
+
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [step, setStep] = useState<"identify" | "verify" | "done">("identify");
+  const [step, setStep] = useState<Step>("identify");
 
   const [identifier, setIdentifier] = useState("");
-  const [maskedTo, setMaskedTo] = useState("");
+  const [sent, setSent] = useState<ForgotResponse | null>(null);
+  const [linkToken, setLinkToken] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -86,7 +96,28 @@ export default function ForgotPasswordPage() {
   const [helpOpen, setHelpOpen] = useState(false);
 
   const codeRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // Имэйлийн холбоосоор ирсэн эсэх. StrictMode-ийн давхар effect-д токен
+  // (хаягаас аль хэдийн арилсан) алдагдахгүйн тулд ref-д хадгална. Нээлттэй
+  // табд холбоосыг буулгавал зөвхөн hash солигдоно — hashchange-ийг ч сонсоно.
+  const linkRef = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const apply = (token: string | null) => {
+      if (!token) return;
+      queueMicrotask(() => {
+        setLinkToken(token);
+        setError("");
+        setStep("link");
+      });
+    };
+    if (linkRef.current === undefined) linkRef.current = takeLinkToken();
+    apply(linkRef.current);
+    const onHash = () => apply(takeLinkToken());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   // Дахин илгээх таймер
   useEffect(() => {
@@ -102,38 +133,38 @@ export default function ForgotPasswordPage() {
     return () => clearTimeout(t);
   }, [codeLeft]);
 
-  // Алхам солигдоход фокусыг зөв газар тавина: код оруулах талбар дээр
-  // (хэрэглэгч SMS-ээ хараад буцаж ирээд шууд бичиж эхэлнэ), эцсийн алхамд
-  // гарчиг дээр (дэлгэц уншигч "боллоо" гэдгийг зарлана).
+  // Алхам солигдоход фокусыг зөв газар тавина
   useEffect(() => {
     if (step === "verify") codeRef.current?.focus();
-    if (step === "done") headingRef.current?.focus();
+    if (step === "link") passwordRef.current?.focus();
+    if (step === "done" || step === "sent") headingRef.current?.focus();
   }, [step]);
 
-  const requestCode = useCallback(
+  const requestReset = useCallback(
     async (isResend: boolean) => {
       if (!identifier.trim()) {
-        setError("Утасны дугаараа оруулна уу");
+        setError("Утас, имэйл эсвэл нэвтрэх нэрээ оруулна уу");
         return;
       }
       setLoading(true);
       setError("");
       try {
-        const res = await api<{ maskedTo: string }>("/auth/forgot-password", {
+        const res = await api<ForgotResponse>("/auth/forgot-password", {
           method: "POST",
           body: { identifier: identifier.trim() },
           auth: false,
         });
-        setMaskedTo(res.maskedTo);
-        setStep("verify");
+        setSent(res);
+        // Хуучин сервер `channels` буцаадаггүй — тэр үед SMS гэж үзнэ
+        const sms = res.channels ? res.channels.sms : true;
+        setStep(sms ? "verify" : "sent");
         setCooldown(RESEND_COOLDOWN_SEC);
-        setCodeLeft(CODE_TTL_SEC);
+        setCodeLeft(sms ? res.expiresInSeconds : 0);
         setHelpOpen(false);
         if (isResend) setCode("");
       } catch (e) {
         setError(errMsg(e));
-        // Илгээх бүтэлгүйтвэл тусламжийг ӨӨРӨӨ нээнэ. Хэрэглэгч алдаа хараад
-        // юу хийхээ мэдэхгүй үлдэх ёсгүй — ажилладаг өөр зам тэр дор нь харагдана.
+        // Илгээх бүтэлгүйтвэл тусламжийг ӨӨРӨӨ нээнэ — ажилладаг өөр зам тэр дор нь харагдана.
         setHelpOpen(true);
       } finally {
         setLoading(false);
@@ -142,7 +173,15 @@ export default function ForgotPasswordPage() {
     [identifier],
   );
 
-  async function submitReset(e: React.FormEvent) {
+  function passwordProblem(): string | null {
+    if (!isPasswordStrong(password)) {
+      return `Нууц үг дор хаяж ${PASSWORD_MIN_LENGTH} тэмдэгт, үсэг ба тоо холилдсон байх ёстой`;
+    }
+    if (password !== confirm) return "Хоёр нууц үг таарахгүй байна";
+    return null;
+  }
+
+  async function submitCode(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (code.length !== CODE_LENGTH) {
@@ -150,14 +189,8 @@ export default function ForgotPasswordPage() {
       codeRef.current?.focus();
       return;
     }
-    if (!isPasswordStrong(password)) {
-      setError(`Нууц үг дор хаяж ${PASSWORD_MIN_LENGTH} тэмдэгт, үсэг ба тоо холилдсон байх ёстой`);
-      return;
-    }
-    if (password !== confirm) {
-      setError("Хоёр нууц үг таарахгүй байна");
-      return;
-    }
+    const problem = passwordProblem();
+    if (problem) return setError(problem);
     setLoading(true);
     try {
       await api("/auth/reset-password", {
@@ -174,9 +207,57 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  const passwordStrong = isPasswordStrong(password);
-  const passwordsMatch = confirm.length > 0 && password === confirm;
+  async function submitLink(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    const problem = passwordProblem();
+    if (problem) return setError(problem);
+    if (!linkToken) return;
+    setLoading(true);
+    try {
+      await api("/auth/reset-password/link", {
+        method: "POST",
+        body: { token: linkToken, newPassword: password },
+        auth: false,
+      });
+      setStep("done");
+    } catch (e) {
+      setError(errMsg(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function restart() {
+    setStep("identify");
+    setError("");
+    setCode("");
+    setCodeLeft(0);
+    setLinkToken(null);
+  }
+
   const codeExpired = step === "verify" && codeLeft === 0;
+  const emailOn = sent?.channels?.email ?? false;
+  const linkMinutes = Math.round((sent?.linkExpiresInSeconds ?? 1800) / 60);
+  const stepNo = step === "identify" ? 1 : 2;
+
+  const passwordFields = (
+    <NewPasswordFields
+      password={password}
+      confirm={confirm}
+      show={showPassword}
+      inputRef={passwordRef}
+      onPassword={(v) => {
+        setPassword(v);
+        if (error) setError("");
+      }}
+      onConfirm={(v) => {
+        setConfirm(v);
+        if (error) setError("");
+      }}
+      onToggleShow={() => setShowPassword((v) => !v)}
+    />
+  );
 
   return (
     <main className="relative flex min-h-screen items-center justify-center px-5 py-10">
@@ -193,16 +274,10 @@ export default function ForgotPasswordPage() {
         {/* ---------- Алхмын заалт ---------- */}
         {step !== "done" && (
           <div className="mb-4">
-            <p className="mb-1.5 text-xs font-semibold tracking-wide text-ink-dim">
-              Алхам {step === "identify" ? 1 : 2} / 2
-            </p>
+            <p className="mb-1.5 text-xs font-semibold tracking-wide text-ink-dim">Алхам {stepNo} / 2</p>
             <div className="flex gap-1.5" aria-hidden>
               <span className="h-1 flex-1 rounded-full bg-brand-bright" />
-              <span
-                className={`h-1 flex-1 rounded-full transition ${
-                  step === "verify" ? "bg-brand-bright" : "bg-line"
-                }`}
-              />
+              <span className={`h-1 flex-1 rounded-full transition ${stepNo === 2 ? "bg-brand-bright" : "bg-line"}`} />
             </div>
           </div>
         )}
@@ -212,7 +287,7 @@ export default function ForgotPasswordPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              void requestCode(false);
+              void requestReset(false);
             }}
             noValidate
             className="space-y-4"
@@ -220,15 +295,19 @@ export default function ForgotPasswordPage() {
             <div>
               <h1 className="text-lg font-bold text-ink">Нууц үг сэргээх</h1>
               <p className="mt-1.5 text-sm text-ink-dim">
-                Бүртгэлтэй утасны дугаараа оруулна уу. Сэргээх кодыг тэр дугаар
-                руу мессежээр илгээнэ.
+                Бүртгэлд тань Gmail эсвэл имэйл холбогдсон бол тэр хаяг руу сэргээх холбоос илгээнэ
               </p>
             </div>
 
             <div>
-              <label htmlFor="identifier" className="mb-1.5 block text-sm font-medium text-ink">
-                Утасны дугаар
-              </label>
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <label htmlFor="identifier" className="block text-sm font-medium text-ink">
+                  Утас, имэйл эсвэл нэвтрэх нэр
+                </label>
+                <InfoHint label="Юу бичих вэ">
+                  Нэвтрэхдээ хэрэглэдэг утасны дугаар, имэйл хаяг эсвэл холбосон Gmail хаягаа бичнэ үү.
+                </InfoHint>
+              </div>
               <input
                 id="identifier"
                 value={identifier}
@@ -237,8 +316,7 @@ export default function ForgotPasswordPage() {
                   if (error) setError("");
                 }}
                 placeholder="99112233"
-                inputMode="tel"
-                autoComplete="tel"
+                autoComplete="username"
                 autoFocus
                 aria-invalid={!!error}
                 aria-describedby={error ? "fp-error" : undefined}
@@ -254,20 +332,62 @@ export default function ForgotPasswordPage() {
               aria-busy={loading}
               className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
             >
-              {loading ? "Илгээж байна…" : "Код илгээх"}
+              {loading ? "Илгээж байна…" : "Сэргээх холбоос авах"}
             </button>
           </form>
         )}
 
-        {/* ---------- Алхам 2: код + шинэ нууц үг ---------- */}
+        {/* ---------- Алхам 2а: имэйл холбоос илгээгдлээ ---------- */}
+        {step === "sent" && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-2.5">
+              <MailCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand" aria-hidden />
+              <div>
+                <h1 ref={headingRef} tabIndex={-1} className="text-lg font-bold text-ink outline-none">
+                  Имэйлээ шалгана уу
+                </h1>
+                <p className="mt-1.5 text-sm text-ink-dim">
+                  <span className="font-semibold text-ink">{sent?.maskedTo}</span> бүртгэлд Gmail эсвэл имэйл
+                  холбогдсон бол тэр хаяг руу нууц үг сэргээх холбоос илгээлээ. Холбоос {linkMinutes} минут
+                  хүчинтэй, нэг л удаа ажиллана.
+                </p>
+              </div>
+            </div>
+            <p className="rounded-xl border border-line bg-panel p-3 text-sm text-ink">
+              Бүртгэл тань зөвхөн утастай, имэйлгүй бол сургалтын төвд хандаж нууц үгээ сэргээлгэнэ үү.
+            </p>
+            <div className="flex items-center justify-between text-sm">
+              <button
+                type="button"
+                onClick={() => void requestReset(true)}
+                disabled={cooldown > 0 || loading}
+                className="min-h-11 font-medium text-brand transition hover:underline disabled:text-ink-dim disabled:no-underline"
+              >
+                {cooldown > 0 ? `Дахин илгээх (${cooldown}с)` : "Дахин илгээх"}
+              </button>
+              <button type="button" onClick={restart} className="min-h-11 text-ink-dim transition hover:text-ink">
+                Өөр хаяг оруулах
+              </button>
+            </div>
+            <ErrorLine id="fp-error" message={error} />
+          </div>
+        )}
+
+        {/* ---------- Алхам 2б: SMS код + шинэ нууц үг ---------- */}
         {step === "verify" && (
-          <form onSubmit={submitReset} noValidate className="space-y-4">
+          <form onSubmit={submitCode} noValidate className="space-y-4">
             <div>
               <h1 className="text-lg font-bold text-ink">Код оруулах</h1>
               <p className="mt-1.5 text-sm text-ink-dim">
-                <span className="font-semibold text-ink">{maskedTo}</span> дугаар
-                руу {CODE_LENGTH} оронтой код илгээлээ.
+                <span className="font-semibold text-ink">{sent?.maskedTo}</span> дугаар руу {CODE_LENGTH} оронтой
+                код илгээлээ
               </p>
+              {emailOn && (
+                <p className="mt-2 flex items-start gap-2 rounded-xl border border-brand/25 bg-brand/5 px-3 py-2 text-xs text-ink">
+                  <MailCheck aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" />
+                  Бүртгэлд Gmail эсвэл имэйл холбогдсон бол код биш, сэргээх холбоос имэйлээр очно
+                </p>
+              )}
             </div>
 
             <div>
@@ -279,147 +399,63 @@ export default function ForgotPasswordPage() {
                 id="code"
                 value={code}
                 onChange={(e) => {
-                  // Зөвхөн цифр — SMS-ээс хуулж буулгахад орсон зай, зураас
-                  // зэргийг чимээгүй цэвэрлэнэ.
+                  // Зөвхөн цифр — SMS-ээс хуулахад орсон зай, зураасыг цэвэрлэнэ
                   setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH));
                   if (error) setError("");
                 }}
                 placeholder="123456"
                 inputMode="numeric"
-                // Утас дээр SMS-ээс кодыг АВТОМАТААР бөглөх боломж
-                // (iOS болон Android хоёулаа энэ утгыг ойлгодог).
                 autoComplete="one-time-code"
                 maxLength={CODE_LENGTH}
                 className={`${inputCls} text-center font-mono text-2xl tracking-[0.5em]`}
               />
-
-              {/* Кодын хугацаа — SMS хайж яваад буцаж ирэхэд амьд эсэхийг
-                  таамаглах ёсгүй. */}
-              <p
-                className={`mt-2 text-xs ${codeExpired ? "text-error" : "text-ink-dim"}`}
-                aria-live="polite"
-              >
+              <p className={`mt-2 text-xs ${codeExpired ? "text-error" : "text-ink-dim"}`} aria-live="polite">
                 {codeExpired
                   ? "Кодын хугацаа дууслаа. Дахин илгээнэ үү."
                   : `Код ${mmss(codeLeft)}-ын дараа хүчингүй болно.`}
               </p>
-
               <div className="mt-2 flex items-center justify-between text-xs">
                 <button
                   type="button"
-                  onClick={() => void requestCode(true)}
+                  onClick={() => void requestReset(true)}
                   disabled={cooldown > 0 || loading}
-                  className="font-medium text-brand transition hover:underline disabled:text-ink-dim disabled:no-underline"
+                  className="min-h-9 font-medium text-brand transition hover:underline disabled:text-ink-dim disabled:no-underline"
                 >
                   {cooldown > 0 ? `Дахин илгээх (${cooldown}с)` : "Код дахин илгээх"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep("identify");
-                    setError("");
-                    setCode("");
-                    setCodeLeft(0);
-                  }}
-                  className="text-ink-dim transition hover:text-ink"
-                >
+                <button type="button" onClick={restart} className="min-h-9 text-ink-dim transition hover:text-ink">
                   Дугаар солих
                 </button>
               </div>
             </div>
 
-            {/* ---------- Шинэ нууц үг ---------- */}
-            <div>
-              <label htmlFor="new-password" className="mb-1.5 block text-sm font-medium text-ink">
-                Шинэ нууц үг
-              </label>
-              <div className="relative">
-                <input
-                  id="new-password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (error) setError("");
-                  }}
-                  autoComplete="new-password"
-                  aria-describedby="pw-rule"
-                  className={`${inputCls} pr-12`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Нууц үгийг нуух" : "Нууц үгийг харах"}
-                  aria-pressed={showPassword}
-                  className="absolute inset-y-0 right-0 flex items-center px-3.5 text-ink-dim transition hover:text-ink"
-                >
-                  {showPassword ? (
-                    <EyeOff aria-hidden className="h-5 w-5" />
-                  ) : (
-                    <Eye aria-hidden className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-              {/* Шаардлагыг (8+ тэмдэгт, үсэг, тоо) илгээхээс ӨМНӨ шалгаж харуулна */}
-              <PasswordChecklist id="pw-rule" value={password} />
-            </div>
-
-            <div>
-              <label
-                htmlFor="confirm-password"
-                className="mb-1.5 block text-sm font-medium text-ink"
-              >
-                Шинэ нууц үг давтах
-              </label>
-              <input
-                id="confirm-password"
-                type={showPassword ? "text" : "password"}
-                value={confirm}
-                onChange={(e) => {
-                  setConfirm(e.target.value);
-                  if (error) setError("");
-                }}
-                autoComplete="new-password"
-                aria-describedby="pw-match"
-                className={inputCls}
-              />
-              <p
-                id="pw-match"
-                aria-live="polite"
-                className={`mt-1.5 flex items-center gap-1.5 text-xs ${
-                  confirm.length === 0
-                    ? "text-ink-dim"
-                    : passwordsMatch
-                      ? "text-success"
-                      : "text-error"
-                }`}
-              >
-                {confirm.length > 0 &&
-                  (passwordsMatch ? (
-                    <>
-                      <Check aria-hidden className="h-3.5 w-3.5 shrink-0" />
-                      Таарч байна
-                    </>
-                  ) : (
-                    "Хоёр нууц үг таарахгүй байна"
-                  ))}
-              </p>
-            </div>
-
+            {passwordFields}
             <ErrorLine id="fp-error" message={error} />
-
-            <button
-              type="submit"
-              disabled={loading || !passwordStrong}
-              aria-busy={loading}
-              className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
-            >
-              {loading ? "Хадгалж байна…" : "Нууц үг солих"}
-            </button>
+            <SubmitButton loading={loading} disabled={!isPasswordStrong(password)} />
           </form>
         )}
 
-        {/* ---------- Алхам 3: боллоо ---------- */}
+        {/* ---------- Алхам 2в: имэйлийн холбоосоор шинэ нууц үг ---------- */}
+        {step === "link" && (
+          <form onSubmit={submitLink} noValidate className="space-y-4">
+            <div>
+              <h1 className="text-lg font-bold text-ink">Шинэ нууц үг</h1>
+              <p className="mt-1.5 text-sm text-ink-dim">
+                Имэйлээр ирсэн холбоос — шинэ нууц үгээ хоёр удаа бичнэ үү
+              </p>
+            </div>
+            {passwordFields}
+            <ErrorLine id="fp-error" message={error} />
+            <SubmitButton loading={loading} disabled={!isPasswordStrong(password)} />
+            {error && (
+              <button type="button" onClick={restart} className="min-h-11 w-full text-sm font-medium text-brand hover:underline">
+                Шинэ холбоос авах
+              </button>
+            )}
+          </form>
+        )}
+
+        {/* ---------- Боллоо ---------- */}
         {step === "done" && (
           <div className="space-y-4">
             <div className="flex items-start gap-2.5">
@@ -429,8 +465,7 @@ export default function ForgotPasswordPage() {
                   Нууц үг солигдлоо
                 </h1>
                 <p className="mt-1.5 text-sm text-ink-dim">
-                  Шинэ нууц үгээрээ нэвтэрнэ үү. Бусад төхөөрөмж дээрх нэвтрэлт
-                  аюулгүй байдлын үүднээс тасарсан.
+                  Шинэ нууц үгээрээ нэвтэрнэ үү. Бусад төхөөрөмж дээрх нэвтрэлт аюулгүй байдлын үүднээс тасарсан.
                 </p>
               </div>
             </div>
@@ -444,51 +479,42 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        {/* ---------- Код ирэхгүй бол ----------
-            OTP урсгалын хамгийн том нүх. Хэрэглэгч SMS хүлээгээд ирэхгүй бол
-            юу ч хийхгүй орхиод явдаг. Тиймээс бодит шалтгаан бүр болон
-            АЖИЛЛАДАГ өөр зам энд бичигдсэн. Илгээх бүтэлгүйтвэл өөрөө нээгдэнэ. */}
-        {step !== "done" && (
+        {/* ---------- Ирэхгүй бол ----------
+            Хэрэглэгч хүлээгээд ирэхгүй бол юу ч хийхгүй орхиод явдаг. Тиймээс
+            бодит шалтгаан бүр болон АЖИЛЛАДАГ өөр зам энд бичигдсэн. */}
+        {step !== "done" && step !== "link" && (
           <div className="mt-5 border-t border-line pt-4">
             <button
               type="button"
               onClick={() => setHelpOpen((v) => !v)}
               aria-expanded={helpOpen}
               aria-controls="fp-help"
-              className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium text-ink transition hover:text-brand"
+              className="flex min-h-11 w-full items-center justify-between gap-2 text-left text-sm font-medium text-ink transition hover:text-brand"
             >
-              Код ирэхгүй байна уу?
+              Имэйл, код ирэхгүй байна уу?
               <ChevronDown
                 aria-hidden
-                className={`h-4 w-4 shrink-0 text-ink-dim transition-transform ${
-                  helpOpen ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 shrink-0 text-ink-dim transition-transform ${helpOpen ? "rotate-180" : ""}`}
               />
             </button>
 
             {helpOpen && (
               <ul id="fp-help" className="mt-3 space-y-2.5 text-sm text-ink-dim">
                 <li>
-                  <span className="font-medium text-ink">Түр хүлээнэ үү.</span>{" "}
-                  Мессеж 1–2 минут саатаж болно. Хүлээж байгаад «Код дахин илгээх»
-                  дарна уу.
+                  <span className="font-medium text-ink">Спам хавтсаа шалгана уу.</span> Имэйл 1–2 минут саатаж, заримдаа
+                  «Спам» хэсэгт ордог.
                 </li>
                 <li>
-                  <span className="font-medium text-ink">Дугаараа шалгана уу.</span>{" "}
-                  Бүртгэлд байгаа дугаараа яг тэр хэвээр, зайгүй, 8 оронтойгоор
+                  <span className="font-medium text-ink">Gmail холбосон эсэхээ шалгана уу.</span> Холбоос зөвхөн
+                  бүртгэлдээ нэмсэн имэйл эсвэл «Миний мэдээлэл»-ээс холбосон Gmail руу очно.
+                </li>
+                <li>
+                  <span className="font-medium text-ink">Бичсэнээ шалгана уу.</span> Утасны дугаараа 8 оронтойгоор, зайгүй
                   бичнэ.
                 </li>
-                <li>
-                  <span className="font-medium text-ink">
-                    Бүртгэлгүй дугаар байж болно.
-                  </span>{" "}
-                  Тухайн дугаар бүртгэлд байхгүй бол код илгээгдэхгүй. Аль
-                  дугаараар бүртгүүлснээ санахгүй бол доорх замыг ашиглана уу.
-                </li>
                 <li className="rounded-xl border border-line bg-panel p-3 text-ink">
-                  <span className="font-semibold">Багш эсвэл админд хандана уу.</span>{" "}
-                  Сургалтын төвийн ажилтан таны бүртгэл дээрээс сэргээх код
-                  илгээж чадна. Тэд кодыг өөрсдөө ХАРАХГҮЙ — зөвхөн танд очно.
+                  <span className="font-semibold">Сургалтын төвд хандана уу.</span> Багш эсвэл админ таны бүртгэлийн
+                  нууц үгийг сэргээж өгнө.
                 </li>
               </ul>
             )}
@@ -497,10 +523,7 @@ export default function ForgotPasswordPage() {
 
         {step !== "done" && (
           <p className="mt-5 text-center text-sm">
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-1.5 text-ink-dim transition hover:text-ink"
-            >
+            <Link href="/login" className="inline-flex min-h-11 items-center gap-1.5 text-ink-dim transition hover:text-ink">
               <ArrowLeft className="h-4 w-4" aria-hidden />
               Нэвтрэх хуудас руу буцах
             </Link>
@@ -508,6 +531,104 @@ export default function ForgotPasswordPage() {
         )}
       </div>
     </main>
+  );
+}
+
+/** Шинэ нууц үг + давтах — SMS ба имэйлийн аль алинд ижил */
+function NewPasswordFields({
+  password,
+  confirm,
+  show,
+  inputRef,
+  onPassword,
+  onConfirm,
+  onToggleShow,
+}: {
+  password: string;
+  confirm: string;
+  show: boolean;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  onPassword: (v: string) => void;
+  onConfirm: (v: string) => void;
+  onToggleShow: () => void;
+}) {
+  const matches = confirm.length > 0 && password === confirm;
+  return (
+    <>
+      <div>
+        <label htmlFor="new-password" className="mb-1.5 block text-sm font-medium text-ink">
+          Шинэ нууц үг
+        </label>
+        <div className="relative">
+          <input
+            ref={inputRef}
+            id="new-password"
+            type={show ? "text" : "password"}
+            value={password}
+            onChange={(e) => onPassword(e.target.value)}
+            autoComplete="new-password"
+            aria-describedby="pw-rule"
+            className={`${inputCls} pr-12`}
+          />
+          <button
+            type="button"
+            onClick={onToggleShow}
+            aria-label={show ? "Нууц үгийг нуух" : "Нууц үгийг харах"}
+            aria-pressed={show}
+            className="absolute inset-y-0 right-0 flex items-center px-3.5 text-ink-dim transition hover:text-ink"
+          >
+            {show ? <EyeOff aria-hidden className="h-5 w-5" /> : <Eye aria-hidden className="h-5 w-5" />}
+          </button>
+        </div>
+        {/* Шаардлагыг (8+ тэмдэгт, үсэг, тоо) илгээхээс ӨМНӨ шалгаж харуулна */}
+        <PasswordChecklist id="pw-rule" value={password} />
+      </div>
+
+      <div>
+        <label htmlFor="confirm-password" className="mb-1.5 block text-sm font-medium text-ink">
+          Шинэ нууц үг давтах
+        </label>
+        <input
+          id="confirm-password"
+          type={show ? "text" : "password"}
+          value={confirm}
+          onChange={(e) => onConfirm(e.target.value)}
+          autoComplete="new-password"
+          aria-describedby="pw-match"
+          className={inputCls}
+        />
+        <p
+          id="pw-match"
+          aria-live="polite"
+          className={`mt-1.5 flex items-center gap-1.5 text-xs ${
+            confirm.length === 0 ? "text-ink-dim" : matches ? "text-success" : "text-error"
+          }`}
+        >
+          {confirm.length > 0 &&
+            (matches ? (
+              <>
+                <Check aria-hidden className="h-3.5 w-3.5 shrink-0" />
+                Таарч байна
+              </>
+            ) : (
+              "Хоёр нууц үг таарахгүй байна"
+            ))}
+        </p>
+      </div>
+    </>
+  );
+}
+
+function SubmitButton({ loading, disabled }: { loading: boolean; disabled: boolean }) {
+  return (
+    <button
+      type="submit"
+      disabled={loading || disabled}
+      aria-busy={loading}
+      className="btn-3d min-h-12 w-full rounded-2xl bg-brand-bright py-3 font-bold tracking-wide text-on-brand transition hover:brightness-105 disabled:opacity-50"
+    >
+      {loading ? "Хадгалж байна…" : "Нууц үг солих"}
+    </button>
   );
 }
 

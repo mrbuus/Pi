@@ -125,7 +125,7 @@ export default function HomeworkCard({
               "Файл 25 МБ-аас их байна. Жижигрүүлээд дахин сонгоорой.";
             throw new Error(validationMessage);
           }
-          const { key } = await uploadFile(entry.file);
+          const { key } = await uploadFile(entry.file, { purpose: "homework" });
           setPhotoKeys((keys) => (keys.includes(key) ? keys : [...keys, key]));
           setPending((list) => list.filter((p) => p.id !== entry.id));
         } catch {

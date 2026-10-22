@@ -32,6 +32,7 @@ import {
   UpdateDraftBlockDto,
   UpdateDraftSetDto,
 } from './internal-drafts.dto';
+import { readStoredBytes } from '../storage/file-store';
 import { InternalDraftsService } from './internal-drafts.service';
 
 /**
@@ -168,10 +169,7 @@ export class InternalDraftFilesController {
   @UseGuards(DraftFileGuard)
   @Get(':key')
   async serve(@Param('key') key: string, @Res() res: Response) {
-    const file = await this.prisma.storedFile.findUnique({
-      where: { key },
-      select: { mime: true, bytes: true },
-    });
+    const file = await readStoredBytes(this.prisma, key);
     if (!file || !file.mime.startsWith('image/'))
       throw new NotFoundException('Файл олдсонгүй');
     res.setHeader('Cache-Control', 'private, max-age=300');

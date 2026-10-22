@@ -184,21 +184,8 @@ describe('ClassDashboardService — харагдах анги', () => {
     ).resolves.toBe('ALL');
   });
 
-  it('Багш — ангийн, хуваарийн, ахлах/туслах багшийн ангиуд (давхардалгүй)', async () => {
-    prisma.classroom.findMany.mockResolvedValue([{ id: 'c1' }]);
-    prisma.classSchedule.findMany.mockResolvedValue([
-      { classroomId: 'c2' },
-      { classroomId: 'c1' },
-    ]);
-    prisma.lessonStaffing.findMany.mockResolvedValue([
-      { schedule: { classroomId: 'c3' } },
-    ]);
+  it('Багш — эзэн 2026-10-22: бүх ангийг харна (засах эрх тусдаа)', async () => {
     const ids = await service.visibleClassIds({ userId: 't', role: Role.TEACHER });
-    expect(ids).toEqual(['c1', 'c2', 'c3']);
-    expect(prisma.classSchedule.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ teacherId: 't' }),
-      }),
-    );
+    expect(ids).toBe('ALL');
   });
 });

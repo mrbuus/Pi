@@ -8,6 +8,7 @@ import {
   ATTENDANCE_ORDER,
   HOMEWORK_MARKS,
   HOMEWORK_ORDER,
+  HwSentIcon,
   RiskMark,
   TONE_SELECTED,
   TONE_TEXT,
@@ -28,16 +29,23 @@ import MakeupChip from "./MakeupChip";
 import { Legend, LegendItem, RiskDot, SentMark } from "./parts";
 import { scoreText, type OnlineCell } from "./StudentCard";
 
-export type FilterKey = "risk" | `att:${AttendanceStatus | "none"}` | `hw:${HomeworkStatus | "none"}` | "online:yes" | "online:no";
+export type FilterKey =
+  | "risk"
+  | `att:${AttendanceStatus | "none"}`
+  | `hw:${HomeworkStatus | "none" | "sent"}`
+  | "online:yes"
+  | "online:no";
 
 interface Ctx {
   rec: DayRec;
   flags: string[];
   online: OnlineCell | null;
+  sent: boolean;
 }
 
-function matches(f: FilterKey, { rec, flags, online }: Ctx): boolean {
+function matches(f: FilterKey, { rec, flags, online, sent }: Ctx): boolean {
   if (f === "risk") return flags.length > 0;
+  if (f === "hw:sent") return sent;
   if (f === "online:yes") return !!online;
   if (f === "online:no") return !online;
   const [kind, v] = f.split(":");
@@ -69,6 +77,8 @@ const HW_CHIPS: ChipDef[] = [
   ...HOMEWORK_ORDER.map((h) => ({ key: `hw:${h}` as FilterKey, label: HOMEWORK_MARKS[h].label, icon: HOMEWORK_MARKS[h].icon, tone: HOMEWORK_MARKS[h].tone })),
   { key: "hw:none", label: "Тэмдэглээгүй", icon: Minus, tone: "neutral" },
 ];
+/** Тухайн хичээлийн даалгаврыг илгээсэн (Assignment/Submission) — самбарын тоймтой ижил нэр */
+const SENT_CHIP: ChipDef = { key: "hw:sent", label: "Илгээсэн", icon: HwSentIcon, tone: "brand" };
 const ONLINE_CHIPS: ChipDef[] = [
   { key: "online:yes", label: "Бодсон", icon: Laptop, tone: "brand" },
   { key: "online:no", label: "Бодоогүй", icon: Minus, tone: "neutral" },
@@ -114,7 +124,12 @@ export default function MonitorView({
   footer?: ReactNode;
 }) {
   const hasOnline = homework && !!onlineData && onlineData.tests.length > 0;
-  const ctxOf = (s: BoardStudent): Ctx => ({ rec: recs.get(s.id)!, flags: flags.get(s.id) ?? NO_FLAGS, online: online[s.id] ?? null });
+  const ctxOf = (s: BoardStudent): Ctx => ({
+    rec: recs.get(s.id)!,
+    flags: flags.get(s.id) ?? NO_FLAGS,
+    online: online[s.id] ?? null,
+    sent: sent.has(s.id),
+  });
   const count = (f: FilterKey) => students.filter((s) => matches(f, ctxOf(s))).length;
   const shown = filter ? students.filter((s) => matches(filter, ctxOf(s))) : students;
   const indexOf = new Map(students.map((s, i) => [s.id, i + 1]));
@@ -233,7 +248,11 @@ export default function MonitorView({
           </p>
         </div>
         <FilterRow label="Ирц">{ATT_CHIPS.map(chip)}</FilterRow>
-        {homework && <FilterRow label="Даалгавар">{HW_CHIPS.map(chip)}</FilterRow>}
+        {homework ? (
+          <FilterRow label="Даалгавар">{[...HW_CHIPS, SENT_CHIP].map(chip)}</FilterRow>
+        ) : (
+          sent.size > 0 && <FilterRow label="Даалгавар">{chip(SENT_CHIP)}</FilterRow>
+        )}
         {hasOnline && <FilterRow label="Онлайн">{ONLINE_CHIPS.map(chip)}</FilterRow>}
       </section>
 

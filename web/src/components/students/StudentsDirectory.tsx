@@ -14,6 +14,8 @@ import { StudentActionsMenu } from "./StudentActions";
 import { Meta, MetaTitle } from "@/components/ui/Meta";
 import { LoadingState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
+import { buildCsv, csvFilename, dateOnlyUB, downloadCsv } from "@/components/registry/csv";
+import { TUITION_PLAN_LABEL } from "@/components/payments/paymentHelpers";
 import {
   StudentListItem,
   SUBJECT_LABEL,
@@ -173,6 +175,51 @@ export default function StudentsDirectory() {
   const inputCls =
     "rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus-visible:border-brand";
 
+  // CSV: дэлгэц дээрх ОДООГИЙН шүүлтүүрт таарсан БҮХ сурагч (хуудаслалтаас үл хамаарна)
+  function exportCsv() {
+    const headers = [
+      "Код",
+      "Овог",
+      "Нэр",
+      "Утас",
+      "Эцэг эхийн утас",
+      "Сургууль",
+      "Түвшин",
+      "Бүлэг",
+      "Салбар",
+      "Анги",
+      "Элссэн огноо",
+      "Төлбөрийн багц",
+      "Төлбөрийн дүн (₮)",
+      "Төлөв",
+      "Архивын шалтгаан",
+    ];
+    const rows = [...filtered]
+      .sort((a, b) => a.firstName.localeCompare(b.firstName, "mn") || a.lastName.localeCompare(b.lastName, "mn"))
+      .map((s) => {
+        const p = s.studentProfile;
+        const room = s.currentClassroom ?? s.lastClassroom;
+        return [
+          s.studentCode,
+          s.lastName,
+          s.firstName,
+          s.phone,
+          p?.fatherPhone ?? p?.motherPhone,
+          p?.school,
+          p?.grade,
+          p?.section,
+          p?.branch,
+          room?.name,
+          dateOnlyUB(p?.joinedOn),
+          p?.tuitionPlan ? (TUITION_PLAN_LABEL[p.tuitionPlan] ?? p.tuitionPlan) : "",
+          p?.tuitionAmount,
+          s.archivedAt ? "Архивласан" : "Идэвхтэй",
+          s.archiveReason,
+        ];
+      });
+    downloadCsv(csvFilename("burtgel"), buildCsv(headers, rows));
+  }
+
   function resetFilters() {
     setSearch("");
     setClassroomFilter("ALL");
@@ -213,23 +260,12 @@ export default function StudentsDirectory() {
           {canSeeMoney && (
             <button
               type="button"
-              onClick={async () => {
-                try {
-                  const csv = await api<string>("/students/export.csv", { responseType: "text" });
-                  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "students.csv";
-                  a.click();
-                  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-                } catch (e) {
-                  setError(errMsg(e));
-                }
-              }}
+              onClick={exportCsv}
+              disabled={filtered.length === 0}
               className="ml-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold text-ink"
             >
               <Download size={15} aria-hidden />
-              CSV татах
+              CSV татах{filtered.length !== (students?.length ?? 0) ? ` (${filtered.length})` : ""}
             </button>
           )}
         </div>

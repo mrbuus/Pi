@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 // ValidationPipe({whitelist:true}) decorator-гүй талбарыг чимээгүй хасдаг тул заавал.
 export class GoogleExchangeDto {
@@ -6,4 +6,9 @@ export class GoogleExchangeDto {
   @IsNotEmpty()
   @MaxLength(200)
   code: string;
+
+  /** «Намайг сана» — нэвтрэх хуудасны сонголт (session-ttl.ts) */
+  @IsOptional()
+  @IsBoolean()
+  remember?: boolean;
 }

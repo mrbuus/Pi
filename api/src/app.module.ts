@@ -68,6 +68,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { RevisionsModule } from './revisions/revisions.module';
 import { PresenceModule } from './presence/presence.module';
 import { ClassDashboardModule } from './class-dashboard/class-dashboard.module';
+import { ClassChecksModule } from './class-checks/class-checks.module';
 import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
 
 @Module({
@@ -183,6 +184,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     PresenceModule,
     // «Анги» самбар (эзэн 2026-10-13)
     ClassDashboardModule,
+    ClassChecksModule,
     // «Дотоод» — нийтлэхээс өмнөх бодлого/тестийн ноорог (эзэн 2026-10-13)
     InternalDraftsModule,
   ],

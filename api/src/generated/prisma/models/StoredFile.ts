@@ -28,10 +28,12 @@ export type AggregateStoredFile = {
 
 export type StoredFileAvgAggregateOutputType = {
   size: number | null
+  pages: number | null
 }
 
 export type StoredFileSumAggregateOutputType = {
   size: number | null
+  pages: number | null
 }
 
 export type StoredFileMinAggregateOutputType = {
@@ -40,6 +42,9 @@ export type StoredFileMinAggregateOutputType = {
   mime: string | null
   size: number | null
   bytes: runtime.Bytes | null
+  storage: string | null
+  pages: number | null
+  expiresAt: Date | null
   createdAt: Date | null
 }
 
@@ -49,6 +54,9 @@ export type StoredFileMaxAggregateOutputType = {
   mime: string | null
   size: number | null
   bytes: runtime.Bytes | null
+  storage: string | null
+  pages: number | null
+  expiresAt: Date | null
   createdAt: Date | null
 }
 
@@ -58,6 +66,9 @@ export type StoredFileCountAggregateOutputType = {
   mime: number
   size: number
   bytes: number
+  storage: number
+  pages: number
+  expiresAt: number
   createdAt: number
   _all: number
 }
@@ -65,10 +76,12 @@ export type StoredFileCountAggregateOutputType = {
 
 export type StoredFileAvgAggregateInputType = {
   size?: true
+  pages?: true
 }
 
 export type StoredFileSumAggregateInputType = {
   size?: true
+  pages?: true
 }
 
 export type StoredFileMinAggregateInputType = {
@@ -77,6 +90,9 @@ export type StoredFileMinAggregateInputType = {
   mime?: true
   size?: true
   bytes?: true
+  storage?: true
+  pages?: true
+  expiresAt?: true
   createdAt?: true
 }
 
@@ -86,6 +102,9 @@ export type StoredFileMaxAggregateInputType = {
   mime?: true
   size?: true
   bytes?: true
+  storage?: true
+  pages?: true
+  expiresAt?: true
   createdAt?: true
 }
 
@@ -95,6 +114,9 @@ export type StoredFileCountAggregateInputType = {
   mime?: true
   size?: true
   bytes?: true
+  storage?: true
+  pages?: true
+  expiresAt?: true
   createdAt?: true
   _all?: true
 }
@@ -190,7 +212,10 @@ export type StoredFileGroupByOutputType = {
   key: string
   mime: string
   size: number
-  bytes: runtime.Bytes
+  bytes: runtime.Bytes | null
+  storage: string
+  pages: number | null
+  expiresAt: Date | null
   createdAt: Date
   _count: StoredFileCountAggregateOutputType | null
   _avg: StoredFileAvgAggregateOutputType | null
@@ -222,7 +247,10 @@ export type StoredFileWhereInput = {
   key?: Prisma.StringFilter<"StoredFile"> | string
   mime?: Prisma.StringFilter<"StoredFile"> | string
   size?: Prisma.IntFilter<"StoredFile"> | number
-  bytes?: Prisma.BytesFilter<"StoredFile"> | runtime.Bytes
+  bytes?: Prisma.BytesNullableFilter<"StoredFile"> | runtime.Bytes | null
+  storage?: Prisma.StringFilter<"StoredFile"> | string
+  pages?: Prisma.IntNullableFilter<"StoredFile"> | number | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"StoredFile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"StoredFile"> | Date | string
 }
 
@@ -231,7 +259,10 @@ export type StoredFileOrderByWithRelationInput = {
   key?: Prisma.SortOrder
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
-  bytes?: Prisma.SortOrder
+  bytes?: Prisma.SortOrderInput | Prisma.SortOrder
+  storage?: Prisma.SortOrder
+  pages?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -243,7 +274,10 @@ export type StoredFileWhereUniqueInput = Prisma.AtLeast<{
   ownerId?: Prisma.StringNullableFilter<"StoredFile"> | string | null
   mime?: Prisma.StringFilter<"StoredFile"> | string
   size?: Prisma.IntFilter<"StoredFile"> | number
-  bytes?: Prisma.BytesFilter<"StoredFile"> | runtime.Bytes
+  bytes?: Prisma.BytesNullableFilter<"StoredFile"> | runtime.Bytes | null
+  storage?: Prisma.StringFilter<"StoredFile"> | string
+  pages?: Prisma.IntNullableFilter<"StoredFile"> | number | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"StoredFile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"StoredFile"> | Date | string
 }, "key">
 
@@ -252,7 +286,10 @@ export type StoredFileOrderByWithAggregationInput = {
   key?: Prisma.SortOrder
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
-  bytes?: Prisma.SortOrder
+  bytes?: Prisma.SortOrderInput | Prisma.SortOrder
+  storage?: Prisma.SortOrder
+  pages?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.StoredFileCountOrderByAggregateInput
   _avg?: Prisma.StoredFileAvgOrderByAggregateInput
@@ -269,7 +306,10 @@ export type StoredFileScalarWhereWithAggregatesInput = {
   key?: Prisma.StringWithAggregatesFilter<"StoredFile"> | string
   mime?: Prisma.StringWithAggregatesFilter<"StoredFile"> | string
   size?: Prisma.IntWithAggregatesFilter<"StoredFile"> | number
-  bytes?: Prisma.BytesWithAggregatesFilter<"StoredFile"> | runtime.Bytes
+  bytes?: Prisma.BytesNullableWithAggregatesFilter<"StoredFile"> | runtime.Bytes | null
+  storage?: Prisma.StringWithAggregatesFilter<"StoredFile"> | string
+  pages?: Prisma.IntNullableWithAggregatesFilter<"StoredFile"> | number | null
+  expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StoredFile"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StoredFile"> | Date | string
 }
 
@@ -278,7 +318,10 @@ export type StoredFileCreateInput = {
   key: string
   mime: string
   size: number
-  bytes: runtime.Bytes
+  bytes?: runtime.Bytes | null
+  storage?: string
+  pages?: number | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -287,7 +330,10 @@ export type StoredFileUncheckedCreateInput = {
   key: string
   mime: string
   size: number
-  bytes: runtime.Bytes
+  bytes?: runtime.Bytes | null
+  storage?: string
+  pages?: number | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -296,7 +342,10 @@ export type StoredFileUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
-  bytes?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  bytes?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  storage?: Prisma.StringFieldUpdateOperationsInput | string
+  pages?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -305,7 +354,10 @@ export type StoredFileUncheckedUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
-  bytes?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  bytes?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  storage?: Prisma.StringFieldUpdateOperationsInput | string
+  pages?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -314,7 +366,10 @@ export type StoredFileCreateManyInput = {
   key: string
   mime: string
   size: number
-  bytes: runtime.Bytes
+  bytes?: runtime.Bytes | null
+  storage?: string
+  pages?: number | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -323,7 +378,10 @@ export type StoredFileUpdateManyMutationInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
-  bytes?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  bytes?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  storage?: Prisma.StringFieldUpdateOperationsInput | string
+  pages?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -332,7 +390,10 @@ export type StoredFileUncheckedUpdateManyInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
-  bytes?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  bytes?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  storage?: Prisma.StringFieldUpdateOperationsInput | string
+  pages?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -342,11 +403,15 @@ export type StoredFileCountOrderByAggregateInput = {
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
   bytes?: Prisma.SortOrder
+  storage?: Prisma.SortOrder
+  pages?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type StoredFileAvgOrderByAggregateInput = {
   size?: Prisma.SortOrder
+  pages?: Prisma.SortOrder
 }
 
 export type StoredFileMaxOrderByAggregateInput = {
@@ -355,6 +420,9 @@ export type StoredFileMaxOrderByAggregateInput = {
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
   bytes?: Prisma.SortOrder
+  storage?: Prisma.SortOrder
+  pages?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -364,15 +432,19 @@ export type StoredFileMinOrderByAggregateInput = {
   mime?: Prisma.SortOrder
   size?: Prisma.SortOrder
   bytes?: Prisma.SortOrder
+  storage?: Prisma.SortOrder
+  pages?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type StoredFileSumOrderByAggregateInput = {
   size?: Prisma.SortOrder
+  pages?: Prisma.SortOrder
 }
 
-export type BytesFieldUpdateOperationsInput = {
-  set?: runtime.Bytes
+export type NullableBytesFieldUpdateOperationsInput = {
+  set?: runtime.Bytes | null
 }
 
 
@@ -383,6 +455,9 @@ export type StoredFileSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   mime?: boolean
   size?: boolean
   bytes?: boolean
+  storage?: boolean
+  pages?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["storedFile"]>
 
@@ -392,6 +467,9 @@ export type StoredFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   mime?: boolean
   size?: boolean
   bytes?: boolean
+  storage?: boolean
+  pages?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["storedFile"]>
 
@@ -401,6 +479,9 @@ export type StoredFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   mime?: boolean
   size?: boolean
   bytes?: boolean
+  storage?: boolean
+  pages?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["storedFile"]>
 
@@ -410,10 +491,13 @@ export type StoredFileSelectScalar = {
   mime?: boolean
   size?: boolean
   bytes?: boolean
+  storage?: boolean
+  pages?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
 }
 
-export type StoredFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"ownerId" | "key" | "mime" | "size" | "bytes" | "createdAt", ExtArgs["result"]["storedFile"]>
+export type StoredFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"ownerId" | "key" | "mime" | "size" | "bytes" | "storage" | "pages" | "expiresAt" | "createdAt", ExtArgs["result"]["storedFile"]>
 
 export type $StoredFilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StoredFile"
@@ -423,7 +507,10 @@ export type $StoredFilePayload<ExtArgs extends runtime.Types.Extensions.Internal
     key: string
     mime: string
     size: number
-    bytes: runtime.Bytes
+    bytes: runtime.Bytes | null
+    storage: string
+    pages: number | null
+    expiresAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["storedFile"]>
   composites: {}
@@ -853,6 +940,9 @@ export interface StoredFileFieldRefs {
   readonly mime: Prisma.FieldRef<"StoredFile", 'String'>
   readonly size: Prisma.FieldRef<"StoredFile", 'Int'>
   readonly bytes: Prisma.FieldRef<"StoredFile", 'Bytes'>
+  readonly storage: Prisma.FieldRef<"StoredFile", 'String'>
+  readonly pages: Prisma.FieldRef<"StoredFile", 'Int'>
+  readonly expiresAt: Prisma.FieldRef<"StoredFile", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"StoredFile", 'DateTime'>
 }
     

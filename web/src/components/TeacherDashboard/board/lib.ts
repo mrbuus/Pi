@@ -77,6 +77,20 @@ export const DEFAULT_CRITERIA: Criteria = {
   missingStreak: 2,
 };
 
+/** Хэн ирц авсан / даалгавар шалгасан (эзэн 2026-10-22): багш тус бүрийн сүүлийн цаг */
+export interface Recorder {
+  id: string;
+  /** «Б. Нэр» */
+  name: string;
+  /** ISO; мэдэгдэхгүй бол null */
+  at: string | null;
+  count: number;
+}
+export interface RecordedBy {
+  attendance: Recorder[];
+  homework: Recorder[];
+}
+
 export interface MarksPayload {
   date: string;
   attendance: AttRow[];
@@ -85,6 +99,7 @@ export interface MarksPayload {
   risk: Record<string, RiskFlag[]>;
   /** «Илгээсэн»: тухайн хичээлийн даалгаврыг илгээсэн сурагчид (Assignment/Submission) */
   sent?: { assignmentIds: string[]; students: string[] };
+  recordedBy?: RecordedBy;
 }
 
 export interface BoardPayload extends MarksPayload {
@@ -129,6 +144,34 @@ export interface DayRec {
 }
 
 export const EMPTY_REC: DayRec = { att: null, lateRange: null, attNote: "", hw: null, hwNote: "", attBy: null, hwBy: null };
+
+/* ───────── Төлөв бүрийн тоо (эзэн 2026-10-22: Ирсэн ба Хоцорсон ТУСДАА) ───────── */
+
+/** = api/src/attendance/board-logic.ts StatusCounts */
+export interface StatusCounts {
+  attendance: Record<AttendanceStatus, number> & { unmarked: number };
+  homework: Record<HomeworkStatus, number> & { unmarked: number };
+}
+
+export function emptyCounts(): StatusCounts {
+  return {
+    attendance: { PRESENT: 0, LATE: 0, ABSENT: 0, EXCUSED: 0, unmarked: 0 },
+    homework: { DONE: 0, PARTIAL: 0, NOT_DONE: 0, unmarked: 0 },
+  };
+}
+
+/** Тухайн өдрийн самбарын тоо: сурагч бүрийн одоогийн (хадгалагдаж буйг оруулаад) төлөв */
+export function dayCounts(ids: string[], recs: Map<string, DayRec>): StatusCounts {
+  const out = emptyCounts();
+  for (const id of ids) {
+    const r = recs.get(id);
+    if (r?.att) out.attendance[r.att]++;
+    else out.attendance.unmarked++;
+    if (r?.hw) out.homework[r.hw]++;
+    else out.homework.unmarked++;
+  }
+  return out;
+}
 
 /* ───────── Шошго ───────── */
 
@@ -242,6 +285,31 @@ export function whenLabel(iso: string | null, today: string, never = "Нэвтэ
   if (key === addDays(today, -1)) return `Өчигдөр ${time}`;
   return `${shortDay(key)}, ${time}`;
 }
+/** Тэмдэглэлийн блокийн цаг: «Өнөөдөр 14:32», «10-р сарын 12, 09:40», өөр он бол «2025 оны 3-р сарын 2, 09:40» */
+export function stampLabel(iso: string, today: string): string {
+  const { key, time } = ubParts(iso);
+  if (key.slice(0, 4) !== today.slice(0, 4)) return `${fullDate(key)}, ${time}`;
+  return whenLabel(iso, today);
+}
+
+/** Самбарын өдрийн «хэн тэмдэглэсэн» цаг: тэр өдөр бол «15:32», бусад үед «10-р сарын 23, 09:10» */
+export function recordedAtLabel(iso: string, date: string): string {
+  const { key, time } = ubParts(iso);
+  return key === date ? time : `${shortDay(key)}, ${time}`;
+}
+
+/** «2026-10» → «2026 оны 10-р сар» */
+export function monthKeyLabel(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  return monthLabel(y, m - 1);
+}
+/** «2026-10» ± n сар */
+export function addMonths(month: string, n: number): string {
+  const [y, m] = month.split("-").map(Number);
+  const d = new Date(y, m - 1 + n, 1);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+}
+
 /** «8797 4469» */
 export function fmtPhone(p: string): string {
   const d = p.replace(/\D/g, "");

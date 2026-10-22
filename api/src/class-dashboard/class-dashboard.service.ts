@@ -117,7 +117,8 @@ export class ClassDashboardService {
    * Багш+/Админ — бүх анги ('ALL').
    */
   async visibleClassIds(actor: Actor): Promise<string[] | 'ALL'> {
-    if (this.managesAll(actor.role)) return 'ALL';
+    // Эзэн 2026-10-22: Багш ч бүх ангийг харна (засах эрх managesAll хэвээр)
+    if (this.managesAll(actor.role) || actor.role === Role.TEACHER) return 'ALL';
     const today = daysAgo(0);
     const [own, schedules, staffing] = await Promise.all([
       this.prisma.classroom.findMany({
@@ -259,7 +260,10 @@ export class ClassDashboardService {
         name: true,
         type: true,
         grade: true,
-        teacher: { select: { id: true, firstName: true, lastName: true } },
+        // avatarUrl = багшийн ӨӨРИЙН профайл зураг (нүүрний/маркетингийн зураг биш)
+        teacher: {
+          select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+        },
         assistantTeacher: {
           select: { id: true, firstName: true, lastName: true },
         },
@@ -420,6 +424,8 @@ export class ClassDashboardService {
         type: c.type,
         grade: c.grade,
         classTeacher: c.teacher ? { id: c.teacher.id, name: lead! } : null,
+        /** Ангийн багшийн профайл зураг (файлын түлхүүр) — картын баруун дээд буланд */
+        teacherAvatarUrl: c.teacher?.avatarUrl ?? null,
         assistantTeacher: c.assistantTeacher
           ? { id: c.assistantTeacher.id, name: assistant! }
           : null,
@@ -679,6 +685,10 @@ export class ClassDashboardService {
     const money = await this.canSeeMoney(userId);
     const roster = await rosterOf(this.prisma, [classroomId]);
     const ids = roster.map((s) => s.id);
+    // «Чек» товчны тоо (api/src/class-checks) — нээлттэй чекүүд
+    const openChecks = await this.prisma.classCheck.count({
+      where: { classroomId, archivedAt: null },
+    });
     const now = new Date();
     const historyFrom = daysAgo(HISTORY_DAYS);
     const today = daysAgo(0);
@@ -1022,6 +1032,7 @@ export class ClassDashboardService {
       windowDays: RECENT_DAYS,
       practiceDays: PRACTICE_DAYS,
       makeupDays: MAKEUP_DAYS,
+      openChecks,
       classroom: {
         id: classroom.id,
         name: classroom.name,

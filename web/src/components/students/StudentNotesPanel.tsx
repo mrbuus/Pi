@@ -66,7 +66,8 @@ function StudentNotesPanelContent({
         method: "POST",
         body: { type: tab, body },
       });
-      setNotes((prev) => [{ ...note, authorName: "Та", canEdit: true }, ...(prev ?? [])]);
+      // Сервер зохиогчийг «Б. Нэр»-ээр буцаана (самбарын drawer-тэй ижил)
+      setNotes((prev) => [{ ...note, authorName: note.authorName ?? "Та", canEdit: true }, ...(prev ?? [])]);
       setDraft("");
     } catch (e) {
       setMsg({ kind: "error", text: errMsg(e) });

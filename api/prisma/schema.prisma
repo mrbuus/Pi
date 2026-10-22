@@ -2299,8 +2299,13 @@ model StoredFile {
   key       String   @id // uploads-ийн key (uuid.ext)
   mime      String
   size      Int
-  bytes     Bytes
+  bytes     Bytes? // зөвхөн storage="db" үед; S3-ийн файлд null
+  storage   String   @default("db") // db | s3 — байт хаана байгаа
+  pages     Int? // PDF-ийн хуудасны тоо (байршуулахад тоолно, зураг = null)
+  expiresAt DateTime? // хадгалах хугацаа дуусах (гэрийн даалгавар 7 хоног), null = байнга
   createdAt DateTime @default(now())
+
+  @@index([expiresAt])
 }
 
 // T10: six success stages; unseen is represented by no row.
@@ -2829,4 +2834,49 @@ model LessonMakeup {
 
   @@unique([studentId, classroomId, date])
   @@index([classroomId, date])
+}
+
+/// «Чек» — ангийн нэртэй шалгах жагсаалт (эзэн 2026-10-22): «Номны мөнгө 25,000₮»
+/// гэх мэт. Багш бүр (ADMIN/TEACHER_PLUS/TEACHER) нээж, сурагч бүрийг +/− тэмдэглэнэ.
+/// Хаах нь зөөлөн (archivedAt) — түүх үлдэнэ. api/src/class-checks.
+/// classroomId → Classroom FK (ON DELETE CASCADE) нь ЗӨВХӨН SQL-д (миграци
+/// 20261022002000_class_checks): Classroom model-д буцах талбар нэмэхгүйн тулд
+/// Prisma relation-гүй. Хэрэглэгчийн id-ууд FK-гүй (StudentBehaviorFlag-ийн адил).
+model ClassCheck {
+  id           String           @id @default(cuid())
+  classroomId  String
+  title        String           @db.VarChar(80)
+  /// Нэг сурагчийн мөнгөн дүн (₮), заавал биш
+  amount       Int?
+  createdById  String
+  createdAt    DateTime         @default(now())
+  archivedAt   DateTime?
+  archivedById String?
+  marks        ClassCheckMark[]
+
+  @@index([classroomId, archivedAt])
+}
+
+/// Сурагч тус бүрийн тэмдэглэгээ — (checkId, studentId) давхардахгүй тул хоёр багш
+/// зэрэг дарсан ч upsert нэг мөрөнд бичнэ. studentId → User FK нь SQL-д (CASCADE).
+model ClassCheckMark {
+  id          String     @id @default(cuid())
+  checkId     String
+  check       ClassCheck @relation(fields: [checkId], references: [id], onDelete: Cascade)
+  studentId   String
+  checked     Boolean    @default(false)
+  updatedById String
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([checkId, studentId])
+  @@index([studentId])
+}
+
+/// Нэвтрэх хуудасны тайлбар/зарлал (эзэн 2026-10-22, Агент D). Ганц мөр id="default";
+/// зөвхөн ADMIN засна (PUT /auth/login-text), нийтэд уншигдана (GET). Энгийн текст.
+model LoginText {
+  id          String   @id @default("default")
+  body        String   @default("")
+  updatedById String?
+  updatedAt   DateTime @updatedAt
 }

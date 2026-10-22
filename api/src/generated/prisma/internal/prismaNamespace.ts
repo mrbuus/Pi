@@ -509,7 +509,10 @@ export const ModelName = {
   MockExamRegistration: 'MockExamRegistration',
   ClassTestStatus: 'ClassTestStatus',
   LessonPhoto: 'LessonPhoto',
-  LessonMakeup: 'LessonMakeup'
+  LessonMakeup: 'LessonMakeup',
+  ClassCheck: 'ClassCheck',
+  ClassCheckMark: 'ClassCheckMark',
+  LoginText: 'LoginText'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -525,7 +528,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "lessonPhoto" | "lessonMakeup"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -8891,6 +8894,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ClassCheck: {
+      payload: Prisma.$ClassCheckPayload<ExtArgs>
+      fields: Prisma.ClassCheckFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClassCheckFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClassCheckFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>
+        }
+        findFirst: {
+          args: Prisma.ClassCheckFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClassCheckFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>
+        }
+        findMany: {
+          args: Prisma.ClassCheckFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>[]
+        }
+        create: {
+          args: Prisma.ClassCheckCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>
+        }
+        createMany: {
+          args: Prisma.ClassCheckCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClassCheckCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>[]
+        }
+        delete: {
+          args: Prisma.ClassCheckDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>
+        }
+        update: {
+          args: Prisma.ClassCheckUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClassCheckDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClassCheckUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClassCheckUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClassCheckUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckPayload>
+        }
+        aggregate: {
+          args: Prisma.ClassCheckAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClassCheck>
+        }
+        groupBy: {
+          args: Prisma.ClassCheckGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassCheckGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClassCheckCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassCheckCountAggregateOutputType> | number
+        }
+      }
+    }
+    ClassCheckMark: {
+      payload: Prisma.$ClassCheckMarkPayload<ExtArgs>
+      fields: Prisma.ClassCheckMarkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClassCheckMarkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClassCheckMarkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>
+        }
+        findFirst: {
+          args: Prisma.ClassCheckMarkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClassCheckMarkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>
+        }
+        findMany: {
+          args: Prisma.ClassCheckMarkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>[]
+        }
+        create: {
+          args: Prisma.ClassCheckMarkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>
+        }
+        createMany: {
+          args: Prisma.ClassCheckMarkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClassCheckMarkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>[]
+        }
+        delete: {
+          args: Prisma.ClassCheckMarkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>
+        }
+        update: {
+          args: Prisma.ClassCheckMarkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClassCheckMarkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClassCheckMarkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClassCheckMarkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClassCheckMarkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCheckMarkPayload>
+        }
+        aggregate: {
+          args: Prisma.ClassCheckMarkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClassCheckMark>
+        }
+        groupBy: {
+          args: Prisma.ClassCheckMarkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassCheckMarkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClassCheckMarkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassCheckMarkCountAggregateOutputType> | number
+        }
+      }
+    }
+    LoginText: {
+      payload: Prisma.$LoginTextPayload<ExtArgs>
+      fields: Prisma.LoginTextFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LoginTextFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LoginTextFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>
+        }
+        findFirst: {
+          args: Prisma.LoginTextFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LoginTextFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>
+        }
+        findMany: {
+          args: Prisma.LoginTextFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>[]
+        }
+        create: {
+          args: Prisma.LoginTextCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>
+        }
+        createMany: {
+          args: Prisma.LoginTextCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LoginTextCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>[]
+        }
+        delete: {
+          args: Prisma.LoginTextDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>
+        }
+        update: {
+          args: Prisma.LoginTextUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>
+        }
+        deleteMany: {
+          args: Prisma.LoginTextDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LoginTextUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LoginTextUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>[]
+        }
+        upsert: {
+          args: Prisma.LoginTextUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTextPayload>
+        }
+        aggregate: {
+          args: Prisma.LoginTextAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLoginText>
+        }
+        groupBy: {
+          args: Prisma.LoginTextGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginTextGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LoginTextCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginTextCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -10208,6 +10433,9 @@ export const StoredFileScalarFieldEnum = {
   mime: 'mime',
   size: 'size',
   bytes: 'bytes',
+  storage: 'storage',
+  pages: 'pages',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 } as const
 
@@ -10651,6 +10879,42 @@ export const LessonMakeupScalarFieldEnum = {
 } as const
 
 export type LessonMakeupScalarFieldEnum = (typeof LessonMakeupScalarFieldEnum)[keyof typeof LessonMakeupScalarFieldEnum]
+
+
+export const ClassCheckScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  title: 'title',
+  amount: 'amount',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  archivedAt: 'archivedAt',
+  archivedById: 'archivedById'
+} as const
+
+export type ClassCheckScalarFieldEnum = (typeof ClassCheckScalarFieldEnum)[keyof typeof ClassCheckScalarFieldEnum]
+
+
+export const ClassCheckMarkScalarFieldEnum = {
+  id: 'id',
+  checkId: 'checkId',
+  studentId: 'studentId',
+  checked: 'checked',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClassCheckMarkScalarFieldEnum = (typeof ClassCheckMarkScalarFieldEnum)[keyof typeof ClassCheckMarkScalarFieldEnum]
+
+
+export const LoginTextScalarFieldEnum = {
+  id: 'id',
+  body: 'body',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LoginTextScalarFieldEnum = (typeof LoginTextScalarFieldEnum)[keyof typeof LoginTextScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -11775,6 +12039,9 @@ export type GlobalOmitConfig = {
   classTestStatus?: Prisma.ClassTestStatusOmit
   lessonPhoto?: Prisma.LessonPhotoOmit
   lessonMakeup?: Prisma.LessonMakeupOmit
+  classCheck?: Prisma.ClassCheckOmit
+  classCheckMark?: Prisma.ClassCheckMarkOmit
+  loginText?: Prisma.LoginTextOmit
 }
 
 /* Types for Logging */

@@ -15,7 +15,7 @@ import {
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { PaymentStatus, Role } from '../generated/prisma/enums';
+import { Role } from '../generated/prisma/enums';
 import {
   ConfirmPaymentDto,
   CreatePaymentDto,
@@ -24,6 +24,7 @@ import {
   ReversePaymentDto,
   UpdatePaymentDto,
 } from './dto/payment.dto';
+import { PaymentFilterQueryDto } from './dto/payment-filter.dto';
 import { PaymentsService } from './payments.service';
 
 interface AuthedRequest {
@@ -66,8 +67,8 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('payments')
-  list(@Query('status') status?: PaymentStatus) {
-    return this.payments.list(status);
+  list(@Query() filters: PaymentFilterQueryDto) {
+    return this.payments.list(filters);
   }
 
   // Багш+ бүртгэл/төлбөр/өдөртэй холбоотой ЮМЫГ ч засаж чадах ёстой (эзэмшигчийн

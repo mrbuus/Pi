@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { ClipboardList } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ClipboardList, Download } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { csvFilename, downloadCsv } from "@/components/registry/csv";
 import { Meta } from "@/components/ui/Meta";
 import { Button } from "@/components/ui/kit/button";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
@@ -21,20 +22,104 @@ export default function RecentPanel() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Payment | null>(null);
   const [reversing, setReversing] = useState<Payment | null>(null);
+  // Шүүлтүүр: дэлгэц ба CSV хоёр ижил (GET /payments, GET /payments/export/csv)
+  const [status, setStatus] = useState("");
+  const [month, setMonth] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [exporting, setExporting] = useState(false);
+
+  const rangeInvalid = !!from && !!to && from > to;
+  const qs = useMemo(() => {
+    const q = new URLSearchParams();
+    if (status) q.set("status", status);
+    if (month) q.set("month", month);
+    if (from) q.set("from", from);
+    if (to) q.set("to", to);
+    const text = q.toString();
+    return text ? `?${text}` : "";
+  }, [status, month, from, to]);
+  const filtered = qs !== "";
 
   const load = useCallback(() => {
-    api<Payment[]>("/payments")
+    if (rangeInvalid) return;
+    api<Payment[]>(`/payments${qs}`)
       .then((d) => {
         setRows(d);
         setError(null);
       })
       .catch((e) => setError(errMsg(e)));
-  }, []);
+  }, [qs, rangeInvalid]);
   useEffect(load, [load]);
+
+  async function exportCsv() {
+    if (exporting || rangeInvalid) return;
+    setExporting(true);
+    try {
+      const csv = await api<string>(`/payments/export/csv${qs}`, { responseType: "text" });
+      downloadCsv(csvFilename("tolbor"), csv);
+      toast.success("CSV татагдлаа");
+    } catch (e) {
+      toast.error(errMsg(e));
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  const control =
+    "min-h-11 w-full rounded-xl border border-line bg-bg px-3 text-sm text-ink outline-none focus:border-brand";
 
   return (
     <section className="space-y-3">
-      <div className="flex justify-end">
+      <div className="chunky grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4" role="group" aria-label="Төлбөрийн шүүлтүүр">
+        <label className="block text-xs font-semibold text-ink-dim">
+          Төлөв
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className={`${control} mt-1`}>
+            <option value="">Бүх төлөв</option>
+            {Object.entries(STATUS_LABEL).map(([key, st]) => (
+              <option key={key} value={key}>
+                {st.text}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-xs font-semibold text-ink-dim">
+          Аль сарын төлбөр
+          <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className={`${control} mt-1`} />
+        </label>
+        <label className="block text-xs font-semibold text-ink-dim">
+          Төлсөн огноо, эхлэх
+          <input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} className={`${control} mt-1`} />
+        </label>
+        <label className="block text-xs font-semibold text-ink-dim">
+          Төлсөн огноо, дуусах
+          <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className={`${control} mt-1`} />
+        </label>
+        {rangeInvalid && (
+          <p role="alert" className="text-sm text-error sm:col-span-2 lg:col-span-4">
+            Эхлэх огноо дуусах огнооноос өмнө байна
+          </p>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {filtered && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="min-h-11"
+            onClick={() => {
+              setStatus("");
+              setMonth("");
+              setFrom("");
+              setTo("");
+            }}
+          >
+            Шүүлтүүр цэвэрлэх
+          </Button>
+        )}
+        <Button variant="outline" className="min-h-11" onClick={() => void exportCsv()} disabled={exporting || rangeInvalid}>
+          <Download aria-hidden /> {exporting ? "Татаж байна" : "CSV татах"}
+        </Button>
         <Link
           href="/app/tuition/refunds"
           className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm font-semibold text-ink hover:border-brand"
@@ -47,7 +132,10 @@ export default function RecentPanel() {
       ) : !rows ? (
         <LoadingState rows={5} label="Төлбөрийн түүх" />
       ) : !rows.length ? (
-        <EmptyState title="Төлбөрийн түүх алга" />
+        <EmptyState
+          title="Төлбөрийн түүх алга"
+          hint={filtered ? "Шүүлтүүрээ өөрчилж үзнэ үү" : undefined}
+        />
       ) : (
         <ul className="chunky divide-y divide-line p-1.5">
           {rows.slice(0, 50).map((p) => {

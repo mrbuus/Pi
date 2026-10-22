@@ -10,12 +10,14 @@ import * as nodemailer from 'nodemailer';
  * Нууц үг сэргээх, мэдэгдэл ЛОГИК өөрчлөгдөх ёсгүй. Тиймээс энд ганц il
  * интерфэйс үлдээж, серверийг ОРЧНЫ ХУВЬСАГЧААР сольдог болгов.
  *
- * Тохиргоо (Render → Environment):
- *   EMAIL_SMTP_HOST    — SMTP хост (жишээ: smtp.gmail.com)
- *   EMAIL_SMTP_PORT    — SMTP портын дугаар (465 эсвэл 587)
- *   EMAIL_SMTP_USER    — SMTP өгөлтийн нэр
- *   EMAIL_SMTP_PASS    — SMTP пасс (gmail-д App Password ашигла)
- *   EMAIL_FROM         — Илгээгчийн хаяг + нэр ("Шинэ ирээдүйн эзэд <noreply@...>")
+ * Тохиргоо (серверийн орчны хувьсагч; Gmail — docs/GOOGLE-LOGIN.md §Б):
+ *   EMAIL_SMTP_HOST    — SMTP хост (Gmail: smtp.gmail.com)
+ *   EMAIL_SMTP_PORT    — 465 (SSL, Gmail-д санал болгох) эсвэл 587 (STARTTLS)
+ *   EMAIL_SMTP_USER    — нэвтрэх хаяг (Gmail: shineireedui.pi@gmail.com)
+ *   EMAIL_SMTP_PASS    — Gmail App Password (16 тэмдэгт, зайгүй) — энгийн нууц үг БИШ
+ *   EMAIL_FROM         — "Шинэ Ирээдүйн Эзэд <shineireedui.pi@gmail.com>"
+ *                        (Gmail өөр хаягаас илгээхийг зөвшөөрдөггүй — USER-тэй ижил)
+ * Аль нэг нь дутуу бол isConfigured()=false, sendEmail() чимээгүй алгасна.
  *
  * SPAM PREVENTION:
  * - Plain text болон энгийн HTML байдаар явуул (маркетингийн үг үгүй)
@@ -75,7 +77,8 @@ export class EmailService {
         secure: port === 465, // SSL-д 465, TLS-д 587
         auth: { user, pass },
       });
-      this.logger.debug(`SMTP транспорт дүнгэлсэн (порт ${port})`);
+      // Хост, порт нууц биш — нууц үг, хэрэглэгчийн нэрийг ХЭЗЭЭ Ч логлохгүй.
+      this.logger.log(`Имэйл үйлчилгээ идэвхтэй (${host}:${port})`);
     } catch (err) {
       this.logger.error('SMTP транспорт үүсгэж чадсангүй');
     }
@@ -111,17 +114,21 @@ export class EmailService {
     }
 
     const { to, subject, text, html } = params;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     try {
-      // Timeout үүсгэх — SMTP сервер хариугүй бол сүйтэнэ
+      // Timeout үүсгэх — SMTP сервер хариугүй бол сүйтэнэ. Илгээлт дуусмагц
+      // finally-д цэвэрлэнэ: эс бөгөөс 10 секундийн таймер процессыг (jest,
+      // graceful shutdown) барьж үлддэг байв.
       const timeoutPromise = new Promise<void>((_, reject) => {
-        setTimeout(
+        timer = setTimeout(
           () =>
             reject(
               new Error(`SMTP сервер ${SEND_TIMEOUT_MS}мс дотор хариу өгөөгүй`),
             ),
           SEND_TIMEOUT_MS,
         );
+        timer.unref?.();
       });
 
       // Имэйлийн мета (From - анахлын нэр ба хаяг хавсаргасан)
@@ -148,6 +155,8 @@ export class EmailService {
           : 'SMTP_ERROR';
       this.logger.error(`Имэйл илгээлт амжилтгүй (${errorCode})`);
       throw err;
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   }
 }

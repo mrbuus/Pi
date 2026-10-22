@@ -75,4 +75,46 @@ JWT_SECRET, RESET_TOKEN_SECRET, CRON_SECRET, GOOGLE_CLIENT_*, DB_POOL_*  ← Ren
 
 **Шилжих дараалал:** RDS → Supabase-ээс `pg_dump` / `pg_restore` → EC2 дээр API асааж `api.pimath.mn`-ээр шалгах → вэбийн `NEXT_PUBLIC_API_URL` солих → Google OAuth консолд шинэ redirect URI нэмэх → Render-ийг унтраах.
 
+### Явц (2026-10-19)
+
+- [x] `pimath-api-sg` — 80/443 бүгд, 22 зөвхөн эзний IP
+- [x] `pimath-db-sg` — 5432 зөвхөн `pimath-api-sg`-ээс
+- [x] RDS `pimath-db` (endpoint `pimath-db.cbe88akqib5a.ap-east-1.rds.amazonaws.com`) — PostgreSQL 18.3, db.t4g.micro, gp3 20 GB (autoscale), public **үгүй**, `ap-east-1a`, хэрэглэгч/сан `pimath`, backup 1 хоног (Free plan хязгаар; Paid-д 7 болгоно), deletion protection
+- [x] EC2 `pimath-api` (i-055bbc10ab714d5c1) — Ubuntu 24.04 arm64, t4g.small, 20 GB gp3 encrypted, `ap-east-1a`, key `~/.ssh/pimath-key.pem`
+- [x] Elastic IP `18.167.227.21` → `pimath-api`
+- [x] Локал v2 өгөгдөл RDS-д (2026-10-19 02:02 dump: User 731, Problem 12816, migration 76). Нээлтийн дараа бүтэн restore ХОРИОТОЙ — SSH tunnel (15432) + скрипт эсвэл psql-ээр л засна
+- [x] API EC2 дээр ажиллаж байна: ~/pimath (branch pi-mn-v2-test, deploy key github_deploy), api/.env (JWT шинээр), pm2 pimath-api + startup, nginx + HTTPS https://api.pimath.mn (certbot, 2027-01-16 хүртэл авто шинэчлэл), DNS Datacom дээр api A 18.167.227.21. Шинэчлэх: ssh pimath "cd ~/pimath && git pull && cd api && npm ci && npm run build && pm2 restart pimath-api"
+- [~] DNS: Cloudflare (shineireedui.pi@gmail.com, Free). `api` A 18.167.227.21 DNS-only нэмэгдсэн. Datacom дээр NS → dalary.ns.cloudflare.com, porter.ns.cloudflare.com (ns1-4.dns.mn-ийг устгана). Хуучин: A → 18.167.227.21; серверт Node 22 + pm2 + nginx + certbot
+- [ ] Албан нээлтийн өмнө: Paid plan → RDS Modify → Multi-AZ
+
+Mac-аас RDS 18 руу `pg_dump`/`psql` ажиллуулахад `brew install postgresql@18` хэрэгтэй.
+
 **Зардал (ойролцоо):** EC2 + RDS жижиг класс ≈ $40–50/сар → $120 кредит ≈ 2–3 сар. Free plan зарим том классыг хаадаг тул зөвхөн жижиг класс сонгоно.
+
+## S3 — зураг, PDF (код бэлэн 2026-10-22, AWS тохиргоо хүлээгдэж байна)
+
+Код: `api/src/storage/file-store.ts`. `S3_BUCKET` тохируулаагүй бол хуучнаараа өгөгдлийн санд хадгална — тохируулмагц шинэ файл S3 руу.
+
+**Урсгал (сервер файлын байт дамжуулахгүй):** утсан дээр зураг → PDF (`web/src/lib/photosToPdf.ts`, 10 хуудас ≈ 3 МБ) → `POST /uploads/presign` → хөтөч S3 руу шууд PUT → `POST /uploads/complete` (хэмжээ, magic bytes, PDF хуудас шалгана) → үзэхдээ `GET /files/:key` эрх шалгаад S3-ийн 5 минутын холбоос руу 302.
+
+**Хадгалах хугацаа:** гэрийн даалгавар 7 хоног (`expiresAt`, өдөр бүр 03:30-д устгана), онолын зураг ба бусад байнга.
+
+### AWS дээр хийх (Console, Hong Kong)
+
+1. **S3 → Create bucket** `pimath-media`, Block all public access ✓, Versioning off, encryption SSE-S3
+2. Bucket → **Permissions → CORS**:
+   ```json
+   [{"AllowedOrigins":["https://pimath.mn","https://www.pimath.mn","http://localhost:3381"],
+     "AllowedMethods":["PUT","GET"],"AllowedHeaders":["content-type"],"MaxAgeSeconds":3600}]
+   ```
+3. Bucket → **Management → Lifecycle rule** `incoming-1day`: prefix `incoming/`, Expire current versions after 1 day (хаягдсан upload)
+4. **IAM → Roles → Create** `pimath-ec2-role` (EC2), inline policy:
+   ```json
+   {"Version":"2012-10-17","Statement":[{"Effect":"Allow",
+     "Action":["s3:GetObject","s3:PutObject","s3:DeleteObject"],
+     "Resource":"arn:aws:s3:::pimath-media/*"}]}
+   ```
+5. **EC2 → pimath-api → Actions → Security → Modify IAM role** → `pimath-ec2-role`
+6. Серверт: `api/.env`-д `S3_BUCKET=pimath-media` нэмээд `npx prisma migrate deploy && npm run build && pm2 restart pimath-api`
+
+Хуучин файлууд (`storage = 'db'`) хэвээр ажиллана; дараа нь S3 руу зөөх скрипт бичнэ.

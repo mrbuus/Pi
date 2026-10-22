@@ -53,8 +53,9 @@ const DEFAULT_CONFIG: TeacherRosterConfig = { mode: "ALTERNATING", validFrom: nu
  *  2. Нүд товшиход тухайн багшийн тэр ээлжийн БҮХ гарагийг PUT-оор солино.
  *  3. ОНЦГОЙ өдөр (TeacherWorkException) — ганц огноонд хүснэгтийг дарна.
  * Багш+ өдөр бүр хуваарь зохиодог тул schedule.manage-гүйгээр засна (эзэн 2026-10-11).
+ * readOnly (энгийн Багш, эзэн 2026-10-22): ижил хүснэгтийг харна, засах товч/маягт гарахгүй.
  */
-export default function TeacherWorkDays() {
+export default function TeacherWorkDays({ readOnly = false }: { readOnly?: boolean }) {
   const today = todayUBKey();
   const [weekStart, setWeekStart] = useState(() => mondayOf(today));
   const [actionError, setActionError] = useState<string | null>(null);
@@ -132,6 +133,7 @@ export default function TeacherWorkDays() {
   const uncheckedCount = teachers.filter((t) => unchecked.has(`${t.id}|${parity}`)).length;
 
   async function toggle(teacherId: string, weekday: number) {
+    if (readOnly) return;
     const key = `${teacherId}|${parity}`;
     const current = cells.get(key) ?? new Set<number>();
     const next = new Set(current);
@@ -170,6 +172,7 @@ export default function TeacherWorkDays() {
   }
 
   async function addException() {
+    if (readOnly) return;
     if (!exTeacherId) {
       setExError("Багш сонгоно уу");
       return;
@@ -206,8 +209,9 @@ export default function TeacherWorkDays() {
           <UserCheck className="h-5 w-5 text-brand-soft" aria-hidden />
           <h2 className="font-bold text-brand-soft">Багшийн ажлын өдөр</h2>
           <InfoHint label="Ажлын өдрийн тухай">
-            Нүд дээр товшиж багшийн ажлын өдрийг тогтооно. «Сондгой / Тэгш» горимд 1-р (сондгой) долоо хоног
-            2026-08-31-нд эхэлж, ээлжилнэ. Зөвхөн нэг өдрийн өөрчлөлтийг доорх «Онцгой өдөр» хэсгээр бүртгэнэ.
+            {readOnly
+              ? "Багш бүрийн ажиллах гарагууд. «Сондгой / Тэгш» горимд 1-р (сондгой) долоо хоног 2026-08-31-нд эхэлж, ээлжилнэ. Нэг өдрийн өөрчлөлт доорх «Онцгой өдөр» хэсэгт харагдана."
+              : "Нүд дээр товшиж багшийн ажлын өдрийг тогтооно. «Сондгой / Тэгш» горимд 1-р (сондгой) долоо хоног 2026-08-31-нд эхэлж, ээлжилнэ. Зөвхөн нэг өдрийн өөрчлөлтийг доорх «Онцгой өдөр» хэсгээр бүртгэнэ."}
           </InfoHint>
         </div>
         <span className="rounded-full bg-ink/5 px-2.5 py-1 text-xs font-semibold text-ink">
@@ -225,12 +229,14 @@ export default function TeacherWorkDays() {
 
       {!loading && (
         <div className="space-y-3">
-          <RosterSettings
-            key={`${config.mode}|${config.validFrom}|${config.validTo}`}
-            config={config}
-            onSaved={(c) => query.setData((prev) => ({ ...prev, config: c }))}
-          />
-          {outOfRange && (
+          {!readOnly && (
+            <RosterSettings
+              key={`${config.mode}|${config.validFrom}|${config.validTo}`}
+              config={config}
+              onSaved={(c) => query.setData((prev) => ({ ...prev, config: c }))}
+            />
+          )}
+          {outOfRange && !readOnly && (
             <p className="flex items-center gap-1.5 rounded-lg bg-warning/15 px-3 py-2 text-sm font-semibold text-warning">
               <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
               Хүснэгтийн хүчинтэй хугацаа өнөөдрийг хамрахгүй байна — хугацааг шинэчилнэ үү.
@@ -259,7 +265,7 @@ export default function TeacherWorkDays() {
             </div>
           )}
 
-          {uncheckedCount > 0 && (
+          {uncheckedCount > 0 && !readOnly && (
             <p className="flex items-start gap-1.5 rounded-lg bg-warning/15 px-3 py-2 text-sm text-warning">
               <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               <span>
@@ -275,6 +281,7 @@ export default function TeacherWorkDays() {
               isOn={isOn}
               isPending={(id) => pending === id}
               onToggle={toggle}
+              readOnly={readOnly}
               caption={`Багшийн ажлын өдөр — ${PARITY_LABEL[parity]}`}
             />
           ) : (
@@ -317,84 +324,86 @@ export default function TeacherWorkDays() {
             </button>
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="twd-teacher" className="text-xs text-ink-dim">
-              Багш
-            </label>
-            <select
-              id="twd-teacher"
-              value={exTeacherId}
-              onChange={(e) => setExTeacherId(e.target.value)}
-              className={inputCls}
-            >
-              <option value="">— сонгох —</option>
-              {teachers.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="twd-date" className="text-xs text-ink-dim">
-              Огноо
-            </label>
-            <input
-              id="twd-date"
-              type="date"
-              value={exDate}
-              onChange={(e) => setExDate(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-ink-dim">Тухайн өдөр</span>
-            <div className="flex gap-1.5">
-              <button
-                type="button"
-                aria-pressed={exWorking}
-                onClick={() => setExWorking(true)}
-                className={`flex-1 rounded-lg border px-2 py-2 text-xs font-semibold transition ${
-                  exWorking
-                    ? "border-success/40 bg-success/15 text-success"
-                    : "border-line text-ink-dim hover:border-brand"
-                }`}
+        {!readOnly && (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="twd-teacher" className="text-xs text-ink-dim">
+                Багш
+              </label>
+              <select
+                id="twd-teacher"
+                value={exTeacherId}
+                onChange={(e) => setExTeacherId(e.target.value)}
+                className={inputCls}
               >
-                Ажиллана
-              </button>
-              <button
-                type="button"
-                aria-pressed={!exWorking}
-                onClick={() => setExWorking(false)}
-                className={`flex-1 rounded-lg border px-2 py-2 text-xs font-semibold transition ${
-                  !exWorking
-                    ? "border-warning/40 bg-warning/15 text-warning"
-                    : "border-line text-ink-dim hover:border-brand"
-                }`}
-              >
-                Ажиллахгүй
+                <option value="">— сонгох —</option>
+                {teachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="twd-date" className="text-xs text-ink-dim">
+                Огноо
+              </label>
+              <input
+                id="twd-date"
+                type="date"
+                value={exDate}
+                onChange={(e) => setExDate(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-ink-dim">Тухайн өдөр</span>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  aria-pressed={exWorking}
+                  onClick={() => setExWorking(true)}
+                  className={`flex-1 rounded-lg border px-2 py-2 text-xs font-semibold transition ${
+                    exWorking
+                      ? "border-success/40 bg-success/15 text-success"
+                      : "border-line text-ink-dim hover:border-brand"
+                  }`}
+                >
+                  Ажиллана
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={!exWorking}
+                  onClick={() => setExWorking(false)}
+                  className={`flex-1 rounded-lg border px-2 py-2 text-xs font-semibold transition ${
+                    !exWorking
+                      ? "border-warning/40 bg-warning/15 text-warning"
+                      : "border-line text-ink-dim hover:border-brand"
+                  }`}
+                >
+                  Ажиллахгүй
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="twd-note" className="text-xs text-ink-dim">
+                Тэмдэглэл
+              </label>
+              <input
+                id="twd-note"
+                value={exNote}
+                onChange={(e) => setExNote(e.target.value)}
+                placeholder="Чөлөө"
+                className={inputCls}
+              />
+            </div>
+            <div className="flex items-end">
+              <button onClick={addException} disabled={exSaving} className={outlineBtn}>
+                {exSaving ? "Хадгалж байна…" : "Бүртгэх"}
               </button>
             </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="twd-note" className="text-xs text-ink-dim">
-              Тэмдэглэл
-            </label>
-            <input
-              id="twd-note"
-              value={exNote}
-              onChange={(e) => setExNote(e.target.value)}
-              placeholder="Чөлөө"
-              className={inputCls}
-            />
-          </div>
-          <div className="flex items-end">
-            <button onClick={addException} disabled={exSaving} className={outlineBtn}>
-              {exSaving ? "Хадгалж байна…" : "Бүртгэх"}
-            </button>
-          </div>
-        </div>
+        )}
 
         {exError && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
@@ -403,8 +412,12 @@ export default function TeacherWorkDays() {
           </div>
         )}
 
+        {readOnly && exceptions.length === 0 && (
+          <p className="text-sm text-ink-dim">Энэ долоо хоногт онцгой өдөр алга</p>
+        )}
+
         {exceptions.length > 0 && (
-          <ul className="mt-4 space-y-1.5">
+          <ul className={readOnly ? "space-y-1.5" : "mt-4 space-y-1.5"}>
             {exceptions.map((x) => (
               <li
                 key={x.id}

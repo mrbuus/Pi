@@ -627,3 +627,25 @@ export type LessonPhoto = Prisma.LessonPhotoModel
  * ClassTestSession-оос тооцоологдоно; энд зөвхөн илгээсэн зураг ба багшийн баталгаа.
  */
 export type LessonMakeup = Prisma.LessonMakeupModel
+/**
+ * Model ClassCheck
+ * «Чек» — ангийн нэртэй шалгах жагсаалт (эзэн 2026-10-22): «Номны мөнгө 25,000₮»
+ * гэх мэт. Багш бүр (ADMIN/TEACHER_PLUS/TEACHER) нээж, сурагч бүрийг +/− тэмдэглэнэ.
+ * Хаах нь зөөлөн (archivedAt) — түүх үлдэнэ. api/src/class-checks.
+ * classroomId → Classroom FK (ON DELETE CASCADE) нь ЗӨВХӨН SQL-д (миграци
+ * 20261022002000_class_checks): Classroom model-д буцах талбар нэмэхгүйн тулд
+ * Prisma relation-гүй. Хэрэглэгчийн id-ууд FK-гүй (StudentBehaviorFlag-ийн адил).
+ */
+export type ClassCheck = Prisma.ClassCheckModel
+/**
+ * Model ClassCheckMark
+ * Сурагч тус бүрийн тэмдэглэгээ — (checkId, studentId) давхардахгүй тул хоёр багш
+ * зэрэг дарсан ч upsert нэг мөрөнд бичнэ. studentId → User FK нь SQL-д (CASCADE).
+ */
+export type ClassCheckMark = Prisma.ClassCheckMarkModel
+/**
+ * Model LoginText
+ * Нэвтрэх хуудасны тайлбар/зарлал (эзэн 2026-10-22, Агент D). Ганц мөр id="default";
+ * зөвхөн ADMIN засна (PUT /auth/login-text), нийтэд уншигдана (GET). Энгийн текст.
+ */
+export type LoginText = Prisma.LoginTextModel

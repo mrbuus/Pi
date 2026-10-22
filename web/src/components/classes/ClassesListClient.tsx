@@ -9,7 +9,7 @@ import InfoHint from "@/components/ui/InfoHint";
 import { Meta } from "@/components/ui/Meta";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
-import { api } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 import { formatMnDate } from "@/lib/dateMn";
@@ -256,6 +256,7 @@ function ClassCardView({
             ]}
           />
         </div>
+        {c.classTeacher && <TeacherAvatar name={c.classTeacher.name} avatarKey={c.teacherAvatarUrl ?? null} />}
         <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-ink-dim transition group-hover:translate-x-0.5" aria-hidden />
       </div>
       {canAssign && !c.classTeacher && (
@@ -321,6 +322,37 @@ function ClassCardView({
       </p>
       <span className="sr-only">Ирц, даалгавар нь сүүлийн {windowDays} хоногийнх</span>
     </div>
+  );
+}
+
+/**
+ * Ангийн багшийн ӨӨРИЙН профайл зураг (User.avatarUrl) — нүүрний/маркетингийн
+ * зураг биш. Зураггүй эсвэл ачаалагдахгүй бол овог, нэрийн эхний үсэг.
+ * Нэр картын мета мөрөнд бичигдсэн тул дүрс нь чимэглэл (aria-hidden).
+ */
+function TeacherAvatar({ name, avatarKey }: { name: string; avatarKey: string | null }) {
+  const [broken, setBroken] = useState(false);
+  // name = «Овог Нэр»
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w.charAt(0).toUpperCase())
+    .join("");
+  const src = avatarKey && !broken ? fileUrl(avatarKey) : undefined;
+  return (
+    <span
+      aria-hidden
+      title={name}
+      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-bright/12 text-xs font-bold text-brand-soft ring-1 ring-line"
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} className="h-full w-full object-cover" />
+      ) : (
+        initials
+      )}
+    </span>
   );
 }
 

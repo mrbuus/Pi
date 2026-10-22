@@ -2,6 +2,7 @@ import { FileAuthorizationService } from './file-authorization.service';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { requireJwtSecret } from '../auth/jwt.strategy';
+import { FileRetentionService } from './file-retention.service';
 import { FilesAuthGuard } from './files-auth.guard';
 import { UploadsController } from './uploads.controller';
 
@@ -12,6 +13,6 @@ import { UploadsController } from './uploads.controller';
     JwtModule.register({ secret: requireJwtSecret() }),
   ],
   controllers: [UploadsController],
-  providers: [FilesAuthGuard, FileAuthorizationService],
+  providers: [FilesAuthGuard, FileAuthorizationService, FileRetentionService],
 })
 export class StorageModule {}

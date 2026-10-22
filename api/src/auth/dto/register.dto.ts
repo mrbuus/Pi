@@ -45,6 +45,12 @@ export class RegisterDto extends ConsentDto {
   @MinLength(4, { message: 'Нууц үг 4-өөс доошгүй тэмдэгт байх ёстой' })
   password?: string;
 
+  /** Gmail-ээр бүртгүүлэх тасалбар (/register?google=…) — бүртгэлийн дараа Gmail автоматаар холбогдоно */
+  @ApiPropertyOptional({ type: String, writeOnly: true })
+  @IsOptional()
+  @IsString()
+  googleTicket?: string;
+
   @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()

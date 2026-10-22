@@ -199,7 +199,6 @@ function SlotBlock({
   const students = slot.students;
   const occ = showOccupancy && students != null && capacity != null;
   const over = occ && students! > capacity!;
-  const pct = occ ? Math.min(100, Math.round((students! / capacity!) * 100)) : 0;
   const endKey = slot.seriesTo !== undefined ? slot.seriesTo : slot.to;
   const ends = endKey ? `${dateLabel(endKey, today, false)} хүртэл` : null;
   const label = [
@@ -221,8 +220,8 @@ function SlotBlock({
       <span className="flex flex-wrap items-center justify-between gap-x-1">
         <span className="shrink-0 text-sm font-bold text-ink">{slot.classLabel}</span>
         {occ && (
-          <span className={cn("inline-flex shrink-0 items-center gap-0.5 text-xs font-semibold tabular-nums", over ? "text-warning" : "text-ink-dim")}>
-            {over && <TriangleAlert className="size-3" aria-hidden />}
+          <span className={cn("inline-flex shrink-0 items-center gap-0.5 text-xs tabular-nums", over ? "font-bold text-ink" : "font-semibold text-ink-dim")}>
+            {over && <TriangleAlert className="size-3 text-warning" aria-hidden />}
             {students}/{capacity}
           </span>
         )}
@@ -232,16 +231,13 @@ function SlotBlock({
           {[slot.subject ? (SUBJECT_LABEL[slot.subject] ?? slot.subject) : null, showTeacher ? slot.teacherName : null].filter(Boolean).join(", ")}
         </span>
       ) : null}
-      {occ && (
-        <span aria-hidden className="mt-1 block h-1 overflow-hidden rounded-full bg-ink/10">
-          <span className={cn("block h-full rounded-full", over ? "bg-warning" : "bg-brand-bright")} style={{ width: `${pct}%` }} />
-        </span>
-      )}
     </>
   );
 
   const style = { "--cls": getClassroomColor(slot.classroomId) } as CSSProperties;
-  const base = "class-row block w-full rounded-md bg-bg py-1 pl-1.5 pr-1.5 text-left";
+  // Суудлаас хэтэрсэн анги: зөөлөн `warning` дэвсгэр (дүүргэлтийн зурвас байхгүй, зөвхөн тоо).
+  // Дизайны «шар хориотой» дүрмийн цорын ганц зөвшөөрөгдсөн үл хамаарал (эзэн 2026-10-22).
+  const base = cn("class-row block w-full rounded-md py-1 pl-1.5 pr-1.5 text-left", over ? "bg-warning/[0.13]" : "bg-bg");
   const block = onSelect ? (
     <button
       type="button"

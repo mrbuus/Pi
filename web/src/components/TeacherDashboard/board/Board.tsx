@@ -15,11 +15,13 @@ import LessonNoteBox from "./LessonNoteBox";
 import MarkView, { type BulkState } from "./MarkView";
 import MonitorView, { type FilterKey } from "./MonitorView";
 import OtherInfo from "./OtherInfo";
+import RecordedByLine from "./RecordedBy";
 import StudentDrawer from "./StudentDrawer";
 import type { OnlineCell } from "./StudentCard";
 import SummaryBar from "./SummaryBar";
 import {
   addDays,
+  dayCounts,
   dayLabel,
   fromKey,
   hasNote,
@@ -462,11 +464,11 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   if (board.status !== "ready" || !data) return <BoardSkeletonBody />;
 
   const total = students.length;
-  const present = students.filter((s) => {
-    const a = recs.get(s.id)?.att;
-    return a === "PRESENT" || a === "LATE";
-  }).length;
-  const done = students.filter((s) => recs.get(s.id)?.hw === "DONE").length;
+  // Төлөв БҮРИЙН тоо (Ирсэн ба Хоцорсон тусдаа — эзэн 2026-10-22)
+  const counts = dayCounts(
+    students.map((s) => s.id),
+    recs,
+  );
   const hasOnline = homework && !!onlineData && onlineData.tests.length > 0;
   const firstStart = Math.min(...cls.lessons.map((l) => l.startMinute));
   const upcoming = date > today || (date === today && ubNowMinute() < firstStart);
@@ -497,8 +499,8 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
 
         <div className="mt-3 space-y-3">
           <SummaryBar
-            present={present}
-            done={homework ? done : null}
+            counts={counts}
+            homework={homework}
             sent={students.filter((s) => sentSet.has(s.id)).length}
             online={hasOnline ? Object.keys(online).length : null}
             total={total}
@@ -517,6 +519,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
               )
             }
           />
+          <RecordedByLine data={board.recordedBy} date={date} homework={homework} />
           {total === 0 ? (
             <div className="rounded-xl border border-dashed border-line px-4 py-8 text-center">
               <p className="font-bold text-ink">Энэ ангид сурагч алга</p>
@@ -586,6 +589,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
           name={names.get(drawer.id) ?? drawer.firstName}
           date={date}
           today={today}
+          homework={homework}
           flags={flags.get(drawer.id) ?? []}
           onClose={() => setDrawerId(null)}
         />

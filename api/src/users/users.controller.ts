@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   BadRequestException,
   Body,
+  ForbiddenException,
   Controller,
   Get,
   HttpCode,
@@ -18,9 +19,11 @@ import {
 import {
   IsBoolean,
   IsEnum,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
+  MaxLength,
 } from 'class-validator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PasswordResetService } from '../auth/password-reset.service';
@@ -62,6 +65,19 @@ class SetUserRoleDto {
   role!: Role;
 }
 
+// Эрхийн матриц: зөвхөн ажилтны хоёр түвшин (Багш ↔ Багш+)
+class SetStaffRoleDto {
+  @ApiProperty({ enum: [Role.TEACHER, Role.TEACHER_PLUS] })
+  @IsIn([Role.TEACHER, Role.TEACHER_PLUS])
+  role!: Role;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+}
+
 interface AuthedRequest {
   user: { userId: string; role: Role };
 }
@@ -77,12 +93,22 @@ export class UsersController {
 
   // Эзний шийдвэр (2026-10-08): Багш+ сурагчийн жагсаалтыг УНШИНА.
   // Засах, архивлах, эрх солих нь ADMIN хэвээр (класс дээрх @Roles).
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  // Багш (TEACHER) зөвхөн ИДЭВХТЭЙ СУРАГЧДЫН жагсаалтыг УНШИНА (эзэн 2026-10-22);
+  // бусад role, архив нь Багш+/Админд л.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get()
   listUsers(
+    @Req() req: AuthedRequest,
     @Query('archived') archived?: string,
     @Query('role') role?: string,
   ) {
+    if (req.user.role === Role.TEACHER) {
+      if (role !== Role.STUDENT || archived === 'true')
+        throw new ForbiddenException(
+          'Багш зөвхөн идэвхтэй сурагчдын жагсаалтыг харна',
+        );
+      return this.users.listUsers(false, Role.STUDENT);
+    }
     const wanted = Object.values(Role).includes(role as Role)
       ? (role as Role)
       : undefined;
@@ -231,6 +257,18 @@ export class UsersController {
       dto.plus,
       dto.canManageStudents ?? false,
     );
+  }
+
+  // Эрхийн матриц (/app/admin/capabilities): Багш ↔ Багш+ — ЗӨВХӨН ADMIN.
+  // ADMIN болон өөрийн эрхийг өөрчилдөггүй, аудитад бичигдэнэ (setStaffRole).
+  @Roles(Role.ADMIN)
+  @Patch(':id/staff-role')
+  setStaffRole(
+    @Param('id') id: string,
+    @Body() dto: SetStaffRoleDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.setStaffRole(id, dto.role, req.user.userId, dto.reason);
   }
 
   @Patch(':id/role')

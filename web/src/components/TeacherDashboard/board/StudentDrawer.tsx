@@ -1,14 +1,12 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { ExternalLink, Minus, Phone, StickyNote, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Minus, Phone, StickyNote, TriangleAlert, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import {
   ATTENDANCE_MARKS,
-  ATTENDANCE_ORDER,
   HOMEWORK_MARKS,
-  TONE_SELECTED,
   TONE_TEXT,
   type AttendanceStatus,
   type HomeworkStatus,
@@ -20,16 +18,37 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import {
   LATE_RANGE_SHORT,
+  addMonths,
   dayLabel,
   fmtPhone,
   fromKey,
   fullDate,
-  monthLabel,
+  monthKeyLabel,
   shortDay,
+  stampLabel,
   ubParts,
   whenLabel,
   type LateRangeValue,
+  type StatusCounts,
 } from "./lib";
+import { CountGrid, CountRow, attendanceCounts, homeworkCounts } from "./parts";
+
+interface MonthAtt {
+  date: string;
+  status: AttendanceStatus;
+  lateRange: LateRangeValue | null;
+  note: string | null;
+  /** Өөр ангид тэмдэглэсэн бол тэр ангийн нэр */
+  classroom: string | null;
+  markedBy: string | null;
+}
+interface MonthHw {
+  date: string;
+  status: HomeworkStatus | null;
+  comment: string | null;
+  classroom: string | null;
+  markedBy: string | null;
+}
 
 interface StudentCardData {
   student: {
@@ -50,11 +69,24 @@ interface StudentCardData {
     from: string;
     to: string;
     lessonDays: string[];
-    attendance: { date: string; status: AttendanceStatus; lateRange: LateRangeValue | null; note: string | null }[];
+    /** Энэ ангид элссэн өдөр — өмнөх хичээл «тэмдэглээгүй» гэж тоологдохгүй */
+    classJoinedOn: string;
+    attendance: MonthAtt[];
+    homework: MonthHw[];
+    counts: StatusCounts;
   };
-  homework: { date: string; status: HomeworkStatus | null; comment: string | null }[];
-  notes: { date: string; status: AttendanceStatus; note: string }[];
+  history: { first: string | null; totals: StatusCounts; sent: number };
 }
+
+/** Сурагчийн тэмдэглэл (api/src/notes — StudentNote, ерөнхий төрөл) */
+interface NoteBlock {
+  id: string;
+  body: string;
+  createdAt: string;
+  authorName: string | null;
+}
+
+const NOTE_MAX = 4000;
 
 function Section({ title, hint, children }: { title: string; hint?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -68,7 +100,7 @@ function Section({ title, hint, children }: { title: string; hint?: React.ReactN
   );
 }
 
-/** Сурагчийн товч мэдээлэл: компьютер дээр баруун талын самбар, утсан дээр бүтэн дэлгэц */
+/** Сурагчийн drawer: компьютер дээр баруун талын самбар, утсан дээр бүтэн дэлгэц */
 export default function StudentDrawer({
   classId,
   className,
@@ -76,6 +108,7 @@ export default function StudentDrawer({
   name,
   date,
   today,
+  homework,
   flags,
   onClose,
 }: {
@@ -86,28 +119,33 @@ export default function StudentDrawer({
   name: string;
   date: string;
   today: string;
+  /** Танхимын анги: дэвтрийн даалгаврын тэмдэглэгээг харуулна */
+  homework: boolean;
   flags: string[];
   onClose: () => void;
 }) {
-  const [data, setData] = useState<StudentCardData | null>(null);
+  const [month, setMonth] = useState(() => date.slice(0, 7));
+  const [card, setCard] = useState<{ month: string; data: StudentCardData } | null>(null);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let alive = true;
-    api<StudentCardData>(`/attendance/classrooms/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}?date=${date}`)
+    api<StudentCardData>(
+      `/attendance/classrooms/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}?date=${date}&month=${month}`,
+    )
       .then((d) => {
         if (!alive) return;
-        setData(d);
+        setCard({ month, data: d });
         setError("");
       })
       .catch((e) => alive && setError(e instanceof Error ? e.message : "Мэдээлэл ачаалагдсангүй"));
     return () => {
       alive = false;
     };
-  }, [classId, studentId, date, retry]);
+  }, [classId, studentId, date, month, retry]);
 
-  const sel = fromKey(date);
+  const data = card?.data ?? null;
   const s = data?.student;
 
   return (
@@ -186,7 +224,7 @@ export default function StudentDrawer({
           </header>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
-            {error ? (
+            {error && !data ? (
               <div className="p-4">
                 <ErrorState message={error} onRetry={() => setRetry((r) => r + 1)} />
               </div>
@@ -198,7 +236,23 @@ export default function StudentDrawer({
                 <div className="skeleton h-28 rounded-lg" />
               </div>
             ) : (
-              <DrawerBody data={data} date={date} today={today} y={sel.getFullYear()} m={sel.getMonth()} />
+              <>
+                <TotalsSection data={data} homework={homework} />
+                <MonthSection
+                  data={data}
+                  month={month}
+                  loading={card?.month !== month}
+                  error={card?.month !== month ? error : ""}
+                  onRetry={() => setRetry((r) => r + 1)}
+                  onMonth={setMonth}
+                  date={date}
+                  today={today}
+                  homework={homework}
+                  currentClass={className}
+                />
+                <NotesSection studentId={studentId} today={today} />
+                <FactsSection data={data} today={today} />
+              </>
             )}
           </div>
 
@@ -217,13 +271,324 @@ export default function StudentDrawer({
   );
 }
 
-function DrawerBody({ data, date, today, y, m }: { data: StudentCardData; date: string; today: string; y: number; m: number }) {
-  const s = data.student;
-  const byDay = new Map(data.month.attendance.map((a) => [a.date, a]));
-  const days = [...new Set([...data.month.lessonDays, ...data.month.attendance.map((a) => a.date)])].sort();
-  const counts: Record<AttendanceStatus, number> = { PRESENT: 0, LATE: 0, ABSENT: 0, EXCUSED: 0 };
-  for (const a of data.month.attendance) counts[a.status]++;
+/* ───────── Бүх хугацааны нийт ───────── */
 
+function TotalsSection({ data, homework }: { data: StudentCardData; homework: boolean }) {
+  const t = data.history.totals;
+  return (
+    <Section title="Нийт" hint={data.history.first ? `Эхний бичлэг: ${fullDate(data.history.first)}` : undefined}>
+      {data.history.first ? (
+        <CountGrid className="gap-y-1">
+          <CountRow label="Ирц" items={attendanceCounts(t)} />
+          <CountRow label="Даалгавар" items={homeworkCounts(homework ? t : null, { sent: data.history.sent })} />
+        </CountGrid>
+      ) : (
+        <p className="text-sm text-ink-dim">Ирц, даалгаврын тэмдэглэгээ хараахан алга</p>
+      )}
+    </Section>
+  );
+}
+
+/* ───────── Сараар: өдөр бүрийн ирц + даалгавар ───────── */
+
+function MonthSection({
+  data,
+  month,
+  loading,
+  error,
+  onRetry,
+  onMonth,
+  date,
+  today,
+  homework,
+  currentClass,
+}: {
+  data: StudentCardData;
+  month: string;
+  loading: boolean;
+  error: string;
+  onRetry: () => void;
+  onMonth: (m: string) => void;
+  date: string;
+  today: string;
+  homework: boolean;
+  currentClass: string;
+}) {
+  const headingId = useId();
+  // Хамгийн эхний бичлэг (эсвэл элссэн сар) ба өнөөдөр/сонгосон өдрийн сар хооронд
+  const first = [data.history.first, data.student.joinedOn].filter((k): k is string => !!k).sort()[0] ?? date;
+  const minMonth = first.slice(0, 7);
+  const maxMonth = [today.slice(0, 7), date.slice(0, 7)].sort()[1];
+  const canPrev = month > minMonth;
+  const canNext = month < maxMonth;
+
+  const m = data.month;
+  const att = new Map(m.attendance.map((a) => [a.date, a]));
+  const hw = new Map(m.homework.map((h) => [h.date, h]));
+  const days = [
+    ...new Set([...m.lessonDays, ...m.attendance.map((a) => a.date), ...(homework ? m.homework.filter((h) => h.status).map((h) => h.date) : [])]),
+  ].sort();
+  // Өдрийн тайлбар: ирцийн тайлбар, даалгаврын тайлбар, өөр ангид тэмдэглэсэн (шинэ нь дээр)
+  const remarks = days
+    .map((k) => ({ k, a: att.get(k), h: homework ? hw.get(k) : undefined }))
+    .filter(({ a, h }) => a?.note || h?.comment || a?.classroom || h?.classroom)
+    .reverse();
+
+  const nav = (dir: -1 | 1) => (
+    <button
+      type="button"
+      onClick={() => onMonth(addMonths(month, dir))}
+      disabled={dir === -1 ? !canPrev : !canNext}
+      aria-label={dir === -1 ? "Өмнөх сар" : "Дараагийн сар"}
+      className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink hover:bg-ink/5 disabled:opacity-30 sm:size-9"
+    >
+      {dir === -1 ? <ChevronLeft className="size-5" aria-hidden /> : <ChevronRight className="size-5" aria-hidden />}
+    </button>
+  );
+
+  return (
+    <section aria-labelledby={headingId} className="border-b border-line px-4 py-3">
+      <div className="-mx-2 mb-1.5 flex items-center gap-1">
+        {nav(-1)}
+        <h3 id={headingId} className="cyrillic-heading flex min-w-0 flex-1 items-center justify-center gap-1.5 text-sm font-bold text-ink">
+          {monthKeyLabel(month)}
+          {loading && !error && <LoaderCircle className="size-3.5 animate-spin text-brand motion-reduce:animate-none" aria-label="Ачаалж байна" />}
+        </h3>
+        {nav(1)}
+      </div>
+
+      {error ? (
+        <ErrorState message={error} onRetry={onRetry} />
+      ) : loading ? (
+        <div aria-busy="true" aria-label="Ачаалж байна" className="space-y-2">
+          <div className="skeleton h-16 rounded-lg" />
+          <SkeletonLine width="70%" />
+        </div>
+      ) : days.length ? (
+        <>
+          <ul className="flex flex-wrap gap-1" aria-label={`${monthKeyLabel(month)}, хичээл бүрийн ирц ба даалгавар`}>
+            {days.map((k) => {
+              const a = att.get(k);
+              const h = homework ? hw.get(k) : undefined;
+              const am = a ? ATTENDANCE_MARKS[a.status] : null;
+              const hm = h?.status ? HOMEWORK_MARKS[h.status] : null;
+              const AttIcon = am?.icon;
+              const HwIcon = hm?.icon;
+              const muted = !a && !hm && (k > today || k < m.classJoinedOn);
+              const attText = a
+                ? `${am!.label}${a.lateRange ? ` ${LATE_RANGE_SHORT[a.lateRange]}` : ""}`
+                : k > today
+                  ? "хараахан болоогүй"
+                  : k < m.classJoinedOn
+                    ? "элсэхээс өмнө"
+                    : "ирц тэмдэглээгүй";
+              const hwText = homework ? (hm ? `даалгавар ${hm.label.toLowerCase()}` : "даалгавар тэмдэглээгүй") : "";
+              const where = a?.classroom ?? h?.classroom ?? null;
+              const label = [dayLabel(k), attText, hwText, where ? `${where} анги` : ""].filter(Boolean).join(", ");
+              return (
+                <li
+                  key={k}
+                  title={label}
+                  className={cn(
+                    "flex w-10 flex-col items-center justify-center gap-0.5 rounded-lg border py-1 text-[11px] tabular-nums",
+                    homework ? "h-[3.75rem]" : "h-12",
+                    muted ? "border-dashed border-line text-ink-dim/60" : "border-line bg-surface text-ink",
+                    where && "border-info/50",
+                    k === date && "ring-2 ring-brand-bright ring-offset-1 ring-offset-surface",
+                  )}
+                >
+                  <span className="font-semibold leading-none">{fromKey(k).getDate()}</span>
+                  {AttIcon && am ? (
+                    <AttIcon className={cn("size-3.5", TONE_TEXT[am.tone])} aria-hidden />
+                  ) : muted ? (
+                    <span className="h-3.5" />
+                  ) : (
+                    <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
+                  )}
+                  {homework &&
+                    (HwIcon && hm ? (
+                      <HwIcon className={cn("size-3.5", TONE_TEXT[hm.tone])} aria-hidden />
+                    ) : muted ? (
+                      <span className="h-3.5" />
+                    ) : (
+                      <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
+                    ))}
+                  <span className="sr-only">{label}</span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <CountGrid className="mt-2.5 gap-y-1">
+            <CountRow label="Ирц" items={attendanceCounts(m.counts, { unmarked: true })} />
+            {homework && <CountRow label="Даалгавар" items={homeworkCounts(m.counts, { unmarked: true })} />}
+          </CountGrid>
+
+          {remarks.length > 0 && (
+            <ul className="mt-3 space-y-2 border-t border-line pt-2.5" aria-label="Өдрийн тайлбар">
+              {remarks.map(({ k, a, h }) => (
+                <li key={k} className="flex gap-2 text-sm">
+                  <StickyNote className="mt-0.5 size-3.5 shrink-0 text-brand" aria-hidden />
+                  <div className="min-w-0">
+                    {a?.note && <p className="break-words text-ink">Ирц: {a.note}</p>}
+                    {h?.comment && <p className="break-words text-ink">Даалгавар: {h.comment}</p>}
+                    <p className="text-xs text-ink-dim">
+                      <Meta
+                        items={[
+                          shortDay(k),
+                          a ? ATTENDANCE_MARKS[a.status].label : null,
+                          h?.status ? HOMEWORK_MARKS[h.status].label : null,
+                          (a?.classroom ?? h?.classroom) ? `${a?.classroom ?? h?.classroom} анги` : null,
+                          a?.markedBy ?? h?.markedBy ?? null,
+                        ]}
+                      />
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : (
+        <p className="text-sm text-ink-dim">{currentClass} ангид энэ сард хичээл ороогүй</p>
+      )}
+    </section>
+  );
+}
+
+/* ───────── Тэмдэглэл: огноотой блок, шинэ нь дээр (эзэн 2026-10-22) ───────── */
+
+function NotesSection({ studentId, today }: { studentId: string; today: string }) {
+  const inputId = useId();
+  const [notes, setNotes] = useState<NoteBlock[] | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    api<NoteBlock[]>(`/students/${encodeURIComponent(studentId)}/notes?type=GENERAL`)
+      .then((list) => {
+        if (!alive) return;
+        setNotes(Array.isArray(list) ? list : []);
+        setLoadError("");
+      })
+      .catch((e) => alive && setLoadError(e instanceof Error ? e.message : "Тэмдэглэл ачаалагдсангүй"));
+    return () => {
+      alive = false;
+    };
+  }, [studentId, retry]);
+
+  const body = draft.trim();
+  const add = async () => {
+    if (!body || saving) return;
+    setSaving(true);
+    setSaveError("");
+    try {
+      const note = await api<NoteBlock>(`/students/${encodeURIComponent(studentId)}/notes`, {
+        method: "POST",
+        body: { type: "GENERAL", body },
+      });
+      setNotes((prev) => [note, ...(prev ?? [])]);
+      setDraft("");
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Хадгалж чадсангүй");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Section title="Тэмдэглэл" hint={notes && notes.length > 0 ? `${notes.length}` : undefined}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void add();
+        }}
+      >
+        <label htmlFor={inputId} className="sr-only">
+          Шинэ тэмдэглэл
+        </label>
+        <textarea
+          id={inputId}
+          value={draft}
+          maxLength={NOTE_MAX}
+          rows={3}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              void add();
+            }
+          }}
+          placeholder="Сурагчийн талаар тэмдэглэл бичих"
+          className="block w-full resize-y rounded-lg border border-line bg-bg px-3 py-2 text-sm text-ink placeholder:text-ink-dim focus-visible:border-brand-bright"
+        />
+        <div className="mt-2 flex min-h-11 items-center gap-2">
+          {saveError ? (
+            <span role="alert" className="inline-flex min-w-0 items-center gap-1 text-xs text-error">
+              <TriangleAlert className="size-3.5 shrink-0" aria-hidden />
+              <span className="min-w-0">{saveError}</span>
+            </span>
+          ) : draft.length > NOTE_MAX - 400 ? (
+            <span className="text-xs tabular-nums text-ink-dim">
+              {draft.length}/{NOTE_MAX}
+            </span>
+          ) : null}
+          <button
+            type="submit"
+            disabled={!body || saving}
+            className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-brand-bright px-4 text-sm font-bold text-on-brand transition-opacity disabled:opacity-50 sm:min-h-9"
+          >
+            {saving && <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />}
+            {saving ? "Хадгалж байна" : "Нэмэх"}
+          </button>
+        </div>
+      </form>
+
+      {loadError && !notes ? (
+        <div className="mt-2">
+          <ErrorState message={loadError} onRetry={() => setRetry((r) => r + 1)} />
+        </div>
+      ) : !notes ? (
+        <div aria-busy="true" aria-label="Ачаалж байна" className="mt-2 space-y-2">
+          <div className="skeleton h-16 rounded-lg" />
+        </div>
+      ) : notes.length === 0 ? (
+        <p className="mt-1 text-sm text-ink-dim">Тэмдэглэл алга, дээр бичээд «Нэмэх» дарна</p>
+      ) : (
+        <ul className="mt-2 space-y-2" aria-label="Тэмдэглэлүүд, шинэ нь дээр">
+          {notes.map((n) => (
+            <li key={n.id} className="rounded-lg border border-line bg-bg/50 px-3 py-2.5">
+              <p className="text-xs text-ink-dim">
+                <Meta
+                  items={[
+                    <time key="t" dateTime={n.createdAt} className="tabular-nums">
+                      {stampLabel(n.createdAt, today)}
+                    </time>,
+                    n.authorName ? (
+                      <span key="a" className="font-semibold text-ink">
+                        {n.authorName}
+                      </span>
+                    ) : null,
+                  ]}
+                />
+              </p>
+              <p className="mt-1 whitespace-pre-wrap break-words text-sm text-ink">{n.body}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  );
+}
+
+/* ───────── Мэдээлэл ───────── */
+
+function FactsSection({ data, today }: { data: StudentCardData; today: string }) {
+  const s = data.student;
   const facts: Array<[string, string]> = [
     ["Сургууль", s.school || "Оруулаагүй"],
     ["Анги", s.grade ? `${s.grade}-р анги` : "Оруулаагүй"],
@@ -231,124 +596,16 @@ function DrawerBody({ data, date, today, y, m }: { data: StudentCardData; date: 
     ["Бүртгүүлсэн", fullDate(ubParts(s.registeredAt).key)],
     ["Сайтад сүүлд орсон", whenLabel(s.lastSeenAt, today)],
   ];
-
   return (
-    <>
-      <Section title={`Ирц, ${monthLabel(y, m)}`}>
-        {days.length ? (
-          <>
-            <ul className="flex flex-wrap gap-1">
-              {days.map((k) => {
-                const a = byDay.get(k);
-                const meta = a ? ATTENDANCE_MARKS[a.status] : null;
-                const Icon = meta?.icon;
-                const future = k > today;
-                const before = k < s.joinedOn;
-                const muted = !a && (future || before);
-                const state = a
-                  ? `${meta!.label}${a.lateRange ? ` ${LATE_RANGE_SHORT[a.lateRange]}` : ""}`
-                  : before
-                    ? "элсэхээс өмнө"
-                    : future
-                      ? "хараахан болоогүй"
-                      : "тэмдэглээгүй";
-                return (
-                  <li
-                    key={k}
-                    title={`${dayLabel(k)}, ${state}`}
-                    className={cn(
-                      "flex h-12 w-9 flex-col items-center justify-center gap-0.5 rounded-lg border text-[11px] tabular-nums",
-                      meta ? TONE_SELECTED[meta.tone] : muted ? "border-dashed border-line text-ink-dim/60" : "border-line text-ink-dim",
-                      k === date && "ring-2 ring-brand-bright ring-offset-1 ring-offset-surface",
-                    )}
-                  >
-                    <span className="font-semibold leading-none">{fromKey(k).getDate()}</span>
-                    {Icon ? <Icon className="size-3.5" aria-hidden /> : muted ? <span className="h-3.5" /> : <Minus className="size-3.5 opacity-60" aria-hidden />}
-                    <span className="sr-only">
-                      {dayLabel(k)}, {state}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-dim">
-              {ATTENDANCE_ORDER.map((a) => {
-                const Icon = ATTENDANCE_MARKS[a].icon;
-                return (
-                  <span key={a} className="inline-flex items-center gap-1">
-                    <Icon className={cn("size-3.5", TONE_TEXT[ATTENDANCE_MARKS[a].tone])} aria-hidden />
-                    {ATTENDANCE_MARKS[a].label} <b className="font-bold tabular-nums text-ink">{counts[a]}</b>
-                  </span>
-                );
-              })}
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-ink-dim">Энэ сард хичээл ороогүй</p>
-        )}
-      </Section>
-
-      <Section title="Сүүлийн даалгавар">
-        {data.homework.length ? (
-          <ul className="divide-y divide-line">
-            {data.homework.map((h) => {
-              const meta = h.status ? HOMEWORK_MARKS[h.status] : null;
-              const Icon = meta?.icon;
-              return (
-                <li key={h.date} className="grid min-h-10 grid-cols-[6.5rem_minmax(0,1fr)] items-center gap-2 py-1.5 text-sm">
-                  <span className="text-ink">{shortDay(h.date)}</span>
-                  <span className="min-w-0">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink">
-                      {Icon && meta ? (
-                        <>
-                          <Icon className={cn("size-4 shrink-0", TONE_TEXT[meta.tone])} aria-hidden />
-                          {meta.label}
-                        </>
-                      ) : (
-                        <span className="text-ink-dim">Тэмдэглээгүй</span>
-                      )}
-                    </span>
-                    {h.comment && <span className="block truncate text-xs text-ink-dim">{h.comment}</span>}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="text-sm text-ink-dim">Даалгаврын тэмдэглэгээ алга</p>
-        )}
-      </Section>
-
-      <Section title="Ирцийн тэмдэглэл">
-        {data.notes.length ? (
-          <ul className="space-y-2">
-            {data.notes.map((n) => (
-              <li key={n.date} className="flex gap-2 text-sm">
-                <StickyNote className="mt-0.5 size-3.5 shrink-0 text-brand" aria-hidden />
-                <div className="min-w-0">
-                  <p className="text-ink">{n.note}</p>
-                  <p className="text-xs text-ink-dim">
-                    <Meta items={[shortDay(n.date), ATTENDANCE_MARKS[n.status].label]} />
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-ink-dim">Тэмдэглэл алга</p>
-        )}
-      </Section>
-
-      <Section title="Мэдээлэл">
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-          {facts.map(([k, v]) => (
-            <div key={k} className="min-w-0">
-              <dt className="text-xs text-ink-dim">{k}</dt>
-              <dd className="text-sm font-semibold text-ink">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </Section>
-    </>
+    <Section title="Мэдээлэл">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+        {facts.map(([k, v]) => (
+          <div key={k} className="min-w-0">
+            <dt className="text-xs text-ink-dim">{k}</dt>
+            <dd className="text-sm font-semibold text-ink">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </Section>
   );
 }

@@ -336,3 +336,99 @@ export function submittedStudentIds(
   }
   return [...out];
 }
+
+/* ───────── Төлөв бүрийн тоо (самбарын тойм, сурагчийн drawer — эзэн 2026-10-22) ───────── */
+
+export type AttStatus = AttRow['status'];
+export type HwStatus = NonNullable<HwRow['status']>;
+
+export interface StatusCounts {
+  attendance: Record<AttStatus, number> & { unmarked: number };
+  homework: Record<HwStatus, number> & { unmarked: number };
+}
+
+export function emptyCounts(): StatusCounts {
+  return {
+    attendance: { PRESENT: 0, LATE: 0, ABSENT: 0, EXCUSED: 0, unmarked: 0 },
+    homework: { DONE: 0, PARTIAL: 0, NOT_DONE: 0, unmarked: 0 },
+  };
+}
+
+/**
+ * Мөр бүрийг төлөвөөр нь тоолно (Ирсэн ба Хоцорсон ТУСДАА — «Ирсэн» гэж хамт тоолохгүй).
+ * `expected` — тэмдэглэгдсэн байх ёстой түлхүүрүүд (самбарт сурагч, drawer-т өнгөрсөн
+ * хичээлийн өдөр): тэдгээрээс мөргүй (даалгаварт төлөвгүй) нь «Тэмдэглээгүй».
+ */
+export function countStatuses(
+  att: { key: string; status: AttStatus }[],
+  hw: { key: string; status: HwStatus | null }[],
+  expected: string[] = [],
+): StatusCounts {
+  const out = emptyCounts();
+  const attKeys = new Set<string>();
+  const hwKeys = new Set<string>();
+  for (const r of att) {
+    out.attendance[r.status]++;
+    attKeys.add(r.key);
+  }
+  for (const r of hw) {
+    if (!r.status) continue;
+    out.homework[r.status]++;
+    hwKeys.add(r.key);
+  }
+  for (const k of new Set(expected)) {
+    if (!attKeys.has(k)) out.attendance.unmarked++;
+    if (!hwKeys.has(k)) out.homework.unmarked++;
+  }
+  return out;
+}
+
+/* ───────── Хэн ирц авсан / даалгавар шалгасан (эзэн 2026-10-22) ───────── */
+
+export interface Recorder {
+  id: string;
+  /** «Б. Нэр» */
+  name: string;
+  /** Хамгийн сүүлд тэмдэглэсэн агшин (ISO); мэдэгдэхгүй бол null */
+  at: string | null;
+  /** Энэ багшийн сүүлд тэмдэглэсэн сурагчийн тоо */
+  count: number;
+}
+
+/**
+ * Одоогийн мөр бүрийн сүүлчийн тэмдэглэгч (`markedById`) ба цаг → багш тус бүрийн тоо,
+ * хамгийн сүүлийн цаг. Сүүлд тэмдэглэсэн нь эхэнд, цаггүй нь хойно.
+ */
+export function summarizeRecorders(
+  rows: { markedById: string; at: Date | null }[],
+  names: Map<string, string>,
+): Recorder[] {
+  const by = new Map<string, { count: number; at: number | null }>();
+  for (const r of rows) {
+    const cur = by.get(r.markedById) ?? { count: 0, at: null };
+    cur.count++;
+    const t = r.at ? r.at.getTime() : null;
+    if (t !== null && (cur.at === null || t > cur.at)) cur.at = t;
+    by.set(r.markedById, cur);
+  }
+  return [...by.entries()]
+    .map(([id, v]) => ({
+      id,
+      name: names.get(id) ?? 'Тодорхойгүй багш',
+      at: v.at === null ? null : new Date(v.at).toISOString(),
+      count: v.count,
+    }))
+    .sort(
+      (a, b) =>
+        (b.at ?? '').localeCompare(a.at ?? '') ||
+        a.name.localeCompare(b.name, 'mn'),
+    );
+}
+
+/** «YYYY-MM» → тэр сарын эхний ба сүүлийн өдөр; буруу бол null */
+export function monthRange(month: string): { from: string; to: string } | null {
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return null;
+  const from = `${month}-01`;
+  const to = addDaysKey(`${addDaysKey(from, 32).slice(0, 8)}01`, -1);
+  return { from, to };
+}

@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, KeyRound, TriangleAlert } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import LoginNotice from "@/components/auth/LoginNotice";
+import { rememberPreference, saveRememberPreference } from "@/components/auth/remember";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, nextFromLocation, setAuth } from "@/lib/api";
 
@@ -28,6 +30,12 @@ import { api, homeForRole, nextFromLocation, setAuth } from "@/lib/api";
  * зөвхөн "буруу" гэсэн хариу авна. Энэ бол нэвтэрч чадахгүй байх хамгийн
  * түгээмэл шалтгаан. Товч нь өгөгдмөл ХААЛТТАЙ (мөрдөгчөөс хамгаална),
  * зөвхөн хэрэглэгч өөрөө дарвал нээгдэнэ.
+ *
+ * «НАМАЙГ САНА» (эзэн 2026-10-22):
+ * Чагттай → токен localStorage-д, сервер 30 хоногийн токен өгнө (хөтөч хаасан ч
+ * нэвтэрсэн хэвээр). Чаггүй → sessionStorage-д, сервер 12 цагийн токен — хөтөч
+ * (таб) хаамагц сесс дуусна, нийтийн компьютер дээр ч 12 цагаас удахгүй.
+ * Сонголтыг хөтөч санана (components/auth/remember.ts), өгөгдмөл нь чагттай.
  *
  * ХОЁР УДАА БУРУУ ОРОЛДСОНЫ ДАРАА:
  * "Нууц үгээ мартсан уу?" холбоосыг ТОД болгож дээш гаргана. Судалгаагаар
@@ -62,6 +70,7 @@ export default function LoginPage() {
   const [authError, setAuthError] = useState("");
   const [failCount, setFailCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(true);
 
   const identifierRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -69,7 +78,12 @@ export default function LoginPage() {
   // localStorage дээрээс сүүлийнх оруулсан утас/имэйлийг ачаалана
   useEffect(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem("login_identifier") : null;
-    if (saved) setIdentifier(saved);
+    const keep = rememberPreference();
+    // Хөтчөөс уншсан утгыг дараагийн микро-даалгаварт (effect дотор synchronous setState биш)
+    queueMicrotask(() => {
+      if (saved) setIdentifier(saved);
+      setRemember(keep);
+    });
   }, []);
 
   function validate(): boolean {
@@ -96,13 +110,13 @@ export default function LoginPage() {
     try {
       const res = await api<{ accessToken: string; role: string }>(
         "/auth/login",
-        { method: "POST", body: { identifier, password }, auth: false },
+        { method: "POST", body: { identifier, password, remember }, auth: false },
       );
       // Амжилттай нэвтэрсний дараа утас/имэйлийг localStorage-д хадгалаа
       if (typeof window !== "undefined") {
         localStorage.setItem("login_identifier", identifier);
       }
-      setAuth(res.accessToken, res.role);
+      setAuth(res.accessToken, res.role, remember);
       router.push(nextFromLocation() ?? homeForRole(res.role));
     } catch (err) {
       // Backend нь аль талбар буруу болохыг ЗОРИУДААР хэлдэггүй (хэрэглэгч
@@ -133,8 +147,11 @@ export default function LoginPage() {
 
         <h1 className="font-display text-2xl font-bold text-ink">Нэвтрэх</h1>
         <p className="mt-1 mb-5 text-sm text-ink-dim">
-          Сургалтын төвийн бүртгэлээрээ орно уу.
+          Сургалтын төвийн бүртгэлээрээ орно уу
         </p>
+
+        {/* Админы бичсэн тайлбар/зарлал — хоосон бол харагдахгүй */}
+        <LoginNotice />
 
         <form onSubmit={submit} noValidate className="space-y-4">
           {/* ---------- Хэн бэ ---------- */}
@@ -227,6 +244,26 @@ export default function LoginPage() {
                 {fieldErrors.password}
               </p>
             )}
+          </div>
+
+          {/* ---------- Намайг сана ---------- */}
+          <div className="flex items-center justify-between gap-3">
+            <label className="flex min-h-11 cursor-pointer select-none items-center gap-2.5 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => {
+                  setRemember(e.target.checked);
+                  saveRememberPreference(e.target.checked);
+                }}
+                className="h-5 w-5 shrink-0 cursor-pointer rounded accent-[var(--brand-bright)]"
+              />
+              Намайг сана
+            </label>
+            <InfoHint label="Намайг сана гэж юу вэ">
+              Чагталбал энэ төхөөрөмж дээр 30 хоног нэвтэрсэн хэвээр байна. Нийтийн
+              эсвэл бусдын компьютер дээр чагтыг авна уу — хөтчөө хаамагц гарна.
+            </InfoHint>
           </div>
 
           {/* ---------- Нэвтрэлтийн алдаа ----------

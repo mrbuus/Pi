@@ -12,30 +12,34 @@ import WeekBuilder from "./WeekBuilder";
 type TabKey = "overview" | "week" | "teachers";
 
 const TABS: { key: TabKey; label: string; icon: typeof CalendarDays }[] = [
-  // Дараалал эзний дассанаар: тогтмол 7 хоног → өдрийн хуваарь → багшийн ажлын өдөр.
+  // Дараалал (эзэн 2026-10-22): өдрийн хуваарь ЭХЭНД, анхдагчаар нээгдэнэ — 7 хоногийн
+  // тогтмол хэв маягийг ховор хардаг тул хоёрдугаарт. Дараа нь багшийн ажлын өдөр.
   // Хуучин «Хуваарь зохиох» таб (бөөнөөр үүсгэх маягт + мөрийн жагсаалт) нь
   // тогтмол хуваарийн торонд шингэсэн: «Шинэ цаг нэмэх» товч, хичээл дээр дарж засах,
   // доор «Төлөвлөсөн өөрчлөлт» (2026-10-18).
-  { key: "overview", label: "Ерөнхий хуваарь", icon: LayoutGrid },
   { key: "week", label: "Өдрийн хуваарь", icon: CalendarDays },
+  { key: "overview", label: "Ерөнхий хуваарь", icon: LayoutGrid },
   { key: "teachers", label: "Багшийн ажлын өдөр", icon: UserCheck },
 ];
 
 /**
- * ADMIN / TEACHER_PLUS-ын хуваарийн ажлын талбар.
+ * ADMIN / TEACHER_PLUS / TEACHER-ийн хуваарийн ажлын талбар.
  *
+ * Энгийн Багш Багш+-тай ИЖИЛ табуудыг харна (ямар ч өдрийн хуваарь, 7 хоногийн
+ * тогтмол хуваарь, багшийн ажлын өдөр, онцгой өдөр) — зөвхөн засах товч, цонх
+ * гарахгүй (эзэн 2026-10-22).
  * Засах эрх: ADMIN бүгд; Багш+ `schedule.manage` тусгай эрхээр (анги тус бүрээр
  * олгогдсон байж болно). Эрхгүй бол тогтмол хуваарийг зөвхөн харна. Амралт/шалгалтын
  * өдөр (жилд 1-2 удаа) таб биш, баруун буланд «Онцгой өдөр» товчоор. Идэвхгүй табыг
  * DOM-д үлдээхгүй тул буцаж ирэхэд өгөгдөл нь шинэчлэгдэнэ.
  */
 export default function StaffScheduleBuilder({ role }: { role: string }) {
-  const [tab, setTab] = useState<TabKey>("overview");
+  const [tab, setTab] = useState<TabKey>("week");
   const access = useScheduleAccess(role);
   const canEdit = canManageAny(access);
   // Багшийн ажлын өдрийн хүснэгтийг Багш+ schedule.manage-гүйгээр засна (эзэн 2026-10-11)
-  const canRoster = canEdit || role === "TEACHER_PLUS";
-  const tabs = TABS.filter((t) => t.key !== "teachers" || canRoster);
+  const canEditRoster = canEdit || role === "TEACHER_PLUS";
+  const tabs = TABS;
   const refs = useRef<Partial<Record<TabKey, HTMLButtonElement | null>>>({});
 
   function onKey(e: KeyboardEvent) {
@@ -88,9 +92,9 @@ export default function StaffScheduleBuilder({ role }: { role: string }) {
       </div>
 
       <div id={`sched-panel-${tab}`} role="tabpanel" aria-labelledby={`sched-tab-${tab}`} className="min-w-0">
-        {tab === "overview" && <PatternOverview access={access} />}
         {tab === "week" && <WeekBuilder />}
-        {tab === "teachers" && <TeacherWorkDays />}
+        {tab === "overview" && <PatternOverview access={access} />}
+        {tab === "teachers" && <TeacherWorkDays readOnly={!canEditRoster} />}
       </div>
     </div>
   );

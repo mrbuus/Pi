@@ -1,3 +1,4 @@
+import { verifySignupTicket } from './google/signup-ticket';
 import { consentData } from './consent.service';
 import {
   BadRequestException,
@@ -5,6 +6,7 @@ import {
   Injectable,
   HttpException,
   HttpStatus,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -22,7 +24,9 @@ import {
 } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
-import { loginAttempts } from './login-attempts';
+import { accountAttempts, loginAttempts } from './login-attempts';
+import { PasswordResetService } from './password-reset.service';
+import { type TokenTtl, tokenTtl } from './session-ttl';
 import {
   PASSWORD_SAME_AS_PHONE_MESSAGE,
   isSameAsPhone,
@@ -45,15 +49,37 @@ export function todayCodeUB(): string {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    // Сонголттой: хуучин unit тестүүд 2 аргументаар үүсгэдэг. Nest үргэлж оруулна.
+    private passwordReset?: PasswordResetService,
   ) {}
 
   async register(dto: RegisterDto) {
     const consent = consentData(dto);
     if (dto.studentType === StudentType.ONLINE && !centreOnlineClassEnabled()) {
       throw new BadRequestException(CENTRE_ONLINE_CLOSED_MESSAGE);
+    }
+    // Gmail-ээр бүртгүүлэх: тасалбарын Gmail-ийг бүртгэлийн имэйл болгоно, утас заавал
+    // (эзний дүрэм: хэрэглэгч бүр утастай, нууц үг = утас). Google ID давхардахгүй.
+    const google = dto.googleTicket ? verifySignupTicket(dto.googleTicket) : null;
+    if (google) {
+      if (!dto.phone) {
+        throw new BadRequestException('Утасны дугаар шаардлагатай');
+      }
+      dto.email = google.email;
+      if (
+        await this.prisma.googleIdentity.findUnique({
+          where: { googleSubject: google.googleSubject },
+        })
+      ) {
+        throw new ConflictException(
+          'Энэ Google бүртгэл аль хэдийн холбогдсон байна — «Google-ээр нэвтрэх»-ийг ашиглана уу',
+        );
+      }
     }
     // Утас эсвэл имэйл аль нэг нь заавал хэрэгтэй
     if (!dto.phone && !dto.email) {
@@ -71,7 +97,11 @@ export class AuthService {
       dto.phone &&
       (await this.prisma.user.findUnique({ where: { phone: dto.phone } }))
     ) {
-      throw new ConflictException('Энэ утасны дугаар бүртгэлтэй байна');
+      throw new ConflictException(
+        google
+          ? 'Энэ утасны дугаар бүртгэлтэй байна. Утас, нууц үгээрээ нэвтэрч «Миний мэдээлэл» хэсгээс Gmail-ээ холбоно уу.'
+          : 'Энэ утасны дугаар бүртгэлтэй байна',
+      );
     }
     if (
       dto.email &&
@@ -181,6 +211,16 @@ export class AuthService {
         // үүнийг true болгоход л хангалттай.
         mustChangePassword: false,
         role,
+        // Gmail-ээр бүртгүүлсэн бол хэрэглэгчтэй НЭГ бичилтээр холбоно
+        googleIdentity: google
+          ? {
+              create: {
+                googleSubject: google.googleSubject,
+                email: google.email,
+                pictureUrl: google.picture,
+              },
+            }
+          : undefined,
         studentProfile: isStudent
           ? {
               create: {
@@ -228,6 +268,7 @@ export class AuthService {
           { username: identifier },
         ],
       },
+      include: { googleIdentity: { select: { email: true } } },
     });
     if (!user) {
       loginAttempts.failure(identifier);
@@ -238,6 +279,7 @@ export class AuthService {
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) {
       loginAttempts.failure(identifier);
+      this.alertOwnerOnRepeatedFailures(user);
       throw new UnauthorizedException(
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
@@ -247,7 +289,27 @@ export class AuthService {
         'Энэ сурагчийн бүртгэл архивлагдсан байна. Сургалтын төвтэй холбогдоно уу.',
       );
     loginAttempts.success(identifier);
-    return this.issueToken(user.id, user.role);
+    accountAttempts.success(user.id);
+    return this.issueToken(user.id, user.role, tokenTtl(dto.remember));
+  }
+
+  /**
+   * 3 удаа буруу нууц үг → бүртгэлийн эзний имэйл/Gmail руу НЭГ мэдэгдэл
+   * (эзэн 2026-10-22). Тоолуур нь бүртгэлээр (userId), түгжээний цонхонд нэг л
+   * удаа. Хариуг ХҮЛЭЭХГҮЙ — нэвтрэлтийн хариуны хугацаа өөрчлөгдвөл бүртгэл
+   * байгааг илчилнэ, мөн SMTP саатал нэвтрэлтийг удаашруулах ёсгүй.
+   */
+  private alertOwnerOnRepeatedFailures(user: {
+    id: string;
+    firstName: string;
+    email: string | null;
+    googleIdentity?: { email: string } | null;
+  }) {
+    accountAttempts.failure(user.id);
+    if (!this.passwordReset || !accountAttempts.claimAlert(user.id)) return;
+    this.passwordReset.sendLoginAlert(user).catch(() =>
+      this.logger.error(`Буруу оролдлогын мэдэгдэл үүсгэж чадсангүй: userId=${user.id}`),
+    );
   }
 
   // Нууц үг солих — анхны нууц үг = утасны дугаар тул энэ урсгал заавал хэрэгтэй
@@ -317,9 +379,13 @@ export class AuthService {
     });
   }
 
-  private issueToken(userId: string, role: Role) {
+  /** ttl заагаагүй бол JwtModule-ийн өгөгдмөл (7 хоног) — session-ttl.ts */
+  private issueToken(userId: string, role: Role, ttl?: TokenTtl) {
+    const payload = { sub: userId, role };
     return {
-      accessToken: this.jwt.sign({ sub: userId, role }),
+      accessToken: ttl
+        ? this.jwt.sign(payload, { expiresIn: ttl })
+        : this.jwt.sign(payload),
       userId,
       role,
     };

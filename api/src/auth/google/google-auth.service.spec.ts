@@ -112,7 +112,7 @@ describe('GoogleAuthService', () => {
   const env = process.env;
   let prisma: ReturnType<typeof makePrisma>;
   let svc: GoogleAuthService;
-  const jwt = { sign: jest.fn(() => 'jwt-token') };
+  const jwt = { sign: jest.fn((..._args: unknown[]) => 'jwt-token') };
 
   beforeEach(() => {
     process.env = {
@@ -121,6 +121,7 @@ describe('GoogleAuthService', () => {
       GOOGLE_CLIENT_SECRET: 'secret',
       GOOGLE_REDIRECT_URI: 'https://api.example/api/auth/google/callback',
       WEB_ORIGIN: 'https://web.example',
+      JWT_SECRET: 'synthetic-jwt-secret',
     };
     prisma = makePrisma();
     svc = new GoogleAuthService(prisma as any, jwt as any);
@@ -165,14 +166,50 @@ describe('GoogleAuthService', () => {
     expect(await svc.handleCallback({ code: 'g-code', state })).toContain('google=expired');
   });
 
-  it('холбоогүй, имэйл таарахгүй бол шинэ бүртгэл ҮҮСГЭХГҮЙ', async () => {
+  it('холбоогүй, имэйл огт бүртгэлгүй бол /register?google=<тасалбар> руу (бүртгэл ШУУД үүсэхгүй)', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ id_token: idToken({ ...good, sub: 'x', email: 'nobody@gmail.com' }) }),
+      json: async () => ({
+        id_token: idToken({ ...good, sub: 'x', email: 'Nobody@gmail.com', given_name: 'Нараа', family_name: 'Бат' }),
+      }),
     });
     const state = stateFrom(await svc.authorizationUrl(GoogleOAuthPurpose.LOGIN));
-    expect(await svc.handleCallback({ code: 'c', state })).toContain('google=not_linked');
+    const target = await svc.handleCallback({ code: 'c', state });
+    expect(target.startsWith('https://web.example/register?google=')).toBe(true);
     expect(prisma.identities).toHaveLength(0);
+    expect(prisma.exchanges).toHaveLength(0);
+    const ticket = new URL(target).searchParams.get('google')!;
+    expect(svc.signupInfo(ticket)).toEqual({ email: 'nobody@gmail.com', firstName: 'Нараа', lastName: 'Бат' });
+    // Нууц мэдээлэл (Google sub) signup-info-д гарахгүй
+    expect(JSON.stringify(svc.signupInfo(ticket))).not.toContain('"x"');
+  });
+
+  it('имэйл бүртгэлтэй ч өөр Google-тэй холбогдсон бол not_linked (шинэ бүртгэлд илгээхгүй)', async () => {
+    prisma.identities.push({ id: 'i-old', userId: 'u-email', googleSubject: 'other-sub', email: 'student@gmail.com' });
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id_token: idToken({ ...good, sub: 'new-sub' }) }),
+    });
+    const state = stateFrom(await svc.authorizationUrl(GoogleOAuthPurpose.LOGIN));
+    expect(await svc.handleCallback({ code: 'c', state })).toContain('/login?google=not_linked');
+    expect(prisma.identities).toHaveLength(1);
+  });
+
+  it('signup-info: хугацаа дууссан/буруу тасалбар → BadRequest', () => {
+    expect(() => svc.signupInfo('nope')).toThrow(BadRequestException);
+  });
+
+  it('exchange: «Намайг сана» → 30 хоног, үгүй → 12 цаг, заагаагүй → өгөгдмөл', async () => {
+    const issue = async (remember?: boolean) => {
+      const state = stateFrom(await svc.authorizationUrl(GoogleOAuthPurpose.LOGIN));
+      const code = new URL(await svc.handleCallback({ code: 'g', state })).searchParams.get('code')!;
+      jwt.sign.mockClear();
+      await svc.exchange(code, remember);
+      return jwt.sign.mock.calls[0] as unknown[];
+    };
+    expect((await issue(true))[1]).toEqual({ expiresIn: '30d' });
+    expect((await issue(false))[1]).toEqual({ expiresIn: '12h' });
+    expect(await issue(undefined)).toHaveLength(1);
   });
 
   it('баталгаажаагүй имэйлтэй Google-ийг хүлээж авахгүй', async () => {

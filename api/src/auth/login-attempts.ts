@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
 
-type Attempts = { failures: number[]; lockedUntil: number };
+type Attempts = { failures: number[]; lockedUntil: number; alertedAt?: number };
 const WINDOW_MS = 15 * 60 * 1000;
+/** Бүртгэлийн эзэнд «буруу нууц үг» имэйл илгээх босго (эзэн 2026-10-22) */
+export const ALERT_AFTER_FAILURES = 3;
 /** Instance-local memory: restart/deploy clears it. Shared storage is required before scaling out. */
 export class LoginAttempts {
   private readonly entries = new Map<string, Attempts>();
@@ -15,7 +17,11 @@ export class LoginAttempts {
     const entry = this.entries.get(key);
     if (!entry) return;
     entry.failures = entry.failures.filter((time) => now - time < WINDOW_MS);
-    if (entry.lockedUntil <= now && !entry.failures.length) {
+    if (
+      entry.lockedUntil <= now &&
+      !entry.failures.length &&
+      (entry.alertedAt === undefined || now - entry.alertedAt >= WINDOW_MS)
+    ) {
       this.entries.delete(key);
       return;
     }
@@ -31,17 +37,18 @@ export class LoginAttempts {
     return this.entries.size >= this.maxEntries &&
       [...this.entries.values()].every((value) => value.lockedUntil > now);
   }
-  failure(identifier: string): void {
+  /** Буруу оролдлого бүртгэнэ; цонхон доторх тоог буцаана (түгжигдсэн үед 0). */
+  failure(identifier: string): number {
     const now = this.now(), key = this.key(identifier);
     let entry = this.current(key, now);
-    if (entry?.lockedUntil && entry.lockedUntil > now) return; // Blocked attempts do not extend the lock.
+    if (entry?.lockedUntil && entry.lockedUntil > now) return 0; // Blocked attempts do not extend the lock.
     if (!entry) {
       if (this.entries.size >= this.maxEntries) {
         for (const oldKey of this.entries.keys()) this.current(oldKey, now);
         // Bounded memory even during attacks with many distinct identifiers.
         if (this.entries.size >= this.maxEntries) {
           const replaceable = [...this.entries].find(([, value]) => value.lockedUntil <= now);
-          if (!replaceable) return;
+          if (!replaceable) return 0;
           this.entries.delete(replaceable[0]);
         }
       }
@@ -50,8 +57,29 @@ export class LoginAttempts {
     }
     entry.failures.push(now);
     if (entry.failures.length >= 8) entry.lockedUntil = now + WINDOW_MS;
+    return entry.failures.length;
+  }
+  /**
+   * «3 удаа буруу» мэдэгдлийг илгээх эсэх. Цонхон дотор `threshold`-д хүрмэгц
+   * ЯГ НЭГ удаа true буцаана — дараагийн оролдлогууд 15 минутын турш (түгжээний
+   * цонх) дахин имэйл үүсгэхгүй (spam хийхгүй). Амжилттай нэвтэрвэл success()
+   * бичлэгийг арилгаж тоолуур шинээр эхэлнэ.
+   */
+  claimAlert(identifier: string, threshold = ALERT_AFTER_FAILURES): boolean {
+    const now = this.now();
+    const entry = this.current(this.key(identifier), now);
+    if (!entry || entry.failures.length < threshold) return false;
+    if (entry.alertedAt !== undefined && now - entry.alertedAt < WINDOW_MS) return false;
+    entry.alertedAt = now;
+    return true;
   }
   success(identifier: string): void { this.entries.delete(this.key(identifier)); }
   get size(): number { return this.entries.size; }
 }
 export const loginAttempts = new LoginAttempts();
+/**
+ * Бүртгэл (userId) тус бүрийн буруу НУУЦ ҮГИЙН тоолуур — зөвхөн «3 удаа буруу»
+ * имэйлд. Нэвтрэх нэрээр (утас/имэйл/нэр) биш ID-аар тоолох нь: халдагч гурван
+ * өөр нэрээр нэг бүртгэлийг оролдсон ч нэг тоолуурт орно. Түгжээ нь loginAttempts-д.
+ */
+export const accountAttempts = new LoginAttempts();

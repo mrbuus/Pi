@@ -11,7 +11,8 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { UPLOAD_DIR } from '../storage/uploads.controller';
+import { UPLOAD_DIR } from '../storage/upload-dir';
+import { deleteStoredFile, s3Enabled, saveStoredFile } from '../storage/file-store';
 import {
   DEFAULT_PLACEMENT_TEST,
   PLACEMENT_TESTS,
@@ -182,11 +183,12 @@ export class PlacementService {
     const mime = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
     try {
       // ӨС = эх сурвалж (Render-ийн диск түр зуурынх), диск = кэш
-      await this.prisma.storedFile.create({ data: { key, mime, size: file.size, bytes: new Uint8Array(file.buffer), ownerId: null } });
+      await saveStoredFile(this.prisma, { key, mime, bytes: file.buffer, ownerId: null });
     } catch {
       throw new ServiceUnavailableException('Зураг хадгалахад алдаа гарлаа. Дахин оролдоно уу.');
     }
-    try { writeFileSync(join(UPLOAD_DIR, key), file.buffer); } catch { /* ӨС-д байгаа тул хангалттай */ }
+    // S3-гүй үед л дискэнд кэшлэнэ (S3 үед EC2-ийн дискийг дүүргэхгүй)
+    if (!s3Enabled()) try { writeFileSync(join(UPLOAD_DIR, key), file.buffer); } catch { /* ӨС-д байгаа тул хангалттай */ }
     photos[String(problem)] = [...list, key];
     await this.prisma.placementAttempt.update({
       where: { id },
@@ -208,7 +210,7 @@ export class PlacementService {
       where: { id },
       data: { photos, photoKeys: a.photoKeys.filter((k) => k !== key) },
     });
-    await this.prisma.storedFile.delete({ where: { key } }).catch(() => undefined);
+    await deleteStoredFile(this.prisma, key).catch(() => undefined);
     return { photos };
   }
 

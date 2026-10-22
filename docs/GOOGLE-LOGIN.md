@@ -1,5 +1,26 @@
 # Google-ээр нэвтрэх ба Gmail холболт: тохируулах заавар
 
+> **2026-10-22 шинэчлэл (прод = pimath.mn, API = api.pimath.mn).** Доорх А/Б хэсгийн
+> Render/Vercel хаягийн оронд эдгээрийг ашиглана:
+>
+> - Google Cloud (`shineireedui.pi@gmail.com`-ийн төсөл) → Credentials → OAuth client (Web):
+>   - **Authorized redirect URI:** `https://api.pimath.mn/api/auth/google/callback`
+>   - **Authorized JavaScript origins:** `https://pimath.mn`, `https://www.pimath.mn`
+>   - OAuth consent screen → **Publish app** → «In production» (эс бөгөөс зөвхөн test users нэвтэрнэ)
+> - Серверийн env: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+>   `GOOGLE_REDIRECT_URI=https://api.pimath.mn/api/auth/google/callback`,
+>   `WEB_ORIGIN=https://pimath.mn,https://www.pimath.mn` (эхнийх нь redirect болон имэйлийн холбоосын хаяг).
+>   `GOOGLE_*` дутуу бол Google товч харагдахгүй.
+> - **Gmail-ээр бүртгүүлэх:** бүртгэлгүй Gmail-ээр «Google-ээр нэвтрэх» дарвал `/register` руу
+>   15 минутын тасалбартай очиж, овог нэр, Gmail урьдчилж бөглөгдөнө; **утас заавал**
+>   (нууц үг = утас), бүртгүүлмэгц Gmail холбогдоно. Gmail нь бүртгэлтэй ч өөр Google-тэй
+>   холбогдсон бол хуучнаараа «профайлаас холбоно уу». Профайлаас холбох хэвээр.
+> - **Имэйл (Б хэсэг):** `EMAIL_SMTP_HOST=smtp.gmail.com`, `EMAIL_SMTP_PORT=465`,
+>   `EMAIL_SMTP_USER=shineireedui.pi@gmail.com`, `EMAIL_SMTP_PASS=<App Password, 16 тэмдэгт зайгүй>`,
+>   `EMAIL_FROM=Шинэ Ирээдүйн Эзэд <shineireedui.pi@gmail.com>`. Тохируулсны дараа: нууц үг
+>   сэргээх нэг удаагийн холбоос (30 мин) ба «3 удаа буруу нууц үг» мэдэгдэл Gmail/имэйл рүү очно.
+>   Дутуу бол имэйл чимээгүй алгасагдана. Нууц үг, App Password-ыг чатад БҮҮ бич.
+
 Хоёулаа **үнэгүй**. Код бэлэн болсон (PR #9). Эзэн Google Cloud-оос 2 түлхүүр аваад Render-т оруулахад л ажиллана.
 Түлхүүр оруулаагүй үед «Google-ээр нэвтрэх» товч харагдахгүй, сайт хэвийн ажилласаар байна.
 
@@ -66,7 +87,7 @@ curl -s https://pimn-api.onrender.com/api/auth/google/config
 - **Холбох:** «Миний мэдээлэл» → **Google бүртгэл холбох** → Google-ээ сонгоно.
   Үүнээс хойш утас, нууц үг бичихгүйгээр **Google-ээр нэвтрэх** товчоор орно.
 - **Автомат холболт:** хэрэглэгчийн Pi.mn дээрх имэйл нь Google-ийн баталгаажсан имэйлтэй яг таарвал эхний удаа автоматаар холбогдоно.
-- **Шинэ бүртгэл үүсэхгүй.** Google-ээр зөвхөн аль хэдийн бүртгэлтэй хүн нэвтэрнэ. Сурагчийг төв өөрөө бүртгэдэг (нууц үг = утас) дүрэм хэвээр.
+- **Gmail-ээр бүртгүүлэх (2026-10-22-ноос):** бүртгэлгүй Gmail → `/register?google=…` (утас заавал, нууц үг = утас), бүртгүүлмэгц Gmail холбогдоно. Шууд бүртгэл үүсэхгүй.
 - Нэг хэрэглэгчид нэг Google бүртгэл. Нэг Google-ийг хоёр хүнд холбох боломжгүй.
 
 ### 6. Аюулгүй байдал (техникийн тэмдэглэл)

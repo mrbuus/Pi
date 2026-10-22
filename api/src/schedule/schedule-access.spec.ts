@@ -180,6 +180,17 @@ describe('teacher work roster access (owner 2026-10-11)', () => {
     ).resolves.toBeUndefined();
     expect(capabilities.assert).not.toHaveBeenCalled();
   });
+  it('plain Teacher READS the roster without schedule.manage (owner 2026-10-22), but cannot edit it', async () => {
+    const { access, capabilities } = make();
+    await expect(
+      access.rosterRead({ userId: 't', role: Role.TEACHER }),
+    ).resolves.toBeUndefined();
+    expect(capabilities.assert).not.toHaveBeenCalled();
+    // бусад эрх (жишээ нь сурагч) уншихдаа ч schedule.manage шаардана
+    await expect(
+      access.rosterRead({ userId: 's', role: Role.STUDENT }),
+    ).rejects.toThrow('denied');
+  });
   it('plain Teacher still needs schedule.manage', async () => {
     const { access, capabilities } = make();
     await expect(

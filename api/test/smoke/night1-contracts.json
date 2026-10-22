@@ -462,7 +462,8 @@
     "path": "/api/users",
     "roles": [
       "ADMIN",
-      "TEACHER_PLUS"
+      "TEACHER_PLUS",
+      "TEACHER"
     ]
   },
   {

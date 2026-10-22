@@ -174,7 +174,8 @@ export class AttendanceController {
     );
   }
 
-  // Самбарын сурагчийн товч мэдээлэл (нэр дээр дарахад)
+  // Самбарын сурагчийн drawer (нэр дээр дарахад): утас + бүх ирц/даалгавар,
+  // `month=YYYY-MM` — сараар гүйлгэх (эзэн 2026-10-22)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('attendance/classrooms/:id/students/:studentId')
   studentCard(
@@ -182,6 +183,7 @@ export class AttendanceController {
     @Param('studentId') studentId: string,
     @Query('date') date: string,
     @Req() req: AuthedRequest,
+    @Query('month') month?: string,
   ) {
     return this.attendance.studentCard(
       classroomId,
@@ -189,6 +191,7 @@ export class AttendanceController {
       date,
       req.user.userId,
       req.user.role,
+      month,
     );
   }
 

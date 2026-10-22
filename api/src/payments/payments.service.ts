@@ -24,6 +24,7 @@ import {
   ReversePaymentDto,
   UpdatePaymentDto,
 } from './dto/payment.dto';
+import { buildPaymentWhere, type PaymentFilters } from './payments-export';
 
 // Хэн (id + роль) дуудаж буйг заавал дамжуулна — аудит лог-д хэрэгтэй
 export interface PaymentActor {
@@ -370,9 +371,10 @@ export class PaymentsService {
     });
   }
 
-  list(status?: PaymentStatus) {
+  // Дэлгэцийн жагсаалт: сүүлийн 200. Шүүлтүүр нь CSV экспорттой нэг (payments-export.ts)
+  list(filters: PaymentFilters = {}) {
     return this.prisma.payment.findMany({
-      where: status ? { status } : undefined,
+      where: buildPaymentWhere(filters),
       include: {
         user: {
           select: { id: true, firstName: true, lastName: true, phone: true },

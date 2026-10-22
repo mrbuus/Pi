@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
 import { todayCodeUB } from '../auth/auth.service';
-import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { findNotAttending } from './attention.logic';
@@ -105,14 +104,12 @@ export class ClassroomsService {
       );
   }
 
-  async list(userId: string, role: Role) {
-    // Энгийн багш: үндсэн эсвэл туслах ангийн багш болсон анги (2026-10-13)
-    const where =
-      role === Role.TEACHER
-        ? { ...classTeacherWhere(userId), archived: false }
-        : { archived: false };
+  // Ажилтан (Багш, Багш+, Админ) БҮХ идэвхтэй ангийг ХАРНА (эзэн 2026-10-22):
+  // энгийн Багш өмнө нь зөвхөн өөрийн (үндсэн/туслах) ангитай байсан. Ирц, даалгавар
+  // тэмдэглэх эрх нь тусдаа (attendance/marking-access.ts) — энд зөвхөн унших.
+  async list(_userId: string, _role: Role) {
     return this.prisma.classroom.findMany({
-      where,
+      where: { archived: false },
       include: {
         teacher: {
           select: { id: true, firstName: true, lastName: true },
@@ -160,9 +157,6 @@ export class ClassroomsService {
 
     if (!classroom || classroom.archived) {
       throw new NotFoundException('Анги олдсонгүй');
-    }
-    if (role === Role.TEACHER && !isClassTeacher(classroom, userId)) {
-      throw new ForbiddenException('Энэ ангид хандах эрхгүй');
     }
     const canManageStudents =
       role === Role.ADMIN ||

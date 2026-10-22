@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   ArrowRightLeft,
   Clock3,
+  Download,
   GraduationCap,
   History,
   Search,
@@ -17,6 +18,7 @@ import { Card, PageHeader, SectionHeader } from "@/components/ui/Surface";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { formatMnDateTime } from "@/lib/dateMn";
+import { buildCsv, csvFilename, dateOnlyUB, downloadCsv } from "./csv";
 
 interface Classroom {
   id: string;
@@ -204,6 +206,26 @@ export default function EnrollmentRegistry() {
       .sort((a, b) => fullName(a.student).localeCompare(fullName(b.student), "mn"));
   }, [activeEntries, search, selectedClassroom, unassigned]);
 
+  // CSV: дэлгэц дээрх сонгосон анги ба хайлтад таарсан мөрүүд
+  function exportCsv() {
+    downloadCsv(
+      csvFilename("burtgel"),
+      buildCsv(
+        ["Код", "Овог", "Нэр", "Сургууль", "Түвшин", "Анги", "Элссэн огноо", "Төлөв"],
+        visibleRows.map((row) => [
+          row.student.studentCode,
+          row.student.lastName,
+          row.student.firstName,
+          row.student.studentProfile?.school,
+          row.student.studentProfile?.grade,
+          row.classroom?.name,
+          dateOnlyUB(row.joinedAt),
+          row.source === "unassigned" ? "Ангид хуваарилагдаагүй" : "Идэвхтэй",
+        ]),
+      ),
+    );
+  }
+
   const historyRows = historyStudentId ? histories.get(historyStudentId) ?? [] : [];
   function openTransfer(row: RosterRow) {
     setTransferRow(row);
@@ -302,6 +324,17 @@ export default function EnrollmentRegistry() {
                     icon={UsersRound}
                     title={selectedTitle}
                     hint={<span className="text-sm font-normal text-ink-dim">{visibleRows.length} сурагч</span>}
+                    actions={
+                      <button
+                        type="button"
+                        onClick={exportCsv}
+                        disabled={visibleRows.length === 0}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold text-ink transition hover:border-brand disabled:opacity-50"
+                      >
+                        <Download className="h-4 w-4" aria-hidden />
+                        CSV татах
+                      </button>
+                    }
                   />
                   <label className="relative block max-w-md">
                     <Search

@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   NotFoundException,
@@ -30,9 +31,24 @@ import {
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import type { RequestWithUser } from '../auth/request.interface';
+import {
+  MAX_UPLOAD_BYTES,
+  UPLOAD_URL_TTL,
+  downloadUrl,
+  finishDirectUpload,
+  parsePurpose,
+  presignUpload,
+  s3Enabled,
+  saveStoredFile,
+  signTicket,
+  verifyTicket,
+  expiresAtFor,
+} from './file-store';
+import { UPLOAD_DIR } from './upload-dir';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilesAuthGuard } from './files-auth.guard';
+import { pdfPageCount } from '../lesson-day/pdf-pages';
 
 // Локал диск хадгалалт — production дээр S3 руу шилжихэд энэ controller-ийн
 // дотоод хэрэгжилт л солигдоно, key-н гэрээ хэвээрээ (SPEC §3)
@@ -42,9 +58,9 @@ import { FilesAuthGuard } from './files-auth.guard';
 // диск рүү (жишээ нь /var/data/uploads) чиглүүлнэ. render.yaml дотор disk mount
 // хийгээд UPLOAD_DIR-ыг тэр замаар өгнө (free багц дээр disk дэмжигдэхгүй тул
 // одоогоор тайлбарласан байгаа).
-// Тохируулаагүй бол ./uploads руу буцаж унана.
-export const UPLOAD_DIR =
-  process.env.UPLOAD_DIR?.trim() || join(process.cwd(), 'uploads');
+// Тохируулаагүй бол ./uploads руу буцаж унана. S3_BUCKET тохируулсан бол байт S3-д
+// хадгалагдаж, диск зөвхөн multipart upload-ийн түр зам болно (file-store.ts).
+export { UPLOAD_DIR };
 
 // ⚠️ ЭНЭ ХЭСЭГ МОДУЛЬ ИМПОРТЛОГДОХ ҮЕД АЖИЛЛАНА.
 // Өмнө нь энд хамгаалалтгүй `mkdirSync` байсан: UPLOAD_DIR нь бичих эрхгүй
@@ -232,17 +248,50 @@ export class UploadsController {
     // magic bytes-аар давхар шалгана. Зөрвөл файлыг устгаад алдаа буцаана.
     const path = join(UPLOAD_DIR, file.filename);
     assertMagicBytesMatch(path);
+    const purpose = parsePurpose(
+      (req as { body?: { purpose?: unknown } }).body?.purpose,
+    );
+    // S3 идэвхтэй: S3-д бичээд дискний түр файлыг устгана (EC2-ийн диск дүүрэхгүй).
+    if (s3Enabled()) {
+      try {
+        await saveStoredFile(this.prisma, {
+          key: file.filename,
+          mime: file.mimetype,
+          bytes: readFileSync(path),
+          ownerId: req.user.userId,
+          purpose,
+        });
+      } catch {
+        throw new ServiceUnavailableException(
+          'Файл хадгалахад алдаа гарлаа. Дахин оролдоно уу.',
+        );
+      } finally {
+        try {
+          unlinkSync(path);
+        } catch {
+          // аль хэдийн устсан
+        }
+      }
+      return { key: file.filename, size: file.size, mime: file.mimetype };
+    }
     // G05: Render-ийн диск deploy бүрт устдаг тул ӨС-д давхар хадгална
     // (диск = кэш, ӨС = эх сурвалж). ӨС-д бичиж чадаагүй бол upload-ийг
     // амжилттай гэж хэлэхгүй — дараагийн deploy-оор чимээгүй алга болохоос сэргийлнэ.
     try {
+      const bytes = readFileSync(path);
       await this.prisma.storedFile.create({
         data: {
           key: file.filename,
           mime: file.mimetype,
           size: file.size,
-          bytes: readFileSync(path),
+          bytes,
           ownerId: req.user.userId,
+          ...(file.mimetype === 'application/pdf'
+            ? { pages: pdfPageCount(bytes) }
+            : {}),
+          ...(purpose === 'homework'
+            ? { expiresAt: expiresAtFor(purpose) }
+            : {}),
         },
       });
     } catch {
@@ -252,6 +301,83 @@ export class UploadsController {
       );
     }
     return { key: file.filename, size: file.size, mime: file.mimetype };
+  }
+
+  /**
+   * Хөтчөөс S3 руу ШУУД илгээх (сервер файлын байтыг дамжуулахгүй).
+   * S3 тохируулаагүй бол `{ direct: false }` — хөтөч хуучин POST /uploads руу шилжинэ.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('uploads/presign')
+  async presign(
+    @Body() body: { name?: unknown; mime?: unknown; size?: unknown; purpose?: unknown },
+    @Req() req: RequestWithUser,
+  ) {
+    if (!s3Enabled()) return { direct: false };
+    const name = typeof body?.name === 'string' ? body.name.slice(0, 200) : '';
+    const mime = typeof body?.mime === 'string' ? body.mime.toLowerCase() : '';
+    const size = typeof body?.size === 'number' ? body.size : -1;
+    if (!isAllowedUpload({ originalname: name, mimetype: mime }))
+      throw new BadRequestException(
+        'Зөвхөн зураг (jpg, png, gif, webp, heic) эсвэл PDF оруулна',
+      );
+    if (size <= 0 || size > MAX_UPLOAD_BYTES)
+      throw new BadRequestException('Файл 25 МБ-аас их байна');
+    const key = `${randomUUID()}${extname(name).toLowerCase()}`;
+    const ticket = signTicket({
+      key,
+      ownerId: req.user.userId,
+      mime,
+      purpose: parsePurpose(body?.purpose),
+      exp: Date.now() + UPLOAD_URL_TTL * 1000,
+    });
+    try {
+      const url = await presignUpload(key, mime);
+      return { direct: true, key, url, ticket, headers: { 'Content-Type': mime } };
+    } catch {
+      throw new ServiceUnavailableException(
+        'Файл хадгалах сан түр ажиллахгүй байна. Дахин оролдоно уу.',
+      );
+    }
+  }
+
+  /** Шууд илгээсэн файлыг шалгаж (хэмжээ, magic bytes, PDF хуудас) бүртгэнэ. */
+  @UseGuards(JwtAuthGuard)
+  @Post('uploads/complete')
+  async complete(@Body() body: { ticket?: unknown }, @Req() req: RequestWithUser) {
+    if (!s3Enabled()) throw new BadRequestException('Шууд илгээлт идэвхгүй');
+    const t = typeof body?.ticket === 'string' ? verifyTicket(body.ticket) : null;
+    if (!t || t.ownerId !== req.user.userId)
+      throw new BadRequestException('Илгээлтийн хугацаа дууссан. Дахин илгээнэ үү.');
+    let size: number, pages: number | null;
+    try {
+      ({ size, pages } = await finishDirectUpload(t.key, t.mime, matchesKnownFileSignature));
+    } catch (error) {
+      const code = error instanceof Error ? error.message : '';
+      if (code === 'bad-signature')
+        throw new BadRequestException(
+          'Файлын агуулга нь зөвшөөрөгдсөн төрөлтэй (зураг/PDF) тохирохгүй байна',
+        );
+      if (code === 'too-large') throw new BadRequestException('Файл 25 МБ-аас их байна');
+      if (code === 'not-found') throw new BadRequestException('Файл ирсэнгүй. Дахин илгээнэ үү.');
+      throw new ServiceUnavailableException('Файл хадгалахад алдаа гарлаа. Дахин оролдоно уу.');
+    }
+    // Давхар complete (сүлжээ давтсан) — мөр аль хэдийн байвал тэрийгээ буцаана
+    await this.prisma.storedFile.upsert({
+      where: { key: t.key },
+      create: {
+        key: t.key,
+        mime: t.mime,
+        size,
+        bytes: null,
+        storage: 's3',
+        ownerId: t.ownerId,
+        pages,
+        expiresAt: expiresAtFor(t.purpose),
+      },
+      update: {},
+    });
+    return { key: t.key, size, mime: t.mime };
   }
 
   // ⚠️ ӨМНӨ НЬ ЭНД ЯМАР Ч ХАМГААЛАЛТГҮЙ БАЙСАН — key-г мэдэх/таах хэн ч
@@ -265,13 +391,25 @@ export class UploadsController {
     }
     res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader('Referrer-Policy', 'no-referrer');
+    // S3-д байгаа файл: эрхийг (FilesAuthGuard) шалгасны дараа 5 минутын холбоос руу
+    // чиглүүлнэ — байтыг хөтөч S3-аас шууд татна, сервер дамжуулахгүй.
+    if (s3Enabled()) {
+      const meta = await this.prisma.storedFile.findUnique({
+        where: { key },
+        select: { storage: true, mime: true },
+      });
+      if (meta?.storage === 's3') {
+        res.redirect(302, await downloadUrl(key, meta.mime));
+        return;
+      }
+    }
     const path = join(UPLOAD_DIR, key);
     if (!existsSync(path)) {
       // Диск дээр алга (redeploy) → ӨС-ээс сэргээж дискэнд кэшлэнэ.
       const stored = await this.prisma.storedFile.findUnique({
         where: { key },
       });
-      if (!stored) throw new NotFoundException('Файл олдсонгүй');
+      if (!stored?.bytes) throw new NotFoundException('Файл олдсонгүй');
       try {
         if (!uploadDirError) writeFileSync(path, stored.bytes);
       } catch {
@@ -305,7 +443,7 @@ export class UploadsController {
         const stored = await this.prisma.storedFile.findUnique({
           where: { key },
         });
-        if (!stored) throw new NotFoundException('Файл олдсонгүй');
+        if (!stored?.bytes) throw new NotFoundException('Файл олдсонгүй');
         res.setHeader('Content-Type', stored.mime);
         res.end(Buffer.from(stored.bytes));
         return;

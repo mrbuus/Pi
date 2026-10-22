@@ -14,6 +14,7 @@ export interface RosterGridTeacher {
  * багшийн тэр гарагийг асаана/унтраана.
  * Гар утсанд (375px) 7 багана багтахгүй тул НЭГ ӨДРИЙГ сонгож, багш бүрийн
  * ганц товчийг харуулна.
+ * readOnly (энгийн Багш): нүд товч биш, зөвхөн харуулна.
  */
 export default function RosterGrid({
   teachers,
@@ -21,12 +22,14 @@ export default function RosterGrid({
   isPending,
   onToggle,
   caption,
+  readOnly = false,
 }: {
   teachers: RosterGridTeacher[];
   isOn: (teacherId: string, weekday: number) => boolean;
   isPending: (teacherId: string) => boolean;
   onToggle: (teacherId: string, weekday: number) => void;
   caption: string;
+  readOnly?: boolean;
 }) {
   const [mobileDay, setMobileDay] = useState<number>(1);
   const totals = WORKWEEK_ORDER.map((w) => teachers.filter((t) => isOn(t.id, w)).length);
@@ -74,20 +77,32 @@ export default function RosterGrid({
                     const on = isOn(t.id, w);
                     return (
                       <td key={w} className="px-0.5 py-0.5 text-center">
-                        <button
-                          type="button"
-                          aria-pressed={on}
-                          aria-label={`${t.name} — ${WEEKDAY_LABELS[w]}`}
-                          disabled={busy}
-                          onClick={() => onToggle(t.id, w)}
-                          className={`inline-flex h-11 w-full min-w-11 items-center justify-center rounded-md border transition disabled:opacity-50 ${
-                            on
-                              ? "border-success/40 bg-success/15 text-success"
-                              : "border-line/70 bg-surface text-ink-dim hover:border-brand"
-                          }`}
-                        >
-                          {on && <Check className="h-4 w-4" aria-hidden />}
-                        </button>
+                        {readOnly ? (
+                          <span
+                            role="img"
+                            aria-label={`${t.name} — ${WEEKDAY_LABELS[w]}: ${on ? "ажиллана" : "ажиллахгүй"}`}
+                            className={`inline-flex h-11 w-full min-w-11 items-center justify-center rounded-md border ${
+                              on ? "border-success/40 bg-success/15 text-success" : "border-line/70 bg-surface text-ink-dim"
+                            }`}
+                          >
+                            {on && <Check className="h-4 w-4" aria-hidden />}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            aria-pressed={on}
+                            aria-label={`${t.name} — ${WEEKDAY_LABELS[w]}`}
+                            disabled={busy}
+                            onClick={() => onToggle(t.id, w)}
+                            className={`inline-flex h-11 w-full min-w-11 items-center justify-center rounded-md border transition disabled:opacity-50 ${
+                              on
+                                ? "border-success/40 bg-success/15 text-success"
+                                : "border-line/70 bg-surface text-ink-dim hover:border-brand"
+                            }`}
+                          >
+                            {on && <Check className="h-4 w-4" aria-hidden />}
+                          </button>
+                        )}
                       </td>
                     );
                   })}
@@ -135,25 +150,34 @@ export default function RosterGrid({
         <ul className="divide-y divide-line/60 rounded-xl border border-line">
           {teachers.map((t) => {
             const on = isOn(t.id, mobileDay);
+            const row = (
+              <>
+                <span className="font-semibold text-ink">{t.name}</span>
+                <span
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md border ${
+                    on ? "border-success/40 bg-success/15 text-success" : "border-line bg-surface"
+                  }`}
+                >
+                  {on && <Check className="h-4 w-4" aria-hidden />}
+                  <span className="sr-only">{on ? "Ажиллана" : "Ажиллахгүй"}</span>
+                </span>
+              </>
+            );
             return (
               <li key={t.id}>
-                <button
-                  type="button"
-                  aria-pressed={on}
-                  disabled={isPending(t.id)}
-                  onClick={() => onToggle(t.id, mobileDay)}
-                  className="flex min-h-11 w-full items-center justify-between gap-2 px-3 text-left text-sm disabled:opacity-50"
-                >
-                  <span className="font-semibold text-ink">{t.name}</span>
-                  <span
-                    className={`inline-flex h-7 w-7 items-center justify-center rounded-md border ${
-                      on ? "border-success/40 bg-success/15 text-success" : "border-line bg-surface"
-                    }`}
+                {readOnly ? (
+                  <div className="flex min-h-11 w-full items-center justify-between gap-2 px-3 text-left text-sm">{row}</div>
+                ) : (
+                  <button
+                    type="button"
+                    aria-pressed={on}
+                    disabled={isPending(t.id)}
+                    onClick={() => onToggle(t.id, mobileDay)}
+                    className="flex min-h-11 w-full items-center justify-between gap-2 px-3 text-left text-sm disabled:opacity-50"
                   >
-                    {on && <Check className="h-4 w-4" aria-hidden />}
-                    <span className="sr-only">{on ? "Ажиллана" : "Ажиллахгүй"}</span>
-                  </span>
-                </button>
+                    {row}
+                  </button>
+                )}
               </li>
             );
           })}

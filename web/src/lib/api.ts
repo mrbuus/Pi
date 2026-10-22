@@ -1,27 +1,58 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
 
-export function getToken(): string | null {
+/**
+ * «Намайг сана» (эзэн 2026-10-22). Чагталсан бол токен localStorage-д (хөтөч
+ * хаасан ч үлдэнэ, сервер 30 хоног), эс бол sessionStorage-д (хөтөч/таб хаахад
+ * устана, сервер 12 цаг). Уншихдаа sessionStorage-ийг түрүүлж харна.
+ */
+const TOKEN_KEY = "pi_token";
+const ROLE_KEY = "pi_role";
+
+function sessionStore(): Storage | null {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null; // Зарим хувийн горимд хандах эрхгүй
+  }
+}
+
+function readAuth(key: string): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("pi_token");
+  return sessionStore()?.getItem(key) ?? localStorage.getItem(key);
+}
+
+export function getToken(): string | null {
+  return readAuth(TOKEN_KEY);
 }
 
 export function getRole(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("pi_role");
+  return readAuth(ROLE_KEY);
 }
 
-export function setAuth(token: string, role: string) {
+/**
+ * remember: true → localStorage, false → sessionStorage. Заагаагүй бол (нууц
+ * үг сольсны дараах шинэ токен гэх мэт) одоогийн хадгалах газраа хэвээр.
+ */
+export function setAuth(token: string, role: string, remember?: boolean) {
   sessionVersion += 1;
   inflight.clear();
-  localStorage.setItem("pi_token", token);
-  localStorage.setItem("pi_role", role);
+  const session = sessionStore();
+  const persistent = remember ?? !session?.getItem(TOKEN_KEY);
+  const target = persistent || !session ? localStorage : session;
+  const other = target === localStorage ? session : localStorage;
+  other?.removeItem(TOKEN_KEY);
+  other?.removeItem(ROLE_KEY);
+  target.setItem(TOKEN_KEY, token);
+  target.setItem(ROLE_KEY, role);
 }
 
 export function clearAuth() {
   sessionVersion += 1;
   inflight.clear();
-  localStorage.removeItem("pi_token");
-  localStorage.removeItem("pi_role");
+  for (const store of [localStorage, sessionStore()]) {
+    store?.removeItem(TOKEN_KEY);
+    store?.removeItem(ROLE_KEY);
+  }
 }
 
 /**
@@ -247,17 +278,79 @@ export async function api<T = unknown>(
  * Том файл дээр нийтлэг timeout ба jitter нь хүрэхгүй байж болох учир
  * uploadFile нь илүү урт timeout (30с) ашигладаг.
  */
+/**
+ * Файлын зориулалт — хадгалах хугацааг тодорхойлно (эзэн 2026-10-22):
+ * `homework` 7 хоногийн дараа устна, `theory` болон бусад нь байнга.
+ */
+export type UploadPurpose = "homework" | "theory" | "general";
+
+type Uploaded = { key: string; size: number; mime: string };
+
+/** Хөтчийн мэдэгдэх mime хоосон байж болно (HEIC) — өргөтгөлөөс нөхнө */
+function guessMime(file: File): string {
+  if (file.type) return file.type;
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return "application/pdf";
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  return ext ? `image/${ext}` : "application/octet-stream";
+}
+
+/**
+ * S3 руу ШУУД илгээх: presign → PUT (сервер байт дамжуулахгүй) → complete.
+ * Сервер S3-гүй бол null буцаана — дуудагч хуучин multipart зам руу шилжинэ.
+ */
+async function uploadDirect(file: File, purpose: UploadPurpose): Promise<Uploaded | null> {
+  const mime = guessMime(file);
+  const plan = await api<{
+    direct: boolean;
+    url?: string;
+    ticket?: string;
+    headers?: Record<string, string>;
+  }>("/uploads/presign", {
+    method: "POST",
+    body: { name: file.name, mime, size: file.size, purpose },
+  });
+  if (!plan.direct || !plan.url || !plan.ticket) return null;
+  const put = await fetch(plan.url, {
+    method: "PUT",
+    headers: plan.headers ?? { "Content-Type": mime },
+    body: file,
+    signal: AbortSignal.timeout(120_000), // утасны сүлжээнд 10 хуудас PDF
+  });
+  if (!put.ok) throw new Error("Файл байршуулахад алдаа гарлаа.");
+  return api<Uploaded>("/uploads/complete", {
+    method: "POST",
+    body: { ticket: plan.ticket },
+  });
+}
+
 export async function uploadFile(
   file: File,
-): Promise<{ key: string; size: number; mime: string }> {
+  opts: { purpose?: UploadPurpose } = {},
+): Promise<Uploaded> {
   // Offline шалга
   if (!isOnline()) {
     throw new Error(
       "Интернэт холболтогүй. Сүлжээний холболтоо шалгаан дахин оролдоно уу.",
     );
   }
+  const purpose = opts.purpose ?? "general";
 
+  // 1) S3 руу шууд — серверийн ачаалал хамгийн бага. Серверийн шалгалтын алдаа
+  //    (төрөл, хэмжээ) бол шууд хэрэглэгчид; сүлжээ/CORS алдаа бол 2) руу.
+  try {
+    const direct = await uploadDirect(file, purpose);
+    if (direct) return direct;
+  } catch (error) {
+    // 404 = хуучин API (presign маршрутгүй) — хуучин зам руу шилжинэ
+    if (error instanceof ApiError && error.status >= 400 && error.status < 500 && error.status !== 404)
+      throw error;
+  }
+
+  // 2) Хуучин зам: сервер дамжуулж хадгална. purpose-ийг файлаас ӨМНӨ — multer
+  //    body-г файлын өмнөх талбараас уншина.
   const form = new FormData();
+  form.append("purpose", purpose);
   form.append("file", file);
   const headers: Record<string, string> = {};
   const token = getToken();

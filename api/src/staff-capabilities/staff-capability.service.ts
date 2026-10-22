@@ -129,10 +129,21 @@ export class StaffCapabilityService {
           updatedAt: true,
         },
       }),
+      // Эрхийн матриц: ажилтан бүр (Админ, Багш+, Багш) нэг мөр. Утасны дугаар
+      // зөвхөн энэ ADMIN-only endpoint-оор гарна (assertAdmin дээр).
       this.prisma.user.findMany({
-        where: { role: Role.TEACHER_PLUS, archivedAt: null },
-        select: { id: true, firstName: true, lastName: true },
-        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+        where: {
+          role: { in: [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER] },
+          archivedAt: null,
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          role: true,
+        },
+        orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
         take: 500,
       }),
       this.prisma.classroom.findMany({
@@ -144,10 +155,14 @@ export class StaffCapabilityService {
     ]);
     return {
       asOf: new Date().toISOString(),
+      /** Матрицад «та» мөрийг түгжихэд (өөрийн түвшинг өөрчилдөггүй) */
+      actorId,
       grants,
       staff,
       classrooms,
       capabilities: STAFF_CAPABILITIES,
+      /** Багш+ олголтгүйгээр байнга эзэмших эрхүүд (матрицад түгжээтэй ✓) */
+      teacherPlusImplicit: TEACHER_PLUS_IMPLICIT,
     };
   }
 

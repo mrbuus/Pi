@@ -163,7 +163,10 @@ export const ModelName = {
   MockExamRegistration: 'MockExamRegistration',
   ClassTestStatus: 'ClassTestStatus',
   LessonPhoto: 'LessonPhoto',
-  LessonMakeup: 'LessonMakeup'
+  LessonMakeup: 'LessonMakeup',
+  ClassCheck: 'ClassCheck',
+  ClassCheckMark: 'ClassCheckMark',
+  LoginText: 'LoginText'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1460,6 +1463,9 @@ export const StoredFileScalarFieldEnum = {
   mime: 'mime',
   size: 'size',
   bytes: 'bytes',
+  storage: 'storage',
+  pages: 'pages',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 } as const
 
@@ -1903,6 +1909,42 @@ export const LessonMakeupScalarFieldEnum = {
 } as const
 
 export type LessonMakeupScalarFieldEnum = (typeof LessonMakeupScalarFieldEnum)[keyof typeof LessonMakeupScalarFieldEnum]
+
+
+export const ClassCheckScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  title: 'title',
+  amount: 'amount',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  archivedAt: 'archivedAt',
+  archivedById: 'archivedById'
+} as const
+
+export type ClassCheckScalarFieldEnum = (typeof ClassCheckScalarFieldEnum)[keyof typeof ClassCheckScalarFieldEnum]
+
+
+export const ClassCheckMarkScalarFieldEnum = {
+  id: 'id',
+  checkId: 'checkId',
+  studentId: 'studentId',
+  checked: 'checked',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClassCheckMarkScalarFieldEnum = (typeof ClassCheckMarkScalarFieldEnum)[keyof typeof ClassCheckMarkScalarFieldEnum]
+
+
+export const LoginTextScalarFieldEnum = {
+  id: 'id',
+  body: 'body',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LoginTextScalarFieldEnum = (typeof LoginTextScalarFieldEnum)[keyof typeof LoginTextScalarFieldEnum]
 
 
 export const SortOrder = {

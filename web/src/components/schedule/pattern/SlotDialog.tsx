@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, CalendarOff, PencilLine, RotateCcw, TriangleAlert } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, ArrowRight, CalendarOff, PencilLine, RotateCcw, TriangleAlert } from "lucide-react";
 import { useId, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/kit/button";
@@ -20,6 +20,7 @@ import {
   timeRange,
   WEEK_ORDER,
   type ClassInfo,
+  type Conflict,
   type Planned,
   type Slot,
   type TeacherOption,
@@ -85,6 +86,7 @@ export default function SlotDialog({
   const [step, setStep] = useState<"form" | "confirm">("form");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [swapWanted, setSwapWanted] = useState(false);
 
   // Split-ээр үүссэн ирээдүйн мөрийг устгавал өмнөх мөр нь дууссан тул цоорхой үүснэ —
   // түүнийг «Өөрчлөлтийг цуцлах»-аар л буцаана
@@ -102,20 +104,6 @@ export default function SlotDialog({
   const teacherLabel = (tid: string | null) =>
     tid ? (personName(teachers.find((t) => t.id === tid)) ?? (tid === slot.teacherId ? slot.teacherName : null) ?? "Сонгосон багш") : `Ангийн багш${classTeacher ? ` (${classTeacher})` : ""}`;
 
-  const changes = useMemo(() => {
-    const out: { key: string; label: string; before: ReactNode; after: ReactNode }[] = [];
-    if (weekday !== slot.weekday) out.push({ key: "wd", label: "Гараг", before: WEEKDAY_LABELS[slot.weekday], after: WEEKDAY_LABELS[weekday] });
-    if (startMinute !== slot.startMinute || endMinute !== slot.endMinute)
-      out.push({ key: "time", label: "Цаг", before: timeRange(slot), after: timeRange({ startMinute, endMinute }) });
-    if (newRoom !== (slot.room ?? null))
-      out.push({ key: "room", label: "Танхим", before: <RoomCell room={slot.room} />, after: <RoomCell room={newRoom} /> });
-    if (newTeacher !== (slot.teacherId ?? null))
-      out.push({ key: "teacher", label: "Багш", before: teacherLabel(slot.teacherId), after: teacherLabel(newTeacher) });
-    return out;
-    // teacherLabel нь teachers-ээс хамаарна
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [weekday, startMinute, endMinute, newRoom, newTeacher, slot, teachers]);
-
   const effFrom = scope === "from" && !future ? fromDate : slot.from;
   const conflicts = useMemo(
     () =>
@@ -129,7 +117,36 @@ export default function SlotDialog({
         : [],
     [mode, slot, chain, seriesTo, weekday, startMinute, endMinute, newRoom, newTeacher, effFrom, slots, classes],
   );
-  const blocking = conflicts.some((c) => c.blocking);
+  // Өөр ангитай танхим давхцсан бол хадгалахыг ХААНА — «Танхим солих»-оор л шийдэгдэнэ
+  // (хоёр анги танхимаа солино). Хоёр талд бодит танхим байх ёстой.
+  const roomClash = conflicts.find((c) => c.kind === "room" && c.other && newRoom !== slot.room)?.other ?? null;
+  const swapPossible = !!roomClash && !!slot.room && slot.room !== "Онлайн" && !!roomClash.room && roomClash.room !== "Онлайн";
+  const swap = swapPossible && swapWanted;
+  const blocking = conflicts.some((c) => c.blocking) || (!!roomClash && !swap);
+  const otherStudents = roomClash ? (classes.get(roomClash.classroomId)?.students ?? roomClash.students ?? null) : null;
+  const slotCap = slot.room ? (ROOMS.find((r) => r.value === slot.room)?.capacity ?? null) : null;
+  const otherOver = swap && otherStudents != null && slotCap != null && otherStudents > slotCap ? otherStudents - slotCap : 0;
+  // «Танхим» давхцлыг тусгай карт болгож харуулна — жагсаалтаас хасна
+  const shownConflicts: Conflict[] = [
+    ...conflicts.filter((c) => c.kind !== "room" || !c.other || newRoom === slot.room),
+    ...(otherOver > 0 ? [{ kind: "capacity" as const, blocking: false, text: `${roomClash?.classLabel}: сурагчдын тоо суудлаас ${otherOver}-ээр хэтэрнэ` }] : []),
+  ];
+
+  const changes = useMemo(() => {
+    const out: { key: string; label: string; before: ReactNode; after: ReactNode }[] = [];
+    if (weekday !== slot.weekday) out.push({ key: "wd", label: "Гараг", before: WEEKDAY_LABELS[slot.weekday], after: WEEKDAY_LABELS[weekday] });
+    if (startMinute !== slot.startMinute || endMinute !== slot.endMinute)
+      out.push({ key: "time", label: "Цаг", before: timeRange(slot), after: timeRange({ startMinute, endMinute }) });
+    if (newRoom !== (slot.room ?? null))
+      out.push({ key: "room", label: "Танхим", before: <RoomCell room={slot.room} />, after: <RoomCell room={newRoom} /> });
+    if (swap && roomClash)
+      out.push({ key: "swap", label: `Танхим (${roomClash.classLabel})`, before: <RoomCell room={roomClash.room} />, after: <RoomCell room={slot.room} /> });
+    if (newTeacher !== (slot.teacherId ?? null))
+      out.push({ key: "teacher", label: "Багш", before: teacherLabel(slot.teacherId), after: teacherLabel(newTeacher) });
+    return out;
+    // teacherLabel нь teachers-ээс хамаарна
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekday, startMinute, endMinute, newRoom, newTeacher, slot, teachers, swap, roomClash]);
 
   const problem = (() => {
     if (mode === "change") {
@@ -175,7 +192,13 @@ export default function SlotDialog({
     const body = { weekday, startMinute, endMinute, room: newRoom, teacherId: newTeacher };
     const patch = (rowId: string, b: object) => api(`/schedule/${rowId}`, { method: "PATCH", body: b });
     try {
-      if (mode === "resume") {
+      if (mode === "change" && swap && roomClash) {
+        // «Танхим солих»: хоёр ангийн танхимыг НЭГ дуудлагаар (атомар) солино
+        await api(`/schedule/${chain[segAt(effFrom)].id}/swap-room`, {
+          method: "POST",
+          body: { otherId: roomClash.id, from: effFrom, ...body },
+        });
+      } else if (mode === "resume") {
         await patch(chain[chain.length - 1].id, { effectiveTo: null });
       } else if (mode === "end") {
         // Тухайн өдрийг агуулсан хэсгийг хаана, түүнээс хойших (ирээдүйн) хэсгүүдийг устгана
@@ -193,7 +216,9 @@ export default function SlotDialog({
         for (const part of chain) await patch(part.id, body);
       }
       toast.success(
-        mode === "resume"
+        mode === "change" && swap && roomClash
+          ? `${slot.classLabel} ба ${roomClash.classLabel}: танхим солигдлоо`
+          : mode === "resume"
           ? `${slot.classLabel}: хуваарь цаашид үргэлжилнэ`
           : mode === "end"
             ? `${slot.classLabel}: ${deletes ? "цаг устлаа" : `${dateLabel(endFrom, today)} гарагаас хасагдлаа`}`
@@ -358,7 +383,17 @@ export default function SlotDialog({
                   <ScopeOption checked={scope === "all"} onChange={() => setScope("all")} name={`${id}-scope`} title="Анхнаас нь засах" hint="Буруу оруулсныг засахад — өнгөрсөн хичээлүүд ч шинэ утгаар харагдана" />
                 </fieldset>
               )}
-              <ConflictList conflicts={conflicts} />
+              {roomClash && (
+                <SwapCard
+                  clash={roomClash}
+                  ownRoom={slot.room}
+                  newRoom={newRoom}
+                  possible={swapPossible}
+                  checked={swap}
+                  onChange={setSwapWanted}
+                />
+              )}
+              <ConflictList conflicts={shownConflicts} />
             </>
           )}
 
@@ -425,7 +460,7 @@ export default function SlotDialog({
             {mode === "resume" && <li>Дуусах огноог арилгаж, энэ цаг цаашид 7 хоног бүр үргэлжилнэ</li>}
             <li className="text-ink-dim">Ангийн сурагч, багш нарт мэдэгдэл очно</li>
           </ul>
-          <ConflictList conflicts={conflicts} />
+          <ConflictList conflicts={shownConflicts} />
           {error && (
             <div role="alert" className="flex items-start gap-2 rounded-xl border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
               <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -435,6 +470,45 @@ export default function SlotDialog({
         </div>
       )}
     </Sheet>
+  );
+}
+
+function SwapCard({
+  clash,
+  ownRoom,
+  newRoom,
+  possible,
+  checked,
+  onChange,
+}: {
+  clash: Slot;
+  ownRoom: string | null;
+  newRoom: string | null;
+  possible: boolean;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div role="group" aria-label="Танхим давхцаж байна" className={cn("space-y-2 rounded-2xl border p-3", checked ? "border-brand-bright bg-brand-bright/[0.05]" : "border-line bg-bg")}>
+      <p className="text-sm text-ink">
+        {newRoom} танхимд {WEEKDAY_LABELS[clash.weekday]} {timeRange(clash)} цагт <b>{clash.classLabel}</b> анги орно
+      </p>
+      {possible ? (
+        <Button type="button" size="sm" variant={checked ? "default" : "outline"} aria-pressed={checked} onClick={() => onChange(!checked)}>
+          <ArrowLeftRight aria-hidden />
+          Танхим солих
+        </Button>
+      ) : (
+        <p className="text-xs text-ink-dim">Танхимгүй эсвэл онлайн ангитай танхим солих боломжгүй — өөр танхим эсвэл цаг сонгоно уу</p>
+      )}
+      {possible && (
+        <p className="text-xs text-ink-dim">
+          {checked
+            ? `${clash.classLabel} анги ${ownRoom} танхимд, энэ анги ${newRoom} танхимд орно — сонгосон огнооноос эхлэн`
+            : "Солихгүй бол хадгалах боломжгүй — өөр танхим эсвэл цаг сонгоно уу"}
+        </p>
+      )}
+    </div>
   );
 }
 

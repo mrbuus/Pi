@@ -17,6 +17,7 @@ import {
   type HwRow,
   type LateRangeValue,
   type MarksPayload,
+  type RecordedBy,
   type RiskFlag,
 } from "./lib";
 
@@ -24,6 +25,8 @@ import {
 export const POLL_MS = 15_000;
 /** Бичиж зогссоноос хойш хадгалах хүлээлт */
 const TYPE_MS = 700;
+/** Хадгалалт дууссаны дараа «хэн тэмдэглэсэн», эрсдэлийг шинэчлэх хүлээлт (товшилтуудыг нэгтгэнэ) */
+const REFRESH_MS = 1_500;
 
 type Cell = "att" | "attNote" | "hw" | "hwNote";
 type Override =
@@ -88,6 +91,7 @@ export function useBoard(classId: string | null, date: string) {
   const [overrides, setOverrides] = useState<Record<string, Override>>({});
   const [risk, setRisk] = useState<Record<string, RiskFlag[]>>({});
   const [sent, setSent] = useState<string[]>([]);
+  const [recordedBy, setRecordedBy] = useState<RecordedBy | null>(null);
   const [criteria, setCriteriaState] = useState<Criteria | null>(null);
   const [save, setSave] = useState<SaveState>({ pending: 0, savedAt: null, error: null });
   const [reloadKey, setReloadKey] = useState(0);
@@ -134,6 +138,7 @@ export function useBoard(classId: string | null, date: string) {
         setServer(toServer(p));
         setRisk(p.risk);
         setSent(p.sent?.students ?? []);
+        setRecordedBy(p.recordedBy ?? null);
         setCriteriaState(p.criteria);
         setStatus("ready");
       })
@@ -158,6 +163,7 @@ export function useBoard(classId: string | null, date: string) {
       if (ctx.current.classId !== cid || ctx.current.date !== d) return;
       setRisk(p.risk);
       setSent(p.sent?.students ?? []);
+      setRecordedBy(p.recordedBy ?? null);
       setCriteriaState(p.criteria);
       // Нисэж байх хооронд манай хадгалалт дууссан бол хуучирсан байж болно — дараагийнхыг хүлээнэ
       if (epoch.current !== at) return;
@@ -179,6 +185,22 @@ export function useBoard(classId: string | null, date: string) {
       document.removeEventListener("visibilitychange", onVis);
     };
   }, [status, poll]);
+
+  // Хадгалалт бүгд дууссаны дараа (товшилтуудыг нэгтгэж) «хэн тэмдэглэсэн», эрсдэлийг шинэчилнэ
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshSoon = useCallback(() => {
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    refreshTimer.current = setTimeout(() => {
+      refreshTimer.current = null;
+      void poll();
+    }, REFRESH_MS);
+  }, [poll]);
+  useEffect(
+    () => () => {
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    },
+    [],
+  );
 
   /* ───────── Бүртгэл = серверийн төлөв + хадгалагдаж буй нүд ───────── */
 
@@ -314,6 +336,7 @@ export function useBoard(classId: string | null, date: string) {
             epoch.current += 1;
             const total = bump(keys, -1);
             setSave((s) => ({ pending: total, savedAt: total === 0 ? nowTime() : s.savedAt, error: s.error }));
+            if (total === 0) refreshSoon();
           } catch (e) {
             if (!same()) return;
             epoch.current += 1;
@@ -334,7 +357,7 @@ export function useBoard(classId: string | null, date: string) {
       for (const sid of sids) chains.current.set(sid, task);
       return task;
     },
-    [bump, settle, poll],
+    [bump, settle, poll, refreshSoon],
   );
 
   const isCurrent = (t: Target) => ctx.current.classId === t.classId && ctx.current.date === t.date;
@@ -546,6 +569,7 @@ export function useBoard(classId: string | null, date: string) {
     recs,
     risk,
     sent,
+    recordedBy,
     criteria,
     save,
     onAtt,

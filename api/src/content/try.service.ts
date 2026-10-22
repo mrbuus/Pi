@@ -1,8 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
-import { UPLOAD_DIR } from '../storage/uploads.controller';
+import { readStoredBytes } from '../storage/file-store';
 import {
   GradableProblem,
   choiceImagesOf,
@@ -88,13 +86,9 @@ export class TryService {
     const t = await this.loadFree(testId);
     const allowed = t.problems.some((tp) => tp.problem.imageKey === key || tp.problem.choiceOptions.some((c) => c.imageKey === key));
     if (!allowed) throw new NotFoundException('Зураг олдсонгүй');
-    const path = join(UPLOAD_DIR, key);
-    if (existsSync(path)) {
-      const stored = await this.prisma.storedFile.findUnique({ where: { key }, select: { mime: true } });
-      return { bytes: readFileSync(path), mime: stored?.mime ?? 'application/octet-stream' };
-    }
-    const stored = await this.prisma.storedFile.findUnique({ where: { key } });
+    // Диск → S3 → өгөгдлийн сан (file-store.ts)
+    const stored = await readStoredBytes(this.prisma, key);
     if (!stored) throw new NotFoundException('Зураг олдсонгүй');
-    return { bytes: Buffer.from(stored.bytes), mime: stored.mime };
+    return stored;
   }
 }

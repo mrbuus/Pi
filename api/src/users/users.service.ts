@@ -17,7 +17,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
-import { isClassTeacher } from '../common/class-teachers';
 import { parseDateOnly, todayUB } from '../common/date';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
@@ -916,6 +915,86 @@ export class UsersService {
     });
   }
 
+  /**
+   * Эрхийн матрицаас Багш ↔ Багш+ солих (эзэн 2026-10-22). `setUserRole`-оос
+   * ТУСАД нь, чанга дүрэмтэй:
+   *  - зөвхөн ADMIN (DB-ээс дахин шалгана);
+   *  - зөвхөн ажилтны хоёр түвшин (TEACHER, TEACHER_PLUS) хоорондоо;
+   *  - ADMIN-ын эрхийг ХЭЗЭЭ Ч өөрчлөхгүй, өөрийнхөө эрхийг ч өөрчлөхгүй;
+   *  - Багш+ → Багш болгоход идэвхтэй тусгай эрхүүдийг цуцална (дахин Багш+
+   *    болгоход хуучин эрх нууцаар сэргэхээс сэргийлнэ);
+   *  - өөрчлөлт бүр аудитад (шалтгаантай) нэг transaction-д бичигдэнэ.
+   */
+  async setStaffRole(
+    targetId: string,
+    role: Role,
+    actorId: string,
+    reason?: string,
+  ) {
+    if (role !== Role.TEACHER && role !== Role.TEACHER_PLUS)
+      throw new BadRequestException('Зөвхөн Багш эсвэл Багш+ түвшин сонгоно');
+    const cleanReason = reason?.trim() || undefined;
+    if (cleanReason && cleanReason.length > 500)
+      throw new BadRequestException('Шалтгаан 500 тэмдэгтээс хэтрэхгүй');
+    if (targetId === actorId)
+      throw new BadRequestException('Өөрийн эрхийг энд өөрчлөх боломжгүй');
+
+    const actor = await this.prisma.user.findUnique({
+      where: { id: actorId },
+      select: { role: true, archivedAt: true },
+    });
+    if (!actor || actor.archivedAt || actor.role !== Role.ADMIN)
+      throw new ForbiddenException('Зөвхөн админ ажилтны түвшинг солино');
+
+    return this.prisma.$transaction(async (tx) => {
+      // Зэрэг хоёр солилт нэг ажилтанд давхцахаас сэргийлнэ (уншихаас ӨМНӨ түгжинэ)
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`staff-role:${targetId}`}))`;
+      const target = await tx.user.findUnique({
+        where: { id: targetId },
+        select: { id: true, role: true, archivedAt: true },
+      });
+      if (!target) throw new NotFoundException('Хэрэглэгч олдсонгүй');
+      if (target.role === Role.ADMIN)
+        throw new ForbiddenException('Админы эрхийг өөрчлөх боломжгүй');
+      if (target.role !== Role.TEACHER && target.role !== Role.TEACHER_PLUS)
+        throw new BadRequestException(
+          'Зөвхөн Багш эсвэл Багш+ ажилтны түвшинг солино',
+        );
+      if (target.archivedAt)
+        throw new BadRequestException('Архивласан ажилтны эрхийг солихгүй');
+      if (target.role === role)
+        return { id: target.id, role: target.role, changed: false };
+
+      await tx.user.update({ where: { id: targetId }, data: { role } });
+      await tx.teacherProfile.upsert({
+        where: { userId: targetId },
+        create: { userId: targetId, canManageStudents: role === Role.TEACHER_PLUS },
+        update: { canManageStudents: role === Role.TEACHER_PLUS },
+      });
+      let revokedGrants = 0;
+      if (role === Role.TEACHER) {
+        const revoked = await tx.staffCapabilityGrant.updateMany({
+          where: { userId: targetId, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+        revokedGrants = revoked.count;
+      }
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          actorRole: Role.ADMIN,
+          action: 'ROLE_CHANGE',
+          entity: 'User',
+          entityId: targetId,
+          before: { role: target.role },
+          after: { role, revokedGrants },
+          reason: cleanReason,
+        },
+      });
+      return { id: target.id, role, changed: true, revokedGrants };
+    });
+  }
+
   // Энгийн хэрэглэгчийг багш болгох / багшийн түвшинг өөрчлөх (зөвхөн админ)
   async setTeacherStatus(
     userId: string,
@@ -1165,18 +1244,11 @@ export class UsersService {
       },
     });
 
-    if (requesterRole === Role.TEACHER) {
-      // Үндсэн ба туслах ангийн багш хоёулаа (common/class-teachers.ts)
-      const ownsClassroom = isClassTeacher(
-        activeEnrollment?.classroom,
-        requesterId,
-      );
-      if (!ownsClassroom) {
-        throw new ForbiddenException(
-          'Зөвхөн өөрийн ангийн сурагчийг харах эрхтэй',
-        );
-      }
-    }
+    // Багш (TEACHER) бүх идэвхтэй сурагчийг УНШИХ эрхтэй (эзэн 2026-10-22) —
+    // өөрийн ангийн шалгалтыг тайлсан. Зөвхөн унших: засах/архивлах маршрутууд
+    // ADMIN/Багш+ хэвээр. Ажилтны (сурагч биш) дэлгэрэнгүйг Багш харахгүй.
+    if (requesterRole === Role.TEACHER && user.role !== Role.STUDENT)
+      throw new ForbiddenException('Зөвхөн сурагчийн мэдээллийг харах эрхтэй');
 
     // Архивлагдсан сурагчийн сүүлийн анги — сэргээхэд урьдчилан сонгоно
     const lastEnrollment =

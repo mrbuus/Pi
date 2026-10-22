@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LoaderCircle, TriangleAlert } from "lucide-react";
+import { rememberPreference } from "@/components/auth/remember";
 import { api, homeForRole, setAuth } from "@/lib/api";
 
 /* Google-ээс буцсаны дараах завсрын хуудас. Сервер энд 60 секундийн нэг
@@ -23,13 +24,15 @@ export default function GoogleCallbackPage() {
       queueMicrotask(() => setError("Нэвтрэх код алга байна."));
       return;
     }
+    // «Намайг сана» — нэвтрэх хуудсан дээрх сонголт (components/auth/remember.ts)
+    const remember = rememberPreference();
     api<{ accessToken: string; role: string }>("/auth/google/exchange", {
       method: "POST",
-      body: { code },
+      body: { code, remember },
       auth: false,
     })
       .then((res) => {
-        setAuth(res.accessToken, res.role);
+        setAuth(res.accessToken, res.role, remember);
         router.replace(homeForRole(res.role));
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Нэвтэрч чадсангүй"));

@@ -16,6 +16,9 @@ import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { api, clearAuth, getRole, getToken } from "@/lib/api";
 import { navigationRole } from "@/lib/navigation-role";
 
+/** Нэвтэрсний дараах зөвшөөрлийн шалгалт (G17). Өгөгдмөл УНТРААЛТТАЙ — эзэн 2026-10-22. */
+const CONSENT_GATE_ENABLED = process.env.NEXT_PUBLIC_CONSENT_GATE === "1";
+
 // Role бүрийн монгол нэр — header identity badge-д ашиглана
 const ROLE_LABEL: Record<string, string> = {
   ADMIN: "Админ",
@@ -109,8 +112,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Нууцлалын нөхцөлийг (G17) хараахан зөвшөөрөөгүй хэрэглэгчийг нэг удаа
   // /app/consent руу чиглүүлнэ. Сервер алдаа өгвөл ажлыг ХААХГҮЙ (шалгалт
   // саадгүй үргэлжилнэ) — дараагийн ачааллаар дахин шалгана.
-  const [consentChecked, setConsentChecked] = useState(false);
+  // ⏸ ТҮР УНТРААСАН (эзэн 2026-10-22): нэвтэрсний дараах «Үйлчилгээний нөхцөл»
+  // алхмыг хасав. Код, /app/consent хуудас, /consent/my API, ӨС-ийн талбарууд
+  // хэвээр. Дахин асаахдаа CONSENT_GATE_ENABLED (доор) — env NEXT_PUBLIC_CONSENT_GATE=1.
+  const [consentChecked, setConsentChecked] = useState(!CONSENT_GATE_ENABLED);
   useEffect(() => {
+    if (!CONSENT_GATE_ENABLED) return;
     if (consentChecked || !getToken() || pathname === "/app/consent") return;
     api<{ needsConsent: boolean }>("/consent/my")
       .then((r) => {

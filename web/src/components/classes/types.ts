@@ -23,6 +23,8 @@ export interface ClassCard {
   grade: number | null;
   /** Ангийн багш ба туслах ангийн багш (дээд тал нь хоёр) */
   classTeacher: PersonRef | null;
+  /** Ангийн багшийн ӨӨРИЙН профайл зураг (User.avatarUrl, файлын түлхүүр) */
+  teacherAvatarUrl?: string | null;
   assistantTeacher: PersonRef | null;
   /** Ангийн багш нар + хуваарийн бусад багш (хайлтад) */
   teachers: string[];
@@ -136,6 +138,8 @@ export interface ClassDashboard {
   windowDays: number;
   practiceDays: number;
   makeupDays: number;
+  /** Нээлттэй «Чек»-ийн тоо (толгойн товчинд) */
+  openChecks?: number;
   classroom: {
     id: string;
     name: string;
@@ -295,4 +299,39 @@ export interface FlagHistoryRow {
   removedAt: string | null;
   removedByName: string | null;
   removeNote: string | null;
+}
+
+/** «Чек» — GET /classrooms/:id/checks (api/src/class-checks) */
+export interface CheckPerson {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface CheckMark {
+  studentId: string;
+  checked: boolean;
+  updatedAt: string;
+  updatedBy: CheckPerson | null;
+}
+
+export interface ClassCheck {
+  id: string;
+  title: string;
+  amount: number | null;
+  createdAt: string;
+  createdBy: CheckPerson | null;
+  archivedAt: string | null;
+  archivedBy: CheckPerson | null;
+  marks: CheckMark[];
+}
+
+export interface ClassChecksResponse {
+  classroomId: string;
+  /** Одоогийн сурагчид (нэрээр) */
+  students: CheckPerson[];
+  /** Ангиас гарсан ч аль нэг чект тэмдэглэгдсэн сурагчид */
+  former: CheckPerson[];
+  checks: ClassCheck[];
+  archived: ClassCheck[];
 }

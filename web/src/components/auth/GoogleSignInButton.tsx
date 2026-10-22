@@ -4,13 +4,16 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import GoogleMark from "./GoogleMark";
 
-/* «Google-ээр нэвтрэх». Сервер дээр GOOGLE_* тохируулаагүй бол огт харагдахгүй
-   (GET /auth/google/config). Товч дарахад сервер state үүсгэж Google-ийн
-   URL-ийг буцаана — JWT, нууц түлхүүр вэбд хэзээ ч ирэхгүй. */
+/* «Google-ээр нэвтрэх / бүртгүүлэх». Сервер дээр GOOGLE_* тохируулаагүй бол огт
+   харагдахгүй (GET /auth/google/config). Товч дарахад сервер state үүсгэж Google-ийн
+   URL-ийг буцаана (prompt=select_account — данс сонгох цонх үргэлж гарна) — JWT,
+   нууц түлхүүр вэбд хэзээ ч ирэхгүй. Бүртгэлгүй Gmail → /register?google=<тасалбар>. */
 // Google-ээс /login?google=<үр дүн> гэж буцсан үеийн тайлбар.
 const RESULT_TEXT: Record<string, string> = {
+  // Gmail-ийн хаяг бүртгэлтэй ч өөр Google бүртгэлтэй холбогдсон (эсвэл холбоогүй) үед л.
+  // Огт бүртгэлгүй Gmail бол сервер /register?google=… руу илгээдэг (signup-ticket.ts).
   not_linked:
-    "Энэ Google бүртгэл Pi.mn-ийн хэрэглэгчтэй холбогдоогүй байна. Эхлээд утас, нууц үгээрээ нэвтэрч «Миний мэдээлэл» хэсгээс Google-ээ холбоно уу.",
+    "Энэ Gmail хаяг pimath.mn-д бүртгэлтэй ч Google-ээр нэвтрэх холбоогүй байна. Утас, нууц үгээрээ нэвтэрч «Миний мэдээлэл» хэсгээс Google-ээ холбоно уу.",
   unverified: "Google бүртгэлийн имэйл баталгаажаагүй байна.",
   expired: "Хугацаа дууссан. Дахин оролдоно уу.",
   error: "Google-тэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.",

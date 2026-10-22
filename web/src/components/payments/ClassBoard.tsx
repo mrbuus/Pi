@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Download, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
+import { Button } from "@/components/ui/kit/button";
 import InfoHint from "@/components/ui/InfoHint";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
 import LedgerList from "./LedgerList";
 import { BlockLegend } from "./MonthBlocks";
 import { millions, mnt, monthName } from "./ledgerFormat";
+import { downloadLedgerCsv } from "./ledgerCsv";
 import { errMsg } from "./paymentHelpers";
 import type { LedgerBoard, LedgerRow } from "./ledgerTypes";
 
@@ -124,7 +126,15 @@ export default function ClassBoard({ id }: { id: string }) {
             </button>
           ))}
         </div>
-        <InfoHint label="Блокийн тайлбар" className="ml-auto">
+        <Button
+          variant="outline"
+          className="ml-auto min-h-11"
+          disabled={rows.length === 0}
+          onClick={() => downloadLedgerCsv(rows, data.year, "tolbor-angi")}
+        >
+          <Download aria-hidden /> CSV татах
+        </Button>
+        <InfoHint label="Блокийн тайлбар">
           <BlockLegend />
         </InfoHint>
       </div>

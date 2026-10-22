@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, TriangleAlert } from "lucide-react";
 import ConsentFields, { EMPTY_CONSENT, PRIVACY_VERSION, consentReady } from "@/components/consent/ConsentFields";
+import GoogleMark from "@/components/auth/GoogleMark";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import LogoMark from "@/components/LogoMark";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, nextFromLocation, setAuth } from "@/lib/api";
@@ -72,6 +74,29 @@ function isStudentKind(kind: Kind): kind is "CLASSROOM" | "ONLINE" {
   return kind === "CLASSROOM" || kind === "ONLINE";
 }
 
+/** GET /auth/google/signup-info — тасалбараас урьдчилж бөглөх мэдээлэл (нууц мэдээлэлгүй) */
+interface GoogleSignup {
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+/**
+ * Gmail-ээр бүртгүүлэх (эзэн 2026-10-22): Google-ээр нэвтрэх гэсэн ч бүртгэлгүй
+ * Gmail-ийг сервер /register?google=<15 минутын тасалбар> руу илгээнэ. Тасалбарыг
+ * хаягийн мөрөөс шууд арилгаж (түүх, Referer-т үлдэхгүй) санах ойд хадгална.
+ */
+function takeGoogleTicket(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  const ticket = params.get("google");
+  // «cancelled», «expired» гэх мэт үр дүнг GoogleSignInButton өөрөө харуулна
+  if (!ticket || !ticket.includes(".")) return null;
+  params.delete("google");
+  const rest = params.toString();
+  window.history.replaceState(null, "", `${window.location.pathname}${rest ? `?${rest}` : ""}`);
+  return ticket;
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const [consent, setConsent] = useState(EMPTY_CONSENT);
@@ -90,6 +115,42 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RegisterResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [googleTicket, setGoogleTicket] = useState<string | null>(null);
+  const [google, setGoogle] = useState<GoogleSignup | null>(null);
+  const [googleError, setGoogleError] = useState("");
+
+  // React dev (StrictMode) effect-ийг 2 удаа ажиллуулдаг: эхнийх нь тасалбарыг
+  // хаягаас арилгадаг тул ref-д хадгалж 2 дахь нь ч ашиглана.
+  const ticketRef = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (ticketRef.current === undefined) ticketRef.current = takeGoogleTicket();
+    const ticket = ticketRef.current;
+    if (!ticket) return;
+    let active = true;
+    api<GoogleSignup>(`/auth/google/signup-info?ticket=${encodeURIComponent(ticket)}`, { auth: false })
+      .then((info) => {
+        if (!active) return;
+        setGoogleTicket(ticket);
+        setGoogle(info);
+        // Овог, нэрийг Google-ээс урьдчилж бөглөнө — хэрэглэгч засаж болно
+        setForm((f) => ({
+          ...f,
+          lastName: f.lastName || info.lastName,
+          firstName: f.firstName || info.firstName,
+        }));
+      })
+      .catch((e) => {
+        if (active) setGoogleError(e instanceof Error ? e.message : "Google-ийн мэдээллийг уншиж чадсангүй");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function dropGoogle() {
+    setGoogleTicket(null);
+    setGoogle(null);
+  }
 
   function set(k: keyof typeof form, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -129,6 +190,8 @@ export default function RegisterPage() {
         firstName: form.firstName,
         lastName: form.lastName,
       };
+      // Gmail тасалбар — сервер шалгаад Gmail-ийг бүртгэлтэй нэг дор холбоно
+      if (googleTicket) body.googleTicket = googleTicket;
       if (kind === "PARENT") {
         body.asParent = true;
       }
@@ -238,6 +301,34 @@ export default function RegisterPage() {
           </Link>
           <p className="mt-2 text-sm font-semibold text-brand">Бүртгэл үүсгэх</p>
         </div>
+
+        {/* Gmail-ээр бүртгүүлж байгаа бол — аль Gmail холбогдохыг тод харуулна */}
+        {google && (
+          <div className="mb-5 rounded-xl border border-brand/30 bg-brand/5 p-3">
+            <p className="flex items-start gap-2.5 text-sm text-ink">
+              <GoogleMark className="mt-0.5 h-4 w-4 shrink-0" />
+              <span className="min-w-0 break-words">
+                Gmail: <span className="font-semibold">{google.email}</span> — бүртгүүлсний дараа энэ Gmail-ээр нэвтэрнэ
+              </span>
+            </p>
+            <p className="mt-1.5 pl-6.5 text-xs text-ink-dim">
+              Утасны дугаар заавал — анхны нууц үг тань утасны дугаар байна
+            </p>
+            <button
+              type="button"
+              onClick={dropGoogle}
+              className="mt-1 min-h-9 pl-6.5 text-xs font-medium text-brand hover:underline"
+            >
+              Gmail-гүйгээр бүртгүүлэх
+            </button>
+          </div>
+        )}
+        {googleError && !google && (
+          <p role="alert" className="mb-5 flex items-start gap-2 rounded-xl border border-error/40 bg-error/10 px-3 py-2.5 text-sm text-ink">
+            <TriangleAlert aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-error" />
+            <span>{googleError}</span>
+          </p>
+        )}
 
         {/* Алхам 1: Та хэн бэ? Эхлээд үүнийг сонговол ЗӨВХӨН хэрэгтэй талбарууд харагдана */}
         <div className="mb-5">
@@ -431,7 +522,7 @@ export default function RegisterPage() {
             )}
 
             {kind === "CLASSROOM" && (
-              <div className="rounded-xl border border-warning/30 bg-warning/10 p-3">
+              <div className="rounded-xl border border-brand/30 bg-brand/5 p-3">
                 <label htmlFor="activationCode" className="mb-1.5 block text-xs font-medium text-ink">
                   Багшаас авсан өнөөдрийн код
                 </label>
@@ -476,6 +567,10 @@ export default function RegisterPage() {
             </button>
           </form>
         )}
+
+        {/* Google-ээр бүртгүүлэх — сервер тохируулаагүй бол харагдахгүй. Аль хэдийн
+            Gmail сонгосон бол дахин санал болгохгүй. */}
+        {!google && <GoogleSignInButton label="Google-ээр бүртгүүлэх" />}
 
         <p className="mt-5 text-center text-sm text-ink-dim">
           Бүртгэлтэй юу?{" "}

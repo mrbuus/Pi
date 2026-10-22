@@ -158,6 +158,8 @@ export interface Conflict {
   text: string;
   /** true бол сервер татгалзана — хадгалахыг хаана */
   blocking: boolean;
+  /** kind="room": тухайн танхимд давхцаж буй өөр ангийн мөр (SlotDialog «Танхим солих»-д) */
+  other?: Slot;
 }
 
 /**
@@ -184,14 +186,14 @@ export function findConflicts(
     if (s.classroomId === c.classroomId) {
       out.push({ kind: "class", blocking: true, text: `Энэ анги ${day} гарагт ${timeRange(s)} цагт аль хэдийн хичээлтэй` });
     } else if (c.room && s.room === c.room) {
-      out.push({ kind: "room", blocking: false, text: `${c.room} танхимд ${day} ${timeRange(s)} цагт ${s.classLabel} анги орно` });
+      out.push({ kind: "room", blocking: false, other: s, text: `${c.room} танхимд ${day} ${timeRange(s)} цагт ${s.classLabel} анги орно` });
     } else if (mine && effTeacher(s.classroomId, s.teacherId) === mine) {
       out.push({ kind: "teacher", blocking: false, text: `Багш ${day} ${timeRange(s)} цагт ${s.classLabel} ангид хичээлтэй` });
     }
   }
   const cap = c.room ? (ROOMS.find((r) => r.value === c.room)?.capacity ?? null) : null;
   if (cap != null && students != null && students > cap) {
-    out.push({ kind: "capacity", blocking: false, text: `${students} сурагч, ${c.room} танхимд ${cap} суудал` });
+    out.push({ kind: "capacity", blocking: false, text: `Сурагчдын тоо суудлаас ${students - cap}-ээр хэтэрнэ` });
   }
   return out;
 }

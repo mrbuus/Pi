@@ -6,6 +6,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResetPasswordLinkDto } from './dto/reset-password-link.dto';
 import { SetAvatarDto } from './dto/set-avatar.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PasswordResetService } from './password-reset.service';
@@ -46,7 +47,8 @@ export class AuthController {
   // ---------- Нууц үг сэргээх (нэвтрээгүй хэрэглэгчид) ----------
 
   // Хамгийн чанга хязгаар энд байх ёстой: илгээх бүрд SMS-ийн ТӨЛБӨР гарна,
-  // мөн хэн нэгний утсыг мессежээр цэглэх (SMS bombing) боломж үүснэ.
+  // мөн хэн нэгний утас/имэйлийг мессежээр цэглэх (bombing) боломж үүснэ.
+  // Бүртгэлд имэйл/Gmail байвал холбоос, эс бол SMS код (password-reset.service.ts).
   // ThrottlerGuard нь IP-гээр, PasswordResetService нь бүртгэлээр хамгаална —
   // хоёр давхарга хамтдаа л хүрэлцэнэ.
   @Throttle({ default: { limit: 5, ttl: 15 * 60_000 } })
@@ -62,6 +64,14 @@ export class AuthController {
   @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.passwordReset.reset(dto.identifier, dto.code, dto.newPassword);
+  }
+
+  // Имэйлээр ирсэн нэг удаагийн холбоос (30 мин). Токен 256 бит тул таах
+  // боломжгүй ч IP-гээр хязгаарлана (ӨС-ийг дэмий ачаалахаас).
+  @Throttle({ default: { limit: 10, ttl: 15 * 60_000 } })
+  @Post('reset-password/link')
+  resetPasswordWithLink(@Body() dto: ResetPasswordLinkDto) {
+    return this.passwordReset.resetWithLink(dto.token, dto.newPassword);
   }
 
   @UseGuards(JwtAuthGuard)

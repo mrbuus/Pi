@@ -16,10 +16,13 @@ import {
   DEFAULT_CRITERIA,
   addDaysKey,
   computeRisk,
+  countStatuses,
   criteriaToStore,
   lessonAssignmentIds,
+  monthRange,
   normalizeCriteria,
   submittedStudentIds,
+  summarizeRecorders,
   ubDateKey,
 } from './board-logic';
 import { loadPreviousLesson } from './lesson-dates';
@@ -290,6 +293,57 @@ export class AttendanceService {
     }));
   }
 
+  /**
+   * Энэ анги, энэ өдрийн ирцийг ХЭН авсан, даалгаврыг ХЭН шалгасан (эзэн 2026-10-22):
+   * мөр бүрийн сүүлчийн тэмдэглэгч (`markedById`) → багш тус бүрийн тоо ба сүүлийн цаг.
+   * Ирцийн мөрөнд цаг (updatedAt) байхгүй тул тэр багшийн тэр мөрийн аудитын сүүлийн
+   * бичлэгээс; аудит олдохгүй бол цаг null. Даалгавар — мөрийн updatedAt.
+   */
+  private async recordedBy(classroomId: string, date: Date) {
+    const [attRows, hwRows] = await Promise.all([
+      this.prisma.attendance.findMany({
+        where: { classroomId, date },
+        select: { id: true, markedById: true },
+      }),
+      this.prisma.dailyHomeworkMark.findMany({
+        where: { classroomId, date, status: { not: null } },
+        select: { markedById: true, updatedAt: true },
+      }),
+    ]);
+    const audits = attRows.length
+      ? await this.prisma.auditLog.findMany({
+          where: {
+            entity: 'Attendance',
+            entityId: { in: attRows.map((r) => r.id) },
+          },
+          select: { entityId: true, actorId: true, at: true },
+        })
+      : [];
+    const lastAt = new Map<string, Date>();
+    for (const a of audits) {
+      const k = `${a.entityId}|${a.actorId}`;
+      const cur = lastAt.get(k);
+      if (!cur || a.at > cur) lastAt.set(k, a.at);
+    }
+    const names = await this.markerNames([
+      ...attRows.map((r) => r.markedById),
+      ...hwRows.map((r) => r.markedById),
+    ]);
+    return {
+      attendance: summarizeRecorders(
+        attRows.map((r) => ({
+          markedById: r.markedById,
+          at: lastAt.get(`${r.id}|${r.markedById}`) ?? null,
+        })),
+        names,
+      ),
+      homework: summarizeRecorders(
+        hwRows.map((r) => ({ markedById: r.markedById, at: r.updatedAt })),
+        names,
+      ),
+    };
+  }
+
   /** Шалгуур + эрсдэлийн тэмдэг: [min(өдөр, өнөөдөр) − windowDays, min(өдөр, өнөөдөр)] */
   private async riskFor(
     classroomId: string,
@@ -544,9 +598,10 @@ export class AttendanceService {
       joinedAt: e.joinedAt,
     }));
     const ids = students.map((s) => s.id);
-    const [risk, sent] = await Promise.all([
+    const [risk, sent, recordedBy] = await Promise.all([
       this.riskFor(classroomId, key, ids, classroom.riskCriteria),
       this.sentFor(classroomId, key, ids),
+      this.recordedBy(classroomId, date),
     ]);
     return {
       date: key,
@@ -565,6 +620,7 @@ export class AttendanceService {
       criteria: risk.criteria,
       risk: risk.flags,
       sent,
+      recordedBy,
       canEditCriteria: role === Role.ADMIN || role === Role.TEACHER_PLUS,
     };
   }
@@ -581,11 +637,12 @@ export class AttendanceService {
         select: { studentId: true },
       })
     ).map((e) => e.studentId);
-    const [attendance, homework, risk, sent] = await Promise.all([
+    const [attendance, homework, risk, sent, recordedBy] = await Promise.all([
       this.attendanceRows(classroomId, date),
       this.homeworkRows(classroomId, date),
       this.riskFor(classroomId, dateKey(date), studentIds, classroom.riskCriteria),
       this.sentFor(classroomId, dateKey(date), studentIds),
+      this.recordedBy(classroomId, date),
     ]);
     return {
       date: dateKey(date),
@@ -594,6 +651,7 @@ export class AttendanceService {
       criteria: risk.criteria,
       risk: risk.flags,
       sent,
+      recordedBy,
     };
   }
 
@@ -652,29 +710,36 @@ export class AttendanceService {
     };
   }
 
-  /** Сурагчийн товч мэдээлэл (самбарын drawer): утас, сургууль, сарын ирц, сүүлийн даалгавар */
+  /**
+   * Сурагчийн drawer (самбарын нэр дээр дарахад): утас, сургууль + БҮХ ирц/даалгавар
+   * (эзэн 2026-10-22). `month` (YYYY-MM, анхдагч нь `date`-ийн сар) — тэр сарын хичээлийн
+   * өдөр (энэ анги), ирц, даалгавар (бүх анги — анги сольсон бол өмнөх ангийнх ч), төлөв
+   * бүрийн тоо (өнгөрсөн, элссэнээс хойшхи тэмдэглээгүй хичээлийг оруулаад). `history` —
+   * бүх хугацааны нийт тоо, «Илгээсэн» даалгавар, хамгийн эхний бичлэгийн огноо (сарын навигаци).
+   */
   async studentCard(
     classroomId: string,
     studentId: string,
     dateStr: string,
     userId: string,
     role: Role,
+    monthStr?: string,
   ) {
     const date = this.parseDate(dateStr);
     const key = dateKey(date);
     await this.assertClassAccess(classroomId, userId, role, { date });
+    const range = monthRange(monthStr || key.slice(0, 7));
+    if (!range) {
+      throw new BadRequestException('Сарын формат буруу байна (YYYY-MM)');
+    }
     const enrollment = await this.prisma.enrollment.findFirst({
       where: { classroomId, studentId, leftAt: null },
       select: { joinedAt: true },
     });
     if (!enrollment) throw new NotFoundException('Сурагч энэ ангид алга байна');
 
-    const monthFrom = `${key.slice(0, 8)}01`;
-    const monthTo = addDaysKey(
-      `${addDaysKey(monthFrom, 32).slice(0, 8)}01`,
-      -1,
-    );
-    const [user, days, monthAtt, recentHw, recentNotes] = await Promise.all([
+    const { from: monthFrom, to: monthTo } = range;
+    const [user, days, allAtt, allHw, sentCount] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: studentId },
         select: {
@@ -697,37 +762,109 @@ export class AttendanceService {
         },
       }),
       this.schedule.expandDays(monthFrom, monthTo, classroomId),
+      // Бүх хугацааны мөр (сурагч жилд ~150 хичээл) — нийт тоо, сарын хэсэг хоёуланд
       this.prisma.attendance.findMany({
-        where: {
-          classroomId,
-          studentId,
-          date: {
-            gte: this.parseDate(monthFrom),
-            lte: this.parseDate(monthTo),
-          },
+        where: { studentId },
+        select: {
+          date: true,
+          status: true,
+          lateRange: true,
+          note: true,
+          classroomId: true,
+          markedById: true,
         },
-        select: { date: true, status: true, lateRange: true, note: true },
+        orderBy: { date: 'desc' },
       }),
       this.prisma.dailyHomeworkMark.findMany({
         where: {
-          classroomId,
           studentId,
-          date: { lte: date },
           OR: [{ status: { not: null } }, { comment: { not: null } }],
         },
-        select: { date: true, status: true, comment: true },
+        select: {
+          date: true,
+          status: true,
+          comment: true,
+          classroomId: true,
+          markedById: true,
+        },
         orderBy: { date: 'desc' },
-        take: 10,
       }),
-      this.prisma.attendance.findMany({
-        where: { classroomId, studentId, date: { lte: date }, note: { not: null } },
-        select: { date: true, status: true, note: true },
-        orderBy: { date: 'desc' },
-        take: 6,
+      this.prisma.submission.count({
+        where: {
+          studentId,
+          assignment: { deletedAt: null },
+          OR: [
+            { submittedAt: { not: null } },
+            { imageKeys: { isEmpty: false } },
+          ],
+        },
       }),
     ]);
     if (!user) throw new NotFoundException('Сурагч олдсонгүй');
     const p = user.studentProfile;
+
+    const inMonth = (d: Date) => {
+      const k = dateKey(d);
+      return k >= monthFrom && k <= monthTo;
+    };
+    const monthAttRows = allAtt.filter((r) => inMonth(r.date));
+    const monthHwRows = allHw.filter((r) => inMonth(r.date));
+    const otherClassIds = [
+      ...new Set(
+        [...monthAttRows, ...monthHwRows]
+          .map((r) => r.classroomId)
+          .filter((id) => id !== classroomId),
+      ),
+    ];
+    const [classNames, names] = await Promise.all([
+      otherClassIds.length
+        ? this.prisma.classroom
+            .findMany({
+              where: { id: { in: otherClassIds } },
+              select: { id: true, name: true },
+            })
+            .then((list) => new Map(list.map((c) => [c.id, c.name])))
+        : Promise.resolve(new Map<string, string>()),
+      this.markerNames([
+        ...monthAttRows.map((r) => r.markedById),
+        ...monthHwRows.map((r) => r.markedById),
+      ]),
+    ]);
+    const otherClass = (id: string) =>
+      id === classroomId ? null : (classNames.get(id) ?? null);
+
+    // Энэ ангид элссэнээс (сургалтад элссэн нь хожуу бол түүнээс) өмнөх хичээлийг
+    // «тэмдэглээгүй» гэж тоолохгүй; ирээдүйн хичээлийг ч мөн.
+    const enrolledOn = dateKey(enrollment.joinedAt);
+    const profileJoined = p?.joinedOn ? dateKey(p.joinedOn) : null;
+    const classJoinedOn =
+      profileJoined && profileJoined > enrolledOn ? profileJoined : enrolledOn;
+    const today = dateKey(todayUB());
+    const lessonDays = days
+      .filter((d) => d.classes.length > 0)
+      .map((d) => d.date);
+    const expected = lessonDays.filter((k) => k >= classJoinedOn && k <= today);
+
+    const monthAtt = monthAttRows.map((r) => ({
+      date: dateKey(r.date),
+      status: r.status,
+      lateRange: r.lateRange,
+      note: r.note,
+      classroom: otherClass(r.classroomId),
+      markedBy: names.get(r.markedById) ?? null,
+    }));
+    const monthHw = monthHwRows.map((r) => ({
+      date: dateKey(r.date),
+      status: r.status,
+      comment: r.comment,
+      classroom: otherClass(r.classroomId),
+      markedBy: names.get(r.markedById) ?? null,
+    }));
+    const firstDates = [allAtt.at(-1)?.date, allHw.at(-1)?.date]
+      .filter((d): d is Date => !!d)
+      .map(dateKey)
+      .sort();
+
     return {
       student: {
         id: user.id,
@@ -739,20 +876,31 @@ export class AttendanceService {
         motherPhone: p?.motherPhone ?? null,
         school: p?.school ?? null,
         grade: p?.grade ?? null,
-        joinedOn: p?.joinedOn
-          ? dateKey(p.joinedOn)
-          : dateKey(enrollment.joinedAt),
+        joinedOn: profileJoined ?? enrolledOn,
         registeredAt: user.createdAt,
         lastSeenAt: user.lastSeenAt,
       },
       month: {
         from: monthFrom,
         to: monthTo,
-        lessonDays: days.filter((d) => d.classes.length > 0).map((d) => d.date),
-        attendance: monthAtt.map((r) => ({ ...r, date: dateKey(r.date) })),
+        lessonDays,
+        classJoinedOn,
+        attendance: monthAtt,
+        homework: monthHw,
+        counts: countStatuses(
+          monthAtt.map((r) => ({ key: r.date, status: r.status })),
+          monthHw.map((r) => ({ key: r.date, status: r.status })),
+          expected,
+        ),
       },
-      homework: recentHw.map((r) => ({ ...r, date: dateKey(r.date) })),
-      notes: recentNotes.map((r) => ({ ...r, date: dateKey(r.date) })),
+      history: {
+        first: firstDates[0] ?? null,
+        totals: countStatuses(
+          allAtt.map((r) => ({ key: dateKey(r.date), status: r.status })),
+          allHw.map((r) => ({ key: dateKey(r.date), status: r.status })),
+        ),
+        sent: sentCount,
+      },
     };
   }
 

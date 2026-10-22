@@ -23,6 +23,13 @@ export class GoogleAuthController {
     return { url: await this.google.authorizationUrl(GoogleOAuthPurpose.LOGIN) };
   }
 
+  /** Gmail-ээр бүртгүүлэх: тасалбараас нэр, имэйлийг урьдчилж бөглөнө. */
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Get('signup-info')
+  signupInfo(@Query('ticket') ticket: string) {
+    return this.google.signupInfo(ticket ?? '');
+  }
+
   /** Нэвтэрсэн хэрэглэгч өөрийн бүртгэлд Google холбох. */
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -48,7 +55,7 @@ export class GoogleAuthController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('exchange')
   exchange(@Body() dto: GoogleExchangeDto) {
-    return this.google.exchange(dto.code);
+    return this.google.exchange(dto.code, dto.remember);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -3,11 +3,9 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { api, getRole } from "@/lib/api";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
-import PatternOverview from "./PatternOverview";
 import StaffScheduleBuilder from "./StaffScheduleBuilder";
 import UpcomingAgenda from "./UpcomingAgenda";
 import WeeklyGrid from "./WeeklyGrid";
-import WeekBuilder from "./WeekBuilder";
 import StudentLessonDays from "@/components/lesson-records/StudentLessonDays";
 import StudentLessonHistory from "@/components/lesson-records/StudentLessonHistory";
 import {
@@ -93,20 +91,11 @@ function TeacherSchedule({ role }: { role: string }) {
 
   return (
     <div className="space-y-8">
-      {/* Багш+ -ийн хувьд зохион байгуулах хэсэг нь ӨДӨР ТУТМЫН ажил тул
-          хамгийн дээр байрлана — өөрийн хичээлийн жагсаалт доогуур орно. */}
-      {role === "TEACHER_PLUS" && <StaffScheduleBuilder role={role} />}
-      {/* Энгийн багшид ерөнхий давтамжийг ХАРУУЛНА (засахгүй) — "бүх багш
-          ерөнхийг нь харж болно" гэсэн эзний дүрэм. */}
-      {/* Энгийн багш: өдрийн хуваарь — батлах, тарсан цаг, тайлбар (эзэн 2026-10-08).
-          Багш оноолтыг зөвхөн харна. */}
-      {role === "TEACHER" && <WeekBuilder />}
-      {role === "TEACHER" && (
-        <section>
-          <h2 className="mb-3 font-bold text-brand-soft">Ерөнхий хуваарь</h2>
-          <PatternOverview readOnly />
-        </section>
-      )}
+      {/* Багш+ ба энгийн Багш ИЖИЛ табуудыг харна (эзэн 2026-10-22): өдрийн хуваарь
+          (ямар ч өдөр), ерөнхий 7 хоног, багшийн ажлын өдөр, онцгой өдөр. Энгийн
+          Багшид засах товч гарахгүй (StaffScheduleBuilder доторх эрхээр). Өдрийн
+          хуваарьт Багш ирц/даалгавар тэмдэглэж, тэмдэглэл бичнэ. */}
+      <StaffScheduleBuilder role={role} />
       <section>
         <h2 className="mb-3 font-bold text-brand-soft">Миний заадаг хичээлүүд</h2>
         {data && data.entries.length === 0 ? (

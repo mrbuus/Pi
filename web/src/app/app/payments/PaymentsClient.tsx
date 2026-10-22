@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CircleAlert, Clock, History, LayoutGrid, Search, X, type LucideIcon } from "lucide-react";
+import { CircleAlert, Clock, Download, History, LayoutGrid, Search, X, type LucideIcon } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
@@ -13,6 +14,7 @@ import LedgerList from "@/components/payments/LedgerList";
 import PendingPanel from "@/components/payments/PendingPanel";
 import PriceReference from "@/components/payments/PriceReference";
 import RecentPanel from "@/components/payments/RecentPanel";
+import { downloadLedgerCsv } from "@/components/payments/ledgerCsv";
 import { millions } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import type { LedgerBoard, LedgerOverview, LedgerRow } from "@/components/payments/ledgerTypes";
@@ -50,6 +52,30 @@ function Problems({ view, onPaid }: { view: ProblemView; onPaid: () => void }) {
   const [data, setData] = useState<LedgerBoard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [more, setMore] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  // Бүх хуудсыг (200-аар) татаж, дэлгэцэнд харагдаагүй мөрүүдийг ч оруулна
+  async function exportCsv() {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      let rows: LedgerRow[] = [];
+      let total = Infinity;
+      let year: LedgerBoard["year"] | null = null;
+      while (rows.length < total) {
+        const d = await api<LedgerBoard>(`/payments/ledger/board?view=${view}&offset=${rows.length}&limit=200`);
+        year = d.year;
+        total = d.total;
+        if (!d.rows.length) break;
+        rows = rows.concat(d.rows);
+      }
+      if (year) downloadLedgerCsv(rows, year, view === "promises" ? "tolbor-amlalt" : "tolbor-asuudaltai");
+    } catch (e) {
+      toast.error(errMsg(e));
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const load = useCallback((offset = 0) => {
     api<LedgerBoard>(`/payments/ledger/board?view=${view}&offset=${offset}&limit=${PAGE}`)
@@ -76,10 +102,15 @@ function Problems({ view, onPaid }: { view: ProblemView; onPaid: () => void }) {
   };
   return (
     <div className="space-y-3">
-      <p className="text-sm text-ink-dim">
-        <span className="font-bold tabular-nums text-ink">{data.total}</span> сурагч, нийт өр{" "}
-        <span className="font-bold tabular-nums text-error">{millions(data.owedNow ?? 0)}</span>
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-ink-dim">
+          <span className="font-bold tabular-nums text-ink">{data.total}</span> сурагч, нийт өр{" "}
+          <span className="font-bold tabular-nums text-error">{millions(data.owedNow ?? 0)}</span>
+        </p>
+        <Button variant="outline" className="min-h-11" disabled={exporting} onClick={() => void exportCsv()}>
+          <Download aria-hidden /> {exporting ? "Татаж байна" : "CSV татах"}
+        </Button>
+      </div>
       <LedgerList rows={data.rows} year={data.year} current={data.month} showClass onPaid={replace} />
       {data.rows.length < data.total && (
         <Button variant="outline" className="w-full" disabled={more} onClick={() => {

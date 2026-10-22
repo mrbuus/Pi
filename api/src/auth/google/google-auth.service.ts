@@ -1,3 +1,5 @@
+import { signSignupTicket, verifySignupTicket } from './signup-ticket';
+import { tokenTtl } from '../session-ttl';
 import {
   BadRequestException,
   Injectable,
@@ -14,8 +16,9 @@ import { PrismaService } from '../../prisma/prisma.service';
  * Google-ээр нэвтрэх / Google бүртгэл холбох (OAuth 2.0 authorization code).
  *
  * Зарчим (эзний дүрэм + аюулгүй байдал):
- *  1. Google-ээр ШИНЭ бүртгэл ҮҮСГЭХГҮЙ. Сурагчийг төв бүртгэдэг (нууц үг =
- *     утас). Google нь зөвхөн аль хэдийн байгаа бүртгэлд орох нэмэлт хаалга.
+ *  1. Google-ээр ШУУД бүртгэл ҮҮСГЭХГҮЙ. Бүртгэлгүй Gmail-ийг /register руу
+ *     15 минутын тасалбартай илгээнэ (signup-ticket.ts, эзэн 2026-10-21): хүн
+ *     УТАСАА бичиж бүртгүүлнэ (нууц үг = утас), Gmail нь автоматаар холбогдоно.
  *  2. Холбох 2 зам: (a) нэвтэрсэн хэрэглэгч профайлаасаа «Google холбох»,
  *     (b) хэрэглэгчийн User.email нь Google-ийн баталгаажсан имэйлтэй яг
  *     таарвал анхны нэвтрэлтээр автоматаар холбоно.
@@ -52,6 +55,9 @@ export interface GoogleClaims {
   email: string;
   emailVerified: boolean;
   picture: string | null;
+  /** Gmail-ээр бүртгүүлэхэд нэрийг урьдчилж бөглөхөд */
+  givenName?: string;
+  familyName?: string;
 }
 
 /** id_token-ийн payload-ийг задлаад iss/aud/exp/email-ийг шалгана. */
@@ -88,6 +94,8 @@ export function verifyIdTokenClaims(
     email: payload.email.toLowerCase(),
     emailVerified: payload.email_verified === true || payload.email_verified === 'true',
     picture: typeof payload.picture === 'string' ? payload.picture : null,
+    givenName: typeof payload.given_name === 'string' ? payload.given_name : undefined,
+    familyName: typeof payload.family_name === 'string' ? payload.family_name : undefined,
   };
 }
 
@@ -215,7 +223,24 @@ export class GoogleAuthService {
     }
 
     const userId = await this.resolveLoginUser(claims);
-    if (!userId) return web('/login', { google: 'not_linked' });
+    if (!userId) {
+      // Gmail-ээр шинээр бүртгүүлэх (эзэн 2026-10-21): энэ имэйлтэй хэрэглэгч огт
+      // байхгүй бол бүртгэлийн хуудас руу 15 минутын тасалбартай. Имэйл нь бүртгэлтэй
+      // (өөр Google-тэй холбогдсон) бол хуучнаараа — профайлаасаа холбоно.
+      const emailTaken = await this.prisma.user.findFirst({
+        where: { email: { equals: claims.email, mode: 'insensitive' } },
+        select: { id: true },
+      });
+      if (emailTaken) return web('/login', { google: 'not_linked' });
+      const ticket = signSignupTicket({
+        googleSubject: claims.sub,
+        email: claims.email,
+        firstName: claims.givenName ?? '',
+        lastName: claims.familyName ?? '',
+        picture: claims.picture,
+      });
+      return web('/register', { google: ticket });
+    }
 
     const code = randomToken();
     await this.prisma.googleLoginExchange.create({
@@ -284,8 +309,14 @@ export class GoogleAuthService {
     return 'linked';
   }
 
-  /** Вэб нэг удаагийн кодыг JWT болгож солино. */
-  async exchange(code: string) {
+  /** Бүртгэлийн хуудас тасалбараас нэр, Gmail-ийг урьдчилж бөглөнө (нууц мэдээлэлгүй) */
+  signupInfo(ticket: string) {
+    const t = verifySignupTicket(ticket);
+    return { email: t.email, firstName: t.firstName, lastName: t.lastName };
+  }
+
+  /** Вэб нэг удаагийн кодыг JWT болгож солино. remember — «Намайг сана» (session-ttl.ts) */
+  async exchange(code: string, remember?: boolean) {
     const row = await this.prisma.googleLoginExchange.findUnique({
       where: { codeHash: sha256(code) },
       include: { user: { select: { id: true, role: true } } },
@@ -300,8 +331,10 @@ export class GoogleAuthService {
     if (consumed.count !== 1) {
       throw new BadRequestException('Нэвтрэх холбоос аль хэдийн ашиглагдсан байна');
     }
+    const payload = { sub: row.user.id, role: row.user.role };
+    const ttl = tokenTtl(remember);
     return {
-      accessToken: this.jwt.sign({ sub: row.user.id, role: row.user.role }),
+      accessToken: ttl ? this.jwt.sign(payload, { expiresIn: ttl }) : this.jwt.sign(payload),
       userId: row.user.id,
       role: row.user.role,
     };

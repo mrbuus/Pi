@@ -101,6 +101,9 @@ function dayStart(key: string): Date {
  * тооцоолно; LessonMakeup-д зөвхөн зураг ба ажилтны шийдвэр.
  * Сурагчид: бусдын нөхөх мэдээлэл, ажилтны тэмдэглэл, dismissMode ХЭЗЭЭ Ч буцахгүй.
  */
+/** Багш шийдвэрлэснээс хойш нөхөх тэмдэглэлийн зургийг хадгалах хоног (эзэн 2026-10-22) */
+export const MAKEUP_KEEP_DAYS_AFTER_DECISION = 14;
+
 @Injectable()
 export class LessonDayService {
   constructor(private readonly prisma: PrismaService) {}
@@ -199,13 +202,15 @@ export class LessonDayService {
     if (missing.length) {
       const metas = await db.storedFile.findMany({
         where: { key: { in: missing } },
-        select: { key: true, mime: true },
+        select: { key: true, mime: true, pages: true },
       });
-      const pdfs = metas.filter((m) => m.mime === PDF_MIME).map((m) => m.key);
+      // Шинэ файлд хуудасны тоо байршуулахад тоологдсон (S3-ийн байтыг дахин татахгүй)
+      for (const m of metas) if (m.mime === PDF_MIME && m.pages) out.set(m.key, m.pages);
+      const pdfs = metas.filter((m) => m.mime === PDF_MIME && !m.pages).map((m) => m.key);
       for (const m of metas) if (m.mime !== PDF_MIME) out.set(m.key, 1);
       for (const key of pdfs) {
         const row = await db.storedFile.findUnique({ where: { key }, select: { bytes: true } });
-        out.set(key, (row && pdfPageCount(row.bytes)) || 1);
+        out.set(key, (row?.bytes && pdfPageCount(row.bytes)) || 1);
       }
       for (const k of missing) {
         if (!out.has(k)) out.set(k, 1);
@@ -431,11 +436,24 @@ export class LessonDayService {
       confirmedAt: new Date(),
       note: encodeDecisionNote(decisionOf(action), note),
     };
-    await this.prisma.lessonMakeup.upsert({
+    const saved = await this.prisma.lessonMakeup.upsert({
       where: { studentId_classroomId_date: { studentId, classroomId, date } },
       create: { classroomId, studentId, date, ...data },
       update: data,
+      select: { imageKeys: true },
     });
+    // Эзэн 2026-10-22: багш баталсан (эсвэл чөлөөлсөн) нөхөх тэмдэглэлийн зураг 14 хоногийн
+    // дараа устна; дахин нээвэл хугацааг цуцална (сурагч дахин илгээх боломжтой байна).
+    if (saved.imageKeys.length)
+      await this.prisma.storedFile.updateMany({
+        where: { key: { in: saved.imageKeys }, ownerId: studentId },
+        data: {
+          expiresAt:
+            action === 'REOPEN'
+              ? null
+              : new Date(data.confirmedAt.getTime() + MAKEUP_KEEP_DAYS_AFTER_DECISION * 86400000),
+        },
+      });
     const item = await this.findOne(classroomId, studentId, date);
     const name = shortName(
       await this.prisma.user.findUnique({

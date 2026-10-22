@@ -6,21 +6,63 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { AuditService } from '../audit/audit.service';
+import { NotifyChannel } from '../generated/prisma/enums';
+import { EmailService } from '../notifications/email.service';
 import { maskPhone, toNationalMn } from '../notifications/phone';
 import { SmsService } from '../notifications/sms.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { loginAlertEmail, resetLinkEmail } from './auth-emails';
 import { requireJwtSecret } from './jwt.strategy';
-import { validatePasswordStrength } from './password-policy';
+import { accountAttempts, loginAttempts } from './login-attempts';
+import {
+  PASSWORD_SAME_AS_PHONE_MESSAGE,
+  isSameAsPhone,
+  validatePasswordStrength,
+} from './password-policy';
 import {
   CODE_TTL_MS,
+  EMAIL_LINK_TTL_MS,
   MAX_REQUESTS_PER_WINDOW,
   REQUEST_WINDOW_MS,
   generateCode,
+  generateLinkToken,
   hashCode,
   isTokenUsable,
+  maskEmail,
   maskIdentifier,
   safeEqualHex,
 } from './password-reset.util';
+
+/** Нийтийн «нууц үгээ мартсан» хариу — бүртгэл байгаа эсэхээс ҮЛ ХАМААРЧ ижил. */
+export interface ForgotPasswordResponse {
+  maskedTo: string;
+  /** SMS кодын хугацаа (секунд) */
+  expiresInSeconds: number;
+  /** Имэйл холбоосын хугацаа (секунд) */
+  linkExpiresInSeconds: number;
+  /** СИСТЕМИЙН тохиргоо (хэрэглэгчийнх биш) — вэб аль замыг тайлбарлахыг шийднэ */
+  channels: { sms: boolean; email: boolean };
+}
+
+/** Имэйлээр сэргээх/мэдэгдэл илгээхэд хэрэгтэй хэрэглэгчийн хэсэг */
+export interface RecoveryUser {
+  id: string;
+  firstName?: string | null;
+  email?: string | null;
+  googleIdentity?: { email: string } | null;
+}
+
+/** Сэргээх имэйл: бүртгэлийн имэйл, эс бол холбосон Gmail */
+export function recoveryEmail(user: RecoveryUser): string | null {
+  return user.email?.trim() || user.googleIdentity?.email?.trim() || null;
+}
+
+/** Вэбийн хаяг (холбоос үүсгэхэд) — WEB_ORIGIN таслалтай жагсаалтын эхнийх */
+function webOrigin(): string {
+  return (process.env.WEB_ORIGIN ?? 'http://localhost:3001').split(',')[0].trim().replace(/\/+$/, '');
+}
+
+type EmailPurpose = 'RESET' | 'LOGIN_ALERT';
 
 /**
  * Нууц үг сэргээх урсгал.
@@ -41,6 +83,7 @@ export class PasswordResetService {
     private prisma: PrismaService,
     private sms: SmsService,
     private audit: AuditService,
+    private email: EmailService,
   ) {}
 
   /**
@@ -52,50 +95,151 @@ export class PasswordResetService {
     return process.env.RESET_TOKEN_SECRET?.trim() || requireJwtSecret();
   }
 
-  /** Утас / имэйл / нэвтрэх нэрийн аль нэгээр хэрэглэгч хайна */
+  /**
+   * Утас / имэйл / нэвтрэх нэр / холбосон Gmail-ийн аль нэгээр хэрэглэгч хайна.
+   * Имэйлийг том жижиг үсэг ялгахгүй (Gmail-д «Bat@Gmail.com» = «bat@gmail.com»).
+   */
   private async findUser(identifier: string) {
     const trimmed = identifier.trim();
     if (!trimmed) return null;
     const national = toNationalMn(trimmed);
+    const isEmail = trimmed.includes('@');
 
     return this.prisma.user.findFirst({
       where: {
         OR: [
           ...(national ? [{ phone: national }] : []),
-          { email: trimmed },
+          ...(isEmail
+            ? [
+                { email: { equals: trimmed, mode: 'insensitive' as const } },
+                { googleIdentity: { is: { email: trimmed.toLowerCase() } } },
+              ]
+            : []),
           { username: trimmed },
         ],
       },
-      select: { id: true, phone: true, role: true },
+      select: {
+        id: true,
+        phone: true,
+        role: true,
+        email: true,
+        username: true,
+        firstName: true,
+        archivedAt: true,
+        googleIdentity: { select: { email: true } },
+      },
     });
   }
 
   /**
-   * Сэргээх код хүсэх. Хариу нь бүртгэл байгаа эсэхээс ҮЛ ХАМААРЧ ижил.
+   * Сэргээх хүсэлт. Хариу нь бүртгэл байгаа эсэхээс ҮЛ ХАМААРЧ ижил.
+   *
+   * Зам (эзэн 2026-10-22): бүртгэлд имэйл эсвэл холбосон Gmail байвал тэр хаяг
+   * руу 30 минутын нэг удаагийн ХОЛБООС; имэйлгүй (зөвхөн утастай) бол хуучин
+   * SMS код. Аль аль нь тохируулагдаагүй бол 503 — «төвтэй холбогдоно уу».
    */
-  async request(
-    identifier: string,
-    ip?: string,
-  ): Promise<{ maskedTo: string; expiresInSeconds: number }> {
+  async request(identifier: string, ip?: string): Promise<ForgotPasswordResponse> {
     // Энэ шалгалт хэрэглэгчээс хамаарахгүй, системийн төлөв тул илчлэл болохгүй.
-    if (!this.sms.isConfigured()) {
+    const channels = {
+      sms: this.sms.isConfigured(),
+      email: this.email.isConfigured(),
+    };
+    if (!channels.sms && !channels.email) {
       throw new ServiceUnavailableException(
-        'SMS үйлчилгээ одоогоор тохируулагдаагүй байна. Сургалтын төвтэй холбогдоно уу.',
+        'Нууц үг сэргээх үйлчилгээ одоогоор тохируулагдаагүй байна. Сургалтын төвтэй холбогдоно уу.',
       );
     }
 
-    const maskedTo = maskIdentifier(identifier);
-    const generic = {
-      maskedTo,
+    const generic: ForgotPasswordResponse = {
+      maskedTo: maskIdentifier(identifier),
       expiresInSeconds: Math.floor(CODE_TTL_MS / 1000),
+      linkExpiresInSeconds: Math.floor(EMAIL_LINK_TTL_MS / 1000),
+      channels,
     };
 
     const user = await this.findUser(identifier);
-    // Бүртгэл олдсонгүй, эсвэл утасгүй (SMS явуулах газаргүй) — чимээгүй зогсоно.
-    if (!user?.phone) return generic;
+    // Бүртгэл олдсонгүй / архивлагдсан — чимээгүй зогсоно (хариу ижил).
+    if (!user || user.archivedAt) return generic;
 
-    await this.issue(user.id, user.phone, ip);
+    const to = recoveryEmail(user);
+    if (channels.email && to) {
+      await this.issueEmailLink(user, to, 'RESET', ip);
+    } else if (channels.sms && user.phone) {
+      await this.issue(user.id, user.phone, ip);
+    }
     return generic;
+  }
+
+  /**
+   * «3 удаа буруу нууц үг» мэдэгдэл (эзэн 2026-10-22). AuthService.login нэг
+   * түгжээний цонхонд НЭГ л удаа дуудна (accountAttempts.claimAlert). Имэйлгүй
+   * эсвэл имэйл тохируулаагүй бол чимээгүй алгасна.
+   */
+  async sendLoginAlert(user: RecoveryUser): Promise<'SENT' | 'RATE_LIMITED' | 'SKIPPED'> {
+    const to = recoveryEmail(user);
+    if (!to || !this.email.isConfigured()) return 'SKIPPED';
+    return this.issueEmailLink(user, to, 'LOGIN_ALERT');
+  }
+
+  /**
+   * Имэйлээр нэг удаагийн сэргээх холбоос үүсгэж илгээнэ. ӨС-д зөвхөн HMAC хэш.
+   * Илгээлтийг ХҮЛЭЭХГҮЙ: SMTP-ийн 1–3 секундийн саатал нь «энэ дугаар
+   * бүртгэлтэй» гэдгийг хариуны хугацаагаар илчилнэ. Алдааг лог руу л бичнэ
+   * (хаяг, токеныг бичихгүй).
+   */
+  private async issueEmailLink(
+    user: RecoveryUser,
+    to: string,
+    purpose: EmailPurpose,
+    ip?: string,
+  ): Promise<'SENT' | 'RATE_LIMITED'> {
+    const now = Date.now();
+    const recent = await this.prisma.passwordResetToken.count({
+      where: {
+        userId: user.id,
+        channel: NotifyChannel.EMAIL,
+        createdAt: { gte: new Date(now - REQUEST_WINDOW_MS) },
+      },
+    });
+    if (recent >= MAX_REQUESTS_PER_WINDOW) {
+      this.logger.warn(
+        `Сэргээх имэйлийн хязгаар давсан: userId=${user.id} ip=${ip ?? '?'}`,
+      );
+      return 'RATE_LIMITED';
+    }
+
+    const token = generateLinkToken();
+    // Нэг үед нэг л идэвхтэй ИМЭЙЛ холбоос. SMS кодыг хөндөхгүй (өөр суваг).
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.updateMany({
+        where: { userId: user.id, channel: NotifyChannel.EMAIL, consumedAt: null },
+        data: { consumedAt: new Date(now) },
+      }),
+      this.prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          codeHash: hashCode(token, this.secret),
+          channel: NotifyChannel.EMAIL,
+          sentToMasked: maskEmail(to),
+          expiresAt: new Date(now + EMAIL_LINK_TTL_MS),
+          requestIp: ip ?? null,
+        },
+      }),
+    ]);
+
+    // Fragment (#) нь серверт ч, Referer-т ч очдоггүй — токен лог, түүхэнд үлдэхгүй.
+    const link = `${webOrigin()}/forgot-password#t=${token}`;
+    const minutes = Math.round(EMAIL_LINK_TTL_MS / 60000);
+    const mail =
+      purpose === 'LOGIN_ALERT'
+        ? loginAlertEmail({ firstName: user.firstName, link, minutes })
+        : resetLinkEmail({ firstName: user.firstName, link, minutes });
+    void this.email
+      .sendEmail({ to, ...mail })
+      .catch(() =>
+        this.logger.error(`Сэргээх имэйл илгээж чадсангүй: userId=${user.id} (${purpose})`),
+      );
+    return 'SENT';
   }
 
   /**
@@ -117,7 +261,7 @@ export class PasswordResetService {
     // өөр өөр IP-гээс нэг хүнийг SMS-ээр цэглэхээс сэргийлнэ.
     const since = new Date(Date.now() - REQUEST_WINDOW_MS);
     const recent = await this.prisma.passwordResetToken.count({
-      where: { userId, createdAt: { gte: since } },
+      where: { userId, channel: NotifyChannel.SMS, createdAt: { gte: since } },
     });
     if (recent >= MAX_REQUESTS_PER_WINDOW) {
       this.logger.warn(
@@ -134,14 +278,14 @@ export class PasswordResetService {
     // үүсч, оролдлогын хязгаар утгагүй болно.
     await this.prisma.$transaction([
       this.prisma.passwordResetToken.updateMany({
-        where: { userId, consumedAt: null },
+        where: { userId, channel: NotifyChannel.SMS, consumedAt: null },
         data: { consumedAt: new Date() },
       }),
       this.prisma.passwordResetToken.create({
         data: {
           userId,
           codeHash: hashCode(code, this.secret),
-          channel: 'SMS',
+          channel: NotifyChannel.SMS,
           sentToMasked: maskPhone(phone),
           expiresAt,
           requestIp: ip ?? null,
@@ -197,7 +341,7 @@ export class PasswordResetService {
     if (!user) throw fail();
 
     const token = await this.prisma.passwordResetToken.findFirst({
-      where: { userId: user.id },
+      where: { userId: user.id, channel: NotifyChannel.SMS },
       orderBy: { createdAt: 'desc' },
     });
     if (!token || !isTokenUsable(token, new Date())) throw fail();
@@ -212,28 +356,9 @@ export class PasswordResetService {
     }
 
     // DTO шалгасан ч сервисийн түвшинд давхар хамгаалалт (password-policy.ts)
-    const weak = validatePasswordStrength(newPassword);
-    if (weak) throw new BadRequestException(weak);
+    this.assertNewPassword(newPassword, user.phone);
 
-    const now = new Date();
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          passwordHash,
-          // Энэ мөчөөс ӨМНӨ олгогдсон бүх JWT хүчингүй болно — өөрөөр хэлбэл
-          // халдагчийн хулгайлсан сесс автоматаар тасарна.
-          passwordChangedAt: now,
-          mustChangePassword: false,
-        },
-      }),
-      // Ашигласан кодыг хаана + үлдсэн бүх кодыг мөн хаана.
-      this.prisma.passwordResetToken.updateMany({
-        where: { userId: user.id, consumedAt: null },
-        data: { consumedAt: now },
-      }),
-    ]);
+    await this.applyNewPassword(user, newPassword);
 
     // Аудит: хэн, хэзээ сэргээснийг мөрдөх боломжтой байх ёстой. Кодыг ч,
     // нууц үгийг ч бичихгүй (AuditService нь "password"-той түлхүүрийг
@@ -248,6 +373,94 @@ export class PasswordResetService {
     });
 
     return { reset: true };
+  }
+
+  /**
+   * Имэйлийн нэг удаагийн холбоосоор нууц үг солих (POST /auth/reset-password/link).
+   * Бүх бүтэлгүй тохиолдолд ЯГ ИЖИЛ мессеж. Холбоосыг атомаар (consumedAt=null
+   * нөхцөлтэй updateMany) хэрэглэнэ — зэрэг ирсэн хоёр хүсэлтийн зөвхөн нэг нь хүчинтэй.
+   */
+  async resetWithLink(token: string, newPassword: string): Promise<{ reset: true }> {
+    const fail = () =>
+      new BadRequestException(
+        'Холбоос хүчингүй эсвэл хугацаа нь дууссан байна. Нууц үг сэргээхийг дахин хүснэ үү.',
+      );
+    if (!token || token.length > 200) throw fail();
+
+    const row = await this.prisma.passwordResetToken.findFirst({
+      where: { codeHash: hashCode(token, this.secret), channel: NotifyChannel.EMAIL },
+      select: {
+        id: true,
+        expiresAt: true,
+        consumedAt: true,
+        attempts: true,
+        sentToMasked: true,
+        user: {
+          select: { id: true, role: true, phone: true, email: true, username: true },
+        },
+      },
+    });
+    const now = new Date();
+    if (!row || !isTokenUsable(row, now)) throw fail();
+
+    // Сул нууц үг холбоосыг «шатаахгүй» — эхлээд шалгаад дараа нь хэрэглэнэ.
+    this.assertNewPassword(newPassword, row.user.phone);
+
+    const consumed = await this.prisma.passwordResetToken.updateMany({
+      where: { id: row.id, consumedAt: null, expiresAt: { gt: now } },
+      data: { consumedAt: now },
+    });
+    if (consumed.count !== 1) throw fail();
+
+    await this.applyNewPassword(row.user, newPassword);
+    await this.audit.record({
+      actorId: row.user.id,
+      actorRole: row.user.role,
+      action: 'PASSWORD_RESET',
+      entity: 'User',
+      entityId: row.user.id,
+      reason: `Имэйлээр ирсэн холбоосоор сэргээв (${row.sentToMasked})`,
+    });
+    return { reset: true };
+  }
+
+  private assertNewPassword(newPassword: string, phone: string | null) {
+    const weak = validatePasswordStrength(newPassword);
+    if (weak) throw new BadRequestException(weak);
+    if (isSameAsPhone(newPassword, phone)) {
+      throw new BadRequestException(PASSWORD_SAME_AS_PHONE_MESSAGE);
+    }
+  }
+
+  /** Нууц үгийг сольж, бүх сесс ба идэвхтэй код/холбоосыг хүчингүй болгоно */
+  private async applyNewPassword(
+    user: { id: string; phone?: string | null; email?: string | null; username?: string | null },
+    newPassword: string,
+  ) {
+    const now = new Date();
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordHash,
+          // Энэ мөчөөс ӨМНӨ олгогдсон бүх JWT хүчингүй болно — өөрөөр хэлбэл
+          // халдагчийн хулгайлсан сесс автоматаар тасарна.
+          passwordChangedAt: now,
+          mustChangePassword: false,
+        },
+      }),
+      // Ашигласан кодыг хаана + үлдсэн бүх код/холбоосыг (хоёр суваг) мөн хаана.
+      this.prisma.passwordResetToken.updateMany({
+        where: { userId: user.id, consumedAt: null },
+        data: { consumedAt: now },
+      }),
+    ]);
+    // Шинэ нууц үгтэй хүн «олон удаа буруу» түгжээнд үлдэхгүй.
+    for (const id of [user.phone, user.email, user.username]) {
+      if (id) loginAttempts.success(id);
+    }
+    accountAttempts.success(user.id);
   }
 
   /**
