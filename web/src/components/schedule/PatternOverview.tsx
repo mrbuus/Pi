@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, CalendarPlus, CalendarX2, TriangleAlert } from "lucide-react";
+import { CalendarClock, CalendarPlus, CalendarX2, TriangleAlert, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useSection } from "@/components/students/progress/useSection";
 import InfoHint from "@/components/ui/InfoHint";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/kit/button";
 import { Meta } from "@/components/ui/Meta";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import AddSlotDialog from "./pattern/AddSlotDialog";
+import ClassPatternDialog, { defaultEffectiveFrom } from "./pattern/ClassPatternDialog";
 import ClassWeekGrid from "./pattern/ClassWeekGrid";
 import {
   canManageAny,
@@ -27,7 +28,7 @@ import {
 import PatternGrid from "./pattern/PatternGrid";
 import PlannedChanges from "./pattern/PlannedChanges";
 import SlotDialog from "./pattern/SlotDialog";
-import { todayUBKey, type ScheduleEntry } from "./types";
+import { addDaysToKey, todayUBKey, type ScheduleEntry } from "./types";
 
 interface ClassroomRow {
   id: string;
@@ -36,7 +37,12 @@ interface ClassroomRow {
   _count?: { enrollments: number };
 }
 
-type Open = { kind: "slot"; slot: Slot; planned: Planned | null } | { kind: "add" } | null;
+type Open =
+  | { kind: "slot"; slot: Slot; planned: Planned | null }
+  | { kind: "add" }
+  // Ангийн 7 хоног/нэр засах (classroomId) эсвэл «Шинэ анги» (null) — эзэн 2026-10-23
+  | { kind: "class"; classroomId: string | null }
+  | null;
 
 /**
  * 7 хоногийн ТОГТМОЛ хуваарь (эзэн 2026-10-18): аль анги аль гарагт хэдэн цагаас
@@ -112,6 +118,13 @@ export default function PatternOverview({
     setOpen(null);
     rowsQ.reload();
   }
+  function classSaved() {
+    setOpen(null);
+    rowsQ.reload();
+    classesQ.reload();
+  }
+  // Шинэ анги үүсгэх — бүх ангид schedule.manage (Админ, Багш+)
+  const canCreateClass = !!manage?.all;
 
   if (rowsQ.data === undefined) {
     if (rowsQ.status === "error") return <ErrorState message={rowsQ.error} onRetry={rowsQ.reload} />;
@@ -124,26 +137,38 @@ export default function PatternOverview({
   return (
     <div className="space-y-4">
       {/* Анги × гараг (эзэн 2026-10-23): танхимын торын ДЭЭР, ижил эрхээр засна */}
-      {current.length > 0 && (
+      {(current.length > 0 || canCreateClass) && (
         <section aria-labelledby="class-pattern-title" className="rounded-xl border border-line bg-surface">
-          <header className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-line px-3 py-2">
-            <h2 id="class-pattern-title" className="cyrillic-heading text-sm font-bold text-ink">
-              Ангийн 7 хоног
-            </h2>
-            <InfoHint label="Ангийн хуваарийн тухай">
-              Анги бүр аль гарагт аль танхимд хэдэн цагаас орохыг харуулна. Хичээлгүй өдөр хоосон
-            </InfoHint>
+          <header className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-line px-3 py-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h2 id="class-pattern-title" className="cyrillic-heading text-sm font-bold text-ink">
+                Ангийн 7 хоног
+              </h2>
+              <InfoHint label="Ангийн хуваарийн тухай">
+                Анги бүр аль гарагт аль танхимд хэдэн цагаас орохыг харуулна. Хичээлгүй өдөр хоосон
+              </InfoHint>
+            </div>
+            {canCreateClass && (
+              <Button size="sm" variant="outline" type="button" onClick={() => setOpen({ kind: "class", classroomId: null })}>
+                <Users aria-hidden />
+                Шинэ анги
+              </Button>
+            )}
           </header>
-          <ClassWeekGrid
-            slots={current}
-            caption="Анги бүрийн 7 хоногийн тогтмол хуваарь: гараг, танхим, эхлэх цаг"
-            todayWeekday={weekdayOf(today)}
-            onSelect={manager ? (slot) => setOpen({ kind: "slot", slot, planned: null }) : undefined}
-            canSelect={canSelect}
-          />
+          {current.length > 0 && (
+            <ClassWeekGrid
+              slots={current}
+              caption="Анги бүрийн 7 хоногийн тогтмол хуваарь: гараг, танхим, эхлэх цаг"
+              todayWeekday={weekdayOf(today)}
+              onSelect={manager ? (slot) => setOpen({ kind: "slot", slot, planned: null }) : undefined}
+              canSelect={canSelect}
+              onSelectClass={manager ? (classroomId) => setOpen({ kind: "class", classroomId }) : undefined}
+              canSelectClass={(classroomId) => canManageClass(manage, classroomId)}
+            />
+          )}
           <footer className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line px-3 py-2 text-xs text-ink-dim">
             <span>Нүд: танхим, эхлэх цаг</span>
-            {manager && <span>Хичээл дээр дарж засна</span>}
+            {manager && <span>Ангийн нэр дээр дарж гараг, цаг, нэрийг засна</span>}
           </footer>
         </section>
       )}
@@ -230,6 +255,18 @@ export default function PatternOverview({
           today={today}
           onClose={() => setOpen(null)}
           onSaved={saved}
+        />
+      )}
+      {open?.kind === "class" && (
+        <ClassPatternDialog
+          key={open.classroomId ?? "new"}
+          classroomId={open.classroomId}
+          slots={all}
+          classes={classes}
+          today={today}
+          defaultFrom={defaultEffectiveFrom(today, current, addDaysToKey)}
+          onClose={() => setOpen(null)}
+          onSaved={classSaved}
         />
       )}
       {open?.kind === "add" && (

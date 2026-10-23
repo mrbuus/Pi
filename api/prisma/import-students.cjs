@@ -470,8 +470,11 @@ function buildImportPlan(sourcePath) {
       const reasons = [];
       const fixes = [];
 
-      if (!lastName || !firstName) {
+      // Эзэн 2026-10-23: овоггүй хүүхдийг ч оруулна (нэр л заавал).
+      if (!firstName) {
         reasons.push('NAME_INCOMPLETE');
+      } else if (!lastName) {
+        fixes.push('LAST_NAME_MISSING');
       }
 
       // Анги баганыг тухайн хуудасны хүлээгдэж буй ангитай тулгана (13 + 4
@@ -486,6 +489,10 @@ function buildImportPlan(sourcePath) {
         // ганц анги (12) руу оруулна (контентын эрх 12-р ангийнхтай ижил).
         angiGrade = config.expectedGrades[0];
         fixes.push(`GRADUATE(анги='${angiText}' → ${angiGrade}-р анги, хуудас=${config.name})`);
+      } else if (!angiGrade && !angiText && config.expectedGrades.length === 1) {
+        // ЗАЛРУУЛГА (эзэн 2026-10-23): анги хоосон бол хуудасны ганц ангийг авна.
+        angiGrade = config.expectedGrades[0];
+        fixes.push(`GRADE_FROM_SHEET(хуудас=${config.name} → ${angiGrade}-р анги)`);
       } else if (!angiGrade) {
         // Анги огт уншигдахгүй бол сурагчийг ямар ангид оруулахаа мэдэхгүй
         // — энэ бол жинхэнэ хатуу зөрчил.

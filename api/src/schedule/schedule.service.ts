@@ -8,6 +8,7 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
 import {
+  ClassroomType,
   NotificationKind,
   Role,
   ScheduleExceptionKind,
@@ -28,6 +29,21 @@ import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { SplitSeriesDto } from './dto/split-series.dto';
 import { SwapRoomDto } from './dto/swap-room.dto';
+import {
+  CreateClassWithPatternDto,
+  PatternDayDto,
+  PutClassPatternDto,
+} from './dto/class-pattern.dto';
+import {
+  activeOn,
+  composeClassName,
+  PatternError,
+  planIsEmpty,
+  planPattern,
+  splitClassName,
+  type PatternPlan,
+  type PatternRow,
+} from './class-pattern';
 import { assertCanSwap, RoomSwapError, swappedRooms } from './room-swap';
 import { UpsertExceptionDto } from './dto/upsert-exception.dto';
 import { UpsertTopicDto } from './dto/upsert-topic.dto';
@@ -743,6 +759,302 @@ export class ScheduleService {
       [a.teacherId, b.teacherId, result.a.teacherId, result.b.teacherId],
     );
     return { mode: 'SWAPPED' as const, ...result };
+  }
+
+  // ============ Ангийн 7 хоног — нэг дор засах (эзэн 2026-10-23) ============
+
+  private async assertTeachersExist(ids: Array<string | null | undefined>) {
+    const unique = [...new Set(ids.filter((v): v is string => !!v))];
+    if (!unique.length) return;
+    const found = await this.prisma.user.findMany({
+      where: { id: { in: unique } },
+      select: { id: true },
+    });
+    if (found.length !== unique.length)
+      throw new NotFoundException('Багш олдсонгүй');
+  }
+
+  /** Идэвхтэй ангиудын дунд ижил нэр (том жижиг үсэг ялгахгүй) байвал 409 */
+  private async assertClassNameFree(name: string, exceptId?: string) {
+    const dup = await this.prisma.classroom.findFirst({
+      where: {
+        archived: false,
+        name: { equals: name, mode: 'insensitive' },
+        ...(exceptId ? { id: { not: exceptId } } : {}),
+      },
+      select: { id: true },
+    });
+    if (dup) throw new ConflictException('Ийм нэртэй анги аль хэдийн байна');
+  }
+
+  private planOrThrow(
+    rows: PatternRow[],
+    days: PatternDayDto[],
+    from: Date,
+  ): PatternPlan {
+    try {
+      return planPattern(rows, days, from, todayUB());
+    } catch (err) {
+      if (err instanceof PatternError) throw new BadRequestException(err.message);
+      throw err;
+    }
+  }
+
+  private static patternSummary(
+    rows: Array<{
+      weekday: number;
+      startMinute: number;
+      endMinute: number;
+      room: string | null;
+      teacherId: string | null;
+    }>,
+  ) {
+    return rows
+      .map((r) => ({
+        weekday: r.weekday,
+        startMinute: r.startMinute,
+        endMinute: r.endMinute,
+        room: r.room,
+        teacherId: r.teacherId,
+      }))
+      .sort((a, b) => a.weekday - b.weekday);
+  }
+
+  /**
+   * PUT /schedule/classrooms/:id/pattern — ангийн гараг, цаг, танхимыг (ба
+   * хүсвэл нэрийг) `effectiveFrom`-оос эхлэн НЭГ транзакцаар шинэчилнэ.
+   * Хассан өдөр → effectiveTo = өмнөх өдөр, шинэ өдөр → шинэ мөр, өөрчлөгдсөн
+   * → applyFromDate-ээр хуваана (түүх, ирц, сэдэв хэвээр). Өөр ангитай танхим
+   * давхцвал бүгд буцаагдана (409). Нэр солиход id хэвээр — элсэлт, ирц, түүх
+   * эвдрэхгүй.
+   */
+  async putClassPattern(
+    classroomId: string,
+    dto: PutClassPatternDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    const classroom = await this.assertClassroomExists(classroomId);
+    const from = this.parseDate(dto.effectiveFrom);
+    const rows = await this.prisma.classSchedule.findMany({
+      where: { classroomId },
+    });
+    const plan = this.planOrThrow(rows, dto.days, from);
+    await this.assertTeachersExist(dto.days.map((d) => d.teacherId));
+
+    let newName = classroom.name;
+    if (dto.name !== undefined || dto.branch !== undefined) {
+      const cur = splitClassName(classroom.name);
+      newName = composeClassName(dto.name ?? cur.label, dto.branch ?? cur.branch);
+      if (!splitClassName(newName).label)
+        throw new BadRequestException('Ангийн нэр оруулна уу');
+      if (newName !== classroom.name)
+        await this.assertClassNameFree(newName, classroomId);
+    }
+    const renamed = newName !== classroom.name;
+    if (planIsEmpty(plan) && !renamed)
+      return { changed: false, classroomId, name: classroom.name };
+
+    const before = ScheduleService.patternSummary(
+      rows.filter((r) => activeOn(r, from)),
+    );
+    const subject =
+      rows.find((r) => activeOn(r, from))?.subject ?? classroom.subject ?? null;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      if (renamed)
+        await tx.classroom.update({
+          where: { id: classroomId },
+          data: { name: newName },
+        });
+
+      // Хараахан эхлээгүй мөр: сэдэв/тэмдэглэл/ирцийн холбоосгүй бол л хасна
+      for (const row of plan.dropUnstarted) {
+        const where = { scheduleId: row.id };
+        const deps = await Promise.all([
+          tx.lessonTopic.count({ where }),
+          tx.scheduleException.count({ where }),
+          tx.lessonStaffing.count({ where }),
+          tx.lessonNote.count({ where }),
+          tx.lessonRecord.count({ where }),
+        ]);
+        if (deps.some((n) => n > 0))
+          throw new ConflictException(
+            'Хасах гэж буй өдөрт сэдэв эсвэл тэмдэглэл бүртгэгдсэн байна — тэр өдрийг тор дээрээс засна уу',
+          );
+        await tx.classSchedule.delete({ where: { id: row.id } });
+      }
+      for (const { row, effectiveTo } of plan.end)
+        await tx.classSchedule.update({
+          where: { id: row.id },
+          data: { effectiveTo },
+        });
+
+      const touched: Prisma.ClassScheduleGetPayload<object>[] = [];
+      const fullRow = (id: string) => rows.find((r) => r.id === id)!;
+      for (const { row, data } of plan.change)
+        touched.push(await this.applyFromDate(tx, fullRow(row.id), from, data));
+      for (const day of plan.add)
+        touched.push(
+          await tx.classSchedule.create({
+            data: {
+              classroomId,
+              ...day,
+              subject,
+              effectiveFrom: from,
+              effectiveTo: null,
+            },
+          }),
+        );
+
+      // Танхимын давхцал — эцсийн төлөвөөр, бусад ангийн мөртэй (409 → бүгд буцна)
+      for (const r of touched)
+        await this.assertRoomFree(
+          {
+            id: r.id,
+            classroomId,
+            room: r.room,
+            weekday: r.weekday,
+            startMinute: r.startMinute,
+            endMinute: r.endMinute,
+            effectiveFrom: r.effectiveFrom,
+            effectiveTo: r.effectiveTo,
+          },
+          tx,
+        );
+      return touched;
+    });
+
+    const after = ScheduleService.patternSummary([
+      ...plan.keep,
+      ...result,
+    ]);
+    if (renamed)
+      await this.recordAudit(
+        actorId,
+        actorRole,
+        'UPDATE',
+        'Classroom',
+        classroomId,
+        { name: classroom.name },
+        { name: newName },
+      );
+    if (!planIsEmpty(plan)) {
+      await this.recordAudit(
+        actorId,
+        actorRole,
+        'UPDATE',
+        'ClassSchedulePattern',
+        classroomId,
+        { effectiveFrom: dateKey(from), days: before },
+        {
+          effectiveFrom: dateKey(from),
+          days: after,
+          endedIds: plan.end.map((e) => e.row.id),
+          droppedIds: plan.dropUnstarted.map((r) => r.id),
+          changedIds: plan.change.map((c) => c.row.id),
+          newIds: result.map((r) => r.id),
+        },
+      );
+      await this.notifyScheduleChange(
+        [classroomId],
+        [...rows.map((r) => r.teacherId), ...result.map((r) => r.teacherId)],
+      );
+    }
+    return {
+      changed: true,
+      classroomId,
+      name: newName,
+      effectiveFrom: dateKey(from),
+      kept: plan.keep.length,
+      changedDays: plan.change.length,
+      endedDays: plan.end.length + plan.dropUnstarted.length,
+      addedDays: plan.add.length,
+    };
+  }
+
+  /**
+   * POST /schedule/classrooms — «Шинэ анги» хуваарийн хуудаснаас: анги ба түүний
+   * 7 хоногийг НЭГ транзакцаар үүсгэнэ (танхим давхцвал анги ч үүсэхгүй).
+   * Нэрийн дүрэм, аудит нь ClassroomsService.create-тэй ижил.
+   */
+  async createClassWithPattern(
+    dto: CreateClassWithPatternDto,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    const name = composeClassName(dto.name, dto.branch);
+    const label = splitClassName(name).label;
+    if (!label) throw new BadRequestException('Ангийн нэр оруулна уу');
+    const from = this.parseDate(dto.effectiveFrom);
+    const plan = this.planOrThrow([], dto.days, from);
+    await this.assertTeachersExist(dto.days.map((d) => d.teacherId));
+    await this.assertClassNameFree(name);
+    const gradeGuess = Number(label.match(/^(\d+)\s*[-–]/)?.[1]);
+    const grade =
+      dto.grade ??
+      (gradeGuess >= 1 && gradeGuess <= 13 ? gradeGuess : null);
+
+    const { classroom, rows } = await this.prisma.$transaction(async (tx) => {
+      const classroom = await tx.classroom.create({
+        data: { name, type: ClassroomType.IN_PERSON, grade },
+      });
+      const rows: Prisma.ClassScheduleGetPayload<object>[] = [];
+      for (const day of plan.add) {
+        const row = await tx.classSchedule.create({
+          data: {
+            classroomId: classroom.id,
+            ...day,
+            effectiveFrom: from,
+            effectiveTo: null,
+          },
+        });
+        await this.assertRoomFree(
+          {
+            id: row.id,
+            classroomId: classroom.id,
+            room: row.room,
+            weekday: row.weekday,
+            startMinute: row.startMinute,
+            endMinute: row.endMinute,
+            effectiveFrom: row.effectiveFrom,
+            effectiveTo: row.effectiveTo,
+          },
+          tx,
+        );
+        rows.push(row);
+      }
+      return { classroom, rows };
+    });
+
+    await this.recordAudit(actorId, actorRole, 'CREATE', 'Classroom', classroom.id, null, {
+      name: classroom.name,
+      type: classroom.type,
+      grade: classroom.grade,
+      teacherId: classroom.teacherId,
+      assistantTeacherId: classroom.assistantTeacherId,
+      subject: classroom.subject,
+    });
+    if (rows.length) {
+      await this.recordAudit(
+        actorId,
+        actorRole,
+        'CREATE',
+        'ClassSchedulePattern',
+        classroom.id,
+        null,
+        {
+          effectiveFrom: dateKey(from),
+          days: ScheduleService.patternSummary(rows),
+          newIds: rows.map((r) => r.id),
+        },
+      );
+      await this.notifyScheduleChange(
+        [classroom.id],
+        rows.map((r) => r.teacherId),
+      );
+    }
+    return { classroom, schedules: rows };
   }
 
   async remove(id: string) {

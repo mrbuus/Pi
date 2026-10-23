@@ -1368,5 +1368,27 @@
       "ADMIN",
       "TEACHER_PLUS"
     ]
+  },
+  {
+    "gap": "ANGI-7HONOG",
+    "file": "schedule/schedule.controller",
+    "controller": "ScheduleController",
+    "method": "PUT",
+    "path": "/api/schedule/classrooms/:id/pattern",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "ANGI-7HONOG",
+    "file": "schedule/schedule.controller",
+    "controller": "ScheduleController",
+    "method": "POST",
+    "path": "/api/schedule/classrooms",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
   }
 ]

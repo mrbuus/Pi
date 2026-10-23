@@ -22,6 +22,10 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { PutTeacherWorkDaysDto } from './dto/put-teacher-workdays.dto';
 import { SplitSeriesDto } from './dto/split-series.dto';
 import { SwapRoomDto } from './dto/swap-room.dto';
+import {
+  CreateClassWithPatternDto,
+  PutClassPatternDto,
+} from './dto/class-pattern.dto';
 import { TeacherWorkDayExceptionDto } from './dto/teacher-workday-exception.dto';
 import { PutRosterConfigDto } from './dto/put-roster-config.dto';
 import { UpdateCalendarDayDto } from './dto/update-calendar-day.dto';
@@ -131,6 +135,40 @@ export class ScheduleController {
     await this.access.manageSchedule(req.user, id);
     await this.access.manageSchedule(req.user, dto.otherId);
     return this.schedule.swapRooms(id, dto);
+  }
+
+  // Ангийн 7 хоног — гараг/цаг/танхим ба нэрийг нэг дор (эзэн 2026-10-23).
+  // Түүх хадгалагдана (effectiveTo/хуваалт); танхим давхцвал 409.
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Put('schedule/classrooms/:id/pattern')
+  async putClassPattern(
+    @Param('id') id: string,
+    @Body() dto: PutClassPatternDto,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.manage(req.user, id);
+    return this.schedule.putClassPattern(
+      id,
+      dto,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
+  // «Шинэ анги» хуваарийн хуудаснаас — анги + 7 хоног нэг транзакцаар.
+  // Бүх ангийн schedule.manage шаардана (Админ, Багш+).
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post('schedule/classrooms')
+  async createClassWithPattern(
+    @Body() dto: CreateClassWithPatternDto,
+    @Req() req: AuthedRequest,
+  ) {
+    await this.access.manage(req.user);
+    return this.schedule.createClassWithPattern(
+      dto,
+      req.user.userId,
+      req.user.role,
+    );
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)

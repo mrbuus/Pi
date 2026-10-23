@@ -21,6 +21,9 @@ export interface ClassWeekGridProps {
   todayWeekday?: number;
   onSelect?: (slot: Slot) => void;
   canSelect?: (slot: Slot) => boolean;
+  /** Ангийн нэр дээр дарахад ангийн 7 хоногийг нэг дор засах цонх (эзэн 2026-10-23) */
+  onSelectClass?: (classroomId: string) => void;
+  canSelectClass?: (classroomId: string) => boolean;
 }
 
 interface ClassRow {
@@ -44,7 +47,7 @@ export function byClassLabel(a: { label: string; className: string }, b: { label
   return a.label.localeCompare(b.label, "mn", { numeric: true }) || a.className.localeCompare(b.className, "mn", { numeric: true });
 }
 
-export default function ClassWeekGrid({ slots, caption, todayWeekday, onSelect, canSelect }: ClassWeekGridProps) {
+export default function ClassWeekGrid({ slots, caption, todayWeekday, onSelect, canSelect, onSelectClass, canSelectClass }: ClassWeekGridProps) {
   const cells = new Map<string, Slot[]>();
   const rowsById = new Map<string, ClassRow>();
   for (const s of slots) {
@@ -107,7 +110,19 @@ export default function ClassWeekGrid({ slots, caption, todayWeekday, onSelect, 
                   style={style}
                   className="class-row sticky left-0 z-10 border-b border-line bg-surface px-2 py-1.5 text-left align-middle text-sm font-bold text-ink shadow-[1px_0_0_0_var(--line)]"
                 >
-                  <span className="block break-words leading-tight">{label}</span>
+                  {onSelectClass && (!canSelectClass || canSelectClass(row.classroomId)) ? (
+                    <button
+                      type="button"
+                      onClick={() => onSelectClass(row.classroomId)}
+                      aria-label={`${label} анги — гараг, цаг, нэр засах`}
+                      title="Гараг, цаг, нэр засах"
+                      className="row-interactive -mx-1 flex min-h-11 w-[calc(100%+0.5rem)] cursor-pointer items-center rounded-md px-1 text-left underline decoration-line decoration-dotted underline-offset-4 hover:bg-bg hover:decoration-ink-dim"
+                    >
+                      <span className="block break-words leading-tight">{label}</span>
+                    </button>
+                  ) : (
+                    <span className="block break-words leading-tight">{label}</span>
+                  )}
                 </th>
                 {WEEK_ORDER.map((wd, i) => {
                   const list = cells.get(`${row.classroomId}|${wd}`) ?? [];
