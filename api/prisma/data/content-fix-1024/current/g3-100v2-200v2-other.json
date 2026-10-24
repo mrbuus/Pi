@@ -1,0 +1,703 @@
+[
+ {
+  "token": "100V2-ABSINEQ-05-B-08",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\left| x^{2} - 2x \\right| \\geq x + 4$ тэнцэтгэл бишийг үл хангах хэдэн бүхэл тоо байх вэ?",
+  "choices": [
+   "4",
+   "5",
+   "6",
+   "3",
+   "$2 *\\*$"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Модультай тэнцэтгэл биш · Тест 5",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-ABSINEQ-07-A-07",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$|x - 1| + |2 - x| > 3 - x$ тэнцэтгэл бишийг бод. Бодолт: $|x - 1| + |2 - x| > 3 - x ⤇ \\left\\{ \\begin{array}{r} x < 1 \\\\ - x > \\lbrack a\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} 1 \\leq x < \\lbrack b\\rbrack \\\\ x - \\lbrack c\\rbrack > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq \\lbrack b\\rbrack \\\\ \\lbrack d\\rbrack x - \\lbrack e\\rbrack > 0 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty;\\lbrackf\\rbrack\\lbrack \\cup \\rbrack\\lbrackg\\rbrack; + \\infty\\lbrack$ байна.",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "ANSWER_KEY_MISSING",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Модультай тэнцэтгэл биш · Тест 7",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-ABSINEQ-07-A-08",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$|x| - 2|x + 1| + 3|x + 2| > 4$ тэнцэтгэл бишийг бод. Бодолт: $|x| - 2|x + 1| + 3|x + 2| > 4 ⤇ ⤇ \\left\\{ \\begin{array}{r} x < - 2 \\\\ - 2x > \\lbrack b\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} - 2 \\leq x < - \\lbrack a\\rbrack \\\\ 4x + \\lbrack c\\rbrack > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} - \\lbrack a\\rbrack \\leq x < 0 \\\\ \\lbrack d\\rbrack > 4 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq 0 \\\\ \\lbrack e\\rbrack x > 0 \\end{array} \\right.$ ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty; - \\lbrackf\\rbrack\\lbrack \\cup \\rbrack\\lbrackg\\rbrack; + \\infty\\lbrack$ байна. Амжилт хүсье!",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "ANSWER_KEY_MISSING",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Модультай тэнцэтгэл биш · Тест 7",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-ABSINEQ-07-B-07",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$|2x + 3| + |1 - x| > 1 - 2x$ тэнцэтгэл бишийг бод. Бодолт: $|2x + 3| + |1 - x| > 1 - 2x ⤇ \\left\\{ \\begin{array}{r} x < - 1.5 \\\\ - x > \\lbrack a\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} - 1.5 \\leq x < \\lbrack b\\rbrack \\\\ x + \\lbrack c\\rbrack > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq \\lbrack b\\rbrack \\\\ \\lbrack d\\rbrack x + \\lbrack e\\rbrack > 0 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty; - \\lbrackf\\rbrack\\lbrack \\cup \\rbrack - \\lbrackg\\rbrack; + \\infty\\lbrack$ байна.",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "ANSWER_KEY_MISSING",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Модультай тэнцэтгэл биш · Тест 7",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-ABSINEQ-07-B-08",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$|x| - 2|x - 1| + 3|x - 2| > 4$ тэнцэтгэл бишийг бод. Бодолт: $|x| - 2|x - 1| + 3|x - 2| > 4 ⤇ ⤇ \\left\\{ \\begin{array}{r} x < 0 \\\\ - 2x > \\lbrack b\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} 0 \\leq x < \\lbrack a\\rbrack \\\\ \\lbrack c\\rbrack > 4 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} \\lbrack a\\rbrack \\leq x < 2 \\\\ - \\lbrack d\\rbrack x + 4 > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq 2 \\\\ \\lbrack e\\rbrack x > 8 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty;\\lbrackf\\rbrack\\lbrack \\cup \\rbrack\\lbrackg\\rbrack; + \\infty\\lbrack$ байна.",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "ANSWER_KEY_MISSING",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Модультай тэнцэтгэл биш · Тест 7",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-LOGEQ-05-B-09",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$\\log_{3}^{2}x + 3\\log_{3}x + 9 = \\frac{37}{\\log_{3}\\frac{x}{27}}$ тэгшитгэлийг бод. Бодолт: $\\log_{3}x = t$ гэсэн орлуулга хийвэл $\\frac{t^{\\lbrack a\\rbrack} - \\lbrack bc\\rbrack}{t - \\lbrack d\\rbrack} = 0$ болох ба $t = \\lbrack e\\rbrack$ гарч орлуулгаа буцаан тэгшитгэлийн шийдийг олбол $x = \\lbrack fg\\rbrack$ байна. $*\\*$",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "ANSWER_KEY_MISSING",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Логарифм тэгшитгэл · Тест 5",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-LOGEXP-09-A-07",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$x = \\log_{5}650;y = \\log_{3}317;z = \\log_{2}112$ тоонуудыг жиш.",
+  "choices": [
+   "$x > y > z$",
+   "$x > z > y$",
+   "$y > z > x$",
+   "$z > x > y$",
+   "$z > y > x *\\*$"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Логарифм илэрхийлэл · Тест 9",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-LOGEXP-09-A-08",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$x = \\log_{0.5}15;y = \\log_{\\frac{1}{16}}3;z = \\log_{\\frac{1}{4}}500$ тоонуудыг жиш.",
+  "choices": [
+   "$x < z < y$",
+   "$y < x < z$",
+   "$x < y < z$",
+   "$z < y < x$",
+   "$z < x < y *\\*$"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Логарифм илэрхийлэл · Тест 9",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-LOGEXP-09-A-09",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$x^{4} = y^{3}$ бол $\\log_{x^{2}}y^{3} + \\log_{\\sqrt{y}}\\frac{1}{x}$ илэрхийллийн утгыг ол. Бодолт: $x^{4} = y^{3}$ гэдгээс $\\log_{y}x = \\frac{\\lbrack a\\rbrack}{\\lbrack b\\rbrack}$ гэж гарна. $\\log_{x^{2}}y^{3} + \\log_{\\sqrt{y}}\\frac{1}{x}$ илэрхийллийг хялбарчилбал $\\frac{\\lbrack c\\rbrack}{\\lbrack d\\rbrack}\\log_{x}y - \\lbrack e\\rbrack\\log_{y}x$ гэдгээс $\\frac{\\lbrack f\\rbrack}{\\lbrack g\\rbrack}$ гэж гарна. $*\\*$",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "ANSWER_KEY_MISSING",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Логарифм илэрхийлэл · Тест 9",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-RATEQ-03-B-03",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\frac{4x + 7}{2} - 8 = - 11$ тэгшитгэлийг бод.",
+  "choices": [
+   "$3\\frac{1}{4}$",
+   "$- 2\\frac{1}{4}$",
+   "$- \\frac{4}{13}$",
+   "$- 3\\frac{1}{4}$",
+   "$\\frac{4}{13}![A grid of squares with dots Description automatically generated](media/image1.png){width=\"5.1456003937007875in\" height=\"0.5in\"}*\\*$"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Рациональ тэгшитгэл · Тест 3",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-RATEQ-08-A-08",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\frac{x^{2}(x - 5)}{x + 2} - \\frac{4(x - 5)}{x + 2} = 0$ тэгшитгэлийн бодит шийдүүдийн үржвэрийг ол.",
+  "choices": [
+   "20",
+   "10",
+   "- 10",
+   "- 15",
+   "$- 20 *\\*$"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Рациональ тэгшитгэл · Тест 8",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-RATEQ-08-B-08",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\frac{9(x + 2)}{x - 3} - \\frac{x^{2}(x + 2)}{x - 3} = 0$ тэгшитгэлийн бодит шийдүүдийн үржвэрийг ол.",
+  "choices": [
+   "18",
+   "- 3",
+   "- 9",
+   "6",
+   "$- 2 *\\*$"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Рациональ тэгшитгэл · Тест 8",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-RATEQ-10-A-03",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$x^{3} - 3x^{2} - 4x = 0$ тэгшитгэлийг бод.",
+  "choices": [
+   "$- 1;4$",
+   "$- 4;0;1$",
+   "$- 1;0;4$",
+   "$- 4;1$",
+   "шийдгүй $*\\*$"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Рациональ тэгшитгэл · Тест 10",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-RATEQ-11-B-07",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$x^{2}\\left( x^{2} - 9 \\right) = (3x - 1)(x + 3)$ тэгшитгэлийн бүх бодит шийдүүдийн нийлбэрийг ол.",
+  "choices": [
+   "- 4",
+   "0",
+   "- 2",
+   "8",
+   "$2![A grid of lines with dots Description automatically generated](media/image2.png){width=\"5.152083333333334in\" height=\"2.0416666666666665in\"}\\$"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Рациональ тэгшитгэл · Тест 11",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "100V2-TOO-01-A-01",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\lbrack - 4;18\\rbrack$ завсарт хэдэн анхны тоо байх вэ?",
+  "choices": null,
+  "correctAnswer": "Хариулт 1",
+  "chapter": {
+   "title": "Тоо тоолол · Тест 1",
+   "book": {
+    "title": "100x100",
+    "sourceLabel": "100x100 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-FUNKTS-03-A-05",
+  "format": "OPEN",
+  "imageKey": null,
+  "statementText": "$P(3x + 1) = x^{2} - 3x - 2$ бол $P( - 2)$-ийн утгыг ол. $(A). - 5 (B).8 (C).2 (D).6 (E).12$",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "PARSE_OR_FORMAT_UNCERTAIN",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Функц · Тест 3",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-FUNKTS-03-B-05",
+  "format": "OPEN",
+  "imageKey": null,
+  "statementText": "$P(2x + 3) = 4x^{2} - 2x + 7$ бол $P(3)$-ийн утгыг ол. $(A).37 (B).7 (C).9 (D).5 (E).19$",
+  "choices": null,
+  "correctAnswer": {
+   "reason": "PARSE_OR_FORMAT_UNCERTAIN",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Функц · Тест 3",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-FUNKTS-04-A-04",
+  "format": "CHOICE",
+  "imageKey": "549d6d64-fc5a-4662-b9df-d11485008c61.png",
+  "statementText": "Дараах зурагт өгөгдсөн графикуудыг ашиглан $f\\left( g(8) \\right) + g\\left( f( - 2) \\right)$-ийн утгыг ол.",
+  "choices": [
+   "5",
+   "$6 (C).7 (D).8 (E).9$"
+  ],
+  "correctAnswer": {
+   "reason": "ANSWER_LETTER_OUT_OF_RANGE",
+   "manualReview": true
+  },
+  "chapter": {
+   "title": "Функц · Тест 4",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-FUNKTS-04-A-09",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$f(x) = \\left\\ \\begin{aligned} 2x - 5, & x < 1 \\\\ 0.5x, & x \\geq 1 \\end{aligned} \\right$ бол $3 \\cdot f(0) + 2 \\cdot f(6)$-ын утгыг ол.",
+  "choices": [
+   "- 3",
+   "21",
+   "- 9",
+   "1",
+   "- 21"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Функц · Тест 4",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-02-A-03",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$x = 1$ шулуун $y = 2x^{2} + ax + 1$ параболын тэгш хэмийн тэнхлэг бол оройн цэгийн ординатыг ол.",
+  "choices": [
+   "1",
+   "- 3",
+   "3",
+   "$- 1 (E).2$"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Квадрат функцийн график · Тест 2",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-02-A-05",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$y = x^{2} + 6x + 7$ функцийн хамгийн бага утгыг ол.",
+  "choices": [
+   "3",
+   "- 3",
+   "- 2",
+   "$7 (E).2$"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Квадрат функцийн график · Тест 2",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-02-B-05",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$y = x^{2} - 8x + 13$ функцийн хамгийн бага утгыг ол.",
+  "choices": [
+   "3",
+   "- 3",
+   "4",
+   "$- 4 (E).13$"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Квадрат функцийн график · Тест 2",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TEGSH_SONDGOI_FUNKTS-02-A-14",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$f(x)$ функц нь тэгш функц ба $f(x) = \\{ \\begin{array}{r} 3x - 2;x < 0 \\\\ mx - n;x \\geq 0 \\end{array}$ бол $m - n$-ийн $\\right$ утгыг ол.",
+  "choices": [
+   "- 1",
+   "1",
+   "5",
+   "- 5",
+   "4 Амжилт хүсье!"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Тэгш сондгой функц · Тест 2",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGONOMETR_ILERHIILEL-08-B-06",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\sin{225{^\\circ}} \\cdot {\\ctg}{225{^\\circ}} + \\cos{225{^\\circ}}$ утгыг ол.",
+  "choices": [
+   "$- \\sqrt{2}$",
+   "- 1",
+   "0",
+   "1",
+   "$\\sqrt{2} *\\*$"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Тригонометр илэрхийлэл · Тест 8",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-05-A-11",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$6\\sin^{2}x - sinx \\cdot cosx - \\cos^{2}x = 3$ тэгшитгэлийн $\\lbrack - \\pi;\\pi\\rbrack$ завсарт хэдэн шийдтэй вэ? Бодолт: $6\\sin^{2}x - sinx \\cdot cosx - \\cos^{2}x = 3 \\rightarrow \\lbrack a\\rbrack\\sin^{2}x - sinx \\cdot cosx - \\lbrack b\\rbrack\\cos^{2}x = 0$ болгож хувиргаад тэгшитгэлийн хоёр талыг $\\cos^{2}x \\neq \\lbrack c\\rbrack$ хувааж $tgx = t$ гэсэн орлуулга хийж цааш бодож орлуулгаа буцаавал $\\lbrack \\begin{matrix} tgx = - \\lbrack d\\rbrack \\\\ tgx = \\frac{\\lbrack e\\rbrack}{\\lbrack f\\rbrack} \\end{matrix}$ тэгшитгэлд $\\right$ шилжинэ. Иймд уг тэгшитгэл өгөгдсөн завсарт $\\lbrack g\\rbrack$ ширхэг шийдтэй байна.",
+  "choices": null,
+  "correctAnswer": {
+   "fill": {}
+  },
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 5",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-05-B-11",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$5\\cos^{2}x - 3sinx \\cdot cosx + \\sin^{2}x = 3$ тэгшитгэлийн $\\lbrack - \\pi;\\pi\\rbrack$ завсарт хэдэн шийдтэй вэ? Бодолт: ${5\\cos^{2}}x - 3sinx \\cdot cosx + \\sin^{2}x = 3 \\rightarrow \\lbrack a\\rbrack{\\cos}^{2}x - sinx \\cdot cosx - \\lbrack b\\rbrack{\\sin}^{2}x = 0$ болгож хувиргаад тэгшитгэлийн хоёр талыг $\\sin^{2}x \\neq \\lbrack c\\rbrack$ хувааж $ctgx = t$ гэсэн орлуулга хийж цааш бодож орлуулгаа буцаавал $\\lbrack \\begin{matrix} ctgx = \\lbrack d\\rbrack \\\\ ctgx = - \\frac{\\lbrack e\\rbrack}{\\lbrack f\\rbrack} \\end{matrix}$ тэгшитгэлд $\\right$ шилжинэ. Иймд уг тэгшитгэл өгөгдсөн завсарт $\\lbrack g\\rbrack$ ширхэг шийдтэй байна.",
+  "choices": null,
+  "correctAnswer": {
+   "fill": {}
+  },
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 5",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-06-A-09",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\tg3x \\cdot \\tg6x = 1$ тэгшитгэл $\\left\\lbrack 0;2\\pi \\right\\lbrack$ завсарт хэдэн шийдтэй вэ?",
+  "choices": [
+   "15",
+   "20",
+   "17",
+   "18",
+   "$16 *\\*$"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 6",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-06-B-09",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "$\\ctg2x \\cdot \\ctg4x = 1$ тэгшитгэл $\\left\\lbrack 0;2\\pi \\right\\lbrack$ завсарт хэдэн шийдтэй вэ?",
+  "choices": [
+   "11",
+   "12",
+   "7",
+   "8",
+   "$10 *\\*$"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 6",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-ULAMJLALYN_HEREGLEE-09-A-10",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$f(x) = x^{4} + mx^{2} + nx + 2$ функцийн нугаралтын цэгийн абсцисс нь $x = 2$ ба энэ цэгт татсан шүргэгч шулууны налалт 1 бол $n$ тоог ол. Бодолт:Өгөгдсөн нөхцлөөс $\\{ \\begin{array}{r} \\lbrack ab\\rbrack + \\lbrack c\\rbrack m + n = 1 \\\\ \\lbrack de\\rbrack + m = 0 \\end{array}$ систем тэгшитгэл үүснэ. $\\right$ Цааш бодож $n$ тоог олбол $n = \\lbrack fg\\rbrack$ байна. Амжилт хүсье!",
+  "choices": null,
+  "correctAnswer": {
+   "fill": {}
+  },
+  "chapter": {
+   "title": "Уламжлалын хэрэглээ · Тест 9",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-ULAMJLALYN_HEREGLEE-09-B-10",
+  "format": "FILL_NUMBER",
+  "imageKey": null,
+  "statementText": "$f(x) = x^{4} - mx^{2} + nx + 6$ функцийн нугаралтын цэгийн абсцисс нь $x = 1$ ба энэ цэгт татсан шүргэгч шулууны налалт 4 бол $b$ тоог ол. Бодолт:Өгөгдсөн нөхцлөөс $\\{ \\begin{array}{r} \\lbrack a\\rbrack - \\lbrack b\\rbrack m + n = \\lbrack c\\rbrack \\\\ \\lbrack de\\rbrack - 2m = 0 \\end{array}$ систем тэгшитгэл үүснэ. $\\right$ Цааш бодож $n$ тоог олбол $n = \\lbrack fg\\rbrack$ байна.",
+  "choices": null,
+  "correctAnswer": {
+   "fill": {}
+  },
+  "chapter": {
+   "title": "Уламжлалын хэрэглээ · Тест 9",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ }
+]

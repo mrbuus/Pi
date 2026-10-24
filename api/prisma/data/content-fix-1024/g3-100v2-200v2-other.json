@@ -1,0 +1,776 @@
+[
+ {
+  "token": "100V2-ABSINEQ-05-B-08",
+  "source": "100x100 V2/Модультай-тэнцэтгэл-биш-5.pdf х.4 Тест 5-B №8",
+  "before": {
+   "statementText": "$\\left| x^{2} - 2x \\right| \\geq x + 4$ тэнцэтгэл бишийг үл хангах хэдэн бүхэл тоо байх вэ?"
+  },
+  "format": "CHOICE",
+  "statementText": "$|x^{2} - 2x| \\geq x + 4$ тэнцэтгэл бишийг үл хангах хэдэн бүхэл тоо байх вэ?",
+  "choices": [
+   {
+    "text": "$4$"
+   },
+   {
+    "text": "$5$"
+   },
+   {
+    "text": "$6$"
+   },
+   {
+    "text": "$3$"
+   },
+   {
+    "text": "$2$"
+   }
+  ],
+  "correct": "A",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 5-B №8 = A таарав."
+ },
+ {
+  "token": "100V2-ABSINEQ-07-A-07",
+  "source": "100x100 V2/Модультай-тэнцэтгэл-биш-7.pdf х.2 Тест 7-A №7",
+  "before": {
+   "statementText": "$|x - 1| + |2 - x| > 3 - x$ тэнцэтгэл бишийг бод. Бодолт: $|x - 1| + |2 - x| > 3 - x ⤇ \\left\\{ \\begin{array}{r} x < 1 \\\\ - x > \\lbrack a\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} 1 \\leq x < \\lbrack b\\rbrack \\\\ x - \\lbrack c\\rbrack > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq \\lbrack b\\rbrack \\\\ \\lbrack d\\rbrack x - \\lbrack e\\rbrack > 0 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty;\\lbrackf\\rbrack\\lbrack \\cup \\rbrack\\lbrackg\\rbrack; + \\infty\\lbrack$ байна."
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$|x - 1| + |2 - x| > 3 - x$ тэнцэтгэл бишийг бод. Бодолт: $|x - 1| + |2 - x| > 3 - x \\Rightarrow \\left\\{ \\begin{array}{l} x < 1 \\\\ -x > \\lbrack a\\rbrack \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} 1 \\leq x < \\lbrack b\\rbrack \\\\ x - \\lbrack c\\rbrack > 0 \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} x \\geq \\lbrack b\\rbrack \\\\ \\lbrack d\\rbrack x - \\lbrack e\\rbrack > 0 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x \\in ]-\\infty; \\lbrack f\\rbrack[ \\cup ]\\lbrack g\\rbrack; +\\infty[$ байна.",
+  "answer": {
+   "a": "0",
+   "b": "2",
+   "c": "2",
+   "d": "3",
+   "e": "6",
+   "f": "0",
+   "g": "2"
+  },
+  "answerSource": "key",
+  "notes": "Түлхүүр 7-A №7: a0 b2 c2 d3 e6 f0 g2 — өөрөө бодож шалгав (]-inf;0[ U ]2;+inf[)."
+ },
+ {
+  "token": "100V2-ABSINEQ-07-A-08",
+  "source": "100x100 V2/Модультай-тэнцэтгэл-биш-7.pdf х.2 Тест 7-A №8",
+  "before": {
+   "statementText": "$|x| - 2|x + 1| + 3|x + 2| > 4$ тэнцэтгэл бишийг бод. Бодолт: $|x| - 2|x + 1| + 3|x + 2| > 4 ⤇ ⤇ \\left\\{ \\begin{array}{r} x < - 2 \\\\ - 2x > \\lbrack b\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} - 2 \\leq x < - \\lbrack a\\rbrack \\\\ 4x + \\lbrack c\\rbrack > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} - \\lbrack a\\rbrack \\leq x < 0 \\\\ \\lbrack d\\rbrack > 4 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq 0 \\\\ \\lbrack e\\rbrack x > 0 \\end{array} \\right.$ ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty; - \\lbrackf\\rbrack\\lbrack \\cup \\rbrack\\lbrackg\\rbrack; + \\infty\\lbrack$ байна. Амжилт хүсье!"
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$|x| - 2|x + 1| + 3|x + 2| > 4$ тэнцэтгэл бишийг бод. Бодолт: $|x| - 2|x + 1| + 3|x + 2| > 4 \\Rightarrow \\left\\{ \\begin{array}{l} x < -2 \\\\ -2x > \\lbrack b\\rbrack \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} -2 \\leq x < -\\lbrack a\\rbrack \\\\ 4x + \\lbrack c\\rbrack > 0 \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} -\\lbrack a\\rbrack \\leq x < 0 \\\\ \\lbrack d\\rbrack > 4 \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} x \\geq 0 \\\\ \\lbrack e\\rbrack x > 0 \\end{array} \\right.$ ба эндээс уг тэнцэтгэл бишийн шийд $x \\in ]-\\infty; -\\lbrack f\\rbrack[ \\cup ]\\lbrack g\\rbrack; +\\infty[$ байна.",
+  "answer": {
+   "a": "1",
+   "b": "8",
+   "c": "4",
+   "d": "4",
+   "e": "2",
+   "f": "4",
+   "g": "0"
+  },
+  "answerSource": "key",
+  "notes": "Түлхүүр 7-A №8: a1 b8 c4 d4 e2 f4 g0 — өөрөө бодож шалгав. Эх дээр мөр таслалтаас болж «⇒» хоёр удаа байсныг нэг болгов; дараагийн хуудасны «Амжилт хүсье!» толгойг хасав."
+ },
+ {
+  "token": "100V2-ABSINEQ-07-B-07",
+  "source": "100x100 V2/Модультай-тэнцэтгэл-биш-7.pdf х.4 Тест 7-B №7",
+  "before": {
+   "statementText": "$|2x + 3| + |1 - x| > 1 - 2x$ тэнцэтгэл бишийг бод. Бодолт: $|2x + 3| + |1 - x| > 1 - 2x ⤇ \\left\\{ \\begin{array}{r} x < - 1.5 \\\\ - x > \\lbrack a\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} - 1.5 \\leq x < \\lbrack b\\rbrack \\\\ x + \\lbrack c\\rbrack > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq \\lbrack b\\rbrack \\\\ \\lbrack d\\rbrack x + \\lbrack e\\rbrack > 0 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty; - \\lbrackf\\rbrack\\lbrack \\cup \\rbrack - \\lbrackg\\rbrack; + \\infty\\lbrack$ байна."
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$|2x + 3| + |1 - x| > 1 - 2x$ тэнцэтгэл бишийг бод. Бодолт: $|2x + 3| + |1 - x| > 1 - 2x \\Rightarrow \\left\\{ \\begin{array}{l} x < -1.5 \\\\ -x > \\lbrack a\\rbrack \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} -1.5 \\leq x < \\lbrack b\\rbrack \\\\ x + \\lbrack c\\rbrack > 0 \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} x \\geq \\lbrack b\\rbrack \\\\ \\lbrack d\\rbrack x + \\lbrack e\\rbrack > 0 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x \\in ]-\\infty; -\\lbrack f\\rbrack[ \\cup ]-\\lbrack g\\rbrack; +\\infty[$ байна.",
+  "answer": {
+   "a": "3",
+   "b": "1",
+   "c": "1",
+   "d": "5",
+   "e": "1",
+   "f": "3",
+   "g": "1"
+  },
+  "answerSource": "key",
+  "notes": "Түлхүүр 7-B №7: a3 b1 c1 d5 e1 f3 g1 — өөрөө бодож шалгав."
+ },
+ {
+  "token": "100V2-ABSINEQ-07-B-08",
+  "source": "100x100 V2/Модультай-тэнцэтгэл-биш-7.pdf х.4 Тест 7-B №8",
+  "before": {
+   "statementText": "$|x| - 2|x - 1| + 3|x - 2| > 4$ тэнцэтгэл бишийг бод. Бодолт: $|x| - 2|x - 1| + 3|x - 2| > 4 ⤇ ⤇ \\left\\{ \\begin{array}{r} x < 0 \\\\ - 2x > \\lbrack b\\rbrack \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} 0 \\leq x < \\lbrack a\\rbrack \\\\ \\lbrack c\\rbrack > 4 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} \\lbrack a\\rbrack \\leq x < 2 \\\\ - \\lbrack d\\rbrack x + 4 > 0 \\end{array} \\right. \\bigcup\\left\\{ \\begin{array}{r} x \\geq 2 \\\\ \\lbrack e\\rbrack x > 8 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x\\in \\rbrack - \\infty;\\lbrackf\\rbrack\\lbrack \\cup \\rbrack\\lbrackg\\rbrack; + \\infty\\lbrack$ байна."
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$|x| - 2|x - 1| + 3|x - 2| > 4$ тэнцэтгэл бишийг бод. Бодолт: $|x| - 2|x - 1| + 3|x - 2| > 4 \\Rightarrow \\left\\{ \\begin{array}{l} x < 0 \\\\ -2x > \\lbrack b\\rbrack \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} 0 \\leq x < \\lbrack a\\rbrack \\\\ \\lbrack c\\rbrack > 4 \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} \\lbrack a\\rbrack \\leq x < 2 \\\\ -\\lbrack d\\rbrack x + 4 > 0 \\end{array} \\right. \\cup \\left\\{ \\begin{array}{l} x \\geq 2 \\\\ \\lbrack e\\rbrack x > 8 \\end{array} \\right.$ болох ба эндээс уг тэнцэтгэл бишийн шийд $x \\in ]-\\infty; \\lbrack f\\rbrack[ \\cup ]\\lbrack g\\rbrack; +\\infty[$ байна.",
+  "answer": {
+   "a": "1",
+   "b": "0",
+   "c": "4",
+   "d": "4",
+   "e": "2",
+   "f": "0",
+   "g": "4"
+  },
+  "answerSource": "key",
+  "notes": "Түлхүүр 7-B №8: a1 b0 c4 d4 e2 f0 g4 — өөрөө бодож шалгав. Эх дээр «⇒» хоёр удаа (мөр таслалт) байсныг нэг болгов."
+ },
+ {
+  "token": "100V2-LOGEQ-05-B-09",
+  "source": "100x100 V2/Логарифм-тэгшитгэл-5.pdf х.4 Тест 5-B №9",
+  "before": {
+   "statementText": "$\\log_{3}^{2}x + 3\\log_{3}x + 9 = \\frac{37}{\\log_{3}\\frac{x}{27}}$ тэгшитгэлийг бод. Бодолт: $\\log_{3}x = t$ гэсэн орлуулга хийвэл $\\frac{t^{\\lbrack a\\rbrack} - \\lbrack bc\\rbrack}{t - \\lbrack d\\rbrack} = 0$ болох ба $t = \\lbrack e\\rbrack$ гарч орлуулгаа буцаан тэгшитгэлийн шийдийг олбол $x = \\lbrack fg\\rbrack$ байна. $*\\*$"
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$\\log_{3}^{2}x + 3\\log_{3}x + 9 = \\frac{37}{\\log_{3}\\frac{x}{27}}$ тэгшитгэлийг бод. Бодолт: $\\log_{3}x = t$ гэсэн орлуулга хийвэл $\\frac{t^{\\lbrack a\\rbrack} - \\lbrack bc\\rbrack}{t - \\lbrack d\\rbrack} = 0$ болох ба $t = \\lbrack e\\rbrack$ гарч орлуулгаа буцаан тэгшитгэлийн шийдийг олбол $x = \\lbrack fg\\rbrack$ байна.",
+  "answer": {
+   "a": "3",
+   "bc": "64",
+   "d": "3",
+   "e": "4",
+   "fg": "81"
+  },
+  "answerSource": "key",
+  "notes": "Түлхүүр 5-B №9: a3 b6 c4 d3 e4 f8 g1 (bc=64, fg=81) — өөрөө бодож шалгав: (t^3-64)/(t-3)=0, t=4, x=81."
+ },
+ {
+  "token": "100V2-LOGEXP-09-A-07",
+  "source": "100x100 V2/Логарифм-илэрхийлэл-9.pdf х.2 Тест 9-A №7",
+  "before": {
+   "statementText": "$x = \\log_{5}650;y = \\log_{3}317;z = \\log_{2}112$ тоонуудыг жиш."
+  },
+  "format": "CHOICE",
+  "statementText": "$x = \\log_{5}650; y = \\log_{3}317; z = \\log_{2}112$ тоонуудыг жиш.",
+  "choices": [
+   {
+    "text": "$x > y > z$"
+   },
+   {
+    "text": "$x > z > y$"
+   },
+   {
+    "text": "$y > z > x$"
+   },
+   {
+    "text": "$z > x > y$"
+   },
+   {
+    "text": "$z > y > x$"
+   }
+  ],
+  "correct": "E",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 9-A №7 = E таарав."
+ },
+ {
+  "token": "100V2-LOGEXP-09-A-08",
+  "source": "100x100 V2/Логарифм-илэрхийлэл-9.pdf х.2 Тест 9-A №8",
+  "before": {
+   "statementText": "$x = \\log_{0.5}15;y = \\log_{\\frac{1}{16}}3;z = \\log_{\\frac{1}{4}}500$ тоонуудыг жиш."
+  },
+  "format": "CHOICE",
+  "statementText": "$x = \\log_{0.5}15; y = \\log_{\\frac{1}{16}}3; z = \\log_{\\frac{1}{4}}500$ тоонуудыг жиш.",
+  "choices": [
+   {
+    "text": "$x < z < y$"
+   },
+   {
+    "text": "$y < x < z$"
+   },
+   {
+    "text": "$x < y < z$"
+   },
+   {
+    "text": "$z < y < x$"
+   },
+   {
+    "text": "$z < x < y$"
+   }
+  ],
+  "correct": "E",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 9-A №8 = E таарав."
+ },
+ {
+  "token": "100V2-LOGEXP-09-A-09",
+  "source": "100x100 V2/Логарифм-илэрхийлэл-9.pdf х.2 Тест 9-A №9",
+  "before": {
+   "statementText": "$x^{4} = y^{3}$ бол $\\log_{x^{2}}y^{3} + \\log_{\\sqrt{y}}\\frac{1}{x}$ илэрхийллийн утгыг ол. Бодолт: $x^{4} = y^{3}$ гэдгээс $\\log_{y}x = \\frac{\\lbrack a\\rbrack}{\\lbrack b\\rbrack}$ гэж гарна. $\\log_{x^{2}}y^{3} + \\log_{\\sqrt{y}}\\frac{1}{x}$ илэрхийллийг хялбарчилбал $\\frac{\\lbrack c\\rbrack}{\\lbrack d\\rbrack}\\log_{x}y - \\lbrack e\\rbrack\\log_{y}x$ гэдгээс $\\frac{\\lbrack f\\rbrack}{\\lbrack g\\rbrack}$ гэж гарна. $*\\*$"
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$x^{4} = y^{3}$ бол $\\log_{x^{2}}y^{3} + \\log_{\\sqrt{y}}\\frac{1}{x}$ илэрхийллийн утгыг ол. Бодолт: $x^{4} = y^{3}$ гэдгээс $\\log_{y}x = \\frac{\\lbrack a\\rbrack}{\\lbrack b\\rbrack}$ гэж гарна. $\\log_{x^{2}}y^{3} + \\log_{\\sqrt{y}}\\frac{1}{x}$ илэрхийллийг хялбарчилбал $\\frac{\\lbrack c\\rbrack}{\\lbrack d\\rbrack}\\log_{x}y - \\lbrack e\\rbrack\\log_{y}x$ гэдгээс $\\frac{\\lbrack f\\rbrack}{\\lbrack g\\rbrack}$ гэж гарна.",
+  "answer": {
+   "a": "3",
+   "b": "4",
+   "c": "3",
+   "d": "2",
+   "e": "2",
+   "f": "1",
+   "g": "2"
+  },
+  "answerSource": "key",
+  "notes": "Түлхүүр 9-A №9: a3 b4 c3 d2 e2 f1 g2 — өөрөө бодож шалгав (3/2*4/3 - 2*3/4 = 1/2)."
+ },
+ {
+  "token": "100V2-RATEQ-03-B-03",
+  "source": "100x100 V2/Тэгшитгэл-3.pdf х.3 Тест 3-B №3",
+  "before": {
+   "statementText": "$\\frac{4x + 7}{2} - 8 = - 11$ тэгшитгэлийг бод."
+  },
+  "format": "CHOICE",
+  "statementText": "$\\frac{4x + 7}{2} - 8 = -11$ тэгшитгэлийг бод.",
+  "choices": [
+   {
+    "text": "$3\\frac{1}{4}$"
+   },
+   {
+    "text": "$-2\\frac{1}{4}$"
+   },
+   {
+    "text": "$-\\frac{4}{13}$"
+   },
+   {
+    "text": "$-3\\frac{1}{4}$"
+   },
+   {
+    "text": "$\\frac{4}{13}$"
+   }
+  ],
+  "correct": "D",
+  "answerSource": "existing",
+  "notes": "E сонголтоос Word-ийн зургийн үлдэгдэл, «*\\*»-г арилгав. Түлхүүр 3-B №3 = D таарав. Эх файл нь «Тэгшитгэл-3» (100x100 V2-д «Рациональ-тэгшитгэл» нэртэй файл алга)."
+ },
+ {
+  "token": "100V2-RATEQ-08-A-08",
+  "source": "100x100 V2/Тэгшитгэл-8.pdf х.2 Тест 8-A №8",
+  "before": {
+   "statementText": "$\\frac{x^{2}(x - 5)}{x + 2} - \\frac{4(x - 5)}{x + 2} = 0$ тэгшитгэлийн бодит шийдүүдийн үржвэрийг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$\\frac{x^{2}(x - 5)}{x + 2} - \\frac{4(x - 5)}{x + 2} = 0$ тэгшитгэлийн бодит шийдүүдийн үржвэрийг ол.",
+  "choices": [
+   {
+    "text": "$20$"
+   },
+   {
+    "text": "$10$"
+   },
+   {
+    "text": "$-10$"
+   },
+   {
+    "text": "$-15$"
+   },
+   {
+    "text": "$-20$"
+   }
+  ],
+  "correct": "B",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 8-A №8 = B таарав (шийд 2; 5)."
+ },
+ {
+  "token": "100V2-RATEQ-08-B-08",
+  "source": "100x100 V2/Тэгшитгэл-8.pdf х.4 Тест 8-B №8",
+  "before": {
+   "statementText": "$\\frac{9(x + 2)}{x - 3} - \\frac{x^{2}(x + 2)}{x - 3} = 0$ тэгшитгэлийн бодит шийдүүдийн үржвэрийг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$\\frac{9(x + 2)}{x - 3} - \\frac{x^{2}(x + 2)}{x - 3} = 0$ тэгшитгэлийн бодит шийдүүдийн үржвэрийг ол.",
+  "choices": [
+   {
+    "text": "$18$"
+   },
+   {
+    "text": "$-3$"
+   },
+   {
+    "text": "$-9$"
+   },
+   {
+    "text": "$6$"
+   },
+   {
+    "text": "$-2$"
+   }
+  ],
+  "correct": "D",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 8-B №8 = D таарав (шийд -2; -3)."
+ },
+ {
+  "token": "100V2-RATEQ-10-A-03",
+  "source": "100x100 V2/Тэгшитгэл-10.pdf х.1 Тест 10-A №3",
+  "before": {
+   "statementText": "$x^{3} - 3x^{2} - 4x = 0$ тэгшитгэлийг бод."
+  },
+  "format": "CHOICE",
+  "statementText": "$x^{3} - 3x^{2} - 4x = 0$ тэгшитгэлийг бод.",
+  "choices": [
+   {
+    "text": "$-1; 4$"
+   },
+   {
+    "text": "$-4; 0; 1$"
+   },
+   {
+    "text": "$-1; 0; 4$"
+   },
+   {
+    "text": "$-4; 1$"
+   },
+   {
+    "text": "шийдгүй"
+   }
+  ],
+  "correct": "C",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 10-A №3 = C таарав."
+ },
+ {
+  "token": "100V2-RATEQ-11-B-07",
+  "source": "100x100 V2/Тэгшитгэл-11.pdf х.5 Тест 11-B №7",
+  "before": {
+   "statementText": "$x^{2}\\left( x^{2} - 9 \\right) = (3x - 1)(x + 3)$ тэгшитгэлийн бүх бодит шийдүүдийн нийлбэрийг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$x^{2}(x^{2} - 9) = (3x - 1)(x + 3)$ тэгшитгэлийн бүх бодит шийдүүдийн нийлбэрийг ол.",
+  "choices": [
+   {
+    "text": "$-4$"
+   },
+   {
+    "text": "$0$"
+   },
+   {
+    "text": "$-2$"
+   },
+   {
+    "text": "$8$"
+   },
+   {
+    "text": "$2$"
+   }
+  ],
+  "correct": "B",
+  "answerSource": "existing",
+  "notes": "E сонголтоос Word-ийн зургийн үлдэгдэл, сондгой «$»-г арилгав. Түлхүүр 11-B №7 = B таарав (шийд -3; -1; 2±√3, нийлбэр 0)."
+ },
+ {
+  "token": "100V2-TOO-01-A-01",
+  "source": "100x100 V2/Тоо-тоолол-1.pdf х.1 Тест 1-A №1",
+  "before": {
+   "statementText": "$\\lbrack - 4;18\\rbrack$ завсарт хэдэн анхны тоо байх вэ?"
+  },
+  "format": "CHOICE",
+  "statementText": "$[-4; 18]$ завсарт хэдэн анхны тоо байх вэ?",
+  "choices": [
+   {
+    "text": "$8$"
+   },
+   {
+    "text": "$7$"
+   },
+   {
+    "text": "$10$"
+   },
+   {
+    "text": "$9$"
+   },
+   {
+    "text": "$11$"
+   }
+  ],
+  "correct": "B",
+  "answerSource": "key",
+  "notes": "Сонголт огт байгаагүй, одоогийн хариу «Хариулт 1» (утгагүй) байсан. Сонголтыг эхээс сэргээж, хариуг түлхүүр 1-A №1 = B-ээс авав (2,3,5,7,11,13,17 — 7 ширхэг, өөрөө шалгав)."
+ },
+ {
+  "token": "200V2-FUNKTS-03-A-05",
+  "source": "200x200 V2/Функц-3 OK.pdf х.1 Тест 3-A №5",
+  "before": {
+   "statementText": "$P(3x + 1) = x^{2} - 3x - 2$ бол $P( - 2)$-ийн утгыг ол. $(A). - 5 (B).8 (C).2 (D).6 (E).12$"
+  },
+  "format": "CHOICE",
+  "statementText": "$P(3x + 1) = x^{2} - 3x - 2$ бол $P(-2)$-ийн утгыг ол.",
+  "choices": [
+   {
+    "text": "$-5$"
+   },
+   {
+    "text": "$8$"
+   },
+   {
+    "text": "$2$"
+   },
+   {
+    "text": "$6$"
+   },
+   {
+    "text": "$12$"
+   }
+  ],
+  "correct": "C",
+  "answerSource": "key",
+  "notes": "OPEN төлөвт сонголтууд нөхцөл дотор наалдсан байсныг салгав. Хариу одоо PARSE_OR_FORMAT_UNCERTAIN байсан тул түлхүүр 3-A №5 = C-ээс авав (x=-1 → 2, өөрөө шалгав)."
+ },
+ {
+  "token": "200V2-FUNKTS-03-B-05",
+  "source": "200x200 V2/Функц-3 OK.pdf х.3 Тест 3-B №5",
+  "before": {
+   "statementText": "$P(2x + 3) = 4x^{2} - 2x + 7$ бол $P(3)$-ийн утгыг ол. $(A).37 (B).7 (C).9 (D).5 (E).19$"
+  },
+  "format": "CHOICE",
+  "statementText": "$P(2x + 3) = 4x^{2} - 2x + 7$ бол $P(3)$-ийн утгыг ол.",
+  "choices": [
+   {
+    "text": "$37$"
+   },
+   {
+    "text": "$7$"
+   },
+   {
+    "text": "$9$"
+   },
+   {
+    "text": "$5$"
+   },
+   {
+    "text": "$19$"
+   }
+  ],
+  "correct": "B",
+  "answerSource": "key",
+  "notes": "OPEN төлөвт сонголтууд нөхцөл дотор наалдсан байсныг салгав. Хариу одоо PARSE_OR_FORMAT_UNCERTAIN байсан тул түлхүүр 3-B №5 = B-ээс авав (x=0 → 7, өөрөө шалгав)."
+ },
+ {
+  "token": "200V2-FUNKTS-04-A-04",
+  "source": "200x200 V2/Функц-4 OK.pdf х.1 Тест 4-A №5 (токен -04 боловч агуулга нь эх дээрх №5)",
+  "before": {
+   "statementText": "Дараах зурагт өгөгдсөн графикуудыг ашиглан $f\\left( g(8) \\right) + g\\left( f( - 2) \\right)$-ийн утгыг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "Дараах зурагт өгөгдсөн графикуудыг ашиглан $f(g(8)) + g(f(-2))$-ийн утгыг ол.",
+  "image": "fig/200V2-FUNKTS-04-A-04.png",
+  "choices": [
+   {
+    "text": "$5$"
+   },
+   {
+    "text": "$6$"
+   },
+   {
+    "text": "$7$"
+   },
+   {
+    "text": "$8$"
+   },
+   {
+    "text": "$9$"
+   }
+  ],
+  "correct": "C",
+  "answerSource": "key",
+  "notes": "Энэ токены агуулга эх дээрх №5 бодлого (эх дээрх №4 нь утгын мужийн өөр бодлого) — импортод дугаар 1-ээр шилжсэн бололтой. Хариуг түлхүүр 4-A №5 = C-ээс авав (f(0)=3, g(0)=4, нийлбэр 7, өөрөө шалгав). Хуучин зурагт зөвхөн g(x) байсан тул f(x), g(x) хоёр графиктай зургийг PDF-ээс 300dpi тайрч солив. 2 сонголт наалдсаныг 5 болгов."
+ },
+ {
+  "token": "200V2-FUNKTS-04-A-09",
+  "source": "200x200 V2/Функц-4 OK.pdf х.2 Тест 4-A №9",
+  "before": {
+   "statementText": "$f(x) = \\left\\ \\begin{aligned} 2x - 5, & x < 1 \\\\ 0.5x, & x \\geq 1 \\end{aligned} \\right$ бол $3 \\cdot f(0) + 2 \\cdot f(6)$-ын утгыг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$f(x) = \\left\\{ \\begin{array}{l} 2x - 5, \\quad x < 1 \\\\ 0.5x, \\quad x \\geq 1 \\end{array} \\right.$ бол $3 \\cdot f(0) + 2 \\cdot f(6)$-ын утгыг ол.",
+  "choices": [
+   {
+    "text": "$-3$"
+   },
+   {
+    "text": "$21$"
+   },
+   {
+    "text": "$-9$"
+   },
+   {
+    "text": "$1$"
+   },
+   {
+    "text": "$-21$"
+   }
+  ],
+  "correct": "C",
+  "answerSource": "existing",
+  "notes": "Эвдэрсэн «\\left\\ … \\right» системийг засав. Түлхүүр 4-A №9 = C таарав (-15+6=-9)."
+ },
+ {
+  "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-02-A-03",
+  "source": "200x200 V2/Квадрат-функцийн-график-2 OK.pdf х.1 Тест 2-A №3",
+  "before": {
+   "statementText": "$x = 1$ шулуун $y = 2x^{2} + ax + 1$ параболын тэгш хэмийн тэнхлэг бол оройн цэгийн ординатыг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$x = 1$ шулуун $y = 2x^{2} + ax + 1$ параболын тэгш хэмийн тэнхлэг бол оройн цэгийн ординатыг ол.",
+  "choices": [
+   {
+    "text": "$1$"
+   },
+   {
+    "text": "$-3$"
+   },
+   {
+    "text": "$3$"
+   },
+   {
+    "text": "$-1$"
+   },
+   {
+    "text": "$2$"
+   }
+  ],
+  "correct": "D",
+  "answerSource": "existing",
+  "notes": "«$- 1 (E).2$» гэж наалдсан D, E сонголтыг салгав. Түлхүүр 2-A №3 = D таарав (a=-4, y(1)=-1)."
+ },
+ {
+  "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-02-A-05",
+  "source": "200x200 V2/Квадрат-функцийн-график-2 OK.pdf х.1 Тест 2-A №5",
+  "before": {
+   "statementText": "$y = x^{2} + 6x + 7$ функцийн хамгийн бага утгыг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$y = x^{2} + 6x + 7$ функцийн хамгийн бага утгыг ол.",
+  "choices": [
+   {
+    "text": "$3$"
+   },
+   {
+    "text": "$-3$"
+   },
+   {
+    "text": "$-2$"
+   },
+   {
+    "text": "$7$"
+   },
+   {
+    "text": "$2$"
+   }
+  ],
+  "correct": "C",
+  "answerSource": "existing",
+  "notes": "Наалдсан D, E сонголтыг салгав. Түлхүүр 2-A №5 = C таарав (y(-3)=-2)."
+ },
+ {
+  "token": "200V2-KVADRAT_FUNKTSIIN_GRAFIK-02-B-05",
+  "source": "200x200 V2/Квадрат-функцийн-график-2 OK.pdf х.3 Тест 2-B №5",
+  "before": {
+   "statementText": "$y = x^{2} - 8x + 13$ функцийн хамгийн бага утгыг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$y = x^{2} - 8x + 13$ функцийн хамгийн бага утгыг ол.",
+  "choices": [
+   {
+    "text": "$3$"
+   },
+   {
+    "text": "$-3$"
+   },
+   {
+    "text": "$4$"
+   },
+   {
+    "text": "$-4$"
+   },
+   {
+    "text": "$13$"
+   }
+  ],
+  "correct": "B",
+  "answerSource": "existing",
+  "notes": "Наалдсан D, E сонголтыг салгав. Түлхүүр 2-B №5 = B таарав (y(4)=-3)."
+ },
+ {
+  "token": "200V2-TEGSH_SONDGOI_FUNKTS-02-A-14",
+  "source": "200x200 V2/Тэгш-сондгой-функц-2 OK.pdf х.2 Тест 2-A №14",
+  "before": {
+   "statementText": "$f(x)$ функц нь тэгш функц ба $f(x) = \\{ \\begin{array}{r} 3x - 2;x < 0 \\\\ mx - n;x \\geq 0 \\end{array}$ бол $m - n$-ийн $\\right$ утгыг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$f(x)$ функц нь тэгш функц ба $f(x) = \\left\\{ \\begin{array}{l} 3x - 2; x < 0 \\\\ mx - n; x \\geq 0 \\end{array} \\right.$ бол $m - n$-ийн утгыг ол.",
+  "choices": [
+   {
+    "text": "$-1$"
+   },
+   {
+    "text": "$1$"
+   },
+   {
+    "text": "$5$"
+   },
+   {
+    "text": "$-5$"
+   },
+   {
+    "text": "$4$"
+   }
+  ],
+  "correct": "D",
+  "answerSource": "existing",
+  "notes": "Эвдэрсэн систем, нөхцөл дундах «$\\right$»-г засав; E сонголтоос «Амжилт хүсье!»-г хасав. Түлхүүр 2-A №14 = D таарав (m=-3, n=2)."
+ },
+ {
+  "token": "200V2-TRIGONOMETR_ILERHIILEL-08-B-06",
+  "source": "200x200 V2/Тригонометр-илэрхийлэл-8-d.pdf х.3 Тест 8-B №6",
+  "before": {
+   "statementText": "$\\sin{225{^\\circ}} \\cdot {\\ctg}{225{^\\circ}} + \\cos{225{^\\circ}}$ утгыг ол."
+  },
+  "format": "CHOICE",
+  "statementText": "$\\sin 225^{\\circ} \\cdot \\ctg 225^{\\circ} + \\cos 225^{\\circ}$ утгыг ол.",
+  "choices": [
+   {
+    "text": "$-\\sqrt{2}$"
+   },
+   {
+    "text": "$-1$"
+   },
+   {
+    "text": "$0$"
+   },
+   {
+    "text": "$1$"
+   },
+   {
+    "text": "$\\sqrt{2}$"
+   }
+  ],
+  "correct": "A",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 8-B №6 = A таарав."
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-05-A-11",
+  "source": "200x200 V2/Тригонометр-тэгшитгэл-5.pdf х.3 Тест 5-A №11",
+  "before": {
+   "statementText": "$6\\sin^{2}x - sinx \\cdot cosx - \\cos^{2}x = 3$ тэгшитгэлийн $\\lbrack - \\pi;\\pi\\rbrack$ завсарт хэдэн шийдтэй вэ? Бодолт: $6\\sin^{2}x - sinx \\cdot cosx - \\cos^{2}x = 3 \\rightarrow \\lbrack a\\rbrack\\sin^{2}x - sinx \\cdot cosx - \\lbrack b\\rbrack\\cos^{2}x = 0$ болгож хувиргаад тэгшитгэлийн хоёр талыг $\\cos^{2}x \\neq \\lbrack c\\rbrack$ хувааж $tgx = t$ гэсэн орлуулга хийж цааш бодож орлуулгаа буцаавал $\\lbrack \\begin{matrix} tgx = - \\lbrack d\\rbrack \\\\ tgx = \\frac{\\lbrack e\\rbrack}{\\lbrack f\\rbrack} \\end{matrix}$ тэгшитгэлд $\\right$ шилжинэ. Иймд уг тэгшитгэл өгөгдсөн завсарт $\\lbrack g\\rbrack$ ширхэг шийдтэй байна."
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$6\\sin^{2}x - \\sin x \\cdot \\cos x - \\cos^{2}x = 3$ тэгшитгэлийн $[-\\pi; \\pi]$ завсарт хэдэн шийдтэй вэ? Бодолт: $6\\sin^{2}x - \\sin x \\cdot \\cos x - \\cos^{2}x = 3 \\rightarrow \\lbrack a\\rbrack\\sin^{2}x - \\sin x \\cdot \\cos x - \\lbrack b\\rbrack\\cos^{2}x = 0$ болгож хувиргаад тэгшитгэлийн хоёр талыг $\\cos^{2}x \\neq \\lbrack c\\rbrack$ хувааж $\\tg x = t$ гэсэн орлуулга хийж цааш бодож орлуулгаа буцаавал $\\left[ \\begin{array}{l} \\tg x = -\\lbrack d\\rbrack \\\\ \\tg x = \\frac{\\lbrack e\\rbrack}{\\lbrack f\\rbrack} \\end{array} \\right.$ тэгшитгэлд шилжинэ. Иймд уг тэгшитгэл өгөгдсөн завсарт $\\lbrack g\\rbrack$ ширхэг шийдтэй байна.",
+  "answer": {
+   "a": "3",
+   "b": "4",
+   "c": "0",
+   "d": "1",
+   "e": "4",
+   "f": "3",
+   "g": "4"
+  },
+  "answerSource": "key",
+  "notes": "Хариу хоосон ({fill:{}}) байсан. Түлхүүр 5-A №11: a3 b4 c0 d1 e4 f3 g4 — өөрөө бодож шалгав (3t^2-t-4=0, t=-1; 4/3, [-pi;pi]-д 4 шийд). Нөхцөл дундах «$\\right$»-г хасав."
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-05-B-11",
+  "source": "200x200 V2/Тригонометр-тэгшитгэл-5.pdf х.6 Тест 5-B №11",
+  "before": {
+   "statementText": "$5\\cos^{2}x - 3sinx \\cdot cosx + \\sin^{2}x = 3$ тэгшитгэлийн $\\lbrack - \\pi;\\pi\\rbrack$ завсарт хэдэн шийдтэй вэ? Бодолт: ${5\\cos^{2}}x - 3sinx \\cdot cosx + \\sin^{2}x = 3 \\rightarrow \\lbrack a\\rbrack{\\cos}^{2}x - sinx \\cdot cosx - \\lbrack b\\rbrack{\\sin}^{2}x = 0$ болгож хувиргаад тэгшитгэлийн хоёр талыг $\\sin^{2}x \\neq \\lbrack c\\rbrack$ хувааж $ctgx = t$ гэсэн орлуулга хийж цааш бодож орлуулгаа буцаавал $\\lbrack \\begin{matrix} ctgx = \\lbrack d\\rbrack \\\\ ctgx = - \\frac{\\lbrack e\\rbrack}{\\lbrack f\\rbrack} \\end{matrix}$ тэгшитгэлд $\\right$ шилжинэ. Иймд уг тэгшитгэл өгөгдсөн завсарт $\\lbrack g\\rbrack$ ширхэг шийдтэй байна."
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$5\\cos^{2}x - 3\\sin x \\cdot \\cos x + \\sin^{2}x = 3$ тэгшитгэлийн $[-\\pi; \\pi]$ завсарт хэдэн шийдтэй вэ? Бодолт: $5\\cos^{2}x - 3\\sin x \\cdot \\cos x + \\sin^{2}x = 3 \\rightarrow \\lbrack a\\rbrack\\cos^{2}x - \\sin x \\cdot \\cos x - \\lbrack b\\rbrack\\sin^{2}x = 0$ болгож хувиргаад тэгшитгэлийн хоёр талыг $\\sin^{2}x \\neq \\lbrack c\\rbrack$ хувааж $\\ctg x = t$ гэсэн орлуулга хийж цааш бодож орлуулгаа буцаавал $\\left[ \\begin{array}{l} \\ctg x = \\lbrack d\\rbrack \\\\ \\ctg x = -\\frac{\\lbrack e\\rbrack}{\\lbrack f\\rbrack} \\end{array} \\right.$ тэгшитгэлд шилжинэ. Иймд уг тэгшитгэл өгөгдсөн завсарт $\\lbrack g\\rbrack$ ширхэг шийдтэй байна.",
+  "answer": {
+   "a": "2",
+   "b": "2",
+   "c": "0",
+   "d": "2",
+   "e": "1",
+   "f": "2",
+   "g": "4"
+  },
+  "answerSource": "key",
+  "notes": "Хариу хоосон ({fill:{}}) байсан. Түлхүүр 5-B №11: a2 b2 c0 d2 e1 f2 g4 — өөрөө бодож шалгав (2t^2-3t-2=0, t=2; -1/2, 4 шийд). ЭХ ДЭЭРХ АЛДАА (хэвээр хуулав): Бодолтын хувиргасан тэгшитгэлд «- sinx·cosx» гэж бичсэн, зөв нь «- 3sinx·cosx» (2cos^2x - 3sinx·cosx - 2sin^2x = 0). Нөхцөл дундах «$\\right$»-г хасав."
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-06-A-09",
+  "source": "200x200 V2/Тригонометр-тэгшитгэл-6-d.pdf х.2 Тест 6-A №9",
+  "before": {
+   "statementText": "$\\tg3x \\cdot \\tg6x = 1$ тэгшитгэл $\\left\\lbrack 0;2\\pi \\right\\lbrack$ завсарт хэдэн шийдтэй вэ?"
+  },
+  "format": "CHOICE",
+  "statementText": "$\\tg 3x \\cdot \\tg 6x = 1$ тэгшитгэл $[0; 2\\pi[$ завсарт хэдэн шийдтэй вэ?",
+  "choices": [
+   {
+    "text": "$15$"
+   },
+   {
+    "text": "$20$"
+   },
+   {
+    "text": "$17$"
+   },
+   {
+    "text": "$18$"
+   },
+   {
+    "text": "$16$"
+   }
+  ],
+  "correct": "D",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 6-A №9 = D (18) таарав, хэвээр үлдээв. ЭРГЭЛЗЭЭ: өөрөө бодоход tg3x = ±1/√3 → [0;2π[-д 12 шийд гарна (cos9x=0-ийн 18 язгуураас cos3x=0 болох 6-г хасна); 12 сонголтод алга — эх бодлого/түлхүүр алдаатай байж магадгүй, эзэн шалгана."
+ },
+ {
+  "token": "200V2-TRIGONOMETR_TEGSHITGEL-06-B-09",
+  "source": "200x200 V2/Тригонометр-тэгшитгэл-6-d.pdf х.4 Тест 6-B №9",
+  "before": {
+   "statementText": "$\\ctg2x \\cdot \\ctg4x = 1$ тэгшитгэл $\\left\\lbrack 0;2\\pi \\right\\lbrack$ завсарт хэдэн шийдтэй вэ?"
+  },
+  "format": "CHOICE",
+  "statementText": "$\\ctg 2x \\cdot \\ctg 4x = 1$ тэгшитгэл $[0; 2\\pi[$ завсарт хэдэн шийдтэй вэ?",
+  "choices": [
+   {
+    "text": "$11$"
+   },
+   {
+    "text": "$12$"
+   },
+   {
+    "text": "$7$"
+   },
+   {
+    "text": "$8$"
+   },
+   {
+    "text": "$10$"
+   }
+  ],
+  "correct": "B",
+  "answerSource": "existing",
+  "notes": "E сонголтын «*\\*» үлдэгдлийг арилгав. Түлхүүр 6-B №9 = B (12) таарав, хэвээр үлдээв. ЭРГЭЛЗЭЭ: өөрөө бодоход ctg2x = ±√3 → [0;2π[-д 8 шийд (D) гарна (cos6x=0-ийн 12 язгуураас sin4x=0 болох π/4, 3π/4, 5π/4, 7π/4 хасагдана) — түлхүүр алдаатай байж магадгүй, эзэн шалгана."
+ },
+ {
+  "token": "200V2-ULAMJLALYN_HEREGLEE-09-A-10",
+  "source": "200x200 V2/Уламжлалын хэрэглээ-9.pdf х.2 Тест 9-A №10",
+  "before": {
+   "statementText": "$f(x) = x^{4} + mx^{2} + nx + 2$ функцийн нугаралтын цэгийн абсцисс нь $x = 2$ ба энэ цэгт татсан шүргэгч шулууны налалт 1 бол $n$ тоог ол. Бодолт:Өгөгдсөн нөхцлөөс $\\{ \\begin{array}{r} \\lbrack ab\\rbrack + \\lbrack c\\rbrack m + n = 1 \\\\ \\lbrack de\\rbrack + m = 0 \\end{array}$ систем тэгшитгэл үүснэ. $\\right$ Цааш бодож $n$ тоог олбол $n = \\lbrack fg\\rbrack$ байна. Амжилт хүсье!"
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$f(x) = x^{4} + mx^{2} + nx + 2$ функцийн нугаралтын цэгийн абсцисс нь $x = 2$ ба энэ цэгт татсан шүргэгч шулууны налалт $1$ бол $n$ тоог ол. Бодолт: Өгөгдсөн нөхцлөөс $\\left\\{ \\begin{array}{l} \\lbrack ab\\rbrack + \\lbrack c\\rbrack m + n = 1 \\\\ \\lbrack de\\rbrack + m = 0 \\end{array} \\right.$ систем тэгшитгэл үүснэ. Цааш бодож $n$ тоог олбол $n = \\lbrack fg\\rbrack$ байна.",
+  "answer": {
+   "ab": "32",
+   "c": "4",
+   "de": "24",
+   "fg": "65"
+  },
+  "answerSource": "key",
+  "notes": "Хариу хоосон ({fill:{}}) байсан. Түлхүүр 9-A №10: a3 b2 c4 d2 e4 f6 g5 (ab=32, de=24, fg=65) — өөрөө бодож шалгав (m=-24, n=65). Дараагийн хуудасны «Амжилт хүсье!», «$\\right$»-г хасав."
+ },
+ {
+  "token": "200V2-ULAMJLALYN_HEREGLEE-09-B-10",
+  "source": "200x200 V2/Уламжлалын хэрэглээ-9.pdf х.4 Тест 9-B №10",
+  "before": {
+   "statementText": "$f(x) = x^{4} - mx^{2} + nx + 6$ функцийн нугаралтын цэгийн абсцисс нь $x = 1$ ба энэ цэгт татсан шүргэгч шулууны налалт 4 бол $b$ тоог ол. Бодолт:Өгөгдсөн нөхцлөөс $\\{ \\begin{array}{r} \\lbrack a\\rbrack - \\lbrack b\\rbrack m + n = \\lbrack c\\rbrack \\\\ \\lbrack de\\rbrack - 2m = 0 \\end{array}$ систем тэгшитгэл үүснэ. $\\right$ Цааш бодож $n$ тоог олбол $n = \\lbrack fg\\rbrack$ байна."
+  },
+  "format": "FILL_NUMBER",
+  "statementText": "$f(x) = x^{4} - mx^{2} + nx + 6$ функцийн нугаралтын цэгийн абсцисс нь $x = 1$ ба энэ цэгт татсан шүргэгч шулууны налалт $4$ бол $b$ тоог ол. Бодолт: Өгөгдсөн нөхцлөөс $\\left\\{ \\begin{array}{l} \\lbrack a\\rbrack - \\lbrack b\\rbrack m + n = \\lbrack c\\rbrack \\\\ \\lbrack de\\rbrack - 2m = 0 \\end{array} \\right.$ систем тэгшитгэл үүснэ. Цааш бодож $n$ тоог олбол $n = \\lbrack fg\\rbrack$ байна.",
+  "answer": {
+   "a": "4",
+   "b": "2",
+   "c": "4",
+   "de": "12",
+   "fg": "12"
+  },
+  "answerSource": "key",
+  "notes": "Хариу хоосон ({fill:{}}) байсан. Түлхүүр 9-B №10: a4 b2 c4 d1 e2 f1 g2 (de=12, fg=12) — өөрөө бодож шалгав (m=6, n=12). ЭХ ДЭЭРХ АЛДАА (хэвээр хуулав): нөхцөлд «b тоог ол» гэсэн, утгаараа «n тоог ол» байх ёстой. «$\\right$»-г хасав."
+ }
+]

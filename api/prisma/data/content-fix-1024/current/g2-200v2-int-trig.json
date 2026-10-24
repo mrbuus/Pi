@@ -1,0 +1,827 @@
+[
+ {
+  "token": "200V2-INT1-01",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "f(x) = 2 функцийн эх функцийг ол.\n (A). 0 (B). 2x (C). 2x + 𝐶 (D). 2 + 𝐶 (E). 𝐶",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-02",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "f(x) = 4x функцийн эх функцийг ол.\n (A). 4x 2 + 𝐶   (B). 4 + 𝐶 (C). x 2 + 𝐶 (D). 4 (E). 2x 2 + 𝐶",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-03",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "f(x) = 5x 4 функцийн эх функцийг ол.\n (A). x 5 + 𝐶   (B). 20x 3 + 𝐶 (C). 5x 3 + 𝐶 (D). 5x 5 + 𝐶 (E). 4x 5 + 𝐶",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-04",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 1 − 2𝑥 функцийн эх функцийг ол.\n   (𝐀). 𝑥 2 + 𝐶 (𝐁). −𝑥 2 + 𝐶  (𝐂). 𝑥 − 2𝑥 2 + 𝐶     (𝐃). 𝑥 − 𝑥 2 + 𝐶       (𝐄). −2𝑥 + 𝐶",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-05",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 2 + 4𝑥 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(−1) = 1 бол 𝐹(𝑥) =?\n   (𝐀). 2𝑥 2 + 2𝑥 + 𝐶            (𝐁). 𝑥 2 + 2𝑥 + 1            (𝐂). 2𝑥 2 + 2𝑥 + 1\n                                          2\n                                 (𝐃). 2𝑥 + 2𝑥                  (𝐄). 𝑥 2 + 2𝑥 + 𝐶",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-06",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "f(x) = 2x + 3x 2 функцийн эх функцийг ол.\n (A). 6x + 2 + 𝐶 (B). x 3 + x 2 + 𝐶 (C). 3x 3 + 2x 2 + 𝐶\n (D). 6x 3 + 4x 2 + 𝐶 (E). x 3 + 2x 2 + 𝐶",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-07",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 4𝑥 3 − 11𝑥 10 функцийн эх функцийг ол.\n   (𝐀). −𝑥 11 + 𝑥 4 + 𝐶        (𝐁). −11𝑥 11 + 12𝑥 4 + 𝐶           (𝐂). 4𝑥 4 − 11𝑥 11 + 𝐶\n                               (𝐃). −110𝑥 9 + 12𝑥 2 + 𝐶            (𝐄). 𝑥 4 − 11𝑥 10 + 𝐶",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-08",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 6𝑥 2 − 8𝑥 + 5 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(−2) = 24 бол 𝐹(𝑥) =?\n   (𝐀). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 18 (𝐁). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 34 (𝐂). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 14\n                              (𝐃). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 66 (𝐄). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 24",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-09",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 9𝑥 2 + 10𝑥 − 3 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(−1) = 2 бол 𝐹(3) =?\n   (𝐀). 117          (𝐁). 124         (𝐂). 114          (𝐃). 107       (𝐄). 132\n\n           2",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-10",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 2 функцийн эх функцийг ол.\n          𝑥\n         2            2             6                        2                2\n   (𝐀). − + 𝐶     (𝐁). + 𝐶     (𝐂). 3 + 𝐶          (𝐃). −        +𝐶   (𝐄).        +𝐶\n         𝑥            𝑥            𝑥                        3𝑥 3             3𝑥 3",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-11",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 5 − 2𝑥 + 3𝑥 2 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(0) = 2 бол 𝐹(1) =?\n   (𝐀). 10            (𝐁). 9           (𝐂). 5             (𝐃). 4          (𝐄). 7",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-12",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = −10𝑥 9 + 8𝑥 7 − 2𝑥 функцийн эх функц 𝐹(𝑥) ба 𝐹(−1) = 5 бол 𝐹(1) =?\n   (𝐀). 4           (𝐁). 7             (𝐂). 5            (𝐃). 6         (𝐄). 10",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-13",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 3𝑥 2 − 4𝑥 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(2) = 19 бол 𝐹(𝑥) =?\n   (𝐀). 𝑥 3 + 4𝑥 2 + 38          (𝐁). 𝑥 3 − 2𝑥 2              (𝐂). 𝑥 3 − 2𝑥 2 + 38\n                                        3      2\n                                 (𝐃). 𝑥 − 2𝑥 + 19             (𝐄). 𝑥 3 − 4𝑥 2 + 19",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-14",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 3√𝑥 функцийн эх функцийг ол.\n                        2                                                     3\n   (𝐀). 𝑥 √𝑥 + 𝐶  (𝐁).    +𝐶    (𝐂). √4𝑥 3 + 𝐶         (𝐃). √8𝑥 3     (𝐄).          +𝐶\n                       √𝑥                                                    2√ 𝑥",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-INT1-15",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑓(𝑥) = 10𝑥 −3 + 4𝑥 3 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(√5) = 5 бол 𝐹(−1) =?\n   (𝐀). 25          (𝐁). 24           (𝐂). −24          (𝐃). −25       (𝐄). −23",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Интеграл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-01",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛𝑥 = 1 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n (𝐀). −0.5𝜋 + 2𝜋𝑘     (𝐁). 𝜋 + 2𝜋𝑘       (𝐂). 2𝜋𝑘     (𝐃). 𝜋𝑘     (𝐄). 0.5𝜋 + 2𝜋𝑘",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-02",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛𝑥 = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n (𝐀). −0.5𝜋 + 2𝜋𝑘    (𝐁). 𝜋 + 2𝜋𝑘     (𝐂). 2𝜋𝑘       (𝐃). 𝜋𝑘      (𝐄). 0.5𝜋 + 2𝜋𝑘",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-03",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "5 \\cdot 𝑠𝑖𝑛5x = 5 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n 𝜋 𝜋 𝜋𝑘 𝜋𝑘 𝜋 2𝜋𝑘\n (A). + 2𝜋𝑘 (B). + (C). (D). 𝜋𝑘 (E). +\n 2 10 5 5 10   5",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-04",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "8 \\cdot 𝑠𝑖𝑛(0.5𝑥) + 8 = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n                       𝜋                                𝜋\n (𝐀). 𝜋 + 4𝜋𝑘      (𝐁). + 𝜋𝑘    (𝐂). −𝜋 + 4𝜋𝑘     (𝐃). − + 𝜋𝑘       (𝐄). шийдгүй\n                       4                                4",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-05",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "2 \\cdot 𝑠𝑖𝑛(2𝜋x) = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n (A). 𝑘 (B). 0.5𝑘 (C). 𝜋𝑘 (D). 2𝑘 (E). шийдгүй\n\n 2𝜋",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-06",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛 M N = 1 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n         𝑥\n      𝜋                1                                   1                    4\n (𝐀). + 2𝜋𝑘        (𝐁). + 𝑘       (𝐂). 1 + 𝑘         (𝐃). − + 𝑘       (𝐄).\n      2                4                                   4                 1 + 4𝑘\n\n           𝜋",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "E",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-07",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛2𝑥 =   тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n           2\n (𝐀). 1 + 𝜋𝑘                    (𝐁). 0.25𝜋 + 𝜋𝑘                      (𝐂). шийдгүй\n                                   1 𝜋𝑘                 1                 𝜋   𝜋𝑘\n                       (𝐃). (−1)! \\cdot +               (𝐄). \\cdot (−1)! 𝑎𝑟𝑐𝑠𝑖𝑛 S T +\n                                   2 2                  2                 2    2",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-08",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛\" 𝑥 − 2𝑠𝑖𝑛𝑥 = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n                    𝜋                                    𝜋\n (𝐀). 𝜋𝑘        (𝐁). + 2𝜋𝑘      (𝐂). шийдгүй       (𝐃). − + 2𝜋𝑘          (𝐄). 2𝜋𝑘\n                    2                                    2",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-09",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛W𝜋 \\cdot (𝑥 − 2)X = 0 тэгшитгэлийн 0 < 𝑥 < 4 завсар дахь шийдүүдийн\n   нийлбэрийг ол.\n  (𝐀). 3             (𝐁). 4          (𝐂). 5             (𝐃). 6        (𝐄). 10",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-10",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛5𝑥 = 1 тэгшитгэлийн 0° < 𝑥 < 45° завсар дахь шийдийг ол.\n   (𝐀). 18°         (𝐁). 25°         (𝐂). 30°         (𝐃). 35°           (𝐄). 42°",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-11",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛W0.5𝜋 \\cdot (𝑥 − 3)X = 1 тэгшитгэлийн 3 < 𝑥 < 9 завсар дахь шийдүүдиийн\n   нийлбэрийг ол.\n  (𝐀). 12             (𝐁). 9          (𝐂). 10            (𝐃). 11        (𝐄). 1",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-12",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛𝑥 = 0.5 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n              𝜋                         𝜋                             𝜋\n   (𝐀). (−1)! + 2𝜋𝑘           (𝐁). (−1)! + 𝜋𝑘               (𝐂). (−1)!  + 2𝜋𝑘\n              6                         6                             3\n                                        𝜋                             𝜋\n                              (𝐃). (−1)! + 𝜋𝑘             (𝐄). (−1)!#$ + 2𝜋𝑘\n                                        3                             3\n\n           𝜋    √3",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-13",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛 S𝑥 + T =    тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n           4     2\n             𝜋   𝜋                      𝜋 𝜋                        𝜋 𝜋\n   (𝐀). (−1)! − + 2𝜋𝑘        (𝐁). (−1)! − + 𝜋𝑘          (𝐂). (−1)!  − + 2𝜋𝑘\n             6 4                        6 4                        3 4\n                                        𝜋 𝜋                         𝜋 𝜋\n                             (𝐃). (−1)! − + 𝜋𝑘          (𝐄). (−1)!#$ − + 𝜋𝑘\n                                         3 4                        3 4",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "D",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-14",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "3 \\cdot 𝑠𝑖𝑛𝑥 = 2 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n                        2                                                2\n    (𝐀). (−1)! 𝑎𝑟𝑐𝑠𝑖𝑛 M N + 2𝜋𝑘                       (𝐁). (−1)! 𝑎𝑟𝑐𝑠𝑖𝑛 M N + 𝜋𝑘\n                        3                                                3\n              !#$\n                          2                 !#$\n                                                        2\n    (𝐂). (−1)     𝑎𝑟𝑐𝑠𝑖𝑛 M N + 2𝜋𝑘 (𝐃). (−1)    𝑎𝑟𝑐𝑠𝑖𝑛 M N + 𝜋𝑘    (𝐄). шийдгүй\n                          3                             3\n\n        3𝑥    √3",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "B",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-15",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛 M N =     тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n         4     2\n              2𝜋                        4𝜋                             4𝜋 4𝜋𝑘\n   (𝐀). (−1)!    + 𝜋𝑘        (𝐁). (−1)!    + 𝜋𝑘             (𝐂). (−1)!    +\n               9                         9                              9   3\n                                        2𝜋 4𝜋𝑘                          𝜋\n                            (𝐃). (−1)!     +                          !\n                                                             (𝐄). (−1) + 𝜋𝑘\n                                         9    3                         3",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-16",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "𝑠𝑖𝑛 3𝑥 = 0.5 тэгшитгэлийн 𝑥𝜖]0; 90°[ завсар дахь шийдүүдийн нийлбэрийг ол.\n    (𝐀). 60°         (𝐁). 15°        (𝐂). 90°         (𝐃). 120°     (𝐄). 150°\n\n                √3",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-17",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "sin 2𝑥 = −      тэгшитгэл 0 ≤ 𝑥 ≤ 2𝜋 завсарт хэдэн шийдтэй вэ?\n                 2\n   (𝐀). 2              (𝐁). 3           (𝐂). 4            (𝐃). 5          (𝐄). 6\n\n                4𝜋𝑥",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "C",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ },
+ {
+  "token": "200V2-TRIGEQ1-18",
+  "format": "CHOICE",
+  "imageKey": null,
+  "statementText": "1 − 2 \\cdot 𝑠𝑖𝑛 M    N = 0 тэгшитгэлийн 0 < 𝑥 < 1 завсар дахь шийдүүдийн\n                 3\n   нийлбэрийг ол.\n   (𝐀). 0.75           (𝐁). 0.2       (𝐂). 0.375         (𝐃). 0.5    (𝐄). 0.625",
+  "choices": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "correctAnswer": "A",
+  "chapter": {
+   "title": "Тригонометр тэгшитгэл · Тест 1-A",
+   "book": {
+    "title": "200x200",
+    "sourceLabel": "200x200 V2"
+   }
+  },
+  "choiceOptions": [],
+  "_count": {
+   "attempts": 0
+  }
+ }
+]

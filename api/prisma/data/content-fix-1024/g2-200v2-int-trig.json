@@ -1,0 +1,959 @@
+[
+  {
+    "token": "200V2-INT1-01",
+    "source": "Интеграл-1-OK.pdf х.1 №1",
+    "before": {
+      "statementText": "f(x) = 2 функцийн эх функцийг ол.\n (A). 0 (B). 2x (C). 2x + 𝐶 (D). 2 + 𝐶 (E). 𝐶"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 2$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$0$"
+      },
+      {
+        "text": "$2x$"
+      },
+      {
+        "text": "$2x + C$"
+      },
+      {
+        "text": "$2 + C$"
+      },
+      {
+        "text": "$C$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-02",
+    "source": "Интеграл-1-OK.pdf х.1 №2",
+    "before": {
+      "statementText": "f(x) = 4x функцийн эх функцийг ол.\n (A). 4x 2 + 𝐶   (B). 4 + 𝐶 (C). x 2 + 𝐶 (D). 4 (E). 2x 2 + 𝐶"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 4x$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$4x^{2} + C$"
+      },
+      {
+        "text": "$4 + C$"
+      },
+      {
+        "text": "$x^{2} + C$"
+      },
+      {
+        "text": "$4$"
+      },
+      {
+        "text": "$2x^{2} + C$"
+      }
+    ],
+    "correct": "E",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-03",
+    "source": "Интеграл-1-OK.pdf х.1 №3",
+    "before": {
+      "statementText": "f(x) = 5x 4 функцийн эх функцийг ол.\n (A). x 5 + 𝐶   (B). 20x 3 + 𝐶 (C). 5x 3 + 𝐶 (D). 5x 5 + 𝐶 (E). 4x 5 + 𝐶"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 5x^{4}$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$x^{5} + C$"
+      },
+      {
+        "text": "$20x^{3} + C$"
+      },
+      {
+        "text": "$5x^{3} + C$"
+      },
+      {
+        "text": "$5x^{5} + C$"
+      },
+      {
+        "text": "$4x^{5} + C$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-04",
+    "source": "Интеграл-1-OK.pdf х.1 №4",
+    "before": {
+      "statementText": "𝑓(𝑥) = 1 − 2𝑥 функцийн эх функцийг ол.\n   (𝐀). 𝑥 2 + 𝐶 (𝐁). −𝑥 2 + 𝐶  (𝐂). 𝑥 − 2𝑥 2 + 𝐶     (𝐃). 𝑥 − 𝑥 2 + 𝐶       (𝐄). −2𝑥 + 𝐶"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 1 - 2x$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$x^{2} + C$"
+      },
+      {
+        "text": "$-x^{2} + C$"
+      },
+      {
+        "text": "$x - 2x^{2} + C$"
+      },
+      {
+        "text": "$x - x^{2} + C$"
+      },
+      {
+        "text": "$-2x + C$"
+      }
+    ],
+    "correct": "D",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-05",
+    "source": "Интеграл-1-OK.pdf х.1 №5",
+    "before": {
+      "statementText": "𝑓(𝑥) = 2 + 4𝑥 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(−1) = 1 бол 𝐹(𝑥) =?\n   (𝐀). 2𝑥 2 + 2𝑥 + 𝐶            (𝐁). 𝑥 2 + 2𝑥 + 1            (𝐂). 2𝑥 2 + 2𝑥 + 1\n                                          2\n                                 (𝐃). 2𝑥 + 2𝑥                  (𝐄). 𝑥 2 + 2𝑥 + 𝐶"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 2 + 4x$ функцийн эх функц нь $F(x)$ ба $F(-1) = 1$ бол $F(x) = ?$",
+    "choices": [
+      {
+        "text": "$2x^{2} + 2x + C$"
+      },
+      {
+        "text": "$x^{2} + 2x + 1$"
+      },
+      {
+        "text": "$2x^{2} + 2x + 1$"
+      },
+      {
+        "text": "$2x^{2} + 2x$"
+      },
+      {
+        "text": "$x^{2} + 2x + C$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-06",
+    "source": "Интеграл-1-OK.pdf х.1 №6",
+    "before": {
+      "statementText": "f(x) = 2x + 3x 2 функцийн эх функцийг ол.\n (A). 6x + 2 + 𝐶 (B). x 3 + x 2 + 𝐶 (C). 3x 3 + 2x 2 + 𝐶\n (D). 6x 3 + 4x 2 + 𝐶 (E). x 3 + 2x 2 + 𝐶"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 2x + 3x^{2}$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$6x + 2 + C$"
+      },
+      {
+        "text": "$x^{3} + x^{2} + C$"
+      },
+      {
+        "text": "$3x^{3} + 2x^{2} + C$"
+      },
+      {
+        "text": "$6x^{3} + 4x^{2} + C$"
+      },
+      {
+        "text": "$x^{3} + 2x^{2} + C$"
+      }
+    ],
+    "correct": "B",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-07",
+    "source": "Интеграл-1-OK.pdf х.1 №7",
+    "before": {
+      "statementText": "𝑓(𝑥) = 4𝑥 3 − 11𝑥 10 функцийн эх функцийг ол.\n   (𝐀). −𝑥 11 + 𝑥 4 + 𝐶        (𝐁). −11𝑥 11 + 12𝑥 4 + 𝐶           (𝐂). 4𝑥 4 − 11𝑥 11 + 𝐶\n                               (𝐃). −110𝑥 9 + 12𝑥 2 + 𝐶            (𝐄). 𝑥 4 − 11𝑥 10 + 𝐶"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 4x^{3} - 11x^{10}$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$-x^{11} + x^{4} + C$"
+      },
+      {
+        "text": "$-11x^{11} + 12x^{4} + C$"
+      },
+      {
+        "text": "$4x^{4} - 11x^{11} + C$"
+      },
+      {
+        "text": "$-110x^{9} + 12x^{2} + C$"
+      },
+      {
+        "text": "$x^{4} - 11x^{10} + C$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-08",
+    "source": "Интеграл-1-OK.pdf х.1 №8",
+    "before": {
+      "statementText": "𝑓(𝑥) = 6𝑥 2 − 8𝑥 + 5 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(−2) = 24 бол 𝐹(𝑥) =?\n   (𝐀). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 18 (𝐁). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 34 (𝐂). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 14\n                              (𝐃). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 66 (𝐄). 2𝑥 3 − 4𝑥 2 + 5𝑥 + 24"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 6x^{2} - 8x + 5$ функцийн эх функц нь $F(x)$ ба $F(-2) = 24$ бол $F(x) = ?$",
+    "choices": [
+      {
+        "text": "$2x^{3} - 4x^{2} + 5x + 18$"
+      },
+      {
+        "text": "$2x^{3} - 4x^{2} + 5x + 34$"
+      },
+      {
+        "text": "$2x^{3} - 4x^{2} + 5x + 14$"
+      },
+      {
+        "text": "$2x^{3} - 4x^{2} + 5x + 66$"
+      },
+      {
+        "text": "$2x^{3} - 4x^{2} + 5x + 24$"
+      }
+    ],
+    "correct": "D",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-09",
+    "source": "Интеграл-1-OK.pdf х.2 №9",
+    "before": {
+      "statementText": "𝑓(𝑥) = 9𝑥 2 + 10𝑥 − 3 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(−1) = 2 бол 𝐹(3) =?\n   (𝐀). 117          (𝐁). 124         (𝐂). 114          (𝐃). 107       (𝐄). 132\n\n           2"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 9x^{2} + 10x - 3$ функцийн эх функц нь $F(x)$ ба $F(-1) = 2$ бол $F(3) = ?$",
+    "choices": [
+      {
+        "text": "$117$"
+      },
+      {
+        "text": "$124$"
+      },
+      {
+        "text": "$114$"
+      },
+      {
+        "text": "$107$"
+      },
+      {
+        "text": "$132$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-10",
+    "source": "Интеграл-1-OK.pdf х.2 №10",
+    "before": {
+      "statementText": "𝑓(𝑥) = 2 функцийн эх функцийг ол.\n          𝑥\n         2            2             6                        2                2\n   (𝐀). − + 𝐶     (𝐁). + 𝐶     (𝐂). 3 + 𝐶          (𝐃). −        +𝐶   (𝐄).        +𝐶\n         𝑥            𝑥            𝑥                        3𝑥 3             3𝑥 3"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = \\frac{2}{x^{2}}$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$-\\frac{2}{x} + C$"
+      },
+      {
+        "text": "$\\frac{2}{x} + C$"
+      },
+      {
+        "text": "$\\frac{6}{x^{3}} + C$"
+      },
+      {
+        "text": "$-\\frac{2}{3x^{3}} + C$"
+      },
+      {
+        "text": "$\\frac{2}{3x^{3}} + C$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-11",
+    "source": "Интеграл-1-OK.pdf х.2 №11",
+    "before": {
+      "statementText": "𝑓(𝑥) = 5 − 2𝑥 + 3𝑥 2 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(0) = 2 бол 𝐹(1) =?\n   (𝐀). 10            (𝐁). 9           (𝐂). 5             (𝐃). 4          (𝐄). 7"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 5 - 2x + 3x^{2}$ функцийн эх функц нь $F(x)$ ба $F(0) = 2$ бол $F(1) = ?$",
+    "choices": [
+      {
+        "text": "$10$"
+      },
+      {
+        "text": "$9$"
+      },
+      {
+        "text": "$5$"
+      },
+      {
+        "text": "$4$"
+      },
+      {
+        "text": "$7$"
+      }
+    ],
+    "correct": "E",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-12",
+    "source": "Интеграл-1-OK.pdf х.2 №12",
+    "before": {
+      "statementText": "𝑓(𝑥) = −10𝑥 9 + 8𝑥 7 − 2𝑥 функцийн эх функц 𝐹(𝑥) ба 𝐹(−1) = 5 бол 𝐹(1) =?\n   (𝐀). 4           (𝐁). 7             (𝐂). 5            (𝐃). 6         (𝐄). 10"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = -10x^{9} + 8x^{7} - 2x$ функцийн эх функц $F(x)$ ба $F(-1) = 5$ бол $F(1) = ?$",
+    "choices": [
+      {
+        "text": "$4$"
+      },
+      {
+        "text": "$7$"
+      },
+      {
+        "text": "$5$"
+      },
+      {
+        "text": "$6$"
+      },
+      {
+        "text": "$10$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": "Эх дээр «эх функц F(x) ба» — «нь» үггүй, хэвээр хуулав"
+  },
+  {
+    "token": "200V2-INT1-13",
+    "source": "Интеграл-1-OK.pdf х.2 №13",
+    "before": {
+      "statementText": "𝑓(𝑥) = 3𝑥 2 − 4𝑥 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(2) = 19 бол 𝐹(𝑥) =?\n   (𝐀). 𝑥 3 + 4𝑥 2 + 38          (𝐁). 𝑥 3 − 2𝑥 2              (𝐂). 𝑥 3 − 2𝑥 2 + 38\n                                        3      2\n                                 (𝐃). 𝑥 − 2𝑥 + 19             (𝐄). 𝑥 3 − 4𝑥 2 + 19"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 3x^{2} - 4x$ функцийн эх функц нь $F(x)$ ба $F(2) = 19$ бол $F(x) = ?$",
+    "choices": [
+      {
+        "text": "$x^{3} + 4x^{2} + 38$"
+      },
+      {
+        "text": "$x^{3} - 2x^{2}$"
+      },
+      {
+        "text": "$x^{3} - 2x^{2} + 38$"
+      },
+      {
+        "text": "$x^{3} - 2x^{2} + 19$"
+      },
+      {
+        "text": "$x^{3} - 4x^{2} + 19$"
+      }
+    ],
+    "correct": "D",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-INT1-14",
+    "source": "Интеграл-1-OK.pdf х.2 №14",
+    "before": {
+      "statementText": "𝑓(𝑥) = 3√𝑥 функцийн эх функцийг ол.\n                        2                                                     3\n   (𝐀). 𝑥 √𝑥 + 𝐶  (𝐁).    +𝐶    (𝐂). √4𝑥 3 + 𝐶         (𝐃). √8𝑥 3     (𝐄).          +𝐶\n                       √𝑥                                                    2√ 𝑥"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 3\\sqrt{x}$ функцийн эх функцийг ол.",
+    "choices": [
+      {
+        "text": "$x\\sqrt{x} + C$"
+      },
+      {
+        "text": "$\\frac{2}{\\sqrt{x}} + C$"
+      },
+      {
+        "text": "$\\sqrt{4x^{3}} + C$"
+      },
+      {
+        "text": "$\\sqrt{8x^{3}}$"
+      },
+      {
+        "text": "$\\frac{3}{2\\sqrt{x}} + C$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": "D сонголт эх дээр «+ C»-гүй, хэвээр хуулав"
+  },
+  {
+    "token": "200V2-INT1-15",
+    "source": "Интеграл-1-OK.pdf х.2 №15",
+    "before": {
+      "statementText": "𝑓(𝑥) = 10𝑥 −3 + 4𝑥 3 функцийн эх функц нь 𝐹(𝑥) ба 𝐹(√5) = 5 бол 𝐹(−1) =?\n   (𝐀). 25          (𝐁). 24           (𝐂). −24          (𝐃). −25       (𝐄). −23"
+    },
+    "format": "CHOICE",
+    "statementText": "$f(x) = 10x^{-3} + 4x^{3}$ функцийн эх функц нь $F(x)$ ба $F(\\sqrt{5}) = 5$ бол $F(-1) = ?$",
+    "choices": [
+      {
+        "text": "$25$"
+      },
+      {
+        "text": "$24$"
+      },
+      {
+        "text": "$-24$"
+      },
+      {
+        "text": "$-25$"
+      },
+      {
+        "text": "$-23$"
+      }
+    ],
+    "correct": "E",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-01",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.1 №1",
+    "before": {
+      "statementText": "𝑠𝑖𝑛𝑥 = 1 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n (𝐀). −0.5𝜋 + 2𝜋𝑘     (𝐁). 𝜋 + 2𝜋𝑘       (𝐂). 2𝜋𝑘     (𝐃). 𝜋𝑘     (𝐄). 0.5𝜋 + 2𝜋𝑘"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin x = 1$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$-0.5\\pi + 2\\pi k$"
+      },
+      {
+        "text": "$\\pi + 2\\pi k$"
+      },
+      {
+        "text": "$2\\pi k$"
+      },
+      {
+        "text": "$\\pi k$"
+      },
+      {
+        "text": "$0.5\\pi + 2\\pi k$"
+      }
+    ],
+    "correct": "E",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-02",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.1 №2",
+    "before": {
+      "statementText": "𝑠𝑖𝑛𝑥 = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n (𝐀). −0.5𝜋 + 2𝜋𝑘    (𝐁). 𝜋 + 2𝜋𝑘     (𝐂). 2𝜋𝑘       (𝐃). 𝜋𝑘      (𝐄). 0.5𝜋 + 2𝜋𝑘"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin x = 0$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$-0.5\\pi + 2\\pi k$"
+      },
+      {
+        "text": "$\\pi + 2\\pi k$"
+      },
+      {
+        "text": "$2\\pi k$"
+      },
+      {
+        "text": "$\\pi k$"
+      },
+      {
+        "text": "$0.5\\pi + 2\\pi k$"
+      }
+    ],
+    "correct": "D",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-03",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.1 №3",
+    "before": {
+      "statementText": "5 \\cdot 𝑠𝑖𝑛5x = 5 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n 𝜋 𝜋 𝜋𝑘 𝜋𝑘 𝜋 2𝜋𝑘\n (A). + 2𝜋𝑘 (B). + (C). (D). 𝜋𝑘 (E). +\n 2 10 5 5 10   5"
+    },
+    "format": "CHOICE",
+    "statementText": "$5 \\cdot \\sin 5x = 5$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$\\frac{\\pi}{2} + 2\\pi k$"
+      },
+      {
+        "text": "$\\frac{\\pi}{10} + \\frac{\\pi k}{5}$"
+      },
+      {
+        "text": "$\\frac{\\pi k}{5}$"
+      },
+      {
+        "text": "$\\pi k$"
+      },
+      {
+        "text": "$\\frac{\\pi}{10} + \\frac{2\\pi k}{5}$"
+      }
+    ],
+    "correct": "E",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-04",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.1 №4",
+    "before": {
+      "statementText": "8 \\cdot 𝑠𝑖𝑛(0.5𝑥) + 8 = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n                       𝜋                                𝜋\n (𝐀). 𝜋 + 4𝜋𝑘      (𝐁). + 𝜋𝑘    (𝐂). −𝜋 + 4𝜋𝑘     (𝐃). − + 𝜋𝑘       (𝐄). шийдгүй\n                       4                                4"
+    },
+    "format": "CHOICE",
+    "statementText": "$8 \\cdot \\sin(0.5x) + 8 = 0$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$\\pi + 4\\pi k$"
+      },
+      {
+        "text": "$\\frac{\\pi}{4} + \\pi k$"
+      },
+      {
+        "text": "$-\\pi + 4\\pi k$"
+      },
+      {
+        "text": "$-\\frac{\\pi}{4} + \\pi k$"
+      },
+      {
+        "text": "шийдгүй"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-05",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.1 №5",
+    "before": {
+      "statementText": "2 \\cdot 𝑠𝑖𝑛(2𝜋x) = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n (A). 𝑘 (B). 0.5𝑘 (C). 𝜋𝑘 (D). 2𝑘 (E). шийдгүй\n\n 2𝜋"
+    },
+    "format": "CHOICE",
+    "statementText": "$2 \\cdot \\sin(2\\pi x) = 0$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$k$"
+      },
+      {
+        "text": "$0.5k$"
+      },
+      {
+        "text": "$\\pi k$"
+      },
+      {
+        "text": "$2k$"
+      },
+      {
+        "text": "шийдгүй"
+      }
+    ],
+    "correct": "B",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-06",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.1 №6",
+    "before": {
+      "statementText": "𝑠𝑖𝑛 M N = 1 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n         𝑥\n      𝜋                1                                   1                    4\n (𝐀). + 2𝜋𝑘        (𝐁). + 𝑘       (𝐂). 1 + 𝑘         (𝐃). − + 𝑘       (𝐄).\n      2                4                                   4                 1 + 4𝑘\n\n           𝜋"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin\\left(\\frac{2\\pi}{x}\\right) = 1$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$\\frac{\\pi}{2} + 2\\pi k$"
+      },
+      {
+        "text": "$\\frac{1}{4} + k$"
+      },
+      {
+        "text": "$1 + k$"
+      },
+      {
+        "text": "$-\\frac{1}{4} + k$"
+      },
+      {
+        "text": "$\\frac{4}{1 + 4k}$"
+      }
+    ],
+    "correct": "E",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-07",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.1 №7",
+    "before": {
+      "statementText": "𝑠𝑖𝑛2𝑥 =   тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n           2\n (𝐀). 1 + 𝜋𝑘                    (𝐁). 0.25𝜋 + 𝜋𝑘                      (𝐂). шийдгүй\n                                   1 𝜋𝑘                 1                 𝜋   𝜋𝑘\n                       (𝐃). (−1)! \\cdot +               (𝐄). \\cdot (−1)! 𝑎𝑟𝑐𝑠𝑖𝑛 S T +\n                                   2 2                  2                 2    2"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin 2x = \\frac{\\pi}{2}$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$1 + \\pi k$"
+      },
+      {
+        "text": "$0.25\\pi + \\pi k$"
+      },
+      {
+        "text": "шийдгүй"
+      },
+      {
+        "text": "$(-1)^{k} \\cdot \\frac{1}{2} + \\frac{\\pi k}{2}$"
+      },
+      {
+        "text": "$\\frac{1}{2} \\cdot (-1)^{k} \\arcsin\\left(\\frac{\\pi}{2}\\right) + \\frac{\\pi k}{2}$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-08",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.2 №8",
+    "before": {
+      "statementText": "𝑠𝑖𝑛\" 𝑥 − 2𝑠𝑖𝑛𝑥 = 0 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n                    𝜋                                    𝜋\n (𝐀). 𝜋𝑘        (𝐁). + 2𝜋𝑘      (𝐂). шийдгүй       (𝐃). − + 2𝜋𝑘          (𝐄). 2𝜋𝑘\n                    2                                    2"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin^{2} x - 2\\sin x = 0$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$\\pi k$"
+      },
+      {
+        "text": "$\\frac{\\pi}{2} + 2\\pi k$"
+      },
+      {
+        "text": "шийдгүй"
+      },
+      {
+        "text": "$-\\frac{\\pi}{2} + 2\\pi k$"
+      },
+      {
+        "text": "$2\\pi k$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-09",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.2 №9",
+    "before": {
+      "statementText": "𝑠𝑖𝑛W𝜋 \\cdot (𝑥 − 2)X = 0 тэгшитгэлийн 0 < 𝑥 < 4 завсар дахь шийдүүдийн\n   нийлбэрийг ол.\n  (𝐀). 3             (𝐁). 4          (𝐂). 5             (𝐃). 6        (𝐄). 10"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin(\\pi \\cdot (x - 2)) = 0$ тэгшитгэлийн $0 < x < 4$ завсар дахь шийдүүдийн нийлбэрийг ол.",
+    "choices": [
+      {
+        "text": "$3$"
+      },
+      {
+        "text": "$4$"
+      },
+      {
+        "text": "$5$"
+      },
+      {
+        "text": "$6$"
+      },
+      {
+        "text": "$10$"
+      }
+    ],
+    "correct": "D",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-10",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.2 №10",
+    "before": {
+      "statementText": "𝑠𝑖𝑛5𝑥 = 1 тэгшитгэлийн 0° < 𝑥 < 45° завсар дахь шийдийг ол.\n   (𝐀). 18°         (𝐁). 25°         (𝐂). 30°         (𝐃). 35°           (𝐄). 42°"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin 5x = 1$ тэгшитгэлийн $0^{\\circ} < x < 45^{\\circ}$ завсар дахь шийдийг ол.",
+    "choices": [
+      {
+        "text": "$18^{\\circ}$"
+      },
+      {
+        "text": "$25^{\\circ}$"
+      },
+      {
+        "text": "$30^{\\circ}$"
+      },
+      {
+        "text": "$35^{\\circ}$"
+      },
+      {
+        "text": "$42^{\\circ}$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-11",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.2 №11",
+    "before": {
+      "statementText": "𝑠𝑖𝑛W0.5𝜋 \\cdot (𝑥 − 3)X = 1 тэгшитгэлийн 3 < 𝑥 < 9 завсар дахь шийдүүдиийн\n   нийлбэрийг ол.\n  (𝐀). 12             (𝐁). 9          (𝐂). 10            (𝐃). 11        (𝐄). 1"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin(0.5\\pi \\cdot (x - 3)) = 1$ тэгшитгэлийн $3 < x < 9$ завсар дахь шийдүүдиийн нийлбэрийг ол.",
+    "choices": [
+      {
+        "text": "$12$"
+      },
+      {
+        "text": "$9$"
+      },
+      {
+        "text": "$10$"
+      },
+      {
+        "text": "$11$"
+      },
+      {
+        "text": "$1$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": "Эх дээр «шийдүүдиийн» (илүү «и») гэж бичигдсэн — дүрмийн дагуу хэвээр хуулав; «шийдүүдийн» болгож засах эсэхийг эзэн шийднэ"
+  },
+  {
+    "token": "200V2-TRIGEQ1-12",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.2 №12",
+    "before": {
+      "statementText": "𝑠𝑖𝑛𝑥 = 0.5 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n              𝜋                         𝜋                             𝜋\n   (𝐀). (−1)! + 2𝜋𝑘           (𝐁). (−1)! + 𝜋𝑘               (𝐂). (−1)!  + 2𝜋𝑘\n              6                         6                             3\n                                        𝜋                             𝜋\n                              (𝐃). (−1)! + 𝜋𝑘             (𝐄). (−1)!#$ + 2𝜋𝑘\n                                        3                             3\n\n           𝜋    √3"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin x = 0.5$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{6} + 2\\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{6} + \\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{3} + 2\\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{3} + \\pi k$"
+      },
+      {
+        "text": "$(-1)^{k + 1} \\frac{\\pi}{3} + 2\\pi k$"
+      }
+    ],
+    "correct": "B",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-13",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.2 №13",
+    "before": {
+      "statementText": "𝑠𝑖𝑛 S𝑥 + T =    тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n           4     2\n             𝜋   𝜋                      𝜋 𝜋                        𝜋 𝜋\n   (𝐀). (−1)! − + 2𝜋𝑘        (𝐁). (−1)! − + 𝜋𝑘          (𝐂). (−1)!  − + 2𝜋𝑘\n             6 4                        6 4                        3 4\n                                        𝜋 𝜋                         𝜋 𝜋\n                             (𝐃). (−1)! − + 𝜋𝑘          (𝐄). (−1)!#$ − + 𝜋𝑘\n                                         3 4                        3 4"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin\\left(x + \\frac{\\pi}{4}\\right) = \\frac{\\sqrt{3}}{2}$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{6} - \\frac{\\pi}{4} + 2\\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{6} - \\frac{\\pi}{4} + \\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{3} - \\frac{\\pi}{4} + 2\\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{3} - \\frac{\\pi}{4} + \\pi k$"
+      },
+      {
+        "text": "$(-1)^{k + 1} \\frac{\\pi}{3} - \\frac{\\pi}{4} + \\pi k$"
+      }
+    ],
+    "correct": "D",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-14",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.3 №14",
+    "before": {
+      "statementText": "3 \\cdot 𝑠𝑖𝑛𝑥 = 2 тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n                        2                                                2\n    (𝐀). (−1)! 𝑎𝑟𝑐𝑠𝑖𝑛 M N + 2𝜋𝑘                       (𝐁). (−1)! 𝑎𝑟𝑐𝑠𝑖𝑛 M N + 𝜋𝑘\n                        3                                                3\n              !#$\n                          2                 !#$\n                                                        2\n    (𝐂). (−1)     𝑎𝑟𝑐𝑠𝑖𝑛 M N + 2𝜋𝑘 (𝐃). (−1)    𝑎𝑟𝑐𝑠𝑖𝑛 M N + 𝜋𝑘    (𝐄). шийдгүй\n                          3                             3\n\n        3𝑥    √3"
+    },
+    "format": "CHOICE",
+    "statementText": "$3 \\cdot \\sin x = 2$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$(-1)^{k} \\arcsin\\left(\\frac{2}{3}\\right) + 2\\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\arcsin\\left(\\frac{2}{3}\\right) + \\pi k$"
+      },
+      {
+        "text": "$(-1)^{k + 1} \\arcsin\\left(\\frac{2}{3}\\right) + 2\\pi k$"
+      },
+      {
+        "text": "$(-1)^{k + 1} \\arcsin\\left(\\frac{2}{3}\\right) + \\pi k$"
+      },
+      {
+        "text": "шийдгүй"
+      }
+    ],
+    "correct": "B",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-15",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.3 №15",
+    "before": {
+      "statementText": "𝑠𝑖𝑛 M N =     тэгшитгэлийг бод. (𝑘 ∈ 𝑍)\n         4     2\n              2𝜋                        4𝜋                             4𝜋 4𝜋𝑘\n   (𝐀). (−1)!    + 𝜋𝑘        (𝐁). (−1)!    + 𝜋𝑘             (𝐂). (−1)!    +\n               9                         9                              9   3\n                                        2𝜋 4𝜋𝑘                          𝜋\n                            (𝐃). (−1)!     +                          !\n                                                             (𝐄). (−1) + 𝜋𝑘\n                                         9    3                         3"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin\\left(\\frac{3x}{4}\\right) = \\frac{\\sqrt{3}}{2}$ тэгшитгэлийг бод. $(k \\in Z)$",
+    "choices": [
+      {
+        "text": "$(-1)^{k} \\frac{2\\pi}{9} + \\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{4\\pi}{9} + \\pi k$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{4\\pi}{9} + \\frac{4\\pi k}{3}$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{2\\pi}{9} + \\frac{4\\pi k}{3}$"
+      },
+      {
+        "text": "$(-1)^{k} \\frac{\\pi}{3} + \\pi k$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-16",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.3 №16",
+    "before": {
+      "statementText": "𝑠𝑖𝑛 3𝑥 = 0.5 тэгшитгэлийн 𝑥𝜖]0; 90°[ завсар дахь шийдүүдийн нийлбэрийг ол.\n    (𝐀). 60°         (𝐁). 15°        (𝐂). 90°         (𝐃). 120°     (𝐄). 150°\n\n                √3"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin 3x = 0.5$ тэгшитгэлийн $x \\in ]0; 90^{\\circ}[$ завсар дахь шийдүүдийн нийлбэрийг ол.",
+    "choices": [
+      {
+        "text": "$60^{\\circ}$"
+      },
+      {
+        "text": "$15^{\\circ}$"
+      },
+      {
+        "text": "$90^{\\circ}$"
+      },
+      {
+        "text": "$120^{\\circ}$"
+      },
+      {
+        "text": "$150^{\\circ}$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-17",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.3 №17",
+    "before": {
+      "statementText": "sin 2𝑥 = −      тэгшитгэл 0 ≤ 𝑥 ≤ 2𝜋 завсарт хэдэн шийдтэй вэ?\n                 2\n   (𝐀). 2              (𝐁). 3           (𝐂). 4            (𝐃). 5          (𝐄). 6\n\n                4𝜋𝑥"
+    },
+    "format": "CHOICE",
+    "statementText": "$\\sin 2x = -\\frac{\\sqrt{3}}{2}$ тэгшитгэл $0 \\leq x \\leq 2\\pi$ завсарт хэдэн шийдтэй вэ?",
+    "choices": [
+      {
+        "text": "$2$"
+      },
+      {
+        "text": "$3$"
+      },
+      {
+        "text": "$4$"
+      },
+      {
+        "text": "$5$"
+      },
+      {
+        "text": "$6$"
+      }
+    ],
+    "correct": "C",
+    "answerSource": "existing",
+    "notes": ""
+  },
+  {
+    "token": "200V2-TRIGEQ1-18",
+    "source": "Тригонометр-тэгшитгэл-1.pdf х.3 №18",
+    "before": {
+      "statementText": "1 − 2 \\cdot 𝑠𝑖𝑛 M    N = 0 тэгшитгэлийн 0 < 𝑥 < 1 завсар дахь шийдүүдийн\n                 3\n   нийлбэрийг ол.\n   (𝐀). 0.75           (𝐁). 0.2       (𝐂). 0.375         (𝐃). 0.5    (𝐄). 0.625"
+    },
+    "format": "CHOICE",
+    "statementText": "$1 - 2 \\cdot \\sin\\left(\\frac{4\\pi x}{3}\\right) = 0$ тэгшитгэлийн $0 < x < 1$ завсар дахь шийдүүдийн нийлбэрийг ол.",
+    "choices": [
+      {
+        "text": "$0.75$"
+      },
+      {
+        "text": "$0.2$"
+      },
+      {
+        "text": "$0.375$"
+      },
+      {
+        "text": "$0.5$"
+      },
+      {
+        "text": "$0.625$"
+      }
+    ],
+    "correct": "A",
+    "answerSource": "existing",
+    "notes": ""
+  }
+]
