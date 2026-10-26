@@ -1,0 +1,90 @@
+/* «Миний хуудас» хэвлэх: дэлгэцэнд нуугдана, хэвлэхэд зөвхөн энэ үлдэнэ.
+   Өнгө нь системийн Canvas/CanvasText — харанхуй горимд ч цагаан цаас, хар бичиг. */
+.printRoot {
+  display: none;
+}
+
+@media print {
+  :global(html):has(.printRoot) {
+    color-scheme: light;
+  }
+  :global(body):has(> .printRoot) {
+    background: Canvas !important;
+    color: CanvasText !important;
+    --ink: CanvasText;
+    --ink-dim: CanvasText;
+    --line: GrayText;
+  }
+  :global(body):has(> .printRoot) > :not(.printRoot) {
+    display: none !important;
+  }
+  .printRoot {
+    display: block;
+    color: CanvasText;
+    background: Canvas;
+    font-size: 10.5pt;
+    line-height: 1.35;
+  }
+  .head {
+    margin-bottom: 5mm;
+    border-bottom: 0.4mm solid CanvasText;
+    padding-bottom: 2mm;
+  }
+  .title {
+    font-size: 15pt;
+    font-weight: 700;
+    margin: 0 0 2mm;
+  }
+  .nameLine {
+    display: flex;
+    gap: 6mm;
+    font-size: 10pt;
+  }
+  .field {
+    display: flex;
+    flex: 1;
+    gap: 2mm;
+    align-items: flex-end;
+  }
+  .field::after {
+    content: "";
+    flex: 1;
+    border-bottom: 0.25mm solid CanvasText;
+    margin-bottom: 1mm;
+  }
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .cols2 {
+    column-count: 2;
+    column-gap: 8mm;
+    column-rule: 0.2mm solid GrayText;
+  }
+  .item {
+    break-inside: avoid;
+    padding: 2mm 0 3mm;
+    border-bottom: 0.2mm solid GrayText;
+  }
+  .itemTitle {
+    font-weight: 700;
+    font-size: 10pt;
+  }
+  .math {
+    overflow: visible;
+  }
+  .math :global(.katex-display) {
+    margin: 1.5mm 0 !important;
+    text-align: left !important;
+  }
+  .small {
+    font-size: 9pt;
+    margin-top: 1mm;
+  }
+  .foot {
+    margin-top: 4mm;
+    font-size: 8pt;
+    text-align: right;
+  }
+}

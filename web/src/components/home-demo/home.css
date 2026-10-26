@@ -237,7 +237,7 @@ html.lenis,html.lenis body{height:auto}
 .sied .cyl{position:absolute;inset:0;perspective:1400px;z-index:2}
 .sied .cyl .rot{position:absolute;left:50%;top:44%;width:0;height:0;transform-style:preserve-3d}
 @media (min-width:900px){.sied .cyl .rot{top:50%}}
-.sied .bk{position:absolute;width:var(--cw);height:calc(var(--cw)*1.32);left:calc(var(--cw)/-2);top:calc(var(--cw)*-0.66);border-radius:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.sied .bk{cursor:pointer;position:absolute;width:var(--cw);height:calc(var(--cw)*1.32);left:calc(var(--cw)/-2);top:calc(var(--cw)*-0.66);border-radius:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .sied .bk .face{position:absolute;inset:0;border-radius:20px;overflow:hidden;padding:14px;display:flex;flex-direction:column;color:#fff;background:linear-gradient(170deg,#1E3263,#122142);box-shadow:0 30px 60px -26px rgba(24,41,80,.55);border:1px solid rgba(255,255,255,.10)}
 .sied .bk .hd{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted)}
 .sied .bk .cv{flex:1;margin:12px 0;border-radius:12px;overflow:hidden;background:#0B1834;display:grid;place-items:center;position:relative}

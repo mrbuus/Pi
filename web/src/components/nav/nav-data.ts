@@ -59,6 +59,7 @@ export const HOME: Record<string, NavLink> = {
 // Ажилтны «Хуваарь» хэсэг: Хуваарь + Төлөвлөгч табууд (nav/ClassHubTabs.tsx;
 // эзэн 2026-10-08, 2026-10-18-нд бусад табыг хассан).
 // Хэрэглэгдэхүүн: график, дүрс, биет, томьёо, бодогч, тор цаас (бүх role)
+const TOOLS_LINK: NavLink = { href: "/app/tools", label: "Хэрэглэгдэхүүн", icon: "shapes" };
 
 const NAV_BY_ROLE: Record<string, NavLink[]> = {
   GROUP_TEACHER: [
@@ -66,6 +67,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Бодолтын бичлэг", icon: "play-circle" },
     { href: "/app/store", label: "Дэлгүүр", icon: "store" },
+    TOOLS_LINK,
   ],
   STUDENT: [
     HOME.STUDENT,
@@ -84,6 +86,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/student/payments", label: "Миний төлбөр", icon: "credit-card" },
     { href: "/app/practice", label: "Дасгал", icon: "practice" },
     { href: "/app/store", label: "Дэлгүүр", icon: "store" },
+    TOOLS_LINK,
   ],
   TEACHER: [
     HOME.TEACHER,
@@ -95,6 +98,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
+    TOOLS_LINK,
   ],
   TEACHER_PLUS: [
     HOME.TEACHER_PLUS,
@@ -115,6 +119,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
     { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
+    TOOLS_LINK,
   ],
   ADMIN: [
     HOME.ADMIN,
@@ -140,6 +145,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/finance", label: "Санхүү", icon: "wallet" },
     { href: "/app/admin/passes", label: "Эрхийн удирдлага", icon: "key" },
     { href: "/app/admin/store", label: "Дэлгүүрийн удирдлага", icon: "store" },
+    TOOLS_LINK,
   ],
   BUYER: [
     HOME.BUYER,
@@ -152,6 +158,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/store", label: "Дэлгүүр", icon: "store" },
+    TOOLS_LINK,
   ],
   PARENT: [
     HOME.PARENT,
@@ -188,6 +195,7 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/practice": "learn",
   "/app/store": "personal",
 
+  "/app/tools": "learn",
   "/app/learn": "learn",
   "/app/library": "learn",
   "/app/videos": "learn",
