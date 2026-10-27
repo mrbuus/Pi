@@ -167,7 +167,12 @@ export const ModelName = {
   LessonMakeup: 'LessonMakeup',
   ClassCheck: 'ClassCheck',
   ClassCheckMark: 'ClassCheckMark',
-  LoginText: 'LoginText'
+  LoginText: 'LoginText',
+  SheetSyncRun: 'SheetSyncRun',
+  SheetRow: 'SheetRow',
+  SheetRowVersion: 'SheetRowVersion',
+  SheetIssue: 'SheetIssue',
+  SheetPayment: 'SheetPayment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1974,6 +1979,78 @@ export const LoginTextScalarFieldEnum = {
 } as const
 
 export type LoginTextScalarFieldEnum = (typeof LoginTextScalarFieldEnum)[keyof typeof LoginTextScalarFieldEnum]
+
+
+export const SheetSyncRunScalarFieldEnum = {
+  id: 'id',
+  trigger: 'trigger',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  ok: 'ok',
+  skipped: 'skipped',
+  hash: 'hash',
+  stats: 'stats',
+  error: 'error'
+} as const
+
+export type SheetSyncRunScalarFieldEnum = (typeof SheetSyncRunScalarFieldEnum)[keyof typeof SheetSyncRunScalarFieldEnum]
+
+
+export const SheetRowScalarFieldEnum = {
+  id: 'id',
+  tab: 'tab',
+  rowKey: 'rowKey',
+  rowNumber: 'rowNumber',
+  hash: 'hash',
+  cells: 'cells',
+  studentId: 'studentId',
+  matchBy: 'matchBy',
+  firstSeenAt: 'firstSeenAt',
+  lastSeenAt: 'lastSeenAt',
+  changedAt: 'changedAt',
+  goneAt: 'goneAt'
+} as const
+
+export type SheetRowScalarFieldEnum = (typeof SheetRowScalarFieldEnum)[keyof typeof SheetRowScalarFieldEnum]
+
+
+export const SheetRowVersionScalarFieldEnum = {
+  id: 'id',
+  sheetRowId: 'sheetRowId',
+  hash: 'hash',
+  cells: 'cells',
+  seenAt: 'seenAt'
+} as const
+
+export type SheetRowVersionScalarFieldEnum = (typeof SheetRowVersionScalarFieldEnum)[keyof typeof SheetRowVersionScalarFieldEnum]
+
+
+export const SheetIssueScalarFieldEnum = {
+  id: 'id',
+  fingerprint: 'fingerprint',
+  kind: 'kind',
+  severity: 'severity',
+  tab: 'tab',
+  rowNumber: 'rowNumber',
+  studentId: 'studentId',
+  title: 'title',
+  detail: 'detail',
+  firstSeenAt: 'firstSeenAt',
+  lastSeenAt: 'lastSeenAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type SheetIssueScalarFieldEnum = (typeof SheetIssueScalarFieldEnum)[keyof typeof SheetIssueScalarFieldEnum]
+
+
+export const SheetPaymentScalarFieldEnum = {
+  paymentId: 'paymentId',
+  studentId: 'studentId',
+  cell: 'cell',
+  createdAt: 'createdAt'
+} as const
+
+export type SheetPaymentScalarFieldEnum = (typeof SheetPaymentScalarFieldEnum)[keyof typeof SheetPaymentScalarFieldEnum]
 
 
 export const SortOrder = {

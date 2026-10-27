@@ -513,7 +513,12 @@ export const ModelName = {
   LessonMakeup: 'LessonMakeup',
   ClassCheck: 'ClassCheck',
   ClassCheckMark: 'ClassCheckMark',
-  LoginText: 'LoginText'
+  LoginText: 'LoginText',
+  SheetSyncRun: 'SheetSyncRun',
+  SheetRow: 'SheetRow',
+  SheetRowVersion: 'SheetRowVersion',
+  SheetIssue: 'SheetIssue',
+  SheetPayment: 'SheetPayment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -529,7 +534,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -9191,6 +9196,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SheetSyncRun: {
+      payload: Prisma.$SheetSyncRunPayload<ExtArgs>
+      fields: Prisma.SheetSyncRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SheetSyncRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SheetSyncRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>
+        }
+        findFirst: {
+          args: Prisma.SheetSyncRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SheetSyncRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>
+        }
+        findMany: {
+          args: Prisma.SheetSyncRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>[]
+        }
+        create: {
+          args: Prisma.SheetSyncRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>
+        }
+        createMany: {
+          args: Prisma.SheetSyncRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SheetSyncRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>[]
+        }
+        delete: {
+          args: Prisma.SheetSyncRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>
+        }
+        update: {
+          args: Prisma.SheetSyncRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.SheetSyncRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SheetSyncRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SheetSyncRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.SheetSyncRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetSyncRunPayload>
+        }
+        aggregate: {
+          args: Prisma.SheetSyncRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSheetSyncRun>
+        }
+        groupBy: {
+          args: Prisma.SheetSyncRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetSyncRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SheetSyncRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetSyncRunCountAggregateOutputType> | number
+        }
+      }
+    }
+    SheetRow: {
+      payload: Prisma.$SheetRowPayload<ExtArgs>
+      fields: Prisma.SheetRowFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SheetRowFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SheetRowFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>
+        }
+        findFirst: {
+          args: Prisma.SheetRowFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SheetRowFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>
+        }
+        findMany: {
+          args: Prisma.SheetRowFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>[]
+        }
+        create: {
+          args: Prisma.SheetRowCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>
+        }
+        createMany: {
+          args: Prisma.SheetRowCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SheetRowCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>[]
+        }
+        delete: {
+          args: Prisma.SheetRowDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>
+        }
+        update: {
+          args: Prisma.SheetRowUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>
+        }
+        deleteMany: {
+          args: Prisma.SheetRowDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SheetRowUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SheetRowUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>[]
+        }
+        upsert: {
+          args: Prisma.SheetRowUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowPayload>
+        }
+        aggregate: {
+          args: Prisma.SheetRowAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSheetRow>
+        }
+        groupBy: {
+          args: Prisma.SheetRowGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetRowGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SheetRowCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetRowCountAggregateOutputType> | number
+        }
+      }
+    }
+    SheetRowVersion: {
+      payload: Prisma.$SheetRowVersionPayload<ExtArgs>
+      fields: Prisma.SheetRowVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SheetRowVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SheetRowVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.SheetRowVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SheetRowVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>
+        }
+        findMany: {
+          args: Prisma.SheetRowVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>[]
+        }
+        create: {
+          args: Prisma.SheetRowVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>
+        }
+        createMany: {
+          args: Prisma.SheetRowVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SheetRowVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.SheetRowVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>
+        }
+        update: {
+          args: Prisma.SheetRowVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SheetRowVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SheetRowVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SheetRowVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SheetRowVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetRowVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.SheetRowVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSheetRowVersion>
+        }
+        groupBy: {
+          args: Prisma.SheetRowVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetRowVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SheetRowVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetRowVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    SheetIssue: {
+      payload: Prisma.$SheetIssuePayload<ExtArgs>
+      fields: Prisma.SheetIssueFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SheetIssueFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SheetIssueFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>
+        }
+        findFirst: {
+          args: Prisma.SheetIssueFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SheetIssueFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>
+        }
+        findMany: {
+          args: Prisma.SheetIssueFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>[]
+        }
+        create: {
+          args: Prisma.SheetIssueCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>
+        }
+        createMany: {
+          args: Prisma.SheetIssueCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SheetIssueCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>[]
+        }
+        delete: {
+          args: Prisma.SheetIssueDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>
+        }
+        update: {
+          args: Prisma.SheetIssueUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>
+        }
+        deleteMany: {
+          args: Prisma.SheetIssueDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SheetIssueUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SheetIssueUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>[]
+        }
+        upsert: {
+          args: Prisma.SheetIssueUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetIssuePayload>
+        }
+        aggregate: {
+          args: Prisma.SheetIssueAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSheetIssue>
+        }
+        groupBy: {
+          args: Prisma.SheetIssueGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetIssueGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SheetIssueCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetIssueCountAggregateOutputType> | number
+        }
+      }
+    }
+    SheetPayment: {
+      payload: Prisma.$SheetPaymentPayload<ExtArgs>
+      fields: Prisma.SheetPaymentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SheetPaymentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SheetPaymentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>
+        }
+        findFirst: {
+          args: Prisma.SheetPaymentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SheetPaymentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>
+        }
+        findMany: {
+          args: Prisma.SheetPaymentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>[]
+        }
+        create: {
+          args: Prisma.SheetPaymentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>
+        }
+        createMany: {
+          args: Prisma.SheetPaymentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SheetPaymentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>[]
+        }
+        delete: {
+          args: Prisma.SheetPaymentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>
+        }
+        update: {
+          args: Prisma.SheetPaymentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>
+        }
+        deleteMany: {
+          args: Prisma.SheetPaymentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SheetPaymentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SheetPaymentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>[]
+        }
+        upsert: {
+          args: Prisma.SheetPaymentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SheetPaymentPayload>
+        }
+        aggregate: {
+          args: Prisma.SheetPaymentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSheetPayment>
+        }
+        groupBy: {
+          args: Prisma.SheetPaymentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetPaymentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SheetPaymentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SheetPaymentCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -11020,6 +11395,78 @@ export const LoginTextScalarFieldEnum = {
 export type LoginTextScalarFieldEnum = (typeof LoginTextScalarFieldEnum)[keyof typeof LoginTextScalarFieldEnum]
 
 
+export const SheetSyncRunScalarFieldEnum = {
+  id: 'id',
+  trigger: 'trigger',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  ok: 'ok',
+  skipped: 'skipped',
+  hash: 'hash',
+  stats: 'stats',
+  error: 'error'
+} as const
+
+export type SheetSyncRunScalarFieldEnum = (typeof SheetSyncRunScalarFieldEnum)[keyof typeof SheetSyncRunScalarFieldEnum]
+
+
+export const SheetRowScalarFieldEnum = {
+  id: 'id',
+  tab: 'tab',
+  rowKey: 'rowKey',
+  rowNumber: 'rowNumber',
+  hash: 'hash',
+  cells: 'cells',
+  studentId: 'studentId',
+  matchBy: 'matchBy',
+  firstSeenAt: 'firstSeenAt',
+  lastSeenAt: 'lastSeenAt',
+  changedAt: 'changedAt',
+  goneAt: 'goneAt'
+} as const
+
+export type SheetRowScalarFieldEnum = (typeof SheetRowScalarFieldEnum)[keyof typeof SheetRowScalarFieldEnum]
+
+
+export const SheetRowVersionScalarFieldEnum = {
+  id: 'id',
+  sheetRowId: 'sheetRowId',
+  hash: 'hash',
+  cells: 'cells',
+  seenAt: 'seenAt'
+} as const
+
+export type SheetRowVersionScalarFieldEnum = (typeof SheetRowVersionScalarFieldEnum)[keyof typeof SheetRowVersionScalarFieldEnum]
+
+
+export const SheetIssueScalarFieldEnum = {
+  id: 'id',
+  fingerprint: 'fingerprint',
+  kind: 'kind',
+  severity: 'severity',
+  tab: 'tab',
+  rowNumber: 'rowNumber',
+  studentId: 'studentId',
+  title: 'title',
+  detail: 'detail',
+  firstSeenAt: 'firstSeenAt',
+  lastSeenAt: 'lastSeenAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type SheetIssueScalarFieldEnum = (typeof SheetIssueScalarFieldEnum)[keyof typeof SheetIssueScalarFieldEnum]
+
+
+export const SheetPaymentScalarFieldEnum = {
+  paymentId: 'paymentId',
+  studentId: 'studentId',
+  cell: 'cell',
+  createdAt: 'createdAt'
+} as const
+
+export type SheetPaymentScalarFieldEnum = (typeof SheetPaymentScalarFieldEnum)[keyof typeof SheetPaymentScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -12146,6 +12593,11 @@ export type GlobalOmitConfig = {
   classCheck?: Prisma.ClassCheckOmit
   classCheckMark?: Prisma.ClassCheckMarkOmit
   loginText?: Prisma.LoginTextOmit
+  sheetSyncRun?: Prisma.SheetSyncRunOmit
+  sheetRow?: Prisma.SheetRowOmit
+  sheetRowVersion?: Prisma.SheetRowVersionOmit
+  sheetIssue?: Prisma.SheetIssueOmit
+  sheetPayment?: Prisma.SheetPaymentOmit
 }
 
 /* Types for Logging */

@@ -11,5 +11,7 @@ import { UsersService } from './users.service';
   imports: [AuthModule],
   controllers: [UsersController, StudentsExportController],
   providers: [UsersService, AuditService],
+  // Шийтийн синк шинэ сурагчийг ижил дүрмээр бүртгэнэ (createClassroomStudent)
+  exports: [UsersService],
 })
 export class UsersModule {}

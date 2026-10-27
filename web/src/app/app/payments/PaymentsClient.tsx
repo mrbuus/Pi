@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CircleAlert, Clock, Download, History, LayoutGrid, Search, X, type LucideIcon } from "lucide-react";
+import { CircleAlert, Clock, Download, FileSpreadsheet, History, LayoutGrid, Search, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
@@ -14,6 +14,7 @@ import LedgerList from "@/components/payments/LedgerList";
 import PendingPanel from "@/components/payments/PendingPanel";
 import PriceReference from "@/components/payments/PriceReference";
 import RecentPanel from "@/components/payments/RecentPanel";
+import SheetSyncPanel from "@/components/payments/SheetSyncPanel";
 import { downloadLedgerCsv } from "@/components/payments/ledgerCsv";
 import { millions } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
@@ -28,12 +29,14 @@ import type { LedgerBoard, LedgerOverview, LedgerRow } from "@/components/paymen
  * буцаах (Түүх), сарын төлөлт (блок), сурагч хайх, үнийн лавлагаа (Үнэ).
  * ========================================================================== */
 
-type TabKey = "classes" | "problems" | "pending" | "history";
+type TabKey = "classes" | "problems" | "pending" | "history" | "sheet";
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "classes", label: "Ангиуд", icon: LayoutGrid },
   { key: "problems", label: "Асуудалтай", icon: CircleAlert },
   { key: "pending", label: "Батлах", icon: Clock },
   { key: "history", label: "Түүх", icon: History },
+  // Google Sheet «2027 оны төлбөрийн мэдээлэл» → вэб синкийн төлөв ба зөрүү (2026-10-27)
+  { key: "sheet", label: "Шийт", icon: FileSpreadsheet },
 ];
 const isTab = (v: string | null): v is TabKey => TABS.some((t) => t.key === v);
 const PAGE = 40;
@@ -280,6 +283,9 @@ export default function PaymentsClient() {
           </TabsContent>
           <TabsContent value="history">
             <RecentPanel />
+          </TabsContent>
+          <TabsContent value="sheet">
+            <SheetSyncPanel />
           </TabsContent>
         </Tabs>
       )}

@@ -2930,3 +2930,80 @@ model LoginText {
   updatedById String?
   updatedAt   DateTime @updatedAt
 }
+
+// ── Google Sheet синк (эзэн 2026-10-27) ──────────────────────────────────────
+// «2027 оны төлбөрийн мэдээлэл» шийтийг 5 минут тутам уншина (шийт → вэб, нэг
+// чиглэл). ЮУ Ч УСТГАХГҮЙ: шийтээс мөр алга болбол goneAt, өөрчлөгдвөл өмнөх
+// хувилбар SheetRowVersion-д үлдэнэ, зөрүү SheetIssue-д (арилмагц resolvedAt).
+model SheetSyncRun {
+  id         String    @id @default(cuid())
+  trigger    String // CRON | MANUAL
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  ok         Boolean   @default(false)
+  skipped    Boolean   @default(false) // шийт өөрчлөгдөөгүй — бичилт хийгээгүй
+  hash       String? // уншсан утгын хэш (өөрчлөлт илрүүлэх)
+  stats      Json?
+  error      String?
+
+  @@index([startedAt])
+}
+
+model SheetRow {
+  id          String            @id @default(cuid())
+  tab         String
+  rowKey      String // нэр + утас (эрэмбэлэхэд мөрийн дугаар өөрчлөгддөг)
+  rowNumber   Int
+  hash        String
+  cells       Json // { A: …, B: … } — хоосон биш нүднүүд
+  studentId   String?
+  matchBy     String?
+  firstSeenAt DateTime          @default(now())
+  lastSeenAt  DateTime          @default(now())
+  changedAt   DateTime          @default(now())
+  goneAt      DateTime?
+  versions    SheetRowVersion[]
+
+  @@unique([tab, rowKey])
+  @@index([studentId])
+}
+
+model SheetRowVersion {
+  id         String   @id @default(cuid())
+  sheetRowId String
+  sheetRow   SheetRow @relation(fields: [sheetRowId], references: [id], onDelete: Restrict)
+  hash       String
+  cells      Json
+  seenAt     DateTime @default(now())
+
+  @@index([sheetRowId, seenAt])
+}
+
+model SheetIssue {
+  id          String    @id @default(cuid())
+  fingerprint String    @unique
+  kind        String
+  severity    String // ERROR | WARN | INFO
+  tab         String?
+  rowNumber   Int?
+  studentId   String?
+  title       String
+  detail      Json?
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  @@index([resolvedAt, severity])
+  @@index([studentId])
+}
+
+// Шийтээс орсон гүйлгээ ↔ шийтийн нүд (`main|2026-09`). Payment-д хүрэхгүй
+// (FK-гүй) — гүйлгээ хэзээ ч устдаггүй тул холбоос найдвартай.
+model SheetPayment {
+  paymentId String   @id
+  studentId String
+  cell      String
+  createdAt DateTime @default(now())
+
+  @@index([studentId, cell])
+}

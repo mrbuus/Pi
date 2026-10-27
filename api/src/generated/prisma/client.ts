@@ -659,3 +659,28 @@ export type ClassCheckMark = Prisma.ClassCheckMarkModel
  * зөвхөн ADMIN засна (PUT /auth/login-text), нийтэд уншигдана (GET). Энгийн текст.
  */
 export type LoginText = Prisma.LoginTextModel
+/**
+ * Model SheetSyncRun
+ * 
+ */
+export type SheetSyncRun = Prisma.SheetSyncRunModel
+/**
+ * Model SheetRow
+ * 
+ */
+export type SheetRow = Prisma.SheetRowModel
+/**
+ * Model SheetRowVersion
+ * 
+ */
+export type SheetRowVersion = Prisma.SheetRowVersionModel
+/**
+ * Model SheetIssue
+ * 
+ */
+export type SheetIssue = Prisma.SheetIssueModel
+/**
+ * Model SheetPayment
+ * 
+ */
+export type SheetPayment = Prisma.SheetPaymentModel

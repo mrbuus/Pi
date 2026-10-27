@@ -64,3 +64,7 @@ web/public/amjilt/
 *_credentials.csv
 *_accessKeys.csv
 infra/aws/**/.env
+
+# Google service account түлхүүр (шийт унших робот)
+.secrets/
+**/.secrets/

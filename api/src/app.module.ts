@@ -61,6 +61,7 @@ import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
 import { ReconcileModule } from './reconcile/reconcile.module';
+import { SheetSyncModule } from './sheet-sync/sheet-sync.module';
 import { FormulasModule } from './formulas/formulas.module';
 import { ReadinessModule } from './readiness/readiness.module';
 import { MistakesModule } from './mistakes/mistakes.module';
@@ -168,6 +169,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     RecommendModule,
     TuitionModule,
     ReconcileModule,
+    SheetSyncModule,
     FormulasModule,
     ReadinessModule,
     MistakesModule,

@@ -4,6 +4,7 @@ import { ROLES_KEY } from './decorators/roles.decorator';
 import { RolesGuard } from './guards/roles.guard';
 import { FinanceController } from '../finance/finance.controller';
 import { TuitionController } from '../tuition/tuition.controller';
+import { SheetSyncController } from '../sheet-sync/sheet-sync.controller';
 
 /**
  * Мөнгөний маршрутуудын эрхийн хамгаалалт — 2026-09-26 (G02–G03).
@@ -24,6 +25,18 @@ describe('Санхүүгийн маршрутууд — тусгай эрхтэ�
     expect(guardsOf(FinanceController)).toContain(RolesGuard);
     expect(rolesOf(FinanceController)).toEqual(['ADMIN', 'TEACHER_PLUS']);
     expect(guardsOf(FinanceController)).toContain(FinanceCapabilityGuard);
+  });
+});
+
+describe('Төлбөрийн шийтийн синк — санхүүгийн эрхтэй ажилтан', () => {
+  it('controller нь RolesGuard + finance.manage, ADMIN/TEACHER_PLUS', () => {
+    expect(guardsOf(SheetSyncController)).toContain(RolesGuard);
+    expect(guardsOf(SheetSyncController)).toContain(FinanceCapabilityGuard);
+    expect(rolesOf(SheetSyncController)).toEqual(['ADMIN', 'TEACHER_PLUS']);
+  });
+  // Синк эхлүүлэх, гүйлгээ буцааж тааруулах, дансны дугаартай түүхий мөр — зөвхөн Админ
+  it.each(['run', 'apply', 'rows'] as const)('%s — зөвхөн ADMIN', (name) => {
+    expect(rolesOf(SheetSyncController.prototype[name])).toEqual(['ADMIN']);
   });
 });
 
