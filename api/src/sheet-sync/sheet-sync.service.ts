@@ -405,9 +405,11 @@ export class SheetSyncService {
   private async syncPayments(plan: Plan, adminId: string, dryRun: boolean, issues: PlanIssue[]) {
     // a) Хуучин (Excel 2026-10-13) гүйлгээг нүдэнд нь холбоно — түлхүүрийн хэшийг
     //    боломжит бүх нүд (+ урьдчилгаа/үлдэгдэл) дээр тооцож олно.
+    //    Гарал үүслийг ЗӨВХӨН сервер өгсөн id-аар (`imp…` = импорт скрипт) таньна —
+    //    тайлбар, clientRequestId-ийг сурагч өөрөө бичиж чаддаг тул итгэхгүй.
     const legacy = await this.prisma.$queryRaw<{ id: string; userId: string; clientRequestId: string | null; amount: number; description: string | null }[]>`
       SELECT p.id, p."userId", p."clientRequestId", p.amount, p.description FROM "Payment" p
-      WHERE p.description LIKE ${`${IMPORT_TAG}%`}
+      WHERE p.id LIKE 'imp%' AND p.description LIKE ${`${IMPORT_TAG}%`}
         AND NOT EXISTS (SELECT 1 FROM "SheetPayment" s WHERE s."paymentId" = p.id)`;
     const newLinks: Prisma.SheetPaymentCreateManyInput[] = [];
     const candidateCache = new Map<string, Map<string, string>>();
@@ -446,9 +448,12 @@ export class SheetSyncService {
       : linked;
     const byStudent = new Map<string, typeof allLinked>();
     for (const l of allLinked) byStudent.set(l.studentId, [...(byStudent.get(l.studentId) ?? []), l]);
+    // Ашиглагдсан түлхүүр — ЯМАР Ч гарал үүсэлтэй гүйлгээнийх (сурагч өөрөө таамагласан
+    // түлхүүрээр төлбөр үүсгэсэн ч синкийн гүйлгээ чимээгүй алгасагдахгүй).
     const takenByStudent = new Map<string, Set<string>>();
-    for (const p of legacy) if (p.clientRequestId) (takenByStudent.get(p.userId) ?? takenByStudent.set(p.userId, new Set()).get(p.userId)!).add(p.clientRequestId);
-    for (const l of allLinked) if (l.clientRequestId) (takenByStudent.get(l.studentId) ?? takenByStudent.set(l.studentId, new Set()).get(l.studentId)!).add(l.clientRequestId);
+    const usedIds = await this.prisma.$queryRaw<{ userId: string; clientRequestId: string }[]>`
+      SELECT "userId", "clientRequestId" FROM "Payment" WHERE "clientRequestId" IS NOT NULL`;
+    for (const p of usedIds) (takenByStudent.get(p.userId) ?? takenByStudent.set(p.userId, new Set()).get(p.userId)!).add(p.clientRequestId);
 
     // c) Тулгалт
     const inserts: { studentId: string; requestId: string; cell: string; amount: number; forMonth: string; paidOn: string | null; label: string }[] = [];
@@ -514,6 +519,14 @@ export class SheetSyncService {
           inserted += res.count;
           const stored = await tx.payment.findMany({ where: { id: { in: part.map((i) => i.id) } }, select: { id: true } });
           const ok = new Set(stored.map((s) => s.id));
+          for (const i of part.filter((x) => !ok.has(x.id)))
+            issues.push({
+              kind: 'INSERT_SKIPPED',
+              severity: 'ERROR',
+              studentId: i.studentId,
+              fp: i.requestId,
+              title: `${mnt(i.amount)} (${i.label}) гүйлгээ бичигдсэнгүй — ижил түлхүүртэй төлбөр байна, шалгана уу`,
+            });
           await tx.sheetPayment.createMany({ data: part.filter((i) => ok.has(i.id)).map((i) => ({ paymentId: i.id, studentId: i.studentId, cell: i.cell })), skipDuplicates: true });
         });
         await yieldLoop();
@@ -674,7 +687,9 @@ export class SheetSyncService {
     const badCells = [...new Set([...plannedByCell.keys(), ...webByCell.keys()])].filter((c) => (plannedByCell.get(c) ?? 0) !== (webByCell.get(c) ?? 0));
     for (const l of confirmed.filter((l) => badCells.includes(cellSlot(l.cell))))
       await this.payments.reverse(l.paymentId, { reason: 'Шийтийн дүнгээр тааруулав' }, actor);
-    const taken = new Set(links.map((l) => l.clientRequestId).filter((x): x is string => !!x));
+    const taken = new Set(
+      (await this.prisma.payment.findMany({ where: { userId: studentId, clientRequestId: { not: null } }, select: { clientRequestId: true } })).map((p) => p.clientRequestId!),
+    );
     const r = reconcileStudent(studentId, planned.filter((p) => badCells.includes(cellSlot(p.cell))), [], taken);
     for (const ins of r.inserts) {
       const id = `shp${randomBytes(11).toString('hex')}`;

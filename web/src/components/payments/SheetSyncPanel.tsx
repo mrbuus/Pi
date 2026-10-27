@@ -85,6 +85,7 @@ const KIND_LABEL: Record<string, string> = {
   RECEIPT_UNREAD: "Баримтын огноо уншигдаагүй",
   ROW_GONE: "Шийтээс устгасан мөр",
   UNLINKED_PAYMENT: "Нүдээ олоогүй гүйлгээ",
+  INSERT_SKIPPED: "Бичигдээгүй гүйлгээ",
   FULL_SPLIT: "Бүтэн жилийн задаргаа",
   FORM_UNKNOWN: "Танигдаагүй хэлбэр",
   PAYMENT_ORPHAN: "Жагсаалтаас хасагдсан",
