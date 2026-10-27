@@ -14,7 +14,9 @@ const FULL_RATIO = 1686 / 746;
  * алга болдог тул харанхуй горимд `logo-full-dark.png`-г (дугуй, доторх цагаан
  * тэмдэг яг хэвээр, зөвхөн дугуйн гаднах бичвэр цагаан) харуулна — сонголтыг
  * globals.css-ийн `.logo-on-light/.logo-on-dark` (data-theme + системийн горим).
- * Дугуй тэмдэг (mark) хоёр горимд ижил харагддаг тул ганц файлтай.
+ * Дугуй тэмдэг (mark) хоёр горимд ижил харагддаг тул ганц файлтай: `logo-circle.png`
+ * (зөвхөн √∞ дугуй). Хуучин `logo-mark.png` нь бичвэрийн хэсэгтэй ТАЙРСАН лого —
+ * эзэн ХЭЗЭЭ Ч ашиглахгүй гэсэн (2026-10-27).
  */
 export default function LogoMark({
   size = 40,
@@ -33,7 +35,7 @@ export default function LogoMark({
     style: { width, height: "auto" } as const,
   };
   if (!isFull)
-    return <Image src="/logo-mark.png" {...common} className={`object-contain ${className}`} />;
+    return <Image src="/logo-circle.png" {...common} className={`object-contain ${className}`} />;
   return (
     <>
       <Image src="/logo-full.png" {...common} className={`logo-on-light object-contain ${className}`} />

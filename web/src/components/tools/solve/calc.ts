@@ -36,6 +36,35 @@ export function bigTex(b: bigint): string {
   return (neg ? "-" : "") + grouped;
 }
 
+/**
+ * C(n,k), A(n,k)-тай илэрхийллийн бичлэг: факториалын бутархай болгож задлахгүй,
+ * сургуулийн тэмдэглэгээгээр C_n^k (тоо нь баруун дээд, баруун доод талд) — эзэн 2026-10-27.
+ * Хослол бүрийг түр том үсгээр орлуулж задлаад, LaTeX-д буцааж тавина.
+ */
+export function combProblemTex(src: string, degrees: boolean): string | null {
+  const re = /\b([CA])\s*\(\s*([^,;()]+?)\s*[,;]\s*([^,;()]+?)\s*\)/g;
+  if (!re.test(src)) return null;
+  const free = "QRSTUVWZ".split("").filter((ch) => !src.includes(ch));
+  const map = new Map<string, string>();
+  let i = 0;
+  const marked = src.replace(re, (_m, kind: string, n: string, k: string) => {
+    const ch = free[i++];
+    if (!ch) return _m;
+    map.set(ch, `${kind}_{${n.trim()}}^{${k.trim()}}`);
+    return ch;
+  });
+  if (!map.size) return null;
+  try {
+    let tex = toLatex(parse(prepare(marked, { degrees })));
+    // Түр үсгүүд src-д байхгүй, toLatex том үсгээр команд бичдэггүй тул шууд солино
+    for (const [ch, t] of map) tex = tex.split(ch).join(t);
+    // Хоёр хослол зэрэгцвэл үржих тэмдэг: C_5^2\cdot C_4^1
+    return tex.replace(/\}\s*(?=[CA]_\{)/g, "}\\cdot ");
+  } catch {
+    return null;
+  }
+}
+
 export function calculate(src: string, opts: { degrees?: boolean } = {}): Solution {
   const degrees = !!opts.degrees;
   let prepared: string;
@@ -64,7 +93,7 @@ export function calculate(src: string, opts: { degrees?: boolean } = {}): Soluti
   } catch (e) {
     return failure(e instanceof ParseError ? e.message : "Илэрхийллийг ойлгосонгүй");
   }
-  const problem = toLatex(node);
+  const problem = combProblemTex(src, degrees) ?? toLatex(node);
   const vars = [...freeSymbols(node)];
   if (vars.length) {
     return { ...failure(`Тооцоолох горимд хувьсагч ($${vars.join(",\\ ")}$) орохгүй. Тэгшитгэл бол «Тэгшитгэл», хаалт задлах бол «Алгебр» горимыг сонгоно уу`), problem };

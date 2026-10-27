@@ -73,6 +73,8 @@ export type LessonRecordMinAggregateOutputType = {
   confirmedByName: string | null
   confirmedAt: Date | null
   updatedAt: Date | null
+  cancelledAt: Date | null
+  cancelledById: string | null
 }
 
 export type LessonRecordMaxAggregateOutputType = {
@@ -100,6 +102,8 @@ export type LessonRecordMaxAggregateOutputType = {
   confirmedByName: string | null
   confirmedAt: Date | null
   updatedAt: Date | null
+  cancelledAt: Date | null
+  cancelledById: string | null
 }
 
 export type LessonRecordCountAggregateOutputType = {
@@ -129,6 +133,8 @@ export type LessonRecordCountAggregateOutputType = {
   confirmedByName: number
   confirmedAt: number
   updatedAt: number
+  cancelledAt: number
+  cancelledById: number
   _all: number
 }
 
@@ -180,6 +186,8 @@ export type LessonRecordMinAggregateInputType = {
   confirmedByName?: true
   confirmedAt?: true
   updatedAt?: true
+  cancelledAt?: true
+  cancelledById?: true
 }
 
 export type LessonRecordMaxAggregateInputType = {
@@ -207,6 +215,8 @@ export type LessonRecordMaxAggregateInputType = {
   confirmedByName?: true
   confirmedAt?: true
   updatedAt?: true
+  cancelledAt?: true
+  cancelledById?: true
 }
 
 export type LessonRecordCountAggregateInputType = {
@@ -236,6 +246,8 @@ export type LessonRecordCountAggregateInputType = {
   confirmedByName?: true
   confirmedAt?: true
   updatedAt?: true
+  cancelledAt?: true
+  cancelledById?: true
   _all?: true
 }
 
@@ -352,6 +364,8 @@ export type LessonRecordGroupByOutputType = {
   confirmedByName: string
   confirmedAt: Date
   updatedAt: Date
+  cancelledAt: Date | null
+  cancelledById: string | null
   _count: LessonRecordCountAggregateOutputType | null
   _avg: LessonRecordAvgAggregateOutputType | null
   _sum: LessonRecordSumAggregateOutputType | null
@@ -404,6 +418,8 @@ export type LessonRecordWhereInput = {
   confirmedByName?: Prisma.StringFilter<"LessonRecord"> | string
   confirmedAt?: Prisma.DateTimeFilter<"LessonRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LessonRecord"> | Date | string
+  cancelledAt?: Prisma.DateTimeNullableFilter<"LessonRecord"> | Date | string | null
+  cancelledById?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
   students?: Prisma.LessonRecordStudentListRelationFilter
 }
 
@@ -434,6 +450,8 @@ export type LessonRecordOrderByWithRelationInput = {
   confirmedByName?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
   students?: Prisma.LessonRecordStudentOrderByRelationAggregateInput
 }
 
@@ -468,6 +486,8 @@ export type LessonRecordWhereUniqueInput = Prisma.AtLeast<{
   confirmedByName?: Prisma.StringFilter<"LessonRecord"> | string
   confirmedAt?: Prisma.DateTimeFilter<"LessonRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LessonRecord"> | Date | string
+  cancelledAt?: Prisma.DateTimeNullableFilter<"LessonRecord"> | Date | string | null
+  cancelledById?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
   students?: Prisma.LessonRecordStudentListRelationFilter
 }, "id" | "scheduleId_date">
 
@@ -498,6 +518,8 @@ export type LessonRecordOrderByWithAggregationInput = {
   confirmedByName?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LessonRecordCountOrderByAggregateInput
   _avg?: Prisma.LessonRecordAvgOrderByAggregateInput
   _max?: Prisma.LessonRecordMaxOrderByAggregateInput
@@ -535,6 +557,8 @@ export type LessonRecordScalarWhereWithAggregatesInput = {
   confirmedByName?: Prisma.StringWithAggregatesFilter<"LessonRecord"> | string
   confirmedAt?: Prisma.DateTimeWithAggregatesFilter<"LessonRecord"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LessonRecord"> | Date | string
+  cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LessonRecord"> | Date | string | null
+  cancelledById?: Prisma.StringNullableWithAggregatesFilter<"LessonRecord"> | string | null
 }
 
 export type LessonRecordCreateInput = {
@@ -564,6 +588,8 @@ export type LessonRecordCreateInput = {
   confirmedByName: string
   confirmedAt?: Date | string
   updatedAt?: Date | string
+  cancelledAt?: Date | string | null
+  cancelledById?: string | null
   students?: Prisma.LessonRecordStudentCreateNestedManyWithoutRecordInput
 }
 
@@ -594,6 +620,8 @@ export type LessonRecordUncheckedCreateInput = {
   confirmedByName: string
   confirmedAt?: Date | string
   updatedAt?: Date | string
+  cancelledAt?: Date | string | null
+  cancelledById?: string | null
   students?: Prisma.LessonRecordStudentUncheckedCreateNestedManyWithoutRecordInput
 }
 
@@ -624,6 +652,8 @@ export type LessonRecordUpdateInput = {
   confirmedByName?: Prisma.StringFieldUpdateOperationsInput | string
   confirmedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   students?: Prisma.LessonRecordStudentUpdateManyWithoutRecordNestedInput
 }
 
@@ -654,6 +684,8 @@ export type LessonRecordUncheckedUpdateInput = {
   confirmedByName?: Prisma.StringFieldUpdateOperationsInput | string
   confirmedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   students?: Prisma.LessonRecordStudentUncheckedUpdateManyWithoutRecordNestedInput
 }
 
@@ -684,6 +716,8 @@ export type LessonRecordCreateManyInput = {
   confirmedByName: string
   confirmedAt?: Date | string
   updatedAt?: Date | string
+  cancelledAt?: Date | string | null
+  cancelledById?: string | null
 }
 
 export type LessonRecordUpdateManyMutationInput = {
@@ -713,6 +747,8 @@ export type LessonRecordUpdateManyMutationInput = {
   confirmedByName?: Prisma.StringFieldUpdateOperationsInput | string
   confirmedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonRecordUncheckedUpdateManyInput = {
@@ -742,6 +778,8 @@ export type LessonRecordUncheckedUpdateManyInput = {
   confirmedByName?: Prisma.StringFieldUpdateOperationsInput | string
   confirmedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type IntNullableListFilter<$PrismaModel = never> = {
@@ -784,6 +822,8 @@ export type LessonRecordCountOrderByAggregateInput = {
   confirmedByName?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
 }
 
 export type LessonRecordAvgOrderByAggregateInput = {
@@ -822,6 +862,8 @@ export type LessonRecordMaxOrderByAggregateInput = {
   confirmedByName?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
 }
 
 export type LessonRecordMinOrderByAggregateInput = {
@@ -849,6 +891,8 @@ export type LessonRecordMinOrderByAggregateInput = {
   confirmedByName?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
 }
 
 export type LessonRecordSumOrderByAggregateInput = {
@@ -917,6 +961,8 @@ export type LessonRecordCreateWithoutStudentsInput = {
   confirmedByName: string
   confirmedAt?: Date | string
   updatedAt?: Date | string
+  cancelledAt?: Date | string | null
+  cancelledById?: string | null
 }
 
 export type LessonRecordUncheckedCreateWithoutStudentsInput = {
@@ -946,6 +992,8 @@ export type LessonRecordUncheckedCreateWithoutStudentsInput = {
   confirmedByName: string
   confirmedAt?: Date | string
   updatedAt?: Date | string
+  cancelledAt?: Date | string | null
+  cancelledById?: string | null
 }
 
 export type LessonRecordCreateOrConnectWithoutStudentsInput = {
@@ -991,6 +1039,8 @@ export type LessonRecordUpdateWithoutStudentsInput = {
   confirmedByName?: Prisma.StringFieldUpdateOperationsInput | string
   confirmedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonRecordUncheckedUpdateWithoutStudentsInput = {
@@ -1020,6 +1070,8 @@ export type LessonRecordUncheckedUpdateWithoutStudentsInput = {
   confirmedByName?: Prisma.StringFieldUpdateOperationsInput | string
   confirmedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1080,6 +1132,8 @@ export type LessonRecordSelect<ExtArgs extends runtime.Types.Extensions.Internal
   confirmedByName?: boolean
   confirmedAt?: boolean
   updatedAt?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
   students?: boolean | Prisma.LessonRecord$studentsArgs<ExtArgs>
   _count?: boolean | Prisma.LessonRecordCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonRecord"]>
@@ -1111,6 +1165,8 @@ export type LessonRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   confirmedByName?: boolean
   confirmedAt?: boolean
   updatedAt?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
 }, ExtArgs["result"]["lessonRecord"]>
 
 export type LessonRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1140,6 +1196,8 @@ export type LessonRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   confirmedByName?: boolean
   confirmedAt?: boolean
   updatedAt?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
 }, ExtArgs["result"]["lessonRecord"]>
 
 export type LessonRecordSelectScalar = {
@@ -1169,9 +1227,11 @@ export type LessonRecordSelectScalar = {
   confirmedByName?: boolean
   confirmedAt?: boolean
   updatedAt?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
 }
 
-export type LessonRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "classroomId" | "date" | "classroomName" | "startMinute" | "endMinute" | "room" | "topic" | "leadTeacherId" | "leadTeacherName" | "assistantTeacherId" | "assistantTeacherName" | "tests" | "testCount" | "description" | "problemNumbersText" | "problemNumbers" | "enrolledCount" | "presentCount" | "absentCount" | "attendanceMarked" | "confirmedById" | "confirmedByName" | "confirmedAt" | "updatedAt", ExtArgs["result"]["lessonRecord"]>
+export type LessonRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "classroomId" | "date" | "classroomName" | "startMinute" | "endMinute" | "room" | "topic" | "leadTeacherId" | "leadTeacherName" | "assistantTeacherId" | "assistantTeacherName" | "tests" | "testCount" | "description" | "problemNumbersText" | "problemNumbers" | "enrolledCount" | "presentCount" | "absentCount" | "attendanceMarked" | "confirmedById" | "confirmedByName" | "confirmedAt" | "updatedAt" | "cancelledAt" | "cancelledById", ExtArgs["result"]["lessonRecord"]>
 export type LessonRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   students?: boolean | Prisma.LessonRecord$studentsArgs<ExtArgs>
   _count?: boolean | Prisma.LessonRecordCountOutputTypeDefaultArgs<ExtArgs>
@@ -1211,6 +1271,8 @@ export type $LessonRecordPayload<ExtArgs extends runtime.Types.Extensions.Intern
     confirmedByName: string
     confirmedAt: Date
     updatedAt: Date
+    cancelledAt: Date | null
+    cancelledById: string | null
   }, ExtArgs["result"]["lessonRecord"]>
   composites: {}
 }
@@ -1661,6 +1723,8 @@ export interface LessonRecordFieldRefs {
   readonly confirmedByName: Prisma.FieldRef<"LessonRecord", 'String'>
   readonly confirmedAt: Prisma.FieldRef<"LessonRecord", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"LessonRecord", 'DateTime'>
+  readonly cancelledAt: Prisma.FieldRef<"LessonRecord", 'DateTime'>
+  readonly cancelledById: Prisma.FieldRef<"LessonRecord", 'String'>
 }
     
 

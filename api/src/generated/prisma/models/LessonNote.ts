@@ -32,6 +32,8 @@ export type LessonNoteMinAggregateOutputType = {
   updatedById: string | null
   updatedByName: string | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type LessonNoteMaxAggregateOutputType = {
@@ -42,6 +44,8 @@ export type LessonNoteMaxAggregateOutputType = {
   updatedById: string | null
   updatedByName: string | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type LessonNoteCountAggregateOutputType = {
@@ -52,6 +56,8 @@ export type LessonNoteCountAggregateOutputType = {
   updatedById: number
   updatedByName: number
   updatedAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -64,6 +70,8 @@ export type LessonNoteMinAggregateInputType = {
   updatedById?: true
   updatedByName?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type LessonNoteMaxAggregateInputType = {
@@ -74,6 +82,8 @@ export type LessonNoteMaxAggregateInputType = {
   updatedById?: true
   updatedByName?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type LessonNoteCountAggregateInputType = {
@@ -84,6 +94,8 @@ export type LessonNoteCountAggregateInputType = {
   updatedById?: true
   updatedByName?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -167,6 +179,8 @@ export type LessonNoteGroupByOutputType = {
   updatedById: string
   updatedByName: string
   updatedAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: LessonNoteCountAggregateOutputType | null
   _min: LessonNoteMinAggregateOutputType | null
   _max: LessonNoteMaxAggregateOutputType | null
@@ -198,6 +212,8 @@ export type LessonNoteWhereInput = {
   updatedById?: Prisma.StringFilter<"LessonNote"> | string
   updatedByName?: Prisma.StringFilter<"LessonNote"> | string
   updatedAt?: Prisma.DateTimeFilter<"LessonNote"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"LessonNote"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LessonNote"> | string | null
 }
 
 export type LessonNoteOrderByWithRelationInput = {
@@ -208,6 +224,8 @@ export type LessonNoteOrderByWithRelationInput = {
   updatedById?: Prisma.SortOrder
   updatedByName?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type LessonNoteWhereUniqueInput = Prisma.AtLeast<{
@@ -222,6 +240,8 @@ export type LessonNoteWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.StringFilter<"LessonNote"> | string
   updatedByName?: Prisma.StringFilter<"LessonNote"> | string
   updatedAt?: Prisma.DateTimeFilter<"LessonNote"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"LessonNote"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LessonNote"> | string | null
 }, "id" | "scheduleId_date">
 
 export type LessonNoteOrderByWithAggregationInput = {
@@ -232,6 +252,8 @@ export type LessonNoteOrderByWithAggregationInput = {
   updatedById?: Prisma.SortOrder
   updatedByName?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LessonNoteCountOrderByAggregateInput
   _max?: Prisma.LessonNoteMaxOrderByAggregateInput
   _min?: Prisma.LessonNoteMinOrderByAggregateInput
@@ -248,6 +270,8 @@ export type LessonNoteScalarWhereWithAggregatesInput = {
   updatedById?: Prisma.StringWithAggregatesFilter<"LessonNote"> | string
   updatedByName?: Prisma.StringWithAggregatesFilter<"LessonNote"> | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LessonNote"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LessonNote"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"LessonNote"> | string | null
 }
 
 export type LessonNoteCreateInput = {
@@ -258,6 +282,8 @@ export type LessonNoteCreateInput = {
   updatedById: string
   updatedByName: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonNoteUncheckedCreateInput = {
@@ -268,6 +294,8 @@ export type LessonNoteUncheckedCreateInput = {
   updatedById: string
   updatedByName: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonNoteUpdateInput = {
@@ -278,6 +306,8 @@ export type LessonNoteUpdateInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedByName?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonNoteUncheckedUpdateInput = {
@@ -288,6 +318,8 @@ export type LessonNoteUncheckedUpdateInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedByName?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonNoteCreateManyInput = {
@@ -298,6 +330,8 @@ export type LessonNoteCreateManyInput = {
   updatedById: string
   updatedByName: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonNoteUpdateManyMutationInput = {
@@ -308,6 +342,8 @@ export type LessonNoteUpdateManyMutationInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedByName?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonNoteUncheckedUpdateManyInput = {
@@ -318,6 +354,8 @@ export type LessonNoteUncheckedUpdateManyInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedByName?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonNoteScheduleIdDateCompoundUniqueInput = {
@@ -333,6 +371,8 @@ export type LessonNoteCountOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   updatedByName?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LessonNoteMaxOrderByAggregateInput = {
@@ -343,6 +383,8 @@ export type LessonNoteMaxOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   updatedByName?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LessonNoteMinOrderByAggregateInput = {
@@ -353,6 +395,8 @@ export type LessonNoteMinOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   updatedByName?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 
@@ -365,6 +409,8 @@ export type LessonNoteSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   updatedById?: boolean
   updatedByName?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["lessonNote"]>
 
 export type LessonNoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -375,6 +421,8 @@ export type LessonNoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   updatedById?: boolean
   updatedByName?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["lessonNote"]>
 
 export type LessonNoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -385,6 +433,8 @@ export type LessonNoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   updatedById?: boolean
   updatedByName?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["lessonNote"]>
 
 export type LessonNoteSelectScalar = {
@@ -395,9 +445,11 @@ export type LessonNoteSelectScalar = {
   updatedById?: boolean
   updatedByName?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type LessonNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "body" | "updatedById" | "updatedByName" | "updatedAt", ExtArgs["result"]["lessonNote"]>
+export type LessonNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "body" | "updatedById" | "updatedByName" | "updatedAt" | "deletedAt" | "deletedById", ExtArgs["result"]["lessonNote"]>
 
 export type $LessonNotePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LessonNote"
@@ -410,6 +462,8 @@ export type $LessonNotePayload<ExtArgs extends runtime.Types.Extensions.Internal
     updatedById: string
     updatedByName: string
     updatedAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["lessonNote"]>
   composites: {}
 }
@@ -840,6 +894,8 @@ export interface LessonNoteFieldRefs {
   readonly updatedById: Prisma.FieldRef<"LessonNote", 'String'>
   readonly updatedByName: Prisma.FieldRef<"LessonNote", 'String'>
   readonly updatedAt: Prisma.FieldRef<"LessonNote", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"LessonNote", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"LessonNote", 'String'>
 }
     
 

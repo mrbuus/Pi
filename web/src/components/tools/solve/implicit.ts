@@ -88,7 +88,11 @@ export function solveForY(r: Relation): string | null {
   const b = simplify({ t: "sub", a: l.b, b: rr.b });
   if (hasY(b) || (b.t === "num" && Math.abs(b.v) < 1e-12)) return null;
   const a = simplify({ t: "sub", a: rr.a, b: l.a });
-  const body = b.t === "num" && b.v === 1 ? a : simplify({ t: "div", a, b });
+  const body =
+    b.t === "num" && b.v === 1 ? a
+      : b.t === "num" && b.v === -1 ? simplify({ t: "neg", a })
+        : b.t === "neg" && b.a.t === "num" && b.a.v === 1 ? simplify({ t: "neg", a })
+          : simplify({ t: "div", a, b });
   if (hasY(body)) return null;
   return toAscii(body);
 }

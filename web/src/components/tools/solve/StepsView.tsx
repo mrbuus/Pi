@@ -7,15 +7,17 @@ import { cn } from "@/lib/cn";
 import { splitStepText, tidyTex } from "./display";
 import type { Step } from "./steps";
 
-/* Дэлгэрэнгүй бодолт: алхам бүр богино гарчиг + томьёо, урт тайлбар «Яагаад?» дотор */
+/* Дэлгэрэнгүй бодолт: алхам бүр богино гарчиг + томьёо, урт тайлбар «Яагаад?» дотор.
+   shown — эхний хэдэн алхмыг харуулах (алхамаар нээх); бусад нь хэвлэхэд л гарна */
 
-function StepItem({ s, i }: { s: Step; i: number }) {
+function StepItem({ s, i, hidden }: { s: Step; i: number; hidden?: boolean }) {
   const [open, setOpen] = useState(false);
-  const { title, why } = splitStepText(s.text, !!s.tex?.length);
+  // «1. Тодорхойлогдох муж» — дугаарыг дугуйд харуулдаг тул давтахгүй
+  const { title, why } = splitStepText(s.text?.replace(/^\s*\d+[.)]\s+/, ""), !!s.tex?.length);
   const Icon = s.tone === "ok" ? CircleCheck : s.tone === "bad" ? CircleX : s.tone === "note" ? Info : null;
   const toneText = s.tone === "bad" ? "text-error" : s.tone === "ok" ? "text-success" : "text-ink";
   return (
-    <li className="flex gap-3 break-inside-avoid">
+    <li className={cn("flex gap-3 break-inside-avoid", hidden ? "hidden print:flex" : "enter-fade")}>
       <span
         aria-hidden
         className={cn(
@@ -51,14 +53,14 @@ function StepItem({ s, i }: { s: Step; i: number }) {
   );
 }
 
-export default function StepsView({ steps, extra }: { steps: Step[]; extra?: string[] }) {
+export default function StepsView({ steps, extra, shown = Infinity }: { steps: Step[]; extra?: string[]; shown?: number }) {
   return (
     <ol className="space-y-4" aria-label="Бодолтын алхам">
       {steps.map((s, i) => (
-        <StepItem key={i} s={s} i={i} />
+        <StepItem key={i} s={s} i={i} hidden={i >= shown} />
       ))}
       {extra?.map((t, i) => (
-        <StepItem key={`x${i}`} s={{ text: "Холимог тоогоор", tex: [t.replace(/^=\s*/, "")] }} i={steps.length + i} />
+        <StepItem key={`x${i}`} s={{ text: "Холимог тоогоор", tex: [t.replace(/^=\s*/, "")] }} i={steps.length + i} hidden={steps.length + i >= shown} />
       ))}
     </ol>
   );

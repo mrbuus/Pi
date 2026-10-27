@@ -19,6 +19,68 @@
  * ========================================================================== */
 
 export class LatexError extends Error {}
+/** Оролт ДУТУУ (хоосон нүд, хаалт хаагдаагүй) — бичиж байх үед алдаа харуулахгүй */
+export class IncompleteError extends LatexError {}
+
+/** Алдаа нь «дутуу оролт» мөн эсэх (LaTeX эсвэл задлагчийн мессеж) */
+export function isIncomplete(e: unknown): boolean {
+  if (e instanceof IncompleteError) return true;
+  const m = e instanceof Error ? e.message : typeof e === "string" ? e : "";
+  return /дутуу|хоосон|бөглөнө|бичнэ үү/i.test(m);
+}
+
+/* ---------- Таслал: аравтын таслал ба системийн тусгаарлагч ---------- */
+
+/** Хаалт/бүлгээс гадуурх таслалаар хуваана */
+function splitTopCommas(s: string): string[] {
+  const out: string[] = [];
+  let depth = 0, cur = "";
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c === "\\" && s[i + 1] === "{") { cur += "\\{"; i++; continue; }
+    if (c === "{" || c === "(" || c === "[") depth++;
+    if (c === "}" || c === ")" || c === "]") depth--;
+    if (c === "," && depth === 0 && s.slice(i - 1, i + 2) !== "{,}") { out.push(cur); cur = ""; continue; }
+    cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
+const REL_RE = /=|<|>|\\(le|ge|leq|geq|lt|gt|leqslant|geqslant)(?![a-z])/;
+
+/**
+ * «2x+y=5, x-y=1» → систем (мөр бүр); «2,5» → 2.5 (Монголд аравтын таслал).
+ * «12,18,30» (3+ бүхэл) жагсаалт хэвээр. Функцийн хаалт доторх таслал (C(10,3)) хэвээр.
+ */
+export function normalizeCommas(latex: string): string {
+  const parts = splitTopCommas(latex);
+  if (parts.length > 1 && parts.every((p) => REL_RE.test(p) && p.trim())) return parts.join("\\\\");
+  let out = "";
+  const stack: boolean[] = []; // true — функцийн аргументын хаалт
+  for (let i = 0; i < latex.length; i++) {
+    const c = latex[i];
+    if (c === "(") {
+      const before = out.replace(/\\(left|mleft|bigl|Bigl)\s*$/, "").trimEnd();
+      stack.push(/[a-zA-Z}]$/.test(before) && !/\\(cdot|times|div|right|mright)$/.test(before));
+    } else if (c === ")") stack.pop();
+    if (c === "," && /\d/.test(latex[i - 1] ?? "") && /\d/.test(latex[i + 1] ?? "") && !stack[stack.length - 1]) {
+      // Өмнө нь эсвэл хойно нь өөр «,цифр» байвал жагсаалт (12,18,30)
+      let j = i - 1;
+      while (j >= 0 && /\d/.test(latex[j])) j--;
+      let k = i + 1;
+      while (k < latex.length && /\d/.test(latex[k])) k++;
+      const listBefore = latex[j] === "," && /\d/.test(latex[j - 1] ?? "");
+      const listAfter = latex[k] === "," && /\d/.test(latex[k + 1] ?? "");
+      if (!listBefore && !listAfter) {
+        out += ".";
+        continue;
+      }
+    }
+    out += c;
+  }
+  return out;
+}
 
 type Tok =
   | { k: "cmd"; v: string } // \frac, \, , \\ г.м.
@@ -84,7 +146,7 @@ class Conv {
   /** Бүлэг { … } -ийн доторх токенууд (эсвэл ганц токен) */
   argTokens(): Tok[] {
     const t = this.next();
-    if (!t) throw new LatexError("Илэрхийлэл дутуу байна");
+    if (!t) throw new IncompleteError("Илэрхийлэл дутуу байна");
     if (t.k === "open") {
       const start = this.i;
       let depth = 1;
@@ -263,20 +325,20 @@ class Conv {
       return "\u0002".repeat(ts.reduce((s, x) => s + ((x as { v: string }).v === "doubleprime" ? 2 : 1), 0));
     }
     const inner = convertTokens(ts).trim();
-    if (!inner) throw new LatexError("Зэргийн илтгэгчийг бичнэ үү");
+    if (!inner) throw new IncompleteError("Зэргийн илтгэгчийг бичнэ үү");
     return /^[0-9]$|^[a-zA-Z]$/.test(inner) ? inner : `(${inner})`;
   }
 
   cmd(v: string): string {
     if (v === "frac" || v === "dfrac" || v === "tfrac" || v === "cfrac") {
       const a = this.arg().trim(), b = this.arg().trim();
-      if (!a || !b) throw new LatexError("Бутархайн хүртвэр, хуваарийг бөглөнө үү");
+      if (!a || !b) throw new IncompleteError("Бутархайн хүртвэр, хуваарийг бөглөнө үү");
       return `((${a})/(${b}))`;
     }
     if (v === "sqrt") {
       const n = this.optArg();
       const x = this.arg().trim();
-      if (!x) throw new LatexError("Язгуурын доторх илэрхийллийг бичнэ үү");
+      if (!x) throw new IncompleteError("Язгуурын доторх илэрхийллийг бичнэ үү");
       const nn = n?.trim();
       if (!nn || nn === "2") return ` sqrt(${x}) `;
       if (nn === "3") return ` cbrt(${x}) `;
@@ -286,8 +348,8 @@ class Conv {
       const a = this.arg().trim(), b = this.arg().trim();
       return ` C(${a},${b}) `;
     }
-    if (v === "left" || v === "bigl" || v === "Bigl" || v === "biggl") return this.delim(this.next(), "l");
-    if (v === "right" || v === "bigr" || v === "Bigr" || v === "biggr") return this.delim(this.next(), "r");
+    if (v === "left" || v === "mleft" || v === "bigl" || v === "Bigl" || v === "biggl") return this.delim(this.next(), "l");
+    if (v === "right" || v === "mright" || v === "bigr" || v === "Bigr" || v === "biggr") return this.delim(this.next(), "r");
     if (v === "middle") return this.delim(this.next(), "l");
     if (MULS.has(v)) return "*";
     if (v === "div") return "/";
@@ -321,7 +383,7 @@ class Conv {
       return v === "end" ? "\n" : "";
     }
     if (v === "displaylines") return this.arg();
-    if (v === "placeholder") throw new LatexError("Хоосон нүдийг бөглөнө үү");
+    if (v === "placeholder") throw new IncompleteError("Хоосон нүдийг бөглөнө үү");
     if (SPACES.has(v)) return " ";
     if (v === "to" || v === "rightarrow" || v === "longrightarrow") return "\u0003";
     if (v === "lfloor" || v === "lceil") return " floor(";
@@ -350,13 +412,15 @@ function finish(s: string): string {
   if (/\u0002/.test(out)) throw new LatexError("Уламжлалын тэмдгийг ойлгосонгүй — «Уламжлал» товчийг ашиглана уу");
   if (/\u0003/.test(out)) throw new LatexError("Хязгаарын бичлэгийг ойлгосонгүй");
   out = out.replace(/\n{2,}/g, "\n").replace(/^\n+|\n+$/g, "");
+  // Хоосон хаалт «()» — нүдийг бөглөөгүй
+  if (/\(\s*\)|\|\s*\|/.test(out)) throw new IncompleteError("Хаалтын доторхыг бичнэ үү");
   return out;
 }
 
 /** LaTeX → задлагчийн бичвэр. Алдаа бол LatexError (монгол мессеж) */
 export function latexToText(latex: string): string {
   if (!latex.trim()) return "";
-  return finish(convertTokens(tokenize(latex)));
+  return finish(convertTokens(tokenize(normalizeCommas(latex))));
 }
 
 /* ---------- Матанализын бичлэг ---------- */
@@ -421,7 +485,7 @@ function stripDx(ts: Tok[]): Tok[] {
 
 /** \frac{d}{dx}(…), \int …dx, \int_a^b …dx, \lim_{x\to a} …, (…)' — биш бол null */
 export function parseCalculus(latex: string): CalcSpec | null {
-  const ts = tokenize(latex);
+  const ts = tokenize(normalizeCommas(latex));
   if (!ts.length) return null;
   const c = new Conv(ts);
   const first = ts[0];

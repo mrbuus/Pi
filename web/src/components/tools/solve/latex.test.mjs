@@ -132,7 +132,8 @@ test("автомат таних: төрөл ба анхдагч үйлдэл", (
   assert.equal(A("\\begin{cases}2x+y=5\\\\x-y=1\\end{cases}").kind, "system");
   assert.deepEqual([A("\\frac{1}{2}+\\frac{1}{3}").kind, A("\\frac{1}{2}+\\frac{1}{3}").primary], ["number", "calc"]);
   assert.ok(A("360").actions.includes("prime"));
-  assert.equal(A("12,18").primary, "gcd");
+  assert.equal(A("12;18").primary, "gcd"); // «12,18» нь одоо 12.18 (аравтын таслал)
+  assert.equal(A("12,18,30").primary, "gcd");
   assert.equal(A("x^{2}-5x+6").primary, "factor");
   assert.equal(A("\\left(2a-3b\\right)^{3}").primary, "expand");
   assert.equal(A("\\frac{x^{2}-1}{x^{2}+2x+1}").primary, "frac");
@@ -158,6 +159,130 @@ test("автомат таних → бодогч: хариу зөв", () => {
   assert.ok(run("\\int_{0}^{1}x^{2}\\,dx").answer.join().includes("\\frac{1}{3}"));
   assert.ok(run("\\lim_{x\\to 0}\\frac{\\sin x}{x}").answer.join().includes("= 1"));
   assert.ok(run("y=x^{3}-3x").ok);
-  assert.ok(run("12,18").ok);
+  assert.ok(run("12;18").ok);
   assert.ok(run("x^{2}-5x+6", "deriv").answer.join().includes("2x-5") || run("x^{2}-5x+6", "deriv").answer.join().includes("2 x-5"));
+});
+
+/* ---------- MathLive-ийн БОДИТ гаралт (хөтөч дээр гарын товчоор оруулж mf.getValue('latex')-аар цуглуулсан, 2026-10-27) ---------- */
+
+import { liveSolve } from "./live.ts";
+import { solveForY } from "./implicit.ts";
+import { normalizeCommas, isIncomplete, IncompleteError } from "./latex.ts";
+
+// [MathLive LaTeX, хүлээгдэх төлөв, хариунд байх ёстой хэсэг (эсвэл төрөл)]
+const REAL = [
+  ["\\left(2x\\right)^2=y", "done", "y = 4 x^{2}"],
+  ["2x^2-3x+1=0", "done", "x_{1} = \\frac{1}{2}"],
+  ["x^3-8", "done", "\\left(x-2\\right)\\left(x^{2}+2x+4\\right)"],
+  ["\\frac{x+1}{x-2}\\ge0", "done", "\\left(-\\infty;\\ -1\\right]\\cup \\left(2;\\ +\\infty\\right)"],
+  ["\\left|2x-1\\right|<5", "done", "\\left(-2;\\ 3\\right)"],
+  ["\\sqrt{x+5}=x-1", "done", "x = 4"],
+  ["2^{x+1}=16", "done", "x = 3"],
+  ["\\log_2\\left(x-1\\right)=3", "done", "x = 9"],
+  ["\\sin\\left(x\\right)=\\frac12", "done", "\\frac{\\pi}{6}"],
+  ["\\cos\\left(2x\\right)=0", "done", "\\frac{\\pi}{4}+\\frac{\\pi}{2}n"],
+  ["y=x^2-4x+3", "done", "x = 1,\\ 3"],
+  ["x+y=5;x-y=1", "done", "\\left(3;\\ 2\\right)"],
+  ["2x+y=5,x-y=1", "done", "\\left(2;\\ 1\\right)"],
+  ["\\frac{\\mathrm{d}}{\\mathrm{d}x}\\left(x^3\\right)", "done", "3x^{2}"],
+  ["\\int x^2\\,\\mathrm{d}x", "done", "\\frac{1}{3}x^{3}+C"],
+  ["\\int_0^1x^2\\,\\mathrm{d}x", "done", "= \\frac{1}{3}"],
+  ["\\lim_{x\\to0}\\frac{\\sin\\left(x\\right)}{x}", "done", "= 1"],
+  ["3!", "done", "= 6"],
+  ["\\sqrt{50}+\\sqrt{18}", "done", "8\\sqrt{2}"],
+  ["\\frac23+\\frac56", "done", "\\frac{3}{2}"],
+  ["15\\%", "done", "= 0.15"],
+  ["2,5", "done", "\\frac{5}{2}"],
+  ["-x^2", "done", "-x^{2}"],
+  ["x^{-1}", "done", "\\frac{1}{x}"],
+  ["\\left(2a-3b\\right)^3", "done", "8a^{3}-36a^{2}b+54ab^{2}-27b^{3}"],
+  ["x^2y", "done", "x^{2}"],
+  ["x^2-5x+6=0", "done", "x_{2} = 3"],
+  ["x^2-3x+2\\le0", "done", "\\left[1;\\ 2\\right]"],
+  ["\\frac{1}{x}+\\frac{1}{x-1}=\\frac32", "done", "x_{1} = \\frac{1}{3}"],
+  ["4^{x}-3\\times2^{x}+2=0", "done", "x_{2} = 1"],
+  ["\\operatorname{\\mathrm{tg}}\\left(x\\right)=1", "done", "\\frac{\\pi}{4}+\\pi n"],
+  ["\\sin\\left(30\\degree\\right)", "done", "\\frac{1}{2}"],
+  ["\\log_{10}\\left(100\\right)", "done", "= 2"],
+  ["\\ln\\left(e^2\\right)", "done", "= 2"],
+  ["\\mathrm{C}_5^2", "done", "= 10"],
+  ["\\sqrt[3]{27}", "done", "= 3"],
+  ["2\\frac13", "done", "\\frac{7}{3}"],
+  ["\\lim_{x\\to\\infty}\\left(1+\\frac{1}{x}\\right)^{x}", "done", "= e"],
+  ["\\left(x^2\\right)^{\\prime}", "done", "2x"],
+  ["\\left|x-3\\right|=2", "done", "x_{2} = 5"],
+  ["a^2-b^2", "done", "\\left(a-b\\right)\\left(a+b\\right)"],
+  ["12;18", "done", "= 6"],
+  ["2x+1>5", "done", "\\left(2;\\ +\\infty\\right)"],
+  ["x\\div2=3", "done", "x = 6"],
+  ["1,5x=3", "done", "x = 2"],
+  ["e^{x}=1", "done", "x = 0"],
+  ["\\sqrt[4]{16}", "done", "= 2"],
+  ["y=x^2", "done", "x_{\\min} = 0"],
+  ["f\\left(x\\right)=x^3-3x", "done", "\\sqrt{3}"],
+  ["\\left(x+1\\right)\\left(x-1\\right)", "done", "x^{2}-1"],
+  ["\\arcsin\\left(1\\right)", "done", "\\frac{\\pi}{2}"],
+  ["\\sin^2\\left(x\\right)+\\cos^2\\left(x\\right)", "done", "= 1"],
+  ["\\exp\\left(0\\right)", "done", "= 1"],
+  ["\\lfloor2,7\\rfloor", "done", "= 2"],
+  ["\\operatorname{\\mathrm{sign}}\\left(-3\\right)", "done", "= -1"],
+  ["\\frac{\\mathrm{d}^2}{\\mathrm{d}x^2}\\left(x^4\\right)", "done", "12x^{2}"],
+  ["\\lim_{x\\to2}x^2", "done", "= 4"],
+  ["\\left[x+1\\right]^2", "done", "x^{2}+2x+1"],
+  ["\\mathrm{A}_5^2", "done", "= 20"],
+  ["x^2+y^2=25", "implicit", null],
+  ["\\frac{1}{\\placeholder{}}", "incomplete", null],
+  ["\\frac{\\placeholder{}}{\\placeholder{}}", "incomplete", null],
+  ["2+", "incomplete", null],
+  ["\\placeholder{}\\degree", "incomplete", null],
+  ["\\placeholder{}^2", "incomplete", null],
+  ["\\lim_{x\\to\\placeholder{}}\\placeholder{}", "incomplete", null],
+  ["\\int_0^{\\placeholder{}}\\placeholder{}\\,\\mathrm{d}x", "incomplete", null],
+  ["x=", "incomplete", null],
+  ["\\left(\\right)", "incomplete", null],
+];
+
+test(`MathLive-ийн бодит гаралт: ${REAL.length} тохиолдол алдаагүй, зөв хариутай`, () => {
+  for (const [latex, status, part] of REAL) {
+    const r = liveSolve(latex);
+    assert.equal(r.status, status, `${latex}: төлөв ${r.status} ${r.message ?? ""}`);
+    if (status === "done") {
+      assert.ok(r.sol.ok, `${latex}: бодож чадсангүй ${JSON.stringify(r.sol.notes)}`);
+      if (part) assert.ok(r.sol.answer.join(" ").includes(part) || (r.sol.problem ?? "").includes(part) || r.sol.steps.some((s) => (s.tex ?? []).join(" ").includes(part)), `${latex}: «${part}» алга — ${JSON.stringify(r.sol.answer)}`);
+    }
+  }
+});
+
+test("(2x)^2 = y → y = 4x^2: функц гэж танина, эхний алхам y-ээр илэрхийлнэ", () => {
+  const r = liveSolve("\\left(2x\\right)^2=y");
+  assert.equal(r.analysis.kind, "function");
+  assert.equal(r.analysis.primary, "study");
+  assert.deepEqual(r.analysis.graph, ["4*x^2"]);
+  assert.ok(r.sol.steps[0].tex.join(" ").includes("y = 4 x^{2}") || r.sol.steps[0].tex.join(" ").includes("y = 4x^{2}"));
+  // y зүүн, баруун, коэффициенттэй, бутархай хуваарьтай
+  const Y = (s) => solveForY(parseRelation(prepare(s)));
+  assert.equal(Y("2y-x^2=4"), "(1/2)*x^2+2");
+  assert.equal(Y("x*y=1"), "(1)/(x)");
+  assert.equal(Y("sin(x)=y"), "sin(x)");
+  assert.equal(Y("x^2+y^2=25"), null);
+  assert.equal(Y("y^2=x"), null);
+  assert.equal(liveSolve("y>x^{2}").status, "implicit");
+});
+
+test("таслал: 2,5 = 2.5, 12,18,30 жагсаалт, систем таслалаар, C(10,3) хэвээр", () => {
+  assert.equal(normalizeCommas("2,5"), "2.5");
+  assert.equal(normalizeCommas("x=2,5"), "x=2.5");
+  assert.equal(normalizeCommas("12,18,30"), "12,18,30");
+  assert.equal(normalizeCommas("2x+y=5,x-y=1"), "2x+y=5\\\\x-y=1");
+  assert.equal(normalizeCommas("C(10,3)"), "C(10,3)");
+  assert.equal(normalizeCommas("2{,}5"), "2{,}5");
+});
+
+test("дутуу оролтыг алдаа гэж харуулахгүй (isIncomplete)", () => {
+  assert.ok(isIncomplete(new IncompleteError("x")));
+  assert.ok(isIncomplete("Илэрхийлэл дутуу байна"));
+  assert.ok(isIncomplete("Хаалт дутуу байна"));
+  assert.ok(!isIncomplete("«*» энд байж болохгүй"));
+  assert.equal(liveSolve("2+*3").status, "error");
+  assert.equal(liveSolve("").status, "empty");
 });

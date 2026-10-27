@@ -7,10 +7,11 @@
  * энд зөвхөн аль горимыг дуудахыг шийднэ. React-гүй, тестлэгдэнэ.
  * ========================================================================== */
 
-import { parse, parseRelation, freeSymbols, type Node } from "../core/expr.ts";
+import { parse, parseRelation, freeSymbols, toLatex, type Node } from "../core/expr.ts";
+import { negPowToDiv, solveForY } from "./implicit.ts";
 import { prepare, splitLines } from "./input.ts";
 import { mfrom, mtotalDeg } from "./mpoly.ts";
-import { toAscii } from "./steps.ts";
+import { relTex, toAscii } from "./steps.ts";
 import type { SolveRequest } from "./solve.ts";
 import type { CalcSpec } from "./latex.ts";
 
@@ -20,7 +21,9 @@ export type Action =
 
 export type Kind =
   | "empty" | "number" | "intlist" | "equation" | "inequality" | "system"
-  | "function" | "expression" | "calculus" | "invalid";
+  | "function" | "expression" | "calculus" | "invalid"
+  /** x, y-тэй харьцаа — y-ээр шийдэгдэхгүй (тойрог г.м.): зөвхөн график */
+  | "implicit";
 
 export interface Analysis {
   kind: Kind;
@@ -35,6 +38,8 @@ export interface Analysis {
   graph: string[];
   /** Ганц хувьсагч x-ийн функц мөн эсэх (Уламжлал, Интеграл …) */
   inX: boolean;
+  /** x, y-тэй тэгшитгэлийг y-ээр илэрхийлсэн бол: анхны харьцаа ба y = … (LaTeX) */
+  fromRelation?: { rel: string; y: string };
 }
 
 export const ACTION_LABEL: Record<Action, string> = {
@@ -111,6 +116,12 @@ function analyzeExpr(text: string, node: Node): Analysis {
     if (!exp && deg < 2) actions.push("expand");
     primary = actions[0];
   } else if (hasVarDenominator(node)) {
+    // x^{-1} → 1/x: олон гишүүнтүүдийн харьцаа болгож хураана
+    const nd = negPowToDiv(node);
+    if (JSON.stringify(nd) !== JSON.stringify(node)) {
+      text = toAscii(nd);
+      node = nd;
+    }
     actions.push("frac");
     if (node.t === "div" && isPoly(node.a) && isPoly(node.b)) actions.push("div");
     primary = "frac";
@@ -124,6 +135,21 @@ function analyzeExpr(text: string, node: Node): Analysis {
   // анхдагчийг эхэнд
   const ordered = [primary, ...actions.filter((a) => a !== primary)];
   return { kind: "expression", actions: ordered, primary, body: text, extra: {}, graph, inX };
+}
+
+/** y = f(x) (body нь зөвхөн x-ийн) → функцийн шинжилгээ */
+function functionAnalysis(bodyText: string, n: Node): Analysis {
+  const a = analyzeExpr(bodyText.trim(), n);
+  const extraActs = a.actions.filter((x) => x !== "study" && x !== "lim" && x !== "expand" && x !== "frac");
+  return {
+    kind: "function",
+    actions: ["study", ...extraActs, "lim"].filter((x, i, arr) => arr.indexOf(x) === i) as Action[],
+    primary: "study",
+    body: a.body,
+    extra: {},
+    graph: [toAscii(n)],
+    inX: true,
+  };
 }
 
 /** «y = …» эсвэл «f(x) = …» хэлбэр */
@@ -173,8 +199,8 @@ export function analyze(text: string, calc?: CalcSpec | null): Analysis {
     }
   }
 
-  // ХИЕХ: «12, 18, 30»
-  if (/^\s*\d+(\s*,\s*\d+)+\s*$/.test(src)) {
+  // ХИЕХ: «12; 18», «12, 18, 30»
+  if (/^\s*\d+(\s*[,;]\s*\d+)+\s*$/.test(src)) {
     return { ...EMPTY, kind: "intlist", actions: ["gcd"], primary: "gcd", body: src };
   }
 
@@ -184,19 +210,7 @@ export function analyze(text: string, calc?: CalcSpec | null): Analysis {
     try {
       const n = parse(prepare(fm[1]));
       const vs = [...freeSymbols(n)];
-      if (vs.every((v) => v === "x")) {
-        const a = analyzeExpr(fm[1].trim(), n);
-        const extraActs = a.actions.filter((x) => x !== "study" && x !== "lim" && x !== "expand" && x !== "frac");
-        return {
-          kind: "function",
-          actions: ["study", ...extraActs, "lim"].filter((x, i, arr) => arr.indexOf(x) === i) as Action[],
-          primary: "study",
-          body: fm[1].trim(),
-          extra: {},
-          graph: [toAscii(n)],
-          inX: true,
-        };
-      }
+      if (vs.every((v) => v === "x")) return functionAnalysis(fm[1], n);
     } catch {
       /* доор энгийн тэгшитгэл гэж үзнэ */
     }
@@ -211,6 +225,19 @@ export function analyze(text: string, calc?: CalcSpec | null): Analysis {
   if (rel) {
     const ineq = rel.op !== "=";
     const vs = new Set([...freeSymbols(rel.lhs), ...freeSymbols(rel.rhs)]);
+    // x ба y-тэй: y-ээр шийдэгдвэл функц ((2x)^2 = y → y = 4x^2), үгүй бол зөвхөн график
+    if (vs.has("x") && vs.has("y") && [...vs].every((v) => v === "x" || v === "y")) {
+      const fy = solveForY(rel);
+      if (fy) {
+        try {
+          const fn = parse(prepare(fy));
+          return { ...functionAnalysis(fy, fn), fromRelation: { rel: relTex(rel), y: `y = ${toLatex(fn)}` } };
+        } catch {
+          /* доор далд муруй гэж үзнэ */
+        }
+      }
+      return { ...EMPTY, kind: "implicit", actions: [], primary: "solve", body: src, graph: [prepare(src)] };
+    }
     const inX = vs.size === 1 && vs.has("x");
     const graph = inX ? [toAscii(rel.lhs), toAscii(rel.rhs)].filter((s, i) => !(i === 1 && s === "0")) : [];
     return { ...EMPTY, kind: ineq ? "inequality" : "equation", actions: ["solve"], primary: "solve", body: src, graph, inX };

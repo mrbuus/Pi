@@ -40,7 +40,11 @@ export async function loadLessonTopics(
       },
     }),
     prisma.lessonRecord.findMany({
-      where: { classroomId: { in: classroomIds }, date: { in: dates } },
+      where: {
+        classroomId: { in: classroomIds },
+        date: { in: dates },
+        cancelledAt: null,
+      },
       select: { classroomId: true, date: true, topic: true, startMinute: true },
     }),
   ]);

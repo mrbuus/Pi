@@ -1695,7 +1695,9 @@ export const LessonRecordScalarFieldEnum = {
   confirmedById: 'confirmedById',
   confirmedByName: 'confirmedByName',
   confirmedAt: 'confirmedAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById'
 } as const
 
 export type LessonRecordScalarFieldEnum = (typeof LessonRecordScalarFieldEnum)[keyof typeof LessonRecordScalarFieldEnum]
@@ -1706,7 +1708,8 @@ export const LessonRecordStudentScalarFieldEnum = {
   recordId: 'recordId',
   studentId: 'studentId',
   studentName: 'studentName',
-  attendance: 'attendance'
+  attendance: 'attendance',
+  removedAt: 'removedAt'
 } as const
 
 export type LessonRecordStudentScalarFieldEnum = (typeof LessonRecordStudentScalarFieldEnum)[keyof typeof LessonRecordStudentScalarFieldEnum]
@@ -1719,7 +1722,9 @@ export const LessonNoteScalarFieldEnum = {
   body: 'body',
   updatedById: 'updatedById',
   updatedByName: 'updatedByName',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type LessonNoteScalarFieldEnum = (typeof LessonNoteScalarFieldEnum)[keyof typeof LessonNoteScalarFieldEnum]

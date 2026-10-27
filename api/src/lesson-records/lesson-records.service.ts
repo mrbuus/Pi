@@ -270,8 +270,11 @@ export class LessonRecordsService {
       })),
     });
     const confirmedByName = await this.actorName(actor.userId);
+    // Цуцлагдсан (cancelledAt) мөр ч энд ирнэ — @@unique [scheduleId, date] тул
+    // шинээр үүсгэхгүй, тэр мөрийг СЭРГЭЭНЭ. Өмнөх утга (сурагчидтай) AuditLog-д.
     const before = await this.prisma.lessonRecord.findUnique({
       where: { scheduleId_date: { scheduleId, date } },
+      include: { students: true },
     });
 
     // Сэдэв: «Орох тест» чөлөөт бичвэр > төлөвлөгөөний гарчиг > хийсэн тестүүдийн нэр
@@ -305,18 +308,14 @@ export class LessonRecordsService {
       const row = await tx.lessonRecord.upsert({
         where: { scheduleId_date: { scheduleId, date } },
         create: { ...data, date },
-        update: data,
+        update: { ...data, cancelledAt: null, cancelledById: null },
       });
-      await tx.lessonRecordStudent.deleteMany({ where: { recordId: row.id } });
-      if (snap.students.length)
-        await tx.lessonRecordStudent.createMany({
-          data: snap.students.map((s) => ({ ...s, recordId: row.id })),
-        });
+      await this.syncStudents(tx, row.id, before?.students ?? [], snap.students);
       return row;
     });
     await this.audit(
       actor,
-      before ? 'UPDATE' : 'CONFIRM',
+      !before ? 'CONFIRM' : before.cancelledAt ? 'RECONFIRM' : 'UPDATE',
       'LessonRecord',
       record.id,
       before,
@@ -331,6 +330,55 @@ export class LessonRecordsService {
     );
     await this.feedLessonTopic(actor, entry, key, typedTopic, testRows);
     return this.present(record, await this.plusOf([record]));
+  }
+
+  /**
+   * Snapshot-ийн сурагчдыг бичнэ — ХЭЗЭЭ Ч устгахгүй (эзэн 2026-10-23): шинийг
+   * нэмнэ, байгааг шинэчилнэ (removedAt-ийг цэвэрлэнэ), snapshot-оос гарсныг
+   * removedAt-ээр тэмдэглэнэ.
+   */
+  private async syncStudents(
+    tx: Pick<PrismaService, 'lessonRecordStudent'>,
+    recordId: string,
+    existing: {
+      id: string;
+      studentId: string;
+      studentName: string;
+      attendance: string | null;
+      removedAt: Date | null;
+    }[],
+    next: { studentId: string; studentName: string; attendance: string | null }[],
+  ) {
+    const old = new Map(existing.map((s) => [s.studentId, s]));
+    const fresh = next.filter((s) => !old.has(s.studentId));
+    if (fresh.length)
+      await tx.lessonRecordStudent.createMany({
+        data: fresh.map((s) => ({ ...s, recordId })),
+      });
+    for (const s of next) {
+      const o = old.get(s.studentId);
+      if (
+        o &&
+        (o.removedAt ||
+          o.studentName !== s.studentName ||
+          o.attendance !== s.attendance)
+      )
+        await tx.lessonRecordStudent.update({
+          where: { id: o.id },
+          data: {
+            studentName: s.studentName,
+            attendance: s.attendance,
+            removedAt: null,
+          },
+        });
+    }
+    const keep = new Set(next.map((s) => s.studentId));
+    const gone = existing.filter((s) => !s.removedAt && !keep.has(s.studentId));
+    if (gone.length)
+      await tx.lessonRecordStudent.updateMany({
+        where: { id: { in: gone.map((s) => s.id) } },
+        data: { removedAt: new Date() },
+      });
   }
 
   /**
@@ -385,16 +433,28 @@ export class LessonRecordsService {
     await this.audit(actor, 'CREATE', 'LessonTopic', row.id, null, row);
   }
 
+  /**
+   * «Батламж цуцлах» — ЗӨӨЛӨН (эзэн 2026-10-23): мөр, сурагчид DB-д үлдэнэ,
+   * cancelledAt бөглөгдөж бүх уншилтаас хасагдана. Дахин батлахад сэргээнэ.
+   */
   async unconfirm(actor: Actor, scheduleId: string, dateStr: string) {
     const { date, key } = this.parseDate(dateStr);
     const row = await this.prisma.lessonRecord.findUnique({
       where: { scheduleId_date: { scheduleId, date } },
       include: { students: true },
     });
-    if (!row) throw new NotFoundException('Батлагдсан бичлэг олдсонгүй.');
+    if (!row || row.cancelledAt)
+      throw new NotFoundException('Батлагдсан бичлэг олдсонгүй.');
     this.assertCanConfirm(actor);
-    await this.prisma.lessonRecord.delete({ where: { id: row.id } });
-    await this.audit(actor, 'REVERSE', 'LessonRecord', row.id, row, null);
+    const cancelledAt = new Date();
+    await this.prisma.lessonRecord.update({
+      where: { id: row.id },
+      data: { cancelledAt, cancelledById: actor.userId },
+    });
+    await this.audit(actor, 'REVERSE', 'LessonRecord', row.id, row, {
+      cancelledAt,
+      cancelledById: actor.userId,
+    });
     return { scheduleId, date: key, confirmed: false };
   }
 
@@ -416,9 +476,16 @@ export class LessonRecordsService {
     const where = { scheduleId_date: { scheduleId, date } };
     const before = await this.prisma.lessonNote.findUnique({ where });
     if (!text) {
-      if (before) {
-        await this.prisma.lessonNote.delete({ where });
-        await this.audit(actor, 'DELETE', 'LessonNote', before.id, before, null);
+      // ЗӨӨЛӨН: мөр, хуучин бичвэр DB-д үлдэнэ; уншилтаас хасагдана (эзэн 2026-10-23)
+      if (before && !before.deletedAt) {
+        const row = await this.prisma.lessonNote.update({
+          where: { id: before.id },
+          data: { deletedAt: new Date(), deletedById: actor.userId },
+        });
+        await this.audit(actor, 'DELETE', 'LessonNote', before.id, before, {
+          deletedAt: row.deletedAt,
+          deletedById: actor.userId,
+        });
       }
       return { scheduleId, date: key, note: null };
     }
@@ -426,7 +493,13 @@ export class LessonRecordsService {
     const row = await this.prisma.lessonNote.upsert({
       where,
       create: { scheduleId, date, body: text, updatedById: actor.userId, updatedByName },
-      update: { body: text, updatedById: actor.userId, updatedByName },
+      update: {
+        body: text,
+        updatedById: actor.userId,
+        updatedByName,
+        deletedAt: null,
+        deletedById: null,
+      },
     });
     await this.audit(actor, 'UPDATE', 'LessonNote', row.id, before, row);
     return {
@@ -451,8 +524,8 @@ export class LessonRecordsService {
     this.assertStaff(actor);
     const { date, key } = this.parseDate(dateStr);
     const [records, notes, dismissals] = await Promise.all([
-      this.prisma.lessonRecord.findMany({ where: { date } }),
-      this.prisma.lessonNote.findMany({ where: { date } }),
+      this.prisma.lessonRecord.findMany({ where: { date, cancelledAt: null } }),
+      this.prisma.lessonNote.findMany({ where: { date, deletedAt: null } }),
       this.prisma.classDismissal.findMany({
         where: { date },
         select: { classroomId: true, approximateAt: true },
@@ -482,7 +555,7 @@ export class LessonRecordsService {
   async classroomHistory(actor: Actor, classroomId: string, limit = 60) {
     this.assertStaff(actor);
     const rows = await this.prisma.lessonRecord.findMany({
-      where: { classroomId },
+      where: { classroomId, cancelledAt: null },
       orderBy: [{ date: 'desc' }, { startMinute: 'asc' }],
       take: Math.min(Math.max(1, Number(limit) || 60), 200),
     });
@@ -495,7 +568,11 @@ export class LessonRecordsService {
     if (actor.role !== Role.STUDENT)
       throw new ForbiddenException('Зөвхөн сурагчид.');
     const rows = await this.prisma.lessonRecordStudent.findMany({
-      where: { studentId: actor.userId },
+      where: {
+        studentId: actor.userId,
+        removedAt: null,
+        record: { cancelledAt: null },
+      },
       include: { record: true },
       orderBy: { record: { date: 'desc' } },
       take: Math.min(Math.max(1, Number(limit) || 60), 200),
@@ -533,7 +610,7 @@ export class LessonRecordsService {
         );
     }
     const rows = await this.prisma.lessonRecordStudent.findMany({
-      where: { studentId },
+      where: { studentId, removedAt: null, record: { cancelledAt: null } },
       include: { record: true },
       orderBy: { record: { date: 'desc' } },
       take: Math.min(Math.max(1, Number(limit) || 60), 200),

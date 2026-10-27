@@ -321,7 +321,7 @@ export class ClassDashboardService {
         select: { studentId: true, kind: true },
       }),
       this.prisma.lessonRecord.findMany({
-        where: { classroomId: { in: classIds } },
+        where: { classroomId: { in: classIds }, cancelledAt: null },
         orderBy: { date: 'desc' },
         distinct: ['classroomId'],
         select: { classroomId: true, date: true, topic: true },
@@ -775,7 +775,11 @@ export class ClassDashboardService {
         },
       }),
       this.prisma.lessonRecord.findMany({
-        where: { classroomId, date: { gte: daysAgo(MAKEUP_DAYS) } },
+        where: {
+          classroomId,
+          date: { gte: daysAgo(MAKEUP_DAYS) },
+          cancelledAt: null,
+        },
         orderBy: { date: 'desc' },
         select: {
           id: true,
@@ -787,10 +791,15 @@ export class ClassDashboardService {
           presentCount: true,
           absentCount: true,
           enrolledCount: true,
-          students: { select: { studentId: true, attendance: true } },
+          students: {
+            where: { removedAt: null },
+            select: { studentId: true, attendance: true },
+          },
         },
       }),
-      this.prisma.lessonRecord.count({ where: { classroomId } }),
+      this.prisma.lessonRecord.count({
+        where: { classroomId, cancelledAt: null },
+      }),
       this.prisma.classSchedule.findMany({
         where: {
           classroomId,
@@ -1253,7 +1262,11 @@ export class ClassDashboardService {
           },
         }),
         this.prisma.lessonRecord.findMany({
-          where: { classroomId, date: { gte: firstDate, lte: lastDate } },
+          where: {
+            classroomId,
+            date: { gte: firstDate, lte: lastDate },
+            cancelledAt: null,
+          },
           select: { date: true },
         }),
         this.prisma.testAccess.findMany({

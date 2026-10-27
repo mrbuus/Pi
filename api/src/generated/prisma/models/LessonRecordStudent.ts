@@ -30,6 +30,7 @@ export type LessonRecordStudentMinAggregateOutputType = {
   studentId: string | null
   studentName: string | null
   attendance: string | null
+  removedAt: Date | null
 }
 
 export type LessonRecordStudentMaxAggregateOutputType = {
@@ -38,6 +39,7 @@ export type LessonRecordStudentMaxAggregateOutputType = {
   studentId: string | null
   studentName: string | null
   attendance: string | null
+  removedAt: Date | null
 }
 
 export type LessonRecordStudentCountAggregateOutputType = {
@@ -46,6 +48,7 @@ export type LessonRecordStudentCountAggregateOutputType = {
   studentId: number
   studentName: number
   attendance: number
+  removedAt: number
   _all: number
 }
 
@@ -56,6 +59,7 @@ export type LessonRecordStudentMinAggregateInputType = {
   studentId?: true
   studentName?: true
   attendance?: true
+  removedAt?: true
 }
 
 export type LessonRecordStudentMaxAggregateInputType = {
@@ -64,6 +68,7 @@ export type LessonRecordStudentMaxAggregateInputType = {
   studentId?: true
   studentName?: true
   attendance?: true
+  removedAt?: true
 }
 
 export type LessonRecordStudentCountAggregateInputType = {
@@ -72,6 +77,7 @@ export type LessonRecordStudentCountAggregateInputType = {
   studentId?: true
   studentName?: true
   attendance?: true
+  removedAt?: true
   _all?: true
 }
 
@@ -153,6 +159,7 @@ export type LessonRecordStudentGroupByOutputType = {
   studentId: string
   studentName: string
   attendance: string | null
+  removedAt: Date | null
   _count: LessonRecordStudentCountAggregateOutputType | null
   _min: LessonRecordStudentMinAggregateOutputType | null
   _max: LessonRecordStudentMaxAggregateOutputType | null
@@ -182,6 +189,7 @@ export type LessonRecordStudentWhereInput = {
   studentId?: Prisma.StringFilter<"LessonRecordStudent"> | string
   studentName?: Prisma.StringFilter<"LessonRecordStudent"> | string
   attendance?: Prisma.StringNullableFilter<"LessonRecordStudent"> | string | null
+  removedAt?: Prisma.DateTimeNullableFilter<"LessonRecordStudent"> | Date | string | null
   record?: Prisma.XOR<Prisma.LessonRecordScalarRelationFilter, Prisma.LessonRecordWhereInput>
 }
 
@@ -191,6 +199,7 @@ export type LessonRecordStudentOrderByWithRelationInput = {
   studentId?: Prisma.SortOrder
   studentName?: Prisma.SortOrder
   attendance?: Prisma.SortOrderInput | Prisma.SortOrder
+  removedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   record?: Prisma.LessonRecordOrderByWithRelationInput
 }
 
@@ -204,6 +213,7 @@ export type LessonRecordStudentWhereUniqueInput = Prisma.AtLeast<{
   studentId?: Prisma.StringFilter<"LessonRecordStudent"> | string
   studentName?: Prisma.StringFilter<"LessonRecordStudent"> | string
   attendance?: Prisma.StringNullableFilter<"LessonRecordStudent"> | string | null
+  removedAt?: Prisma.DateTimeNullableFilter<"LessonRecordStudent"> | Date | string | null
   record?: Prisma.XOR<Prisma.LessonRecordScalarRelationFilter, Prisma.LessonRecordWhereInput>
 }, "id" | "recordId_studentId">
 
@@ -213,6 +223,7 @@ export type LessonRecordStudentOrderByWithAggregationInput = {
   studentId?: Prisma.SortOrder
   studentName?: Prisma.SortOrder
   attendance?: Prisma.SortOrderInput | Prisma.SortOrder
+  removedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LessonRecordStudentCountOrderByAggregateInput
   _max?: Prisma.LessonRecordStudentMaxOrderByAggregateInput
   _min?: Prisma.LessonRecordStudentMinOrderByAggregateInput
@@ -227,6 +238,7 @@ export type LessonRecordStudentScalarWhereWithAggregatesInput = {
   studentId?: Prisma.StringWithAggregatesFilter<"LessonRecordStudent"> | string
   studentName?: Prisma.StringWithAggregatesFilter<"LessonRecordStudent"> | string
   attendance?: Prisma.StringNullableWithAggregatesFilter<"LessonRecordStudent"> | string | null
+  removedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LessonRecordStudent"> | Date | string | null
 }
 
 export type LessonRecordStudentCreateInput = {
@@ -234,6 +246,7 @@ export type LessonRecordStudentCreateInput = {
   studentId: string
   studentName: string
   attendance?: string | null
+  removedAt?: Date | string | null
   record: Prisma.LessonRecordCreateNestedOneWithoutStudentsInput
 }
 
@@ -243,6 +256,7 @@ export type LessonRecordStudentUncheckedCreateInput = {
   studentId: string
   studentName: string
   attendance?: string | null
+  removedAt?: Date | string | null
 }
 
 export type LessonRecordStudentUpdateInput = {
@@ -250,6 +264,7 @@ export type LessonRecordStudentUpdateInput = {
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   studentName?: Prisma.StringFieldUpdateOperationsInput | string
   attendance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  removedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   record?: Prisma.LessonRecordUpdateOneRequiredWithoutStudentsNestedInput
 }
 
@@ -259,6 +274,7 @@ export type LessonRecordStudentUncheckedUpdateInput = {
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   studentName?: Prisma.StringFieldUpdateOperationsInput | string
   attendance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  removedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type LessonRecordStudentCreateManyInput = {
@@ -267,6 +283,7 @@ export type LessonRecordStudentCreateManyInput = {
   studentId: string
   studentName: string
   attendance?: string | null
+  removedAt?: Date | string | null
 }
 
 export type LessonRecordStudentUpdateManyMutationInput = {
@@ -274,6 +291,7 @@ export type LessonRecordStudentUpdateManyMutationInput = {
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   studentName?: Prisma.StringFieldUpdateOperationsInput | string
   attendance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  removedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type LessonRecordStudentUncheckedUpdateManyInput = {
@@ -282,6 +300,7 @@ export type LessonRecordStudentUncheckedUpdateManyInput = {
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   studentName?: Prisma.StringFieldUpdateOperationsInput | string
   attendance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  removedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type LessonRecordStudentListRelationFilter = {
@@ -305,6 +324,7 @@ export type LessonRecordStudentCountOrderByAggregateInput = {
   studentId?: Prisma.SortOrder
   studentName?: Prisma.SortOrder
   attendance?: Prisma.SortOrder
+  removedAt?: Prisma.SortOrder
 }
 
 export type LessonRecordStudentMaxOrderByAggregateInput = {
@@ -313,6 +333,7 @@ export type LessonRecordStudentMaxOrderByAggregateInput = {
   studentId?: Prisma.SortOrder
   studentName?: Prisma.SortOrder
   attendance?: Prisma.SortOrder
+  removedAt?: Prisma.SortOrder
 }
 
 export type LessonRecordStudentMinOrderByAggregateInput = {
@@ -321,6 +342,7 @@ export type LessonRecordStudentMinOrderByAggregateInput = {
   studentId?: Prisma.SortOrder
   studentName?: Prisma.SortOrder
   attendance?: Prisma.SortOrder
+  removedAt?: Prisma.SortOrder
 }
 
 export type LessonRecordStudentCreateNestedManyWithoutRecordInput = {
@@ -370,6 +392,7 @@ export type LessonRecordStudentCreateWithoutRecordInput = {
   studentId: string
   studentName: string
   attendance?: string | null
+  removedAt?: Date | string | null
 }
 
 export type LessonRecordStudentUncheckedCreateWithoutRecordInput = {
@@ -377,6 +400,7 @@ export type LessonRecordStudentUncheckedCreateWithoutRecordInput = {
   studentId: string
   studentName: string
   attendance?: string | null
+  removedAt?: Date | string | null
 }
 
 export type LessonRecordStudentCreateOrConnectWithoutRecordInput = {
@@ -414,6 +438,7 @@ export type LessonRecordStudentScalarWhereInput = {
   studentId?: Prisma.StringFilter<"LessonRecordStudent"> | string
   studentName?: Prisma.StringFilter<"LessonRecordStudent"> | string
   attendance?: Prisma.StringNullableFilter<"LessonRecordStudent"> | string | null
+  removedAt?: Prisma.DateTimeNullableFilter<"LessonRecordStudent"> | Date | string | null
 }
 
 export type LessonRecordStudentCreateManyRecordInput = {
@@ -421,6 +446,7 @@ export type LessonRecordStudentCreateManyRecordInput = {
   studentId: string
   studentName: string
   attendance?: string | null
+  removedAt?: Date | string | null
 }
 
 export type LessonRecordStudentUpdateWithoutRecordInput = {
@@ -428,6 +454,7 @@ export type LessonRecordStudentUpdateWithoutRecordInput = {
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   studentName?: Prisma.StringFieldUpdateOperationsInput | string
   attendance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  removedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type LessonRecordStudentUncheckedUpdateWithoutRecordInput = {
@@ -435,6 +462,7 @@ export type LessonRecordStudentUncheckedUpdateWithoutRecordInput = {
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   studentName?: Prisma.StringFieldUpdateOperationsInput | string
   attendance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  removedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type LessonRecordStudentUncheckedUpdateManyWithoutRecordInput = {
@@ -442,6 +470,7 @@ export type LessonRecordStudentUncheckedUpdateManyWithoutRecordInput = {
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   studentName?: Prisma.StringFieldUpdateOperationsInput | string
   attendance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  removedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -452,6 +481,7 @@ export type LessonRecordStudentSelect<ExtArgs extends runtime.Types.Extensions.I
   studentId?: boolean
   studentName?: boolean
   attendance?: boolean
+  removedAt?: boolean
   record?: boolean | Prisma.LessonRecordDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonRecordStudent"]>
 
@@ -461,6 +491,7 @@ export type LessonRecordStudentSelectCreateManyAndReturn<ExtArgs extends runtime
   studentId?: boolean
   studentName?: boolean
   attendance?: boolean
+  removedAt?: boolean
   record?: boolean | Prisma.LessonRecordDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonRecordStudent"]>
 
@@ -470,6 +501,7 @@ export type LessonRecordStudentSelectUpdateManyAndReturn<ExtArgs extends runtime
   studentId?: boolean
   studentName?: boolean
   attendance?: boolean
+  removedAt?: boolean
   record?: boolean | Prisma.LessonRecordDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonRecordStudent"]>
 
@@ -479,9 +511,10 @@ export type LessonRecordStudentSelectScalar = {
   studentId?: boolean
   studentName?: boolean
   attendance?: boolean
+  removedAt?: boolean
 }
 
-export type LessonRecordStudentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "recordId" | "studentId" | "studentName" | "attendance", ExtArgs["result"]["lessonRecordStudent"]>
+export type LessonRecordStudentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "recordId" | "studentId" | "studentName" | "attendance" | "removedAt", ExtArgs["result"]["lessonRecordStudent"]>
 export type LessonRecordStudentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   record?: boolean | Prisma.LessonRecordDefaultArgs<ExtArgs>
 }
@@ -503,6 +536,7 @@ export type $LessonRecordStudentPayload<ExtArgs extends runtime.Types.Extensions
     studentId: string
     studentName: string
     attendance: string | null
+    removedAt: Date | null
   }, ExtArgs["result"]["lessonRecordStudent"]>
   composites: {}
 }
@@ -932,6 +966,7 @@ export interface LessonRecordStudentFieldRefs {
   readonly studentId: Prisma.FieldRef<"LessonRecordStudent", 'String'>
   readonly studentName: Prisma.FieldRef<"LessonRecordStudent", 'String'>
   readonly attendance: Prisma.FieldRef<"LessonRecordStudent", 'String'>
+  readonly removedAt: Prisma.FieldRef<"LessonRecordStudent", 'DateTime'>
 }
     
 

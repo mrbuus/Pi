@@ -168,6 +168,10 @@ describe('lesson topics from the day plan', () => {
     expect(prisma.test.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: { in: ['t2'] } } }),
     );
+    // Цуцлагдсан (зөөлөн) батламжийн сэдэв шошгонд орохгүй
+    expect(prisma.lessonRecord.findMany.mock.calls[0][0].where).toMatchObject({
+      cancelledAt: null,
+    });
   });
 
   it('labels assignments; falls back to the date label when topics cannot be read', async () => {

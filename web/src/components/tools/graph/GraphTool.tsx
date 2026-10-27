@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { Home, Pause, Play, Plus, Trash2, ZoomIn, ZoomOut } from "lucide-react";
+import { Home, Keyboard, Pause, Play, Plus, Trash2, ZoomIn, ZoomOut } from "lucide-react";
 import MathText from "@/components/MathText";
 import { Button } from "@/components/ui/kit/button";
 import { cn } from "@/lib/cn";
@@ -10,6 +10,9 @@ import { loadState, saveState } from "../core/export";
 import { usePending } from "../core/hub";
 import { MATH_FONT, SERIES_COLORS, SvgLabel } from "../core/svgText";
 import ToolFrame, { NumberField, Panel, Toggle } from "../core/ToolFrame";
+import MathInput, { type MathInputHandle } from "../core/MathInput";
+import MathKeyboard from "../core/MathKeyboard";
+import { isIncomplete, readLatex } from "../solve/latex";
 import {
   analyze,
   clamp,
@@ -47,9 +50,24 @@ import { placeLabels, shortNum, textWidth } from "./labels";
 
 interface Line {
   id: number;
+  /** Задлагчийн бичвэр (analyze-д) */
   src: string;
+  /** Талбарт харагдах LaTeX (MathLive); хуучин хадгалалтад байхгүй бол src-ээс */
+  latex?: string;
+  /** Бүрэн бөгөөд буруу оруулгын мессеж (дутуу үед хоосон) */
+  bad?: string;
   on: boolean;
   ci: number;
+}
+
+/** MathLive-ийн LaTeX → задлагчийн бичвэр. Дутуу (хоосон нүд) үед зураг зурахгүй, алдаа харуулахгүй */
+function fromLatex(latex: string): { src: string; bad?: string } {
+  if (!latex.trim()) return { src: "" };
+  try {
+    return { src: readLatex(latex).text };
+  } catch (e) {
+    return isIncomplete(e) ? { src: "" } : { src: "", bad: e instanceof Error ? e.message : "Оролтыг шалгана уу" };
+  }
 }
 interface Saved {
   lines: Line[];
@@ -89,22 +107,7 @@ const DEFAULTS: Saved = {
   params: {},
 };
 
-const EXAMPLES = ["y=x^2-4x+3", "y=sin(x)", "y=|x-2|", "x^2+y^2=25", "x^2/9+y^2/4=1", "x^2-y^2=1", "y>x^2", "y=a*x^2+b*x+c", "y=1/x", "y=tg(x)", "y=2^x", "y=log_2(x)"];
 
-const INSERTS: { tex: string; ins: string; label: string }[] = [
-  { tex: "x^{2}", ins: "^2", label: "Квадрат" },
-  { tex: "x^{n}", ins: "^(", label: "Зэрэг" },
-  { tex: "\\sqrt{x}", ins: "sqrt(", label: "Язгуур" },
-  { tex: "\\left|x\\right|", ins: "|", label: "Модуль" },
-  { tex: "\\pi", ins: "pi", label: "Пи" },
-  { tex: "\\sin", ins: "sin(", label: "Синус" },
-  { tex: "\\cos", ins: "cos(", label: "Косинус" },
-  { tex: "\\operatorname{tg}", ins: "tg(", label: "Тангенс" },
-  { tex: "\\ln", ins: "ln(", label: "Натурал логарифм" },
-  { tex: "\\log_a", ins: "log_2(", label: "Логарифм" },
-  { tex: "\\le", ins: "<=", label: "Бага буюу тэнцүү" },
-  { tex: "\\ge", ins: ">=", label: "Их буюу тэнцүү" },
-];
 
 const KIND_LABEL: Record<Special["kind"], string> = {
   zero: "Тэг",
@@ -160,7 +163,10 @@ export default function GraphTool() {
   const wrap = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const nextId = useRef(Math.max(...init.lines.map((l) => l.id), 1) + 1);
-  const focus = useRef<{ id: number; el: HTMLInputElement | null }>({ id: -1, el: null });
+  // Нэг нийтлэг гар: идэвхтэй мөрийн талбар руу бичнэ
+  const handles = useRef(new Map<number, MathInputHandle | null>());
+  const activeField = useRef<MathInputHandle | null>(null);
+  const [kbOpen, setKbOpen] = useState(false);
   const clipId = useId().replace(/[^a-zA-Z0-9]/g, "");
 
   const view: View = useMemo(() => ({ ...vp, w: size.w, h: size.h }), [vp, size]);
@@ -344,24 +350,6 @@ export default function GraphTool() {
     });
   const remove = (id: number) => setLines((ls) => (ls.length > 1 ? ls.filter((l) => l.id !== id) : ls.map((l) => ({ ...l, src: "" }))));
 
-  const insert = (text: string) => {
-    const { id, el } = focus.current;
-    if (id < 0 || !el) {
-      const last = lines[lines.length - 1];
-      update(last.id, { src: last.src + text });
-      return;
-    }
-    const s = el.selectionStart ?? el.value.length;
-    const e = el.selectionEnd ?? s;
-    const v = el.value.slice(0, s) + text + el.value.slice(e);
-    update(id, { src: v });
-    const pos = s + text.length;
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(pos, pos);
-    });
-  };
-
   /* ---------- Параметр хөдөлгөөн ---------- */
   useEffect(() => {
     if (!anim) return;
@@ -498,7 +486,12 @@ export default function GraphTool() {
     });
     // Утсан дээр цөөн шошго: ихэнх нь доорх жагсаалтад
     const max = view.w < 520 ? 4 : 10;
-    const order = reqs.map((r, i) => ({ r, i })).filter(({ r }) => r.px > 0 && r.px < view.w && r.py > 0 && r.py < view.h);
+    // Нэг цэг хоёр төрөлтэй (жишээ нь оргил ба y-огтлол) бол шошго нэг л удаа
+    const seenT = new Set<string>();
+    const order = reqs
+      .map((r, i) => ({ r, i }))
+      .filter(({ r }) => r.px > 0 && r.px < view.w && r.py > 0 && r.py < view.h)
+      .filter(({ r }) => (seenT.has(r.t) ? false : (seenT.add(r.t), true)));
     const keep = order.slice(0, max);
     // x, y, O тэнхлэгийн нэрийн байрыг хориглоно
     const ax0 = pxOf(view, 0);
@@ -581,26 +574,30 @@ export default function GraphTool() {
                       />
                     </button>
                     <div className="min-w-0 flex-1">
-                      <input
-                        value={l.src}
-                        onChange={(e) => update(l.id, { src: e.target.value })}
-                        onFocus={(e) => (focus.current = { id: l.id, el: e.currentTarget })}
-                        placeholder="y = x^2 - 4x + 3"
-                        aria-label={`Тэгшитгэл ${i + 1}`}
-                        spellCheck={false}
-                        autoCapitalize="off"
-                        autoCorrect="off"
+                      <div
                         className={cn(
-                          "h-11 w-full rounded-lg border bg-bg px-3 font-mono text-sm text-ink",
-                          it.kind === "error" ? "border-error" : "border-line",
+                          "rounded-lg border bg-bg px-2 transition-colors duration-[var(--dur-micro)] focus-within:border-brand-bright",
+                          l.bad || it.kind === "error" ? "border-error" : "border-line",
                         )}
-                      />
-                      {it.kind === "error" && <p className="mt-1 text-xs text-error">{it.message}</p>}
-                      {"tex" in it && (
-                        <div className="mt-1 min-w-0 overflow-x-auto text-sm text-ink-dim">
-                          <MathText>{`$${it.tex}$`}</MathText>
-                        </div>
-                      )}
+                      >
+                        <MathInput
+                          ref={(h) => {
+                            handles.current.set(l.id, h);
+                          }}
+                          value={l.latex ?? ("tex" in it ? it.tex : l.src)}
+                          onChange={(latex, plain) => update(l.id, plain ? { latex, src: latex, bad: undefined } : { latex, ...fromLatex(latex), bad: fromLatex(latex).bad })}
+                          onFocus={() => {
+                            activeField.current = handles.current.get(l.id) ?? null;
+                            setKbOpen(true);
+                          }}
+                          onEnter={() => setKbOpen(false)}
+                          placeholder="y = x^2"
+                          ariaLabel={`Тэгшитгэл ${i + 1}`}
+                          size={20}
+                          className="min-w-0 overflow-x-auto"
+                        />
+                      </div>
+                      {(l.bad || it.kind === "error") && <p className="mt-1 text-xs text-error">{l.bad ?? (it.kind === "error" ? it.message : "")}</p>}
                     </div>
                     <Button variant="ghost" size="icon" onClick={() => remove(l.id)} aria-label="Тэгшитгэлийг устгах">
                       <Trash2 className="h-4 w-4" aria-hidden />
@@ -609,21 +606,35 @@ export default function GraphTool() {
                 );
               })}
             </ul>
-            <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Тэмдэгт оруулах">
-              {INSERTS.map((b) => (
-                <button
-                  key={b.ins}
-                  type="button"
-                  title={b.label}
-                  aria-label={b.label}
-                  onPointerDown={(e) => e.preventDefault()}
-                  onClick={() => insert(b.ins)}
-                  className="min-h-10 min-w-10 rounded-lg border border-line bg-surface px-2 text-sm text-ink hover:border-brand-bright/50"
-                >
-                  <MathText>{`$${b.tex}$`}</MathText>
-                </button>
-              ))}
+            <button
+              type="button"
+              onClick={() => {
+                if (!activeField.current) activeField.current = handles.current.get(lines[lines.length - 1].id) ?? null;
+                setKbOpen((v) => !v);
+              }}
+              aria-pressed={kbOpen}
+              className={cn(
+                "mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-medium",
+                kbOpen ? "text-brand" : "text-ink-dim hover:text-ink",
+              )}
+            >
+              <Keyboard className="h-4 w-4" aria-hidden />
+              {kbOpen ? "Гарыг нуух" : "Математик гар"}
+            </button>
+            {/* Утсан дээр доор бэхлэгдсэн, компьютер дээр тэгшитгэлийн доор (физик гараар ч бичнэ) */}
+            <div
+              className={cn(
+                "fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[max(env(safe-area-inset-bottom),6px)] pt-1.5 shadow-[0_-8px_24px_-12px_rgb(0_0_0/0.25)]",
+                "lg:static lg:z-auto lg:mt-2 lg:rounded-2xl lg:border lg:p-2 lg:shadow-none",
+                !kbOpen && "hidden",
+              )}
+            >
+              <div className="mx-auto max-w-xl lg:max-w-none">
+                <MathKeyboard field={activeField} onEnter={() => setKbOpen(false)} degrees={deg} onDegrees={toggleDeg} />
+              </div>
             </div>
+            {/* Утсан дээр гар доорх агуулгыг хаахгүйн тулд зай */}
+            {kbOpen && <div className="h-[22rem] lg:hidden" aria-hidden />}
           </Panel>
 
           {paramNames.length > 0 && (
@@ -714,23 +725,6 @@ export default function GraphTool() {
             )}
           </Panel>
 
-          <Panel title="Жишээ">
-            <div className="flex flex-wrap gap-1.5">
-              {EXAMPLES.map((src) => {
-                const a = analyze(src);
-                return (
-                  <button
-                    key={src}
-                    type="button"
-                    onClick={() => addLine(src)}
-                    className="min-h-10 rounded-lg border border-line bg-surface px-2.5 text-sm text-ink hover:border-brand-bright/50"
-                  >
-                    <MathText>{`$${"tex" in a ? a.tex : src}$`}</MathText>
-                  </button>
-                );
-              })}
-            </div>
-          </Panel>
 
           <Panel title="Харагдац">
             <div className="flex flex-wrap gap-1.5">

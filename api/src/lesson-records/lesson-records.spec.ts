@@ -86,11 +86,14 @@ function makePrisma() {
         ...create,
       })),
       findMany: jest.fn(async () => []),
+      update: jest.fn(async ({ where, data }: any) => ({ id: where.id, ...data })),
       delete: jest.fn(async () => ({})),
     },
     lessonRecordStudent: {
       deleteMany: jest.fn(async () => ({})),
       createMany: jest.fn(async () => ({})),
+      update: jest.fn(async () => ({})),
+      updateMany: jest.fn(async () => ({})),
       findMany: jest.fn(async () => []),
     },
     lessonNote: {
@@ -100,6 +103,7 @@ function makePrisma() {
         updatedAt: new Date(),
         ...create,
       })),
+      update: jest.fn(async ({ where, data }: any) => ({ id: where.id, ...data })),
       delete: jest.fn(async () => ({})),
       findMany: jest.fn(async () => []),
     },
@@ -299,19 +303,95 @@ describe('LessonRecordsService.confirm', () => {
       confirmedById: 'tp',
       leadTeacherId: 'lead',
       assistantTeacherId: null,
+      cancelledAt: null,
       students: [],
     });
     await expect(
       service.unconfirm({ userId: 'lead', role: Role.TEACHER }, 's1', DATE),
     ).rejects.toThrow();
     await service.unconfirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE);
-    expect(prisma.lessonRecord.delete).toHaveBeenCalledWith({ where: { id: 'r1' } });
     expect(prisma.auditLog.create.mock.calls[0][0].data.action).toBe('REVERSE');
+  });
+
+  it('батламж цуцлах ЗӨӨЛӨН: мөр, сурагчид устахгүй, cancelledAt бөглөгдөнө', async () => {
+    const { service, prisma } = makeService();
+    const row = {
+      id: 'r1',
+      topic: 'Логарифм',
+      confirmedById: 'tp',
+      cancelledAt: null,
+      students: [{ id: 'rs1', studentId: 'st1', attendance: 'PRESENT' }],
+    };
+    prisma.lessonRecord.findUnique.mockResolvedValue(row);
+    const out = await service.unconfirm(
+      { userId: 'tp', role: Role.TEACHER_PLUS },
+      's1',
+      DATE,
+    );
+    expect(out).toEqual({ scheduleId: 's1', date: DATE, confirmed: false });
+    expect(prisma.lessonRecord.delete).not.toHaveBeenCalled();
+    expect(prisma.lessonRecordStudent.deleteMany).not.toHaveBeenCalled();
+    const upd = prisma.lessonRecord.update.mock.calls[0][0];
+    expect(upd.where).toEqual({ id: 'r1' });
+    expect(upd.data.cancelledAt).toBeInstanceOf(Date);
+    expect(upd.data.cancelledById).toBe('tp');
+    // Аудитын before-д бүтэн мөр (сурагчидтай) үлдэнэ
+    const audit = prisma.auditLog.create.mock.calls[0][0].data;
+    expect(audit.before).toMatchObject({ id: 'r1', topic: 'Логарифм', students: [{ studentId: 'st1' }] });
+    expect(audit.after).toMatchObject({ cancelledById: 'tp' });
+
+    // Аль хэдийн цуцлагдсан бол дахин цуцлахгүй (404), юу ч бичихгүй
+    prisma.lessonRecord.findUnique.mockResolvedValue({ ...row, cancelledAt: new Date() });
+    await expect(
+      service.unconfirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE),
+    ).rejects.toThrow('олдсонгүй');
+    expect(prisma.lessonRecord.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('цуцлагдсан мөрийг дахин батлахад шинээр үүсгэхгүй — сэргээнэ (RECONFIRM, before аудитад)', async () => {
+    const { service, prisma } = makeService();
+    const cancelled = {
+      id: 'r1',
+      scheduleId: 's1',
+      topic: 'Хуучин сэдэв',
+      description: 'Хуучин тайлбар',
+      problemNumbersText: null,
+      cancelledAt: new Date('2026-10-06T02:00:00Z'),
+      cancelledById: 'tp',
+      students: [
+        { id: 'rs1', studentId: 'st1', studentName: 'Анар Б', attendance: 'ABSENT', removedAt: null },
+        { id: 'rsX', studentId: 'gone', studentName: 'Явсан', attendance: 'PRESENT', removedAt: null },
+      ],
+    };
+    prisma.lessonRecord.findUnique.mockResolvedValue(cancelled);
+    await service.confirm({ userId: 'adm', role: Role.ADMIN }, 's1', DATE);
+
+    const ups = prisma.lessonRecord.upsert.mock.calls[0][0];
+    expect(ups.where).toEqual({ scheduleId_date: { scheduleId: 's1', date: expect.any(Date) } });
+    expect(ups.update).toMatchObject({ cancelledAt: null, cancelledById: null, confirmedById: 'adm' });
+    // Сурагчдыг хэзээ ч устгахгүй
+    expect(prisma.lessonRecordStudent.deleteMany).not.toHaveBeenCalled();
+    // Шинэ сурагч (st2) нэмэгдэнэ, байсан st1-ийн ирц шинэчлэгдэнэ
+    expect(prisma.lessonRecordStudent.createMany.mock.calls[0][0].data.map((s: any) => s.studentId)).toEqual(['st2']);
+    expect(prisma.lessonRecordStudent.update).toHaveBeenCalledWith({
+      where: { id: 'rs1' },
+      data: { studentName: 'Анар Б', attendance: 'PRESENT', removedAt: null },
+    });
+    // snapshot-оос гарсан сурагч — removedAt
+    const gone = prisma.lessonRecordStudent.updateMany.mock.calls[0][0];
+    expect(gone.where).toEqual({ id: { in: ['rsX'] } });
+    expect(gone.data.removedAt).toBeInstanceOf(Date);
+
+    const audit = prisma.auditLog.create.mock.calls
+      .map((c: any) => c[0].data)
+      .find((d: any) => d.entity === 'LessonRecord');
+    expect(audit.action).toBe('RECONFIRM');
+    expect(audit.before).toMatchObject({ topic: 'Хуучин сэдэв', description: 'Хуучин тайлбар', students: [{ studentId: 'st1' }, { studentId: 'gone' }] });
   });
 });
 
 describe('Багшийн тайлбар', () => {
-  it('хоосон тайлбар мөр үүсгэхгүй, байсан бол устгана', async () => {
+  it('хоосон тайлбар мөр үүсгэхгүй; байсан бол ЗӨӨЛӨН хасна (устгахгүй, хуучин бичвэр аудитад)', async () => {
     const { service, prisma } = makeService();
     const r = await service.setNote(
       { userId: 't', role: Role.TEACHER },
@@ -321,11 +401,44 @@ describe('Багшийн тайлбар', () => {
     );
     expect(r.note).toBeNull();
     expect(prisma.lessonNote.upsert).not.toHaveBeenCalled();
+    expect(prisma.lessonNote.update).not.toHaveBeenCalled();
+    prisma.lessonNote.findUnique.mockResolvedValueOnce({ id: 'n1', body: 'Самбар эвдэрсэн', deletedAt: null });
+    const r2 = await service.setNote({ userId: 't', role: Role.TEACHER }, 's1', DATE, '');
+    expect(r2.note).toBeNull();
     expect(prisma.lessonNote.delete).not.toHaveBeenCalled();
-    prisma.lessonNote.findUnique.mockResolvedValueOnce({ id: 'n1', body: 'x' });
-    await service.setNote({ userId: 't', role: Role.TEACHER }, 's1', DATE, '');
-    expect(prisma.lessonNote.delete).toHaveBeenCalled();
     expect(prisma.lessonNote.upsert).not.toHaveBeenCalled();
+    const upd = prisma.lessonNote.update.mock.calls[0][0];
+    expect(upd.where).toEqual({ id: 'n1' });
+    expect(upd.data.deletedAt).toBeInstanceOf(Date);
+    expect(upd.data.deletedById).toBe('t');
+    expect(upd.data).not.toHaveProperty('body');
+    const audit = prisma.auditLog.create.mock.calls[0][0].data;
+    expect(audit).toMatchObject({ action: 'DELETE', entity: 'LessonNote', before: { body: 'Самбар эвдэрсэн' } });
+
+    // Аль хэдийн хасагдсаныг дахин хасахгүй
+    prisma.lessonNote.findUnique.mockResolvedValueOnce({ id: 'n1', body: 'x', deletedAt: new Date() });
+    await service.setNote({ userId: 't', role: Role.TEACHER }, 's1', DATE, '');
+    expect(prisma.lessonNote.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('хассан тайлбарт дахин бичихэд мөрийг сэргээнэ (deletedAt цэвэрлэнэ)', async () => {
+    const { service, prisma } = makeService();
+    prisma.lessonNote.findUnique.mockResolvedValueOnce({ id: 'n1', body: 'x', deletedAt: new Date() });
+    await service.setNote({ userId: 't', role: Role.TEACHER }, 's1', DATE, 'Шинэ');
+    expect(prisma.lessonNote.upsert.mock.calls[0][0].update).toMatchObject({
+      body: 'Шинэ',
+      deletedAt: null,
+      deletedById: null,
+    });
+  });
+
+  it('уншилт: цуцлагдсан батламж, хассан тайлбар хаана ч харагдахгүй', async () => {
+    const { service, prisma } = makeService();
+    await service.day({ userId: 'a', role: Role.ADMIN }, DATE);
+    expect(prisma.lessonRecord.findMany.mock.calls[0][0].where).toMatchObject({ cancelledAt: null });
+    expect(prisma.lessonNote.findMany.mock.calls[0][0].where).toMatchObject({ deletedAt: null });
+    await service.classroomHistory({ userId: 'a', role: Role.ADMIN }, 'c1');
+    expect(prisma.lessonRecord.findMany.mock.calls[1][0].where).toEqual({ classroomId: 'c1', cancelledAt: null });
   });
 
   it('бүх ажилтан бичнэ; сурагч/эцэг эх бичихгүй, өдрийн өгөгдлийг уншихгүй', async () => {
@@ -365,6 +478,8 @@ describe('Багшийн тайлбар', () => {
     const rows = await service.mine({ userId: 'st1', role: Role.STUDENT });
     expect(prisma.lessonRecordStudent.findMany.mock.calls[0][0].where).toEqual({
       studentId: 'st1',
+      removedAt: null,
+      record: { cancelledAt: null },
     });
     expect(Object.keys(rows[0]).sort()).toEqual(
       [
@@ -414,6 +529,8 @@ describe('Сурагчийн хичээлийн түүх (ажилтан)', () =
     );
     expect(prisma.lessonRecordStudent.findMany.mock.calls[0][0].where).toEqual({
       studentId: 'st1',
+      removedAt: null,
+      record: { cancelledAt: null },
     });
     expect(rows[0]).toMatchObject({ date: DATE, attendance: 'PRESENT', presentCount: 10 });
     expect(JSON.stringify(rows)).not.toMatch(/note|body/i);

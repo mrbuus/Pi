@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect, useImperativeHandle, useRef, useState, type ReactNode, type Ref } from "react";
-import { ArrowLeft, ArrowRight, Delete, Play } from "lucide-react";
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 import type { MathfieldElement } from "mathlive";
-import MathText from "@/components/MathText";
 import { cn } from "@/lib/cn";
 
 /* ============================================================================
  * Хэрэглэгдэхүүний НИЙТЛЭГ математик оруулга (Бодогч, дараа нь График).
  *
  *   <MathInput ref={h} value={latex} onChange={(latex, plain) => …} onEnter={…} />
- *   <MathKeyboard target={h} onSubmit={…} />
+ *   <MathKeyboard field={h} onEnter={…} />        (core/MathKeyboard.tsx)
  *
  * - MathLive (npm, CDN БИШ) зөвхөн клиентэд dynamic import. Бутархай нь жинхэнэ
  *   дээд/доод нүдтэй, курсор нүд хооронд шилжинэ.
  * - MathLive-ийн өөрийн виртуал гар УНТАРСАН; утасны системийн гар гарахгүй
  *   (inputmode=none) — оронд нь MathKeyboard. Компьютерт физик гараар бичнэ.
+ * - Хоосон нүд (бутархай, зэрэг, язгуур) тасархай хүрээтэй, курсор нүдэнд очно.
  * - Фонт: KaTeX-ийн фонт (MathText аль хэдийн ачаалдаг), дуу байхгүй.
  * - MathLive ачаалагдаагүй/алдаа гарвал энгийн бичвэрийн талбар (plain=true).
  * ========================================================================== */
@@ -85,14 +84,15 @@ const FIELD_CSS = `
   --primary: var(--brand);
   --smart-fence-color: var(--ink-dim);
   --smart-fence-opacity: 0.6;
-  --placeholder-color: var(--brand);
-  --placeholder-opacity: 0.55;
+  --placeholder-color: var(--ink-dim);
+  --placeholder-opacity: 0.7;
   --text-font-family: inherit;
 }
 .pi-math-input math-field:focus, .pi-math-input math-field:focus-within { outline: none; }
 .pi-math-input math-field::part(menu-toggle),
 .pi-math-input math-field::part(virtual-keyboard-toggle) { display: none; }
 .pi-math-input math-field::part(content) { padding: 2px 0; }
+.pi-math-input math-field::part(placeholder) { color: var(--ink-dim); }
 `;
 
 interface Props {
@@ -177,6 +177,10 @@ export default function MathInput({ ref, value, onChange, onEnter, onFocus, plac
           },
           { capture: true },
         );
+        // Утсан дээр системийн гар гарахгүй (MathLive өөрөө тавьдаг ч баталгаажуулна)
+        const sink = () => el.shadowRoot?.querySelector('[part="keyboard-sink"]')?.setAttribute("inputmode", "none");
+        sink();
+        el.addEventListener("focusin", sink);
         mfRef.current = mf;
         setState("ready");
       })
@@ -286,7 +290,7 @@ export default function MathInput({ ref, value, onChange, onEnter, onFocus, plac
       )}
       {state === "loading" && <div aria-hidden className="absolute inset-y-2 left-1 w-40 rounded-md skeleton" />}
       {state !== "loading" && empty && placeholder && (
-        <span aria-hidden className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-base text-ink-dim/70">
+        <span aria-hidden className="pointer-events-none absolute left-1.5 top-1/2 -translate-y-1/2 border-b-2 border-dotted border-ink-dim/45 pb-0.5 text-lg text-ink-dim/80">
           {placeholder}
         </span>
       )}
@@ -298,8 +302,20 @@ export default function MathInput({ ref, value, onChange, onEnter, onFocus, plac
 
 function plainOf(latex: string): string {
   return latex
+    .replace(/\\left\(#0\\right\)\^\{\\prime\}/g, "(")
+    .replace(/\\left\(#0\\right\)/g, "(")
+    .replace(/\\left\[#0\\right\]/g, "(")
+    .replace(/\\log_\{10\}\\left\(#0\\right\)/g, "lg(")
+    .replace(/\\log_\{2\}\\left\(#0\\right\)/g, "log_2(")
+    .replace(/\\(exp|sin\^\{2\}|cos\^\{2\})\\left\(#0\\right\)/g, (_, f: string) => `${f.replace(/\^\{2\}/, "^2")}(`)
+    .replace(/\\frac\{\\pi\}\{#\?\}/g, "pi/")
+    .replace(/#\?\\frac\{#\?\}\{#\?\}/g, "")
+    .replace(/#@!/g, "!")
+    .replace(/#@\\degree/g, "°")
+    .replace(/\\%/g, "/100")
+    .replace(/\\lfloor #0\\rfloor/g, "floor(")
     .replace(/\\frac\{#@\}\{#\?\}/g, "/")
-    .replace(/#@\^\{2\}/g, "^2")
+    .replace(/#@\^\{([23])\}/g, "^$1")
     .replace(/#@\^\{#\?\}/g, "^")
     .replace(/\\sqrt\[3\]\{#0\}/g, "cbrt(")
     .replace(/\\sqrt\[#\?\]\{#0\}/g, "root(")
@@ -329,192 +345,4 @@ function plainInsert(el: HTMLInputElement, text: string, set: (v: string) => voi
     el.focus();
     el.setSelectionRange(pos, pos);
   });
-}
-
-/* ============================================================================
- * Монгол математик гар (Photomath маяг): том товч, 3 хуудас
- * ========================================================================== */
-
-export interface KeyDef {
-  /** Товч дээрх LaTeX эсвэл lucide дүрс */
-  label: string | ReactNode;
-  /** Дэлгэц уншигчид */
-  aria: string;
-  /** Оруулах LaTeX (#0, #?, #@) */
-  insert?: string;
-  /** Гараар бичсэн мэт (хаалт) */
-  typed?: string;
-  /** MathLive тушаал */
-  cmd?: string;
-  /** Тод өнгөтэй (үйлдлийн тэмдэг) */
-  tone?: "op" | "fn";
-}
-
-const k = (label: string, insert: string, aria: string, tone?: KeyDef["tone"]): KeyDef => ({ label, insert, aria, tone });
-const t = (label: string, typed: string, aria: string, tone?: KeyDef["tone"]): KeyDef => ({ label, typed, aria, tone });
-
-export const KEY_PAGES: { id: string; label: string; keys: KeyDef[] }[] = [
-  {
-    id: "123",
-    label: "123",
-    keys: [
-      k("x", "x", "x"), k("x^{2}", "#@^{2}", "квадрат"), k("x^{n}", "#@^{#?}", "зэрэг"), k("7", "7", "7"), k("8", "8", "8"), k("9", "9", "9"), k("\\div", "\\div", "хуваах", "op"),
-      t("(", "(", "нээх хаалт"), t(")", ")", "хаах хаалт"), k("\\frac{\\square}{\\square}", "\\frac{#@}{#?}", "бутархай"), k("4", "4", "4"), k("5", "5", "5"), k("6", "6", "6"), k("\\times", "\\times", "үржих", "op"),
-      k("\\sqrt{\\square}", "\\sqrt{#0}", "квадрат язгуур"), k("|x|", "\\left|#0\\right|", "модуль"), k("\\pi", "\\pi", "пи"), k("1", "1", "1"), k("2", "2", "2"), k("3", "3", "3"), k("-", "-", "хасах", "op"),
-      k("y", "y", "y"), k(",", ",", "таслал"), k(";", ";", "систем: тэгшитгэл тусгаарлах"), k("0", "0", "0"), k(".", ".", "аравтын цэг"), k("=", "=", "тэнцүү", "op"), k("+", "+", "нэмэх", "op"),
-    ],
-  },
-  {
-    id: "fx",
-    label: "f(x)",
-    keys: [
-      k("\\sin", "\\sin\\left(#0\\right)", "синус", "fn"), k("\\cos", "\\cos\\left(#0\\right)", "косинус", "fn"), k("\\operatorname{tg}", "\\operatorname{tg}\\left(#0\\right)", "тангенс", "fn"), k("\\operatorname{ctg}", "\\operatorname{ctg}\\left(#0\\right)", "котангенс", "fn"),
-      k("\\log_{\\square}", "\\log_{#?}\\left(#0\\right)", "логарифм", "fn"), k("\\ln", "\\ln\\left(#0\\right)", "натурал логарифм", "fn"), k("\\lg", "\\lg\\left(#0\\right)", "аравтын логарифм", "fn"),
-      k("\\arcsin", "\\arcsin\\left(#0\\right)", "арксинус", "fn"), k("\\arccos", "\\arccos\\left(#0\\right)", "арккосинус", "fn"), k("\\operatorname{arctg}", "\\operatorname{arctg}\\left(#0\\right)", "арктангенс", "fn"),
-      k("\\sqrt[n]{\\square}", "\\sqrt[#?]{#0}", "n зэргийн язгуур"), k("\\sqrt[3]{\\square}", "\\sqrt[3]{#0}", "куб язгуур"), k("e", "e", "e тоо"), k("n!", "!", "факториал"),
-      k("<", "<", "бага", "op"), k(">", ">", "их", "op"), k("\\le", "\\le", "бага буюу тэнцүү", "op"), k("\\ge", "\\ge", "их буюу тэнцүү", "op"), k("^{\\circ}", "\\degree", "градус"), k("\\infty", "\\infty", "хязгааргүй"), k("C_{n}^{k}", "\\mathrm{C}_{#?}^{#?}", "хослол"),
-      k("\\tfrac{d}{dx}", "\\frac{\\mathrm{d}}{\\mathrm{d}x}\\left(#0\\right)", "уламжлал", "fn"), k("\\textstyle\\int", "\\int #0\\,\\mathrm{d}x", "интеграл", "fn"), k("\\textstyle\\int_{a}^{b}", "\\int_{#?}^{#?} #0\\,\\mathrm{d}x", "тодорхой интеграл", "fn"),
-      k("\\lim", "\\lim_{x\\to #?} #0", "хязгаар", "fn"), k("y=", "y=", "функц y тэнцүү"), k("x", "x", "x"), k("y", "y", "y"),
-    ],
-  },
-  {
-    id: "abc",
-    label: "abc",
-    keys: [
-      ..."abcdkmn".split("").map((c) => k(c, c, c)),
-      ..."pqrstuv".split("").map((c) => k(c, c, c)),
-      k("w", "w", "w"), k("x", "x", "x"), k("y", "y", "y"), k("z", "z", "z"), t("(", "(", "нээх хаалт"), t(")", ")", "хаах хаалт"), k("=", "=", "тэнцүү", "op"),
-      k("+", "+", "нэмэх", "op"), k("-", "-", "хасах", "op"), k("\\times", "\\times", "үржих", "op"), k("\\div", "\\div", "хуваах", "op"), k("x^{n}", "#@^{#?}", "зэрэг"), k(",", ",", "таслал"), k(";", ";", "систем: тэгшитгэл тусгаарлах"),
-    ],
-  },
-];
-
-const KEY_BASE =
-  "flex min-h-12 min-w-0 select-none items-center justify-center rounded-xl border text-[17px] text-ink transition-colors duration-[var(--dur-micro)] [touch-action:manipulation] active:scale-[0.97] sm:min-h-[52px]";
-
-/** Дарж байх хугацаанд давтагдах товч (⌫, ←, →) */
-function RepeatButton({ onAct, aria, children }: { onAct: () => void; aria: string; children: ReactNode }) {
-  const timer = useRef<{ t?: ReturnType<typeof setTimeout>; i?: ReturnType<typeof setInterval> }>({});
-  const stop = () => {
-    clearTimeout(timer.current.t);
-    clearInterval(timer.current.i);
-  };
-  useEffect(() => stop, []);
-  return (
-    <button
-      type="button"
-      aria-label={aria}
-      title={aria}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        onAct();
-        stop();
-        timer.current.t = setTimeout(() => {
-          timer.current.i = setInterval(onAct, 70);
-        }, 420);
-      }}
-      onPointerUp={stop}
-      onPointerLeave={stop}
-      onPointerCancel={stop}
-      onClick={(e) => {
-        if (e.detail === 0) onAct(); // гарнаас (Enter/Space)
-      }}
-      className={cn(KEY_BASE, "h-11 w-12 border-transparent text-ink-dim hover:bg-ink/5 hover:text-ink sm:h-11")}
-    >
-      {children}
-    </button>
-  );
-}
-
-export function MathKeyboard({
-  target,
-  onSubmit,
-  submitLabel = "Бодох",
-  submitDisabled,
-  className,
-}: {
-  target: { current: MathInputHandle | null };
-  onSubmit?: () => void;
-  submitLabel?: string;
-  submitDisabled?: boolean;
-  className?: string;
-}) {
-  const [page, setPage] = useState(0);
-  const press = (key: KeyDef) => {
-    const h = target.current;
-    if (!h) return;
-    if (key.cmd) h.command(key.cmd);
-    else if (key.typed) h.typed(key.typed);
-    else if (key.insert) h.insert(key.insert);
-  };
-  const keys = KEY_PAGES[page].keys;
-  return (
-    <div className={cn("space-y-2", className)} role="group" aria-label="Математик гар">
-      <div className="flex items-center gap-1">
-        <div role="tablist" aria-label="Гарын хуудас" className="flex min-w-0 flex-1 gap-1">
-          {KEY_PAGES.map((p, i) => (
-            <button
-              key={p.id}
-              type="button"
-              role="tab"
-              aria-selected={i === page}
-              onPointerDown={(e) => e.preventDefault()}
-              onClick={() => setPage(i)}
-              className={cn(
-                "min-h-11 min-w-0 flex-1 rounded-xl px-2 text-sm font-semibold transition-colors duration-[var(--dur-micro)] sm:flex-none sm:px-4",
-                i === page ? "bg-brand-bright text-on-brand" : "text-ink-dim hover:bg-ink/5 hover:text-ink",
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-        <RepeatButton aria="Курсорыг зүүн тийш" onAct={() => target.current?.command("moveToPreviousChar")}>
-          <ArrowLeft className="h-5 w-5" aria-hidden />
-        </RepeatButton>
-        <RepeatButton aria="Курсорыг баруун тийш" onAct={() => target.current?.command("moveToNextChar")}>
-          <ArrowRight className="h-5 w-5" aria-hidden />
-        </RepeatButton>
-        <RepeatButton aria="Арилгах" onAct={() => target.current?.command("deleteBackward")}>
-          <Delete className="h-5 w-5" aria-hidden />
-        </RepeatButton>
-      </div>
-      <div role="tabpanel" className="grid grid-cols-7 gap-1.5">
-        {keys.map((key, i) => (
-          <button
-            key={`${page}-${i}`}
-            type="button"
-            aria-label={key.aria}
-            title={key.aria}
-            onPointerDown={(e) => e.preventDefault()}
-            onClick={() => press(key)}
-            className={cn(
-              KEY_BASE,
-              key.tone === "op"
-                ? "border-line bg-brand-tint/60 hover:bg-brand-tint"
-                : key.tone === "fn"
-                  ? "border-line bg-bg text-[15px] hover:bg-ink/5"
-                  : /^\d$|^\.$/.test(String(key.label))
-                    ? "border-line bg-surface text-lg font-medium hover:bg-ink/5"
-                    : "border-line bg-bg hover:bg-ink/5",
-            )}
-          >
-            {typeof key.label === "string" ? <MathText>{`$${key.label}$`}</MathText> : key.label}
-          </button>
-        ))}
-      </div>
-      {onSubmit && (
-        <button
-          type="button"
-          onPointerDown={(e) => e.preventDefault()}
-          onClick={onSubmit}
-          disabled={submitDisabled}
-          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-bright text-base font-semibold text-on-brand transition-opacity duration-[var(--dur-micro)] hover:opacity-95 disabled:opacity-50"
-        >
-          <Play className="h-4 w-4" aria-hidden />
-          {submitLabel}
-        </button>
-      )}
-    </div>
-  );
 }

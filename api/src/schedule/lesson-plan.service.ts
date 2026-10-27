@@ -381,10 +381,10 @@ export class LessonPlanService {
           })
         : none<Prisma.LessonTopicGetPayload<object>>(),
       this.prisma.lessonNote.findMany({
-        where: { date, scheduleId: { in: scheduleIds } },
+        where: { date, scheduleId: { in: scheduleIds }, deletedAt: null },
       }),
       this.prisma.lessonRecord.findMany({
-        where: { date, scheduleId: { in: scheduleIds } },
+        where: { date, scheduleId: { in: scheduleIds }, cancelledAt: null },
       }),
       this.prisma.classDismissal.findMany({
         where: { date, classroomId: { in: classIds } },

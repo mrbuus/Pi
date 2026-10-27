@@ -2568,6 +2568,11 @@ model LessonRecord {
   confirmedByName      String
   confirmedAt          DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  // «Батламж цуцлах» ЗӨӨЛӨН (эзэн 2026-10-23 дүрэм): мөр, сурагчид DB-д үлдэнэ;
+  // cancelledAt-тэй мөр ямар ч уншилтад орохгүй. Дахин батлахад энэ мөрийг
+  // сэргээнэ (@@unique [scheduleId, date]), өмнөх утга AuditLog-д.
+  cancelledAt          DateTime?
+  cancelledById        String?
 
   students LessonRecordStudent[]
 
@@ -2586,21 +2591,26 @@ model LessonRecordStudent {
   studentId   String
   studentName String
   attendance  String?
+  // Дахин батлахад snapshot-оос гарсан сурагч — устгахгүй, removedAt бөглөнө
+  removedAt   DateTime?
 
   @@unique([recordId, studentId])
   @@index([studentId])
 }
 
 // Багшийн нэмэлт тайлбар — ЗӨВХӨН ажилтанд. Сурагч/эцэг эхэд хэзээ ч
-// буцаахгүй (lesson-records модуль л уншина). Хоосон бол мөр байхгүй.
+// буцаахгүй (lesson-records модуль л уншина). Хоосолбол мөр устахгүй —
+// deletedAt бөглөгдөж (body хэвээр), уншилтаас хасагдана.
 model LessonNote {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   scheduleId    String
-  date          DateTime @db.Date
-  body          String   @db.VarChar(500)
+  date          DateTime  @db.Date
+  body          String    @db.VarChar(500)
   updatedById   String
   updatedByName String
-  updatedAt     DateTime @updatedAt
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  deletedById   String?
 
   @@unique([scheduleId, date])
 }
