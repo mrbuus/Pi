@@ -68,3 +68,6 @@ infra/aws/**/.env
 # Google service account түлхүүр (шийт унших робот)
 .secrets/
 **/.secrets/
+
+# Нэр, утас, дүн агуулсан тайлан (PII) — git-д ХЭЗЭЭ Ч бүү оруул
+api/prisma/reports/
