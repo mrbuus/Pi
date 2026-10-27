@@ -491,9 +491,10 @@ html.lenis,html.lenis body{height:auto}
 .sied .legal{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px 20px;margin-top:22px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim)}
 @media (min-width:900px){.sied .foot .ask{grid-template-columns:1fr auto;align-items:end}.sied .foot .cols{grid-template-columns:1.4fr 1fr 1fr 1fr}.sied .foot .cols .br{grid-column:auto}}
 .sied .cur{position:fixed;left:0;top:0;z-index:100;pointer-events:none;display:none}
-.sied .cur i{position:absolute;left:-21px;top:-21px;width:42px;height:42px;border:1px solid rgba(255,255,255,.55);border-radius:50%;transition:transform .25s,border-color .25s;mix-blend-mode:difference}
-.sied .cur b{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:#fff;mix-blend-mode:difference}
-.sied .cur.big i{transform:scale(1.6);border-color:var(--accent)}
+.sied .cur{mix-blend-mode:difference;will-change:transform}
+.sied .cur svg{position:absolute;left:-24px;top:-24px;width:48px;height:48px;overflow:visible;fill:none;stroke:#fff;stroke-width:1.1;stroke-linecap:round;opacity:.8;transition:transform .2s cubic-bezier(.2,.7,.2,1)}
+.sied .cur b{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:#fff}
+.sied .cur.big svg{transform:rotate(45deg) scale(1.35)}
 @media (pointer:fine){.sied .cur{display:block}}
 @media (prefers-reduced-motion:reduce){.sied .mq{animation:none}.sied .fly h1 .w{transition:none}}
 

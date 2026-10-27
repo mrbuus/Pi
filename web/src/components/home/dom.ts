@@ -313,7 +313,7 @@ const tickClock=()=>{ clockEl.textContent='Улаанбаатар, '+new Date().
 tickClock(); const clockTimer=setInterval(tickClock,15000);
 
 const cur=$('#cur'); let cx=innerWidth/2, cy=innerHeight/2, tx=cx, ty=cy;
-on(window,'pointermove',e=>{ tx=e.clientX; ty=e.clientY; S.mx=e.clientX/innerWidth-.5; S.my=e.clientY/innerHeight-.5; cur.classList.toggle('big',!!e.target.closest('a,button,.chip,.tv.side,.tag')); },{passive:true});
+on(window,'pointermove',e=>{ tx=e.clientX; ty=e.clientY; cur.style.transform=`translate3d(${tx}px,${ty}px,0)`; S.mx=e.clientX/innerWidth-.5; S.my=e.clientY/innerHeight-.5; cur.classList.toggle('big',!!e.target.closest('a,button,.chip,.tv.side,.tag')); },{passive:true});
 
 const EL={lab:$('#labView'),hero:$('#hero'),idea:$('#idea'),ring:$('#books'),slide:$('#slide'),glb:$('#branches'),notew:$('#notew'),wmk:wmk};
 const heroView=$('#heroView'), shade=$('#heroShade'), fly=$('#fly'), b1=$('#b1'), b2=$('#b2'), out=$('#out'), tag=$('#tag'), b2li=$$('#b2 li');
@@ -345,7 +345,6 @@ function frame(now){
   S.vel=lenis? lenis.velocity : 0;
   const R={}; for(const k in EL) R[k]=EL[k].getBoundingClientRect();
 
-  cx+=(tx-cx)*.2; cy+=(ty-cy)*.2; cur.style.transform=`translate3d(${cx}px,${cy}px,0)`;
   const past=R.hero.bottom<vh*.5; root.classList.toggle('past',past); logoTone();
 
   /* 1. HERO */
