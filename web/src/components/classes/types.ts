@@ -182,8 +182,13 @@ export interface ClassDashboard {
       topic: string | null;
       position: number | null;
       total: number | null;
-      source: "MANUAL" | "LESSON_TOPIC" | "EXAM" | null;
+      source: "MANUAL" | "LESSON_TOPIC" | "COVERED" | "EXAM" | null;
     } | null;
+    /** Номын явц: батлагдсан хичээл (огноотой) + өмнө үзсэн (огноогүй) — эзэн 2026-10-27 */
+    coverage?: {
+      pastTests: number;
+      books: { code: string; title: string; totalChapters: number; coveredChapters: number; pastChapters: number }[];
+    };
     confirmedLessons: number;
     recentLessons: {
       id: string;
@@ -336,4 +341,28 @@ export interface ClassChecksResponse {
   former: CheckPerson[];
   checks: ClassCheck[];
   archived: ClassCheck[];
+}
+
+/** GET /class-dashboard/classes/:id/coverage — «Өмнө үзсэн сэдэв» сонгогч (эзэн 2026-10-27) */
+export interface CoverageTest {
+  id: string;
+  title: string;
+  variant: string | null;
+  /** Өмнө үзсэн (огноогүй) гэж тэмдэглэсэн */
+  past: boolean;
+  /** Өдрийн хичээлээр батлагдсан огноо */
+  lessonDates: string[];
+}
+export interface CoverageBook {
+  id: string;
+  code: string;
+  title: string;
+  totalChapters: number;
+  coveredChapters: number;
+  pastChapters: number;
+  chapters: { id: string; order: number; title: string; tests: CoverageTest[] }[];
+}
+export interface CoverageTree {
+  classroomId: string;
+  books: CoverageBook[];
 }

@@ -133,6 +133,10 @@ export class LessonPlanService {
     return [...meta.values()].filter((t) => t.available);
   }
 
+  /**
+   * `customTitle` — багшийн гараар бичсэн сэдэв (тестүүдийн нэрээс автоматаар
+   * үүссэн гарчгаас ялгаатай бол), «Орох тест» талбарт урьдчилан бөглөнө.
+   */
   private presentPlan(
     topic: {
       testIds: string[];
@@ -141,13 +145,16 @@ export class LessonPlanService {
       title: string;
       updatedAt: Date;
     } | null,
+    meta: Map<string, TestMeta> = new Map(),
   ) {
     if (!topic) return null;
+    const auto = planTitle(topic.testIds.map((id) => meta.get(id)?.short ?? ''));
     return {
       testIds: topic.testIds,
       dismissMode: (topic.dismissMode as DismissMode | null) ?? null,
       photoStudentId: topic.photoStudentId,
       title: topic.title || null,
+      customTitle: topic.title && topic.title !== auto ? topic.title : null,
       updatedAt: topic.updatedAt,
     };
   }
@@ -192,12 +199,13 @@ export class LessonPlanService {
         select: { photoStudentId: true, date: true },
       }),
     ]);
+    const meta = await this.testsMeta(topic?.testIds ?? []);
     return {
       scheduleId,
       classroomId: schedule.classroomId,
       date: key,
       occurrenceDate,
-      plan: this.presentPlan(topic),
+      plan: this.presentPlan(topic, meta),
       roster,
       photoSuggestion: suggestPhotoStudent(
         roster.map((r) => r.id),
@@ -218,6 +226,7 @@ export class LessonPlanService {
       testIds: string[];
       dismissMode?: DismissMode | null;
       photoStudentId?: string | null;
+      title?: string | null;
     },
   ) {
     if (!PLANNERS.includes(actor.role))
@@ -261,11 +270,20 @@ export class LessonPlanService {
     const previousAuto = planTitle(
       (existing?.testIds ?? []).map((id) => meta.get(id)?.short ?? ''),
     );
-    const manualTitle =
-      existing?.title && existing.title !== previousAuto ? existing.title : null;
-    const title = sorted.length
-      ? planTitle(sorted.map((t) => t.short))
-      : (manualTitle ?? '');
+    // «Орох тест» чөлөөт бичвэр (эзэн 2026-10-27): өгсөн бол түүнийг л мөрдөнө
+    const explicit = dto.title !== undefined;
+    const typed = explicit ? (dto.title ?? '').replace(/\s+/g, ' ').trim().slice(0, 200) : '';
+    const manualTitle = explicit
+      ? typed || null
+      : existing?.title && existing.title !== previousAuto
+        ? existing.title
+        : null;
+    const title =
+      explicit && manualTitle
+        ? manualTitle
+        : sorted.length
+          ? planTitle(sorted.map((t) => t.short))
+          : (manualTitle ?? '');
     const testIds = sorted.map((t) => t.testId);
 
     if (!testIds.length && !dismissMode && !photoStudentId && !manualTitle) {
@@ -296,7 +314,7 @@ export class LessonPlanService {
       scheduleId,
       date: key,
       occurrenceDate,
-      plan: this.presentPlan(row),
+      plan: this.presentPlan(row, meta),
     };
   }
 
@@ -545,6 +563,11 @@ export class LessonPlanService {
                 presentCount: record.presentCount,
                 absentCount: record.absentCount,
                 attendanceMarked: record.attendanceMarked,
+                // Батлахад бичсэн сэдэв, тайлбар, бодлогын дугаар (эзэн 2026-10-27)
+                topic: record.topic,
+                description: record.description,
+                problemNumbersText: record.problemNumbersText,
+                problemNumbers: record.problemNumbers,
               }
             : null,
           dismissalAt:

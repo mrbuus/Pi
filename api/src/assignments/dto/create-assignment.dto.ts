@@ -41,4 +41,10 @@ export class CreateAssignmentDto {
   @IsOptional()
   @IsDateString()
   dueDate?: string;
+
+  /** Даалгавар өгсөн хичээлийн өдөр (YYYY-MM-DD). Хичээлгүй өдөр бол өмнөх хичээл рүү шилжинэ */
+  @ApiPropertyOptional({ type: String, example: '2026-10-26' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  lessonDate?: string;
 }

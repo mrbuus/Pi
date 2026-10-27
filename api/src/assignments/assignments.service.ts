@@ -15,6 +15,11 @@ import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { ReviewAction, ReviewDto } from './dto/review.dto';
 import { SubmitDto } from './dto/submit.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
+import {
+  resolveAssignmentLessonDate,
+  withHomeworkLessons,
+} from './homework-lesson';
+import { ubKeyOf } from './homework-lesson.logic';
 
 @Injectable()
 export class AssignmentsService {
@@ -28,6 +33,11 @@ export class AssignmentsService {
 
   // parseDateOnly plain Error шидвэл HTTP 500 болчихно — энд эргүүлж 400
   // болгож, хэрэглэгчид ойлгомжтой монгол мессеж өгнө.
+  /** YYYY-MM-DD шалгана (буруу бол 400) */
+  private lessonKey(value: string): string {
+    return this.parseDate(value).toISOString().slice(0, 10);
+  }
+
   private parseDate(value: string): Date {
     try {
       return parseDateOnly(value);
@@ -103,9 +113,16 @@ export class AssignmentsService {
   ) {
     await this.assertClassAccess(classroomId, userId, role);
     await this.assertTeacherAttachments(dto.imageKeys ?? [], userId);
-    const assignment = await this.prisma.assignment.create({
+    // Даалгавар өгсөн хичээл (эзэн 2026-10-27): сурагч сэдэв сонгохгүй
+    const lessonDate = await resolveAssignmentLessonDate(
+      this.prisma,
+      classroomId,
+      dto.lessonDate ? this.lessonKey(dto.lessonDate) : ubKeyOf(new Date()),
+    );
+    const created = await this.prisma.assignment.create({
       data: {
         classroomId,
+        lessonDate: parseDateOnly(lessonDate),
         title: dto.title,
         description: dto.description,
         type: dto.type,
@@ -114,6 +131,7 @@ export class AssignmentsService {
         createdById: userId,
       },
     });
+    const [assignment] = await withHomeworkLessons(this.prisma, [created]);
 
     try {
       const enrollments = await this.prisma.enrollment.findMany({
@@ -130,7 +148,7 @@ export class AssignmentsService {
         {
           kind: 'HOMEWORK',
           title: 'Шинэ гэрийн даалгавар',
-          body: assignment.title,
+          body: assignment.lesson.label,
           link: '/app/student',
         },
       );
@@ -162,7 +180,7 @@ export class AssignmentsService {
         '"from" огноо "to" огнооноос өмнө байх ёстой',
       );
     }
-    return this.prisma.assignment.findMany({
+    const list = await this.prisma.assignment.findMany({
       where: {
         classroomId,
         deletedAt: null,
@@ -184,6 +202,7 @@ export class AssignmentsService {
         },
       },
     });
+    return withHomeworkLessons(this.prisma, list);
   }
 
   // 🎯 Сурагч тус бүрийн ХИЙГЭЭГҮЙ (submission мөр байхгүй эсвэл NOT_DONE)
@@ -283,9 +302,18 @@ export class AssignmentsService {
         assignment.imageKeys,
       );
 
-    const updated = await this.prisma.assignment.update({
+    const lessonDate =
+      dto.lessonDate !== undefined
+        ? await resolveAssignmentLessonDate(
+            this.prisma,
+            assignment.classroomId,
+            this.lessonKey(dto.lessonDate),
+          )
+        : undefined;
+    const saved = await this.prisma.assignment.update({
       where: { id },
       data: {
+        ...(lessonDate ? { lessonDate: parseDateOnly(lessonDate) } : {}),
         ...(dto.title !== undefined ? { title: dto.title } : {}),
         ...(dto.description !== undefined
           ? { description: dto.description }
@@ -305,9 +333,10 @@ export class AssignmentsService {
       entity: 'Assignment',
       entityId: id,
       before: assignment,
-      after: updated,
+      after: saved,
     });
 
+    const [updated] = await withHomeworkLessons(this.prisma, [saved]);
     return updated;
   }
 
@@ -394,7 +423,8 @@ export class AssignmentsService {
         },
       },
     });
-    return assignments.map(({ submissions, ...a }) => {
+    const labelled = await withHomeworkLessons(this.prisma, assignments);
+    return labelled.map(({ submissions, ...a }) => {
       const enrollment = enrollments.find(
         (e) =>
           e.classroomId === a.classroomId &&

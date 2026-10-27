@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -12,7 +13,12 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
-import { AddBehaviorFlagDto, RemoveBehaviorFlagDto } from './class-dashboard.dto';
+import { ClassCoverageService } from './class-coverage.service';
+import {
+  AddBehaviorFlagDto,
+  RemoveBehaviorFlagDto,
+  SavePastCoverageDto,
+} from './class-dashboard.dto';
 import { ClassDashboardService } from './class-dashboard.service';
 
 interface AuthedRequest {
@@ -28,7 +34,10 @@ interface AuthedRequest {
 @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
 @Controller('class-dashboard')
 export class ClassDashboardController {
-  constructor(private readonly dashboard: ClassDashboardService) {}
+  constructor(
+    private readonly dashboard: ClassDashboardService,
+    private readonly coverage: ClassCoverageService,
+  ) {}
 
   @Get()
   list(@Req() req: AuthedRequest) {
@@ -48,6 +57,28 @@ export class ClassDashboardController {
     @Query('month') month?: string,
   ) {
     return this.dashboard.month(classroomId, month, req.user.userId);
+  }
+
+  /**
+   * «Сэдэв, хөтөлбөр» — ангийн үзсэн сэдвийн мод (эзэн 2026-10-27): ном → бүлэг →
+   * тест; тест бүр «өмнө үзсэн» (огноогүй) ба батлагдсан хичээлийн огноотой.
+   */
+  @Get('classes/:classroomId/coverage')
+  coverageTree(
+    @Req() req: AuthedRequest,
+    @Param('classroomId') classroomId: string,
+  ) {
+    return this.coverage.tree(classroomId, req.user.userId);
+  }
+
+  /** «Өмнө үзсэн сэдэв тэмдэглэх» — бүтэн багцыг нэг удаад хадгална (хасах нь зөөлөн) */
+  @Put('classes/:classroomId/coverage/past')
+  savePastCoverage(
+    @Req() req: AuthedRequest,
+    @Param('classroomId') classroomId: string,
+    @Body() dto: SavePastCoverageDto,
+  ) {
+    return this.coverage.savePast(classroomId, dto.testIds, req.user.userId);
   }
 
   @Get('students/:studentId/competency')

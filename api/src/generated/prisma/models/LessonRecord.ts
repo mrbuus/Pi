@@ -30,6 +30,7 @@ export type LessonRecordAvgAggregateOutputType = {
   startMinute: number | null
   endMinute: number | null
   testCount: number | null
+  problemNumbers: number | null
   enrolledCount: number | null
   presentCount: number | null
   absentCount: number | null
@@ -40,6 +41,7 @@ export type LessonRecordSumAggregateOutputType = {
   startMinute: number | null
   endMinute: number | null
   testCount: number | null
+  problemNumbers: number[]
   enrolledCount: number | null
   presentCount: number | null
   absentCount: number | null
@@ -61,6 +63,8 @@ export type LessonRecordMinAggregateOutputType = {
   assistantTeacherId: string | null
   assistantTeacherName: string | null
   testCount: number | null
+  description: string | null
+  problemNumbersText: string | null
   enrolledCount: number | null
   presentCount: number | null
   absentCount: number | null
@@ -86,6 +90,8 @@ export type LessonRecordMaxAggregateOutputType = {
   assistantTeacherId: string | null
   assistantTeacherName: string | null
   testCount: number | null
+  description: string | null
+  problemNumbersText: string | null
   enrolledCount: number | null
   presentCount: number | null
   absentCount: number | null
@@ -112,6 +118,9 @@ export type LessonRecordCountAggregateOutputType = {
   assistantTeacherName: number
   tests: number
   testCount: number
+  description: number
+  problemNumbersText: number
+  problemNumbers: number
   enrolledCount: number
   presentCount: number
   absentCount: number
@@ -128,6 +137,7 @@ export type LessonRecordAvgAggregateInputType = {
   startMinute?: true
   endMinute?: true
   testCount?: true
+  problemNumbers?: true
   enrolledCount?: true
   presentCount?: true
   absentCount?: true
@@ -138,6 +148,7 @@ export type LessonRecordSumAggregateInputType = {
   startMinute?: true
   endMinute?: true
   testCount?: true
+  problemNumbers?: true
   enrolledCount?: true
   presentCount?: true
   absentCount?: true
@@ -159,6 +170,8 @@ export type LessonRecordMinAggregateInputType = {
   assistantTeacherId?: true
   assistantTeacherName?: true
   testCount?: true
+  description?: true
+  problemNumbersText?: true
   enrolledCount?: true
   presentCount?: true
   absentCount?: true
@@ -184,6 +197,8 @@ export type LessonRecordMaxAggregateInputType = {
   assistantTeacherId?: true
   assistantTeacherName?: true
   testCount?: true
+  description?: true
+  problemNumbersText?: true
   enrolledCount?: true
   presentCount?: true
   absentCount?: true
@@ -210,6 +225,9 @@ export type LessonRecordCountAggregateInputType = {
   assistantTeacherName?: true
   tests?: true
   testCount?: true
+  description?: true
+  problemNumbersText?: true
+  problemNumbers?: true
   enrolledCount?: true
   presentCount?: true
   absentCount?: true
@@ -323,6 +341,9 @@ export type LessonRecordGroupByOutputType = {
   assistantTeacherName: string | null
   tests: runtime.JsonValue
   testCount: number
+  description: string | null
+  problemNumbersText: string | null
+  problemNumbers: number[]
   enrolledCount: number
   presentCount: number
   absentCount: number
@@ -372,6 +393,9 @@ export type LessonRecordWhereInput = {
   assistantTeacherName?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
   tests?: Prisma.JsonFilter<"LessonRecord">
   testCount?: Prisma.IntFilter<"LessonRecord"> | number
+  description?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
+  problemNumbersText?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
+  problemNumbers?: Prisma.IntNullableListFilter<"LessonRecord">
   enrolledCount?: Prisma.IntFilter<"LessonRecord"> | number
   presentCount?: Prisma.IntFilter<"LessonRecord"> | number
   absentCount?: Prisma.IntFilter<"LessonRecord"> | number
@@ -399,6 +423,9 @@ export type LessonRecordOrderByWithRelationInput = {
   assistantTeacherName?: Prisma.SortOrderInput | Prisma.SortOrder
   tests?: Prisma.SortOrder
   testCount?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  problemNumbersText?: Prisma.SortOrderInput | Prisma.SortOrder
+  problemNumbers?: Prisma.SortOrder
   enrolledCount?: Prisma.SortOrder
   presentCount?: Prisma.SortOrder
   absentCount?: Prisma.SortOrder
@@ -430,6 +457,9 @@ export type LessonRecordWhereUniqueInput = Prisma.AtLeast<{
   assistantTeacherName?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
   tests?: Prisma.JsonFilter<"LessonRecord">
   testCount?: Prisma.IntFilter<"LessonRecord"> | number
+  description?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
+  problemNumbersText?: Prisma.StringNullableFilter<"LessonRecord"> | string | null
+  problemNumbers?: Prisma.IntNullableListFilter<"LessonRecord">
   enrolledCount?: Prisma.IntFilter<"LessonRecord"> | number
   presentCount?: Prisma.IntFilter<"LessonRecord"> | number
   absentCount?: Prisma.IntFilter<"LessonRecord"> | number
@@ -457,6 +487,9 @@ export type LessonRecordOrderByWithAggregationInput = {
   assistantTeacherName?: Prisma.SortOrderInput | Prisma.SortOrder
   tests?: Prisma.SortOrder
   testCount?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  problemNumbersText?: Prisma.SortOrderInput | Prisma.SortOrder
+  problemNumbers?: Prisma.SortOrder
   enrolledCount?: Prisma.SortOrder
   presentCount?: Prisma.SortOrder
   absentCount?: Prisma.SortOrder
@@ -491,6 +524,9 @@ export type LessonRecordScalarWhereWithAggregatesInput = {
   assistantTeacherName?: Prisma.StringNullableWithAggregatesFilter<"LessonRecord"> | string | null
   tests?: Prisma.JsonWithAggregatesFilter<"LessonRecord">
   testCount?: Prisma.IntWithAggregatesFilter<"LessonRecord"> | number
+  description?: Prisma.StringNullableWithAggregatesFilter<"LessonRecord"> | string | null
+  problemNumbersText?: Prisma.StringNullableWithAggregatesFilter<"LessonRecord"> | string | null
+  problemNumbers?: Prisma.IntNullableListFilter<"LessonRecord">
   enrolledCount?: Prisma.IntWithAggregatesFilter<"LessonRecord"> | number
   presentCount?: Prisma.IntWithAggregatesFilter<"LessonRecord"> | number
   absentCount?: Prisma.IntWithAggregatesFilter<"LessonRecord"> | number
@@ -517,6 +553,9 @@ export type LessonRecordCreateInput = {
   assistantTeacherName?: string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: number
+  description?: string | null
+  problemNumbersText?: string | null
+  problemNumbers?: Prisma.LessonRecordCreateproblemNumbersInput | number[]
   enrolledCount?: number
   presentCount?: number
   absentCount?: number
@@ -544,6 +583,9 @@ export type LessonRecordUncheckedCreateInput = {
   assistantTeacherName?: string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: number
+  description?: string | null
+  problemNumbersText?: string | null
+  problemNumbers?: Prisma.LessonRecordCreateproblemNumbersInput | number[]
   enrolledCount?: number
   presentCount?: number
   absentCount?: number
@@ -571,6 +613,9 @@ export type LessonRecordUpdateInput = {
   assistantTeacherName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbersText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbers?: Prisma.LessonRecordUpdateproblemNumbersInput | number[]
   enrolledCount?: Prisma.IntFieldUpdateOperationsInput | number
   presentCount?: Prisma.IntFieldUpdateOperationsInput | number
   absentCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -598,6 +643,9 @@ export type LessonRecordUncheckedUpdateInput = {
   assistantTeacherName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbersText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbers?: Prisma.LessonRecordUpdateproblemNumbersInput | number[]
   enrolledCount?: Prisma.IntFieldUpdateOperationsInput | number
   presentCount?: Prisma.IntFieldUpdateOperationsInput | number
   absentCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -625,6 +673,9 @@ export type LessonRecordCreateManyInput = {
   assistantTeacherName?: string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: number
+  description?: string | null
+  problemNumbersText?: string | null
+  problemNumbers?: Prisma.LessonRecordCreateproblemNumbersInput | number[]
   enrolledCount?: number
   presentCount?: number
   absentCount?: number
@@ -651,6 +702,9 @@ export type LessonRecordUpdateManyMutationInput = {
   assistantTeacherName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbersText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbers?: Prisma.LessonRecordUpdateproblemNumbersInput | number[]
   enrolledCount?: Prisma.IntFieldUpdateOperationsInput | number
   presentCount?: Prisma.IntFieldUpdateOperationsInput | number
   absentCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -677,6 +731,9 @@ export type LessonRecordUncheckedUpdateManyInput = {
   assistantTeacherName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbersText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbers?: Prisma.LessonRecordUpdateproblemNumbersInput | number[]
   enrolledCount?: Prisma.IntFieldUpdateOperationsInput | number
   presentCount?: Prisma.IntFieldUpdateOperationsInput | number
   absentCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -685,6 +742,14 @@ export type LessonRecordUncheckedUpdateManyInput = {
   confirmedByName?: Prisma.StringFieldUpdateOperationsInput | string
   confirmedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type IntNullableListFilter<$PrismaModel = never> = {
+  equals?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  has?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
+  hasEvery?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  hasSome?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type LessonRecordScheduleIdDateCompoundUniqueInput = {
@@ -708,6 +773,9 @@ export type LessonRecordCountOrderByAggregateInput = {
   assistantTeacherName?: Prisma.SortOrder
   tests?: Prisma.SortOrder
   testCount?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  problemNumbersText?: Prisma.SortOrder
+  problemNumbers?: Prisma.SortOrder
   enrolledCount?: Prisma.SortOrder
   presentCount?: Prisma.SortOrder
   absentCount?: Prisma.SortOrder
@@ -722,6 +790,7 @@ export type LessonRecordAvgOrderByAggregateInput = {
   startMinute?: Prisma.SortOrder
   endMinute?: Prisma.SortOrder
   testCount?: Prisma.SortOrder
+  problemNumbers?: Prisma.SortOrder
   enrolledCount?: Prisma.SortOrder
   presentCount?: Prisma.SortOrder
   absentCount?: Prisma.SortOrder
@@ -743,6 +812,8 @@ export type LessonRecordMaxOrderByAggregateInput = {
   assistantTeacherId?: Prisma.SortOrder
   assistantTeacherName?: Prisma.SortOrder
   testCount?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  problemNumbersText?: Prisma.SortOrder
   enrolledCount?: Prisma.SortOrder
   presentCount?: Prisma.SortOrder
   absentCount?: Prisma.SortOrder
@@ -768,6 +839,8 @@ export type LessonRecordMinOrderByAggregateInput = {
   assistantTeacherId?: Prisma.SortOrder
   assistantTeacherName?: Prisma.SortOrder
   testCount?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  problemNumbersText?: Prisma.SortOrder
   enrolledCount?: Prisma.SortOrder
   presentCount?: Prisma.SortOrder
   absentCount?: Prisma.SortOrder
@@ -782,6 +855,7 @@ export type LessonRecordSumOrderByAggregateInput = {
   startMinute?: Prisma.SortOrder
   endMinute?: Prisma.SortOrder
   testCount?: Prisma.SortOrder
+  problemNumbers?: Prisma.SortOrder
   enrolledCount?: Prisma.SortOrder
   presentCount?: Prisma.SortOrder
   absentCount?: Prisma.SortOrder
@@ -791,6 +865,15 @@ export type LessonRecordSumOrderByAggregateInput = {
 export type LessonRecordScalarRelationFilter = {
   is?: Prisma.LessonRecordWhereInput
   isNot?: Prisma.LessonRecordWhereInput
+}
+
+export type LessonRecordCreateproblemNumbersInput = {
+  set: number[]
+}
+
+export type LessonRecordUpdateproblemNumbersInput = {
+  set?: number[]
+  push?: number | number[]
 }
 
 export type LessonRecordCreateNestedOneWithoutStudentsInput = {
@@ -823,6 +906,9 @@ export type LessonRecordCreateWithoutStudentsInput = {
   assistantTeacherName?: string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: number
+  description?: string | null
+  problemNumbersText?: string | null
+  problemNumbers?: Prisma.LessonRecordCreateproblemNumbersInput | number[]
   enrolledCount?: number
   presentCount?: number
   absentCount?: number
@@ -849,6 +935,9 @@ export type LessonRecordUncheckedCreateWithoutStudentsInput = {
   assistantTeacherName?: string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: number
+  description?: string | null
+  problemNumbersText?: string | null
+  problemNumbers?: Prisma.LessonRecordCreateproblemNumbersInput | number[]
   enrolledCount?: number
   presentCount?: number
   absentCount?: number
@@ -891,6 +980,9 @@ export type LessonRecordUpdateWithoutStudentsInput = {
   assistantTeacherName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbersText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbers?: Prisma.LessonRecordUpdateproblemNumbersInput | number[]
   enrolledCount?: Prisma.IntFieldUpdateOperationsInput | number
   presentCount?: Prisma.IntFieldUpdateOperationsInput | number
   absentCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -917,6 +1009,9 @@ export type LessonRecordUncheckedUpdateWithoutStudentsInput = {
   assistantTeacherName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   testCount?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbersText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  problemNumbers?: Prisma.LessonRecordUpdateproblemNumbersInput | number[]
   enrolledCount?: Prisma.IntFieldUpdateOperationsInput | number
   presentCount?: Prisma.IntFieldUpdateOperationsInput | number
   absentCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -974,6 +1069,9 @@ export type LessonRecordSelect<ExtArgs extends runtime.Types.Extensions.Internal
   assistantTeacherName?: boolean
   tests?: boolean
   testCount?: boolean
+  description?: boolean
+  problemNumbersText?: boolean
+  problemNumbers?: boolean
   enrolledCount?: boolean
   presentCount?: boolean
   absentCount?: boolean
@@ -1002,6 +1100,9 @@ export type LessonRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   assistantTeacherName?: boolean
   tests?: boolean
   testCount?: boolean
+  description?: boolean
+  problemNumbersText?: boolean
+  problemNumbers?: boolean
   enrolledCount?: boolean
   presentCount?: boolean
   absentCount?: boolean
@@ -1028,6 +1129,9 @@ export type LessonRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   assistantTeacherName?: boolean
   tests?: boolean
   testCount?: boolean
+  description?: boolean
+  problemNumbersText?: boolean
+  problemNumbers?: boolean
   enrolledCount?: boolean
   presentCount?: boolean
   absentCount?: boolean
@@ -1054,6 +1158,9 @@ export type LessonRecordSelectScalar = {
   assistantTeacherName?: boolean
   tests?: boolean
   testCount?: boolean
+  description?: boolean
+  problemNumbersText?: boolean
+  problemNumbers?: boolean
   enrolledCount?: boolean
   presentCount?: boolean
   absentCount?: boolean
@@ -1064,7 +1171,7 @@ export type LessonRecordSelectScalar = {
   updatedAt?: boolean
 }
 
-export type LessonRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "classroomId" | "date" | "classroomName" | "startMinute" | "endMinute" | "room" | "topic" | "leadTeacherId" | "leadTeacherName" | "assistantTeacherId" | "assistantTeacherName" | "tests" | "testCount" | "enrolledCount" | "presentCount" | "absentCount" | "attendanceMarked" | "confirmedById" | "confirmedByName" | "confirmedAt" | "updatedAt", ExtArgs["result"]["lessonRecord"]>
+export type LessonRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "classroomId" | "date" | "classroomName" | "startMinute" | "endMinute" | "room" | "topic" | "leadTeacherId" | "leadTeacherName" | "assistantTeacherId" | "assistantTeacherName" | "tests" | "testCount" | "description" | "problemNumbersText" | "problemNumbers" | "enrolledCount" | "presentCount" | "absentCount" | "attendanceMarked" | "confirmedById" | "confirmedByName" | "confirmedAt" | "updatedAt", ExtArgs["result"]["lessonRecord"]>
 export type LessonRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   students?: boolean | Prisma.LessonRecord$studentsArgs<ExtArgs>
   _count?: boolean | Prisma.LessonRecordCountOutputTypeDefaultArgs<ExtArgs>
@@ -1093,6 +1200,9 @@ export type $LessonRecordPayload<ExtArgs extends runtime.Types.Extensions.Intern
     assistantTeacherName: string | null
     tests: runtime.JsonValue
     testCount: number
+    description: string | null
+    problemNumbersText: string | null
+    problemNumbers: number[]
     enrolledCount: number
     presentCount: number
     absentCount: number
@@ -1540,6 +1650,9 @@ export interface LessonRecordFieldRefs {
   readonly assistantTeacherName: Prisma.FieldRef<"LessonRecord", 'String'>
   readonly tests: Prisma.FieldRef<"LessonRecord", 'Json'>
   readonly testCount: Prisma.FieldRef<"LessonRecord", 'Int'>
+  readonly description: Prisma.FieldRef<"LessonRecord", 'String'>
+  readonly problemNumbersText: Prisma.FieldRef<"LessonRecord", 'String'>
+  readonly problemNumbers: Prisma.FieldRef<"LessonRecord", 'Int[]'>
   readonly enrolledCount: Prisma.FieldRef<"LessonRecord", 'Int'>
   readonly presentCount: Prisma.FieldRef<"LessonRecord", 'Int'>
   readonly absentCount: Prisma.FieldRef<"LessonRecord", 'Int'>

@@ -350,7 +350,7 @@ export class ClassSessionsService {
       },
     });
     const testIds = tests.map((t) => t.id);
-    const [sessions, statuses, plans] = await Promise.all([
+    const [sessions, statuses, plans, past] = await Promise.all([
       this.prisma.classTestSession.findMany({
         where: { classroomId, testId: { in: testIds } },
         select: { testId: true, date: true, excludedProblemIds: true },
@@ -369,6 +369,11 @@ export class ClassSessionsService {
             select: { testIds: true, date: true },
           })
         : Promise.resolve([] as { testIds: string[]; date: Date }[]),
+      // «Өмнө үзсэн» (огноогүй) — эзэн 2026-10-27
+      this.prisma.classCoveredTest.findMany({
+        where: { classroomId, removedAt: null, testId: { in: testIds } },
+        select: { testId: true },
+      }),
     ]);
     return buildRoadmap({
       books,
@@ -386,6 +391,7 @@ export class ClassSessionsService {
           : [],
       ),
       removedTestIds: statuses.map((s) => s.testId),
+      pastTestIds: past.map((p) => p.testId),
       plans: plans.map((p) => ({ testIds: p.testIds, date: dateKey(p.date) })),
     });
   }

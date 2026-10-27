@@ -7,7 +7,13 @@ import MathText from "@/components/MathText";
 import { Button } from "@/components/ui/kit/button";
 import { Card, CardContent } from "@/components/ui/kit/card";
 import { formatMnDateTime } from "@/lib/dateMn";
-type Day = { id: string; date: string; chapter: { title: string } };
+type Day = {
+  id: string;
+  date: string;
+  chapter: { title: string };
+  /** Хичээлээр нэрлэсэн шошго (эзэн 2026-10-27): «10-р сарын 26 — Сэдэв» */
+  lesson?: { label: string } | null;
+};
 type Evidence = {
   id: string;
   kind?: string;
@@ -124,7 +130,7 @@ export default function PupilLessonDay() {
         <option value="">Өдрөө сонгох</option>
         {days.map((d) => (
           <option key={d.id} value={d.id}>
-            {d.date.slice(0, 10)} — {d.chapter.title}
+            {d.lesson?.label ?? `${d.date.slice(0, 10)} — ${d.chapter.title}`}
           </option>
         ))}
       </select>

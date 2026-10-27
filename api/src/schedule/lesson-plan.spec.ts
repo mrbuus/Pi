@@ -240,6 +240,28 @@ describe('LessonPlanService.putPlan', () => {
     });
   });
 
+  it('«Орох тест» чөлөөт бичвэр: тест сонгосон ч гарчиг болно; хоосон бол тестийн нэр (эзэн 2026-10-27)', async () => {
+    const { service, prisma } = makePlanService();
+    const out = await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], title: '  Давтлага   хичээл ' });
+    expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({ title: 'Давтлага хичээл', testIds: ['t1'] });
+    expect(out.plan?.customTitle).toBe('Давтлага хичээл');
+
+    await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: [], title: 'Номноос гадуур' });
+    expect(prisma.lessonTopic.create.mock.calls[1][0].data).toMatchObject({ title: 'Номноос гадуур', testIds: [] });
+
+    prisma.lessonTopic.findUnique.mockResolvedValueOnce({
+      id: 'lt1',
+      title: 'Давтлага',
+      testIds: [],
+      dismissMode: null,
+      photoStudentId: null,
+      chapterId: null,
+    });
+    const cleared = await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], title: '' });
+    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({ title: 'Тоо тоолол 1' });
+    expect(cleared.plan?.customTitle).toBeNull();
+  });
+
   it('маршрут: day-plan — ажилтан; plan бичих/унших — Багш+, Админ', () => {
     const roles = (n: keyof ScheduleController) =>
       [...Reflect.getMetadata(ROLES_KEY, ScheduleController.prototype[n])].sort();

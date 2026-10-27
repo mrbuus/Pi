@@ -508,6 +508,7 @@ export const ModelName = {
   MockExamEvent: 'MockExamEvent',
   MockExamRegistration: 'MockExamRegistration',
   ClassTestStatus: 'ClassTestStatus',
+  ClassCoveredTest: 'ClassCoveredTest',
   LessonPhoto: 'LessonPhoto',
   LessonMakeup: 'LessonMakeup',
   ClassCheck: 'ClassCheck',
@@ -528,7 +529,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -8746,6 +8747,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ClassCoveredTest: {
+      payload: Prisma.$ClassCoveredTestPayload<ExtArgs>
+      fields: Prisma.ClassCoveredTestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClassCoveredTestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClassCoveredTestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>
+        }
+        findFirst: {
+          args: Prisma.ClassCoveredTestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClassCoveredTestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>
+        }
+        findMany: {
+          args: Prisma.ClassCoveredTestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>[]
+        }
+        create: {
+          args: Prisma.ClassCoveredTestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>
+        }
+        createMany: {
+          args: Prisma.ClassCoveredTestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClassCoveredTestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>[]
+        }
+        delete: {
+          args: Prisma.ClassCoveredTestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>
+        }
+        update: {
+          args: Prisma.ClassCoveredTestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClassCoveredTestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClassCoveredTestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClassCoveredTestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClassCoveredTestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClassCoveredTestPayload>
+        }
+        aggregate: {
+          args: Prisma.ClassCoveredTestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClassCoveredTest>
+        }
+        groupBy: {
+          args: Prisma.ClassCoveredTestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassCoveredTestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClassCoveredTestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClassCoveredTestCountAggregateOutputType> | number
+        }
+      }
+    }
     LessonPhoto: {
       payload: Prisma.$LessonPhotoPayload<ExtArgs>
       fields: Prisma.LessonPhotoFieldRefs
@@ -9384,6 +9459,7 @@ export const AssignmentScalarFieldEnum = {
   dueDate: 'dueDate',
   createdById: 'createdById',
   createdAt: 'createdAt',
+  lessonDate: 'lessonDate',
   deletedAt: 'deletedAt'
 } as const
 
@@ -10653,6 +10729,9 @@ export const LessonRecordScalarFieldEnum = {
   assistantTeacherName: 'assistantTeacherName',
   tests: 'tests',
   testCount: 'testCount',
+  description: 'description',
+  problemNumbersText: 'problemNumbersText',
+  problemNumbers: 'problemNumbers',
   enrolledCount: 'enrolledCount',
   presentCount: 'presentCount',
   absentCount: 'absentCount',
@@ -10849,6 +10928,23 @@ export const ClassTestStatusScalarFieldEnum = {
 } as const
 
 export type ClassTestStatusScalarFieldEnum = (typeof ClassTestStatusScalarFieldEnum)[keyof typeof ClassTestStatusScalarFieldEnum]
+
+
+export const ClassCoveredTestScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  testId: 'testId',
+  chapterId: 'chapterId',
+  source: 'source',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt',
+  removedAt: 'removedAt',
+  removedById: 'removedById'
+} as const
+
+export type ClassCoveredTestScalarFieldEnum = (typeof ClassCoveredTestScalarFieldEnum)[keyof typeof ClassCoveredTestScalarFieldEnum]
 
 
 export const LessonPhotoScalarFieldEnum = {
@@ -12039,6 +12135,7 @@ export type GlobalOmitConfig = {
   mockExamEvent?: Prisma.MockExamEventOmit
   mockExamRegistration?: Prisma.MockExamRegistrationOmit
   classTestStatus?: Prisma.ClassTestStatusOmit
+  classCoveredTest?: Prisma.ClassCoveredTestOmit
   lessonPhoto?: Prisma.LessonPhotoOmit
   lessonMakeup?: Prisma.LessonMakeupOmit
   classCheck?: Prisma.ClassCheckOmit

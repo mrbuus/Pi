@@ -62,6 +62,8 @@ import {
   type IndependentDay,
   type StudentMonthStats,
 } from './class-month.logic';
+import { loadClassCoverage } from './class-coverage.data';
+import { ROADMAP_BOOK_CODES } from '../class-sessions/roadmap.logic';
 import {
   COMPETENCY_V0,
   competencyTrend,
@@ -165,6 +167,7 @@ export class ClassDashboardService {
         grade: true,
         archived: true,
         progressChapterId: true,
+        subject: true,
         teacher: {
           select: { id: true, firstName: true, lastName: true, role: true },
         },
@@ -514,12 +517,19 @@ export class ClassDashboardService {
     return out;
   }
 
+  /**
+   * Одоогийн бүлэг: гараар тохируулсан → хичээлийн сэдэв → үзсэн сэдвийн хамгийн
+   * хол бүлэг (батлагдсан хичээл + «өмнө үзсэн», эзэн 2026-10-27) → сүүлийн шалгалт.
+   */
   private async currentChapter(
     classroomId: string,
     progressChapterId: string | null,
+    coveredChapterId: string | null = null,
   ) {
     let chapterId = progressChapterId;
-    let source: 'MANUAL' | 'LESSON_TOPIC' | 'EXAM' | null = chapterId ? 'MANUAL' : null;
+    let source: 'MANUAL' | 'LESSON_TOPIC' | 'COVERED' | 'EXAM' | null = chapterId
+      ? 'MANUAL'
+      : null;
     if (!chapterId) {
       const topic = await this.prisma.lessonTopic.findFirst({
         where: { schedule: { classroomId }, chapterId: { not: null } },
@@ -530,6 +540,10 @@ export class ClassDashboardService {
         chapterId = topic.chapterId;
         source = 'LESSON_TOPIC';
       }
+    }
+    if (!chapterId && coveredChapterId) {
+      chapterId = coveredChapterId;
+      source = 'COVERED';
     }
     if (!chapterId) {
       const access = await this.prisma.testAccess.findFirst({
@@ -703,6 +717,8 @@ export class ClassDashboardService {
     const now = new Date();
     const historyFrom = daysAgo(HISTORY_DAYS);
     const today = daysAgo(0);
+    // Үзсэн сэдвийн түүх = батлагдсан хичээл (огноотой) ∪ өмнө үзсэн (огноогүй)
+    const coverageP = loadClassCoverage(this.prisma, classroomId, classroom.subject);
 
     const [
       exams,
@@ -717,6 +733,7 @@ export class ClassDashboardService {
       staffing,
       chapter,
       practiceTopics,
+      coverage,
     ] = await Promise.all([
       this.loadExams(classroomId, roster),
       this.prisma.attendance.findMany({
@@ -795,7 +812,9 @@ export class ClassDashboardService {
         where: { schedule: { classroomId }, date: { gte: daysAgo(STAFFING_DAYS) } },
         select: { leadTeacherId: true, assistantTeacherId: true },
       }),
-      this.currentChapter(classroomId, classroom.progressChapterId),
+      coverageP.then((c) =>
+        this.currentChapter(classroomId, classroom.progressChapterId, c.furthestChapterId),
+      ),
       ids.length
         ? this.prisma.$queryRaw<
             {
@@ -822,6 +841,7 @@ export class ClassDashboardService {
             GROUP BY t.id, t.name, t."order"
             ORDER BY t."order", t.name`)
         : Promise.resolve([]),
+      coverageP,
     ]);
     const payments = money ? await this.paymentStates(ids) : null;
     // Бие даасан ажил — сүүлийн PRACTICE_DAYS УБ-ын өдөр (бүх эх сурвалж)
@@ -1118,6 +1138,26 @@ export class ClassDashboardService {
         : null,
       syllabus: {
         current: chapter,
+        // Номын явц: үндсэн ном (100V3, 200V3) + үзсэн бүлэгтэй бусад ном
+        coverage: {
+          pastTests: coverage.books.reduce(
+            (n, b) => n + b.chapters.reduce((m, c) => m + c.tests.filter((t) => t.past).length, 0),
+            0,
+          ),
+          books: coverage.books
+            .filter(
+              (b) =>
+                b.coveredChapters > 0 ||
+                (ROADMAP_BOOK_CODES as readonly string[]).includes(b.code),
+            )
+            .map((b) => ({
+              code: b.code,
+              title: b.title,
+              totalChapters: b.totalChapters,
+              coveredChapters: b.coveredChapters,
+              pastChapters: b.pastChapters,
+            })),
+        },
         confirmedLessons: lessonCount,
         recentLessons: lessons.slice(0, 12).map((l) => ({
           id: l.id,

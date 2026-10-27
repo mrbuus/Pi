@@ -7,6 +7,8 @@ import SubmissionRecord, {
   type SubmissionRecordData,
 } from "./SubmissionRecord";
 import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
+import MathText from "@/components/MathText";
+import { LessonLabel, extraTitle, type HomeworkLesson } from "./LessonLabel";
 
 /* ============================================================================
  * Тест/даалгавар бүрийг ЖИЖИГ БОКСОД тус тусад нь харуулна (owner-ийн
@@ -21,6 +23,8 @@ interface TestAssignment {
   createdAt: string;
   _count?: { submissions: number };
   imageKeys?: string[];
+  /** Сурагчид харагддагтай ИЖИЛ шошго (эзэн 2026-10-27) */
+  lesson?: HomeworkLesson | null;
 }
 
 interface SubmissionRow extends SubmissionRecordData {
@@ -76,8 +80,18 @@ export default function TeacherHomeworkTestCard({
         className="flex min-h-11 w-full flex-col items-start gap-1 rounded-xl px-3 py-3 text-left transition hover:bg-ink/5"
       >
         <div className="flex w-full items-start justify-between gap-2">
-          <span className="min-w-0 flex-1 break-words text-sm font-bold">
-            {assignment.title}
+          <span
+            className="min-w-0 flex-1 break-words text-sm font-bold"
+            title={assignment.lesson?.label}
+          >
+            <LessonLabel lesson={assignment.lesson} fallback={assignment.title} />
+            {extraTitle(assignment.title, assignment.lesson) && (
+              <span className="mt-0.5 block text-xs font-medium text-ink-dim">
+                <MathText>
+                  {extraTitle(assignment.title, assignment.lesson) ?? ""}
+                </MathText>
+              </span>
+            )}
           </span>
           <span aria-hidden="true" className="shrink-0 text-ink-dim">
             {isOpen ? (

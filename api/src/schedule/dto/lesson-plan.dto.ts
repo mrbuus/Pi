@@ -6,6 +6,7 @@ import {
   IsIn,
   IsOptional,
   IsString,
+  MaxLength,
 } from 'class-validator';
 import { DISMISS_MODES, type DismissMode } from '../lesson-plan.logic';
 
@@ -30,4 +31,15 @@ export class PutLessonPlanDto {
   @IsOptional()
   @IsString()
   photoStudentId?: string | null;
+
+  /**
+   * «Орох тест» талбарт багшийн чөлөөт бичвэр (эзэн 2026-10-27) — хичээл үргэлж
+   * номноос биш. Өгвөл LessonTopic.title болно (тест сонгосон ч); хоосон бол
+   * гарчиг тестүүдийн нэрээс. Өгөхгүй (undefined) бол хуучин дүрэм хэвээр.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  title?: string | null;
 }

@@ -20,6 +20,47 @@ export function normalizeNote(body: unknown): string | null {
   return trimmed;
 }
 
+/** Батлахад бичих тайлбарын дээд урт */
+export const DESCRIPTION_MAX = 1000;
+/** «1-12, 15, 20» бичвэрийн дээд урт, хамгийн их дугаар, жагсаалтын хэмжээ */
+export const PROBLEM_TEXT_MAX = 200;
+const PROBLEM_NUMBER_MAX = 999;
+const PROBLEM_LIST_MAX = 500;
+
+/** Чөлөөт бичвэрийг цэвэрлэнэ: хоосон бол null, урт бол таслана. */
+export function cleanText(value: unknown, max: number): string | null {
+  if (typeof value !== 'string') return null;
+  const t = value.replace(/\r\n?/g, '\n').trim();
+  return t ? t.slice(0, max) : null;
+}
+
+/**
+ * Бодсон бодлогын дугаар (эзэн 2026-10-27): «1-12, 15, 20» → [1..12, 15, 20].
+ * Таслал, цэгтэй таслал, зай тусгаарлагч; муж нь «-», «–», «—». Өсөхөөр,
+ * давхардалгүй. Нэг ч хэсэг танигдахгүй бол null — бичвэр нь хэвээр хадгалагдана.
+ */
+export function parseProblemNumbers(text: string | null | undefined): number[] | null {
+  if (!text) return null;
+  const parts = text
+    .split(/[,;\s]+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (!parts.length) return null;
+  const out = new Set<number>();
+  for (const part of parts) {
+    const m = part.match(/^(\d{1,3})(?:[-\u2013\u2014](\d{1,3}))?$/);
+    if (!m) return null;
+    const a = Number(m[1]);
+    const b = m[2] === undefined ? a : Number(m[2]);
+    if (a < 1 || b < a || b > PROBLEM_NUMBER_MAX) return null;
+    for (let n = a; n <= b; n++) {
+      out.add(n);
+      if (out.size > PROBLEM_LIST_MAX) return null;
+    }
+  }
+  return [...out].sort((x, y) => x - y);
+}
+
 /** УБ-ын тухайн өдрийн [эхлэл, дараагийн өдрийн эхлэл) — UTC Date хэлбэрээр. */
 export function ubDayBounds(date: string): { start: Date; end: Date } {
   const start = new Date(`${date}T00:00:00+08:00`);

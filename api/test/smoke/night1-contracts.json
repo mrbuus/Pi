@@ -1004,6 +1004,30 @@
     ]
   },
   {
+    "gap": "OMNO-UZSEN",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "GET",
+    "path": "/api/class-dashboard/classes/:classroomId/coverage",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "OMNO-UZSEN",
+    "file": "class-dashboard/class-dashboard.controller",
+    "controller": "ClassDashboardController",
+    "method": "PUT",
+    "path": "/api/class-dashboard/classes/:classroomId/coverage/past",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
     "gap": "CLASS-DASH",
     "file": "classrooms/classrooms.controller",
     "controller": "ClassroomsController",

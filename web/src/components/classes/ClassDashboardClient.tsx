@@ -257,7 +257,7 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                   <MakeupPanel classroomId={data.classroom.id} {...makeupRange()} />
                 </TabsContent>
                 <TabsContent value="topics" className="mt-4">
-                  <TopicsTab data={data} />
+                  <TopicsTab data={data} onChanged={() => void load()} />
                 </TabsContent>
               </Tabs>
             )}

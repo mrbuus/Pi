@@ -613,6 +613,16 @@ export type MockExamRegistration = Prisma.MockExamRegistrationModel
  */
 export type ClassTestStatus = Prisma.ClassTestStatusModel
 /**
+ * Model ClassCoveredTest
+ * «Өмнө үзсэн сэдэв» (эзэн 2026-10-27): систем эхлэхээс ӨМНӨ анги үзсэн тестийг
+ * ОГНООГҮЙгээр тэмдэглэнэ. Огноотой (өдрийн хичээлээр батлагдсан) үзсэн тест нь
+ * ClassTestSession-д — ангийн түүх = ClassTestSession (огноотой) ∪ энэ (огноогүй).
+ * Хасах нь ЗӨӨЛӨН: removedAt тавина, мөр устахгүй; дахин тэмдэглэвэл removedAt-г
+ * цэвэрлэнэ. Өөрчлөлт бүр AuditLog-д (entity «ClassCoveredTest», entityId = анги).
+ * classroomId/testId/chapterId — plain string (LessonTopic-ийн адил, тест устсан ч мөр үлдэнэ).
+ */
+export type ClassCoveredTest = Prisma.ClassCoveredTestModel
+/**
  * Model LessonPhoto
  * Онолын зураг (эзэн 2026-10-18): тухайн өдрийн хичээлийн онолыг томилогдсон сурагч
  * илгээнэ; тэр өдрийн тестүүдэд (testIds) холбогдож хадгалагдана — хэдэн сарын

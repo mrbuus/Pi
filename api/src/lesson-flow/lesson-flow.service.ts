@@ -13,6 +13,8 @@ import { dismissalDate } from '../learning-lab/dismissal';
 import { packetInput, receiptInput, turnInput } from './input';
 import { choosePhotoTurn, homeworkPrefill, RotationPupil } from './rotation';
 import { isClassTeacher } from '../common/class-teachers';
+import { loadLessonTopics } from '../assignments/homework-lesson';
+import { buildHomeworkLesson } from '../assignments/homework-lesson.logic';
 
 /**
  * Өдрийн багцын ажилтны эрх (засвар 2026-10-18): ADMIN, TEACHER_PLUS — бүх анги;
@@ -600,7 +602,26 @@ export class LessonFlowService {
     const result: typeof packets = [];
     for (const packet of packets)
       if (await this.member(packet, userId)) result.push(packet);
-    return result;
+    // Өдрийг хичээлээр нэрлэнэ (эзэн 2026-10-27): өдрийн төлөвлөгөөний сэдэв,
+    // үгүй бол багцын бүлэг — сурагч бүлэг/сэдэв сонгохгүй, зөвхөн өдрөө таньна
+    const pairs = result.map((p) => ({
+      classroomId: p.classroomId,
+      date: p.date.toISOString().slice(0, 10),
+    }));
+    let topics = new Map<string, string | null>();
+    try {
+      topics = await loadLessonTopics(this.prisma, pairs);
+    } catch {
+      // сэдэвгүйгээр (бүлгийн нэрээр) үргэлжилнэ
+    }
+    return result.map((p, i) => ({
+      ...p,
+      lesson: buildHomeworkLesson(
+        pairs[i].date,
+        topics.get(`${pairs[i].classroomId}|${pairs[i].date}`) ??
+          p.chapter.title,
+      ),
+    }));
   }
   async receipt(packetId: string, raw: unknown, userId: string) {
     const body = receiptInput(raw);

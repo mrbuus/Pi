@@ -209,7 +209,7 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/admin/enrollment": "admin",
   "/app/admin/reconcile": "finance",
   "/app/admin/theory": "internal",
-  "/app/admin/students": "admin",
+  "/app/admin/students": "class",
   "/app/admin/audit": "admin",
   "/app/admin/analytics": "admin",
   "/app/payments": "finance",
@@ -218,11 +218,11 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/student/payments": "personal",
 };
 
-// Role-ийн онцгой бүлэглэл: энгийн Багшид «Сурагчид» ганцаараа «Удирдлага» бүлэгт
-// орох нь төөрөгдүүлэх тул «Анги» бүлэгт (Багш+/Админд ITEM_GROUP хэвээр).
-const ITEM_GROUP_BY_ROLE: Partial<Record<string, Record<string, GroupKey>>> = {
-  TEACHER: { "/app/admin/students": "class" },
-};
+// Role-ийн онцгой бүлэглэл (одоогоор хоосон — «Сурагчид» бүх role-д «Анги» бүлэгт).
+const ITEM_GROUP_BY_ROLE: Partial<Record<string, Record<string, GroupKey>>> = {};
+
+// «Анги» бүлгийн хамгийн сүүлд байх холбоос (эзэн 2026-10-27: «Сурагчид» Анги дотор сүүлд)
+const CLASS_GROUP_LAST = "/app/admin/students";
 
 // Өмнө нь "Нууц үг солих" тусдаа, гарцаагүй тод цэсийн зүйл байсан — эзний
 // хүсэлтээр /app/profile дотор нэг хэсэг болгон шилжүүлж, оронд нь энд зөвхөн
@@ -312,6 +312,8 @@ export function getRoleNav(role: string | null): RoleNav {
     const group = (role ? ITEM_GROUP_BY_ROLE[role]?.[item.href] : undefined) ?? ITEM_GROUP[item.href] ?? "learn";
     buckets[group].push(item);
   }
+  const lastIdx = buckets.class.findIndex((i) => i.href === CLASS_GROUP_LAST);
+  if (lastIdx >= 0) buckets.class.push(...buckets.class.splice(lastIdx, 1));
   // Миний мэдээлэл, тусламж, мэдэгдэл… баруун дээд булангийн хэрэглэгчийн цэст
   // (nav/UserMenu.tsx) шилжсэн — зүүн цэсэнд давхардуулахгүй (эзэн 2026-10-13).
 

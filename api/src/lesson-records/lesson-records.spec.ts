@@ -5,6 +5,7 @@ import {
   buildSnapshot,
   enrolledOn,
   normalizeNote,
+  parseProblemNumbers,
 } from './lesson-records.logic';
 import { LessonRecordsService } from './lesson-records.service';
 
@@ -447,5 +448,54 @@ describe('LessonRecordsController маршрутын эрх', () => {
         [Role.ADMIN, Role.TEACHER, Role.TEACHER_PLUS].sort(),
       );
     expect(roles('mine')).toEqual([Role.STUDENT]);
+  });
+});
+
+describe('Батлахад нэмэлт: сэдэв, тайлбар, бодлогын дугаар (эзэн 2026-10-27)', () => {
+  it('«1-12, 15, 20» → тоон жагсаалт; танигдахгүй бол null', () => {
+    expect(parseProblemNumbers('1-3, 15; 20 2')).toEqual([1, 2, 3, 15, 20]);
+    expect(parseProblemNumbers('5–7')).toEqual([5, 6, 7]);
+    expect(parseProblemNumbers('3,3,1')).toEqual([1, 3]);
+    expect(parseProblemNumbers('')).toBeNull();
+    expect(parseProblemNumbers('1-12, бусад')).toBeNull();
+    expect(parseProblemNumbers('9-2')).toBeNull();
+    expect(parseProblemNumbers('0')).toBeNull();
+  });
+
+  it('бичсэн сэдэв, тайлбар, дугаарыг хадгална; өгөөгүй бол өмнөхийг хадгална', async () => {
+    const { service, prisma } = makeService();
+    prisma.lessonTopic = {
+      findUnique: jest.fn(async () => null),
+      create: jest.fn(async ({ data }: any) => ({ id: 'lt1', ...data })),
+      update: jest.fn(),
+    };
+    await service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE, undefined, {
+      topic: '  Давтлага  ',
+      description: 'Самбарт бодов',
+      problemNumbers: '1-3, 7',
+    });
+    const create = prisma.lessonRecord.upsert.mock.calls[0][0].create;
+    expect(create).toMatchObject({
+      topic: 'Давтлага',
+      description: 'Самбарт бодов',
+      problemNumbersText: '1-3, 7',
+      problemNumbers: [1, 2, 3, 7],
+    });
+    // Төлөвлөгөөгүй хичээлд сэдвийг LessonTopic-д шинээр нэмнэ (дарж бичихгүй)
+    expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({ title: 'Давтлага', chapterId: null });
+
+    prisma.lessonRecord.findUnique.mockResolvedValueOnce({
+      id: 'r1',
+      description: 'Өмнөх',
+      problemNumbersText: 'бүгд',
+    });
+    await service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE);
+    const update = prisma.lessonRecord.upsert.mock.calls[1][0].update;
+    expect(update).toMatchObject({
+      topic: 'Логарифм',
+      description: 'Өмнөх',
+      problemNumbersText: 'бүгд',
+      problemNumbers: [],
+    });
   });
 });

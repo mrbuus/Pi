@@ -50,6 +50,8 @@ export interface RoadmapTestOut {
   excludedNumbers?: number[];
   /** Өмнөх хичээлд төлөвлөсөн боловч хараахан хийгдээгүй (нэмэлт талбар) */
   plannedOn?: string;
+  /** «Өмнө үзсэн» гэж огноогүй тэмдэглэсэн (ClassCoveredTest, эзэн 2026-10-27) */
+  past?: true;
 }
 export interface RoadmapResult {
   books: {
@@ -111,6 +113,8 @@ export function buildRoadmap(input: {
   tests: RoadmapTestIn[];
   sessions: RoadmapSessionIn[];
   removedTestIds: string[];
+  /** «Өмнө үзсэн» (огноогүй) тест — бүлгийг «хийсэн» болгоно, doneOn-гүй */
+  pastTestIds?: string[];
   /** Өмнөх хичээлүүдийн төлөвлөгөө (зорилтот өдрөөс ӨМНӨХ) — next-ийг урагшлуулна */
   plans?: RoadmapPlanIn[];
   nextLimit?: number;
@@ -135,6 +139,7 @@ export function buildRoadmap(input: {
     if (!prev || prev.date < s.date) lastSession.set(s.testId, s);
   }
   const removed = new Set(input.removedTestIds);
+  const past = new Set(input.pastTestIds ?? []);
   const plannedOn = new Map<string, string>();
   for (const p of input.plans ?? [])
     for (const id of p.testIds) {
@@ -173,7 +178,7 @@ export function buildRoadmap(input: {
         book,
         chapter,
         tests,
-        done: dates.length > 0,
+        done: dates.length > 0 || tests.some((t) => past.has(t.id)),
         doneOn: dates.at(-1) ?? null,
         removed: tests.some((t) => removed.has(t.id)),
         planned: planned.at(-1) ?? null,
@@ -240,6 +245,7 @@ export function buildRoadmap(input: {
           if (nums.length) out.excludedNumbers = nums;
         }
         if (!u.done && u.planned) out.plannedOn = u.planned;
+        if (past.has(t.id)) out.past = true;
         return out;
       }),
     });

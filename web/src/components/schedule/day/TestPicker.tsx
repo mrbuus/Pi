@@ -22,6 +22,9 @@ export default function TestPicker({
   selected,
   onChange,
   keepIds = [],
+  freeText,
+  onFreeTextChange,
+  hideChips = false,
 }: {
   classroomId: string;
   date: string;
@@ -29,6 +32,16 @@ export default function TestPicker({
   onChange: (ids: string[]) => void;
   /** Хийсэн гэж бүртгэгдсэн ч энэ жагсаалтад сонгогдох ёстой (батлах цонх) */
   keepIds?: string[];
+  /**
+   * «Орох тест» чөлөөт бичвэр (эзэн 2026-10-27): хичээл үргэлж номноос биш тул
+   * багш дурын сэдэв бичнэ. Бичих зуур доорх жагсаалт тохирох ном/сэдэв/тестээр
+   * шүүгдэнэ; тестийг сонговол холбогдож, бичвэр арилна. Сонгохгүй бол бичвэр нь
+   * хичээлийн сэдэв болж хадгалагдана. Өгөөгүй бол энгийн хайлт.
+   */
+  freeText?: string;
+  onFreeTextChange?: (text: string) => void;
+  /** Сонгосон тестийн чипийг нуух (батлах цонх өөрөө жагсаадаг) */
+  hideChips?: boolean;
 }) {
   const { data, status, error, reload } = useSection<Roadmap | null>(
     `/classrooms/${classroomId}/roadmap?date=${date}`,
@@ -45,8 +58,18 @@ export default function TestPicker({
 
   const sortIds = (ids: string[]) =>
     [...ids].sort((a, b) => (index.get(a) ?? 1e9) - (index.get(b) ?? 1e9));
+  const freeMode = onFreeTextChange !== undefined;
   const toggle = (id: string) =>
     onChange(chosen.has(id) ? selected.filter((x) => x !== id) : sortIds([...selected, id]));
+  /** Жагсаалтаас сонгох — чөлөөт бичвэрээр хайсан бол бичвэр нь сэдэв биш, арилна */
+  const pick = (id: string) => {
+    const adding = !chosen.has(id);
+    toggle(id);
+    if (adding && freeMode && query.trim()) {
+      setQuery("");
+      onFreeTextChange?.("");
+    }
+  };
 
   async function setRemoved(u: TestUnit, removed: boolean) {
     setBusy(u.test.testId);
@@ -82,7 +105,7 @@ export default function TestPicker({
   const groups: { key: string; book: string; topic: string; units: TestUnit[] }[] = [];
   for (const u of units) {
     if (!visible(u)) continue;
-    if (q && !`${u.test.short} ${u.topic}`.toLowerCase().includes(q)) continue;
+    if (q && !`${u.test.short} ${u.topic} ${u.bookTitle}`.toLowerCase().includes(q)) continue;
     const key = `${u.bookCode}|${u.topic}`;
     const last = groups.at(-1);
     if (last?.key === key) last.units.push(u);
@@ -92,7 +115,7 @@ export default function TestPicker({
 
   return (
     <div className="space-y-3">
-      {selected.length > 0 && (
+      {selected.length > 0 && !hideChips && (
         <ul aria-label="Сонгосон тест" className="flex flex-wrap gap-1.5">
           {selected.map((id) => {
             const u = byId.get(id);
@@ -124,7 +147,7 @@ export default function TestPicker({
               <button
                 key={id}
                 type="button"
-                onClick={() => toggle(id)}
+                onClick={() => pick(id)}
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-panel px-3 text-sm font-semibold text-ink hover:border-brand"
               >
                 <Plus className="size-4 text-brand-soft" aria-hidden />
@@ -136,15 +159,26 @@ export default function TestPicker({
       )}
 
       <label className="relative block">
-        <span className="sr-only">Тест хайх</span>
+        <span className="sr-only">Орох тест</span>
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-dim" aria-hidden />
         <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Тест хайх"
+          value={freeMode ? (freeText ?? "") : query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            onFreeTextChange?.(e.target.value);
+          }}
+          onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
+          maxLength={freeMode ? 200 : undefined}
+          placeholder="Орох тест"
+          autoComplete="off"
           className="min-h-11 w-full rounded-lg border border-line bg-bg pl-9 pr-3 text-sm"
         />
       </label>
+      {freeMode && (freeText ?? "").trim() && (
+        <p className="text-xs text-ink-dim">
+          Доороос тест сонговол холбогдоно, эс бөгөөс «{(freeText ?? "").trim()}» гэж сэдэв болж хадгалагдана
+        </p>
+      )}
 
       {actionError && (
         <p role="alert" className="rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
@@ -170,7 +204,7 @@ export default function TestPicker({
                     <button
                       type="button"
                       aria-pressed={on}
-                      onClick={() => toggle(u.test.testId)}
+                      onClick={() => pick(u.test.testId)}
                       className={cn(
                         "flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-2 text-left text-sm",
                         on ? "bg-brand-bright/10 font-semibold text-brand-soft" : skipped ? "text-warning hover:bg-warning/10" : "text-ink hover:bg-ink/[0.03]",

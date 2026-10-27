@@ -75,7 +75,11 @@ export class LessonRecordsController {
     @Param('scheduleId') scheduleId: string,
     @Body() dto: ConfirmLessonDto,
   ) {
-    return this.records.confirm(req.user, scheduleId, dto.date, dto.tests);
+    return this.records.confirm(req.user, scheduleId, dto.date, dto.tests, {
+      topic: dto.topic,
+      description: dto.description,
+      problemNumbers: dto.problemNumbers,
+    });
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)

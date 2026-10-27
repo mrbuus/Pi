@@ -83,6 +83,8 @@ const WEEKDAY_SHORT = ["Да", "Мя", "Лх", "Пү", "Ба", "Бя", "Ня"];
 
 interface CalendarAssignment {
   createdAt: string;
+  /** Даалгавар өгсөн хичээлийн өдөр — байвал createdAt-ийн оронд (эзэн 2026-10-27) */
+  lesson?: { date: string } | null;
 }
 
 interface TeacherHomeworkCalendarProps {
@@ -107,7 +109,7 @@ export default function TeacherHomeworkCalendar({
   const countByDay = useMemo(() => {
     const map = new Map<string, number>();
     for (const a of assignments) {
-      const key = ubDateKey(a.createdAt);
+      const key = a.lesson?.date ?? ubDateKey(a.createdAt);
       map.set(key, (map.get(key) ?? 0) + 1);
     }
     return map;

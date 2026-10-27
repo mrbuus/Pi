@@ -9,12 +9,14 @@ import {
 } from "@/components/ui/StateBlock";
 import { api, uploadFile } from "@/lib/api";
 import TeacherHomeworkCalendar, {
+  formatMnDate,
   ubDateKey,
   ubToday,
 } from "./TeacherHomeworkCalendar";
 import TeacherHomeworkFrequencyPanel from "./TeacherHomeworkFrequencyPanel";
 import { type SubmissionRecordData } from "./SubmissionRecord";
 import TeacherHomeworkTestCard from "./TeacherHomeworkTestCard";
+import type { HomeworkLesson } from "./LessonLabel";
 
 /* ============================================================================
  * ОНЛАЙН ангийн гэрийн даалгавар (Assignment + Submission).
@@ -37,7 +39,12 @@ interface Assignment {
   createdAt: string;
   imageKeys?: string[];
   _count?: { submissions: number };
+  /** Даалгавар өгсөн хичээл ба сэдэв — сурагчид харагдах шошго */
+  lesson?: HomeworkLesson | null;
 }
+
+/** Даалгаврын хичээлийн өдөр (хуучин хариунд lesson байхгүй бол үүсгэсэн өдөр) */
+const lessonKeyOf = (a: Assignment) => a.lesson?.date ?? ubDateKey(a.createdAt);
 
 interface RosterRow extends SubmissionRecordData {
   student: { id: string; firstName: string; lastName: string };
@@ -142,7 +149,7 @@ export default function OnlineHomeworkSection({
   }
 
   const dayItems = useMemo(
-    () => items.filter((a) => ubDateKey(a.createdAt) === selectedDate),
+    () => items.filter((a) => lessonKeyOf(a) === selectedDate),
     [items, selectedDate],
   );
 
@@ -150,9 +157,10 @@ export default function OnlineHomeworkSection({
     <section className="space-y-5">
       <CreateAssignmentForm
         classroomId={classroomId}
+        lessonDate={selectedDate}
         onCreated={(a) => {
           setItems((list) => [a, ...list]);
-          setSelectedDate(ubDateKey(a.createdAt));
+          setSelectedDate(lessonKeyOf(a));
         }}
       />
 
@@ -236,9 +244,12 @@ export default function OnlineHomeworkSection({
 /* ---------------- Үүсгэх маягт ---------------- */
 function CreateAssignmentForm({
   classroomId,
+  lessonDate,
   onCreated,
 }: {
   classroomId: string;
+  /** Хуанлид сонгосон өдөр — хичээлгүй бол API өмнөх хичээл рүү шилжүүлнэ */
+  lessonDate: string;
   onCreated: (a: Assignment) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -285,6 +296,8 @@ function CreateAssignmentForm({
             title: title.trim(),
             description: description.trim() || undefined,
             dueDate: dueDate || undefined,
+            // Ирээдүйн өдөр сонгосон бол өнөөдрийн хичээлд холбоно
+            lessonDate: lessonDate > ubToday() ? ubToday() : lessonDate,
             imageKeys: imageKeys.length ? imageKeys : undefined,
           },
         },
@@ -315,6 +328,12 @@ function CreateAssignmentForm({
   return (
     <form onSubmit={submit} className="space-y-3 chunky p-4">
       <h3 className="font-bold">Шинэ даалгавар</h3>
+      <p className="text-xs text-ink-dim">
+        Хичээлийн өдөр:{" "}
+        {formatMnDate(lessonDate > ubToday() ? ubToday() : lessonDate)}. Тэр
+        өдөр хичээлгүй бол өмнөх хичээлд холбогдож, сурагчид тэр хичээлийн
+        сэдвээр харагдана
+      </p>
       <label className="block text-sm">
         <span className="mb-1 block font-medium">Гарчиг</span>
         <input

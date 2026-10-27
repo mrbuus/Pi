@@ -11,6 +11,29 @@ import { formatMinutes } from "../types";
 import TestPicker from "./TestPicker";
 import { fullTestTitle, shortClass, type DayEntry, type TestInfo } from "./types";
 
+/** Батлахад бичих тайлбарын дээд урт — API-ийн DESCRIPTION_MAX-тай ижил */
+const DESCRIPTION_MAX = 1000;
+
+/**
+ * «1-12, 15, 20» → [1..12, 15, 20] (API lesson-records.logic.parseProblemNumbers-тэй
+ * ижил дүрэм). Танигдахгүй бол null — бичвэр нь хэвээр хадгалагдана.
+ */
+function parseProblemNumbers(text: string): number[] | null {
+  const parts = text.split(/[,;\s]+/).map((p) => p.trim()).filter(Boolean);
+  if (!parts.length) return null;
+  const out = new Set<number>();
+  for (const part of parts) {
+    const m = part.match(/^(\d{1,3})(?:[-\u2013\u2014](\d{1,3}))?$/);
+    if (!m) return null;
+    const a = Number(m[1]);
+    const b = m[2] === undefined ? a : Number(m[2]);
+    if (a < 1 || b < a) return null;
+    for (let n = a; n <= b; n++) out.add(n);
+    if (out.size > 500) return null;
+  }
+  return [...out].sort((x, y) => x - y);
+}
+
 interface Row {
   testId: string;
   excluded: string[];
@@ -66,6 +89,11 @@ function Body({
   const [extra, setExtra] = useState<Record<string, TestInfo>>({});
   const [open, setOpen] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  // Багшийн бичих нэмэлт (эзэн 2026-10-27): чөлөөт сэдэв, тайлбар, бодсон бодлогын дугаар
+  const [topic, setTopic] = useState(e.record?.topic && e.record.topic !== e.topic ? e.record.topic : "");
+  const [description, setDescription] = useState(e.record?.description ?? "");
+  const [numbers, setNumbers] = useState(e.record?.problemNumbersText ?? "");
+  const parsedNumbers = parseProblemNumbers(numbers);
   const [busy, setBusy] = useState(false);
   const [undoArmed, setUndoArmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,7 +140,13 @@ function Body({
     run(async () => {
       await api(`/lesson-records/${e.scheduleId}/confirm`, {
         method: "PUT",
-        body: { date, tests: rows.map((r) => ({ testId: r.testId, excludedProblemIds: r.excluded })) },
+        body: {
+          date,
+          tests: rows.map((r) => ({ testId: r.testId, excludedProblemIds: r.excluded })),
+          topic: topic.trim() || null,
+          description: description.trim() || null,
+          problemNumbers: numbers.trim() || null,
+        },
       });
     });
   const unconfirm = () =>
@@ -217,7 +251,8 @@ function Body({
         )}
 
         {adding ? (
-          <div className="rounded-xl border border-line p-3">
+          <div className="space-y-2 rounded-xl border border-line p-3">
+            <h4 className="text-xs font-bold text-ink-dim">Орох тест</h4>
             <TestPicker
               classroomId={e.classroomId}
               date={date}
@@ -226,14 +261,64 @@ function Body({
               onChange={(ids) =>
                 setRows((list) => ids.map((id) => list.find((r) => r.testId === id) ?? { testId: id, excluded: [] }))
               }
+              freeText={topic}
+              onFreeTextChange={setTopic}
+              hideChips
             />
           </div>
         ) : (
-          <button type="button" onClick={() => setAdding(true)} className={cn(chip, "border-dashed border-line text-ink-dim hover:border-brand hover:text-ink")}>
-            <Plus className="size-4" aria-hidden />
-            Тест нэмэх
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setAdding(true)} className={cn(chip, "border-dashed border-line text-ink-dim hover:border-brand hover:text-ink")}>
+              <Plus className="size-4" aria-hidden />
+              Тест, сэдэв нэмэх
+            </button>
+            {topic.trim() && (
+              <span className="min-w-0 truncate text-sm text-ink">
+                Сэдэв: <span className="font-semibold">{topic.trim()}</span>
+              </span>
+            )}
+          </div>
         )}
+
+        <div className="space-y-1.5">
+          <label htmlFor={`confirm-numbers-${e.scheduleId}`} className="text-xs font-bold text-ink-dim">
+            Бодсон бодлогын дугаар
+          </label>
+          <input
+            id={`confirm-numbers-${e.scheduleId}`}
+            value={numbers}
+            maxLength={200}
+            onChange={(ev) => setNumbers(ev.target.value)}
+            onKeyDown={(ev) => ev.key === "Enter" && ev.preventDefault()}
+            placeholder="Жишээ нь 1-12, 15, 20"
+            inputMode="text"
+            autoComplete="off"
+            aria-describedby={`confirm-numbers-hint-${e.scheduleId}`}
+            className="min-h-11 w-full rounded-lg border border-line bg-bg px-3 text-sm"
+          />
+          <p id={`confirm-numbers-hint-${e.scheduleId}`} className="text-xs text-ink-dim">
+            {!numbers.trim()
+              ? "Заавал биш — муж, таслалаар бичнэ"
+              : parsedNumbers
+                ? `${parsedNumbers.length} бодлого`
+                : "Тоогоор задлах боломжгүй — бичсэнээр нь хадгална"}
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor={`confirm-desc-${e.scheduleId}`} className="text-xs font-bold text-ink-dim">
+            Тайлбар
+          </label>
+          <textarea
+            id={`confirm-desc-${e.scheduleId}`}
+            value={description}
+            maxLength={DESCRIPTION_MAX}
+            rows={3}
+            onChange={(ev) => setDescription(ev.target.value.slice(0, DESCRIPTION_MAX))}
+            placeholder="Хичээлд юу хийснийг товч бичнэ"
+            className="w-full resize-y rounded-lg border border-line bg-bg p-2.5 text-sm"
+          />
+        </div>
       </div>
 
       <footer className="flex flex-wrap items-center gap-2 border-t border-line px-4 py-3">

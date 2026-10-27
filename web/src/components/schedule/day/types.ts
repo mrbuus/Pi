@@ -40,6 +40,11 @@ export interface DayEntry extends Omit<WeekEntry, "leadTeacher" | "assistantTeac
     presentCount: number;
     absentCount: number;
     attendanceMarked: number;
+    /** Батлахад бичсэн сэдэв, тайлбар, бодлогын дугаар (эзэн 2026-10-27) */
+    topic?: string | null;
+    description?: string | null;
+    problemNumbersText?: string | null;
+    problemNumbers?: number[];
   } | null;
   dismissalAt: string | null;
 }
@@ -108,6 +113,8 @@ export interface PlanContext {
     dismissMode: DismissMode | null;
     photoStudentId: string | null;
     title: string | null;
+    /** Багшийн гараар бичсэн сэдэв (тестийн нэрээс автоматаар үүсээгүй бол) */
+    customTitle?: string | null;
   } | null;
   roster: { id: string; name: string }[];
   photoSuggestion: string | null;

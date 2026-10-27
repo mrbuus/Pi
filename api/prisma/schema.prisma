@@ -550,6 +550,10 @@ model Assignment {
   dueDate     DateTime?
   createdById String
   createdAt   DateTime       @default(now())
+  // Даалгавар ӨГСӨН хичээлийн өдөр (эзэн 2026-10-27): сурагч сэдэв сонгохгүй,
+  // «10-р сарын 26 — Сэдэв» шошгыг анги + энэ өдрийн төлөвлөгөөнөөс угсарна.
+  // null = 2026-10-27-оос өмнөх мөр → createdAt-ийн УБ өдрөөр тооцно.
+  lessonDate  DateTime?      @db.Date
 
   // Зөөлөн устгал: hard DELETE хийвэл Submission-ы түүхэн бичлэгүүд орфон
   // үлдэнэ. Уншихдаа заавал deletedAt: null гэж шүүнэ.
@@ -558,6 +562,7 @@ model Assignment {
   submissions Submission[]
 
   @@index([deletedAt])
+  @@index([classroomId, lessonDate])
 }
 
 model Submission {
@@ -2549,6 +2554,12 @@ model LessonRecord {
   // [{ id, testId, title }] — тухайн өдөр анги хийсэн тест (ClassTestSession)
   tests                Json     @default("[]")
   testCount            Int      @default(0)
+  // Батлахад багшийн бичсэн чөлөөт тайлбар (эзэн 2026-10-27)
+  description          String?
+  // Бодсон бодлогын дугаар — багшийн бичсэнээр («1-12, 15, 20»)
+  problemNumbersText   String?
+  // Дээрхийг задалсан тоон жагсаалт (задалж чадаагүй бол хоосон)
+  problemNumbers       Int[]    @default([])
   enrolledCount        Int      @default(0)
   presentCount         Int      @default(0)
   absentCount          Int      @default(0)
@@ -2797,6 +2808,32 @@ model ClassTestStatus {
 
   @@unique([classroomId, testId])
   @@index([classroomId])
+}
+
+/// «Өмнө үзсэн сэдэв» (эзэн 2026-10-27): систем эхлэхээс ӨМНӨ анги үзсэн тестийг
+/// ОГНООГҮЙгээр тэмдэглэнэ. Огноотой (өдрийн хичээлээр батлагдсан) үзсэн тест нь
+/// ClassTestSession-д — ангийн түүх = ClassTestSession (огноотой) ∪ энэ (огноогүй).
+/// Хасах нь ЗӨӨЛӨН: removedAt тавина, мөр устахгүй; дахин тэмдэглэвэл removedAt-г
+/// цэвэрлэнэ. Өөрчлөлт бүр AuditLog-д (entity «ClassCoveredTest», entityId = анги).
+/// classroomId/testId/chapterId — plain string (LessonTopic-ийн адил, тест устсан ч мөр үлдэнэ).
+model ClassCoveredTest {
+  id          String    @id @default(cuid())
+  classroomId String
+  testId      String
+  // Тэмдэглэх үеийн бүлэг (snapshot) — бүлгээр нь нэгтгэхэд
+  chapterId   String?
+  // «PAST» = өмнө үзсэн (огноогүй). Ирээдүйд өөр огноогүй эх сурвалж нэмэгдэж болно.
+  source      String    @default("PAST")
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedById String?
+  updatedAt   DateTime?
+  removedAt   DateTime?
+  removedById String?
+
+  @@unique([classroomId, testId])
+  @@index([classroomId, removedAt])
+  @@index([testId])
 }
 
 /// Онолын зураг (эзэн 2026-10-18): тухайн өдрийн хичээлийн онолыг томилогдсон сурагч

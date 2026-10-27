@@ -240,8 +240,10 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
     dismissMode: p.ctx.plan?.dismissMode ?? null,
     photoStudentId: p.ctx.plan?.photoStudentId ?? null,
     note: e.note?.body ?? "",
+    title: p.ctx.plan?.customTitle ?? "",
   };
   const [testIds, setTestIds] = useState<string[]>(initial.testIds);
+  const [title, setTitle] = useState(initial.title);
   const [dismissMode, setDismissMode] = useState<DismissMode | null>(initial.dismissMode);
   const [photo, setPhoto] = useState<string | null>(initial.photoStudentId);
   const [note, setNote] = useState(initial.note);
@@ -251,7 +253,8 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
   const planChanged =
     testIds.join() !== initial.testIds.join() ||
     dismissMode !== initial.dismissMode ||
-    photo !== initial.photoStudentId;
+    photo !== initial.photoStudentId ||
+    title.trim() !== initial.title.trim();
   const noteChanged = note.trim() !== initial.note.trim();
 
   async function save() {
@@ -261,7 +264,7 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
       if (planChanged)
         await api(`/schedule/${e.scheduleId}/plan`, {
           method: "PUT",
-          body: { date: p.date, testIds, dismissMode, photoStudentId: photo },
+          body: { date: p.date, testIds, dismissMode, photoStudentId: photo, title: title.trim() || null },
         });
       if (noteChanged)
         await api(`/lesson-records/${e.scheduleId}/note`, {
@@ -281,8 +284,15 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
   return (
     <>
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4">
-        <Section title="Тест">
-          <TestPicker classroomId={e.classroomId} date={p.date} selected={testIds} onChange={setTestIds} />
+        <Section title="Орох тест">
+          <TestPicker
+            classroomId={e.classroomId}
+            date={p.date}
+            selected={testIds}
+            onChange={setTestIds}
+            freeText={title}
+            onFreeTextChange={setTitle}
+          />
         </Section>
 
         <Section title="Хичээлийн дараа">

@@ -7,14 +7,14 @@ import RequireRole from "@/components/nav/RequireRole";
 import { Button } from "@/components/ui/kit/button";
 import InfoHint from "@/components/ui/InfoHint";
 import { Meta } from "@/components/ui/Meta";
-import { SkeletonCard } from "@/components/ui/Skeleton";
+import { SkeletonLine } from "@/components/ui/Skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { api, fileUrl } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 import { formatMnDate } from "@/lib/dateMn";
-import { PAYMENT_META } from "./meta";
-import { RateCell, Segmented } from "./parts";
+import { PAYMENT_META, rateTone } from "./meta";
+import { Segmented } from "./parts";
 import TeacherPicker from "./TeacherPicker";
 import type { ClassCard, ClassListResponse } from "./types";
 
@@ -163,9 +163,16 @@ export default function ClassesListClient() {
 
         {error && <ErrorState message={error} onRetry={() => void load()} />}
         {!data && !error && (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Ангиуд ачаалж байна">
+          <div className="space-y-2" role="status" aria-label="Ангиуд ачаалж байна">
             {Array.from({ length: 6 }, (_, i) => (
-              <SkeletonCard key={i} />
+              <div key={i} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3" aria-hidden>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <SkeletonLine width={160} height={16} />
+                  <SkeletonLine width="45%" height={12} />
+                </div>
+                <SkeletonLine width={220} height={28} className="hidden md:block" />
+                <SkeletonLine width={36} height={36} className="rounded-full" />
+              </div>
             ))}
           </div>
         )}
@@ -180,10 +187,10 @@ export default function ClassesListClient() {
           <EmptyState icon={Search} title="Хайлтад тохирох анги алга" hint="Өөр үгээр хайж үзнэ үү" />
         )}
         {shown.length > 0 && (
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="@container space-y-2">
             {shown.map((c) => (
               <li key={c.id}>
-                <ClassCardView
+                <ClassRowView
                   c={c}
                   windowDays={data!.windowDays}
                   canAssign={!!data!.permissions.manageClasses}
@@ -206,11 +213,13 @@ export default function ClassesListClient() {
 }
 
 /**
- * Ангийн карт — карт бүхэлдээ анги руу орох холбоос (нэрний холбоос картыг
- * бүрхэнэ). Ангийн багшгүй бол Багш+/Админд «Багш оноох» товч (холбоосоос
- * тусдаа, дээр нь давхарлана).
+ * Ангийн мөр (эзэн 2026-10-27: нэг баганаар, нэг мөрөнд нэг анги).
+ * Мөр бүхэлдээ анги руу орох холбоос (нэрний холбоос мөрийг бүрхэнэ).
+ * Өргөн (≥ @2xl контейнер) үед бүх мэдээлэл нэг мөрөнд; нарийн үед 2 мөр:
+ * 1) нэр, сурагч, багш, зураг 2) үзүүлэлтүүд. Ангийн багшгүй бол Багш+/Админд
+ * «Багш оноох» товч (холбоосоос тусдаа, дээр нь давхарлана).
  */
-function ClassCardView({
+function ClassRowView({
   c,
   windowDays,
   canAssign,
@@ -223,67 +232,86 @@ function ClassCardView({
 }) {
   const pay = c.payment;
   const payTotal = pay ? pay.PAID + pay.PARTIAL + pay.PENDING + pay.NONE : 0;
+  const showPay = !!pay && payTotal > 0;
+  const payParts = pay
+    ? [
+        `${PAYMENT_META.PAID.label.toLowerCase()} ${pay.PAID}`,
+        pay.PARTIAL ? `${PAYMENT_META.PARTIAL.label.toLowerCase()} ${pay.PARTIAL}` : null,
+        pay.PENDING ? `хүлээгдэж буй ${pay.PENDING}` : null,
+        pay.NONE ? `бүртгэлгүй ${pay.NONE}` : null,
+      ].filter((x): x is string => !!x)
+    : [];
   const classTeachers = [c.classTeacher?.name, c.assistantTeacher?.name].filter((n): n is string => !!n);
+  const teacherText = classTeachers.length
+    ? classTeachers.join(", ")
+    : c.teachers.length
+      ? c.teachers.slice(0, 2).join(", ")
+      : canAssign
+        ? null
+        : "Багш оноогоогүй";
   return (
     <div
-      className="class-row surface-interactive group relative h-full rounded-2xl border border-line bg-surface p-4 elev-1"
+      className="class-row class-row-interactive group relative flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-line bg-surface px-3 py-2.5 @2xl:flex-nowrap @2xl:px-4"
       style={{ "--cls": getClassroomColor(c.id) } as React.CSSProperties}
     >
-      <div className="flex items-start gap-2">
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate text-lg font-bold text-ink">
-            <Link
-              href={`/app/classes/${encodeURIComponent(c.id)}`}
-              className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
-              {c.name}
-            </Link>
-          </h2>
+      <div className="min-w-0 flex-1">
+        <h2 className="truncate text-base font-bold text-ink">
+          <Link
+            href={`/app/classes/${encodeURIComponent(c.id)}`}
+            className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {c.name}
+          </Link>
+        </h2>
+        <div className="flex min-w-0 items-center gap-2">
           <Meta
-            className="mt-0.5 text-sm text-ink-dim"
+            className="min-w-0 truncate text-sm text-ink-dim"
             items={[
               <span key="s" className="inline-flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" aria-hidden />
                 {c.students}
               </span>,
-              classTeachers.length
-                ? classTeachers.join(", ")
-                : c.teachers.length
-                  ? c.teachers.slice(0, 2).join(", ")
-                  : canAssign
-                    ? null
-                    : "Багш оноогоогүй",
+              teacherText,
             ]}
           />
+          {canAssign && !c.classTeacher && (
+            <button
+              type="button"
+              onClick={onAssign}
+              className="relative z-10 inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-1.5 text-sm font-semibold text-brand hover:bg-brand-bright/8 focus-visible:outline-2 focus-visible:outline-brand"
+            >
+              <UserPlus className="h-4 w-4" aria-hidden /> Багш оноох
+            </button>
+          )}
         </div>
-        {c.classTeacher && <TeacherAvatar name={c.classTeacher.name} avatarKey={c.teacherAvatarUrl ?? null} />}
-        <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-ink-dim transition group-hover:translate-x-0.5" aria-hidden />
+        <p className="truncate text-xs text-ink-dim">
+          {c.lastLesson
+            ? `Сүүлийн хичээл ${formatMnDate(c.lastLesson.date)}${c.lastLesson.topic ? ` — ${c.lastLesson.topic}` : ""}`
+            : "Батлагдсан хичээл хараахан алга"}
+        </p>
       </div>
-      {canAssign && !c.classTeacher && (
-        <button
-          type="button"
-          onClick={onAssign}
-          className="relative z-10 -ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-brand hover:bg-brand-bright/8 focus-visible:outline-2 focus-visible:outline-brand"
-        >
-          <UserPlus className="h-4 w-4" aria-hidden /> Багш оноох
-        </button>
-      )}
 
-      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2">
-        <Metric label="Ирц">
-          <RateCell rate={c.attendanceRate} />
+      <dl
+        className={cn(
+          "order-last grid w-full gap-x-2 border-t border-line pt-2",
+          showPay ? "grid-cols-5" : "grid-cols-4",
+          "@2xl:order-none @2xl:flex @2xl:w-auto @2xl:shrink-0 @2xl:gap-x-4 @2xl:border-t-0 @2xl:pt-0",
+        )}
+      >
+        <Metric label="Ирц" className="@2xl:w-16 @4xl:w-24">
+          <RowRate rate={c.attendanceRate} />
         </Metric>
-        <Metric label="Даалгавар">
-          <RateCell rate={c.homeworkRate} />
+        <Metric label="Даалгавар" className="@2xl:w-16 @4xl:w-24">
+          <RowRate rate={c.homeworkRate} />
         </Metric>
-        <Metric label="Шалгалт">
+        <Metric label="Шалгалт" className="@2xl:w-16">
           {c.examAvg === null ? (
             <span className="text-sm text-ink-dim">{c.examCount ? "Дүн алга" : "—"}</span>
           ) : (
             <span className="text-sm font-semibold tabular-nums text-ink">{c.examAvg}%</span>
           )}
         </Metric>
-        <Metric label="Анхаарах">
+        <Metric label="Анхаарах" className="@2xl:w-16">
           <span
             className={cn(
               "inline-flex items-center gap-1 text-sm font-semibold tabular-nums",
@@ -294,34 +322,40 @@ function ClassCardView({
             {c.riskCount}
           </span>
         </Metric>
+        {showPay && pay && (
+          <Metric label="Энэ сар" className="@2xl:w-20 @4xl:w-24">
+            <span className="inline-flex min-w-0 items-center gap-1.5" title={`Энэ сар — ${payParts.join(", ")}`}>
+              <span className="hidden h-1.5 w-8 shrink-0 overflow-hidden rounded-full bg-ink/10 @4xl:flex" aria-hidden>
+                <span className="bg-success" style={{ width: `${(pay.PAID / payTotal) * 100}%` }} />
+                <span className="bg-error" style={{ width: `${(pay.PARTIAL / payTotal) * 100}%` }} />
+                <span className="bg-info" style={{ width: `${(pay.PENDING / payTotal) * 100}%` }} />
+              </span>
+              <span className="text-sm font-semibold tabular-nums text-ink" aria-hidden>
+                {pay.PAID}/{payTotal}
+              </span>
+              <span className="sr-only">Энэ сар — {payParts.join(", ")}</span>
+            </span>
+          </Metric>
+        )}
       </dl>
 
-      {pay && payTotal > 0 && (
-        <div className="mt-3 border-t border-line pt-2">
-          <div className="flex h-1.5 overflow-hidden rounded-full bg-ink/10" aria-hidden>
-            <span className="bg-success" style={{ width: `${(pay.PAID / payTotal) * 100}%` }} />
-            <span className="bg-error" style={{ width: `${(pay.PARTIAL / payTotal) * 100}%` }} />
-            <span className="bg-info" style={{ width: `${(pay.PENDING / payTotal) * 100}%` }} />
-          </div>
-          <Meta
-            className="mt-1 text-xs text-ink-dim"
-            items={[
-              `Энэ сар ${PAYMENT_META.PAID.label.toLowerCase()} ${pay.PAID}`,
-              pay.PARTIAL ? `${PAYMENT_META.PARTIAL.label.toLowerCase()} ${pay.PARTIAL}` : null,
-              pay.PENDING ? `хүлээгдэж буй ${pay.PENDING}` : null,
-              pay.NONE ? `бүртгэлгүй ${pay.NONE}` : null,
-            ]}
-          />
-        </div>
-      )}
-
-      <p className="mt-2 truncate text-xs text-ink-dim">
-        {c.lastLesson
-          ? `Сүүлийн хичээл ${formatMnDate(c.lastLesson.date)}${c.lastLesson.topic ? ` — ${c.lastLesson.topic}` : ""}`
-          : "Батлагдсан хичээл хараахан алга"}
-      </p>
+      {c.classTeacher && <TeacherAvatar name={c.classTeacher.name} avatarKey={c.teacherAvatarUrl ?? null} />}
+      <ChevronRight className="h-5 w-5 shrink-0 text-ink-dim transition group-hover:translate-x-0.5" aria-hidden />
       <span className="sr-only">Ирц, даалгавар нь сүүлийн {windowDays} хоногийнх</span>
     </div>
+  );
+}
+
+/** Хувь — нарийн үед зөвхөн тоо, өргөн үед жижиг баганатай (parts.RateCell-ийн нягт хувилбар) */
+function RowRate({ rate }: { rate: number | null }) {
+  if (rate === null) return <span className="text-sm text-ink-dim">—</span>;
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <span className="hidden h-1.5 w-8 shrink-0 overflow-hidden rounded-full bg-ink/10 @4xl:block" aria-hidden>
+        <span className={cn("block h-full rounded-full", rateTone(rate))} style={{ width: `${rate}%` }} />
+      </span>
+      <span className="text-sm font-semibold tabular-nums text-ink">{rate}%</span>
+    </span>
   );
 }
 
@@ -356,11 +390,11 @@ function TeacherAvatar({ name, avatarKey }: { name: string; avatarKey: string | 
   );
 }
 
-function Metric({ label, children }: { label: string; children: React.ReactNode }) {
+function Metric({ label, className, children }: { label: string; className?: string; children: React.ReactNode }) {
   return (
-    <div className="min-w-0">
-      <dt className="text-xs font-semibold text-ink-dim">{label}</dt>
-      <dd className="mt-0.5">{children}</dd>
+    <div className={cn("min-w-0", className)}>
+      <dt className="truncate text-xs font-semibold text-ink-dim">{label}</dt>
+      <dd className="mt-0.5 truncate">{children}</dd>
     </div>
   );
 }

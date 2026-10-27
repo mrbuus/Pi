@@ -12,10 +12,23 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import {
   buildSnapshot,
+  cleanText,
+  DESCRIPTION_MAX,
   enrolledOn,
   normalizeNote,
+  parseProblemNumbers,
+  PROBLEM_TEXT_MAX,
   ubDayBounds,
 } from './lesson-records.logic';
+import { compareBookOrder, planTitle } from '../schedule/lesson-plan.logic';
+import { shortTestName } from '../class-sessions/roadmap.logic';
+
+/** Батлахад багшийн бичих нэмэлт (эзэн 2026-10-27). undefined = өмнөхийг хадгална. */
+export interface ConfirmDetails {
+  topic?: string | null;
+  description?: string | null;
+  problemNumbers?: string | null;
+}
 
 export type Actor = { userId: string; role: Role };
 
@@ -170,6 +183,7 @@ export class LessonRecordsService {
     scheduleId: string,
     dateStr: string,
     tests?: { testId: string; excludedProblemIds: string[] }[],
+    details: ConfirmDetails = {},
   ) {
     this.assertCanConfirm(actor);
     const { date, key } = this.parseDate(dateStr);
@@ -203,15 +217,19 @@ export class LessonRecordsService {
       }),
     ]);
     const testIds = sessions.flatMap((s) => (s.testId ? [s.testId] : []));
-    const testTitles = new Map(
-      (testIds.length
-        ? await this.prisma.test.findMany({
-            where: { id: { in: testIds } },
-            select: { id: true, title: true },
-          })
-        : []
-      ).map((t) => [t.id, t.title]),
-    );
+    const testRows = testIds.length
+      ? await this.prisma.test.findMany({
+          where: { id: { in: testIds } },
+          select: {
+            id: true,
+            title: true,
+            chapterId: true,
+            variantLabel: true,
+            chapter: { select: { order: true, book: { select: { code: true } } } },
+          },
+        })
+      : [];
+    const testTitles = new Map(testRows.map((t) => [t.id, t.title]));
     // Өөр ангиас шилжсэн эсэх — тэдэнд л joinedAt мөрдөнө (logic-ийн тайлбар)
     const late = enrollments.filter((e) => e.joinedAt >= end);
     const movedIds = new Set(
@@ -256,9 +274,29 @@ export class LessonRecordsService {
       where: { scheduleId_date: { scheduleId, date } },
     });
 
+    // Сэдэв: «Орох тест» чөлөөт бичвэр > төлөвлөгөөний гарчиг > хийсэн тестүүдийн нэр
+    const typedTopic = cleanText(details.topic, 200);
+    const libraryTests = sessions.flatMap((s) => (s.testId ? [testTitles.get(s.testId) ?? ''] : []));
+    const topic =
+      typedTopic ?? snap.record.topic ?? (planTitle(libraryTests.map(shortTestName)) || null);
+    // Тайлбар, бодлогын дугаар — өгөөгүй (undefined) бол өмнөх батламжийнхыг хадгална
+    const description =
+      details.description === undefined
+        ? (before?.description ?? null)
+        : cleanText(details.description, DESCRIPTION_MAX);
+    const problemNumbersText =
+      details.problemNumbers === undefined
+        ? (before?.problemNumbersText ?? null)
+        : cleanText(details.problemNumbers, PROBLEM_TEXT_MAX);
+    const problemNumbers = parseProblemNumbers(problemNumbersText) ?? [];
+
     const record = await this.prisma.$transaction(async (tx) => {
       const data = {
         ...snap.record,
+        topic,
+        description,
+        problemNumbersText,
+        problemNumbers,
         tests: snap.record.tests as Prisma.InputJsonValue,
         confirmedById: actor.userId,
         confirmedByName,
@@ -282,9 +320,69 @@ export class LessonRecordsService {
       'LessonRecord',
       record.id,
       before,
-      { ...snap.record, date: key, students: snap.students.length },
+      {
+        ...snap.record,
+        topic,
+        description,
+        problemNumbersText,
+        date: key,
+        students: snap.students.length,
+      },
     );
+    await this.feedLessonTopic(actor, entry, key, typedTopic, testRows);
     return this.present(record, await this.plusOf([record]));
+  }
+
+  /**
+   * Ангийн «Одоогийн бүлэг» (class-dashboard currentChapter нь LessonTopic.chapterId-ээс):
+   * батлахад хийсэн тестийн хамгийн хол бүлгийг төлөвлөгөөнд БӨГЛӨНӨ. Зөвхөн
+   * НЭМНЭ — төлөвлөгөөний байгаа гарчиг, бүлгийг дарж бичихгүй. Төлөвлөгөөгүй
+   * хичээлд шинэ мөр (гарчиг = бичсэн сэдэв) үүсгэнэ.
+   */
+  private async feedLessonTopic(
+    actor: Actor,
+    entry: { scheduleId: string; exception?: { originalDate?: string | null } | null },
+    key: string,
+    typedTopic: string | null,
+    tests: {
+      chapterId: string | null;
+      variantLabel: string | null;
+      chapter: { order: number; book: { code: string } | null } | null;
+    }[],
+  ) {
+    const last = tests
+      .filter((t) => t.chapterId)
+      .sort((a, b) =>
+        compareBookOrder(
+          { bookCode: a.chapter?.book?.code ?? null, chapterOrder: a.chapter?.order ?? null, variantLabel: a.variantLabel },
+          { bookCode: b.chapter?.book?.code ?? null, chapterOrder: b.chapter?.order ?? null, variantLabel: b.variantLabel },
+        ),
+      )
+      .at(-1);
+    const chapterId = last?.chapterId ?? null;
+    if (!chapterId && !typedTopic) return;
+    const date = parseDateOnly(entry.exception?.originalDate ?? key);
+    const where = { scheduleId_date: { scheduleId: entry.scheduleId, date } };
+    const existing = await this.prisma.lessonTopic.findUnique({ where });
+    if (existing) {
+      const data: { chapterId?: string; title?: string } = {};
+      if (!existing.chapterId && chapterId) data.chapterId = chapterId;
+      if (!existing.title && typedTopic) data.title = typedTopic;
+      if (!Object.keys(data).length) return;
+      const row = await this.prisma.lessonTopic.update({ where: { id: existing.id }, data });
+      await this.audit(actor, 'UPDATE', 'LessonTopic', row.id, existing, row);
+      return;
+    }
+    const row = await this.prisma.lessonTopic.create({
+      data: {
+        scheduleId: entry.scheduleId,
+        date,
+        title: typedTopic ?? '',
+        chapterId,
+        createdById: actor.userId,
+      },
+    });
+    await this.audit(actor, 'CREATE', 'LessonTopic', row.id, null, row);
   }
 
   async unconfirm(actor: Actor, scheduleId: string, dateStr: string) {
@@ -491,6 +589,9 @@ export class LessonRecordsService {
     confirmedById: string;
     confirmedByName: string;
     confirmedAt: Date;
+    description?: string | null;
+    problemNumbersText?: string | null;
+    problemNumbers?: number[];
   }, plus: Set<string> = new Set()) {
     return {
       id: r.id,
@@ -512,6 +613,9 @@ export class LessonRecordsService {
       attendanceMarked: r.attendanceMarked,
       confirmedByName: markPlus(r.confirmedByName, r.confirmedById, plus),
       confirmedAt: r.confirmedAt,
+      description: r.description ?? null,
+      problemNumbersText: r.problemNumbersText ?? null,
+      problemNumbers: r.problemNumbers ?? [],
     };
   }
 }

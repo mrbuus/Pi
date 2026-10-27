@@ -14,9 +14,23 @@ export const DrawerClose = DrawerPrimitive.Close;
 export const DrawerTitle = DrawerPrimitive.Title;
 export const DrawerDescription = DrawerPrimitive.Description;
 
+/**
+ * vaul нь Content дээрх pointerdown бүрт чирэлт эхлүүлж, ДАРСАН элемент дээр
+ * `setPointerCapture` хийдэг. Төрөлх <select> дээр дарахад систем жагсаалт нээгдэж
+ * pointerup хуудсанд ирэхгүй тул барилт <select> дээр УЛДЭНЭ — дараагийн дарах
+ * бүр (цонх дотор ч, гадна ч) зорьсон элементдээ биш өөр газар очиж, хамааралгүй
+ * үйлдэл гарна (эзэн 2026-10-27, «Онолын зураг илгээх сурагч»). Тиймээс <select>
+ * дээрх pointerdown-ийг vaul-д хүргэхгүй — сонгох нь хэвийн, чирэлт эхлэхгүй.
+ */
+function stopSelectPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+  const target = event.target as Element | null;
+  if (target?.closest?.("select")) event.stopPropagation();
+}
+
 export function DrawerContent({
   className,
   children,
+  onPointerDownCapture,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
   return (
@@ -28,6 +42,10 @@ export function DrawerContent({
           className,
         )}
         {...props}
+        onPointerDownCapture={(event) => {
+          onPointerDownCapture?.(event);
+          stopSelectPointerDown(event);
+        }}
       >
         <div aria-hidden className="mx-auto mt-2.5 h-1.5 w-11 shrink-0 rounded-full bg-ink/15" />
         {children}

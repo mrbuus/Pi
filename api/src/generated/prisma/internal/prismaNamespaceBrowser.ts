@@ -162,6 +162,7 @@ export const ModelName = {
   MockExamEvent: 'MockExamEvent',
   MockExamRegistration: 'MockExamRegistration',
   ClassTestStatus: 'ClassTestStatus',
+  ClassCoveredTest: 'ClassCoveredTest',
   LessonPhoto: 'LessonPhoto',
   LessonMakeup: 'LessonMakeup',
   ClassCheck: 'ClassCheck',
@@ -414,6 +415,7 @@ export const AssignmentScalarFieldEnum = {
   dueDate: 'dueDate',
   createdById: 'createdById',
   createdAt: 'createdAt',
+  lessonDate: 'lessonDate',
   deletedAt: 'deletedAt'
 } as const
 
@@ -1683,6 +1685,9 @@ export const LessonRecordScalarFieldEnum = {
   assistantTeacherName: 'assistantTeacherName',
   tests: 'tests',
   testCount: 'testCount',
+  description: 'description',
+  problemNumbersText: 'problemNumbersText',
+  problemNumbers: 'problemNumbers',
   enrolledCount: 'enrolledCount',
   presentCount: 'presentCount',
   absentCount: 'absentCount',
@@ -1879,6 +1884,23 @@ export const ClassTestStatusScalarFieldEnum = {
 } as const
 
 export type ClassTestStatusScalarFieldEnum = (typeof ClassTestStatusScalarFieldEnum)[keyof typeof ClassTestStatusScalarFieldEnum]
+
+
+export const ClassCoveredTestScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  testId: 'testId',
+  chapterId: 'chapterId',
+  source: 'source',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt',
+  removedAt: 'removedAt',
+  removedById: 'removedById'
+} as const
+
+export type ClassCoveredTestScalarFieldEnum = (typeof ClassCoveredTestScalarFieldEnum)[keyof typeof ClassCoveredTestScalarFieldEnum]
 
 
 export const LessonPhotoScalarFieldEnum = {
