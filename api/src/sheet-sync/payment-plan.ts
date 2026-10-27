@@ -286,17 +286,23 @@ export function matchStudent(
   const p = phone8(who.phone);
   const nameKey = `${normKey(who.last)}|${normKey(who.first)}`;
   const firstKey = normKey(who.first);
+  const exact = db.byName.get(nameKey) ?? [];
   if (p) {
     const hits = db.byPhone.get(p) ?? [];
-    if (hits.length === 1) return { student: hits[0], by: 'phone' };
+    if (hits.length === 1) {
+      // Ах дүү нэг утас хэрэглэдэг: утас таарсан ч НЭР өөр, харин яг ижил овог-нэртэй
+      // өөр ганц сурагч байвал түүнийг сонгоно (2026-10-27 прод: Эрхэмбаяр ↔ Эрдэмтөгс).
+      if (normKey(hits[0].firstName) !== firstKey && exact.length === 1 && exact[0] !== hits[0])
+        return { student: exact[0], by: 'name' };
+      return { student: hits[0], by: 'phone' };
+    }
     if (hits.length > 1) {
       const named = hits.filter((s) => normKey(s.firstName) === firstKey);
       if (named.length === 1) return { student: named[0], by: 'phone+name' };
     }
   }
-  const named = db.byName.get(nameKey) ?? [];
-  if (named.length === 1) return { student: named[0], by: 'name' };
-  if (named.length > 1) return { conflict: `Ижил нэртэй ${named.length} сурагч` };
+  if (exact.length === 1) return { student: exact[0], by: 'name' };
+  if (exact.length > 1) return { conflict: `Ижил нэртэй ${exact.length} сурагч` };
   for (const pp of [phone8(who.father), phone8(who.mother)]) {
     if (!pp) continue;
     const hits = (db.byParent.get(pp) ?? []).filter((s) => normKey(s.firstName) === firstKey);

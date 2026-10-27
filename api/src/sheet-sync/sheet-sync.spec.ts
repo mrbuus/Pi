@@ -100,6 +100,12 @@ describe('buildPlan', () => {
     expect(plan.issues.find((i) => i.kind === 'TOTAL_MISMATCH')).toBeTruthy(); // 650,000 ≠ 350,000
     expect(plan.rowMatches.get(`${SHEET.MAIN}|бат|болд|99112233`)).toEqual({ studentId: 'u1', by: 'phone' });
   });
+  it('ах дүү нэг утастай — нэр нь яг таарсан хүүхдийг сонгоно', () => {
+    const sibling = student({ id: 'u2', firstName: 'Дорж', phone: null });
+    const book = { [SHEET.MAIN]: mainSheet([row({ 11: 300000, 23: 300000 }, { 2: 'Дорж' })]) };
+    const plan = buildPlan(book, [student(), sibling], today);
+    expect([...plan.perStudent.keys()]).toEqual(['u2']);
+  });
   it('таарахгүй мөрийг шинэ сурагчийн мэдээлэлтэй буцаана', () => {
     const book = { [SHEET.MAIN]: mainSheet([row({ 11: 300000, 23: 300000 }, { 1: 'Шинэ', 2: 'Хүүхэд', 4: '88001122', 12: 'зүүн' })]) };
     const plan = buildPlan(book, [student()], today);
