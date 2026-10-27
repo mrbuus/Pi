@@ -295,7 +295,9 @@ class SolidStage{
         let sx=(_sq2.x-_sq1.x)*w, sy=-(_sq2.y-_sq1.y)*h; const sl=Math.hypot(sx,sy)||1; let nx=-sy/sl, ny=sx/sl;
         // өндөр шиг төвөөр гарах шугамд тал нь кадр бүр солигдож «h» үсэрдэг байсан — 20px-ээс хэтрэхэд л солигдоно
         const side=nx*(x-cx0)+ny*(y-cy0); if(!L.side) L.side=side<0?-1:1; else if(Math.abs(side)>20) L.side=side<0?-1:1;
-        ox=nx*15*L.side; oy=ny*15*L.side; }
+        // хэвтээ орчим хэрчим (суурийн r, a): шошгыг үргэлж ДЭЭШ нь — доорх ирмэг, суурийн тойрогтой давхцахгүй (эзэн 2026-10-27)
+        if(Math.abs(ny)>.6) L.side=ny<0?1:-1;
+        ox=nx*21*L.side; oy=ny*21*L.side; }
       L.ax=x; L.ay=y; L.X=x+ox; L.Y=y+oy; L.on=true;
     });
     // давхцал: оройн нэр эхэлж байрлана, бусад нь тэднээс түлхэгдэнэ; дэлгэцээс гарахгүй
