@@ -22,7 +22,7 @@ const S={hero:0,idea:0,globe:0,club:0,vLab:false,vHero:true,vIdea:false,vGlobe:f
 window.S=S;
 
 let lenis=null;
-if(!RM){ lenis=new Lenis({lerp:.09,smoothWheel:true}); }
+if(!RM){ lenis=new Lenis({lerp:.15,wheelMultiplier:1.5,smoothWheel:true}); }
 const goTo=y=>{ lenis? lenis.scrollTo(y,{duration:1.4,force:true}) : scrollTo({top:y,behavior:'smooth'}); };
 $$('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
   const id=a.getAttribute('href'); if(id.length<2||id[0]!=='#') return; const t=$(id); if(!t) return;

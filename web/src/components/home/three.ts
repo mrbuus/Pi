@@ -213,7 +213,7 @@ class SolidStage{
     const mk=(arr,mat,dashed)=>{ if(!arr.length) return; const l=new LineSegments2(new LineSegmentsGeometry().setPositions(arr.flatMap(v=>[v.x,v.y,v.z])),mat); if(dashed) l.computeLineDistances(); l.renderOrder=3; l.frustumCulled=false; this.root.add(l); };
     mk(em,this.M.em); mk(aux,this.M.aux,true); mk(rt,this.M.rt); mk(dim,this.M.dim);
     for(const k in this.P) this.addLabel(k,this.P[k],'v',{vtx:k});
-    this.secLab=this.addLabel('\\alpha',V(0,0,0),'sec');
+    this.secLab={pos:V(0,0,0)};
     const re=()=>{ if(!katex) return setTimeout(re,120); this.labels.forEach(L=>tex(L.el,L.src)); }; re();
   }
   addLabel(src,pos,kind,extra={}){ const el=document.createElement('span'); el.className=kind; tex(el,src); this.ann.appendChild(el); const L={el,src,pos,kind,...extra}; this.labels.push(L); return L; }

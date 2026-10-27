@@ -69,8 +69,8 @@ html.lenis,html.lenis body{height:auto}
 .sie.light .sheet .it:hover{background:rgba(11,24,52,.06)}
 .sie .sheet .meta{display:grid;gap:8px;margin:6px 4px 2px;padding:14px 10px 8px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 .sie .sheet .meta a{color:var(--text)}
-.sie .hero{position:relative;height:460vh}
-@media (min-width:900px){.sie .hero{height:520vh}}
+.sie .hero{position:relative;height:320vh}
+@media (min-width:900px){.sie .hero{height:370vh}}
 .sie .hero .view{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 22%,#1A2C54 0%,#0F1D3D 55%,#0B1834 100%);will-change:clip-path}
 .sie .hero canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
 .sie .hero .shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(11,24,52,0) 30%,rgba(11,24,52,.74) 58%,#0B1834 92%)}
@@ -209,7 +209,7 @@ html.lenis,html.lenis body{height:auto}
 .sie .lv canvas:active{cursor:grabbing}
 .sie .lv .hint{position:absolute;left:16px;bottom:14px;z-index:3;pointer-events:none}
 @media (min-width:900px){.sie .lab{grid-template-columns:400px 1fr;align-items:center;gap:48px}.sie .lv{height:84vh;order:0}}
-.sie .sphere{position:relative;height:250vh}
+.sie .sphere{position:relative;height:180vh}
 .sie .sphere canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
 .sie .sphere .w1,.sie .sphere .w2{position:absolute;font-size:clamp(56px,14vw,200px);line-height:.88;letter-spacing:-.06em;font-weight:800;white-space:nowrap;z-index:2;will-change:transform}
 .sie .sphere .w1{left:var(--pad);top:max(84px,12vh)}
@@ -222,7 +222,7 @@ html.lenis,html.lenis body{height:auto}
 .sie .stats span{display:block;margin-top:6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;line-height:1.45}
 @media (min-width:900px){.sie .sphere .about{left:auto;right:var(--pad);width:420px;top:46%;bottom:auto;transform:translateY(-50%)}.sie .stats{left:auto;right:var(--pad);top:50%;transform:translateY(-50%);grid-template-columns:1fr;gap:26px;text-align:right;width:240px}
 }
-.sie .ring{position:relative;height:440vh;background:var(--paper);color:var(--paper-ink)}
+.sie .ring{position:relative;height:310vh;background:var(--paper);color:var(--paper-ink)}
 .sie .ring .mono{color:#5A6888}
 .sie .ring .mono.dot::before{background:var(--navy)}
 .sie .ring .rh{position:absolute;z-index:4;left:var(--pad);right:var(--pad);top:84px;text-align:center}
@@ -392,7 +392,7 @@ html.lenis,html.lenis body{height:auto}
 .sie .slide .ln .sep{display:inline-block;width:.18em;height:.18em;border-radius:50%;background:currentColor;vertical-align:middle;margin:0 .45em;opacity:.5}
 .sie .slide .ln.o .sep{background:transparent;border:1.1px solid rgba(255,255,255,.28);opacity:1}
 .sie .slide .ln.o{color:transparent;-webkit-text-stroke:1.1px rgba(255,255,255,.28)}
-.sie .globe{position:relative;height:420vh}
+.sie .globe{position:relative;height:300vh}
 .sie .globe .gv{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 50%,#0F1F45,#040A1C 80%);will-change:clip-path;touch-action:pan-y}
 .sie .globe canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
 .sie .globe .gl,.sie .globe .gr{position:absolute;z-index:3;font-size:clamp(38px,10.2vw,120px);font-weight:800;letter-spacing:-.05em;line-height:.92;pointer-events:none;will-change:transform,opacity;white-space:nowrap}
