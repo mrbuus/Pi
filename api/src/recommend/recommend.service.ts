@@ -12,6 +12,8 @@ import {
   activeClassSubjects,
   blockedSubjects,
   canAccessChapter,
+  canAccessProblem,
+  classroomRelease,
   activePurchaseWhere,
   collectPassScope,
   hasActiveClassroomEnrollment,
@@ -191,17 +193,32 @@ export class RecommendService {
     const subjectGate: Prisma.ChapterWhereInput = blocked.length
       ? { NOT: { book: { subject: { in: blocked } } } }
       : {};
-    const entitlement: Prisma.ChapterWhereInput =
-      activeClass || scope.all
-        ? subjectGate
-        : {
-            ...subjectGate,
-            OR: [
-              { freePreview: true },
-              { id: { in: scope.chapterIds } },
-              { bookId: { in: bookIds } },
-            ],
-          };
+    // Танхимын анги бүх бүлгийг БИШ, зөвхөн ангид нээгдсэн тестийн бодлогуудыг
+    // нээнэ (эзэн 2026-10-29) — өнөөдрийн тестийг урьдчилан санал болгохгүй.
+    const release = activeClass
+      ? await classroomRelease(this.prisma, studentId, role)
+      : null;
+    const entitlement: Prisma.ChapterWhereInput = scope.all
+      ? subjectGate
+      : {
+          ...subjectGate,
+          OR: [
+            { freePreview: true },
+            { id: { in: scope.chapterIds } },
+            { bookId: { in: bookIds } },
+            ...(release ? [{ id: { in: [...release.chapterIds] } }] : []),
+          ],
+        };
+    const releasedOnly = (chapter: {
+      id: string;
+      bookId: string | null;
+      freePreview: boolean;
+    }) =>
+      !!release &&
+      !scope.all &&
+      !chapter.freePreview &&
+      !scope.chapterIds.includes(chapter.id) &&
+      !(chapter.bookId && bookIds.includes(chapter.bookId));
     const historicalIds = [
       ...new Set([
         ...attemptRows.map((r) => r.problem.chapterId),
@@ -291,7 +308,12 @@ export class RecommendService {
             where: {
               deletedAt: null,
               chapterId: chapter.id,
-              id: { notIn: [...measured.seen] },
+              id: releasedOnly(chapter)
+                ? {
+                    in: [...release!.problemIds],
+                    notIn: [...measured.seen],
+                  }
+                : { notIn: [...measured.seen] },
             },
             select: {
               id: true,
@@ -414,12 +436,7 @@ export class RecommendService {
 
     if (problem.chapter.deletedAt)
       throw new NotFoundException('Бодлого олдсонгүй');
-    const allowed = await canAccessChapter(
-      this.prisma,
-      studentId,
-      role,
-      problem.chapter,
-    );
+    const allowed = await canAccessProblem(this.prisma, studentId, role, problem);
     if (!allowed)
       throw new ForbiddenException('Энэ бодлогыг бодох эрхгүй байна');
 

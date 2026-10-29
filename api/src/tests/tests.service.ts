@@ -1567,12 +1567,19 @@ export class TestsService {
           'Энэ тест таны ангийн хичээлд хамаарахгүй байна',
         );
     }
+    // Ангид оноосон тест — оноосон цаг (assignedAt) нь ирээгүй бол хараахан
+    // нээгдэхгүй (эзэн 2026-10-29: ирээдүйн огноотой шалгалтыг урьдчилан эхлүүлдэг байсан)
     const enrollment = await db.enrollment.findFirst({
       where: {
         studentId: userId,
         leftAt: null,
         classroomId: { in: test.access.map((a) => a.classroomId) },
-        classroom: { archived: false },
+        classroom: {
+          archived: false,
+          testAccess: {
+            some: { testId: test.id, assignedAt: { lte: new Date() } },
+          },
+        },
       },
     });
     if (enrollment) {

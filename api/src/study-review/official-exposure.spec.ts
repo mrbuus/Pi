@@ -19,7 +19,10 @@ describe('official exam exposure boundary', () => {
   it('excludes old issued and draft-only problems from candidates', async () => {
     const db = {
       problem: {
-        findMany: jest.fn().mockResolvedValue([{ id: 'p' }, { id: 'q' }]),
+        findMany: jest.fn().mockResolvedValue([
+          { id: 'p', chapterId: 'c', chapter: { id: 'c', bookId: null, freePreview: true } },
+          { id: 'q', chapterId: 'c', chapter: { id: 'c', bookId: null, freePreview: true } },
+        ]),
       },
       attempt: { findMany: jest.fn().mockResolvedValue([]) },
       learningEvent: { findMany: jest.fn().mockResolvedValue([]) },
@@ -35,9 +38,9 @@ describe('official exam exposure boundary', () => {
     const service = new StudyReviewService(db as unknown as PrismaService);
     const candidates = await (
       service as unknown as {
-        candidates: (u: string, c: string[]) => Promise<unknown[]>;
+        candidates: (u: string, r: string, c: string[]) => Promise<unknown[]>;
       }
-    ).candidates('u', ['c']);
+    ).candidates('u', 'STUDENT', ['c']);
     expect(candidates).toEqual([]);
   });
   it('closed key and solution are hidden only for live overlap, without changing first evidence', async () => {

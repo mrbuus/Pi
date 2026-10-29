@@ -2,6 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { Role, StudentType, Subject } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { todayUB } from './date';
 
 // Багш эрхтэй роль бүлэг — контент/тест/бичлэгийн эрхийн шалгалт бүрт ижил
 // (SPEC §11: багш нар үргэлж бүх контентыг харна).
@@ -184,6 +185,88 @@ export interface ChapterAccessTarget {
   freePreview: boolean;
 }
 
+// ============ Ангид НЭЭГДСЭН тест (эзэн 2026-10-29) ============
+// Танхимын сурагч бүх бүлгийг (хариутай нь) харж, өнөөдрийн ангийн тестийн
+// хариуг урьдчилан мэдэж болдог байсан. Одоо зөвхөн өөрийн ангид багшийн
+// нээсэн тестийн бодлогууд л харагдана. Нэгж нь ТЕСТ — нэг бүлэгт 20 хүртэл
+// тест (A/B) байдаг тул бүлгээр нээвэл бусад тест нь задарна.
+// Нээгдсэн = ангид хийсэн (ClassTestSession.date) эсвэл оноосон (TestAccess)
+// өдөр нь ӨНГӨРСӨН (Улаанбаатарын өнөөдрөөс өмнө). Өнөөдрийнх маргааш нээгдэнэ.
+// 1000 бодлого / ЭЕШ сорил өөрийн эргэн харалтын дүрэмтэй (thousand/review-gate)
+// тул энд хэзээ ч нээгдэхгүй.
+const RELEASE_EXCLUDED_TYPES = ['THOUSAND', 'EESH_MOCK'] as const;
+
+export interface ClassroomRelease {
+  testIds: Set<string>;
+  problemIds: Set<string>;
+  chapterIds: Set<string>;
+}
+
+export async function classroomRelease(
+  prisma: PrismaService,
+  userId: string,
+  role: Role,
+): Promise<ClassroomRelease | null> {
+  if (!(await hasActiveClassroomEnrollment(prisma, userId, role))) return null;
+  const enrollments = await prisma.enrollment.findMany({
+    where: { studentId: userId, leftAt: null, classroom: { archived: false } },
+    select: { classroomId: true },
+  });
+  const classroomIds = enrollments.map((e) => e.classroomId);
+  const todayDate = todayUB(); // UB огнооны UTC шөнө дунд (@db.Date-тэй харьцуулна)
+  const todayStart = new Date(todayDate.getTime() - 8 * 60 * 60 * 1000);
+  const testWhere: Prisma.TestWhereInput = {
+    deletedAt: null,
+    type: { notIn: [...RELEASE_EXCLUDED_TYPES] },
+  };
+  const [sessions, accesses] = await Promise.all([
+    prisma.classTestSession.findMany({
+      where: {
+        classroomId: { in: classroomIds },
+        testId: { not: null },
+        date: { lt: todayDate },
+      },
+      select: { testId: true },
+    }),
+    prisma.testAccess.findMany({
+      where: {
+        classroomId: { in: classroomIds },
+        assignedAt: { lt: todayStart },
+        test: testWhere,
+      },
+      select: { testId: true },
+    }),
+  ]);
+  const testIds = new Set<string>();
+  for (const a of accesses) testIds.add(a.testId);
+  // ClassTestSession тест рүү relation-гүй тул төрлийг тусад нь шүүнэ
+  const sessionTestIds = [
+    ...new Set(sessions.flatMap((s) => (s.testId ? [s.testId] : []))),
+  ];
+  if (sessionTestIds.length) {
+    const valid = await prisma.test.findMany({
+      where: { id: { in: sessionTestIds }, ...testWhere },
+      select: { id: true },
+    });
+    for (const t of valid) testIds.add(t.id);
+  }
+  const release: ClassroomRelease = {
+    testIds,
+    problemIds: new Set(),
+    chapterIds: new Set(),
+  };
+  if (testIds.size === 0) return release;
+  const rows = await prisma.testProblem.findMany({
+    where: { testId: { in: [...testIds] }, problem: { deletedAt: null } },
+    select: { problemId: true, problem: { select: { chapterId: true } } },
+  });
+  for (const r of rows) {
+    release.problemIds.add(r.problemId);
+    release.chapterIds.add(r.problem.chapterId);
+  }
+  return release;
+}
+
 // ============ Хичээлээр хаалттай контент (эзэн 2026-10-18) ============
 // MATH = анхдагч, нийтийн хичээл. Бусад хичээл (SOCIAL_STUDIES, SAT) зөвхөн
 // тухайн хичээлтэй ИДЭВХТЭЙ ангийн хэрэглэгчид харагдана (эцэг эх — баталгаажсан
@@ -328,33 +411,40 @@ export async function collectContentScope(
     ],
   };
 }
+/**
+ * full     — бүлгийн бүх бодлого (багш, freePreview, pass, худалдан авалт)
+ * released — зөвхөн ангид нээгдсэн тестийн бодлогууд (`problemIds`)
+ * none     — эрхгүй
+ */
+export type ChapterGrant =
+  | { level: 'full' }
+  | { level: 'released'; problemIds: Set<string> }
+  | { level: 'none' };
+
 async function chapterGrant(
   prisma: PrismaService,
   userId: string,
   role: Role,
   chapter: ChapterAccessTarget,
   requiresVideo: boolean,
-): Promise<boolean> {
+): Promise<ChapterGrant> {
+  const FULL = { level: 'full' } as const;
+  const NONE = { level: 'none' } as const;
   const subject = await chapterSubjectOf(prisma, chapter);
   const gated = subject !== Subject.MATH;
-  if (chapter.freePreview && !gated) return true;
+  if (chapter.freePreview && !gated) return FULL;
   if (
     TEACHER_ROLES.includes(role) &&
     (await internalTeachingRole(prisma, userId))
   )
-    return true;
+    return FULL;
   // Хаалттай хичээл: тухайн хичээлийн идэвхтэй ангигүй бол ямар ч эрх (pass,
   // худалдан авалт, freePreview) хүрэхгүй
   let own: Set<Subject> | null = null;
   if (gated) {
     own = await activeClassSubjects(prisma, userId, role);
-    if (!own.has(subject)) return false;
-    if (chapter.freePreview) return true;
-  }
-  // Танхимын анги нь зөвхөн өөрийн хичээлийн бүлгүүдийг нээнэ (null = MATH)
-  if (await hasActiveClassroomEnrollment(prisma, userId, role)) {
-    own ??= await activeClassSubjects(prisma, userId, role);
-    if (own.has(subject)) return true;
+    if (!own.has(subject)) return NONE;
+    if (chapter.freePreview) return FULL;
   }
   if (
     await hasCoveringPass(prisma, userId, {
@@ -362,36 +452,71 @@ async function chapterGrant(
       bookId: chapter.bookId,
     })
   )
-    return true;
-  if (!chapter.bookId) return false;
-  const purchase = await prisma.purchase.findFirst({
-    where: {
-      ...activePurchaseWhere(userId),
-      productItem: {
-        kind: 'BOOK',
-        refId: chapter.bookId,
-        ...(requiresVideo ? { includesVideo: true } : {}),
+    return FULL;
+  if (chapter.bookId) {
+    const purchase = await prisma.purchase.findFirst({
+      where: {
+        ...activePurchaseWhere(userId),
+        productItem: {
+          kind: 'BOOK',
+          refId: chapter.bookId,
+          ...(requiresVideo ? { includesVideo: true } : {}),
+        },
       },
-    },
-    select: { id: true },
-  });
-  return !!purchase;
+      select: { id: true },
+    });
+    if (purchase) return FULL;
+  }
+  // Танхимын анги: зөвхөн өөрийн хичээлд, зөвхөн НЭЭГДСЭН тестийн бодлогууд
+  const release = await classroomRelease(prisma, userId, role);
+  if (release && release.chapterIds.has(chapter.id)) {
+    own ??= await activeClassSubjects(prisma, userId, role);
+    if (own.has(subject))
+      return { level: 'released', problemIds: release.problemIds };
+  }
+  return NONE;
 }
-/** General theory/problem content includes book-only purchases. */
-export function canAccessChapter(
+
+/** Бүлгийн түвшний контент (онол, бүлгийн бичлэг, жагсаалт) — нэг ч бодлого нээгдсэн бол хангалттай. */
+export async function canAccessChapter(
   prisma: PrismaService,
   userId: string,
   role: Role,
   chapter: ChapterAccessTarget,
 ): Promise<boolean> {
-  return chapterGrant(prisma, userId, role, chapter, false);
+  return (await chapterGrant(prisma, userId, role, chapter, false)).level !== 'none';
 }
 /** Media additionally requires the BOOK product's includesVideo entitlement. */
-export function canAccessVideoChapter(
+export async function canAccessVideoChapter(
   prisma: PrismaService,
   userId: string,
   role: Role,
   chapter: ChapterAccessTarget,
 ): Promise<boolean> {
-  return chapterGrant(prisma, userId, role, chapter, true);
+  return (await chapterGrant(prisma, userId, role, chapter, true)).level !== 'none';
+}
+/** Бүлгийн аль бодлого харагдахыг тодорхойлно — бодлогын жагсаалтыг шүүхэд. */
+export function chapterAccessGrant(
+  prisma: PrismaService,
+  userId: string,
+  role: Role,
+  chapter: ChapterAccessTarget,
+  requiresVideo = false,
+): Promise<ChapterGrant> {
+  return chapterGrant(prisma, userId, role, chapter, requiresVideo);
+}
+/**
+ * Нэг бодлогын эрх (хариу, бодолт, бичлэг, зураг). Танхимын сурагчид зөвхөн
+ * ангид нээгдсэн тестэд орсон бодлого.
+ */
+export async function canAccessProblem(
+  prisma: PrismaService,
+  userId: string,
+  role: Role,
+  problem: { id: string; chapter: ChapterAccessTarget },
+  requiresVideo = false,
+): Promise<boolean> {
+  const grant = await chapterGrant(prisma, userId, role, problem.chapter, requiresVideo);
+  if (grant.level === 'full') return true;
+  return grant.level === 'released' && grant.problemIds.has(problem.id);
 }

@@ -7,7 +7,7 @@ import {
 import { createHash, randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role, LearningEventType } from '../generated/prisma/enums';
-import { canAccessChapter } from '../common/access';
+import { canAccessChapter, canAccessProblem } from '../common/access';
 import { gradeAnswer, hasKnownAnswer } from '../tests/grading';
 import { canonicalizePracticeChoiceInput } from '../recommend/recommend.service';
 import { Family, generate, fromId, gradeGenerated } from './generator';
@@ -109,7 +109,7 @@ export class LearningLabService {
     });
     if (!problem || problem.deletedAt)
       throw new NotFoundException('Бодлого олдсонгүй.');
-    if (!(await canAccessChapter(this.prisma, userId, role, problem.chapter)))
+    if (!(await canAccessProblem(this.prisma, userId, role, problem)))
       throw new ForbiddenException('Энэ бодлогыг үзэх эрхгүй.');
     return problem;
   }

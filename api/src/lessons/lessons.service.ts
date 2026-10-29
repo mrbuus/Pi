@@ -11,7 +11,7 @@ import {
   canAccessChapter,
   canAccessVideoChapter,
   collectContentScope,
-  hasActiveClassroomEnrollment,
+  classroomRelease,
   internalTeachingRole,
   assertInternalTeachingStaff,
 } from '../common/access';
@@ -183,8 +183,8 @@ export class LessonsService {
 
     let accessible = chapters;
     if (!(await internalTeachingRole(this.prisma, userId))) {
-      const [enrolled, scope, own] = await Promise.all([
-        hasActiveClassroomEnrollment(this.prisma, userId, role),
+      const [release, scope, own] = await Promise.all([
+        classroomRelease(this.prisma, userId, role),
         collectContentScope(this.prisma, userId),
         activeClassSubjects(this.prisma, userId, role),
       ]);
@@ -195,7 +195,8 @@ export class LessonsService {
         if (subject !== Subject.MATH && !own.has(subject)) return false;
         return (
           c.freePreview ||
-          (enrolled && own.has(subject)) ||
+          // Танхимын анги: зөвхөн ангид нээгдсэн тестийн бүлэг (эзэн 2026-10-29)
+          (!!release?.chapterIds.has(c.id) && own.has(subject)) ||
           scope.all ||
           scope.chapterIds.includes(c.id) ||
           (c.bookId !== null && scope.bookIds.includes(c.bookId))

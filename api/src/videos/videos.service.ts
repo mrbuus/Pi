@@ -7,6 +7,7 @@ import {
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '../generated/prisma/client';
 import {
+  canAccessProblem,
   canAccessVideoChapter,
   internalTeachingRole,
   assertInternalTeachingStaff,
@@ -151,6 +152,7 @@ export class VideosService {
     const problem = await this.prisma.problem.findUnique({
       where: { id: problemId },
       select: {
+        id: true,
         chapterId: true,
         deletedAt: true,
         chapter: {
@@ -171,7 +173,7 @@ export class VideosService {
     )
       throw new NotFoundException('Бодлого олдсонгүй');
     if (
-      !(await canAccessVideoChapter(this.prisma, userId, role, problem.chapter))
+      !(await canAccessProblem(this.prisma, userId, role, problem, true))
     )
       throw new ForbiddenException('Бичлэг үзэх эрхгүй');
     const rows = await this.prisma.video.findMany({

@@ -4,6 +4,7 @@ import type { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   canAccessChapter,
+  canAccessProblem,
   canAccessVideoChapter,
   hasCoveringPass,
 } from '../common/access';
@@ -260,12 +261,14 @@ export class FileAuthorizationService {
         this.prisma.problem.findMany({
           where: { OR: [{ imageKey: key }, { choiceOptions: { some: { imageKey: key } } }] },
           select: {
+            id: true,
             chapter: { select: { id: true, bookId: true, freePreview: true } },
           },
         }),
         this.prisma.video.findMany({
           where: { s3Key: key },
           select: {
+            problemId: true,
             chapter: { select: { id: true, bookId: true, freePreview: true } },
           },
         }),
@@ -306,8 +309,13 @@ export class FileAuthorizationService {
       string,
       { id: string; bookId: string | null; freePreview: boolean }
     >();
-    for (const ref of [...theories, ...problems])
+    for (const ref of theories)
       if (ref.chapter) chapters.set(ref.chapter.id, ref.chapter);
+    // Бодлогын зураг: танхимын сурагчид зөвхөн ангид нээгдсэн бодлогынх (2026-10-29)
+    for (const problem of problems)
+      for (const viewer of viewers)
+        if (await canAccessProblem(this.prisma, viewer.id, viewer.role, problem))
+          return true;
     for (const cover of covers) {
       if (!cover.archived && !cover.deletedAt) return true; // cover belongs to visible catalogue, not a private upload fallback
       for (const chapter of cover.chapters) chapters.set(chapter.id, chapter);
@@ -349,12 +357,21 @@ export class FileAuthorizationService {
       if (ref.chapter)
         for (const viewer of viewers)
           if (
-            await canAccessVideoChapter(
-              this.prisma,
-              viewer.id,
-              viewer.role,
-              ref.chapter,
-            )
+            // Бодлогын бичлэг: бодлогын түвшний эрх (ангид нээгдсэн бодлого л)
+            ref.problemId
+              ? await canAccessProblem(
+                  this.prisma,
+                  viewer.id,
+                  viewer.role,
+                  { id: ref.problemId, chapter: ref.chapter },
+                  true,
+                )
+              : await canAccessVideoChapter(
+                  this.prisma,
+                  viewer.id,
+                  viewer.role,
+                  ref.chapter,
+                )
           )
             return true;
 

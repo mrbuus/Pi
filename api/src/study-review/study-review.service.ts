@@ -11,7 +11,7 @@ import { parseRational } from '../learning-lab/generator';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
-import { canAccessChapter } from '../common/access';
+import { canAccessChapter, chapterAccessGrant } from '../common/access';
 import { choiceModeOf, gradeAnswer, GradableProblem } from '../tests/grading';
 import { canonicalizePracticeChoiceInput } from '../recommend/recommend.service';
 import {
@@ -246,17 +246,36 @@ export class StudyReviewService {
     return new Set(sessions.flatMap(officialProblemIds));
   }
 
-  private async candidates(userId: string, chapterIds: string[]) {
-    const rows = await this.prisma.problem.findMany({
+  private async candidates(userId: string, role: Role, chapterIds: string[]) {
+    const allRows = await this.prisma.problem.findMany({
       where: {
         chapterId: { in: chapterIds },
         deletedAt: null,
         chapter: { bookId: { not: null }, book: { deletedAt: null } },
         analysis: { answerKeyStatus: 'VERIFIED' },
       },
-      include: { analysis: true, choiceOptions: true },
+      include: {
+        analysis: true,
+        choiceOptions: true,
+        chapter: { select: { id: true, bookId: true, freePreview: true } },
+      },
       orderBy: { id: 'asc' },
       take: 2000,
+    });
+    // Танхимын сурагч: зөвхөн ангид нээгдсэн тестийн бодлого (эзэн 2026-10-29)
+    const grants = new Map<string, Awaited<ReturnType<typeof chapterAccessGrant>>>();
+    for (const p of allRows)
+      if (!grants.has(p.chapterId))
+        grants.set(
+          p.chapterId,
+          await chapterAccessGrant(this.prisma, userId, role, p.chapter),
+        );
+    const rows = allRows.filter((p) => {
+      const g = grants.get(p.chapterId);
+      return (
+        g?.level === 'full' ||
+        (g?.level === 'released' && g.problemIds.has(p.id))
+      );
     });
     const ids = rows.map((p) => p.id);
     const [attempts, events, reviews, official] = await Promise.all([
@@ -299,6 +318,7 @@ export class StudyReviewService {
     const chapters = await this.chapters(userId, role);
     const fresh = await this.candidates(
       userId,
+      role,
       chapters.map((c) => c.id),
     );
     const resumable = await this.prisma.studyReviewRun.findFirst({
@@ -444,7 +464,7 @@ export class StudyReviewService {
           return replay.id;
         }
         // Selection under the per-user lock excludes previous review assignments as well as actual answer/help records.
-        const candidates = await this.candidates(userId, input.chapterIds);
+        const candidates = await this.candidates(userId, role, input.chapterIds);
         if (!candidates.length)
           throw new BadRequestException(
             'Шалгасан түлхүүртэй, өмнө нь бүртгэгдээгүй бодлого алга. Өөр сэдэв сонгоно уу.',

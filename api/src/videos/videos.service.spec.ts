@@ -2,11 +2,17 @@ import { VideosService } from './videos.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '../generated/prisma/enums';
 import { canAccessVideoChapter } from '../common/access';
-jest.mock('../common/access', () => ({
+jest.mock('../common/access', () => {
+  // Бодлогын бичлэг бодлогын түвшний эрхээр (canAccessProblem) шалгагдана —
+  // хоёуланг нэг mock-оор удирдана
+  const gate = jest.fn();
+  return {
   ...jest.requireActual('../common/access'),
-  canAccessVideoChapter: jest.fn(),
+  canAccessVideoChapter: gate,
+  canAccessProblem: gate,
   TEACHER_ROLES: ['ADMIN', 'TEACHER_PLUS', 'TEACHER'],
-}));
+  };
+});
 const access = jest.mocked(canAccessVideoChapter);
 describe('video mapping, ownership and disclosure', () => {
   const video = {

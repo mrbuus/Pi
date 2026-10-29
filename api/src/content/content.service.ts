@@ -9,6 +9,9 @@ import { Prisma } from '../generated/prisma/client';
 import { MistakeType, Role, Subject } from '../generated/prisma/enums';
 import {
   canAccessChapter,
+  canAccessProblem,
+  canAccessVideoChapter,
+  chapterAccessGrant,
   catalogSubjectsFor,
   chapterSubjectWhere,
   internalTeachingRole,
@@ -1002,15 +1005,26 @@ export class ContentService {
       throw new NotFoundException('Бүлэг сэдэв олдсонгүй');
     }
 
-    const allowed = await this.canViewFullChapter(userId, role, chapter);
-    if (!allowed) {
+    const grant = await chapterAccessGrant(this.prisma, userId, role, chapter);
+    if (grant.level === 'none') {
       throw new ForbiddenException(
         'Энэ бүлгийг үзэх эрхгүй байна — эрх худалдаж авах эсвэл ангид элсэх шаардлагатай',
       );
     }
+    // Танхимын сурагч: зөвхөн ангид нээгдсэн тестийн бодлогууд (эзэн 2026-10-29)
+    const releasedOnly =
+      grant.level === 'released' ? [...grant.problemIds] : null;
+    // Бодолтын YouTube холбоос — бичлэгийн эрхгүй бол хасна
+    const videoAllowed =
+      grant.level === 'released' ||
+      (await canAccessVideoChapter(this.prisma, userId, role, chapter));
 
     const problems = await this.prisma.problem.findMany({
-      where: { chapterId, deletedAt: null },
+      where: {
+        chapterId,
+        deletedAt: null,
+        ...(releasedOnly ? { id: { in: releasedOnly } } : {}),
+      },
       include: {
         choiceOptions: { orderBy: { order: 'asc' } },
         tags: { include: { tag: true } },
@@ -1050,6 +1064,7 @@ export class ContentService {
             ...p,
             correctAnswer: undefined,
             analysis: undefined,
+            youtubeUrl: videoAllowed ? p.youtubeUrl : null,
             // Засварын түүхийн мэдээлэл сурагчид хэрэггүй (хэн зассан — ажилтны ID)
             version: undefined,
             updatedAt: undefined,
@@ -1184,7 +1199,7 @@ export class ContentService {
     ) {
       throw new NotFoundException('Бодлого олдсонгүй');
     }
-    if (!(await canAccessChapter(this.prisma, userId, role, problem.chapter))) {
+    if (!(await canAccessProblem(this.prisma, userId, role, problem))) {
       throw new ForbiddenException('Энэ бүлгийн эрх шаардлагатай');
     }
     const view = {

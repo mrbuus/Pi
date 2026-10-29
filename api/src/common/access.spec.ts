@@ -2,6 +2,7 @@ import { Role, StudentType, Subject } from '../generated/prisma/enums';
 import {
   blockedSubjects,
   canAccessChapter,
+  canAccessProblem,
   catalogSubjectsFor,
   chapterSubjectWhere,
   collectPassScope,
@@ -95,6 +96,8 @@ function makeAccessPrisma(opts: {
   classSubjects?: (Subject | null)[];
   /** PARENT: баталгаажсан хүүхдийн ангиудын хичээл */
   childClassSubjects?: (Subject | null)[];
+  /** Ангид НЭЭГДСЭН (өнгөрсөн өдөр хийсэн) тестийн бодлогууд */
+  released?: { testId: string; problemId: string; chapterId: string }[];
 }) {
   const own =
     opts.classSubjects ?? (opts.hasActiveEnrollment ? [null] : []);
@@ -113,6 +116,9 @@ function makeAccessPrisma(opts: {
     enrollment: {
       findFirst: async () => (opts.hasActiveEnrollment ? { id: 'e1' } : null),
       findMany: async ({ where }: any) => {
+        // classroomRelease: нэг сурагчийн ангиуд
+        if (typeof where.studentId === 'string')
+          return opts.hasActiveEnrollment ? [{ classroomId: 'cl1' }] : [];
         const ids: string[] = where.studentId.in;
         return [
           ...own,
@@ -129,6 +135,24 @@ function makeAccessPrisma(opts: {
           .filter((p) => p.expiresAt > now)
           .map((p) => ({ pass: { scope: p.scope } }));
       },
+    },
+    classTestSession: {
+      findMany: async () =>
+        [...new Set((opts.released ?? []).map((r) => r.testId))].map(
+          (testId) => ({ testId }),
+        ),
+    },
+    testAccess: { findMany: async () => [] },
+    test: {
+      findMany: async ({ where }: any) =>
+        (where.id.in as string[]).map((id) => ({ id })),
+    },
+    testProblem: {
+      findMany: async () =>
+        (opts.released ?? []).map((r) => ({
+          problemId: r.problemId,
+          problem: { chapterId: r.chapterId },
+        })),
     },
     // canAccessChapter-ийн Purchase гинж (ном+видео худалдан авалт) —
     // анхдагчаар юу ч аваагүй гэж үзнэ
@@ -278,14 +302,45 @@ describe('canAccessChapter — SPEC §11 хандалтын дүрэм', () => {
     );
   });
 
-  it('танхимын идэвхтэй сурагч бүх бүлгийг ALLOW', async () => {
+  // Эзэн 2026-10-29: танхимын сурагч бүх бүлгийг (хариутай нь) хардаг байсан нь
+  // өнөөдрийн ангийн тестийн хариуг урьдчилан задалдаг байсан.
+  it('танхимын сурагч — ангид нээгдээгүй бүлгийг DENY', async () => {
     const prisma = makeAccessPrisma({
       studentProfile: { type: StudentType.CLASSROOM, activatedAt: new Date() },
       hasActiveEnrollment: true,
     });
     expect(await canAccessChapter(prisma, 's1', Role.STUDENT, chapter)).toBe(
+      false,
+    );
+  });
+
+  it('танхимын сурагч — ангид нээгдсэн тестийн бодлого л ALLOW (бусад тест хаалттай)', async () => {
+    const prisma = makeAccessPrisma({
+      studentProfile: { type: StudentType.CLASSROOM, activatedAt: new Date() },
+      hasActiveEnrollment: true,
+      released: [{ testId: 't1', problemId: 'p1', chapterId: 'c1' }],
+    });
+    expect(await canAccessChapter(prisma, 's1', Role.STUDENT, chapter)).toBe(
       true,
     );
+    expect(
+      await canAccessProblem(prisma, 's1', Role.STUDENT, { id: 'p1', chapter }),
+    ).toBe(true);
+    // Ижил бүлгийн өөр (B хувилбар, маргаашийн) тестийн бодлого
+    expect(
+      await canAccessProblem(prisma, 's1', Role.STUDENT, { id: 'p2', chapter }),
+    ).toBe(false);
+  });
+
+  it('pass-тай танхимын сурагч бүлгийн бүх бодлогыг ALLOW', async () => {
+    const prisma = makeAccessPrisma({
+      studentProfile: { type: StudentType.CLASSROOM, activatedAt: new Date() },
+      hasActiveEnrollment: true,
+      userPasses: [{ expiresAt: FUTURE, scope: { chapterIds: ['c1'] } }],
+    });
+    expect(
+      await canAccessProblem(prisma, 's1', Role.STUDENT, { id: 'p2', chapter }),
+    ).toBe(true);
   });
 
   it('дууссан UserPass эрх өгөхгүй — DENY (аюулгүй байдлын гол зан төлөв)', async () => {
@@ -399,6 +454,10 @@ describe('Нийгмийн ухааны (gated) бүлэг — зөвхөн ту
   const activeClassroom = {
     studentProfile: { type: StudentType.CLASSROOM, activatedAt: new Date() },
     hasActiveEnrollment: true,
+    released: [
+      { testId: 'st', problemId: 'sp', chapterId: 'sc1' },
+      { testId: 'mt', problemId: 'mp', chapterId: 'c1' },
+    ],
   };
 
   it('математикийн ангийн сурагчид DENY (freePreview, {all} pass байсан ч)', async () => {
