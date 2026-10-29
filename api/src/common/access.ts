@@ -202,7 +202,48 @@ export interface ClassroomRelease {
   chapterIds: Set<string>;
 }
 
-export async function classroomRelease(
+/**
+ * classroomRelease-ийн богино хугацааны санах ой (аудит 2026-10-29): нэг хүсэлт (жиш:
+ * файлын эрх) бодлого бүрээр дахин дахин дууддаг тул (prisma, userId, role)-оор 30 секунд
+ * хадгална. Хүчингүй болгох = зөвхөн TTL — шинэ нээлт/анги солих нь хамгийн ихдээ 30с
+ * хоцорч харагдана (нээлт өдрөөр тооцогддог тул хүлээн зөвшөөрөгдөнө). Prisma объект бүр
+ * өөрийн Map-тэй (WeakMap) — тестийн mock-ууд хоорондоо холилдохгүй. Буцаах Set-үүдийг
+ * дуудагч ӨӨРЧЛӨХГҮЙ (хуваалцсан объект).
+ */
+const RELEASE_TTL_MS = 30_000;
+const RELEASE_CACHE_MAX = 500;
+const releaseCache = new WeakMap<
+  object,
+  Map<string, { at: number; value: Promise<ClassroomRelease | null> }>
+>();
+
+export function clearClassroomReleaseCache(prisma?: PrismaService): void {
+  if (prisma) releaseCache.delete(prisma);
+}
+
+export function classroomRelease(
+  prisma: PrismaService,
+  userId: string,
+  role: Role,
+): Promise<ClassroomRelease | null> {
+  const map =
+    releaseCache.get(prisma) ??
+    new Map<string, { at: number; value: Promise<ClassroomRelease | null> }>();
+  releaseCache.set(prisma, map);
+  const key = `${role}:${userId}`;
+  const now = Date.now();
+  const hit = map.get(key);
+  if (hit && now - hit.at < RELEASE_TTL_MS) return hit.value;
+  if (map.size >= RELEASE_CACHE_MAX)
+    for (const [k, v] of map) if (now - v.at >= RELEASE_TTL_MS) map.delete(k);
+  if (map.size >= RELEASE_CACHE_MAX) map.clear();
+  const value = loadClassroomRelease(prisma, userId, role);
+  map.set(key, { at: now, value });
+  value.catch(() => map.delete(key));
+  return value;
+}
+
+async function loadClassroomRelease(
   prisma: PrismaService,
   userId: string,
   role: Role,

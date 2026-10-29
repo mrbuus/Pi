@@ -189,13 +189,10 @@ export default function PupilLessonDay() {
                 </Link>
               )}
               <Link
-                href="/app/student#homework"
+                href="/app/homework"
                 className="block text-primary underline"
               >
-                Багшийн гэрийн даалгавар
-              </Link>
-              <Link href="/app/study" className="block text-primary underline">
-                Эхний хариултаа тэмдэглэх
+                Гэрийн даалгавар
               </Link>
             </CardContent>
           </Card>

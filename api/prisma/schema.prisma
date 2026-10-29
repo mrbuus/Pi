@@ -3037,6 +3037,8 @@ model HomeworkAttempt {
   startedAt    DateTime              @default(now())
   /// Дараагийн хичээлийн эхлэл (УБ 00:00); дараагийн хичээл тодорхойгүй бол null
   deadlineAt   DateTime?
+  /// Эхлэх үеийн Test.timeLimitMin (минут); null = хязгааргүй. Autosave/шалгах бүрт Test уншихгүй
+  timeLimitMin Int?
   answers      Json                  @default("{}")
   /// Эхний «Шалгах» үеийн хариу (ML дохио)
   firstAnswers Json?

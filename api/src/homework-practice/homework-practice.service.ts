@@ -29,6 +29,9 @@ import {
 
 const PDF_MAX_BYTES = 25 * 1024 * 1024;
 const MAX_PAGES = 6;
+/** loadProblems-ийн процессын санах ой: autosave/шалгах бүрт бодлого дахин уншихгүй */
+const PROBLEMS_TTL_MS = 60_000;
+const PROBLEMS_CACHE_MAX = 200;
 
 type AttemptRow = {
   id: string;
@@ -39,6 +42,7 @@ type AttemptRow = {
   status: 'IN_PROGRESS' | 'SUBMITTED';
   startedAt: Date;
   deadlineAt: Date | null;
+  timeLimitMin: number | null;
   answers: unknown;
   checksUsed: number;
   score: number | null;
@@ -61,6 +65,11 @@ function asRecord(v: unknown): Record<string, unknown> {
 @Injectable()
 export class HomeworkPracticeService {
   constructor(private prisma: PrismaService) {}
+
+  private problemsCache = new Map<
+    string,
+    { at: number; value: Promise<HomeworkProblemRow[]> }
+  >();
 
   private parseDate(value: unknown): string {
     if (typeof value !== 'string')
@@ -147,7 +156,30 @@ export class HomeworkPracticeService {
         _count: { select: { problems: true } },
       },
     });
+    // B хувилбарыг анги ДАРАА нь танхимд (эсвэл оноосон шалгалтаар) бодох бол гэрийн
+    // даалгавар болгохгүй — урьдчилан харж/хариугаа мэдэж очихгүй (аудит 2026-10-29)
+    const siblingIds = siblings.map((t) => t.id);
+    const [inClass, futureAccess] = siblingIds.length
+      ? await Promise.all([
+          this.prisma.classTestSession.findMany({
+            where: { classroomId: { in: classroomIds }, testId: { in: siblingIds } },
+            select: { classroomId: true, testId: true },
+          }),
+          this.prisma.testAccess.findMany({
+            where: {
+              classroomId: { in: classroomIds },
+              testId: { in: siblingIds },
+              assignedAt: { gt: new Date() },
+            },
+            select: { classroomId: true, testId: true },
+          }),
+        ])
+      : [[], []];
+    const reserved = [...inClass, ...futureAccess].flatMap((r) =>
+      r.testId ? [{ classroomId: r.classroomId, testId: r.testId }] : [],
+    );
     return buildSlots({
+      reserved,
       enrollments: enrollments.map((e) => ({
         classroomId: e.classroomId,
         classroomName: e.classroom.name,
@@ -187,7 +219,22 @@ export class HomeworkPracticeService {
     throw new ForbiddenException('Энэ гэрийн даалгавар танд нээгдээгүй байна');
   }
 
-  private async loadProblems(testId: string): Promise<HomeworkProblemRow[]> {
+  /** Тестийн бодлого — процессод 60с хадгална (админ засвар хамгийн ихдээ 1 мин хоцорно) */
+  private loadProblems(testId: string): Promise<HomeworkProblemRow[]> {
+    const now = Date.now();
+    const hit = this.problemsCache.get(testId);
+    if (hit && now - hit.at < PROBLEMS_TTL_MS) return hit.value;
+    if (this.problemsCache.size >= PROBLEMS_CACHE_MAX)
+      for (const [k, v] of this.problemsCache)
+        if (now - v.at >= PROBLEMS_TTL_MS) this.problemsCache.delete(k);
+    if (this.problemsCache.size >= PROBLEMS_CACHE_MAX) this.problemsCache.clear();
+    const value = this.fetchProblems(testId);
+    this.problemsCache.set(testId, { at: now, value });
+    value.catch(() => this.problemsCache.delete(testId));
+    return value;
+  }
+
+  private fetchProblems(testId: string): Promise<HomeworkProblemRow[]> {
     return this.prisma.testProblem.findMany({
       where: { testId },
       orderBy: { order: 'asc' },
@@ -211,7 +258,26 @@ export class HomeworkPracticeService {
     }) as Promise<HomeworkProblemRow[]>;
   }
 
-  /** Сурагчийн өөрийн оролдлого + эрхийг ДАХИН шалгана */
+  /**
+   * Autosave/шалгах: зөвхөн хөнгөн шалгалт (1 асуулга) — өөрийнх, IN_PROGRESS, хичээлийн
+   * өдөр MAX_DAYS цонхонд. Бүтэн эрхийг (анги, B хувилбар) эхлүүлэх/илгээх үед шалгана.
+   */
+  private async ownOpenAttempt(attemptId: string, studentId: string) {
+    const attempt = (await this.prisma.homeworkAttempt.findUnique({
+      where: { id: attemptId },
+    })) as AttemptRow | null;
+    if (!attempt || attempt.studentId !== studentId)
+      throw new NotFoundException('Гэрийн даалгавар олдсонгүй');
+    if (attempt.status === 'SUBMITTED')
+      throw new ConflictException('Гэрийн даалгавар илгээгдсэн байна');
+    const today = dateKey(todayUB());
+    const date = dateKey(attempt.lessonDate);
+    if (date > today || date < addDaysKey(today, -(MAX_DAYS - 1)))
+      throw new ForbiddenException('Энэ гэрийн даалгаврын хугацаа дууссан байна');
+    return attempt;
+  }
+
+  /** Сурагчийн өөрийн оролдлого + эрхийг ДАХИН (бүтнээр) шалгана — илгээх үед */
   private async ownAttempt(attemptId: string, studentId: string) {
     const attempt = (await this.prisma.homeworkAttempt.findUnique({
       where: { id: attemptId },
@@ -366,6 +432,7 @@ export class HomeworkPracticeService {
             testId: item.id,
             lessonDate: parseDateOnly(date),
             deadlineAt: slot.deadlineAt,
+            timeLimitMin: item.timeLimitMin,
           },
         })) as AttemptRow;
       } catch (e) {
@@ -377,14 +444,10 @@ export class HomeworkPracticeService {
         if (!attempt) throw e;
       }
     }
-    return this.attemptView(attempt, item.timeLimitMin, slot.deadlineAt);
+    return this.attemptView(attempt, slot.deadlineAt);
   }
 
-  private async attemptView(
-    attempt: AttemptRow,
-    timeLimitMin: number | null,
-    deadlineAt: Date | null,
-  ) {
+  private async attemptView(attempt: AttemptRow, deadlineAt: Date | null) {
     const [rows, last] = await Promise.all([
       this.loadProblems(attempt.testId),
       this.prisma.homeworkCheck.findFirst({
@@ -405,8 +468,14 @@ export class HomeworkPracticeService {
       remainingSec:
         attempt.status === 'SUBMITTED'
           ? null
-          : remainingSec(timeLimitMin, attempt.startedAt),
+          : remainingSec(attempt.timeLimitMin, attempt.startedAt),
       checksUsed: attempt.checksUsed,
+      score:
+        attempt.status === 'SUBMITTED' &&
+        attempt.score !== null &&
+        attempt.total !== null
+          ? { correct: attempt.score, total: attempt.total }
+          : null,
       maxChecks: MAX_CHECKS,
       problems: rows.map(problemView),
       answers: asRecord(attempt.answers),
@@ -418,22 +487,16 @@ export class HomeworkPracticeService {
 
   /* ───────── PATCH /homework/attempts/:id ───────── */
 
-  /** Тестийн хугацааны хязгаар (байвал) + зай өнгөрсөн эсэх — серверт хэрэгжүүлнэ */
-  private async timeExpired(attempt: AttemptRow): Promise<boolean> {
-    const test = await this.prisma.test.findUnique({
-      where: { id: attempt.testId },
-      select: { timeLimitMin: true },
-    });
-    if (!test?.timeLimitMin) return false;
-    const limitMs = (test.timeLimitMin * 60 + TIME_GRACE_SEC) * 1000;
+  /** Хугацааны хязгаар (эхлэх үед хадгалсан) + зай өнгөрсөн эсэх — серверт хэрэгжүүлнэ */
+  private timeExpired(attempt: AttemptRow): boolean {
+    if (!attempt.timeLimitMin) return false;
+    const limitMs = (attempt.timeLimitMin * 60 + TIME_GRACE_SEC) * 1000;
     return Date.now() > new Date(attempt.startedAt).getTime() + limitMs;
   }
 
   async save(studentId: string, attemptId: string, answers: unknown) {
-    const { attempt } = await this.ownAttempt(attemptId, studentId);
-    if (attempt.status === 'SUBMITTED')
-      throw new ConflictException('Гэрийн даалгавар илгээгдсэн байна');
-    if (await this.timeExpired(attempt))
+    const attempt = await this.ownOpenAttempt(attemptId, studentId);
+    if (this.timeExpired(attempt))
       throw new ConflictException('Хугацаа дууссан — илгээнэ үү');
     const rows = await this.loadProblems(attempt.testId);
     const merged = mergeAnswers(rows, attempt.answers, answers);
@@ -448,12 +511,10 @@ export class HomeworkPracticeService {
   /* ───────── POST /homework/attempts/:id/check ───────── */
 
   async check(studentId: string, attemptId: string, answers: unknown) {
-    const { attempt } = await this.ownAttempt(attemptId, studentId);
-    if (attempt.status === 'SUBMITTED')
-      throw new ConflictException('Гэрийн даалгавар илгээгдсэн байна');
+    const attempt = await this.ownOpenAttempt(attemptId, studentId);
     if (attempt.checksUsed >= MAX_CHECKS)
       throw new ConflictException('Шалгах эрх дууссан — одоо илгээнэ үү');
-    if (await this.timeExpired(attempt))
+    if (this.timeExpired(attempt))
       throw new ConflictException('Хугацаа дууссан — илгээнэ үү');
     const rows = await this.loadProblems(attempt.testId);
     const merged = mergeAnswers(rows, attempt.answers, answers);
@@ -501,7 +562,7 @@ export class HomeworkPracticeService {
     if (attempt.status === 'SUBMITTED') return this.submittedView(attempt);
     const rows = await this.loadProblems(attempt.testId);
     // Хугацаа дууссаны дараах шинэ хариуг авахгүй — хадгалсан хариугаар дүгнэнэ
-    const late = await this.timeExpired(attempt);
+    const late = this.timeExpired(attempt);
     const merged = late
       ? mergeAnswers(rows, attempt.answers, {})
       : mergeAnswers(rows, attempt.answers, answers);
@@ -589,7 +650,10 @@ export class HomeworkPracticeService {
       throw new ForbiddenException('Зөвхөн өөрийн байршуулсан файлыг илгээнэ үү');
     if (file.mime !== 'application/pdf' || file.size > PDF_MAX_BYTES || !file.expiresAt)
       throw new BadRequestException('Гэрийн даалгаврын PDF файл илгээнэ үү');
-    const realPages = file.pages ?? pages;
+    // Хуудасны тоог зөвхөн серверт тоолсон StoredFile.pages-ээс авна (клиентийнхэд итгэхгүй)
+    if (file.pages === null || file.pages === undefined)
+      throw new BadRequestException('PDF файлын хуудсыг уншиж чадсангүй — дахин илгээнэ үү');
+    const realPages = file.pages;
     if (realPages < 1 || realPages > MAX_PAGES)
       throw new BadRequestException(`1–${MAX_PAGES} хуудас илгээнэ үү`);
 

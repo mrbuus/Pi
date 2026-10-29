@@ -23,6 +23,7 @@ import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { ApiError, api } from "@/lib/api";
 import { formatMnDate } from "@/lib/dateMn";
+import { cleanTitle } from "@/lib/studentTitle";
 
 /* ============================================================================
  * Сурагчийн «Миний самбар» (эзэн 2026-10-29, SURAGCH-SHINECHLEL §1) — багшийн
@@ -258,7 +259,7 @@ function HomeworkTodayCard() {
               return (
                 <li key={it.testId} className="flex items-center gap-3 rounded-lg border border-line px-3 py-2">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-ink">{it.title}</p>
+                    <p className="truncate font-semibold text-ink">{cleanTitle(it.title, it.variantLabel)}</p>
                     <p className="text-xs text-ink-dim">
                       <Meta items={[`${it.problemCount} бодлого`, it.late ? "Хоцорсон" : null]} />
                     </p>
@@ -304,7 +305,7 @@ function TestsCard() {
         <div className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2">
           <div className="min-w-0">
             <p className="text-xs text-ink-dim">Сүүлийн дүн</p>
-            <p className="truncate font-semibold text-ink">{last.test.title}</p>
+            <p className="truncate font-semibold text-ink">{cleanTitle(last.test.title, null, last.test.title)}</p>
           </div>
           <span className="shrink-0 font-display text-xl font-bold tabular-nums text-ink">
             {last.totalScore}/{last.maxScore}

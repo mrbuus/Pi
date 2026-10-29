@@ -17,6 +17,7 @@ import { formatMnDate } from "@/lib/dateMn";
 import MyRankings, { type MyResult } from "./MyRankings";
 import { examTitleOf, ExamsToTakeList, useMyExams } from "./StudentExamLists";
 import { errorText } from "./types";
+import { cleanTitle } from "@/lib/studentTitle";
 
 /* ============================================================================
  * Сурагчийн НЭГ «Шалгалт» хэсэг (эзэн 2026-10-29): бүх төрлийн тест, шалгалт,
@@ -272,7 +273,7 @@ function DoneTab({ studentId }: { studentId: string | null }) {
       seen.add(r.test.id);
       out.push({
         id: r.test.id,
-        title: r.test.title,
+        title: cleanTitle(r.test.title, null, r.test.title),
         date: r.createdAt,
         absent: false,
         score: { total: r.totalScore, max: r.maxScore },

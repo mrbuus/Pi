@@ -1,28 +1,7 @@
 import { formatMnDate } from "@/lib/dateMn";
 
-/**
- * Сурагчид номын дотоод нэр («100x100», «200×200», «V2», «V3») ХЭЗЭЭ Ч харуулахгүй
- * (эзэн 2026-10-29, шийдвэр 6), хувилбарын үсгийг ч гарчигт давтахгүй — даалгавар
- * нь үргэлж B хувилбар тул «Даалгавар» гэж л нэрлэнэ.
- */
-export function cleanTitle(title: string, variantLabel?: string | null): string {
-  let t = title
-    // «100x100», «200 × 200», кирилл «х»
-    .replace(/\b\d{2,4}\s*[xX×хХ]\s*\d{2,4}\b/g, " ")
-    // «V2», «V3» гэх мэт хувилбарын код
-    .replace(/(^|[\s·—–:-])V\d\b/g, "$1")
-    .replace(/\s+·\s+/g, " · ");
-  if (variantLabel) {
-    const v = variantLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    // Төгсгөлийн «-B», « B», «(B)», «B хувилбар»
-    t = t.replace(new RegExp(`[\\s(-]*${v}\\)?(\\s*хувилбар)?\\s*$`, "i"), "");
-  }
-  t = t
-    .replace(/\s{2,}/g, " ")
-    .replace(/^[\s·—–:,-]+|[\s·—–:,-]+$/g, "")
-    .trim();
-  return t || "Даалгавар";
-}
+// Нийтлэг цэвэрлэгч (сурагчийн бүх дэлгэц) — хуучин импортыг эвдэхгүй
+export { cleanTitle } from "@/lib/studentTitle";
 
 /** Улаанбаатарын өнөөдөр «YYYY-MM-DD» */
 export function todayKeyUB(): string {

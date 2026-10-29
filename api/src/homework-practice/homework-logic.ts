@@ -50,6 +50,11 @@ export interface SlotInput {
   done: VariantTest[];
   /** Ижил groupKey-тэй, онлайнаар дүгнэгдэх (AUTO, бодлоготой) тестүүд */
   siblings: HomeworkTest[];
+  /**
+   * Тухайн ангид танхимд бодогдох (ClassTestSession, аль ч өдөр) эсвэл ирээдүйд оноогдсон
+   * (TestAccess.assignedAt > одоо) тестүүд — тэр ангийн гэрийн даалгавар болохгүй.
+   */
+  reserved?: { classroomId: string; testId: string }[];
   fromKey: string;
   toKey: string;
 }
@@ -70,9 +75,14 @@ export interface HomeworkSlot {
  */
 export function buildSlots(input: SlotInput): HomeworkSlot[] {
   const doneById = new Map(input.done.map((t) => [t.id, t]));
-  const siblings = input.siblings;
   const out: HomeworkSlot[] = [];
   for (const e of input.enrollments) {
+    const reserved = new Set(
+      (input.reserved ?? [])
+        .filter((r) => r.classroomId === e.classroomId)
+        .map((r) => r.testId),
+    );
+    const siblings = input.siblings.filter((t) => !reserved.has(t.id));
     const mine = input.sessions.filter((s) => s.classroomId === e.classroomId);
     const days = [
       ...new Set(

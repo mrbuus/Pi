@@ -138,7 +138,8 @@ export default function HomeworkSolve({
       setLastCheckScore(scoreFrom(a.lastCheck, a.problems.length));
       if (a.status === "SUBMITTED") {
         doneRef.current = true;
-        setFinal({ score: scoreFrom(a.lastCheck, a.problems.length), results: a.lastCheck });
+        // Серверийн эцсийн оноо (хариугүй бодлогыг тооцохгүй) — байхгүй бол дүнгээс тоолно
+        setFinal({ score: a.score ?? scoreFrom(a.lastCheck, a.problems.length), results: a.lastCheck });
         setPhase("result");
         return;
       }
@@ -281,8 +282,16 @@ export default function HomeworkSolve({
       setLastCheckScore({ correct: r.correct, total: r.total });
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) {
-        setChecksUsed(maxChecks);
-        setActionError("Шалгах эрх дууссан. Одоо илгээж болно");
+        // Төлөв серверт өөрчлөгдсөн (хугацаа/илгээсэн/эрх дууссан) — дахин ачаална
+        const msg = e.message ?? "";
+        setActionError(
+          /хугацаа/i.test(msg)
+            ? "Хугацаа дууссан. Хариуг чинь илгээж байна"
+            : /илгээгдсэн/i.test(msg)
+              ? "Даалгавар аль хэдийн илгээгдсэн байна"
+              : "Шалгах эрх дууссан. Одоо илгээж болно",
+        );
+        void start();
       } else {
         setActionError(e instanceof Error && e.message ? e.message : "Шалгаж чадсангүй. Дахин оролдоно уу");
       }

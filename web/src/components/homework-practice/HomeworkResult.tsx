@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, CircleCheck } from "lucide-react";
+import { ArrowLeft, CircleCheck, CircleMinus } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { CHECK_META } from "./CheckMark";
 import PhotoButton from "./PhotoButton";
 import type { CheckResult, HwScore } from "./types";
+
+/** Хариуны түлхүүргүй бодлого — сервер дүгнээгүй (results-д байхгүй), оноонд орохгүй */
+const UNGRADED = { label: "Дүгнэгдээгүй", icon: CircleMinus, cls: "border-dashed border-line bg-surface text-ink-dim" };
 
 /** Илгээсний дараах дүн: оноо + бодлого бүрийн зөв/буруу (зөв хариугүй) */
 export default function HomeworkResult({
@@ -25,6 +28,7 @@ export default function HomeworkResult({
   date: string;
   backHref: string;
 }) {
+  const hasUngraded = !!results && problemIds.some((id) => !results[id]);
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <section className="rounded-xl border border-line bg-surface p-5 text-center elev-1 sm:p-6">
@@ -46,8 +50,8 @@ export default function HomeworkResult({
           </h2>
           <ul className="grid grid-cols-5 gap-2 sm:grid-cols-8">
             {problemIds.map((id, i) => {
-              const r = results[id] ?? "BLANK";
-              const m = CHECK_META[r];
+              const r = results[id];
+              const m = r ? CHECK_META[r] : UNGRADED;
               const Icon = m.icon;
               return (
                 <li
@@ -71,6 +75,12 @@ export default function HomeworkResult({
                 </span>
               );
             })}
+            {hasUngraded && (
+              <span className="inline-flex items-center gap-1">
+                <CircleMinus className="size-3.5" aria-hidden />
+                {UNGRADED.label}
+              </span>
+            )}
           </div>
         </section>
       )}

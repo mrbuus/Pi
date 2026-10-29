@@ -10,6 +10,7 @@ import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { collapseVariants, type GroupRow, type TestRow } from "@/components/test-list/types";
 import { dateTimeUB } from "@/components/thousand/format";
 import { errorText, shortTitle } from "./types";
+import { cleanTitle } from "@/lib/studentTitle";
 
 export interface MyExamRow extends TestRow {
   percent: number | null;
@@ -21,7 +22,11 @@ export interface MyExamRow extends TestRow {
 }
 
 const dateUB = (v: string | null) => (v ? dateTimeUB(v).slice(0, 10) : null);
-const titleOf = (row: TestRow) => (row.type === "THOUSAND" ? shortTitle(row.title) : row.title);
+// Сурагчийн дэлгэц: номын дотоод нэр/«·»-гүй (lib/studentTitle)
+const titleOf = (row: TestRow) => {
+  const raw = row.type === "THOUSAND" ? shortTitle(row.title) : row.title;
+  return cleanTitle(raw, null, raw);
+};
 
 /** «Өгөх» / «Өгсөн» жагсаалтын өгөгдөл — /exam-results/my (A/B-оос нэгийг л) */
 export function useMyExams(studentId: string | null, query: string) {

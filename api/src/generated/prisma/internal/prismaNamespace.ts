@@ -11704,6 +11704,7 @@ export const HomeworkAttemptScalarFieldEnum = {
   status: 'status',
   startedAt: 'startedAt',
   deadlineAt: 'deadlineAt',
+  timeLimitMin: 'timeLimitMin',
   answers: 'answers',
   firstAnswers: 'firstAnswers',
   checksUsed: 'checksUsed',

@@ -33,6 +33,8 @@ export default function PhotoButton({
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState<HwPhoto | null | undefined>(photo);
   const [error, setError] = useState("");
+  // «Дахин оролдох» бүрт нэмэгдэнэ — татах effect-ийг дахин ажиллуулна
+  const [retry, setRetry] = useState(0);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function PhotoButton({
     return () => {
       cancelled = true;
     };
-  }, [open, loaded, classroomId, date]);
+  }, [open, loaded, classroomId, date, retry]);
 
   useEffect(() => {
     if (!open) return;
@@ -139,7 +141,10 @@ export default function PhotoButton({
             </div>
 
             {error && loaded === undefined ? (
-              <ErrorState message={error} onRetry={() => setError("")} />
+              <ErrorState message={error} onRetry={() => {
+                  setError("");
+                  setRetry((n) => n + 1);
+                }} />
             ) : loaded === undefined ? (
               <div className="space-y-2" role="status" aria-label="Ачаалж байна">
                 <SkeletonLine width="50%" />

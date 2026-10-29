@@ -2,6 +2,7 @@ import { Dot, Meta, MetaTitle } from "@/components/ui/Meta";
 import StudentRowAction from "./StudentRowAction";
 import TeacherRowMeta from "./TeacherRowMeta";
 import { thousandShortTitle, type TestRow } from "./types";
+import { cleanTitle } from "@/lib/studentTitle";
 
 export default function TestRowItem({
   test,
@@ -14,7 +15,10 @@ export default function TestRowItem({
 }) {
   // 1000 бодлого: «Сорил 10-A» гэх мэт нэрээр (дугаар нь эрэмбэлэх түлхүүр)
   const thousand = test.type === "THOUSAND";
-  const short = thousand ? thousandShortTitle(test.title) : null;
+  const rawShort = thousand ? thousandShortTitle(test.title) : null;
+  // Сурагчид номын дотоод нэр/«·» харуулахгүй (lib/studentTitle); багшид эх нэр
+  const short = rawShort && !isTeacher ? cleanTitle(rawShort, null, rawShort) : rawShort;
+  const plain = isTeacher ? test.title : cleanTitle(test.title, test.variantLabel, test.title);
   const badge = thousand ? (/(\d+)\s*-?\s*[A-ZА-Я]?\s*$/.exec(short ?? "")?.[1] ?? <Dot />) : num ?? <Dot />;
   return (
     <div className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
@@ -23,7 +27,7 @@ export default function TestRowItem({
       </span>
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-1.5 truncate text-sm font-semibold text-ink">
-          {thousand ? <MetaTitle>{short}</MetaTitle> : num !== null ? `Тест ${num}` : test.title}
+          {thousand ? <MetaTitle>{short}</MetaTitle> : num !== null ? `Тест ${num}` : plain}
           {/* А/Б хувилбар — багшид ХОЁУЛАНГ нь тодорхой пилл-ээр ялгаж
               харуулна (Дутагдал §1: сурагчид ЗӨВХӨН нэгийг харна). */}
           {test.variantLabel && isTeacher && (

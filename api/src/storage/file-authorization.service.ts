@@ -9,7 +9,10 @@ import {
   hasCoveringPass,
 } from '../common/access';
 import { canStaffClassDay, staffDays } from '../lesson-day/staff-access';
-import { addDateDays } from '../common/date';
+import { addDateDays, todayUB } from '../common/date';
+
+/** Гэрийн даалгаврын бодлогын зургийг харах хугацаа (хичээлийн өдрөөс, хоног) */
+const HOMEWORK_IMAGE_DAYS = 31;
 export interface FileActor {
   id: string;
   role: Role;
@@ -347,6 +350,61 @@ export class FileAuthorizationService {
     >();
     for (const ref of theories)
       if (ref.chapter) chapters.set(ref.chapter.id, ref.chapter);
+    // Шалгалтын зураг: сурагч тухайн бодлоготой тестийг ЭХЛҮҮЛСЭН бол (session
+    // зөвхөн эрхтэй үед үүсдэг) зургийг харна — ном худалдаж аваагүй, зөвхөн
+    // тест/ангиар хамрагдсан (жиш: 1000 бодлогын шалгалт) сурагчид хэрэгтэй.
+    // canAccessProblem (classroomRelease — хүнд)-оос ӨМНӨ шалгана (аудит 2026-10-29).
+    if (
+      problems.length > 0 &&
+      (actor.role === Role.STUDENT || actor.role === Role.BUYER)
+    ) {
+      const imageWhere = {
+        OR: [{ imageKey: key }, { choiceOptions: { some: { imageKey: key } } }],
+      } satisfies Prisma.ProblemWhereInput;
+      const examSession = await this.prisma.testAttemptSession.findFirst({
+        where: {
+          studentId: actor.id,
+          test: {
+            deletedAt: null,
+            problems: { some: { problem: imageWhere } },
+          },
+        },
+        select: { id: true },
+      });
+      if (examSession) return true;
+      // Гэрийн даалгаврын B хувилбар (homework-practice): оролдлого зөвхөн жагсаалтад
+      // нээгдсэн үед үүсдэг. Зөвхөн сүүлийн 31 хоногийн, одоо идэвхтэй элсэлттэй ангийнх.
+      const testIds = (
+        await this.prisma.testProblem.findMany({
+          where: { problem: imageWhere },
+          select: { testId: true },
+        })
+      ).map((t) => t.testId);
+      if (testIds.length) {
+        const attempts = await this.prisma.homeworkAttempt.findMany({
+          where: {
+            studentId: actor.id,
+            testId: { in: testIds },
+            lessonDate: { gte: addDateDays(todayUB(), -HOMEWORK_IMAGE_DAYS) },
+          },
+          select: { classroomId: true },
+        });
+        const classroomIds = [...new Set(attempts.map((a) => a.classroomId))];
+        if (
+          classroomIds.length &&
+          (await this.prisma.enrollment.findFirst({
+            where: {
+              studentId: actor.id,
+              classroomId: { in: classroomIds },
+              leftAt: null,
+              classroom: { archived: false },
+            },
+            select: { id: true },
+          }))
+        )
+          return true;
+      }
+    }
     // Бодлогын зураг: танхимын сурагчид зөвхөн ангид нээгдсэн бодлогынх (2026-10-29)
     for (const problem of problems)
       for (const viewer of viewers)
@@ -363,52 +421,6 @@ export class FileAuthorizationService {
         )
           return true;
 
-    // Шалгалтын зураг: сурагч тухайн бодлоготой тестийг ЭХЛҮҮЛСЭН бол (session
-    // зөвхөн эрхтэй үед үүсдэг) зургийг харна — ном худалдаж аваагүй, зөвхөн
-    // тест/ангиар хамрагдсан (жиш: 1000 бодлогын шалгалт) сурагчид хэрэгтэй.
-    if (
-      problems.length > 0 &&
-      (actor.role === Role.STUDENT || actor.role === Role.BUYER)
-    ) {
-      const examSession = await this.prisma.testAttemptSession.findFirst({
-        where: {
-          studentId: actor.id,
-          test: {
-            deletedAt: null,
-            problems: {
-              some: {
-                problem: {
-                  OR: [{ imageKey: key }, { choiceOptions: { some: { imageKey: key } } }],
-                },
-              },
-            },
-          },
-        },
-        select: { id: true },
-      });
-      if (examSession) return true;
-      // Гэрийн даалгаврын B хувилбар (homework-practice): эхлүүлсэн оролдлого нь
-      // зөвхөн жагсаалтад нээгдсэн үед үүсдэг тул бодлогын зургийг харна.
-      const homeworkAttempt = await this.prisma.homeworkAttempt.findFirst({
-        where: {
-          studentId: actor.id,
-          testId: {
-            in: (
-              await this.prisma.testProblem.findMany({
-                where: {
-                  problem: {
-                    OR: [{ imageKey: key }, { choiceOptions: { some: { imageKey: key } } }],
-                  },
-                },
-                select: { testId: true },
-              })
-            ).map((t) => t.testId),
-          },
-        },
-        select: { id: true },
-      });
-      if (homeworkAttempt) return true;
-    }
 
     for (const ref of videos)
       if (ref.chapter)

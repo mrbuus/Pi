@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS "HomeworkAttempt" (
   "status" "HomeworkAttemptStatus" NOT NULL DEFAULT 'IN_PROGRESS',
   "startedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "deadlineAt" TIMESTAMP(3),
+  "timeLimitMin" INTEGER,
   "answers" JSONB NOT NULL DEFAULT '{}',
   "firstAnswers" JSONB,
   "checksUsed" INTEGER NOT NULL DEFAULT 0,
@@ -24,6 +25,8 @@ CREATE TABLE IF NOT EXISTS "HomeworkAttempt" (
   "updatedAt" TIMESTAMP(3) NOT NULL,
   CONSTRAINT "HomeworkAttempt_pkey" PRIMARY KEY ("id")
 );
+-- Хүснэгт өмнө нь (локал туршилтад) баганагүй үүссэн бол нэмнэ
+ALTER TABLE "HomeworkAttempt" ADD COLUMN IF NOT EXISTS "timeLimitMin" INTEGER;
 CREATE UNIQUE INDEX IF NOT EXISTS "HomeworkAttempt_studentId_testId_lessonDate_key"
   ON "HomeworkAttempt"("studentId", "testId", "lessonDate");
 CREATE INDEX IF NOT EXISTS "HomeworkAttempt_classroomId_lessonDate_idx"

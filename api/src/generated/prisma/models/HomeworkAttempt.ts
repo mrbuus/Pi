@@ -27,12 +27,14 @@ export type AggregateHomeworkAttempt = {
 }
 
 export type HomeworkAttemptAvgAggregateOutputType = {
+  timeLimitMin: number | null
   checksUsed: number | null
   score: number | null
   total: number | null
 }
 
 export type HomeworkAttemptSumAggregateOutputType = {
+  timeLimitMin: number | null
   checksUsed: number | null
   score: number | null
   total: number | null
@@ -47,6 +49,7 @@ export type HomeworkAttemptMinAggregateOutputType = {
   status: $Enums.HomeworkAttemptStatus | null
   startedAt: Date | null
   deadlineAt: Date | null
+  timeLimitMin: number | null
   checksUsed: number | null
   score: number | null
   total: number | null
@@ -63,6 +66,7 @@ export type HomeworkAttemptMaxAggregateOutputType = {
   status: $Enums.HomeworkAttemptStatus | null
   startedAt: Date | null
   deadlineAt: Date | null
+  timeLimitMin: number | null
   checksUsed: number | null
   score: number | null
   total: number | null
@@ -79,6 +83,7 @@ export type HomeworkAttemptCountAggregateOutputType = {
   status: number
   startedAt: number
   deadlineAt: number
+  timeLimitMin: number
   answers: number
   firstAnswers: number
   checksUsed: number
@@ -91,12 +96,14 @@ export type HomeworkAttemptCountAggregateOutputType = {
 
 
 export type HomeworkAttemptAvgAggregateInputType = {
+  timeLimitMin?: true
   checksUsed?: true
   score?: true
   total?: true
 }
 
 export type HomeworkAttemptSumAggregateInputType = {
+  timeLimitMin?: true
   checksUsed?: true
   score?: true
   total?: true
@@ -111,6 +118,7 @@ export type HomeworkAttemptMinAggregateInputType = {
   status?: true
   startedAt?: true
   deadlineAt?: true
+  timeLimitMin?: true
   checksUsed?: true
   score?: true
   total?: true
@@ -127,6 +135,7 @@ export type HomeworkAttemptMaxAggregateInputType = {
   status?: true
   startedAt?: true
   deadlineAt?: true
+  timeLimitMin?: true
   checksUsed?: true
   score?: true
   total?: true
@@ -143,6 +152,7 @@ export type HomeworkAttemptCountAggregateInputType = {
   status?: true
   startedAt?: true
   deadlineAt?: true
+  timeLimitMin?: true
   answers?: true
   firstAnswers?: true
   checksUsed?: true
@@ -248,6 +258,7 @@ export type HomeworkAttemptGroupByOutputType = {
   status: $Enums.HomeworkAttemptStatus
   startedAt: Date
   deadlineAt: Date | null
+  timeLimitMin: number | null
   answers: runtime.JsonValue
   firstAnswers: runtime.JsonValue | null
   checksUsed: number
@@ -289,6 +300,7 @@ export type HomeworkAttemptWhereInput = {
   status?: Prisma.EnumHomeworkAttemptStatusFilter<"HomeworkAttempt"> | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFilter<"HomeworkAttempt"> | Date | string
   deadlineAt?: Prisma.DateTimeNullableFilter<"HomeworkAttempt"> | Date | string | null
+  timeLimitMin?: Prisma.IntNullableFilter<"HomeworkAttempt"> | number | null
   answers?: Prisma.JsonFilter<"HomeworkAttempt">
   firstAnswers?: Prisma.JsonNullableFilter<"HomeworkAttempt">
   checksUsed?: Prisma.IntFilter<"HomeworkAttempt"> | number
@@ -308,6 +320,7 @@ export type HomeworkAttemptOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   deadlineAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  timeLimitMin?: Prisma.SortOrderInput | Prisma.SortOrder
   answers?: Prisma.SortOrder
   firstAnswers?: Prisma.SortOrderInput | Prisma.SortOrder
   checksUsed?: Prisma.SortOrder
@@ -331,6 +344,7 @@ export type HomeworkAttemptWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumHomeworkAttemptStatusFilter<"HomeworkAttempt"> | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFilter<"HomeworkAttempt"> | Date | string
   deadlineAt?: Prisma.DateTimeNullableFilter<"HomeworkAttempt"> | Date | string | null
+  timeLimitMin?: Prisma.IntNullableFilter<"HomeworkAttempt"> | number | null
   answers?: Prisma.JsonFilter<"HomeworkAttempt">
   firstAnswers?: Prisma.JsonNullableFilter<"HomeworkAttempt">
   checksUsed?: Prisma.IntFilter<"HomeworkAttempt"> | number
@@ -350,6 +364,7 @@ export type HomeworkAttemptOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   deadlineAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  timeLimitMin?: Prisma.SortOrderInput | Prisma.SortOrder
   answers?: Prisma.SortOrder
   firstAnswers?: Prisma.SortOrderInput | Prisma.SortOrder
   checksUsed?: Prisma.SortOrder
@@ -376,6 +391,7 @@ export type HomeworkAttemptScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumHomeworkAttemptStatusWithAggregatesFilter<"HomeworkAttempt"> | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeWithAggregatesFilter<"HomeworkAttempt"> | Date | string
   deadlineAt?: Prisma.DateTimeNullableWithAggregatesFilter<"HomeworkAttempt"> | Date | string | null
+  timeLimitMin?: Prisma.IntNullableWithAggregatesFilter<"HomeworkAttempt"> | number | null
   answers?: Prisma.JsonWithAggregatesFilter<"HomeworkAttempt">
   firstAnswers?: Prisma.JsonNullableWithAggregatesFilter<"HomeworkAttempt">
   checksUsed?: Prisma.IntWithAggregatesFilter<"HomeworkAttempt"> | number
@@ -394,6 +410,7 @@ export type HomeworkAttemptCreateInput = {
   status?: $Enums.HomeworkAttemptStatus
   startedAt?: Date | string
   deadlineAt?: Date | string | null
+  timeLimitMin?: number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: number
@@ -413,6 +430,7 @@ export type HomeworkAttemptUncheckedCreateInput = {
   status?: $Enums.HomeworkAttemptStatus
   startedAt?: Date | string
   deadlineAt?: Date | string | null
+  timeLimitMin?: number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: number
@@ -432,6 +450,7 @@ export type HomeworkAttemptUpdateInput = {
   status?: Prisma.EnumHomeworkAttemptStatusFieldUpdateOperationsInput | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deadlineAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: Prisma.IntFieldUpdateOperationsInput | number
@@ -451,6 +470,7 @@ export type HomeworkAttemptUncheckedUpdateInput = {
   status?: Prisma.EnumHomeworkAttemptStatusFieldUpdateOperationsInput | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deadlineAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: Prisma.IntFieldUpdateOperationsInput | number
@@ -470,6 +490,7 @@ export type HomeworkAttemptCreateManyInput = {
   status?: $Enums.HomeworkAttemptStatus
   startedAt?: Date | string
   deadlineAt?: Date | string | null
+  timeLimitMin?: number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: number
@@ -488,6 +509,7 @@ export type HomeworkAttemptUpdateManyMutationInput = {
   status?: Prisma.EnumHomeworkAttemptStatusFieldUpdateOperationsInput | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deadlineAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: Prisma.IntFieldUpdateOperationsInput | number
@@ -506,6 +528,7 @@ export type HomeworkAttemptUncheckedUpdateManyInput = {
   status?: Prisma.EnumHomeworkAttemptStatusFieldUpdateOperationsInput | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deadlineAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: Prisma.IntFieldUpdateOperationsInput | number
@@ -530,6 +553,7 @@ export type HomeworkAttemptCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   deadlineAt?: Prisma.SortOrder
+  timeLimitMin?: Prisma.SortOrder
   answers?: Prisma.SortOrder
   firstAnswers?: Prisma.SortOrder
   checksUsed?: Prisma.SortOrder
@@ -540,6 +564,7 @@ export type HomeworkAttemptCountOrderByAggregateInput = {
 }
 
 export type HomeworkAttemptAvgOrderByAggregateInput = {
+  timeLimitMin?: Prisma.SortOrder
   checksUsed?: Prisma.SortOrder
   score?: Prisma.SortOrder
   total?: Prisma.SortOrder
@@ -554,6 +579,7 @@ export type HomeworkAttemptMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   deadlineAt?: Prisma.SortOrder
+  timeLimitMin?: Prisma.SortOrder
   checksUsed?: Prisma.SortOrder
   score?: Prisma.SortOrder
   total?: Prisma.SortOrder
@@ -570,6 +596,7 @@ export type HomeworkAttemptMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   deadlineAt?: Prisma.SortOrder
+  timeLimitMin?: Prisma.SortOrder
   checksUsed?: Prisma.SortOrder
   score?: Prisma.SortOrder
   total?: Prisma.SortOrder
@@ -578,6 +605,7 @@ export type HomeworkAttemptMinOrderByAggregateInput = {
 }
 
 export type HomeworkAttemptSumOrderByAggregateInput = {
+  timeLimitMin?: Prisma.SortOrder
   checksUsed?: Prisma.SortOrder
   score?: Prisma.SortOrder
   total?: Prisma.SortOrder
@@ -615,6 +643,7 @@ export type HomeworkAttemptCreateWithoutChecksInput = {
   status?: $Enums.HomeworkAttemptStatus
   startedAt?: Date | string
   deadlineAt?: Date | string | null
+  timeLimitMin?: number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: number
@@ -633,6 +662,7 @@ export type HomeworkAttemptUncheckedCreateWithoutChecksInput = {
   status?: $Enums.HomeworkAttemptStatus
   startedAt?: Date | string
   deadlineAt?: Date | string | null
+  timeLimitMin?: number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: number
@@ -667,6 +697,7 @@ export type HomeworkAttemptUpdateWithoutChecksInput = {
   status?: Prisma.EnumHomeworkAttemptStatusFieldUpdateOperationsInput | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deadlineAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: Prisma.IntFieldUpdateOperationsInput | number
@@ -685,6 +716,7 @@ export type HomeworkAttemptUncheckedUpdateWithoutChecksInput = {
   status?: Prisma.EnumHomeworkAttemptStatusFieldUpdateOperationsInput | $Enums.HomeworkAttemptStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deadlineAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   firstAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   checksUsed?: Prisma.IntFieldUpdateOperationsInput | number
@@ -734,6 +766,7 @@ export type HomeworkAttemptSelect<ExtArgs extends runtime.Types.Extensions.Inter
   status?: boolean
   startedAt?: boolean
   deadlineAt?: boolean
+  timeLimitMin?: boolean
   answers?: boolean
   firstAnswers?: boolean
   checksUsed?: boolean
@@ -754,6 +787,7 @@ export type HomeworkAttemptSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   status?: boolean
   startedAt?: boolean
   deadlineAt?: boolean
+  timeLimitMin?: boolean
   answers?: boolean
   firstAnswers?: boolean
   checksUsed?: boolean
@@ -772,6 +806,7 @@ export type HomeworkAttemptSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   status?: boolean
   startedAt?: boolean
   deadlineAt?: boolean
+  timeLimitMin?: boolean
   answers?: boolean
   firstAnswers?: boolean
   checksUsed?: boolean
@@ -790,6 +825,7 @@ export type HomeworkAttemptSelectScalar = {
   status?: boolean
   startedAt?: boolean
   deadlineAt?: boolean
+  timeLimitMin?: boolean
   answers?: boolean
   firstAnswers?: boolean
   checksUsed?: boolean
@@ -799,7 +835,7 @@ export type HomeworkAttemptSelectScalar = {
   updatedAt?: boolean
 }
 
-export type HomeworkAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "classroomId" | "testId" | "lessonDate" | "status" | "startedAt" | "deadlineAt" | "answers" | "firstAnswers" | "checksUsed" | "score" | "total" | "submittedAt" | "updatedAt", ExtArgs["result"]["homeworkAttempt"]>
+export type HomeworkAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "classroomId" | "testId" | "lessonDate" | "status" | "startedAt" | "deadlineAt" | "timeLimitMin" | "answers" | "firstAnswers" | "checksUsed" | "score" | "total" | "submittedAt" | "updatedAt", ExtArgs["result"]["homeworkAttempt"]>
 export type HomeworkAttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   checks?: boolean | Prisma.HomeworkAttempt$checksArgs<ExtArgs>
   _count?: boolean | Prisma.HomeworkAttemptCountOutputTypeDefaultArgs<ExtArgs>
@@ -824,6 +860,10 @@ export type $HomeworkAttemptPayload<ExtArgs extends runtime.Types.Extensions.Int
      * Дараагийн хичээлийн эхлэл (УБ 00:00); дараагийн хичээл тодорхойгүй бол null
      */
     deadlineAt: Date | null
+    /**
+     * Эхлэх үеийн Test.timeLimitMin (минут); null = хязгааргүй. Autosave/шалгах бүрт Test уншихгүй
+     */
+    timeLimitMin: number | null
     answers: runtime.JsonValue
     /**
      * Эхний «Шалгах» үеийн хариу (ML дохио)
@@ -1266,6 +1306,7 @@ export interface HomeworkAttemptFieldRefs {
   readonly status: Prisma.FieldRef<"HomeworkAttempt", 'HomeworkAttemptStatus'>
   readonly startedAt: Prisma.FieldRef<"HomeworkAttempt", 'DateTime'>
   readonly deadlineAt: Prisma.FieldRef<"HomeworkAttempt", 'DateTime'>
+  readonly timeLimitMin: Prisma.FieldRef<"HomeworkAttempt", 'Int'>
   readonly answers: Prisma.FieldRef<"HomeworkAttempt", 'Json'>
   readonly firstAnswers: Prisma.FieldRef<"HomeworkAttempt", 'Json'>
   readonly checksUsed: Prisma.FieldRef<"HomeworkAttempt", 'Int'>

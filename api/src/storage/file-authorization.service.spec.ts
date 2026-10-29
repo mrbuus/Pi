@@ -57,6 +57,32 @@ describe('file authorization boundaries', () => {
       photo.filter((u) => u === a.where.studentId).map(() => ({ classroomId: 'c1', date: day })),
     );
   }
+  it('homework B problem image: only recent attempt (31 days) + active enrollment, checked before release', async () => {
+    db.problem.findMany.mockResolvedValue([
+      { id: 'p1', chapter: { id: 'ch', bookId: 'b', freePreview: false } },
+    ]);
+    db.testProblem.findMany.mockResolvedValue([{ testId: 'B1' }]);
+    let attemptWhere: any = null;
+    db.homeworkAttempt.findMany.mockImplementation(async (a: any) => {
+      attemptWhere = a.where;
+      return a.where.studentId === 's1' ? [{ classroomId: 'c1' }] : [];
+    });
+    db.enrollment.findFirst.mockImplementation(async (a: any) =>
+      a.where.studentId === 's1' && a.where.classroomId?.in?.includes('c1') && a.where.leftAt === null
+        ? { id: 'e' }
+        : null,
+    );
+    const ok = (id: string) => service.allowed({ id, role: 'STUDENT' } as never, 'prob.png');
+    await expect(ok('s1')).resolves.toBe(true);
+    expect(attemptWhere.lessonDate.gte).toBeInstanceOf(Date);
+    const ageDays = (Date.now() - attemptWhere.lessonDate.gte.getTime()) / 86400000;
+    expect(ageDays).toBeGreaterThan(29);
+    expect(ageDays).toBeLessThan(33);
+    // Ангиас гарсан (идэвхтэй элсэлтгүй) — зураг нээгдэхгүй
+    db.enrollment.findFirst.mockResolvedValue(null);
+    await expect(ok('s1')).resolves.toBe(false);
+    await expect(ok('s2')).resolves.toBe(false);
+  });
   it('make-up note photos: owner student and that class/day staff only — private precedence', async () => {
     db.storedFile.findUnique.mockResolvedValue({ ownerId: 'owner' });
     refs(['owner'], ['owner']); // also copied into a theory photo — still private

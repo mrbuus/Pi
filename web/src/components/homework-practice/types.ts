@@ -76,6 +76,8 @@ export interface HwAttempt {
   remainingSec: number | null;
   checksUsed: number;
   maxChecks: number;
+  /** Илгээсэн бол серверийн эцсийн оноо, үгүй бол null */
+  score: HwScore | null;
   problems: HwProblem[];
   answers: HwAnswers;
   lastCheck: Record<string, CheckResult> | null;

@@ -46,6 +46,7 @@ function makeDb() {
     { studentId: 's1', classroomId: 'c1', joinedAt: d('2026-09-01'), classroom: { name: '10А' } },
   ];
   const attempts: Row[] = [];
+  const accesses: Row[] = [];
   const checks: Row[] = [];
   const photos: Row[] = [];
   const files: Record<string, Row> = {
@@ -53,6 +54,7 @@ function makeDb() {
     'f2.pdf': { ownerId: 's1', mime: 'application/pdf', size: 1000, pages: 2, expiresAt: new Date() },
     'x.pdf': { ownerId: 's2', mime: 'application/pdf', size: 1000, pages: 1, expiresAt: new Date() },
     'img.jpg': { ownerId: 's1', mime: 'image/jpeg', size: 1000, pages: null, expiresAt: new Date() },
+    'nopages.pdf': { ownerId: 's1', mime: 'application/pdf', size: 1000, pages: null, expiresAt: new Date() },
   };
   let seq = 0;
   const matchAttempt = (a: Row, w: Row) =>
@@ -81,7 +83,18 @@ function makeDb() {
             (where.classroomId.in ? where.classroomId.in.includes(s.classroomId) : s.classroomId === where.classroomId) &&
             (!where.date?.gte || s.date >= where.date.gte) &&
             (!where.date?.lte || s.date <= where.date.lte) &&
-            (!where.date?.lt || s.date < where.date.lt),
+            (!where.date?.lt || s.date < where.date.lt) &&
+            (!where.testId?.in || where.testId.in.includes(s.testId)),
+        ),
+      ),
+    },
+    testAccess: {
+      findMany: jest.fn(async ({ where }: any) =>
+        accesses.filter(
+          (a) =>
+            where.classroomId.in.includes(a.classroomId) &&
+            (!where.testId?.in || where.testId.in.includes(a.testId)) &&
+            (!where.assignedAt?.gt || a.assignedAt > where.assignedAt.gt),
         ),
       ),
     },
@@ -196,7 +209,7 @@ function makeDb() {
     dailyHomeworkMark: { findMany: jest.fn(async () => [{ classroomId: 'c1', date: d('2026-10-29'), status: 'PARTIAL' }]) },
     $transaction: jest.fn(async (fn: any) => fn(db)),
   };
-  return { db, attempts, checks, photos, enrollments, sessions, tests };
+  return { db, attempts, accesses, checks, photos, enrollments, sessions, tests };
 }
 
 describe('HomeworkPracticeService — танхимын сурагчийн гэрийн даалгавар', () => {
@@ -292,10 +305,44 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     await expect(svc.submit('s2', attemptId, {})).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('ангиас гарсан бол үргэлжлүүлэхгүй (дуудлага бүрт дахин шалгана)', async () => {
+  it('ангиас гарсан бол эхлүүлэх/илгээх үед бүтэн эрхийг дахин шалгана', async () => {
     const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
     env.enrollments.length = 0;
-    await expect(svc.save('s1', attemptId, { p1: 'B' })).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(svc.start('s1', { testId: 'B1', date: '2026-10-27' })).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(svc.submit('s1', attemptId, { p1: 'B' })).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('autosave/шалгах хөнгөн: бүтэн жагсаалт дахин босгохгүй, Test уншихгүй, бодлого санах ойгоос', async () => {
+    const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect(env.attempts[0].timeLimitMin).toBe(30);
+    const counts = () => ({
+      enroll: env.db.enrollment.findMany.mock.calls.length,
+      sess: env.db.classTestSession.findMany.mock.calls.length,
+      tests: env.db.test.findMany.mock.calls.length,
+      problems: env.db.testProblem.findMany.mock.calls.length,
+    });
+    const before = counts();
+    await svc.save('s1', attemptId, { p1: 'B' });
+    await svc.check('s1', attemptId, { p2: 'C' });
+    expect(counts()).toEqual(before);
+    expect(env.db.test.findUnique).not.toHaveBeenCalled();
+    // MAX_DAYS цонхноос гадуурх хичээлийн өдрийн оролдлого — хадгалахгүй
+    jest.setSystemTime(new Date('2026-12-15T02:00:00Z'));
+    await expect(svc.save('s1', attemptId, { p1: 'A' })).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('B хувилбарыг анги дараа нь танхимд бодох бол гэрийн даалгавар болохгүй', async () => {
+    env.sessions.push({ classroomId: 'c1', date: d('2026-11-20'), testId: 'B1' });
+    await expect(svc.my('s1')).resolves.toEqual({ days: [] });
+    await expect(svc.start('s1', { testId: 'B1', date: '2026-10-27' })).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('B хувилбар ирээдүйд ангид оноогдсон (TestAccess.assignedAt > одоо) бол гэрийн даалгавар болохгүй', async () => {
+    env.accesses.push({ classroomId: 'c1', testId: 'B1', assignedAt: new Date('2026-11-05T00:00:00Z') });
+    await expect(svc.my('s1')).resolves.toEqual({ days: [] });
+    // Өмнө оноосон (өнгөрсөн) бол саад болохгүй
+    env.accesses[0].assignedAt = new Date('2026-10-01T00:00:00Z');
+    expect((await svc.my('s1')).days).toHaveLength(1);
   });
 
   it('шалгах: зөвхөн зөв/буруу, 2 удаа; 3 дахь нь 409; эхний хариу хадгалагдана', async () => {
@@ -317,8 +364,11 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
 
   it('илгээх: оноо хадгална, давтан дуудвал ижил хариу, дараа нь autosave/шалгах 409', async () => {
     const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect((await svc.start('s1', { testId: 'B1', date: '2026-10-27' })).score).toBeNull();
     const res = await svc.submit('s1', attemptId, { p1: 'B', p2: 'D' });
     expect(res.score).toEqual({ correct: 1, total: 2 });
+    const view = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect(view).toMatchObject({ status: 'SUBMITTED', score: { correct: 1, total: 2 }, remainingSec: null });
     expect(res.results).toEqual({ p1: 'CORRECT', p2: 'WRONG' });
     expect(env.attempts[0]).toMatchObject({ status: 'SUBMITTED', score: 1, total: 2 });
     const again = await svc.submit('s1', attemptId, { p1: 'A' });
@@ -365,6 +415,8 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
 
     await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'x.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
     await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'img.jpg', pages: 1 })).rejects.toThrow('PDF');
+    // Серверт хуудас тоолоогүй PDF — клиентийн тоонд итгэхгүй
+    await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'nopages.pdf', pages: 2 })).rejects.toThrow('хуудс');
     await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'f1.pdf', pages: 7 })).rejects.toThrow('хуудас');
     await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-26', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
     await expect(svc.addPhoto('s1', { classroomId: 'c9', date: '2026-10-27', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);

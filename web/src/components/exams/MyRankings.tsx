@@ -6,6 +6,7 @@ import { ChevronDown, Trophy } from "lucide-react";
 import { api } from "@/lib/api";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { formatMnDate } from "@/lib/dateMn";
+import { cleanTitle } from "@/lib/studentTitle";
 
 type Rank = { rank: number | null; participants: number; tied: number; label?: string; id?: string };
 type Ranking = { classes: Rank[]; school: Rank | null; exam: Rank };
@@ -79,7 +80,7 @@ function ResultCard({ result }: { result: MyResult }) {
           href={`/app/tests/${result.test.id}/result`}
           className="min-w-0 break-words font-bold text-ink hover:text-brand-soft"
         >
-          {result.test.title}
+          {cleanTitle(result.test.title, null, result.test.title)}
         </Link>
         <span className="shrink-0 text-right tabular-nums">
           <span className="block font-display text-lg font-bold text-ink">
