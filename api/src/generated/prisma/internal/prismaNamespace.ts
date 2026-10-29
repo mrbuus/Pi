@@ -518,7 +518,10 @@ export const ModelName = {
   SheetRow: 'SheetRow',
   SheetRowVersion: 'SheetRowVersion',
   SheetIssue: 'SheetIssue',
-  SheetPayment: 'SheetPayment'
+  SheetPayment: 'SheetPayment',
+  HomeworkAttempt: 'HomeworkAttempt',
+  HomeworkCheck: 'HomeworkCheck',
+  HomeworkPhoto: 'HomeworkPhoto'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -534,7 +537,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -9566,6 +9569,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HomeworkAttempt: {
+      payload: Prisma.$HomeworkAttemptPayload<ExtArgs>
+      fields: Prisma.HomeworkAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>
+        }
+        update: {
+          args: Prisma.HomeworkAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkAttempt>
+        }
+        groupBy: {
+          args: Prisma.HomeworkAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeworkCheck: {
+      payload: Prisma.$HomeworkCheckPayload<ExtArgs>
+      fields: Prisma.HomeworkCheckFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkCheckFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkCheckFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkCheckFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkCheckFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkCheckFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkCheckCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkCheckCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkCheckCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkCheckDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>
+        }
+        update: {
+          args: Prisma.HomeworkCheckUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkCheckDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkCheckUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkCheckUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkCheckUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCheckPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkCheckAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkCheck>
+        }
+        groupBy: {
+          args: Prisma.HomeworkCheckGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkCheckGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkCheckCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkCheckCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeworkPhoto: {
+      payload: Prisma.$HomeworkPhotoPayload<ExtArgs>
+      fields: Prisma.HomeworkPhotoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkPhotoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkPhotoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkPhotoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkPhotoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkPhotoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkPhotoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkPhotoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkPhotoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkPhotoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>
+        }
+        update: {
+          args: Prisma.HomeworkPhotoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkPhotoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkPhotoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkPhotoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkPhotoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkPhotoPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkPhotoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkPhoto>
+        }
+        groupBy: {
+          args: Prisma.HomeworkPhotoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkPhotoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkPhotoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkPhotoCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -11467,6 +11692,53 @@ export const SheetPaymentScalarFieldEnum = {
 export type SheetPaymentScalarFieldEnum = (typeof SheetPaymentScalarFieldEnum)[keyof typeof SheetPaymentScalarFieldEnum]
 
 
+export const HomeworkAttemptScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  testId: 'testId',
+  lessonDate: 'lessonDate',
+  status: 'status',
+  startedAt: 'startedAt',
+  deadlineAt: 'deadlineAt',
+  answers: 'answers',
+  firstAnswers: 'firstAnswers',
+  checksUsed: 'checksUsed',
+  score: 'score',
+  total: 'total',
+  submittedAt: 'submittedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeworkAttemptScalarFieldEnum = (typeof HomeworkAttemptScalarFieldEnum)[keyof typeof HomeworkAttemptScalarFieldEnum]
+
+
+export const HomeworkCheckScalarFieldEnum = {
+  id: 'id',
+  attemptId: 'attemptId',
+  n: 'n',
+  answers: 'answers',
+  results: 'results',
+  createdAt: 'createdAt'
+} as const
+
+export type HomeworkCheckScalarFieldEnum = (typeof HomeworkCheckScalarFieldEnum)[keyof typeof HomeworkCheckScalarFieldEnum]
+
+
+export const HomeworkPhotoScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  lessonDate: 'lessonDate',
+  fileKey: 'fileKey',
+  pages: 'pages',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkPhotoScalarFieldEnum = (typeof HomeworkPhotoScalarFieldEnum)[keyof typeof HomeworkPhotoScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -12325,6 +12597,20 @@ export type EnumPlacementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$
 export type ListEnumPlacementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlacementStatus[]'>
     
 
+
+/**
+ * Reference to a field of type 'HomeworkAttemptStatus'
+ */
+export type EnumHomeworkAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeworkAttemptStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'HomeworkAttemptStatus[]'
+ */
+export type ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeworkAttemptStatus[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -12598,6 +12884,9 @@ export type GlobalOmitConfig = {
   sheetRowVersion?: Prisma.SheetRowVersionOmit
   sheetIssue?: Prisma.SheetIssueOmit
   sheetPayment?: Prisma.SheetPaymentOmit
+  homeworkAttempt?: Prisma.HomeworkAttemptOmit
+  homeworkCheck?: Prisma.HomeworkCheckOmit
+  homeworkPhoto?: Prisma.HomeworkPhotoOmit
 }
 
 /* Types for Logging */

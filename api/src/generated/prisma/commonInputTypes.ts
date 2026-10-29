@@ -1272,6 +1272,23 @@ export type EnumPlacementStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumPlacementStatusFilter<$PrismaModel>
 }
 
+export type EnumHomeworkAttemptStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeworkAttemptStatus | Prisma.EnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeworkAttemptStatusFilter<$PrismaModel> | $Enums.HomeworkAttemptStatus
+}
+
+export type EnumHomeworkAttemptStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeworkAttemptStatus | Prisma.EnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeworkAttemptStatusWithAggregatesFilter<$PrismaModel> | $Enums.HomeworkAttemptStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeworkAttemptStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeworkAttemptStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -2465,6 +2482,23 @@ export type NestedEnumPlacementStatusWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPlacementStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPlacementStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumHomeworkAttemptStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeworkAttemptStatus | Prisma.EnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeworkAttemptStatusFilter<$PrismaModel> | $Enums.HomeworkAttemptStatus
+}
+
+export type NestedEnumHomeworkAttemptStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeworkAttemptStatus | Prisma.EnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeworkAttemptStatus[] | Prisma.ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeworkAttemptStatusWithAggregatesFilter<$PrismaModel> | $Enums.HomeworkAttemptStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeworkAttemptStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeworkAttemptStatusFilter<$PrismaModel>
 }
 
 

@@ -662,3 +662,19 @@ export type SheetIssue = Prisma.SheetIssueModel
  * 
  */
 export type SheetPayment = Prisma.SheetPaymentModel
+/**
+ * Model HomeworkAttempt
+ * 
+ */
+export type HomeworkAttempt = Prisma.HomeworkAttemptModel
+/**
+ * Model HomeworkCheck
+ * 
+ */
+export type HomeworkCheck = Prisma.HomeworkCheckModel
+/**
+ * Model HomeworkPhoto
+ * Танхимын сурагчийн гэрийн даалгаврын зураг (утсан дээр PDF болгосон, ≤6 хуудас).
+ * Файл нь StoredFile (purpose "homework", 7 хоног). Шинээр илгээвэл хуучныг зөөлөн устгана.
+ */
+export type HomeworkPhoto = Prisma.HomeworkPhotoModel

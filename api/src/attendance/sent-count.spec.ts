@@ -49,6 +49,8 @@ describe('«Илгээсэн» — хичээлийн даалгавар сон�
       user: { findMany: jest.fn().mockResolvedValue([]) },
       assignment: { findMany: jest.fn().mockResolvedValue([]) },
       submission: { findMany: jest.fn().mockResolvedValue([]) },
+      homeworkAttempt: { findMany: jest.fn().mockResolvedValue([]) },
+      homeworkPhoto: { findMany: jest.fn().mockResolvedValue([]) },
     };
     const svc = new AttendanceService(db, {} as never, { record: jest.fn() } as never);
     expect((await svc.marks('class', '2026-10-18', 't', Role.TEACHER)).sent).toEqual({ assignmentIds: [], students: [] });
@@ -62,5 +64,32 @@ describe('«Илгээсэн» — хичээлийн даалгавар сон�
     expect(where.assignmentId).toEqual({ in: ['hw'] });
     expect(where.studentId).toEqual({ in: ['a', 'b'] });
     expect(db.assignment.findMany.mock.calls[0][0].where).toMatchObject({ classroomId: 'class', deletedAt: null });
+  });
+  it('онлайн бодсон гэрийн даалгавар (SUBMITTED) эсвэл зураг = илгээсэн, зөвхөн өмнөх хичээлийнх', async () => {
+    const d = (k: string) => new Date(`${k}T00:00:00.000Z`);
+    const db: any = {
+      classroom: { findUnique: jest.fn().mockResolvedValue({ id: 'class', teacherId: 't', archived: false, riskCriteria: null }) },
+      enrollment: { findMany: jest.fn().mockResolvedValue([{ studentId: 'a' }, { studentId: 'b' }, { studentId: 'c' }]) },
+      attendance: { findMany: jest.fn().mockResolvedValue([]) },
+      dailyHomeworkMark: { findMany: jest.fn().mockResolvedValue([]) },
+      user: { findMany: jest.fn().mockResolvedValue([]) },
+      assignment: { findMany: jest.fn().mockResolvedValue([]) },
+      submission: { findMany: jest.fn().mockResolvedValue([]) },
+      homeworkAttempt: { findMany: jest.fn().mockResolvedValue([
+        { studentId: 'a', lessonDate: d('2026-10-15') },
+        { studentId: 'c', lessonDate: d('2026-10-13') }, // өмнөх хичээл биш
+      ]) },
+      homeworkPhoto: { findMany: jest.fn().mockResolvedValue([{ studentId: 'b', lessonDate: d('2026-10-15') }]) },
+      classSchedule: { findMany: jest.fn().mockResolvedValue([]) },
+      classTestSession: { findMany: jest.fn().mockResolvedValue([{ date: d('2026-10-13'), testId: 'x' }, { date: d('2026-10-15'), testId: 'y' }]) },
+      scheduleException: { findMany: jest.fn().mockResolvedValue([]) },
+      academicCalendarDay: { findMany: jest.fn().mockResolvedValue([]) },
+    };
+    const svc = new AttendanceService(db, {} as never, { record: jest.fn() } as never);
+    const res = await svc.marks('class', '2026-10-18', 't', Role.TEACHER);
+    expect(res.sent.students.sort()).toEqual(['a', 'b']);
+    const where = db.homeworkAttempt.findMany.mock.calls[0][0].where;
+    expect(where).toMatchObject({ classroomId: 'class', status: 'SUBMITTED' });
+    expect(db.homeworkPhoto.findMany.mock.calls[0][0].where).toMatchObject({ classroomId: 'class', deletedAt: null });
   });
 });

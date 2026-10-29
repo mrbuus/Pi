@@ -385,6 +385,72 @@ export class AttendanceService {
    * сурагчид. Даалгавар сонгох дүрэм — board-logic.lessonAssignmentIds.
    */
   private async sentFor(classroomId: string, key: string, studentIds: string[]) {
+    const [byAssignment, byHomework] = await Promise.all([
+      this.assignmentSentFor(classroomId, key, studentIds),
+      this.homeworkSentFor(classroomId, key, studentIds),
+    ]);
+    if (!byHomework.length) return byAssignment;
+    return {
+      assignmentIds: byAssignment.assignmentIds,
+      students: [...new Set([...byAssignment.students, ...byHomework])],
+    };
+  }
+
+  /**
+   * Гэрийн даалгаврын онлайн бодолт/зураг (homework-practice, эзэн 2026-10-29): ӨМНӨХ хичээлийн
+   * өдрийн (lessonDate) даалгаврыг ИЛГЭЭСЭН (HomeworkAttempt SUBMITTED) эсвэл зураг (HomeworkPhoto)
+   * явуулсан одоогийн сурагчид. Мөр байхгүй бол өмнөх хичээлийг тооцоолохгүй (хөнгөн).
+   */
+  private async homeworkSentFor(
+    classroomId: string,
+    key: string,
+    studentIds: string[],
+  ): Promise<string[]> {
+    if (!studentIds.length) return [];
+    const range = {
+      gte: parseDateOnly(addDaysKey(key, -35)),
+      lt: parseDateOnly(key),
+    };
+    const [attempts, photos] = await Promise.all([
+      this.prisma.homeworkAttempt.findMany({
+        where: {
+          classroomId,
+          status: 'SUBMITTED',
+          lessonDate: range,
+          studentId: { in: studentIds },
+        },
+        select: { studentId: true, lessonDate: true },
+      }),
+      this.prisma.homeworkPhoto.findMany({
+        where: {
+          classroomId,
+          deletedAt: null,
+          lessonDate: range,
+          studentId: { in: studentIds },
+        },
+        select: { studentId: true, lessonDate: true },
+      }),
+    ]);
+    if (!attempts.length && !photos.length) return [];
+    const { prev } = await loadPreviousLesson(this.prisma, classroomId, key);
+    if (!prev) return [];
+    return submittedStudentIds(
+      [...attempts, ...photos]
+        .filter((r) => dateKey(r.lessonDate) === prev)
+        .map((r) => ({
+          studentId: r.studentId,
+          submittedAt: r.lessonDate,
+          imageKeys: [],
+        })),
+      studentIds,
+    );
+  }
+
+  private async assignmentSentFor(
+    classroomId: string,
+    key: string,
+    studentIds: string[],
+  ) {
     const dayStart = new Date(`${key}T00:00:00+08:00`);
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
     const createdFrom = new Date(`${addDaysKey(key, -35)}T00:00:00+08:00`);

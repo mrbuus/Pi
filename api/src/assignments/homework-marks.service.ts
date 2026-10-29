@@ -553,6 +553,36 @@ export class HomeworkMarksService {
         }
       }
     }
+    // Танхимын сурагчийн гэртээ онлайнаар бодож ИЛГЭЭСЭН гэрийн даалгавар (HomeworkAttempt,
+    // lessonDate = өмнөх хичээл) — тэр тестэд шалгалтын дүн (TestResult) байхгүй бол
+    // зөв бодсон тоо / нийт бодлогоор тооцно (homework-practice, эзэн 2026-10-29).
+    const counted = new Set(results.map((r) => `${r.testId}|${r.studentId}`));
+    const attempts = await this.prisma.homeworkAttempt.findMany({
+      where: {
+        classroomId,
+        lessonDate: parseDateOnly(prev),
+        status: 'SUBMITTED',
+        testId: { in: pairs.map((p) => p.testId) },
+        studentId: { in: studentIds },
+      },
+      select: { testId: true, studentId: true, score: true, total: true },
+    });
+    for (const a of attempts) {
+      if (counted.has(`${a.testId}|${a.studentId}`)) continue;
+      const cur = students[a.studentId];
+      if (cur) {
+        cur.score += a.score ?? 0;
+        cur.max += a.total ?? 0;
+        cur.taken += 1;
+      } else {
+        students[a.studentId] = {
+          score: a.score ?? 0,
+          max: a.total ?? 0,
+          testId: a.testId,
+          taken: 1,
+        };
+      }
+    }
     for (const s of Object.values(students)) {
       s.score = Math.round(s.score * 10) / 10;
       s.max = Math.round(s.max * 10) / 10;
