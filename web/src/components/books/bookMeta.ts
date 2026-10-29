@@ -26,4 +26,6 @@ export const BOOK_META: Record<string, BookMeta> = {
   PI: { name: "π тест", sub: "Давтлагын тест", short: "π тест", art: "pi", color: "#263F74", color2: "#14264B", order: 7, blurb: "Шалгалтын бүтэцтэй давтлагын тест" },
 };
 
-export const bookName = (code: string, dbTitle: string) => BOOK_META[code]?.name ?? dbTitle;
+/** Сурагчид харагдах нэр: DB displayName («Е-1») → BOOK_META → DB title */
+export const bookName = (code: string, dbTitle: string, displayName?: string | null) =>
+  displayName?.trim() || BOOK_META[code]?.name || dbTitle;

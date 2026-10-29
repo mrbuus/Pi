@@ -669,11 +669,19 @@ model Book {
   // гэж шүүнэ.
   deletedAt DateTime?
 
+  // Сурагчид харагдах нэр/дараалал (2026-10-29 эзний шийдвэр 6): «Е-1», «Е-2» ...
+  // title нь дотоод/импортын нэр хэвээр; сурагчид displayName ?? title харагдана.
+  displayName   String?
+  displayOrder  Int?
+  // true бол сурагчийн каталог/номын сангаас нуугдана (V2 давхардал, LAB, тест ном)
+  studentHidden Boolean @default(false)
+
   chapters Chapter[]
 
   @@index([archived])
   @@index([subject])
   @@index([deletedAt])
+  @@index([studentHidden, displayOrder])
 }
 
 model Chapter {

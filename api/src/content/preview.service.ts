@@ -1,19 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Subject } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { BOOK_DISPLAY_ORDER, studentBookWhere } from '../common/book-display';
 // Нийтийн урьдчилсан харагдац зөвхөн MATH — бусад хичээл ангиар хаалттай (эзэн 2026-10-18)
 @Injectable()
 export class PreviewService {
   constructor(private readonly prisma: PrismaService) {}
   async books() {
     return this.prisma.book.findMany({
-      where: { archived: false, deletedAt: null, subject: Subject.MATH },
-      orderBy: [{ code: 'asc' }, { id: 'asc' }],
+      // Нийтийн тул сурагчаас нуусан ном (V2 давхардал, LAB) гарахгүй
+      where: { archived: false, deletedAt: null, subject: Subject.MATH, ...studentBookWhere(false) },
+      orderBy: [...BOOK_DISPLAY_ORDER, { id: 'asc' }],
       take: 100,
       select: {
         id: true,
         code: true,
         title: true,
+        displayName: true,
         chapters: {
           where: { deletedAt: null },
           orderBy: [{ order: 'asc' }, { id: 'asc' }],
@@ -33,7 +36,7 @@ export class PreviewService {
       select: {
         id: true,
         title: true,
-        book: { select: { id: true, title: true } },
+        book: { select: { id: true, title: true, displayName: true } },
         problems: {
           where: { deletedAt: null },
           orderBy: [{ page: 'asc' }, { number: 'asc' }, { id: 'asc' }],
@@ -49,7 +52,7 @@ export class PreviewService {
       id: chapter.id,
       title: chapter.title,
       book: chapter.book
-        ? { id: chapter.book.id, title: chapter.book.title }
+        ? { id: chapter.book.id, title: chapter.book.title, displayName: chapter.book.displayName }
         : null,
       problems: chapter.problems.map((p) => ({
         id: p.id,

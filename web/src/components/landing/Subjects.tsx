@@ -8,7 +8,7 @@ import { SkeletonLine } from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/kit/button";
 import styles from "./sections.module.css";
 
-interface Book { id: string; code: string; title: string; _count: { chapters: number } }
+interface Book { id: string; code: string; title: string; displayName?: string | null; _count: { chapters: number } }
 interface Chapter { id: string; title: string; order: number; freePreview: boolean; _count: { problems: number; theories: number } }
 type SubjectKey = "MATH" | "SOCIAL_STUDIES";
 interface SubjectMeta { key: SubjectKey; title: string; description: string; topics: string[] }
@@ -86,7 +86,7 @@ function SubjectCard({ meta, index }: { meta: SubjectMeta; index: number }) {
       {loading ? <div role="status" className={styles.loading}><span className="sr-only">Номын сан ачаалж байна</span><SkeletonLine height={16} /><SkeletonLine width="75%" height={16} /><SkeletonLine width="85%" height={16} /></div>
         : loadError ? <div><p className="text-sm text-error">Номын санг ачаалж чадсангүй.</p><Button variant="link" onClick={() => void loadBooks()}>Дахин оролдох</Button></div>
           : books?.length ? <div className={styles.bookGrid}>{books.map(book => <button key={book.id} type="button" onClick={() => void openBook(book)} aria-pressed={selectedBook?.id === book.id} className={styles.bookChoice}>
-            <strong>{book.code}</strong><span><Meta items={[book.title, `${book._count.chapters} бүлэг`]} /></span>
+            <strong>{book.displayName || book.title}</strong><span><Meta items={[`${book._count.chapters} бүлэг`]} /></span>
           </button>)}</div>
             : <p className={styles.smallCopy}>Энэ хичээлийн цахим бодлогын сан хараахан нийтлэгдээгүй.</p>}
       {selectedBook && <div className={styles.chapterPanel}>

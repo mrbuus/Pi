@@ -263,7 +263,7 @@ export class VideosService {
         title: true,
         bookId: true,
         freePreview: true,
-        book: { select: { code: true, title: true } },
+        book: { select: { code: true, title: true, displayName: true } },
         _count: { select: { videos: { where: { deletedAt: null } } } },
       },
       orderBy: [{ book: { code: 'asc' } }, { order: 'asc' }],

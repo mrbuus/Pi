@@ -32,6 +32,7 @@ interface Book {
   id: string;
   code: string;
   title: string;
+  displayName?: string | null;
   problemCount?: number;
 }
 
@@ -287,7 +288,7 @@ export default function BuyerDashboard() {
         {booksQ.status === "ready" && books.length > 0 && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {books.map((b) => {
-              const meta = getBookMeta(b.code, b.title);
+              const meta = getBookMeta(b.code, b.title, b.displayName);
               return (
                 <div
                   key={b.id}

@@ -487,7 +487,10 @@ export const BookScalarFieldEnum = {
   sourceLabel: 'sourceLabel',
   archived: 'archived',
   subject: 'subject',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  displayName: 'displayName',
+  displayOrder: 'displayOrder',
+  studentHidden: 'studentHidden'
 } as const
 
 export type BookScalarFieldEnum = (typeof BookScalarFieldEnum)[keyof typeof BookScalarFieldEnum]

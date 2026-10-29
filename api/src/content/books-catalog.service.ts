@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Subject, TestGradingMode, TestType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { BOOK_DISPLAY_ORDER, studentBookWhere } from '../common/book-display';
 
 // Нийтийн номын каталог (/books, нэвтрэлтгүй): ном → сэдэв → бүлэг → тест.
 // Сэдэв = бүлгийн нэрний « · »-ээс өмнөх хэсэг («Тоо тоолол · Тест 1» → «Тоо тоолол»).
@@ -63,7 +64,7 @@ export function freeTestIds(chapters: ChapterLite[]): Set<string> {
   return out;
 }
 
-const PUBLIC_BOOK_SELECT = { id: true, code: true, title: true, subject: true } as const;
+const PUBLIC_BOOK_SELECT = { id: true, code: true, title: true, displayName: true, subject: true } as const;
 const CHAPTER_WITH_TESTS = {
   id: true,
   title: true,
@@ -106,9 +107,10 @@ export class BooksCatalogService {
   private async publicBooks() {
     const rows = await this.prisma.book.findMany({
       // Нийтэд зөвхөн MATH — бусад хичээл ангиар хаалттай (эзэн 2026-10-18)
-      where: { archived: false, deletedAt: null, subject: Subject.MATH },
+      // studentHidden (эзэн 2026-10-29, шийдвэр 6): V2 давхардал, LAB, тест ном
+      where: { archived: false, deletedAt: null, subject: Subject.MATH, ...studentBookWhere(false) },
       select: PUBLIC_BOOK_SELECT,
-      orderBy: { code: 'asc' },
+      orderBy: BOOK_DISPLAY_ORDER,
     });
     const codes = new Set(rows.map((b) => b.code));
     return rows.filter((b) => !/LAB|legacy/i.test(b.code) && !b.id.startsWith('v2-') && !codes.has(`${b.code}V3`));

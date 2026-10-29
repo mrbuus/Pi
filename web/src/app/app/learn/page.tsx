@@ -100,7 +100,7 @@ export default function LearnIndexPage() {
     }
     return [...map.entries()].map(([code, rows]) => ({
       code,
-      title: rows[0]?.book?.title,
+      title: rows[0]?.book ? rows[0].book.displayName || rows[0].book.title : undefined,
       chapters: [...rows].sort((a, b) => a.order - b.order),
     }));
   }, [chapters]);
@@ -197,11 +197,8 @@ export default function LearnIndexPage() {
             <section key={group.code} className="space-y-3">
               <div className="flex items-baseline gap-2">
                 <h2 className="text-lg font-extrabold">
-                  {group.title ?? group.code}
+                  {group.title ?? "Бусад"}
                 </h2>
-                <span className="font-mono text-xs text-ink-dim">
-                  {group.code}
-                </span>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {group.chapters.map((c) => (

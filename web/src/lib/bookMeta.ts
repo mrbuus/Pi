@@ -68,7 +68,14 @@ function resolveActiveTheme(): "light" | "dark" {
 }
 
 // Код яг таарахгүй бол (ж: "200-legacy") хамгийн урт таарах угтварыг олно
-export function getBookMeta(code: string, title?: string): BookMeta {
+// displayName (DB, «Е-1») байвал шошго нь түүнийх — «100×100» сурагчид харагдахгүй
+export function getBookMeta(code: string, title?: string, displayName?: string | null): BookMeta {
+  const meta = bookMetaByCode(code, title);
+  const name = displayName?.trim();
+  return name ? { ...meta, label: name } : meta;
+}
+
+function bookMetaByCode(code: string, title?: string): BookMeta {
   const theme = resolveActiveTheme();
   const direct = BOOK_TONE[code];
   const prefixKey = direct

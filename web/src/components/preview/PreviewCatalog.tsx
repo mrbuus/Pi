@@ -17,6 +17,7 @@ interface Chapter {
 interface Book {
   id: string;
   title: string;
+  displayName?: string | null;
   code: string;
   chapters: Chapter[];
 }
@@ -160,7 +161,7 @@ export default function PreviewCatalog() {
               <option value="">Ном сонгоно уу</option>
               {books.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.title}
+                  {b.displayName || b.title}
                 </option>
               ))}
             </select>

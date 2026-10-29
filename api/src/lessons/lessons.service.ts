@@ -50,7 +50,7 @@ export class LessonsService {
         order: true,
         bookId: true,
         freePreview: true,
-        book: { select: { code: true, title: true, subject: true } },
+        book: { select: { code: true, title: true, displayName: true, subject: true } },
         _count: { select: { problems: true } },
       },
     });
@@ -170,7 +170,15 @@ export class LessonsService {
         grade: true,
         freePreview: true,
         bookId: true,
-        book: { select: { code: true, title: true, subject: true } },
+        book: {
+          select: {
+            code: true,
+            title: true,
+            displayName: true,
+            subject: true,
+            studentHidden: true,
+          },
+        },
         _count: {
           select: {
             theories: { where: { archivedAt: null } },
@@ -178,7 +186,11 @@ export class LessonsService {
           },
         },
       },
-      orderBy: [{ book: { code: 'asc' } }, { order: 'asc' }],
+      orderBy: [
+        { book: { displayOrder: { sort: 'asc', nulls: 'last' } } },
+        { book: { code: 'asc' } },
+        { order: 'asc' },
+      ],
     });
 
     let accessible = chapters;
@@ -191,6 +203,8 @@ export class LessonsService {
       // common/access.ts chapterGrant-тэй ижил: MATH-аас бусад хичээл зөвхөн
       // тухайн хичээлийн ангид; анги нь зөвхөн өөрийн хичээлийг нээнэ
       accessible = chapters.filter((c) => {
+        // Сурагчаас нуусан ном (V2 давхардал, LAB) — эзэн 2026-10-29, шийдвэр 6
+        if (c.book?.studentHidden) return false;
         const subject = c.book?.subject ?? Subject.MATH;
         if (subject !== Subject.MATH && !own.has(subject)) return false;
         return (
