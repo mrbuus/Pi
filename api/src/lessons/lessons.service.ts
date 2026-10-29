@@ -13,10 +13,17 @@ import {
   collectContentScope,
   classroomRelease,
   internalTeachingRole,
+  studentTestAccessOr,
+  studentTestScope,
   assertInternalTeachingStaff,
 } from '../common/access';
 import { Prisma } from '../generated/prisma/client';
-import { LearningEventType, Role, Subject } from '../generated/prisma/enums';
+import {
+  LearningEventType,
+  Role,
+  Subject,
+  TestType,
+} from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTheoryDto, UpdateTheoryDto } from './dto/theory.dto';
 import { LessonProgressAction, RecordProgressDto } from './dto/progress.dto';
@@ -69,6 +76,10 @@ export class LessonsService {
       role,
       chapter,
     );
+    // Тестүүд: сурагчид зөвхөн ЭХЛҮҮЛЖ болохыг (common/access.ts
+    // studentTestAccessOr — ангид оноосон цаг нь ирсэн, танхимынханд нээгдсэн
+    // бүлгийн эрх). 1000 бодлого / ЭЕШ сорил зөвхөн ангид оноосон бол.
+    const testAccessWhere = await this.lessonTestWhere(userId, role);
     const [theories, videos, tests, progress] = await Promise.all([
       this.prisma.theoryBlock.findMany({
         where: { chapterId, archivedAt: null },
@@ -96,7 +107,12 @@ export class LessonsService {
             }[],
           ),
       this.prisma.test.findMany({
-        where: { chapterId, isDraft: false, deletedAt: null },
+        where: {
+          chapterId,
+          isDraft: false,
+          deletedAt: null,
+          ...testAccessWhere,
+        },
         select: {
           id: true,
           title: true,
@@ -131,6 +147,37 @@ export class LessonsService {
         problemCount: t._count.problems,
       })),
       progress,
+    };
+  }
+
+  private async lessonTestWhere(
+    userId: string,
+    role: Role,
+  ): Promise<Prisma.TestWhereInput> {
+    if (await internalTeachingRole(this.prisma, userId)) return {};
+    const scope = await studentTestScope(this.prisma, userId, role);
+    const now = new Date();
+    const accessOr = studentTestAccessOr(scope, now);
+    const assigned: Prisma.TestWhereInput[] = scope.classroomIds.length
+      ? [
+          {
+            access: {
+              some: {
+                classroomId: { in: scope.classroomIds },
+                assignedAt: { lte: now },
+              },
+            },
+          },
+        ]
+      : [];
+    return {
+      OR: [
+        ...assigned,
+        {
+          type: { notIn: [TestType.THOUSAND, TestType.EESH_MOCK] },
+          ...(accessOr ? { OR: accessOr } : {}),
+        },
+      ],
     };
   }
 

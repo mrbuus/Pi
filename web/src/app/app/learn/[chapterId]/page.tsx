@@ -428,11 +428,14 @@ const TEST_TYPE_LABEL: Record<string, string> = {
   EESH_MOCK: "ЭЕШ сорил",
   CUSTOM: "Бусад",
   THEORY: "Онолын шалгалт",
+  THOUSAND: "1000 бодлого",
 };
 
+// Жагсаалтыг сервер шүүнэ (lessons.service lessonTestWhere): сурагч эхлүүлж
+// болох тест л ирнэ — ангийн хийгээгүй сэдэв, эхлэх цаг ирээгүй шалгалт орохгүй
 function TestStep({ tests }: { tests: LessonDetail["tests"] }) {
   if (tests.length === 0) {
-    return <StepEmpty text="Энэ бүлэгт шалгалт хараахан алга." />;
+    return <StepEmpty text="Энэ бүлэгт одоогоор өгөх тест алга" />;
   }
   return (
     <div className="space-y-2">

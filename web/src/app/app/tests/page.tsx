@@ -1,20 +1,21 @@
 "use client";
 
-import { Search, Check, Clock, X } from "lucide-react";
+import { Search } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { LoadingState } from "@/components/ui/StateBlock";
 import { api, getRole } from "@/lib/api";
 import ContinueBanner from "@/components/test-list/ContinueBanner";
 import ClassBoard from "@/components/exams/ClassBoard";
 import ExamsBoard from "@/components/exams/ExamsBoard";
 import StudentExamLists from "@/components/exams/StudentExamLists";
+import StudentExamsHub from "@/components/exams/StudentExamsHub";
 import TopicGroup from "@/components/test-list/TopicGroup";
 import {
   collapseVariants,
   isExamType,
   splitTopic,
   SUBJECTS,
-  type AttendanceRow,
   type GroupRow,
   type Tab,
   type TestRow,
@@ -41,8 +42,20 @@ import {
 // зүсэж, "Дараагийнхыг харах" товчоор нэмнэ (DOM хэт томрохоос сэргийлнэ).
 const PAGE_SIZE = 20;
 
+const noopSubscribe = () => () => {};
+
 export default function TestsPage() {
-  const role = typeof window !== "undefined" ? getRole() : null;
+  // Эрх localStorage-д — серверийн HTML ба эхний клиент рендер ижил байхын тулд
+  // hydration-ий дараа л уншина (сурагч, ажилтан өөр мод рендерлэнэ)
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
+  if (!mounted) return <LoadingState rows={3} />;
+  const role = getRole();
+  // Сурагч, худалдан авагч — нэг «Шалгалт» хэсэг (Өгөх, Өгсөн, Эрэмбэ, Жишиг сорил)
+  if (role === "STUDENT" || role === "BUYER") return <StudentExamsHub />;
+  return <StaffTestsView role={role} />;
+}
+
+function StaffTestsView({ role }: { role: string | null }) {
   const isTeacher = role === "ADMIN" || role === "TEACHER" || role === "TEACHER_PLUS";
   // «Шалгалт» табыг тусад нь харуулдаг (ажилтан — ExamsBoard, сурагч — Өгөх/Өгсөн)
   const isLearner = role === "STUDENT" || role === "BUYER";
@@ -61,8 +74,6 @@ export default function TestsPage() {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [shownCount, setShownCount] = useState(PAGE_SIZE);
   const [studentId, setStudentId] = useState<string | null>(null);
-  // Ирц — зөвхөн танхимын сурагчид дээр нь харагдана (онлайн сурагч ирцгүй)
-  const [attendance, setAttendance] = useState<AttendanceRow[] | null>(null);
 
   const loadTests = useCallback(() => {
     setLoading(true);
@@ -81,22 +92,11 @@ export default function TestsPage() {
   }, [loadTests]);
 
   useEffect(() => {
-    // Ирц/хэрэглэгчийн ID — туслах мэдээлэл тул амжилтгүй бол чимээгүй орхино;
-    // үндсэн тестийн жагсаалт дээрх loadTests өөрөө бүрэн алдаа+"Дахин
-    // оролдох" дэмждэг тул энд давхардуулах шаардлагагүй.
+    // Хэрэглэгчийн ID — A/B хувилбар сонгоход; амжилтгүй бол чимээгүй орхино
     if (!isTeacher && role === "STUDENT") {
-      api<{ id: string; studentProfile?: { type?: string } }>("/auth/me")
-        .then((me) => {
-          setStudentId(me.id);
-          if (me.studentProfile?.type === "CLASSROOM") {
-            return api<AttendanceRow[]>("/attendance/my").then((rows) =>
-              setAttendance(rows.slice(0, 10)),
-            );
-          }
-        })
-        .catch(() => {
-          /* Ирц заавал биш нэмэлт мэдээлэл — үндсэн жагсаалтад нөлөөлөхгүй */
-        });
+      api<{ id: string }>("/auth/me")
+        .then((me) => setStudentId(me.id))
+        .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -230,37 +230,6 @@ export default function TestsPage() {
       {/* Дуусаагүй сесс — сурагч тасарсан бол шууд буцаж орох зам (сэдэв бүлэг,
           хайлт, хуудаслалтаас үл хамааран, ХАМГИЙН дээр) */}
       {!isTeacher && !loading && !error && <ContinueBanner tests={tests} />}
-
-      {/* Ирц — зөвхөн танхимын сурагчид (Шийдвэр Г) */}
-      {attendance && attendance.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 chunky px-4 py-3">
-          <span className="text-xs font-bold text-ink-dim">Миний ирц:</span>
-          {attendance.map((a, i) => (
-            <span
-              key={i}
-              title={a.date.slice(0, 10)}
-              className={`rounded-lg px-2 py-1 text-[11px] font-medium ${
-                a.status === "PRESENT"
-                  ? "bg-success/15 text-success"
-                  : a.status === "LATE"
-                    ? "bg-warning/15 text-warning"
-                    : a.status === "EXCUSED"
-                      ? "bg-line/30 text-ink-dim"
-                      : "bg-error/15 text-error"
-              }`}
-            >
-              {a.date.slice(5, 10)}{" "}
-              {a.status === "PRESENT"
-                ? <><Check className="h-4 w-4" aria-hidden /> ирсэн</>
-                : a.status === "LATE"
-                  ? <><Clock className="h-4 w-4" aria-hidden /> хоцорсон</>
-                  : a.status === "EXCUSED"
-                    ? "чөлөөтэй"
-                    : <><X className="h-4 w-4" aria-hidden /> тасалсан</>}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Хоёр ангилал: Тест (сэдвийн дасгал) / Шалгалт (сэдвийн шалгалт, сорил) */}
       <div className="flex gap-2">

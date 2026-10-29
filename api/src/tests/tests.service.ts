@@ -20,8 +20,9 @@ import {
 import {
   activeClassSubjects,
   blockedSubjects,
-  collectPassScope,
-  hasCoveringPass,
+  scopeGrantsTest,
+  studentTestAccessOr,
+  studentTestScope,
   TEACHER_ROLES,
   internalTeachingRole,
   assertInternalTeachingStaff,
@@ -125,6 +126,13 @@ function toGradable(row: TestProblemRow): GradableProblem {
     choiceOptions: row.problem.choiceOptions,
   };
 }
+
+// Ирээдүйд оноосон үед огноотойгоор «удахгүй» гэж харагдах шалгалтын төрлүүд
+const UPCOMING_EXAM_TYPES: TestType[] = [
+  TestType.CHAPTER_EXAM,
+  TestType.EESH_MOCK,
+  TestType.THOUSAND,
+];
 
 @Injectable()
 export class TestsService {
@@ -726,7 +734,7 @@ export class TestsService {
       });
     }
     const now = new Date();
-    const [enrollments, scope, purchases] = await Promise.all([
+    const [enrollments, scope] = await Promise.all([
       this.prisma.enrollment.findMany({
         where: {
           studentId: userId,
@@ -735,48 +743,24 @@ export class TestsService {
         },
         include: { classroom: { select: { subject: true } } },
       }),
-      collectPassScope(this.prisma, userId),
-      this.prisma.purchase.findMany({
-        where: {
-          userId,
-          grantedAt: { lte: now },
-          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-        },
-        select: { productItem: { select: { kind: true, refId: true } } },
-      }),
+      studentTestScope(this.prisma, userId, role),
     ]);
 
+    // Эхлүүлж болох тест л (common/access.ts studentTestAccessOr): ангид
+    // оноосон бол assignedAt <= одоо; танхимын сурагчид бүлэг/номын эрх зөвхөн
+    // ангид нээгдсэн бүлэгт (эзэн 2026-10-29 — ангийн хийгээгүй сэдвийн тест
+    // харагдахгүй)
     let accessFilter: Prisma.TestWhereInput | undefined;
-    if (!scope.all) {
-      const accessOr: Prisma.TestWhereInput[] = [];
-      if (enrollments.length) {
-        accessOr.push({
-          access: {
-            some: {
-              classroomId: { in: enrollments.map((e) => e.classroomId) },
-            },
-          },
-        });
-      }
-      const purchasedTests = purchases
-        .filter((p) => p.productItem.kind === 'TEST')
-        .map((p) => p.productItem.refId);
-      const purchasedBooks = purchases
-        .filter((p) => p.productItem.kind === 'BOOK')
-        .map((p) => p.productItem.refId);
-      if (purchasedTests.length) accessOr.push({ id: { in: purchasedTests } });
-      if (purchasedBooks.length)
-        accessOr.push({ chapter: { bookId: { in: purchasedBooks } } });
-      if (scope.testIds.length) accessOr.push({ id: { in: scope.testIds } });
-      if (scope.chapterIds.length) {
-        accessOr.push({ chapterId: { in: scope.chapterIds } });
-      }
-      if (scope.bookIds.length) {
-        accessOr.push({ chapter: { bookId: { in: scope.bookIds } } });
-      }
+    const accessOr = studentTestAccessOr(scope, now);
+    if (accessOr) {
       // Жишиг сорилд бүртгүүлсэн тест — цонх хаагдсан ч дүн, эргэн харалтад үлдэнэ
-      accessOr.push({ mockEvents: { some: { published: true, registrations: { some: { userId } } } } });
-      if (accessOr.length === 0) return [];
+      accessOr.push({
+        mockEvents: {
+          some: { published: true, registrations: { some: { userId } } },
+        },
+      });
+      // Өөрийн эхлүүлсэн/дүнтэй тест үргэлж (үргэлжлүүлэх, дүнгээ харах)
+      accessOr.push({ attemptSessions: { some: { studentId: userId } } });
       accessFilter = { OR: accessOr };
     }
 
@@ -819,10 +803,64 @@ export class TestsService {
       orderBy: { createdAt: 'desc' },
     });
     // Сурагчид session-ий төлөвийг нэг талбар болгож өгнө (Үргэлжлүүлэх товч)
-    return rows.map(({ attemptSessions, ...t }) => ({
+    const listed = rows.map(({ attemptSessions, ...t }) => ({
       ...t,
       sessionStatus: attemptSessions[0]?.status ?? null,
     }));
+    // Ирээдүйд оноосон ШАЛГАЛТ — зөвхөн огноотой «удахгүй» мөр (бодлого,
+    // эхлэх товчгүй). DAILY/CUSTOM/THEORY дасгал огт харагдахгүй.
+    if (!scope.classroomIds.length) return listed;
+    const seen = new Set(listed.map((t) => t.id));
+    const upcomingTypes = UPCOMING_EXAM_TYPES.filter(
+      (t) => includeThousand || t !== TestType.THOUSAND,
+    );
+    const future = await this.prisma.test.findMany({
+      where: {
+        ...subjectFilter,
+        ...(blocked.length
+          ? { NOT: { chapter: { book: { subject: { in: blocked } } } } }
+          : {}),
+        AND: [{ type: { in: upcomingTypes } }],
+        deletedAt: null,
+        isDraft: false,
+        access: {
+          some: {
+            classroomId: { in: scope.classroomIds },
+            assignedAt: { gt: now },
+          },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        gradingMode: true,
+        timeLimitMin: true,
+        variantLabel: true,
+        groupKey: true,
+        chapter: { select: { book: { select: { code: true } } } },
+        createdAt: true,
+        access: {
+          where: { classroomId: { in: scope.classroomIds } },
+          select: { assignedAt: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    const upcoming = future
+      .filter((t) => !seen.has(t.id))
+      .map(({ access, ...t }) => ({
+        ...t,
+        _count: { problems: 0 },
+        results: [] as { totalScore: number; maxScore: number }[],
+        sessionStatus: null,
+        upcoming: true as const,
+        assignedAt:
+          access
+            .map((a) => a.assignedAt)
+            .sort((a, b) => a.getTime() - b.getTime())[0] ?? null,
+      }));
+    return [...listed, ...upcoming];
   }
 
   // GET /tests/:id — багшид бүрэн бүтэц, сурагчид зөвхөн интро мета
@@ -1594,33 +1632,26 @@ export class TestsService {
       });
       bookId = chapter?.bookId ?? null;
     }
-    const viaPass = await hasCoveringPass(db as PrismaService, userId, {
-      testId: test.id,
-      chapterId: test.chapterId,
-      bookId,
-    });
-    if (viaPass) {
+    // Pass / худалдан авалт (common/access.ts scopeGrantsTest): танхимын
+    // сурагчид бүлэг/номын эрх зөвхөн ангид нээгдсэн бүлэгт хүрнэ. Өмнө нь
+    // эхлүүлчихсэн сесстэй бол дуусгах, илгээх, эргэн харах эрх хэвээр.
+    const scope = await studentTestScope(
+      db as PrismaService,
+      userId,
+      Role.STUDENT,
+    );
+    const target = { id: test.id, chapterId: test.chapterId, bookId };
+    if (scopeGrantsTest(scope, target)) return;
+    if (
+      scope.releasedChapterIds !== null &&
+      scopeGrantsTest({ ...scope, releasedChapterIds: null }, target) &&
+      (await db.testAttemptSession.findUnique({
+        where: { testId_studentId: { testId: test.id, studentId: userId } },
+        select: { id: true },
+      }))
+    )
       return;
-    }
-
-    // Fulfilled, unexpired test or containing-book purchases grant exam access.
     const now = new Date();
-    const purchase = await db.purchase.findFirst({
-      where: {
-        userId,
-        grantedAt: { lte: now },
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-        productItem: {
-          OR: [
-            { kind: 'TEST', refId: test.id },
-            ...(bookId ? [{ kind: 'BOOK' as const, refId: bookId }] : []),
-          ],
-        },
-      },
-    });
-    if (purchase) {
-      return;
-    }
 
     // Жишиг сорил (MockExamEvent): бүртгүүлсэн хэрэглэгч цонхны дотор эхэлнэ;
     // эхэлчихсэн бол (session бий) цонх хаагдсан ч дуусгах, илгээх, эргэн харах эрхтэй.

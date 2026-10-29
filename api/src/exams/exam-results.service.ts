@@ -10,7 +10,11 @@ import {
   StudentType,
   TestType,
 } from '../generated/prisma/enums';
-import { collectContentScope } from '../common/access';
+import {
+  scopeGrantsTest,
+  studentTestAccessOr,
+  studentTestScope,
+} from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
 import { ItemStatus } from '../tests/exam-items';
 import {
@@ -79,33 +83,24 @@ export class ExamResultsService {
 
   // ================= «Шалгалт»: Өгөх / Өгсөн =================
 
-  async myExams(userId: string) {
-    const [enrollments, scope] = await Promise.all([
-      this.prisma.enrollment.findMany({
-        where: {
-          studentId: userId,
-          leftAt: null,
-          classroom: { archived: false },
-        },
-        select: { classroomId: true },
-      }),
-      collectContentScope(this.prisma, userId),
-    ]);
-    const classIds = enrollments.map((e) => e.classroomId);
+  async myExams(userId: string, role: Role = Role.STUDENT) {
+    const now = new Date();
+    const scope = await studentTestScope(this.prisma, userId, role);
+    const classIds = scope.classroomIds;
     // Өөрийн дүн/ирээгүй/сесстэй шалгалт үргэлж харагдана (цаасан дүнг
     // оноогоогүй ангид оруулсан ч сурагч дүнгээ харна).
     const visibility: Prisma.TestWhereInput[] = [
       { results: { some: { studentId: userId } } },
       { absences: { some: { studentId: userId } } },
       { attemptSessions: { some: { studentId: userId } } },
+      // Ангид оноосон ч эхлэх цаг нь ирээгүй — «Эхлэх: огноо» (товчгүй)
+      ...(classIds.length
+        ? [{ access: { some: { classroomId: { in: classIds } } } }]
+        : []),
+      // Эхлүүлж болох (common/access.ts): танхимын сурагчид бүлэг/номын эрх
+      // зөвхөн ангид нээгдсэн бүлэгт
+      ...(studentTestAccessOr(scope, now) ?? []),
     ];
-    if (classIds.length)
-      visibility.push({ access: { some: { classroomId: { in: classIds } } } });
-    if (scope.testIds.length) visibility.push({ id: { in: scope.testIds } });
-    if (scope.chapterIds.length)
-      visibility.push({ chapterId: { in: scope.chapterIds } });
-    if (scope.bookIds.length)
-      visibility.push({ chapter: { bookId: { in: scope.bookIds } } });
 
     const tests = await this.prisma.test.findMany({
       where: {
@@ -122,7 +117,8 @@ export class ExamResultsService {
         timeLimitMin: true,
         variantLabel: true,
         groupKey: true,
-        chapter: { select: { book: { select: { code: true } } } },
+        chapterId: true,
+        chapter: { select: { bookId: true, book: { select: { code: true } } } },
         _count: { select: { problems: true } },
         access: {
           where: { classroomId: { in: classIds } },
@@ -156,7 +152,7 @@ export class ExamResultsService {
           timeLimitMin: t.timeLimitMin,
           variantLabel: t.variantLabel,
           groupKey: t.groupKey,
-          chapter: t.chapter,
+          chapter: t.chapter ? { book: t.chapter.book } : null,
           _count: t._count,
           results: result
             ? [{ totalScore: result.totalScore, maxScore: result.maxScore }]
@@ -164,6 +160,17 @@ export class ExamResultsService {
           percent: result ? rounded(result.totalScore, result.maxScore) : null,
           sessionStatus: session?.status ?? null,
           assignedAt: assigned.length ? new Date(assigned[0]) : null,
+          // Ангид оноосон ч эхлэх цаг ирээгүй, өөр эрхгүй — «Эхлэх: огноо», товчгүй
+          upcoming:
+            assigned.length > 0 &&
+            assigned[0] > now.getTime() &&
+            !session &&
+            !result &&
+            !scopeGrantsTest(scope, {
+              id: t.id,
+              chapterId: t.chapterId,
+              bookId: t.chapter?.bookId ?? null,
+            }),
           takenAt:
             result?.createdAt ??
             (session?.status === AttemptSessionStatus.SUBMITTED

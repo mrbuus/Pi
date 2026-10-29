@@ -411,6 +411,108 @@ export async function collectContentScope(
     ],
   };
 }
+// ============ Сурагчид ЭХЛҮҮЛЖ болох тестүүд (эзэн 2026-10-29) ============
+// Жагсаалт (/tests, /exam-results/my, хичээлийн хуудас) ба эхлэх эрх нэг дүрэмтэй:
+// - Ангид оноосон тест — зөвхөн оноосон цаг (assignedAt) нь ирсэн бол
+// - pass scope.all, тест тус бүрийн pass, TEST худалдан авалт — үргэлж
+// - Бүлэг/номын pass, BOOK худалдан авалт — танхимын сурагчид зөвхөн ангид
+//   НЭЭГДСЭН бүлэгт (classroomRelease.chapterIds); BUYER/онлайнд хязгааргүй
+export interface StudentTestScope {
+  all: boolean;
+  classroomIds: string[];
+  /** Тест тус бүрийн эрх: pass testIds + TEST худалдан авалт */
+  testIds: string[];
+  /** Бүлгийн pass */
+  chapterIds: string[];
+  /** Номын pass + BOOK худалдан авалт */
+  bookIds: string[];
+  /** Танхимын сурагч: бүлэг/номын эрх зөвхөн эдгээр бүлэгт. null = хязгааргүй */
+  releasedChapterIds: string[] | null;
+}
+
+export async function studentTestScope(
+  prisma: PrismaService,
+  userId: string,
+  role: Role,
+): Promise<StudentTestScope> {
+  const [enrollments, scope, release] = await Promise.all([
+    prisma.enrollment.findMany({
+      where: {
+        studentId: userId,
+        leftAt: null,
+        classroom: { archived: false },
+      },
+      select: { classroomId: true },
+    }),
+    collectContentScope(prisma, userId),
+    classroomRelease(prisma, userId, role),
+  ]);
+  return {
+    all: scope.all,
+    classroomIds: enrollments.map((e) => e.classroomId),
+    testIds: scope.testIds,
+    chapterIds: scope.chapterIds,
+    bookIds: scope.bookIds,
+    releasedChapterIds: release ? [...release.chapterIds] : null,
+  };
+}
+
+/**
+ * Эхлүүлж болох тестийн WHERE-ийн OR хэсгүүд (цэвэр функц). scope.all бол
+ * null (шүүлтгүй). Хоосон массив = юу ч харагдахгүй.
+ */
+export function studentTestAccessOr(
+  scope: StudentTestScope,
+  now = new Date(),
+): Prisma.TestWhereInput[] | null {
+  if (scope.all) return null;
+  const or: Prisma.TestWhereInput[] = [];
+  if (scope.classroomIds.length) {
+    or.push({
+      access: {
+        some: {
+          classroomId: { in: scope.classroomIds },
+          assignedAt: { lte: now },
+        },
+      },
+    });
+  }
+  if (scope.testIds.length) or.push({ id: { in: scope.testIds } });
+  const released = scope.releasedChapterIds;
+  if (released === null) {
+    if (scope.chapterIds.length)
+      or.push({ chapterId: { in: scope.chapterIds } });
+    if (scope.bookIds.length)
+      or.push({ chapter: { bookId: { in: scope.bookIds } } });
+  } else {
+    const ok = new Set(released);
+    const chapters = scope.chapterIds.filter((id) => ok.has(id));
+    if (chapters.length) or.push({ chapterId: { in: chapters } });
+    if (scope.bookIds.length && released.length)
+      or.push({
+        AND: [
+          { chapter: { bookId: { in: scope.bookIds } } },
+          { chapterId: { in: released } },
+        ],
+      });
+  }
+  return or;
+}
+
+/** Нэг тестэд ангиас гадуурх (pass/худалдан авалт) эрх хүрэх эсэх — цэвэр функц */
+export function scopeGrantsTest(
+  scope: StudentTestScope,
+  test: { id: string; chapterId: string | null; bookId: string | null },
+): boolean {
+  if (scope.all || scope.testIds.includes(test.id)) return true;
+  const viaChapter =
+    (!!test.chapterId && scope.chapterIds.includes(test.chapterId)) ||
+    (!!test.bookId && scope.bookIds.includes(test.bookId));
+  if (!viaChapter) return false;
+  if (scope.releasedChapterIds === null) return true;
+  return !!test.chapterId && scope.releasedChapterIds.includes(test.chapterId);
+}
+
 /**
  * full     — бүлгийн бүх бодлого (багш, freePreview, pass, худалдан авалт)
  * released — зөвхөн ангид нээгдсэн тестийн бодлогууд (`problemIds`)

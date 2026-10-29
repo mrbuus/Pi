@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronRight, ClipboardCheck, Hourglass, NotebookPen, Play } from "lucide-react";
+import { CalendarClock, ChevronRight, ClipboardCheck, Hourglass, NotebookPen, Play } from "lucide-react";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
 import { Meta, MetaTitle } from "@/components/ui/Meta";
@@ -23,12 +23,8 @@ export interface MyExamRow extends TestRow {
 const dateUB = (v: string | null) => (v ? dateTimeUB(v).slice(0, 10) : null);
 const titleOf = (row: TestRow) => (row.type === "THOUSAND" ? shortTitle(row.title) : row.title);
 
-/**
- * Сурагчийн «Шалгалт» (SHALGALT-TOLOVLOGOO §4): «Өгөх» — оноогдсон/худалдаж
- * авсан, эхлэх хугацаатай; «Өгсөн» — оноо. A/B хувилбараас сурагч нэгийг л
- * харна (Тест табтай ижил дүрэм).
- */
-export default function StudentExamLists({ studentId, query }: { studentId: string | null; query: string }) {
+/** «Өгөх» / «Өгсөн» жагсаалтын өгөгдөл — /exam-results/my (A/B-оос нэгийг л) */
+export function useMyExams(studentId: string | null, query: string) {
   const [rows, setRows] = useState<MyExamRow[] | null>(null);
   const [error, setError] = useState("");
 
@@ -37,7 +33,12 @@ export default function StudentExamLists({ studentId, query }: { studentId: stri
     try {
       const { exams } = await api<{ exams: MyExamRow[] }>("/exam-results/my");
       const now = Date.now();
-      setRows(exams.map((r) => ({ ...r, upcoming: !!r.assignedAt && Date.parse(r.assignedAt) > now })));
+      setRows(
+        exams.map((r) => ({
+          ...r,
+          upcoming: r.upcoming ?? (!!r.assignedAt && Date.parse(r.assignedAt) > now),
+        })),
+      );
     } catch (e) {
       setError(errorText(e, "Шалгалтын жагсаалт ачаалж чадсангүй"));
     }
@@ -61,11 +62,57 @@ export default function StudentExamLists({ studentId, query }: { studentId: stri
         .sort(
           (a, b) =>
             Number(b.sessionStatus === "IN_PROGRESS") - Number(a.sessionStatus === "IN_PROGRESS") ||
+            Number(!!a.upcoming) - Number(!!b.upcoming) ||
             (b.assignedAt ?? "").localeCompare(a.assignedAt ?? ""),
         ),
       taken: picked.filter(done).sort((a, b) => (b.takenAt ?? "").localeCompare(a.takenAt ?? "")),
     };
   }, [rows, query, studentId]);
+
+  return { rows, error, load, toTake, taken };
+}
+
+export const examTitleOf = titleOf;
+
+/** «Өгөх» — оноогдсон/эрхтэй, эхлэх хугацаатай шалгалтууд */
+export function ExamsToTakeList({ rows }: { rows: MyExamRow[] }) {
+  return (
+    <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface elev-1">
+      {rows.map((r) => (
+        <li key={r.id} className="flex items-center gap-3 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="flex flex-wrap items-center gap-1.5 font-semibold text-ink">
+              <MetaTitle>{titleOf(r)}</MetaTitle>
+              {r.variantLabel && r.type !== "THOUSAND" && <Badge tone="info">Хувилбар {r.variantLabel}</Badge>}
+            </p>
+            <p className="mt-0.5 text-xs text-ink-dim">
+              <Meta
+                items={[
+                  r.upcoming ? null : `${r._count.problems} бодлого`,
+                  r.timeLimitMin ? `${r.timeLimitMin} мин` : null,
+                  r.assignedAt
+                    ? r.upcoming
+                      ? `Эхлэх: ${dateTimeUB(r.assignedAt)}`
+                      : `Оноосон: ${dateUB(r.assignedAt)}`
+                    : null,
+                ]}
+              />
+            </p>
+          </div>
+          <TakeAction row={r} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Сурагчийн «Шалгалт» (SHALGALT-TOLOVLOGOO §4): «Өгөх» — оноогдсон/худалдаж
+ * авсан, эхлэх хугацаатай; «Өгсөн» — оноо. A/B хувилбараас сурагч нэгийг л
+ * харна (Тест табтай ижил дүрэм).
+ */
+export default function StudentExamLists({ studentId, query }: { studentId: string | null; query: string }) {
+  const { rows, error, load, toTake, taken } = useMyExams(studentId, query);
 
   if (error) return <ErrorState message={error} onRetry={() => void load()} />;
   if (!rows) {
@@ -87,32 +134,7 @@ export default function StudentExamLists({ studentId, query }: { studentId: stri
         {toTake.length === 0 ? (
           <p className="chunky p-4 text-sm text-ink-dim">Одоогоор өгөх шалгалт алга. Багш оноомогц энд гарна.</p>
         ) : (
-          <ul className="divide-y divide-line overflow-hidden chunky">
-            {toTake.map((r) => (
-              <li key={r.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-center gap-1.5 font-semibold text-ink">
-                    <MetaTitle>{titleOf(r)}</MetaTitle>
-                    {r.variantLabel && r.type !== "THOUSAND" && <Badge tone="info">Хувилбар {r.variantLabel}</Badge>}
-                  </p>
-                  <p className="mt-0.5 text-xs text-ink-dim">
-                    <Meta
-                      items={[
-                        `${r._count.problems} бодлого`,
-                        r.timeLimitMin ? `${r.timeLimitMin} мин` : null,
-                        r.assignedAt
-                          ? r.upcoming
-                            ? `Эхлэх: ${dateTimeUB(r.assignedAt)}`
-                            : `Оноосон: ${dateUB(r.assignedAt)}`
-                          : null,
-                      ]}
-                    />
-                  </p>
-                </div>
-                <TakeAction row={r} />
-              </li>
-            ))}
-          </ul>
+          <ExamsToTakeList rows={toTake} />
         )}
       </section>
 
@@ -163,6 +185,13 @@ export default function StudentExamLists({ studentId, query }: { studentId: stri
 }
 
 function TakeAction({ row }: { row: MyExamRow }) {
+  if (row.upcoming) {
+    return (
+      <span className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg bg-line/30 px-3 text-xs font-semibold text-ink-dim">
+        <CalendarClock className="h-3.5 w-3.5" aria-hidden /> Удахгүй
+      </span>
+    );
+  }
   if (row.gradingMode === "MANUAL") {
     return (
       <span className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg bg-line/30 px-3 text-xs text-ink-dim">

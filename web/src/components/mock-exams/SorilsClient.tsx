@@ -112,7 +112,7 @@ export default function SorilsClient() {
   );
 }
 
-function EventCard({ ev, now, reg, canRegister, loggedIn, busy, onAct, big = false }: {
+export function EventCard({ ev, now, reg, canRegister, loggedIn, busy, onAct, big = false }: {
   ev: MockEvent; now: number; reg: ReturnType<ReturnType<typeof useMockExams>["regOf"]>;
   canRegister: boolean; loggedIn: boolean; busy: boolean; onAct: (on: boolean) => void; big?: boolean;
 }) {
