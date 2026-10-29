@@ -183,7 +183,7 @@ export default function SheetSyncPanel() {
 
   return (
     <div className="space-y-4">
-      <section className="chunky space-y-3 p-4" aria-label="Шийтийн синкийн төлөв">
+      <section className="chunky space-y-3 p-4" aria-label="Төлбөрийн мэдээлэл татах төлөв">
         <div className="flex flex-wrap items-center gap-3">
           <span
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${failed ? "bg-error/12 text-error" : "bg-success/15 text-success"}`}
@@ -204,7 +204,7 @@ export default function SheetSyncPanel() {
           {isAdmin && (
             <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled={status.running} onClick={() => void runNow()}>
               <RefreshCw className={status.running ? "motion-safe:animate-spin" : undefined} aria-hidden />
-              {status.running ? "Татаж байна" : "Одоо татах"}
+              {status.running ? "Татаж байна" : "Төлбөрийн мэдээлэл татах"}
             </Button>
           )}
         </div>
