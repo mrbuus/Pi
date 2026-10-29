@@ -57,6 +57,7 @@ import { StorageModule } from './storage/storage.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TestsModule } from './tests/tests.module';
 import { ThousandModule } from './thousand/thousand.module';
+import { HomeworkPracticeModule } from './homework-practice/homework-practice.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
@@ -133,6 +134,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ContentModule,
     TestsModule,
     ThousandModule,
+    HomeworkPracticeModule,
     AttemptsModule,
     StorageModule,
     PassesModule,

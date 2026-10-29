@@ -1414,5 +1414,75 @@
       "ADMIN",
       "TEACHER_PLUS"
     ]
+  },
+  {
+    "gap": "HW1",
+    "file": "homework-practice/homework-practice.controller",
+    "controller": "HomeworkPracticeController",
+    "method": "GET",
+    "path": "/api/homework/my",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "HW1",
+    "file": "homework-practice/homework-practice.controller",
+    "controller": "HomeworkPracticeController",
+    "method": "POST",
+    "path": "/api/homework/attempts",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "HW1",
+    "file": "homework-practice/homework-practice.controller",
+    "controller": "HomeworkPracticeController",
+    "method": "PATCH",
+    "path": "/api/homework/attempts/:id",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "HW1",
+    "file": "homework-practice/homework-practice.controller",
+    "controller": "HomeworkPracticeController",
+    "method": "POST",
+    "path": "/api/homework/attempts/:id/check",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "HW1",
+    "file": "homework-practice/homework-practice.controller",
+    "controller": "HomeworkPracticeController",
+    "method": "POST",
+    "path": "/api/homework/attempts/:id/submit",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "HW1",
+    "file": "homework-practice/homework-practice.controller",
+    "controller": "HomeworkPracticeController",
+    "method": "POST",
+    "path": "/api/homework/photos",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "HW1",
+    "file": "homework-practice/homework-practice.controller",
+    "controller": "HomeworkPracticeController",
+    "method": "DELETE",
+    "path": "/api/homework/photos/:id",
+    "roles": [
+      "STUDENT"
+    ]
   }
 ]

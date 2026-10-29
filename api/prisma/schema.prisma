@@ -3007,3 +3007,68 @@ model SheetPayment {
 
   @@index([studentId, cell])
 }
+
+// ============ Гэрийн даалгаврын онлайн бодолт (эзэн 2026-10-29) ============
+// Танхимын сурагч ангид хийсэн тестийн нөгөө хувилбарыг (A → B) гэртээ бодно.
+// Шалгалтын TestAttemptSession-оос ТУСДАА (тэр нь нэг удаагийн, TestResult бичдэг).
+// «Шалгах» дээд тал нь 2 удаа, бүгд HomeworkCheck-т хадгалагдана (эхний хариу = ML дохио).
+// lessonDate = анги A хувилбарыг хийсэн өдөр. Гадаад хүснэгтэд FK-гүй (ClassCheck-ийн адил).
+// api/src/homework-practice, миграци 20261029120000_homework_attempts.
+enum HomeworkAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
+model HomeworkAttempt {
+  id           String                @id @default(cuid())
+  studentId    String
+  classroomId  String
+  testId       String
+  lessonDate   DateTime              @db.Date
+  status       HomeworkAttemptStatus @default(IN_PROGRESS)
+  startedAt    DateTime              @default(now())
+  /// Дараагийн хичээлийн эхлэл (УБ 00:00); дараагийн хичээл тодорхойгүй бол null
+  deadlineAt   DateTime?
+  answers      Json                  @default("{}")
+  /// Эхний «Шалгах» үеийн хариу (ML дохио)
+  firstAnswers Json?
+  checksUsed   Int                   @default(0)
+  score        Int?
+  total        Int?
+  submittedAt  DateTime?
+  updatedAt    DateTime              @updatedAt
+  checks       HomeworkCheck[]
+
+  @@unique([studentId, testId, lessonDate])
+  @@index([classroomId, lessonDate])
+}
+
+model HomeworkCheck {
+  id        String          @id @default(cuid())
+  attemptId String
+  attempt   HomeworkAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  /// 1, 2 — «Шалгах»; 0 — эцсийн илгээлт (submit)
+  n         Int
+  answers   Json
+  results   Json
+  createdAt DateTime        @default(now())
+
+  @@unique([attemptId, n])
+}
+
+/// Танхимын сурагчийн гэрийн даалгаврын зураг (утсан дээр PDF болгосон, ≤6 хуудас).
+/// Файл нь StoredFile (purpose "homework", 7 хоног). Шинээр илгээвэл хуучныг зөөлөн устгана.
+model HomeworkPhoto {
+  id          String    @id @default(cuid())
+  studentId   String
+  classroomId String
+  lessonDate  DateTime  @db.Date
+  fileKey     String
+  pages       Int
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  @@index([studentId, classroomId, lessonDate])
+  @@index([classroomId, lessonDate])
+  @@index([fileKey])
+}

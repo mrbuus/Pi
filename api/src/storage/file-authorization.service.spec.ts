@@ -34,6 +34,10 @@ describe('file authorization boundaries', () => {
       'classroom',
       'classSchedule',
       'lessonStaffing',
+      'homeworkPhoto',
+      'homeworkAttempt',
+      'testProblem',
+      'testAttemptSession',
     ])
       db[model] = {
         findUnique: jest.fn(async () => null),
@@ -67,6 +71,33 @@ describe('file authorization boundaries', () => {
     await expect(ok('other', 'TEACHER')).resolves.toBe(false);
     await expect(ok('plus', 'TEACHER_PLUS')).resolves.toBe(true);
     await expect(ok('admin', 'ADMIN')).resolves.toBe(true);
+  });
+  it('homework photo PDF: owner, class staff (lesson day + 14), verified parent — not classmates or other teachers', async () => {
+    db.storedFile.findUnique.mockResolvedValue({ ownerId: 'owner' });
+    db.homeworkPhoto.findMany.mockImplementation(async (a: any) =>
+      a.where.studentId === 'owner' && a.where.fileKey === 'hw.pdf' && a.where.deletedAt === null
+        ? [{ classroomId: 'c1', lessonDate: day, studentId: 'owner' }]
+        : [],
+    );
+    db.classroom.findUnique.mockResolvedValue({ id: 'c1', teacherId: 'ct', assistantTeacherId: null });
+    db.lessonStaffing.findMany.mockImplementation(async (args: any) =>
+      args.where.OR[0].leadTeacherId === 'sub' ? [{ date: new Date('2026-10-12T00:00:00Z') }] : [],
+    );
+    db.parentLink.findFirst.mockImplementation(async (args: any) =>
+      args.where.parentId === 'mom' && args.where.studentId === 'owner' ? { id: 'l' } : null,
+    );
+    db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+    const ok = (id: string, role: string) => service.allowed({ id, role } as never, 'hw.pdf');
+    await expect(ok('owner', 'STUDENT')).resolves.toBe(true);
+    await expect(ok('mate', 'STUDENT')).resolves.toBe(false);
+    await expect(ok('ct', 'TEACHER')).resolves.toBe(true);
+    await expect(ok('sub', 'TEACHER')).resolves.toBe(true);
+    await expect(ok('other', 'TEACHER')).resolves.toBe(false);
+    await expect(ok('plus', 'TEACHER_PLUS')).resolves.toBe(true);
+    await expect(ok('mom', 'PARENT')).resolves.toBe(true);
+    await expect(ok('stranger', 'PARENT')).resolves.toBe(false);
+    const window = db.lessonStaffing.findMany.mock.calls[0][0].where.date;
+    expect(window.lte.toISOString().slice(0, 10)).toBe('2026-10-24');
   });
   it('theory photos: staff of that class/day and that class students, not outsiders', async () => {
     db.storedFile.findUnique.mockResolvedValue({ ownerId: 'up' });

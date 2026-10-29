@@ -513,3 +513,11 @@ export const PlacementStatus = {
 } as const
 
 export type PlacementStatus = (typeof PlacementStatus)[keyof typeof PlacementStatus]
+
+
+export const HomeworkAttemptStatus = {
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUBMITTED: 'SUBMITTED'
+} as const
+
+export type HomeworkAttemptStatus = (typeof HomeworkAttemptStatus)[keyof typeof HomeworkAttemptStatus]

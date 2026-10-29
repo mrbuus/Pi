@@ -172,7 +172,10 @@ export const ModelName = {
   SheetRow: 'SheetRow',
   SheetRowVersion: 'SheetRowVersion',
   SheetIssue: 'SheetIssue',
-  SheetPayment: 'SheetPayment'
+  SheetPayment: 'SheetPayment',
+  HomeworkAttempt: 'HomeworkAttempt',
+  HomeworkCheck: 'HomeworkCheck',
+  HomeworkPhoto: 'HomeworkPhoto'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2051,6 +2054,53 @@ export const SheetPaymentScalarFieldEnum = {
 } as const
 
 export type SheetPaymentScalarFieldEnum = (typeof SheetPaymentScalarFieldEnum)[keyof typeof SheetPaymentScalarFieldEnum]
+
+
+export const HomeworkAttemptScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  testId: 'testId',
+  lessonDate: 'lessonDate',
+  status: 'status',
+  startedAt: 'startedAt',
+  deadlineAt: 'deadlineAt',
+  answers: 'answers',
+  firstAnswers: 'firstAnswers',
+  checksUsed: 'checksUsed',
+  score: 'score',
+  total: 'total',
+  submittedAt: 'submittedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeworkAttemptScalarFieldEnum = (typeof HomeworkAttemptScalarFieldEnum)[keyof typeof HomeworkAttemptScalarFieldEnum]
+
+
+export const HomeworkCheckScalarFieldEnum = {
+  id: 'id',
+  attemptId: 'attemptId',
+  n: 'n',
+  answers: 'answers',
+  results: 'results',
+  createdAt: 'createdAt'
+} as const
+
+export type HomeworkCheckScalarFieldEnum = (typeof HomeworkCheckScalarFieldEnum)[keyof typeof HomeworkCheckScalarFieldEnum]
+
+
+export const HomeworkPhotoScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  lessonDate: 'lessonDate',
+  fileKey: 'fileKey',
+  pages: 'pages',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkPhotoScalarFieldEnum = (typeof HomeworkPhotoScalarFieldEnum)[keyof typeof HomeworkPhotoScalarFieldEnum]
 
 
 export const SortOrder = {

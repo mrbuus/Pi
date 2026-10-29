@@ -115,6 +115,8 @@ describe('Хэн тэмдэглэсэн (эзэн 2026-10-22)', () => {
       },
       assignment: { findMany: jest.fn().mockResolvedValue([]) },
       submission: { findMany: jest.fn().mockResolvedValue([]) },
+      homeworkAttempt: { findMany: jest.fn().mockResolvedValue([]) },
+      homeworkPhoto: { findMany: jest.fn().mockResolvedValue([]) },
     };
   }
 

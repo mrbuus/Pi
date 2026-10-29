@@ -8,7 +8,8 @@ import {
   canAccessVideoChapter,
   hasCoveringPass,
 } from '../common/access';
-import { canStaffClassDay } from '../lesson-day/staff-access';
+import { canStaffClassDay, staffDays } from '../lesson-day/staff-access';
+import { addDateDays } from '../common/date';
 export interface FileActor {
   id: string;
   role: Role;
@@ -62,6 +63,41 @@ export class FileAuthorizationService {
           }),
         ])
       : [[], []];
+    // Гэрийн даалгаврын зураг (HomeworkPhoto, эзэн 2026-10-29) ХУВИЙН: эзэн (дээр), тэр
+    // анги/өдрийн ажилтан, баталгаажсан эцэг эх л харна. Устгасан (deletedAt) мөр эрх өгөхгүй.
+    const homeworkPhotoRefs = uploader
+      ? await this.prisma.homeworkPhoto.findMany({
+          where: { fileKey: key, studentId: uploader, deletedAt: null },
+          select: { classroomId: true, lessonDate: true, studentId: true },
+        })
+      : [];
+    if (homeworkPhotoRefs.length) {
+      if (staff(actor.role)) {
+        // Даалгавар өгсөн өдрөөс хойш 14 хоногт тэр ангийн хичээл заасан багш (дараагийн
+        // хичээл дээр шалгадаг) — ангийн багш/Багш+ бол бүх өдөр.
+        for (const ref of homeworkPhotoRefs) {
+          const days = await staffDays(
+            this.prisma,
+            { userId: actor.id, role: actor.role },
+            ref.classroomId,
+            ref.lessonDate,
+            addDateDays(ref.lessonDate, 14),
+          );
+          if (days === 'ALL' || (days && days.size > 0)) return true;
+        }
+        return false;
+      }
+      if (actor.role === Role.PARENT)
+        return !!(await this.prisma.parentLink.findFirst({
+          where: {
+            parentId: actor.id,
+            studentId: uploader as string,
+            verifiedAt: { not: null },
+          },
+          select: { id: true },
+        }));
+      return false;
+    }
     // Нөхөх тэмдэглэл ХУВИЙН: эзэн (дээр) ба тэр анги/өдрийн ажилтнаас бусдад хаалттай.
     if (makeupRefs.length && !staff(actor.role)) return false;
     const lessonDayGrant = async (): Promise<boolean> => {
@@ -351,6 +387,27 @@ export class FileAuthorizationService {
         select: { id: true },
       });
       if (examSession) return true;
+      // Гэрийн даалгаврын B хувилбар (homework-practice): эхлүүлсэн оролдлого нь
+      // зөвхөн жагсаалтад нээгдсэн үед үүсдэг тул бодлогын зургийг харна.
+      const homeworkAttempt = await this.prisma.homeworkAttempt.findFirst({
+        where: {
+          studentId: actor.id,
+          testId: {
+            in: (
+              await this.prisma.testProblem.findMany({
+                where: {
+                  problem: {
+                    OR: [{ imageKey: key }, { choiceOptions: { some: { imageKey: key } } }],
+                  },
+                },
+                select: { testId: true },
+              })
+            ).map((t) => t.testId),
+          },
+        },
+        select: { id: true },
+      });
+      if (homeworkAttempt) return true;
     }
 
     for (const ref of videos)
