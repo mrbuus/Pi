@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { StudentComingSoon } from "@/components/ui/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Миний зорилго | Шинэ Ирээдүйн Эзэд",
@@ -9,5 +10,5 @@ export const metadata: Metadata = {
 export default function GoalsLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <StudentComingSoon title="Миний зорилго">{children}</StudentComingSoon>;
 }

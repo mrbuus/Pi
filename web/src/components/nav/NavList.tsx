@@ -40,7 +40,7 @@ function ItemRow({
           active
             ? "bg-brand-bright/10 font-semibold text-brand-soft"
             : "text-ink-dim hover:bg-panel hover:text-ink"
-        }`}
+        } ${item.soon && !active ? "opacity-60" : ""}`}
       >
         {/* Бүлгийн өнгөт дэвсгэртэй дүрс — цэсийг нүдээр хурдан ялгана. */}
         <span
@@ -53,6 +53,11 @@ function ItemRow({
           {item.label}
         </span>
         {item.badge === "makeup" && !collapsedRail && <MakeupNavBadge />}
+        {item.soon && !collapsedRail && (
+          <span className="ml-auto shrink-0 rounded-full border border-line px-2 py-0.5 text-[10px] font-semibold text-ink-dim">
+            Тун удахгүй
+          </span>
+        )}
       </Link>
     </li>
   );
@@ -142,6 +147,7 @@ function GroupSection({
 
 export default function NavList({
   home,
+  main = [],
   groups,
   pathname,
   collapsedRail = false,
@@ -149,6 +155,8 @@ export default function NavList({
   onNavigate,
 }: {
   home: NavLinkType | null;
+  /** Бүлэггүй гол мөрүүд (сурагч) — нүүрний доор шууд */
+  main?: NavLinkType[];
   groups: NavGroup[];
   pathname: string;
   collapsedRail?: boolean;
@@ -167,15 +175,27 @@ export default function NavList({
   }
   return (
     <nav aria-label="Үндсэн цэс" className="flex flex-col gap-3">
-      {home && (
-        <ul>
-          <ItemRow
-            item={home}
-            active={home.href === pathname}
-            collapsedRail={collapsedRail}
-            tone={GROUP_TONE.home}
-            onNavigate={onNavigate}
-          />
+      {(home || main.length > 0) && (
+        <ul className="flex flex-col gap-0.5">
+          {home && (
+            <ItemRow
+              item={home}
+              active={home.href === pathname}
+              collapsedRail={collapsedRail}
+              tone={GROUP_TONE.home}
+              onNavigate={onNavigate}
+            />
+          )}
+          {main.map((item) => (
+            <ItemRow
+              key={item.href}
+              item={item}
+              active={item.href === pathname}
+              collapsedRail={collapsedRail}
+              tone={GROUP_TONE.learn}
+              onNavigate={onNavigate}
+            />
+          ))}
         </ul>
       )}
       <div className={`flex flex-col ${collapsedRail ? "gap-1" : "gap-2"}`}>

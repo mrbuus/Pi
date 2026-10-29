@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, ClipboardCheck, CreditCard, NotebookPen } from "lucide-react";
+import { CalendarDays, ClipboardCheck, CreditCard, NotebookPen } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api, fileUrl, getRole, uploadFile } from "@/lib/api";
@@ -34,11 +34,12 @@ const ROLE_LABEL: Record<string, string> = {
   BUYER: "Худалдан авагч",
 };
 
+// Сурагчийн цэстэй ижил 4 гол хэсэг (эзэн 2026-10-29, SURAGCH-SHINECHLEL §1)
 const QUICK_ACTIONS = [
-  { href: "/app/tests", label: "Шалгалт", hint: "Тест өгөх", icon: ClipboardCheck, tone: "bg-brand-bright/15 text-brand-soft" },
-  { href: "/app/student#homework", label: "Даалгавар", hint: "Гэрийн даалгавар", icon: NotebookPen, tone: "bg-accent-violet/15 text-accent-violet" },
-  { href: "/app/learn", label: "Хичээл", hint: "Онол, видео", icon: BookOpen, tone: "bg-accent-teal/15 text-accent-teal" },
-  { href: "/app/student/payments", label: "Төлбөр", hint: "Миний төлбөр", icon: CreditCard, tone: "bg-accent-gold/15 text-accent-gold" },
+  { href: "/app/homework", label: "Даалгавар", hint: "Гэрийн даалгавар", icon: NotebookPen, tone: "bg-accent-violet/15 text-accent-violet" },
+  { href: "/app/lesson-flow/my", label: "Хичээл", hint: "Өнөөдөр, нөхөх", icon: CalendarDays, tone: "bg-accent-teal/15 text-accent-teal" },
+  { href: "/app/tests", label: "Шалгалт", hint: "Тест, дүн", icon: ClipboardCheck, tone: "bg-brand-bright/15 text-brand-soft" },
+  { href: "/app/student/payments", label: "Төлбөр", hint: "Миний төлбөр", icon: CreditCard, tone: "bg-success/15 text-success" },
 ] as const;
 
 function initials(firstName: string, lastName: string): string {

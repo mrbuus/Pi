@@ -7,9 +7,11 @@ export interface NavLink {
   icon: IconName;
   /** Мөрийн баруун талын тоо — "makeup" = components/makeup/MakeupNavBadge (нөхөөгүй хичээл) */
   badge?: "makeup";
+  /** «Тун удахгүй» — цэсэнд бүдэг, жижиг шошготой; сурагчид ComingSoon дэлгэц гарна */
+  soon?: boolean;
 }
 
-export type GroupKey = "learn" | "class" | "finance" | "admin" | "internal" | "personal";
+export type GroupKey = "learn" | "class" | "finance" | "admin" | "internal" | "personal" | "soon";
 
 // Бүлгийн монгол шошго — эзний хүсэлтээр чиг үүргээр нь бүлэглэсэн.
 export const GROUP_LABEL: Record<GroupKey, string> = {
@@ -19,6 +21,7 @@ export const GROUP_LABEL: Record<GroupKey, string> = {
   admin: "Удирдлага",
   internal: "Дотоод",
   personal: "Хувийн",
+  soon: "Тун удахгүй",
 };
 
 export const GROUP_ICON: Record<GroupKey, IconName> = {
@@ -28,6 +31,7 @@ export const GROUP_ICON: Record<GroupKey, IconName> = {
   admin: "shield",
   internal: "pencil",
   personal: "user",
+  soon: "clock",
 };
 
 // Бүлэг бүрийн өнгө (шинэ дизайн, 2026-09-26 — «өнгөлөг, урам өгөх»).
@@ -41,6 +45,7 @@ export const GROUP_TONE: Record<GroupKey | "home", string> = {
   admin: "bg-brand-bright/15 text-brand-soft",
   internal: "bg-accent-sky/15 text-accent-sky",
   personal: "bg-accent-sky/15 text-accent-sky",
+  soon: "bg-ink/5 text-ink-dim",
 };
 
 // Role бүрийн НҮҮР (dashboard) холбоос — самбарын дээд хэсэгт бүлэглэлгүй,
@@ -69,24 +74,23 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/store", label: "Дэлгүүр", icon: "store" },
     TOOLS_LINK,
   ],
+  // Сурагчийн цэс — цөөн, тодорхой (эзэн 2026-10-29, SURAGCH-SHINECHLEL §1).
+  // Миний дүн, Нөхөх, Хуваарь → «Хичээл»/«Шалгалт» доторх табууд;
+  // Дэлгүүр, Хэрэглэгдэхүүн → баруун дээд хэрэглэгчийн цэс (STUDENT_PERSONAL_LINKS).
   STUDENT: [
     HOME.STUDENT,
-    { href: "/app/results-ranking", label: "Миний дүн, байр", icon: "chart" },
-    { href: "/app/lesson-flow/my", label: "Өдрийн хичээл", icon: "calendar" },
-    // Тасалсан/хоцорсон өдрийн хичээлээ нөхөх + онолын зураг (эзэн 2026-10-18)
-    { href: "/app/makeup", label: "Нөхөх хичээл", icon: "list-checks", badge: "makeup" },
-    { href: "/app/study", label: "Суралцах", icon: "book-open" },
-    { href: "/app/study/history", label: "Давтлагын түүх", icon: "clock" },
-    { href: "/app/learn", label: "Хичээл үзэх", icon: "book-open" },
-    { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
-    { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
+    { href: "/app/homework", label: "Гэрийн даалгавар", icon: "clipboard-list" },
+    // Өнөөдөр, Нөхөх, Хуваарь табтай hub (nav/StudentLessonTabs.tsx)
+    { href: "/app/lesson-flow/my", label: "Хичээл", icon: "calendar", badge: "makeup" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
-    { href: "/app/goals", label: "Миний зорилго", icon: "target" },
-    { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
-    { href: "/app/student/payments", label: "Миний төлбөр", icon: "credit-card" },
-    { href: "/app/practice", label: "Дасгал", icon: "practice" },
-    { href: "/app/store", label: "Дэлгүүр", icon: "store" },
-    TOOLS_LINK,
+    { href: "/app/library", label: "Ном", icon: "book-open" },
+    { href: "/app/student/payments", label: "Төлбөр", icon: "credit-card" },
+    { href: "/app/study", label: "Суралцах", icon: "layers", soon: true },
+    { href: "/app/study/history", label: "Давтлага", icon: "clock", soon: true },
+    { href: "/app/practice", label: "Дасгал", icon: "practice", soon: true },
+    { href: "/app/learn", label: "Хичээл үзэх", icon: "book-open", soon: true },
+    { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle", soon: true },
+    { href: "/app/goals", label: "Миний зорилго", icon: "target", soon: true },
   ],
   TEACHER: [
     HOME.TEACHER,
@@ -241,7 +245,7 @@ const COMMON_PERSONAL: NavLink[] = [
 // Бусад бүх холбоос «Бусад» дотор хэвээр — нэг ч цэс хасагдахгүй.
 const PRIMARY_BY_ROLE: Record<string, string[]> = {
   GROUP_TEACHER: ["/app/library", "/app/videos"],
-  STUDENT: ["/app/learn", "/app/tests", "/app/schedule"],
+  STUDENT: ["/app/homework", "/app/lesson-flow/my", "/app/tests"],
   TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
   TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
   ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
@@ -251,6 +255,8 @@ const PRIMARY_BY_ROLE: Record<string, string[]> = {
 
 // Доод мөрөнд харуулах богино шошго (урт нэр 375px-т багтахгүй).
 const SHORT_LABEL: Record<string, string> = {
+  "/app/homework": "Даалгавар",
+  "/app/lesson-flow/my": "Хичээл",
   "/app/learn": "Хичээл",
   "/app/library": "Сан",
   "/app/videos": "Видео",
@@ -287,18 +293,25 @@ export interface NavGroup {
 
 export interface RoleNav {
   home: NavLink | null;
+  /** Бүлэглэлгүй, үргэлж харагдах гол мөрүүд (сурагч) */
+  main: NavLink[];
   groups: NavGroup[];
 }
 
-const GROUP_ORDER: GroupKey[] = ["learn", "class", "finance", "admin", "internal", "personal"];
+// Гол цэсээ бүлэглэлгүй, шууд жагсаах role (цөөн зүйлтэй тул бүлэг нээх шаардлагагүй)
+const FLAT_ROLES = new Set(["STUDENT"]);
+
+const GROUP_ORDER: GroupKey[] = ["learn", "class", "finance", "admin", "internal", "personal", "soon"];
 // Ажилтанд «Анги» хамгийн дээр (эзэн 2026-10-18: «Анги нь Сургалтаас дээр байх»)
-const STAFF_GROUP_ORDER: GroupKey[] = ["class", "learn", "finance", "admin", "internal", "personal"];
+const STAFF_GROUP_ORDER: GroupKey[] = ["class", "learn", "finance", "admin", "internal", "personal", "soon"];
 const STAFF_ROLES = new Set(["ADMIN", "TEACHER_PLUS", "TEACHER"]);
 
 export function getRoleNav(role: string | null): RoleNav {
   const items = (role ? NAV_BY_ROLE[role] ?? [] : []).filter((i) => SMS_ENABLED || i.href !== "/app/sms");
   const home = items[0] ?? null;
-  const rest = items.slice(1);
+  const flat = !!role && FLAT_ROLES.has(role);
+  const main = flat ? items.slice(1).filter((i) => !i.soon) : [];
+  const rest = items.slice(1).filter((i) => !flat || i.soon);
 
   const buckets: Record<GroupKey, NavLink[]> = {
     learn: [],
@@ -307,8 +320,13 @@ export function getRoleNav(role: string | null): RoleNav {
     admin: [],
     internal: [],
     personal: [],
+    soon: [],
   };
   for (const item of rest) {
+    if (item.soon) {
+      buckets.soon.push(item);
+      continue;
+    }
     const group = (role ? ITEM_GROUP_BY_ROLE[role]?.[item.href] : undefined) ?? ITEM_GROUP[item.href] ?? "learn";
     buckets[group].push(item);
   }
@@ -325,7 +343,7 @@ export function getRoleNav(role: string | null): RoleNav {
     items: buckets[key],
   }));
 
-  return { home, groups };
+  return { home, main, groups };
 }
 
 // Дээд самбарт харуулах хуудасны гарчиг — идэвхтэй маршрутын шошгыг
@@ -343,12 +361,32 @@ const HUB_TITLE: Record<string, string> = {
 
 export const PERSONAL_LINKS: NavLink[] = [PROFILE_LINK, ...COMMON_PERSONAL];
 
+// Сурагчийн хувийн цэсэнд нэмэгдэх холбоосууд (зүүн цэснээс шилжсэн, эзэн 2026-10-29)
+const STUDENT_PERSONAL_LINKS: NavLink[] = [{ href: "/app/store", label: "Дэлгүүр", icon: "store" }, TOOLS_LINK];
+
+/** Баруун дээд хэрэглэгчийн цэсний холбоосууд — role-оор */
+export function getPersonalLinks(role: string | null | undefined): NavLink[] {
+  return role === "STUDENT" ? [PROFILE_LINK, ...STUDENT_PERSONAL_LINKS, ...COMMON_PERSONAL] : PERSONAL_LINKS;
+}
+
+// Сурагчийн цэсэнд тусдаа мөргүй ч өөрийн гарчигтай хуудсууд (hub доторх табууд, хувийн цэс)
+const STUDENT_TITLE: Record<string, string> = {
+  "/app/makeup": "Нөхөх хичээл",
+  "/app/schedule": "Хуваарь",
+  "/app/results-ranking": "Миний дүн, байр",
+  "/app/store": "Дэлгүүр",
+  "/app/tools": "Хэрэглэгдэхүүн",
+};
+
 export function getPageTitle(role: string | null, pathname: string): string {
-  const personal = PERSONAL_LINKS.find((l) => l.href === pathname);
+  const personal = getPersonalLinks(role).find((l) => l.href === pathname);
   if (personal) return personal.label;
   if (HUB_TITLE[pathname] && role && ["ADMIN", "TEACHER_PLUS", "TEACHER"].includes(role)) return HUB_TITLE[pathname];
-  const { home, groups } = getRoleNav(role);
+  if (role === "STUDENT" && STUDENT_TITLE[pathname]) return STUDENT_TITLE[pathname];
+  const { home, main, groups } = getRoleNav(role);
   if (home?.href === pathname) return home.label;
+  const mainHit = main.find((item) => item.href === pathname);
+  if (mainHit) return mainHit.label;
   for (const group of groups) {
     const hit = group.items.find((item) => item.href === pathname);
     if (hit) return hit.label;

@@ -6,7 +6,7 @@ import { LogOut } from "lucide-react";
 import { fileUrl } from "@/lib/api";
 import { staffName } from "@/lib/personName";
 import { NavIcon } from "./icons";
-import { PERSONAL_LINKS } from "./nav-data";
+import { getPersonalLinks } from "./nav-data";
 
 export interface UserMenuMe {
   firstName: string;
@@ -24,11 +24,14 @@ export interface UserMenuMe {
  */
 export default function UserMenu({
   me,
+  role,
   roleLabel,
   extra,
   onLogout,
 }: {
   me: UserMenuMe | null;
+  /** Харагдаж буй role — сурагчид Дэлгүүр, Хэрэглэгдэхүүн нэмэгдэнэ */
+  role?: string | null;
   roleLabel: string;
   extra?: string;
   onLogout: () => void;
@@ -66,7 +69,7 @@ export default function UserMenu({
             </p>
           </div>
           <DropdownMenu.Separator className="my-1 h-px bg-line" />
-          {PERSONAL_LINKS.map((l) => (
+          {getPersonalLinks(role ?? me?.role).map((l) => (
             <DropdownMenu.Item key={l.href} asChild>
               <Link
                 href={l.href}
