@@ -28,6 +28,7 @@ import {
   independentCorrectRecords,
 } from "@/components/study/study-policy";
 import TheoryReader from "@/components/study/TheoryReader";
+import { StudentComingSoon } from "@/components/ui/ComingSoon";
 import { formatMnDate } from "@/lib/dateMn";
 type RecordRow = {
   id: string;
@@ -78,7 +79,16 @@ const FAMILIES = [
   ["quadratic", "Квадрат тэгшитгэл"],
   ["fractions", "Бутархайн нийлбэр"],
 ];
+// Сурагчид одоохондоо «Тун удахгүй» (эзэн 2026-10-29); /app/study/review хэвээр нээлттэй
 export default function StudyPage() {
+  return (
+    <StudentComingSoon title="Суралцах">
+      <StudyPageContent />
+    </StudentComingSoon>
+  );
+}
+
+function StudyPageContent() {
   const [asOf, setAsOf] = useState(0);
   const [task, setTask] = useState<Task | null>(null),
     [mode, setMode] = useState("independent"),

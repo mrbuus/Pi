@@ -65,7 +65,7 @@ interface SidebarProps {
 // Хувийн цэс, гарах, цагаан/хар нь баруун дээд булангийн хэрэглэгчийн цэст
 // (nav/UserMenu.tsx) шилжсэн (эзэн 2026-10-13).
 export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange }: SidebarProps) {
-  const { home, groups } = getRoleNav(role);
+  const { home, main, groups } = getRoleNav(role);
   const railPreference = useSyncExternalStore(subscribeRail, readRailCollapsed, getServerRailCollapsed);
   const wide = useSyncExternalStore(subscribeWide, readWide, getServerWide);
   const railCollapsed = railPreference || !wide;
@@ -102,7 +102,7 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
             </Link>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
-            <NavList home={home} groups={groups} pathname={pathname} collapsedRail={!expanded} />
+            <NavList home={home} main={main} groups={groups} pathname={pathname} collapsedRail={!expanded} />
           </div>
           {/* Нарийн дэлгэц дээр rail байнга хумигдсан — тогтоох товч хэрэггүй */}
           <div className={`shrink-0 border-t border-line p-2 ${wide ? "flex" : "hidden"} ${expanded ? "justify-end" : "justify-center"}`}>
@@ -141,7 +141,7 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
             </button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3" data-vaul-no-drag>
-            <NavList home={home} groups={groups} pathname={pathname} openActive onNavigate={() => onMobileOpenChange(false)} />
+            <NavList home={home} main={main} groups={groups} pathname={pathname} openActive onNavigate={() => onMobileOpenChange(false)} />
           </div>
         </DrawerContent>
       </Drawer>

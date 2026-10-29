@@ -8,6 +8,7 @@ import BottomTabs from "@/components/nav/BottomTabs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import Sidebar from "@/components/nav/Sidebar";
 import ClassHubTabs, { hubFor } from "@/components/nav/ClassHubTabs";
+import StudentLessonTabs, { isStudentLessonPath } from "@/components/nav/StudentLessonTabs";
 import UserMenu from "@/components/nav/UserMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
@@ -150,7 +151,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Дэд хуудсууд цэсэнд эх хэсгээ идэвхтэй харуулна: табтай хэсгүүд (Хуваарь,
   // Элсэлт) → эх мөр, анги/сурагч/ноорогийн дэлгэрэнгүй → жагсаалт.
   const hub = hubFor(displayRole, pathname);
-  const navPathname = hub
+  // Сурагчийн «Хичээл» hub: Өнөөдөр, Нөхөх, Хуваарь → цэсэнд «Хичээл» идэвхтэй
+  const studentLesson = isStudentLessonPath(displayRole, pathname);
+  const navPathname = studentLesson
+    ? "/app/lesson-flow/my"
+    : hub
     ? hub.navHref
     : pathname.startsWith("/app/classes/")
       ? "/app/classes"
@@ -203,6 +208,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <NotificationBell />
                   <UserMenu
                     me={me}
+                    role={displayRole ?? role}
                     roleLabel={ROLE_LABEL[displayRole ?? ""] ?? displayRole ?? ""}
                     extra={childName}
                     onLogout={logout}
@@ -222,6 +228,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               ? <LoadingState label="Анги удирдах хэсгийг нээж байна…" />
               : <>
                   {hub && <ClassHubTabs pathname={pathname} tabs={hub.tabs} label={hub.label} />}
+                  {studentLesson && <StudentLessonTabs pathname={pathname} />}
                   {children}
                 </>}
           </main>

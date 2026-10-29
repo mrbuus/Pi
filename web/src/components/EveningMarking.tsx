@@ -46,7 +46,14 @@ interface TodoSession {
   problems: TodoProblem[];
 }
 
-export default function EveningMarking() {
+export default function EveningMarking({
+  title = "Оройн тэмдэглэгээ",
+  hideWhenEmpty = false,
+}: {
+  title?: string;
+  /** Тэмдэглэх тест байхгүй (алдаагүй) үед картыг огт харуулахгүй — сурагчийн самбар */
+  hideWhenEmpty?: boolean;
+} = {}) {
   const [sessions, setSessions] = useState<TodoSession[]>([]);
   // problemId → одоогийн тэмдэглэгээ (optimistic)
   const [marks, setMarks] = useState<Record<string, string>>({});
@@ -101,10 +108,11 @@ export default function EveningMarking() {
   }
 
   if (!loaded) return null;
+  if (hideWhenEmpty && !loadError && sessions.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-brand-bright/30 bg-brand-bright/5 p-6">
-      <h2 className="font-bold text-brand-soft">Оройн тэмдэглэгээ</h2>
+    <section className="rounded-xl border border-line bg-surface p-5 elev-1">
+      <h2 className="font-bold text-brand-soft">{title}</h2>
       <p className="mt-1 text-sm text-ink-dim">
         Өнөөдөр ангид хийсэн бодлогуудаа цаасан дээрээсээ хараад тэмдэглээрэй
       </p>

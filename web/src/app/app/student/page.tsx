@@ -1,29 +1,43 @@
 "use client";
 
-import { Pin } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import StreakWeekCard from "@/components/activity/StreakWeekCard";
+import {
+  ArrowRight,
+  CalendarDays,
+  CircleCheck,
+  CircleDashed,
+  ClipboardCheck,
+  ClipboardList,
+  Clock,
+  Megaphone,
+  Pin,
+} from "lucide-react";
 import DashboardGreeting from "@/components/DashboardGreeting";
 import EveningMarking from "@/components/EveningMarking";
 import HomeworkList from "@/components/homework/HomeworkList";
-import MyHomeworkMarks from "@/components/homework/MyHomeworkMarks";
-import { LoadingState, ErrorState } from "@/components/ui/StateBlock";
+import PaidUntilCard from "@/components/payments/PaidUntilCard";
+import RoomBadge from "@/components/schedule/RoomBadge";
+import { formatMinutes, todayUBKey, type DayExpansion, type ScheduleMeResponse } from "@/components/schedule/types";
+import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
-import { api } from "@/lib/api";
+import { ApiError, api } from "@/lib/api";
+import { formatMnDate } from "@/lib/dateMn";
 
-interface Stats {
-  totalAttempts: number;
-  weakestTags: { tag: string; type: string; attempts: number; successRate: number }[];
-}
+/* ============================================================================
+ * Сурагчийн «Миний самбар» (эзэн 2026-10-29, SURAGCH-SHINECHLEL §1) — багшийн
+ * самбарын стандартаар цөөн, давхардалгүй блок:
+ *   мэндчилгээ + 4 хавтан → өнөөдрийн хичээл → өнөөдрийн гэрийн даалгавар →
+ *   ангийн тест тэмдэглэх (байвал) → шалгалт → төвийн мэдэгдэл (байвал) → төлбөр.
+ * Ирцийн жагсаалт, сул тал, шалгалтын дүнгийн жагсаалт, streak — хасагдсан
+ * (дэлгэрэнгүй нь Хичээл, Шалгалт хэсэгт).
+ * ========================================================================== */
+
 interface TestResult {
-  test: { title: string };
+  test: { id: string; title: string };
   totalScore: number;
   maxScore: number;
-}
-interface AttendanceRow {
-  date: string;
-  status: string;
-  classroom: { name: string };
+  createdAt?: string;
 }
 interface EnrolledClassroom {
   id: string;
@@ -37,26 +51,39 @@ interface Announcement {
   pinned: boolean;
   createdAt: string;
 }
+type HomeworkStatus = "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED";
+interface HomeworkItem {
+  testId: string;
+  title: string;
+  variantLabel: string | null;
+  problemCount: number;
+  status: HomeworkStatus;
+  checksUsed: number;
+  maxChecks: number;
+  score: { correct: number; total: number } | null;
+  late: boolean;
+}
+interface HomeworkDay {
+  date: string;
+  classroomId: string;
+  classroomName: string;
+  deadlineAt: string | null;
+  items: HomeworkItem[];
+}
 
-type Status = "loading" | "ready" | "error";
+type Status = "loading" | "ready" | "error" | "missing";
 
-/** Нэг API дуудлагыг ачаалж байгаа/бэлэн/алдаатай гэсэн 3 төлөвт хөрвүүлж,
- * дахин оролдох боломж өгнө — амжилтгүй дуудлага "хоосон дата"-с ялгагдана. */
-function useSection<T>(path: string): {
-  data: T | undefined;
-  status: Status;
-  error: string;
-  reload: () => void;
-} {
+/** Нэг API дуудлагын ачаалж байгаа/бэлэн/алдаатай төлөв + дахин оролдох.
+ * 404 = «missing» (API хараахан байхгүй) — алдаа гэж харуулахгүй. */
+function useSection<T>(path: string | null) {
   const [data, setData] = useState<T>();
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState("");
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
+    if (!path) return;
     let alive = true;
-    // Анхны төлөв аль хэдийн "loading" тул энд дахин synchronous setState
-    // хийхгүй — зөвхөн амжилт/алдааны үр дүнг async callback-аас бичнэ.
     api<T>(path)
       .then((d) => {
         if (!alive) return;
@@ -65,18 +92,19 @@ function useSection<T>(path: string): {
       })
       .catch((e) => {
         if (!alive) return;
+        if (e instanceof ApiError && e.status === 404) {
+          setStatus("missing");
+          return;
+        }
         setError(e instanceof Error ? e.message : "Алдаа гарлаа");
         setStatus("error");
       });
     return () => {
       alive = false;
     };
-    // path нь тогтмол утгуудаар дуудагддаг тул зөвхөн tick өөрчлөгдөхөд дахин ачаална.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick]);
+  }, [path, tick]);
 
   function reload() {
-    // Дахин оролдоход товч дарах мөчид (effect биш) шууд "ачаалж байна" болгоно.
     setStatus("loading");
     setTick((t) => t + 1);
   }
@@ -84,251 +112,244 @@ function useSection<T>(path: string): {
   return { data, status, error, reload };
 }
 
-export default function StudentDashboard() {
-  const statsQ = useSection<Stats>("/attempts/my-stats");
-  const resultsQ = useSection<TestResult[]>("/tests/my-results");
-  const attendanceQ = useSection<AttendanceRow[]>("/attendance/my");
-  // Зөвхөн танхимын сурагчид төвийн зар буцаана (онлайнд хоосон)
-  const announcementsQ = useSection<Announcement[]>("/announcements");
-  // A student can belong to both class types; the profile is not an enrollment list.
-  const classesQ = useSection<EnrolledClassroom[]>("/assignments/my-classrooms");
-  const hasClassroom = classesQ.data?.some((classroom) => classroom.type === "IN_PERSON");
-  const hasOnline = classesQ.data?.some((classroom) => classroom.type === "ONLINE");
+const CARD = "rounded-xl border border-line bg-surface p-5 elev-1";
 
-  const announcements = announcementsQ.data ?? [];
-  const results = resultsQ.data ?? [];
-  const attendance = attendanceQ.data ?? [];
-
+function CardHead({ icon: Icon, title, href, linkLabel }: { icon: typeof Clock; title: string; href?: string; linkLabel?: string }) {
   return (
-    <div className="space-y-8">
-      <DashboardGreeting />
-      {/* Гарчиг дээд мөрөнд (layout) аль хэдийн харагддаг тул давхардуулахгүй. */}
-      <h1 className="sr-only">Миний самбар</h1>
-
-      {/* Дараалсан өдөр + 7 хоногийн тууз — урам өгөх гол карт. Жилийн heatmap
-          карт дотор «Бүтэн жилийн түүх»-ээр нээгдэнэ. */}
-      <StreakWeekCard />
-
-      {/* Төвийн самбар — зөвхөн танхимын сурагчид */}
-      {announcementsQ.status === "loading" && (
-        <section className="chunky p-6">
-          <LoadingState rows={3} label="Төвийн самбар" />
-        </section>
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <h2 className="flex items-center gap-2 font-bold text-brand-soft">
+        <Icon className="h-5 w-5 shrink-0" aria-hidden />
+        {title}
+      </h2>
+      {href && (
+        <Link href={href} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand-soft hover:underline">
+          {linkLabel}
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </Link>
       )}
-      {announcementsQ.status === "error" && (
-        <ErrorState message={announcementsQ.error} onRetry={announcementsQ.reload} />
-      )}
-      {announcementsQ.status === "ready" && announcements.length > 0 && (
-        <AnnouncementsSection announcements={announcements} />
-      )}
-
-      <div id="homework" className="scroll-mt-24 space-y-6">
-        {classesQ.status === "loading" && (
-          <section className="chunky p-6">
-            <LoadingState rows={3} label="Гэрийн даалгавар" />
-          </section>
-        )}
-        {classesQ.status === "error" && <ErrorState message={classesQ.error} onRetry={classesQ.reload} />}
-        {classesQ.status === "ready" && (
-          <>
-            {hasClassroom && <MyHomeworkMarks />}
-            <HomeworkList hideWhenEmpty={!hasOnline} />
-          </>
-        )}
-      </div>
-
-      {/* Оройн тэмдэглэгээ — token-гүй, багшийн оруулсан тестээс (EveningMarking) */}
-      <EveningMarking />
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="chunky p-6">
-          <h2 className="mb-4 font-bold text-brand-soft">Миний сул талууд</h2>
-          {statsQ.status === "loading" && <LoadingState rows={4} label="Сул талууд" />}
-          {statsQ.status === "error" && (
-            <ErrorState message={statsQ.error} onRetry={statsQ.reload} />
-          )}
-          {statsQ.status === "ready" && !statsQ.data?.weakestTags.length && (
-            <p className="text-sm text-ink-dim">Дата хуримтлагдаагүй байна</p>
-          )}
-          {statsQ.status === "ready" && (
-            <WeakestTagsPanel weakestTags={statsQ.data?.weakestTags ?? []} />
-          )}
-        </section>
-
-        <section className="chunky p-6">
-          <h2 className="mb-4 font-bold text-brand-soft">Шалгалтын дүн</h2>
-          {resultsQ.status === "loading" && <LoadingState rows={3} label="Шалгалтын дүн" />}
-          {resultsQ.status === "error" && (
-            <ErrorState message={resultsQ.error} onRetry={resultsQ.reload} />
-          )}
-          {resultsQ.status === "ready" && results.length === 0 && (
-            <p className="text-sm text-ink-dim">Дүн алга байна</p>
-          )}
-          {resultsQ.status === "ready" && results.length > 0 && (
-            <TestResultsPanel results={results} />
-          )}
-
-          <h2 className="mt-6 mb-3 font-bold text-brand-soft">Сүүлийн ирц</h2>
-          {attendanceQ.status === "loading" && <LoadingState rows={2} label="Ирц" />}
-          {attendanceQ.status === "error" && (
-            <ErrorState message={attendanceQ.error} onRetry={attendanceQ.reload} />
-          )}
-          {attendanceQ.status === "ready" && attendance.length === 0 && (
-            <p className="text-sm text-ink-dim">Ирцийн мэдээлэл алга байна</p>
-          )}
-          {attendanceQ.status === "ready" && attendance.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {attendance.slice(0, 10).map((a, i) => (
-                <span
-                  key={i}
-                  className={`rounded-lg px-3 py-1 text-xs ${
-                    a.status === "PRESENT"
-                      ? "bg-success/15 text-success"
-                      : a.status === "LATE"
-                        ? "bg-warning/15 text-warning"
-                        : "bg-error/15 text-error"
-                  }`}
-                >
-                  <Meta items={[a.date.slice(0, 10), a.status === "PRESENT" ? "Ирсэн" : a.status === "LATE" ? "Хоцорсон" : "Тасалсан"]} />
-                </span>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
     </div>
   );
 }
 
-function AnnouncementsSection({ announcements }: { announcements: Announcement[] }) {
-  const [expanded, setExpanded] = useState(false);
-  const maxVisible = 3;
-  const visibleAnnouncements = expanded ? announcements : announcements.slice(0, maxVisible);
-  const hasMore = announcements.length > maxVisible;
+export default function StudentDashboard() {
+  // A student can belong to both class types; the profile is not an enrollment list.
+  const classesQ = useSection<EnrolledClassroom[]>("/assignments/my-classrooms");
+  const hasClassroom = !!classesQ.data?.some((c) => c.type === "IN_PERSON");
+  const hasOnline = !!classesQ.data?.some((c) => c.type === "ONLINE");
 
   return (
-    <section className="rounded-2xl border border-brand-bright/30 bg-brand-bright/5 p-6">
-      <h2 className="mb-4 flex items-center gap-2 font-bold text-brand-soft">
-        <span className="inline-block h-2 w-2 rounded-full bg-accent-teal" />
-        Төвийн самбар
-      </h2>
-      <div className="space-y-3">
-        {visibleAnnouncements.map((a) => (
-          <div
-            key={a.id}
-            className={`rounded-xl border p-4 ${
-              a.pinned
-                ? "border-warning/30 bg-warning/5"
-                : "border-line bg-surface"
-            }`}
+    <div className="space-y-6">
+      <DashboardGreeting />
+      {/* Гарчиг дээд мөрөнд (layout) аль хэдийн харагддаг тул давхардуулахгүй. */}
+      <h1 className="sr-only">Миний самбар</h1>
+
+      {classesQ.status === "error" && <ErrorState message={classesQ.error} onRetry={classesQ.reload} />}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {hasClassroom && <TodayLessonCard />}
+        {hasClassroom && <HomeworkTodayCard />}
+        <TestsCard />
+        <div className="space-y-2">
+          <PaidUntilCard compact />
+          <Link
+            href="/app/student/payments"
+            className="inline-flex min-h-11 items-center gap-1 px-1 text-sm font-semibold text-brand-soft hover:underline"
           >
-            <div className="flex items-center gap-2">
-              {a.pinned && <Pin className="h-3.5 w-3.5 text-warning" aria-label="Зангиатай" />}
-              <p className="font-semibold">{a.title}</p>
-              <span className="ml-auto text-xs text-ink-dim">
-                {a.createdAt.slice(0, 10)}
-              </span>
-            </div>
-            <p className="mt-1.5 whitespace-pre-line text-sm text-ink-dim">
-              {a.body}
-            </p>
-          </div>
-        ))}
+            Төлбөрийн дэлгэрэнгүй
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
       </div>
-      {hasMore && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-          className="mt-3 w-full rounded-lg border border-line py-2 text-sm font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
-        >
-          {expanded
-            ? `Бага харуулах — ${announcements.length - maxVisible} нуугдсан`
-            : `Бүгдийг харах — ${announcements.length}/${announcements.length}`}
-        </button>
+
+      {/* Багш нар ангийн самбартаа ашигладаг өөрийн тэмдэглэгээ (SelfState) —
+          тэмдэглэх тест байхгүй бол харагдахгүй */}
+      {hasClassroom && <EveningMarking title="Өнөөдрийн ангийн тест — тэмдэглэх" hideWhenEmpty />}
+
+      {/* Онлайн ангийн даалгавар (/assignments/my) — онлайн сурагчид л */}
+      {hasOnline && <HomeworkList hideWhenEmpty />}
+
+      <AnnouncementsCard />
+    </div>
+  );
+}
+
+/* ── Өнөөдрийн хичээл: /schedule/me → анги, /schedule/days → амралт, цаг, танхим ── */
+function TodayLessonCard() {
+  const meQ = useSection<ScheduleMeResponse>("/schedule/me");
+  const classroomId = meQ.data?.classroomId ?? null;
+  const today = todayUBKey();
+  const daysQ = useSection<DayExpansion[]>(
+    classroomId ? `/schedule/days?${new URLSearchParams({ from: today, to: today, classroomId }).toString()}` : null,
+  );
+
+  if ((meQ.status === "ready" || meQ.status === "missing") && !classroomId) return null;
+  const loading = meQ.status === "loading" || (classroomId && daysQ.status === "loading");
+  const day = daysQ.data?.find((d) => d.date.slice(0, 10) === today) ?? daysQ.data?.[0];
+
+  return (
+    <section className={CARD} aria-label="Өнөөдрийн хичээл">
+      <CardHead icon={CalendarDays} title="Өнөөдрийн хичээл" href="/app/lesson-flow/my" linkLabel="Хичээл" />
+      {loading && <LoadingState rows={2} label="Өнөөдрийн хичээл" />}
+      {meQ.status === "error" && <ErrorState message={meQ.error} onRetry={meQ.reload} />}
+      {daysQ.status === "error" && <ErrorState message={daysQ.error} onRetry={daysQ.reload} />}
+      {!loading && daysQ.status === "ready" && (
+        day?.holiday ? (
+          <p className="rounded-lg border border-dashed border-line px-4 py-3 text-sm text-ink-dim">
+            Өнөөдөр хичээлгүй — {day.holiday.title}
+          </p>
+        ) : !day || day.classes.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-line px-4 py-3 text-sm text-ink-dim">
+            Өнөөдөр хичээлгүй
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {day.classes.map((c) => (
+              <li key={c.id} className="flex items-center gap-3 rounded-lg border border-line px-3 py-2">
+                <RoomBadge room={c.room} />
+                <div className="min-w-0">
+                  <p className="font-bold tabular-nums text-ink">
+                    {formatMinutes(c.startMinute)}–{formatMinutes(c.endMinute)}
+                  </p>
+                  <p className="truncate text-sm text-ink-dim">
+                    <Meta items={[c.classroomName, c.subject, c.teacherName]} />
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
       )}
     </section>
   );
 }
 
-function WeakestTagsPanel({ weakestTags }: { weakestTags: Array<{ tag: string; type: string; attempts: number; successRate: number }> }) {
-  const [expanded, setExpanded] = useState(false);
-  const maxVisible = 5;
-  const visibleTags = expanded ? weakestTags : weakestTags.slice(0, maxVisible);
-  const hasMore = weakestTags.length > maxVisible;
+/* ── Өнөөдрийн гэрийн даалгавар: GET /homework/my?days=2 ── */
+const HW_STATUS: Record<HomeworkStatus, { label: string; icon: typeof Clock; tone: string }> = {
+  NOT_STARTED: { label: "Эхлээгүй", icon: CircleDashed, tone: "text-ink-dim" },
+  IN_PROGRESS: { label: "Хийж байна", icon: Clock, tone: "text-info" },
+  SUBMITTED: { label: "Илгээсэн", icon: CircleCheck, tone: "text-success" },
+};
 
-  if (weakestTags.length === 0) {
-    return <p className="text-sm text-ink-dim">Дата хуримтлагдаагүй байна</p>;
-  }
+function HomeworkTodayCard() {
+  const q = useSection<{ days: HomeworkDay[] }>("/homework/my?days=2");
+  // Хамгийн сүүлийн өдрийн даалгавар (өнөөдөр эсвэл өчигдөр)
+  const days = [...(q.data?.days ?? [])].filter((d) => d.items.length > 0).sort((a, b) => b.date.localeCompare(a.date));
+  const latest = days[0];
 
   return (
-    <div className="space-y-3">
-      {visibleTags.map((t) => (
-        <div key={t.tag}>
-          <div className="flex justify-between text-sm">
-            <span>{t.tag}</span>
-            <span className="text-ink-dim">
-              {t.successRate}% — {t.attempts} оролдлого
-            </span>
-          </div>
-          <div className="mt-1 h-2 overflow-hidden rounded-full bg-panel">
-            <div
-              className={`h-full rounded-full ${
-                t.successRate < 50
-                  ? "bg-error"
-                  : t.successRate < 80
-                    ? "bg-warning"
-                    : "bg-success"
-              }`}
-              style={{ width: `${Math.max(t.successRate, 4)}%` }}
-            />
-          </div>
-        </div>
-      ))}
-      {hasMore && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-          className="mt-2 w-full rounded-lg border border-line py-2 text-xs font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
-        >
-          {expanded
-            ? `Бага харуулах — ${weakestTags.length - maxVisible} нуугдсан`
-            : `${weakestTags.length} / ${weakestTags.length} харуулах`}
-        </button>
+    <section className={CARD} aria-label="Өнөөдрийн гэрийн даалгавар">
+      <CardHead icon={ClipboardList} title="Өнөөдрийн гэрийн даалгавар" href="/app/homework" linkLabel="Даалгавар" />
+      {q.status === "loading" && <LoadingState rows={2} label="Гэрийн даалгавар" />}
+      {q.status === "error" && <ErrorState message={q.error} onRetry={q.reload} />}
+      {(q.status === "missing" || (q.status === "ready" && !latest)) && (
+        <p className="rounded-lg border border-dashed border-line px-4 py-3 text-sm text-ink-dim">
+          Одоогоор гэрийн даалгавар алга
+        </p>
       )}
-    </div>
+      {q.status === "ready" && latest && (
+        <>
+          <p className="mb-2 text-xs text-ink-dim">
+            <Meta items={[formatMnDate(latest.date), latest.classroomName]} />
+          </p>
+          <ul className="space-y-2">
+            {latest.items.map((it) => {
+              const st = HW_STATUS[it.status];
+              const Icon = st.icon;
+              return (
+                <li key={it.testId} className="flex items-center gap-3 rounded-lg border border-line px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-ink">{it.title}</p>
+                    <p className="text-xs text-ink-dim">
+                      <Meta items={[`${it.problemCount} бодлого`, it.late ? "Хоцорсон" : null]} />
+                    </p>
+                  </div>
+                  <span className={`inline-flex shrink-0 items-center gap-1 text-sm font-semibold ${st.tone}`}>
+                    <Icon className="h-4 w-4" aria-hidden />
+                    {st.label}
+                    {it.status === "SUBMITTED" && it.score && (
+                      <span className="tabular-nums">{it.score.correct}/{it.score.total}</span>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <Link
+            href="/app/homework"
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:opacity-90"
+          >
+            Даалгавар хийх
+          </Link>
+        </>
+      )}
+    </section>
   );
 }
 
-function TestResultsPanel({ results }: { results: TestResult[] }) {
-  const [expanded, setExpanded] = useState(false);
-  const maxVisible = 4;
-  const visibleResults = expanded ? results : results.slice(0, maxVisible);
-  const hasMore = results.length > maxVisible;
-
+/* ── Шалгалт: сүүлийн дүн + Шалгалт хэсэг рүү (жагсаалт тэнд) ── */
+function TestsCard() {
+  const q = useSection<TestResult[]>("/tests/my-results");
+  const last = q.data?.[0];
   return (
-    <div className="space-y-2">
-      {visibleResults.map((r, i) => (
-        <div
-          key={i}
-          className="flex justify-between rounded-lg border border-line px-4 py-2.5 text-sm"
-        >
-          <span>{r.test.title}</span>
-          <span className="font-bold">
-            {r.totalScore}/{r.maxScore}
+    <section className={CARD} aria-label="Шалгалт">
+      <CardHead icon={ClipboardCheck} title="Шалгалт" href="/app/tests" linkLabel="Бүгд" />
+      {q.status === "loading" && <LoadingState rows={1} label="Шалгалт" />}
+      {q.status === "error" && <ErrorState message={q.error} onRetry={q.reload} />}
+      {(q.status === "missing" || (q.status === "ready" && !last)) && (
+        <p className="rounded-lg border border-dashed border-line px-4 py-3 text-sm text-ink-dim">
+          Одоогоор дүн алга — шалгалтаа өгөөд энд харна
+        </p>
+      )}
+      {q.status === "ready" && last && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2">
+          <div className="min-w-0">
+            <p className="text-xs text-ink-dim">Сүүлийн дүн</p>
+            <p className="truncate font-semibold text-ink">{last.test.title}</p>
+          </div>
+          <span className="shrink-0 font-display text-xl font-bold tabular-nums text-ink">
+            {last.totalScore}/{last.maxScore}
           </span>
         </div>
-      ))}
-      {hasMore && (
+      )}
+    </section>
+  );
+}
+
+/* ── Төвийн мэдэгдэл — хоосон бол огт харагдахгүй ── */
+function AnnouncementsCard() {
+  const q = useSection<Announcement[]>("/announcements");
+  const [expanded, setExpanded] = useState(false);
+  if (q.status === "error") return <ErrorState message={q.error} onRetry={q.reload} />;
+  const list = q.data ?? [];
+  if (q.status !== "ready" || list.length === 0) return null;
+  const maxVisible = 3;
+  const visible = expanded ? list : list.slice(0, maxVisible);
+
+  return (
+    <section className={CARD} aria-label="Төвийн мэдэгдэл">
+      <CardHead icon={Megaphone} title="Төвийн мэдэгдэл" />
+      <div className="space-y-3">
+        {visible.map((a) => (
+          <div key={a.id} className="rounded-lg border border-line p-4">
+            <div className="flex items-center gap-2">
+              {a.pinned && <Pin className="h-3.5 w-3.5 text-brand-soft" aria-label="Зангиатай" />}
+              <p className="font-semibold">{a.title}</p>
+              <span className="ml-auto shrink-0 text-xs text-ink-dim">{formatMnDate(a.createdAt)}</span>
+            </div>
+            <p className="mt-1.5 whitespace-pre-line text-sm text-ink-dim">{a.body}</p>
+          </div>
+        ))}
+      </div>
+      {list.length > maxVisible && (
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          className="mt-2 w-full rounded-lg border border-line py-2 text-xs font-semibold text-ink-dim transition hover:border-brand hover:text-ink"
+          className="mt-3 min-h-11 w-full rounded-lg border border-line text-sm font-semibold text-ink-dim transition hover:text-ink"
         >
-          {expanded
-            ? `Бага харуулах — ${results.length - maxVisible} нуугдсан`
-            : `Бүгдийг харах — ${results.length}/${results.length}`}
+          {expanded ? "Бага харуулах" : `Бүгдийг харах (${list.length})`}
         </button>
       )}
-    </div>
+    </section>
   );
 }

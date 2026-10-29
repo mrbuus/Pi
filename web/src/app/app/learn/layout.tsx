@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { StudentComingSoon } from "@/components/ui/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Хичээл үзэх — Шинэ Ирээдүйн Эзэд",
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 export default function LearnLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <StudentComingSoon title="Хичээл үзэх">{children}</StudentComingSoon>;
 }
