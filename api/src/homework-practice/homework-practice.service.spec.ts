@@ -75,6 +75,14 @@ function makeDb() {
             (!where.classroomId || e.classroomId === where.classroomId),
         ),
       ),
+      findFirst: jest.fn(async ({ where }: any) =>
+        enrollments.find(
+          (e) =>
+            e.studentId === where.studentId &&
+            e.classroomId === where.classroomId &&
+            !e.leftAt,
+        ) ?? null,
+      ),
     },
     classTestSession: {
       findMany: jest.fn(async ({ where }: any) =>
@@ -87,6 +95,11 @@ function makeDb() {
             (!where.testId?.in || where.testId.in.includes(s.testId)),
         ),
       ),
+      findFirst: jest.fn(async ({ where }: any) =>
+        sessions.find(
+          (s) => s.classroomId === where.classroomId && s.testId === where.testId,
+        ) ?? null,
+      ),
     },
     testAccess: {
       findMany: jest.fn(async ({ where }: any) =>
@@ -96,6 +109,14 @@ function makeDb() {
             (!where.testId?.in || where.testId.in.includes(a.testId)) &&
             (!where.assignedAt?.gt || a.assignedAt > where.assignedAt.gt),
         ),
+      ),
+      findFirst: jest.fn(async ({ where }: any) =>
+        accesses.find(
+          (a) =>
+            a.classroomId === where.classroomId &&
+            a.testId === where.testId &&
+            (!where.assignedAt?.gt || a.assignedAt > where.assignedAt.gt),
+        ) ?? null,
       ),
     },
     test: {
@@ -329,6 +350,12 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     // MAX_DAYS цонхноос гадуурх хичээлийн өдрийн оролдлого — хадгалахгүй
     jest.setSystemTime(new Date('2026-12-15T02:00:00Z'));
     await expect(svc.save('s1', attemptId, { p1: 'A' })).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('эхэлсний дараа B-г ангид товловол «Шалгах» зөв/бурууг ХЭЛЭХГҮЙ (403)', async () => {
+    const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    env.sessions.push({ classroomId: 'c1', date: d('2026-11-20'), testId: 'B1' });
+    await expect(svc.check('s1', attemptId, { p1: 'B' })).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('B хувилбарыг анги дараа нь танхимд бодох бол гэрийн даалгавар болохгүй', async () => {

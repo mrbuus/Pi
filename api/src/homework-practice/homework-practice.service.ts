@@ -262,6 +262,34 @@ export class HomeworkPracticeService {
    * Autosave/шалгах: зөвхөн хөнгөн шалгалт (1 асуулга) — өөрийнх, IN_PROGRESS, хичээлийн
    * өдөр MAX_DAYS цонхонд. Бүтэн эрхийг (анги, B хувилбар) эхлүүлэх/илгээх үед шалгана.
    */
+  private async assertStillHomework(attempt: AttemptRow) {
+    const [enrolled, inClass, futureAccess] = await Promise.all([
+      this.prisma.enrollment.findFirst({
+        where: {
+          studentId: attempt.studentId,
+          classroomId: attempt.classroomId,
+          leftAt: null,
+          classroom: { archived: false },
+        },
+        select: { id: true },
+      }),
+      this.prisma.classTestSession.findFirst({
+        where: { classroomId: attempt.classroomId, testId: attempt.testId },
+        select: { id: true },
+      }),
+      this.prisma.testAccess.findFirst({
+        where: {
+          classroomId: attempt.classroomId,
+          testId: attempt.testId,
+          assignedAt: { gt: new Date() },
+        },
+        select: { testId: true },
+      }),
+    ]);
+    if (!enrolled || inClass || futureAccess)
+      throw new ForbiddenException('Энэ гэрийн даалгавар танд нээгдээгүй байна');
+  }
+
   private async ownOpenAttempt(attemptId: string, studentId: string) {
     const attempt = (await this.prisma.homeworkAttempt.findUnique({
       where: { id: attemptId },
@@ -516,6 +544,9 @@ export class HomeworkPracticeService {
       throw new ConflictException('Шалгах эрх дууссан — одоо илгээнэ үү');
     if (this.timeExpired(attempt))
       throw new ConflictException('Хугацаа дууссан — илгээнэ үү');
+    // «Шалгах» зөв/бурууг хэлдэг тул эрхийг дахин баталгаажуулна (дээд тал 2 удаа —
+    // хямд): анги идэвхтэй хэвээр, тэр тестийг ангид хийх/оноох хуваарь гараагүй.
+    await this.assertStillHomework(attempt);
     const rows = await this.loadProblems(attempt.testId);
     const merged = mergeAnswers(rows, attempt.answers, answers);
     const graded = gradeHomework(rows, merged);
