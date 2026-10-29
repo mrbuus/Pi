@@ -139,3 +139,38 @@ ssh pimath 'cd ~/pimath && git pull && export NODE_OPTIONS=--max-old-space-size=
 SSH «timed out» бол эзний IP солигдсон — EC2 → `pimath-api-sg` → SSH дүрмийн Source = **My IP**.
 
 t4g.small (2 GB) дээр build санах ой хүрэлцэхгүй (heap out of memory) — `NODE_OPTIONS=--max-old-space-size=3072` заавал (2 GB swap ашиглана).
+
+## Гэрийн даалгаврын оргил ачаалал (22:00–23:00) — тохиргооны санал (2026-10-29, хэрэгжүүлээгүй)
+
+Нөхцөл: нэг EC2 t4g.small (2 GB, `pimath-api` + `pimath-web`), RDS t4g.micro, S3 presigned upload. Хэдэн зуун сурагч ≤6 хуудас (≤12 МБ) PDF илгээж, хариугаа автоматаар хадгална.
+
+### Файл илгээх — API санах ой
+
+- `POST /uploads/complete` PDF-ийг **бүтэн татахаа больсон**: эхний 64 КБ (`Range: bytes=0-65535`, нийт хэмжээ Content-Range-аас, тусдаа HEAD-гүй) + сүүлийн 64 КБ (`bytes=-65536`) уншиж хуудсыг тоолно. pdf-lib (`photosToPdf`) хуудасны модыг файлын эхэнд бичдэг. Олдохгүй бөгөөд ≤2 МБ бол бүтэн уншина; түүнээс том бол хөтчийн `pages` (1–50) ашиглана
+- Нэг complete ≈ 128 КБ (өмнө нь бүтэн файл: 12 МБ PDF = 12 МБ Buffer + 24 МБ хүртэл latin1 string ≈ 36 МБ). 50 зэрэг complete: ~1.8 GB → ~6 МБ
+- Зориулалтын хязгаар: `homework` 12 МБ, бусад 25 МБ (presign, complete, хуучин multipart гурвуулаа)
+- `@Throttle` 30/мин хэрэглэгч бүрт: `POST /uploads`, `/uploads/presign`, `/uploads/complete`
+- Хуучин `POST /uploads` (S3-гүй/presign бүтэлгүйтсэн үед): multer дискэнд урсгалаар бичнэ, S3 руу `createReadStream`-ээр илгээнэ (санах ойд бүтэн ачаалахгүй)
+
+**nginx (`/etc/nginx/sites-available/pimath-web`, `api.pimath.mn`):** `client_max_body_size 26m;` байх ёстой — анхдагч 1m бол хуучин multipart зам 413 өгнө. presigned PUT S3 руу шууд очдог тул nginx-ээр дамжихгүй. Шалгах: `sudo nginx -T | grep client_max_body_size`. Мөн `client_body_buffer_size 128k;` (том body-г nginx дискэнд буферлэнэ).
+
+### pm2 — санах ойн хязгаар (`infra/aws/ecosystem.config.cjs`)
+
+| Процесс | `NODE_OPTIONS` | `max_memory_restart` |
+|---|---|---|
+| `pimath-api` | `--max-old-space-size=512` | 750M |
+| `pimath-web` | `--max-old-space-size=448` | 650M |
+
+Нийт ≈ 1.4 GB, OS/nginx-д ~500 МБ үлдэнэ. Нэг процесс хэтэрвэл pm2 зөвхөн түүнийг дахин асаана (OOM-killer хоёуланг нь унагахаас сэргийлнэ). Хэрэглэх заавар файлын толгойд. Build үед `NODE_OPTIONS=--max-old-space-size=3072` хэвээр.
+
+### Prisma pool ↔ RDS t4g.micro
+
+- RDS `max_connections` = `LEAST(DBInstanceClassMemory/9531392, 5000)` → 1 GiB класст ≈ **80** (бодит утга: `SHOW max_connections;`)
+- API `DB_POOL_MAX` анхдагч **15** (`api/src/prisma/prisma.service.ts`) — нэг Node процесс, автосэйв ~10–20 мс → ~6 зэрэг холболт хангалттай, ×2.5 нөөц. 15 нь 80-аас хол доогуур: `prisma migrate deploy`, psql, мониторинг, нөөц `pg_dump`-д зай үлдэнэ
+- pm2 cluster/2+ EC2 болговол: `instances × DB_POOL_MAX ≤ ~60` (жишээ нь 2 × 15, 4 × 12)
+- Вэб (Next) өгөгдлийн санд шууд холбогддоггүй — зөвхөн API
+- micro класст RAM бага тул pool-ыг томсгох нь хурд нэмэхгүй (CPU credit, shared_buffers хязгаартай). Удаашрал = индекс/query; `DB_STATEMENT_TIMEOUT_MS=10000` гацсан query-г таслана
+
+### Ачааллын шалгалт
+
+`k6/homework-peak.js` — 500 VU, 10 минут (`k6/README.md`). Зөвхөн локал QA хуулбар сан дээр; прод руу хэзээ ч.

@@ -8,10 +8,10 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createHmac, timingSafeEqual } from 'crypto';
-import { existsSync, readFileSync, unlinkSync } from 'fs';
+import { closeSync, createReadStream, existsSync, openSync, readFileSync, readSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import type { PrismaService } from '../prisma/prisma.service';
-import { pdfPageCount } from '../lesson-day/pdf-pages';
+import { PDF_PROBE_BYTES, pdfPageCount, pdfPageCountFromRanges } from '../lesson-day/pdf-pages';
 import { UPLOAD_DIR } from './upload-dir';
 
 /**
@@ -39,6 +39,19 @@ export const UPLOAD_URL_TTL = 600;
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 export const s3Enabled = (): boolean => BUCKET.length > 0;
+
+/**
+ * Зориулалт бүрийн дээд хэмжээ. Гэрийн даалгавар = утсан дээр угсарсан ≤6 хуудас PDF
+ * (`photosToPdf` 12 МБ-аас том бол өөрөө татгалздаг) — серверт ч мөн адил хатуу хязгаар.
+ */
+export const HOMEWORK_MAX_BYTES = 12 * 1024 * 1024;
+export function maxBytesFor(purpose: FilePurpose): number {
+  return purpose === 'homework' ? HOMEWORK_MAX_BYTES : MAX_UPLOAD_BYTES;
+}
+/** Хөтчийн мэдэгдсэн хуудасны тоог хүлээж авах дээд хэмжээ (задалж чадаагүй үед) */
+export const CLIENT_PAGES_MAX = 50;
+/** Хэсэгчилсэн уншилтаар олдоогүй PDF-ийг бүтэн уншиж болох дээд хэмжээ */
+export const PDF_FULL_READ_MAX = 2 * 1024 * 1024;
 
 let client: S3Client | null = null;
 function s3(): S3Client {
@@ -77,12 +90,38 @@ export function expiresAtFor(purpose: FilePurpose, now = new Date()): Date | nul
 
 /* ─────────── Бичих / унших / устгах ─────────── */
 
-export interface SaveInput {
+export type SaveInput = {
   key: string;
   mime: string;
-  bytes: Buffer;
   ownerId: string | null;
   purpose?: FilePurpose;
+} & (
+  | { bytes: Buffer; path?: never; size?: never }
+  /** Дискэн дээрх файл (multer) — S3 руу урсгалаар илгээнэ, санах ойд бүтэн ачаалахгүй */
+  | { path: string; size: number; bytes?: never }
+);
+
+/** Дискэн дээрх файлын [offset, offset+len) хэсгийг уншина */
+function readRange(path: string, offset: number, len: number): Buffer {
+  const out = Buffer.alloc(len);
+  const fd = openSync(path, 'r');
+  try {
+    return out.subarray(0, readSync(fd, out, 0, len, offset));
+  } finally {
+    closeSync(fd);
+  }
+}
+
+/** Дискэн дээрх PDF-ийн хуудас: эхний/сүүлийн 64 КБ, олдохгүй бөгөөд жижиг бол бүтэн */
+export function pdfPageCountOnDisk(path: string, size: number): number | null {
+  if (size <= 2 * PDF_PROBE_BYTES) return pdfPageCount(readFileSync(path));
+  const head = readRange(path, 0, PDF_PROBE_BYTES);
+  const tail = readRange(path, size - PDF_PROBE_BYTES, PDF_PROBE_BYTES);
+  const pages = pdfPageCountFromRanges(head, tail);
+  if (pages !== null) return pages;
+  // Ховор бүтэцтэй PDF: бүтнээр нь уншина (хэмжээ нь maxBytesFor-оор хязгаарлагдсан).
+  // Клиентийн хэлсэн тоонд хэзээ ч итгэхгүй — хуудасны хязгаарыг тойрох боломжтой болно.
+  return pdfPageCount(readFileSync(path));
 }
 
 /**
@@ -91,15 +130,23 @@ export interface SaveInput {
  * Мөр үүсгэж чадаагүй бол S3-ийн объектыг буцааж устгана (өнчин файл үлдээхгүй).
  */
 export async function saveStoredFile(prisma: PrismaService, input: SaveInput) {
-  const pages = input.mime === 'application/pdf' ? pdfPageCount(input.bytes) : null;
+  const isPdf = input.mime === 'application/pdf';
+  const size = input.bytes ? input.bytes.length : input.size;
+  const pages = !isPdf
+    ? null
+    : input.bytes
+      ? pdfPageCount(input.bytes)
+      : pdfPageCountOnDisk(input.path, input.size);
   const expiresAt = expiresAtFor(input.purpose ?? 'general');
   if (!s3Enabled()) {
+    // S3-гүй (локал/хуучин) горим — байт өгөгдлийн санд орох тул санах ойд уншина
+    const bytes = input.bytes ?? readFileSync(input.path);
     return prisma.storedFile.create({
       data: {
         key: input.key,
         mime: input.mime,
-        size: input.bytes.length,
-        bytes: new Uint8Array(input.bytes),
+        size,
+        bytes: new Uint8Array(bytes),
         ownerId: input.ownerId,
         storage: 'db',
         pages,
@@ -111,7 +158,8 @@ export async function saveStoredFile(prisma: PrismaService, input: SaveInput) {
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: finalKey(input.key),
-      Body: input.bytes,
+      Body: input.bytes ?? createReadStream(input.path),
+      ContentLength: size,
       ContentType: input.mime,
     }),
   );
@@ -120,7 +168,7 @@ export async function saveStoredFile(prisma: PrismaService, input: SaveInput) {
       data: {
         key: input.key,
         mime: input.mime,
-        size: input.bytes.length,
+        size,
         bytes: null,
         ownerId: input.ownerId,
         storage: 's3',
@@ -238,11 +286,39 @@ export async function presignUpload(key: string, mime: string): Promise<string> 
   );
 }
 
+export interface FinishOptions {
+  /** Зориулалтын дээд хэмжээ (`maxBytesFor`) */
+  maxBytes?: number;
+  /** Хөтчийн мэдэгдсэн хуудасны тоо — серверт задалж чадаагүй үед л, [1, CLIENT_PAGES_MAX] */
+  clientPages?: unknown;
+}
+
+/** «bytes 0-15/12345» → 12345 */
+function totalFromRange(contentRange: string | undefined): number | null {
+  const m = /\/(\d+)\s*$/.exec(contentRange ?? '');
+  return m ? Number(m[1]) : null;
+}
+
+function errorName(error: unknown): string {
+  const e = error as { name?: string; Code?: string; $metadata?: { httpStatusCode?: number } };
+  if (e?.$metadata?.httpStatusCode === 416) return 'InvalidRange';
+  return e?.name ?? e?.Code ?? '';
+}
+
+export function clampClientPages(value: unknown): number | null {
+  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+  if (!Number.isInteger(n) || n < 1) return null;
+  return Math.min(n, CLIENT_PAGES_MAX);
+}
+
 /**
- * Хөтчийн илгээсэн файлыг шалгаад баталгаажуулна:
- *   1) хэмжээ (HEAD) — 25 MB-аас их бол устгана
- *   2) эхний 16 байт — `check` (magic bytes) татгалзвал устгана
- *   3) PDF бол хуудсыг тоолно (нэг бүсэд S3→EC2 траффик үнэгүй)
+ * Хөтчийн илгээсэн файлыг шалгаад баталгаажуулна. Файлыг санах ойд БҮТЭН уншихгүй
+ * (2 GB EC2 дээр 22:00–23:00-ийн гэрийн даалгаврын оргилд зэрэг олон 12 МБ PDF):
+ *   1) эхний хэсгийг ranged GET-ээр (зураг — 16 байт, PDF — 64 КБ) — Content-Range-аас
+ *      нийт хэмжээ, эхний 16 байтаас magic bytes. Тусдаа HEAD хийхгүй
+ *   2) хэмжээ > зориулалтын хязгаар (гэрийн даалгавар 12 МБ, бусад 25 МБ) бол устгана
+ *   3) PDF бол хуудас: эхний + сүүлийн 64 КБ (`bytes=-65536`) → олдохгүй бөгөөд ≤2 МБ бол
+ *      бүтэн → тэгсэн ч үгүй бол хөтчийн мэдэгдсэн тоо (хязгаартай) → null
  *   4) incoming/ → f/ руу хуулна
  * Амжилтгүй бол объектыг устгаад алдаа шиднэ.
  */
@@ -250,32 +326,62 @@ export async function finishDirectUpload(
   key: string,
   mime: string,
   check: (head: Buffer) => boolean,
+  opts: FinishOptions = {},
 ): Promise<{ size: number; pages: number | null }> {
+  const maxBytes = opts.maxBytes ?? MAX_UPLOAD_BYTES;
   const src = incomingKey(key);
   const drop = () =>
     s3()
       .send(new DeleteObjectCommand({ Bucket: BUCKET, Key: src }))
       .catch(() => undefined);
+  const isPdf = mime === 'application/pdf';
+  const probe = isPdf ? PDF_PROBE_BYTES : 16;
+  let head: Buffer;
   let size: number;
   try {
-    size = (await s3().send(new HeadObjectCommand({ Bucket: BUCKET, Key: src }))).ContentLength ?? 0;
-  } catch {
+    const got = await s3().send(
+      new GetObjectCommand({ Bucket: BUCKET, Key: src, Range: `bytes=0-${probe - 1}` }),
+    );
+    head = await bodyBytes(got.Body);
+    size = totalFromRange(got.ContentRange) ?? (head.length < probe ? head.length : -1);
+    if (size < 0) {
+      // Content-Range буцаагаагүй S3-тай нийцтэй үйлчилгээ — хэмжээг HEAD-ээр
+      const meta = await s3().send(new HeadObjectCommand({ Bucket: BUCKET, Key: src }));
+      size = meta.ContentLength ?? 0;
+    }
+  } catch (error) {
+    // 0 байт объект → 416 InvalidRange
+    if (errorName(error) === 'InvalidRange') {
+      await drop();
+      throw new Error('too-large');
+    }
     throw new Error('not-found');
   }
-  if (size <= 0 || size > MAX_UPLOAD_BYTES) {
+  if (size <= 0 || size > maxBytes) {
     await drop();
     throw new Error('too-large');
   }
-  const isPdf = mime === 'application/pdf';
-  const got = await s3().send(
-    new GetObjectCommand({ Bucket: BUCKET, Key: src, ...(isPdf ? {} : { Range: 'bytes=0-15' }) }),
-  );
-  const bytes = await bodyBytes(got.Body);
-  if (!check(bytes.subarray(0, 16))) {
+  if (!check(head.subarray(0, 16))) {
     await drop();
     throw new Error('bad-signature');
   }
-  const pages = isPdf ? pdfPageCount(bytes) : null;
+  let pages: number | null = null;
+  if (isPdf) {
+    if (size <= head.length) {
+      pages = pdfPageCount(head);
+    } else {
+      const tailGot = await s3().send(
+        new GetObjectCommand({ Bucket: BUCKET, Key: src, Range: `bytes=-${PDF_PROBE_BYTES}` }),
+      );
+      pages = pdfPageCountFromRanges(head, await bodyBytes(tailGot.Body));
+      if (pages === null) {
+        // Ховор бүтэцтэй PDF: бүтнээр нь уншина (size нь дээр maxBytes-оор хязгаарлагдсан).
+        // Клиентийн илгээсэн хуудасны тоонд ИТГЭХГҮЙ — хязгаар шалгахад ашиглагддаг.
+        const full = await s3().send(new GetObjectCommand({ Bucket: BUCKET, Key: src }));
+        pages = pdfPageCount(await bodyBytes(full.Body));
+      }
+    }
+  }
   await s3().send(
     new CopyObjectCommand({
       Bucket: BUCKET,

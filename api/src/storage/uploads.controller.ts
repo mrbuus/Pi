@@ -15,6 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import {
   accessSync,
@@ -23,7 +24,6 @@ import {
   existsSync,
   mkdirSync,
   openSync,
-  readFileSync,
   readSync,
   unlinkSync,
   writeFileSync,
@@ -34,6 +34,7 @@ import type { RequestWithUser } from '../auth/request.interface';
 import {
   MAX_UPLOAD_BYTES,
   UPLOAD_URL_TTL,
+  maxBytesFor,
   downloadUrl,
   finishDirectUpload,
   parsePurpose,
@@ -48,7 +49,16 @@ import { UPLOAD_DIR } from './upload-dir';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilesAuthGuard } from './files-auth.guard';
-import { pdfPageCount } from '../lesson-day/pdf-pages';
+
+/** «Файл 12 МБ-аас их байна» — зориулалтын хязгаараар */
+const tooLargeMessage = (maxBytes: number) =>
+  `Файл ${Math.round(maxBytes / (1024 * 1024))} МБ-аас их байна`;
+
+/**
+ * Хэрэглэгч бүрт (getTracker = JWT sub) минутад 30 — нэг гэрийн даалгавар = 1 presign +
+ * 1 complete, дахин илгээх, онолын зураг зэрэгт хангалттай; давталттай скриптээс хамгаална.
+ */
+const UPLOAD_THROTTLE = { default: { limit: 30, ttl: 60_000 } };
 
 // Локал диск хадгалалт — production дээр S3 руу шилжихэд энэ controller-ийн
 // дотоод хэрэгжилт л солигдоно, key-н гэрээ хэвээрээ (SPEC §3)
@@ -206,7 +216,11 @@ function assertMagicBytesMatch(filePath: string): void {
 export class UploadsController {
   constructor(private prisma: PrismaService) {}
 
+  // Хуучин multipart зам (S3-гүй үед эсвэл presign бүтэлгүйтвэл). Multer дискэнд урсгалаар
+  // бичнэ (санах ойд биш), 25 МБ хатуу хязгаар; S3 руу мөн урсгалаар илгээнэ.
+  // nginx `client_max_body_size` ≥ 26m байх ёстой (infra/aws/README.md).
   @UseGuards(JwtAuthGuard)
+  @Throttle(UPLOAD_THROTTLE)
   @Post('uploads')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -218,7 +232,7 @@ export class UploadsController {
             `${randomUUID()}${extname(file.originalname).toLowerCase()}`,
           ),
       }),
-      limits: { fileSize: 25 * 1024 * 1024 },
+      limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 5 },
       fileFilter: (_req, file, cb) => {
         if (isAllowedUpload(file)) cb(null, true);
         else
@@ -251,13 +265,23 @@ export class UploadsController {
     const purpose = parsePurpose(
       (req as { body?: { purpose?: unknown } }).body?.purpose,
     );
-    // S3 идэвхтэй: S3-д бичээд дискний түр файлыг устгана (EC2-ийн диск дүүрэхгүй).
+    if (file.size > maxBytesFor(purpose)) {
+      try {
+        unlinkSync(path);
+      } catch {
+        // аль хэдийн устсан
+      }
+      throw new BadRequestException(tooLargeMessage(maxBytesFor(purpose)));
+    }
+    // S3 идэвхтэй: дискнээс S3 руу урсгалаар (санах ойд бүтэн ачаалахгүй), дараа нь
+    // дискний түр файлыг устгана (EC2-ийн диск дүүрэхгүй).
     if (s3Enabled()) {
       try {
         await saveStoredFile(this.prisma, {
           key: file.filename,
           mime: file.mimetype,
-          bytes: readFileSync(path),
+          path,
+          size: file.size,
           ownerId: req.user.userId,
           purpose,
         });
@@ -278,21 +302,13 @@ export class UploadsController {
     // (диск = кэш, ӨС = эх сурвалж). ӨС-д бичиж чадаагүй бол upload-ийг
     // амжилттай гэж хэлэхгүй — дараагийн deploy-оор чимээгүй алга болохоос сэргийлнэ.
     try {
-      const bytes = readFileSync(path);
-      await this.prisma.storedFile.create({
-        data: {
-          key: file.filename,
-          mime: file.mimetype,
-          size: file.size,
-          bytes,
-          ownerId: req.user.userId,
-          ...(file.mimetype === 'application/pdf'
-            ? { pages: pdfPageCount(bytes) }
-            : {}),
-          ...(purpose === 'homework'
-            ? { expiresAt: expiresAtFor(purpose) }
-            : {}),
-        },
+      await saveStoredFile(this.prisma, {
+        key: file.filename,
+        mime: file.mimetype,
+        path,
+        size: file.size,
+        ownerId: req.user.userId,
+        purpose,
       });
     } catch {
       unlinkSync(path);
@@ -308,6 +324,7 @@ export class UploadsController {
    * S3 тохируулаагүй бол `{ direct: false }` — хөтөч хуучин POST /uploads руу шилжинэ.
    */
   @UseGuards(JwtAuthGuard)
+  @Throttle(UPLOAD_THROTTLE)
   @Post('uploads/presign')
   async presign(
     @Body() body: { name?: unknown; mime?: unknown; size?: unknown; purpose?: unknown },
@@ -321,14 +338,15 @@ export class UploadsController {
       throw new BadRequestException(
         'Зөвхөн зураг (jpg, png, gif, webp, heic) эсвэл PDF оруулна',
       );
-    if (size <= 0 || size > MAX_UPLOAD_BYTES)
-      throw new BadRequestException('Файл 25 МБ-аас их байна');
+    const purpose = parsePurpose(body?.purpose);
+    if (size <= 0 || size > maxBytesFor(purpose))
+      throw new BadRequestException(tooLargeMessage(maxBytesFor(purpose)));
     const key = `${randomUUID()}${extname(name).toLowerCase()}`;
     const ticket = signTicket({
       key,
       ownerId: req.user.userId,
       mime,
-      purpose: parsePurpose(body?.purpose),
+      purpose,
       exp: Date.now() + UPLOAD_URL_TTL * 1000,
     });
     try {
@@ -343,22 +361,30 @@ export class UploadsController {
 
   /** Шууд илгээсэн файлыг шалгаж (хэмжээ, magic bytes, PDF хуудас) бүртгэнэ. */
   @UseGuards(JwtAuthGuard)
+  @Throttle(UPLOAD_THROTTLE)
   @Post('uploads/complete')
-  async complete(@Body() body: { ticket?: unknown }, @Req() req: RequestWithUser) {
+  async complete(
+    @Body() body: { ticket?: unknown; pages?: unknown },
+    @Req() req: RequestWithUser,
+  ) {
     if (!s3Enabled()) throw new BadRequestException('Шууд илгээлт идэвхгүй');
     const t = typeof body?.ticket === 'string' ? verifyTicket(body.ticket) : null;
     if (!t || t.ownerId !== req.user.userId)
       throw new BadRequestException('Илгээлтийн хугацаа дууссан. Дахин илгээнэ үү.');
     let size: number, pages: number | null;
     try {
-      ({ size, pages } = await finishDirectUpload(t.key, t.mime, matchesKnownFileSignature));
+      ({ size, pages } = await finishDirectUpload(t.key, t.mime, matchesKnownFileSignature, {
+        maxBytes: maxBytesFor(t.purpose),
+        clientPages: body?.pages,
+      }));
     } catch (error) {
       const code = error instanceof Error ? error.message : '';
       if (code === 'bad-signature')
         throw new BadRequestException(
           'Файлын агуулга нь зөвшөөрөгдсөн төрөлтэй (зураг/PDF) тохирохгүй байна',
         );
-      if (code === 'too-large') throw new BadRequestException('Файл 25 МБ-аас их байна');
+      if (code === 'too-large')
+        throw new BadRequestException(tooLargeMessage(maxBytesFor(t.purpose)));
       if (code === 'not-found') throw new BadRequestException('Файл ирсэнгүй. Дахин илгээнэ үү.');
       throw new ServiceUnavailableException('Файл хадгалахад алдаа гарлаа. Дахин оролдоно уу.');
     }

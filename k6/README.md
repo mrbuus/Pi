@@ -19,3 +19,23 @@
 `node --test k6/contract.test.cjs` нь HTTP дуудлагагүйгээр target guard, 20 өөр бодлого, fail-fast, 2000 VU тохиргоо, threshold-ийг шалгана. `node --test api/test/load/acceptance.test.cjs` нь Node runner-ийн зорилтот босгыг шалгана. Энэ нь бодит 2000-VU хэмжилт биш.
 
 Эх сурвалж: [k6 per-VU iterations](https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/per-vu-iterations/), [thresholds](https://grafana.com/docs/k6/latest/using-k6/thresholds/).
+
+## Гэрийн даалгаврын оргил — `k6/homework-peak.js` (2026-10-29)
+
+500 VU, нэг аялал/VU, ~10 минут: 0–60с тарсан ирэлт → `GET /homework/my` → `POST /homework/attempts` → `PATCH` autosave 20с ±5с тутам (анхдагч 24 удаа) → 2 удаа `/check` → `/submit` → `POST /uploads/presign` (homework PDF, 1.8 МБ). `complete` + `POST /homework/photos` нь зөвхөн `LOAD_S3_LOCAL=1` ба presigned URL loopback (minio) үед — бодит S3 руу PUT хийхгүй.
+
+Босго: нийт p95 <500ms, autosave/presign p95 <300ms, start/check/submit p95 <800ms, алдаа <0.5%.
+
+**Ажиллуулах — зөвхөн локал QA ХУУЛБАР сан дээр** (жинхэнэ `pimn_v2` 127.0.0.1:5544 дээр БИШ, прод БИШ):
+
+1. `createdb pimn_qa_load` → `pg_restore` хуучин dump-аас эсвэл хоосон схем + `prisma migrate deploy` (`DATABASE_URL` нь ЗӨВХӨН энэ хуулбар руу)
+2. Хуулбар дээр синтетик анги `ltclass_*`, тест `lttest_*` (B хувилбар), 500 сурагч үүсгэж, тухайн өдөр ангид нээгдсэн байдлаар тохируулна; сурагч бүрийн JWT-г хуулбарын тусдаа `JWT_SECRET`-ээр
+3. `k6/homework-fixture.json` (commit хийхгүй, mode 0600): `[{ "token", "testId": "lttest_…", "date": "YYYY-MM-DD", "classroomId": "ltclass_…" }, …]` — VU бүрт ялгаатай token
+4. API-г хуулбарын `DATABASE_URL`/`JWT_SECRET`-ээр асаагаад repo root-оос:
+   ```bash
+   LOAD_VUS=1 LOAD_THINK_SEC=1 LOAD_FIXTURE=$PWD/k6/homework-fixture.json k6 run k6/homework-peak.js   # smoke
+   LOAD_FIXTURE=$PWD/k6/homework-fixture.json k6 run --summary-export k6/results-homework.json k6/homework-peak.js
+   ```
+5. Дууссаны дараа хуулбар санг `dropdb pimn_qa_load`
+
+Оффлайн шалгалт: `node --test k6/homework-peak.test.cjs` (HTTP дуудлагагүй — аялал, guard, S3 хамгаалалт).
