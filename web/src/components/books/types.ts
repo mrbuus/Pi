@@ -3,6 +3,8 @@ export interface BookSummary {
   id: string;
   code: string;
   title: string;
+  /** Сурагчид харагдах нэр («Е-1»), байвал BOOK_META/title-ээс давуу */
+  displayName?: string | null;
   subject: string;
   topics: number;
   chapters: number;

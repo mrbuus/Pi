@@ -12,7 +12,7 @@ import { api, homeForRole } from "@/lib/api";
 import { toneFor } from "@/lib/topicSymbols";
 import MockExamBanner from "@/components/mock-exams/MockExamBanner";
 import Book3D from "./Book3D";
-import { BOOK_META } from "./bookMeta";
+import { BOOK_META, bookName as displayBookName } from "./bookMeta";
 import TryTest from "./TryTest";
 import UnlockPanel from "./UnlockPanel";
 import type { BookDetail, BookSummary, ChapterItem, TestItem, TopicItem } from "./types";
@@ -92,7 +92,7 @@ export default function BooksWorkspace({ initialCode }: { initialCode?: string }
   const pickTopic = (t: string) => { setTopic(t); setOpenTest(null); setPane("tests"); };
   const current = books?.find((b) => b.code === code) ?? null;
   const meta = code ? BOOK_META[code] : undefined;
-  const bookName = meta?.name ?? current?.title ?? "";
+  const bookName = current ? displayBookName(current.code, current.title, current.displayName) : (meta?.name ?? "");
   const topicObj = detail?.topics.find((t) => t.name === topic) ?? null;
 
   // Дараагийн үнэгүй тест (сэдвийн дарааллаар)
@@ -136,7 +136,7 @@ export default function BooksWorkspace({ initialCode }: { initialCode?: string }
                   <li key={b.code} className="shrink-0 lg:shrink">
                     <button onClick={() => pickBook(b.code)} className="surface-interactive flex min-h-12 w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3 py-2 text-left">
                       <span className="h-8 w-6 shrink-0 rounded-[3px] shadow-sm" style={{ background: `linear-gradient(170deg, ${m?.color ?? "#1E3263"}, ${m?.color2 ?? "#122142"})` }} aria-hidden />
-                      <span className="min-w-0"><span className="block truncate text-sm font-semibold">{m?.name ?? b.title}</span><span className="block text-xs text-ink-dim">{b.solvableTests ? `${b.tests} тест, ${b.freeTests} үнэгүй` : "Удахгүй"}</span></span>
+                      <span className="min-w-0"><span className="block truncate text-sm font-semibold">{displayBookName(b.code, b.title, b.displayName)}</span><span className="block text-xs text-ink-dim">{b.solvableTests ? `${b.tests} тест, ${b.freeTests} үнэгүй` : "Удахгүй"}</span></span>
                       <ChevronRight className="ml-auto hidden h-4 w-4 text-ink-dim lg:block" aria-hidden />
                     </button>
                   </li>

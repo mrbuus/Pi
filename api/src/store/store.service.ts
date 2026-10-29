@@ -14,6 +14,7 @@ import {
 } from '../passes/pass-snapshot';
 import { sumMoney } from '../finance/month-bounds';
 import { TEACHER_ROLES } from '../common/access';
+import { bookDisplayName } from '../common/book-display';
 
 export interface ProductItemWithRefData {
   id: string;
@@ -59,7 +60,7 @@ export class StoreService {
       }),
       this.prisma.book.findMany({
         where: { id: { in: bookIds }, deletedAt: null },
-        select: { id: true, title: true, code: true },
+        select: { id: true, title: true, code: true, displayName: true },
       }),
     ]);
 
@@ -91,10 +92,12 @@ export class StoreService {
           };
         } else if (item.kind === ProductKind.BOOK) {
           const book = bookMap.get(item.refId);
+          // Худалдан авагчид харагдах нэр (код «100V3» гэх мэт дотоод нэр гаргахгүй)
+          const name = book ? bookDisplayName(book) : 'Ном';
           return {
             ...base,
-            title: book?.title || 'Ном',
-            description: `${book?.code || ''} — ${book?.title || 'Ном'}`.trim(),
+            title: name,
+            description: name,
           };
         }
 
@@ -375,7 +378,7 @@ export class StoreService {
       }),
       this.prisma.book.findMany({
         where: { id: { in: bookIds } },
-        select: { id: true, title: true, code: true },
+        select: { id: true, title: true, code: true, displayName: true },
       }),
     ]);
 
@@ -393,7 +396,10 @@ export class StoreService {
       title:
         p.productItem.kind === ProductKind.TEST
           ? testMap.get(p.productItem.refId)?.title || 'Шалгалт'
-          : bookMap.get(p.productItem.refId)?.title || 'Ном',
+          : (() => {
+                const b = bookMap.get(p.productItem.refId);
+                return b ? bookDisplayName(b) : 'Ном';
+              })(),
     }));
   }
 

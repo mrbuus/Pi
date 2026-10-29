@@ -11,13 +11,18 @@ import {
   canAccessChapter,
   canAccessProblem,
   canAccessVideoChapter,
+  activeClassSubjects,
   chapterAccessGrant,
   catalogSubjectsFor,
+  classroomRelease,
+  collectContentScope,
   chapterSubjectWhere,
   internalTeachingRole,
   assertInternalTeachingStaff,
   TEACHER_ROLES,
 } from '../common/access';
+import { BOOK_DISPLAY_ORDER, studentBookWhere } from '../common/book-display';
+import { chapterListAccess } from './chapter-visibility';
 import { SubjectChapterDto } from './dto/subject-chapter.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -151,10 +156,14 @@ export class ContentService {
   ) {
     const visible = await catalogSubjectsFor(this.prisma, viewer);
     if (subject && visible && !visible.includes(subject)) return [];
+    // visible === null ⇔ төвийн ажилтан (catalogSubjectsFor) — бүх номыг харна;
+    // бусдад studentHidden ном нуугдана (эзэн 2026-10-29, шийдвэр 6)
+    const isStaff = visible === null;
     const books = await this.prisma.book.findMany({
       where: {
         archived: false,
         deletedAt: null,
+        ...studentBookWhere(isStaff),
         ...(subject
           ? { subject }
           : visible
@@ -170,7 +179,7 @@ export class ContentService {
           },
         },
       },
-      orderBy: { code: 'asc' },
+      orderBy: BOOK_DISPLAY_ORDER,
     });
 
     return books.map(({ chapters, ...book }) => ({
@@ -204,6 +213,17 @@ export class ContentService {
     if (dto.sourceLabel !== undefined) data.sourceLabel = dto.sourceLabel;
     if (dto.subject !== undefined) data.subject = dto.subject;
     if (dto.archived !== undefined) data.archived = dto.archived;
+    // Сурагчид харагдах нэр/дараалал/нуух — зөвхөн ADMIN
+    const displayTouched =
+      dto.displayName !== undefined ||
+      dto.displayOrder !== undefined ||
+      dto.studentHidden !== undefined;
+    if (displayTouched && actorRole !== Role.ADMIN)
+      throw new ForbiddenException('Сурагчид харагдах нэрийг админ л засна');
+    if (dto.displayName !== undefined)
+      data.displayName = dto.displayName?.trim() || null;
+    if (dto.displayOrder !== undefined) data.displayOrder = dto.displayOrder;
+    if (dto.studentHidden !== undefined) data.studentHidden = dto.studentHidden;
 
     const updated = await this.prisma.book.update({ where: { id }, data });
     await this.recordAudit(
@@ -384,7 +404,8 @@ export class ContentService {
   ) {
     const visible = await catalogSubjectsFor(this.prisma, viewer);
     if (subject && visible && !visible.includes(subject)) return [];
-    return this.prisma.chapter.findMany({
+    const isStaff = visible === null;
+    const rows = await this.prisma.chapter.findMany({
       where: {
         ...(grade ? { grade } : {}),
         ...(bookId ? { bookId } : {}),
@@ -392,13 +413,24 @@ export class ContentService {
         // үр дүнд ороохгүй — доорх book:{subject} nested filter үүнийг хийнэ
         ...(subject ? { book: { subject } } : {}),
         deletedAt: null,
-        // Архивласан/устгасан номын бүлгүүдийг харуулахгүй
-        OR: [{ bookId: null }, { book: { archived: false, deletedAt: null } }],
+        // Архивласан/устгасан (ажилтан бишид — сурагчаас нуусан) номын бүлгүүдийг харуулахгүй
+        OR: [
+          { bookId: null },
+          {
+            book: {
+              archived: false,
+              deletedAt: null,
+              ...studentBookWhere(isStaff),
+            },
+          },
+        ],
         // Хичээлээр хаалттай контент (нэвтрээгүй → MATH, сурагч → ангийн хичээл)
         ...(visible ? { AND: [chapterSubjectWhere(visible)] } : {}),
       },
       include: {
-        book: { select: { code: true, title: true } },
+        book: {
+          select: { code: true, title: true, displayName: true, subject: true },
+        },
         _count: {
           select: {
             problems: true,
@@ -409,6 +441,69 @@ export class ContentService {
       },
       orderBy: [{ grade: 'asc' }, { order: 'asc' }],
     });
+    if (isStaff || !viewer?.userId || viewer.role !== Role.STUDENT) return rows;
+    return this.filterChaptersForClassroomStudent(rows, viewer.userId);
+  }
+
+  /**
+   * Танхимын сурагч: зөвхөн эрхтэй (full) эсвэл ангид нээгдсэн тесттэй
+   * (released) бүлгүүд. Бүх тооцоо НЭГ удаа (бүлэг бүрд DB дуудахгүй).
+   * Ангигүй сурагч (худалдан авагч) өөрчлөгдөхгүй — түгжээтэй бүлгээ харж
+   * эрх авах замаа хадгална.
+   */
+  private async filterChaptersForClassroomStudent<
+    T extends {
+      id: string;
+      bookId: string | null;
+      freePreview: boolean;
+      book: { subject: Subject } | null;
+      _count: { problems: number };
+    },
+  >(rows: T[], userId: string) {
+    const release = await classroomRelease(this.prisma, userId, Role.STUDENT);
+    if (!release) return rows;
+    const [scope, ownSubjects] = await Promise.all([
+      collectContentScope(this.prisma, userId),
+      activeClassSubjects(this.prisma, userId, Role.STUDENT),
+    ]);
+    const ctx = { scope, ownSubjects, release };
+    const graded = rows.map((ch) => ({
+      ch,
+      access: chapterListAccess(
+        {
+          id: ch.id,
+          bookId: ch.bookId,
+          freePreview: ch.freePreview,
+          subject: ch.book?.subject ?? Subject.MATH,
+        },
+        ctx,
+      ),
+    }));
+    const releasedIds = graded
+      .filter((g) => g.access === 'released')
+      .map((g) => g.ch.id);
+    const counts = new Map<string, number>();
+    if (releasedIds.length && release.problemIds.size) {
+      const grouped = await this.prisma.problem.groupBy({
+        by: ['chapterId'],
+        where: {
+          id: { in: [...release.problemIds] },
+          chapterId: { in: releasedIds },
+          deletedAt: null,
+        },
+        _count: { _all: true },
+      });
+      for (const g of grouped) counts.set(g.chapterId, g._count._all);
+    }
+    return graded
+      .filter((g) => g.access !== 'none')
+      .map(({ ch, access }) => ({
+        ...ch,
+        access,
+        accessibleProblems:
+          access === 'full' ? ch._count.problems : (counts.get(ch.id) ?? 0),
+      }))
+      .filter((ch) => ch.accessibleProblems > 0 || ch.access === 'full');
   }
 
   /**
@@ -1116,7 +1211,7 @@ export class ContentService {
         title: true,
         order: true,
         freePreview: true,
-        book: { select: { code: true, title: true } },
+        book: { select: { code: true, title: true, displayName: true } },
         _count: {
           select: { problems: true, theories: { where: { archivedAt: null } } },
         },
@@ -1141,7 +1236,7 @@ export class ContentService {
         grade: true,
         freePreview: true,
         deletedAt: true,
-        book: { select: { code: true, title: true } },
+        book: { select: { code: true, title: true, displayName: true } },
         _count: { select: { problems: true } },
       },
     });

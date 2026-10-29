@@ -25,7 +25,7 @@ import { ErrorState, EmptyState } from "@/components/ui/StateBlock";
 interface ChapterOpt {
   id: string;
   title: string;
-  book?: { code: string; title: string } | null;
+  book?: { code: string; title: string; displayName?: string | null } | null;
   _count?: { videos: number };
 }
 interface Video {
@@ -38,7 +38,7 @@ interface Video {
 interface Chapter {
   id: string;
   title: string;
-  book?: { code: string; title: string } | null;
+  book?: { code: string; title: string; displayName?: string | null } | null;
 }
 
 export default function VideosPage() {
@@ -187,7 +187,9 @@ export default function VideosPage() {
             {grouped.map(([bookCode, chapters]) => (
               <div key={bookCode}>
                 <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-ink-dim">
-                  {bookCode}
+                  {chapters[0]?.book
+                    ? chapters[0].book.displayName || chapters[0].book.title
+                    : bookCode}
                 </p>
                 <div className="space-y-1">
                   {chapters.map((c) => (

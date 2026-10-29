@@ -227,7 +227,7 @@ export default function LessonChapterPage() {
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-xs font-bold uppercase tracking-wide text-brand-soft">
-            {chapter.book?.code ?? "Хичээл"}
+            {chapter.book ? (chapter.book.displayName || chapter.book.title) : "Хичээл"}
           </p>
           {chapter.freePreview && (
             <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold text-success">

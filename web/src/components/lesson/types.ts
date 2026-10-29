@@ -18,6 +18,8 @@ export interface LessonBookRef {
   id?: string;
   code: string;
   title: string;
+  /** Сурагчид харагдах нэр («Е-1») — байвал title-ийн оронд */
+  displayName?: string | null;
 }
 
 export interface LessonChapterProgressSummary {

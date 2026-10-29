@@ -30,7 +30,7 @@ export class TryService {
       where: { id: testId, deletedAt: null, isDraft: false },
       select: {
         id: true, title: true, variantLabel: true, timeLimitMin: true, type: true,
-        chapter: { select: { id: true, title: true, bookId: true, book: { select: { code: true, title: true, archived: true, deletedAt: true } } } },
+        chapter: { select: { id: true, title: true, bookId: true, book: { select: { code: true, title: true, displayName: true, archived: true, deletedAt: true } } } },
         problems: { orderBy: { order: 'asc' }, select: { points: true, problem: { select: PROBLEM_SELECT } } },
       },
     });
@@ -55,7 +55,7 @@ export class TryService {
     });
     return {
       id: t.id, title: t.title, variantLabel: t.variantLabel, timeLimitMin: t.timeLimitMin, type: t.type,
-      book: { code: t.chapter!.book!.code, title: t.chapter!.book!.title },
+      book: { code: t.chapter!.book!.code, title: t.chapter!.book!.title, displayName: t.chapter!.book!.displayName },
       chapter: { id: t.chapter!.id, title: t.chapter!.title },
       problemCount: problems.length, problems,
     };

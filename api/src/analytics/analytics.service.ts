@@ -248,7 +248,7 @@ export class AnalyticsService {
       SELECT
         ch.id AS "chapterId",
         ch.title AS "chapterTitle",
-        b.title AS "bookTitle",
+        COALESCE(NULLIF(b."displayName", ''), b.title) AS "bookTitle",
         COUNT(*)::int AS "totalAttempts",
         COUNT(*) FILTER (WHERE ${Prisma.raw(SUCCESS_SQL_FRAGMENT)})::int AS "correctAttempts"
       FROM "Attempt" a

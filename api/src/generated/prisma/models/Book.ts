@@ -20,8 +20,18 @@ export type BookModel = runtime.Types.Result.DefaultSelection<Prisma.$BookPayloa
 
 export type AggregateBook = {
   _count: BookCountAggregateOutputType | null
+  _avg: BookAvgAggregateOutputType | null
+  _sum: BookSumAggregateOutputType | null
   _min: BookMinAggregateOutputType | null
   _max: BookMaxAggregateOutputType | null
+}
+
+export type BookAvgAggregateOutputType = {
+  displayOrder: number | null
+}
+
+export type BookSumAggregateOutputType = {
+  displayOrder: number | null
 }
 
 export type BookMinAggregateOutputType = {
@@ -33,6 +43,9 @@ export type BookMinAggregateOutputType = {
   archived: boolean | null
   subject: $Enums.Subject | null
   deletedAt: Date | null
+  displayName: string | null
+  displayOrder: number | null
+  studentHidden: boolean | null
 }
 
 export type BookMaxAggregateOutputType = {
@@ -44,6 +57,9 @@ export type BookMaxAggregateOutputType = {
   archived: boolean | null
   subject: $Enums.Subject | null
   deletedAt: Date | null
+  displayName: string | null
+  displayOrder: number | null
+  studentHidden: boolean | null
 }
 
 export type BookCountAggregateOutputType = {
@@ -55,9 +71,20 @@ export type BookCountAggregateOutputType = {
   archived: number
   subject: number
   deletedAt: number
+  displayName: number
+  displayOrder: number
+  studentHidden: number
   _all: number
 }
 
+
+export type BookAvgAggregateInputType = {
+  displayOrder?: true
+}
+
+export type BookSumAggregateInputType = {
+  displayOrder?: true
+}
 
 export type BookMinAggregateInputType = {
   id?: true
@@ -68,6 +95,9 @@ export type BookMinAggregateInputType = {
   archived?: true
   subject?: true
   deletedAt?: true
+  displayName?: true
+  displayOrder?: true
+  studentHidden?: true
 }
 
 export type BookMaxAggregateInputType = {
@@ -79,6 +109,9 @@ export type BookMaxAggregateInputType = {
   archived?: true
   subject?: true
   deletedAt?: true
+  displayName?: true
+  displayOrder?: true
+  studentHidden?: true
 }
 
 export type BookCountAggregateInputType = {
@@ -90,6 +123,9 @@ export type BookCountAggregateInputType = {
   archived?: true
   subject?: true
   deletedAt?: true
+  displayName?: true
+  displayOrder?: true
+  studentHidden?: true
   _all?: true
 }
 
@@ -131,6 +167,18 @@ export type BookAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: BookAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: BookSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: BookMinAggregateInputType
@@ -161,6 +209,8 @@ export type BookGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: BookCountAggregateInputType | true
+  _avg?: BookAvgAggregateInputType
+  _sum?: BookSumAggregateInputType
   _min?: BookMinAggregateInputType
   _max?: BookMaxAggregateInputType
 }
@@ -174,7 +224,12 @@ export type BookGroupByOutputType = {
   archived: boolean
   subject: $Enums.Subject
   deletedAt: Date | null
+  displayName: string | null
+  displayOrder: number | null
+  studentHidden: boolean
   _count: BookCountAggregateOutputType | null
+  _avg: BookAvgAggregateOutputType | null
+  _sum: BookSumAggregateOutputType | null
   _min: BookMinAggregateOutputType | null
   _max: BookMaxAggregateOutputType | null
 }
@@ -206,6 +261,9 @@ export type BookWhereInput = {
   archived?: Prisma.BoolFilter<"Book"> | boolean
   subject?: Prisma.EnumSubjectFilter<"Book"> | $Enums.Subject
   deletedAt?: Prisma.DateTimeNullableFilter<"Book"> | Date | string | null
+  displayName?: Prisma.StringNullableFilter<"Book"> | string | null
+  displayOrder?: Prisma.IntNullableFilter<"Book"> | number | null
+  studentHidden?: Prisma.BoolFilter<"Book"> | boolean
   chapters?: Prisma.ChapterListRelationFilter
 }
 
@@ -218,6 +276,9 @@ export type BookOrderByWithRelationInput = {
   archived?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
+  displayOrder?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentHidden?: Prisma.SortOrder
   chapters?: Prisma.ChapterOrderByRelationAggregateInput
 }
 
@@ -233,6 +294,9 @@ export type BookWhereUniqueInput = Prisma.AtLeast<{
   archived?: Prisma.BoolFilter<"Book"> | boolean
   subject?: Prisma.EnumSubjectFilter<"Book"> | $Enums.Subject
   deletedAt?: Prisma.DateTimeNullableFilter<"Book"> | Date | string | null
+  displayName?: Prisma.StringNullableFilter<"Book"> | string | null
+  displayOrder?: Prisma.IntNullableFilter<"Book"> | number | null
+  studentHidden?: Prisma.BoolFilter<"Book"> | boolean
   chapters?: Prisma.ChapterListRelationFilter
 }, "id" | "code">
 
@@ -245,9 +309,14 @@ export type BookOrderByWithAggregationInput = {
   archived?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
+  displayOrder?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentHidden?: Prisma.SortOrder
   _count?: Prisma.BookCountOrderByAggregateInput
+  _avg?: Prisma.BookAvgOrderByAggregateInput
   _max?: Prisma.BookMaxOrderByAggregateInput
   _min?: Prisma.BookMinOrderByAggregateInput
+  _sum?: Prisma.BookSumOrderByAggregateInput
 }
 
 export type BookScalarWhereWithAggregatesInput = {
@@ -262,6 +331,9 @@ export type BookScalarWhereWithAggregatesInput = {
   archived?: Prisma.BoolWithAggregatesFilter<"Book"> | boolean
   subject?: Prisma.EnumSubjectWithAggregatesFilter<"Book"> | $Enums.Subject
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Book"> | Date | string | null
+  displayName?: Prisma.StringNullableWithAggregatesFilter<"Book"> | string | null
+  displayOrder?: Prisma.IntNullableWithAggregatesFilter<"Book"> | number | null
+  studentHidden?: Prisma.BoolWithAggregatesFilter<"Book"> | boolean
 }
 
 export type BookCreateInput = {
@@ -273,6 +345,9 @@ export type BookCreateInput = {
   archived?: boolean
   subject?: $Enums.Subject
   deletedAt?: Date | string | null
+  displayName?: string | null
+  displayOrder?: number | null
+  studentHidden?: boolean
   chapters?: Prisma.ChapterCreateNestedManyWithoutBookInput
 }
 
@@ -285,6 +360,9 @@ export type BookUncheckedCreateInput = {
   archived?: boolean
   subject?: $Enums.Subject
   deletedAt?: Date | string | null
+  displayName?: string | null
+  displayOrder?: number | null
+  studentHidden?: boolean
   chapters?: Prisma.ChapterUncheckedCreateNestedManyWithoutBookInput
 }
 
@@ -297,6 +375,9 @@ export type BookUpdateInput = {
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subject?: Prisma.EnumSubjectFieldUpdateOperationsInput | $Enums.Subject
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  studentHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chapters?: Prisma.ChapterUpdateManyWithoutBookNestedInput
 }
 
@@ -309,6 +390,9 @@ export type BookUncheckedUpdateInput = {
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subject?: Prisma.EnumSubjectFieldUpdateOperationsInput | $Enums.Subject
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  studentHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chapters?: Prisma.ChapterUncheckedUpdateManyWithoutBookNestedInput
 }
 
@@ -321,6 +405,9 @@ export type BookCreateManyInput = {
   archived?: boolean
   subject?: $Enums.Subject
   deletedAt?: Date | string | null
+  displayName?: string | null
+  displayOrder?: number | null
+  studentHidden?: boolean
 }
 
 export type BookUpdateManyMutationInput = {
@@ -332,6 +419,9 @@ export type BookUpdateManyMutationInput = {
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subject?: Prisma.EnumSubjectFieldUpdateOperationsInput | $Enums.Subject
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  studentHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type BookUncheckedUpdateManyInput = {
@@ -343,6 +433,9 @@ export type BookUncheckedUpdateManyInput = {
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subject?: Prisma.EnumSubjectFieldUpdateOperationsInput | $Enums.Subject
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  studentHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type BookCountOrderByAggregateInput = {
@@ -354,6 +447,13 @@ export type BookCountOrderByAggregateInput = {
   archived?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
+  displayOrder?: Prisma.SortOrder
+  studentHidden?: Prisma.SortOrder
+}
+
+export type BookAvgOrderByAggregateInput = {
+  displayOrder?: Prisma.SortOrder
 }
 
 export type BookMaxOrderByAggregateInput = {
@@ -365,6 +465,9 @@ export type BookMaxOrderByAggregateInput = {
   archived?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
+  displayOrder?: Prisma.SortOrder
+  studentHidden?: Prisma.SortOrder
 }
 
 export type BookMinOrderByAggregateInput = {
@@ -376,6 +479,13 @@ export type BookMinOrderByAggregateInput = {
   archived?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
+  displayOrder?: Prisma.SortOrder
+  studentHidden?: Prisma.SortOrder
+}
+
+export type BookSumOrderByAggregateInput = {
+  displayOrder?: Prisma.SortOrder
 }
 
 export type BookNullableScalarRelationFilter = {
@@ -412,6 +522,9 @@ export type BookCreateWithoutChaptersInput = {
   archived?: boolean
   subject?: $Enums.Subject
   deletedAt?: Date | string | null
+  displayName?: string | null
+  displayOrder?: number | null
+  studentHidden?: boolean
 }
 
 export type BookUncheckedCreateWithoutChaptersInput = {
@@ -423,6 +536,9 @@ export type BookUncheckedCreateWithoutChaptersInput = {
   archived?: boolean
   subject?: $Enums.Subject
   deletedAt?: Date | string | null
+  displayName?: string | null
+  displayOrder?: number | null
+  studentHidden?: boolean
 }
 
 export type BookCreateOrConnectWithoutChaptersInput = {
@@ -450,6 +566,9 @@ export type BookUpdateWithoutChaptersInput = {
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subject?: Prisma.EnumSubjectFieldUpdateOperationsInput | $Enums.Subject
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  studentHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type BookUncheckedUpdateWithoutChaptersInput = {
@@ -461,6 +580,9 @@ export type BookUncheckedUpdateWithoutChaptersInput = {
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subject?: Prisma.EnumSubjectFieldUpdateOperationsInput | $Enums.Subject
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  studentHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -503,6 +625,9 @@ export type BookSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   archived?: boolean
   subject?: boolean
   deletedAt?: boolean
+  displayName?: boolean
+  displayOrder?: boolean
+  studentHidden?: boolean
   chapters?: boolean | Prisma.Book$chaptersArgs<ExtArgs>
   _count?: boolean | Prisma.BookCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["book"]>
@@ -516,6 +641,9 @@ export type BookSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   archived?: boolean
   subject?: boolean
   deletedAt?: boolean
+  displayName?: boolean
+  displayOrder?: boolean
+  studentHidden?: boolean
 }, ExtArgs["result"]["book"]>
 
 export type BookSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -527,6 +655,9 @@ export type BookSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   archived?: boolean
   subject?: boolean
   deletedAt?: boolean
+  displayName?: boolean
+  displayOrder?: boolean
+  studentHidden?: boolean
 }, ExtArgs["result"]["book"]>
 
 export type BookSelectScalar = {
@@ -538,9 +669,12 @@ export type BookSelectScalar = {
   archived?: boolean
   subject?: boolean
   deletedAt?: boolean
+  displayName?: boolean
+  displayOrder?: boolean
+  studentHidden?: boolean
 }
 
-export type BookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "title" | "coverKey" | "sourceLabel" | "archived" | "subject" | "deletedAt", ExtArgs["result"]["book"]>
+export type BookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "title" | "coverKey" | "sourceLabel" | "archived" | "subject" | "deletedAt" | "displayName" | "displayOrder" | "studentHidden", ExtArgs["result"]["book"]>
 export type BookInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapters?: boolean | Prisma.Book$chaptersArgs<ExtArgs>
   _count?: boolean | Prisma.BookCountOutputTypeDefaultArgs<ExtArgs>
@@ -562,6 +696,9 @@ export type $BookPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     archived: boolean
     subject: $Enums.Subject
     deletedAt: Date | null
+    displayName: string | null
+    displayOrder: number | null
+    studentHidden: boolean
   }, ExtArgs["result"]["book"]>
   composites: {}
 }
@@ -994,6 +1131,9 @@ export interface BookFieldRefs {
   readonly archived: Prisma.FieldRef<"Book", 'Boolean'>
   readonly subject: Prisma.FieldRef<"Book", 'Subject'>
   readonly deletedAt: Prisma.FieldRef<"Book", 'DateTime'>
+  readonly displayName: Prisma.FieldRef<"Book", 'String'>
+  readonly displayOrder: Prisma.FieldRef<"Book", 'Int'>
+  readonly studentHidden: Prisma.FieldRef<"Book", 'Boolean'>
 }
     
 

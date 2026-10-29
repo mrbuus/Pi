@@ -24,8 +24,12 @@ interface Chapter {
   order: number;
   grade?: number;
   freePreview: boolean;
-  book?: { code: string; title: string };
+  book?: { code: string; title: string; displayName?: string | null };
   _count: { problems: number; theories: number; tests: number };
+  /** Зөвхөн танхимын сурагчид: full = бүх бодлого, released = ангид нээгдсэн тестийнх */
+  access?: "full" | "released";
+  /** Танхимын сурагчид харагдах бодлогын тоо (API тооцно) */
+  accessibleProblems?: number;
 }
 interface ChoiceOption {
   label: string;
@@ -66,6 +70,10 @@ interface Book {
   id: string;
   code: string;
   title: string;
+  /** Сурагчид харагдах нэр («Е-1»), API-аас; байхгүй бол title */
+  displayName?: string | null;
+  /** API-ийн дараалал (null = үндсэн жагсаалтад ороогүй) */
+  displayOrder?: number | null;
   sourceLabel?: string | null;
   problemCount?: number;
   testCount?: number;
@@ -120,17 +128,19 @@ function cleanBookCode(value: string) {
 const ICON_BTN =
   "inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-dim transition hover:bg-ink/5 hover:text-ink focus-visible:outline-2 focus-visible:outline-brand";
 
-// Үндсэн жагсаалтад харагдах ном (эзний хүсэлт 2026-10-18) — энэ дарааллаар.
-// Бусад ном «Бусад ном» товчоор нээгдэнэ.
-const FEATURED_BOOK_CODES = ["100V3", "200V3", "HG1", "1000"];
-
-// Ижил нэртэй хоёр ном (100x100 V2 ба V3) ялгагдахаар номын товчны шошго.
-function bookLabel(book: Book, all: Book[]) {
+// Номын товчны шошго (эзэн 2026-10-29, шийдвэр 6): сурагчид displayName («Е-1»)
+// эсвэл title — «100x100», «V2», «V3» хэзээ ч харагдахгүй. Ажилтанд дотоод нэр
+// хаалтанд («Е-1 (100x100)»); ижил нэртэй ном (V2 давхардал) кодоор ялгагдана.
+function bookLabel(book: Book, all: Book[], staff: boolean) {
+  const shown = book.displayName?.trim() || book.title;
+  if (!staff) return shown;
+  if (shown !== book.title) return `${shown} (${book.title})`;
   const twin = all.some((b) => b.id !== book.id && b.title === book.title);
-  if (!twin) return book.title;
-  const version = /V\d+/i.exec(book.sourceLabel ?? book.code)?.[0]?.toUpperCase();
-  return version ? `${book.title} ${version}` : `${book.title} (${book.code})`;
+  return twin ? `${book.title} (${book.code})` : book.title;
 }
+
+/** Сурагчид харагдах бодлогын тоо (танхимын сурагчид зөвхөн нээгдсэнийх) */
+const visibleProblems = (ch: Chapter) => ch.accessibleProblems ?? ch._count.problems;
 
 function groupChapters(chapters: Chapter[]): TopicGroup[] {
   const groups = new Map<string, Omit<TopicGroup, "tone" | "testNo">>();
@@ -147,7 +157,7 @@ function groupChapters(chapters: Chapter[]): TopicGroup[] {
         free: 0,
       } satisfies Omit<TopicGroup, "tone" | "testNo">);
     current.chapters.push(chapter);
-    current.problems += chapter._count.problems;
+    current.problems += visibleProblems(chapter);
     current.theories += chapter._count.theories;
     current.tests += chapter._count.tests;
     if (chapter.freePreview) current.free += 1;
@@ -202,6 +212,7 @@ export default function LibraryPage() {
   const [booksLoaded, setBooksLoaded] = useState(false);
   const [bookId, setBookId] = useState<string>("");
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [chaptersLoaded, setChaptersLoaded] = useState(false);
   const [activeTopic, setActiveTopic] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [showOtherBooks, setShowOtherBooks] = useState(false);
@@ -270,12 +281,13 @@ export default function LibraryPage() {
             ? withProblems.find(
                 (book) =>
                   cleanBookCode(book.code) === requestedKey ||
-                  cleanBookCode(book.title) === requestedKey,
+                  cleanBookCode(book.title) === requestedKey ||
+                  (!!book.displayName && cleanBookCode(book.displayName) === requestedKey),
               )
             : null;
-          // Анхдагч: хамгийн сүүлийн хувилбар (100x100 V3) — эзний хүсэлт 2026-10-08
-          const latest = withProblems.find((b) => /V3$/i.test(b.sourceLabel ?? ""));
-          setBookId((id) => id || (requestedBook ?? latest ?? withProblems[0]).id);
+          // Анхдагч: API-ийн дарааллын эхний ном (displayOrder — Е-1)
+          const first = withProblems.find((b) => b.displayOrder != null) ?? withProblems[0];
+          setBookId((id) => id || (requestedBook ?? first).id);
         }
       })
       .catch((error) => {
@@ -290,8 +302,9 @@ export default function LibraryPage() {
 
   useEffect(() => {
     if (!bookId) return;
+    setChaptersLoaded(false);
     api<Chapter[]>(`/chapters?bookId=${bookId}`)
-      .then(setChapters)
+      .then((list) => setChapters(list ?? []))
       .catch((error) => {
         setChapters([]);
         setCatalogError(
@@ -299,7 +312,8 @@ export default function LibraryPage() {
             ? error.message
             : "Бүлэг сэдэв ачаалахад алдаа гарлаа",
         );
-      });
+      })
+      .finally(() => setChaptersLoaded(true));
   }, [bookId]);
 
   async function loadProblemsFor(ch: Chapter) {
@@ -384,7 +398,13 @@ export default function LibraryPage() {
               {(loadingProblems || loadedFor !== ch.id) && !locked && !problemsError && (
                 <SkeletonRows rows={4} />
               )}
-              {locked && (
+              {locked && ch.access && (
+                // Танхимын сурагч: эрх худалдаж авах биш — ангид үзсэний дараа нээгдэнэ
+                <p className="text-center text-sm text-ink-dim">
+                  Энэ сэдэв ангидаа үзсэний дараа нээгдэнэ
+                </p>
+              )}
+              {locked && !ch.access && (
                 <div className="text-center">
                   <p className="text-sm text-ink-dim">
                     Энэ бүлгийг үзэх эрх хэрэгтэй байна.
@@ -447,12 +467,11 @@ export default function LibraryPage() {
         )}
       </div>
 
-      {/* Номын таб: онцлох 4 ном, бусад нь «Бусад ном» товчоор */}
+      {/* Номын таб: API-ийн дарааллаар. Ажилтанд дараалалгүй (сурагчаас нуусан г.м.)
+          ном «Бусад ном» товчоор; сурагчид API зөвхөн харагдах номыг өгнө */}
       {(() => {
-        const featured = FEATURED_BOOK_CODES.map((code) => books.find((b) => b.code === code)).filter(
-          (b): b is Book => !!b,
-        );
-        const others = books.filter((b) => !FEATURED_BOOK_CODES.includes(b.code));
+        const featured = canEdit ? books.filter((b) => b.displayOrder != null) : books;
+        const others = canEdit ? books.filter((b) => b.displayOrder == null) : [];
         // Онцлох ном байхгүй хичээлд (ж: Нийгмийн ухаан) бүгдийг шууд харуулна;
         // сонгосон ном «бусад»-д байвал жагсаалт нээлттэй үлдэнэ
         const othersOpen = featured.length === 0 || showOtherBooks || others.some((b) => b.id === bookId);
@@ -475,7 +494,7 @@ export default function LibraryPage() {
                     : "border-line text-ink-dim hover:border-brand-bright/40"
                 }`}
               >
-                {bookLabel(b, books)}
+                {bookLabel(b, books, canEdit)}
                 <span className="ml-1.5 font-normal text-ink-dim">{b.testCount ?? 0} тест</span>
               </button>
             ))}
@@ -515,7 +534,7 @@ export default function LibraryPage() {
       {currentBook && (
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 className="text-xl font-extrabold">
-            <MetaTitle>{bookLabel(currentBook, books)}</MetaTitle>
+            <MetaTitle>{bookLabel(currentBook, books, canEdit)}</MetaTitle>
           </h2>
           <Meta
             className="text-sm text-ink-dim"
@@ -527,11 +546,18 @@ export default function LibraryPage() {
         </div>
       )}
 
-      {chapters.length === 0 && !catalogError && bookId && (
-        <p className="text-sm text-ink-dim">
-          Энэ номд бүлэг сэдэв хараахан нэмэгдээгүй байна.
-        </p>
-      )}
+      {chaptersLoaded && chapters.length === 0 && !catalogError && bookId &&
+        (canEdit ? (
+          <p className="text-sm text-ink-dim">
+            Энэ номд бүлэг сэдэв хараахан нэмэгдээгүй байна.
+          </p>
+        ) : (
+          // Танхимын сурагч: API зөвхөн ангид нээгдсэн сэдвийг өгнө
+          <EmptyState
+            title="Ангидаа үзсэн сэдвүүд энд харагдана"
+            hint="Ангидаа тест хийсний маргааш бодлого, хариу нь энд нээгдэнэ"
+          />
+        ))}
 
       {activeGroup && (
         <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
@@ -690,7 +716,7 @@ export default function LibraryPage() {
                             )}
                           </div>
                           <p className="mt-0.5 text-sm text-ink-dim">
-                            {ch._count.problems} бодлого
+                            {visibleProblems(ch)} бодлого
                             {ch._count.theories > 0 &&
                               ` — ${ch._count.theories} онол`}
                           </p>

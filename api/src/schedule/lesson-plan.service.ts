@@ -24,6 +24,7 @@ import {
   excludedNumbersOf,
   shortTestName,
 } from '../class-sessions/roadmap.logic';
+import { bookDisplayName } from '../common/book-display';
 
 type Actor = { userId: string; role: Role };
 const STAFF: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
@@ -38,6 +39,8 @@ export interface TestMeta {
   variant: string | null;
   bookCode: string | null;
   bookTitle: string | null;
+  /** Сурагчид харагдах нэр (displayName ?? title) */
+  bookDisplayName: string | null;
   chapterId: string | null;
   chapterOrder: number | null;
   chapterTitle: string | null;
@@ -95,7 +98,7 @@ export class LessonPlanService {
           select: {
             order: true,
             title: true,
-            book: { select: { code: true, title: true } },
+            book: { select: { code: true, title: true, displayName: true } },
           },
         },
         problems: { orderBy: { order: 'asc' }, select: { problemId: true } },
@@ -111,6 +114,7 @@ export class LessonPlanService {
           variant: t.variantLabel,
           bookCode: t.chapter?.book?.code ?? null,
           bookTitle: t.chapter?.book?.title ?? null,
+          bookDisplayName: t.chapter?.book ? bookDisplayName(t.chapter.book) : null,
           chapterId: t.chapterId,
           chapterOrder: t.chapter?.order ?? null,
           chapterTitle: t.chapter?.title ?? null,
@@ -584,6 +588,7 @@ export class LessonPlanService {
             short: t.short,
             variant: t.variant,
             bookTitle: t.bookTitle,
+            bookDisplayName: t.bookDisplayName,
             chapterTitle: t.chapterTitle,
             problemIds: t.problemIds,
           },
