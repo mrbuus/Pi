@@ -97,6 +97,10 @@ function makeDb() {
             (!where.gradingMode || t.gradingMode === where.gradingMode),
         ),
       ),
+      findUnique: jest.fn(async ({ where }: any) => {
+        const t = tests.find((x) => x.id === where.id);
+        return t ? { timeLimitMin: (t as any).timeLimitMin ?? null } : null;
+      }),
     },
     testProblem: {
       findMany: jest.fn(async ({ where }: any) => problems[where.testId] ?? []),
@@ -336,6 +340,17 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     await svc.submit('s1', attemptId, { p1: 'B' });
     const list = await svc.my('s1');
     expect(list.days[0].items[0].late).toBe(true);
+  });
+
+  it('хугацааны хязгаар серверт: 30 мин + 60с-ийн дараа хадгалах/шалгах 409, илгээхэд шинэ хариуг авахгүй', async () => {
+    jest.setSystemTime(new Date('2026-10-28T10:00:00Z'));
+    const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    await svc.save('s1', attemptId, { p1: 'B' });
+    jest.setSystemTime(new Date('2026-10-28T10:31:30Z')); // 31.5 мин — зай өнгөрсөн
+    await expect(svc.save('s1', attemptId, { p2: 'C' })).rejects.toBeInstanceOf(ConflictException);
+    await expect(svc.check('s1', attemptId, { p2: 'C' })).rejects.toBeInstanceOf(ConflictException);
+    const res = await svc.submit('s1', attemptId, { p2: 'C' });
+    expect(res.score).toEqual({ correct: 1, total: 2 }); // p2-ийн хожуу хариу тооцогдоогүй
   });
 
   it('зураг: өөрийн PDF, шинээр илгээвэл хуучныг зөөлөн устгана; бусдын/зураг файл татгалзана', async () => {

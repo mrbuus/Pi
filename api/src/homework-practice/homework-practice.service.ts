@@ -11,6 +11,7 @@ import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   EXCLUDED_TYPES,
+  TIME_GRACE_SEC,
   MAX_CHECKS,
   MAX_DAYS,
   buildSlots,
@@ -417,10 +418,23 @@ export class HomeworkPracticeService {
 
   /* ───────── PATCH /homework/attempts/:id ───────── */
 
+  /** Тестийн хугацааны хязгаар (байвал) + зай өнгөрсөн эсэх — серверт хэрэгжүүлнэ */
+  private async timeExpired(attempt: AttemptRow): Promise<boolean> {
+    const test = await this.prisma.test.findUnique({
+      where: { id: attempt.testId },
+      select: { timeLimitMin: true },
+    });
+    if (!test?.timeLimitMin) return false;
+    const limitMs = (test.timeLimitMin * 60 + TIME_GRACE_SEC) * 1000;
+    return Date.now() > new Date(attempt.startedAt).getTime() + limitMs;
+  }
+
   async save(studentId: string, attemptId: string, answers: unknown) {
     const { attempt } = await this.ownAttempt(attemptId, studentId);
     if (attempt.status === 'SUBMITTED')
       throw new ConflictException('Гэрийн даалгавар илгээгдсэн байна');
+    if (await this.timeExpired(attempt))
+      throw new ConflictException('Хугацаа дууссан — илгээнэ үү');
     const rows = await this.loadProblems(attempt.testId);
     const merged = mergeAnswers(rows, attempt.answers, answers);
     const res = await this.prisma.homeworkAttempt.updateMany({
@@ -439,6 +453,8 @@ export class HomeworkPracticeService {
       throw new ConflictException('Гэрийн даалгавар илгээгдсэн байна');
     if (attempt.checksUsed >= MAX_CHECKS)
       throw new ConflictException('Шалгах эрх дууссан — одоо илгээнэ үү');
+    if (await this.timeExpired(attempt))
+      throw new ConflictException('Хугацаа дууссан — илгээнэ үү');
     const rows = await this.loadProblems(attempt.testId);
     const merged = mergeAnswers(rows, attempt.answers, answers);
     const graded = gradeHomework(rows, merged);
@@ -484,7 +500,11 @@ export class HomeworkPracticeService {
     const { attempt } = await this.ownAttempt(attemptId, studentId);
     if (attempt.status === 'SUBMITTED') return this.submittedView(attempt);
     const rows = await this.loadProblems(attempt.testId);
-    const merged = mergeAnswers(rows, attempt.answers, answers);
+    // Хугацаа дууссаны дараах шинэ хариуг авахгүй — хадгалсан хариугаар дүгнэнэ
+    const late = await this.timeExpired(attempt);
+    const merged = late
+      ? mergeAnswers(rows, attempt.answers, {})
+      : mergeAnswers(rows, attempt.answers, answers);
     const graded = gradeHomework(rows, merged);
     const submittedAt = new Date();
     const done = await this.prisma.$transaction(async (tx) => {

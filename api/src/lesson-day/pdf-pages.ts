@@ -16,9 +16,16 @@ export function pdfPageCount(bytes: Buffer | Uint8Array): number | null {
 const isPdfHeader = (buf: Buffer) => buf.subarray(0, 5).toString('latin1') === '%PDF-';
 
 /** Хэсгийн текст + бүтэн FlateDecode урсгалуудыг задалсан текстүүд */
+// Задлах нийт хэмжээ, урсгалын тоонд дээд хязгаар — олон жижиг «бөмбөг» урсгалаар
+// санах ойг дүүргэхээс хамгаална (хуудасны мод нь хэдхэн КБ).
+const INFLATE_TOTAL_MAX = 24 * 1024 * 1024;
+const INFLATE_STREAMS_MAX = 2000;
+
 function textsOf(buf: Buffer): string[] {
   const texts = [buf.toString('latin1')];
   let from = 0;
+  let inflatedTotal = 0;
+  let streams = 0;
   for (;;) {
     const start = buf.indexOf('stream', from, 'latin1');
     if (start < 0) break;
@@ -34,13 +41,15 @@ function textsOf(buf: Buffer): string[] {
     if (end < 0) break;
     // Зургийн (DCTDecode) урсгалыг задлах гэж оролдохгүй — зөвхөн zlib толгойтой нь
     if (buf[dataStart] === 0x78) {
+      if (++streams > INFLATE_STREAMS_MAX || inflatedTotal > INFLATE_TOTAL_MAX)
+        break;
       try {
         // maxOutputLength — шахалтын «бөмбөг»-өөс хамгаална (хуудасны мод хэдхэн КБ)
-        texts.push(
-          inflateSync(buf.subarray(dataStart, end), { maxOutputLength: 8 * 1024 * 1024 }).toString(
-            'latin1',
-          ),
-        );
+        const out = inflateSync(buf.subarray(dataStart, end), {
+          maxOutputLength: 8 * 1024 * 1024,
+        });
+        inflatedTotal += out.length;
+        texts.push(out.toString('latin1'));
       } catch {
         // гэмтсэн/өөр шүүлтүүр — алгасна
       }

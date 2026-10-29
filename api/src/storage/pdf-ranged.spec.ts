@@ -268,8 +268,13 @@ describe('finishDirectUpload — файлыг бүтэн уншихгүй', () =
       clientPages: 1,
     });
     expect(out.pages).toBe(40);
+    // Бүтэн уншилт ч шалгасан хэмжээгээр Range-тэй (TOCTOU-аас хамгаална)
     expect(
-      calls.some((c) => c.name === 'GetObjectCommand' && !c.input.Range),
+      calls.some(
+        (c) =>
+          c.name === 'GetObjectCommand' &&
+          c.input.Range === `bytes=0-${weird.length - 1}`,
+      ),
     ).toBe(true);
   });
 

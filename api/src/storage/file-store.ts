@@ -377,8 +377,17 @@ export async function finishDirectUpload(
       if (pages === null) {
         // Ховор бүтэцтэй PDF: бүтнээр нь уншина (size нь дээр maxBytes-оор хязгаарлагдсан).
         // Клиентийн илгээсэн хуудасны тоонд ИТГЭХГҮЙ — хязгаар шалгахад ашиглагддаг.
-        const full = await s3().send(new GetObjectCommand({ Bucket: BUCKET, Key: src }));
-        pages = pdfPageCount(await bodyBytes(full.Body));
+        // Range-ээр яг шалгасан хэмжээг (≤ maxBytes) л татна — шалгалтын дараа объект
+        // солигдсон ч (TOCTOU) хязгаараас их уншихгүй.
+        const full = await s3().send(
+          new GetObjectCommand({ Bucket: BUCKET, Key: src, Range: `bytes=0-${size - 1}` }),
+        );
+        const bytes = await bodyBytes(full.Body);
+        if (bytes.length > size) {
+          await drop();
+          throw new Error('too-large');
+        }
+        pages = pdfPageCount(bytes);
       }
     }
   }

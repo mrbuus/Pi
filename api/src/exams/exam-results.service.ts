@@ -118,7 +118,7 @@ export class ExamResultsService {
         variantLabel: true,
         groupKey: true,
         chapterId: true,
-        chapter: { select: { bookId: true, book: { select: { code: true } } } },
+        chapter: { select: { bookId: true, book: { select: { code: true, displayName: true } } } },
         _count: { select: { problems: true } },
         access: {
           where: { classroomId: { in: classIds } },

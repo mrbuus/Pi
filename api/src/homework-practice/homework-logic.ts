@@ -22,7 +22,12 @@ export const MAX_CHECKS = 2;
 export const DEFAULT_DAYS = 14;
 export const MAX_DAYS = 31;
 /** Гэрийн даалгаварт хэзээ ч орохгүй төрөл (өөрийн эргэн харалтын дүрэмтэй) */
-export const EXCLUDED_TYPES = ['THOUSAND', 'EESH_MOCK'] as const;
+// Шалгалтын төрлүүд гэрийн даалгавар болохгүй (CHAPTER_EXAM-ийн B хувилбар нь
+// өөр ангийн/дараагийн шалгалтад нөөцлөгдсөн байж болно — аюулгүй байдлын шалгалт 2026-10-29)
+export const EXCLUDED_TYPES = ['THOUSAND', 'EESH_MOCK', 'CHAPTER_EXAM'] as const;
+
+/** Хугацааны хязгаараас хойш зөвшөөрөх сүлжээний зай (секунд) */
+export const TIME_GRACE_SEC = 60;
 
 export type CheckResult = 'CORRECT' | 'WRONG' | 'BLANK';
 

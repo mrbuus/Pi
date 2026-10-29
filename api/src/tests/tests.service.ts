@@ -728,7 +728,7 @@ export class TestsService {
         include: {
           _count: { select: { problems: true, results: true } },
           access: { include: { classroom: { select: { name: true } } } },
-          chapter: { select: { book: { select: { code: true } } } },
+          chapter: { select: { book: { select: { code: true, displayName: true } } } },
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -788,7 +788,7 @@ export class TestsService {
         timeLimitMin: true,
         variantLabel: true,
         groupKey: true, // сэдвээр бүлэглэх UI-д: "Илтгэгч тэгшитгэл 1"
-        chapter: { select: { book: { select: { code: true } } } }, // номын өнгө
+        chapter: { select: { book: { select: { code: true, displayName: true } } } }, // номын өнгө
         createdAt: true,
         _count: { select: { problems: true } },
         results: {
@@ -838,7 +838,7 @@ export class TestsService {
         timeLimitMin: true,
         variantLabel: true,
         groupKey: true,
-        chapter: { select: { book: { select: { code: true } } } },
+        chapter: { select: { book: { select: { code: true, displayName: true } } } },
         createdAt: true,
         access: {
           where: { classroomId: { in: scope.classroomIds } },
