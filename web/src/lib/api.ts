@@ -299,7 +299,11 @@ function guessMime(file: File): string {
  * S3 руу ШУУД илгээх: presign → PUT (сервер байт дамжуулахгүй) → complete.
  * Сервер S3-гүй бол null буцаана — дуудагч хуучин multipart зам руу шилжинэ.
  */
-async function uploadDirect(file: File, purpose: UploadPurpose): Promise<Uploaded | null> {
+async function uploadDirect(
+  file: File,
+  purpose: UploadPurpose,
+  pages?: number,
+): Promise<Uploaded | null> {
   const mime = guessMime(file);
   const plan = await api<{
     direct: boolean;
@@ -320,13 +324,14 @@ async function uploadDirect(file: File, purpose: UploadPurpose): Promise<Uploade
   if (!put.ok) throw new Error("Файл байршуулахад алдаа гарлаа.");
   return api<Uploaded>("/uploads/complete", {
     method: "POST",
-    body: { ticket: plan.ticket },
+    // pages — сервер PDF-ийг задалж чадаагүй үед л ашиглана (хязгаартай)
+    body: pages ? { ticket: plan.ticket, pages } : { ticket: plan.ticket },
   });
 }
 
 export async function uploadFile(
   file: File,
-  opts: { purpose?: UploadPurpose } = {},
+  opts: { purpose?: UploadPurpose; pages?: number } = {},
 ): Promise<Uploaded> {
   // Offline шалга
   if (!isOnline()) {
@@ -339,7 +344,7 @@ export async function uploadFile(
   // 1) S3 руу шууд — серверийн ачаалал хамгийн бага. Серверийн шалгалтын алдаа
   //    (төрөл, хэмжээ) бол шууд хэрэглэгчид; сүлжээ/CORS алдаа бол 2) руу.
   try {
-    const direct = await uploadDirect(file, purpose);
+    const direct = await uploadDirect(file, purpose, opts.pages);
     if (direct) return direct;
   } catch (error) {
     // 404 = хуучин API (presign маршрутгүй) — хуучин зам руу шилжинэ

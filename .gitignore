@@ -29,6 +29,7 @@ api/prisma/reports/payment-import.json
 # Local load-test credentials and reports
 api/test/load/.synthetic-k6/
 k6/fixture.json
+k6/homework-fixture.json
 k6/results*.json
 
 # Isolated v2 runtime, synthetic secrets and browser output
