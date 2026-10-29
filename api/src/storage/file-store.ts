@@ -118,7 +118,9 @@ export function pdfPageCountOnDisk(path: string, size: number): number | null {
   const head = readRange(path, 0, PDF_PROBE_BYTES);
   const tail = readRange(path, size - PDF_PROBE_BYTES, PDF_PROBE_BYTES);
   const pages = pdfPageCountFromRanges(head, tail);
-  if (pages !== null || size > PDF_FULL_READ_MAX) return pages;
+  if (pages !== null) return pages;
+  // Ховор бүтэцтэй PDF: бүтнээр нь уншина (хэмжээ нь maxBytesFor-оор хязгаарлагдсан).
+  // Клиентийн хэлсэн тоонд хэзээ ч итгэхгүй — хуудасны хязгаарыг тойрох боломжтой болно.
   return pdfPageCount(readFileSync(path));
 }
 
@@ -372,12 +374,13 @@ export async function finishDirectUpload(
         new GetObjectCommand({ Bucket: BUCKET, Key: src, Range: `bytes=-${PDF_PROBE_BYTES}` }),
       );
       pages = pdfPageCountFromRanges(head, await bodyBytes(tailGot.Body));
-      if (pages === null && size <= PDF_FULL_READ_MAX) {
+      if (pages === null) {
+        // Ховор бүтэцтэй PDF: бүтнээр нь уншина (size нь дээр maxBytes-оор хязгаарлагдсан).
+        // Клиентийн илгээсэн хуудасны тоонд ИТГЭХГҮЙ — хязгаар шалгахад ашиглагддаг.
         const full = await s3().send(new GetObjectCommand({ Bucket: BUCKET, Key: src }));
         pages = pdfPageCount(await bodyBytes(full.Body));
       }
     }
-    pages ??= clampClientPages(opts.clientPages);
   }
   await s3().send(
     new CopyObjectCommand({

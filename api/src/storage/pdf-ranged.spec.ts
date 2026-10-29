@@ -255,20 +255,21 @@ describe('finishDirectUpload — файлыг бүтэн уншихгүй', () =
     ]);
   });
 
-  it('задлагдахгүй том PDF → хөтчийн тоо (хязгаартай), бүтэн GET хийхгүй', async () => {
+  it('задлагдахгүй том PDF → клиентийн тоонд ИТГЭХГҮЙ, бүтэн уншиж тоолно', async () => {
+    // Хуудасны хязгаар (гэрийн даалгавар 6) клиентийн тоогоор тойрогдохгүй байх
     const weird = Buffer.concat([
       Buffer.from('%PDF-1.7\n'),
+      Buffer.alloc(3 * 1024 * 1024, 0x20),
+      Buffer.from('1 0 obj << /Type /Pages /Kids [] /Count 40 >> endobj\n'),
       Buffer.alloc(3 * 1024 * 1024, 0x20),
     ]);
     const calls = mockS3(weird);
     const out = await finishDirectUpload('k.pdf', 'application/pdf', okSig, {
-      clientPages: 6,
+      clientPages: 1,
     });
-    expect(out.pages).toBe(6);
+    expect(out.pages).toBe(40);
     expect(
-      calls
-        .filter((c) => c.name === 'GetObjectCommand')
-        .every((c) => c.input.Range),
+      calls.some((c) => c.name === 'GetObjectCommand' && !c.input.Range),
     ).toBe(true);
   });
 
