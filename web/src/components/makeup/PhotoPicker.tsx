@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   CircleCheck,
   ChevronRight,
+  Crop,
   ExternalLink,
   FileText,
   ImagePlus,
@@ -14,6 +15,7 @@ import {
   RefreshCw,
   RotateCw,
   Send,
+  Trash2,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -21,9 +23,12 @@ import { Button } from "@/components/ui/kit/button";
 import { fileUrl, uploadFile, type UploadPurpose } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { PDF_MAX_PAGES, photosToPdf, type Rotation } from "@/lib/photosToPdf";
+import CropDialog from "./CropDialog";
 
 interface Picked {
   id: string;
+  /** Анх сонгосон файл — дахин тайрахад эндээс эхэлнэ */
+  original: File;
   file: File;
   url: string;
   rotation: Rotation;
@@ -45,12 +50,17 @@ export default function PhotoPicker({
   fileName = "zurag.pdf",
   highlight = false,
   purpose = "general",
+  maxPages = PDF_MAX_PAGES,
+  crop = false,
+  replaceLabel = "Солих",
+  onDelete,
 }: {
   /** Одоо хавсаргасан түлхүүрүүд (ихэвчлэн ганц PDF) */
   current: string[];
   /** Илгээсэн хуудасны тоо */
   pages: number;
-  onSave: (keys: string[]) => Promise<void>;
+  /** keys + хуудасны тоо (хоёр дахь аргументыг хуучин дуудагчид үл тооно) */
+  onSave: (keys: string[], pages: number) => Promise<void>;
   saveLabel?: string;
   addLabel?: string;
   fileName?: string;
@@ -58,7 +68,16 @@ export default function PhotoPicker({
   highlight?: boolean;
   /** Хадгалах хугацаа: `theory` байнга, `homework` 7 хоног */
   purpose?: UploadPurpose;
+  /** Дээд хуудасны тоо (гэрийн даалгавар 6) */
+  maxPages?: number;
+  /** Зураг сонгосны дараа тайрах алхам (алгасаж болно) */
+  crop?: boolean;
+  /** Илгээсэн мөрийн «Солих» товчны нэр */
+  replaceLabel?: string;
+  /** Өгвөл илгээсэн мөрөнд «Устгах» товч гарна */
+  onDelete?: () => Promise<void>;
 }) {
+  const max = Math.min(maxPages, PDF_MAX_PAGES);
   const [editing, setEditing] = useState(current.length === 0);
   const [picked, setPicked] = useState<Picked[]>([]);
   const [phase, setPhase] = useState<"" | "build" | "upload" | "save">("");
@@ -67,6 +86,9 @@ export default function PhotoPicker({
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const [justSent, setJustSent] = useState(false);
+  const [cropQueue, setCropQueue] = useState<string[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const urls = useRef<string[]>([]);
 
   useEffect(() => {
@@ -80,15 +102,39 @@ export default function PhotoPicker({
     if (!files?.length) return;
     setError("");
     setJustSent(false);
-    const room = PDF_MAX_PAGES - picked.length;
+    const room = max - picked.length;
     const chosen = Array.from(files).slice(0, Math.max(0, room));
-    if (chosen.length < files.length) setError(`${PDF_MAX_PAGES} хүртэл зураг сонгоно`);
+    if (chosen.length < files.length) setError(`${max} хүртэл зураг сонгоно`);
     const next = chosen.map((file, i) => {
       const url = URL.createObjectURL(file);
       urls.current.push(url);
-      return { id: `${Date.now()}-${i}-${file.name}`, file, url, rotation: 0 as Rotation };
+      return { id: `${Date.now()}-${i}-${file.name}`, original: file, file, url, rotation: 0 as Rotation };
     });
     setPicked((prev) => [...prev, ...next]);
+    if (crop) setCropQueue((q) => [...q, ...next.map((n) => n.id)]);
+  }
+
+  function applyCrop(id: string, file: File) {
+    const url = URL.createObjectURL(file);
+    urls.current.push(url);
+    setPicked((prev) => prev.map((p) => (p.id === id ? { ...p, file, url } : p)));
+    setCropQueue((q) => q.filter((x) => x !== id));
+  }
+
+  async function remove() {
+    if (!onDelete) return;
+    setDeleting(true);
+    setError("");
+    try {
+      await onDelete();
+      setConfirmDelete(false);
+      setJustSent(false);
+      setEditing(true);
+    } catch (e) {
+      setError(e instanceof Error && e.message ? e.message : "Устгаж чадсангүй. Дахин оролдоно уу");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   function move(index: number, delta: number) {
@@ -112,14 +158,14 @@ export default function PhotoPicker({
     setProgress(0);
     try {
       setPhase("build");
-      const { file } = await photosToPdf(
+      const { file, pages: count } = await photosToPdf(
         picked.map((p) => ({ file: p.file, rotation: p.rotation })),
-        { fileName, onProgress: (d, t) => setProgress(Math.round((d / t) * 100)) },
+        { fileName, maxPages: max, onProgress: (d, t) => setProgress(Math.round((d / t) * 100)) },
       );
       setPhase("upload");
       const { key } = await uploadFile(file, { purpose });
       setPhase("save");
-      await onSave([key]);
+      await onSave([key], count);
       setPicked([]);
       setEditing(false);
       setJustSent(true);
@@ -131,6 +177,10 @@ export default function PhotoPicker({
   }
 
   const sent = current.length > 0;
+  // Хасагдсан/болисон зургийн id дараалалд үлдэж болно — байгаа эхнийхийг л авна
+  const cropId = cropQueue.find((id) => picked.some((p) => p.id === id));
+  const cropping = cropId ? picked.find((p) => p.id === cropId) : undefined;
+  const cropIndex = cropping ? picked.indexOf(cropping) : 0;
 
   return (
     <div className="space-y-3">
@@ -161,8 +211,26 @@ export default function PhotoPicker({
           {!editing && (
             <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
               <RefreshCw aria-hidden />
-              Солих
+              {replaceLabel}
             </Button>
+          )}
+          {onDelete && !editing && !confirmDelete && (
+            <Button size="sm" variant="ghost" onClick={() => setConfirmDelete(true)} aria-label="Илгээсэн зургийг устгах">
+              <Trash2 aria-hidden />
+              Устгах
+            </Button>
+          )}
+          {onDelete && confirmDelete && (
+            <span className="flex basis-full flex-wrap items-center gap-2 sm:basis-auto">
+              <span className="text-sm text-ink-dim">Устгах уу?</span>
+              <Button size="sm" variant="danger" disabled={deleting} onClick={() => void remove()}>
+                {deleting ? <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden /> : <Trash2 aria-hidden />}
+                Тийм
+              </Button>
+              <Button size="sm" variant="ghost" disabled={deleting} onClick={() => setConfirmDelete(false)}>
+                Үгүй
+              </Button>
+            </span>
           )}
         </div>
       )}
@@ -197,7 +265,7 @@ export default function PhotoPicker({
             </button>
           </div>
           <p className="cyrillic-tight text-sm text-ink-dim">
-            Дэвтрийн хуудас бүрийг гэрэлтэй газар, бүтнээр нь зураарай. {PDF_MAX_PAGES} хүртэл зураг
+            Дэвтрийн хуудас бүрийг гэрэлтэй газар, бүтнээр нь зураарай. {max} хүртэл зураг
           </p>
         </div>
       )}
@@ -227,6 +295,17 @@ export default function PhotoPicker({
                   >
                     <X className="size-4" aria-hidden />
                   </button>
+                  {crop && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setCropQueue((q) => (q.includes(p.id) ? q : [p.id, ...q]))}
+                      aria-label={`${i + 1}-р зургийг тайрах`}
+                      className="absolute bottom-1 right-1 flex size-8 items-center justify-center rounded-full bg-ink/70 text-bg transition hover:bg-ink focus-visible:ring-2 focus-visible:ring-brand-bright"
+                    >
+                      <Crop className="size-4" aria-hidden />
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center justify-between px-0.5">
                   <button type="button" className={iconBtn} disabled={busy || i === 0} onClick={() => move(i, -1)} aria-label={`${i + 1}-р зургийг өмнө нь`}>
@@ -241,7 +320,7 @@ export default function PhotoPicker({
                 </div>
               </li>
             ))}
-            {picked.length < PDF_MAX_PAGES && (
+            {picked.length < max && (
               <li className={picked.length ? "" : "col-span-3 sm:col-span-4"}>
                 <button
                   type="button"
@@ -283,7 +362,7 @@ export default function PhotoPicker({
               </Button>
             )}
             <span className="ml-auto text-xs tabular-nums text-ink-dim">
-              {picked.length}/{PDF_MAX_PAGES}
+              {picked.length}/{max}
             </span>
           </div>
         </>
@@ -316,6 +395,17 @@ export default function PhotoPicker({
           e.target.value = "";
         }}
       />
+
+      {cropping && (
+        <CropDialog
+          key={cropping.id}
+          file={cropping.original}
+          index={cropIndex}
+          total={picked.length}
+          onDone={(file) => applyCrop(cropping.id, file)}
+          onSkip={() => setCropQueue((q) => q.filter((x) => x !== cropping.id))}
+        />
+      )}
 
       {error && (
         <p role="alert" className="flex items-center gap-1.5 text-sm text-error">

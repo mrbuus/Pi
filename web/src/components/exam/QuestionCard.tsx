@@ -19,7 +19,8 @@ export interface QuestionCardProblem {
   format: string;
   statementText?: string | null;
   imageKey?: string | null;
-  points: number;
+  /** Өгөхгүй бол оноо харуулахгүй (гэрийн даалгавар) */
+  points?: number;
   choiceMode: "TEXT" | "LETTER" | null;
   choices: string[] | null;
   /** Сонголтын зургууд (choices-тэй ижил дараалал); зураггүй бол null */
@@ -39,8 +40,9 @@ export default function QuestionCard({
   problemNumber: number;
   answer: number | string | undefined;
   onAnswer: (value: number | string) => void;
-  selfState: string | undefined;
-  onSelfState: (value: string) => void;
+  selfState?: string | undefined;
+  /** Өгөхгүй бол өөрийн үнэлгээний мөр харагдахгүй (гэрийн даалгавар) */
+  onSelfState?: (value: string) => void;
   keypadTheme: "navy" | "light";
 }) {
   const pid = problem.id;
@@ -51,7 +53,7 @@ export default function QuestionCard({
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-bright/15 font-display text-base font-bold text-brand-soft">
           {problemNumber}
         </span>
-        <span className="text-[11px] text-ink-dim">{problem.points} оноо</span>
+        {problem.points !== undefined && <span className="text-[11px] text-ink-dim">{problem.points} оноо</span>}
       </div>
 
       {/* Мэдэгдэл (+ байвал зураг хажуугаар) — уншихад тав тухтай өргөнд хязгаарлана */}
@@ -103,7 +105,7 @@ export default function QuestionCard({
         )}
       </div>
 
-      <SelfAssessment value={selfState} onChange={onSelfState} />
+      {onSelfState && <SelfAssessment value={selfState} onChange={onSelfState} />}
     </div>
   );
 }

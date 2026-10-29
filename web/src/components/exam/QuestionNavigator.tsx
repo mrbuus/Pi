@@ -1,6 +1,6 @@
 "use client";
 
-import { Flag } from "lucide-react";
+import { Check, Flag, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Meta } from "@/components/ui/Meta";
 
@@ -22,6 +22,8 @@ export interface NavigatorCell {
   id: string;
   answered: boolean;
   flagged: boolean;
+  /** Гэрийн даалгаврын «Шалгах»-ын дүн — өгвөл буланд ✓/✕ дүрс + aria текст */
+  mark?: "CORRECT" | "WRONG" | null;
 }
 
 export default function QuestionNavigator({
@@ -119,6 +121,16 @@ export default function QuestionNavigator({
           <span className="flex items-center gap-1.5">
             <span className="h-4 w-4 rounded border-[3px] border-ink" /> Одоогийн
           </span>
+          {cells.some((c) => c.mark) && (
+            <>
+              <span className="flex items-center gap-1.5">
+                <Check size={14} aria-hidden className="rounded-full bg-success p-0.5 text-on-success" /> Зөв
+              </span>
+              <span className="flex items-center gap-1.5">
+                <X size={14} aria-hidden className="rounded-full bg-error p-0.5 text-on-error" /> Буруу
+              </span>
+            </>
+          )}
         </div>
 
         {partIIStart !== undefined && partIIStart > 0 && partIIStart < cells.length ? (
@@ -186,7 +198,7 @@ function NavigatorGrid({
                   onClose();
                 }}
                 aria-current={isCurrent ? "true" : undefined}
-                aria-label={`${globalIndex + 1}-р бодлого${c.answered ? ", хариулсан" : ", хариулаагүй"}${c.flagged ? ", тэмдэглэсэн" : ""}${isCurrent ? ", одоогийн" : ""}`}
+                aria-label={`${globalIndex + 1}-р бодлого${c.answered ? ", хариулсан" : ", хариулаагүй"}${c.mark === "CORRECT" ? ", зөв" : c.mark === "WRONG" ? ", буруу" : ""}${c.flagged ? ", тэмдэглэсэн" : ""}${isCurrent ? ", одоогийн" : ""}`}
                 className={`relative flex h-11 w-11 items-center justify-center rounded-lg text-xs font-bold transition ${
                   c.answered
                     ? "border border-brand bg-brand/15 text-ink"
@@ -199,6 +211,20 @@ function NavigatorGrid({
                     size={14}
                     aria-hidden
                     className="absolute -right-1.5 -top-1.5 rounded-full bg-warning text-on-warning"
+                  />
+                )}
+                {c.mark === "CORRECT" && (
+                  <Check
+                    size={14}
+                    aria-hidden
+                    className="absolute -bottom-1.5 -left-1.5 rounded-full bg-success p-0.5 text-on-success"
+                  />
+                )}
+                {c.mark === "WRONG" && (
+                  <X
+                    size={14}
+                    aria-hidden
+                    className="absolute -bottom-1.5 -left-1.5 rounded-full bg-error p-0.5 text-on-error"
                   />
                 )}
               </button>
