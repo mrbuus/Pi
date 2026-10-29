@@ -20,7 +20,7 @@ export class ExamResultsController {
   @Roles(Role.STUDENT, Role.BUYER)
   @Get('my')
   my(@Req() req: AuthedRequest) {
-    return this.results.myExams(req.user.userId);
+    return this.results.myExams(req.user.userId, req.user.role);
   }
 
   // Нэг шалгалтын дүнгийн дэлгэц (өөрийн дүн)

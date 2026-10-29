@@ -15,13 +15,33 @@ export interface TestRow {
   // (зөвхөн chapter.book.code ирдэг) — ирээдүйд нэмэгдвэл splitTopic() доор
   // heuristic-ээс өмнө автоматаар ашиглагдана.
   chapter?: {
-    book?: { code: string } | null;
+    book?: { code: string; displayName?: string | null } | null;
     title?: string;
     topic?: { name?: string } | null;
   } | null;
   _count: { problems: number; results?: number };
   results?: { totalScore: number; maxScore: number }[];
   sessionStatus?: "IN_PROGRESS" | "SUBMITTED" | null;
+  /** Ангид оноосон ч эхлэх цаг ирээгүй шалгалт — огноотой, эхлэх товчгүй */
+  upcoming?: boolean;
+  assignedAt?: string | null;
+}
+
+// Сурагчид номын кодыг («100», «200V3») хэзээ ч харуулахгүй (эзэн 2026-10-29):
+// Book.displayName ирвэл түүгээр, үгүй бол мэдэгдэх кодын нэрээр, бусад үед юу ч үгүй.
+const STUDENT_BOOK_NAMES: Record<string, string> = {
+  "100V3": "Е-1",
+  "200V3": "Е-2",
+  "300": "Е-3",
+  "1000": "1000 бодлого",
+  HG1: "Хавтгайн геометр 1",
+  OGT: "Огторгуйн геометр",
+};
+export function studentBookLabel(
+  book: { code: string; displayName?: string | null } | null | undefined,
+): string | null {
+  if (!book) return null;
+  return book.displayName ?? STUDENT_BOOK_NAMES[book.code] ?? null;
 }
 
 export interface AttendanceRow {

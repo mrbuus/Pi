@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import TestRowItem from "./TestRowItem";
-import { bookColor, THOUSAND_TOPIC, type GroupRow } from "./types";
+import { bookColor, studentBookLabel, THOUSAND_TOPIC, type GroupRow } from "./types";
 
 export default function TopicGroup({
   topic,
@@ -18,6 +18,8 @@ export default function TopicGroup({
   const doneCount = rows.filter((r) => (r.row.results?.length ?? 0) > 0).length;
   // Номын өнгө — сэдвийн бүх тест нэг номд харьяалагддаг (Шийдвэр В)
   const book = bookColor(rows[0]?.row.chapter?.book?.code);
+  // Сурагчид код биш, номын нэр (Е-1, Е-2…); мэдэгдэхгүй бол чип үгүй
+  const bookLabel = isTeacher ? book?.key : studentBookLabel(rows[0]?.row.chapter?.book);
 
   return (
     <div
@@ -37,9 +39,9 @@ export default function TopicGroup({
         </span>
         <span className="min-w-0 flex-1 truncate font-bold text-ink">{topic}</span>
         {/* «1000 бодлого» бүлгийн нэрэнд ном аль хэдийн бий — давхар чип хэрэггүй */}
-        {book && topic !== THOUSAND_TOPIC && (
+        {book && bookLabel && topic !== THOUSAND_TOPIC && (
           <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${book.chip}`}>
-            {book.key}
+            {bookLabel}
           </span>
         )}
         {!isTeacher && doneCount > 0 && (
