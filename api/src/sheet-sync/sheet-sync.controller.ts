@@ -36,10 +36,11 @@ export class SheetSyncController {
     return {
       configured: this.sync.isConfigured(),
       enabled: this.sync.isEnabled(),
+      writeEnabled: this.sync.isWriteEnabled(),
       running: this.sync.isRunning(),
       lastRun,
       lastFullAt: lastOk?.startedAt ?? null,
-      last: lastOk ? { rows: stats.rows, payments: stats.payments, notes: stats.notes, createdStudents: stats.createdStudents, sheetRows: stats.sheetRows } : null,
+      last: lastOk ? { rows: stats.rows, payments: stats.payments, notes: stats.notes, createdStudents: stats.createdStudents, appended: stats.appended, sheetRows: stats.sheetRows } : null,
       open: open
         .map((g) => ({ severity: g.severity, kind: g.kind, count: g._count._all }))
         .sort((a, b) => SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) || b.count - a.count),

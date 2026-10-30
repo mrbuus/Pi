@@ -22,6 +22,22 @@ import {
   SHEET,
   UnmatchedRow,
 } from './payment-plan';
+import {
+  APPEND_FLOOD,
+  AppendCandidate,
+  AppendRow,
+  findSumFormula,
+  freeRows,
+  judge,
+  MAX_APPEND_PER_RUN,
+  rowIsFree,
+  rowWrites,
+  SETTLE_MS,
+  sumFormulaFor,
+  toRequests,
+  verifyWritten,
+  writeHeaderProblems,
+} from './sheet-append';
 import { Book, colLetter, rowCells, toBook } from './sheet-book';
 import { SheetsClient, sheetsConfigFromEnv } from './sheets.client';
 
@@ -135,7 +151,8 @@ export class SheetSyncService {
       const hash = sha(fetched.tabs);
       if (run && trigger === 'CRON') {
         const lastFull = await this.prisma.sheetSyncRun.findFirst({ where: { ok: true, skipped: false }, orderBy: { startedAt: 'desc' } });
-        if (lastFull?.hash === hash && Date.now() - lastFull.startedAt.getTime() < FULL_CHECK_EVERY_MS) {
+        // Шийт өөрчлөгдөөгүй ч вэбд шинээр ирсэн хүүхэд шийтэд нэмэгдэхээр хүлээж байвал алгасахгүй
+        if (lastFull?.hash === hash && Date.now() - lastFull.startedAt.getTime() < FULL_CHECK_EVERY_MS && !(await this.appendWaiting())) {
           await this.prisma.sheetSyncRun.update({ where: { id: run.id }, data: { finishedAt: new Date(), ok: true, skipped: true, hash } });
           return { runId: run.id, ok: true, skipped: true };
         }
@@ -197,8 +214,11 @@ export class SheetSyncService {
     const noteStats = await this.syncNotes(plan, admin.id, ctx.dryRun);
     const profileStats = await this.syncProfiles(plan, rowStats.changedKeys, created.ids, admin.id, ctx.dryRun);
 
-    // 5) Вэбд ангид байгаа ч шийтэд алга (жишээ нь шийтэд нэмэхээ мартсан)
-    await this.webOnly(plan, issues);
+    // 5) Вэбээр бүртгүүлж анх ирсэн хүүхдийг шийтийн эзэн жагсаалтад нэмнэ
+    const append = await this.appendToSheet(plan, students, issues, admin.id, ctx.dryRun);
+
+    // 6) Вэбд ангид байгаа ч шийтэд алга (жишээ нь шийтэд нэмэхээ мартсан)
+    await this.webOnly(plan, issues, append.handled);
 
     const issueStats = ctx.dryRun
       ? { open: issues.length, opened: 0 }
@@ -213,11 +233,12 @@ export class SheetSyncService {
       notes: noteStats,
       profiles: profileStats,
       createdStudents: created.names.length,
+      appended: append.stats,
       unmatched: plan.unmatched.length,
       skippedTabs: plan.skippedTabs,
       issues: issueStats,
       headers: rowStats.headers,
-      ...(ctx.dryRun ? { preview: { created: created.names, issues: summarizeIssues(issues) } } : {}),
+      ...(ctx.dryRun ? { preview: { created: created.names, appended: append.preview, issues: summarizeIssues(issues) } } : {}),
     };
   }
 
@@ -594,8 +615,9 @@ export class SheetSyncService {
     return { updated };
   }
 
-  private async webOnly(plan: Plan, issues: PlanIssue[]) {
+  private async webOnly(plan: Plan, issues: PlanIssue[], handled: Set<string>) {
     const matched = new Set([...plan.rowMatches.values()].map((m) => m.studentId));
+    for (const id of handled) matched.add(id); // шийтэд нэмэх хэсэг өөрөө мэдэгдэнэ
     const rows = await this.prisma.$queryRaw<{ id: string; lastName: string; firstName: string; classroom: string }[]>`
       SELECT DISTINCT ON (u.id) u.id, u."lastName", u."firstName", cl.name AS classroom
       FROM "User" u
@@ -612,6 +634,209 @@ export class SheetSyncService {
           studentId: r.id,
           title: `${r.lastName} ${r.firstName} (${r.classroom}) вэбд ангид байгаа ч шийтэд алга — төлбөр нь шийтэд бүртгэгдээгүй байж магадгүй`,
         });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Вэб → шийт (эзэн 2026-10-30): вэбээр бүртгүүлсэн хүүхэд анх ирсэн өдрөөрөө
+  // эзэн жагсаалтын дараагийн хоосон мөрөнд нэмэгдэнэ. SHEET_WRITE_ENABLED=1 үед л.
+  // Давхар мөрөөс сэргийлэх нь: шийтийг дөнгөж уншсан (тэр хүүхэд алга); нэг удаа
+  // нэмсэн хүүхдийг дахин хэзээ ч автоматаар нэмэхгүй (AuditLog); бичихийн өмнө
+  // мөрийг дахин уншина; бичсэнээ буцааж уншиж шалгана; ирц 30 минут тогтсоны дараа.
+  isWriteEnabled(): boolean {
+    return process.env.SHEET_WRITE_ENABLED === '1' && this.isEnabled();
+  }
+
+  private softDeleteAttendance: boolean | null = null;
+  /** Ирцийн зөөлөн устгал (deletedAt) серверт хараахан ороогүй байж болно — нэг удаа шалгана. */
+  private async attendanceNotDeleted(): Promise<Prisma.Sql> {
+    if (this.softDeleteAttendance == null) {
+      const r = await this.prisma.$queryRaw<{ n: number }[]>`
+        SELECT count(*)::int AS n FROM information_schema.columns WHERE table_name = 'Attendance' AND column_name = 'deletedAt'`;
+      this.softDeleteAttendance = (r[0]?.n ?? 0) > 0;
+    }
+    return this.softDeleteAttendance ? Prisma.sql`AND a."deletedAt" IS NULL` : Prisma.empty;
+  }
+
+  /** Анх ирсэн (PRESENT/LATE) танхимын идэвхтэй сурагчид — шийтэд байгаа эсэхийг дуудагч шүүнэ. */
+  private async loadAppendCandidates(): Promise<AppendCandidate[]> {
+    const notDeleted = await this.attendanceNotDeleted();
+    return this.prisma.$queryRaw<AppendCandidate[]>`
+      SELECT u.id, u."lastName", u."firstName", u.phone, sp."fatherPhone", sp."motherPhone", sp.school, sp.grade,
+             to_char(sp."joinedOn", 'YYYY-MM-DD') AS "joinedOn",
+             to_char(fa.first, 'YYYY-MM-DD') AS "firstPresent",
+             cls.names AS classrooms
+      FROM "User" u
+      JOIN "StudentProfile" sp ON sp."userId" = u.id AND sp.type = 'CLASSROOM' AND sp."approvalPending" = false
+      JOIN LATERAL (
+        SELECT min(a.date) AS first FROM "Attendance" a
+        WHERE a."studentId" = u.id AND a.status IN ('PRESENT', 'LATE') ${notDeleted}
+      ) fa ON fa.first IS NOT NULL
+      JOIN LATERAL (
+        SELECT array_agg(DISTINCT c.name ORDER BY c.name) AS names
+        FROM "Enrollment" e JOIN "Classroom" c ON c.id = e."classroomId" AND c.archived = false AND c.type = 'IN_PERSON'
+        WHERE e."studentId" = u.id AND e."leftAt" IS NULL
+      ) cls ON cls.names IS NOT NULL
+      WHERE u.role = 'STUDENT' AND u."archivedAt" IS NULL`;
+  }
+
+  /** Шийтэд нэмэгдэхээр хүлээж буй хүүхэд бий эсэх — байвал cron шийт өөрчлөгдөөгүй ч ажиллана. */
+  private async appendWaiting(): Promise<boolean> {
+    if (!this.isWriteEnabled()) return false;
+    const notDeleted = await this.attendanceNotDeleted();
+    const r = await this.prisma.$queryRaw<{ n: number }[]>`
+      SELECT count(*)::int AS n FROM "User" u
+      JOIN "StudentProfile" sp ON sp."userId" = u.id AND sp.type = 'CLASSROOM' AND sp."approvalPending" = false
+      WHERE u.role = 'STUDENT' AND u."archivedAt" IS NULL
+        AND EXISTS (SELECT 1 FROM "Attendance" a WHERE a."studentId" = u.id AND a.status IN ('PRESENT', 'LATE') ${notDeleted})
+        AND EXISTS (
+          SELECT 1 FROM "Enrollment" e JOIN "Classroom" c ON c.id = e."classroomId" AND c.archived = false AND c.type = 'IN_PERSON'
+          WHERE e."studentId" = u.id AND e."leftAt" IS NULL)
+        AND NOT EXISTS (SELECT 1 FROM "SheetRow" s WHERE s."studentId" = u.id AND s."goneAt" IS NULL)
+        AND NOT EXISTS (
+          SELECT 1 FROM "SheetIssue" i
+          WHERE i."studentId" = u.id AND i.kind IN ('APPEND_BLOCKED', 'APPEND_FAILED') AND i."resolvedAt" IS NULL)`;
+    return (r[0]?.n ?? 0) > 0;
+  }
+
+  private async appendToSheet(plan: Plan, students: DbStudent[], issues: PlanIssue[], adminId: string, dryRun: boolean) {
+    const handled = new Set<string>();
+    const preview: string[] = [];
+    if (!dryRun && !this.isWriteEnabled()) return { handled, preview, stats: { enabled: false } };
+
+    const matched = new Set([...plan.rowMatches.values()].map((m) => m.studentId));
+    const candidates = (await this.loadAppendCandidates()).filter((c) => !matched.has(c.id));
+    if (!candidates.length) return { handled, preview, stats: { enabled: true, appended: 0 } };
+    const ids = candidates.map((c) => c.id);
+    const [before, pending] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        where: { entity: 'User', entityId: { in: ids }, action: { in: ['SHEET_APPEND', 'SHEET_APPEND_UNVERIFIED'] } },
+        select: { entityId: true, after: true },
+      }),
+      this.prisma.sheetIssue.findMany({ where: { kind: 'APPEND_PENDING', resolvedAt: null, studentId: { in: ids } }, select: { studentId: true, detail: true } }),
+    ]);
+    const appendedBefore = new Map(before.map((b) => [b.entityId, (b.after as { row?: number } | null)?.row ?? null]));
+    const since = new Map(pending.map((p) => [p.studentId ?? '', String((p.detail as { since?: string } | null)?.since ?? '')]));
+
+    type Due = { c: AppendCandidate; row: AppendRow; label: string; since: string };
+    const now = Date.now();
+    const today = todayUb();
+    const name = (c: AppendCandidate) => `${c.lastName} ${c.firstName}`.trim();
+    const blocked = (c: AppendCandidate, reason: string) => {
+      handled.add(c.id);
+      issues.push({ kind: 'APPEND_BLOCKED', severity: 'WARN', studentId: c.id, title: `${name(c)} (${c.classrooms.join(', ')}) шийтэд автоматаар нэмэгдсэнгүй: ${reason}` });
+    };
+    const waiting = (d: Due) => {
+      handled.add(d.c.id);
+      issues.push({
+        kind: 'APPEND_PENDING',
+        severity: 'INFO',
+        studentId: d.c.id,
+        title: `${d.label} ${d.row.start}-нд анх ирсэн — шийтийн эзэн жагсаалтад удахгүй автоматаар нэмэгдэнэ`,
+        detail: { since: d.since, start: d.row.start, section: d.row.section },
+      });
+    };
+    const fail = (title: string, d?: Due, detail?: Record<string, unknown>) =>
+      issues.push({ kind: 'APPEND_FAILED', severity: 'ERROR', studentId: d?.c.id, title, detail });
+
+    const due: Due[] = [];
+    candidates.sort((a, b) => a.firstPresent.localeCompare(b.firstPresent) || name(a).localeCompare(name(b)));
+    for (const c of candidates) {
+      if (appendedBefore.has(c.id)) {
+        const row = appendedBefore.get(c.id);
+        blocked(c, `${row ? `${row}-р мөрөнд ` : ''}нэг удаа нэмсэн боловч одоо шийтэд алга (устгасан эсвэл нэр, утас нь өөрчлөгдсөн) — дахин автоматаар нэмэхгүй, гараар шалгана уу`);
+        continue;
+      }
+      const v = judge(c, { today, unmatched: plan.unmatched, students, matched });
+      if (!v.ok) {
+        blocked(c, v.reason);
+        continue;
+      }
+      const d: Due = { c, row: v.row, label: `${name(c)} (${v.row.section})`, since: since.get(c.id) || new Date(now).toISOString() };
+      if (!dryRun && now - Date.parse(d.since) < SETTLE_MS) waiting(d);
+      else due.push(d);
+    }
+    if (dryRun) {
+      preview.push(...due.map((d) => `${d.label} — эхэлсэн ${d.row.start}`));
+      return { handled, preview, stats: { enabled: this.isWriteEnabled(), wouldAppend: due.length } };
+    }
+    if (!due.length) return { handled, preview, stats: { enabled: true, appended: 0 } };
+    if (due.length > APPEND_FLOOD) {
+      due.forEach(waiting);
+      fail(`Шийтэд нэг дор ${due.length} хүүхэд нэмэгдэх гэж байна — алдаа байж болзошгүй тул нэгийг ч нэмээгүй, шалгана уу`);
+      return { handled, preview, stats: { enabled: true, appended: 0, flood: due.length } };
+    }
+    const config = sheetsConfigFromEnv();
+    if (!config || plan.skippedTabs.includes(SHEET.MAIN)) {
+      due.forEach(waiting); // бүтэц засагдмагц нэмэгдэнэ (HEADER зөрүү тусдаа гарсан)
+      return { handled, preview, stats: { enabled: true, appended: 0 } };
+    }
+
+    const batch = due.slice(0, MAX_APPEND_PER_RUN);
+    due.slice(MAX_APPEND_PER_RUN).forEach(waiting);
+    const done: string[] = [];
+    const writer = new SheetsClient(config, { write: true });
+    const quoted = `'${SHEET.MAIN.replace(/'/g, "''")}'`;
+    try {
+      const tab = await writer.tabInfo(SHEET.MAIN);
+      if (!tab) throw new Error(`«${SHEET.MAIN}» хуудас олдсонгүй`);
+      const grid = await writer.readRange(`${quoted}!A1:BZ`, 'FORMULA');
+      const headerIssues = writeHeaderProblems(grid[0]);
+      if (headerIssues.length) {
+        batch.forEach(waiting);
+        fail(`Шийтийн эзэн жагсаалтын багана өөрчлөгдсөн тул шинэ хүүхэд нэмээгүй: ${headerIssues.join('; ')}`);
+        return { handled, preview, stats: { enabled: true, appended: 0 } };
+      }
+      const slots = freeRows(grid, batch.length, tab.rowCount);
+      const source = findSumFormula(grid);
+      for (const [k, d] of batch.entries()) {
+        const slot = slots[k];
+        if (!slot) {
+          batch.slice(k).forEach(waiting);
+          fail('Шийтийн эзэн жагсаалтын төгсгөлд хоосон мөр олдсонгүй — доор нь дугаартай хоосон мөр нэмж өгнө үү');
+          break;
+        }
+        // Ажилтан яг одоо тэр мөрөнд бичсэн байж болно — бичихийн өмнө дахин уншина
+        const fresh = await writer.readRange(`${quoted}!A${slot.row}:BZ${slot.row}`, 'FORMULA');
+        if (!rowIsFree(fresh[0])) {
+          batch.slice(k).forEach(waiting); // дараагийн удаа шинэ байдлаар нь дахин сонгоно
+          break;
+        }
+        const formula = source ? sumFormulaFor(source.formula, source.row, slot.row) : null;
+        await writer.batchUpdate(toRequests(tab.sheetId, slot.row, rowWrites(d.c, d.row, slot, { today, formula })));
+        handled.add(d.c.id);
+        // Шалгахаас өмнө тэмдэглэнэ — дараа нь юу ч болсон энэ хүүхдийг дахин автоматаар нэмэхгүй
+        const record = (action: string) =>
+          this.audit.record({
+            actorId: adminId,
+            actorRole: 'SYSTEM',
+            action,
+            entity: 'User',
+            entityId: d.c.id,
+            after: { tab: SHEET.MAIN, row: slot.row, start: d.row.start, section: d.row.section },
+            reason: 'Вэбээс шийтийн эзэн жагсаалтад шинэ хүүхэд нэмэв',
+          });
+        await record('SHEET_APPEND');
+        const back = await writer.readRange(`${quoted}!A${slot.row}:K${slot.row}`, 'UNFORMATTED_VALUE');
+        if (!verifyWritten(back[0], d.c, d.row)) {
+          await record('SHEET_APPEND_UNVERIFIED');
+          fail(`${d.label}-г шийтийн ${slot.row}-р мөрөнд бичсэн боловч буцааж уншихад таарсангүй — тэр мөрийг шалгана уу`, d, { row: slot.row });
+          break;
+        }
+        done.push(`${d.label} → ${slot.row}-р мөр`);
+      }
+    } catch (error) {
+      const status = (error as { response?: { status?: number } }).response?.status;
+      const message = error instanceof Error ? error.message : String(error);
+      fail(
+        status === 403
+          ? 'Шийтэд бичих эрх алга — шийтийг pimath-sheet-reader@piweb-508013.iam.gserviceaccount.com-д «Засварлагч» (Editor) эрхээр хуваалцана уу'
+          : `Шийтэд шинэ хүүхэд нэмж чадсангүй: ${message.slice(0, 300)}`,
+      );
+      // Бичигдсэн эсэх нь тодорхойгүй ч дараагийн удаа шийтийг шинээр уншаад олдохгүй бол л дахин бичнэ
+      for (const d of batch) if (!handled.has(d.c.id)) waiting(d);
+    }
+    if (done.length) await this.notifyAdmins(`Шийтэд ${done.length} шинэ хүүхэд нэмлээ`, done.slice(0, 20).join(', '));
+    return { handled, preview, stats: { enabled: true, appended: done.length, rows: done } };
   }
 
   // ---------------------------------------------------------------------------

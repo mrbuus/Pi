@@ -33,6 +33,8 @@ type Severity = "ERROR" | "WARN" | "INFO";
 interface SyncStatus {
   configured: boolean;
   enabled: boolean;
+  /** Вэбээр бүртгүүлж анх ирсэн хүүхдийг шийтэд нэмэх (SHEET_WRITE_ENABLED) */
+  writeEnabled?: boolean;
   running: boolean;
   lastRun: { startedAt: string; finishedAt: string | null; ok: boolean; skipped: boolean; error: string | null } | null;
   lastFullAt: string | null;
@@ -40,6 +42,7 @@ interface SyncStatus {
     rows?: Record<string, number>;
     payments?: { inserted?: number; amount?: number; skipped?: boolean };
     createdStudents?: number;
+    appended?: { appended?: number };
   } | null;
   open: { severity: Severity; kind: string; count: number }[];
 }
@@ -89,6 +92,9 @@ const KIND_LABEL: Record<string, string> = {
   FULL_SPLIT: "Бүтэн жилийн задаргаа",
   FORM_UNKNOWN: "Танигдаагүй хэлбэр",
   PAYMENT_ORPHAN: "Жагсаалтаас хасагдсан",
+  APPEND_PENDING: "Шийтэд нэмэгдэх гэж буй хүүхэд",
+  APPEND_BLOCKED: "Шийтэд автоматаар нэмээгүй",
+  APPEND_FAILED: "Шийтэд бичиж чадсангүй",
 };
 const FILTERS: { key: "" | Severity; label: string }[] = [
   { key: "", label: "Бүгд" },
@@ -197,6 +203,7 @@ export default function SheetSyncPanel() {
                 items={[
                   `Шалгасан ${ago(status.lastRun?.finishedAt ?? null)}`,
                   status.enabled ? "5 минут тутам автоматаар" : "Автомат татах унтраалттай",
+                  status.writeEnabled ? "Шинэ хүүхдийг шийтэд нэмнэ" : null,
                 ]}
               />
             </p>
@@ -209,11 +216,12 @@ export default function SheetSyncPanel() {
           )}
         </div>
         {status.last && (
-          <dl className="grid grid-cols-3 gap-2 text-center">
+          <dl className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
             {[
               { label: "Шийтийн мөр", value: rows.toLocaleString("en-US") },
               { label: "Сүүлд нэмсэн гүйлгээ", value: String(status.last.payments?.inserted ?? 0) },
               { label: "Шинэ сурагч", value: String(status.last.createdStudents ?? 0) },
+              { label: "Шийтэд нэмсэн", value: String(status.last.appended?.appended ?? 0) },
             ].map((s) => (
               <div key={s.label} className="rounded-xl bg-bg px-2 py-2">
                 <dt className="text-xs text-ink-dim">{s.label}</dt>
