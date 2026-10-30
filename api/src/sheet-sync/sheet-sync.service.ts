@@ -538,7 +538,7 @@ export class SheetSyncService {
         entity: 'Payment',
         entityId: 'sheet-sync',
         after: { inserted, amount: inserts.reduce((t, i) => t + i.amount, 0) },
-        reason: 'Google Sheet төлбөрийн синк',
+        reason: 'Шийтээс төлбөрийн мэдээлэл татсан',
       });
     }
     return {
@@ -588,7 +588,7 @@ export class SheetSyncService {
         entityId: s.id,
         before: { tuitionPlan: s.plan, tuitionAmount: s.tuitionAmount, joinedOn: s.joinedOn, leftOn: s.leftOn },
         after: { tuitionPlan: b.resolvedPlan, tuitionAmount: b.resolvedAmount ?? s.tuitionAmount, joinedOn: s.joinedOn ?? b.start, leftOn: s.leftOn ?? b.leftOn },
-        reason: 'Google Sheet төлбөрийн синк',
+        reason: 'Шийтээс төлбөрийн мэдээлэл татсан',
       });
     }
     return { updated };
