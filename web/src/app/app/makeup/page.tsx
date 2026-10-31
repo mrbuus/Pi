@@ -1,13 +1,7 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import RequireRole from "@/components/nav/RequireRole";
-import StudentMakeupView from "@/components/makeup/StudentMakeupView";
-
-/** Сурагчийн «Нөхөх хичээл» (эзэн 2026-10-18) — нөхөх үүрэг + онолын зураг */
-export default function MakeupPage() {
-  return (
-    <RequireRole allow={["STUDENT"]}>
-      <StudentMakeupView />
-    </RequireRole>
-  );
+// Сурагчийн «Нөхөх хичээл» → «Хичээл» hub-ийн «Нөхөх» таб (SURAGCH-V2-GEREE, 2026-10-31).
+// Мэдэгдэл, хуучин холбоос эвдрэхгүйн тулд шилжүүлнэ.
+export default function MakeupRedirect() {
+  redirect("/app/my-class?tab=makeup");
 }
