@@ -262,7 +262,11 @@ function makeDb() {
         ),
       ),
     },
-    attendance: { groupBy: jest.fn(async () => []) },
+    attendance: {
+      groupBy: jest.fn(async () => []),
+      findMany: jest.fn(async () => []),
+    },
+    lessonTopic: { findMany: jest.fn(async () => []) },
     dailyHomeworkMark: {
       groupBy: jest.fn(async () => []),
       findFirst: jest.fn(async () => null),
@@ -497,6 +501,7 @@ describe('StudentHubService', () => {
         { status: 'PARTIAL', _count: { _all: 2 } },
       ]);
       env.db.dailyHomeworkMark.findFirst.mockResolvedValue({
+        classroomId: 'c1',
         date: d('2026-10-30'),
         status: 'PARTIAL',
         comment: 'Дутуу',
@@ -525,12 +530,26 @@ describe('StudentHubService', () => {
           room: '301',
           topic: 'Тригонометр',
         },
-        latestMark: { date: '2026-10-30', status: 'PARTIAL', comment: 'Дутуу' },
+        // D' = 10-30, D = ангийн өмнөх хичээл (10-27: тест + бүртгэл)
+        latestMark: {
+          date: '2026-10-30',
+          status: 'PARTIAL',
+          comment: 'Дутуу',
+          classroomId: 'c1',
+          lessonDate: '2026-10-27',
+        },
       });
       expect(env.db.attendance.groupBy.mock.calls[0][0].where).toEqual({
         studentId: 's1',
       });
-      expect(callCount(env.db)).toBeLessThanOrEqual(6);
+      // 5 + бүртгэл 1 + сүүлийн тэмдэглэгээний D (хичээлийн өдрийн нэгдэл, 5) — 3 давалгаа
+      expect(callCount(env.db)).toBeLessThanOrEqual(11);
+      expect(env.db.lessonRecord.findMany.mock.calls[0][0].where).toMatchObject(
+        {
+          classroomId: { in: ['c1'] },
+          date: { gte: d('2026-09-25'), lte: d('2026-10-29') },
+        },
+      );
     });
 
     it('батлагдсан бүртгэлийн сэдэв давамгайлна', async () => {
@@ -703,23 +722,27 @@ describe('StudentHubService', () => {
     });
 
     it('өнөөдөр хийсэн тест 403 (маргааш нээгдэнэ), бодлого уншихгүй', async () => {
-      await expect(svc.testDetail('s1', 'B2')).rejects.toMatchObject({
-        status: 403,
+      const err = await svc.testDetail('s1', 'B2').catch((e) => e);
+      expect(err.status).toBe(403);
+      expect(err.getResponse()).toEqual({
+        statusCode: 403,
+        error: 'Forbidden',
+        code: 'NOT_OPEN_YET',
         message: 'Энэ тест маргааш нээгдэнэ.',
       });
       expect(env.db.testProblem.findMany).not.toHaveBeenCalled();
     });
 
     it('анги хийгээгүй, элсэхээс өмнөх, 1000 бодлого → 403; устсан → 404', async () => {
-      await expect(svc.testDetail('s1', 'NOPE')).rejects.toMatchObject({
-        status: 403,
-      });
-      await expect(svc.testDetail('s1', 'OLD')).rejects.toMatchObject({
-        status: 403,
-      });
-      await expect(svc.testDetail('s1', 'K1')).rejects.toMatchObject({
-        status: 403,
-      });
+      expect(
+        (await svc.testDetail('s1', 'NOPE').catch((e) => e)).getResponse(),
+      ).toMatchObject({ statusCode: 403, code: 'NOT_CLASS_TEST' });
+      expect(
+        (await svc.testDetail('s1', 'OLD').catch((e) => e)).getResponse(),
+      ).toMatchObject({ statusCode: 403, code: 'NOT_CLASS_TEST' });
+      expect(
+        (await svc.testDetail('s1', 'K1').catch((e) => e)).getResponse(),
+      ).toMatchObject({ statusCode: 403, code: 'NOT_CLASS_TEST' });
       await expect(svc.testDetail('s1', 'DEL')).rejects.toMatchObject({
         status: 404,
       });
@@ -728,9 +751,9 @@ describe('StudentHubService', () => {
 
     it('ангигүй сурагч 403', async () => {
       env.db.enrollment.findMany.mockResolvedValue([]);
-      await expect(svc.testDetail('s1', 'A1')).rejects.toMatchObject({
-        status: 403,
-      });
+      expect(
+        (await svc.testDetail('s1', 'A1').catch((e) => e)).getResponse(),
+      ).toMatchObject({ statusCode: 403, code: 'NOT_CLASS_TEST' });
     });
   });
 

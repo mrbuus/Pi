@@ -16,7 +16,11 @@ import type {
   ResolverSchedule,
 } from '../schedule/week-resolver';
 import { resolveWeek } from '../schedule/week-resolver';
-import { uniqueClasses, type StudentClass } from './lesson-days';
+import {
+  loadLessonDays,
+  uniqueClasses,
+  type StudentClass,
+} from './lesson-days';
 import {
   MARK_LOOKAHEAD_DAYS,
   MIN_MONTH,
@@ -109,6 +113,21 @@ interface TestRow {
   deletedAt: Date | null;
   _count: { problems: number };
 }
+
+/** 403 + шалтгааны код (вэб: NOT_OPEN_YET → «маргааш нээгдэнэ», NOT_CLASS_TEST) */
+export type TestForbiddenCode = 'NOT_OPEN_YET' | 'NOT_CLASS_TEST';
+
+function testForbidden(code: TestForbiddenCode, message: string) {
+  return new ForbiddenException({
+    statusCode: 403,
+    error: 'Forbidden',
+    code,
+    message,
+  });
+}
+
+const notClassTest = () =>
+  testForbidden('NOT_CLASS_TEST', 'Энэ тестийг танай анги хийгээгүй байна.');
 
 function push<V>(map: Map<string, V[]>, key: string, value: V) {
   const list = map.get(key);
@@ -548,7 +567,12 @@ export class StudentHubService {
         this.prisma.dailyHomeworkMark.findFirst({
           where: { studentId, status: { not: null } },
           orderBy: [{ date: 'desc' }, { updatedAt: 'desc' }],
-          select: { date: true, status: true, comment: true },
+          select: {
+            classroomId: true,
+            date: true,
+            status: true,
+            comment: true,
+          },
         }),
         this.prisma.academicCalendarDay.findMany({
           where: { date: todayDate },
@@ -615,28 +639,51 @@ export class StudentHubService {
     });
     const entry =
       day && !day.isHoliday ? pickToday(day.entries, ubMinuteOfDay()) : null;
-    let todayView: HubOverview['today'] = null;
-    if (entry) {
-      // Багш баталсан бүртгэл байвал түүний сэдэв/цаг давамгайлна
-      const record = await this.prisma.lessonRecord.findFirst({
-        where: {
+    // Багш баталсан бүртгэл байвал түүний сэдэв/цаг давамгайлна; сүүлийн тэмдэглэгээний
+    // D (даалгавар өгсөн хичээлийн өдөр) = D'-ээс өмнөх ангийн сүүлийн хичээлийн өдөр
+    const markKey = latest?.status ? dateKey(latest.date) : null;
+    const [record, markDays] = await Promise.all([
+      entry
+        ? this.prisma.lessonRecord.findFirst({
+            where: {
+              classroomId: entry.classroomId,
+              scheduleId: entry.scheduleId,
+              date: todayDate,
+              cancelledAt: null,
+            },
+            select: {
+              topic: true,
+              startMinute: true,
+              endMinute: true,
+              room: true,
+            },
+          })
+        : Promise.resolve(null),
+      latest && markKey
+        ? loadLessonDays(
+            this.prisma,
+            studentId,
+            addDaysKey(markKey, -MARK_LOOKAHEAD_DAYS),
+            addDaysKey(markKey, -1),
+            latest.classroomId,
+          )
+        : Promise.resolve(null),
+    ]);
+    const todayView: HubOverview['today'] = entry
+      ? {
           classroomId: entry.classroomId,
-          scheduleId: entry.scheduleId,
-          date: todayDate,
-          cancelledAt: null,
-        },
-        select: { topic: true, startMinute: true, endMinute: true, room: true },
-      });
-      todayView = {
-        classroomId: entry.classroomId,
-        classroomName: entry.classroomName,
-        date: today,
-        startMinute: record?.startMinute ?? entry.startMinute,
-        endMinute: record?.endMinute ?? entry.endMinute,
-        room: record?.room ?? entry.room,
-        topic: topicOf(record?.topic, entry.topic),
-      };
-    }
+          classroomName: entry.classroomName,
+          date: today,
+          startMinute: record?.startMinute ?? entry.startMinute,
+          endMinute: record?.endMinute ?? entry.endMinute,
+          room: record?.room ?? entry.room,
+          topic: topicOf(record?.topic, entry.topic),
+        }
+      : null;
+    const prevDays =
+      latest && markDays
+        ? (markDays.byClass.get(latest.classroomId) ?? [])
+        : [];
     return {
       classrooms: classes.map((c) => ({
         id: c.classroomId,
@@ -655,6 +702,10 @@ export class StudentHubService {
               date: dateKey(latest.date),
               status: latest.status,
               comment: latest.comment,
+              classroomId: latest.classroomId,
+              lessonDate: prevDays.length
+                ? prevDays[prevDays.length - 1]
+                : null,
             }
           : null,
     };
@@ -960,8 +1011,7 @@ export class StudentHubService {
       },
     });
     const classes = uniqueClasses(enrollments);
-    if (!classes.length)
-      throw new ForbiddenException('Энэ тестийг танай анги хийгээгүй байна.');
+    if (!classes.length) throw notClassTest();
     const own = this.ownAttendanceKeys(enrollments);
     const [sessions, test] = await Promise.all([
       this.prisma.classTestSession.findMany({
@@ -995,16 +1045,14 @@ export class StudentHubService {
       })
       .map((s) => dateKey(s.date))
       .sort();
-    if (!dates.length)
-      throw new ForbiddenException('Энэ тестийг танай анги хийгээгүй байна.');
+    if (!dates.length) throw notClassTest();
     if (!test || test.deletedAt) throw new NotFoundException('Тест олдсонгүй');
     const open = dates.filter((d) => testOpen(d, today, test));
     if (!open.length)
-      throw new ForbiddenException(
-        dates.some((d) => d === today)
-          ? 'Энэ тест маргааш нээгдэнэ.'
-          : 'Энэ тестийг энд нээх боломжгүй.',
-      );
+      throw dates.some((d) => d === today) &&
+        testOpen(addDaysKey(today, -1), today, test)
+        ? testForbidden('NOT_OPEN_YET', 'Энэ тест маргааш нээгдэнэ.')
+        : notClassTest();
     const rows = await this.prisma.testProblem.findMany({
       where: { testId, problem: { deletedAt: null } },
       orderBy: { order: 'asc' },

@@ -27,11 +27,16 @@ export interface HubOverview {
     room: string | null;
     topic: string | null;
   } | null;
-  /** Хамгийн сүүлд багшийн тавьсан тэмдэглэгээ; date = тэмдэглэсэн өдөр (D') */
+  /**
+   * Хамгийн сүүлд багшийн тавьсан тэмдэглэгээ: date = тэмдэглэсэн өдөр (D'), lessonDate =
+   * даалгавар өгсөн хичээлийн өдөр (D; олдохгүй/хуучин анги бол null)
+   */
   latestMark: {
     date: string;
     status: HomeworkStatus;
     comment: string | null;
+    classroomId: string;
+    lessonDate: string | null;
   } | null;
 }
 
