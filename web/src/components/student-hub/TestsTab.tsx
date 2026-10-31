@@ -122,7 +122,8 @@ function TestItem({ test, showClass }: { test: HubTestListItem; showClass: boole
   return (
     <div className="flex min-h-14 items-center gap-3 px-3 py-2.5">
       {body}
-      {test.testId && !test.open && (
+      {/* 1000 бодлого, ЭЕШ сорил г.м. хэзээ ч нээгдэхгүй — зөвхөн маргааш нээгдэх тестэд тэмдэг */}
+      {test.testId && !test.open && test.closedReason === "TOMORROW" && (
         <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-ink/5 px-2.5 py-1 text-xs font-semibold text-ink-dim">
           <Clock className="size-3.5" aria-hidden />
           Маргааш нээгдэнэ

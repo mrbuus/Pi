@@ -239,9 +239,6 @@ export default function LessonFlowPage() {
         </p>
       )}
       {message && <p role="status">{message}</p>}
-      <Link href="/app/lesson-flow/my" className="text-primary underline">
-        Сурагчийн хичээлийн өдөр
-      </Link>
       {preview && (
         <>
           <Card>

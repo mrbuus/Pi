@@ -27,12 +27,17 @@ export interface HubOverview {
   latestMark: { date: string; status: HomeworkStatus; comment: string | null } | null;
 }
 
+/** Хаалттай тестийн шалтгаан: TOMORROW → «Маргааш нээгдэнэ»; NOT_AVAILABLE → юу ч бичихгүй */
+export type HubTestClosedReason = "TOMORROW" | "NOT_AVAILABLE";
+
 export interface HubDayTest {
   /** null = гараар оруулсан (гарааны) тест — нэрээрээ харагдана, нээгдэхгүй */
   testId: string | null;
   title: string;
   variant: string | null;
   open: boolean;
+  /** open=false үед л утгатай */
+  closedReason: HubTestClosedReason | null;
 }
 
 export interface HubHomeworkPhoto {
@@ -82,6 +87,8 @@ export interface HubTestListItem {
   classroomName: string;
   problemCount: number;
   open: boolean;
+  /** open=false үед л утгатай */
+  closedReason: HubTestClosedReason | null;
 }
 
 export interface HubProblemChoice {
