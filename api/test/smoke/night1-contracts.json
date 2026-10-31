@@ -1484,5 +1484,55 @@
     "roles": [
       "STUDENT"
     ]
+  },
+  {
+    "gap": "SURAGCH-V2",
+    "file": "student-hub/student-hub.controller",
+    "controller": "StudentHubController",
+    "method": "GET",
+    "path": "/api/student-hub/overview",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "SURAGCH-V2",
+    "file": "student-hub/student-hub.controller",
+    "controller": "StudentHubController",
+    "method": "GET",
+    "path": "/api/student-hub/days",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "SURAGCH-V2",
+    "file": "student-hub/student-hub.controller",
+    "controller": "StudentHubController",
+    "method": "GET",
+    "path": "/api/student-hub/tests",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "SURAGCH-V2",
+    "file": "student-hub/student-hub.controller",
+    "controller": "StudentHubController",
+    "method": "GET",
+    "path": "/api/student-hub/tests/:testId",
+    "roles": [
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "SURAGCH-V2",
+    "file": "student-hub/student-hub.controller",
+    "controller": "StudentHubController",
+    "method": "GET",
+    "path": "/api/student-hub/theory",
+    "roles": [
+      "STUDENT"
+    ]
   }
 ]
