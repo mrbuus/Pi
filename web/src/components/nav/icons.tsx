@@ -6,6 +6,7 @@ import {
   BookOpen,
   Building,
   CalendarDays,
+  Camera,
   ChevronDown,
   ClipboardCheck,
   ClipboardList,
@@ -68,10 +69,12 @@ export type IconName =
   | "clock"
   | "bell"
   | "pencil"
+  | "camera"
   | "shapes";
 
 const ICONS: Record<IconName, LucideIcon> = {
   pencil: PencilRuler,
+  camera: Camera,
   shapes: Shapes,
   school: School, wallet: Wallet, store: Store, chart: ChartNoAxesCombined, refund: Undo2, practice: Dumbbell,
   "message-square": MessageSquare,

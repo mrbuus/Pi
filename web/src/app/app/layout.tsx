@@ -8,7 +8,6 @@ import BottomTabs from "@/components/nav/BottomTabs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import Sidebar from "@/components/nav/Sidebar";
 import ClassHubTabs, { hubFor } from "@/components/nav/ClassHubTabs";
-import StudentLessonTabs, { isStudentLessonPath } from "@/components/nav/StudentLessonTabs";
 import UserMenu from "@/components/nav/UserMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
@@ -151,10 +150,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Дэд хуудсууд цэсэнд эх хэсгээ идэвхтэй харуулна: табтай хэсгүүд (Хуваарь,
   // Элсэлт) → эх мөр, анги/сурагч/ноорогийн дэлгэрэнгүй → жагсаалт.
   const hub = hubFor(displayRole, pathname);
-  // Сурагчийн «Хичээл» hub: Өнөөдөр, Нөхөх, Хуваарь → цэсэнд «Хичээл» идэвхтэй
-  const studentLesson = isStudentLessonPath(displayRole, pathname);
-  const navPathname = studentLesson
-    ? "/app/lesson-flow/my"
+  // Сурагчийн «Хичээл» hub (/app/my-class, табууд нь ?tab=) ба тестийн дэд хуудас → цэсэнд «Хичээл» идэвхтэй
+  const navPathname = displayRole === "STUDENT" && pathname.startsWith("/app/my-class/")
+    ? "/app/my-class"
     : hub
     ? hub.navHref
     : pathname.startsWith("/app/classes/")
@@ -228,7 +226,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               ? <LoadingState label="Анги удирдах хэсгийг нээж байна…" />
               : <>
                   {hub && <ClassHubTabs pathname={pathname} tabs={hub.tabs} label={hub.label} />}
-                  {studentLesson && <StudentLessonTabs pathname={pathname} />}
                   {children}
                 </>}
           </main>

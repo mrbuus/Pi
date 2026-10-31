@@ -74,14 +74,16 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/store", label: "Дэлгүүр", icon: "store" },
     TOOLS_LINK,
   ],
-  // Сурагчийн цэс — цөөн, тодорхой (эзэн 2026-10-29, SURAGCH-SHINECHLEL §1).
-  // Миний дүн, Нөхөх, Хуваарь → «Хичээл»/«Шалгалт» доторх табууд;
+  // Сурагчийн цэс — цөөн, тодорхой (эзэн 2026-10-29, SURAGCH-SHINECHLEL §1;
+  // 2026-10-31 SURAGCH-V2-GEREE: хичээлийн өдөр бүрийн мэдээлэл нэг дор).
+  // Нөхөх, Хуваарь, Ирц, Тестүүд → «Хичээл» (/app/my-class) доторх табууд;
   // Дэлгүүр, Хэрэглэгдэхүүн → баруун дээд хэрэглэгчийн цэс (STUDENT_PERSONAL_LINKS).
   STUDENT: [
     HOME.STUDENT,
     { href: "/app/homework", label: "Гэрийн даалгавар", icon: "clipboard-list" },
-    // Өнөөдөр, Нөхөх, Хуваарь табтай hub (nav/StudentLessonTabs.tsx)
-    { href: "/app/lesson-flow/my", label: "Хичээл", icon: "calendar", badge: "makeup" },
+    // Хичээлүүд, Ирц, Тестүүд, Нөхөх, Хуваарь табтай hub (student-hub/MyClassHub.tsx)
+    { href: "/app/my-class", label: "Хичээл", icon: "calendar", badge: "makeup" },
+    { href: "/app/theory", label: "Онолын зураг", icon: "camera" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/library", label: "Ном", icon: "book-open" },
     { href: "/app/student/payments", label: "Төлбөр", icon: "credit-card" },
@@ -185,6 +187,8 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/dismissal": "class",
   "/app/lesson-flow": "class",
   "/app/lesson-flow/my": "class",
+  "/app/my-class": "class",
+  "/app/theory": "learn",
   "/app/makeup": "class",
   "/app/admin/classrooms": "admin",
   // «Анги» самбар (эзэн 2026-10-13); бүртгэлийн удирдлага /app/admin/classrooms хэвээр
@@ -245,7 +249,7 @@ const COMMON_PERSONAL: NavLink[] = [
 // Бусад бүх холбоос «Бусад» дотор хэвээр — нэг ч цэс хасагдахгүй.
 const PRIMARY_BY_ROLE: Record<string, string[]> = {
   GROUP_TEACHER: ["/app/library", "/app/videos"],
-  STUDENT: ["/app/homework", "/app/lesson-flow/my", "/app/tests"],
+  STUDENT: ["/app/homework", "/app/my-class", "/app/theory"],
   TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
   TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
   ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
@@ -256,7 +260,8 @@ const PRIMARY_BY_ROLE: Record<string, string[]> = {
 // Доод мөрөнд харуулах богино шошго (урт нэр 375px-т багтахгүй).
 const SHORT_LABEL: Record<string, string> = {
   "/app/homework": "Даалгавар",
-  "/app/lesson-flow/my": "Хичээл",
+  "/app/my-class": "Хичээл",
+  "/app/theory": "Онол",
   "/app/learn": "Хичээл",
   "/app/library": "Сан",
   "/app/videos": "Видео",
