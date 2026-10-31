@@ -32,6 +32,7 @@ import {
 import { staffCovers, staffDays, type StaffActor } from './staff-access';
 import { pdfPageCount } from './pdf-pages';
 import { inUploadWindow, topicOf } from '../student-hub/student-hub.logic';
+import { classDayEvidence } from '../student-hub/lesson-days';
 
 /** Сурагчийн «Нөхөх хичээл» жагсаалтын цонх (ангийн самбарын MAKEUP_DAYS-тэй ижил) */
 export const MAKEUP_WINDOW_DAYS = 60;
@@ -158,6 +159,33 @@ export class LessonDayService {
       select: { id: true },
     });
     return !!row;
+  }
+
+  /**
+   * Онолын зураг ИЛГЭЭХ эрх (сурагч): тухайн өдөр ангид элссэн байсан — одоогийн гишүүн бол
+   * joinedAt ≤ тэр өдөр (УБ), эсвэл тэр өдөр өөрийн ирцтэй (сурагчийн самбарын visibleDay-тэй
+   * ижил); хуучин гишүүн бол тэр өдрийг хамарсан бичилт — БА тэр өдөр ангийн хичээлийн өдөр
+   * (ирц ∪ тест ∪ бүртгэл ∪ сэдэв, цуцалсныг хасаж). Асуулга 6, нэг давалгаанд.
+   */
+  private async assertStudentUploadDay(classroomId: string, studentId: string, key: string) {
+    const end = new Date(dayStart(key).getTime() + DAY_MS);
+    const [joined, evidence] = await Promise.all([
+      this.prisma.enrollment.findFirst({
+        where: {
+          classroomId,
+          studentId,
+          joinedAt: { lt: end },
+          OR: [{ leftAt: null, classroom: { archived: false } }, { leftAt: { gte: end } }],
+        },
+        select: { id: true },
+      }),
+      classDayEvidence(this.prisma, classroomId, studentId, key),
+    ]);
+    // photoAccess (classMember) аль хэдийн гишүүн гэж баталсан тул өөрийн ирц = тэр өдөр ангид байсан
+    if (!joined && !evidence.ownAttendance)
+      throw new ForbiddenException('Тухайн өдөр та энэ ангид элсээгүй байсан.');
+    if (!evidence.lessonDay)
+      throw new ForbiddenException('Энэ өдөр танай ангийн хичээлийн өдөр биш байна.');
   }
 
   /** Зургийн түлхүүр бүр илгээгчийнх (StoredFile.ownerId), зураг төрөлтэй байна. */
@@ -694,6 +722,8 @@ export class LessonDayService {
     // Сурагч: тухайн өдөр ангид элссэн (photoAccess) + өнөөдөр ба өмнөх 13 хоног
     if (kind === 'STUDENT' && !inUploadWindow(key, todayKey))
       throw new ForbiddenException('Онолын зургийг хичээл болсноос хойш 14 хоногийн дотор илгээнэ.');
+    // Сурагч: тэр өдөр элссэн байсан + ангийн хичээлийн өдөр (ажилтны дүрэм өөрчлөгдөөгүй)
+    if (kind === 'STUDENT') await this.assertStudentUploadDay(classroomId, actor.userId, key);
     const ctx = await this.dayContext(classroomId, date);
     await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`photo:${classroomId}:${key}:${actor.userId}`}))::text`;

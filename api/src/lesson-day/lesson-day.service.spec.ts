@@ -40,6 +40,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       'storedFile',
       'lessonRecord',
       'chapter',
+      'scheduleException',
     ])
       db[m] = model();
     db.$transaction = jest.fn(async (fn: (tx: unknown) => unknown) => fn(db));
@@ -183,6 +184,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
 
     it('томилогдоогүй ч ангийн гишүүн сурагч илгээнэ; томилолт зөвхөн тэмдэг', async () => {
       db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.classTestSession.findFirst.mockResolvedValue({ id: 'cts' }); // хичээлийн өдөр
       db.lessonTopic.findMany.mockResolvedValue([{ testIds: ['tA'], photoStudentId: 's1' }]);
       db.storedFile.findMany.mockResolvedValue([{ key: 'x.jpg', mime: 'image/jpeg' }]);
       const res = await service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-20', ['x.jpg']);
@@ -266,6 +268,74 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       const res = await service.uploadDayPhotos(staff('x', Role.ADMIN), 'c1', '2026-10-01', ['t.jpg']);
       expect(res.canUpload).toBe(true);
       expect(db.lessonPhoto.create.mock.calls[0][0].data).toMatchObject({ studentId: 'x' });
+      // Ажилтанд элсэлт/хичээлийн өдрийн шалгалт үгүй
+      expect(db.scheduleException.findMany).not.toHaveBeenCalled();
+      expect(db.attendance.findFirst).not.toHaveBeenCalled();
+    });
+
+    describe('сурагч: тэр өдөр элссэн байсан + ангийн хичээлийн өдөр', () => {
+      // dayContext (testIds сонгоно) ба хичээлийн өдрийн нотолгоо (scheduleId сонгоно)
+      let evidenceTopics: any[];
+      let exceptions: any[];
+      let joinedOk = true;
+      beforeEach(() => {
+        evidenceTopics = [];
+        exceptions = [];
+        db.storedFile.findMany.mockResolvedValue([{ key: 'x.jpg', mime: 'image/jpeg' }]);
+        db.lessonTopic.findMany.mockImplementation(async (args: any) =>
+          args.select.scheduleId ? evidenceTopics : [],
+        );
+        db.scheduleException.findMany.mockImplementation(async () => exceptions);
+        // classMember (photoAccess) — одоогийн гишүүн; хатуу шалгалт: joinedAt < өдрийн төгсгөл
+        db.enrollment.findFirst.mockImplementation(async (args: any) =>
+          args.where.joinedAt ? (joinedOk ? { id: 'e' } : null) : { id: 'e' },
+        );
+        joinedOk = true;
+      });
+      const upload = (date: string) =>
+        service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', date, ['x.jpg']);
+
+      it('хичээлийн өдөр биш (ямар ч нотолгоогүй) → 403', async () => {
+        await expect(upload('2026-10-21')).rejects.toMatchObject({ status: 403 });
+        expect(db.lessonPhoto.create).not.toHaveBeenCalled();
+      });
+
+      it('ирц, тест, бүртгэлийн аль нэг нь хичээлийн өдөр болгоно', async () => {
+        db.lessonRecord.findFirst.mockResolvedValueOnce({ id: 'r' });
+        await expect(upload('2026-10-21')).resolves.toMatchObject({ date: '2026-10-21' });
+        const rec = db.lessonRecord.findFirst.mock.calls[0][0];
+        expect(rec.where).toEqual({ classroomId: 'c1', date: D('2026-10-21'), cancelledAt: null });
+        const att = db.attendance.findFirst.mock.calls[0][0];
+        expect(att.where).toEqual({ classroomId: 'c1', studentId: 's2', date: D('2026-10-21') });
+        expect(att.select).toEqual({ id: true });
+      });
+
+      it('элсэхээс өмнөх өдөр 403; тэр өдөр өөрийн ирцтэй бол зөвшөөрнө', async () => {
+        joinedOk = false;
+        db.classTestSession.findFirst.mockResolvedValue({ id: 'cts' });
+        await expect(upload('2026-10-21')).rejects.toMatchObject({ status: 403 });
+        const strict = db.enrollment.findFirst.mock.calls.find((c: any[]) => c[0].where.joinedAt)[0];
+        // УБ 10-21-ний төгсгөл = 10-21T16:00Z
+        expect(strict.where.joinedAt).toEqual({ lt: new Date('2026-10-21T16:00:00.000Z') });
+        expect(strict.where.OR).toEqual([
+          { leftAt: null, classroom: { archived: false } },
+          { leftAt: { gte: new Date('2026-10-21T16:00:00.000Z') } },
+        ]);
+        db.attendance.findFirst.mockResolvedValue({ id: 'a' });
+        await expect(upload('2026-10-21')).resolves.toMatchObject({ date: '2026-10-21' });
+      });
+
+      it('зөвхөн цуцалсан хичээлийн сэдэвтэй өдөр 403; зөөж ирсэн сэдэвтэй өдөр зөвшөөрнө', async () => {
+        evidenceTopics = [{ scheduleId: 'sch1', date: D('2026-10-20') }];
+        exceptions = [{ scheduleId: 'sch1', date: D('2026-10-20'), kind: 'CANCELLED', newDate: null }];
+        await expect(upload('2026-10-20')).rejects.toMatchObject({ status: 403 });
+        evidenceTopics = [{ scheduleId: 'sch1', date: D('2026-10-18') }];
+        exceptions = [{ scheduleId: 'sch1', date: D('2026-10-18'), kind: 'MOVED', newDate: D('2026-10-22') }];
+        await expect(upload('2026-10-22')).resolves.toMatchObject({ date: '2026-10-22' });
+        evidenceTopics = [{ scheduleId: 'sch1', date: D('2026-10-23') }];
+        exceptions = [];
+        await expect(upload('2026-10-23')).resolves.toMatchObject({ date: '2026-10-23' });
+      });
     });
 
     it('myPhotos: canUpload цонхоор, assignedToMe томилолтоор', async () => {

@@ -264,6 +264,70 @@ export async function currentClass(
     : null;
 }
 
+/** Зөөгдөж ирсэн хичээлийн сэдвийг хайх хүрээ (анхны огнооноос ± хоног) */
+const MOVED_TOPIC_SPAN_DAYS = 60;
+
+/**
+ * Анги + өдөр: хичээлийн өдөр мөн эсэх (өөрийн Attendance ∪ ClassTestSession ∪ LessonRecord
+ * (цуцлаагүй) ∪ LessonTopic — цуцалсныг хасаж, зөөснийг newDate-ээр) ба өөрийн ирцтэй эсэх.
+ * Асуулга 5, нэг давалгаанд. Онолын зураг илгээх эрхэд (lesson-day).
+ */
+export async function classDayEvidence(
+  prisma: PrismaService,
+  classroomId: string,
+  studentId: string,
+  key: string,
+): Promise<{ lessonDay: boolean; ownAttendance: boolean }> {
+  const date = parseDateOnly(key);
+  const span = MOVED_TOPIC_SPAN_DAYS * 86_400_000;
+  const [own, session, record, topics, exceptions] = await Promise.all([
+    // note-ийг ХЭЗЭЭ Ч сонгохгүй
+    prisma.attendance.findFirst({
+      where: { classroomId, studentId, date },
+      select: { id: true },
+    }),
+    prisma.classTestSession.findFirst({
+      where: { classroomId, date },
+      select: { id: true },
+    }),
+    prisma.lessonRecord.findFirst({
+      where: { classroomId, date, cancelledAt: null },
+      select: { id: true },
+    }),
+    prisma.lessonTopic.findMany({
+      where: {
+        schedule: { classroomId },
+        OR: [
+          { date },
+          {
+            date: {
+              gte: new Date(date.getTime() - span),
+              lte: new Date(date.getTime() + span),
+            },
+            schedule: {
+              exceptions: { some: { kind: 'MOVED', newDate: date } },
+            },
+          },
+        ],
+      },
+      select: { scheduleId: true, date: true },
+    }),
+    prisma.scheduleException.findMany({
+      where: { schedule: { classroomId }, OR: [{ date }, { newDate: date }] },
+      select: { scheduleId: true, date: true, kind: true, newDate: true },
+    }),
+  ]);
+  const index = exceptionIndex(exceptions.map(toExceptionLite));
+  const lessonDay =
+    !!own ||
+    !!session ||
+    !!record ||
+    topics.some(
+      (t) => lessonDateOf(t.scheduleId, dateKey(t.date), index) === key,
+    );
+  return { lessonDay, ownAttendance: !!own };
+}
+
 /**
  * Ирээдүйн [fromKey, toKey] хичээлийн өдрүүд — хуваарь (цуцалсан/зөөсөн exception-тэй)
  * ∪ төлөвлөсөн LessonTopic (анхны огноо → lessonDateOf). Амралт/онцгой өдөр (AcademicCalendarDay,
