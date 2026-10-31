@@ -36,7 +36,7 @@ const COLS = "grid-cols-[1.5rem_repeat(4,minmax(0,1fr))] sm:grid-cols-[5.75rem_r
 
 /** Бүх хайрцгийн нийтлэг хэлбэр: утсан дээр дүрс дээр, бичиг доор (≥44px); компьютер дээр нэг мөр */
 export const BOX =
-  "relative flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg border px-1 py-1 text-[11px] font-medium leading-tight transition-colors sm:min-h-9 sm:flex-row sm:gap-1.5 sm:px-2 sm:text-[13px]";
+  "relative flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg border px-1 py-1 text-[11px] font-medium leading-tight sm:min-h-9 sm:flex-row sm:gap-1.5 sm:px-2 sm:text-[13px]";
 const BOX_IDLE = "border-line bg-surface text-ink-dim hover:border-ink/30 hover:text-ink";
 
 /** Онлайн дүн: «9/12», «8,5/12» */
@@ -88,7 +88,8 @@ function StatusGroup<T extends string>({
             aria-pressed={on}
             // Дахин дарвал цэвэрлэнэ
             onClick={() => onChange(on ? null : v)}
-            className={cn(BOX, "active:scale-[0.98]", on ? cn(TONE_SELECTED[meta.tone], "font-semibold") : BOX_IDLE)}
+            // Өнгө анимацигүй, дарсан агшинд солигдоно — сул утсан дээр «удаан» мэдрэгдэхгүй
+            className={cn(BOX, "active:opacity-80", on ? cn(TONE_SELECTED[meta.tone], "font-semibold") : BOX_IDLE)}
           >
             <Icon className={cn("size-4 shrink-0", on ? TONE_TEXT[meta.tone] : "opacity-60")} aria-hidden />
             <span className="cyrillic-tight max-w-full truncate">{meta.label}</span>

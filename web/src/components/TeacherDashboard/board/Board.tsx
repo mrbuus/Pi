@@ -192,7 +192,7 @@ function BoardRoot({ link }: { link: BoardLink }) {
       {cls.lessons.map((l) => (
         <span key={l.scheduleId} className="inline-flex items-center gap-1.5 font-semibold tabular-nums text-ink">
           <span>
-            {hm(l.startMinute)}–{hm(l.endMinute)}
+            {hm(l.startMinute)}
             {l.room ? "," : ""}
           </span>
           {l.room && <RoomBadge room={l.room} size="sm" />}
@@ -387,26 +387,28 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
     rememberTab(lessonNow, t);
   };
 
-  const { onAtt: saveAtt, onHw: saveHw, bulkAtt, bulkHw } = board;
+  // `recs`-ээс ХАМААРАХГҮЙ (board.current-оор уншина): эс бөгөөс товшилт бүрт функц шинэчлэгдэж
+  // 40 карт бүгд дахин зурагдаж, сул утсан дээр 200–400 мс гацдаг байв (эзэн 2026-10-31)
+  const { onAtt: saveAtt, onHw: saveHw, bulkAtt, bulkHw, current: currentRec } = board;
   const onAtt = useCallback(
     (id: string, v: AttendanceStatus | null) => {
-      const before = recs.get(id);
+      const before = currentRec(id);
       saveAtt(id, v);
-      const rec = { ...(before ?? ({} as DayRec)), att: v };
+      const rec = { ...before, att: v };
       const wants = v === "LATE" || v === "ABSENT" || v === "EXCUSED";
       setUi((u) => ({ open: nextOpen(u.open, id, rec, wants, homework), bulk: { ...u.bulk, att: without(u.bulk.att, id) } }));
     },
-    [recs, saveAtt, homework],
+    [currentRec, saveAtt, homework],
   );
   const onHw = useCallback(
     (id: string, v: HomeworkStatus | null) => {
-      const before = recs.get(id);
+      const before = currentRec(id);
       saveHw(id, v);
-      const rec = { ...(before ?? ({} as DayRec)), hw: v };
+      const rec = { ...before, hw: v };
       const wants = v === "PARTIAL" || v === "NOT_DONE";
       setUi((u) => ({ open: nextOpen(u.open, id, rec, wants, homework), bulk: { ...u.bulk, hw: without(u.bulk.hw, id) } }));
     },
-    [recs, saveHw, homework],
+    [currentRec, saveHw, homework],
   );
   const onToggle = useCallback((id: string) => {
     setUi((u) => {

@@ -155,6 +155,8 @@ export function useBoard(classId: string | null, date: string) {
 
   /* ───────── 15 сек тутам (харагдаж байхад) шинэчлэх ───────── */
 
+  /** Сүүлд хэрэглэсэн хариу — яг ижил бол дэлгэцийг дахин зурахгүй (сул утсанд 15 сек тутам гацахгүй) */
+  const lastPoll = useRef("");
   const poll = useCallback(async () => {
     const { classId: cid, date: d } = ctx.current;
     if (!cid || document.visibilityState !== "visible") return;
@@ -162,6 +164,9 @@ export function useBoard(classId: string | null, date: string) {
     try {
       const p = await api<MarksPayload>(`/attendance/classrooms/${encodeURIComponent(cid)}/marks?date=${d}`);
       if (ctx.current.classId !== cid || ctx.current.date !== d) return;
+      const key = `${cid}|${d}|${JSON.stringify(p)}`;
+      if (key === lastPoll.current && epoch.current === at) return;
+      lastPoll.current = key;
       setRisk(p.risk);
       setSent(p.sent?.students ?? []);
       setRecordedBy(p.recordedBy ?? null);
@@ -573,6 +578,8 @@ export function useBoard(classId: string | null, date: string) {
     recordedBy,
     criteria,
     save,
+    /** Хамгийн сүүлийн бүртгэл (түр утгатай) — тогтвортой, render-ээс хамаарахгүй */
+    current,
     onAtt,
     onRange,
     onAttNote,

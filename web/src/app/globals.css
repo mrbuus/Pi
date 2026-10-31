@@ -238,6 +238,19 @@ html {
   color-scheme: light dark;
 }
 
+/* Утсан дээр товшилт хоцрохгүй (давхар товшилтоор томруулахыг хүлээхгүй), саарал
+   тодруулга гарахгүй — товч дарахад шууд хариулна (эзэн 2026-10-31) */
+a,
+button,
+summary,
+label,
+select,
+[role="button"],
+[role="tab"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background: var(--bg);
   color: var(--ink);

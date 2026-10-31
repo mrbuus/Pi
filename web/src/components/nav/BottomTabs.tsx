@@ -35,7 +35,7 @@ export default function BottomTabs({
   return (
     <nav
       aria-label="Гол цэс"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="mx-auto grid max-w-lg auto-cols-fr grid-flow-col gap-1 px-2 py-1.5">
         {tabs.map((t) => {

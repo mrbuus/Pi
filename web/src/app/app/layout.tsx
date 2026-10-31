@@ -185,8 +185,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col">
+          {/* backdrop-blur үгүй: сул утсан дээр гүйлгэх, товшилт бүрт бүдгэрүүлгийг дахин зурж гацаадаг (эзэн 2026-10-31) */}
           {!examFullscreen && (
-            <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur">
+            <header className="sticky top-0 z-30 border-b border-line bg-bg">
               <div className="flex h-14 items-center gap-3 px-4">
                 <ContextNavigation role={displayRole ?? role} pathname={pathname} />
                 {pageTitle && (
