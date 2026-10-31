@@ -151,7 +151,7 @@ export async function photosToPdf(
   }
   const bytes = await doc.save({ useObjectStreams: true });
   if (bytes.length > PDF_MAX_BYTES)
-    throw new Error("PDF хэт том болчихлоо. Зургийн тоог цөөлөөд дахин оролдоно уу");
+    throw new Error("Зураг хэт том болчихлоо. Зургийн тоог цөөлөөд дахин оролдоно уу");
   const file = new File([bytes as BlobPart], opts.fileName ?? "zurag.pdf", { type: "application/pdf" });
   return { file, pages: photos.length };
 }
