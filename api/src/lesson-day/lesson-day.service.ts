@@ -31,6 +31,7 @@ import {
 } from './makeup.logic';
 import { staffCovers, staffDays, type StaffActor } from './staff-access';
 import { pdfPageCount } from './pdf-pages';
+import { inUploadWindow } from '../student-hub/student-hub.logic';
 
 /** Сурагчийн «Нөхөх хичээл» жагсаалтын цонх (ангийн самбарын MAKEUP_DAYS-тэй ижил) */
 export const MAKEUP_WINDOW_DAYS = 60;
@@ -627,7 +628,8 @@ export class LessonDayService {
       this.names([...(ctx.assignedId ? [ctx.assignedId] : []), ...ctx.photos.map((p) => p.studentId)]),
     ]);
     const key = dateKey(date);
-    const upcoming = key > dateKey(todayUB());
+    const todayKey = dateKey(todayUB());
+    const upcoming = key > todayKey;
     return {
       classroomId,
       classroomName: ctx.classroom.name,
@@ -644,7 +646,10 @@ export class LessonDayService {
             isMe: ctx.assignedId === actor.userId,
           }
         : null,
-      canUpload: !upcoming && (kind === 'STAFF' || ctx.assignedId === actor.userId),
+      // Эзэн 2026-10-31 (СУРАГЧ V2): тухайн өдөр ангид элссэн АЛЬ Ч сурагч өнөөдөр ба өмнөх
+      // 13 хоногт илгээнэ; томилогдсон эсэх нь зөвхөн «Томилогдсон» тэмдэг.
+      canUpload: !upcoming && (kind === 'STAFF' || inUploadWindow(key, todayKey)),
+      assignedToMe: !!ctx.assignedId && ctx.assignedId === actor.userId,
       photos: ctx.photos
         .filter((p) => p.imageKeys.length)
         .map((p) => ({
@@ -661,12 +666,14 @@ export class LessonDayService {
   async uploadDayPhotos(actor: Actor, classroomId: string, dateText: string, keys: string[]) {
     const date = this.day(dateText);
     const key = dateKey(date);
-    if (key > dateKey(todayUB()))
+    const todayKey = dateKey(todayUB());
+    if (key > todayKey)
       throw new BadRequestException('Хичээл болсны дараа онолын зургаа илгээнэ.');
     const kind = await this.photoAccess(actor, classroomId, date);
+    // Сурагч: тухайн өдөр ангид элссэн (photoAccess) + өнөөдөр ба өмнөх 13 хоног
+    if (kind === 'STUDENT' && !inUploadWindow(key, todayKey))
+      throw new ForbiddenException('Онолын зургийг хичээл болсноос хойш 14 хоногийн дотор илгээнэ.');
     const ctx = await this.dayContext(classroomId, date);
-    if (kind === 'STUDENT' && ctx.assignedId !== actor.userId)
-      throw new ForbiddenException('Энэ өдрийн онолын зургийг томилогдсон сурагч илгээнэ.');
     await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`photo:${classroomId}:${key}:${actor.userId}`}))::text`;
       const mine = await tx.lessonPhoto.findFirst({
@@ -771,7 +778,8 @@ export class LessonDayService {
         uploader: d.assignedId
           ? { name: names.get(d.assignedId) ?? 'Сурагч', isMe: d.assignedId === studentId }
           : null,
-        canUpload: d.assignedId === studentId && d.date <= todayKey,
+        canUpload: inUploadWindow(d.date, todayKey),
+        assignedToMe: d.assignedId === studentId,
         photos: d.photos.map((p) => ({
           id: p.id,
           uploaderName: names.get(p.studentId) ?? 'Сурагч',

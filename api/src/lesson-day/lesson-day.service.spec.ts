@@ -174,21 +174,78 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
     await expect(service.submitMakeupPhotos('s9', 'c1', '2026-10-10', [])).rejects.toMatchObject({ status: 404 });
   });
 
-  it('онолын зураг: томилогдоогүй сурагч илгээхгүй, томилогдсон нь илгээнэ', async () => {
-    db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
-    db.lessonTopic.findMany.mockResolvedValue([{ testIds: ['tA'], photoStudentId: 's1' }]);
-    await expect(
-      service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-10', ['x.jpg']),
-    ).rejects.toMatchObject({ status: 403 });
-    db.storedFile.findMany.mockResolvedValue([{ key: 'p.jpg', mime: 'image/png' }]);
-    await service.uploadDayPhotos(staff('s1', Role.STUDENT), 'c1', '2026-10-10', ['p.jpg']);
-    expect(db.lessonPhoto.create.mock.calls[0][0].data).toMatchObject({
-      classroomId: 'c1',
-      studentId: 's1',
-      imageKeys: ['p.jpg'],
-      testIds: ['tA'],
+  describe('онолын зураг илгээх (СУРАГЧ V2, эзэн 2026-10-31)', () => {
+    // УБ 2026-10-24 18:00
+    beforeEach(() => jest.useFakeTimers({ now: new Date('2026-10-24T10:00:00Z'), doNotFake: ['nextTick', 'setImmediate'] }));
+    afterEach(() => jest.useRealTimers());
+
+    it('томилогдоогүй ч ангийн гишүүн сурагч илгээнэ; томилолт зөвхөн тэмдэг', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.lessonTopic.findMany.mockResolvedValue([{ testIds: ['tA'], photoStudentId: 's1' }]);
+      db.storedFile.findMany.mockResolvedValue([{ key: 'x.jpg', mime: 'image/jpeg' }]);
+      const res = await service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-20', ['x.jpg']);
+      expect(db.lessonPhoto.create.mock.calls[0][0].data).toMatchObject({
+        classroomId: 'c1',
+        studentId: 's2',
+        imageKeys: ['x.jpg'],
+        testIds: ['tA'],
+      });
+      expect(res.canUpload).toBe(true);
+      expect(res.assignedToMe).toBe(false);
+      expect(res.uploader).toMatchObject({ isMe: false });
+      expect(res.uploader).not.toHaveProperty('studentId');
+      expect(db.lessonTopic.findMany.mock.calls[0][0].select).not.toHaveProperty('dismissMode');
     });
-    expect(db.lessonTopic.findMany.mock.calls[0][0].select).not.toHaveProperty('dismissMode');
+
+    it('томилогдсон сурагчид assignedToMe = true', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.lessonTopic.findMany.mockResolvedValue([{ testIds: [], photoStudentId: 's1' }]);
+      const res = await service.dayPhotos(staff('s1', Role.STUDENT), 'c1', '2026-10-24');
+      expect(res).toMatchObject({ canUpload: true, assignedToMe: true, uploader: { isMe: true } });
+    });
+
+    it('14 хоногоос өмнөх өдөр сурагч илгээхгүй (403), харах нь хэвээр', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      await expect(
+        service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-10', ['x.jpg']),
+      ).rejects.toMatchObject({ status: 403 });
+      expect(db.lessonPhoto.create).not.toHaveBeenCalled();
+      const view = await service.dayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-10');
+      expect(view.canUpload).toBe(false);
+      // 13 хоногийн өмнөх өдөр — цонхны эхлэл
+      const edge = await service.dayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-11');
+      expect(edge.canUpload).toBe(true);
+    });
+
+    it('ирээдүйн өдөр 400, ангид хамааралгүй сурагч 403', async () => {
+      await expect(
+        service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-25', ['x.jpg']),
+      ).rejects.toMatchObject({ status: 400 });
+      db.enrollment.findFirst.mockResolvedValue(null);
+      await expect(
+        service.uploadDayPhotos(staff('s9', Role.STUDENT), 'c1', '2026-10-24', ['x.jpg']),
+      ).rejects.toMatchObject({ status: 403 });
+    });
+
+    it('ажилтны дүрэм хэвээр: 14 хоногоос өмнөх өдөр ч илгээнэ', async () => {
+      db.storedFile.findMany.mockResolvedValue([{ key: 't.jpg', mime: 'image/jpeg' }]);
+      const res = await service.uploadDayPhotos(staff('x', Role.ADMIN), 'c1', '2026-10-01', ['t.jpg']);
+      expect(res.canUpload).toBe(true);
+      expect(db.lessonPhoto.create.mock.calls[0][0].data).toMatchObject({ studentId: 'x' });
+    });
+
+    it('myPhotos: canUpload цонхоор, assignedToMe томилолтоор', async () => {
+      db.enrollment.findMany.mockResolvedValue([{ classroomId: 'c1', classroom: { name: 'QA' } }]);
+      db.lessonTopic.findMany.mockResolvedValue([
+        { date: D('2026-10-22'), testIds: [], photoStudentId: 's1', schedule: { classroomId: 'c1' } },
+        { date: D('2026-10-01'), testIds: [], photoStudentId: 's2', schedule: { classroomId: 'c1' } },
+      ]);
+      const rows = await service.myPhotos('s2');
+      expect(rows.map((r) => [r.date, r.canUpload, r.assignedToMe])).toEqual([
+        ['2026-10-22', true, false],
+        ['2026-10-01', false, true],
+      ]);
+    });
   });
 
   it('онолын зураг: ангид хамааралгүй сурагч харахгүй', async () => {
