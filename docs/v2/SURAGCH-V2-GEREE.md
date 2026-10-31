@@ -38,8 +38,11 @@
 - **Харуулахгүй талбарууд:** `LessonNote`, `LessonRecord.description`, `dismissMode`.
 - **Тест:** анги ClassTestSession-оор хийсэн (`testId` null биш) тест. Нээх нөхцөл нь гарсан өдрийн маргааш (`date < todayUB`); энэ нь `classroomRelease`-ийн дүрэмтэй адил. Тухайн өдөр нээгдэхгүй.
   - **Гарааны тест:** `manualTitle`-тай мөр жагсаалтад нэрээрээ харагдана, нээх боломжгүй.
+  - **Идэвхжсэн сурагч л** (`hasActiveClassroomEnrollment`: CLASSROOM профайл + `activatedAt` + одоогийн анги) тест нээнэ — `homework-practice` `loadSlots`-той ижил.
+  - `closedReason`: `TOMORROW` (өнөөдөр хийсэн → «Маргааш нээгдэнэ»), `NOT_AVAILABLE` (1000 бодлого, ЭЕШ сорил, гарааны тест, идэвхжээгүй → тэмдэггүй, дарагдахгүй).
+- **Цуцалсан/зөөсөн хичээл:** LessonTopic/LessonStaffing анхны огноогоороо хадгалагддаг. CANCELLED exception-тэй бол хичээлийн өдөр биш, MOVED бол `newDate`-д тооцно. Ирээдүйн хичээлээс (урьдчилан илгээх) AcademicCalendarDay (бүх анги эсвэл тухайн анги) хасагдана.
 - **Онолын зураг харах:** тухайн өдөр ангид элссэн байсан сурагч харна (одоо байгаа `classMember`).
-- **Онолын зураг илгээх:** ШИНЭ дүрэм. Тухайн өдөр ангид элссэн аль ч сурагч илгээж болно. Хугацаа нь өнөөдөр ба сүүлийн 14 хоног.
+- **Онолын зураг илгээх:** ШИНЭ дүрэм. Тухайн өдөр ангид элссэн аль ч сурагч илгээж болно (одоогийн гишүүн бол `joinedAt` ≤ тэр өдөр, эсвэл тэр өдөр өөрийн ирцтэй). Тэр өдөр ангийн хичээлийн өдөр байх ёстой. Хугацаа нь өнөөдөр ба сүүлийн 14 хоног.
   - Томилогдсон сурагч (`photoStudentId`) байвал «Томилогдсон» гэж тодорно.
   - Сурагч бүрийн илгээсэн зураг тусдаа (одоо байгаа LessonPhoto, нэг сурагч нэг өдөрт нэг мөр).
 - **Даалгаврын зураг:** сүүлийн 14 хоногийн ХИЧЭЭЛИЙН ӨДӨР БҮРД илгээж болно. B хувилбартай тест байх албагүй.
@@ -66,7 +69,7 @@ GET /student-hub/days?month=YYYY-MM      (өгөгдмөл: одоогийн с�
     topic|null,
     teachers: string[],           // LessonRecord/LessonStaffing-ийн нэр, Багш+ нэрэнд «+»
     problemNumbers: string|null,  // LessonRecord.problemNumbersText
-    tests: [{ testId|null, title, variant|null, open: boolean }],
+    tests: [{ testId|null, title, variant|null, open: boolean, closedReason: 'TOMORROW'|'NOT_AVAILABLE'|null }],
     attendance: { status, lateRange|null } | null,
     homework: { status|null, comment|null, checkedOn: date|null } ,  // checkedOn = D'
     theory: { count, mine: boolean, canUpload: boolean, assignedToMe: boolean },
@@ -76,16 +79,17 @@ GET /student-hub/days?month=YYYY-MM      (өгөгдмөл: одоогийн с�
 }
 
 GET /student-hub/tests?q=
-→ [{ testId|null, title, variant|null, date, classroomName, problemCount, open }]   // огноогоор буурах
+→ [{ testId|null, title, variant|null, date, classroomName, problemCount, open, closedReason }]   // огноогоор буурах; идэвхжээгүй сурагчид []
 
 GET /student-hub/tests/:testId
 → { testId, title, variant, date, problems: [{ id, order, stem, imageKey|null, choices: [{label,text,imageKey|null}], correctAnswer, hasVideo }] }
-   // 403: анги хийгээгүй, эсвэл өнөөдөр хийсэн (маргааш нээгдэнэ)
+   // 403: анги хийгээгүй, идэвхжээгүй сурагч (NOT_CLASS_TEST), эсвэл өнөөдөр хийсэн (NOT_OPEN_YET)
 
 GET /student-hub/theory?q=&from=&to=
 → [{ classroomId, classroomName, date, topic|null, tests: string[], count, uploaders: string[], canUpload }]
    // q: сэдэв (LessonTopic.title, LessonRecord.topic, Chapter.title) ба тестийн нэрээр, том жижиг үсэг ялгахгүй
    // q байхгүй бол хичээлийн бүх өдөр (зураггүй өдөр ч орно, count=0) — from/to өгөгдмөл: сүүлийн 60 хоног
+   // q-тэй, from-гүй бол from = max(2026-09-01, to − 400 хоног); «хэт урт» 400 зөвхөн ИЛ өгсөн хүрээнд
 ```
 
 Онолын зураг өдрөөр харах, илгээх хэсэгт одоо байгаа endpoint-ууд хэвээр ашиглагдана. Зөвхөн илгээх эрхийн дүрэм өөрчлөгдөнө:
@@ -102,7 +106,7 @@ POST   /homework/photos   { classroomId, date, fileKey, pages }
 DELETE /homework/photos/:id
 ```
 
-Ачаалал: endpoint бүр ≤ 6 асуулга, `Promise.all` ашиглана. N+1 асуулга хориотой. Сар нь ≤ 31 өдөр.
+Ачаалал: relation-гүй хавтгай `findMany` (`classroomId IN (…)` + огноо), `Promise.all` давалгаа: overview 12 асуулга/2 давалгаа, days ≤ 16/3, theory ≤ 12/3, tests ≤ 6/3. N+1 асуулга хориотой. Сар нь ≤ 31 өдөр.
 
 ## Вэб
 
