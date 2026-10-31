@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, CalendarDays, Camera, ChevronRight, Images, Search, SearchX, X } from "lucide-react";
+import { CalendarDays, Camera, ChevronRight, Images, Search, SearchX, X } from "lucide-react";
 import { dayLabel } from "@/components/makeup/types";
 import { todayKeyUB } from "@/components/homework-practice/lib";
 import { PageHeader } from "@/components/ui/Surface";
@@ -131,7 +131,6 @@ export default function TheoryBrowser() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
-  const pushed = useRef(false);
   const scrollY = useRef(0);
   const autoOpened = useRef(false);
 
@@ -188,7 +187,6 @@ export default function TheoryBrowser() {
   }, [openDay]);
 
   const markOpen = useCallback(() => {
-    pushed.current = true;
     scrollY.current = window.scrollY;
   }, []);
 
@@ -213,25 +211,11 @@ export default function TheoryBrowser() {
       rows?.find((r) => rowKey(r) === rowKey(openDay)) ?? todayRows.find((r) => rowKey(r) === rowKey(openDay));
     return (
       <div className="mx-auto max-w-2xl">
-        <div className="mb-4 flex items-start gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Буцах"
-            onClick={() => {
-              if (pushed.current) {
-                pushed.current = false;
-                router.back();
-              } else router.replace("/app/theory");
-            }}
-          >
-            <ArrowLeft className="size-5" aria-hidden />
-          </Button>
-          <div className="min-w-0 flex-1 pt-1">
-            <h1 className="cyrillic-heading text-xl font-extrabold tracking-tight text-ink">{dayLabel(openDay.date)}</h1>
-            {meta && <p className="text-sm text-ink-dim">{meta.classroomName}</p>}
-          </div>
-        </div>
+        {/* Буцах товч бүрхүүлийнх (ContextNavigation) — өмнөх хуудас руу */}
+        <header className="mb-4">
+          <h1 className="cyrillic-heading text-xl font-extrabold tracking-tight text-ink">{dayLabel(openDay.date)}</h1>
+          {meta && <p className="text-sm text-ink-dim">{meta.classroomName}</p>}
+        </header>
         <div className="chunky p-4 sm:p-5">
           <TheoryDayPanel
             key={rowKey(openDay)}
@@ -246,7 +230,7 @@ export default function TheoryBrowser() {
 
   const chip = (active: boolean) =>
     cn(
-      "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition focus-within:ring-2 focus-within:ring-brand-bright",
+      "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold transition focus-within:ring-2 focus-within:ring-brand-bright",
       active ? "border-brand-bright bg-brand-bright text-on-brand" : "border-line bg-surface text-ink hover:border-brand-bright",
     );
   const customDate = !!dateFilter && dateFilter !== today && dateFilter !== yesterday;
@@ -292,7 +276,7 @@ export default function TheoryBrowser() {
             </button>
           )}
         </label>
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
           <button type="button" className={chip(!dateFilter)} onClick={() => setDateFilter("")} aria-pressed={!dateFilter}>
             Бүгд
           </button>

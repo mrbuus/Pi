@@ -121,7 +121,7 @@ export default function PageViewer({
       role="dialog"
       aria-modal="true"
       aria-labelledby="page-viewer-title"
-      className="fixed inset-0 z-[80] flex flex-col bg-black/95 text-white"
+      className="fixed inset-0 z-[80] flex flex-col bg-black text-white"
     >
       <div className="flex shrink-0 items-center gap-1 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-1">
         <div className="min-w-0 flex-1 px-2">

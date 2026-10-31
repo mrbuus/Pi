@@ -72,7 +72,7 @@ export default function HomeworkPhotoPanel({
         <div className="mb-3 flex items-center gap-2">
           <HwSentIcon className="size-5 shrink-0 text-brand-soft" />
           <h3 className="font-bold text-ink">Дэвтрийн зураг</h3>
-          <span className="ml-auto text-xs tabular-nums text-ink-dim">{HOMEWORK_MAX_PAGES} хүртэл хуудас</span>
+          {canSend && <span className="ml-auto text-xs tabular-nums text-ink-dim">{HOMEWORK_MAX_PAGES} хүртэл хуудас</span>}
         </div>
       )}
       <PhotoSetSender

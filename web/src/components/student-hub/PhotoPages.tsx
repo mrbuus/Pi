@@ -53,7 +53,9 @@ export default function PhotoPages({
     return () => io.disconnect();
   }, [autoLoad]);
 
-  const state = usePdfPages(keys, visible);
+  // Үзэгчийг хаахад кэшээс дахин уншина (үзэгч татсан бол жижиг зураг ч гарна)
+  const [seen, setSeen] = useState(0);
+  const state = usePdfPages(keys, visible, seen);
   const total = state.status === "ready" ? state.urls.length : Math.max(1, pages);
   const shown = Math.min(total, max);
   const extra = total - shown;
@@ -100,7 +102,17 @@ export default function PhotoPages({
         })}
       </ul>
       {open !== null && (
-        <PageViewer keys={keys} pages={total} start={open} title={title} subtitle={subtitle} onClose={() => setOpen(null)} />
+        <PageViewer
+          keys={keys}
+          pages={total}
+          start={open}
+          title={title}
+          subtitle={subtitle}
+          onClose={() => {
+            setOpen(null);
+            setSeen((n) => n + 1);
+          }}
+        />
       )}
     </>
   );
