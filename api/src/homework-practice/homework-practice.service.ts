@@ -10,6 +10,7 @@ import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  currentClass,
   loadLessonDays,
   loadUpcomingDays,
   visibleLessonDays,
@@ -539,8 +540,10 @@ export class HomeworkPracticeService {
     today: string,
   ): Promise<boolean> {
     if (inAdvanceWindow(date, today)) {
-      const set = await loadLessonDays(this.prisma, studentId, today, today, classroomId);
-      const upcoming = await loadUpcomingDays(this.prisma, set.classes, date, date);
+      // Одоогийн анги (нэг асуулга); ирээдүйн өдөр тул өөрийн ирц байхгүй — элссэн өдрөөс хойш л
+      const cls = await currentClass(this.prisma, studentId, classroomId);
+      if (!cls || date < cls.joinedKey) return false;
+      const upcoming = await loadUpcomingDays(this.prisma, [cls], date, date);
       return (upcoming.get(classroomId) ?? []).includes(date);
     }
     if (inUploadWindow(date, today)) {

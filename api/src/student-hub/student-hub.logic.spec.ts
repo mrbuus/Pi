@@ -2,10 +2,13 @@ import {
   attendanceSummary,
   correctAnswerOf,
   dayKey,
+  exceptionIndex,
   homeworkFor,
   homeworkSummary,
   hubProblem,
   inUploadWindow,
+  isHolidayFor,
+  lessonDateOf,
   lessonDaysByClass,
   matchesWords,
   monthWindow,
@@ -16,6 +19,7 @@ import {
   resolveRange,
   shiftMonth,
   testOpen,
+  testState,
   topicOf,
   ubMinuteOfDay,
   visibleDay,
@@ -52,6 +56,46 @@ describe('student-hub.logic — хичээлийн өдрийн нэгдэл', (
     expect(visibleDay('2026-10-20', '2026-10-22', false)).toBe(false);
     expect(visibleDay('2026-10-20', '2026-10-22', true)).toBe(true);
     expect(visibleDay('2026-10-22', '2026-10-22', false)).toBe(true);
+  });
+});
+
+describe('student-hub.logic — цуцалсан/зөөсөн хичээл, амралт', () => {
+  const index = exceptionIndex([
+    { scheduleId: 's1', date: '2026-10-20', kind: 'CANCELLED', newDate: null },
+    {
+      scheduleId: 's1',
+      date: '2026-10-22',
+      kind: 'MOVED',
+      newDate: '2026-10-24',
+    },
+    { scheduleId: 's2', date: '2026-10-22', kind: 'MOVED', newDate: null },
+  ]);
+
+  it('сэдвийн анхны огноо: цуцалсан → null, зөөсөн → шинэ огноо, ижил өдөр цаг солисон → хэвээр', () => {
+    expect(lessonDateOf('s1', '2026-10-20', index)).toBeNull();
+    expect(lessonDateOf('s1', '2026-10-22', index)).toBe('2026-10-24');
+    expect(lessonDateOf('s2', '2026-10-22', index)).toBe('2026-10-22');
+    expect(lessonDateOf('s1', '2026-10-27', index)).toBe('2026-10-27');
+    // Өөр хуваарийн exception нөлөөлөхгүй
+    expect(lessonDateOf('s3', '2026-10-20', index)).toBe('2026-10-20');
+  });
+
+  it('амралт: бүх ангид (classroomIds хоосон) эсвэл зөвхөн заасан ангид', () => {
+    const holidays = [
+      { date: '2026-11-01', type: 'HOLIDAY', title: 'Бүгд', classroomIds: [] },
+      {
+        date: '2026-11-02',
+        type: 'NO_CLASS',
+        title: 'c1',
+        classroomIds: ['c1'],
+      },
+      { date: '2026-11-03', type: 'BREAK', title: 'Заагаагүй' },
+    ];
+    expect(isHolidayFor(holidays, 'c2', '2026-11-01')).toBe(true);
+    expect(isHolidayFor(holidays, 'c1', '2026-11-02')).toBe(true);
+    expect(isHolidayFor(holidays, 'c2', '2026-11-02')).toBe(false);
+    expect(isHolidayFor(holidays, 'c2', '2026-11-03')).toBe(true);
+    expect(isHolidayFor(holidays, 'c1', '2026-11-04')).toBe(false);
   });
 });
 
@@ -210,6 +254,46 @@ describe('student-hub.logic — тест нээх дүрэм', () => {
         type: 'CHAPTER_EXAM',
       }),
     ).toBe(true);
+  });
+});
+
+describe('student-hub.logic — тестийн хаалттай шалтгаан', () => {
+  const daily = { deletedAt: null, type: 'DAILY' };
+  it('нээлттэй → шалтгаангүй; өнөөдөр хийсэн → TOMORROW', () => {
+    expect(testState('2026-10-30', '2026-10-31', daily, true)).toEqual({
+      open: true,
+      closedReason: null,
+    });
+    expect(testState('2026-10-31', '2026-10-31', daily, true)).toEqual({
+      open: false,
+      closedReason: 'TOMORROW',
+    });
+  });
+
+  it('хэзээ ч нээгдэхгүй (1000 бодлого, ЭЕШ сорил, гараар, устсан, идэвхжээгүй) → NOT_AVAILABLE', () => {
+    for (const type of ['THOUSAND', 'EESH_MOCK'])
+      for (const date of ['2026-10-30', '2026-10-31'])
+        expect(
+          testState(date, '2026-10-31', { deletedAt: null, type }, true),
+        ).toEqual({ open: false, closedReason: 'NOT_AVAILABLE' });
+    expect(testState('2026-10-31', '2026-10-31', null, true).closedReason).toBe(
+      'NOT_AVAILABLE',
+    );
+    expect(
+      testState(
+        '2026-10-30',
+        '2026-10-31',
+        { deletedAt: new Date(), type: 'DAILY' },
+        true,
+      ).closedReason,
+    ).toBe('NOT_AVAILABLE');
+    expect(testState('2026-10-30', '2026-10-31', daily, false)).toEqual({
+      open: false,
+      closedReason: 'NOT_AVAILABLE',
+    });
+    expect(
+      testState('2026-10-31', '2026-10-31', daily, false).closedReason,
+    ).toBe('NOT_AVAILABLE');
   });
 });
 

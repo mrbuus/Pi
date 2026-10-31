@@ -3,14 +3,19 @@ import { ubDateKey } from '../attendance/board-logic';
 import type { PrismaService } from '../prisma/prisma.service';
 import type {
   ResolverException,
+  ResolverHoliday,
   ResolverSchedule,
 } from '../schedule/week-resolver';
 import {
   dayKey,
+  exceptionIndex,
+  isHolidayFor,
+  lessonDateOf,
   lessonDaysByClass,
   resolveRange,
   topicOf,
   visibleDay,
+  type ExceptionLite,
   type LessonDayEvidence,
 } from './student-hub.logic';
 
@@ -31,11 +36,27 @@ export interface LessonDaySet {
   topics: Map<string, string | null>;
 }
 
+/** ScheduleException мөр → ExceptionLite (огноо «YYYY-MM-DD») */
+export function toExceptionLite(x: {
+  scheduleId: string;
+  date: Date;
+  kind: 'CANCELLED' | 'MOVED';
+  newDate: Date | null;
+}): ExceptionLite {
+  return {
+    scheduleId: x.scheduleId,
+    date: dateKey(x.date),
+    kind: x.kind,
+    newDate: x.newDate ? dateKey(x.newDate) : null,
+  };
+}
+
 /**
  * Сурагчийн ОДООГИЙН (leftAt null, архивлаагүй) ангиудын [fromKey, toKey] хичээлийн өдрүүд:
- * өөрийн Attendance ∪ LessonTopic ∪ ClassTestSession ∪ LessonRecord (цуцлаагүй). Асуулга 5
- * (сэдэвгүй бүлгийн нэр хэрэгтэй үед +1), хоёр давалгаанд (N+1 үгүй). homework-practice
- * (гэрийн даалгаврын зураг, /homework/my) ашиглана.
+ * өөрийн Attendance ∪ LessonTopic ∪ ClassTestSession ∪ LessonRecord (цуцлаагүй). LessonTopic
+ * анхны огноогоороо хадгалагддаг тул CANCELLED exception-тэй сэдэв хичээлийн өдөр болохгүй,
+ * MOVED нь newDate руу шилжинэ (lessonDateOf). Асуулга 6 (+ ангийн нэр, сэдэвгүй бүлгийн нэр),
+ * хоёр давалгаанд (N+1 үгүй). homework-practice (гэрийн даалгаврын зураг, /homework/my) ашиглана.
  */
 export async function loadLessonDays(
   prisma: PrismaService,
@@ -80,16 +101,22 @@ export async function loadLessonDays(
       topics: new Map(),
     };
   const ids = classes.map((c) => c.classroomId);
-  const [topics, sessions, records] = await Promise.all([
+  const [topicRows, exceptions, sessions, records] = await Promise.all([
     prisma.lessonTopic.findMany({
       where: { date: range, schedule: { classroomId: { in: ids } } },
       // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй
       select: {
+        scheduleId: true,
         date: true,
         title: true,
         chapterId: true,
         schedule: { select: { classroomId: true } },
       },
+    }),
+    // Сэдвийн анхны огнооны цуцлалт/зөөлт
+    prisma.scheduleException.findMany({
+      where: { date: range, schedule: { classroomId: { in: ids } } },
+      select: { scheduleId: true, date: true, kind: true, newDate: true },
     }),
     prisma.classTestSession.findMany({
       where: { classroomId: { in: ids }, date: range },
@@ -103,12 +130,23 @@ export async function loadLessonDays(
   ]);
   const current = new Set(ids);
   const own = attendance.filter((a) => current.has(a.classroomId));
+  const exIndex = exceptionIndex(exceptions.map(toExceptionLite));
+  const topics = topicRows.flatMap((t) => {
+    const date = lessonDateOf(t.scheduleId, dateKey(t.date), exIndex);
+    return date
+      ? [
+          {
+            classroomId: t.schedule.classroomId,
+            date,
+            title: t.title,
+            chapterId: t.chapterId,
+          },
+        ]
+      : [];
+  });
   const evidence: LessonDayEvidence[] = [
     ...own.map((a) => ({ classroomId: a.classroomId, date: dateKey(a.date) })),
-    ...topics.map((t) => ({
-      classroomId: t.schedule.classroomId,
-      date: dateKey(t.date),
-    })),
+    ...topics.map((t) => ({ classroomId: t.classroomId, date: t.date })),
     ...sessions.map((s) => ({
       classroomId: s.classroomId,
       date: dateKey(s.date),
@@ -150,7 +188,7 @@ export async function loadLessonDays(
   for (const r of records)
     if (r.topic) at(dayKey(r.classroomId, dateKey(r.date))).rec.push(r.topic);
   for (const t of topics) {
-    const c = at(dayKey(t.schedule.classroomId, dateKey(t.date)));
+    const c = at(dayKey(t.classroomId, t.date));
     c.topic.push(t.title);
     const ch = t.chapterId ? chapters.get(t.chapterId) : undefined;
     if (ch) c.chapter.push(ch);
@@ -203,9 +241,34 @@ export function uniqueClasses(
 }
 
 /**
+ * Сурагчийн тухайн ОДООГИЙН (leftAt null, архивлаагүй) анги — нэг асуулга. Хоёр идэвхтэй
+ * бичилт байвал эртнийхийг (uniqueClasses-ийн дүрэм). classroomName хоосон (хэрэглэхгүй дуудагчид).
+ */
+export async function currentClass(
+  prisma: PrismaService,
+  studentId: string,
+  classroomId: string,
+): Promise<StudentClass | null> {
+  const row = await prisma.enrollment.findFirst({
+    where: {
+      studentId,
+      classroomId,
+      leftAt: null,
+      classroom: { archived: false },
+    },
+    orderBy: { joinedAt: 'asc' },
+    select: { joinedAt: true },
+  });
+  return row
+    ? { classroomId, classroomName: '', joinedKey: ubDateKey(row.joinedAt) }
+    : null;
+}
+
+/**
  * Ирээдүйн [fromKey, toKey] хичээлийн өдрүүд — хуваарь (цуцалсан/зөөсөн exception-тэй)
- * ∪ төлөвлөсөн LessonTopic. Гэрийн даалгаврын зургийг урьдчилан илгээхэд (эзэн 2026-10-31).
- * Асуулга 2, нэг давалгаанд.
+ * ∪ төлөвлөсөн LessonTopic (анхны огноо → lessonDateOf). Амралт/онцгой өдөр (AcademicCalendarDay,
+ * бүх анги эсвэл зөвхөн тухайн анги — overview/week-resolver-ийн дүрэм) хасагдана. Гэрийн
+ * даалгаврын зургийг урьдчилан илгээхэд (эзэн 2026-10-31). Асуулга 3 (+ relation 3), нэг давалгаанд.
  */
 export async function loadUpcomingDays(
   prisma: PrismaService,
@@ -219,7 +282,7 @@ export async function loadUpcomingDays(
   const names = new Map(classes.map((c) => [c.classroomId, c.classroomName]));
   const from = parseDateOnly(fromKey);
   const to = parseDateOnly(toKey);
-  const [rows, topics] = await Promise.all([
+  const [rows, topics, calendar] = await Promise.all([
     prisma.classSchedule.findMany({
       where: {
         classroomId: { in: ids },
@@ -247,10 +310,32 @@ export async function loadUpcomingDays(
       },
     }),
     prisma.lessonTopic.findMany({
-      where: { date: { gte: from, lte: to }, schedule: { classroomId: { in: ids } } },
-      select: { date: true, schedule: { select: { classroomId: true } } },
+      where: {
+        date: { gte: from, lte: to },
+        schedule: { classroomId: { in: ids } },
+      },
+      select: {
+        scheduleId: true,
+        date: true,
+        schedule: { select: { classroomId: true } },
+      },
+    }),
+    prisma.academicCalendarDay.findMany({
+      where: { date: { gte: from, lte: to } },
+      select: {
+        date: true,
+        type: true,
+        title: true,
+        classrooms: { select: { classroomId: true } },
+      },
     }),
   ]);
+  const holidays: ResolverHoliday[] = calendar.map((h) => ({
+    date: dateKey(h.date),
+    type: h.type,
+    title: h.title,
+    classroomIds: h.classrooms.map((c) => c.classroomId),
+  }));
   const schedules: ResolverSchedule[] = [];
   const exceptions: ResolverException[] = [];
   for (const r of rows) {
@@ -282,6 +367,7 @@ export async function loadUpcomingDays(
   }
   const add = (classroomId: string, date: string) => {
     if (date < fromKey || date > toKey) return;
+    if (isHolidayFor(holidays, classroomId, date)) return;
     const list = out.get(classroomId) ?? [];
     if (!list.includes(date)) list.push(date);
     out.set(classroomId, list);
@@ -290,7 +376,11 @@ export async function loadUpcomingDays(
     const i = k.lastIndexOf('|');
     add(k.slice(0, i), k.slice(i + 1));
   }
-  for (const t of topics) add(t.schedule.classroomId, dateKey(t.date));
+  const exIndex = exceptionIndex(exceptions);
+  for (const t of topics) {
+    const date = lessonDateOf(t.scheduleId, dateKey(t.date), exIndex);
+    if (date) add(t.schedule.classroomId, date);
+  }
   for (const list of out.values()) list.sort();
   return out;
 }

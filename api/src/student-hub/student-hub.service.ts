@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { addDaysKey, normalizeVariant } from '../attendance/board-logic';
+import { isActivatedClassroomStudent } from '../common/access';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { markPlus } from '../common/teacher-plus';
 import { Role } from '../generated/prisma/enums';
@@ -16,11 +17,7 @@ import type {
   ResolverSchedule,
 } from '../schedule/week-resolver';
 import { resolveWeek } from '../schedule/week-resolver';
-import {
-  loadLessonDays,
-  uniqueClasses,
-  type StudentClass,
-} from './lesson-days';
+import { uniqueClasses, type StudentClass } from './lesson-days';
 import {
   MARK_LOOKAHEAD_DAYS,
   MIN_MONTH,
@@ -28,10 +25,12 @@ import {
   THEORY_MAX_RANGE_DAYS,
   attendanceSummary,
   dayKey,
+  exceptionIndex,
   homeworkFor,
   homeworkSummary,
   hubProblem,
   inUploadWindow,
+  lessonDateOf,
   lessonDaysByClass,
   matchesWords,
   monthWindow,
@@ -39,6 +38,7 @@ import {
   queryWords,
   resolveRange,
   testOpen,
+  testState,
   topicOf,
   ubMinuteOfDay,
   visibleDay,
@@ -46,6 +46,7 @@ import {
   type HubProblemRow,
   type LessonDayEvidence,
   type MarkRow,
+  type TestClosedReason,
 } from './student-hub.logic';
 import type {
   HubDay,
@@ -205,86 +206,82 @@ export class StudentHubService {
     return new Map(rows.map((c) => [c.id, c.title]));
   }
 
+  /** Одоогийн (leftAt null, архивлаагүй) элсэлтүүд — relation-гүй, нэг асуулга */
+  private enrollmentRows(studentId: string) {
+    return this.prisma.enrollment.findMany({
+      where: this.currentWhere(studentId),
+      orderBy: { joinedAt: 'asc' },
+      select: { classroomId: true, joinedAt: true },
+    });
+  }
+
+  /** id → ангийн нэр (нэг асуулга) */
+  private async classNames(ids: string[]): Promise<Map<string, string>> {
+    if (!ids.length) return new Map();
+    const rows = await this.prisma.classroom.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, name: true },
+    });
+    return new Map(rows.map((c) => [c.id, c.name]));
+  }
+
+  private classesOf(
+    rows: { classroomId: string; joinedAt: Date }[],
+    names: Map<string, string>,
+  ): StudentClass[] {
+    return uniqueClasses(
+      rows.map((r) => ({
+        classroomId: r.classroomId,
+        joinedAt: r.joinedAt,
+        classroom: { name: names.get(r.classroomId) ?? '' },
+      })),
+    );
+  }
+
   /**
-   * [fromKey, toKey] хичээлийн өдрүүдийн эх сурвалж. 1-р давалгаа: ангиуд + (өөрийн ирц,
-   * тэмдэглэгээ, хуваарь/сэдэв/оноолт/exception — relation-оор нэг дуудлагад); 2-р: тест,
-   * бүртгэл, онолын зураг.
+   * [fromKey, toKey] хичээлийн өдрүүдийн эх сурвалж — relation-гүй хавтгай findMany-ууд:
+   * 1-р давалгаа: элсэлт, өөрийн ирц, тэмдэглэгээ (studentId-аар); 2-р: classroomId IN (…) +
+   * огноогоор ангийн нэр, хуваарь, сэдэв, оноолт, exception, тест, бүртгэл, онолын зураг.
+   * LessonTopic/LessonStaffing анхны огноогоороо байдаг тул цуцалсныг хасаж, зөөснийг
+   * newDate руу шилжүүлнэ (хуурамч хичээлийн өдөр үүсгэхгүй).
    */
   private async loadBundle(
     studentId: string,
     fromKey: string,
     toKey: string,
+    /** true: /days (тэмдэглэгээ, оноолт, хуваарийн цаг); false: /theory */
+    opts: { days: boolean },
   ): Promise<DayBundle> {
     const range: Range = {
       gte: parseDateOnly(fromKey),
       lte: parseDateOnly(toKey),
     };
-    const enrollments = await this.prisma.enrollment.findMany({
-      where: this.currentWhere(studentId),
-      orderBy: { joinedAt: 'asc' },
-      select: {
-        classroomId: true,
-        joinedAt: true,
-        classroom: {
-          select: {
-            name: true,
-            // note-ийг ХЭЗЭЭ Ч сонгохгүй
-            attendances: {
-              where: { studentId, date: range },
-              select: { date: true, status: true, lateRange: true },
-            },
-            dailyHomeworkMarks: {
-              where: { studentId, date: range },
-              select: { date: true, status: true, comment: true },
-            },
-            classSchedules: {
-              select: {
-                id: true,
-                weekday: true,
-                startMinute: true,
-                endMinute: true,
-                room: true,
-                teacherId: true,
-                effectiveFrom: true,
-                effectiveTo: true,
-                // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй
-                topics: {
-                  where: { date: range },
-                  select: {
-                    date: true,
-                    title: true,
-                    chapterId: true,
-                    photoStudentId: true,
-                  },
-                },
-                staffing: {
-                  where: { date: range },
-                  select: {
-                    date: true,
-                    leadTeacherId: true,
-                    assistantTeacherId: true,
-                  },
-                },
-                exceptions: {
-                  where: { OR: [{ date: range }, { newDate: range }] },
-                  select: {
-                    date: true,
-                    kind: true,
-                    newDate: true,
-                    newStartMinute: true,
-                    newEndMinute: true,
-                    newRoom: true,
-                  },
-                },
-              },
-            },
-          },
+    const [enrollments, attendance, marks] = await Promise.all([
+      this.enrollmentRows(studentId),
+      // note-ийг ХЭЗЭЭ Ч сонгохгүй
+      this.prisma.attendance.findMany({
+        where: { studentId, date: range, classroom: { archived: false } },
+        select: {
+          classroomId: true,
+          date: true,
+          status: true,
+          lateRange: true,
         },
-      },
-    });
-    const classes = uniqueClasses(enrollments);
+      }),
+      opts.days
+        ? this.prisma.dailyHomeworkMark.findMany({
+            where: { studentId, date: range },
+            select: {
+              classroomId: true,
+              date: true,
+              status: true,
+              comment: true,
+            },
+          })
+        : Promise.resolve([]),
+    ]);
     const bundle: DayBundle = {
-      classes,
+      classes: [],
       byClass: new Map(),
       attendance: new Map(),
       marks: new Map(),
@@ -295,11 +292,71 @@ export class StudentHubService {
       records: new Map(),
       photos: new Map(),
     };
-    if (!classes.length) return bundle;
-    const ids = classes.map((c) => c.classroomId);
-    const [sessions, records, photos] = await Promise.all([
+    const ids = [...new Set(enrollments.map((e) => e.classroomId))];
+    if (!ids.length) return bundle;
+    const inIds = { in: ids };
+    const ofClasses = { schedule: { classroomId: inIds } };
+    const [
+      names,
+      scheduleRows,
+      topics,
+      staffing,
+      exRows,
+      sessions,
+      records,
+      photos,
+    ] = await Promise.all([
+      this.classNames(ids),
+      // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй
+      this.prisma.classSchedule.findMany({
+        where: { classroomId: inIds },
+        select: {
+          id: true,
+          classroomId: true,
+          weekday: true,
+          startMinute: true,
+          endMinute: true,
+          room: true,
+          teacherId: true,
+          effectiveFrom: true,
+          effectiveTo: true,
+        },
+      }),
+      this.prisma.lessonTopic.findMany({
+        where: { date: range, ...ofClasses },
+        select: {
+          scheduleId: true,
+          date: true,
+          title: true,
+          chapterId: true,
+          photoStudentId: true,
+        },
+      }),
+      opts.days
+        ? this.prisma.lessonStaffing.findMany({
+            where: { date: range, ...ofClasses },
+            select: {
+              scheduleId: true,
+              date: true,
+              leadTeacherId: true,
+              assistantTeacherId: true,
+            },
+          })
+        : Promise.resolve([]),
+      this.prisma.scheduleException.findMany({
+        where: { ...ofClasses, OR: [{ date: range }, { newDate: range }] },
+        select: {
+          scheduleId: true,
+          date: true,
+          kind: true,
+          newDate: true,
+          newStartMinute: true,
+          newEndMinute: true,
+          newRoom: true,
+        },
+      }),
       this.prisma.classTestSession.findMany({
-        where: { classroomId: { in: ids }, date: range },
+        where: { classroomId: inIds, date: range },
         select: {
           classroomId: true,
           date: true,
@@ -311,7 +368,7 @@ export class StudentHubService {
       }),
       // description-ийг ХЭЗЭЭ Ч сонгохгүй
       this.prisma.lessonRecord.findMany({
-        where: { classroomId: { in: ids }, date: range, cancelledAt: null },
+        where: { classroomId: inIds, date: range, cancelledAt: null },
         select: {
           classroomId: true,
           date: true,
@@ -329,7 +386,7 @@ export class StudentHubService {
         orderBy: { startMinute: 'asc' },
       }),
       this.prisma.lessonPhoto.findMany({
-        where: { classroomId: { in: ids }, date: range },
+        where: { classroomId: inIds, date: range },
         select: {
           classroomId: true,
           date: true,
@@ -339,69 +396,76 @@ export class StudentHubService {
         orderBy: { createdAt: 'asc' },
       }),
     ]);
+    bundle.classes = this.classesOf(enrollments, names);
+    const current = new Set(ids);
+    const classOf = new Map(scheduleRows.map((r) => [r.id, r.classroomId]));
+    const schedules: ResolverSchedule[] = scheduleRows.map((r) => ({
+      id: r.id,
+      classroomId: r.classroomId,
+      classroomName: names.get(r.classroomId) ?? '',
+      weekday: r.weekday,
+      startMinute: r.startMinute,
+      endMinute: r.endMinute,
+      teacherId: r.teacherId,
+      teacherName: null,
+      room: r.room,
+      subject: null,
+      effectiveFrom: dateKey(r.effectiveFrom),
+      effectiveTo: r.effectiveTo ? dateKey(r.effectiveTo) : null,
+    }));
+    const exceptions: ResolverException[] = exRows.map((x) => ({
+      scheduleId: x.scheduleId,
+      date: dateKey(x.date),
+      kind: x.kind,
+      newDate: x.newDate ? dateKey(x.newDate) : null,
+      newStartMinute: x.newStartMinute,
+      newEndMinute: x.newEndMinute,
+      newRoom: x.newRoom,
+      note: null,
+    }));
+    const exIndex = exceptionIndex(exceptions);
+    /** Анхны огноотой мөр → «анги|бодит огноо» (цуцалсан бол null) */
+    const lessonKey = (scheduleId: string, date: Date) => {
+      const cid = classOf.get(scheduleId);
+      const real = cid
+        ? lessonDateOf(scheduleId, dateKey(date), exIndex)
+        : null;
+      return cid && real ? { cid, date: real } : null;
+    };
 
     const evidence: LessonDayEvidence[] = [];
-    const schedules: ResolverSchedule[] = [];
-    const exceptions: ResolverException[] = [];
-    const seen = new Set<string>();
-    for (const e of enrollments) {
-      const cid = e.classroomId;
-      if (seen.has(cid)) continue;
-      seen.add(cid);
-      for (const a of e.classroom.attendances) {
-        const date = dateKey(a.date);
-        evidence.push({ classroomId: cid, date });
-        bundle.attendance.set(dayKey(cid, date), {
-          status: a.status,
-          lateRange: a.lateRange,
-        });
-      }
-      for (const m of e.classroom.dailyHomeworkMarks)
-        bundle.marks.set(dayKey(cid, dateKey(m.date)), {
+    for (const a of attendance) {
+      if (!current.has(a.classroomId)) continue;
+      const date = dateKey(a.date);
+      evidence.push({ classroomId: a.classroomId, date });
+      bundle.attendance.set(dayKey(a.classroomId, date), {
+        status: a.status,
+        lateRange: a.lateRange,
+      });
+    }
+    for (const m of marks)
+      if (current.has(m.classroomId))
+        bundle.marks.set(dayKey(m.classroomId, dateKey(m.date)), {
           status: m.status,
           comment: m.comment,
         });
-      for (const s of e.classroom.classSchedules) {
-        schedules.push({
-          id: s.id,
-          classroomId: cid,
-          classroomName: e.classroom.name,
-          weekday: s.weekday,
-          startMinute: s.startMinute,
-          endMinute: s.endMinute,
-          teacherId: s.teacherId,
-          teacherName: null,
-          room: s.room,
-          subject: null,
-          effectiveFrom: dateKey(s.effectiveFrom),
-          effectiveTo: s.effectiveTo ? dateKey(s.effectiveTo) : null,
-        });
-        for (const x of s.exceptions)
-          exceptions.push({
-            scheduleId: s.id,
-            date: dateKey(x.date),
-            kind: x.kind,
-            newDate: x.newDate ? dateKey(x.newDate) : null,
-            newStartMinute: x.newStartMinute,
-            newEndMinute: x.newEndMinute,
-            newRoom: x.newRoom,
-            note: null,
-          });
-        for (const t of s.topics) {
-          const date = dateKey(t.date);
-          evidence.push({ classroomId: cid, date });
-          push(bundle.topics, dayKey(cid, date), {
-            title: t.title,
-            chapterId: t.chapterId,
-            photoStudentId: t.photoStudentId,
-          });
-        }
-        for (const st of s.staffing)
-          push(bundle.staffing, dayKey(cid, dateKey(st.date)), {
-            leadTeacherId: st.leadTeacherId,
-            assistantTeacherId: st.assistantTeacherId,
-          });
-      }
+    for (const t of topics) {
+      const at = lessonKey(t.scheduleId, t.date);
+      if (!at) continue;
+      evidence.push({ classroomId: at.cid, date: at.date });
+      push(bundle.topics, dayKey(at.cid, at.date), {
+        title: t.title,
+        chapterId: t.chapterId,
+        photoStudentId: t.photoStudentId,
+      });
+    }
+    for (const st of staffing) {
+      const at = lessonKey(st.scheduleId, st.date);
+      if (!at) continue;
+      push(bundle.staffing, dayKey(at.cid, at.date), {
+        leadTeacherId: st.leadTeacherId,
+        assistantTeacherId: st.assistantTeacherId,
+      });
     }
     for (const s of sessions) {
       const date = dateKey(s.date);
@@ -424,7 +488,8 @@ export class StudentHubService {
           imageKeys: p.imageKeys,
         });
     bundle.byClass = lessonDaysByClass(evidence, toKey);
-    bundle.slots = resolveRange(fromKey, toKey, schedules, exceptions);
+    if (opts.days)
+      bundle.slots = resolveRange(fromKey, toKey, schedules, exceptions);
     return bundle;
   }
 
@@ -452,12 +517,14 @@ export class StudentHubService {
     date: string,
     today: string,
     tests: Map<string, TestRow>,
+    active: boolean,
   ) {
     const out: {
       testId: string | null;
       title: string;
       variant: string | null;
       open: boolean;
+      closedReason: TestClosedReason | null;
       problemCount: number;
     }[] = [];
     const seen = new Set<string>();
@@ -469,7 +536,7 @@ export class StudentHubService {
             testId: null,
             title,
             variant: null,
-            open: false,
+            ...testState(date, today, null, active),
             problemCount: s.manualProblemCount ?? 0,
           });
         continue;
@@ -482,7 +549,7 @@ export class StudentHubService {
         testId: t.id,
         title: t.title,
         variant: normalizeVariant(t.variantLabel),
-        open: testOpen(date, today, t),
+        ...testState(date, today, t, active),
         problemCount: t._count.problems,
       });
     }
@@ -502,173 +569,165 @@ export class StudentHubService {
     const todayDate = todayUB();
     const today = dateKey(todayDate);
     const topicFrom = parseDateOnly(addDaysKey(today, -MARK_LOOKAHEAD_DAYS));
-    const [enrollments, attendance, homework, latest, holidays] =
-      await Promise.all([
-        this.prisma.enrollment.findMany({
-          where: this.currentWhere(studentId),
-          orderBy: { joinedAt: 'asc' },
-          select: {
-            classroomId: true,
-            joinedAt: true,
-            classroom: {
-              select: {
-                name: true,
-                classSchedules: {
-                  where: {
-                    effectiveFrom: { lte: todayDate },
-                    OR: [
-                      { effectiveTo: null },
-                      { effectiveTo: { gte: topicFrom } },
-                    ],
-                  },
-                  select: {
-                    id: true,
-                    weekday: true,
-                    startMinute: true,
-                    endMinute: true,
-                    room: true,
-                    teacherId: true,
-                    effectiveFrom: true,
-                    effectiveTo: true,
-                    exceptions: {
-                      where: {
-                        OR: [{ date: todayDate }, { newDate: todayDate }],
-                      },
-                      select: {
-                        date: true,
-                        kind: true,
-                        newDate: true,
-                        newStartMinute: true,
-                        newEndMinute: true,
-                        newRoom: true,
-                      },
-                    },
-                    // Зөөгдөж ирсэн хичээлийн сэдэв анхны огноогоороо байдаг тул ойрын хугацааг уншина
-                    topics: {
-                      where: { date: { gte: topicFrom, lte: todayDate } },
-                      select: { date: true, title: true },
-                    },
-                  },
-                },
+    // 1-р давалгаа: studentId / өнөөдрөөр (relation-гүй)
+    const [
+      enrollments,
+      attendance,
+      homework,
+      latest,
+      calendar,
+      calendarClasses,
+    ] = await Promise.all([
+      this.enrollmentRows(studentId),
+      this.prisma.attendance.groupBy({
+        by: ['status'],
+        where: { studentId },
+        _count: { _all: true },
+      }),
+      this.prisma.dailyHomeworkMark.groupBy({
+        by: ['status'],
+        where: { studentId, status: { not: null } },
+        _count: { _all: true },
+      }),
+      this.prisma.dailyHomeworkMark.findFirst({
+        where: { studentId, status: { not: null } },
+        orderBy: [{ date: 'desc' }, { updatedAt: 'desc' }],
+        select: {
+          classroomId: true,
+          date: true,
+          status: true,
+          comment: true,
+        },
+      }),
+      this.prisma.academicCalendarDay.findMany({
+        where: { date: todayDate },
+        select: { id: true, type: true, title: true },
+      }),
+      this.prisma.academicCalendarDayClassroom.findMany({
+        where: { calendarDay: { date: todayDate } },
+        select: { calendarDayId: true, classroomId: true },
+      }),
+    ]);
+    const ids = [...new Set(enrollments.map((e) => e.classroomId))];
+    const inIds = { in: ids };
+    const ofClasses = { schedule: { classroomId: inIds } };
+    const markKey = latest?.status ? dateKey(latest.date) : null;
+    // 2-р давалгаа: classroomId IN (…) — хуваарь, exception, сэдэв, өнөөдрийн бүртгэл,
+    // сүүлийн тэмдэглэгээний D (нэг жижиг асуулга)
+    const [names, scheduleRows, exRows, topicRows, records, lessonDate] =
+      ids.length
+        ? await Promise.all([
+            this.classNames(ids),
+            this.prisma.classSchedule.findMany({
+              where: {
+                classroomId: inIds,
+                effectiveFrom: { lte: todayDate },
+                OR: [
+                  { effectiveTo: null },
+                  { effectiveTo: { gte: topicFrom } },
+                ],
               },
-            },
-          },
-        }),
-        this.prisma.attendance.groupBy({
-          by: ['status'],
-          where: { studentId },
-          _count: { _all: true },
-        }),
-        this.prisma.dailyHomeworkMark.groupBy({
-          by: ['status'],
-          where: { studentId, status: { not: null } },
-          _count: { _all: true },
-        }),
-        this.prisma.dailyHomeworkMark.findFirst({
-          where: { studentId, status: { not: null } },
-          orderBy: [{ date: 'desc' }, { updatedAt: 'desc' }],
-          select: {
-            classroomId: true,
-            date: true,
-            status: true,
-            comment: true,
-          },
-        }),
-        this.prisma.academicCalendarDay.findMany({
-          where: { date: todayDate },
-          select: {
-            type: true,
-            title: true,
-            classrooms: { select: { classroomId: true } },
-          },
-        }),
-      ]);
-    const classes = uniqueClasses(enrollments);
-    const schedules: ResolverSchedule[] = [];
-    const exceptions: ResolverException[] = [];
-    const topics: { scheduleId: string; date: string; title: string }[] = [];
-    const seen = new Set<string>();
-    for (const e of enrollments) {
-      if (seen.has(e.classroomId)) continue;
-      seen.add(e.classroomId);
-      for (const s of e.classroom.classSchedules) {
-        schedules.push({
-          id: s.id,
-          classroomId: e.classroomId,
-          classroomName: e.classroom.name,
-          weekday: s.weekday,
-          startMinute: s.startMinute,
-          endMinute: s.endMinute,
-          teacherId: s.teacherId,
-          teacherName: null,
-          room: s.room,
-          subject: null,
-          effectiveFrom: dateKey(s.effectiveFrom),
-          effectiveTo: s.effectiveTo ? dateKey(s.effectiveTo) : null,
-        });
-        for (const x of s.exceptions)
-          exceptions.push({
-            scheduleId: s.id,
-            date: dateKey(x.date),
-            kind: x.kind,
-            newDate: x.newDate ? dateKey(x.newDate) : null,
-            newStartMinute: x.newStartMinute,
-            newEndMinute: x.newEndMinute,
-            newRoom: x.newRoom,
-            note: null,
-          });
-        for (const t of s.topics)
-          topics.push({
-            scheduleId: s.id,
-            date: dateKey(t.date),
-            title: t.title,
-          });
-      }
-    }
+              select: {
+                id: true,
+                classroomId: true,
+                weekday: true,
+                startMinute: true,
+                endMinute: true,
+                room: true,
+                teacherId: true,
+                effectiveFrom: true,
+                effectiveTo: true,
+              },
+            }),
+            this.prisma.scheduleException.findMany({
+              where: {
+                ...ofClasses,
+                OR: [{ date: todayDate }, { newDate: todayDate }],
+              },
+              select: {
+                scheduleId: true,
+                date: true,
+                kind: true,
+                newDate: true,
+                newStartMinute: true,
+                newEndMinute: true,
+                newRoom: true,
+              },
+            }),
+            // Зөөгдөж ирсэн хичээлийн сэдэв анхны огноогоороо байдаг тул ойрын хугацааг уншина
+            this.prisma.lessonTopic.findMany({
+              where: { ...ofClasses, date: { gte: topicFrom, lte: todayDate } },
+              select: { scheduleId: true, date: true, title: true },
+            }),
+            // Багш баталсан бүртгэл байвал түүний сэдэв/цаг давамгайлна (description-гүй)
+            this.prisma.lessonRecord.findMany({
+              where: { classroomId: inIds, date: todayDate, cancelledAt: null },
+              select: {
+                classroomId: true,
+                scheduleId: true,
+                topic: true,
+                startMinute: true,
+                endMinute: true,
+                room: true,
+              },
+            }),
+            latest && markKey && ids.includes(latest.classroomId)
+              ? this.lastLessonDayBefore(studentId, latest.classroomId, markKey)
+              : Promise.resolve(null),
+          ])
+        : [new Map<string, string>(), [], [], [], [], null];
+    const classes = this.classesOf(enrollments, names);
+    const schedules: ResolverSchedule[] = scheduleRows.map((r) => ({
+      id: r.id,
+      classroomId: r.classroomId,
+      classroomName: names.get(r.classroomId) ?? '',
+      weekday: r.weekday,
+      startMinute: r.startMinute,
+      endMinute: r.endMinute,
+      teacherId: r.teacherId,
+      teacherName: null,
+      room: r.room,
+      subject: null,
+      effectiveFrom: dateKey(r.effectiveFrom),
+      effectiveTo: r.effectiveTo ? dateKey(r.effectiveTo) : null,
+    }));
+    const exceptions: ResolverException[] = exRows.map((x) => ({
+      scheduleId: x.scheduleId,
+      date: dateKey(x.date),
+      kind: x.kind,
+      newDate: x.newDate ? dateKey(x.newDate) : null,
+      newStartMinute: x.newStartMinute,
+      newEndMinute: x.newEndMinute,
+      newRoom: x.newRoom,
+      note: null,
+    }));
     const [day] = resolveWeek({
       weekStart: today,
       schedules,
       exceptions,
-      topics,
-      holidays: holidays.map((h) => ({
+      topics: topicRows.map((t) => ({
+        scheduleId: t.scheduleId,
+        date: dateKey(t.date),
+        title: t.title,
+      })),
+      holidays: calendar.map((h) => ({
         date: today,
         type: h.type,
         title: h.title,
-        classroomIds: h.classrooms.map((c) => c.classroomId),
+        classroomIds: calendarClasses
+          .filter((c) => c.calendarDayId === h.id)
+          .map((c) => c.classroomId),
       })),
     });
     const entry =
       day && !day.isHoliday ? pickToday(day.entries, ubMinuteOfDay()) : null;
-    // Багш баталсан бүртгэл байвал түүний сэдэв/цаг давамгайлна; сүүлийн тэмдэглэгээний
-    // D (даалгавар өгсөн хичээлийн өдөр) = D'-ээс өмнөх ангийн сүүлийн хичээлийн өдөр
-    const markKey = latest?.status ? dateKey(latest.date) : null;
-    const [record, markDays] = await Promise.all([
-      entry
-        ? this.prisma.lessonRecord.findFirst({
-            where: {
-              classroomId: entry.classroomId,
-              scheduleId: entry.scheduleId,
-              date: todayDate,
-              cancelledAt: null,
-            },
-            select: {
-              topic: true,
-              startMinute: true,
-              endMinute: true,
-              room: true,
-            },
-          })
-        : Promise.resolve(null),
-      latest && markKey
-        ? loadLessonDays(
-            this.prisma,
-            studentId,
-            addDaysKey(markKey, -MARK_LOOKAHEAD_DAYS),
-            addDaysKey(markKey, -1),
-            latest.classroomId,
-          )
-        : Promise.resolve(null),
-    ]);
+    const record = entry
+      ? records.find(
+          (r) =>
+            r.classroomId === entry.classroomId &&
+            r.scheduleId === entry.scheduleId,
+        )
+      : undefined;
     const todayView: HubOverview['today'] = entry
       ? {
           classroomId: entry.classroomId,
@@ -680,10 +739,6 @@ export class StudentHubService {
           topic: topicOf(record?.topic, entry.topic),
         }
       : null;
-    const prevDays =
-      latest && markDays
-        ? (markDays.byClass.get(latest.classroomId) ?? [])
-        : [];
     return {
       classrooms: classes.map((c) => ({
         id: c.classroomId,
@@ -703,12 +758,47 @@ export class StudentHubService {
               status: latest.status,
               comment: latest.comment,
               classroomId: latest.classroomId,
-              lessonDate: prevDays.length
-                ? prevDays[prevDays.length - 1]
-                : null,
+              lessonDate,
             }
           : null,
     };
+  }
+
+  /**
+   * Сүүлийн тэмдэглэгээний D = D'-ээс өмнөх ангийн сүүлийн хичээлийн өдөр (MARK_LOOKAHEAD_DAYS
+   * дотор) — хичээлийн өдрийн нэгдлийг (өөрийн ирц ∪ тест ∪ бүртгэл (цуцлаагүй) ∪ сэдэв,
+   * цуцалсан сэдвийг хасаж, зөөснийг newDate-ээр) НЭГ асуулгаар (loadLessonDays-ийн оронд).
+   */
+  private async lastLessonDayBefore(
+    studentId: string,
+    classroomId: string,
+    markKey: string,
+  ): Promise<string | null> {
+    const from = addDaysKey(markKey, -MARK_LOOKAHEAD_DAYS);
+    const to = addDaysKey(markKey, -1);
+    const rows = await this.prisma.$queryRaw<{ d: string | null }[]>`
+      SELECT to_char(max(u.d), 'YYYY-MM-DD') AS d FROM (
+        SELECT a."date" AS d FROM "Attendance" a
+          WHERE a."studentId" = ${studentId} AND a."classroomId" = ${classroomId}
+            AND a."date" BETWEEN ${from}::date AND ${to}::date
+        UNION ALL
+        SELECT s."date" FROM "ClassTestSession" s
+          WHERE s."classroomId" = ${classroomId}
+            AND s."date" BETWEEN ${from}::date AND ${to}::date
+        UNION ALL
+        SELECT r."date" FROM "LessonRecord" r
+          WHERE r."classroomId" = ${classroomId} AND r."cancelledAt" IS NULL
+            AND r."date" BETWEEN ${from}::date AND ${to}::date
+        UNION ALL
+        SELECT COALESCE(x."newDate", t."date") FROM "LessonTopic" t
+          JOIN "ClassSchedule" cs ON cs."id" = t."scheduleId"
+          LEFT JOIN "ScheduleException" x
+            ON x."scheduleId" = t."scheduleId" AND x."date" = t."date"
+          WHERE cs."classroomId" = ${classroomId}
+            AND t."date" BETWEEN ${from}::date AND ${to}::date
+            AND (x."kind" IS NULL OR x."kind" <> 'CANCELLED')
+      ) u WHERE u.d BETWEEN ${from}::date AND ${to}::date`;
+    return rows[0]?.d ?? null;
   }
 
   /* ───────── GET /student-hub/days?month=YYYY-MM ───────── */
@@ -723,8 +813,8 @@ export class StudentHubService {
     // D' (дараагийн хичээл) сарын гадна байж болох тул цааш уншина (өнөөдрөөс хэтрэхгүй)
     const ext = addDaysKey(win.to, MARK_LOOKAHEAD_DAYS);
     const extTo = ext < today ? ext : today;
-    const [b, hwPhotos] = await Promise.all([
-      this.loadBundle(studentId, win.from, extTo),
+    const [b, hwPhotos, activated] = await Promise.all([
+      this.loadBundle(studentId, win.from, extTo, { days: true }),
       this.prisma.homeworkPhoto.findMany({
         where: {
           studentId,
@@ -744,7 +834,10 @@ export class StudentHubService {
         },
         orderBy: { createdAt: 'desc' },
       }),
+      isActivatedClassroomStudent(this.prisma, studentId),
     ]);
+    // hasActiveClassroomEnrollment: идэвхжсэн профайл + одоогийн анги (b.classes)
+    const active = activated && b.classes.length > 0;
     const list = this.visibleDays(b, win.from, win.to);
     const base = {
       month: win.month,
@@ -809,11 +902,12 @@ export class StudentHubService {
             .map((r) => r.problemNumbersText?.trim())
             .filter((v): v is string => !!v)
             .join('; ') || null,
-        tests: this.dayTests(b, key, date, today, tests).map((t) => ({
+        tests: this.dayTests(b, key, date, today, tests, active).map((t) => ({
           testId: t.testId,
           title: t.title,
           variant: t.variant,
           open: t.open,
+          closedReason: t.closedReason,
         })),
         attendance: att
           ? { status: att.status, lateRange: att.lateRange }
@@ -882,26 +976,9 @@ export class StudentHubService {
       gte: parseDateOnly(MIN_DATE),
       lte: parseDateOnly(today),
     };
-    const enrollments = await this.prisma.enrollment.findMany({
-      where: this.currentWhere(studentId),
-      orderBy: { joinedAt: 'asc' },
-      select: {
-        classroomId: true,
-        joinedAt: true,
-        classroom: {
-          select: {
-            name: true,
-            attendances: {
-              where: { studentId, date: range },
-              select: { date: true },
-            },
-          },
-        },
-      },
-    });
-    const classes = uniqueClasses(enrollments);
-    if (!classes.length) return [];
-    const own = this.ownAttendanceKeys(enrollments);
+    const { classes, own, active } = await this.classAccess(studentId, range);
+    // homework-practice loadSlots-той ижил: идэвхжээгүй сурагчид ангийн тест ХООСОН
+    if (!active) return [];
     const sessions = await this.prisma.classTestSession.findMany({
       where: {
         classroomId: { in: classes.map((c) => c.classroomId) },
@@ -944,7 +1021,7 @@ export class StudentHubService {
             date,
             classroomName,
             problemCount: s.manualProblemCount ?? 0,
-            open: false,
+            ...testState(date, today, null, active),
           });
         continue;
       }
@@ -960,7 +1037,7 @@ export class StudentHubService {
         date,
         classroomName,
         problemCount: t._count.problems,
-        open: testOpen(date, today, t),
+        ...testState(date, today, t, active),
       });
     }
     return rows.sort(
@@ -970,17 +1047,37 @@ export class StudentHubService {
     );
   }
 
-  private ownAttendanceKeys(
-    enrollments: {
-      classroomId: string;
-      classroom: { attendances: { date: Date }[] };
-    }[],
-  ): Set<string> {
-    const out = new Set<string>();
-    for (const e of enrollments)
-      for (const a of e.classroom.attendances)
-        out.add(dayKey(e.classroomId, dateKey(a.date)));
-    return out;
+  /**
+   * Тестийн эрхийн суурь — нэг давалгаа: одоогийн элсэлт, өөрийн ирцтэй өдрүүд (элсэхээс
+   * өмнөх өдрийг харуулах), идэвхжсэн танхимын профайл; 2-р: ангийн нэр (names=true үед).
+   * active = hasActiveClassroomEnrollment-ийн дүрэм (идэвхжсэн CLASSROOM профайл + одоогийн анги).
+   */
+  private async classAccess(
+    studentId: string,
+    range: Range,
+    names = true,
+  ): Promise<{ classes: StudentClass[]; own: Set<string>; active: boolean }> {
+    const [enrollments, attendance, activated] = await Promise.all([
+      this.enrollmentRows(studentId),
+      this.prisma.attendance.findMany({
+        where: { studentId, date: range, classroom: { archived: false } },
+        select: { classroomId: true, date: true },
+      }),
+      isActivatedClassroomStudent(this.prisma, studentId),
+    ]);
+    const ids = [...new Set(enrollments.map((e) => e.classroomId))];
+    const active = activated && ids.length > 0;
+    const classes = this.classesOf(
+      enrollments,
+      active && names ? await this.classNames(ids) : new Map<string, string>(),
+    );
+    const current = new Set(ids);
+    const own = new Set(
+      attendance
+        .filter((a) => current.has(a.classroomId))
+        .map((a) => dayKey(a.classroomId, dateKey(a.date))),
+    );
+    return { classes, own, active };
   }
 
   /* ───────── GET /student-hub/tests/:testId ───────── */
@@ -993,26 +1090,13 @@ export class StudentHubService {
       gte: parseDateOnly(MIN_DATE),
       lte: parseDateOnly(today),
     };
-    const enrollments = await this.prisma.enrollment.findMany({
-      where: this.currentWhere(studentId),
-      orderBy: { joinedAt: 'asc' },
-      select: {
-        classroomId: true,
-        joinedAt: true,
-        classroom: {
-          select: {
-            name: true,
-            attendances: {
-              where: { studentId, date: range },
-              select: { date: true },
-            },
-          },
-        },
-      },
-    });
-    const classes = uniqueClasses(enrollments);
-    if (!classes.length) throw notClassTest();
-    const own = this.ownAttendanceKeys(enrollments);
+    const { classes, own, active } = await this.classAccess(
+      studentId,
+      range,
+      false,
+    );
+    // hasActiveClassroomEnrollment (classroomRelease-ийн дүрэм): идэвхжээгүй бол зөв хариу үгүй
+    if (!active) throw notClassTest();
     const [sessions, test] = await Promise.all([
       this.prisma.classTestSession.findMany({
         where: {
@@ -1101,21 +1185,25 @@ export class StudentHubService {
     const words = queryWords(q);
     let to = toText ? this.parseDay(toText, 'to') : today;
     if (to > today) to = today;
+    // Өгөгдмөл эхлэл `to`-оос тоологдоно: q-тэй бол хамгийн урт зөвшөөрөгдөх хүрээ (MIN_DATE-ээс
+    // эрт биш), q-гүй бол сүүлийн 60 хоног. «Хэт урт» 400 зөвхөн ИЛ өгсөн хүрээнд.
     let from = fromText
       ? this.parseDay(fromText, 'from')
-      : words.length
-        ? MIN_DATE
-        : addDaysKey(today, -(THEORY_DEFAULT_DAYS - 1));
+      : addDaysKey(
+          to,
+          words.length ? -THEORY_MAX_RANGE_DAYS : -(THEORY_DEFAULT_DAYS - 1),
+        );
     if (from < MIN_DATE) from = MIN_DATE;
     if (to < from)
       throw new BadRequestException('Хүрээний эхлэл төгсгөлөөсөө хойно байна.');
     if (
+      fromText &&
       (parseDateOnly(to).getTime() - parseDateOnly(from).getTime()) / DAY_MS >
-      THEORY_MAX_RANGE_DAYS
+        THEORY_MAX_RANGE_DAYS
     )
       throw new BadRequestException('Хүрээ хэт урт байна.');
 
-    const b = await this.loadBundle(studentId, from, to);
+    const b = await this.loadBundle(studentId, from, to, { days: false });
     const list = this.visibleDays(b, from, to);
     if (!list.length) return [];
     const uploaderIds: string[] = [];
@@ -1137,7 +1225,8 @@ export class StudentHubService {
       const chapterNames = topicRows.map((t) =>
         t.chapterId ? (chapters.get(t.chapterId) ?? null) : null,
       );
-      const testTitles = this.dayTests(b, key, date, today, tests).map(
+      // Зөвхөн нэрс (хайлт, жагсаалт) — нээх эрх энд хамаагүй
+      const testTitles = this.dayTests(b, key, date, today, tests, true).map(
         (t) => t.title,
       );
       if (

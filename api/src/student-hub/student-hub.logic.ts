@@ -14,6 +14,7 @@ import {
   resolveWeek,
   type ResolvedEntry,
   type ResolverException,
+  type ResolverHoliday,
   type ResolverSchedule,
 } from '../schedule/week-resolver';
 import { choiceModeOf, hasKnownAnswer } from '../tests/grading';
@@ -130,6 +131,57 @@ export function nextLessonDay(
   return null;
 }
 
+/* ───────── Цуцалсан/зөөсөн хичээл, амралтын өдөр ───────── */
+
+export interface ExceptionLite {
+  scheduleId: string;
+  /** Анхны огноо */
+  date: string;
+  kind: 'CANCELLED' | 'MOVED';
+  newDate: string | null;
+}
+
+/** «хуваарь|анхны огноо» → exception */
+export function exceptionIndex(
+  list: readonly ExceptionLite[],
+): Map<string, ExceptionLite> {
+  return new Map(list.map((x) => [`${x.scheduleId}|${x.date}`, x]));
+}
+
+/**
+ * LessonTopic/LessonStaffing нь хуваарийн АНХНЫ огноогоор хадгалагддаг (week-resolver-ийн
+ * topicDate). Хичээл болох бодит огноо: CANCELLED → null (хичээл болоогүй, хуурамч өдөр
+ * үүсгэхгүй), MOVED → newDate (newDate хоосон бол ижил өдөр цаг/танхим солисон), үгүй бол
+ * анхны огноо.
+ */
+export function lessonDateOf(
+  scheduleId: string,
+  date: string,
+  index: Map<string, ExceptionLite>,
+): string | null {
+  const x = index.get(`${scheduleId}|${date}`);
+  if (!x) return date;
+  if (x.kind === 'CANCELLED') return null;
+  return x.newDate ?? x.date;
+}
+
+/**
+ * Тухайн ангид тухайн өдөр амралт/онцгой өдөр мөн эсэх — week-resolver-ийн дүрмээр:
+ * classroomIds хоосон = БҮХ анги (overview-д day.isHoliday), эс бол зөвхөн заасан ангиуд
+ * (resolveWeek тэдний хичээлийг entries-ээс хасдаг).
+ */
+export function isHolidayFor(
+  holidays: readonly ResolverHoliday[],
+  classroomId: string,
+  date: string,
+): boolean {
+  return holidays.some(
+    (h) =>
+      h.date === date &&
+      (!h.classroomIds?.length || h.classroomIds.includes(classroomId)),
+  );
+}
+
 /**
  * Сурагчид харагдах өдөр: ангид орсон өдрөөс хойш (Enrollment.joinedAt), эсвэл тэр өдөр
  * өөрийн ирцийн мөртэй (joinedAt хожуу бичигдсэн ч өөрийн ирц харагдана).
@@ -235,6 +287,33 @@ export function testOpen(
   if ((RELEASE_EXCLUDED_TYPES as readonly string[]).includes(test.type))
     return false;
   return date < today;
+}
+
+/** Хаалттай тестийн шалтгаан: TOMORROW → «Маргааш нээгдэнэ», NOT_AVAILABLE → юу ч бичихгүй */
+export type TestClosedReason = 'TOMORROW' | 'NOT_AVAILABLE';
+
+/**
+ * Тестийн мөрийн нээлттэй эсэх ба шалтгаан. `active` = идэвхжсэн танхимын сурагч
+ * (hasActiveClassroomEnrollment-ийн дүрэм) — үгүй бол хэзээ ч нээгдэхгүй. Гараар бичсэн
+ * (testId-гүй), 1000 бодлого/ЭЕШ сорил, устгасан → NOT_AVAILABLE; өнөөдөр хийсэн → TOMORROW.
+ */
+export function testState(
+  date: string,
+  today: string,
+  test: { deletedAt: Date | null; type: string } | null | undefined,
+  active: boolean,
+): { open: boolean; closedReason: TestClosedReason | null } {
+  if (active && testOpen(date, today, test))
+    return { open: true, closedReason: null };
+  const never =
+    !active ||
+    !test ||
+    !!test.deletedAt ||
+    (RELEASE_EXCLUDED_TYPES as readonly string[]).includes(test.type);
+  return {
+    open: false,
+    closedReason: never || date < today ? 'NOT_AVAILABLE' : 'TOMORROW',
+  };
 }
 
 /* ───────── Сэдэв, хайлт ───────── */

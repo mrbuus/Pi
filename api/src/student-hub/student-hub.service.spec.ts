@@ -16,6 +16,7 @@ function schedule(
 ) {
   return {
     id,
+    classroomId: 'c1',
     weekday,
     startMinute,
     endMinute: startMinute + 90,
@@ -23,61 +24,101 @@ function schedule(
     teacherId: 't3',
     effectiveFrom: d('2026-09-01'),
     effectiveTo: null,
-    topics: [],
-    staffing: [],
-    exceptions: [],
     ...extra,
   };
 }
+
+const inRange = (date: Date, r: any) =>
+  !r || ((!r.gte || date >= r.gte) && (!r.lte || date <= r.lte));
 
 /** s1 — 10А (c1), 2026-10-20-нд элссэн */
 function makeDb() {
   const enrollment: Row = {
     classroomId: 'c1',
     joinedAt: new Date('2026-10-19T17:00:00Z'), // УБ 10-20 01:00
-    classroom: {
-      name: '10А',
-      attendances: [
-        { date: d('2026-10-15'), status: 'PRESENT', lateRange: null }, // элсэхээс өмнө — өөрийн ирц тул харагдана
-        { date: d('2026-10-23'), status: 'PRESENT', lateRange: null },
-        { date: d('2026-10-27'), status: 'LATE', lateRange: 'FIVE_TO_TEN' },
-        { date: d('2026-10-30'), status: 'ABSENT', lateRange: null },
-      ],
-      dailyHomeworkMarks: [
-        { date: d('2026-10-25'), status: 'DONE', comment: 'Сайн' },
-        { date: d('2026-10-27'), status: 'PARTIAL', comment: 'Дутуу' },
-        { date: d('2026-10-30'), status: 'NOT_DONE', comment: null },
-      ],
-      classSchedules: [
-        schedule('sch1', 2, 900, '201'), // Мягмар
-        schedule('sch2', 5, 600, '105', {
-          staffing: [
-            {
-              date: d('2026-10-30'),
-              leadTeacherId: 't4',
-              assistantTeacherId: null,
-            },
-          ],
-        }), // Баасан
-        schedule('sch3', 0, 540, null, {
-          topics: [
-            {
-              date: d('2026-10-25'),
-              title: 'Квадрат тэгшитгэл',
-              chapterId: 'ch1',
-              photoStudentId: 's1',
-            },
-            {
-              date: d('2026-10-18'),
-              title: 'Хуучин сэдэв',
-              chapterId: null,
-              photoStudentId: null,
-            }, // элсэхээс өмнө
-          ],
-        }), // Ням
-      ],
-    },
   };
+  const attendance: Row[] = [
+    {
+      classroomId: 'c1',
+      date: d('2026-10-15'),
+      status: 'PRESENT',
+      lateRange: null,
+    }, // элсэхээс өмнө — өөрийн ирц тул харагдана
+    {
+      classroomId: 'c1',
+      date: d('2026-10-23'),
+      status: 'PRESENT',
+      lateRange: null,
+    },
+    {
+      classroomId: 'c1',
+      date: d('2026-10-27'),
+      status: 'LATE',
+      lateRange: 'FIVE_TO_TEN',
+    },
+    {
+      classroomId: 'c1',
+      date: d('2026-10-30'),
+      status: 'ABSENT',
+      lateRange: null,
+    },
+    {
+      classroomId: 'old',
+      date: d('2026-10-29'),
+      status: 'PRESENT',
+      lateRange: null,
+    }, // хуучин анги — тооцохгүй
+  ];
+  const marks: Row[] = [
+    {
+      classroomId: 'c1',
+      date: d('2026-10-25'),
+      status: 'DONE',
+      comment: 'Сайн',
+    },
+    {
+      classroomId: 'c1',
+      date: d('2026-10-27'),
+      status: 'PARTIAL',
+      comment: 'Дутуу',
+    },
+    {
+      classroomId: 'c1',
+      date: d('2026-10-30'),
+      status: 'NOT_DONE',
+      comment: null,
+    },
+  ];
+  const schedules: Row[] = [
+    schedule('sch1', 2, 900, '201'), // Мягмар
+    schedule('sch2', 5, 600, '105'), // Баасан
+    schedule('sch3', 0, 540, null), // Ням
+  ];
+  const staffing: Row[] = [
+    {
+      scheduleId: 'sch2',
+      date: d('2026-10-30'),
+      leadTeacherId: 't4',
+      assistantTeacherId: null,
+    },
+  ];
+  const topics: Row[] = [
+    {
+      scheduleId: 'sch3',
+      date: d('2026-10-25'),
+      title: 'Квадрат тэгшитгэл',
+      chapterId: 'ch1',
+      photoStudentId: 's1',
+    },
+    {
+      scheduleId: 'sch3',
+      date: d('2026-10-18'),
+      title: 'Хуучин сэдэв',
+      chapterId: null,
+      photoStudentId: null,
+    }, // элсэхээс өмнө
+  ];
+  const exceptions: Row[] = [];
   const sessions: Row[] = [
     {
       classroomId: 'c1',
@@ -190,6 +231,33 @@ function makeDb() {
   ];
   const db: any = {
     enrollment: { findMany: jest.fn(async () => [enrollment]) },
+    classroom: {
+      findMany: jest.fn(async ({ where }: any) =>
+        [{ id: 'c1', name: '10А' }].filter((c) => where.id.in.includes(c.id)),
+      ),
+    },
+    studentProfile: {
+      findUnique: jest.fn(async () => ({
+        type: 'CLASSROOM',
+        activatedAt: d('2026-09-01'),
+      })),
+    },
+    classSchedule: {
+      findMany: jest.fn(async ({ where }: any) =>
+        schedules.filter((r) => where.classroomId.in.includes(r.classroomId)),
+      ),
+    },
+    lessonTopic: {
+      findMany: jest.fn(async ({ where }: any) =>
+        topics.filter((t) => inRange(t.date, where.date)),
+      ),
+    },
+    lessonStaffing: {
+      findMany: jest.fn(async ({ where }: any) =>
+        staffing.filter((t) => inRange(t.date, where.date)),
+      ),
+    },
+    scheduleException: { findMany: jest.fn(async () => exceptions) },
     classTestSession: {
       findMany: jest.fn(async ({ where }: any) =>
         sessions.filter((s) => !where.testId || s.testId === where.testId),
@@ -197,7 +265,6 @@ function makeDb() {
     },
     lessonRecord: {
       findMany: jest.fn(async () => records),
-      findFirst: jest.fn(async () => null),
     },
     lessonPhoto: {
       findMany: jest.fn(async () => [
@@ -264,24 +331,46 @@ function makeDb() {
     },
     attendance: {
       groupBy: jest.fn(async () => []),
-      findMany: jest.fn(async () => []),
+      findMany: jest.fn(async ({ where }: any) =>
+        attendance.filter((a) => inRange(a.date, where.date)),
+      ),
     },
-    lessonTopic: { findMany: jest.fn(async () => []) },
     dailyHomeworkMark: {
       groupBy: jest.fn(async () => []),
       findFirst: jest.fn(async () => null),
+      findMany: jest.fn(async ({ where }: any) =>
+        marks.filter((m) => inRange(m.date, where.date)),
+      ),
     },
     academicCalendarDay: { findMany: jest.fn(async () => []) },
+    academicCalendarDayClassroom: { findMany: jest.fn(async () => []) },
+    $queryRaw: jest.fn(async () => [{ d: null }]),
   };
-  return { db, enrollment, sessions, tests, records };
+  return {
+    db,
+    enrollment,
+    sessions,
+    tests,
+    records,
+    topics,
+    staffing,
+    exceptions,
+    schedules,
+    attendance,
+  };
 }
 
-/** Бүх mock-ийн нийт дуудлага (асуулгын тоо) */
+/** Бүх mock-ийн нийт дуудлага (асуулгын тоо; $queryRaw ч орно) */
 function callCount(db: any): number {
   let n = 0;
-  for (const model of Object.values(db))
+  for (const model of Object.values(db)) {
+    if (jest.isMockFunction(model)) {
+      n += model.mock.calls.length;
+      continue;
+    }
     for (const fn of Object.values(model as Row))
       if (jest.isMockFunction(fn)) n += fn.mock.calls.length;
+  }
   return n;
 }
 
@@ -327,8 +416,20 @@ describe('StudentHubService', () => {
         teachers: ['Б. Болортуяа+', 'У. Эмүжин'],
         problemNumbers: '1-12, 15',
         tests: [
-          { testId: 'A1', title: 'Тест 18', variant: 'A', open: true },
-          { testId: null, title: 'Гарааны тест', variant: null, open: false },
+          {
+            testId: 'A1',
+            title: 'Тест 18',
+            variant: 'A',
+            open: true,
+            closedReason: null,
+          },
+          {
+            testId: null,
+            title: 'Гарааны тест',
+            variant: null,
+            open: false,
+            closedReason: 'NOT_AVAILABLE',
+          },
         ],
         attendance: { status: 'LATE', lateRange: 'FIVE_TO_TEN' },
         homework: {
@@ -377,7 +478,13 @@ describe('StudentHubService', () => {
       const res = await svc.days('s1', '2026-10');
       const today = res.days.find((x) => x.date === '2026-10-31')!;
       expect(today.tests).toEqual([
-        { testId: 'B2', title: 'Тест 19', variant: 'B', open: false },
+        {
+          testId: 'B2',
+          title: 'Тест 19',
+          variant: 'B',
+          open: false,
+          closedReason: 'TOMORROW',
+        },
       ]);
       expect(today.homework).toEqual({
         status: null,
@@ -391,8 +498,15 @@ describe('StudentHubService', () => {
         checkedOn: '2026-10-31',
       });
       const k1 = res.days.find((x) => x.date === '2026-10-23')!;
+      // 1000 бодлого хэзээ ч нээгдэхгүй — «Маргааш нээгдэнэ» биш
       expect(k1.tests).toEqual([
-        { testId: 'K1', title: '1000 бодлого', variant: null, open: false },
+        {
+          testId: 'K1',
+          title: '1000 бодлого',
+          variant: null,
+          open: false,
+          closedReason: 'NOT_AVAILABLE',
+        },
       ]);
       expect(k1.homework).toEqual({
         status: 'DONE',
@@ -418,13 +532,18 @@ describe('StudentHubService', () => {
         leftAt: null,
         classroom: { archived: false },
       });
-      const cls = enr.select.classroom.select;
-      expect(cls.attendances.select).not.toHaveProperty('note');
-      expect(cls.attendances.where.studentId).toBe('s1');
-      expect(cls.dailyHomeworkMarks.where.studentId).toBe('s1');
-      expect(cls.classSchedules.select.topics.select).not.toHaveProperty(
-        'dismissMode',
-      );
+      const att = env.db.attendance.findMany.mock.calls[0][0];
+      expect(att.select).not.toHaveProperty('note');
+      expect(att.where.studentId).toBe('s1');
+      expect(
+        env.db.dailyHomeworkMark.findMany.mock.calls[0][0].where.studentId,
+      ).toBe('s1');
+      expect(
+        env.db.lessonTopic.findMany.mock.calls[0][0].select,
+      ).not.toHaveProperty('dismissMode');
+      expect(
+        env.db.classSchedule.findMany.mock.calls[0][0].select,
+      ).not.toHaveProperty('dismissMode');
       const rec = env.db.lessonRecord.findMany.mock.calls[0][0];
       expect(rec.select).not.toHaveProperty('description');
       expect(rec.where.cancelledAt).toBeNull();
@@ -438,9 +557,7 @@ describe('StudentHubService', () => {
 
     it("D'-ийг олохын тулд сарын гадна уншина, гэхдээ өнөөдрөөс хэтрэхгүй", async () => {
       await svc.days('s1', '2026-09');
-      const range =
-        env.db.enrollment.findMany.mock.calls[0][0].select.classroom.select
-          .attendances.where.date;
+      const range = env.db.attendance.findMany.mock.calls[0][0].where.date;
       expect(range.gte).toEqual(d('2026-09-01'));
       expect(range.lte).toEqual(d('2026-10-31')); // 09-30 + 35 = 11-04 → өнөөдөр
       const hw =
@@ -448,9 +565,95 @@ describe('StudentHubService', () => {
       expect(hw.lte).toEqual(d('2026-09-30'));
     });
 
-    it('асуулга ≤ 8 (3 давалгаа), N+1 үгүй', async () => {
+    it('асуулга ≤ 16, relation-гүй хавтгай, N+1 үгүй (3 давалгаа)', async () => {
       await svc.days('s1', '2026-10');
-      expect(callCount(env.db)).toBeLessThanOrEqual(8);
+      // 1: элсэлт, ирц, тэмдэглэгээ, даалгаврын зураг, профайл; 2: нэр, хуваарь, сэдэв,
+      // оноолт, exception, тест, бүртгэл, онолын зураг; 3: тест, хүн, бүлэг
+      expect(callCount(env.db)).toBeLessThanOrEqual(16);
+      for (const [name, model] of Object.entries(env.db)) {
+        if (jest.isMockFunction(model)) continue;
+        for (const fn of Object.values(model as Row))
+          if (jest.isMockFunction(fn))
+            for (const [args] of fn.mock.calls as any[][])
+              if (args?.select)
+                // _count нь нэг SQL доторх дэд асуулга; бусад relation select хориотой
+                for (const [k, v] of Object.entries(args.select))
+                  if (k !== '_count')
+                    expect([name, k, typeof v]).toEqual([name, k, 'boolean']);
+      }
+    });
+
+    it('цуцалсан хичээлийн сэдэв хичээлийн өдөр болохгүй; зөөсөн сэдэв шинэ огноонд', async () => {
+      env.topics.push(
+        // 10-20 (Мягмар) цуцлагдсан — сэдэв анхны огноогоор үлдсэн
+        {
+          scheduleId: 'sch1',
+          date: d('2026-10-20'),
+          title: 'Цуцлагдсан',
+          chapterId: null,
+          photoStudentId: null,
+        },
+        // 10-22 (Пүрэв биш — sch2 Баасан 10-23) → 10-28 рүү зөөсөн
+        {
+          scheduleId: 'sch2',
+          date: d('2026-10-16'),
+          title: 'Зөөгдсөн',
+          chapterId: null,
+          photoStudentId: 's1',
+        },
+      );
+      env.staffing.push({
+        scheduleId: 'sch2',
+        date: d('2026-10-16'),
+        leadTeacherId: 't1',
+        assistantTeacherId: null,
+      });
+      env.exceptions.push(
+        {
+          scheduleId: 'sch1',
+          date: d('2026-10-20'),
+          kind: 'CANCELLED',
+          newDate: null,
+          newStartMinute: null,
+          newEndMinute: null,
+          newRoom: null,
+        },
+        {
+          scheduleId: 'sch2',
+          date: d('2026-10-16'),
+          kind: 'MOVED',
+          newDate: d('2026-10-28'),
+          newStartMinute: 700,
+          newEndMinute: 790,
+          newRoom: '9',
+        },
+      );
+      const res = await svc.days('s1', '2026-10');
+      const dates = res.days.map((x) => x.date);
+      expect(dates).not.toContain('2026-10-20');
+      expect(dates).not.toContain('2026-10-16');
+      const moved = res.days.find((x) => x.date === '2026-10-28')!;
+      expect(moved).toMatchObject({
+        topic: 'Зөөгдсөн',
+        startMinute: 700,
+        room: '9',
+        teachers: ['Б. Болортуяа+'],
+        theory: { assignedToMe: true },
+      });
+    });
+
+    it('идэвхжээгүй сурагч: тест жагсаалтад байна, нээгдэхгүй (NOT_AVAILABLE)', async () => {
+      env.db.studentProfile.findUnique.mockResolvedValue({
+        type: 'CLASSROOM',
+        activatedAt: null,
+      });
+      const res = await svc.days('s1', '2026-10');
+      const day = res.days.find((x) => x.date === '2026-10-27')!;
+      expect(day.tests[0]).toMatchObject({
+        testId: 'A1',
+        open: false,
+        closedReason: 'NOT_AVAILABLE',
+      });
     });
 
     it('буруу/хэт эрт/ирээдүйн сар → 400; анги байхгүй бол хоосон', async () => {
@@ -476,20 +679,14 @@ describe('StudentHubService', () => {
   describe('GET /student-hub/overview', () => {
     beforeEach(() => {
       env.db.enrollment.findMany.mockResolvedValue([
-        {
-          classroomId: 'c1',
-          joinedAt: d('2026-09-01'),
-          classroom: {
-            name: '10А',
-            classSchedules: [
-              {
-                ...schedule('sat', 6, 1080, '301'),
-                topics: [{ date: d('2026-10-31'), title: 'Тригонометр' }],
-              },
-              schedule('sat-early', 6, 600, '101'),
-            ],
-          },
-        },
+        { classroomId: 'c1', joinedAt: d('2026-09-01') },
+      ]);
+      env.db.classSchedule.findMany.mockResolvedValue([
+        schedule('sat', 6, 1080, '301'),
+        schedule('sat-early', 6, 600, '101'),
+      ]);
+      env.db.lessonTopic.findMany.mockResolvedValue([
+        { scheduleId: 'sat', date: d('2026-10-31'), title: 'Тригонометр' },
       ]);
       env.db.attendance.groupBy.mockResolvedValue([
         { status: 'PRESENT', _count: { _all: 6 } },
@@ -506,6 +703,7 @@ describe('StudentHubService', () => {
         status: 'PARTIAL',
         comment: 'Дутуу',
       });
+      env.db.$queryRaw.mockResolvedValue([{ d: '2026-10-27' }]);
     });
 
     it('ирц/даалгаврын хувь, өнөөдрийн дуусаагүй хичээл, сүүлийн тэмдэглэгээ', async () => {
@@ -530,7 +728,7 @@ describe('StudentHubService', () => {
           room: '301',
           topic: 'Тригонометр',
         },
-        // D' = 10-30, D = ангийн өмнөх хичээл (10-27: тест + бүртгэл)
+        // D' = 10-30, D = ангийн өмнөх хичээл (нэгдлийн нэг асуулга)
         latestMark: {
           date: '2026-10-30',
           status: 'PARTIAL',
@@ -542,64 +740,102 @@ describe('StudentHubService', () => {
       expect(env.db.attendance.groupBy.mock.calls[0][0].where).toEqual({
         studentId: 's1',
       });
-      // 5 + бүртгэл 1 + сүүлийн тэмдэглэгээний D (хичээлийн өдрийн нэгдэл, 5) — 3 давалгаа
-      expect(callCount(env.db)).toBeLessThanOrEqual(11);
-      expect(env.db.lessonRecord.findMany.mock.calls[0][0].where).toMatchObject(
-        {
-          classroomId: { in: ['c1'] },
-          date: { gte: d('2026-09-25'), lte: d('2026-10-29') },
-        },
+      // 1: элсэлт, 2 groupBy, сүүлийн тэмдэглэгээ, онцгой өдөр ×2; 2: нэр, хуваарь,
+      // exception, сэдэв, өнөөдрийн бүртгэл, D — нийт 12, 2 давалгаа, loadLessonDays-гүй
+      expect(callCount(env.db)).toBeLessThanOrEqual(12);
+      expect(env.db.attendance.findMany).not.toHaveBeenCalled();
+      expect(env.db.classTestSession.findMany).not.toHaveBeenCalled();
+      const [, ...values] = env.db.$queryRaw.mock.calls[0];
+      expect(values).toEqual(
+        expect.arrayContaining(['s1', 'c1', '2026-09-25', '2026-10-29']),
       );
+      const sql = env.db.$queryRaw.mock.calls[0][0].join('?');
+      expect(sql).toContain('"cancelledAt" IS NULL');
+      expect(sql).toContain("<> 'CANCELLED'");
+      expect(sql).toContain('COALESCE(x."newDate", t."date")');
     });
 
     it('батлагдсан бүртгэлийн сэдэв давамгайлна', async () => {
-      env.db.lessonRecord.findFirst.mockResolvedValue({
-        topic: 'Синус теорем',
-        startMinute: 1085,
-        endMinute: 1170,
-        room: '302',
-      });
+      env.db.lessonRecord.findMany.mockResolvedValue([
+        {
+          classroomId: 'c1',
+          scheduleId: 'sat-early',
+          topic: 'Өглөөний',
+          startMinute: 600,
+          endMinute: 690,
+          room: '101',
+        },
+        {
+          classroomId: 'c1',
+          scheduleId: 'sat',
+          topic: 'Синус теорем',
+          startMinute: 1085,
+          endMinute: 1170,
+          room: '302',
+        },
+      ]);
       const res = await svc.overview('s1');
       expect(res.today).toMatchObject({
         topic: 'Синус теорем',
         startMinute: 1085,
         room: '302',
       });
+      expect(env.db.lessonRecord.findMany.mock.calls[0][0].where).toEqual({
+        classroomId: { in: ['c1'] },
+        date: d('2026-10-31'),
+        cancelledAt: null,
+      });
       expect(
-        env.db.lessonRecord.findFirst.mock.calls[0][0].where,
-      ).toMatchObject({ scheduleId: 'sat', cancelledAt: null });
+        env.db.lessonRecord.findMany.mock.calls[0][0].select,
+      ).not.toHaveProperty('description');
     });
 
-    it('бүх ангийн амралтын өдөр эсвэл цуцалсан бол today = null', async () => {
+    it('бүх ангийн эсвэл ЭНЭ ангийн амралтын өдөр, цуцалсан бол today = null', async () => {
       env.db.academicCalendarDay.findMany.mockResolvedValue([
-        { type: 'HOLIDAY', title: 'Амралт', classrooms: [] },
+        { id: 'h1', type: 'HOLIDAY', title: 'Амралт' },
+      ]);
+      expect((await svc.overview('s1')).today).toBeNull();
+      // Зөвхөн өөр ангийн амралт — хичээл хэвээр
+      env.db.academicCalendarDayClassroom.findMany.mockResolvedValue([
+        { calendarDayId: 'h1', classroomId: 'c9' },
+      ]);
+      expect((await svc.overview('s1')).today).not.toBeNull();
+      env.db.academicCalendarDayClassroom.findMany.mockResolvedValue([
+        { calendarDayId: 'h1', classroomId: 'c1' },
       ]);
       expect((await svc.overview('s1')).today).toBeNull();
       env.db.academicCalendarDay.findMany.mockResolvedValue([]);
-      env.db.enrollment.findMany.mockResolvedValue([
+      env.db.academicCalendarDayClassroom.findMany.mockResolvedValue([]);
+      env.db.classSchedule.findMany.mockResolvedValue([
+        schedule('sat', 6, 1080, '301'),
+      ]);
+      env.db.scheduleException.findMany.mockResolvedValue([
         {
-          classroomId: 'c1',
-          joinedAt: d('2026-09-01'),
-          classroom: {
-            name: '10А',
-            classSchedules: [
-              schedule('sat', 6, 1080, '301', {
-                exceptions: [
-                  {
-                    date: d('2026-10-31'),
-                    kind: 'CANCELLED',
-                    newDate: null,
-                    newStartMinute: null,
-                    newEndMinute: null,
-                    newRoom: null,
-                  },
-                ],
-              }),
-            ],
-          },
+          scheduleId: 'sat',
+          date: d('2026-10-31'),
+          kind: 'CANCELLED',
+          newDate: null,
+          newStartMinute: null,
+          newEndMinute: null,
+          newRoom: null,
         },
       ]);
       expect((await svc.overview('s1')).today).toBeNull();
+    });
+
+    it('сүүлийн тэмдэглэгээ хуучин ангид бол lessonDate null, D-ийн асуулга үгүй', async () => {
+      env.db.dailyHomeworkMark.findFirst.mockResolvedValue({
+        classroomId: 'old',
+        date: d('2026-10-30'),
+        status: 'DONE',
+        comment: null,
+      });
+      const res = await svc.overview('s1');
+      expect(res.latestMark).toMatchObject({
+        classroomId: 'old',
+        lessonDate: null,
+      });
+      expect(env.db.$queryRaw).not.toHaveBeenCalled();
     });
 
     it('мөргүй сурагч: хувь 0, latestMark null', async () => {
@@ -615,6 +851,7 @@ describe('StudentHubService', () => {
       });
       expect(res.attendance.rate).toBe(0);
       expect(res.homework.rate).toBe(0);
+      expect(callCount(env.db)).toBe(6);
     });
   });
 
@@ -630,6 +867,7 @@ describe('StudentHubService', () => {
           classroomName: '10А',
           problemCount: 8,
           open: false,
+          closedReason: 'TOMORROW',
         },
         {
           testId: 'A1',
@@ -639,6 +877,7 @@ describe('StudentHubService', () => {
           classroomName: '10А',
           problemCount: 12,
           open: true,
+          closedReason: null,
         },
         {
           testId: null,
@@ -648,6 +887,7 @@ describe('StudentHubService', () => {
           classroomName: '10А',
           problemCount: 10,
           open: false,
+          closedReason: 'NOT_AVAILABLE',
         },
         {
           testId: 'K1',
@@ -657,9 +897,27 @@ describe('StudentHubService', () => {
           classroomName: '10А',
           problemCount: 20,
           open: false,
+          closedReason: 'NOT_AVAILABLE',
         },
       ]);
-      expect(callCount(env.db)).toBeLessThanOrEqual(3);
+      // 1: элсэлт, ирц, профайл; 2: нэр, тест-сесс; 3: тест
+      expect(callCount(env.db)).toBeLessThanOrEqual(6);
+    });
+
+    it('идэвхжээгүй (activatedAt-гүй эсвэл онлайн) сурагчид хоосон — loadSlots-той ижил', async () => {
+      env.db.studentProfile.findUnique.mockResolvedValue({
+        type: 'CLASSROOM',
+        activatedAt: null,
+      });
+      expect(await svc.tests('s1')).toEqual([]);
+      env.db.studentProfile.findUnique.mockResolvedValue({
+        type: 'ONLINE',
+        activatedAt: d('2026-09-01'),
+      });
+      expect(await svc.tests('s1')).toEqual([]);
+      env.db.studentProfile.findUnique.mockResolvedValue(null);
+      expect(await svc.tests('s1')).toEqual([]);
+      expect(env.db.classTestSession.findMany).not.toHaveBeenCalled();
     });
 
     it('хайлт том жижиг үсэг ялгахгүй', async () => {
@@ -749,6 +1007,18 @@ describe('StudentHubService', () => {
       expect(env.db.testProblem.findMany).not.toHaveBeenCalled();
     });
 
+    it('идэвхжээгүй сурагч 403 NOT_CLASS_TEST, бодлого (зөв хариу) уншихгүй', async () => {
+      env.db.studentProfile.findUnique.mockResolvedValue({
+        type: 'CLASSROOM',
+        activatedAt: null,
+      });
+      expect(
+        (await svc.testDetail('s1', 'A1').catch((e) => e)).getResponse(),
+      ).toMatchObject({ statusCode: 403, code: 'NOT_CLASS_TEST' });
+      expect(env.db.testProblem.findMany).not.toHaveBeenCalled();
+      expect(env.db.classTestSession.findMany).not.toHaveBeenCalled();
+    });
+
     it('ангигүй сурагч 403', async () => {
       env.db.enrollment.findMany.mockResolvedValue([]);
       expect(
@@ -806,6 +1076,32 @@ describe('StudentHubService', () => {
       expect(calls[calls.length - 1][0].where.date.gte).toEqual(
         d('2026-09-01'),
       );
+    });
+
+    it('q-тэй, from-гүй: 400 хоногоос хойш ч 400 өгөхгүй — хүрээ to − 400 хоног', async () => {
+      jest.setSystemTime(new Date('2027-12-01T04:00:00Z'));
+      await expect(svc.theory('s1', 'вектор')).resolves.toBeDefined();
+      const calls = env.db.lessonPhoto.findMany.mock.calls;
+      expect(calls[calls.length - 1][0].where.date).toEqual({
+        gte: d('2026-10-27'),
+        lte: d('2027-12-01'),
+      });
+      // to өгсөн бол түүнээс тоолно
+      await svc.theory('s1', 'вектор', undefined, '2027-06-30');
+      expect(calls[calls.length - 1][0].where.date.gte).toEqual(
+        d('2026-09-01'),
+      );
+      // ИЛ өгсөн хэт урт хүрээ л 400
+      await expect(
+        svc.theory('s1', 'вектор', '2026-09-01', '2027-12-01'),
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it('онолын жагсаалт: оноолт, тэмдэглэгээ уншихгүй (≤ 12 асуулга)', async () => {
+      await svc.theory('s1');
+      expect(env.db.lessonStaffing.findMany).not.toHaveBeenCalled();
+      expect(env.db.dailyHomeworkMark.findMany).not.toHaveBeenCalled();
+      expect(callCount(env.db)).toBeLessThanOrEqual(12);
     });
 
     it('from/to шалгалт', async () => {

@@ -159,6 +159,20 @@ export async function hasCoveringPass(
   return false;
 }
 
+// Идэвхжүүлэх код оруулсан (activatedAt) ТАНХИМЫН сурагчийн профайл эсэх — нэг асуулга.
+// Одоогийн ангиа аль хэдийн уншсан дуудагч (student-hub) үүнийг + «ангитай» гэдгийг
+// хослуулж hasActiveClassroomEnrollment-тэй ижил дүрэм авна (давхар асуулгагүй).
+export async function isActivatedClassroomStudent(
+  prisma: PrismaService,
+  userId: string,
+): Promise<boolean> {
+  const profile = await prisma.studentProfile.findUnique({
+    where: { userId },
+    select: { type: true, activatedAt: true },
+  });
+  return profile?.type === StudentType.CLASSROOM && !!profile.activatedAt;
+}
+
 // Танхимын идэвхтэй (activatedAt-тай, leftAt: null) сурагч эсэхийг шалгана.
 // Зөвхөн STUDENT рольд хамаарна (эцэг эх/багш өөрийн StudentProfile-гүй).
 export async function hasActiveClassroomEnrollment(
@@ -167,12 +181,7 @@ export async function hasActiveClassroomEnrollment(
   role: Role,
 ): Promise<boolean> {
   if (role !== Role.STUDENT) return false;
-  const profile = await prisma.studentProfile.findUnique({
-    where: { userId },
-  });
-  if (profile?.type !== StudentType.CLASSROOM || !profile.activatedAt) {
-    return false;
-  }
+  if (!(await isActivatedClassroomStudent(prisma, userId))) return false;
   const active = await prisma.enrollment.findFirst({
     where: { studentId: userId, leftAt: null, classroom: { archived: false } },
   });

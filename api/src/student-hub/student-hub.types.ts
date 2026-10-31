@@ -6,6 +6,7 @@ import type {
   HomeworkSummary,
   HomeworkView,
   HubProblem,
+  TestClosedReason,
 } from './student-hub.logic';
 
 export type LateRangeValue =
@@ -45,6 +46,8 @@ export interface HubDayTest {
   title: string;
   variant: string | null;
   open: boolean;
+  /** open=false үед: TOMORROW — маргааш нээгдэнэ; NOT_AVAILABLE — хэзээ ч нээгдэхгүй */
+  closedReason: TestClosedReason | null;
 }
 
 export interface HubDay {
@@ -94,6 +97,8 @@ export interface HubTestRow {
   classroomName: string;
   problemCount: number;
   open: boolean;
+  /** open=false үед: TOMORROW — маргааш нээгдэнэ; NOT_AVAILABLE — хэзээ ч нээгдэхгүй */
+  closedReason: TestClosedReason | null;
 }
 
 export interface HubTestDetail {
