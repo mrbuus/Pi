@@ -35,6 +35,7 @@ export interface HwPhoto {
   uploadedAt: string;
 }
 
+/** V2 (SURAGCH-V2-GEREE): хичээлийн ӨДӨР БҮР ирнэ, `items` хоосон байж болно */
 export interface HwDay {
   date: string; // YYYY-MM-DD
   classroomId: string;
@@ -42,7 +43,12 @@ export interface HwDay {
   deadlineAt: string | null;
   items: HwItem[];
   photo: HwPhoto | null;
+  /** Багшийн тэмдэглэгээ (дараагийн хичээлийн өдөр тавьдаг) */
   mark: HomeworkStatus | null;
+  /** Багшийн тайлбар (V2) */
+  markComment?: string | null;
+  /** Сэдэв (V2) */
+  topic?: string | null;
 }
 
 export interface HwMyResponse {

@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/kit/button";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import PhotoPicker from "./PhotoPicker";
-import TheoryPhotoDays from "./TheoryPhotoDays";
 import { setMakeupCount } from "./MakeupNavBadge";
 import { dayLabel, isOpen, type MyMakeup, type MakeupTest, STATUS_CHIP, STATUS_META, testLabel } from "./types";
 
@@ -316,19 +315,17 @@ export default function StudentMakeupView() {
         )}
       </section>
 
-      <section aria-labelledby="theory-title" className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Images className="size-5 text-brand-soft" aria-hidden />
-          <h2 id="theory-title" className="cyrillic-heading text-lg font-bold text-ink">
-            Онолын зураг
-          </h2>
-          <InfoHint label="Онолын зургийн тайлбар">
-            Хичээл бүрийн онолыг томилогдсон сурагч зургаар илгээнэ. Тэр өдрийн тестүүдтэй холбогдож хадгалагдах тул
-            хэдэн сарын дараа ч тестийнхээ онолыг эндээс олно
-          </InfoHint>
-        </div>
-        <TheoryPhotoDays />
-      </section>
+      <Link
+        href="/app/theory"
+        className="chunky chunky-press flex min-h-16 items-center gap-3 px-4 py-3 focus-visible:ring-2 focus-visible:ring-brand-bright sm:px-5"
+      >
+        <Images className="size-6 shrink-0 text-brand-soft" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="cyrillic-heading block font-bold text-ink">Онолын зураг</span>
+          <span className="block text-sm text-ink-dim">Өдрөөр, сэдвээр хайх, илгээх</span>
+        </span>
+        <ArrowRight className="size-5 shrink-0 text-ink-dim" aria-hidden />
+      </Link>
     </div>
   );
 }
