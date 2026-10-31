@@ -4,6 +4,7 @@ import { NotificationCenterModule } from '../notification-center/notification-ce
 import { ScheduleService } from '../schedule/schedule.service';
 import { AttendanceController } from './attendance.controller';
 import { AttendanceService } from './attendance.service';
+import { AttendanceDaySummaryService } from './day-summary.service';
 
 @Module({
   // G39-өөс хойш ScheduleService нь NotificationCenterService-ээс хамаардаг
@@ -16,6 +17,6 @@ import { AttendanceService } from './attendance.service';
   // адилхан хэв маяг) — зөвхөн PrismaService (global)-аас хамаардаг тул
   // аюулгүй. AuditService-ийг мөн шууд provider болгож нэмсэн (assignments
   // модультай ижил хэв маяг).
-  providers: [AttendanceService, ScheduleService, AuditService],
+  providers: [AttendanceService, AttendanceDaySummaryService, ScheduleService, AuditService],
 })
 export class AttendanceModule {}

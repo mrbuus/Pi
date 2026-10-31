@@ -30,23 +30,47 @@ interface Props {
 export default function DateStrip({ footer, todayKey, lessonDays, selectedKey, view, onView, onSelect }: Props) {
   const scroller = useRef<HTMLDivElement>(null);
   const first = useRef(true);
-  const days = useMemo(() => daysOfMonth(view.y, view.m), [view.y, view.m]);
+  // Хоёр захад хажуугийн сарын 7 өдөр — 1-ний, 31-ний өдөр ч зурвасын ГОЛД гарна (эзэн 2026-10-31)
+  const days = useMemo(
+    () => [
+      ...Array.from({ length: 7 }, (_, i) => new Date(view.y, view.m, i - 6)),
+      ...daysOfMonth(view.y, view.m),
+      ...Array.from({ length: 7 }, (_, i) => new Date(view.y, view.m + 1, i + 1)),
+    ],
+    [view.y, view.m],
+  );
 
   const shift = (delta: number) => {
     const d = new Date(view.y, view.m + delta, 1);
     onView({ y: d.getFullYear(), m: d.getMonth() });
   };
 
-  // Сонгосон өдрийг (байхгүй бол өнөөдрийг) зурвасын голд — хуудсыг биш, зөвхөн зурвасыг гүйлгэнэ
+  // Сонгосон өдрийг (байхгүй бол өнөөдрийг) зурвасын голд — хуудсыг биш, зөвхөн зурвасыг гүйлгэнэ.
+  // Зурвасын өргөн ачаалал дуусах үед өөрчлөгддөг тул өргөн солигдох бүрт дахин голлуулна
+  // (хэрэглэгч өөрөө гүйлгээгүй бол — эзэн 2026-10-31: өнөөдөр үргэлж голд).
   useEffect(() => {
     const sc = scroller.current;
     if (!sc) return;
-    const target =
-      sc.querySelector<HTMLElement>('[data-selected="true"]') ?? sc.querySelector<HTMLElement>('[data-today="true"]');
-    const left = target ? target.offsetLeft - (sc.clientWidth - target.clientWidth) / 2 : 0;
+    let touched = false;
+    const center = (smooth: boolean) => {
+      const target =
+        sc.querySelector<HTMLElement>('[data-selected="true"]') ?? sc.querySelector<HTMLElement>('[data-today="true"]');
+      const left = target ? target.offsetLeft - (sc.clientWidth - target.clientWidth) / 2 : 0;
+      sc.scrollTo({ left: Math.max(0, left), behavior: smooth ? "smooth" : "auto" });
+    };
     const calm = first.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     first.current = false;
-    sc.scrollTo({ left: Math.max(0, left), behavior: calm ? "auto" : "smooth" });
+    center(!calm);
+    const mark = () => (touched = true);
+    sc.addEventListener("pointerdown", mark, { passive: true });
+    sc.addEventListener("wheel", mark, { passive: true });
+    const ro = new ResizeObserver(() => !touched && center(false));
+    ro.observe(sc);
+    return () => {
+      ro.disconnect();
+      sc.removeEventListener("pointerdown", mark);
+      sc.removeEventListener("wheel", mark);
+    };
   }, [view.y, view.m, selectedKey]);
 
   return (
@@ -88,14 +112,15 @@ export default function DateStrip({ footer, todayKey, lessonDays, selectedKey, v
         className="relative order-3 basis-full overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:order-2 sm:min-w-0 sm:flex-1 sm:basis-0"
       >
         <ul className="flex w-max gap-1">
-          {days.map((d) => {
+          {days.map((d, i) => {
             const key = toKey(d);
+            const outside = d.getMonth() !== view.m;
             const wd = mondayIndex(d);
             const lesson = lessonDays.has(key);
             const selected = key === selectedKey;
             const today = key === todayKey;
             return (
-              <li key={key} className={cn(wd === 0 && d.getDate() !== 1 && "ml-1.5 border-l border-line pl-1.5")}>
+              <li key={key} className={cn(wd === 0 && i > 0 && "ml-1.5 border-l border-line pl-1.5", outside && !selected && "opacity-55")}>
                 <button
                   type="button"
                   data-selected={selected}

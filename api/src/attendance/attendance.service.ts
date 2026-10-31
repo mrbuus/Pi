@@ -569,6 +569,12 @@ export class AttendanceService {
             teacherName: e.teacherName,
                 leadTeacher: e.leadTeacher?.name ?? null,
                 assistantTeacher: e.assistantTeacher?.name ?? null,
+                // Нэвтэрсэн хүний орох хичээл — самбар энэ ангийг өөрөө нээнэ (эзэн 2026-10-31).
+                // Өдрийн оноолт (ахлах/туслах) байвал түүгээр, эс бөгөөс хуваарийн багшаар.
+                mine:
+                  e.leadTeacher || e.assistantTeacher
+                    ? e.leadTeacher?.id === userId || e.assistantTeacher?.id === userId
+                    : e.teacherId === userId,
               })),
       };
     });

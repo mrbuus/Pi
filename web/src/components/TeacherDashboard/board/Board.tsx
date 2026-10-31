@@ -126,13 +126,22 @@ function BoardRoot({ link }: { link: BoardLink }) {
   const dayReady = day?.date === date;
   const classes = useMemo(() => (dayReady ? day!.classes : []), [dayReady, day]);
 
-  // Сонгосон анги: багшийн сонголт → сүүлд сонгосон (энэ өдөр хичээлтэй бол) → явагдаж буй/эхний хичээл
+  // Сонгосон анги: багшийн сонголт → ӨӨРИЙН орох хичээл (эзэн 2026-10-31: хуваарьт тавигдсан анги
+  // шууд нээгдэнэ — одоо явагдаж буй, эс бөгөөс дараагийн, эс бөгөөс сүүлд орсон) → сүүлд сонгосон →
+  // явагдаж буй/эхний хичээл. Өөр анги руу сольж болно (picked).
   const classId = useMemo(() => {
     if (picked) return picked;
     if (!dayReady) return null;
+    const now = date === today ? ubNowMinute() : -1;
+    const mine = classes.flatMap((c) => c.lessons.filter((l) => l.mine).map((l) => ({ id: c.id, l })));
+    if (mine.length) {
+      const live = mine.find(({ l }) => l.startMinute <= now && now < l.endMinute);
+      const next = mine.filter(({ l }) => l.startMinute > now).sort((a, b) => a.l.startMinute - b.l.startMinute)[0];
+      const last = mine.filter(({ l }) => l.startMinute <= now).sort((a, b) => b.l.startMinute - a.l.startMinute)[0];
+      return (live ?? next ?? last ?? mine[0]).id;
+    }
     const saved = readStore(CLASS_KEY);
     if (saved && classes.some((c) => c.id === saved)) return saved;
-    const now = date === today ? ubNowMinute() : -1;
     const live = classes.find((c) => c.lessons.some((l) => l.startMinute <= now && now < l.endMinute));
     return (live ?? classes[0])?.id ?? null;
   }, [picked, dayReady, classes, date, today]);

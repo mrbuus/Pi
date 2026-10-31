@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { AttendanceService } from './attendance.service';
+import { AttendanceDaySummaryService } from './day-summary.service';
 import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 import { RiskCriteriaDto } from './dto/risk-criteria.dto';
 
@@ -24,7 +25,10 @@ interface AuthedRequest {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class AttendanceController {
-  constructor(private attendance: AttendanceService) {}
+  constructor(
+    private attendance: AttendanceService,
+    private daySummaries: AttendanceDaySummaryService,
+  ) {}
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Post('classrooms/:id/attendance')
@@ -109,6 +113,13 @@ export class AttendanceController {
       req.user.role,
       classroomId,
     );
+  }
+
+  // «Ангиуд» → «Өнөөдөр»: тухайн өдрийн анги бүрийн ирц, даалгаврын тоо (эзэн 2026-10-31)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('attendance/day-summary')
+  daySummary(@Query('date') date: string, @Req() req: AuthedRequest) {
+    return this.daySummaries.daySummary(date, req.user.userId, req.user.role);
   }
 
   // Самбарын бүтэн өгөгдөл: хичээл, сурагчид, тэмдэглэгээ, шалгуур, эрсдэл

@@ -16,10 +16,14 @@ import { formatMnDate } from "@/lib/dateMn";
 import { PAYMENT_META, rateTone } from "./meta";
 import { Segmented } from "./parts";
 import TeacherPicker from "./TeacherPicker";
+import TodayOverview from "./TodayOverview";
 import type { ClassCard, ClassListResponse } from "./types";
 
 type SortKey = "name" | "risk" | "attendance";
 const SORT_KEY = "pi_classes_sort";
+/** «Бүх анги» эсвэл «Өнөөдөр» тойм (эзэн 2026-10-31) — хэрэглэгчийн сүүлийн сонголт */
+type View = "all" | "today";
+const VIEW_KEY = "pi_classes_view";
 
 /** «Анги (Баруун 4)» → «Баруун 4» */
 function branchOf(name: string): string | null {
@@ -42,6 +46,7 @@ export default function ClassesListClient() {
   const [branch, setBranch] = useState("ALL");
   const [sort, setSort] = useState<SortKey>("name");
   const [assigning, setAssigning] = useState<ClassCard | null>(null);
+  const [view, setView] = useState<View>("all");
 
   const load = useCallback(async () => {
     setError("");
@@ -55,10 +60,24 @@ export default function ClassesListClient() {
   useEffect(() => {
     const t = window.setTimeout(() => {
       setSort(readSort());
+      try {
+        if (localStorage.getItem(VIEW_KEY) === "today") setView("today");
+      } catch {
+        /* хувийн горим — «Бүх анги» */
+      }
       void load();
     }, 0);
     return () => window.clearTimeout(t);
   }, [load]);
+
+  function changeView(v: View) {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      /* хадгалахгүй — асуудалгүй */
+    }
+  }
 
   function changeSort(v: SortKey) {
     setSort(v);
@@ -127,78 +146,94 @@ export default function ClassesListClient() {
           )}
         </header>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <label className="relative block min-w-0 sm:w-64">
-            <span className="sr-only">Анги эсвэл багшаар хайх</span>
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" aria-hidden />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Анги, багш хайх"
-              className="min-h-11 w-full rounded-xl border border-line bg-surface py-2 pl-9 pr-3 text-ink focus-visible:outline-2 focus-visible:outline-brand"
-            />
-          </label>
-          {branches.length > 1 && (
-            <Segmented
-              label="Салбар"
-              value={branch}
-              onChange={setBranch}
-              options={[{ value: "ALL", label: "Бүгд" }, ...branches.map((b) => ({ value: b, label: b }))]}
+        <Segmented
+          label="Харагдац"
+          value={view}
+          onChange={changeView}
+          options={[
+            { value: "all", label: "Бүх анги" },
+            { value: "today", label: "Өнөөдөр" },
+          ]}
+        />
+
+        {view === "today" && <TodayOverview />}
+
+        {view === "all" && (
+          <>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <label className="relative block min-w-0 sm:w-64">
+              <span className="sr-only">Анги эсвэл багшаар хайх</span>
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" aria-hidden />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Анги, багш хайх"
+                className="min-h-11 w-full rounded-xl border border-line bg-surface py-2 pl-9 pr-3 text-ink focus-visible:outline-2 focus-visible:outline-brand"
+              />
+            </label>
+            {branches.length > 1 && (
+              <Segmented
+                label="Салбар"
+                value={branch}
+                onChange={setBranch}
+                options={[{ value: "ALL", label: "Бүгд" }, ...branches.map((b) => ({ value: b, label: b }))]}
+              />
+            )}
+            <label className="flex items-center gap-2 text-sm text-ink-dim sm:ml-auto">
+              Эрэмбэ
+              <select
+                value={sort}
+                onChange={(e) => changeSort(e.target.value as SortKey)}
+                className="min-h-11 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink focus-visible:outline-2 focus-visible:outline-brand"
+              >
+                <option value="name">Нэрээр</option>
+                <option value="risk">Анхаарах хүүхэд олноор</option>
+                <option value="attendance">Ирц сулаар</option>
+              </select>
+            </label>
+          </div>
+
+          {error && <ErrorState message={error} onRetry={() => void load()} />}
+          {!data && !error && (
+            <div className="space-y-2" role="status" aria-label="Ангиуд ачаалж байна">
+              {Array.from({ length: 6 }, (_, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3" aria-hidden>
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <SkeletonLine width={160} height={16} />
+                    <SkeletonLine width="45%" height={12} />
+                  </div>
+                  <SkeletonLine width={220} height={28} className="hidden md:block" />
+                  <SkeletonLine width={36} height={36} className="rounded-full" />
+                </div>
+              ))}
+            </div>
+          )}
+          {data && data.classes.length === 0 && (
+            <EmptyState
+              icon={School}
+              title="Танд харагдах анги алга"
+              hint="Хуваарьт таныг багшаар оноосон эсвэл ангийн багшаар бүртгэсэн үед энд гарна"
             />
           )}
-          <label className="flex items-center gap-2 text-sm text-ink-dim sm:ml-auto">
-            Эрэмбэ
-            <select
-              value={sort}
-              onChange={(e) => changeSort(e.target.value as SortKey)}
-              className="min-h-11 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink focus-visible:outline-2 focus-visible:outline-brand"
-            >
-              <option value="name">Нэрээр</option>
-              <option value="risk">Анхаарах хүүхэд олноор</option>
-              <option value="attendance">Ирц сулаар</option>
-            </select>
-          </label>
-        </div>
-
-        {error && <ErrorState message={error} onRetry={() => void load()} />}
-        {!data && !error && (
-          <div className="space-y-2" role="status" aria-label="Ангиуд ачаалж байна">
-            {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3" aria-hidden>
-                <div className="min-w-0 flex-1 space-y-2">
-                  <SkeletonLine width={160} height={16} />
-                  <SkeletonLine width="45%" height={12} />
-                </div>
-                <SkeletonLine width={220} height={28} className="hidden md:block" />
-                <SkeletonLine width={36} height={36} className="rounded-full" />
-              </div>
-            ))}
-          </div>
-        )}
-        {data && data.classes.length === 0 && (
-          <EmptyState
-            icon={School}
-            title="Танд харагдах анги алга"
-            hint="Хуваарьт таныг багшаар оноосон эсвэл ангийн багшаар бүртгэсэн үед энд гарна"
-          />
-        )}
-        {data && data.classes.length > 0 && shown.length === 0 && (
-          <EmptyState icon={Search} title="Хайлтад тохирох анги алга" hint="Өөр үгээр хайж үзнэ үү" />
-        )}
-        {shown.length > 0 && (
-          <ul className="@container space-y-2">
-            {shown.map((c) => (
-              <li key={c.id}>
-                <ClassRowView
-                  c={c}
-                  windowDays={data!.windowDays}
-                  canAssign={!!data!.permissions.manageClasses}
-                  onAssign={() => setAssigning(c)}
-                />
-              </li>
-            ))}
-          </ul>
+          {data && data.classes.length > 0 && shown.length === 0 && (
+            <EmptyState icon={Search} title="Хайлтад тохирох анги алга" hint="Өөр үгээр хайж үзнэ үү" />
+          )}
+          {shown.length > 0 && (
+            <ul className="@container space-y-2">
+              {shown.map((c) => (
+                <li key={c.id}>
+                  <ClassRowView
+                    c={c}
+                    windowDays={data!.windowDays}
+                    canAssign={!!data!.permissions.manageClasses}
+                    onAssign={() => setAssigning(c)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+          </>
         )}
         {assigning && (
           <TeacherPicker

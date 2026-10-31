@@ -19,6 +19,8 @@ export interface BoardLesson {
   teacherName: string | null;
   leadTeacher: string | null;
   assistantTeacher: string | null;
+  /** Нэвтэрсэн хүний орох хичээл (ахлах/туслах, эс бөгөөс хуваарийн багш) */
+  mine?: boolean;
 }
 
 export interface DayClass {
