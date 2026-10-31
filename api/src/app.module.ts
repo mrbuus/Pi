@@ -58,6 +58,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { TestsModule } from './tests/tests.module';
 import { ThousandModule } from './thousand/thousand.module';
 import { HomeworkPracticeModule } from './homework-practice/homework-practice.module';
+import { StudentHubModule } from './student-hub/student-hub.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
@@ -135,6 +136,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     TestsModule,
     ThousandModule,
     HomeworkPracticeModule,
+    StudentHubModule,
     AttemptsModule,
     StorageModule,
     PassesModule,

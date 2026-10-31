@@ -31,6 +31,7 @@ import {
 } from './makeup.logic';
 import { staffCovers, staffDays, type StaffActor } from './staff-access';
 import { pdfPageCount } from './pdf-pages';
+import { inUploadWindow, topicOf } from '../student-hub/student-hub.logic';
 
 /** Сурагчийн «Нөхөх хичээл» жагсаалтын цонх (ангийн самбарын MAKEUP_DAYS-тэй ижил) */
 export const MAKEUP_WINDOW_DAYS = 60;
@@ -564,7 +565,7 @@ export class LessonDayService {
   // ───────────────────────── Онолын зураг ─────────────────────────
 
   private async dayContext(classroomId: string, date: Date) {
-    const [classroom, topics, sessions, photos] = await Promise.all([
+    const [classroom, topics, sessions, photos, records] = await Promise.all([
       this.prisma.classroom.findUnique({
         where: { id: classroomId },
         select: { id: true, name: true },
@@ -572,7 +573,7 @@ export class LessonDayService {
       // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй (зөвхөн багшид)
       this.prisma.lessonTopic.findMany({
         where: { date, schedule: { classroomId } },
-        select: { testIds: true, photoStudentId: true },
+        select: { testIds: true, photoStudentId: true, title: true, chapterId: true },
       }),
       this.prisma.classTestSession.findMany({
         where: { classroomId, date, testId: { not: null } },
@@ -581,6 +582,12 @@ export class LessonDayService {
       this.prisma.lessonPhoto.findMany({
         where: { classroomId, date },
         orderBy: { createdAt: 'asc' },
+      }),
+      // description-ийг ХЭЗЭЭ Ч сонгохгүй — зөвхөн сэдэв
+      this.prisma.lessonRecord.findMany({
+        where: { classroomId, date, cancelledAt: null },
+        select: { topic: true },
+        orderBy: { startMinute: 'asc' },
       }),
     ]);
     if (!classroom) throw new NotFoundException('Анги олдсонгүй');
@@ -592,7 +599,19 @@ export class LessonDayService {
       ]),
     ];
     const assignedId = topics.find((t) => t.photoStudentId)?.photoStudentId ?? null;
-    return { classroom, testIds, assignedId, photos };
+    // Сэдэв: LessonRecord.topic → LessonTopic.title → Chapter.title (хоосон гарчигтай үед л)
+    let topic = topicOf(...(records ?? []).map((r) => r.topic), ...topics.map((t) => t.title));
+    if (!topic) {
+      const chapterIds = topics.flatMap((t) => (t.chapterId ? [t.chapterId] : []));
+      if (chapterIds.length) {
+        const chapters = await this.prisma.chapter.findMany({
+          where: { id: { in: chapterIds } },
+          select: { title: true },
+        });
+        topic = topicOf(...chapters.map((c) => c.title));
+      }
+    }
+    return { classroom, testIds, assignedId, photos, topic };
   }
 
   private async names(ids: string[]) {
@@ -627,12 +646,14 @@ export class LessonDayService {
       this.names([...(ctx.assignedId ? [ctx.assignedId] : []), ...ctx.photos.map((p) => p.studentId)]),
     ]);
     const key = dateKey(date);
-    const upcoming = key > dateKey(todayUB());
+    const todayKey = dateKey(todayUB());
+    const upcoming = key > todayKey;
     return {
       classroomId,
       classroomName: ctx.classroom.name,
       date: key,
       upcoming,
+      topic: ctx.topic,
       tests: ctx.testIds.flatMap((id) => {
         const t = tests.get(id);
         return t ? [{ testId: id, title: t.title, variant: normalizeVariant(t.variantLabel) }] : [];
@@ -644,13 +665,18 @@ export class LessonDayService {
             isMe: ctx.assignedId === actor.userId,
           }
         : null,
-      canUpload: !upcoming && (kind === 'STAFF' || ctx.assignedId === actor.userId),
+      // Эзэн 2026-10-31 (СУРАГЧ V2): тухайн өдөр ангид элссэн АЛЬ Ч сурагч өнөөдөр ба өмнөх
+      // 13 хоногт илгээнэ; томилогдсон эсэх нь зөвхөн «Томилогдсон» тэмдэг.
+      canUpload: !upcoming && (kind === 'STAFF' || inUploadWindow(key, todayKey)),
+      assignedToMe: !!ctx.assignedId && ctx.assignedId === actor.userId,
       photos: ctx.photos
         .filter((p) => p.imageKeys.length)
         .map((p) => ({
           id: p.id,
           uploaderName: names.get(p.studentId) ?? 'Сурагч',
           isMine: p.studentId === actor.userId,
+          // Томилогдсон сурагчийн зураг эсэх (сурагчид id ХЭЗЭЭ Ч очихгүй)
+          isAssigned: !!ctx.assignedId && p.studentId === ctx.assignedId,
           imageKeys: p.imageKeys,
           pages: p.imageKeys.reduce((n, k) => n + (pages.get(k) ?? 1), 0),
           createdAt: p.createdAt,
@@ -661,12 +687,14 @@ export class LessonDayService {
   async uploadDayPhotos(actor: Actor, classroomId: string, dateText: string, keys: string[]) {
     const date = this.day(dateText);
     const key = dateKey(date);
-    if (key > dateKey(todayUB()))
+    const todayKey = dateKey(todayUB());
+    if (key > todayKey)
       throw new BadRequestException('Хичээл болсны дараа онолын зургаа илгээнэ.');
     const kind = await this.photoAccess(actor, classroomId, date);
+    // Сурагч: тухайн өдөр ангид элссэн (photoAccess) + өнөөдөр ба өмнөх 13 хоног
+    if (kind === 'STUDENT' && !inUploadWindow(key, todayKey))
+      throw new ForbiddenException('Онолын зургийг хичээл болсноос хойш 14 хоногийн дотор илгээнэ.');
     const ctx = await this.dayContext(classroomId, date);
-    if (kind === 'STUDENT' && ctx.assignedId !== actor.userId)
-      throw new ForbiddenException('Энэ өдрийн онолын зургийг томилогдсон сурагч илгээнэ.');
     await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`photo:${classroomId}:${key}:${actor.userId}`}))::text`;
       const mine = await tx.lessonPhoto.findFirst({
@@ -771,11 +799,13 @@ export class LessonDayService {
         uploader: d.assignedId
           ? { name: names.get(d.assignedId) ?? 'Сурагч', isMe: d.assignedId === studentId }
           : null,
-        canUpload: d.assignedId === studentId && d.date <= todayKey,
+        canUpload: inUploadWindow(d.date, todayKey),
+        assignedToMe: d.assignedId === studentId,
         photos: d.photos.map((p) => ({
           id: p.id,
           uploaderName: names.get(p.studentId) ?? 'Сурагч',
           isMine: p.studentId === studentId,
+          isAssigned: !!d.assignedId && p.studentId === d.assignedId,
           imageKeys: p.imageKeys,
           pages: p.imageKeys.reduce((n, k) => n + (pages.get(k) ?? 1), 0),
           createdAt: p.createdAt,
