@@ -38,6 +38,8 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       'lessonTopic',
       'lessonPhoto',
       'storedFile',
+      'lessonRecord',
+      'chapter',
     ])
       db[m] = model();
     db.$transaction = jest.fn(async (fn: (tx: unknown) => unknown) => fn(db));
@@ -195,6 +197,38 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       expect(res.uploader).toMatchObject({ isMe: false });
       expect(res.uploader).not.toHaveProperty('studentId');
       expect(db.lessonTopic.findMany.mock.calls[0][0].select).not.toHaveProperty('dismissMode');
+    });
+
+    it('өдрийн сэдэв, зураг бүрийн isAssigned; сурагчид id очихгүй', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.lessonTopic.findMany.mockResolvedValue([
+        { testIds: [], photoStudentId: 's1', title: 'Сэдэв', chapterId: null },
+      ]);
+      db.lessonPhoto.findMany.mockResolvedValue([
+        { id: 'p1', studentId: 's1', imageKeys: ['a.jpg'], createdAt: new Date() },
+        { id: 'p2', studentId: 's2', imageKeys: ['b.jpg'], createdAt: new Date() },
+      ]);
+      const res = await service.dayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-24');
+      expect(res.topic).toBe('Сэдэв');
+      expect(res.assignedToMe).toBe(false);
+      expect(res.photos.map((p) => [p.id, p.isAssigned, p.isMine])).toEqual([
+        ['p1', true, false],
+        ['p2', false, true],
+      ]);
+      expect(JSON.stringify(res)).not.toMatch(/"s1"|"s2"|studentId/);
+      // Батлагдсан бүртгэлийн сэдэв давамгайлна; description сонгогдохгүй
+      db.lessonRecord.findMany.mockResolvedValue([{ topic: 'Батлагдсан' }]);
+      expect((await service.dayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-24')).topic).toBe('Батлагдсан');
+      expect(db.lessonRecord.findMany.mock.calls[0][0].select).toEqual({ topic: true });
+    });
+
+    it('сэдвийн гарчиг хоосон бол бүлгийн нэр, юу ч үгүй бол null', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.lessonTopic.findMany.mockResolvedValue([{ testIds: [], photoStudentId: null, title: ' ', chapterId: 'ch1' }]);
+      db.chapter.findMany.mockResolvedValue([{ title: 'Вектор' }]);
+      expect((await service.dayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-24')).topic).toBe('Вектор');
+      db.lessonTopic.findMany.mockResolvedValue([]);
+      expect((await service.dayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-24')).topic).toBeNull();
     });
 
     it('томилогдсон сурагчид assignedToMe = true', async () => {

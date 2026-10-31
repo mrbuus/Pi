@@ -1246,9 +1246,11 @@ export class AttendanceService {
             }
           : {}),
       },
+      // note сурагчид ХЭЗЭЭ Ч очихгүй; lateRange — СУРАГЧ V2 (2026-10-31)
       select: {
         date: true,
         status: true,
+        lateRange: true,
         classroom: { select: { id: true, name: true } },
       },
       orderBy: { date: 'desc' },
