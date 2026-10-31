@@ -2,18 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, FileCheck2, X } from "lucide-react";
-import PhotoPicker from "@/components/makeup/PhotoPicker";
+import HomeworkPhotoPanel from "@/components/student-hub/HomeworkPhotoPanel";
+import { HOMEWORK_MAX_PAGES } from "@/components/student-hub/photo-types";
 import { SkeletonLine } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import type { HwMyResponse, HwPhoto } from "./types";
 
-export const HW_PHOTO_MAX_PAGES = 6;
+export const HW_PHOTO_MAX_PAGES = HOMEWORK_MAX_PAGES;
 
 /**
- * «Зураг илгээх» — буланд байрлах жижиг товч + цонх. Дэвтрийн зургийг (≤6 хуудас)
- * тайрч, PDF болгож, purpose "homework" (7 хоног) -оор илгээнэ.
+ * «Зураг илгээх» — бодох/дүнгийн дэлгэцийн толгойд байрлах жижиг товч + цонх.
+ * Цонхны агуулга нь `student-hub/HomeworkPhotoPanel` (жагсаалттай ижил логик).
  * `photo` === undefined бол (бодох дэлгэцийн толгойд) цонх нээгдэхэд жагсаалтаас олно.
  */
 export default function PhotoButton({
@@ -61,8 +62,8 @@ export default function PhotoButton({
     if (!open) return;
     closeRef.current?.focus();
     function onKey(e: KeyboardEvent) {
-      // Тайрах цонх нээлттэй бол Escape зөвхөн түүнийг хаана
-      if (e.key === "Escape" && !document.querySelector("[data-crop-dialog]")) setOpen(false);
+      // Тайрах цонх / зураг үзэгч нээлттэй бол Escape зөвхөн түүнийг хаана
+      if (e.key === "Escape" && !document.querySelector("[data-crop-dialog], [data-page-viewer]")) setOpen(false);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -71,20 +72,6 @@ export default function PhotoButton({
   function update(next: HwPhoto | null) {
     setLoaded(next);
     onChange?.(next);
-  }
-
-  async function save(keys: string[], pages: number) {
-    const next = await api<HwPhoto>("/homework/photos", {
-      method: "POST",
-      body: { classroomId, date, fileKey: keys[0], pages },
-    });
-    update(next);
-  }
-
-  async function remove() {
-    if (!loaded) return;
-    await api(`/homework/photos/${encodeURIComponent(loaded.id)}`, { method: "DELETE" });
-    update(null);
   }
 
   const sent = !!loaded;
@@ -127,7 +114,7 @@ export default function PhotoButton({
                 <p id="hw-photo-title" className="font-bold text-ink">
                   Дэвтрийн зураг
                 </p>
-                <p className="text-sm text-ink-dim">{HW_PHOTO_MAX_PAGES} хүртэл хуудас, 7 хоног хадгална</p>
+                <p className="text-sm text-ink-dim">{HW_PHOTO_MAX_PAGES} хүртэл хуудас</p>
               </div>
               <button
                 ref={closeRef}
@@ -151,18 +138,13 @@ export default function PhotoButton({
                 <SkeletonLine height={40} />
               </div>
             ) : (
-              <PhotoPicker
-                key={loaded?.fileKey ?? "new"}
-                current={loaded ? [loaded.fileKey] : []}
-                pages={loaded?.pages ?? 0}
-                onSave={save}
-                onDelete={remove}
-                fileName={`daalgavar-${date}.pdf`}
-                purpose="homework"
-                maxPages={HW_PHOTO_MAX_PAGES}
-                crop
-                replaceLabel="Дахин илгээх"
-                addLabel="Хуудас нэмэх"
+              <HomeworkPhotoPanel
+                classroomId={classroomId}
+                date={date}
+                photo={loaded}
+                canSend
+                onChange={update}
+                expanded
               />
             )}
           </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookOpenCheck, ChevronRight, CircleCheck, Clock, Hourglass, Play, RotateCcw } from "lucide-react";
+import { BookOpenCheck, ChevronRight, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
 import { HOMEWORK_MARKS, TONE_SELECTED } from "@/components/attendance/marks";
 import { dayLabel } from "@/components/makeup/types";
 import { PageHeader } from "@/components/ui/Surface";
@@ -11,7 +11,8 @@ import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatMnDateTime } from "@/lib/dateMn";
-import PhotoButton from "./PhotoButton";
+import HomeworkPhotoPanel from "@/components/student-hub/HomeworkPhotoPanel";
+import { HOMEWORK_WINDOW_DAYS, dayDiff } from "@/components/student-hub/photo-types";
 import { cleanTitle, solveHref, todayKeyUB } from "./lib";
 import type { HwDay, HwItem, HwMyResponse, HwPhoto } from "./types";
 
@@ -83,58 +84,96 @@ function ItemRow({ day, item }: { day: HwDay; item: HwItem }) {
   );
 }
 
-function DayCard({ day, today, onPhoto }: { day: HwDay; today: boolean; onPhoto: (p: HwPhoto | null) => void }) {
+function MarkBadge({ day }: { day: HwDay }) {
   const mark = day.mark ? HOMEWORK_MARKS[day.mark] : null;
-  const MarkIcon = mark?.icon;
+  if (!mark) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[11px] font-semibold text-ink-dim"
+        title="Багшийн тэмдэглэгээ"
+      >
+        <CircleDashed className="size-3.5" aria-hidden />
+        Шалгаагүй
+      </span>
+    );
+  }
+  const Icon = mark.icon;
+  return (
+    <span
+      className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold", TONE_SELECTED[mark.tone])}
+      title="Багшийн тэмдэглэгээ"
+    >
+      <Icon className="size-3.5" aria-hidden />
+      {mark.label}
+    </span>
+  );
+}
+
+function DayCard({
+  day,
+  today,
+  canSend,
+  onPhoto,
+}: {
+  day: HwDay;
+  today: boolean;
+  canSend: boolean;
+  onPhoto: (p: HwPhoto | null) => void;
+}) {
+  const comment = day.markComment?.trim();
   return (
     <article
       id={dayId(day)}
       className={cn(
-        "scroll-mt-24 rounded-xl border bg-surface p-4 elev-1 sm:p-5",
+        "scroll-mt-24 space-y-3 rounded-xl border bg-surface p-4 elev-1 sm:p-5",
         today ? "border-brand-bright/60 ring-1 ring-brand-bright/30" : "border-line",
       )}
     >
-      <div className="flex items-start gap-2">
-        <div className="min-w-0 flex-1">
-          <h2 className="cyrillic-heading flex flex-wrap items-center gap-2 font-bold text-ink">
-            {dayLabel(day.date)}
-            {today && (
-              <span className="rounded-full bg-brand-bright px-2 py-0.5 text-[11px] font-bold text-on-brand">Өнөөдөр</span>
-            )}
-          </h2>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-ink-dim">
-            <span>{day.classroomName}</span>
-            {day.deadlineAt && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[11px] font-semibold tabular-nums">
-                <Clock className="size-3" aria-hidden />
-                {formatMnDateTime(day.deadlineAt, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })} хүртэл
-              </span>
-            )}
-            {mark && MarkIcon && (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold",
-                  TONE_SELECTED[mark.tone],
-                )}
-                title="Багшийн тэмдэглэгээ"
-              >
-                <MarkIcon className="size-3.5" aria-hidden />
-                {mark.label}
-              </span>
-            )}
-          </div>
+      <header className="space-y-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="cyrillic-heading font-bold text-ink">{dayLabel(day.date)}</h2>
+          {today && (
+            <span className="rounded-full bg-brand-bright px-2 py-0.5 text-[11px] font-bold text-on-brand">Өнөөдөр</span>
+          )}
+          <span className="ml-auto">
+            <MarkBadge day={day} />
+          </span>
         </div>
-        <PhotoButton classroomId={day.classroomId} date={day.date} photo={day.photo} onChange={onPhoto} />
-      </div>
+        {day.topic && <p className="cyrillic-tight font-semibold text-ink">{day.topic}</p>}
+        <div className="flex flex-wrap items-center gap-1.5 text-sm text-ink-dim">
+          <span>{day.classroomName}</span>
+          {day.deadlineAt && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[11px] font-semibold tabular-nums">
+              <Clock className="size-3" aria-hidden />
+              {formatMnDateTime(day.deadlineAt, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })} хүртэл
+            </span>
+          )}
+        </div>
+        {comment && (
+          <p className="flex items-start gap-1.5 rounded-lg bg-panel px-3 py-2 text-sm text-ink">
+            <MessageSquareText className="mt-0.5 size-4 shrink-0 text-ink-dim" aria-label="Багшийн тайлбар" />
+            <span className="min-w-0 break-words">{comment}</span>
+          </p>
+        )}
+      </header>
 
-      {day.items.length > 0 ? (
-        <ul className="mt-3 divide-y divide-line border-t border-line">
-          {day.items.map((it) => (
-            <ItemRow key={it.testId} day={day} item={it} />
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 border-t border-line pt-3 text-sm text-ink-dim">Энэ өдөр тестийн даалгавар алга</p>
+      <HomeworkPhotoPanel
+        classroomId={day.classroomId}
+        date={day.date}
+        photo={day.photo}
+        canSend={canSend}
+        onChange={onPhoto}
+      />
+
+      {day.items.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-ink-dim">Онлайн тест</h3>
+          <ul className="mt-1 divide-y divide-line">
+            {day.items.map((it) => (
+              <ItemRow key={it.testId} day={day} item={it} />
+            ))}
+          </ul>
+        </div>
       )}
     </article>
   );
@@ -149,14 +188,14 @@ function DayStrip({ days, todayKey }: { days: HwDay[]; todayKey: string }) {
       <ul className="flex w-max gap-1">
         {keys.map((key) => {
           const ds = days.filter((d) => d.date === key);
-          const done = ds.every((d) => d.items.every((i) => i.status === "SUBMITTED"));
+          const done = ds.every((d) => !!d.photo && d.items.every((i) => i.status === "SUBMITTED"));
           const [, m, dd] = key.split("-").map(Number);
           const today = key === todayKey;
           return (
             <li key={key}>
               <button
                 type="button"
-                aria-label={`${dayLabel(key)}${done ? ", бүгд илгээсэн" : ""}${today ? ", өнөөдөр" : ""}`}
+                aria-label={`${dayLabel(key)}${done ? ", илгээсэн" : ""}${today ? ", өнөөдөр" : ""}`}
                 aria-current={today ? "date" : undefined}
                 onClick={() =>
                   document.getElementById(dayId(ds[0]))?.scrollIntoView({
@@ -216,7 +255,7 @@ export default function HomeworkList() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="Гэрийн даалгавар" description="Хичээлийн дараах өдөр бүрийн даалгавар" />
+      <PageHeader title="Гэрийн даалгавар" description="Хичээлийн өдөр бүрийн дэвтрийн зураг ба тест" />
       {error && !days ? (
         <ErrorState message={error} onRetry={() => setRetry((n) => n + 1)} />
       ) : !days ? (
@@ -224,23 +263,19 @@ export default function HomeworkList() {
       ) : sorted.length === 0 ? (
         <EmptyState
           icon={BookOpenCheck}
-          title="Өнөөдөр гэрийн даалгавар алга"
-          hint="Ангидаа тест бодсон өдөр даалгавар энд автоматаар гарна"
+          title="Сүүлийн 14 хоногт хичээл алга"
+          hint="Хичээлд суусан өдөр бүр энд гарч, дэвтрийнхээ зургийг илгээнэ"
         />
       ) : (
         <>
           <DayStrip days={sorted} todayKey={todayKey} />
-          {!sorted.some((d) => d.date === todayKey) && (
-            <p className="mb-3 rounded-xl border border-dashed border-line px-4 py-3 text-sm text-ink-dim">
-              Өнөөдөр гэрийн даалгавар алга
-            </p>
-          )}
           <div className="space-y-3">
             {sorted.map((d) => (
               <DayCard
                 key={dayId(d)}
                 day={d}
                 today={d.date === todayKey}
+                canSend={dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS}
                 onPhoto={(photo) =>
                   setDays((prev) =>
                     (prev ?? []).map((x) =>
