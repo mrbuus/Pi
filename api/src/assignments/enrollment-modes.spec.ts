@@ -11,7 +11,7 @@ describe('student enrollment homework modes', () => {
     expect(await service.myClassrooms('jwt-student')).toEqual(classrooms);
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { studentId: 'jwt-student', leftAt: null, student: { archivedAt: null }, classroom: { archived: false } },
-      select: { classroom: { select: { id: true, name: true, type: true } } },
+      select: { classroom: { select: { id: true, name: true, type: true, grade: true } } },
     }));
   });
   it('does not invent a homework mode when no active enrollment exists', async () => {
