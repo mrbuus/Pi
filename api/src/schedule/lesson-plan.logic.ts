@@ -50,6 +50,40 @@ export function planTitle(shortNames: string[]): string {
   return shortNames.filter(Boolean).join(', ');
 }
 
+export const CUSTOM_TOPIC_MAX = 12;
+
+/**
+ * Багшийн бичсэн сэдвүүд (эзэн 2026-10-31): хоосон зай нэгтгэж, хоосныг хасаж,
+ * том жижиг үсэг ялгалгүй давхардлыг хасна; эхэлж бичсэн дараалал хадгалагдана.
+ */
+export function cleanCustomTopics(list: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of list) {
+    const text = String(raw ?? '').replace(/\s+/g, ' ').trim().slice(0, 200);
+    const key = text.toLocaleLowerCase('mn');
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    out.push(text);
+    if (out.length === CUSTOM_TOPIC_MAX) break;
+  }
+  return out;
+}
+
+/**
+ * Хадгалсан чөлөөт сэдвүүд. Шинэ багана (customTopics) хоосон боловч хуучин
+ * дүрмээр гараар бичсэн гарчиг (тестүүдийн нэрээс ялгаатай) байвал түүнийг
+ * нэг сэдэв гэж уншина — 2026-10-27..31-ний бичлэг алдагдахгүй.
+ */
+export function storedCustomTopics(topic: {
+  customTopics?: string[] | null;
+  title: string;
+  autoTitle: string;
+}): string[] {
+  if (topic.customTopics?.length) return topic.customTopics;
+  return topic.title && topic.title !== topic.autoTitle ? [topic.title] : [];
+}
+
 /**
  * Онолын зураг илгээх дараагийн сурагч: хэзээ ч илгээгээгүй нь эхэнд (сүүлд
  * илгээсэн хүнээс хойшхи дарааллаар), бүгд илгээсэн бол хамгийн эрт илгээсэн нь.

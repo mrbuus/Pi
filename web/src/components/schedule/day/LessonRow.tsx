@@ -66,7 +66,7 @@ export default function LessonRow(p: Props) {
   const capacity = roomCapacityOf(e.room);
   const over = capacity ? Math.max(0, e.students - capacity) : 0;
   const dismiss = e.plan?.dismissMode ?? null;
-  const time = `${formatMinutes(e.startMinute)}–${formatMinutes(e.endMinute)}`;
+  const time = formatMinutes(e.startMinute);
   const label = `${shortClass(e.classroomName)}, ${time}`;
   const extras = !!(e.note || e.plan?.photoStudent || dismiss || over > 0 || e.exception);
 
@@ -92,7 +92,6 @@ export default function LessonRow(p: Props) {
             <span className="block truncate text-base font-bold text-ink">{shortClass(e.classroomName)}</span>
             <span className="block text-xs tabular-nums text-ink-dim">
               {e.students} сурагч
-              {e.endMinute !== p.blockEnd && <span className="ml-2 font-semibold text-ink">{formatMinutes(e.endMinute)} хүртэл</span>}
             </span>
           </span>
         </button>

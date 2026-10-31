@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, NotebookPen } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { cn } from "@/lib/cn";
 import { fullTestTitle, type DayEntry, type TestInfo } from "./types";
@@ -37,14 +37,18 @@ function itemsOf(
   });
 }
 
-/** Мөрийн «замын зураг»: өмнөх хичээлийн тест → өнөөдрийн (хийсэн эсвэл төлөвлөсөн) тест */
+/**
+ * Мөрийн «замын зураг»: өмнөх хичээлийн тест → өнөөдрийн (хийсэн эсвэл
+ * төлөвлөсөн) тест + бодлогын санд байхгүй, багшийн бичсэн сэдвүүд.
+ */
 export function roadOf(entry: DayEntry, tests: Record<string, TestInfo>) {
   const previous = itemsOf(entry.previous?.tests ?? [], tests);
   const doneToday = entry.done.length > 0;
   const today = doneToday
     ? itemsOf(entry.done, tests)
     : itemsOf((entry.plan?.testIds ?? []).map((testId) => ({ testId, excludedNumbers: [] })), tests);
-  return { previous, today, doneToday };
+  const topics = entry.plan?.customTopics ?? [];
+  return { previous, today, doneToday, topics };
 }
 
 /**
@@ -62,7 +66,7 @@ export default function RoadMap({
   emptyLabel: string;
   className?: string;
 }) {
-  const { previous, today, doneToday } = roadOf(entry, tests);
+  const { previous, today, doneToday, topics } = roadOf(entry, tests);
   const [open, setOpen] = useState(false);
   const timer = useRef<number | null>(null);
   const pressed = useRef(false);
@@ -84,6 +88,7 @@ export default function RoadMap({
   const all = [
     ...previous.map((x) => `Өмнөх: ${x.full}${x.excluded.length ? ` (хассан ${x.excluded.join(", ")})` : ""}`),
     ...today.map((x) => `${doneToday ? "Хийсэн" : "Өнөөдөр"}: ${x.full}${x.excluded.length ? ` (хассан ${x.excluded.join(", ")})` : ""}`),
+    ...topics.map((t) => `Сэдэв: ${t}`),
   ];
   const cancel = () => {
     if (timer.current) window.clearTimeout(timer.current);
@@ -131,7 +136,7 @@ export default function RoadMap({
           <ArrowRight className="size-3.5 shrink-0 text-ink-dim" aria-label="дараа нь" />
         </>
       )}
-      {today.length > 0 ? (
+      {today.length > 0 || topics.length > 0 ? (
         <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 font-semibold text-ink">
           <span className="sr-only">{doneToday ? "Хийсэн:" : "Өнөөдөр:"}</span>
           {today.map((x) => (
@@ -139,6 +144,12 @@ export default function RoadMap({
               {doneToday && <Check className="size-3.5 text-success" aria-hidden />}
               {x.short}
               <Excluded numbers={x.excluded} />
+            </span>
+          ))}
+          {topics.map((t) => (
+            <span key={`topic-${t}`} className="inline-flex min-w-0 items-center gap-1" title="Бодлогын санд байхгүй сэдэв">
+              <NotebookPen className="size-3.5 shrink-0 text-ink-dim" aria-hidden />
+              <span className="min-w-0">{t}</span>
             </span>
           ))}
         </span>

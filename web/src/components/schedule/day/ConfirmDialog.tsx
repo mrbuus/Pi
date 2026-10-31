@@ -90,7 +90,15 @@ function Body({
   const [open, setOpen] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   // Багшийн бичих нэмэлт (эзэн 2026-10-27): чөлөөт сэдэв, тайлбар, бодсон бодлогын дугаар
-  const [topic, setTopic] = useState(e.record?.topic && e.record.topic !== e.topic ? e.record.topic : "");
+  // Олон сэдэв (эзэн 2026-10-31): батлаагүй бол төлөвлөгөөний сэдвүүдээр эхэлнэ; бичлэгт таслалаар нэг мөр
+  const [topics, setTopics] = useState<string[]>(
+    e.record
+      ? e.record.topic && e.record.topic !== e.topic
+        ? [e.record.topic]
+        : []
+      : (e.plan?.customTopics ?? []),
+  );
+  const topic = topics.join(", ").slice(0, 200);
   const [description, setDescription] = useState(e.record?.description ?? "");
   const [numbers, setNumbers] = useState(e.record?.problemNumbersText ?? "");
   const parsedNumbers = parseProblemNumbers(numbers);
@@ -165,7 +173,7 @@ function Body({
           <Meta
             items={[
               date.slice(5).replace("-", "."),
-              `${formatMinutes(e.startMinute)}–${formatMinutes(e.endMinute)}`,
+              formatMinutes(e.startMinute),
               e.record && `${e.record.confirmedByName} баталсан ${stampUB(e.record.confirmedAt)}`,
             ]}
           />
@@ -261,8 +269,8 @@ function Body({
               onChange={(ids) =>
                 setRows((list) => ids.map((id) => list.find((r) => r.testId === id) ?? { testId: id, excluded: [] }))
               }
-              freeText={topic}
-              onFreeTextChange={setTopic}
+              customTopics={topics}
+              onCustomTopicsChange={setTopics}
               hideChips
             />
           </div>
@@ -272,9 +280,9 @@ function Body({
               <Plus className="size-4" aria-hidden />
               Тест, сэдэв нэмэх
             </button>
-            {topic.trim() && (
+            {topics.length > 0 && (
               <span className="min-w-0 truncate text-sm text-ink">
-                Сэдэв: <span className="font-semibold">{topic.trim()}</span>
+                Сэдэв: <span className="font-semibold">{topic}</span>
               </span>
             )}
           </div>

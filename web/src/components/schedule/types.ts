@@ -60,6 +60,17 @@ export function formatMinutes(total: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+/** Хичээл бүр 120 минут (STATUS §7.1) */
+export const LESSON_MINUTES = 120;
+
+/**
+ * Дуусах цагийг гараар оруулахгүй (эзэн 2026-10-31): эхлэх цаг + үргэлжлэх
+ * хугацаа. Шөнө дундаас хэтэрвэл 23:59-д тогтоно.
+ */
+export function endAfter(start: string, minutes = LESSON_MINUTES): string {
+  return formatMinutes(Math.min(timeToMinutes(start) + Math.max(minutes, 1), 24 * 60 - 1));
+}
+
 /** "09:00" → 540 — <input type="time"> утгыг минут руу хөрвүүлнэ */
 export function timeToMinutes(value: string): number {
   const [h, m] = value.split(":").map((n) => Number.parseInt(n, 10));

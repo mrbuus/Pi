@@ -36,7 +36,7 @@ import { SetStaffingDto } from './dto/set-staffing.dto';
 import { ScheduleAccessService } from './schedule-access.service';
 import { ScheduleService } from './schedule.service';
 import { LessonPlanService } from './lesson-plan.service';
-import { PutLessonPlanDto } from './dto/lesson-plan.dto';
+import { PutDayMealDto, PutLessonPlanDto } from './dto/lesson-plan.dto';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -346,6 +346,20 @@ export class ScheduleController {
   @Get('schedule/plan-tests')
   planTests(@Query('ids') ids: string, @Req() req: AuthedRequest) {
     return this.plans.planTests(req.user, ids);
+  }
+
+  // Хуваарийн цонхноос тестийн бодлогууд нэг хуудсанд, хариутай (эзэн 2026-10-31)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('schedule/test-problems')
+  testProblems(@Query('testId') testId: string, @Req() req: AuthedRequest) {
+    return this.plans.testProblems(req.user, String(testId ?? ''));
+  }
+
+  // Амралтын өдрийн хоол: хэн хийх, юу хийх (эзэн 2026-10-31)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Put('schedule/day-meal')
+  putDayMeal(@Body() dto: PutDayMealDto, @Req() req: AuthedRequest) {
+    return this.plans.putMeal(req.user, dto);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)

@@ -105,7 +105,7 @@ export default function UpcomingAgenda({
                   className="flex flex-wrap items-center gap-2 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs"
                 >
                   <span className="font-bold text-brand-soft">
-                    {formatMinutes(c.startMinute)}–{formatMinutes(c.endMinute)}
+                    {formatMinutes(c.startMinute)}
                   </span>
                   <span className="font-semibold">{c.classroomName}</span>
                   <span className="text-ink-dim">

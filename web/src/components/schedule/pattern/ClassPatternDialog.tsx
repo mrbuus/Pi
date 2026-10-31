@@ -8,7 +8,13 @@ import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 import RoomBadge from "../RoomBadge";
-import { formatMinutes, ROOMS, timeToMinutes, WEEKDAY_LABELS, WEEKDAY_SHORT } from "../types";
+import { endAfter, formatMinutes, LESSON_MINUTES, ROOMS, timeToMinutes, WEEKDAY_LABELS, WEEKDAY_SHORT } from "../types";
+
+/** Өмнөх үргэлжлэх хугацааг хадгална (байхгүй бол 120 минут) */
+const durationOf = (d: { start: string; end: string }) => {
+  const dur = d.start && d.end ? timeToMinutes(d.end) - timeToMinutes(d.start) : 0;
+  return dur > 0 ? dur : LESSON_MINUTES;
+};
 import {
   classLabelOf,
   dateLabel,
@@ -429,7 +435,7 @@ function DayRow({
                     active ? "border-brand text-brand" : "border-line text-ink-dim hover:border-brand hover:text-ink",
                   )}
                 >
-                  {s}–{e}
+                  {s}
                 </button>
               );
             })}
@@ -438,13 +444,19 @@ function DayRow({
             <label htmlFor={`${base}-s`} className="mb-1 block text-xs text-ink-dim">
               Эхлэх
             </label>
-            <input id={`${base}-s`} type="time" value={day.start} onChange={(e) => onChange({ start: e.target.value })} className={cn(FIELD, "tabular-nums")} />
-          </div>
-          <div>
-            <label htmlFor={`${base}-e`} className="mb-1 block text-xs text-ink-dim">
-              Дуусах
-            </label>
-            <input id={`${base}-e`} type="time" value={day.end} onChange={(e) => onChange({ end: e.target.value })} className={cn(FIELD, "tabular-nums")} />
+            <input
+              id={`${base}-s`}
+              type="time"
+              value={day.start}
+              onChange={(e) =>
+                onChange(
+                  e.target.value
+                    ? { start: e.target.value, end: endAfter(e.target.value, durationOf(day)) }
+                    : { start: e.target.value },
+                )
+              }
+              className={cn(FIELD, "tabular-nums")}
+            />
           </div>
           <div className="col-span-2">
             <label htmlFor={`${base}-r`} className="mb-1 block text-xs text-ink-dim">
@@ -470,7 +482,7 @@ function DayRow({
           {clash && (
             <div className="col-span-2 space-y-1.5">
               <ConflictList
-                conflicts={[{ text: `${day.room} танхимд ${WEEKDAY_LABELS[wd]} ${formatMinutes(clash.startMinute)}–${formatMinutes(clash.endMinute)} цагт ${clash.classLabel} анги орно`, blocking: !swap }]}
+                conflicts={[{ text: `${day.room} танхимд ${WEEKDAY_LABELS[wd]} ${formatMinutes(clash.startMinute)} цагт ${clash.classLabel} анги орно`, blocking: !swap }]}
               />
               {check?.swapPossible && (
                 <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-line px-3 text-sm text-ink">

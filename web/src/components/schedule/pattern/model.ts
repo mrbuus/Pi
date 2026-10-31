@@ -136,8 +136,9 @@ export function dateLabel(key: string, today?: string, withWeekday = true): stri
   return withWeekday ? `${y}${base}, ${WEEKDAY_LABELS[weekdayOf(key)]}` : `${y}${base}`;
 }
 
+/** Зөвхөн эхлэх цаг (эзэн 2026-10-31: дуусах цаг харуулахгүй) */
 export function timeRange(s: { startMinute: number; endMinute: number }): string {
-  return `${formatMinutes(s.startMinute)}–${formatMinutes(s.endMinute)}`;
+  return formatMinutes(s.startMinute);
 }
 
 /** Хоёр хугацааны мужийн огтлолцол (огноо мөрөөр, null = төгсгөлгүй) */

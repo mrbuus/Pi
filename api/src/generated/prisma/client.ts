@@ -422,6 +422,11 @@ export type ScheduleException = Prisma.ScheduleExceptionModel
  */
 export type LessonTopic = Prisma.LessonTopicModel
 /**
+ * Model DayMeal
+ * 
+ */
+export type DayMeal = Prisma.DayMealModel
+/**
  * Model SchedulePublication
  * 
  */

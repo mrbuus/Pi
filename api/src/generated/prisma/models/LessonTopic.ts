@@ -59,6 +59,7 @@ export type LessonTopicCountAggregateOutputType = {
   testIds: number
   dismissMode: number
   photoStudentId: number
+  customTopics: number
   _all: number
 }
 
@@ -98,6 +99,7 @@ export type LessonTopicCountAggregateInputType = {
   testIds?: true
   dismissMode?: true
   photoStudentId?: true
+  customTopics?: true
   _all?: true
 }
 
@@ -184,6 +186,7 @@ export type LessonTopicGroupByOutputType = {
   testIds: string[]
   dismissMode: string | null
   photoStudentId: string | null
+  customTopics: string[]
   _count: LessonTopicCountAggregateOutputType | null
   _min: LessonTopicMinAggregateOutputType | null
   _max: LessonTopicMaxAggregateOutputType | null
@@ -218,6 +221,7 @@ export type LessonTopicWhereInput = {
   testIds?: Prisma.StringNullableListFilter<"LessonTopic">
   dismissMode?: Prisma.StringNullableFilter<"LessonTopic"> | string | null
   photoStudentId?: Prisma.StringNullableFilter<"LessonTopic"> | string | null
+  customTopics?: Prisma.StringNullableListFilter<"LessonTopic">
   schedule?: Prisma.XOR<Prisma.ClassScheduleScalarRelationFilter, Prisma.ClassScheduleWhereInput>
 }
 
@@ -232,6 +236,7 @@ export type LessonTopicOrderByWithRelationInput = {
   testIds?: Prisma.SortOrder
   dismissMode?: Prisma.SortOrderInput | Prisma.SortOrder
   photoStudentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customTopics?: Prisma.SortOrder
   schedule?: Prisma.ClassScheduleOrderByWithRelationInput
 }
 
@@ -250,6 +255,7 @@ export type LessonTopicWhereUniqueInput = Prisma.AtLeast<{
   testIds?: Prisma.StringNullableListFilter<"LessonTopic">
   dismissMode?: Prisma.StringNullableFilter<"LessonTopic"> | string | null
   photoStudentId?: Prisma.StringNullableFilter<"LessonTopic"> | string | null
+  customTopics?: Prisma.StringNullableListFilter<"LessonTopic">
   schedule?: Prisma.XOR<Prisma.ClassScheduleScalarRelationFilter, Prisma.ClassScheduleWhereInput>
 }, "id" | "scheduleId_date">
 
@@ -264,6 +270,7 @@ export type LessonTopicOrderByWithAggregationInput = {
   testIds?: Prisma.SortOrder
   dismissMode?: Prisma.SortOrderInput | Prisma.SortOrder
   photoStudentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customTopics?: Prisma.SortOrder
   _count?: Prisma.LessonTopicCountOrderByAggregateInput
   _max?: Prisma.LessonTopicMaxOrderByAggregateInput
   _min?: Prisma.LessonTopicMinOrderByAggregateInput
@@ -283,6 +290,7 @@ export type LessonTopicScalarWhereWithAggregatesInput = {
   testIds?: Prisma.StringNullableListFilter<"LessonTopic">
   dismissMode?: Prisma.StringNullableWithAggregatesFilter<"LessonTopic"> | string | null
   photoStudentId?: Prisma.StringNullableWithAggregatesFilter<"LessonTopic"> | string | null
+  customTopics?: Prisma.StringNullableListFilter<"LessonTopic">
 }
 
 export type LessonTopicCreateInput = {
@@ -295,6 +303,7 @@ export type LessonTopicCreateInput = {
   testIds?: Prisma.LessonTopicCreatetestIdsInput | string[]
   dismissMode?: string | null
   photoStudentId?: string | null
+  customTopics?: Prisma.LessonTopicCreatecustomTopicsInput | string[]
   schedule: Prisma.ClassScheduleCreateNestedOneWithoutTopicsInput
 }
 
@@ -309,6 +318,7 @@ export type LessonTopicUncheckedCreateInput = {
   testIds?: Prisma.LessonTopicCreatetestIdsInput | string[]
   dismissMode?: string | null
   photoStudentId?: string | null
+  customTopics?: Prisma.LessonTopicCreatecustomTopicsInput | string[]
 }
 
 export type LessonTopicUpdateInput = {
@@ -321,6 +331,7 @@ export type LessonTopicUpdateInput = {
   testIds?: Prisma.LessonTopicUpdatetestIdsInput | string[]
   dismissMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoStudentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customTopics?: Prisma.LessonTopicUpdatecustomTopicsInput | string[]
   schedule?: Prisma.ClassScheduleUpdateOneRequiredWithoutTopicsNestedInput
 }
 
@@ -335,6 +346,7 @@ export type LessonTopicUncheckedUpdateInput = {
   testIds?: Prisma.LessonTopicUpdatetestIdsInput | string[]
   dismissMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoStudentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customTopics?: Prisma.LessonTopicUpdatecustomTopicsInput | string[]
 }
 
 export type LessonTopicCreateManyInput = {
@@ -348,6 +360,7 @@ export type LessonTopicCreateManyInput = {
   testIds?: Prisma.LessonTopicCreatetestIdsInput | string[]
   dismissMode?: string | null
   photoStudentId?: string | null
+  customTopics?: Prisma.LessonTopicCreatecustomTopicsInput | string[]
 }
 
 export type LessonTopicUpdateManyMutationInput = {
@@ -360,6 +373,7 @@ export type LessonTopicUpdateManyMutationInput = {
   testIds?: Prisma.LessonTopicUpdatetestIdsInput | string[]
   dismissMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoStudentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customTopics?: Prisma.LessonTopicUpdatecustomTopicsInput | string[]
 }
 
 export type LessonTopicUncheckedUpdateManyInput = {
@@ -373,6 +387,7 @@ export type LessonTopicUncheckedUpdateManyInput = {
   testIds?: Prisma.LessonTopicUpdatetestIdsInput | string[]
   dismissMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoStudentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customTopics?: Prisma.LessonTopicUpdatecustomTopicsInput | string[]
 }
 
 export type LessonTopicListRelationFilter = {
@@ -401,6 +416,7 @@ export type LessonTopicCountOrderByAggregateInput = {
   testIds?: Prisma.SortOrder
   dismissMode?: Prisma.SortOrder
   photoStudentId?: Prisma.SortOrder
+  customTopics?: Prisma.SortOrder
 }
 
 export type LessonTopicMaxOrderByAggregateInput = {
@@ -473,7 +489,16 @@ export type LessonTopicCreatetestIdsInput = {
   set: string[]
 }
 
+export type LessonTopicCreatecustomTopicsInput = {
+  set: string[]
+}
+
 export type LessonTopicUpdatetestIdsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type LessonTopicUpdatecustomTopicsInput = {
   set?: string[]
   push?: string | string[]
 }
@@ -488,6 +513,7 @@ export type LessonTopicCreateWithoutScheduleInput = {
   testIds?: Prisma.LessonTopicCreatetestIdsInput | string[]
   dismissMode?: string | null
   photoStudentId?: string | null
+  customTopics?: Prisma.LessonTopicCreatecustomTopicsInput | string[]
 }
 
 export type LessonTopicUncheckedCreateWithoutScheduleInput = {
@@ -500,6 +526,7 @@ export type LessonTopicUncheckedCreateWithoutScheduleInput = {
   testIds?: Prisma.LessonTopicCreatetestIdsInput | string[]
   dismissMode?: string | null
   photoStudentId?: string | null
+  customTopics?: Prisma.LessonTopicCreatecustomTopicsInput | string[]
 }
 
 export type LessonTopicCreateOrConnectWithoutScheduleInput = {
@@ -542,6 +569,7 @@ export type LessonTopicScalarWhereInput = {
   testIds?: Prisma.StringNullableListFilter<"LessonTopic">
   dismissMode?: Prisma.StringNullableFilter<"LessonTopic"> | string | null
   photoStudentId?: Prisma.StringNullableFilter<"LessonTopic"> | string | null
+  customTopics?: Prisma.StringNullableListFilter<"LessonTopic">
 }
 
 export type LessonTopicCreateManyScheduleInput = {
@@ -554,6 +582,7 @@ export type LessonTopicCreateManyScheduleInput = {
   testIds?: Prisma.LessonTopicCreatetestIdsInput | string[]
   dismissMode?: string | null
   photoStudentId?: string | null
+  customTopics?: Prisma.LessonTopicCreatecustomTopicsInput | string[]
 }
 
 export type LessonTopicUpdateWithoutScheduleInput = {
@@ -566,6 +595,7 @@ export type LessonTopicUpdateWithoutScheduleInput = {
   testIds?: Prisma.LessonTopicUpdatetestIdsInput | string[]
   dismissMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoStudentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customTopics?: Prisma.LessonTopicUpdatecustomTopicsInput | string[]
 }
 
 export type LessonTopicUncheckedUpdateWithoutScheduleInput = {
@@ -578,6 +608,7 @@ export type LessonTopicUncheckedUpdateWithoutScheduleInput = {
   testIds?: Prisma.LessonTopicUpdatetestIdsInput | string[]
   dismissMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoStudentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customTopics?: Prisma.LessonTopicUpdatecustomTopicsInput | string[]
 }
 
 export type LessonTopicUncheckedUpdateManyWithoutScheduleInput = {
@@ -590,6 +621,7 @@ export type LessonTopicUncheckedUpdateManyWithoutScheduleInput = {
   testIds?: Prisma.LessonTopicUpdatetestIdsInput | string[]
   dismissMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoStudentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customTopics?: Prisma.LessonTopicUpdatecustomTopicsInput | string[]
 }
 
 
@@ -605,6 +637,7 @@ export type LessonTopicSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   testIds?: boolean
   dismissMode?: boolean
   photoStudentId?: boolean
+  customTopics?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonTopic"]>
 
@@ -619,6 +652,7 @@ export type LessonTopicSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   testIds?: boolean
   dismissMode?: boolean
   photoStudentId?: boolean
+  customTopics?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonTopic"]>
 
@@ -633,6 +667,7 @@ export type LessonTopicSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   testIds?: boolean
   dismissMode?: boolean
   photoStudentId?: boolean
+  customTopics?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonTopic"]>
 
@@ -647,9 +682,10 @@ export type LessonTopicSelectScalar = {
   testIds?: boolean
   dismissMode?: boolean
   photoStudentId?: boolean
+  customTopics?: boolean
 }
 
-export type LessonTopicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "title" | "chapterId" | "createdById" | "updatedAt" | "testIds" | "dismissMode" | "photoStudentId", ExtArgs["result"]["lessonTopic"]>
+export type LessonTopicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "title" | "chapterId" | "createdById" | "updatedAt" | "testIds" | "dismissMode" | "photoStudentId" | "customTopics", ExtArgs["result"]["lessonTopic"]>
 export type LessonTopicInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }
@@ -676,6 +712,7 @@ export type $LessonTopicPayload<ExtArgs extends runtime.Types.Extensions.Interna
     testIds: string[]
     dismissMode: string | null
     photoStudentId: string | null
+    customTopics: string[]
   }, ExtArgs["result"]["lessonTopic"]>
   composites: {}
 }
@@ -1110,6 +1147,7 @@ export interface LessonTopicFieldRefs {
   readonly testIds: Prisma.FieldRef<"LessonTopic", 'String[]'>
   readonly dismissMode: Prisma.FieldRef<"LessonTopic", 'String'>
   readonly photoStudentId: Prisma.FieldRef<"LessonTopic", 'String'>
+  readonly customTopics: Prisma.FieldRef<"LessonTopic", 'String[]'>
 }
     
 

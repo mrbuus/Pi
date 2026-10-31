@@ -20,6 +20,8 @@ export interface DayEntry extends Omit<WeekEntry, "leadTeacher" | "assistantTeac
   mine: boolean;
   plan: {
     testIds: string[];
+    /** Бодлогын санд байхгүй, багшийн бичсэн сэдвүүд (эзэн 2026-10-31) */
+    customTopics?: string[];
     dismissMode: DismissMode | null;
     photoStudent: { id: string; name: string } | null;
   } | null;
@@ -75,6 +77,8 @@ export interface DayPlanResponse {
   } | null;
   entries: DayEntry[];
   tests: Record<string, TestInfo>;
+  /** Бямба, Ням л — хоол хийх хүн, юу хийх (эзэн 2026-10-31); бусад өдөр null */
+  meal?: { cook: StaffRef | null; food: string | null } | null;
 }
 
 /** GET /classrooms/:id/roadmap */
@@ -113,6 +117,8 @@ export interface PlanContext {
     dismissMode: DismissMode | null;
     photoStudentId: string | null;
     title: string | null;
+    /** Бодлогын санд байхгүй сэдвүүд — тесттэй зэрэг, хэдийг ч */
+    customTopics?: string[];
     /** Багшийн гараар бичсэн сэдэв (тестийн нэрээс автоматаар үүсээгүй бол) */
     customTitle?: string | null;
   } | null;

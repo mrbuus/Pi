@@ -2100,8 +2100,21 @@ model LessonTopic {
   dismissMode    String?
   // Онолын зургийг илгээх сурагч (User.id) — ангийнхан хэн болохыг урьдчилж харна
   photoStudentId String?
+  // Бодлогын санд байхгүй, багшийн бичсэн сэдвүүд («Иррац шалгалт» г.м., эзэн 2026-10-31) —
+  // тесттэй зэрэг олон байж болно. title = тестүүдийн нэр + эдгээр (planTitle).
+  customTopics   String[] @default([])
 
   @@unique([scheduleId, date])
+}
+
+// Амралтын өдрийн (Бямба, Ням) хоол (эзэн 2026-10-31): хэн хийх, юу хийх — чөлөөт бичвэр,
+// хоолны сан үгүй. Хоосон орхиж болно. Устгахгүй — хоослоход утгууд null болно.
+model DayMeal {
+  date        DateTime @id @db.Date
+  cookId      String?
+  food        String?
+  updatedById String
+  updatedAt   DateTime @updatedAt
 }
 
 // Өдрийн хуваарийг нийтэлсэн тэмдэг (эзэн 2026-10-11): Багш+ «Нийтлэх» дарахад

@@ -216,9 +216,6 @@ export default function AddSlotDialog({
           <Field label="Эхлэх цаг" htmlFor={`${id}-start`}>
             <input id={`${id}-start`} type="time" value={start} onChange={(e) => changeStart(e.target.value)} className={cn(FIELD, "tabular-nums")} />
           </Field>
-          <Field label="Дуусах цаг" htmlFor={`${id}-end`}>
-            <input id={`${id}-end`} type="time" value={end} onChange={(e) => setEnd(e.target.value)} className={cn(FIELD, "tabular-nums")} />
-          </Field>
           <Field label="Танхим" htmlFor={`${id}-room`}>
             <div className="flex items-center gap-2">
               <select id={`${id}-room`} value={room} onChange={(e) => setRoom(e.target.value)} className={FIELD}>
@@ -280,7 +277,7 @@ export default function AddSlotDialog({
             <dd className="text-ink">{days.map((d) => WEEKDAY_LABELS[d]).join(", ")}</dd>
             <dt className="text-ink-dim">Цаг</dt>
             <dd className="tabular-nums text-ink">
-              {formatMinutes(startMinute)}–{formatMinutes(endMinute)}
+              {formatMinutes(startMinute)}
             </dd>
             <dt className="text-ink-dim">Танхим</dt>
             <dd className="text-ink">{room ? <RoomBadge room={room} size="sm" /> : "Танхимгүй"}</dd>

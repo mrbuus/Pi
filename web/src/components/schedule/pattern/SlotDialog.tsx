@@ -344,9 +344,6 @@ export default function SlotDialog({
                 <Field label="Эхлэх цаг" htmlFor={`${id}-start`}>
                   <input id={`${id}-start`} type="time" value={start} onChange={(e) => changeStart(e.target.value)} className={cn(FIELD, "tabular-nums")} />
                 </Field>
-                <Field label="Дуусах цаг" htmlFor={`${id}-end`}>
-                  <input id={`${id}-end`} type="time" value={end} onChange={(e) => setEnd(e.target.value)} className={cn(FIELD, "tabular-nums")} />
-                </Field>
                 <Field label="Багш" htmlFor={`${id}-teacher`} wide>
                   <select id={`${id}-teacher`} value={teacherId} onChange={(e) => setTeacherId(e.target.value)} className={FIELD}>
                     <option value="">{teacherLabel(null)}</option>

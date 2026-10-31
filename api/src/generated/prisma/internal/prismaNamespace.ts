@@ -470,6 +470,7 @@ export const ModelName = {
   ClassSchedule: 'ClassSchedule',
   ScheduleException: 'ScheduleException',
   LessonTopic: 'LessonTopic',
+  DayMeal: 'DayMeal',
   SchedulePublication: 'SchedulePublication',
   LessonStaffing: 'LessonStaffing',
   TeacherWorkDay: 'TeacherWorkDay',
@@ -537,7 +538,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5943,6 +5944,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DayMeal: {
+      payload: Prisma.$DayMealPayload<ExtArgs>
+      fields: Prisma.DayMealFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DayMealFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DayMealFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>
+        }
+        findFirst: {
+          args: Prisma.DayMealFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DayMealFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>
+        }
+        findMany: {
+          args: Prisma.DayMealFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>[]
+        }
+        create: {
+          args: Prisma.DayMealCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>
+        }
+        createMany: {
+          args: Prisma.DayMealCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DayMealCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>[]
+        }
+        delete: {
+          args: Prisma.DayMealDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>
+        }
+        update: {
+          args: Prisma.DayMealUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>
+        }
+        deleteMany: {
+          args: Prisma.DayMealDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DayMealUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DayMealUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>[]
+        }
+        upsert: {
+          args: Prisma.DayMealUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DayMealPayload>
+        }
+        aggregate: {
+          args: Prisma.DayMealAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDayMeal>
+        }
+        groupBy: {
+          args: Prisma.DayMealGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DayMealGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DayMealCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DayMealCountAggregateOutputType> | number
+        }
+      }
+    }
     SchedulePublication: {
       payload: Prisma.$SchedulePublicationPayload<ExtArgs>
       fields: Prisma.SchedulePublicationFieldRefs
@@ -10957,10 +11032,22 @@ export const LessonTopicScalarFieldEnum = {
   updatedAt: 'updatedAt',
   testIds: 'testIds',
   dismissMode: 'dismissMode',
-  photoStudentId: 'photoStudentId'
+  photoStudentId: 'photoStudentId',
+  customTopics: 'customTopics'
 } as const
 
 export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
+
+
+export const DayMealScalarFieldEnum = {
+  date: 'date',
+  cookId: 'cookId',
+  food: 'food',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DayMealScalarFieldEnum = (typeof DayMealScalarFieldEnum)[keyof typeof DayMealScalarFieldEnum]
 
 
 export const SchedulePublicationScalarFieldEnum = {
@@ -12839,6 +12926,7 @@ export type GlobalOmitConfig = {
   classSchedule?: Prisma.ClassScheduleOmit
   scheduleException?: Prisma.ScheduleExceptionOmit
   lessonTopic?: Prisma.LessonTopicOmit
+  dayMeal?: Prisma.DayMealOmit
   schedulePublication?: Prisma.SchedulePublicationOmit
   lessonStaffing?: Prisma.LessonStaffingOmit
   teacherWorkDay?: Prisma.TeacherWorkDayOmit

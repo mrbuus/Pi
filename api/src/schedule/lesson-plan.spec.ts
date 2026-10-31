@@ -2,9 +2,11 @@ import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/enums';
 import { LessonPlanService } from './lesson-plan.service';
 import {
+  cleanCustomTopics,
   compareBookOrder,
   planTitle,
   resolveOccurrence,
+  storedCustomTopics,
   suggestPhotoStudent,
 } from './lesson-plan.logic';
 import { ScheduleController } from './schedule.controller';
@@ -240,11 +242,15 @@ describe('LessonPlanService.putPlan', () => {
     });
   });
 
-  it('«Орох тест» чөлөөт бичвэр: тест сонгосон ч гарчиг болно; хоосон бол тестийн нэр (эзэн 2026-10-27)', async () => {
+  it('хуучин клиентийн ганц `title` нэг сэдэв болж, тестүүдийн нэрийн ард залгагдана (эзэн 2026-10-31)', async () => {
     const { service, prisma } = makePlanService();
     const out = await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], title: '  Давтлага   хичээл ' });
-    expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({ title: 'Давтлага хичээл', testIds: ['t1'] });
-    expect(out.plan?.customTitle).toBe('Давтлага хичээл');
+    expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({
+      title: 'Тоо тоолол 1, Давтлага хичээл',
+      testIds: ['t1'],
+      customTopics: ['Давтлага хичээл'],
+    });
+    expect(out.plan?.customTopics).toEqual(['Давтлага хичээл']);
 
     await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: [], title: 'Номноос гадуур' });
     expect(prisma.lessonTopic.create.mock.calls[1][0].data).toMatchObject({ title: 'Номноос гадуур', testIds: [] });
@@ -253,20 +259,89 @@ describe('LessonPlanService.putPlan', () => {
       id: 'lt1',
       title: 'Давтлага',
       testIds: [],
+      customTopics: [],
       dismissMode: null,
       photoStudentId: null,
       chapterId: null,
     });
     const cleared = await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], title: '' });
-    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({ title: 'Тоо тоолол 1' });
-    expect(cleared.plan?.customTitle).toBeNull();
+    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({ title: 'Тоо тоолол 1', customTopics: [] });
+    expect(cleared.plan?.customTopics).toEqual([]);
+  });
+
+  it('олон чөлөөт сэдэв тесттэй зэрэг: давхардал, хоосныг хасна; хадгалсан сэдэв хэвээр (эзэн 2026-10-31)', async () => {
+    const { service, prisma } = makePlanService();
+    const out = await service.putPlan(tp, 's1', {
+      date: '2026-10-19',
+      testIds: ['t1'],
+      customTopics: ['Иррац шалгалт', '  ', 'иррац   шалгалт', 'Шалгалтын тайлбар'],
+    });
+    expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({
+      testIds: ['t1'],
+      customTopics: ['Иррац шалгалт', 'Шалгалтын тайлбар'],
+      title: 'Тоо тоолол 1, Иррац шалгалт, Шалгалтын тайлбар',
+    });
+    expect(out.plan?.customTopics).toEqual(['Иррац шалгалт', 'Шалгалтын тайлбар']);
+
+    // Зөвхөн тарах/үлдэхийг өөрчлөхөд (customTopics, title аль нь ч ирээгүй) сэдэв алдагдахгүй
+    prisma.lessonTopic.findUnique.mockResolvedValueOnce({
+      id: 'lt1',
+      title: 'Иррац шалгалт',
+      testIds: [],
+      customTopics: ['Иррац шалгалт'],
+      dismissMode: null,
+      photoStudentId: null,
+      chapterId: null,
+    });
+    await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: [], dismissMode: 'STAY' });
+    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({
+      customTopics: ['Иррац шалгалт'],
+      title: 'Иррац шалгалт',
+    });
+  });
+
+  it('амралтын өдрийн хоол: Бямба/Ням л, Багш+; хоослоход мөр устахгүй (эзэн 2026-10-31)', async () => {
+    const { service, prisma } = makePlanService();
+    prisma.dayMeal = {
+      findUnique: jest.fn(async () => null),
+      upsert: jest.fn(async ({ create }: any) => ({ ...create, updatedAt: new Date() })),
+    };
+    prisma.user = {
+      findFirst: jest.fn(async () => ({ id: 'cook' })),
+      findUnique: jest.fn(async () => null),
+      findMany: jest.fn(async () => []),
+    };
+    // 2026-10-19 = Даваа
+    await expect(service.putMeal(tp, { date: '2026-10-19', food: 'Цуйван' })).rejects.toThrow('Бямба');
+    await expect(
+      service.putMeal({ userId: 't', role: Role.TEACHER }, { date: '2026-10-31', food: 'Цуйван' }),
+    ).rejects.toThrow();
+    // 2026-10-31 = Бямба
+    await service.putMeal(tp, { date: '2026-10-31', cookId: 'cook', food: '  Цуйван  ' });
+    expect(prisma.dayMeal.upsert.mock.calls[0][0].create).toMatchObject({ cookId: 'cook', food: 'Цуйван', updatedById: 'tp' });
+    await service.putMeal(tp, { date: '2026-11-01', cookId: null, food: '' });
+    expect(prisma.dayMeal.upsert.mock.calls[1][0].update).toMatchObject({ cookId: null, food: null });
+    expect(prisma.auditLog.create.mock.calls[0][0].data).toMatchObject({ entity: 'DayMeal' });
+  });
+
+  it('cleanCustomTopics: 12-оос хэтрэхгүй, 200 тэмдэгт', () => {
+    const many = Array.from({ length: 20 }, (_, i) => `Сэдэв ${i}`);
+    expect(cleanCustomTopics(many)).toHaveLength(12);
+    expect(cleanCustomTopics(['а'.repeat(300)])[0]).toHaveLength(200);
+  });
+
+  it('хуучин гарчиг (2026-10-27..31) customTopics хоосон үед нэг сэдэв болж уншигдана', () => {
+    expect(storedCustomTopics({ customTopics: [], title: 'Шалгалт', autoTitle: '' })).toEqual(['Шалгалт']);
+    expect(storedCustomTopics({ customTopics: [], title: 'Тоо тоолол 1', autoTitle: 'Тоо тоолол 1' })).toEqual([]);
+    expect(storedCustomTopics({ customTopics: ['А'], title: 'x', autoTitle: '' })).toEqual(['А']);
   });
 
   it('маршрут: day-plan — ажилтан; plan бичих/унших — Багш+, Админ', () => {
     const roles = (n: keyof ScheduleController) =>
       [...Reflect.getMetadata(ROLES_KEY, ScheduleController.prototype[n])].sort();
     expect(roles('dayPlan')).toEqual([Role.ADMIN, Role.TEACHER, Role.TEACHER_PLUS].sort());
-    for (const n of ['putPlan', 'getPlan', 'upsertTopic', 'clearTopic'] as const)
+    expect(roles('testProblems')).toEqual([Role.ADMIN, Role.TEACHER, Role.TEACHER_PLUS].sort());
+    for (const n of ['putPlan', 'getPlan', 'upsertTopic', 'clearTopic', 'putDayMeal'] as const)
       expect(roles(n)).toEqual([Role.ADMIN, Role.TEACHER_PLUS].sort());
   });
 });
@@ -300,6 +375,7 @@ describe('Өдрийн самбарын «ажиллах багш» = «Багш
       classroom: empty,
       user: empty,
       test: empty,
+      dayMeal: { findUnique: jest.fn(async () => null) },
     };
     const out = await new LessonPlanService(prisma, schedule).dayPlan(
       { userId: 'tp', role: Role.TEACHER_PLUS },

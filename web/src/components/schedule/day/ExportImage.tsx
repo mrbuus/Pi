@@ -165,8 +165,8 @@ export default function ExportImage({
                   <span>Туслах</span>
                 </div>
                 {g.rows.map((e, i) => {
-                  const { today } = roadOf(e, tests);
-                  const testText = today.map((x) => x.short).join(", ") || e.topic || "";
+                  const { today, topics } = roadOf(e, tests);
+                  const testText = [...today.map((x) => x.short), ...topics].join(", ") || e.topic || "";
                   return (
                     <div
                       key={`${e.scheduleId}-${i}`}
@@ -176,7 +176,7 @@ export default function ExportImage({
                       )}
                     >
                       <span className="font-bold tabular-nums">
-                        {formatMinutes(e.startMinute)}–{formatMinutes(e.endMinute)}
+                        {formatMinutes(e.startMinute)}
                       </span>
                       <span>
                         <RoomBadge room={e.room} size="md" />

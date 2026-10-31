@@ -18,7 +18,7 @@ import { getClassroomColor } from "@/lib/classroomColor";
 import { Meta } from "@/components/ui/Meta";
 import RoomShape from "./RoomShape";
 import TopicPicker from "./topic-picker/TopicPicker";
-import { formatMinutes, ROOMS, SUBJECT_LABEL, timeToMinutes, WEEKDAY_LABELS, WORKWEEK_ORDER, type BookLite, type ChapterLite, type TeacherLite, type WeekEntry } from "./types";
+import { endAfter, formatMinutes, ROOMS, SUBJECT_LABEL, timeToMinutes, WEEKDAY_LABELS, WORKWEEK_ORDER, type BookLite, type ChapterLite, type TeacherLite, type WeekEntry } from "./types";
 import { staffName, withPlus } from "@/lib/personName";
 
 /**
@@ -417,7 +417,7 @@ function EntryActionPanelContent({
           <p className="mt-0.5 text-xs text-ink-dim">
             <Meta items={[
               `${weekdayLabel}, ${date}`,
-              `${formatMinutes(entry.startMinute)}–${formatMinutes(entry.endMinute)}`
+              formatMinutes(entry.startMinute)
             ]} />
           </p>
           {entry.room && (
@@ -686,19 +686,10 @@ function EntryActionPanelContent({
                   id="panel-move-start"
                   type="time"
                   value={moveStart}
-                  onChange={(e) => setMoveStart(e.target.value)}
-                  className={inputCls}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label htmlFor="panel-move-end" className="text-xs text-ink-dim">
-                  Шинэ дуусах цаг
-                </label>
-                <input
-                  id="panel-move-end"
-                  type="time"
-                  value={moveEnd}
-                  onChange={(e) => setMoveEnd(e.target.value)}
+                  onChange={(e) => {
+                    setMoveStart(e.target.value);
+                    if (entry && e.target.value) setMoveEnd(endAfter(e.target.value, entry.endMinute - entry.startMinute));
+                  }}
                   className={inputCls}
                 />
               </div>
@@ -826,19 +817,10 @@ function EntryActionPanelContent({
                         id="panel-split-start"
                         type="time"
                         value={splitStart}
-                        onChange={(e) => setSplitStart(e.target.value)}
-                        className={inputCls}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label htmlFor="panel-split-end" className="text-xs text-ink-dim">
-                        Дуусах цаг
-                      </label>
-                      <input
-                        id="panel-split-end"
-                        type="time"
-                        value={splitEnd}
-                        onChange={(e) => setSplitEnd(e.target.value)}
+                        onChange={(e) => {
+                          setSplitStart(e.target.value);
+                          if (entry && e.target.value) setSplitEnd(endAfter(e.target.value, entry.endMinute - entry.startMinute));
+                        }}
                         className={inputCls}
                       />
                     </div>

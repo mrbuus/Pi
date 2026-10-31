@@ -124,6 +124,7 @@ export const ModelName = {
   ClassSchedule: 'ClassSchedule',
   ScheduleException: 'ScheduleException',
   LessonTopic: 'LessonTopic',
+  DayMeal: 'DayMeal',
   SchedulePublication: 'SchedulePublication',
   LessonStaffing: 'LessonStaffing',
   TeacherWorkDay: 'TeacherWorkDay',
@@ -1321,10 +1322,22 @@ export const LessonTopicScalarFieldEnum = {
   updatedAt: 'updatedAt',
   testIds: 'testIds',
   dismissMode: 'dismissMode',
-  photoStudentId: 'photoStudentId'
+  photoStudentId: 'photoStudentId',
+  customTopics: 'customTopics'
 } as const
 
 export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
+
+
+export const DayMealScalarFieldEnum = {
+  date: 'date',
+  cookId: 'cookId',
+  food: 'food',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DayMealScalarFieldEnum = (typeof DayMealScalarFieldEnum)[keyof typeof DayMealScalarFieldEnum]
 
 
 export const SchedulePublicationScalarFieldEnum = {

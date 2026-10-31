@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, EyeOff, Plus, RotateCcw, Search, Sparkles, X } from "lucide-react";
+import { Check, ChevronDown, EyeOff, NotebookPen, Plus, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -10,6 +10,9 @@ import { ErrorState } from "@/components/ui/StateBlock";
 import { roadmapUnits, type Roadmap, type TestUnit } from "./types";
 
 const shortDay = (d: string) => d.slice(5).replace("-", ".");
+/** API-ийн CUSTOM_TOPIC_MAX-тай ижил */
+const TOPIC_MAX = 12;
+const sameTopic = (a: string, b: string) => a.toLocaleLowerCase("mn") === b.toLocaleLowerCase("mn");
 
 /**
  * Номын дарааллаар тест сонгох (эзэн 2026-10-18): хамгийн сүүлд хийсний
@@ -22,8 +25,8 @@ export default function TestPicker({
   selected,
   onChange,
   keepIds = [],
-  freeText,
-  onFreeTextChange,
+  customTopics = [],
+  onCustomTopicsChange,
   hideChips = false,
 }: {
   classroomId: string;
@@ -33,14 +36,14 @@ export default function TestPicker({
   /** Хийсэн гэж бүртгэгдсэн ч энэ жагсаалтад сонгогдох ёстой (батлах цонх) */
   keepIds?: string[];
   /**
-   * «Орох тест» чөлөөт бичвэр (эзэн 2026-10-27): хичээл үргэлж номноос биш тул
-   * багш дурын сэдэв бичнэ. Бичих зуур доорх жагсаалт тохирох ном/сэдэв/тестээр
-   * шүүгдэнэ; тестийг сонговол холбогдож, бичвэр арилна. Сонгохгүй бол бичвэр нь
-   * хичээлийн сэдэв болж хадгалагдана. Өгөөгүй бол энгийн хайлт.
+   * Бодлогын санд байхгүй сэдвүүд (эзэн 2026-10-27, 2026-10-31): бичих зуур доорх
+   * жагсаалт тохирох ном/сэдэв/тестээр шүүгдэнэ; тест сонговол холбогдоно, Enter
+   * эсвэл «сэдэв болгох» дарвал бичвэр нь ТУСДАА сэдэв болж нэмэгдэнэ. Хэдийг ч,
+   * тесттэй зэрэг. Өгөөгүй бол энгийн хайлт.
    */
-  freeText?: string;
-  onFreeTextChange?: (text: string) => void;
-  /** Сонгосон тестийн чипийг нуух (батлах цонх өөрөө жагсаадаг) */
+  customTopics?: string[];
+  onCustomTopicsChange?: (list: string[]) => void;
+  /** Сонгосон ТЕСТИЙН чипийг нуух (батлах цонх өөрөө жагсаадаг); сэдвийн чип үргэлж харагдана */
   hideChips?: boolean;
 }) {
   const { data, status, error, reload } = useSection<Roadmap | null>(
@@ -58,17 +61,25 @@ export default function TestPicker({
 
   const sortIds = (ids: string[]) =>
     [...ids].sort((a, b) => (index.get(a) ?? 1e9) - (index.get(b) ?? 1e9));
-  const freeMode = onFreeTextChange !== undefined;
+  const freeMode = onCustomTopicsChange !== undefined;
+  const typed = query.replace(/\s+/g, " ").trim();
+  const typedExists = customTopics.some((t) => sameTopic(t, typed));
+  const canAddTopic = freeMode && !!typed && !typedExists && customTopics.length < TOPIC_MAX;
   const toggle = (id: string) =>
     onChange(chosen.has(id) ? selected.filter((x) => x !== id) : sortIds([...selected, id]));
-  /** Жагсаалтаас сонгох — чөлөөт бичвэрээр хайсан бол бичвэр нь сэдэв биш, арилна */
+  /** Жагсаалтаас сонгох — хайсан бичвэр арилна, бичсэн сэдвүүд хэвээр */
   const pick = (id: string) => {
     const adding = !chosen.has(id);
     toggle(id);
-    if (adding && freeMode && query.trim()) {
-      setQuery("");
-      onFreeTextChange?.("");
-    }
+    if (adding && freeMode && query.trim()) setQuery("");
+  };
+  /** Бичсэн бичвэрийг тусдаа сэдэв болгоно (тест, бусад сэдэв хэвээр) */
+  const addTopic = () => {
+    // Аль хэдийн нэмсэн сэдэв — дахин нэмэхгүй, талбарыг л цэвэрлэнэ
+    if (freeMode && typedExists) setQuery("");
+    if (!canAddTopic) return;
+    onCustomTopicsChange?.([...customTopics, typed.slice(0, 200)]);
+    setQuery("");
   };
 
   async function setRemoved(u: TestUnit, removed: boolean) {
@@ -115,9 +126,9 @@ export default function TestPicker({
 
   return (
     <div className="space-y-3">
-      {selected.length > 0 && !hideChips && (
-        <ul aria-label="Сонгосон тест" className="flex flex-wrap gap-1.5">
-          {selected.map((id) => {
+      {((selected.length > 0 && !hideChips) || customTopics.length > 0) && (
+        <ul aria-label="Сонгосон тест, сэдэв" className="flex flex-wrap gap-1.5">
+          {!hideChips && selected.map((id) => {
             const u = byId.get(id);
             return (
               <li key={id}>
@@ -133,6 +144,21 @@ export default function TestPicker({
               </li>
             );
           })}
+          {customTopics.map((t) => (
+            <li key={`topic-${t}`}>
+              <button
+                type="button"
+                onClick={() => onCustomTopicsChange?.(customTopics.filter((x) => x !== t))}
+                aria-label={`${t} сэдвийг хасах`}
+                title="Бодлогын санд байхгүй сэдэв"
+                className="inline-flex min-h-9 max-w-full items-center gap-1.5 rounded-full border border-line bg-panel px-3 text-sm font-semibold text-ink"
+              >
+                <NotebookPen className="size-3.5 shrink-0 text-ink-dim" aria-hidden />
+                <span className="min-w-0 truncate">{t}</span>
+                <X className="size-3.5 shrink-0" aria-hidden />
+              </button>
+            </li>
+          ))}
         </ul>
       )}
 
@@ -162,22 +188,31 @@ export default function TestPicker({
         <span className="sr-only">Орох тест</span>
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-dim" aria-hidden />
         <input
-          value={freeMode ? (freeText ?? "") : query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            onFreeTextChange?.(e.target.value);
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            addTopic();
           }}
-          onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
           maxLength={freeMode ? 200 : undefined}
-          placeholder="Орох тест"
+          placeholder={freeMode ? "Тест хайх эсвэл сэдэв бичих" : "Орох тест"}
           autoComplete="off"
           className="min-h-11 w-full rounded-lg border border-line bg-bg pl-9 pr-3 text-sm"
         />
       </label>
-      {freeMode && (freeText ?? "").trim() && (
-        <p className="text-xs text-ink-dim">
-          Доороос тест сонговол холбогдоно, эс бөгөөс «{(freeText ?? "").trim()}» гэж сэдэв болж хадгалагдана
-        </p>
+      {freeMode && typed && (
+        <button
+          type="button"
+          onClick={addTopic}
+          disabled={!canAddTopic}
+          className="inline-flex min-h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-dashed border-brand bg-brand-bright/5 px-3 text-left text-sm font-semibold text-brand-soft hover:bg-brand-bright/10 disabled:border-line disabled:text-ink-dim"
+        >
+          <Plus className="size-4 shrink-0" aria-hidden />
+          <span className="min-w-0 truncate">
+            {typedExists ? `«${typed}» нэмэгдсэн` : customTopics.length >= TOPIC_MAX ? "Сэдэв 12-оос олон болохгүй" : `«${typed}» сэдэв болгож нэмэх`}
+          </span>
+        </button>
       )}
 
       {actionError && (

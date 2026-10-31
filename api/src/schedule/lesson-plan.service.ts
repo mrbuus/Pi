@@ -14,12 +14,14 @@ import {
 import { markPlus, teacherPlusIds } from '../common/teacher-plus';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  cleanCustomTopics,
   compareBookOrder,
   planTitle,
+  storedCustomTopics,
   suggestPhotoStudent,
   type DismissMode,
 } from './lesson-plan.logic';
-import { ScheduleService } from './schedule.service';
+import { ScheduleService, teacherDisplayNames } from './schedule.service';
 import {
   excludedNumbersOf,
   shortTestName,
@@ -144,6 +146,7 @@ export class LessonPlanService {
   private presentPlan(
     topic: {
       testIds: string[];
+      customTopics: string[];
       dismissMode: string | null;
       photoStudentId: string | null;
       title: string;
@@ -155,12 +158,25 @@ export class LessonPlanService {
     const auto = planTitle(topic.testIds.map((id) => meta.get(id)?.short ?? ''));
     return {
       testIds: topic.testIds,
+      customTopics: this.customTopicsOf(topic, meta),
       dismissMode: (topic.dismissMode as DismissMode | null) ?? null,
       photoStudentId: topic.photoStudentId,
       title: topic.title || null,
       customTitle: topic.title && topic.title !== auto ? topic.title : null,
       updatedAt: topic.updatedAt,
     };
+  }
+
+  /** Тухайн хичээлийн хадгалсан чөлөөт сэдвүүд (хуучин гарчгийг ч тооцно). */
+  private customTopicsOf(
+    topic: { testIds: string[]; customTopics: string[]; title: string } | null,
+    meta: Map<string, TestMeta>,
+  ): string[] {
+    if (!topic) return [];
+    return storedCustomTopics({
+      ...topic,
+      autoTitle: planTitle(topic.testIds.map((id) => meta.get(id)?.short ?? '')),
+    });
   }
 
   private async roster(classroomId: string) {
@@ -231,6 +247,7 @@ export class LessonPlanService {
       dismissMode?: DismissMode | null;
       photoStudentId?: string | null;
       title?: string | null;
+      customTopics?: string[];
     },
   ) {
     if (!PLANNERS.includes(actor.role))
@@ -270,27 +287,19 @@ export class LessonPlanService {
     }
     const dismissMode = dto.dismissMode ?? null;
 
-    // Гараар бичсэн гарчиг (хуучин «Сэдэв») — тестгүй үед хадгалагдана
-    const previousAuto = planTitle(
-      (existing?.testIds ?? []).map((id) => meta.get(id)?.short ?? ''),
-    );
-    // «Орох тест» чөлөөт бичвэр (эзэн 2026-10-27): өгсөн бол түүнийг л мөрдөнө
-    const explicit = dto.title !== undefined;
-    const typed = explicit ? (dto.title ?? '').replace(/\s+/g, ' ').trim().slice(0, 200) : '';
-    const manualTitle = explicit
-      ? typed || null
-      : existing?.title && existing.title !== previousAuto
-        ? existing.title
-        : null;
-    const title =
-      explicit && manualTitle
-        ? manualTitle
-        : sorted.length
-          ? planTitle(sorted.map((t) => t.short))
-          : (manualTitle ?? '');
+    // Бодлогын санд байхгүй сэдвүүд (эзэн 2026-10-31) — тесттэй зэрэг, хэдийг ч.
+    // Хуучин клиент ганц `title` илгээдэг бол түүнийг нэг сэдэв гэж авна; аль
+    // нь ч ирээгүй бол хадгалсныг хэвээр үлдээнэ.
+    const customTopics =
+      dto.customTopics !== undefined
+        ? cleanCustomTopics(dto.customTopics)
+        : dto.title !== undefined
+          ? cleanCustomTopics([dto.title ?? ''])
+          : this.customTopicsOf(existing, meta);
+    const title = planTitle([...sorted.map((t) => t.short), ...customTopics]);
     const testIds = sorted.map((t) => t.testId);
 
-    if (!testIds.length && !dismissMode && !photoStudentId && !manualTitle) {
+    if (!testIds.length && !dismissMode && !photoStudentId && !customTopics.length) {
       if (existing) {
         await this.prisma.lessonTopic.delete({ where: { id: existing.id } });
         await this.audit(actor, 'DELETE', existing.id, existing, null);
@@ -301,6 +310,7 @@ export class LessonPlanService {
     const data = {
       title,
       testIds,
+      customTopics,
       dismissMode,
       photoStudentId,
       // Ангийн «одоогийн бүлэг» (class-dashboard) — хамгийн хол тестийн бүлэг
@@ -328,6 +338,7 @@ export class LessonPlanService {
     entityId: string,
     before: unknown,
     after: unknown,
+    entity = 'LessonTopic',
   ) {
     const json = (v: unknown) =>
       v === null || v === undefined
@@ -338,7 +349,7 @@ export class LessonPlanService {
         actorId: actor.userId,
         actorRole: actor.role,
         action,
-        entity: 'LessonTopic',
+        entity,
         entityId,
         before: json(before),
         after: json(after),
@@ -527,6 +538,7 @@ export class LessonPlanService {
           plan: topic
             ? {
                 testIds: topic.testIds,
+                customTopics: this.customTopicsOf(topic, meta),
                 dismissMode: (topic.dismissMode as DismissMode | null) ?? null,
                 photoStudent: photo
                   ? { id: photo.id, name: studentName(photo) }
@@ -594,6 +606,113 @@ export class LessonPlanService {
           },
         ]),
       ),
+      meal: await this.mealOf(date, key),
     };
   }
+
+  /** Бямба, Ням л хоолтой (эзэн 2026-10-31); бусад өдөр null. */
+  private async mealOf(date: Date, key: string) {
+    if (!isWeekendKey(key)) return null;
+    const row = await this.prisma.dayMeal.findUnique({ where: { date } });
+    const cook = row?.cookId
+      ? await this.prisma.user.findUnique({
+          where: { id: row.cookId },
+          select: { id: true, role: true, firstName: true, lastName: true },
+        })
+      : null;
+    // Ижил нэртэй ажилтан байвал овгийн үсэг — хуваарийн бусад нэртэй нэг хэлбэр
+    const pool = cook
+      ? await this.prisma.user.findMany({
+          where: { role: { in: STAFF } },
+          select: { firstName: true },
+        })
+      : [];
+    return {
+      cook: cook
+        ? {
+            id: cook.id,
+            name: teacherDisplayNames([cook], pool).get(cook.id) ?? cook.firstName,
+            role: cook.role,
+          }
+        : null,
+      food: row?.food ?? null,
+    };
+  }
+
+  /**
+   * PUT /schedule/day-meal — амралтын өдрийн хоол: хэн хийх (ажилтан), юу хийх
+   * (чөлөөт бичвэр). Хоослоход мөр устахгүй, утгууд null болно.
+   */
+  async putMeal(
+    actor: Actor,
+    dto: { date: string; cookId?: string | null; food?: string | null },
+  ) {
+    if (!PLANNERS.includes(actor.role))
+      throw new ForbiddenException('Зөвхөн Багш+, Админ');
+    const { date, key } = this.parse(dto.date);
+    if (!isWeekendKey(key))
+      throw new BadRequestException('Хоолыг зөвхөн Бямба, Ням гарагт бичнэ');
+    const cookId = dto.cookId || null;
+    if (cookId) {
+      const cook = await this.prisma.user.findFirst({
+        where: { id: cookId, role: { in: STAFF } },
+        select: { id: true },
+      });
+      if (!cook) throw new BadRequestException('Сонгосон ажилтан олдсонгүй');
+    }
+    const food = (dto.food ?? '').replace(/\s+/g, ' ').trim().slice(0, 200) || null;
+    const existing = await this.prisma.dayMeal.findUnique({ where: { date } });
+    const row = await this.prisma.dayMeal.upsert({
+      where: { date },
+      update: { cookId, food, updatedById: actor.userId },
+      create: { date, cookId, food, updatedById: actor.userId },
+    });
+    await this.audit(actor, existing ? 'UPDATE' : 'CREATE', key, existing, row, 'DayMeal');
+    return { date: key, meal: await this.mealOf(date, key) };
+  }
+
+  /**
+   * GET /schedule/test-problems?testId= — хуваарийн цонхноос тестийн бодлогуудыг
+   * НЭГ хуудсанд, хариутай нь (зөвхөн ажилтан; эзэн 2026-10-31). Шинжилгээ үгүй.
+   */
+  async testProblems(actor: Actor, testId: string) {
+    this.assertStaff(actor);
+    const meta = (await this.testsMeta([testId])).get(testId);
+    if (!meta || !meta.available) throw new BadRequestException('Тест олдсонгүй');
+    const rows = await this.prisma.problem.findMany({
+      where: { id: { in: meta.problemIds }, deletedAt: null },
+      select: {
+        id: true,
+        format: true,
+        statementText: true,
+        imageKey: true,
+        choices: true,
+        correctAnswer: true,
+        points: true,
+        choiceOptions: {
+          orderBy: { order: 'asc' },
+          select: { label: true, text: true, imageKey: true, isCorrect: true },
+        },
+      },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return {
+      testId,
+      title: meta.title,
+      short: meta.short,
+      variant: meta.variant,
+      bookTitle: meta.bookTitle,
+      // Дугаар = тест дэх байр (хассан бодлогын дугаартай ижил)
+      problems: meta.problemIds.flatMap((id, i) => {
+        const p = byId.get(id);
+        return p ? [{ ...p, number: i + 1 }] : [];
+      }),
+    };
+  }
+}
+
+/** YYYY-MM-DD нь Бямба (6) эсвэл Ням (0) эсэх — JS гараг */
+function isWeekendKey(key: string): boolean {
+  const wd = new Date(`${key}T00:00:00.000Z`).getUTCDay();
+  return wd === 0 || wd === 6;
 }

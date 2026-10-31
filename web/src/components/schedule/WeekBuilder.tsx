@@ -17,6 +17,7 @@ import PlanDialog from "./day/PlanDialog";
 import ConfirmDialog from "./day/ConfirmDialog";
 import DayTeachers, { type TeacherLoad } from "./day/DayTeachers";
 import ExportImage from "./day/ExportImage";
+import DayMeal from "./day/DayMeal";
 import { Excluded } from "./day/RoadMap";
 import { branchOf, type DayEntry, type DayPlanResponse } from "./day/types";
 import { withPlus } from "@/lib/personName";
@@ -332,10 +333,10 @@ export default function WeekBuilder() {
                     </h3>
                     <div className="space-y-4">
                       {s.blocks.map((blk) => (
-                        <div key={blk.start} role="group" aria-label={`${formatMinutes(blk.start)}–${formatMinutes(blk.end)}`}>
+                        <div key={blk.start} role="group" aria-label={formatMinutes(blk.start)}>
                           <p className="mb-1.5 flex items-center gap-2 px-1">
                             <span className="text-base font-bold tabular-nums text-ink">
-                              {formatMinutes(blk.start)}–{formatMinutes(blk.end)}
+                              {formatMinutes(blk.start)}
                             </span>
                             <span className="text-xs tabular-nums text-ink-dim">{blk.rows.length} анги</span>
                           </p>
@@ -393,6 +394,16 @@ export default function WeekBuilder() {
                 className="lg:sticky lg:top-4"
               />
             </div>
+          )}
+          {data.meal && (
+            <DayMeal
+              key={day}
+              date={day}
+              meal={data.meal}
+              canEdit={canPlan}
+              teachers={teachers}
+              onSaved={(meal) => setData((prev) => prev && { ...prev, meal })}
+            />
           )}
           <Legend canPlan={canPlan} />
         </>

@@ -27,6 +27,7 @@ import RoomBadge from "../RoomBadge";
 import { formatMinutes, WEEKDAY_LABELS } from "../types";
 import { Excluded, roadOf } from "./RoadMap";
 import TestPicker from "./TestPicker";
+import TestProblems from "./TestProblems";
 import { TeacherTag } from "./LessonRow";
 import {
   DISMISS_LABEL,
@@ -88,7 +89,7 @@ function Body(p: Props & { entry: DayEntry }) {
             <Meta
               items={[
                 `${weekday}, ${p.date.slice(5).replace("-", ".")}`,
-                `${formatMinutes(e.startMinute)}–${formatMinutes(e.endMinute)}`,
+                formatMinutes(e.startMinute),
                 `${e.students} сурагч`,
               ]}
             />
@@ -163,7 +164,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 /** Багшид — төлөвлөгөө, өмнөх/хийсэн тест, тэмдэглэл, батламжийг ХАРНА */
 function ReadOnly(p: Props & { entry: DayEntry }) {
   const e = p.entry;
-  const { previous, today, doneToday } = roadOf(e, p.tests);
+  const { previous, today, doneToday, topics } = roadOf(e, p.tests);
+  const testIds = [
+    ...new Set(doneToday ? e.done.flatMap((d) => (d.testId ? [d.testId] : [])) : (e.plan?.testIds ?? [])),
+  ];
   const line = (x: { key: string; full: string; excluded: number[] }) => (
     <li key={x.key} className="text-sm text-ink">
       {x.full}
@@ -178,8 +182,28 @@ function ReadOnly(p: Props & { entry: DayEntry }) {
         </Section>
       )}
       <Section title={doneToday ? "Хийсэн тест" : "Өнөөдрийн тест"}>
-        {today.length ? <ul className="space-y-0.5">{today.map(line)}</ul> : <p className="text-sm text-ink-dim">{e.topic ?? "Төлөвлөөгүй"}</p>}
+        {today.length || topics.length ? (
+          <ul className="space-y-0.5">
+            {today.map(line)}
+            {topics.map((t) => (
+              <li key={`topic-${t}`} className="text-sm text-ink">
+                {t}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-ink-dim">{e.topic ?? "Төлөвлөөгүй"}</p>
+        )}
       </Section>
+      {testIds.length > 0 && (
+        <Section title="Тестийн бодлогууд">
+          <div className="space-y-2">
+            {testIds.map((id) => (
+              <TestProblems key={id} testId={id} label={p.tests[id]?.short ?? "Тест"} />
+            ))}
+          </div>
+        </Section>
+      )}
       {(e.plan?.dismissMode || e.plan?.photoStudent) && (
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
           {e.plan?.dismissMode && (
@@ -237,24 +261,31 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
   const e = p.entry;
   const initial = {
     testIds: p.ctx.plan?.testIds ?? [],
+    customTopics: p.ctx.plan?.customTopics ?? [],
     dismissMode: p.ctx.plan?.dismissMode ?? null,
     photoStudentId: p.ctx.plan?.photoStudentId ?? null,
     note: e.note?.body ?? "",
-    title: p.ctx.plan?.customTitle ?? "",
   };
   const [testIds, setTestIds] = useState<string[]>(initial.testIds);
-  const [title, setTitle] = useState(initial.title);
+  const [topics, setTopics] = useState<string[]>(initial.customTopics);
   const [dismissMode, setDismissMode] = useState<DismissMode | null>(initial.dismissMode);
   const [photo, setPhoto] = useState<string | null>(initial.photoStudentId);
   const [note, setNote] = useState(initial.note);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const suggestion = p.ctx.roster.find((r) => r.id === p.ctx.photoSuggestion) ?? null;
+  // Шинээр сонгосон тестийн нэр өдрийн хариунд байхгүй — нэрийг тусад нь авна
+  const unknown = testIds.filter((id) => !p.tests[id]);
+  const { data: extraTests } = useSection<{ testId: string; short: string }[]>(
+    unknown.length ? `/schedule/plan-tests?ids=${unknown.join(",")}` : null,
+    [],
+  );
+  const testName = (id: string) => p.tests[id]?.short ?? extraTests.find((t) => t.testId === id)?.short ?? "Тест";
   const planChanged =
     testIds.join() !== initial.testIds.join() ||
     dismissMode !== initial.dismissMode ||
     photo !== initial.photoStudentId ||
-    title.trim() !== initial.title.trim();
+    topics.join("\n") !== initial.customTopics.join("\n");
   const noteChanged = note.trim() !== initial.note.trim();
 
   async function save() {
@@ -264,7 +295,7 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
       if (planChanged)
         await api(`/schedule/${e.scheduleId}/plan`, {
           method: "PUT",
-          body: { date: p.date, testIds, dismissMode, photoStudentId: photo, title: title.trim() || null },
+          body: { date: p.date, testIds, customTopics: topics, dismissMode, photoStudentId: photo },
         });
       if (noteChanged)
         await api(`/lesson-records/${e.scheduleId}/note`, {
@@ -290,10 +321,20 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
             date={p.date}
             selected={testIds}
             onChange={setTestIds}
-            freeText={title}
-            onFreeTextChange={setTitle}
+            customTopics={topics}
+            onCustomTopicsChange={setTopics}
           />
         </Section>
+
+        {testIds.length > 0 && (
+          <Section title="Тестийн бодлогууд">
+            <div className="space-y-2">
+              {testIds.map((id) => (
+                <TestProblems key={id} testId={id} label={testName(id)} />
+              ))}
+            </div>
+          </Section>
+        )}
 
         <Section title="Хичээлийн дараа">
           <div role="radiogroup" aria-label="Хичээлийн дараа" className="inline-flex rounded-xl border border-line bg-bg p-1">
