@@ -1,9 +1,14 @@
 import { dateKey, parseDateOnly } from '../common/date';
 import { ubDateKey } from '../attendance/board-logic';
 import type { PrismaService } from '../prisma/prisma.service';
+import type {
+  ResolverException,
+  ResolverSchedule,
+} from '../schedule/week-resolver';
 import {
   dayKey,
   lessonDaysByClass,
+  resolveRange,
   topicOf,
   visibleDay,
   type LessonDayEvidence,
@@ -195,4 +200,97 @@ export function uniqueClasses(
         joinedKey: ubDateKey(r.joinedAt),
       });
   return [...out.values()];
+}
+
+/**
+ * Ирээдүйн [fromKey, toKey] хичээлийн өдрүүд — хуваарь (цуцалсан/зөөсөн exception-тэй)
+ * ∪ төлөвлөсөн LessonTopic. Гэрийн даалгаврын зургийг урьдчилан илгээхэд (эзэн 2026-10-31).
+ * Асуулга 2, нэг давалгаанд.
+ */
+export async function loadUpcomingDays(
+  prisma: PrismaService,
+  classes: StudentClass[],
+  fromKey: string,
+  toKey: string,
+): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  if (!classes.length || fromKey > toKey) return out;
+  const ids = classes.map((c) => c.classroomId);
+  const names = new Map(classes.map((c) => [c.classroomId, c.classroomName]));
+  const from = parseDateOnly(fromKey);
+  const to = parseDateOnly(toKey);
+  const [rows, topics] = await Promise.all([
+    prisma.classSchedule.findMany({
+      where: {
+        classroomId: { in: ids },
+        effectiveFrom: { lte: to },
+        OR: [{ effectiveTo: null }, { effectiveTo: { gte: from } }],
+      },
+      select: {
+        id: true,
+        classroomId: true,
+        weekday: true,
+        startMinute: true,
+        endMinute: true,
+        room: true,
+        effectiveFrom: true,
+        effectiveTo: true,
+        exceptions: {
+          where: {
+            OR: [
+              { date: { gte: from, lte: to } },
+              { newDate: { gte: from, lte: to } },
+            ],
+          },
+          select: { date: true, kind: true, newDate: true },
+        },
+      },
+    }),
+    prisma.lessonTopic.findMany({
+      where: { date: { gte: from, lte: to }, schedule: { classroomId: { in: ids } } },
+      select: { date: true, schedule: { select: { classroomId: true } } },
+    }),
+  ]);
+  const schedules: ResolverSchedule[] = [];
+  const exceptions: ResolverException[] = [];
+  for (const r of rows) {
+    schedules.push({
+      id: r.id,
+      classroomId: r.classroomId,
+      classroomName: names.get(r.classroomId) ?? '',
+      weekday: r.weekday,
+      startMinute: r.startMinute,
+      endMinute: r.endMinute,
+      teacherId: null,
+      teacherName: null,
+      room: r.room,
+      subject: null,
+      effectiveFrom: dateKey(r.effectiveFrom),
+      effectiveTo: r.effectiveTo ? dateKey(r.effectiveTo) : null,
+    });
+    for (const x of r.exceptions)
+      exceptions.push({
+        scheduleId: r.id,
+        date: dateKey(x.date),
+        kind: x.kind,
+        newDate: x.newDate ? dateKey(x.newDate) : null,
+        newStartMinute: null,
+        newEndMinute: null,
+        newRoom: null,
+        note: null,
+      });
+  }
+  const add = (classroomId: string, date: string) => {
+    if (date < fromKey || date > toKey) return;
+    const list = out.get(classroomId) ?? [];
+    if (!list.includes(date)) list.push(date);
+    out.set(classroomId, list);
+  };
+  for (const k of resolveRange(fromKey, toKey, schedules, exceptions).keys()) {
+    const i = k.lastIndexOf('|');
+    add(k.slice(0, i), k.slice(i + 1));
+  }
+  for (const t of topics) add(t.schedule.classroomId, dateKey(t.date));
+  for (const list of out.values()) list.sort();
+  return out;
 }

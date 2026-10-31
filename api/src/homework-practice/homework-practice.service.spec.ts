@@ -51,6 +51,8 @@ function makeDb() {
   const attendance: Row[] = [];
   const topics: Row[] = [];
   const records: Row[] = [];
+  // Хуваарь — ирээдүйн хичээл (урьдчилан илгээх)
+  const schedules: Row[] = [];
   const marks: Row[] = [{ classroomId: 'c1', date: d('2026-10-29'), status: 'PARTIAL', comment: null }];
   const inRange = (date: Date, r: any) =>
     (!r?.gte || date >= r.gte) && (!r?.lte || date <= r.lte);
@@ -265,10 +267,15 @@ function makeDb() {
         records.filter((r) => where.classroomId.in.includes(r.classroomId) && inRange(r.date, where.date)),
       ),
     },
+    classSchedule: {
+      findMany: jest.fn(async ({ where }: any) =>
+        schedules.filter((r) => where.classroomId.in.includes(r.classroomId)),
+      ),
+    },
     chapter: { findMany: jest.fn(async () => [{ id: 'ch1', title: 'Вектор' }]) },
     $transaction: jest.fn(async (fn: any) => fn(db)),
   };
-  return { db, attempts, accesses, checks, photos, enrollments, sessions, tests, attendance, topics, records, marks };
+  return { db, attempts, accesses, checks, photos, enrollments, sessions, tests, attendance, topics, records, marks, schedules };
 }
 
 describe('HomeworkPracticeService — танхимын сурагчийн гэрийн даалгавар', () => {
@@ -472,6 +479,27 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     await expect(svc.check('s1', attemptId, { p2: 'C' })).rejects.toBeInstanceOf(ConflictException);
     const res = await svc.submit('s1', attemptId, { p2: 'C' });
     expect(res.score).toEqual({ correct: 1, total: 2 }); // p2-ийн хожуу хариу тооцогдоогүй
+  });
+
+  it('урьдчилан: ирэх 7 хоногийн хичээлийн өдөрт зураг илгээнэ; цуцалсан, 7 хоногоос цааш, хичээлгүй өдөр татгалзана', async () => {
+    jest.setSystemTime(new Date('2026-10-28T10:00:00Z')); // УБ 10-28 Лхагва
+    // Баасан (5) гараг, 10-30-ны хичээл; 11-06-нд цуцалсан
+    env.schedules.push({
+      id: 'sch5', classroomId: 'c1', weekday: 5, startMinute: 1080, endMinute: 1170, room: null,
+      effectiveFrom: d('2026-09-01'), effectiveTo: null,
+      exceptions: [{ date: d('2026-11-06'), kind: 'CANCELLED', newDate: null }],
+    });
+    const my = await svc.my('s1');
+    const up = my.days.filter((x: any) => x.upcoming).map((x: any) => x.date);
+    expect(up).toEqual(['2026-10-30']);
+    await expect(
+      svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-30', fileKey: 'f1.pdf', pages: 3 }),
+    ).resolves.toMatchObject({ fileKey: 'f1.pdf' });
+    // Пүрэв — хичээлгүй
+    await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-29', fileKey: 'f1.pdf', pages: 3 })).rejects.toBeInstanceOf(ForbiddenException);
+    // 7 хоногоос цааш
+    await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-11-06', fileKey: 'f1.pdf', pages: 3 })).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(svc.addPhoto('s1', { classroomId: 'c9', date: '2026-10-30', fileKey: 'f1.pdf', pages: 3 })).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('зураг: өөрийн PDF, шинээр илгээвэл хуучныг зөөлөн устгана; бусдын/зураг файл татгалзана', async () => {

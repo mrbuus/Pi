@@ -39,6 +39,14 @@ export function dayKey(classroomId: string, date: string): string {
   return `${classroomId}|${date}`;
 }
 
+/** Гэрийн даалгаврын зургийг урьдчилан илгээх: өнөөдрөөс хойших 7 хоногийн хичээл (эзэн 2026-10-31) */
+export const ADVANCE_DAYS = 7;
+
+/** D нь (өнөөдөр, өнөөдөр + 7] цонхонд байгаа эсэх — урьдчилан илгээх */
+export function inAdvanceWindow(date: string, today: string): boolean {
+  return date > today && date <= addDaysKey(today, ADVANCE_DAYS);
+}
+
 /** D нь [өнөөдөр − 13, өнөөдөр] цонхонд байгаа эсэх (зураг илгээх эрх) */
 export function inUploadWindow(date: string, today: string): boolean {
   return date <= today && date >= addDaysKey(today, -(UPLOAD_WINDOW_DAYS - 1));

@@ -9,9 +9,15 @@ import { addDaysKey, ubDateKey } from '../attendance/board-logic';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { loadLessonDays, visibleLessonDays } from '../student-hub/lesson-days';
+import {
+  loadLessonDays,
+  loadUpcomingDays,
+  visibleLessonDays,
+} from '../student-hub/lesson-days';
 import {
   dayKey,
+  ADVANCE_DAYS,
+  inAdvanceWindow,
   inUploadWindow,
   nextLessonDay,
 } from '../student-hub/student-hub.logic';
@@ -344,6 +350,7 @@ export class HomeworkPracticeService {
       classroomId: string;
       classroomName: string;
       slot: HomeworkSlot | null;
+      upcoming?: boolean;
     };
     const rows = new Map<string, DayRow>();
     for (const cls of lessons.classes)
@@ -353,6 +360,22 @@ export class HomeworkPracticeService {
           classroomId: cls.classroomId,
           classroomName: cls.classroomName,
           slot: null,
+        });
+    // Ирэх 7 хоногийн хичээл — зургаа урьдчилан илгээнэ (эзэн 2026-10-31)
+    const upcoming = await loadUpcomingDays(
+      this.prisma,
+      lessons.classes,
+      addDaysKey(today, 1),
+      addDaysKey(today, ADVANCE_DAYS),
+    );
+    for (const cls of lessons.classes)
+      for (const date of upcoming.get(cls.classroomId) ?? [])
+        rows.set(dayKey(cls.classroomId, date), {
+          date,
+          classroomId: cls.classroomId,
+          classroomName: cls.classroomName,
+          slot: null,
+          upcoming: true,
         });
     for (const slot of slots) {
       const k = dayKey(slot.classroomId, slot.date);
@@ -498,6 +521,7 @@ export class HomeworkPracticeService {
             : null,
           mark: mark?.status ?? null,
           markComment: mark?.comment ?? null,
+          upcoming: !!row.upcoming,
           topic: lessons.topics.get(dayKey(row.classroomId, row.date)) ?? null,
         };
       }),
@@ -514,6 +538,11 @@ export class HomeworkPracticeService {
     date: string,
     today: string,
   ): Promise<boolean> {
+    if (inAdvanceWindow(date, today)) {
+      const set = await loadLessonDays(this.prisma, studentId, today, today, classroomId);
+      const upcoming = await loadUpcomingDays(this.prisma, set.classes, date, date);
+      return (upcoming.get(classroomId) ?? []).includes(date);
+    }
     if (inUploadWindow(date, today)) {
       const set = await loadLessonDays(
         this.prisma,
@@ -761,7 +790,10 @@ export class HomeworkPracticeService {
       throw new BadRequestException(`1–${MAX_PAGES} хуудас илгээнэ үү`);
     const date = this.parseDate(body.date);
     const today = dateKey(todayUB());
-    if (date > today || date < addDaysKey(today, -(MAX_DAYS - 1)))
+    if (
+      date > addDaysKey(today, ADVANCE_DAYS) ||
+      date < addDaysKey(today, -(MAX_DAYS - 1))
+    )
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
     if (!(await this.photoDayAllowed(studentId, body.classroomId, date, today)))
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
