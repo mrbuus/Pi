@@ -24,9 +24,11 @@ import {
   type PromiseState,
 } from './ledger';
 import { withPlus } from '../revisions/revision-snapshot';
+import { AuditService } from '../audit/audit.service';
 import { PaymentsService, type PaymentActor } from './payments.service';
+import { classDays, primaryEnrollment, settlements } from './ledger-load';
 import type { CreatePaymentDto } from './dto/payment.dto';
-import type { LedgerPayDto } from './dto/ledger.dto';
+import type { LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
 
 /** Төлбөрийн хэсгийн нэг сурагчийн мөр — блок, өр, тэмдэглэл, амлалт. */
 export interface LedgerRow extends Omit<LedgerResult, 'plan'> {
@@ -68,8 +70,7 @@ const STUDENT_SELECT = {
   enrollments: {
     where: { leftAt: null },
     orderBy: { joinedAt: 'desc' as const },
-    take: 1,
-    select: { classroom: { select: { id: true, name: true } } },
+    select: { classroom: { select: { id: true, name: true, type: true, archived: true } } },
   },
 } satisfies Prisma.UserSelect;
 
@@ -97,6 +98,7 @@ export class PaymentsLedgerService {
   constructor(
     private prisma: PrismaService,
     private payments: PaymentsService,
+    private audit: AuditService,
   ) {}
 
   private baseWhere(): Prisma.UserWhereInput {
@@ -115,7 +117,10 @@ export class PaymentsLedgerService {
     });
     if (!users.length) return [];
     const ids = users.map((u) => u.id);
-    const [payments, notes] = await Promise.all([
+    const primary = new Map(
+      users.map((u) => [u.id, primaryEnrollment(u.enrollments)?.classroom ?? null]),
+    );
+    const [payments, notes, days, settled] = await Promise.all([
       this.prisma.payment.findMany({
         where: {
           userId: { in: ids },
@@ -142,6 +147,11 @@ export class PaymentsLedgerService {
           resolvedAt: true,
         },
       }),
+      classDays(
+        this.prisma,
+        [...primary.values()].filter((c) => !!c).map((c) => c!.id),
+      ),
+      settlements(this.prisma, ids),
     ]);
     const authors = new Map(
       (
@@ -166,14 +176,15 @@ export class PaymentsLedgerService {
 
     return users.map((u): LedgerRow => {
       const profile = u.studentProfile;
-      const classroom = u.enrollments[0]?.classroom ?? null;
+      const primaryClass = primary.get(u.id) ?? null;
+      const classroom = primaryClass ? { id: primaryClass.id, name: primaryClass.name } : null;
       const mine = payBy.get(u.id) ?? [];
       const startDate = dateKey(profile?.joinedOn);
       const leftOn = dateKey(profile?.leftOn);
       const { plan, ...ledger } = computeLedger({
         plan: profile?.tuitionPlan ?? null,
         tuitionAmount: profile?.tuitionAmount ?? null,
-        tier: tierFor(profile?.grade, classroom?.name).tier,
+        tier: tierFor(profile?.grade, classroom?.name, classroom ? days.get(classroom.id) : null).tier,
         startDate,
         leftOn,
         payments: mine.map((p) => ({
@@ -182,6 +193,7 @@ export class PaymentsLedgerService {
           paidOn: dateKey(p.paidAt),
         })),
         today,
+        settled: settled.has(u.id),
       });
       const myNotes = notesBy.get(u.id) ?? [];
       const last = myNotes[0];
@@ -414,7 +426,7 @@ export class PaymentsLedgerService {
     const today = todayKeyUB();
     const [row] = await this.rows({ id }, today);
     if (!row) throw new NotFoundException('Сурагч олдсонгүй');
-    const [profile, payments, notes, refunds] = await Promise.all([
+    const [profile, payments, notes, refunds, days, settled] = await Promise.all([
       this.prisma.studentProfile.findUnique({
         where: { userId: id },
         select: {
@@ -466,7 +478,10 @@ export class PaymentsLedgerService {
           classroom: { select: { name: true } },
         },
       }),
+      classDays(this.prisma, row.classroom ? [row.classroom.id] : []),
+      settlements(this.prisma, [id]),
     ]);
+    const settlement = settled.get(id) ?? null;
     const people = new Map(
       (
         await this.prisma.user.findMany({
@@ -476,6 +491,7 @@ export class PaymentsLedgerService {
                 ...new Set([
                   ...notes.map((n) => n.createdById),
                   ...payments.map((p) => p.confirmedById).filter((x): x is string => !!x),
+                  ...(settlement ? [settlement.createdById] : []),
                 ]),
               ],
             },
@@ -487,13 +503,22 @@ export class PaymentsLedgerService {
     const paidDates = payments
       .filter((p) => p.status === PaymentStatus.CONFIRMED)
       .map((p) => dateKey(p.paidAt ?? p.createdAt)!);
-    const { tier } = tierFor(profile?.grade, row.classroom?.name);
+    const daysPerWeek = row.classroom ? (days.get(row.classroom.id) ?? null) : null;
+    const { tier } = tierFor(profile?.grade, row.classroom?.name, daysPerWeek);
     return {
       year: this.yearView(),
       today,
       month: this.currentMonth(today),
       row,
       tier,
+      daysPerWeek,
+      settlement: settlement
+        ? {
+            note: settlement.note,
+            at: settlement.createdAt,
+            authorName: people.get(settlement.createdById) ?? null,
+          }
+        : null,
       profile,
       payments: payments.map(({ confirmedById, ...p }) => ({
         ...p,
@@ -553,5 +578,52 @@ export class PaymentsLedgerService {
     }
     const [row] = await this.rows({ id: studentId }, today);
     return { paymentId: created.id, row };
+  }
+
+  /**
+   * Багш+ / Админ: стандарт үнээс бага төлсөн ч «бүтэн жил» гэж тооцох, эсвэл
+   * буцааж системийн тооцоонд (дутуу) оруулах (эзэн 2026-10-31). Тайлбар сонголттой.
+   * Устгахгүй — буцаахад revokedAt; түүх AuditLog-д.
+   */
+  async settle(studentId: string, dto: LedgerSettleDto, actor: PaymentActor) {
+    const year = ACADEMIC_YEAR.id;
+    const today = todayKeyUB();
+    const student = await this.prisma.user.findFirst({
+      where: { AND: [this.baseWhere(), { id: studentId }] },
+      select: { id: true },
+    });
+    if (!student) throw new NotFoundException('Сурагч олдсонгүй');
+    const note = dto.note?.trim() || null;
+    const change = await this.prisma.$transaction(async (tx) => {
+      const active = await tx.tuitionSettlement.findFirst({
+        where: { studentId, year, revokedAt: null },
+      });
+      if (dto.full) {
+        if (active) return null; // аль хэдийн бүтэн — давхар дарсан
+        const created = await tx.tuitionSettlement.create({
+          data: { studentId, year, note, createdById: actor.id },
+        });
+        return { action: 'SETTLE', id: created.id, before: null, after: created };
+      }
+      if (!active) return null;
+      const revoked = await tx.tuitionSettlement.update({
+        where: { id: active.id },
+        data: { revokedAt: new Date(), revokedById: actor.id },
+      });
+      return { action: 'UNSETTLE', id: active.id, before: active, after: revoked };
+    });
+    if (change)
+      await this.audit.record({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: change.action,
+        entity: 'TuitionSettlement',
+        entityId: change.id,
+        before: change.before ?? undefined,
+        after: { ...change.after, studentId },
+        reason: dto.full ? (note ?? 'Бүтэн жилд тооцсон') : (note ?? 'Системийн тооцоонд буцаасан'),
+      });
+    const [row] = await this.rows({ id: studentId }, today);
+    return { row };
   }
 }

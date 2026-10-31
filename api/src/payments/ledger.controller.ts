@@ -12,7 +12,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
-import { LedgerBoardQueryDto, LedgerPayDto } from './dto/ledger.dto';
+import { LedgerBoardQueryDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
 import { FinanceCapabilityGuard } from './finance-capability.guard';
 import { PaymentsLedgerService } from './ledger.service';
 
@@ -53,5 +53,15 @@ export class PaymentsLedgerController {
     @Req() req: AuthedRequest,
   ) {
     return this.ledger.pay(id, dto, { id: req.user.userId, role: req.user.role });
+  }
+
+  /** Төлөв л солино (бүтэн жил / системийн тооцоо) — төлсөн дүнд хүрэхгүй. */
+  @Post('student/:id/settle')
+  settle(
+    @Param('id') id: string,
+    @Body() dto: LedgerSettleDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.ledger.settle(id, dto, { id: req.user.userId, role: req.user.role });
   }
 }

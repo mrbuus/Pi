@@ -176,25 +176,25 @@ export function makeupOwed(
 export type PaymentState = 'PAID' | 'PARTIAL' | 'PENDING' | 'NONE';
 
 /**
- * Энэ сарын төлбөрийн төлөв. Жилийн төлбөрт (FULL_YEAR) энэ хичээлийн жилд
- * баталгаажсан төлбөр байвал PAID. Дүн мэдэгдэхгүй бол баталгаажсан ямар ч
- * төлбөрийг PAID гэж үзнэ.
+ * Энэ сарын төлбөрийн төлөв — Төлбөр хэсгийн сарын блокоос (payments/ledger.ts),
+ * тиймээс хоёр дэлгэц ЯГ ижил (эзэн 2026-10-31: зун бүтэн жилээ төлсөн хүүхэд
+ * энд «Бүртгэлгүй» → «Төлбөр дутуу» жагсаалтад, 3 өдрийн ангийн 300 мянга
+ * төлсөн хүүхэд «Дутуу» гэж харагдаж байсан). Гараар бүтэн жил бол блок PAID.
  */
-export function paymentState(input: {
-  plan: string | null;
-  tuitionAmount: number | null;
-  confirmedThisMonth: number;
-  confirmedThisYear: number;
+export function paymentStateOf(input: {
+  /** Энэ сарын блок (идэвхгүй сар бол OFF эсвэл undefined) */
+  block: { state: 'PAID' | 'PARTIAL' | 'OWED' | 'FUTURE' | 'OFF' } | undefined;
+  owedNow: number;
+  paidTotal: number;
   pendingThisMonth: number;
 }): PaymentState {
-  if (input.plan === 'FULL_YEAR' && input.confirmedThisYear > 0) return 'PAID';
-  if (input.confirmedThisMonth > 0) {
-    if (!input.tuitionAmount || input.confirmedThisMonth >= input.tuitionAmount)
-      return 'PAID';
-    return 'PARTIAL';
-  }
-  if (input.pendingThisMonth > 0) return 'PENDING';
-  return 'NONE';
+  const { block, owedNow, paidTotal, pendingThisMonth } = input;
+  // Өнөөдрийн байдлаар өртэй бол (бүтэн жилийн үлдэгдэл ч) — Төлбөр хэсгийн «өр»-тэй ижил
+  if (owedNow > 0)
+    return pendingThisMonth > 0 ? 'PENDING' : paidTotal > 0 ? 'PARTIAL' : 'NONE';
+  if (block?.state === 'PAID' || (block?.state === 'FUTURE' && paidTotal > 0)) return 'PAID';
+  if (pendingThisMonth > 0) return 'PENDING';
+  return block?.state === 'PARTIAL' ? 'PARTIAL' : 'NONE';
 }
 
 /** "2026-10" — Улаанбаатарын цагаар. */

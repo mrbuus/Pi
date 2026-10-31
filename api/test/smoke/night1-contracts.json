@@ -1083,6 +1083,17 @@
     "path": "/api/payments/ledger/student/:id/pay"
   },
   {
+    "gap": "PAY-LEDGER",
+    "file": "payments/ledger.controller",
+    "controller": "PaymentsLedgerController",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ],
+    "method": "POST",
+    "path": "/api/payments/ledger/student/:id/settle"
+  },
+  {
     "gap": "UDRIIN-HICHEEL",
     "file": "classrooms/classrooms.controller",
     "controller": "ClassroomsController",

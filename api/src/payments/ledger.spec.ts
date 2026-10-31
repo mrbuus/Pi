@@ -228,3 +228,73 @@ describe('todayKeyUB', () => {
     expect(todayKeyUB(new Date('2026-10-13T17:00:00Z'))).toBe('2026-10-14');
   });
 });
+
+// Эзэн 2026-10-31: үнэ суудаг ангийн 7 хоногийн өдрөөс, Багш+ гараар «бүтэн жил»
+describe('суудаг анги, гараар бүтэн жил, хоцорч төлсөн', () => {
+  const g9 = PRICE_TIERS.g9_11;
+
+  it('үнэ сургуулийн ангиас биш, 7 хоногт хэдэн өдөр ордгоос', () => {
+    // 11-р ангийн хүүхэд 12-р ангийнхантай (4 өдөр) → 350 мянга / 2.5 сая
+    expect(tierFor(11, '12-11 (Баруун 4)', 4).tier.key).toBe('g12');
+    // 12-р ангийн хүүхэд 3 өдрийн ангид → 300 мянга / 2 сая
+    expect(tierFor(12, '11-2 (Баруун 4)', 3).tier.key).toBe('g9_11');
+    // Нийгэм өдрөөс үл хамаарна; хуваарьгүй анги → сургуулийн ангиар
+    expect(tierFor(11, 'НИЙГЭМ (Зүүн 4)', 3).tier.key).toBe('social');
+    expect(tierFor(11, '11-1', null).tier.key).toBe('g9_11');
+    expect(tierFor(11, '11-1', 0).tier.key).toBe('g9_11');
+  });
+
+  it('гэрээ = стандарт үнэ; шийтээс ирсэн «төлсөн дүн» гэрээ болохгүй', () => {
+    // 3 өдрийн анги, шийт 350 мянгыг сарын дүн гэж бичсэн → 300 мянга
+    expect(resolvePlan('MONTHLY', 350_000, g9)).toMatchObject({ fee: 300_000 });
+    // 4 өдрийн анги, бүтэн жилд 2 сая төлсөн → гэрээ 2.5 сая (дутуу харагдана)
+    expect(resolvePlan('FULL_YEAR', 2_000_000, g12)).toMatchObject({ total: 2_500_000, settled: false });
+    const r = computeLedger(base({ plan: 'FULL_YEAR', tuitionAmount: 2_000_000, payments: [pay(2_000_000, '2026-06')] }));
+    expect(r.remaining).toBe(500_000);
+    expect(r.owedNow).toBe(500_000);
+  });
+
+  it('3 өдрийн ангийн 2 сая = бүрэн, 300 мянгаар сар бүр төлсөн = бүрэн', () => {
+    const full = computeLedger(base({ tier: g9, plan: 'FULL_YEAR', tuitionAmount: 2_000_000, payments: [pay(2_000_000, '2026-06')] }));
+    expect(full.remaining).toBe(0);
+    expect(states(full).every((s) => s === 'PAID')).toBe(true);
+    const monthly = computeLedger(base({ tier: g9, tuitionAmount: 350_000, payments: [pay(350_000, '2026-09'), pay(300_000, '2026-10')] }));
+    expect(monthly.owedNow).toBe(0);
+    expect(states(monthly).slice(0, 2)).toEqual(['PAID', 'PAID']);
+  });
+
+  it('гараар бүтэн жил: гэрээ = бодит төлсөн дүн, бүх сар төлсөн, өр/илүү үгүй', () => {
+    const r = computeLedger(base({ plan: 'MONTHLY', payments: [pay(1_000_000, '2026-09', '2026-09-03')], settled: true }));
+    expect(r.plan).toMatchObject({ kind: 'FULL_YEAR', settled: true, total: 1_000_000 });
+    expect(states(r).every((s) => s === 'PAID')).toBe(true);
+    expect([r.owedNow, r.remaining, r.credit, r.overdueDays]).toEqual([0, 0, 0, 0]);
+    expect(r.nextDue).toBeNull();
+    // 0₮ (багшийн хүүхэд) ч бүтэн
+    const free = computeLedger(base({ payments: [], settled: true }));
+    expect(states(free).every((s) => s === 'PAID')).toBe(true);
+    expect(free.owedNow).toBe(0);
+    // жилийн дундаас орсон бол өмнөх сар OFF хэвээр
+    const late = computeLedger(base({ startDate: '2026-11-05', payments: [], settled: true }));
+    expect(states(late).slice(0, 3)).toEqual(['OFF', 'OFF', 'PAID']);
+  });
+
+  it('хоцорч төлсөн хоног ба одоогийн хэтэрсэн хоног', () => {
+    const r = computeLedger(
+      base({
+        today: '2026-11-20',
+        payments: [pay(350_000, '2026-09', '2026-09-01'), pay(350_000, '2026-10', '2026-10-12')],
+      }),
+    );
+    expect(r.blocks[0]).toMatchObject({ state: 'PAID', paidOn: '2026-09-01', lateDays: 0 });
+    expect(r.blocks[1]).toMatchObject({ state: 'PAID', paidOn: '2026-10-12', lateDays: 11 });
+    // 11-р сар 11/01-нд төлөгдөх байсан → 19 хоног хэтэрсэн
+    expect(r.overdueDays).toBe(19);
+    expect(r.blocks[2]).toMatchObject({ state: 'OWED', paidOn: null, lateDays: 0 });
+    // хоёр сарыг нэг дор хожуу төлсөн — хоёулаа тэр өдөр бүрэн
+    const two = computeLedger(base({ today: '2026-11-20', payments: [pay(700_000, '2026-10', '2026-10-20')] }));
+    expect(two.blocks.slice(0, 2).map((b) => [b.paidOn, b.lateDays])).toEqual([
+      ['2026-10-20', 49],
+      ['2026-10-20', 19],
+    ]);
+  });
+});

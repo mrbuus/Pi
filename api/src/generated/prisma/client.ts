@@ -342,6 +342,11 @@ export type Purchase = Prisma.PurchaseModel
  */
 export type ExpenseRecord = Prisma.ExpenseRecordModel
 /**
+ * Model TuitionSettlement
+ * 
+ */
+export type TuitionSettlement = Prisma.TuitionSettlementModel
+/**
  * Model TuitionRefund
  * 
  */

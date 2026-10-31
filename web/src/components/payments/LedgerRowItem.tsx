@@ -28,7 +28,9 @@ export function RowSummary({ r, align = "right" }: { r: LedgerRow; align?: "righ
     return (
       <span className={box}>
         <span className="font-bold tabular-nums text-error">{mnt(r.owedNow)}</span>
-        <span className="text-xs text-ink-dim">{r.owedMonths} сарын өр</span>
+        <span className="text-xs text-ink-dim">
+          {r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : `${r.owedMonths} сарын өр`}
+        </span>
       </span>
     );
   if (r.credit > 0)
@@ -81,6 +83,8 @@ export function NoteLine({ r }: { r: LedgerRow }) {
 }
 
 function PlanTag({ r }: { r: LedgerRow }) {
+  if (r.plan.settled)
+    return <span className="rounded-md bg-success/10 px-1.5 text-xs font-semibold text-success">Бүтэнд тооцсон</span>;
   return r.plan.guessed ? (
     <span className="rounded-md border border-dashed border-ink/30 px-1.5 text-xs text-ink-dim">Багц?</span>
   ) : (
@@ -134,7 +138,7 @@ export default function LedgerRowItem({
           </span>
           <RowSummary r={r} />
         </span>
-        <CompactBlocks blocks={r.blocks} current={current} />
+        <CompactBlocks blocks={r.blocks} current={current} settled={r.plan.settled} />
         <NoteLine r={r} />
       </Link>
     );
@@ -148,7 +152,12 @@ export default function LedgerRowItem({
         <span className="block truncate">{name}</span>
         {meta}
       </Link>
-      <CompactBlocks blocks={r.blocks} current={current} onPick={onPay ? (m) => onPay(r, m) : undefined} />
+      <CompactBlocks
+        blocks={r.blocks}
+        current={current}
+        settled={r.plan.settled}
+        onPick={onPay ? (m) => onPay(r, m) : undefined}
+      />
       <RowSummary r={r} />
       {(r.promise || r.notes.last) && (
         <Link href={`${href}#notes`} className="col-start-1 col-end-4 min-w-0 rounded-md py-0.5 hover:underline">

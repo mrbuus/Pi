@@ -28,6 +28,7 @@ import PayDialog from "./PayDialog";
 import NoteDialog from "./NoteDialog";
 import PlanDialog from "./PlanDialog";
 import RefundDialog from "./RefundDialog";
+import SettleSwitch from "./SettleSwitch";
 import { BlockLegend, LargeBlocks } from "./MonthBlocks";
 import { dayLabel, mnt, monthName, PLAN_LABEL, stampLabel } from "./ledgerFormat";
 import { METHOD_LABEL, STATUS_LABEL, errMsg } from "./paymentHelpers";
@@ -42,11 +43,12 @@ const REFUND_STATUS: Record<string, string> = {
   CANCELLED: "Цуцалсан",
 };
 
-function Stat({ label, value, tone = "text-ink" }: { label: string; value: string; tone?: string }) {
+function Stat({ label, value, tone = "text-ink", sub }: { label: string; value: string; tone?: string; sub?: string }) {
   return (
     <div className="min-w-0">
       <p className="text-xs text-ink-dim">{label}</p>
       <p className={`text-[15px] font-bold tabular-nums sm:text-lg ${tone}`}>{value}</p>
+      {sub && <p className="text-xs text-ink-dim">{sub}</p>}
     </div>
   );
 }
@@ -110,9 +112,12 @@ export default function StudentLedger({ id }: { id: string }) {
   const back = r.classroom
     ? { href: `/app/payments/class/${encodeURIComponent(r.classroom.id)}`, label: r.classroom.name }
     : { href: "/app/payments", label: "Төлбөр" };
-  const planText = r.plan.guessed
-    ? "Багц тодорхойгүй"
-    : `${PLAN_LABEL[r.plan.kind]} ${mnt(r.plan.kind === "MONTHLY" ? r.plan.fee : r.plan.total)}`;
+  // Гараар бүтэн жилд гэрээ = төлсөн дүн — «Төлсөн»-тэй давхардуулж дүн бичихгүй
+  const planText = r.plan.settled
+    ? "Бүтэнд тооцсон"
+    : r.plan.guessed
+      ? "Багц тодорхойгүй"
+      : `${PLAN_LABEL[r.plan.kind]} ${mnt(r.plan.kind === "MONTHLY" ? r.plan.fee : r.plan.total)}`;
   const name = `${r.firstName} ${r.lastName}`;
 
   return (
@@ -135,7 +140,14 @@ export default function StudentLedger({ id }: { id: string }) {
                   style={{ background: getClassroomColor(r.classroom.id) }}
                 />
               )}
-              <Meta items={[r.classroom?.name, r.code, r.startDate ? `${dayLabel(r.startDate)}-нээс` : null]} />
+              <Meta
+                items={[
+                  r.classroom?.name,
+                  data.daysPerWeek ? `7 хоногт ${data.daysPerWeek} өдөр` : null,
+                  r.code,
+                  r.startDate ? `${dayLabel(r.startDate)}-нээс` : null,
+                ]}
+              />
             </p>
           </div>
           <button
@@ -152,7 +164,12 @@ export default function StudentLedger({ id }: { id: string }) {
 
         <div className="grid grid-cols-3 gap-2 rounded-2xl bg-ink/[0.03] p-3 sm:gap-3">
           <Stat label="Төлсөн" value={mnt(r.paidTotal)} />
-          <Stat label="Өр" value={mnt(r.owedNow)} tone={r.owedNow > 0 ? "text-error" : "text-ink"} />
+          <Stat
+            label="Өр"
+            value={mnt(r.owedNow)}
+            tone={r.owedNow > 0 ? "text-error" : "text-ink"}
+            sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
+          />
           {r.credit > 0 ? (
             <Stat label="Илүү төлсөн" value={mnt(r.credit)} tone="text-info" />
           ) : (
@@ -167,8 +184,15 @@ export default function StudentLedger({ id }: { id: string }) {
               <BlockLegend />
             </InfoHint>
           </div>
-          <LargeBlocks blocks={r.blocks} current={data.month} onPick={(m) => setPay({ month: m })} />
+          <LargeBlocks
+            blocks={r.blocks}
+            current={data.month}
+            settled={r.plan.settled}
+            onPick={(m) => setPay({ month: m })}
+          />
         </div>
+
+        <SettleSwitch row={r} settlement={data.settlement} onChanged={load} />
 
         <div className="flex flex-wrap gap-2">
           <Button onClick={() => setPay({ month: null })}>

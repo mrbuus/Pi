@@ -80,10 +80,11 @@ export interface PriceTier {
 
 // web/src/lib/orgInfo.ts TUITION-тэй ижил. Нийгмийн анги: Excel-ийн «Нийгэм»
 // хуудас (бүтэн 1.5 сая, суудал/сар 300 мянга); хуваан төлөх үнэ тогтоогоогүй.
+// Түлхүүр (g12, g9_11) хуучнаараа — шатлалыг одоо 7 хоногийн өдрөөр сонгоно (tierFor).
 export const PRICE_TIERS: Record<PriceTier['key'], PriceTier> = {
   g12: {
     key: 'g12',
-    label: '12-р анги',
+    label: '7 хоногт 4 өдөр',
     monthly: 350_000,
     fullYear: 2_500_000,
     installment: 3_000_000,
@@ -91,7 +92,7 @@ export const PRICE_TIERS: Record<PriceTier['key'], PriceTier> = {
   },
   g9_11: {
     key: 'g9_11',
-    label: '9-11-р анги',
+    label: '7 хоногт 3 өдөр',
     monthly: 300_000,
     fullYear: 2_000_000,
     installment: 2_500_000,
@@ -107,13 +108,24 @@ export const PRICE_TIERS: Record<PriceTier['key'], PriceTier> = {
   },
 };
 
-/** Ангийн нэр, сурагчийн ангиас үнийн шатлал. 13-х анги нь 12-р ангийн бүлэг. */
+/**
+ * Үнийн шатлал СУУДАГ АНГИАС (эзэн 2026-10-31): 7 хоногт 4 өдөр ордог анги =
+ * 350 мянга / 2.5 сая, 3 өдөр = 300 мянга / 2 сая. Хүүхэд сургуульдаа хэддүгээр
+ * ангид сурдгаас хамаарахгүй — 11-р ангийн хүүхэд 12-р ангийнхантай (4 өдөр)
+ * суувал 12-ын үнэ. Ангийн хуваарь (ClassSchedule) алга бол сургуулийн ангиар.
+ * 13-х анги нь 12-р ангийн бүлэг.
+ */
 export function tierFor(
   grade: number | null | undefined,
   classroomName?: string | null,
+  daysPerWeek?: number | null,
 ): { tier: PriceTier; guessed: boolean } {
   if (classroomName && /нийгэм/i.test(classroomName))
     return { tier: PRICE_TIERS.social, guessed: false };
+  if (daysPerWeek != null && daysPerWeek >= 4)
+    return { tier: PRICE_TIERS.g12, guessed: false };
+  if (daysPerWeek != null && daysPerWeek >= 1)
+    return { tier: PRICE_TIERS.g9_11, guessed: false };
   if (grade === 9 || grade === 10 || grade === 11)
     return { tier: PRICE_TIERS.g9_11, guessed: false };
   if (grade === 12 || grade === 13)
@@ -139,6 +151,8 @@ export interface LedgerInput {
   payments: LedgerPayment[];
   today: DateKey;
   year?: AcademicYear;
+  /** Багш+ гараар «бүтэн жил» гэж тооцсон (TuitionSettlement) */
+  settled?: boolean;
 }
 
 export interface MonthBlock {
@@ -150,6 +164,10 @@ export interface MonthBlock {
   paid: number;
   /** Энэ сарын дүн төлөгдөх өдөр (OFF үед null) */
   dueOn: DateKey | null;
+  /** Энэ сар БҮРЭН төлөгдсөн өдөр (төлбөрийн огноогоор; тодорхойгүй бол null) */
+  paidOn: DateKey | null;
+  /** Төлөгдөх өдрөөс хэдэн хоног хоцорч бүрэн төлөгдсөн (цагтаа бол 0) */
+  lateDays: number;
 }
 
 export interface ResolvedPlan {
@@ -162,6 +180,8 @@ export interface ResolvedPlan {
   total: number;
   /** Хуваан төлөхийн эхний хэсэг */
   first: number;
+  /** Гараар бүтэн жилд тооцсон — гэрээ = бодит төлсөн дүн */
+  settled: boolean;
 }
 
 export interface LedgerResult {
@@ -183,6 +203,8 @@ export interface LedgerResult {
   credit: number;
   /** Эхний бүрэн төлөгдөөгүй сар */
   nextDue: { month: MonthKey; amount: number; dueOn: DateKey } | null;
+  /** Хамгийн эртний төлөгдөөгүй сарын хугацаа хэтэрсэн хоног (өргүй бол 0) */
+  overdueDays: number;
   /** Эхнээсээ дараалан бүрэн төлсөн сүүлийн сар */
   coveredThrough: MonthKey | null;
 }
@@ -192,16 +214,25 @@ const inRange = (n: number | null, lo: number, hi: number): n is number =>
 
 const monthOf = (d: DateKey): MonthKey => d.slice(0, 7);
 
-/** Багцыг тодорхойлно. Бодит бус дүн (350₮, 25 сая) бол шатлалын үнийг авна. */
+/** Хоёр өдрийн зөрүү (хоногоор) */
+const daysBetween = (from: DateKey, to: DateKey): number =>
+  Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+
+/**
+ * Багцыг тодорхойлно. Гэрээний дүн = суудаг ангийн СТАНДАРТ үнэ (эзэн 2026-10-31).
+ * Профайлын tuitionAmount нь шийтээс ирсэн «төлсөн дүн» (бүтэн жилд FULL нүдний
+ * нийлбэр, сар бүрд хамгийн олон давтагдсан дүн) — үүнийг гэрээ болговол бага
+ * төлсөн хүүхэд үргэлж «бүрэн» харагдаж, 3 өдрийн ангийн 350 мянга төлсөн хүүхэд
+ * 300 мянга төлмөгц «дутуу» болдог байсан. Онцгой тохиолдлыг Багш+ гараар
+ * «бүтэн жил» гэж тооцно (LedgerInput.settled). tuitionAmount одоо зөвхөн
+ * бүртгэлгүй багцыг таамаглахад.
+ */
 export function resolvePlan(
   plan: PlanKind | null,
   tuitionAmount: number | null,
   tier: PriceTier,
 ): ResolvedPlan {
   const yearly = inRange(tuitionAmount, 800_000, 6_000_000)
-    ? tuitionAmount
-    : null;
-  const monthly = inRange(tuitionAmount, 100_000, 799_999)
     ? tuitionAmount
     : null;
   const installTotal = tier.installment ?? tier.fullYear;
@@ -212,15 +243,15 @@ export function resolvePlan(
     guessed: boolean,
     fee: number,
     total: number,
-  ): ResolvedPlan => ({ kind, guessed, fee, total, first: firstOf(total) });
+  ): ResolvedPlan => ({ kind, guessed, fee, total, first: firstOf(total), settled: false });
 
   switch (plan) {
     case 'MONTHLY':
-      return make('MONTHLY', false, monthly ?? tier.monthly, 0);
+      return make('MONTHLY', false, tier.monthly, 0);
     case 'FULL_YEAR':
-      return make('FULL_YEAR', false, 0, yearly ?? tier.fullYear);
+      return make('FULL_YEAR', false, 0, tier.fullYear);
     case 'INSTALLMENT':
-      return make('INSTALLMENT', false, 0, yearly ?? installTotal);
+      return make('INSTALLMENT', false, 0, installTotal);
     default:
       // Бүртгэлгүй багц: дүн нь шатлалын бүтэн/хуваан үнэтэй яг таарвал тэр,
       // эс бөгөөс сар бүр гэж таамаглана (хамгийн түгээмэл).
@@ -228,7 +259,7 @@ export function resolvePlan(
         return make('FULL_YEAR', true, 0, tier.fullYear);
       if (tier.installment && yearly === tier.installment)
         return make('INSTALLMENT', true, 0, tier.installment);
-      return make('MONTHLY', true, monthly ?? tier.monthly, 0);
+      return make('MONTHLY', true, tier.monthly, 0);
   }
 }
 
@@ -281,10 +312,21 @@ export function countsForYear(
 
 export function computeLedger(input: LedgerInput): LedgerResult {
   const year = input.year ?? ACADEMIC_YEAR;
-  const plan = resolvePlan(input.plan, input.tuitionAmount, input.tier);
+  let plan = resolvePlan(input.plan, input.tuitionAmount, input.tier);
+  if (input.settled)
+    plan = { ...plan, kind: 'FULL_YEAR', guessed: false, fee: 0, settled: true };
   const active = activeMonths(input.startDate, input.leftOn, year);
   const day = pad2(cycleDay(input.startDate, year));
   const startDue = active.length ? `${active[0]}-${day}` : null;
+
+  // Энэ жилд тооцогдох төлбөр (багцын төрлөөс хамаарна)
+  const counted = input.payments.filter((p) =>
+    countsForYear(p, plan.kind, input.startDate, year),
+  );
+  const paidTotal = counted.reduce((s, p) => s + Math.max(0, Math.round(p.amount)), 0);
+  // Гараар бүтэн жил: гэрээ = бодит төлсөн дүн → идэвхтэй сар бүр «төлсөн»
+  // (0₮ ч байж болно), илүү төлөлт ч, өр ч үгүй. Буцаалтад мөн энэ гэрээ.
+  if (plan.settled) plan = { ...plan, total: paidTotal, first: paidTotal };
 
   // 1) Сар бүрийн ногдох дүн ба төлөгдөх өдөр
   const dues = new Map<MonthKey, { due: number; dueOn: DateKey }>();
@@ -316,16 +358,35 @@ export function computeLedger(input: LedgerInput): LedgerResult {
     );
   }
 
-  // 2) Энэ жилд тооцогдох төлбөр → хуучнаас нь дүүргэнэ (Шийдвэр 1)
-  const paidTotal = input.payments
-    .filter((p) => countsForYear(p, plan.kind, input.startDate, year))
-    .reduce((s, p) => s + Math.max(0, Math.round(p.amount)), 0);
+  // Сар БҮРЭН төлөгдсөн өдөр (хоцорч төлсөн эсэх): төлбөрийг огноогоор нь
+  // дараалуулж хуримтлуулна. Гараар бүтэн жилд утгагүй тул тооцохгүй.
+  const dated = plan.settled
+    ? []
+    : counted
+        .map((p) => ({
+          amount: Math.max(0, Math.round(p.amount)),
+          on: p.paidOn ?? (p.forMonth ? `${p.forMonth}-01` : null),
+        }))
+        .sort((a, b) => (a.on ?? '9999').localeCompare(b.on ?? '9999'));
+  let k = 0;
+  let acc = dated[0]?.amount ?? 0;
+  const coveredOn = (target: number): DateKey | null => {
+    while (k < dated.length && acc < target) {
+      k++;
+      if (k < dated.length) acc += dated[k].amount;
+    }
+    return k < dated.length ? dated[k].on : null;
+  };
+
+  // 2) Төлбөрийг хуучнаас нь дүүргэнэ (Шийдвэр 1)
   let left = paidTotal;
+  let need = 0;
   const blocks: MonthBlock[] = year.months.map((month) => {
     const d = dues.get(month);
-    if (!d) return { month, state: 'OFF', due: 0, paid: 0, dueOn: null };
+    if (!d) return { month, state: 'OFF', due: 0, paid: 0, dueOn: null, paidOn: null, lateDays: 0 };
     const paid = Math.min(d.due, left);
     left -= paid;
+    need += d.due;
     const state: BlockState =
       paid >= d.due
         ? 'PAID'
@@ -334,7 +395,9 @@ export function computeLedger(input: LedgerInput): LedgerResult {
           : d.dueOn <= input.today
             ? 'OWED'
             : 'FUTURE';
-    return { month, state, due: d.due, paid, dueOn: d.dueOn };
+    const paidOn = state === 'PAID' && d.due > 0 ? coveredOn(need) : null;
+    const lateDays = paidOn && paidOn > d.dueOn ? daysBetween(d.dueOn, paidOn) : 0;
+    return { month, state, due: d.due, paid, dueOn: d.dueOn, paidOn, lateDays };
   });
 
   // 3) Хураангуй
@@ -370,6 +433,8 @@ export function computeLedger(input: LedgerInput): LedgerResult {
     remaining: Math.max(0, price - (paidTotal - left)),
     credit: left,
     nextDue,
+    overdueDays:
+      nextDue && nextDue.dueOn < input.today ? daysBetween(nextDue.dueOn, input.today) : 0,
     coveredThrough,
   };
 }
@@ -401,13 +466,8 @@ export function promiseState(
 ): { state: PromiseState; overdueDays: number } {
   if (paymentDates.some((d) => d >= notedOn))
     return { state: 'KEPT', overdueDays: 0 };
-  if (promisedOn < today) {
-    const days = Math.round(
-      (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${promisedOn}T00:00:00Z`)) /
-        86_400_000,
-    );
-    return { state: 'BROKEN', overdueDays: days };
-  }
+  if (promisedOn < today)
+    return { state: 'BROKEN', overdueDays: daysBetween(promisedOn, today) };
   return { state: 'UPCOMING', overdueDays: 0 };
 }
 

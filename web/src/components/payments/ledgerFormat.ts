@@ -59,11 +59,15 @@ export const STATE_LABEL: Record<BlockState, string> = {
   OFF: "Сураагүй",
 };
 
-/** Блокийн бүтэн тайлбар — aria-label/title-д */
-export function blockLabel(b: MonthBlock): string {
+/** Блокийн бүтэн тайлбар — aria-label/title-д. settled = гараар бүтэн жил (дүнгүй). */
+export function blockLabel(b: MonthBlock, settled = false): string {
   const head = `${monthName(b.month)}: ${STATE_LABEL[b.state]}`;
   if (b.state === "OFF") return head;
-  if (b.state === "PAID") return `${head} ${mnt(b.paid)}`;
+  if (settled && b.state === "PAID") return `${head} (бүтэн жилд тооцсон)`;
+  if (b.state === "PAID")
+    return b.lateDays > 0
+      ? `${head} ${mnt(b.paid)} — ${b.lateDays} хоног хоцорч, ${dayLabel(b.paidOn)}-нд`
+      : `${head} ${mnt(b.paid)}`;
   if (b.state === "PARTIAL") return `${head} — ${mnt(b.paid)} / ${mnt(b.due)}`;
   if (b.state === "FUTURE") return `${head} — ${dayLabel(b.dueOn)}-нд ${mnt(b.due)}`;
   return `${head} ${mnt(b.due)}`;

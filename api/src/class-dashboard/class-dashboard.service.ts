@@ -25,6 +25,8 @@ import {
   type RosterStudent,
 } from '../exams/exam-data';
 import { PrismaService } from '../prisma/prisma.service';
+import { ACADEMIC_YEAR, todayKeyUB } from '../payments/ledger';
+import { ledgersFor } from '../payments/ledger-load';
 import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import {
   BEHAVIOR_FLAGS,
@@ -40,9 +42,8 @@ import {
   laggingTopics,
   makeupOwed,
   monthKeyUB,
-  paymentState,
+  paymentStateOf,
   riskFlags,
-  schoolYearStartMonth,
   scoreBins,
   weeklyRates,
   type AttendanceStatus,
@@ -198,46 +199,35 @@ export class ClassDashboardService {
       { state: PaymentState; tuitionAmount: number | null; paidThisMonth: number }
     >();
     if (studentIds.length === 0) return out;
+    // Төлбөр хэсгийн ledger-ээс (ижил гэрээ, ижил waterfall, гараар бүтэн жил)
     const month = monthKeyUB();
-    const yearStart = schoolYearStartMonth(month);
-    const [profiles, payments] = await Promise.all([
-      this.prisma.studentProfile.findMany({
-        where: { userId: { in: studentIds } },
-        select: { userId: true, tuitionAmount: true, tuitionPlan: true },
-      }),
-      this.prisma.payment.findMany({
+    const idx = ACADEMIC_YEAR.months.indexOf(month);
+    const [ledgers, pending] = await Promise.all([
+      ledgersFor(this.prisma, studentIds, todayKeyUB()),
+      this.prisma.payment.groupBy({
+        by: ['userId'],
         where: {
           userId: { in: studentIds },
-          status: { in: ['CONFIRMED', 'PENDING'] },
+          status: 'PENDING',
           storePurchaseId: null,
-          forMonth: { gte: yearStart },
+          forMonth: month,
         },
-        select: { userId: true, amount: true, status: true, forMonth: true },
+        _sum: { amount: true },
       }),
     ]);
-    const profileBy = new Map(profiles.map((p) => [p.userId, p]));
-    const agg = new Map<string, { month: number; year: number; pending: number }>();
-    for (const p of payments) {
-      const a = agg.get(p.userId) ?? { month: 0, year: 0, pending: 0 };
-      if (p.status === 'CONFIRMED') {
-        a.year += p.amount;
-        if (p.forMonth === month) a.month += p.amount;
-      } else if (p.forMonth === month) a.pending += p.amount;
-      agg.set(p.userId, a);
-    }
+    const pendingBy = new Map(pending.map((p) => [p.userId, p._sum.amount ?? 0]));
     for (const id of studentIds) {
-      const prof = profileBy.get(id);
-      const a = agg.get(id) ?? { month: 0, year: 0, pending: 0 };
+      const ledger = ledgers.get(id);
+      const block = ledger && idx >= 0 ? ledger.blocks[idx] : undefined;
       out.set(id, {
-        state: paymentState({
-          plan: prof?.tuitionPlan ?? null,
-          tuitionAmount: prof?.tuitionAmount ?? null,
-          confirmedThisMonth: a.month,
-          confirmedThisYear: a.year,
-          pendingThisMonth: a.pending,
+        state: paymentStateOf({
+          block,
+          owedNow: ledger?.owedNow ?? 0,
+          paidTotal: ledger?.paidTotal ?? 0,
+          pendingThisMonth: pendingBy.get(id) ?? 0,
         }),
-        tuitionAmount: prof?.tuitionAmount ?? null,
-        paidThisMonth: a.month,
+        tuitionAmount: block?.due ?? null,
+        paidThisMonth: block?.paid ?? 0,
       });
     }
     return out;

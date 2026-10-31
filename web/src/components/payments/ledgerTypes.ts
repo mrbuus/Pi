@@ -10,6 +10,10 @@ export interface MonthBlock {
   due: number;
   paid: number;
   dueOn: string | null;
+  /** Бүрэн төлөгдсөн өдөр (төлбөрийн огноогоор) */
+  paidOn: string | null;
+  /** Хугацаанаас хэдэн хоног хоцорч бүрэн төлөгдсөн (цагтаа бол 0) */
+  lateDays: number;
 }
 
 export interface YearView {
@@ -26,7 +30,8 @@ export interface LedgerRow {
   code: string | null;
   phone: string | null;
   classroom: { id: string; name: string } | null;
-  plan: { kind: PlanKind; guessed: boolean; fee: number; total: number; first: number; raw: string | null };
+  /** settled = Багш+ гараар «бүтэн жил» гэж тооцсон (гэрээ = төлсөн дүн) */
+  plan: { kind: PlanKind; guessed: boolean; settled: boolean; fee: number; total: number; first: number; raw: string | null };
   startDate: string | null;
   leftOn: string | null;
   blocks: MonthBlock[];
@@ -38,6 +43,8 @@ export interface LedgerRow {
   remaining: number;
   credit: number;
   nextDue: { month: string; amount: number; dueOn: string } | null;
+  /** Хамгийн эртний төлөгдөөгүй сарын хугацаа хэтэрсэн хоног */
+  overdueDays: number;
   coveredThrough: string | null;
   notes: { count: number; last: { body: string; authorName: string | null; at: string } | null };
   promise: { on: string; state: PromiseState; overdueDays: number } | null;
@@ -126,6 +133,9 @@ export interface StudentLedger {
   month: string;
   row: LedgerRow;
   tier: PriceTier;
+  /** Суудаг анги 7 хоногт хэдэн өдөр ордог (үнэ үүнээс) */
+  daysPerWeek: number | null;
+  settlement: { note: string | null; at: string; authorName: string | null } | null;
   profile: {
     grade: number | null;
     tuitionPlan: string | null;

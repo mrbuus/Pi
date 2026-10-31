@@ -16,6 +16,7 @@ import {
   tierFor,
   todayKeyUB,
 } from '../payments/ledger';
+import { classDays, settlements } from '../payments/ledger-load';
 import { computePlanRefund, contractRange } from './plan-refund';
 
 @Injectable()
@@ -70,18 +71,24 @@ export class TuitionService {
 
     // Багцаас хамаарсан гэрээ (plan-refund.ts) — сар бүр бол гарсан мөчлөг л
     // өдрөөр, бүтэн/хуваан бол жилийн гэрээ бүхэлдээ өдрөөр хуваагдана.
-    const payments = await this.prisma.payment.findMany({
-      where: {
-        userId: studentId,
-        status: 'CONFIRMED',
-        storePurchaseId: null,
-      },
-      select: { amount: true, forMonth: true, paidAt: true },
-    });
+    const [payments, days, settled] = await Promise.all([
+      this.prisma.payment.findMany({
+        where: {
+          userId: studentId,
+          status: 'CONFIRMED',
+          storePurchaseId: null,
+        },
+        select: { amount: true, forMonth: true, paidAt: true },
+      }),
+      classDays(this.prisma, [classroomId]),
+      settlements(this.prisma, [studentId]),
+    ]);
+    // Төлбөр хэсэгтэй ижил гэрээ: суудаг ангийн 7 хоногийн өдөр, гараар бүтэн жил
     const ledgerInput = {
+      settled: settled.has(studentId),
       plan: profile.tuitionPlan,
       tuitionAmount: profile.tuitionAmount,
-      tier: tierFor(profile.grade, classroom.name).tier,
+      tier: tierFor(profile.grade, classroom.name, days.get(classroomId) ?? null).tier,
       startDate,
       leftOn: null,
       payments: payments.map((p) => ({

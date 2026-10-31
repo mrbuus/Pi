@@ -1650,6 +1650,26 @@ model ExpenseRecord {
   @@index([createdAt])
 }
 
+// ============ Гараар «бүтэн жил» гэж тооцох ============
+
+// Багш+ / Админ шийдвэр (эзэн 2026-10-31): стандарт үнээс бага төлсөн ч бүтэн
+// жилд тооцогдох хүүхэд (багшийн гэр бүл, тусгай тохиролцоо). Идэвхтэй мөр
+// (revokedAt = null) байвал тухайн хичээлийн жилийн бүх сар «төлсөн», гэрээний
+// дүн = бодит төлсөн дүн. Устгахгүй: буцаахад revokedAt, дахин тооцоход шинэ мөр.
+// User-тэй relation зориуд тавиагүй (User моделийг өөрчлөхгүй, AuditLog-той адил).
+model TuitionSettlement {
+  id          String    @id @default(cuid())
+  studentId   String
+  year        String // ledger.ts ACADEMIC_YEAR.id, ж: "2026-2027"
+  note        String?
+  createdById String
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+  revokedById String?
+
+  @@index([year, studentId])
+}
+
 // ============ Төлбөрийн буцаалт ============
 
 enum RefundStatus {

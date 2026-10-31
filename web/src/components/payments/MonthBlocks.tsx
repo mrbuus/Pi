@@ -45,15 +45,18 @@ export function CompactBlocks({
   blocks,
   current,
   onPick,
+  settled = false,
 }: {
   blocks: MonthBlock[];
   current?: string;
   onPick?: (month: string) => void;
+  /** Гараар бүтэн жил — тайлбарт дүн биш «бүтэн жилд тооцсон» */
+  settled?: boolean;
 }) {
   return (
     <div className={GRID}>
       {blocks.map((b) => {
-        const label = blockLabel(b);
+        const label = blockLabel(b, settled);
         const cls = `relative block h-7 overflow-hidden rounded-md md:h-11 md:rounded-lg ${COMPACT[b.state]} ${
           b.month === current ? "outline outline-2 outline-offset-1 outline-brand/35" : ""
         }`;
@@ -105,13 +108,15 @@ const LARGE: Record<BlockState, string> = {
   OFF: "bg-ink/[0.04] text-ink-dim",
 };
 
-function LargeBody({ b }: { b: MonthBlock }) {
+function LargeBody({ b, settled }: { b: MonthBlock; settled: boolean }) {
   switch (b.state) {
     case "PAID":
+      // Гараар бүтэн жилд сарын хуваасан дүн утгагүй тул зөвхөн тэмдэг.
+      // Хоцорч төлсөн сар — тэмдгийн оронд цаг (хоног нь тайлбарт).
       return (
         <>
-          <Check className="h-4 w-4" aria-hidden />
-          <span className="tabular-nums">{shortMnt(b.paid)}</span>
+          {b.lateDays > 0 ? <Clock3 className="h-4 w-4" aria-hidden /> : <Check className="h-4 w-4" aria-hidden />}
+          {!settled && <span className="tabular-nums">{shortMnt(b.paid)}</span>}
         </>
       );
     case "PARTIAL":
@@ -145,15 +150,17 @@ export function LargeBlocks({
   blocks,
   current,
   onPick,
+  settled = false,
 }: {
   blocks: MonthBlock[];
   current?: string;
   onPick?: (month: string) => void;
+  settled?: boolean;
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-9">
       {blocks.map((b) => {
-        const label = blockLabel(b);
+        const label = blockLabel(b, settled);
         const pickable = onPick && (b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
         const cls = `relative flex min-h-16 flex-col justify-between overflow-hidden rounded-xl p-2 text-left text-sm font-semibold ${LARGE[b.state]} ${
           b.month === current ? "ring-2 ring-brand/40 ring-offset-2 ring-offset-surface" : ""
@@ -169,7 +176,7 @@ export function LargeBlocks({
             )}
             <span className={`relative text-xs ${b.state === "PAID" ? "" : "text-ink-dim"}`}>{monthName(b.month)}</span>
             <span className="relative flex items-center gap-1">
-              <LargeBody b={b} />
+              <LargeBody b={b} settled={settled} />
             </span>
           </>
         );
@@ -213,6 +220,12 @@ export function BlockLegend() {
           {i.t}
         </li>
       ))}
+      <li className="flex items-center gap-2 text-sm">
+        <span className="inline-flex h-4 w-6 items-center justify-center rounded bg-success text-on-success">
+          <Clock3 className="h-3 w-3" aria-hidden />
+        </span>
+        Хоцорч төлсөн
+      </li>
     </ul>
   );
 }

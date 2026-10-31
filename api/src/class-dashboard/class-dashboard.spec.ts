@@ -15,7 +15,7 @@ import {
   laggingTopics,
   makeupOwed,
   monthKeyUB,
-  paymentState,
+  paymentStateOf,
   riskFlags,
   schoolYearStartMonth,
   scoreBins,
@@ -101,20 +101,23 @@ describe('class-dashboard — цэвэр тооцоо', () => {
     ).toBe(1);
   });
 
-  it('төлбөрийн төлөв', () => {
-    const base = {
-      plan: 'MONTHLY',
-      tuitionAmount: 400000,
-      confirmedThisMonth: 0,
-      confirmedThisYear: 0,
-      pendingThisMonth: 0,
-    };
-    expect(paymentState(base)).toBe('NONE');
-    expect(paymentState({ ...base, pendingThisMonth: 400000 })).toBe('PENDING');
-    expect(paymentState({ ...base, confirmedThisMonth: 200000 })).toBe('PARTIAL');
-    expect(paymentState({ ...base, confirmedThisMonth: 400000 })).toBe('PAID');
-    expect(paymentState({ ...base, tuitionAmount: null, confirmedThisMonth: 1 })).toBe('PAID');
-    expect(paymentState({ ...base, plan: 'FULL_YEAR', confirmedThisYear: 1 })).toBe('PAID');
+  it('төлбөрийн төлөв — Төлбөр хэсгийн сарын блокоос', () => {
+    const base = { block: { state: 'OWED' as const }, owedNow: 300000, paidTotal: 0, pendingThisMonth: 0 };
+    expect(paymentStateOf(base)).toBe('NONE');
+    expect(paymentStateOf({ ...base, pendingThisMonth: 300000 })).toBe('PENDING');
+    // өмнөх сараа төлсөн, энэ сар өртэй → дутуу
+    expect(paymentStateOf({ ...base, paidTotal: 300000 })).toBe('PARTIAL');
+    expect(paymentStateOf({ ...base, block: { state: 'PARTIAL' }, paidTotal: 200000 })).toBe('PARTIAL');
+    // зун бүтэн жилээ төлсөн (forMonth 6–8-р сар) — блок PAID
+    expect(paymentStateOf({ ...base, block: { state: 'PAID' }, owedNow: 0, paidTotal: 2000000 })).toBe('PAID');
+    // энэ сарын төлөх өдөр болоогүй, өмнөх нь төлөгдсөн
+    expect(paymentStateOf({ ...base, block: { state: 'FUTURE' }, owedNow: 0, paidTotal: 300000 })).toBe('PAID');
+    expect(paymentStateOf({ ...base, block: { state: 'FUTURE' }, owedNow: 0, paidTotal: 0 })).toBe('NONE');
+    // бүтэн жилээс 2 сая төлсөн (2.5 сая): энэ сарын блок дүүрсэн ч үлдэгдэл өр → дутуу
+    expect(paymentStateOf({ ...base, block: { state: 'PAID' }, owedNow: 500000, paidTotal: 2000000 })).toBe('PARTIAL');
+    // идэвхгүй сар (жилийн дундаас орсон, гарсан)
+    expect(paymentStateOf({ ...base, block: { state: 'OFF' }, owedNow: 0 })).toBe('NONE');
+    expect(paymentStateOf({ ...base, block: undefined, owedNow: 0 })).toBe('NONE');
   });
 
   it('хичээлийн жилийн эхлэл ба УБ-ын сар', () => {

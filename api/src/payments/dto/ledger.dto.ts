@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
@@ -78,4 +79,18 @@ export class LedgerPayDto {
   @IsOptional()
   @IsUUID('4')
   clientRequestId?: string;
+}
+
+// Багш+ / Админ: «бүтэн жил» гэж тооцох (full=true) эсвэл системийн тооцоонд
+// буцаах (full=false). Төлсөн дүнд хүрэхгүй — зөвхөн төлөв (эзэн 2026-10-31).
+export class LedgerSettleDto {
+  @ApiProperty({ type: Boolean })
+  @IsBoolean()
+  full: boolean;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  note?: string;
 }
