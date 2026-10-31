@@ -27,7 +27,7 @@ function daysUntil(iso: string): number {
 
 type Status = "loading" | "ready" | "error";
 
-export default function PaidUntilCard({ studentId, compact = false, studentName, paymentHref = "/app/student/payments" }: { studentId?: string; compact?: boolean; studentName?: string; paymentHref?: string }) {
+export default function PaidUntilCard({ studentId, compact = false, studentName, paymentHref = "/app/student/payments#pay" }: { studentId?: string; compact?: boolean; studentName?: string; paymentHref?: string }) {
   const titleId = useId();
   const [loadedPath, setLoadedPath] = useState("");
   const path = studentId ? `/tuition/paid-until/${encodeURIComponent(studentId)}` : "/tuition/paid-until/my";
@@ -73,27 +73,27 @@ export default function PaidUntilCard({ studentId, compact = false, studentName,
   const view =
     left === null
       ? {
-          tone: "bg-ink/5 text-ink-dim",
+          tone: "text-ink-dim",
           icon: CalendarClock,
           title: "Төлбөрийн хугацаа тооцогдоогүй байна",
           hint: "Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана.",
         }
       : left < 0
         ? {
-            tone: "bg-error/10 text-error",
+            tone: "text-error",
             icon: CalendarX,
             title: `${Math.abs(left)} хоногийн өмнө дууссан`,
             hint: "Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй.",
           }
         : left < 7
           ? {
-              tone: "bg-info/10 text-info",
+              tone: "text-info",
               icon: CalendarClock,
               title: left === 0 ? "Өнөөдөр дуусна" : `${left} хоногийн дараа дуусна`,
               hint: "Удахгүй дуусах гэж байна — дараагийн сарын төлбөрөө бэлдээрэй.",
             }
           : {
-              tone: "bg-success/10 text-success",
+              tone: "text-success",
               icon: CalendarCheck,
               title: `${left} хоног үлдсэн`,
               hint: "Бүх зүйл хэвийн. Хичээлдээ анхаараарай!",
@@ -102,8 +102,8 @@ export default function PaidUntilCard({ studentId, compact = false, studentName,
 
   return (
     <section aria-labelledby={titleId} className="overflow-hidden chunky">
-      <div className={`flex items-center gap-4 p-5 ${view.tone}`}>
-        <span className={`flex shrink-0 items-center justify-center rounded-2xl bg-panel/70 ${compact ? "h-12 w-12" : "h-16 w-16"}`}>
+      <div className="flex items-center gap-4 p-5">
+        <span className={`flex shrink-0 items-center justify-center rounded-2xl bg-panel ${view.tone} ${compact ? "h-12 w-12" : "h-16 w-16"}`}>
           <Icon className={compact ? "h-7 w-7" : "h-9 w-9"} aria-hidden />
         </span>
         <div className="min-w-0">
@@ -113,11 +113,11 @@ export default function PaidUntilCard({ studentId, compact = false, studentName,
           <p className={`font-display font-bold ${compact ? "text-2xl" : "text-3xl"} leading-tight text-ink tabular-nums`}>
             {paidUntil ? dateLabel(paidUntil) : "—"}
           </p>
-          <p className="mt-0.5 text-sm font-semibold">{view.title}</p>
+          <p className={`mt-0.5 text-sm font-semibold ${view.tone}`}>{view.title}</p>
         </div>
       </div>
-      <p className="px-5 py-3 text-sm text-ink-dim">{view.hint}</p>
-      {left === null && <Link href={paymentHref} className="mx-5 mb-4 inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-semibold text-on-brand">Төлбөр хийх</Link>}
+      <p className="border-t border-line px-5 py-3 text-sm text-ink-dim">{view.hint}</p>
+      {left === null && paymentHref && <Link href={paymentHref} className="mx-5 mb-4 inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-semibold text-on-brand">Төлбөр хийх</Link>}
     </section>
   );
 }

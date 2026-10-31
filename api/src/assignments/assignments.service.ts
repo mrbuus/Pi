@@ -377,7 +377,10 @@ export class AssignmentsService {
         student: { archivedAt: null },
         classroom: { archived: false },
       },
-      select: { classroom: { select: { id: true, name: true, type: true } } },
+      // grade — сурагчийн төлбөрийн багц (9–11, 12-р анги) ангиас хамаарна
+      select: {
+        classroom: { select: { id: true, name: true, type: true, grade: true } },
+      },
       orderBy: { joinedAt: 'desc' },
     });
     return enrollments.map((enrollment) => enrollment.classroom);

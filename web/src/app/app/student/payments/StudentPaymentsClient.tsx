@@ -1,20 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Check,
-  Clock,
-  Copy,
-  Landmark,
-  Phone,
-  Receipt,
-  Banknote,
-  Wallet,
-} from "lucide-react";
+import { Receipt } from "lucide-react";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
-import { BANK, PHONES, formatMnt, TUITION } from "@/lib/orgInfo";
+import { formatMnt } from "@/lib/orgInfo";
 // НЭГ эх сурвалж. Энд өмнө нь өөрийн хуулбар байсан бөгөөд түүнд хоёр алдаа бий
 // байв: (1) төлбөрийн арга "TRANSFER" гэж бичигдсэн атал ӨС-ийн утга нь
 // "BANK_TRANSFER" — данснаас төлсөн сурагчид түүхий утга харагдана;
@@ -22,6 +13,7 @@ import { BANK, PHONES, formatMnt, TUITION } from "@/lib/orgInfo";
 // Мөн үгс нь бусад дэлгэцээс өөр байсан ("Төлөгдсөн" vs "Баталгаажсан").
 import { METHOD_LABEL, STATUS_LABEL } from "@/components/payments/paymentHelpers";
 import PaidUntilCard from "@/components/payments/PaidUntilCard";
+import PayInfo from "@/components/payments/PayInfo";
 
 /* ============================================================================
  * Сурагчийн «Миний төлбөр» (шинэ дизайн, 2026-09-26).
@@ -96,56 +88,6 @@ function useLoad<T>(path: string) {
   };
 }
 
-function HowToPay() {
-  const [copied, setCopied] = useState(false);
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(BANK.account);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard эрхгүй (хуучин браузер) — дугаар дэлгэц дээр харагдсаар байна.
-    }
-  }
-
-  return (
-    <section aria-labelledby="how-to-pay" className="chunky p-5">
-      <h2 id="how-to-pay" className="mb-3 font-bold text-ink">
-        Хэрхэн төлөх вэ
-      </h2>
-      <div className="flex flex-wrap items-start gap-3 rounded-2xl bg-accent-sky/10 p-4 sm:flex-nowrap">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-sky/15 text-accent-sky">
-          <Landmark className="h-5 w-5" aria-hidden />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm text-ink-dim">
-            <Meta items={[BANK.name, BANK.holder]} />
-          </p>
-          <p className="text-lg font-extrabold tabular-nums text-ink">{BANK.account}</p>
-          <p className="text-xs text-ink-dim">Гүйлгээний утгад сурагчийн код, нэрээ бичээрэй.</p>
-        </div>
-        <button
-          type="button"
-          onClick={copy}
-          className="flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-xl border border-line bg-panel px-3 sm:w-auto text-sm font-semibold text-ink transition hover:border-brand-bright/50"
-        >
-          {copied ? <Check className="h-4 w-4 text-success" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
-          {copied ? "Хуулсан" : "Хуулах"}
-        </button>
-      </div>
-      <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-dim">
-        <Phone className="h-4 w-4" aria-hidden />
-        {PHONES.map((p) => (
-          <a key={p} href={`tel:${p.replace(/\s/g, "")}`} className="font-semibold text-brand-soft underline-offset-2 hover:underline">
-            {p}
-          </a>
-        ))}
-      </p>
-    </section>
-  );
-}
-
 export default function StudentPaymentsClient() {
   const q = useLoad<Payment[]>("/payments/my");
   const payments = q.data ?? [];
@@ -154,7 +96,6 @@ export default function StudentPaymentsClient() {
   const pending = payments.filter((p) => p.status === "PENDING");
   const totalConfirmed = confirmed.reduce((sum, p) => sum + p.amount, 0);
   const totalPending = pending.reduce((sum, p) => sum + p.amount, 0);
-  const tuitionAmount = TUITION[0]?.plans?.find((p) => p.kind === "MONTHLY")?.amount ?? 350_000;
 
   // Түүхийг сараар бүлэглэнэ (төлсөн огноо, байхгүй бол бүртгэсэн огноо).
   const groups = new Map<string, Payment[]>();
@@ -167,7 +108,8 @@ export default function StudentPaymentsClient() {
     <div className="space-y-6">
       <h1 className="sr-only">Миний төлбөр</h1>
 
-      <PaidUntilCard />
+      <PaidUntilCard paymentHref="" />
+      <PayInfo id="pay" />
 
       {q.status === "loading" && (
         <section className="chunky p-5">
@@ -178,27 +120,14 @@ export default function StudentPaymentsClient() {
 
       {q.status === "ready" && (
         <>
-          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="flex flex-col rounded-2xl bg-accent-teal/10 p-4">
-              <dt className="order-last text-xs text-ink-dim">Нийт төлсөн</dt>
-              <dd className="text-xl font-extrabold tabular-nums text-ink">
-                <Wallet className="mb-1 h-5 w-5 text-accent-teal" aria-hidden />
-                {formatMnt(totalConfirmed)}
-              </dd>
+          <dl className="chunky grid grid-cols-2 divide-x divide-line">
+            <div className="p-4">
+              <dt className="text-xs text-ink-dim">Нийт төлсөн</dt>
+              <dd className="text-xl font-extrabold tabular-nums text-ink">{formatMnt(totalConfirmed)}</dd>
             </div>
-            <div className="flex flex-col rounded-2xl bg-accent-violet/10 p-4">
-              <dt className="order-last text-xs text-ink-dim">Сарын төлбөр</dt>
-              <dd className="text-xl font-extrabold tabular-nums text-ink">
-                <Banknote className="mb-1 h-5 w-5 text-accent-violet" aria-hidden />
-                {formatMnt(tuitionAmount)}
-              </dd>
-            </div>
-            <div className="col-span-2 flex flex-col rounded-2xl bg-warning/10 p-4 sm:col-span-1">
-              <dt className="order-last text-xs text-ink-dim">Баталгаажихыг хүлээж буй</dt>
-              <dd className="text-xl font-extrabold tabular-nums text-ink">
-                <Clock className="mb-1 h-5 w-5 text-warning" aria-hidden />
-                {formatMnt(totalPending)}
-              </dd>
+            <div className="p-4">
+              <dt className="text-xs text-ink-dim">Баталгаажихыг хүлээж буй</dt>
+              <dd className="text-xl font-extrabold tabular-nums text-ink">{formatMnt(totalPending)}</dd>
             </div>
           </dl>
 
@@ -255,8 +184,6 @@ export default function StudentPaymentsClient() {
           </section>
         </>
       )}
-
-      <HowToPay />
     </div>
   );
 }
