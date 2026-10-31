@@ -1,9 +1,7 @@
 "use client";
 
-import { CalendarDays, ClipboardCheck, CreditCard, NotebookPen } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { api, fileUrl, getRole, uploadFile } from "@/lib/api";
+import { api, fileUrl, uploadFile } from "@/lib/api";
 import { Meta } from "@/components/ui/Meta";
 
 /* ============================================================================
@@ -33,14 +31,6 @@ const ROLE_LABEL: Record<string, string> = {
   PARENT: "Эцэг эх",
   BUYER: "Худалдан авагч",
 };
-
-// Сурагчийн цэстэй ижил 4 гол хэсэг (эзэн 2026-10-29, SURAGCH-SHINECHLEL §1)
-const QUICK_ACTIONS = [
-  { href: "/app/homework", label: "Даалгавар", hint: "Гэрийн даалгавар", icon: NotebookPen, tone: "bg-accent-violet/15 text-accent-violet" },
-  { href: "/app/lesson-flow/my", label: "Хичээл", hint: "Өнөөдөр, нөхөх", icon: CalendarDays, tone: "bg-accent-teal/15 text-accent-teal" },
-  { href: "/app/tests", label: "Шалгалт", hint: "Тест, дүн", icon: ClipboardCheck, tone: "bg-brand-bright/15 text-brand-soft" },
-  { href: "/app/student/payments", label: "Төлбөр", hint: "Миний төлбөр", icon: CreditCard, tone: "bg-success/15 text-success" },
-] as const;
 
 function initials(firstName: string, lastName: string): string {
   return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
@@ -83,8 +73,6 @@ export default function DashboardGreeting() {
   if (!me) return null;
 
   const verifiedChildren = children.filter((c) => c.verified);
-  const role = typeof window !== "undefined" ? getRole() : null;
-  const isStudent = role === "STUDENT";
 
   return (
     <div className="mb-6 space-y-4">
@@ -149,27 +137,6 @@ export default function DashboardGreeting() {
         </p>
       )}
 
-      {/* Сурагчийн түргэн үйлдэл — өнгөт хавтан (шинэ дизайн, 2026-09-26).
-          Утсан дээр 2x2, компьютер дээр 4 багана. */}
-      {isStudent && (
-        <nav aria-label="Түргэн үйлдэл" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {QUICK_ACTIONS.map(({ href, label, hint, icon: Icon, tone }) => (
-            <Link
-              key={href}
-              href={href}
-              className="group chunky chunky-press flex min-h-24 flex-col justify-between p-4"
-            >
-              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tone}`}>
-                <Icon className="h-5 w-5" aria-hidden />
-              </span>
-              <span>
-                <span className="block font-bold text-ink">{label}</span>
-                <span className="block text-xs text-ink-dim">{hint}</span>
-              </span>
-            </Link>
-          ))}
-        </nav>
-      )}
     </div>
   );
 }
