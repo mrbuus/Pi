@@ -194,7 +194,7 @@ export interface ChapterAccessTarget {
 // өдөр нь ӨНГӨРСӨН (Улаанбаатарын өнөөдрөөс өмнө). Өнөөдрийнх маргааш нээгдэнэ.
 // 1000 бодлого / ЭЕШ сорил өөрийн эргэн харалтын дүрэмтэй (thousand/review-gate)
 // тул энд хэзээ ч нээгдэхгүй.
-const RELEASE_EXCLUDED_TYPES = ['THOUSAND', 'EESH_MOCK'] as const;
+export const RELEASE_EXCLUDED_TYPES = ['THOUSAND', 'EESH_MOCK'] as const;
 
 export interface ClassroomRelease {
   testIds: Set<string>;
