@@ -388,18 +388,21 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
           <label htmlFor={`plan-note-${e.scheduleId}`} className="sr-only">
             Тэмдэглэл
           </label>
+          {/* Ирцийн самбарын дээд талын тэмдэглэлтэй НЭГ бичлэг (LessonNote) — тэнд шууд харагдана */}
           <textarea
             id={`plan-note-${e.scheduleId}`}
             value={note}
             maxLength={NOTE_MAX}
-            rows={3}
+            rows={2}
             onChange={(ev) => setNote(ev.target.value.slice(0, NOTE_MAX))}
-            placeholder="Багш нарт харагдана"
-            className="w-full resize-y rounded-lg border border-line bg-bg p-2.5 text-sm"
+            placeholder="Ирцийн самбарын дээд хэсэгт багш нарт харагдана"
+            className="field-sizing-content block min-h-16 w-full resize-none overflow-x-hidden rounded-lg border border-line bg-bg p-2.5 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           />
-          <p className={cn("text-right text-xs tabular-nums", note.length >= NOTE_MAX ? "text-warning" : "text-ink-dim")}>
-            {note.length}/{NOTE_MAX}
-          </p>
+          {note.length > NOTE_MAX - 60 && (
+            <p className={cn("text-right text-xs tabular-nums", note.length >= NOTE_MAX ? "text-warning" : "text-ink-dim")}>
+              {note.length}/{NOTE_MAX}
+            </p>
+          )}
         </Section>
       </div>
 
