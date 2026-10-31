@@ -55,7 +55,7 @@ describe('student-hub.logic — хичээлийн өдрийн нэгдэл', (
   });
 });
 
-describe('student-hub.logic — D → D\' даалгаврын тэмдэглэгээ', () => {
+describe("student-hub.logic — D → D' даалгаврын тэмдэглэгээ", () => {
   const days = ['2026-10-23', '2026-10-25', '2026-10-27'];
   const marks = new Map<string, MarkRow>([
     [dayKey('c1', '2026-10-25'), { status: 'PARTIAL', comment: 'Дутуу' }],
@@ -63,7 +63,7 @@ describe('student-hub.logic — D → D\' даалгаврын тэмдэглэ�
     [dayKey('c2', '2026-10-25'), { status: 'DONE', comment: null }],
   ]);
 
-  it('D-ийн тэмдэглэгээ = D\' (дараагийн хичээл) дээрх мөр, тайлбартай', () => {
+  it("D-ийн тэмдэглэгээ = D' (дараагийн хичээл) дээрх мөр, тайлбартай", () => {
     expect(homeworkFor('c1', '2026-10-23', days, marks)).toEqual({
       status: 'PARTIAL',
       comment: 'Дутуу',
@@ -71,7 +71,7 @@ describe('student-hub.logic — D → D\' даалгаврын тэмдэглэ�
     });
   });
 
-  it('D\' болсон ч багш тэмдэглээгүй бол төлөв null, checkedOn = D\'', () => {
+  it("D' болсон ч багш тэмдэглээгүй бол төлөв null, checkedOn = D'", () => {
     expect(homeworkFor('c1', '2026-10-25', days, marks)).toEqual({
       status: null,
       comment: null,
@@ -79,7 +79,7 @@ describe('student-hub.logic — D → D\' даалгаврын тэмдэглэ�
     });
   });
 
-  it('D\' хараахан болоогүй (сүүлийн хичээл) — «Шалгаагүй»', () => {
+  it("D' хараахан болоогүй (сүүлийн хичээл) — «Шалгаагүй»", () => {
     expect(homeworkFor('c1', '2026-10-27', days, marks)).toEqual({
       status: null,
       comment: null,
@@ -101,7 +101,11 @@ describe('student-hub.logic — сар', () => {
       prevMonth: '2026-09',
       nextMonth: null,
     });
-    expect(monthWindow('', '2026-11-05')).toMatchObject({ month: '2026-11', to: '2026-11-05', nextMonth: null });
+    expect(monthWindow('', '2026-11-05')).toMatchObject({
+      month: '2026-11',
+      to: '2026-11-05',
+      nextMonth: null,
+    });
   });
 
   it('хамгийн эрт 2026-09 — prevMonth null', () => {
@@ -142,7 +146,14 @@ describe('student-hub.logic — хувь', () => {
         { status: 'ABSENT', count: 2 },
         { status: 'EXCUSED', count: 1 },
       ]),
-    ).toEqual({ total: 9, PRESENT: 5, LATE: 1, ABSENT: 2, EXCUSED: 1, rate: 67 });
+    ).toEqual({
+      total: 9,
+      PRESENT: 5,
+      LATE: 1,
+      ABSENT: 2,
+      EXCUSED: 1,
+      rate: 67,
+    });
   });
 
   it('даалгавар: (Хийсэн + Дутуу·0.5) / нийт; төлөвгүй мөр тооцогдохгүй', () => {
@@ -172,13 +183,33 @@ describe('student-hub.logic — тест нээх дүрэм', () => {
     expect(testOpen('2026-10-31', '2026-10-31', t)).toBe(false);
   });
   it('устгасан, 1000 бодлого, ЭЕШ сорил, testId-гүй — хэзээ ч нээгдэхгүй', () => {
-    expect(testOpen('2026-10-01', '2026-10-31', { deletedAt: new Date(), type: 'DAILY' })).toBe(false);
-    expect(testOpen('2026-10-01', '2026-10-31', { deletedAt: null, type: 'THOUSAND' })).toBe(false);
-    expect(testOpen('2026-10-01', '2026-10-31', { deletedAt: null, type: 'EESH_MOCK' })).toBe(false);
+    expect(
+      testOpen('2026-10-01', '2026-10-31', {
+        deletedAt: new Date(),
+        type: 'DAILY',
+      }),
+    ).toBe(false);
+    expect(
+      testOpen('2026-10-01', '2026-10-31', {
+        deletedAt: null,
+        type: 'THOUSAND',
+      }),
+    ).toBe(false);
+    expect(
+      testOpen('2026-10-01', '2026-10-31', {
+        deletedAt: null,
+        type: 'EESH_MOCK',
+      }),
+    ).toBe(false);
     expect(testOpen('2026-10-01', '2026-10-31', null)).toBe(false);
   });
   it('CHAPTER_EXAM classroomRelease-тэй адил нээгдэнэ', () => {
-    expect(testOpen('2026-10-01', '2026-10-31', { deletedAt: null, type: 'CHAPTER_EXAM' })).toBe(true);
+    expect(
+      testOpen('2026-10-01', '2026-10-31', {
+        deletedAt: null,
+        type: 'CHAPTER_EXAM',
+      }),
+    ).toBe(true);
   });
 });
 
@@ -193,7 +224,9 @@ describe('student-hub.logic — зураг илгээх цонх', () => {
 
 describe('student-hub.logic — сэдэв, хайлт', () => {
   it('topicOf: бүртгэл → сэдэв → бүлэг, хоосныг алгасна', () => {
-    expect(topicOf('Квадрат тэгшитгэл', 'Сэдэв', 'Бүлэг')).toBe('Квадрат тэгшитгэл');
+    expect(topicOf('Квадрат тэгшитгэл', 'Сэдэв', 'Бүлэг')).toBe(
+      'Квадрат тэгшитгэл',
+    );
     expect(topicOf(null, '  ', 'Бүлэг')).toBe('Бүлэг');
     expect(topicOf(undefined, null, null)).toBeNull();
   });
@@ -201,7 +234,9 @@ describe('student-hub.logic — сэдэв, хайлт', () => {
   it('хайлт: том жижиг үсэг ялгахгүй (Ү, Ө ч), үг бүр таарна', () => {
     const words = queryWords('  ӨНЦӨГ  үржвэр ');
     expect(words).toEqual(['өнцөг', 'үржвэр']);
-    expect(matchesWords(words, ['Өнцгийн', 'Векторын скаляр ҮРЖВЭР ба өнцөг'])).toBe(true);
+    expect(
+      matchesWords(words, ['Өнцгийн', 'Векторын скаляр ҮРЖВЭР ба өнцөг']),
+    ).toBe(true);
     expect(matchesWords(words, ['Векторын скаляр үржвэр'])).toBe(false);
     expect(matchesWords([], [null])).toBe(true);
     expect(queryWords(undefined)).toEqual([]);
@@ -225,17 +260,47 @@ describe('student-hub.logic — хуваарь', () => {
   };
 
   it('resolveRange: долоо хоногуудаар задалж, цуцалсан/зөөсөн exception-ийг тусгана', () => {
-    const map = resolveRange('2026-10-01', '2026-10-31', [schedule], [
-      { scheduleId: 's1', date: '2026-10-13', kind: 'CANCELLED', newDate: null, newStartMinute: null, newEndMinute: null, newRoom: null, note: null },
-      { scheduleId: 's1', date: '2026-10-20', kind: 'MOVED', newDate: '2026-10-21', newStartMinute: 600, newEndMinute: 690, newRoom: '305', note: null },
-    ]);
+    const map = resolveRange(
+      '2026-10-01',
+      '2026-10-31',
+      [schedule],
+      [
+        {
+          scheduleId: 's1',
+          date: '2026-10-13',
+          kind: 'CANCELLED',
+          newDate: null,
+          newStartMinute: null,
+          newEndMinute: null,
+          newRoom: null,
+          note: null,
+        },
+        {
+          scheduleId: 's1',
+          date: '2026-10-20',
+          kind: 'MOVED',
+          newDate: '2026-10-21',
+          newStartMinute: 600,
+          newEndMinute: 690,
+          newRoom: '305',
+          note: null,
+        },
+      ],
+    );
     expect([...map.keys()].sort()).toEqual([
       'c1|2026-10-06',
       'c1|2026-10-21',
       'c1|2026-10-27',
     ]);
-    expect(map.get('c1|2026-10-21')?.[0]).toMatchObject({ startMinute: 600, room: '305' });
-    expect(map.get('c1|2026-10-27')?.[0]).toMatchObject({ startMinute: 900, endMinute: 990, room: '201' });
+    expect(map.get('c1|2026-10-21')?.[0]).toMatchObject({
+      startMinute: 600,
+      room: '305',
+    });
+    expect(map.get('c1|2026-10-27')?.[0]).toMatchObject({
+      startMinute: 900,
+      endMinute: 990,
+      room: '201',
+    });
   });
 
   it('pickToday: дуусаагүй эхнийх, бүгд дууссан бол сүүлийнх', () => {
@@ -273,7 +338,11 @@ describe('student-hub.logic — бодлогын харагдац', () => {
   });
 
   it('хуучин хэлбэр (choices + үсэг): сонголт A–E, зөв хариу үсгээр', () => {
-    const row = base({ choices: ['1', '2', '3', '4', '5'], correctAnswer: 'c', youtubeUrl: 'https://youtu.be/x' });
+    const row = base({
+      choices: ['1', '2', '3', '4', '5'],
+      correctAnswer: 'c',
+      youtubeUrl: 'https://youtu.be/x',
+    });
     expect(hubProblem(row)).toEqual({
       id: 'p1',
       order: 3,
@@ -309,14 +378,31 @@ describe('student-hub.logic — бодлогын харагдац', () => {
   });
 
   it('placeholder үсэгтэй (LETTER) ба нөхөх бодлого', () => {
-    expect(correctAnswerOf(base({ choices: ['A', 'B', 'C', 'D', 'E'], correctAnswer: 'd' }))).toBe('D');
-    const fill = base({ format: 'FILL_NUMBER', statementText: '[a][b]', correctAnswer: { b: '5', a: '3' } });
+    expect(
+      correctAnswerOf(
+        base({ choices: ['A', 'B', 'C', 'D', 'E'], correctAnswer: 'd' }),
+      ),
+    ).toBe('D');
+    const fill = base({
+      format: 'FILL_NUMBER',
+      statementText: '[a][b]',
+      correctAnswer: { b: '5', a: '3' },
+    });
     expect(correctAnswerOf(fill)).toBe('a = 3, b = 5');
     expect(hubProblem(fill).choices).toEqual([]);
   });
 
   it('хариу тодорхойгүй бол null', () => {
-    expect(correctAnswerOf(base({ choices: ['1', '2'], correctAnswer: { reason: 'ANSWER_KEY_MISSING' } }))).toBeNull();
-    expect(correctAnswerOf(base({ format: 'FILL_NUMBER', correctAnswer: '' }))).toBeNull();
+    expect(
+      correctAnswerOf(
+        base({
+          choices: ['1', '2'],
+          correctAnswer: { reason: 'ANSWER_KEY_MISSING' },
+        }),
+      ),
+    ).toBeNull();
+    expect(
+      correctAnswerOf(base({ format: 'FILL_NUMBER', correctAnswer: '' })),
+    ).toBeNull();
   });
 });

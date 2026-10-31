@@ -69,7 +69,10 @@ export interface MonthWindow {
  * ?month=YYYY-MM → сарын хил. Өгөгдөөгүй бол одоогийн сар. 2026-09-ээс өмнөх, ирээдүйн
  * эсвэл буруу хэлбэртэй бол null (дуудагч 400 өгнө).
  */
-export function monthWindow(raw: string | undefined, today: string): MonthWindow | null {
+export function monthWindow(
+  raw: string | undefined,
+  today: string,
+): MonthWindow | null {
   const current = today.slice(0, 7);
   const month = raw === undefined || raw === '' ? current : raw;
   const range = monthRange(month);
@@ -111,7 +114,10 @@ export function lessonDaysByClass(
 }
 
 /** Өсөх дараалалтай `days`-ээс `date`-ээс ХОЙШХИ эхний хичээлийн өдөр (D') */
-export function nextLessonDay(days: readonly string[], date: string): string | null {
+export function nextLessonDay(
+  days: readonly string[],
+  date: string,
+): string | null {
   for (const d of days) if (d > date) return d;
   return null;
 }
@@ -120,7 +126,11 @@ export function nextLessonDay(days: readonly string[], date: string): string | n
  * Сурагчид харагдах өдөр: ангид орсон өдрөөс хойш (Enrollment.joinedAt), эсвэл тэр өдөр
  * өөрийн ирцийн мөртэй (joinedAt хожуу бичигдсэн ч өөрийн ирц харагдана).
  */
-export function visibleDay(date: string, joinedKey: string, ownAttendance: boolean): boolean {
+export function visibleDay(
+  date: string,
+  joinedKey: string,
+  ownAttendance: boolean,
+): boolean {
   return ownAttendance || date >= joinedKey;
 }
 
@@ -149,7 +159,11 @@ export function homeworkFor(
   const next = nextLessonDay(classDays, date);
   if (!next) return { status: null, comment: null, checkedOn: null };
   const m = marks.get(dayKey(classroomId, next));
-  return { status: m?.status ?? null, comment: m?.comment ?? null, checkedOn: next };
+  return {
+    status: m?.status ?? null,
+    comment: m?.comment ?? null,
+    checkedOn: next,
+  };
 }
 
 /* ───────── Хувь ───────── */
@@ -210,14 +224,17 @@ export function testOpen(
   test: { deletedAt: Date | null; type: string } | null | undefined,
 ): boolean {
   if (!test || test.deletedAt) return false;
-  if ((RELEASE_EXCLUDED_TYPES as readonly string[]).includes(test.type)) return false;
+  if ((RELEASE_EXCLUDED_TYPES as readonly string[]).includes(test.type))
+    return false;
   return date < today;
 }
 
 /* ───────── Сэдэв, хайлт ───────── */
 
 /** LessonRecord.topic → LessonTopic.title → Chapter.title → null (хоосон мөрийг алгасна) */
-export function topicOf(...candidates: (string | null | undefined)[]): string | null {
+export function topicOf(
+  ...candidates: (string | null | undefined)[]
+): string | null {
   for (const c of candidates) {
     const t = c?.trim();
     if (t) return t;
@@ -236,7 +253,10 @@ export function queryWords(q: string | undefined): string[] {
 }
 
 /** Үг бүр бичвэрүүдийн аль нэгэнд агуулагдана (AND); үггүй бол үнэн */
-export function matchesWords(words: string[], texts: (string | null | undefined)[]): boolean {
+export function matchesWords(
+  words: string[],
+  texts: (string | null | undefined)[],
+): boolean {
   if (!words.length) return true;
   const hay = texts
     .filter((t): t is string => !!t)
@@ -260,7 +280,13 @@ export function resolveRange(
   const out = new Map<string, ResolvedEntry[]>();
   if (!schedules.length || fromKey > toKey) return out;
   for (let start = fromKey; start <= toKey; start = addDaysKey(start, 7)) {
-    const week = resolveWeek({ weekStart: start, schedules, exceptions, topics: [], holidays: [] });
+    const week = resolveWeek({
+      weekStart: start,
+      schedules,
+      exceptions,
+      topics: [],
+      holidays: [],
+    });
     for (const day of week) {
       if (day.date > toKey) continue;
       for (const e of day.entries) {
@@ -279,7 +305,9 @@ export function pickToday<T extends { startMinute: number; endMinute: number }>(
 ): T | null {
   if (!entries.length) return null;
   const sorted = [...entries].sort((a, b) => a.startMinute - b.startMinute);
-  return sorted.find((e) => e.endMinute > nowMinute) ?? sorted[sorted.length - 1];
+  return (
+    sorted.find((e) => e.endMinute > nowMinute) ?? sorted[sorted.length - 1]
+  );
 }
 
 /** УБ цагаар шөнө дундаас хойшхи минут */
@@ -304,7 +332,9 @@ export function correctAnswerOf(row: HomeworkProblemRow): string | null {
   if (mode === 'TEXT') {
     if (g.choiceOptions && g.choiceOptions.length > 0) {
       const sorted = [...g.choiceOptions].sort((a, b) => a.order - b.order);
-      const letters = sorted.flatMap((o, i) => (o.isCorrect ? [letter(i)] : []));
+      const letters = sorted.flatMap((o, i) =>
+        o.isCorrect ? [letter(i)] : [],
+      );
       return letters.length ? letters.join(', ') : null;
     }
     const c = g.correctAnswer;
@@ -312,7 +342,9 @@ export function correctAnswerOf(row: HomeworkProblemRow): string | null {
     return typeof c === 'string' ? c.trim().toUpperCase() : null;
   }
   if (mode === 'LETTER')
-    return typeof g.correctAnswer === 'string' ? g.correctAnswer.trim().toUpperCase() : null;
+    return typeof g.correctAnswer === 'string'
+      ? g.correctAnswer.trim().toUpperCase()
+      : null;
   return answerText(g.correctAnswer);
 }
 
