@@ -49,6 +49,8 @@ export interface HwDay {
   markComment?: string | null;
   /** Сэдэв (V2) */
   topic?: string | null;
+  /** Ирэх 7 хоногийн хичээл — зургаа урьдчилан илгээнэ (эзэн 2026-10-31) */
+  upcoming?: boolean;
 }
 
 export interface HwMyResponse {

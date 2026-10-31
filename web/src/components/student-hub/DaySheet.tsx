@@ -163,7 +163,7 @@ function DayBody({ day, onChange }: { day: HubDay; onChange: () => void }) {
           ) : undefined
         }
       >
-        <TheoryDayPanel classroomId={day.classroomId} date={date} onChange={onChange} />
+        <TheoryDayPanel classroomId={day.classroomId} date={date} onChange={onChange} embedded />
       </Section>
 
       <Section title="Миний даалгаврын зураг">

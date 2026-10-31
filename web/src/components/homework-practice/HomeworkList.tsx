@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookOpenCheck, ChevronRight, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BookOpenCheck, CalendarClock, ChevronRight, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
 import { HOMEWORK_MARKS, TONE_SELECTED } from "@/components/attendance/marks";
 import { dayLabel } from "@/components/makeup/types";
+import { weekdayShort } from "@/components/student-hub/lib";
 import { PageHeader } from "@/components/ui/Surface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
@@ -132,11 +133,15 @@ function DayCard({
       <header className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="cyrillic-heading font-bold text-ink">{dayLabel(day.date)}</h2>
-          {today && (
-            <span className="rounded-full bg-brand-bright px-2 py-0.5 text-[11px] font-bold text-on-brand">Өнөөдөр</span>
-          )}
           <span className="ml-auto">
-            <MarkBadge day={day} />
+            {day.upcoming ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-brand-bright/50 px-2 py-0.5 text-[11px] font-semibold text-brand-soft">
+                <CalendarClock className="size-3.5" aria-hidden />
+                Урьдчилан
+              </span>
+            ) : (
+              <MarkBadge day={day} />
+            )}
           </span>
         </div>
         {day.topic && <p className="cyrillic-tight font-semibold text-ink">{day.topic}</p>}
@@ -179,23 +184,36 @@ function DayCard({
   );
 }
 
-/** Өдрийн зурвас — даалгавартай өдрүүд (шинэ нь эхэнд), дарахад тухайн карт руу гүйлгэнэ */
+/**
+ * Өдрийн зурвас — эрт нь зүүн, хожуу нь баруун талд (эзэн 2026-10-31); нээхэд өнөөдөр
+ * (эсвэл өнөөдрөөс өмнөх сүүлийн хичээл) харагдах хүртэл гүйлгэнэ. Дарахад тухайн карт руу.
+ */
 function DayStrip({ days, todayKey }: { days: HwDay[]; todayKey: string }) {
-  const keys = useMemo(() => Array.from(new Set(days.map((d) => d.date))), [days]);
+  const keys = useMemo(() => Array.from(new Set(days.map((d) => d.date))).sort(), [days]);
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const focus = [...keys].reverse().find((k) => k <= todayKey) ?? keys[0];
+    const chip = nav.querySelector<HTMLElement>(`[data-day="${focus}"]`);
+    if (chip) nav.scrollLeft = chip.offsetLeft - nav.clientWidth / 2 + chip.offsetWidth / 2;
+  }, [keys, todayKey]);
   if (keys.length < 2) return null;
   return (
-    <nav aria-label="Өдөр сонгох" className="mb-4 overflow-x-auto rounded-xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav ref={navRef} aria-label="Өдөр сонгох" className="mb-4 overflow-x-auto rounded-xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <ul className="flex w-max gap-1">
         {keys.map((key) => {
           const ds = days.filter((d) => d.date === key);
           const done = ds.every((d) => !!d.photo && d.items.every((i) => i.status === "SUBMITTED"));
-          const [, m, dd] = key.split("-").map(Number);
+          const dd = Number(key.slice(8));
           const today = key === todayKey;
+          const ahead = key > todayKey;
           return (
             <li key={key}>
               <button
                 type="button"
-                aria-label={`${dayLabel(key)}${done ? ", илгээсэн" : ""}${today ? ", өнөөдөр" : ""}`}
+                data-day={key}
+                aria-label={`${dayLabel(key)}${done ? ", илгээсэн" : ""}${today ? ", өнөөдөр" : ""}${ahead ? ", урьдчилан" : ""}`}
                 aria-current={today ? "date" : undefined}
                 onClick={() =>
                   document.getElementById(dayId(ds[0]))?.scrollIntoView({
@@ -205,10 +223,14 @@ function DayStrip({ days, todayKey }: { days: HwDay[]; todayKey: string }) {
                 }
                 className={cn(
                   "flex h-14 w-12 flex-col items-center justify-center gap-0.5 rounded-lg text-center transition-colors",
-                  today ? "bg-brand-bright text-on-brand" : "bg-brand-bright/10 text-ink hover:bg-brand-bright/20",
+                  today
+                    ? "bg-brand-bright text-on-brand"
+                    : ahead
+                      ? "border border-dashed border-brand-bright/50 text-ink hover:bg-brand-bright/10"
+                      : "bg-brand-bright/10 text-ink hover:bg-brand-bright/20",
                 )}
               >
-                <span className="text-[10px] font-medium leading-none tabular-nums">{m}-р сар</span>
+                <span className="text-[10px] font-medium leading-none">{weekdayShort(key)}</span>
                 <span className="text-base font-bold leading-none tabular-nums">{dd}</span>
                 {done ? (
                   <CircleCheck className={cn("size-3", today ? "text-on-brand" : "text-success")} aria-hidden />
@@ -253,6 +275,19 @@ export default function HomeworkList() {
     [days],
   );
 
+  // Өнөөдөр → дараагийн хичээлүүд (ойрх нь эхэнд) → өмнөх (шинэ нь эхэнд)
+  const sections = useMemo(
+    () => [
+      { title: "Өнөөдөр", days: sorted.filter((d) => d.date === todayKey) },
+      {
+        title: "Урьдчилан илгээх",
+        days: sorted.filter((d) => d.date > todayKey).reverse(),
+      },
+      { title: "Өмнөх хичээлүүд", days: sorted.filter((d) => d.date < todayKey) },
+    ],
+    [sorted, todayKey],
+  );
+
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Гэрийн даалгавар" description="Хичээлийн өдөр бүрийн дэвтрийн зураг ба тест" />
@@ -269,23 +304,33 @@ export default function HomeworkList() {
       ) : (
         <>
           <DayStrip days={sorted} todayKey={todayKey} />
-          <div className="space-y-3">
-            {sorted.map((d) => (
-              <DayCard
-                key={dayId(d)}
-                day={d}
-                today={d.date === todayKey}
-                canSend={dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS}
-                onPhoto={(photo) =>
-                  setDays((prev) =>
-                    (prev ?? []).map((x) =>
-                      x.date === d.date && x.classroomId === d.classroomId ? { ...x, photo } : x,
-                    ),
-                  )
-                }
-              />
-            ))}
-          </div>
+          {sections.map((sec) =>
+            sec.days.length ? (
+              <section key={sec.title} className="mb-6">
+                <h2 className="mb-2 text-sm font-semibold text-ink-dim">{sec.title}</h2>
+                <div className="space-y-3">
+                  {sec.days.map((d) => (
+                    <DayCard
+                      key={dayId(d)}
+                      day={d}
+                      today={d.date === todayKey}
+                      canSend={
+                        !!d.upcoming ||
+                        (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS)
+                      }
+                      onPhoto={(photo) =>
+                        setDays((prev) =>
+                          (prev ?? []).map((x) =>
+                            x.date === d.date && x.classroomId === d.classroomId ? { ...x, photo } : x,
+                          ),
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null,
+          )}
         </>
       )}
     </div>

@@ -116,7 +116,7 @@ export default function StudentDashboard() {
           </div>
           {ov.latestMark && <LatestMarkCard mark={ov.latestMark} />}
           <RecentDays />
-          <EveningMarking title="Өнөөдрийн ангийн тест — тэмдэглэх" hideWhenEmpty />
+          <EveningMarking title="Ангийн тестээ тэмдэглэх" hideWhenEmpty collapsible />
         </>
       )}
 

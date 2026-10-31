@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import MathText from "@/components/MathText";
 import { api } from "@/lib/api";
 import { Meta } from "@/components/ui/Meta";
+import { ChevronDown } from "lucide-react";
+import { dayShort } from "@/components/student-hub/lib";
 
 /* ============================================================================
  * Оройн тэмдэглэгээ — token-гүй, тест дээр суурилсан хувилбар.
@@ -49,8 +51,11 @@ interface TodoSession {
 export default function EveningMarking({
   title = "Оройн тэмдэглэгээ",
   hideWhenEmpty = false,
+  collapsible = false,
 }: {
   title?: string;
+  /** Тест бүрийг хураасан харуулна, дарахад бодлогууд нээгдэнэ — сурагчийн самбар */
+  collapsible?: boolean;
   /** Тэмдэглэх тест байхгүй (алдаагүй) үед картыг огт харуулахгүй — сурагчийн самбар */
   hideWhenEmpty?: boolean;
 } = {}) {
@@ -58,6 +63,7 @@ export default function EveningMarking({
   // problemId → одоогийн тэмдэглэгээ (optimistic)
   const [marks, setMarks] = useState<Record<string, string>>({});
   const [loaded, setLoaded] = useState(false);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
   const [loadError, setLoadError] = useState("");
   const [markError, setMarkError] = useState("");
 
@@ -114,7 +120,7 @@ export default function EveningMarking({
     <section className="rounded-xl border border-line bg-surface p-5 elev-1">
       <h2 className="font-bold text-brand-soft">{title}</h2>
       <p className="mt-1 text-sm text-ink-dim">
-        Өнөөдөр ангид хийсэн бодлогуудаа цаасан дээрээсээ хараад тэмдэглээрэй
+        Ангид хийсэн бодлогуудаа цаасан дээрээсээ хараад тэмдэглээрэй
       </p>
 
       {loadError && (
@@ -144,23 +150,31 @@ export default function EveningMarking({
               key={s.sessionId}
               className="rounded-xl border border-line bg-panel p-4"
             >
-              <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
+              <button
+                type="button"
+                disabled={!collapsible}
+                aria-expanded={collapsible ? !!open[s.sessionId] : undefined}
+                onClick={() => setOpen((o) => ({ ...o, [s.sessionId]: !o[s.sessionId] }))}
+                className="flex w-full items-center gap-3 text-left disabled:cursor-default"
+              >
+                <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{s.test.title}</p>
                   <p className="text-xs text-ink-dim">
-                    <Meta items={[s.date.slice(0, 10), `хаагдах ${s.markingClosesOn}`]} />
+                    <Meta items={[dayShort(s.date.slice(0, 10)), `${dayShort(s.markingClosesOn.slice(0, 10))} хүртэл`]} />
                   </p>
                 </div>
                 <span className="shrink-0 rounded-lg bg-ink/5 px-2.5 py-1 text-xs text-ink-dim">
-                  <Meta
-                    items={[
-                      `${done}/${s.problems.length}`,
-                      `${s.daysLeft + 1} өдөр үлдсэн`,
-                    ]}
-                  />
+                  {done}/{s.problems.length}
                 </span>
-              </div>
-              <div className="space-y-2.5">
+                {collapsible && (
+                  <ChevronDown
+                    className={`size-4 shrink-0 text-ink-dim transition ${open[s.sessionId] ? "rotate-180" : ""}`}
+                    aria-hidden
+                  />
+                )}
+              </button>
+              {(!collapsible || open[s.sessionId]) && (
+              <div className="mt-3 space-y-2.5">
                 {s.problems.map((p) => (
                   <div
                     key={p.problemId}
@@ -199,6 +213,7 @@ export default function EveningMarking({
                   </div>
                 ))}
               </div>
+              )}
             </div>
           );
         })}

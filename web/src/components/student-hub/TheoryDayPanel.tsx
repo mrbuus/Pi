@@ -55,10 +55,13 @@ export default function TheoryDayPanel({
   classroomId,
   date,
   onChange,
+  embedded = false,
 }: {
   classroomId: string;
   date: string;
   onChange?: () => void;
+  /** Өдрийн дэлгэрэнгүйд — сэдэв, тест дээр нь харагдсан тул давтахгүй */
+  embedded?: boolean;
 }) {
   const [day, setDay] = useState<TheoryDayV2 | null>(null);
   const [topic, setTopic] = useState<string | null>(null);
@@ -116,7 +119,7 @@ export default function TheoryDayPanel({
 
   return (
     <div className="space-y-4">
-      {(topic || day.tests.length > 0) && (
+      {!embedded && (topic || day.tests.length > 0) && (
         <div className="space-y-2">
           {topic && <p className="cyrillic-tight text-base font-semibold text-ink">{topic}</p>}
           {day.tests.length > 0 && (
@@ -147,7 +150,6 @@ export default function TheoryDayPanel({
             <Camera className="size-5 shrink-0 text-brand-soft" aria-hidden />
             <h3 className="font-bold text-ink">Онолын зураг илгээх</h3>
             {assignedToMe && <AssignedTag />}
-            <span className="ml-auto text-xs tabular-nums text-ink-dim">{THEORY_MAX_PAGES} хүртэл хуудас</span>
           </div>
           <PhotoSetSender
             sent={null}
