@@ -47,6 +47,13 @@ function makeDb() {
   ];
   const attempts: Row[] = [];
   const accesses: Row[] = [];
+  // Хичээлийн өдрийн нэгдэл (СУРАГЧ V2): өөрийн ирц, сэдэв, батлагдсан бүртгэл
+  const attendance: Row[] = [];
+  const topics: Row[] = [];
+  const records: Row[] = [];
+  const marks: Row[] = [{ classroomId: 'c1', date: d('2026-10-29'), status: 'PARTIAL', comment: null }];
+  const inRange = (date: Date, r: any) =>
+    (!r?.gte || date >= r.gte) && (!r?.lte || date <= r.lte);
   const checks: Row[] = [];
   const photos: Row[] = [];
   const files: Record<string, Row> = {
@@ -227,10 +234,41 @@ function makeDb() {
       ),
     },
     storedFile: { findUnique: jest.fn(async ({ where }: any) => files[where.key] ?? null) },
-    dailyHomeworkMark: { findMany: jest.fn(async () => [{ classroomId: 'c1', date: d('2026-10-29'), status: 'PARTIAL' }]) },
+    dailyHomeworkMark: {
+      findMany: jest.fn(async ({ where }: any) =>
+        marks.filter(
+          (m) =>
+            where.classroomId.in.includes(m.classroomId) &&
+            where.date.in.some((x: Date) => x.getTime() === m.date.getTime()),
+        ),
+      ),
+    },
+    attendance: {
+      findMany: jest.fn(async ({ where }: any) =>
+        attendance.filter(
+          (a) =>
+            a.studentId === where.studentId &&
+            (!where.classroomId || a.classroomId === where.classroomId) &&
+            inRange(a.date, where.date),
+        ),
+      ),
+    },
+    lessonTopic: {
+      findMany: jest.fn(async ({ where }: any) =>
+        topics
+          .filter((t) => where.schedule.classroomId.in.includes(t.classroomId) && inRange(t.date, where.date))
+          .map((t) => ({ ...t, schedule: { classroomId: t.classroomId } })),
+      ),
+    },
+    lessonRecord: {
+      findMany: jest.fn(async ({ where }: any) =>
+        records.filter((r) => where.classroomId.in.includes(r.classroomId) && inRange(r.date, where.date)),
+      ),
+    },
+    chapter: { findMany: jest.fn(async () => [{ id: 'ch1', title: 'Вектор' }]) },
     $transaction: jest.fn(async (fn: any) => fn(db)),
   };
-  return { db, attempts, accesses, checks, photos, enrollments, sessions, tests };
+  return { db, attempts, accesses, checks, photos, enrollments, sessions, tests, attendance, topics, records, marks };
 }
 
 describe('HomeworkPracticeService — танхимын сурагчийн гэрийн даалгавар', () => {
@@ -360,16 +398,17 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
 
   it('B хувилбарыг анги дараа нь танхимд бодох бол гэрийн даалгавар болохгүй', async () => {
     env.sessions.push({ classroomId: 'c1', date: d('2026-11-20'), testId: 'B1' });
-    await expect(svc.my('s1')).resolves.toEqual({ days: [] });
+    // Хичээлийн өдөр хэвээр (зураг илгээнэ), онлайн даалгавар байхгүй
+    expect((await svc.my('s1')).days.map((x) => [x.date, x.items])).toEqual([['2026-10-27', []]]);
     await expect(svc.start('s1', { testId: 'B1', date: '2026-10-27' })).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('B хувилбар ирээдүйд ангид оноогдсон (TestAccess.assignedAt > одоо) бол гэрийн даалгавар болохгүй', async () => {
     env.accesses.push({ classroomId: 'c1', testId: 'B1', assignedAt: new Date('2026-11-05T00:00:00Z') });
-    await expect(svc.my('s1')).resolves.toEqual({ days: [] });
+    expect((await svc.my('s1')).days.map((x) => x.items)).toEqual([[]]);
     // Өмнө оноосон (өнгөрсөн) бол саад болохгүй
     env.accesses[0].assignedAt = new Date('2026-10-01T00:00:00Z');
-    expect((await svc.my('s1')).days).toHaveLength(1);
+    expect((await svc.my('s1')).days[0].items.map((i) => i.testId)).toEqual(['B1']);
   });
 
   it('шалгах: зөвхөн зөв/буруу, 2 удаа; 3 дахь нь 409; эхний хариу хадгалагдана', async () => {
@@ -416,7 +455,12 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     jest.setSystemTime(new Date('2026-10-29T02:00:00Z')); // УБ 10-29 10:00 — хугацаа өнгөрсөн
     await svc.submit('s1', attemptId, { p1: 'B' });
     const list = await svc.my('s1');
-    expect(list.days[0].items[0].late).toBe(true);
+    // 10-29 (дараагийн хичээл) өөрөө B-гүй хичээлийн өдөр болж эхэнд гарна
+    expect(list.days.map((x) => [x.date, x.items.length])).toEqual([
+      ['2026-10-29', 0],
+      ['2026-10-27', 1],
+    ]);
+    expect(list.days[1].items[0].late).toBe(true);
   });
 
   it('хугацааны хязгаар серверт: 30 мин + 60с-ийн дараа хадгалах/шалгах 409, илгээхэд шинэ хариуг авахгүй', async () => {
@@ -452,6 +496,80 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     await expect(svc.deletePhoto('s1', p2.id)).resolves.toEqual({ deleted: true });
     await expect(svc.deletePhoto('s1', p2.id)).resolves.toEqual({ deleted: true });
     expect((await svc.my('s1')).days[0].photo).toBeNull();
+  });
+
+  describe('хичээлийн өдөр бүр (СУРАГЧ V2)', () => {
+    beforeEach(() => {
+      // 10-24: зөвхөн ирц (B хувилбаргүй), 10-25: сэдэв + бүртгэл, 10-20: элсэхээс өмнө биш, 14 хоногт
+      env.attendance.push(
+        { studentId: 's1', classroomId: 'c1', date: d('2026-10-24') },
+        { studentId: 's1', classroomId: 'c1', date: d('2026-10-27') },
+        { studentId: 's2', classroomId: 'c1', date: d('2026-10-22') },
+      );
+      env.topics.push(
+        { classroomId: 'c1', date: d('2026-10-25'), title: 'Сэдэв LessonTopic', chapterId: null },
+        { classroomId: 'c1', date: d('2026-10-21'), title: ' ', chapterId: 'ch1' },
+      );
+      env.records.push({ classroomId: 'c1', date: d('2026-10-25'), topic: 'Батлагдсан сэдэв' });
+      env.marks.push(
+        { classroomId: 'c1', date: d('2026-10-25'), status: 'DONE', comment: 'Сайн хийсэн' },
+        { classroomId: 'c1', date: d('2026-10-27'), status: 'NOT_DONE', comment: 'Дэвтэргүй' },
+      );
+    });
+
+    it('GET /homework/my: B-гүй өдөр items: [], markComment ба topic, хуучин талбарууд хэвээр', async () => {
+      const res = await svc.my('s1');
+      expect(res.days.map((x) => x.date)).toEqual(['2026-10-27', '2026-10-25', '2026-10-24', '2026-10-21']);
+      const b = res.days[0];
+      expect(b.items.map((i) => i.testId)).toEqual(['B1']);
+      expect(b).toMatchObject({ deadlineAt: '2026-10-28T16:00:00.000Z', mark: 'PARTIAL', markComment: null, topic: null });
+      expect(res.days[1]).toMatchObject({
+        date: '2026-10-25',
+        classroomName: '10А',
+        items: [],
+        photo: null,
+        mark: 'NOT_DONE',
+        markComment: 'Дэвтэргүй',
+        topic: 'Батлагдсан сэдэв',
+      });
+      expect(res.days[2]).toMatchObject({ date: '2026-10-24', items: [], mark: 'DONE', markComment: 'Сайн хийсэн', topic: null });
+      // Хоосон сэдэвтэй бол бүлгийн нэр
+      expect(res.days[3]).toMatchObject({ date: '2026-10-21', topic: 'Вектор' });
+      // Бусдын ирц (s2) хичээлийн өдөрт тооцогдохгүй, сонголтод note байхгүй
+      expect(env.db.attendance.findMany.mock.calls[0][0].where.studentId).toBe('s1');
+      expect(env.db.attendance.findMany.mock.calls[0][0].select).not.toHaveProperty('note');
+      expect(env.db.lessonRecord.findMany.mock.calls[0][0].select).not.toHaveProperty('description');
+      expect(env.db.lessonTopic.findMany.mock.calls[0][0].select).not.toHaveProperty('dismissMode');
+    });
+
+    it('POST /homework/photos: B хувилбаргүй хичээлийн өдөрт илгээнэ', async () => {
+      const p = await svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-24', fileKey: 'f1.pdf', pages: 3 });
+      expect(p).toMatchObject({ fileKey: 'f1.pdf', pages: 3 });
+      expect(env.photos[0]).toMatchObject({ classroomId: 'c1', lessonDate: d('2026-10-24') });
+      const day = (await svc.my('s1')).days.find((x) => x.date === '2026-10-24')!;
+      expect(day.photo).toMatchObject({ id: p.id });
+    });
+
+    it('POST /homework/photos: хичээлгүй өдөр, өөр анги, бусдын ирцтэй өдөр — 403', async () => {
+      await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-23', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-22', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(svc.addPhoto('s1', { classroomId: 'c9', date: '2026-10-24', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
+      expect(env.photos).toHaveLength(0);
+    });
+
+    it('POST /homework/photos: 14 хоногоос өмнөх B-гүй өдөр 403, B хувилбартай өдөр 31 хоногийн дүрмээр хэвээр', async () => {
+      env.attendance.push({ studentId: 's1', classroomId: 'c1', date: d('2026-10-10') });
+      await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-10', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
+      env.sessions.push({ classroomId: 'c1', date: d('2026-10-10'), testId: 'A1' });
+      await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-10', fileKey: 'f1.pdf', pages: 1 })).resolves.toMatchObject({ fileKey: 'f1.pdf' });
+    });
+
+    it('ангид элсэхээс өмнөх (өөрийн ирцгүй) өдөр жагсаалтад орохгүй', async () => {
+      env.enrollments[0].joinedAt = d('2026-10-25');
+      const res = await svc.my('s1');
+      // 10-24 нь өөрийн ирцтэй тул үлдэнэ, 10-21 (зөвхөн сэдэв) хасагдана
+      expect(res.days.map((x) => x.date)).toEqual(['2026-10-27', '2026-10-25', '2026-10-24']);
+    });
   });
 });
 

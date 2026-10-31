@@ -9,6 +9,12 @@ import { addDaysKey, ubDateKey } from '../attendance/board-logic';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { loadLessonDays, visibleLessonDays } from '../student-hub/lesson-days';
+import {
+  dayKey,
+  inUploadWindow,
+  nextLessonDay,
+} from '../student-hub/student-hub.logic';
 import {
   EXCLUDED_TYPES,
   TIME_GRACE_SEC,
@@ -21,6 +27,7 @@ import {
   mergeAnswers,
   problemView,
   remainingSec,
+  ubDayStart,
   variantOf,
   type CheckResult,
   type HomeworkProblemRow,
@@ -326,13 +333,56 @@ export class HomeworkPracticeService {
     const days = clampDays(daysRaw);
     const today = dateKey(todayUB());
     const fromKey = addDaysKey(today, -(days - 1));
-    const slots = await this.loadSlots(studentId, fromKey, today);
-    if (!slots.length) return { days: [] };
-    const testIds = [...new Set(slots.flatMap((s) => s.items.map((i) => i.id)))];
-    const nextDates = [
-      ...new Set(slots.flatMap((s) => (s.nextLessonDate ? [s.nextLessonDate] : []))),
+    // B хувилбартай өдрүүд (онлайн бодолт — эрхийн дүрэм өөрчлөгдөөгүй) + одоогийн ангийн
+    // ХИЧЭЭЛИЙН ӨДӨР БҮР (СУРАГЧ V2, эзэн 2026-10-31): B-гүй өдөр items: [] — зураг илгээнэ.
+    const [slots, lessons] = await Promise.all([
+      this.loadSlots(studentId, fromKey, today),
+      loadLessonDays(this.prisma, studentId, fromKey, today),
+    ]);
+    type DayRow = {
+      date: string;
+      classroomId: string;
+      classroomName: string;
+      slot: HomeworkSlot | null;
+    };
+    const rows = new Map<string, DayRow>();
+    for (const cls of lessons.classes)
+      for (const date of visibleLessonDays(lessons, cls, fromKey))
+        rows.set(dayKey(cls.classroomId, date), {
+          date,
+          classroomId: cls.classroomId,
+          classroomName: cls.classroomName,
+          slot: null,
+        });
+    for (const slot of slots) {
+      const k = dayKey(slot.classroomId, slot.date);
+      const row = rows.get(k);
+      if (row) row.slot = slot;
+      else
+        rows.set(k, {
+          date: slot.date,
+          classroomId: slot.classroomId,
+          classroomName: slot.classroomName,
+          slot,
+        });
+    }
+    if (!rows.size) return { days: [] };
+    const list = [...rows.values()].sort(
+      (a, b) =>
+        b.date.localeCompare(a.date) ||
+        a.classroomName.localeCompare(b.classroomName),
+    );
+    // D өдрийн тэмдэглэгээ D' (дараагийн хичээлийн өдөр) дээр: хичээлийн өдрийн нэгдлээс,
+    // олдохгүй бол (ирээдүйд) B хувилбарын тестийн хуваарийн дараагийн өдөр
+    const nextOf = (r: DayRow) =>
+      nextLessonDay(lessons.byClass.get(r.classroomId) ?? [], r.date) ??
+      r.slot?.nextLessonDate ??
+      null;
+    const testIds = [
+      ...new Set(slots.flatMap((s) => s.items.map((i) => i.id))),
     ];
-    const [attempts, photos, marks] = await Promise.all([
+    const nextDates = [...new Set(list.flatMap((r) => nextOf(r) ?? []))];
+    const attemptsQuery = () =>
       this.prisma.homeworkAttempt.findMany({
         where: {
           studentId,
@@ -349,7 +399,11 @@ export class HomeworkPracticeService {
           total: true,
           submittedAt: true,
         },
-      }),
+      });
+    const [attempts, photos, marks] = await Promise.all([
+      testIds.length
+        ? attemptsQuery()
+        : Promise.resolve([] as Awaited<ReturnType<typeof attemptsQuery>>),
       this.prisma.homeworkPhoto.findMany({
         where: {
           studentId,
@@ -370,37 +424,49 @@ export class HomeworkPracticeService {
         ? this.prisma.dailyHomeworkMark.findMany({
             where: {
               studentId,
-              classroomId: { in: [...new Set(slots.map((s) => s.classroomId))] },
+              classroomId: { in: [...new Set(list.map((r) => r.classroomId))] },
               date: { in: nextDates.map((d) => parseDateOnly(d)) },
             },
-            select: { classroomId: true, date: true, status: true },
+            select: {
+              classroomId: true,
+              date: true,
+              status: true,
+              comment: true,
+            },
           })
         : Promise.resolve(
-            [] as { classroomId: string; date: Date; status: string | null }[],
+            [] as {
+              classroomId: string;
+              date: Date;
+              status: string | null;
+              comment: string | null;
+            }[],
           ),
     ]);
     return {
-      days: slots.map((slot) => {
+      days: list.map((row) => {
+        const slot = row.slot;
         const photo = photos.find(
           (p) =>
-            p.classroomId === slot.classroomId &&
-            dateKey(p.lessonDate) === slot.date,
+            p.classroomId === row.classroomId &&
+            dateKey(p.lessonDate) === row.date,
         );
-        const mark = slot.nextLessonDate
+        const next = nextOf(row);
+        const mark = next
           ? marks.find(
               (m) =>
-                m.classroomId === slot.classroomId &&
-                dateKey(m.date) === slot.nextLessonDate,
+                m.classroomId === row.classroomId && dateKey(m.date) === next,
             )
           : undefined;
+        const deadlineAt = slot?.deadlineAt ?? (next ? ubDayStart(next) : null);
         return {
-          date: slot.date,
-          classroomId: slot.classroomId,
-          classroomName: slot.classroomName,
-          deadlineAt: slot.deadlineAt?.toISOString() ?? null,
-          items: slot.items.map((item) => {
+          date: row.date,
+          classroomId: row.classroomId,
+          classroomName: row.classroomName,
+          deadlineAt: deadlineAt?.toISOString() ?? null,
+          items: (slot?.items ?? []).map((item) => {
             const a = attempts.find(
-              (x) => x.testId === item.id && dateKey(x.lessonDate) === slot.date,
+              (x) => x.testId === item.id && dateKey(x.lessonDate) === row.date,
             );
             return {
               testId: item.id,
@@ -413,11 +479,13 @@ export class HomeworkPracticeService {
               checksUsed: a?.checksUsed ?? 0,
               maxChecks: MAX_CHECKS,
               score:
-                a?.status === 'SUBMITTED' && a.score !== null && a.total !== null
+                a?.status === 'SUBMITTED' &&
+                a.score !== null &&
+                a.total !== null
                   ? { correct: a.score, total: a.total }
                   : null,
               submittedAt: a?.submittedAt?.toISOString() ?? null,
-              late: isLate(a?.submittedAt ?? null, slot.deadlineAt),
+              late: isLate(a?.submittedAt ?? null, slot?.deadlineAt ?? null),
             };
           }),
           photo: photo
@@ -429,9 +497,36 @@ export class HomeworkPracticeService {
               }
             : null,
           mark: mark?.status ?? null,
+          markComment: mark?.comment ?? null,
+          topic: lessons.topics.get(dayKey(row.classroomId, row.date)) ?? null,
         };
       }),
     };
+  }
+
+  /**
+   * Гэрийн даалгаврын зураг илгээх өдөр мөн эсэх: (1) одоогийн ангийн хичээлийн өдөр, сүүлийн
+   * 14 хоногт (B хувилбар шаардахгүй — СУРАГЧ V2), эсвэл (2) өмнөх дүрмээр B хувилбартай өдөр.
+   */
+  private async photoDayAllowed(
+    studentId: string,
+    classroomId: string,
+    date: string,
+    today: string,
+  ): Promise<boolean> {
+    if (inUploadWindow(date, today)) {
+      const set = await loadLessonDays(
+        this.prisma,
+        studentId,
+        date,
+        date,
+        classroomId,
+      );
+      const cls = set.classes.find((c) => c.classroomId === classroomId);
+      if (cls && visibleLessonDays(set, cls, date).includes(date)) return true;
+    }
+    const slots = await this.loadSlots(studentId, date, date, classroomId);
+    return slots.some((s) => s.classroomId === classroomId && s.date === date);
   }
 
   /* ───────── POST /homework/attempts ───────── */
@@ -668,8 +763,7 @@ export class HomeworkPracticeService {
     const today = dateKey(todayUB());
     if (date > today || date < addDaysKey(today, -(MAX_DAYS - 1)))
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
-    const slots = await this.loadSlots(studentId, date, date, body.classroomId);
-    if (!slots.some((s) => s.classroomId === body.classroomId && s.date === date))
+    if (!(await this.photoDayAllowed(studentId, body.classroomId, date, today)))
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
 
     // Файл: өөрийн байршуулсан, «homework» зорилготой (7 хоног хадгалах), PDF
