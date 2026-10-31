@@ -324,6 +324,32 @@ describe('LessonPlanService.putPlan', () => {
     expect(prisma.auditLog.create.mock.calls[0][0].data).toMatchObject({ entity: 'DayMeal' });
   });
 
+  it('тестийн бодлогын хариу: гадны багш үгүй; Багш — хуваарьт орсон тест л, ЭЕШ сорил үгүй', async () => {
+    const { service, prisma } = makePlanService();
+    const user = (role: Role, external = false) => ({ role, archivedAt: null, externalTeacherProfile: external ? { userId: 'x' } : null });
+    prisma.user = { findUnique: jest.fn() };
+    prisma.lessonTopic.findFirst = jest.fn(async () => null);
+    prisma.classTestSession = { findFirst: jest.fn(async () => null) };
+    prisma.testAccess = { findFirst: jest.fn(async () => null) };
+    prisma.problem = { findMany: jest.fn(async () => []) };
+    prisma.test.findUnique = jest.fn(async () => ({ type: 'DAILY', createdById: 'other' }));
+    const teacher = { userId: 't', role: Role.TEACHER };
+
+    prisma.user.findUnique.mockResolvedValue(user(Role.TEACHER, true));
+    await expect(service.testProblems(teacher, 'u2')).rejects.toThrow('төвийн');
+
+    prisma.user.findUnique.mockResolvedValue(user(Role.TEACHER));
+    await expect(service.testProblems(teacher, 'u2')).rejects.toThrow('хуваарьт');
+    prisma.lessonTopic.findFirst.mockResolvedValueOnce({ id: 'lt' });
+    await expect(service.testProblems(teacher, 'u2')).resolves.toMatchObject({ testId: 'u2' });
+
+    prisma.test.findUnique.mockResolvedValueOnce({ type: 'EESH_MOCK', createdById: 'other' });
+    await expect(service.testProblems(teacher, 'u2')).rejects.toThrow('эрхгүй');
+
+    prisma.user.findUnique.mockResolvedValue(user(Role.TEACHER_PLUS));
+    await expect(service.testProblems(tp, 'u2')).resolves.toMatchObject({ testId: 'u2' });
+  });
+
   it('cleanCustomTopics: 12-оос хэтрэхгүй, 200 тэмдэгт', () => {
     const many = Array.from({ length: 20 }, (_, i) => `Сэдэв ${i}`);
     expect(cleanCustomTopics(many)).toHaveLength(12);

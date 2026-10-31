@@ -4,7 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
-import { Role } from '../generated/prisma/enums';
+import { Role, TestType } from '../generated/prisma/enums';
 import {
   addDateDays,
   dateKey,
@@ -12,6 +12,7 @@ import {
   todayUB,
 } from '../common/date';
 import { markPlus, teacherPlusIds } from '../common/teacher-plus';
+import { internalTeachingRole } from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   cleanCustomTopics,
@@ -672,11 +673,48 @@ export class LessonPlanService {
   }
 
   /**
+   * Хариуны түлхүүр харах эрх — TestsService.getOne-той нэг зарчим: зөвхөн
+   * дотоод багш (гадны багш, архивласан хүн үгүй). Багш+ / Админ дурын тест;
+   * Багш — хуваарьт төлөвлөсөн/хийсэн, өөрийн ангид оноосон эсвэл өөрийн
+   * үүсгэсэн тест л. ЭЕШ сорил, 1000 бодлогыг Багшид харуулахгүй.
+   */
+  private async assertCanSeeAnswers(actor: Actor, testId: string) {
+    const role = await internalTeachingRole(this.prisma, actor.userId);
+    if (!role) throw new ForbiddenException('Зөвхөн төвийн багшид');
+    if (role !== Role.TEACHER) return;
+    const test = await this.prisma.test.findUnique({
+      where: { id: testId },
+      select: { type: true, createdById: true },
+    });
+    if (!test) throw new BadRequestException('Тест олдсонгүй');
+    if (test.createdById === actor.userId) return;
+    if (test.type === TestType.EESH_MOCK || test.type === TestType.THOUSAND)
+      throw new ForbiddenException('Энэ шалгалтын хариуг харах эрхгүй');
+    const [planned, done, assigned] = await Promise.all([
+      this.prisma.lessonTopic.findFirst({ where: { testIds: { has: testId } }, select: { id: true } }),
+      this.prisma.classTestSession.findFirst({ where: { testId }, select: { id: true } }),
+      this.prisma.testAccess.findFirst({
+        where: {
+          testId,
+          classroom: {
+            archived: false,
+            OR: [{ teacherId: actor.userId }, { assistantTeacherId: actor.userId }],
+          },
+        },
+        select: { testId: true },
+      }),
+    ]);
+    if (!planned && !done && !assigned)
+      throw new ForbiddenException('Энэ тест хуваарьт ороогүй байна');
+  }
+
+  /**
    * GET /schedule/test-problems?testId= — хуваарийн цонхноос тестийн бодлогуудыг
    * НЭГ хуудсанд, хариутай нь (зөвхөн ажилтан; эзэн 2026-10-31). Шинжилгээ үгүй.
    */
   async testProblems(actor: Actor, testId: string) {
     this.assertStaff(actor);
+    await this.assertCanSeeAnswers(actor, testId);
     const meta = (await this.testsMeta([testId])).get(testId);
     if (!meta || !meta.available) throw new BadRequestException('Тест олдсонгүй');
     const rows = await this.prisma.problem.findMany({
