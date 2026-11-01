@@ -7,6 +7,7 @@ import '../../../app/shell/app_shell.dart';
 import '../../../core/files/files.dart';
 import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/solution/solution.dart';
 import '../../exam/data/exam_models.dart' show ChoiceMode;
 import '../application/study_review_controller.dart';
 import '../data/study_models.dart';
@@ -415,7 +416,7 @@ class _Reveal extends StatelessWidget {
         if (keyText != null && keyText.isNotEmpty) MathText(keyText),
         if ((item.solution ?? '').isNotEmpty) ...[
           const SizedBox(height: AppSpace.sm),
-          MathText(item.solution!),
+          SolutionView(source: item.solution, showTitle: false),
         ] else
           Text('Бичгэн тайлбар оруулаагүй', style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
         const SizedBox(height: AppSpace.sm),

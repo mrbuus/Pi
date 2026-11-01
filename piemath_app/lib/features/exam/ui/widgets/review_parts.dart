@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/math/math.dart';
 import '../../../../core/ui/ui.dart';
+import '../../../../shared/solution/solution.dart';
 import '../../data/exam_models.dart';
 import '../exam_icons.dart';
 import 'answer_inputs.dart';
@@ -88,7 +89,7 @@ class ReviewProblemCard extends StatelessWidget {
                 childrenPadding: const EdgeInsets.only(bottom: AppSpace.sm),
                 expandedCrossAxisAlignment: CrossAxisAlignment.start,
                 title: Text('Бодолт', style: context.text.titleSmall?.copyWith(color: c.brand)),
-                children: [MathText(p.solution!)],
+                children: [SolutionView(source: p.solution, showTitle: false)],
               ),
             ),
           if (p.youtube != null)
