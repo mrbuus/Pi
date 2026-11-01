@@ -41,6 +41,10 @@ final tokenHolderProvider = Provider<TokenHolder>((ref) => TokenHolder());
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 
+/// Гарах/хугацаа дуусах үед ажиллах цэвэрлэгээ (жишээ: шалгалтын офлайн ноорог).
+/// core нь feature-ийг импортлохгүйн тулд app/bootstrap-д override хийнэ (SECURITY §3).
+final signOutCleanupsProvider = Provider<List<Future<void> Function()>>((ref) => const []);
+
 final sessionProvider = NotifierProvider<SessionController, SessionState>(SessionController.new);
 
 class SessionController extends Notifier<SessionState> {
@@ -121,6 +125,13 @@ class SessionController extends Notifier<SessionState> {
   Future<void> _clear() async {
     _holder.set(null);
     await _store.clear();
+    for (final cleanup in ref.read(signOutCleanupsProvider)) {
+      try {
+        await cleanup();
+      } on Object {
+        // Цэвэрлэгээ бүтэлгүйтсэн ч гаралт заавал дуусна.
+      }
+    }
   }
 
   static CurrentUser _parseUser(Object? json) => CurrentUser.fromJson((json! as Map).cast<String, Object?>());
