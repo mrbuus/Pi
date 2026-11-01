@@ -8,6 +8,7 @@ import { FcmPushSender, readFcmConfig, type PushSender } from './push-sender';
 function makeDb() {
   return {
     deviceToken: {
+      findUnique: jest.fn().mockResolvedValue(null),
       upsert: jest.fn().mockResolvedValue({ id: 'd1', platform: 'ios', lastSeenAt: new Date() }),
       findMany: jest.fn().mockResolvedValue([]),
       updateMany: jest.fn().mockResolvedValue({ count: 1 }),

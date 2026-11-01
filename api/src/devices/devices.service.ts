@@ -23,6 +23,15 @@ export class DevicesService {
   async register(userId: string, dto: RegisterDeviceDto) {
     const token = dto.token.trim();
     const now = new Date();
+    // FCM/APNs токен нь тухайн суулгалтад л мэдэгдэх таамаглашгүй утга тул эзэмшигч нь
+    // утсыг барьж буй хүн. Эзэн солигдохыг (нэг утсанд өөр хүн нэвтэрсэн) аудитад үлдээнэ.
+    const previous = await this.prisma.deviceToken.findUnique({
+      where: { token },
+      select: { userId: true, revokedAt: true },
+    });
+    if (previous && previous.userId !== userId && !previous.revokedAt) {
+      this.logger.warn(`Төхөөрөмжийн токен эзэн солигдлоо: ${previous.userId} → ${userId}`);
+    }
     const row = await this.prisma.deviceToken.upsert({
       where: { token },
       create: {

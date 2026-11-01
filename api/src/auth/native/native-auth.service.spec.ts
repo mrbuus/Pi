@@ -142,36 +142,36 @@ describe('POST /auth/google/native', () => {
 });
 
 describe('POST /auth/apple', () => {
-  const base = { sub: 'apple-sub', email: 'bat@gmail.com', email_verified: 'true' };
+  const base = { sub: 'apple-sub', email: 'bat@gmail.com', email_verified: 'true', nonce: 'n-1' };
 
   it('тохируулаагүй бол 503', async () => {
     delete process.env.APPLE_CLIENT_IDS;
-    await expect(make().svc.appleLogin(appleToken(base))).rejects.toBeInstanceOf(ServiceUnavailableException);
+    await expect(make().svc.appleLogin(appleToken(base), 'n-1')).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 
   it('холбогдсон Apple бүртгэлд JWT өгнө (JWKS-ээр гарын үсэг шалгана)', async () => {
     const db = makeDb();
     db.appleIdentity.findUnique.mockResolvedValue({ id: 'a1', userId: 'u1', email: 'bat@gmail.com' });
     const { svc, fetcher } = make({ db });
-    expect(await svc.appleLogin(appleToken(base))).toMatchObject({ status: 'ok', userId: 'u1' });
+    expect(await svc.appleLogin(appleToken(base), 'n-1')).toMatchObject({ status: 'ok', userId: 'u1' });
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
 
   it('өөр түлхүүрээр зурсан токеныг татгалзана', async () => {
-    await expect(make().svc.appleLogin(appleToken(base, { key: other.privateKey }))).rejects.toBeInstanceOf(
+    await expect(make().svc.appleLogin(appleToken(base, { key: other.privateKey }), 'n-1')).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
   });
 
   it('өөр aud-тэй токеныг татгалзана', async () => {
-    await expect(make().svc.appleLogin(appleToken(base, { aud: 'com.evil.app' }))).rejects.toBeInstanceOf(
+    await expect(make().svc.appleLogin(appleToken(base, { aud: 'com.evil.app' }), 'n-1')).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
   });
 
   it('үл мэдэгдэх kid бол JWKS-ийг дахин татаад олдохгүй бол 401', async () => {
     const { svc, fetcher } = make();
-    await expect(svc.appleLogin(appleToken(base, { kid: 'unknown' }))).rejects.toBeInstanceOf(
+    await expect(svc.appleLogin(appleToken(base, { kid: 'unknown' }), 'n-1')).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
     // Эхний татлага + сэлгэлтийн нэг дахин татлага (минутын хязгаартай)
@@ -191,21 +191,31 @@ describe('POST /auth/apple', () => {
     );
   });
 
-  it('баталгаажсан имэйл бүртгэлтэй таарвал автоматаар холбоно', async () => {
+  it('имэйл таарсан ч автоматаар ХОЛБОХГҮЙ (pre-hijacking) → not_linked', async () => {
     const db = makeDb();
     db.user.findFirst.mockResolvedValue({ id: 'u1', appleIdentity: null });
-    const res = await make({ db }).svc.appleLogin(appleToken(base));
-    expect(db.appleIdentity.create).toHaveBeenCalledWith({
-      data: { userId: 'u1', appleSubject: 'apple-sub', email: 'bat@gmail.com' },
-    });
-    expect(res.status).toBe('ok');
+    const res = await make({ db }).svc.appleLogin(appleToken(base), 'n-1');
+    expect(res).toEqual({ status: 'not_linked' });
+    expect(db.appleIdentity.create).not.toHaveBeenCalled();
+  });
+
+  it('nonce-гүй токеныг татгалзана', async () => {
+    const { svc } = make();
+    await expect(svc.appleLogin(appleToken(base))).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('нэг токеныг хоёр дахь удаа ашиглахгүй (replay)', async () => {
+    const db = makeDb();
+    db.appleIdentity.findUnique.mockResolvedValue({ id: 'a1', userId: 'u1', email: 'bat@gmail.com' });
+    const { svc } = make({ db });
+    const token = appleToken(base);
+    await svc.appleLogin(token, 'n-1');
+    await expect(svc.appleLogin(token, 'n-1')).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
   it('privaterelay имэйлээр холбохгүй, бүртгэл үүсгэхгүй → not_linked', async () => {
     const db = makeDb();
-    const res = await make({ db }).svc.appleLogin(
-      appleToken({ ...base, email: 'x@privaterelay.appleid.com' }),
-    );
+    const res = await make({ db }).svc.appleLogin(appleToken({ ...base, email: 'x@privaterelay.appleid.com' }), 'n-1');
     expect(res).toEqual({ status: 'not_linked' });
     expect(db.user.findFirst).not.toHaveBeenCalled();
     expect(db.appleIdentity.create).not.toHaveBeenCalled();
@@ -214,7 +224,7 @@ describe('POST /auth/apple', () => {
   it('холбох: өөр хэрэглэгчид холбогдсон Apple бол taken', async () => {
     const db = makeDb();
     db.appleIdentity.findUnique.mockResolvedValue({ id: 'a1', userId: 'u2' });
-    expect(await make({ db }).svc.appleLink('u1', appleToken(base))).toEqual({ result: 'taken' });
+    expect(await make({ db }).svc.appleLink('u1', appleToken(base), 'n-1')).toEqual({ result: 'taken' });
     expect(db.appleIdentity.upsert).not.toHaveBeenCalled();
   });
 });

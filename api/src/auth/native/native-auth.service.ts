@@ -84,6 +84,17 @@ export class NativeAuthService {
   /** Модулийн JwtService нь өөрийн secret-ийг давуу үздэг тул Apple-д тусдаа (түлхүүргүй) */
   private readonly rsaJwt = new JwtService({});
   private jwksCache: { keys: JsonWebKey[]; at: number } | null = null;
+  /** Ашигласан Apple токен (sha256) → хугацаа дуусах мс. Нэг токеныг 2 удаа ашиглахгүй (replay). */
+  private readonly usedAppleTokens = new Map<string, number>();
+
+  private consumeOnce(token: string, exp: unknown) {
+    const now = Date.now();
+    for (const [k, until] of this.usedAppleTokens) if (until <= now) this.usedAppleTokens.delete(k);
+    const key = createHash('sha256').update(token).digest('hex');
+    if (this.usedAppleTokens.has(key)) throw new UnauthorizedException('Apple нэвтрэлтийг дахин эхлүүлнэ үү');
+    const until = typeof exp === 'number' ? exp * 1000 : now + 10 * 60_000;
+    this.usedAppleTokens.set(key, until);
+  }
 
   constructor(
     private prisma: PrismaService,
@@ -209,7 +220,10 @@ export class NativeAuthService {
       throw invalid();
     }
     if (typeof payload.sub !== 'string' || !payload.sub) throw invalid();
-    if (nonce) {
+    // nonce ЗААВАЛ: өөр газраас (өөр апп, сайт) олж авсан токеныг энд ашиглахаас сэргийлнэ.
+    if (!nonce) throw invalid();
+    this.consumeOnce(identityToken, payload.exp);
+    {
       // Апп nonce-ийг шууд эсвэл SHA-256 hex хэлбэрээр Apple-д дамжуулдаг
       const hashed = createHash('sha256').update(nonce).digest('hex');
       if (payload.nonce !== nonce && payload.nonce !== hashed) throw invalid();
@@ -236,19 +250,8 @@ export class NativeAuthService {
       }
       return this.issue(identity.userId, remember);
     }
-    // Баталгаажсан, бодит (privaterelay биш) имэйл нь бүртгэлтэй таарвал автоматаар холбоно
-    if (claims.email && claims.emailVerified && !claims.email.endsWith('@privaterelay.appleid.com')) {
-      const user = await this.prisma.user.findFirst({
-        where: { email: { equals: claims.email, mode: 'insensitive' } },
-        select: { id: true, appleIdentity: { select: { id: true } } },
-      });
-      if (user && !user.appleIdentity) {
-        await this.prisma.appleIdentity.create({
-          data: { userId: user.id, appleSubject: claims.sub, email: claims.email },
-        });
-        return this.issue(user.id, remember);
-      }
-    }
+    // Имэйлээр автоматаар ХОЛБОХГҮЙ: манай бүртгэлийн имэйл баталгаажаагүй тул хэн нэгэн
+    // бусдын имэйлээр урьдчилан бүртгэл үүсгэж хулгайлах (pre-hijacking) боломжтой.
     // Apple-ээр бүртгэл үүсгэхгүй — утсаараа нэвтэрч профайлаасаа холбоно.
     return { status: 'not_linked' };
   }
