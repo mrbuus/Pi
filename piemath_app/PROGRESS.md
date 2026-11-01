@@ -8,7 +8,7 @@
 - Milestone: **M0 дууссан, M2 дууссан.** Дараа нь M1, M3, M4, M5, M7, M8 — зэрэгцээ agent-уудаар (доор «Ажлын хэв маяг»)
 - Branch: `piemath-app` (суурь: прод `4d3b648` + номын QR S1)
 - Flutter 3.47.9 stable / Dart 3.13.7 (cloud: `~/flutter`, `export PATH=~/flutter/bin:$PATH`)
-- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 252/252 ногоон
+- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 294/294 ногоон
 - Ноорог PR (зөвхөн CI, merge хийхгүй): https://github.com/mrbuus/Pi/pull/53
 
 ## Ажлын хэв маяг — зэрэгцээ agent (эзэн 2026-11-01)
@@ -48,6 +48,19 @@
 | 6 | Шинэ домэйн (piemath) авах уу — `API_BASE_URL` солих | — | — |
 
 ## Бичлэгүүд
+
+### 2026-11-01 — M1 нэвтрэлт, профайл (agent, `3361d4b`)
+
+- `/login` (нэг талбар, нууц үг харах, «Намайг сана» өгөгдмөл чагттай, 2 алдааны дараа «Нууц үгээ сэргээх» тод,
+  login-text зарлал, сүүлийн нэвтрэх нэрийг secure storage-д), `/forgot-password` (2 алхам + имэйлийн `#t=` холбоос,
+  60с дахин илгээх, «код ирэхгүй» тусламж), нууц үгийн бодлого (= `password-policy.ts`), `/app/profile`,
+  `/app/password` (`replaceToken`), `/app/consent` (gate унтраалттай, вэбтэй ижил). 42 шинэ тест, 3 golden.
+- Тест бичихэд: `loginPrefsProvider`-ийг `MemoryLoginPrefs`-ээр override; `test/features/auth/auth_test_helpers.dart`
+  (`pumpAuthApp`, `settle`) бүтэн апп-ын тестэд дахин ашиглаж болно.
+- Нээлттэй: нууц үг сольсны дараах токен 7 хоног (30 биш) — эзний шийдвэр; имэйлийн холбоосыг app link болгох;
+  профайлын зураг солих (core/files-ийн дараа); Google холбох (M6).
+- Mac/төхөөрөмж: autofill (нэвтрэх нэр, нууц үг, нэг удаагийн код), жижиг утсанд гар талбарыг хаахгүй, iOS Keychain.
+- M8 багшийн agent эхэлсэн (`3361d4b` дээр).
 
 ### 2026-11-01 — M0.4, M0.5, M0.6, M2, API гэрээ (cloud session, зэрэгцээ agent)
 

@@ -10,9 +10,10 @@
 
 | Вэб зам | Хэн | Апп | Milestone | Төлөв |
 |---|---|---|---|---|
-| `/login`, `/forgot-password`, `/register`, `/teacher-register` | Н | Нэвтрэх, сэргээх, бүртгүүлэх | M1 | — |
+| `/login`, `/forgot-password` | Н | Нэвтрэх, сэргээх | M1 | ✅ |
+| `/register`, `/teacher-register` | Н | Бүртгүүлэх — вэбээр (эзний шийдвэр хүлээгдэж буй) | M1 | ↗ |
 | `/auth/google` | Н | Google native | M6 | — |
-| `/app/consent`, `/terms`, `/privacy` | бүгд | Зөвшөөрөл, нөхцөл, нууцлал | M1 | — |
+| `/app/consent`, `/terms`, `/privacy` | бүгд | Зөвшөөрөл (gate унтраалттай), нөхцөл/нууцлал вэбээр | M1 | ✅ |
 | `/books`, `/books/[code]` | Н, С, Х | Номын каталог, үнэгүй тест | M5 | — |
 | `/sorils`, `/placement` | Н, С | Жишиг сорил, түвшин тогтоох | M5 | — |
 | `/tools`, `/app/tools` | бүгд | Хэрэглэгдэхүүн | M5 | — |
@@ -42,7 +43,7 @@
 | `/app/makeup` | Нөхөх хичээл | M3 | — |
 | `/app/student/payments`, `/app/payments` (сурагчийн хэсэг) | Төлбөрийн төлөв, данс хуулах | M3 | — |
 | `/app/store`, `/app/buyer` | Дэлгүүр, худалдан авалт | M5 | — |
-| `/app/profile`, `/app/password` | Профайл, нууц үг | M1 | — |
+| `/app/profile`, `/app/password` | Профайл, нууц үг | M1 | ✅ |
 | `/app/feedback`, `/app/support` | Санал хүсэлт, тусламж | M3 | — |
 | `/app/lesson-flow/my` | Хичээлийн урсгал | M3 | — |
 
