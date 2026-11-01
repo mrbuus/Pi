@@ -35,7 +35,13 @@ export function primaryEnrollment<
   return live.find((e) => !/нийгэм/i.test(e.classroom.name)) ?? live[0] ?? enrollments[0] ?? null;
 }
 
-/** Анги бүр 7 хоногт хэдэн өдөр ордог — одоо хүчинтэй хуваарийн давхардаагүй гараг. */
+/**
+ * Анги бүр 7 хоногт хэдэн өдөр ордог — ТОГТМОЛ хэв маягаар (дуусах огноогүй
+ * мөрийн давхардаагүй гараг). «Одоо хүчинтэй» мөрөөр тоолбол гараг солиход
+ * завсарт нэг өдөр дутна: хуучин мөр өнөөдөр хаагдаж, шинэ нь маргаашаас
+ * эхэлдэг (2026-11-01: 12-9-ийн Бямба → Ням, 6 анги «3 өдөр» болж 300 мянга
+ * гарсан). Тогтмол мөргүй (бүгд түр) ангид одоо хүчинтэйгээр.
+ */
 export async function classDays(
   prisma: PrismaService,
   classroomIds: string[],
@@ -46,13 +52,20 @@ export async function classDays(
   const rows = await prisma.classSchedule.findMany({
     where: {
       classroomId: { in: [...new Set(classroomIds)] },
-      effectiveFrom: { lte: now },
       OR: [{ effectiveTo: null }, { effectiveTo: { gt: now } }],
     },
-    select: { classroomId: true, weekday: true },
-    distinct: ['classroomId', 'weekday'],
+    select: { classroomId: true, weekday: true, effectiveFrom: true, effectiveTo: true },
   });
-  for (const r of rows) out.set(r.classroomId, (out.get(r.classroomId) ?? 0) + 1);
+  const open = new Map<string, Set<number>>();
+  const current = new Map<string, Set<number>>();
+  const add = (m: Map<string, Set<number>>, id: string, wd: number) =>
+    (m.get(id) ?? m.set(id, new Set()).get(id)!).add(wd);
+  for (const r of rows) {
+    if (!r.effectiveTo) add(open, r.classroomId, r.weekday);
+    if (r.effectiveFrom <= now) add(current, r.classroomId, r.weekday);
+  }
+  for (const id of new Set(rows.map((r) => r.classroomId)))
+    out.set(id, (open.get(id) ?? current.get(id))?.size ?? 0);
   return out;
 }
 
