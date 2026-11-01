@@ -7,6 +7,7 @@ import '../../../core/math/math.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/solution/solution.dart';
 import '../../exam/data/exam_models.dart' show ProblemFormat;
 import '../../exam/domain/fill_slots.dart';
 import '../../exam/ui/widgets/answer_inputs.dart';
@@ -253,7 +254,10 @@ class _MistakeDetailState extends ConsumerState<MistakeDetail> {
                   ),
                 if ((_item.solutionOutline ?? '').isNotEmpty) ...[
                   if (correct != null) const SizedBox(height: AppSpace.md),
-                  MathText(_item.solutionOutline!),
+                  SolutionView(
+                    source: _item.solutionOutline,
+                    formulas: [for (final f in _item.formulas) SolutionFormulaRef(slug: f.slug, title: f.title)],
+                  ),
                 ],
               ],
             ),

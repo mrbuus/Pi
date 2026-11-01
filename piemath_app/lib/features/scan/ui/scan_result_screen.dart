@@ -8,6 +8,7 @@ import '../../../core/files/file_image.dart';
 import '../../../core/math/math.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/solution/solution.dart';
 import '../data/scan_result.dart';
 import '../domain/lock_message.dart';
 import '../domain/scan_code.dart';
@@ -226,9 +227,7 @@ class _ScanBody extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Бодолт', style: context.text.titleSmall?.copyWith(color: c.brandSoft)),
-                  const SizedBox(height: AppSpace.sm),
-                  MathText(data.solution!),
+                  SolutionView(source: data.solution),
                 ],
               ),
             ),
