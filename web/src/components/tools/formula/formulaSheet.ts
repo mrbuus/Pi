@@ -16,6 +16,16 @@ export interface SheetExample {
   answer: string;
 }
 
+/** Мэдлэггүй хүнд зориулсан энгийн тайлбар (docs/v2/TOMYO-ENGIIN-TAILBAR.md). \\colA{…}–\\colD{…} = өнгө */
+export interface SheetSimple {
+  say: string;
+  formula: string;
+  parts: { tex: string; mean: string }[];
+  steps: string[];
+  example: SheetExample;
+  watch?: string;
+}
+
 export interface SheetFormula {
   slug: string;
   title: string;
@@ -34,6 +44,7 @@ export interface SheetFormula {
   keywords: string[];
   widget: string | null;
   variants?: { label: string; latex: string }[];
+  simple?: SheetSimple;
 }
 
 export interface SheetSection {
@@ -126,11 +137,33 @@ export function parseSheet(json: unknown): FormulaSheet | null {
       keywords: strArr(f.keywords),
       widget: isStr(f.widget) && f.widget ? f.widget : null,
       variants: variants.length ? variants : undefined,
+      simple: parseSimple(f.simple),
     });
   }
   sections.sort((a, b) => a.order - b.order);
   for (const s of sections) s.count = formulas.filter((f) => f.section === s.slug).length;
   return { version: typeof raw.version === "number" ? raw.version : 1, sections, formulas };
+}
+
+/** Энгийн тайлбарыг шалгаж авна; дутуу бол undefined (карт хуучин хэлбэрээр) */
+function parseSimple(v: unknown): SheetSimple | undefined {
+  if (!v || typeof v !== "object") return undefined;
+  const o = v as Record<string, unknown>;
+  const ex = o.example as Record<string, unknown> | undefined;
+  if (!isStr(o.say) || !isStr(o.formula) || !ex || !isStr(ex.problem)) return undefined;
+  const steps = strArr(o.steps);
+  if (!steps.length) return undefined;
+  const parts = Array.isArray(o.parts)
+    ? (o.parts as Record<string, unknown>[]).filter((p) => p && isStr(p.tex)).map((p) => ({ tex: p.tex as string, mean: isStr(p.mean) ? p.mean : "" }))
+    : [];
+  return {
+    say: o.say,
+    formula: o.formula,
+    parts,
+    steps,
+    example: { problem: ex.problem as string, steps: strArr(ex.steps), answer: isStr(ex.answer) ? ex.answer : "" },
+    watch: isStr(o.watch) && o.watch.trim() ? o.watch : undefined,
+  };
 }
 
 /** Бүрэн бүтэн байдлын шалгалт (тест, скрипт): алдааны жагсаалт, хоосон бол зөв */

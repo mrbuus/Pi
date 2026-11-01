@@ -29,7 +29,8 @@ import {
 let sheetPromise: Promise<FormulaSheet> | null = null;
 function loadSheet(): Promise<FormulaSheet> {
   if (!sheetPromise) {
-    sheetPromise = fetch("/tools/formulas.json", { cache: "force-cache" })
+    // no-cache: ETag-аар шалгана (өөрчлөгдөөгүй бол 304, хурдан) — deploy-ийн дараа шинэ тайлбар шууд харагдана
+    sheetPromise = fetch("/tools/formulas.json", { cache: "no-cache" })
       .then((r) => {
         if (!r.ok) throw new Error("status");
         return r.json();

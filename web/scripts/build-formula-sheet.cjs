@@ -100,6 +100,18 @@ function main() {
       const general = str(f.general);
       if (general && general !== latex) out.general = general;
       if (variants.length) out.variants = variants;
+      // Энгийн тайлбар (web/scripts/check-formula-simple.cjs-ээр шалгагдсан)
+      const sm = f.simple;
+      if (sm && str(sm.say) && str(sm.formula) && Array.isArray(sm.steps) && sm.example) {
+        out.simple = {
+          say: str(sm.say),
+          formula: str(sm.formula),
+          parts: (Array.isArray(sm.parts) ? sm.parts : []).filter((x) => x && str(x.tex)).map((x) => ({ tex: str(x.tex), mean: str(x.mean) })),
+          steps: strArr(sm.steps),
+          example: { problem: str(sm.example.problem), steps: strArr(sm.example.steps), answer: str(sm.example.answer) },
+        };
+        if (str(sm.watch)) out.simple.watch = str(sm.watch);
+      }
       formulas.push(out);
     });
   }
