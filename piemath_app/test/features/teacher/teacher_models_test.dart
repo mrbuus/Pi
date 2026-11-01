@@ -57,15 +57,15 @@ void main() {
 
   test('Төлөвийн хөрвүүлэлт буцаж ижил', () {
     for (final s in AttendanceStatus.values) {
-      expect(AttendanceStatus.fromApi(s.api), s);
+      expect(attendanceFromApi(s.api), s);
     }
     for (final s in HomeworkStatus.values) {
-      expect(HomeworkStatus.fromApi(s.api), s);
+      expect(homeworkFromApi(s.api), s);
     }
     for (final r in LateRange.values) {
-      expect(LateRange.fromApi(r.api), r);
+      expect(lateRangeFromApi(r.api), r);
     }
-    expect(AttendanceStatus.fromApi('SICK'), isNull);
+    expect(attendanceFromApi('SICK'), isNull);
   });
 
   test('AssignmentSummary: шалгах хүлээгдэж буй тоо', () {
