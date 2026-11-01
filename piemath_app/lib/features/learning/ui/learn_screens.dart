@@ -228,7 +228,7 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
   Widget build(BuildContext context) {
     final l = widget.lesson;
     final images = ref.watch(fileImageProvider);
-    final empty = l.theories.isEmpty && l.videos.isEmpty && l.tests.isEmpty;
+    final empty = l.theories.isEmpty && l.videos.isEmpty && l.tests.isEmpty && l.problemCount == 0;
     return ListView(
       padding: const EdgeInsets.all(AppSpace.gutter),
       children: [
@@ -272,6 +272,29 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
             VideoTile(video: v, watched: _started.contains(v.id), onStarted: () => _videoStarted(v)),
             const SizedBox(height: AppSpace.sm),
           ],
+        ],
+        if (l.problemCount > 0) ...[
+          const SizedBox(height: AppSpace.xl),
+          const SectionHeader(title: 'Бодлого', padding: EdgeInsets.only(bottom: AppSpace.sm)),
+          AppCard(
+            onTap: () => context.push('/app/library/${Uri.encodeComponent(l.chapterId)}/problems'),
+            child: Row(
+              children: [
+                Icon(LearningIcons.problems, color: context.colors.brand),
+                const SizedBox(width: AppSpace.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Бүлгийн бодлогууд', style: context.text.titleSmall),
+                      Text('${l.problemCount} бодлого', style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+                    ],
+                  ),
+                ),
+                Icon(AppIcons.forward, color: context.colors.inkDim),
+              ],
+            ),
+          ),
         ],
         if (l.tests.isNotEmpty) ...[
           const SizedBox(height: AppSpace.xl),

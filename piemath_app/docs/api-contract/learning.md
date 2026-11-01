@@ -91,14 +91,24 @@ OPEN → мөр. (`gradeAnswer(problem, answer)` choiceOrder-гүй.) Сонго
 
 ## 4. Хичээл, номын сан, видео (`/app/learn`, `/app/library`, `/app/videos`)
 
-- `GET /lessons/chapters?subject=&bookId=` → `[{ id, title, order, grade?, freePreview, bookId?, book?: { id?, code, title, displayName? }, progress?: { percent?, stepsDone?, stepsTotal?, lastOpenedAt? } }]`.
-- `GET /lessons/:chapterId` → `{ chapter, theories: [{ id, title, content, imageKeys, order, freePreview? }], videos: [{ id, title, s3Key, duration? }],
-  problemCount, tests: [{ id, title, type, timeLimitMin?, price?, variantLabel? }], progress?: { theoryIds?, videoIds?, problemsOpened?, testIds? } }`.
-  `theories[].content` — markdown + LaTeX (`SafeMarkdown`-аар). Эрхгүй бүлэгт 403 ★.
-- `POST /lessons/:chapterId/progress` `{ action: THEORY_VIEWED|VIDEO_STARTED|VIDEO_COMPLETED|PROBLEMS_OPENED, theoryId?, videoId? }`.
-- ТОДРУУЛАХ: вэбийн `components/lesson/types.ts` өөрөө «progress-ийн бүтэц таамагласан» гэж бичсэн — `lessons.service.ts`
-  (`getLesson`, `listChaptersWithLessons`)-ээс апп бичихээс өмнө баталгаажуул; бүх progress талбарыг optional-оор уншина.
+- `GET /lessons/chapters?subject=&bookId=` (бодит хэлбэр, `lessons.service.ts` `listChaptersWithLessons`) →
+  `[{ id, title, order, grade, book: { code, title, displayName, subject }, theoryCount, videoCount, theoriesRead, videosWatched, completed }]`.
+  `freePreview`, `bookId`, `progress{percent,stepsDone}` ГЭСЭН талбар БАЙХГҮЙ (өмнөх хувилбар таамагласан). Явц = `(theoriesRead + videosWatched) / (theoryCount + videoCount)`
+  (тоолуурыг бүлгийн тооноос хэтрүүлэхгүй); `completed` — сервер тооцсон. `videoCount` нь бичлэгийн эрхгүй бол 0.
+  `videosWatched` зөвхөн `VIDEO_COMPLETED` үйл явдлыг тоолно (`VIDEO_STARTED` тоологдохгүй).
+- `GET /lessons/:chapterId` → `{ chapter: { id, title, book }, theories: [{ id, title, content, imageKeys, order }], videos: [{ id, title, url|s3Key, duration?, media?: { embedUrl }, unavailable? }],
+  problemCount, tests: [{ id, title, type, problemCount }], progress: { theoryRead: string[], videosWatched: string[], problemsAttempted: number } }`.
+  `theories[].content` — markdown + LaTeX. Эрхгүй бүлэгт 403 (сервер монгол тайлбар өгнө).
+- `POST /lessons/:chapterId/progress` `{ action, theoryId?, videoId? }`, `action` ∈ **`THEORY_READ`** (`theoryId` заавал), **`VIDEO_STARTED`**, **`VIDEO_COMPLETED`**
+  (`videoId` заавал). Хуучин `THEORY_VIEWED`, `PROBLEMS_OPENED` БАЙХГҮЙ. Хариу ҮРГЭЛЖ 202 `{ accepted: true }` (бичилт алдаатай ч); дутуу id-д 400.
+  `THEORY_READ` нь `LearningEvent PAGE_VIEW` болж `progress.theoryRead`-д орно. Апп `VIDEO_STARTED`-ыг товшилтоор илгээнэ; `VIDEO_COMPLETED`-ыг
+  гадаад тоглуулагчаас мэдэх боломжгүй тул илгээхгүй (тиймээс «бичлэг үзсэн» тоо апп-аас өсөхгүй) ★.
 - Номын сан: `GET /books?subject=`, `GET /chapters?bookId=` (вэб `library/page.tsx`) — part 1 онолын гэрээтэй давхцана ★.
+  Апп бүлгийн жагсаалтыг `GET /lessons/chapters`-аас авна.
+- Бүлгийн бодлого (`/app/library/:chapterId/problems`): `GET /chapters/:id/problems?skip=0&take=50` (`take` ≤ 100, нийт тоо ИРЭХГҮЙ — хуудас дүүрэн ирвэл үргэлжлүүлнэ) →
+  `[{ id, number, page, statementText, imageKey, format, choices: string[]|null, choiceOptions: [{ label, text, imageKey }], youtubeUrl, variantLabel, tags, formulas }]`.
+  Сурагчид `correctAnswer`, `analysis`, `version` ирэхгүй; `youtubeUrl` бичлэгийн эрхгүй бол `null`. Ангийн сурагчид зөвхөн нээгдсэн тестийн бодлого.
+  Эрхгүй бол 403, бүлэг устсан бол 404 (монгол тайлбартай).
   **Номын `code`-ийг сурагчид бүү харуул** (`displayName ?? title`).
 - Видео: `GET /videos?chapterId=`, `GET /videos/chapters`, `GET /videos/problem` ★, `POST /videos/:id/open` (тоглуулах холбоос/эрх; вэб
   `ProblemVideoDisclosure`). Видео файл `/files/:s3Key`-ээр (S3 → 302 presigned, exam.md §7) — урсгал (stream) тоглуулагч Range header
@@ -113,21 +123,24 @@ OPEN → мөр. (`gradeAnswer(problem, answer)` choiceOrder-гүй.) Сонго
 ## 6. Зорилго, бэлэн байдал, идэвх
 
 - Зорилго (`/app/goals`, STUDENT): `GET /goals`, `POST /goals` `{ title, description?, targetDate? (ISO), status?: TaskStatus, subject?: MATH|SOCIAL_STUDIES|SAT }`,
-  `PATCH /goals/:id` (бүх талбар сонголттой), `DELETE /goals/:id` ★ (устгал хатуу/зөөлөн эсэхийг шалга).
+  `PATCH /goals/:id` (бүх талбар сонголттой; `targetDate: null` бол огноог арилгана), `DELETE /goals/:id` → `{ ok: true }` — **ХАТУУ устгал** (`prisma.studentGoal.delete`),
+  тиймээс апп хэрэглэхгүй: оронд нь `status: "CANCELLED"`. Хариу: `{ id, title, description, targetDate (ISO), status, subject, createdAt, updatedAt }`.
+  `TaskStatus` ∈ PLANNED|IN_PROGRESS|DONE|BLOCKED|CANCELLED. Бусдын зорилгод 404 «Зорилго олдсонгүй».
 - ЭЕШ бэлэн байдал (`/app/readiness`): `GET /readiness/my` (STUDENT), `GET /readiness/student/:id` (эцэг эх, ажилтан) →
   `{ index (0–100), low, high, dataPoints, effectiveDataPoints, coverage, topics: [{ topic, title, mastery: number|null, measured, weight, attempts, effectiveAttempts, trend: UP|DOWN|FLAT }] }`.
+  Нэмэлт: `nextBestTopics` (сул тал × ЭЕШ-ийн жингээр эхний 3 сэдэв, `topics`-тэй ижил хэлбэр), `weeklyHistory: [{ week: "YYYY-MM-DD", index, coverage }]` (8 долоо хоног; `coverage` 0 бол хэмжилтгүй). `topic` нь кодын нэр (ALG, DERIV), `title` монгол.
   Тооцоолол серверт — апп зөвхөн харуулна (`low..high` муж = тодорхойгүй байдал; «таамаг» гэж хэт итгэлтэй бүү харуул).
 - Идэвх: `GET /activity/me?year=` → `{ year, totalActiveDays, days: [{ date: "YYYY-MM-DD", count, level, isHoliday, isClassDay }] }` (бүтэн жил —
-  ~365 мөр; `compute()` хэрэггүй, гэхдээ кэшлэ); `GET /activity/streak` → `{ currentStreak, longestStreak, totalActiveDays }`.
+  ~365 мөр; `level` 0-4: 0, 1-3, 4-7, 8-14, 15+ бодлого). `GET /activity/streak` байдаг ч апп ашиглахгүй (UX-RESEARCH §10: дарамттай дараалал).
 
 ## 7. Сурагчид хамааралгүй (PARITY засвар)
 
-- `/app/planner` — ажилтны даалгаврын самбар (`/tasks/*`, `staff-directory`), сурагчийн «төлөвлөгч» БИШ → M9/`↗`.
+- `/app/planner` — ажилтны даалгаврын самбар (`/tasks/*`, `staff-directory`), сурагчийн «төлөвлөгч» БИШ → M9/`↗`. Сурагчийн төлөвлөгч нь `/app/goals` (`StudentGoal`).
 - `/app/insights` — багшийн аналитик (`/insights/distractor-analysis|problem-quality|topic-mastery`) **[хүнд]** → M9/`↗`.
 - `/app/results-ranking` → `/app/tests?tab=rank` redirect (exam.md §1.5 `GET /test-rankings/:testId`).
 - Гэрийн даалгаврын B хувилбар (`/homework/my`, `/homework/attempts*`, `/homework/photos*`) — part 1 (homework) гэрээ.
 
 ## ТОДРУУЛАХ
 
-1. ★ тэмдэгтэй endpoint-уудын бүтэн хэлбэр (lessons progress, videos, formulas query, study-review history, goals delete) — тухайн дэлгэцийг бичихэд.
+1. ★ тэмдэгтэй endpoint-уудын бүтэн хэлбэр (videos, formulas query, study-review history) — тухайн дэлгэцийг бичихэд. Lessons progress, goals delete, chapter problems — 2026-11-02 баталгаажсан.
 2. Алдааны дэвтрийн retry-д сонголтын зураг (`choiceImages`) ирдэггүй — зурагтай сонголттой бодлогыг апп-д яаж харуулах ([A] эсвэл зөвхөн бичвэр).

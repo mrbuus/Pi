@@ -203,6 +203,10 @@ void main() {
     expect(find.byType(StudyHubScreen), findsOneWidget);
     expect(find.text('Өнөөдөр 2 бодлого давтахаар байна'), findsOneWidget);
     expect(find.text('Томьёоны сан'), findsOneWidget);
+    for (final t in ['Зорилго', 'Бэлэн байдал', 'Идэвх']) {
+      await tester.scrollUntilVisible(find.text(t), 200, scrollable: find.byType(Scrollable).first);
+      expect(find.text(t), findsOneWidget);
+    }
     expect(find.textContaining('streak', findRichText: true), findsNothing);
   });
 }

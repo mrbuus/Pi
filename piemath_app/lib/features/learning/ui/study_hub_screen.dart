@@ -26,6 +26,9 @@ class StudyHubScreen extends ConsumerWidget {
       const _Tile('Хичээл үзэх', 'Онол, бичлэг, сэдвийн тест', LearningIcons.lesson, '/app/learn'),
       const _Tile('Томьёоны сан', 'Хайх, дэлгэрэнгүй үзэх', LearningIcons.formula, '/app/formulas'),
       const _Tile('Онлайн хичээл', 'Сэдвээр бичлэг үзэх', AppIcons.video, '/app/videos'),
+      const _Tile('Зорилго', 'Өөрийн зорилго, хугацаа', AppIcons.goal, '/app/goals'),
+      const _Tile('Бэлэн байдал', 'Сэдэв бүрийн баримжаа', LearningIcons.readiness, '/app/readiness'),
+      const _Tile('Идэвх', 'Өдөр бүр бодсон бодлого', LearningIcons.activity, '/app/activity'),
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('Суралцах')),

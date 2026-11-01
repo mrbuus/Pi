@@ -18,4 +18,15 @@ abstract final class LearningIcons {
   static const IconData open = LucideIcons.externalLink;
   static const IconData library = LucideIcons.libraryBig;
   static const IconData practice = LucideIcons.dumbbell;
+  static const IconData add = LucideIcons.plus;
+  static const IconData blocked = LucideIcons.ban;
+  static const IconData cancelled = LucideIcons.circleX;
+  static const IconData inProgress = LucideIcons.circlePlay;
+  static const IconData trendUp = LucideIcons.trendingUp;
+  static const IconData trendDown = LucideIcons.trendingDown;
+  static const IconData trendFlat = LucideIcons.minus;
+  static const IconData readiness = LucideIcons.gauge;
+  static const IconData activity = LucideIcons.calendarCheck;
+  static const IconData edit = LucideIcons.pencil;
+  static const IconData problems = LucideIcons.listChecks;
 }
