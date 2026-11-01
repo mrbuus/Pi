@@ -18,6 +18,10 @@ on:
         description: "iOS debug build (macOS runner) ажиллуулах"
         type: boolean
         default: false
+      update_goldens:
+        description: "Golden PNG-г Linux дээр шинээр үүсгэж artifact болгон гаргах (commit хийхгүй)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -63,6 +67,37 @@ jobs:
 
       - name: Android debug APK
         run: flutter build apk --debug
+
+  # Golden зургийн эх нь Linux (фонтын растер платформоор ялгаатай). Mac дээр хөгжүүлэхэд
+  # шинэ/өөрчлөгдсөн golden-ыг энд үүсгээд `gh run download -n goldens`-ээр татаж commit хийнэ.
+  goldens:
+    name: Golden шинэчлэх (Linux)
+    if: github.event_name == 'workflow_dispatch' && inputs.update_goldens
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: piemath_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Сангууд
+        run: flutter pub get
+
+      - name: Golden үүсгэх
+        run: flutter test --tags golden --update-goldens
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldens
+          path: piemath_app/test/goldens/*.png
+          retention-days: 7
 
   ios:
     name: iOS debug build (codesign-гүй)
