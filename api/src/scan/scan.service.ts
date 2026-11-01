@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AttemptSessionStatus, Role, TestType } from '../generated/prisma/enums';
-import { collectContentScope } from '../common/access';
+import { collectContentScope, internalTeachingRole } from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
 import { choiceModeOf, choiceTextsOf, GradableProblem, hasKnownAnswer } from '../tests/grading';
 import {
@@ -12,8 +12,6 @@ import {
 import { resolveStudentReview } from '../thousand/thousand.service';
 import { decideScanAccess, ScanTestRow } from './scan-gate';
 import { normalizeScanCode } from './scan-code';
-
-const STAFF: ReadonlySet<Role> = new Set([Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER]);
 
 const ACCESS_REVIEW_SELECT = {
   classroomId: true,
@@ -68,8 +66,14 @@ export class ScanService {
     });
     if (!problem) throw new NotFoundException('Энэ QR кодтой бодлого олдсонгүй');
 
-    const staff = STAFF.has(role);
-    const tests = staff ? [] : await this.studentTestRows(problem.testItems.map((i) => i.test), userId, now);
+    // JWT-ийн role дээр бүү итгэ: гадны багш (TEACHER + externalTeacherProfile),
+    // архивласан ажилтан төвийн бодолтыг харахгүй — сурагчийн хаалтаар явна.
+    const staff = role !== Role.STUDENT && role !== Role.BUYER && role !== Role.PARENT
+      ? (await internalTeachingRole(this.prisma, userId)) !== null
+      : false;
+    const tests = staff
+      ? []
+      : await this.studentTestRows(problem.id, problem.testItems.map((i) => i.test), userId, now);
     const solution = problem.analysis?.solutionOutline ?? null;
     const access = decideScanAccess({
       staff,
@@ -133,6 +137,7 @@ export class ScanService {
 
   /** Бодлого орсон тест бүрд сурагч илгээсэн эсэх, 1000-ын тестэд эргэн харалтын түвшин. */
   private async studentTestRows(
+    problemId: string,
     tests: { id: string; type: TestType; chapterId: string | null; chapter: { bookId: string | null } | null }[],
     userId: string,
     now: Date,
@@ -141,9 +146,14 @@ export class ScanService {
     const testIds = tests.map((t) => t.id);
     const sessions = await this.prisma.testAttemptSession.findMany({
       where: { studentId: userId, testId: { in: testIds }, status: AttemptSessionStatus.SUBMITTED },
-      select: { testId: true, submittedAt: true },
+      select: { testId: true, submittedAt: true, problemOrder: true },
     });
     const submittedAt = new Map(sessions.map((s) => [s.testId, s.submittedAt]));
+    // /tests/:id/review нь session.problemOrder-оор шүүдэг — илгээсний дараа тестэд
+    // нэмэгдсэн (сурагчийн хараагүй) бодлогын бодолт нээгдэх ёсгүй.
+    const sawProblem = new Map(
+      sessions.map((s) => [s.testId, Array.isArray(s.problemOrder) && s.problemOrder.includes(problemId)]),
+    );
 
     const thousandSubmitted = tests.filter((t) => t.type === TestType.THOUSAND && submittedAt.has(t.id));
     let classRows: AccessRow[] = [];
@@ -157,7 +167,9 @@ export class ScanService {
 
     return tests.map((t): ScanTestRow => {
       const submitted = submittedAt.has(t.id);
-      if (t.type !== TestType.THOUSAND) return { kind: 'OTHER', submitted };
+      if (t.type !== TestType.THOUSAND) {
+        return { kind: 'OTHER', submitted: submitted && sawProblem.get(t.id) === true };
+      }
       if (!submitted || !scope) return { kind: 'THOUSAND', submitted, review: null };
       const purchaseOrPass =
         scope.all ||

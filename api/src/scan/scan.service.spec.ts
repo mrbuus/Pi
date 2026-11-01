@@ -1,9 +1,12 @@
 import { NotFoundException } from '@nestjs/common';
 import { ScanService } from './scan.service';
 
-jest.mock('../common/access', () => ({ collectContentScope: jest.fn() }));
+jest.mock('../common/access', () => ({ collectContentScope: jest.fn(), internalTeachingRole: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const access = require('../common/access') as { collectContentScope: jest.Mock };
+const access = require('../common/access') as {
+  collectContentScope: jest.Mock;
+  internalTeachingRole: jest.Mock;
+};
 
 const NOW = new Date('2026-11-01T00:00:00Z');
 const day = 24 * 60 * 60 * 1000;
@@ -34,7 +37,7 @@ function problemRow(testType: 'THOUSAND' | 'CHAPTER_EXAM', status = 'VERIFIED') 
 
 function makeService(opts: {
   problem: unknown;
-  sessions?: { testId: string; submittedAt: Date }[];
+  sessions?: { testId: string; submittedAt: Date; problemOrder?: string[] }[];
   enrollments?: { classroomId: string }[];
   accessRows?: unknown[];
 }) {
@@ -47,7 +50,11 @@ function makeService(opts: {
   return { service: new ScanService(prisma as never), prisma };
 }
 
-beforeEach(() => access.collectContentScope.mockResolvedValue(noScope));
+beforeEach(() => {
+  jest.clearAllMocks();
+  access.collectContentScope.mockResolvedValue(noScope);
+  access.internalTeachingRole.mockResolvedValue(null);
+});
 
 describe('ScanService.lookup', () => {
   it('буруу код → 404, сан руу хандахгүй', async () => {
@@ -142,7 +149,7 @@ describe('ScanService.lookup', () => {
   it('бүлгийн тест: илгээсэн + VERIFIED → зөвхөн бодолт, зөв хариу биш', async () => {
     const { service } = makeService({
       problem: problemRow('CHAPTER_EXAM'),
-      sessions: [{ testId: 't1', submittedAt: NOW }],
+      sessions: [{ testId: 't1', submittedAt: NOW, problemOrder: ['p0', 'p1'] }],
     });
     const r = (await service.lookup('AB12CD34', 'u1', 'STUDENT' as never, NOW)) as Record<string, unknown>;
     expect(r.access).toBe('SOLUTION');
@@ -154,14 +161,39 @@ describe('ScanService.lookup', () => {
   it('бүлгийн тест: бодолт AUTO_DRAFT бол илгээсэн ч нээхгүй', async () => {
     const { service } = makeService({
       problem: problemRow('CHAPTER_EXAM', 'AUTO_DRAFT'),
-      sessions: [{ testId: 't1', submittedAt: NOW }],
+      sessions: [{ testId: 't1', submittedAt: NOW, problemOrder: ['p1'] }],
     });
     const r = (await service.lookup('AB12CD34', 'u1', 'STUDENT' as never, NOW)) as Record<string, unknown>;
     expect(r.access).toBe('LOCKED');
     expect(r).not.toHaveProperty('solution');
   });
 
-  it('ажилтан: тестийн мөр шалгахгүйгээр бүгдийг харна', async () => {
+  it('бүлгийн тест: илгээсний дараа нэмэгдсэн (хараагүй) бодлогын бодолт нээгдэхгүй', async () => {
+    const { service } = makeService({
+      problem: problemRow('CHAPTER_EXAM'),
+      sessions: [{ testId: 't1', submittedAt: NOW, problemOrder: ['p0', 'p2'] }],
+    });
+    const r = (await service.lookup('AB12CD34', 'u1', 'STUDENT' as never, NOW)) as Record<string, unknown>;
+    expect(r.access).toBe('LOCKED');
+    expect(r).not.toHaveProperty('solution');
+  });
+
+  it('гадны/архивласан багш (JWT нь TEACHER) сурагчийн хаалтаар явна', async () => {
+    access.internalTeachingRole.mockResolvedValue(null);
+    const { service } = makeService({ problem: problemRow('THOUSAND') });
+    const r = (await service.lookup('AB12CD34', 'u1', 'TEACHER' as never, NOW)) as Record<string, unknown>;
+    expect(r.access).toBe('LOCKED');
+    expect(r).not.toHaveProperty('solution');
+  });
+
+  it('сурагчийн role-д ажилтны шалгалт дуудахгүй', async () => {
+    const { service } = makeService({ problem: problemRow('THOUSAND') });
+    await service.lookup('AB12CD34', 'u1', 'STUDENT' as never, NOW);
+    expect(access.internalTeachingRole).not.toHaveBeenCalled();
+  });
+
+  it('төвийн ажилтан: тестийн мөр шалгахгүйгээр бүгдийг харна', async () => {
+    access.internalTeachingRole.mockResolvedValue('TEACHER');
     const { service, prisma } = makeService({ problem: problemRow('THOUSAND') });
     const r = (await service.lookup('AB12CD34', 'u1', 'TEACHER' as never, NOW)) as Record<string, unknown>;
     expect(r.access).toBe('FULL');
