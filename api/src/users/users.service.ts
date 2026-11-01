@@ -1114,8 +1114,13 @@ export class UsersService {
     // Нууц үг = утас (эзний дүрэм, 2026-11-01): дугаар солигдоход нууц үг нь
     // ХУУЧИН дугаар хэвээрээ байвал шинэ дугаар болно. Хэрэглэгч өөрөө сольсон
     // нууц үгийг хөндөхгүй. Сесс тасрахгүй (passwordChangedAt-ыг хөндөхгүй).
+    // Зөвхөн СУРАГЧ — Багш+ ажилтан/админы нууц үгийг ингэж тогтоож болохгүй.
     let passwordHash: string | undefined;
-    if (dto.phone && dto.phone !== target.phone) {
+    if (
+      target.role === Role.STUDENT &&
+      dto.phone &&
+      dto.phone !== target.phone
+    ) {
       const defaultPassword = target.phone ?? target.email;
       if (
         defaultPassword &&
@@ -1214,7 +1219,9 @@ export class UsersService {
           email: result.user.email,
         },
         studentProfile: result.studentProfile,
-        ...(dto.phone && dto.phone !== target.phone
+        ...(target.role === Role.STUDENT &&
+        dto.phone &&
+        dto.phone !== target.phone
           ? { passwordFollowedPhone }
           : {}),
       },

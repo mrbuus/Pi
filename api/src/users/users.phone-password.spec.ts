@@ -8,6 +8,7 @@ import { StaffCapabilityService } from '../staff-capabilities/staff-capability.s
 // Нууц үг = утас (эзний дүрэм, 2026-11-01): ажилтан утсыг солиход нууц үг нь
 // хуучин дугаар хэвээр бол шинэ дугаар болно; өөрөө сольсон нууц үг хэвээр.
 async function setup(target: {
+  role?: Role;
   phone: string | null;
   email?: string | null;
   password: string;
@@ -21,7 +22,7 @@ async function setup(target: {
       where.id
         ? {
             id: 'u1',
-            role: Role.STUDENT,
+            role: target.role ?? Role.STUDENT,
             firstName: 'A',
             lastName: 'B',
             phone: target.phone,
@@ -84,6 +85,15 @@ describe('updateProfile: утас солигдоход нууц үг даган�
     const res = await t.run('99111111');
     expect(res.passwordFollowedPhone).toBe(false);
     expect(t.savedHash()).toBeUndefined();
+  });
+
+  it('ажилтан/админы нууц үгийг утсаар солихгүй', async () => {
+    for (const role of [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER]) {
+      const t = await setup({ role, phone: '99111111', password: '99111111' });
+      const res = await t.run('88222222');
+      expect(res.passwordFollowedPhone).toBe(false);
+      expect(t.savedHash()).toBeUndefined();
+    }
   });
 
   it('хариунд passwordHash буцаахгүй', async () => {
