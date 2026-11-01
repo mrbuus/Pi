@@ -37,6 +37,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  assets:
+    - assets/brand/
+
   # Вэбийн web/public/fonts-оос (OFL) tool/build_fonts.py-аар TTF болгосон.
   # Ажиллах үед сүлжээнээс фонт ХЭЗЭЭ Ч татахгүй.
   fonts:

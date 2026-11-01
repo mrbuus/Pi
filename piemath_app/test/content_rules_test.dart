@@ -38,7 +38,7 @@ void main() {
 
   test('өнгийг дизайны токеноос гадуур шууд бичихгүй', () {
     // Color(0x...) зөвхөн lib/core/ui/tokens.dart-д.
-    final hex = RegExp(r'Color\(0x[0-9A-Fa-f]{8}\)|Colors\.(?!transparent\b)\w+');
+    final hex = RegExp(r'Color\(0x[0-9A-Fa-f]{8}\)|(?<![A-Za-z])Colors\.(?!transparent\b)\w+');
     final hits = <String>[];
     for (final file in sources) {
       if (file.path.endsWith('lib/core/ui/tokens.dart')) continue;

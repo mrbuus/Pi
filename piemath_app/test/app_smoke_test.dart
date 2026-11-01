@@ -5,5 +5,6 @@ void main() {
   testWidgets('апп асна', (tester) async {
     await tester.pumpWidget(const PiemathApp());
     expect(find.text('Piemath'), findsOneWidget);
+    expect(find.text('Шинэ ирээдүйн эзэд'), findsOneWidget);
   });
 }
