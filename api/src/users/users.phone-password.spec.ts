@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcryptjs';
+import { ForbiddenException } from '@nestjs/common';
 import { Role } from '../generated/prisma/enums';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -44,8 +45,8 @@ async function setup(target: {
     { record } as unknown as AuditService,
     {} as StaffCapabilityService,
   );
-  const run = (phone: string) =>
-    service.updateProfile('u1', { phone }, 'admin', Role.ADMIN);
+  const run = (phone: string, actorRole: Role = Role.ADMIN) =>
+    service.updateProfile('u1', { phone }, 'admin', actorRole);
   const savedHash = () =>
     (update.mock.calls[0][0] as { data: { passwordHash?: string } }).data
       .passwordHash;
@@ -88,7 +89,7 @@ describe('updateProfile: утас солигдоход нууц үг даган�
   });
 
   it('ажилтан/админы нууц үгийг утсаар солихгүй', async () => {
-    for (const role of [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER]) {
+    for (const role of [Role.TEACHER_PLUS, Role.TEACHER]) {
       const t = await setup({ role, phone: '99111111', password: '99111111' });
       const res = await t.run('88222222');
       expect(res.passwordFollowedPhone).toBe(false);
@@ -102,5 +103,47 @@ describe('updateProfile: утас солигдоход нууц үг даган�
     const call = t.update.mock.calls[0][0] as { select?: object };
     expect(call.select).toBeDefined();
     expect(call.select).not.toHaveProperty('passwordHash');
+  });
+});
+
+describe('updateProfile: хэн хэнийг засах вэ', () => {
+  it('Багш+ сурагчийг засна', async () => {
+    const t = await setup({ phone: '99111111', password: 'x' });
+    await expect(t.run('88222222', Role.TEACHER_PLUS)).resolves.toBeDefined();
+  });
+
+  it('Багш+ эцэг эхийг засна', async () => {
+    const t = await setup({
+      role: Role.PARENT,
+      phone: '99111111',
+      password: 'x',
+    });
+    await expect(t.run('88222222', Role.TEACHER_PLUS)).resolves.toBeDefined();
+  });
+
+  it('Багш+ багш, Багш+, админыг засахгүй', async () => {
+    for (const role of [Role.TEACHER, Role.TEACHER_PLUS, Role.ADMIN]) {
+      const t = await setup({ role, phone: '99111111', password: 'x' });
+      await expect(t.run('88222222', Role.TEACHER_PLUS)).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(t.update).not.toHaveBeenCalled();
+    }
+  });
+
+  it('Админ багш, Багш+-ийг засна', async () => {
+    for (const role of [Role.TEACHER, Role.TEACHER_PLUS]) {
+      const t = await setup({ role, phone: '99111111', password: 'x' });
+      await expect(t.run('88222222')).resolves.toBeDefined();
+    }
+  });
+
+  it('Админ өөр админыг засахгүй', async () => {
+    const t = await setup({
+      role: Role.ADMIN,
+      phone: '99111111',
+      password: 'x',
+    });
+    await expect(t.run('88222222')).rejects.toThrow(ForbiddenException);
   });
 });

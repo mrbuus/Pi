@@ -1057,6 +1057,18 @@ export class UsersService {
     });
     if (!target) throw new NotFoundException('Хэрэглэгч олдсонгүй');
 
+    // Эрхийн хил (эзэн 2026-11-01): Багш+ сурагч/эцэг эх/худалдан авагчийг
+    // засна; багш, Багш+, админы мэдээллийг (утас = нэвтрэх түлхүүр) зөвхөн
+    // Админ. Өөр админыг хэн ч засахгүй.
+    const staffTarget =
+      target.role === Role.ADMIN ||
+      target.role === Role.TEACHER_PLUS ||
+      target.role === Role.TEACHER;
+    if (staffTarget && actorRole !== Role.ADMIN)
+      throw new ForbiddenException('Ажилтны мэдээллийг зөвхөн Админ засна');
+    if (target.role === Role.ADMIN && targetId !== actorId)
+      throw new ForbiddenException('Өөр админы мэдээллийг засах боломжгүй');
+
     const studentFields: (keyof UpdateUserProfileDto)[] = [
       'grade',
       'school',
