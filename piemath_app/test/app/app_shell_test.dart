@@ -54,8 +54,9 @@ void main() {
     for (final label in ['Нүүр', 'Даалгавар', 'Хичээл', 'Онол', 'Бусад']) {
       expect(find.text(label), findsWidgets, reason: label);
     }
-    // Нүүр хараахан хийгдээгүй — «удахгүй» дэлгэц, хоосон цагаан биш.
-    expect(find.byType(PendingScreen), findsOneWidget);
+    // Сурагчийн нүүр (M3) — хоосон цагаан биш (mock-д самбарын endpoint байхгүй тул алдааны төлөв).
+    expect(find.text('Миний самбар'), findsOneWidget);
+    expect(find.byType(PendingScreen), findsNothing);
 
     await tester.tap(find.text('Бусад'));
     await tester.pumpAndSettle();
