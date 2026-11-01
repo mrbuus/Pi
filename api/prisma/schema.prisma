@@ -828,6 +828,10 @@ model Problem {
   // YouTube бодолтын бичлэг (1000 бодлого) — youtube.com/watch, youtu.be, youtube.com/shorts
   youtubeUrl   String?
 
+  // Номд хэвлэх QR-ийн нууц код (pimath.mn/q/<код>) — token-оос тусдаа, таахын
+  // аргагүй 8 тэмдэгт. Хэвлэгдсэний дараа ХЭЗЭЭ Ч бүү өөрчил (scan/scan-code.ts).
+  scanCode     String?  @unique
+
   // 2-р хэсгийн (FILL_NUMBER) алхмын багц: [{ label: "1-1", boxes: ["a","b"], points: 3 }].
   // Багцын бүх нүд зөв → багцын оноо, нэг нь буруу → 0; 0 оноотой багц тооцогдохгүй.
   // Хоосон бол бодлого бүхэлдээ нэг зүйл (tests/exam-items.ts).

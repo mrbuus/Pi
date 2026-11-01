@@ -587,6 +587,7 @@ export const ProblemScalarFieldEnum = {
   attemptCount: 'attemptCount',
   correctRate: 'correctRate',
   youtubeUrl: 'youtubeUrl',
+  scanCode: 'scanCode',
   scoringGroups: 'scoringGroups',
   version: 'version',
   updatedAt: 'updatedAt',

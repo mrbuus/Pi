@@ -59,6 +59,7 @@ import { TestsModule } from './tests/tests.module';
 import { ThousandModule } from './thousand/thousand.module';
 import { HomeworkPracticeModule } from './homework-practice/homework-practice.module';
 import { StudentHubModule } from './student-hub/student-hub.module';
+import { ScanModule } from './scan/scan.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
@@ -137,6 +138,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ThousandModule,
     HomeworkPracticeModule,
     StudentHubModule,
+    ScanModule,
     AttemptsModule,
     StorageModule,
     PassesModule,

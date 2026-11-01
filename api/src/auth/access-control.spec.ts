@@ -5,6 +5,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { FinanceController } from '../finance/finance.controller';
 import { TuitionController } from '../tuition/tuition.controller';
 import { SheetSyncController } from '../sheet-sync/sheet-sync.controller';
+import { ScanController } from '../scan/scan.controller';
 
 /**
  * Мөнгөний маршрутуудын эрхийн хамгаалалт — 2026-09-26 (G02–G03).
@@ -155,5 +156,14 @@ describe('Night-1 route guards across six roles', () => {
       console.info(
         `Night-1 pending sibling contracts: ${missing.length}; run NIGHT1_COMPLETE=1 after integrating listed PR dependencies.`,
       );
+  });
+});
+
+describe('Номын QR (scan) — нэвтэрсэн хэрэглэгч, бодолтыг scan-gate шийднэ', () => {
+  it('JwtAuthGuard + RolesGuard, бүх нэвтэрсэн role', () => {
+    expect(guardsOf(ScanController)).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
+    expect(rolesOf(ScanController.prototype.lookup)?.sort()).toEqual(
+      ['ADMIN', 'BUYER', 'PARENT', 'STUDENT', 'TEACHER', 'TEACHER_PLUS'],
+    );
   });
 });
