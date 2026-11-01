@@ -8,7 +8,7 @@
 - Milestone: **M0 дууссан, M2 дууссан.** Дараа нь M1, M3, M4, M5, M7, M8 — зэрэгцээ agent-уудаар (доор «Ажлын хэв маяг»)
 - Branch: `piemath-app` (суурь: прод `4d3b648` + номын QR S1)
 - Flutter 3.47.9 stable / Dart 3.13.7 (cloud: `~/flutter`, `export PATH=~/flutter/bin:$PATH`)
-- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 294/294 ногоон
+- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 338/338 ногоон
 - Ноорог PR (зөвхөн CI, merge хийхгүй): https://github.com/mrbuus/Pi/pull/53
 
 ## Ажлын хэв маяг — зэрэгцээ agent (эзэн 2026-11-01)
@@ -48,6 +48,19 @@
 | 6 | Шинэ домэйн (piemath) авах уу — `API_BASE_URL` солих | — | — |
 
 ## Бичлэгүүд
+
+### 2026-11-01 — M5 QR, ном (agent, `877193a`)
+
+- `/app/scan` (камер, гар оруулга, торч; зөвхөн `pimath.mn/q/<код>` эсвэл 8 тэмдэгт, 3с дотор давтсаныг алгасна),
+  `/app/scan/:code` (бодлого, хариу, бодолт, YouTube, вэбийн яг ижил түгжээний бичвэр, 404/429/офлайн),
+  `/books`, `/books/:code`, сэдэв, үнэгүй тест `/books/:code/try/:testId` (сервер дүгнэнэ), `/sorils`, `/placement`
+  (мэдээлэл; бүртгэл/өгөх нь вэбээр). Апп дотор юу ч зарахгүй (Apple IAP).
+- Сан: `mobile_scanner` 7.4.3; `android/gradle.properties`-д `useUnbundled=true` (Play Services, ~2–3MB хэмнэнэ).
+- Native: iOS `NSCameraUsageDescription`; Android App Links intent filter `https://pimath.mn/q/` (autoVerify).
+- **Эзэн/вэб [Э]:** bundle ID батлагдсаны дараа вэбд `/.well-known/assetlinks.json` (`mn.piemath.app` + release
+  SHA-256), `/.well-known/apple-app-site-association` (`<TEAMID>.mn.piemath.app`, `/q/*`); iOS `Runner.entitlements`
+  `applinks:pimath.mn` — Xcode-оор холбоно (Mac).
+- Mac/төхөөрөмж: камер (iOS Vision, Android 8–14 ML Kit), `/q/` deep link, тоон гар.
 
 ### 2026-11-01 — M1 нэвтрэлт, профайл (agent, `3361d4b`)
 
