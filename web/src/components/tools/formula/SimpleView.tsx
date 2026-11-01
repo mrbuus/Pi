@@ -65,8 +65,24 @@ export function FitWidth({ children, className }: { children: ReactNode; classNa
   );
 }
 
-export default function SimpleView({ s, big }: { s: SheetSimple; big?: boolean }) {
-  const [open, setOpen] = useState(false);
+export default function SimpleView({
+  s,
+  big,
+  open,
+  onToggle,
+  loading,
+  failed,
+  onRetry,
+}: {
+  s: SheetSimple;
+  big?: boolean;
+  /** «Алхамаар ойлгох» нээлттэй эсэх — дэлгэрэнгүйг эцэг нь татна */
+  open: boolean;
+  onToggle: () => void;
+  loading?: boolean;
+  failed?: boolean;
+  onRetry?: () => void;
+}) {
   const pal = palette();
   const c = (t: string) => colorize(t, pal);
   return (
@@ -94,7 +110,7 @@ export default function SimpleView({ s, big }: { s: SheetSimple; big?: boolean }
 
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={onToggle}
         aria-expanded={open}
         className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-brand-bright/10 px-3 text-sm font-semibold text-brand-soft transition-colors duration-[var(--dur-micro)] hover:bg-brand-bright/15"
       >
@@ -103,7 +119,22 @@ export default function SimpleView({ s, big }: { s: SheetSimple; big?: boolean }
         <ChevronDown className={cn("h-4 w-4 transition-transform duration-[var(--dur-base)]", open && "rotate-180")} aria-hidden />
       </button>
 
-      {open && (
+      {open && loading && (
+        <div className="space-y-2" aria-busy="true" aria-label="Ачаалж байна">
+          <div className="skeleton h-5 w-11/12 rounded" />
+          <div className="skeleton h-5 w-9/12 rounded" />
+          <div className="skeleton h-20 w-full rounded-2xl" />
+        </div>
+      )}
+      {open && failed && (
+        <p className="flex flex-wrap items-center gap-2 text-sm text-ink-dim">
+          Алхмуудыг ачаалж чадсангүй
+          <button type="button" onClick={onRetry} className="min-h-10 rounded-xl px-2 font-semibold text-brand-soft">
+            Дахин оролдох
+          </button>
+        </p>
+      )}
+      {open && !loading && !failed && s.steps && (
         <div className="space-y-4">
           <ol className="space-y-2" aria-label="Хэрхэн хэрэглэх вэ">
             {s.steps.map((t, i) => (
@@ -118,6 +149,7 @@ export default function SimpleView({ s, big }: { s: SheetSimple; big?: boolean }
             ))}
           </ol>
 
+          {s.example && (
           <section className="rounded-2xl border border-line bg-bg p-3" aria-label="Жишээ">
             <h4 className="mb-1 text-xs font-semibold text-ink-dim">Жишээ</h4>
             <p className="text-base text-ink">
@@ -135,6 +167,7 @@ export default function SimpleView({ s, big }: { s: SheetSimple; big?: boolean }
               <MathText>{c(s.example.answer)}</MathText>
             </p>
           </section>
+          )}
 
           {s.watch && (
             <p className="flex gap-2 rounded-xl border border-line bg-bg px-3 py-2 text-sm text-ink">

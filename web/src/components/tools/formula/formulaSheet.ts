@@ -21,9 +21,51 @@ export interface SheetSimple {
   say: string;
   formula: string;
   parts: { tex: string; mean: string }[];
-  steps: string[];
-  example: SheetExample;
+  /** Дэлгэрэнгүй файлаас (formulas-detail/<бүлэг>.json) — «Алхамаар ойлгох» дарахад ачаална */
+  steps?: string[];
+  example?: SheetExample;
   watch?: string;
+}
+
+/** formulas-detail/<бүлэг>.json дахь нэг томьёоны хойшлуулсан хэсэг */
+export interface FormulaDetail {
+  explanation?: string;
+  examples?: SheetExample[];
+  commonMistakes?: string[];
+  mnemonic?: string;
+  eeshTip?: string;
+  conditions?: string[];
+  general?: string;
+  variants?: { label: string; latex: string }[];
+  simpleMore?: { steps?: string[]; example?: SheetExample; watch?: string };
+}
+
+/** Жагсаалтын томьёон дээр дэлгэрэнгүйг нэмнэ (байхгүй талбар хэвээр) */
+export function mergeDetail(f: SheetFormula, d: FormulaDetail | undefined): SheetFormula {
+  if (!d) return f;
+  const ex = (v: unknown): SheetExample[] =>
+    Array.isArray(v)
+      ? (v as Record<string, unknown>[])
+          .filter((e) => e && isStr(e.problem))
+          .map((e) => ({ problem: e.problem as string, steps: strArr(e.steps), answer: isStr(e.answer) ? e.answer : "" }))
+      : [];
+  const out: SheetFormula = {
+    ...f,
+    explanation: isStr(d.explanation) ? d.explanation : f.explanation,
+    examples: d.examples ? ex(d.examples) : f.examples,
+    commonMistakes: d.commonMistakes ? strArr(d.commonMistakes) : f.commonMistakes,
+    mnemonic: isStr(d.mnemonic) ? d.mnemonic : f.mnemonic,
+    eeshTip: isStr(d.eeshTip) ? d.eeshTip : f.eeshTip,
+    conditions: d.conditions ? strArr(d.conditions) : f.conditions,
+    general: isStr(d.general) && d.general.trim() ? d.general : f.general,
+    variants: Array.isArray(d.variants) && d.variants.length ? d.variants : f.variants,
+  };
+  if (f.simple && d.simpleMore) {
+    const m = d.simpleMore;
+    const e = m.example ? ex([m.example])[0] : undefined;
+    out.simple = { ...f.simple, steps: strArr(m.steps), example: e, watch: isStr(m.watch) && m.watch.trim() ? m.watch : undefined };
+  }
+  return out;
 }
 
 export interface SheetFormula {
@@ -150,9 +192,9 @@ function parseSimple(v: unknown): SheetSimple | undefined {
   if (!v || typeof v !== "object") return undefined;
   const o = v as Record<string, unknown>;
   const ex = o.example as Record<string, unknown> | undefined;
-  if (!isStr(o.say) || !isStr(o.formula) || !ex || !isStr(ex.problem)) return undefined;
+  // Жагсаалтад зөвхөн say/formula/parts ирнэ; алхам, жишээ нь дэлгэрэнгүй файлаас
+  if (!isStr(o.say) || !isStr(o.formula)) return undefined;
   const steps = strArr(o.steps);
-  if (!steps.length) return undefined;
   const parts = Array.isArray(o.parts)
     ? (o.parts as Record<string, unknown>[]).filter((p) => p && isStr(p.tex)).map((p) => ({ tex: p.tex as string, mean: isStr(p.mean) ? p.mean : "" }))
     : [];
@@ -160,8 +202,8 @@ function parseSimple(v: unknown): SheetSimple | undefined {
     say: o.say,
     formula: o.formula,
     parts,
-    steps,
-    example: { problem: ex.problem as string, steps: strArr(ex.steps), answer: isStr(ex.answer) ? ex.answer : "" },
+    steps: steps.length ? steps : undefined,
+    example: ex && isStr(ex.problem) ? { problem: ex.problem as string, steps: strArr(ex.steps), answer: isStr(ex.answer) ? ex.answer : "" } : undefined,
     watch: isStr(o.watch) && o.watch.trim() ? o.watch : undefined,
   };
 }
@@ -368,7 +410,8 @@ const indexCache = new WeakMap<SheetFormula, Indexed>();
 function indexOf(f: SheetFormula): Indexed {
   let ix = indexCache.get(f);
   if (ix) return ix;
-  const text = [f.explanation, f.mnemonic, f.eeshTip, ...f.conditions.map(stripTex), ...f.commonMistakes.map(stripTex)].join(" ");
+  // Жагсаалтын хөнгөн файлд тайлбар байхгүй — энгийн өгүүлбэр, үсгийн утгаар хайна
+  const text = [f.simple ? stripTex(f.simple.say) : "", ...(f.simple?.parts ?? []).map((p) => stripTex(p.mean)), f.explanation, f.mnemonic, f.eeshTip, ...f.conditions.map(stripTex), ...f.commonMistakes.map(stripTex)].join(" ");
   const latexAll = [f.latex, f.general ?? "", ...(f.variants ?? []).map((v) => v.latex)].join(" ");
   ix = {
     title: normText(f.title),

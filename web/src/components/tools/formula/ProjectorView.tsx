@@ -8,6 +8,7 @@ import { Toggle } from "../core/ToolFrame";
 import { copyLatex } from "./FormulaCard";
 import { conditionMath, displayMath, type SheetFormula } from "./formulaSheet.ts";
 import { colorize } from "./SimpleView";
+import { useFormulaDetail } from "./detail";
 
 /* ============================================================================
  * Проектор: нэг томьёог дэлгэц дүүрэн, том үсгээр. Сум/товчоор дараагийнх руу.
@@ -34,7 +35,8 @@ export default function ProjectorView({
   const [example, setExample] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const f = list[i];
+  // Слайдад жишээ, нөхцөл хэрэгтэй тул тухайн томьёоны дэлгэрэнгүйг татна
+  const { f } = useFormulaDetail(list[i] as SheetFormula | undefined, true);
 
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;

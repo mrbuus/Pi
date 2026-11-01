@@ -13,6 +13,7 @@ import { Panel, Segmented, Toggle } from "../core/ToolFrame";
 import { loadState, saveState } from "../core/export";
 import { FormulaCard } from "./FormulaCard";
 import ProjectorView from "./ProjectorView";
+import { withDetails } from "./detail";
 import PrintSheet, { DEFAULT_PRINT, type PrintDetail, type PrintOpts } from "./PrintSheet";
 import WidgetPanel, { WIDGET_KEYS } from "./WidgetPanel";
 import {
@@ -146,10 +147,11 @@ function FormulaBrowser({ sheet }: { sheet: FormulaSheet }) {
   }, []);
   const endPrint = useCallback(() => setPrinting(null), []);
 
-  const startPrint = (list: SheetFormula[]) => {
+  const startPrint = async (list: SheetFormula[]) => {
     if (!list.length) return;
     if (list.length > 150) toast.message(`${list.length} томьёо хэвлэгдэнэ, хэдэн хуудас болно`);
-    setPrinting(list);
+    // Нөхцөл, тайлбар дэлгэрэнгүй файлд байдаг — хэвлэхийн өмнө татна
+    setPrinting(await withDetails(list));
   };
 
   const clearBasket = () => {
