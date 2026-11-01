@@ -1,7 +1,38 @@
-import '../../app/feature_routes.dart';
+import 'package:go_router/go_router.dart';
 
-/// `books` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
+import '../../app/feature_routes.dart';
+import 'ui/book_detail_screen.dart';
+import 'ui/books_screen.dart';
+import 'ui/placement_screen.dart';
+import 'ui/sorils_screen.dart';
+import 'ui/try_test_screen.dart';
+
+/// `books` feature-ийн маршрутууд (нэвтрэлтгүй). Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
-/// Төлөвлөсөн замууд (вэбийн замтай ижил) — public: /books, /books/:code, /sorils, /placement.
-/// Бүртгээгүй `/app/...` замд shell автоматаар «удахгүй» дэлгэц (PendingScreen) харуулна.
-const booksRoutes = FeatureRoutes();
+/// - `/books` каталог, `/books/:code` ном (сэдвүүд), `/books/:code/topic/:i` сэдвийн тестүүд,
+///   `/books/:code/try/:testId` үнэгүй тест бодох.
+/// - `/sorils` жишиг сорил (мэдээлэл; бүртгэл вэбээр), `/placement` түвшин тогтоох (мэдээлэл; өгөх нь вэбээр).
+final booksRoutes = FeatureRoutes(
+  public: [
+    GoRoute(path: '/books', builder: (_, _) => const BooksScreen()),
+    GoRoute(
+      path: '/books/:code',
+      builder: (_, s) => BookDetailScreen(code: s.pathParameters['code'] ?? ''),
+      routes: [
+        GoRoute(
+          path: 'topic/:index',
+          builder: (_, s) => BookTopicScreen(
+            code: s.pathParameters['code'] ?? '',
+            index: int.tryParse(s.pathParameters['index'] ?? '') ?? -1,
+          ),
+        ),
+        GoRoute(
+          path: 'try/:testId',
+          builder: (_, s) => TryTestScreen(code: s.pathParameters['code'] ?? '', testId: s.pathParameters['testId'] ?? ''),
+        ),
+      ],
+    ),
+    GoRoute(path: '/sorils', builder: (_, _) => const SorilsScreen()),
+    GoRoute(path: '/placement', builder: (_, _) => const PlacementScreen()),
+  ],
+);

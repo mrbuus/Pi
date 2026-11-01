@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Номын хуудсан дээрх QR кодыг уншихын тулд камер хэрэгтэй. Зураг хадгалагдахгүй.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Piemath</string>
 	<key>CFBundleExecutable</key>
