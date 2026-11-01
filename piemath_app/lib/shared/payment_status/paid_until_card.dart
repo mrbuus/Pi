@@ -12,15 +12,27 @@ final paymentTodayProvider = Provider<UbDateTime>((ref) => UbDateTime.now());
 
 /// `GET /tuition/paid-until/my` ([studentId] null) эсвэл `/tuition/paid-until/:studentId`
 /// (эцэг эх — баталгаажсан хүүхэд, ангийн багш). Хариу `{ paidUntil: ISO | null }`.
-final paidUntilProvider = FutureProvider.autoDispose.family<String?, String?>((ref, studentId) {
-  final path = studentId == null ? '/tuition/paid-until/my' : '/tuition/paid-until/${Uri.encodeComponent(studentId)}';
-  return ref.read(apiClientProvider).get(path, parse: (j) => (j! as Map)['paidUntil'] as String?);
+final paidUntilProvider = FutureProvider.autoDispose.family<String?, String?>((
+  ref,
+  studentId,
+) {
+  final path = studentId == null
+      ? '/tuition/paid-until/my'
+      : '/tuition/paid-until/${Uri.encodeComponent(studentId)}';
+  return ref
+      .read(apiClientProvider)
+      .get(path, parse: (j) => (j! as Map)['paidUntil'] as String?);
 });
 
 /// «Хэдий хүртэл төлсөн» карт (вэбийн `PaidUntilCard`). Өнгө + дүрс + үгээр төлөв.
 /// Сурагч, эцэг эх, багш бүгд энэ виджетийг ашиглана.
 class PaidUntilCard extends ConsumerWidget {
-  const PaidUntilCard({super.key, this.studentId, this.compact = false, this.studentName});
+  const PaidUntilCard({
+    super.key,
+    this.studentId,
+    this.compact = false,
+    this.studentName,
+  });
 
   final String? studentId;
   final bool compact;
@@ -34,35 +46,58 @@ class PaidUntilCard extends ConsumerWidget {
     return async.when(
       skipLoadingOnRefresh: false,
       loading: () => const SkeletonPulse(child: SkeletonCard(lines: 1)),
-      error: (e, _) => AppCard(
-        child: Row(
-          children: [
-            Icon(AppIcons.error, color: context.colors.error),
-            const SizedBox(width: AppSpace.md),
-            Expanded(
-              child: Text(
-                e is ApiError ? e.message : AppStrings.genericError,
-                style: context.text.bodyMedium,
+      // 403 (жишээ: туслах багш) — эвдрэл биш, төвийг сахисан тайлбар (HOW-TO-CONTINUE §3).
+      error: (e, _) => e is ApiError && e.kind == ApiErrorKind.forbidden
+          ? AppCard(
+              child: Row(
+                children: [
+                  Icon(AppIcons.info, color: context.colors.inkDim),
+                  const SizedBox(width: AppSpace.md),
+                  Expanded(
+                    child: Text(
+                      'Төлбөрийн мэдээлэл танд харагдахгүй',
+                      style: context.text.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : AppCard(
+              child: Row(
+                children: [
+                  Icon(AppIcons.error, color: context.colors.error),
+                  const SizedBox(width: AppSpace.md),
+                  Expanded(
+                    child: Text(
+                      e is ApiError ? e.message : AppStrings.genericError,
+                      style: context.text.bodyMedium,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        ref.invalidate(paidUntilProvider(studentId)),
+                    child: const Text(AppStrings.retry),
+                  ),
+                ],
               ),
             ),
-            TextButton(
-              onPressed: () => ref.invalidate(paidUntilProvider(studentId)),
-              child: const Text(AppStrings.retry),
-            ),
-          ],
-        ),
-      ),
       data: (iso) => _PaidUntilBody(
         view: PaidUntilView.of(iso, today: ref.watch(paymentTodayProvider)),
         compact: compact,
-        title: studentName == null ? 'Хэдий хүртэл төлсөн' : '$studentName: төлбөрийн хугацаа',
+        title: studentName == null
+            ? 'Хэдий хүртэл төлсөн'
+            : '$studentName: төлбөрийн хугацаа',
       ),
     );
   }
 }
 
 class _PaidUntilBody extends StatelessWidget {
-  const _PaidUntilBody({required this.view, required this.compact, required this.title});
+  const _PaidUntilBody({
+    required this.view,
+    required this.compact,
+    required this.title,
+  });
 
   final PaidUntilView view;
   final bool compact;
@@ -90,19 +125,31 @@ class _PaidUntilBody extends StatelessWidget {
                       color: c.surfaceSunken,
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
-                    child: Icon(view.icon, color: tone, size: compact ? 26 : 32),
+                    child: Icon(
+                      view.icon,
+                      color: tone,
+                      size: compact ? 26 : 32,
+                    ),
                   ),
                   const SizedBox(width: AppSpace.lg),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: context.text.labelMedium?.copyWith(color: c.inkDim)),
+                        Text(
+                          title,
+                          style: context.text.labelMedium?.copyWith(
+                            color: c.inkDim,
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           view.dateLabel ?? 'Тооцоогүй',
-                          style: (compact ? context.text.displaySmall : context.text.displayMedium)
-                              ?.copyWith(fontSize: compact ? 22 : 26),
+                          style:
+                              (compact
+                                      ? context.text.displaySmall
+                                      : context.text.displayMedium)
+                                  ?.copyWith(fontSize: compact ? 22 : 26),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -117,7 +164,10 @@ class _PaidUntilBody extends StatelessWidget {
             ),
             Divider(height: 1, color: c.line),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.md),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpace.lg,
+                vertical: AppSpace.md,
+              ),
               child: Text(view.hint, style: context.text.bodySmall),
             ),
           ],

@@ -97,6 +97,7 @@ abstract final class NavData {
       _internal,
       _import,
       NavLink('/app/teacher', 'Багшийн самбар', AppIcons.classes),
+      NavLink('/app/teacher-hours', 'Цагийн бүртгэл', AppIcons.time),
       _library, _videos, _tests, _leads, _sorils, _reconcile, _schedule, _adminTheory, _students,
       NavLink('/app/admin/audit', 'Аудит', AppIcons.shield),
       _analytics, _sms, _classes,
