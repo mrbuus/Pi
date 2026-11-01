@@ -7,6 +7,8 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/ui/ui.dart';
 import '../../homework/domain/homework_logic.dart' show dayLabel;
+import '../../homework/ui/composer/notebook_composer_screen.dart';
+import '../../my_class/data/my_class_repository.dart' as hub show theoryDayProvider;
 import '../data/theory_models.dart';
 import '../data/theory_repository.dart';
 
@@ -45,8 +47,15 @@ class _DayBody extends ConsumerWidget {
 
   String get _subtitle => [dayLabel(day.date), day.classroomName].join(', ');
 
+  /// Өөрчлөлтийн дараа энэ өдөр, жагсаалтын зургийн тоо, «Хичээл» hub-ын өдрийн онолыг шинэчилнэ.
+  void _refreshAfterChange(WidgetRef ref) {
+    ref.invalidate(theoryDayProvider((day.classroomId, day.date)));
+    ref.invalidate(theoryListProvider);
+    ref.invalidate(hub.theoryDayProvider((classroomId: day.classroomId, date: day.date)));
+  }
+
   Future<void> _upload(BuildContext context, WidgetRef ref) async {
-    final ok = await PhotoComposerScreen.open(
+    final ok = await NotebookComposerScreen.open(
       context,
       title: 'Онолын зураг илгээх',
       subtitle: '$_subtitle, ${PhotoDocumentLimits.theoryMaxPages} хүртэл хуудас',
@@ -65,7 +74,7 @@ class _DayBody extends ConsumerWidget {
         await ref.read(theoryRepositoryProvider).savePhotos(day.classroomId, day.date, [file.key]);
       },
     );
-    if (ok) ref.invalidate(theoryDayProvider((day.classroomId, day.date)));
+    if (ok) _refreshAfterChange(ref);
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
@@ -82,7 +91,7 @@ class _DayBody extends ConsumerWidget {
     if (yes != true) return;
     try {
       await ref.read(theoryRepositoryProvider).savePhotos(day.classroomId, day.date, const []);
-      ref.invalidate(theoryDayProvider((day.classroomId, day.date)));
+      _refreshAfterChange(ref);
     } on ApiError catch (e) {
       if (context.mounted) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(e.message)));
     }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/ui/ui.dart';
 import 'classroom_homework_view.dart';
+import 'homework_icons.dart';
 import 'homework_providers.dart';
 import 'online_homework_view.dart';
 
@@ -18,6 +20,12 @@ class HomeworkScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Гэрийн даалгавар'),
         actions: [
+          if (!online)
+            IconButton(
+              tooltip: 'Жилийн түүх',
+              icon: const Icon(HomeworkIcons.history),
+              onPressed: () => context.push('/app/homework/history'),
+            ),
           InfoHint(
             title: 'Гэрийн даалгавар',
             message: online

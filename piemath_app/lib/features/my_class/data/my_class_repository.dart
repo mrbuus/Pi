@@ -55,6 +55,14 @@ class MyClassRepository {
         parse: (j) => (_map(j)['testId'] as String?) ?? testId,
       );
 
+  /// Нөхөх хичээлийн тэмдэглэлийн зураг — БҮТЭН багцыг орлуулна (`imageKeys` 0–12). Шинэчлэгдсэн мөрийг буцаана.
+  Future<MakeupItem> sendMakeupPhotos({required String classroomId, required String date, required List<String> imageKeys}) =>
+      _api.post(
+        '/makeup/me/${Uri.encodeComponent(classroomId)}/$date/photos',
+        body: {'imageKeys': imageKeys},
+        parse: (j) => MakeupItem.fromJson(_map(j)),
+      );
+
   Future<TheoryDay> theoryDay({required String classroomId, required String date}) => _api.get(
         '/lesson-day/${Uri.encodeComponent(classroomId)}/$date/photos',
         parse: (j) => TheoryDay.fromJson(_map(j)),

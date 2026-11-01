@@ -98,4 +98,57 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('төлбөр: хугацаа дууссан бол хоногоор, тодорхойгүй бол тайлбартай', (tester) async {
+    final http = FakeHttp()
+      ..json('GET', '/student-hub/overview', overviewJson())
+      ..json('GET', '/assignments/my-classrooms', <Object?>[])
+      ..json('GET', '/student-hub/days', daysJson())
+      ..json('GET', '/tuition/paid-until/my', {'paidUntil': '2000-01-01T00:00:00.000Z'})
+      ..json('GET', '/announcements', <Object?>[]);
+    await pumpStudentRoute(tester, http: http, location: '/app/student');
+    await settle(tester);
+    await tester.scrollUntilVisible(find.text('Хэдий хүртэл төлсөн'), 300);
+    expect(find.textContaining('хоногийн өмнө дууссан'), findsOneWidget);
+    expect(find.text('Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй'), findsOneWidget);
+    expect(find.text('Төвийн мэдэгдэл'), findsNothing, reason: 'мэдэгдэл байхгүй бол хэсэг нуугдана');
+  });
+
+  testWidgets('нийт самбар алдаатай бол «Дахин оролдох», дараа нь өгөгдөл гарна', (tester) async {
+    final http = FakeHttp()
+      ..on('GET', '/student-hub/overview', (_) => const FakeResponse(<String, Object?>{'message': 'Алдаа'}, status: 500))
+      ..on('GET', '/student-hub/overview', (_) => FakeResponse(overviewJson()))
+      ..json('GET', '/assignments/my-classrooms', <Object?>[])
+      ..json('GET', '/student-hub/days', daysJson())
+      ..json('GET', '/tuition/paid-until/my', {'paidUntil': '2099-01-01T00:00:00.000Z'})
+      ..json('GET', '/announcements', <Object?>[]);
+    await pumpStudentRoute(tester, http: http, location: '/app/student');
+    await settle(tester);
+    expect(find.byType(ErrorState), findsOneWidget);
+    await tester.tap(find.text(AppStrings.retry));
+    await settle(tester);
+    expect(find.byType(ErrorState), findsNothing);
+    expect(find.byType(RateTile), findsNWidgets(2));
+  });
+
+  testWidgets('сүүлийн хичээл дарахад тэр өдрийн дэлгэц', (tester) async {
+    final router = await pumpStudentRoute(tester, http: homeHttp(), location: '/app/student');
+    await settle(tester);
+    await tester.scrollUntilVisible(find.text('Сүүлийн хичээлүүд'), 300);
+    final row = find.text('Илтгэгч функц').last;
+    await tester.ensureVisible(row);
+    await tester.pump();
+    await tester.tap(row);
+    await settle(tester);
+    expect(router.state.uri.path, startsWith('/app/my-class/day/'));
+  });
+
+  testWidgets('хар горим: хүрэх талбай ба контраст', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpStudentRoute(tester, http: homeHttp(), location: '/app/student', dark: true);
+    await settle(tester);
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
 }

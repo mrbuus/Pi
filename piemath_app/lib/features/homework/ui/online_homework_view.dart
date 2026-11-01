@@ -9,6 +9,7 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
+import 'composer/notebook_composer_screen.dart';
 import 'homework_badges.dart';
 import 'homework_icons.dart';
 import 'homework_providers.dart';
@@ -58,7 +59,7 @@ class AssignmentCard extends ConsumerWidget {
   Future<void> _submit(BuildContext context, WidgetRef ref) async {
     final a = assignment;
     final resend = a.submission != null;
-    final ok = await PhotoComposerScreen.open(
+    final ok = await NotebookComposerScreen.open(
       context,
       title: resend ? 'Дахин илгээх' : 'Даалгавар илгээх',
       subtitle: a.title,

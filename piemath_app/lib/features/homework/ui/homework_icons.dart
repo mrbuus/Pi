@@ -19,5 +19,6 @@ abstract final class HomeworkIcons {
   static const IconData approved = LucideIcons.badgeCheck;
   static const IconData returned = LucideIcons.undo2;
   static const IconData wrong = LucideIcons.circleX;
+  static const IconData history = LucideIcons.history;
   static const IconData blank = LucideIcons.circleDashed;
 }

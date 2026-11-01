@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import '../domain/homework_history_logic.dart';
 import 'homework_models.dart';
 
 /// Гэрийн даалгаврын API (`docs/api-contract/homework.md`). Бизнесийн дүрэм серверт.
@@ -26,6 +27,13 @@ class HomeworkRepository {
       );
 
   Future<void> deletePhoto(String id) => _api.delete<Object?>('/homework/photos/${Uri.encodeComponent(id)}');
+
+  /// Тухайн жилийн багшийн тэмдэглэгээ (огноогоор буурах; тэмдэглээгүй өдөр орохгүй).
+  Future<List<HwMarkEntry>> myMarks(int year) => _api.get(
+        '/homework-marks/my',
+        query: {'year': year},
+        parse: (j) => [for (final e in (j as List? ?? const [])) HwMarkEntry.fromJson(e)],
+      );
 
   /// Онлайн загвар: миний даалгаврууд.
   Future<List<Assignment>> myAssignments() => _api.get(
