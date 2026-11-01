@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/shell/app_shell.dart';
 import '../../../core/auth/current_user.dart';
@@ -8,13 +9,15 @@ import '../../../core/auth/session.dart';
 import '../../../core/files/file_image.dart';
 import '../../../core/network/network_providers.dart';
 import '../../../core/ui/ui.dart';
+import '../../push/push_service.dart';
 import 'auth_icons.dart';
 import 'change_password_form.dart';
+import 'linked_accounts_card.dart';
 
 /// «Миний мэдээлэл» — хувийн мэдээлэл, код, нууц үг солих нэг дор (вэбийн `/app/profile`).
 ///
-/// Нэр, утас, имэйлийг ЗАСАХ endpoint API-д байхгүй — зөвхөн харуулна. Профайл зураг солих,
-/// Google холбох нь дараагийн шатанд (файл байршуулалт, M6).
+/// Нэр, утас, имэйлийг ЗАСАХ endpoint API-д байхгүй — зөвхөн харуулна. Google/Apple холбох,
+/// бүртгэл устгах хүсэлт (M6) энд. Профайл зураг солих нь дараагийн шатанд (файл байршуулалт).
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -133,11 +136,20 @@ class _ProfileBody extends ConsumerWidget {
                 ),
                 const SectionHeader(title: 'Нууц үг солих'),
                 const AppCard(child: ChangePasswordForm()),
+                const LinkedAccountsSection(),
                 const SizedBox(height: AppSpace.xl),
                 OutlinedButton.icon(
                   icon: Icon(AppIcons.logout, color: context.colors.error),
                   label: Text('Гарах', style: TextStyle(color: context.colors.error)),
                   onPressed: () => _confirmLogout(context, ref),
+                ),
+                const SizedBox(height: AppSpace.md),
+                Center(
+                  child: TextButton(
+                    style: TextButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap)),
+                    onPressed: () => context.push(deletionRequestPath),
+                    child: Text('Бүртгэл устгах хүсэлт', style: TextStyle(color: context.colors.inkDim)),
+                  ),
                 ),
               ],
             ),
@@ -159,7 +171,10 @@ class _ProfileBody extends ConsumerWidget {
         ],
       ),
     );
-    if (ok ?? false) await ref.read(sessionProvider.notifier).signOut();
+    if (!(ok ?? false)) return;
+    // Нэвтрэх токен хүчинтэй байхад серверээс push токеныг устгана (гарсны дараа 401 болно).
+    await ref.read(pushServiceProvider).unregisterPush();
+    await ref.read(sessionProvider.notifier).signOut();
   }
 }
 
@@ -276,6 +291,9 @@ class _FieldRow extends StatelessWidget {
     );
   }
 }
+
+/// Бүртгэл устгах хүсэлтийн зам (`auth_routes.dart`).
+const deletionRequestPath = '/app/profile/deletion-request';
 
 /// `/app/password` — хуучин холбоосонд (вэб нь профайл руу шилжүүлдэг). Апп-д ганцаар нь харуулна.
 class ChangePasswordScreen extends StatelessWidget {

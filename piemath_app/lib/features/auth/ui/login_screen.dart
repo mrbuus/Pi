@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/auth/session.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
+import '../../push/push_service.dart';
 import '../data/auth_repository.dart';
 import '../data/login_prefs.dart';
 import 'auth_icons.dart';
+import 'native_sign_in_section.dart';
 import 'widgets/auth_widgets.dart';
 
 /// Нэвтрэх хуудасны админы зарлал (`GET /auth/login-text`). Алдаа, хоосон бол юу ч харуулахгүй —
@@ -59,6 +61,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.initState();
     final s = ref.read(sessionProvider);
     _info = widget.message ?? (s is SignedOut ? s.message : null);
+    // Нэвтэрмэгц push токен бүртгэнэ (bootstrap уншаагүй байсан ч).
+    ref.read(pushSyncProvider);
     _loadPrefs();
   }
 
@@ -269,6 +273,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
             const SizedBox(height: AppSpace.lg),
+            NativeSignInSection(remember: _remember, enabled: !_loading),
             Divider(color: context.colors.line),
             const SizedBox(height: AppSpace.sm),
             Row(
