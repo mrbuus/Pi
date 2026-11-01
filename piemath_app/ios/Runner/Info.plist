@@ -72,5 +72,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Push (FCM/APNs): апп хаалттай үед мэдэгдэл хүлээн авах. Firebase тохируулаагүй бол нөлөөгүй. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/app/app.dart';
 import 'package:piemath_app/app/router.dart';
@@ -23,6 +24,7 @@ Future<ProviderContainer> pumpAuthApp(
   String? location,
   Size size = const Size(390, 844),
   ThemeMode themeMode = ThemeMode.light,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size * 2;
   tester.view.devicePixelRatio = 2;
@@ -34,6 +36,7 @@ Future<ProviderContainer> pumpAuthApp(
       ...testOverrides(http: http, store: store ?? MemoryTokenStore(auth)),
       sharedPreferencesProvider.overrideWithValue(sp),
       loginPrefsProvider.overrideWithValue(prefs ?? MemoryLoginPrefs()),
+      ...overrides,
     ],
     retry: (_, _) => null,
   );

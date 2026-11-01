@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE"/>
     <!-- Шалгалтын үеийн дэлгэц бичлэг илрүүлэх (Android 15+, энгийн зөвшөөрөл) -->
     <uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING"/>
+    <!-- Push мэдэгдэл (Android 13+, нэвтэрсний дараа асууна). Firebase тохируулаагүй бол асуухгүй. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!-- allowBackup=false: токен (flutter_secure_storage) Google Drive-д нөөцлөгдөхгүй,
          сэргээхэд "Failed to unwrap key" алдаа гарахгүй. dataExtractionRules нь Android 12+

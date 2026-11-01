@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/feature_routes.dart';
 import '../../app/redirect.dart';
 import 'ui/consent_screen.dart';
+import 'ui/deletion_request_screen.dart';
 import 'ui/forgot_password_screen.dart';
 import 'ui/login_screen.dart';
 import 'ui/profile_screen.dart';
@@ -11,7 +12,7 @@ import 'ui/profile_screen.dart';
 ///
 /// - public: `/login`, `/forgot-password` (`#t=<токен>` — имэйлийн холбоос). `/register` апп-д хийгдээгүй
 ///   (эзний шийдвэр) — router-ийн «удахгүй» дэлгэц вэбээр нээнэ.
-/// - shell: `/app/profile`, `/app/password`.
+/// - shell: `/app/profile`, `/app/profile/deletion-request`, `/app/password`.
 /// - fullscreen: `/app/consent` (вэбийн адил шалгалт унтраалттай — `consentGateEnabled`).
 final authRoutes = FeatureRoutes(
   public: [
@@ -29,6 +30,7 @@ final authRoutes = FeatureRoutes(
   ],
   shell: [
     GoRoute(path: '/app/profile', builder: (_, _) => const ProfileScreen()),
+    GoRoute(path: deletionRequestPath, builder: (_, _) => const DeletionRequestScreen()),
     GoRoute(path: '/app/password', builder: (_, _) => const ChangePasswordScreen()),
   ],
   fullscreen: [
