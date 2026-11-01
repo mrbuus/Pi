@@ -1,81 +1,52 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../shared/marks/marks.dart';
+
+export '../../../shared/marks/marks.dart' show AttendanceStatus, HomeworkStatus, LateRange;
+
 part 'teacher_models.freezed.dart';
 part 'teacher_models.g.dart';
 
 /// Багшийн хэсгийн API загварууд — `docs/api-contract/teacher.md`.
 /// Огнооны талбар бүр `YYYY-MM-DD` мөр (UB-ийн өдөр) эсвэл ISO агшин — тайлбарт заасан.
 
-/// Ирцийн төлөв (Prisma `AttendanceStatus`). Тасалсан шалтгаанд «өвчтэй» сонголт байхгүй (эзний дүрэм).
-enum AttendanceStatus {
-  present,
-  late,
-  absent,
-  excused;
+// Ирц/даалгаврын төлөв — `shared/marks`-ийн НЭГ enum (сурагч, эцэг эх, багш бүгд). Энд зөвхөн API мөр.
+// Тасалсан шалтгаанд «өвчтэй» сонголт байхгүй (эзний дүрэм).
 
+extension AttendanceStatusApi on AttendanceStatus {
   String get api => switch (this) {
-        present => 'PRESENT',
-        late => 'LATE',
-        absent => 'ABSENT',
-        excused => 'EXCUSED',
-      };
-
-  static AttendanceStatus? fromApi(Object? v) => switch (v) {
-        'PRESENT' => present,
-        'LATE' => late,
-        'ABSENT' => absent,
-        'EXCUSED' => excused,
-        _ => null,
-      };
+    AttendanceStatus.present => 'PRESENT',
+    AttendanceStatus.late => 'LATE',
+    AttendanceStatus.absent => 'ABSENT',
+    AttendanceStatus.excused => 'EXCUSED',
+  };
 }
 
-/// Танхимын гэрийн даалгаврын тэмдэглэгээ (Prisma `HomeworkMarkStatus`).
-enum HomeworkStatus {
-  done,
-  partial,
-  notDone;
-
+extension HomeworkStatusApi on HomeworkStatus {
   String get api => switch (this) {
-        done => 'DONE',
-        partial => 'PARTIAL',
-        notDone => 'NOT_DONE',
-      };
-
-  static HomeworkStatus? fromApi(Object? v) => switch (v) {
-        'DONE' => done,
-        'PARTIAL' => partial,
-        'NOT_DONE' => notDone,
-        _ => null,
-      };
+    HomeworkStatus.done => 'DONE',
+    HomeworkStatus.partial => 'PARTIAL',
+    HomeworkStatus.notDone => 'NOT_DONE',
+  };
 }
 
-/// Хоцролтын хугацаа — зөвхөн LATE үед.
-enum LateRange {
-  fiveToTen,
-  tenToThirty,
-  thirtyToSixty,
-  overOneHour;
-
+extension LateRangeApi on LateRange {
   String get api => switch (this) {
-        fiveToTen => 'FIVE_TO_TEN',
-        tenToThirty => 'TEN_TO_THIRTY',
-        thirtyToSixty => 'THIRTY_TO_SIXTY',
-        overOneHour => 'OVER_ONE_HOUR',
-      };
-
-  static LateRange? fromApi(Object? v) => switch (v) {
-        'FIVE_TO_TEN' => fiveToTen,
-        'TEN_TO_THIRTY' => tenToThirty,
-        'THIRTY_TO_SIXTY' => thirtyToSixty,
-        'OVER_ONE_HOUR' => overOneHour,
-        _ => null,
-      };
+    LateRange.fiveToTen => 'FIVE_TO_TEN',
+    LateRange.tenToThirty => 'TEN_TO_THIRTY',
+    LateRange.thirtyToSixty => 'THIRTY_TO_SIXTY',
+    LateRange.overOneHour => 'OVER_ONE_HOUR',
+  };
 }
+
+AttendanceStatus? attendanceFromApi(Object? v) => v is String ? parseAttendanceStatus(v) : null;
+HomeworkStatus? homeworkFromApi(Object? v) => v is String ? parseHomeworkStatus(v) : null;
+LateRange? lateRangeFromApi(Object? v) => v is String ? parseLateRange(v) : null;
 
 class AttStatusConverter implements JsonConverter<AttendanceStatus?, Object?> {
   const AttStatusConverter();
   @override
-  AttendanceStatus? fromJson(Object? json) => AttendanceStatus.fromApi(json);
+  AttendanceStatus? fromJson(Object? json) => attendanceFromApi(json);
   @override
   Object? toJson(AttendanceStatus? object) => object?.api;
 }
@@ -83,7 +54,7 @@ class AttStatusConverter implements JsonConverter<AttendanceStatus?, Object?> {
 class HwStatusConverter implements JsonConverter<HomeworkStatus?, Object?> {
   const HwStatusConverter();
   @override
-  HomeworkStatus? fromJson(Object? json) => HomeworkStatus.fromApi(json);
+  HomeworkStatus? fromJson(Object? json) => homeworkFromApi(json);
   @override
   Object? toJson(HomeworkStatus? object) => object?.api;
 }
@@ -91,7 +62,7 @@ class HwStatusConverter implements JsonConverter<HomeworkStatus?, Object?> {
 class LateRangeConverter implements JsonConverter<LateRange?, Object?> {
   const LateRangeConverter();
   @override
-  LateRange? fromJson(Object? json) => LateRange.fromApi(json);
+  LateRange? fromJson(Object? json) => lateRangeFromApi(json);
   @override
   Object? toJson(LateRange? object) => object?.api;
 }
@@ -136,23 +107,16 @@ abstract class DayClass with _$DayClass {
 
 @freezed
 abstract class DayBoard with _$DayBoard {
-  const factory DayBoard({
-    required String date,
-    @Default(<DayClass>[]) List<DayClass> classes,
-    DayClass? selected,
-  }) = _DayBoard;
+  const factory DayBoard({required String date, @Default(<DayClass>[]) List<DayClass> classes, DayClass? selected}) =
+      _DayBoard;
 
   factory DayBoard.fromJson(Map<String, Object?> json) => _$DayBoardFromJson(json);
 }
 
 @freezed
 abstract class BoardStudent with _$BoardStudent {
-  const factory BoardStudent({
-    required String id,
-    @Default('') String firstName,
-    String? lastName,
-    String? code,
-  }) = _BoardStudent;
+  const factory BoardStudent({required String id, @Default('') String firstName, String? lastName, String? code}) =
+      _BoardStudent;
 
   factory BoardStudent.fromJson(Map<String, Object?> json) => _$BoardStudentFromJson(json);
 }
@@ -265,13 +229,13 @@ abstract class BoardPayload with _$BoardPayload {
   bool get isOnline => classroom.type == 'ONLINE';
 
   MarksPayload get marks => MarksPayload(
-        date: date,
-        attendance: attendance,
-        homework: homework,
-        risk: risk,
-        recordedBy: recordedBy,
-        sent: sent,
-      );
+    date: date,
+    attendance: attendance,
+    homework: homework,
+    risk: risk,
+    recordedBy: recordedBy,
+    sent: sent,
+  );
 }
 
 /// `POST /classrooms/:id/attendance` хариу.
