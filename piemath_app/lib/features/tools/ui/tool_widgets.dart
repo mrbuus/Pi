@@ -72,9 +72,13 @@ class _MetricTile extends StatelessWidget {
           for (final r in metric.rows)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: MathText(
-                '\$${r.tex}\$',
-                style: TextStyle(fontSize: big ? 18 : 16, color: c.ink),
+              // Урт томьёо (Герон г.м.) нарийн утсанд хэтрэхгүй — хэвтээ гүйлгэнэ.
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: MathText(
+                  '\$${r.tex}\$',
+                  style: TextStyle(fontSize: big ? 18 : 16, color: c.ink),
+                ),
               ),
             ),
         ],
