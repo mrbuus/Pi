@@ -49,6 +49,26 @@
 
 ## Бичлэгүүд
 
+### 2026-11-01 — ЭЦСИЙН ТАЙЛАН (cloud session, кредит дуусч байна)
+
+**Нэгтгэгдсэн, push хийгдсэн (`piemath-app`):** M0 (бүгд), M1 нэвтрэлт/профайл, M2 томьёо, M5 QR/ном, API гэрээ,
+платформ/CI/шалгалтын хамгаалалтын суурь. Тест 338/338, analyze 0. Ноорог PR #53 (суурь `pi-mn-v2-test`, merge
+хийхгүй) — `web`/`e2e` CI улаан нь `pi-mn-v2-test` дээр ч улаан (вэбийн lint), энэ ажлаас биш.
+
+**Ажиллаж байсан agent-ууд (нэгтгэгдээгүй бол дараагийн session ДАХИН хийнэ):** M3a сурагчийн нүүр/«Хичээл»/хуваарь
+(+`lib/shared/marks/`), M3b даалгавар/онол/`core/files`, M4 шалгалт өгөх, M7 эцэг эх/мэдэгдэл/төлбөр/тусламж
+(+`lib/shared/payment_status/`), M8 багш. Доорх бичлэгүүдэд аль нь нэгтгэгдсэнийг харна уу; нэгтгэгдээгүй бол
+`lib/features/<x>/<x>_routes.dart` хоосон хэвээр (дэлгэц PendingScreen харуулна).
+
+**Дараагийн session-ий яг алхам:**
+1. `PROGRESS.md` (энэ файл) → `docs/RULES.md` → `docs/api-contract/00-overview.md` + тухайн feature-ийн гэрээ.
+2. Нэгтгэгдээгүй feature-ийг дахин хийх: дараалал M4 шалгалт → M3a → M3b → M7 → M8. Feature бүр зөвхөн
+   `lib/features/<x>/**`, маршрут `<x>_routes.dart`-д; mock API `test/helpers/fake_http.dart` + `test_container.dart`.
+3. Нэгтгэсний дараа: `lib/shared/marks/`, `payment_status`-ийг feature доторх түр хуулбаруудтай нэгтгэх; мэдэгдлийн
+   badge-ийг shell-д (`unreadNotificationsCountProvider`); feature-local `*Icons`-ийг `AppIcons` руу.
+4. M6 (push, Google/Apple нэвтрэлт, бүртгэл устгах хүсэлт [A][Э]), M9 (таблет/админ — ихэнх нь ↗), M10 (дэлгүүр).
+5. Lucide variable фонт (~1.4MB APK) — хэрэглэсэн глифээс өөрийн фонт (`AppIcons` л солигдоно).
+
 ### 2026-11-01 — M5 QR, ном (agent, `877193a`)
 
 - `/app/scan` (камер, гар оруулга, торч; зөвхөн `pimath.mn/q/<код>` эсвэл 8 тэмдэгт, 3с дотор давтсаныг алгасна),
