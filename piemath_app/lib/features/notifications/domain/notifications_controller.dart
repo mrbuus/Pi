@@ -160,6 +160,9 @@ class NotificationsController extends AsyncNotifier<NotificationsState> {
 
 /// Уншаагүй мэдэгдлийн тоо — хонх/badge-д (shell эзэн холбоно). Апп нээлттэй (resumed) үед
 /// 60 секунд тутам асууна (вэбийн `NotificationBell`). Push (FCM) M6-д нэмэгдэнэ.
+/// Уншаагүй тоог тогтмол асуух эсэх (widget тестэд унтраана — таймер үлдэхгүй).
+final notificationsPollingProvider = Provider<bool>((ref) => true);
+
 final unreadNotificationsCountProvider =
     AsyncNotifierProvider.autoDispose<UnreadNotificationsCount, int>(UnreadNotificationsCount.new);
 
@@ -168,11 +171,13 @@ class UnreadNotificationsCount extends AsyncNotifier<int> {
 
   @override
   Future<int> build() async {
-    final timer = Timer.periodic(interval, (_) {
-      final life = WidgetsBinding.instance.lifecycleState;
-      if (life == null || life == AppLifecycleState.resumed) unawaited(_poll());
-    });
-    ref.onDispose(timer.cancel);
+    if (ref.read(notificationsPollingProvider)) {
+      final timer = Timer.periodic(interval, (_) {
+        final life = WidgetsBinding.instance.lifecycleState;
+        if (life == null || life == AppLifecycleState.resumed) unawaited(_poll());
+      });
+      ref.onDispose(timer.cancel);
+    }
     return ref.read(notificationsRepositoryProvider).unreadCount();
   }
 

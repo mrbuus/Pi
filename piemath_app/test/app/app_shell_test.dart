@@ -65,6 +65,15 @@ void main() {
     expect(find.text('Шалгалт'), findsOneWidget);
   });
 
+  testWidgets('«Бусад» табад уншаагүй мэдэгдлийн тоо', (tester) async {
+    final http = FakeHttp()
+      ..json('GET', '/auth/me', fakeMe())
+      ..json('GET', '/notifications/my/unread-count', {'count': 3});
+    await pumpApp(tester, auth: const StoredAuth(token: 't', userId: 'u1', role: UserRole.student), http: http);
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byType(Badge), matching: find.text('3')), findsOneWidget);
+  });
+
   testWidgets('таблет (768dp+) дээр зүүн rail', (tester) async {
     final http = FakeHttp()..json('GET', '/auth/me', fakeMe(role: 'PARENT'));
     await pumpApp(

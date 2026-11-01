@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/auth/session.dart';
 import '../../core/auth/user_role.dart';
 import '../../core/ui/ui.dart';
+import '../../features/notifications/domain/notifications_controller.dart';
 import '../nav/nav_data.dart';
 
 /// «Бусад» цэсний зам.
@@ -49,7 +50,7 @@ class AppShell extends ConsumerWidget {
                 destinations: [
                   for (final t in tabs)
                     NavigationRailDestination(icon: Icon(t.icon), label: Text(t.tabLabel)),
-                  const NavigationRailDestination(icon: Icon(AppIcons.more), label: Text('Бусад')),
+                  const NavigationRailDestination(icon: MoreTabIcon(), label: Text('Бусад')),
                 ],
               ),
               VerticalDivider(width: 1, color: context.colors.line),
@@ -66,8 +67,28 @@ class AppShell extends ConsumerWidget {
         onDestinationSelected: onSelect,
         destinations: [
           for (final t in tabs) NavigationDestination(icon: Icon(t.icon), label: t.tabLabel, tooltip: t.label),
-          const NavigationDestination(icon: Icon(AppIcons.more), label: 'Бусад'),
+          const NavigationDestination(icon: MoreTabIcon(), label: 'Бусад'),
         ],
+      ),
+    );
+  }
+}
+
+/// «Бусад» таб — уншаагүй мэдэгдэл байвал тоотой тэмдэг (мэдэгдэл «Бусад» дотор байдаг).
+class MoreTabIcon extends ConsumerWidget {
+  const MoreTabIcon({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(unreadNotificationsCountProvider).value ?? 0;
+    return Semantics(
+      label: unread > 0 ? 'Уншаагүй мэдэгдэл $unread' : null,
+      child: Badge(
+        isLabelVisible: unread > 0,
+        backgroundColor: context.colors.error,
+        textColor: context.colors.onStatus,
+        label: Text(unread > 99 ? '99+' : '$unread'),
+        child: const Icon(AppIcons.more),
       ),
     );
   }
