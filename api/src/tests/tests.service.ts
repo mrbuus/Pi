@@ -43,6 +43,7 @@ import {
   UpdateTestDraftDto,
 } from './dto/test-draft.dto';
 import { SaveSessionDto } from './dto/submit-test.dto';
+import { countIntegrityEvents, countsAsLeave } from './integrity-events';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import {
   answerToken,
@@ -1468,13 +1469,20 @@ export class TestsService {
     // Анти-чит: шалгалтын горимоос гарсан тоог багшид харуулна (Шийдвэр 3)
     const sessions = await this.prisma.testAttemptSession.findMany({
       where: { testId, studentId: { in: rows.map((r) => r.studentId) } },
-      select: { studentId: true, leaveCount: true },
+      select: { studentId: true, leaveCount: true, events: true },
     });
-    const leaveBy = new Map(sessions.map((s) => [s.studentId, s.leaveCount]));
-    return rows.map((r) => ({
-      ...r,
-      leaveCount: leaveBy.get(r.studentId) ?? null,
-    }));
+    const sessionBy = new Map(sessions.map((s) => [s.studentId, s]));
+    return rows.map((r) => {
+      const s = sessionBy.get(r.studentId);
+      // Гар утасны апп: дэлгэцийн зураг / бичлэгийн тоо (leaveCount-д ордоггүй)
+      const integrity = s ? countIntegrityEvents(s.events) : null;
+      return {
+        ...r,
+        leaveCount: s?.leaveCount ?? null,
+        screenshotCount: integrity?.screenshotCount ?? null,
+        recordingCount: integrity?.recordingCount ?? null,
+      };
+    });
   }
 
   // Сурагчийн өөрийн дүнгүүд — эцэг эхэд мөн энэ өгөгдөл харагдана
@@ -1804,9 +1812,7 @@ export class TestsService {
       ? [...(session.events as unknown[])]
       : [];
     if (dto.event) {
-      if (dto.event === 'LEAVE' || dto.event === 'FULLSCREEN_EXIT') {
-        leaveCount += 1;
-      }
+      if (countsAsLeave(dto.event)) leaveCount += 1;
       events.push({ t: new Date().toISOString(), type: dto.event });
       if (events.length > MAX_EVENTS)
         events.splice(0, events.length - MAX_EVENTS);

@@ -167,3 +167,69 @@ describe('Номын QR (scan) — нэвтэрсэн хэрэглэгч, бод
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// Piemath гар утасны апп (2026-11-02): push токен, native нэвтрэлт, бүртгэл
+// устгах ХҮСЭЛТ. Маршрут бүр guard + role-той; нэвтрэх маршрут нээлттэй.
+// ---------------------------------------------------------------------------
+import { DevicesController } from '../devices/devices.controller';
+import { NativeAuthController } from './native/native-auth.controller';
+import {
+  AccountDeletionController,
+  AdminDeletionRequestsController,
+} from '../account-deletion/account-deletion.controller';
+// @nestjs/throttler-ийн THROTTLER_LIMIT метадатын түлхүүр
+const THROTTLER_LIMIT = 'THROTTLER:LIMIT';
+
+const ALL_SIX = ['ADMIN', 'BUYER', 'PARENT', 'STUDENT', 'TEACHER', 'TEACHER_PLUS'];
+
+function routeOf(controller: object, handler: object) {
+  const prefix = String(Reflect.getMetadata(PATH_METADATA, controller) ?? '');
+  const path = String(Reflect.getMetadata(PATH_METADATA, handler) ?? '');
+  const method = RequestMethod[Reflect.getMetadata(METHOD_METADATA, handler)];
+  const parts = [prefix, path].map((p) => p.replace(/^\/+|\/+$/g, '')).filter(Boolean);
+  return `${method} /api/${parts.join('/')}`;
+}
+
+function expectRoleMatrix(controller: object, handler: object, allowed: string[]) {
+  for (const role of [undefined, ...Object.values(Role)]) {
+    const context = {
+      getHandler: () => handler,
+      getClass: () => controller,
+      switchToHttp: () => ({
+        getRequest: () => ({ user: role ? { userId: 'synthetic-user', role } : undefined }),
+      }),
+    } as unknown as ExecutionContext;
+    expect(roleGuard.canActivate(context)).toBe(!!role && allowed.includes(role));
+  }
+}
+
+describe('Гар утасны апп — шинэ маршрутын эрх', () => {
+  const guarded: [string, object, object, string[]][] = [
+    ['POST /api/devices', DevicesController, DevicesController.prototype.register, ALL_SIX],
+    ['DELETE /api/devices/:token', DevicesController, DevicesController.prototype.unregister, ALL_SIX],
+    ['POST /api/auth/google/native/link', NativeAuthController, NativeAuthController.prototype.googleLink, ALL_SIX],
+    ['POST /api/auth/apple/link', NativeAuthController, NativeAuthController.prototype.appleLink, ALL_SIX],
+    ['POST /api/me/deletion-request', AccountDeletionController, AccountDeletionController.prototype.create, ALL_SIX],
+    ['GET /api/me/deletion-request', AccountDeletionController, AccountDeletionController.prototype.mine, ALL_SIX],
+    ['GET /api/admin/deletion-requests', AdminDeletionRequestsController, AdminDeletionRequestsController.prototype.list, ['ADMIN']],
+    ['PATCH /api/admin/deletion-requests/:id', AdminDeletionRequestsController, AdminDeletionRequestsController.prototype.review, ['ADMIN']],
+  ];
+
+  it.each(guarded)('%s — JwtAuthGuard + RolesGuard + role матриц', (route, controller, handler, roles) => {
+    expect(routeOf(controller, handler)).toBe(route);
+    const guards = [...guardsOf(controller), ...guardsOf(handler)];
+    expect(guards).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
+    expect([...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort()).toEqual([...roles].sort());
+    expectRoleMatrix(controller, handler, roles);
+  });
+
+  it.each([
+    ['POST /api/auth/google/native', NativeAuthController.prototype.google],
+    ['POST /api/auth/apple', NativeAuthController.prototype.apple],
+  ])('%s — нэвтрээгүй хүнд нээлттэй, login-той ижил чанга хязгаар', (route, handler) => {
+    expect(routeOf(NativeAuthController, handler)).toBe(route);
+    expect([...guardsOf(NativeAuthController), ...guardsOf(handler)]).not.toContain(JwtAuthGuard);
+    expect(Reflect.getMetadata(THROTTLER_LIMIT + 'default', handler)).toBe(10);
+  });
+});

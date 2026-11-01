@@ -51,5 +51,6 @@ Nest-ийн OpenAPI нь ихэнх хариуны бүтцийг агуулда
 | [schedule-attendance.md](schedule-attendance.md) | хуваарь, ирц, нөхөх хичээл |
 | [homework.md](homework.md) | гэрийн даалгавар (танхим/онлайн/зураг), дадлага |
 | [notifications-payments-misc.md](notifications-payments-misc.md) | мэдэгдэл, төлбөрийн төлөв, санал хүсэлт, хичээлийн урсгал |
+| [mobile-server.md](mobile-server.md) | аппад зориулж нэмсэн: шалгалтын SCREENSHOT/RECORDING үйл явдал, `/devices` (push), `/auth/google/native`, `/auth/apple`, бүртгэл устгах хүсэлт |
 
 2-р хэсэг (шалгалт өгөх, эргэн харалт, ном, QR, эцэг эх, багш) — өөр agent, өөр файлууд.
