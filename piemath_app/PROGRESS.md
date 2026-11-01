@@ -5,10 +5,11 @@
 
 ## Одоогийн төлөв
 
-- Milestone: **M0 дууссан, M2 дууссан.** Дараа нь M1, M3, M4, M5, M7, M8 — зэрэгцээ agent-уудаар (доор «Ажлын хэв маяг»)
+- Milestone: **M0, M1, M2, M5 ✅; M3, M4, M7 ◐ (ажилладаг, зарим тест/golden дутуу); M8 эхлэл (зөвхөн загвар)**
+- **Эхлээд унш:** `docs/HOW-TO-CONTINUE.md` — ажлын арга, конвенц, тест, урхи, agent-д өгөх загвар
 - Branch: `piemath-app` (суурь: прод `4d3b648` + номын QR S1)
 - Flutter 3.47.9 stable / Dart 3.13.7 (cloud: `~/flutter`, `export PATH=~/flutter/bin:$PATH`)
-- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 338/338 ногоон
+- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 542/542 ногоон (HEAD `51bec33`)
 - Ноорог PR (зөвхөн CI, merge хийхгүй): https://github.com/mrbuus/Pi/pull/53
 
 ## Ажлын хэв маяг — зэрэгцээ agent (эзэн 2026-11-01)
@@ -49,25 +50,41 @@
 
 ## Бичлэгүүд
 
-### 2026-11-01 — ЭЦСИЙН ТАЙЛАН (cloud session, кредит дуусч байна)
+### 2026-11-01 — ЭЦСИЙН ТАЙЛАН (cloud session, кредит дуусав)
 
-**Нэгтгэгдсэн, push хийгдсэн (`piemath-app`):** M0 (бүгд), M1 нэвтрэлт/профайл, M2 томьёо, M5 QR/ном, API гэрээ,
-платформ/CI/шалгалтын хамгаалалтын суурь. Тест 338/338, analyze 0. Ноорог PR #53 (суурь `pi-mn-v2-test`, merge
-хийхгүй) — `web`/`e2e` CI улаан нь `pi-mn-v2-test` дээр ч улаан (вэбийн lint), энэ ажлаас биш.
+**Бүгд нэгтгэгдэж push хийгдсэн** (`piemath-app` `51bec33`): тест 542/542, analyze 0. Ноорог PR #53 (суурь
+`pi-mn-v2-test`, merge хийхгүй); `web`/`e2e` CI улаан нь `pi-mn-v2-test` дээр ч улаан (вэбийн lint) — апп-аас биш.
+Апп-ын CI (Android debug build) push бүрт concurrency-оор цуцлагдсан — сүүлийн run-ийн үр дүнг шалга.
 
-**Ажиллаж байсан agent-ууд (нэгтгэгдээгүй бол дараагийн session ДАХИН хийнэ):** M3a сурагчийн нүүр/«Хичээл»/хуваарь
-(+`lib/shared/marks/`), M3b даалгавар/онол/`core/files`, M4 шалгалт өгөх, M7 эцэг эх/мэдэгдэл/төлбөр/тусламж
-(+`lib/shared/payment_status/`), M8 багш. Доорх бичлэгүүдэд аль нь нэгтгэгдсэнийг харна уу; нэгтгэгдээгүй бол
-`lib/features/<x>/<x>_routes.dart` хоосон хэвээр (дэлгэц PendingScreen харуулна).
+| Хэсэг | Төлөв | Юу ажилладаг | Дутуу (дараагийн яг алхам) |
+|---|---|---|---|
+| M0 суурь | ✅ | дизайн, сүлжээ, нэвтрэлтийн төлөв, router/shell, CI, Android хамгаалалт | Lucide variable фонт ~1.4MB (M10) |
+| M1 нэвтрэлт | ✅ | `/login`, `/forgot-password`, `/app/profile`, `/app/password`, `/app/consent` | профайлын зураг солих (`FileUploader` бэлэн болсон) |
+| M2 томьёо | ✅ | MathText, ChoiceGrid, ProblemFigure, аудит 100% | сангийн 5 эвдэрсэн томьёо (LATEX-AUDIT.md) |
+| M3 сурагч | ◐ | `/app/student`, `/app/my-class` (5 таб, өдөр, ангийн тест), `/app/makeup`, `/app/schedule` (`/schedule/week`), `lib/shared/marks/` | widget тест: my-class табууд, өдөр, тест, хуваарь (`test/features/student_fixtures.dart`, `student_harness.dart`); golden `student_*`; нөхөх зураг илгээх `/app/makeup/photos/:c/:d` (одоо түр дэлгэц) → `POST /makeup/me/:c/:d/photos` |
+| M3 даалгавар/онол | ◐ | `lib/core/files/` (S3 redirect, кэш, `FileUploader`, зураг → баримт), `/app/homework` (2 загвар), `/app/homework/:testId`, `/app/theory` | widget тест + golden (`test/features/homework/hw_fixtures.dart`, override: todayKeyProvider, isOnlineStudentProvider, fileCacheDirectoryProvider, photoSourceProvider, jpegCompressorProvider, documentRendererProvider); crop алхам; `homework-marks/my` жилийн түүх |
+| M4 шалгалт | ◐ | `/app/tests`, intro, өгөх (бүх хариултын төрөл, autosave вэбтэй ижил, офлайн draft, таймер, гарах анхааруулга, хамгаалалт), дүн, эргэн харалт, 1000 | golden `exam_*`; дүнгийн хуудасны widget тест; `/test-rankings/:id`; **гарах үед `exam_draft:` SharedPreferences түлхүүрүүдийг устгах** (SECURITY §3 — `SessionController.signOut`-д hook) |
+| M5 QR/ном | ✅ | `/app/scan`, `/app/scan/:code`, `/books`, үнэгүй тест, `/sorils`, `/placement` (мэдээлэл) | iOS Universal Links (Mac), вэбд `.well-known` файлууд [Э] |
+| M7 эцэг эх | ◐ | `/app/parent`, `/app/parent/weekly`, `/app/notifications` (+settings), `/app/student/payments`, `/app/support`, `/app/feedback`, `lib/shared/payment_status/` | жилийн түүх (`ParentRepository.history()` + дэлгэц); санал хүсэлтэд хавсралт (`FileUploader`) |
+| M8 багш | — (загвар) | `lib/features/teacher/data/teacher_models.dart` (бүх endpoint-ийн freezed загвар) | `data/teacher_repository.dart` → `domain/board_logic.dart` (вэбийн `useBoard.ts`) → `application/board_controller.dart` → дэлгэцүүд → `teacher_routes.dart` (дэлгэрэнгүй жагсаалт agent-ийн тайланд: board, ангиуд, сурагчийн 4 таб, тэмдэглэл, цаг, тарах цаг, онлайн даалгавар шалгах) |
+| M6, M9, M10 | — | | push/Google/Apple [A][Э], таблет/админ (ихэнх ↗), дэлгүүр |
 
-**Дараагийн session-ий яг алхам:**
-1. `PROGRESS.md` (энэ файл) → `docs/RULES.md` → `docs/api-contract/00-overview.md` + тухайн feature-ийн гэрээ.
-2. Нэгтгэгдээгүй feature-ийг дахин хийх: дараалал M4 шалгалт → M3a → M3b → M7 → M8. Feature бүр зөвхөн
-   `lib/features/<x>/**`, маршрут `<x>_routes.dart`-д; mock API `test/helpers/fake_http.dart` + `test_container.dart`.
-3. Нэгтгэсний дараа: `lib/shared/marks/`, `payment_status`-ийг feature доторх түр хуулбаруудтай нэгтгэх; мэдэгдлийн
-   badge-ийг shell-д (`unreadNotificationsCountProvider`); feature-local `*Icons`-ийг `AppIcons` руу.
-4. M6 (push, Google/Apple нэвтрэлт, бүртгэл устгах хүсэлт [A][Э]), M9 (таблет/админ — ихэнх нь ↗), M10 (дэлгүүр).
-5. Lucide variable фонт (~1.4MB APK) — хэрэглэсэн глифээс өөрийн фонт (`AppIcons` л солигдоно).
+**Нэгтгэх ажил (нийтлэг файл, үндсэн session):**
+1. Feature доторх түр тэмдгүүдийг `lib/shared/marks/`-ээр солих: `features/parent/ui/mark_chip.dart`,
+   `features/homework/ui/homework_badges.dart` (HomeworkMarkBadge, StatusPill).
+2. Feature-local дүрсийг (`ScanIcons`, `BooksIcons`, `FileIcons`, `HomeworkIcons`, `MyClassIcons`, `parent_icons`,
+   `notifications_icons`, `support_icons`, `payment_icons`, `exam_icons`) `AppIcons` руу.
+3. Мэдэгдлийн badge: `unreadNotificationsCountProvider` (features/notifications) → AppShell / «Бусад».
+4. `ApiError`: 503-ийн монгол серверийн мессежийг ерөнхийд нь харуулах (M1 feature дотор тойрсон).
+5. Нэвтрэлтийн widget тестэд `loginPrefsProvider` → `MemoryLoginPrefs` override.
+
+**Эзний шийдвэр/тодруулга (шинэ):** нууц үг сольсны дараах токен 7 хоног; эцэг эх сарын төлбөрийн дэлгэрэнгүй харах эсэх;
+вэб сургалтын төлбөрийг ангиар, сервер 7 хоногийн өдрөөр — зөрж болно; дүнтэй танилцах код хүүхдийн имэйлд очдог
+(ихэнх нь имэйлгүй); багшийн тэмдэглэл устгах нь сервер дээр hard delete (зөөлөн устгалын дүрэмтэй зөрчилдөнө);
+QR-аар төлбөртэй ном нээхийг апп дотор зарахгүй (Apple IAP) — вэб/төвөөр.
+
+**Дараагийн session-ий яг алхам:** (1) `docs/HOW-TO-CONTINUE.md` унш; (2) M8 багшийг дуусга; (3) M3/M4/M7-ийн
+дутуу тест, golden; (4) дээрх «Нэгтгэх ажил»; (5) сүүлийн CI run (Android APK) ногоон эсэх; (6) M6.
 
 ### 2026-11-01 — M5 QR, ном (agent, `877193a`)
 

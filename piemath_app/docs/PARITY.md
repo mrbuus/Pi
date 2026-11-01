@@ -26,14 +26,14 @@
 
 | Вэб зам | Апп | Milestone | Төлөв |
 |---|---|---|---|
-| `/app` (нүүр), `/app/student` | Нүүр | M3 | — |
-| `/app/my-class`, `/app/my-class/tests/[testId]` | Миний анги, өдөр бүр, ангийн тест | M3 | — |
-| `/app/theory` | Онол | M3 | — |
-| `/app/homework`, `/app/homework/[testId]` | Гэрийн даалгавар (зураг → PDF, дадлага) | M3 | — |
-| `/app/schedule` | Хуваарь | M3 | — |
-| `/app/notifications`, `/app/notifications/settings` | Мэдэгдэл | M3 / M6 | — |
-| `/app/tests`, `/app/tests/[id]`, `/[id]/result`, `/[id]/review` | Шалгалт өгөх, дүн, эргэн харалт | M4 | — |
-| `/app/thousand/*` | → `/app/tests` (redirect) | M4 | — |
+| `/app` (нүүр), `/app/student` | Нүүр | M3 | ◐ |
+| `/app/my-class`, `/app/my-class/tests/[testId]` | Миний анги, өдөр бүр, ангийн тест | M3 | ◐ |
+| `/app/theory` | Онол | M3 | ◐ |
+| `/app/homework`, `/app/homework/[testId]` | Гэрийн даалгавар (зураг → PDF, дадлага) | M3 | ◐ |
+| `/app/schedule` | Хуваарь (сурагч, эцэг эх; ажилтанд вэбээр) | M3 | ◐ |
+| `/app/notifications`, `/app/notifications/settings` | Мэдэгдэл (апп дотор; push M6) | M3 / M6 | ✅ |
+| `/app/tests`, `/app/tests/[id]`, `/[id]/result`, `/[id]/review` | Шалгалт өгөх, дүн, эргэн харалт | M4 | ◐ |
+| `/app/thousand/*` | → `/app/tests` (redirect) | M4 | ✅ |
 | `/app/online`, `/app/online/[id]` | Онлайн хичээл | M5 | — |
 | `/app/learn`, `/app/learn/[chapterId]`, `/app/library`, `/app/videos` | Бүлэг, номын сан, видео | M5 | — |
 | `/app/practice`, `/app/study`, `/app/study/history`, `/app/study/review` | Дадлага, давтлага | M5 | — |
@@ -41,18 +41,18 @@
 | `/app/goals`, `/app/readiness`, `/app/planner`, `/app/insights` | Зорилго, бэлэн байдал, төлөвлөгч | M5 | — |
 | `/app/formulas`, `/app/formulas/[slug]` | Томьёоны сан | M5 | — |
 | `/app/results-ranking` | Дүнгийн жагсаалт | M5 | — |
-| `/app/makeup` | Нөхөх хичээл | M3 | — |
-| `/app/student/payments`, `/app/payments` (сурагчийн хэсэг) | Төлбөрийн төлөв, данс хуулах | M3 | — |
+| `/app/makeup` | Нөхөх хичээл (зураг илгээх дутуу) | M3 | ◐ |
+| `/app/student/payments`, `/app/payments` (сурагчийн хэсэг) | Төлбөрийн төлөв, данс хуулах | M3 | ✅ |
 | `/app/store`, `/app/buyer` | Дэлгүүр, худалдан авалт | M5 | — |
 | `/app/profile`, `/app/password` | Профайл, нууц үг | M1 | ✅ |
-| `/app/feedback`, `/app/support` | Санал хүсэлт, тусламж | M3 | — |
+| `/app/feedback`, `/app/support` | Санал хүсэлт, тусламж | M3 | ✅ |
 | `/app/lesson-flow/my` | Хичээлийн урсгал | M3 | — |
 
 ## Эцэг эх
 
 | Вэб зам | Апп | Milestone | Төлөв |
 |---|---|---|---|
-| `/app/parent`, `/app/parent/weekly` | Хүүхэд сонгох, 7 хоногийн тойм, ирц, дүн, төлбөр | M7 | — |
+| `/app/parent`, `/app/parent/weekly` | Хүүхэд сонгох, 7 хоногийн тойм, ирц, дүн, төлбөр (жилийн түүх дутуу) | M7 | ◐ |
 | `/app/dismissal` | Анги тарах цаг (БАГШИЙН хуудас — эцэг эхийн чөлөөний API байхгүй, api-contract/parent.md) | M8 | — |
 
 ## Багш / Багш+
@@ -66,7 +66,7 @@
 | `/app/teacher-hours` | Цагийн бүртгэл | M8 | — |
 | `/app/tests/new`, `/app/tests/[id]/edit`, `/app/tests/[id]/results` | Тест үүсгэх/засах, дүн | M9 | — |
 | `/app/internal`, `/app/internal/[id]`, `/[id]/solve` | Дотоод ноорог | M9 | ↗? |
-| `/app/import` | Импорт | M9 | ↗ |
+| `/app/import` | Импорт (Word файл) | M9 | ↗ |
 | `/app/formulas/review`, `/print`, `/widgets` | Томьёо засвар | M9 | ↗ |
 | `/app/tuition`, `/app/tuition/refunds`, `/refund/[id]` | Сургалтын төлбөр (Б+) | M9 | — |
 | `/app/payments/class/[id]`, `/app/payments/student/[id]` | Төлбөрийн төлөв (Б: зөвхөн сурагч тус бүр) | M8/M9 | — |
