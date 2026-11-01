@@ -11,7 +11,6 @@ import '../../../core/ui/ui.dart';
 import '../../payments/domain/org_info.dart';
 import '../data/support_models.dart';
 import '../data/support_repository.dart';
-import 'support_icons.dart';
 
 /// Түргэн асуултууд — серверийн сэдэв ачаалагдаагүй үед (вэбийн `CentreHelp` `QUICK`).
 const _quickQuestions = [
@@ -125,7 +124,9 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
               ),
             ),
             if (reply.fallback != null)
-              AppCard(child: Text(reply.fallback!, style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim))),
+              AppCard(
+                child: Text(reply.fallback!, style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim)),
+              ),
             for (var i = 0; i < reply.matches.length; i++)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpace.sm),
@@ -140,7 +141,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                       if (reply.matches[i].source != null && reply.matches[i].source!.href.isNotEmpty)
                         TextButton.icon(
                           onPressed: () => _openSource(reply.matches[i].source!.href),
-                          icon: const Icon(SupportIcons.source, size: 18),
+                          icon: const Icon(AppIcons.theory, size: 18),
                           label: Text(reply.matches[i].source!.label),
                         ),
                     ],
@@ -166,7 +167,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                 const SizedBox(height: AppSpace.sm),
                 FilledButton.icon(
                   onPressed: _pending || _question.text.trim().length < 2 ? null : _ask,
-                  icon: const Icon(SupportIcons.send, size: 18),
+                  icon: const Icon(AppIcons.send, size: 18),
                   label: Text(_pending ? 'Хайж байна' : 'Асуух'),
                 ),
                 if (_error != null) ...[
@@ -187,12 +188,12 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
               children: [
                 for (final p in OrgInfo.phones)
                   ListTile(
-                    leading: const Icon(SupportIcons.phone),
+                    leading: const Icon(AppIcons.phone),
                     title: Text(p),
                     onTap: () => launchUrl(Uri.parse('tel:${p.replaceAll(' ', '')}')),
                   ),
                 ListTile(
-                  leading: const Icon(SupportIcons.mail),
+                  leading: const Icon(AppIcons.mail),
                   title: const Text(OrgInfo.email),
                   onTap: () => launchUrl(Uri.parse('mailto:${OrgInfo.email}')),
                 ),

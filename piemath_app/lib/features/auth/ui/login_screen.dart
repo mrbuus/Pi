@@ -8,7 +8,6 @@ import '../../../core/ui/ui.dart';
 import '../../push/push_service.dart';
 import '../data/auth_repository.dart';
 import '../data/login_prefs.dart';
-import 'auth_icons.dart';
 import 'native_sign_in_section.dart';
 import 'widgets/auth_widgets.dart';
 
@@ -114,12 +113,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .read(authRepositoryProvider)
           .login(identifier: identifier, password: _password.text, remember: _remember);
       await ref.read(loginPrefsProvider).save(identifier: identifier, remember: _remember);
-      await ref.read(sessionProvider.notifier).signIn(
-            token: result.accessToken,
-            userId: result.userId,
-            role: result.role,
-            remember: _remember,
-          );
+      await ref
+          .read(sessionProvider.notifier)
+          .signIn(token: result.accessToken, userId: result.userId, role: result.role, remember: _remember);
       // Router redirect энэ дэлгэцийг солино.
     } on ApiError catch (e) {
       if (!mounted) return;
@@ -153,20 +149,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
             ),
             const SizedBox(height: AppSpace.lg),
-            if (notice.isNotEmpty) ...[
-              _LoginNotice(body: notice),
-              const SizedBox(height: AppSpace.lg),
-            ],
-            if (_info != null) ...[
-              FormMessage(message: _info, isError: false),
-              const SizedBox(height: AppSpace.lg),
-            ],
+            if (notice.isNotEmpty) ...[_LoginNotice(body: notice), const SizedBox(height: AppSpace.lg)],
+            if (_info != null) ...[FormMessage(message: _info, isError: false), const SizedBox(height: AppSpace.lg)],
             Row(
               children: [
                 Expanded(child: Text('Утас, имэйл эсвэл нэвтрэх нэр', style: context.text.labelLarge)),
                 const InfoHint(
                   title: 'Юу бичих вэ',
-                  message: 'Гурвын аль нэгээр нэвтэрч болно — бүртгүүлэхдээ өгсөн утасны дугаар, эсвэл '
+                  message:
+                      'Гурвын аль нэгээр нэвтэрч болно — бүртгүүлэхдээ өгсөн утасны дугаар, эсвэл '
                       'бүртгэлдээ нэмсэн имэйл хаяг, эсвэл нэвтрэх нэр. Ихэнх сурагч утасны дугаараа хэрэглэдэг.',
                 ),
               ],
@@ -196,7 +187,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Expanded(child: Text('Нууц үг', style: context.text.labelLarge)),
                 const InfoHint(
                   title: 'Нууц үгээ мэдэхгүй байна уу',
-                  message: 'Анх удаа нэвтэрч байгаа бол нууц үг тань утасны дугаар (8 орон). '
+                  message:
+                      'Анх удаа нэвтэрч байгаа бол нууц үг тань утасны дугаар (8 орон). '
                       'Нэвтэрсний дараа «Миний мэдээлэл» хэсгээс өөрчилж болно.',
                 ),
               ],
@@ -244,7 +236,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const InfoHint(
                   title: 'Намайг сана гэж юу вэ',
-                  message: 'Чагталбал энэ утсан дээр 30 хоног нэвтэрсэн хэвээр байна. Бусдын утсаар '
+                  message:
+                      'Чагталбал энэ утсан дээр 30 хоног нэвтэрсэн хэвээр байна. Бусдын утсаар '
                       'нэвтэрч байгаа бол чагтыг авна уу — аппыг хаамагц гарна.',
                 ),
               ],
@@ -311,7 +304,7 @@ class _LoginNotice extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(AuthIcons.notice, size: 18, color: context.colors.brand),
+            Icon(AppIcons.megaphone, size: 18, color: context.colors.brand),
             const SizedBox(width: AppSpace.sm),
             Expanded(child: Text(body, style: context.text.bodyMedium)),
           ],

@@ -12,7 +12,6 @@ import '../../../shared/solution/solution.dart';
 import '../data/scan_result.dart';
 import '../domain/lock_message.dart';
 import '../domain/scan_code.dart';
-import 'scan_icons.dart';
 
 /// Номын QR-аар нээсэн бодлого (`/app/scan/:code`, вэбийн `app/scan/[code]`).
 ///
@@ -42,8 +41,14 @@ class ScanResultScreen extends ConsumerWidget {
     return async.when(
       skipLoadingOnRefresh: false,
       loading: () => const _Frame(title: 'Бодлого', child: LoadingState(cards: 2)),
-      error: (e, _) => _Frame(title: 'Бодлого', child: _ScanError(error: e, code: code)),
-      data: (data) => _Frame(title: _title(data), child: _ScanBody(data: data)),
+      error: (e, _) => _Frame(
+        title: 'Бодлого',
+        child: _ScanError(error: e, code: code),
+      ),
+      data: (data) => _Frame(
+        title: _title(data),
+        child: _ScanBody(data: data),
+      ),
     );
   }
 
@@ -114,8 +119,7 @@ class _ScanBody extends ConsumerWidget {
     final title = ScanResultScreen._title(data);
     final book = data.source.book;
     // «1000 бодлого», «Сорил 16-A» гэсэн бүлгийн нэрт номын нэр давтагддаг — давхар бүү харуул (вэбтэй ижил).
-    final bookShown =
-        book != null && !data.source.chapter.toLowerCase().startsWith(book.toLowerCase()) ? book : null;
+    final bookShown = book != null && !data.source.chapter.toLowerCase().startsWith(book.toLowerCase()) ? book : null;
     final lock = data.access == ScanAccess.locked && data.lockReason != null
         ? lockMessage(data.lockReason!, data.opensAt)
         : null;
@@ -147,7 +151,7 @@ class _ScanBody extends ConsumerWidget {
                 const SizedBox(height: AppSpace.md),
                 Row(
                   children: [
-                    Icon(ScanIcons.imageHint, size: 16, color: c.inkDim),
+                    Icon(AppIcons.gallery, size: 16, color: c.inkDim),
                     const SizedBox(width: AppSpace.sm),
                     Expanded(child: Text('Зургийг номын хуудаснаас харна уу.', style: context.text.bodySmall)),
                   ],
@@ -202,7 +206,7 @@ class _ScanBody extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(ScanIcons.lock, size: 20, color: c.brand),
+                Icon(AppIcons.password, size: 20, color: c.brand),
                 const SizedBox(width: AppSpace.md),
                 Expanded(
                   child: Column(
@@ -226,9 +230,7 @@ class _ScanBody extends ConsumerWidget {
             child: AppCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SolutionView(source: data.solution),
-                ],
+                children: [SolutionView(source: data.solution)],
               ),
             ),
           ),
@@ -236,7 +238,7 @@ class _ScanBody extends ConsumerWidget {
         if (data.youtube != null && isAllowedYoutubeUrl(data.youtube!.url)) ...[
           const SizedBox(height: AppSpace.md),
           OutlinedButton.icon(
-            icon: const Icon(ScanIcons.video, size: 18),
+            icon: const Icon(AppIcons.video, size: 18),
             label: const Text('Бодолтын видео үзэх'),
             onPressed: () => launchUrl(Uri.parse(data.youtube!.url), mode: LaunchMode.externalApplication),
           ),
@@ -260,7 +262,9 @@ class _AnswerRow extends StatelessWidget {
         Icon(AppIcons.success, size: 18, color: c.success),
         const SizedBox(width: AppSpace.sm),
         Text('$label: ', style: context.text.titleSmall),
-        Flexible(child: MathText(value, style: context.text.bodyMedium?.copyWith(color: c.success))),
+        Flexible(
+          child: MathText(value, style: context.text.bodyMedium?.copyWith(color: c.success)),
+        ),
       ],
     );
   }

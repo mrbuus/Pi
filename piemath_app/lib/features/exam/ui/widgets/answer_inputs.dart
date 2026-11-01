@@ -4,7 +4,6 @@ import '../../../../core/math/math.dart';
 import '../../../../core/ui/ui.dart';
 import '../../data/exam_models.dart';
 import '../../domain/fill_slots.dart';
-import '../exam_icons.dart';
 
 typedef ImageFor = ImageProvider Function(String key);
 
@@ -337,7 +336,7 @@ class NumericKeypad extends StatelessWidget {
             else
               for (final k in extraKeys) key(k, () => onDigit(k), semantics: k == '-' ? 'Хасах тэмдэг' : 'Аравтын цэг'),
             key('0', () => onDigit('0')),
-            key('', onBackspace, semantics: 'Арилгах', child: const Icon(ExamIcons.backspace)),
+            key('', onBackspace, semantics: 'Арилгах', child: const Icon(AppIcons.backspace)),
           ],
         ),
         if (extraKeys.isNotEmpty)

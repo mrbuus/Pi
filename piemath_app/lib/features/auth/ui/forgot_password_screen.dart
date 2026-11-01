@@ -10,7 +10,6 @@ import '../../../core/ui/ui.dart';
 import '../data/auth_models.dart';
 import '../data/auth_repository.dart';
 import '../domain/password_policy.dart';
-import 'auth_icons.dart';
 import 'widgets/auth_widgets.dart';
 
 /// SMS кодын урт.
@@ -143,11 +142,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     }
     setState(() => _loading = true);
     try {
-      await ref.read(authRepositoryProvider).resetPassword(
-            identifier: _identifier.text,
-            code: _code.text,
-            newPassword: _password.text,
-          );
+      await ref
+          .read(authRepositoryProvider)
+          .resetPassword(identifier: _identifier.text, code: _code.text, newPassword: _password.text);
       if (mounted) setState(() => _step = ResetStep.done);
     } on ApiError catch (e) {
       if (!mounted) return;
@@ -202,10 +199,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_step != ResetStep.done) ...[
-            _StepIndicator(step: stepNo),
-            const SizedBox(height: AppSpace.lg),
-          ],
+          if (_step != ResetStep.done) ...[_StepIndicator(step: stepNo), const SizedBox(height: AppSpace.lg)],
           ...switch (_step) {
             ResetStep.identify => _identifyStep(context),
             ResetStep.sent => _sentStep(context),
@@ -240,55 +234,55 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       Text(text, style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim));
 
   Widget _submitButton(VoidCallback onPressed, String label, {bool enabled = true}) => FilledButton(
-        onPressed: _loading || !enabled ? null : onPressed,
-        child: _loading ? const ButtonProgress() : Text(label),
-      );
+    onPressed: _loading || !enabled ? null : onPressed,
+    child: _loading ? const ButtonProgress() : Text(label),
+  );
 
   List<Widget> _identifyStep(BuildContext context) => [
-        _title(context, 'Нууц үг сэргээх'),
-        const SizedBox(height: AppSpace.sm),
-        _dim(context, 'Бүртгэлд тань Gmail эсвэл имэйл холбогдсон бол тэр хаяг руу сэргээх холбоос илгээнэ'),
-        const SizedBox(height: AppSpace.xl),
-        Row(
-          children: [
-            Expanded(child: Text('Утас, имэйл эсвэл нэвтрэх нэр', style: context.text.labelLarge)),
-            const InfoHint(
-              title: 'Юу бичих вэ',
-              message: 'Нэвтрэхдээ хэрэглэдэг утасны дугаар, имэйл хаяг эсвэл холбосон Gmail хаягаа бичнэ үү.',
-            ),
-          ],
+    _title(context, 'Нууц үг сэргээх'),
+    const SizedBox(height: AppSpace.sm),
+    _dim(context, 'Бүртгэлд тань Gmail эсвэл имэйл холбогдсон бол тэр хаяг руу сэргээх холбоос илгээнэ'),
+    const SizedBox(height: AppSpace.xl),
+    Row(
+      children: [
+        Expanded(child: Text('Утас, имэйл эсвэл нэвтрэх нэр', style: context.text.labelLarge)),
+        const InfoHint(
+          title: 'Юу бичих вэ',
+          message: 'Нэвтрэхдээ хэрэглэдэг утасны дугаар, имэйл хаяг эсвэл холбосон Gmail хаягаа бичнэ үү.',
         ),
-        TextField(
-          controller: _identifier,
-          enabled: !_loading,
-          keyboardType: TextInputType.emailAddress,
-          autocorrect: false,
-          enableSuggestions: false,
-          textInputAction: TextInputAction.done,
-          autofillHints: const [AutofillHints.username],
-          onSubmitted: (_) => _request(),
-          onChanged: (_) {
-            if (_error != null) setState(() => _error = null);
-          },
-          decoration: const InputDecoration(hintText: '99112233', prefixIcon: Icon(AppIcons.user, size: 20)),
-        ),
-        const SizedBox(height: AppSpace.md),
-        FormMessage(message: _error),
-        const SizedBox(height: AppSpace.lg),
-        _submitButton(_request, 'Сэргээх холбоос авах'),
-      ];
+      ],
+    ),
+    TextField(
+      controller: _identifier,
+      enabled: !_loading,
+      keyboardType: TextInputType.emailAddress,
+      autocorrect: false,
+      enableSuggestions: false,
+      textInputAction: TextInputAction.done,
+      autofillHints: const [AutofillHints.username],
+      onSubmitted: (_) => _request(),
+      onChanged: (_) {
+        if (_error != null) setState(() => _error = null);
+      },
+      decoration: const InputDecoration(hintText: '99112233', prefixIcon: Icon(AppIcons.user, size: 20)),
+    ),
+    const SizedBox(height: AppSpace.md),
+    FormMessage(message: _error),
+    const SizedBox(height: AppSpace.lg),
+    _submitButton(_request, 'Сэргээх холбоос авах'),
+  ];
 
   Widget _resendRow(String resendLabel, String changeLabel) => Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          TextButton(
-            onPressed: _cooldown > 0 || _loading ? null : () => _request(resend: true),
-            child: Text(_cooldown > 0 ? 'Дахин илгээх ($_cooldownс)' : resendLabel),
-          ),
-          TextButton(onPressed: _restart, child: Text(changeLabel)),
-        ],
-      );
+    alignment: WrapAlignment.spaceBetween,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: [
+      TextButton(
+        onPressed: _cooldown > 0 || _loading ? null : () => _request(resend: true),
+        child: Text(_cooldown > 0 ? 'Дахин илгээх ($_cooldownс)' : resendLabel),
+      ),
+      TextButton(onPressed: _restart, child: Text(changeLabel)),
+    ],
+  );
 
   List<Widget> _sentStep(BuildContext context) {
     final minutes = ((_sent?.linkExpiresInSeconds ?? 1800) / 60).round();
@@ -296,7 +290,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(AuthIcons.mailSent, color: context.colors.brand),
+          Icon(AppIcons.mailCheck, color: context.colors.brand),
           const SizedBox(width: AppSpace.md),
           Expanded(child: _title(context, 'Имэйлээ шалгана уу')),
         ],
@@ -331,7 +325,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         const SizedBox(height: AppSpace.sm),
         const FormMessage(
           isError: false,
-          icon: AuthIcons.mailSent,
+          icon: AppIcons.mailCheck,
           message: 'Бүртгэлд Gmail эсвэл имэйл холбогдсон бол код биш, сэргээх холбоос имэйлээр очно',
         ),
       ],
@@ -342,10 +336,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         autofillHints: const [AutofillHints.oneTimeCode],
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(resetCodeLength),
-        ],
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(resetCodeLength)],
         style: context.text.headlineSmall?.copyWith(letterSpacing: 8),
         onChanged: (_) {
           if (_error != null) setState(() => _error = null);
@@ -379,35 +370,35 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   }
 
   List<Widget> _linkStep(BuildContext context) => [
-        _title(context, 'Шинэ нууц үг'),
-        const SizedBox(height: AppSpace.sm),
-        _dim(context, 'Имэйлээр ирсэн холбоос — шинэ нууц үгээ хоёр удаа бичнэ үү'),
-        const SizedBox(height: AppSpace.xl),
-        NewPasswordFields(
-          password: _password,
-          confirm: _confirm,
-          obscure: _obscure,
-          enabled: !_loading,
-          onToggleObscure: () => setState(() => _obscure = !_obscure),
-          onChanged: () => setState(() => _error = null),
-          onSubmitted: _submitLink,
-        ),
-        const SizedBox(height: AppSpace.md),
-        FormMessage(message: _error),
-        const SizedBox(height: AppSpace.lg),
-        _submitButton(_submitLink, 'Нууц үг солих', enabled: isPasswordStrong(_password.text)),
-        if (_error != null) TextButton(onPressed: _restart, child: const Text('Шинэ холбоос авах')),
-      ];
+    _title(context, 'Шинэ нууц үг'),
+    const SizedBox(height: AppSpace.sm),
+    _dim(context, 'Имэйлээр ирсэн холбоос — шинэ нууц үгээ хоёр удаа бичнэ үү'),
+    const SizedBox(height: AppSpace.xl),
+    NewPasswordFields(
+      password: _password,
+      confirm: _confirm,
+      obscure: _obscure,
+      enabled: !_loading,
+      onToggleObscure: () => setState(() => _obscure = !_obscure),
+      onChanged: () => setState(() => _error = null),
+      onSubmitted: _submitLink,
+    ),
+    const SizedBox(height: AppSpace.md),
+    FormMessage(message: _error),
+    const SizedBox(height: AppSpace.lg),
+    _submitButton(_submitLink, 'Нууц үг солих', enabled: isPasswordStrong(_password.text)),
+    if (_error != null) TextButton(onPressed: _restart, child: const Text('Шинэ холбоос авах')),
+  ];
 
   List<Widget> _doneStep(BuildContext context) => [
-        Icon(AppIcons.success, size: 40, color: context.colors.success),
-        const SizedBox(height: AppSpace.lg),
-        _title(context, 'Нууц үг солигдлоо'),
-        const SizedBox(height: AppSpace.sm),
-        _dim(context, 'Шинэ нууц үгээрээ нэвтэрнэ үү. Бусад төхөөрөмж дээрх нэвтрэлт аюулгүй байдлын үүднээс тасарсан.'),
-        const SizedBox(height: AppSpace.xl),
-        FilledButton(onPressed: () => context.go('/login'), child: const Text('Нэвтрэх')),
-      ];
+    Icon(AppIcons.success, size: 40, color: context.colors.success),
+    const SizedBox(height: AppSpace.lg),
+    _title(context, 'Нууц үг солигдлоо'),
+    const SizedBox(height: AppSpace.sm),
+    _dim(context, 'Шинэ нууц үгээрээ нэвтэрнэ үү. Бусад төхөөрөмж дээрх нэвтрэлт аюулгүй байдлын үүднээс тасарсан.'),
+    const SizedBox(height: AppSpace.xl),
+    FilledButton(onPressed: () => context.go('/login'), child: const Text('Нэвтрэх')),
+  ];
 }
 
 class _StepIndicator extends StatelessWidget {
@@ -418,14 +409,14 @@ class _StepIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget bar(bool on) => Expanded(
-          child: Container(
-            height: 4,
-            decoration: BoxDecoration(
-              color: on ? context.colors.brandBright : context.colors.line,
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
-          ),
-        );
+      child: Container(
+        height: 4,
+        decoration: BoxDecoration(
+          color: on ? context.colors.brandBright : context.colors.line,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+      ),
+    );
     return Semantics(
       label: 'Алхам $step / 2',
       excludeSemantics: true,
@@ -434,7 +425,13 @@ class _StepIndicator extends StatelessWidget {
         children: [
           Text('Алхам $step / 2', style: context.text.labelMedium?.copyWith(color: context.colors.inkDim)),
           const SizedBox(height: AppSpace.sm),
-          Row(children: [bar(true), const SizedBox(width: AppSpace.sm), bar(step == 2)]),
+          Row(
+            children: [
+              bar(true),
+              const SizedBox(width: AppSpace.sm),
+              bar(step == 2),
+            ],
+          ),
         ],
       ),
     );
@@ -451,17 +448,20 @@ class _HelpSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget item(String title, String body) => Padding(
-          padding: const EdgeInsets.only(bottom: AppSpace.md),
-          child: Text.rich(
+      padding: const EdgeInsets.only(bottom: AppSpace.md),
+      child: Text.rich(
+        TextSpan(
+          children: [
             TextSpan(
-              children: [
-                TextSpan(text: '$title ', style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                TextSpan(text: body),
-              ],
+              text: '$title ',
+              style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
-            style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
-          ),
-        );
+            TextSpan(text: body),
+          ],
+        ),
+        style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

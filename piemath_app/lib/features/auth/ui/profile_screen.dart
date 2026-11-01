@@ -10,7 +10,6 @@ import '../../../core/files/file_image.dart';
 import '../../../core/network/network_providers.dart';
 import '../../../core/ui/ui.dart';
 import '../../push/push_service.dart';
-import 'auth_icons.dart';
 import 'change_password_form.dart';
 import 'linked_accounts_card.dart';
 
@@ -126,7 +125,7 @@ class _ProfileBody extends ConsumerWidget {
                       ),
                       Divider(color: context.colors.line),
                       _FieldRow(
-                        icon: AuthIcons.mail,
+                        icon: AppIcons.mail,
                         label: 'Имэйл',
                         value: user.email,
                         placeholder: 'Имэйл холбогдоогүй',

@@ -7,7 +7,6 @@ import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Цагийн бүртгэл (`/app/teacher-hours`): сарын орсон хичээл, нийт цаг. Цагийн хөлс хадгалагддаггүй.
@@ -38,7 +37,7 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
               IconButton(
                 tooltip: 'Өмнөх сар',
                 constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-                icon: const Icon(TeacherIcons.prevDay),
+                icon: const Icon(AppIcons.back),
                 onPressed: () => setState(() => _month = shiftMonth(month, -1)),
               ),
               Expanded(
@@ -51,7 +50,7 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
               IconButton(
                 tooltip: 'Дараагийн сар',
                 constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-                icon: const Icon(TeacherIcons.nextDay),
+                icon: const Icon(AppIcons.forward),
                 onPressed: month.compareTo(current) >= 0 ? null : () => setState(() => _month = shiftMonth(month, 1)),
               ),
             ],
@@ -75,7 +74,7 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
                 return [
                   const SizedBox(
                     height: 260,
-                    child: EmptyState(icon: TeacherIcons.hours, title: 'Энэ сард орсон хичээл алга'),
+                    child: EmptyState(icon: AppIcons.timer, title: 'Энэ сард орсон хичээл алга'),
                   ),
                 ];
               }

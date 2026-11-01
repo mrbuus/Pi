@@ -6,7 +6,6 @@ import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
 import '../application/mistakes_controller.dart';
 import '../data/mistake_models.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 import 'mistake_detail.dart';
 
@@ -63,7 +62,7 @@ class _NotebookList extends ConsumerWidget {
           onTap: () => context.push('/app/mistakes/today'),
           child: Row(
             children: [
-              Icon(LearningIcons.review, color: context.colors.brand),
+              Icon(AppIcons.repeat, color: context.colors.brand),
               const SizedBox(width: AppSpace.md),
               Expanded(
                 child: Column(
@@ -72,7 +71,8 @@ class _NotebookList extends ConsumerWidget {
                     Text('Өнөөдрийн давтлага', style: context.text.titleSmall),
                     Text(
                       today.when(
-                        data: (l) => l.isEmpty ? 'Өнөөдөр товлосон бодлого алга' : 'Өнөөдөр ${l.length} бодлого давтахаар байна',
+                        data: (l) =>
+                            l.isEmpty ? 'Өнөөдөр товлосон бодлого алга' : 'Өнөөдөр ${l.length} бодлого давтахаар байна',
                         loading: () => 'Ачаалж байна',
                         error: (_, _) => 'Давтлагыг нээж үзнэ үү',
                       ),
@@ -90,7 +90,11 @@ class _NotebookList extends ConsumerWidget {
           spacing: AppSpace.sm,
           runSpacing: AppSpace.sm,
           children: [
-            ChoiceChip(label: const Text('Бүгд'), selected: filter.status == null, onSelected: (_) => ctl.setStatus(null)),
+            ChoiceChip(
+              label: const Text('Бүгд'),
+              selected: filter.status == null,
+              onSelected: (_) => ctl.setStatus(null),
+            ),
             for (final s in MistakeStatus.values)
               ChoiceChip(
                 label: Text(s.label),
@@ -134,7 +138,7 @@ class _NotebookList extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpace.xl),
             child: EmptyState(
-              icon: LearningIcons.mistakes,
+              icon: AppIcons.homework,
               title: filtered ? 'Энэ шүүлтүүрт алдаа олдсонгүй' : 'Дэвтэр хоосон байна',
               message: filtered
                   ? null
@@ -143,10 +147,7 @@ class _NotebookList extends ConsumerWidget {
             ),
           )
         else ...[
-          for (final m in n.items) ...[
-            _MistakeRow(item: m),
-            const SizedBox(height: AppSpace.md),
-          ],
+          for (final m in n.items) ...[_MistakeRow(item: m), const SizedBox(height: AppSpace.md)],
           if (n.nextCursor != null) const _LoadMore(),
         ],
       ],
@@ -197,7 +198,10 @@ class _MistakeRow extends ConsumerWidget {
     final c = context.colors;
     return AppCard(
       onTap: () => Navigator.of(context).push<void>(
-        MaterialPageRoute(fullscreenDialog: true, builder: (_) => MistakeDetailPage(mistakeId: item.id, initial: item)),
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => MistakeDetailPage(mistakeId: item.id, initial: item),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,11 +209,7 @@ class _MistakeRow extends ConsumerWidget {
           MathText(item.problem.statementText ?? 'Зурагтай бодлого', maxLines: 3, overflow: TextOverflow.ellipsis),
           const SizedBox(height: AppSpace.sm),
           Meta(
-            items: [
-              item.status.label,
-              item.reason?.label,
-              item.testTitle,
-            ],
+            items: [item.status.label, item.reason?.label, item.testTitle],
             style: context.text.bodySmall?.copyWith(color: c.inkDim),
           ),
         ],

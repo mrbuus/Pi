@@ -6,7 +6,6 @@ import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
 import '../data/formula_models.dart';
 import '../data/formula_repository.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// `/app/formulas` — томьёоны сан: хайх, түвшин/хэсгээр шүүх, «Миний томьёо».
@@ -29,7 +28,12 @@ class _FormulasScreenState extends ConsumerState<FormulasScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Томьёоны сан'),
-          bottom: const TabBar(tabs: [Tab(text: 'Бүгд'), Tab(text: 'Миний томьёо')]),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Бүгд'),
+              Tab(text: 'Миний томьёо'),
+            ],
+          ),
         ),
         body: TabBarView(children: [_allTab(), const _MineTab()]),
       ),
@@ -61,7 +65,10 @@ class _FormulasScreenState extends ConsumerState<FormulasScreen> {
           padding: const EdgeInsets.all(AppSpace.gutter),
           children: [
             TextField(
-              decoration: const InputDecoration(hintText: 'Томьёогоор хайх', prefixIcon: Icon(AppIcons.search, size: 20)),
+              decoration: const InputDecoration(
+                hintText: 'Томьёогоор хайх',
+                prefixIcon: Icon(AppIcons.search, size: 20),
+              ),
               onChanged: (v) => setState(() => _query = v),
             ),
             const SizedBox(height: AppSpace.md),
@@ -69,9 +76,21 @@ class _FormulasScreenState extends ConsumerState<FormulasScreen> {
               spacing: AppSpace.sm,
               runSpacing: AppSpace.sm,
               children: [
-                ChoiceChip(label: const Text('Бүх түвшин'), selected: _level.isEmpty, onSelected: (_) => setState(() => _level = '')),
-                ChoiceChip(label: const Text('Үндсэн'), selected: _level == 'CORE', onSelected: (_) => setState(() => _level = 'CORE')),
-                ChoiceChip(label: const Text('Нэмэлт'), selected: _level == 'EXTRA', onSelected: (_) => setState(() => _level = 'EXTRA')),
+                ChoiceChip(
+                  label: const Text('Бүх түвшин'),
+                  selected: _level.isEmpty,
+                  onSelected: (_) => setState(() => _level = ''),
+                ),
+                ChoiceChip(
+                  label: const Text('Үндсэн'),
+                  selected: _level == 'CORE',
+                  onSelected: (_) => setState(() => _level = 'CORE'),
+                ),
+                ChoiceChip(
+                  label: const Text('Нэмэлт'),
+                  selected: _level == 'EXTRA',
+                  onSelected: (_) => setState(() => _level = 'EXTRA'),
+                ),
               ],
             ),
             if (c.sections.isNotEmpty) ...[
@@ -91,10 +110,17 @@ class _FormulasScreenState extends ConsumerState<FormulasScreen> {
             ],
             const SizedBox(height: AppSpace.xl),
             if (shown.isEmpty)
-              const EmptyState(icon: LearningIcons.formula, title: 'Томьёо олдсонгүй', message: 'Хайлт, шүүлтүүрээ өөрчилж үзнэ үү')
+              const EmptyState(
+                icon: AppIcons.formula,
+                title: 'Томьёо олдсонгүй',
+                message: 'Хайлт, шүүлтүүрээ өөрчилж үзнэ үү',
+              )
             else
               for (final (slug, title) in headers) ...[
-                SectionHeader(title: title, padding: const EdgeInsets.only(bottom: AppSpace.sm)),
+                SectionHeader(
+                  title: title,
+                  padding: const EdgeInsets.only(bottom: AppSpace.sm),
+                ),
                 for (final f in bySection[slug] ?? const <FormulaSummary>[]) ...[
                   _FormulaRow(title: f.title, latex: f.display, slug: f.slug, level: f.level),
                   const SizedBox(height: AppSpace.sm),
@@ -127,17 +153,15 @@ class _FormulaRow extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(title, style: context.text.titleSmall)),
-              if (level == 'EXTRA') Text('Нэмэлт', style: context.text.labelSmall?.copyWith(color: context.colors.inkDim)),
+              if (level == 'EXTRA')
+                Text('Нэмэлт', style: context.text.labelSmall?.copyWith(color: context.colors.inkDim)),
             ],
           ),
           if (latex != null && latex!.isNotEmpty) ...[
             const SizedBox(height: AppSpace.sm),
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: MathText('\$$latex\$'),
-              ),
+              child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: MathText('\$$latex\$')),
             ),
           ],
           if (footer != null) ...[
@@ -166,7 +190,7 @@ class _MineTab extends ConsumerWidget {
       data: (m) {
         if (m.items.isEmpty) {
           return const EmptyState(
-            icon: LearningIcons.formula,
+            icon: AppIcons.formula,
             title: 'Тестэд тулгарсан томьёо алга',
             message: 'Тест өгсний дараа тухайн бодлогуудад хэрэгтэй томьёо энд гарна',
           );

@@ -11,7 +11,6 @@ import '../data/parent_models.dart';
 import '../data/parent_repository.dart';
 import '../domain/parent_labels.dart';
 import 'mark_chip.dart';
-import 'parent_icons.dart';
 import 'parent_list_card.dart';
 import 'weekly_report_screen.dart' show parentTodayProvider;
 
@@ -57,10 +56,13 @@ class _ParentHistoryScreenState extends ConsumerState<ParentHistoryScreen> {
           onRetry: () => ref.invalidate(parentChildrenProvider),
         ),
         data: (links) {
-          final verified = [for (final l in links) if (l.verified) l.student];
+          final verified = [
+            for (final l in links)
+              if (l.verified) l.student,
+          ];
           if (verified.isEmpty) {
             return const EmptyState(
-              icon: ParentIcons.children,
+              icon: AppIcons.children,
               title: 'Баталгаажсан хүүхэд алга',
               message: 'Баталгаажсан хүүхдийн жилийн түүх энд харагдана.',
             );
@@ -155,7 +157,8 @@ class HistoryBody extends ConsumerStatefulWidget {
 class _HistoryBodyState extends ConsumerState<HistoryBody> {
   int _pages = 1;
 
-  ({String studentId, int year, int page}) _key(int page) => (studentId: widget.studentId, year: widget.year, page: page);
+  ({String studentId, int year, int page}) _key(int page) =>
+      (studentId: widget.studentId, year: widget.year, page: page);
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +213,7 @@ class _HistoryContent extends StatelessWidget {
         child: SizedBox(
           height: 240,
           child: EmptyState(
-            icon: ParentIcons.attendance,
+            icon: AppIcons.schedule,
             title: 'Энэ жилд бүртгэл алга',
             message: 'Ирц, даалгавар, дүн бүртгэгдэхэд энд харагдана.',
           ),
@@ -264,7 +267,9 @@ class _HistoryContent extends StatelessWidget {
                   date: dayLabel(r.createdAt),
                   subtitle: r.title,
                   trailing: Text(
-                    r.score != null && r.max != null ? '${r.score!.round()}/${r.max!.round()} оноо' : 'Дүн бүртгэгдээгүй',
+                    r.score != null && r.max != null
+                        ? '${r.score!.round()}/${r.max!.round()} оноо'
+                        : 'Дүн бүртгэгдээгүй',
                     style: context.text.labelMedium,
                   ),
                 ),
@@ -281,9 +286,9 @@ class _HistoryContent extends StatelessWidget {
                   date: dayLabel(a.at),
                   subtitle: a.chapter,
                   trailing: switch (a.autoCorrect) {
-                    true => MarkLabel(icon: ParentIcons.ok, label: 'Зөв', color: c.success),
-                    false => MarkLabel(icon: ParentIcons.bad, label: 'Буруу', color: c.error),
-                    null => MarkLabel(icon: ParentIcons.unknown, label: 'Өөрөө үнэлсэн', color: c.inkDim),
+                    true => MarkLabel(icon: AppIcons.success, label: 'Зөв', color: c.success),
+                    false => MarkLabel(icon: AppIcons.failure, label: 'Буруу', color: c.error),
+                    null => MarkLabel(icon: AppIcons.circleDot, label: 'Өөрөө үнэлсэн', color: c.inkDim),
                   },
                 ),
             ],
@@ -312,7 +317,10 @@ class _HistoryContent extends StatelessWidget {
                 ParentDatedRow(
                   date: dayLabel(p.date),
                   subtitle: p.chapter,
-                  trailing: Text(p.receipts > 0 ? '${p.receipts} хүлээн авсан' : 'Хүлээн аваагүй', style: context.text.labelMedium),
+                  trailing: Text(
+                    p.receipts > 0 ? '${p.receipts} хүлээн авсан' : 'Хүлээн аваагүй',
+                    style: context.text.labelMedium,
+                  ),
                 ),
             ],
           ),

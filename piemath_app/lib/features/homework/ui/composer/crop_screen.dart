@@ -208,7 +208,7 @@ class _CropScreenState extends ConsumerState<CropScreen> {
                 children: [
                   IconButton(
                     tooltip: 'Эргүүлэх',
-                    icon: const Icon(FileIcons.rotate),
+                    icon: const Icon(AppIcons.rotate),
                     onPressed: _size == null || _saving ? null : _rotate,
                   ),
                   TextButton(

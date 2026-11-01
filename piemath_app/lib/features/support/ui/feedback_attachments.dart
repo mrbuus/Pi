@@ -9,7 +9,6 @@ import '../../../core/files/photo_document.dart';
 import '../../../core/files/photo_source.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
-import 'support_icons.dart';
 
 /// Санал хүсэлтэд хавсаргах зургийн дээд тоо (сервер: `attachmentKeys` ихдээ 3).
 const maxFeedbackAttachments = 3;
@@ -32,7 +31,13 @@ class FeedbackAttachment {
 /// image_picker шахахдаа JPEG болгодог.
 ({String name, String mime}) imageUploadMeta(String rawName) {
   final lower = rawName.toLowerCase();
-  const known = {'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif', 'webp': 'image/webp'};
+  const known = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+  };
   final dot = lower.lastIndexOf('.');
   final ext = dot < 0 ? '' : lower.substring(dot + 1);
   final mime = known[ext];
@@ -157,7 +162,7 @@ class _FeedbackAttachmentsFieldState extends ConsumerState<FeedbackAttachmentsFi
           children: [
             Row(
               children: [
-                Icon(SupportIcons.attachImage, size: 18, color: context.colors.inkDim),
+                Icon(AppIcons.imagePlus, size: 18, color: context.colors.inkDim),
                 const SizedBox(width: AppSpace.sm),
                 Expanded(
                   child: Text(
@@ -231,7 +236,10 @@ class _Row extends StatelessWidget {
                 fit: BoxFit.cover,
                 cacheWidth: 112,
                 excludeFromSemantics: true,
-                errorBuilder: (_, _, _) => ColoredBox(color: c.line, child: Icon(AppIcons.gallery, color: c.inkDim)),
+                errorBuilder: (_, _, _) => ColoredBox(
+                  color: c.line,
+                  child: Icon(AppIcons.gallery, color: c.inkDim),
+                ),
               ),
             ),
           ),
@@ -246,7 +254,7 @@ class _Row extends StatelessWidget {
             IconButton(
               tooltip: 'Дахин оролдох',
               constraints: const BoxConstraints(minWidth: AppSizes.minTap, minHeight: AppSizes.minTap),
-              icon: const Icon(SupportIcons.retryUpload, size: 20),
+              icon: const Icon(AppIcons.retry, size: 20),
               onPressed: enabled ? () => controller.retry(a) : null,
             ),
           IconButton(

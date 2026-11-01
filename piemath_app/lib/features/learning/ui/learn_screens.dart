@@ -8,7 +8,6 @@ import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
 import '../data/lesson_models.dart';
 import '../data/lesson_repository.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 import 'video_tile.dart';
 
@@ -27,7 +26,7 @@ class ChapterRow extends StatelessWidget {
       onTap: () => context.push('/app/learn/${Uri.encodeComponent(ch.id)}'),
       child: Row(
         children: [
-          Icon(ch.completed ? LearningIcons.done : LearningIcons.lesson, color: ch.completed ? c.success : c.brand),
+          Icon(ch.completed ? AppIcons.success : AppIcons.theory, color: ch.completed ? c.success : c.brand),
           const SizedBox(width: AppSpace.md),
           Expanded(
             child: Column(
@@ -46,7 +45,11 @@ class ChapterRow extends StatelessWidget {
                   const SizedBox(height: AppSpace.sm),
                   Semantics(
                     label: 'Явц ${ch.itemsDone} / ${ch.itemsTotal}',
-                    child: LinearProgressIndicator(value: ch.progress, minHeight: 4, borderRadius: BorderRadius.circular(2)),
+                    child: LinearProgressIndicator(
+                      value: ch.progress,
+                      minHeight: 4,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ],
               ],
@@ -85,28 +88,31 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
         data: (all) {
           if (all.isEmpty) {
             return const EmptyState(
-              icon: LearningIcons.lesson,
+              icon: AppIcons.theory,
               title: 'Одоогоор нээлттэй хичээл алга',
               message: 'Танд нээгдсэн бүлгийн онол, бичлэг энд гарна',
             );
           }
           final q = _query.trim().toLowerCase();
-          final shown = [for (final c in all) if (q.isEmpty || c.title.toLowerCase().contains(q) || c.bookName.toLowerCase().contains(q)) c];
+          final shown = [
+            for (final c in all)
+              if (q.isEmpty || c.title.toLowerCase().contains(q) || c.bookName.toLowerCase().contains(q)) c,
+          ];
           return ListView(
             padding: const EdgeInsets.all(AppSpace.gutter),
             children: [
               TextField(
-                decoration: const InputDecoration(hintText: 'Бүлэг, номоор хайх', prefixIcon: Icon(AppIcons.search, size: 20)),
+                decoration: const InputDecoration(
+                  hintText: 'Бүлэг, номоор хайх',
+                  prefixIcon: Icon(AppIcons.search, size: 20),
+                ),
                 onChanged: (v) => setState(() => _query = v),
               ),
               const SizedBox(height: AppSpace.lg),
               if (shown.isEmpty)
                 const EmptyState(title: 'Олдсонгүй', message: 'Хайлтаа өөрчилж үзнэ үү')
               else
-                for (final c in shown) ...[
-                  ChapterRow(chapter: c),
-                  const SizedBox(height: AppSpace.md),
-                ],
+                for (final c in shown) ...[ChapterRow(chapter: c), const SizedBox(height: AppSpace.md)],
             ],
           );
         },
@@ -134,7 +140,7 @@ class LibraryScreen extends ConsumerWidget {
         data: (all) {
           if (all.isEmpty) {
             return const EmptyState(
-              icon: LearningIcons.library,
+              icon: AppIcons.libraryBig,
               title: 'Одоогоор нээлттэй ном алга',
               message: 'Ангид элсэх эсвэл эрх авсны дараа энд харагдана',
             );
@@ -233,11 +239,19 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
       padding: const EdgeInsets.all(AppSpace.gutter),
       children: [
         MathText(l.title, style: context.text.headlineSmall),
-        if (l.bookName.isNotEmpty) Text(l.bookName, style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
-        if (empty) const Padding(padding: EdgeInsets.only(top: AppSpace.xl), child: EmptyState(title: 'Энэ бүлэгт материал алга')),
+        if (l.bookName.isNotEmpty)
+          Text(l.bookName, style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+        if (empty)
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpace.xl),
+            child: EmptyState(title: 'Энэ бүлэгт материал алга'),
+          ),
         if (l.theories.isNotEmpty) ...[
           const SizedBox(height: AppSpace.xl),
-          const SectionHeader(title: 'Онол', padding: EdgeInsets.only(bottom: AppSpace.sm)),
+          const SectionHeader(
+            title: 'Онол',
+            padding: EdgeInsets.only(bottom: AppSpace.sm),
+          ),
           for (final t in l.theories) ...[
             AppCard(
               padding: EdgeInsets.zero,
@@ -247,7 +261,11 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
                   tilePadding: const EdgeInsets.symmetric(horizontal: AppSpace.lg),
                   childrenPadding: const EdgeInsets.fromLTRB(AppSpace.lg, 0, AppSpace.lg, AppSpace.lg),
                   expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                  leading: Icon(_read.contains(t.id) ? LearningIcons.done : LearningIcons.pending, size: 20, color: _read.contains(t.id) ? context.colors.success : context.colors.inkDim),
+                  leading: Icon(
+                    _read.contains(t.id) ? AppIcons.success : AppIcons.circle,
+                    size: 20,
+                    color: _read.contains(t.id) ? context.colors.success : context.colors.inkDim,
+                  ),
                   title: Text(t.title.isEmpty ? 'Онол' : t.title, style: context.text.titleSmall),
                   onExpansionChanged: (open) {
                     if (open) _theoryOpened(t);
@@ -267,7 +285,10 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
         ],
         if (l.videos.isNotEmpty) ...[
           const SizedBox(height: AppSpace.xl),
-          const SectionHeader(title: 'Бичлэг', padding: EdgeInsets.only(bottom: AppSpace.sm)),
+          const SectionHeader(
+            title: 'Бичлэг',
+            padding: EdgeInsets.only(bottom: AppSpace.sm),
+          ),
           for (final v in l.videos) ...[
             VideoTile(video: v, watched: _started.contains(v.id), onStarted: () => _videoStarted(v)),
             const SizedBox(height: AppSpace.sm),
@@ -275,19 +296,25 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
         ],
         if (l.problemCount > 0) ...[
           const SizedBox(height: AppSpace.xl),
-          const SectionHeader(title: 'Бодлого', padding: EdgeInsets.only(bottom: AppSpace.sm)),
+          const SectionHeader(
+            title: 'Бодлого',
+            padding: EdgeInsets.only(bottom: AppSpace.sm),
+          ),
           AppCard(
             onTap: () => context.push('/app/library/${Uri.encodeComponent(l.chapterId)}/problems'),
             child: Row(
               children: [
-                Icon(LearningIcons.problems, color: context.colors.brand),
+                Icon(AppIcons.checklist, color: context.colors.brand),
                 const SizedBox(width: AppSpace.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Бүлгийн бодлогууд', style: context.text.titleSmall),
-                      Text('${l.problemCount} бодлого', style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+                      Text(
+                        '${l.problemCount} бодлого',
+                        style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+                      ),
                     ],
                   ),
                 ),
@@ -298,7 +325,10 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
         ],
         if (l.tests.isNotEmpty) ...[
           const SizedBox(height: AppSpace.xl),
-          const SectionHeader(title: 'Сэдвийн тест', padding: EdgeInsets.only(bottom: AppSpace.sm)),
+          const SectionHeader(
+            title: 'Сэдвийн тест',
+            padding: EdgeInsets.only(bottom: AppSpace.sm),
+          ),
           for (final t in l.tests) ...[
             AppCard(
               onTap: () => context.push('/app/tests/${Uri.encodeComponent(t.id)}'),
@@ -311,7 +341,11 @@ class _LessonBodyState extends ConsumerState<_LessonBody> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         MathText(t.title, style: context.text.titleSmall),
-                        if (t.problemCount != null) Text('${t.problemCount} бодлого', style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+                        if (t.problemCount != null)
+                          Text(
+                            '${t.problemCount} бодлого',
+                            style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+                          ),
                       ],
                     ),
                   ),
@@ -366,7 +400,10 @@ class VideosScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             MathText(c.title, style: context.text.titleSmall),
-                            Meta(items: [c.bookName, '${c.videoCount} бичлэг'], style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+                            Meta(
+                              items: [c.bookName, '${c.videoCount} бичлэг'],
+                              style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+                            ),
                           ],
                         ),
                       ),
@@ -407,10 +444,7 @@ class ChapterVideosScreen extends ConsumerWidget {
             : ListView(
                 padding: const EdgeInsets.all(AppSpace.gutter),
                 children: [
-                  for (final v in videos) ...[
-                    VideoTile(video: v),
-                    const SizedBox(height: AppSpace.sm),
-                  ],
+                  for (final v in videos) ...[VideoTile(video: v), const SizedBox(height: AppSpace.sm)],
                 ],
               ),
       ),

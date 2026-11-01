@@ -10,7 +10,6 @@ import '../data/support_models.dart';
 import '../data/support_repository.dart';
 import '../domain/feedback_form.dart';
 import 'feedback_attachments.dart';
-import 'support_icons.dart';
 
 final myFeedbackProvider = FutureProvider.autoDispose<FeedbackPage>(
   (ref) => ref.watch(supportRepositoryProvider).myFeedback(),
@@ -174,7 +173,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   const SizedBox(height: AppSpace.md),
                   FilledButton.icon(
                     onPressed: _sending ? null : _send,
-                    icon: const Icon(SupportIcons.send, size: 18),
+                    icon: const Icon(AppIcons.send, size: 18),
                     label: Text(_sending ? 'Илгээж байна' : 'Хүсэлт илгээх'),
                   ),
                   if (_message != null) ...[
@@ -183,7 +182,9 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                       liveRegion: true,
                       child: Text(
                         _message!,
-                        style: context.text.bodyMedium?.copyWith(color: _failed ? context.colors.error : context.colors.ink),
+                        style: context.text.bodyMedium?.copyWith(
+                          color: _failed ? context.colors.error : context.colors.ink,
+                        ),
                       ),
                     ),
                   ],
@@ -207,7 +208,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                     child: SizedBox(
                       height: 200,
                       child: EmptyState(
-                        icon: SupportIcons.feedback,
+                        icon: AppIcons.document,
                         title: 'Хүсэлт хараахан алга',
                         message: 'Илгээсэн хүсэлт, түүний хариу энд харагдана.',
                       ),
@@ -240,10 +241,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 }
 
 IconData _kindIcon(FeedbackKind k) => switch (k) {
-      FeedbackKind.bug => SupportIcons.bug,
-      FeedbackKind.suggestion => SupportIcons.suggestion,
-      FeedbackKind.question => SupportIcons.question,
-    };
+  FeedbackKind.bug => AppIcons.bug,
+  FeedbackKind.suggestion => AppIcons.lightbulb,
+  FeedbackKind.question => AppIcons.message,
+};
 
 String _date(String iso) {
   final t = parseApiInstant(iso);

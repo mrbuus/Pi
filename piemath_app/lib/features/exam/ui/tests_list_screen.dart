@@ -10,7 +10,6 @@ import '../../../core/ui/ui.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
 import '../domain/test_list_logic.dart';
-import 'exam_icons.dart';
 
 /// «Өгөх» / «Өгсөн, дүн» табын өгөгдөл — вэбийн `StudentExamsHub` (+ `StudentExamLists`).
 @immutable
@@ -120,7 +119,7 @@ class _TakeTab extends ConsumerWidget {
           onTap: () => context.push('/app/tests/${inProgress.first.id}'),
           child: Row(
             children: [
-              Icon(ExamIcons.timer, color: context.colors.brand),
+              Icon(AppIcons.timer, color: context.colors.brand),
               const SizedBox(width: AppSpace.md),
               Expanded(
                 child: Column(
@@ -230,7 +229,7 @@ class _TestTile extends StatelessWidget {
       statusIcon = AppIcons.document;
     } else if (r.sessionStatus == SessionStatus.inProgress) {
       status = 'Үргэлжлүүлэх';
-      statusIcon = ExamIcons.timer;
+      statusIcon = AppIcons.timer;
     } else {
       status = null;
       statusIcon = null;

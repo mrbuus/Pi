@@ -6,7 +6,6 @@ import '../../../app/shell/app_shell.dart';
 import '../../../core/ui/ui.dart';
 import '../application/mistakes_controller.dart';
 import '../data/mistake_models.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 import 'mistake_detail.dart';
 
@@ -44,7 +43,7 @@ class _MistakesTodayScreenState extends ConsumerState<MistakesTodayScreen> {
         data: (items) {
           if (items.isEmpty) {
             return const EmptyState(
-              icon: LearningIcons.review,
+              icon: AppIcons.repeat,
               title: 'Өнөөдөр товлосон давтлага алга',
               message: 'Дэвтрийн бусад бодлогыг хүссэн үедээ дахин бодож болно',
             );
@@ -113,10 +112,7 @@ class _Summary extends StatelessWidget {
       message: total - correct > 0
           ? 'Зөрүүтэй бодлогууд дэвтэрт үлдэнэ. Дараагийн давтлагаар бататгана уу'
           : 'Дараагийн өдөр дахин бататгана уу',
-      action: FilledButton(
-        onPressed: () => context.go('/app/mistakes'),
-        child: const Text('Дэвтэр рүү буцах'),
-      ),
+      action: FilledButton(onPressed: () => context.go('/app/mistakes'), child: const Text('Дэвтэр рүү буцах')),
     );
   }
 }

@@ -7,12 +7,16 @@ import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_extras.dart';
 import '../data/teacher_repository.dart';
-import 'teacher_icons.dart';
 
 /// «Хэн засаж байна» (`POST /presence`, түлхүүр `attendance:<ангийн id>:<өдөр>`). 45 сек тутам цохилно,
 /// апп ар талд орвол зогсоно, гарахдаа `leave: true`. Алдаа гарвал чимээгүй (зөвхөн мэдээллийн зурвас).
 class PresenceBeat extends ConsumerStatefulWidget {
-  const PresenceBeat({super.key, required this.classId, required this.date, this.interval = const Duration(seconds: 45)});
+  const PresenceBeat({
+    super.key,
+    required this.classId,
+    required this.date,
+    this.interval = const Duration(seconds: 45),
+  });
 
   final String classId;
   final String date;
@@ -80,7 +84,7 @@ class _PresenceBeatState extends ConsumerState<PresenceBeat> {
         color: c.surfaceSunken,
         child: Row(
           children: [
-            Icon(TeacherIcons.editors, size: 16, color: c.inkDim),
+            Icon(AppIcons.children, size: 16, color: c.inkDim),
             const SizedBox(width: AppSpace.sm),
             Expanded(
               child: Text(

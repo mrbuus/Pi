@@ -11,7 +11,6 @@ import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
 import 'composer/notebook_composer_screen.dart';
 import 'homework_badges.dart';
-import 'homework_icons.dart';
 import 'homework_providers.dart';
 
 /// Онлайн ангийн загвар (`/assignments/my`): багшийн даалгавар → зураг + тэмдэглэл илгээх,
@@ -135,7 +134,10 @@ class AssignmentCard extends ConsumerWidget {
                         child: SizedBox.square(
                           dimension: 64,
                           child: isDocumentKey(key)
-                              ? ColoredBox(color: c.surfaceSunken, child: Icon(AppIcons.document, color: c.inkDim))
+                              ? ColoredBox(
+                                  color: c.surfaceSunken,
+                                  child: Icon(AppIcons.document, color: c.inkDim),
+                                )
                               : Image(
                                   image: ResizeImage(images.image(key), width: thumbPx, allowUpscaling: false),
                                   fit: BoxFit.cover,
@@ -156,7 +158,7 @@ class AssignmentCard extends ConsumerWidget {
             const SizedBox(height: AppSpace.sm),
             Row(
               children: [
-                Icon(HomeworkIcons.deadline, size: 16, color: c.inkDim),
+                Icon(AppIcons.time, size: 16, color: c.inkDim),
                 const SizedBox(width: AppSpace.xs),
                 Text('${DateMn.long(UbDateTime.fromInstant(a.dueDate!))} хүртэл', style: context.text.bodySmall),
               ],
@@ -171,7 +173,7 @@ class AssignmentCard extends ConsumerWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(HomeworkIcons.comment, size: 16, color: c.inkDim, semanticLabel: 'Багшийн тайлбар'),
+                  Icon(AppIcons.messageSquareText, size: 16, color: c.inkDim, semanticLabel: 'Багшийн тайлбар'),
                   const SizedBox(width: AppSpace.sm),
                   Expanded(child: Text(review, style: context.text.bodyMedium)),
                 ],

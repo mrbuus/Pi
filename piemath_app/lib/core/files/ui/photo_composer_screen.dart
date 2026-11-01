@@ -9,7 +9,6 @@ import '../file_uploader.dart';
 import '../photo_document.dart';
 import '../photo_set_upload.dart';
 import '../photo_source.dart';
-import 'file_icons.dart';
 
 /// Илгээх үйлдэл: зургууд, тэмдэглэл, явц, цуцлах токен.
 typedef PhotoSubmit = Future<void> Function(
@@ -111,9 +110,9 @@ class _PhotoComposerScreenState extends ConsumerState<PhotoComposerScreen> {
   }
 
   Future<void> _camera() => _add(() async {
-        final p = await ref.read(photoSourceProvider).takePhoto();
-        return p == null ? const <PhotoPage>[] : [p];
-      });
+    final p = await ref.read(photoSourceProvider).takePhoto();
+    return p == null ? const <PhotoPage>[] : [p];
+  });
 
   Future<void> _gallery() => _add(() => ref.read(photoSourceProvider).pickFromGallery(limit: _room));
 
@@ -158,13 +157,25 @@ class _PhotoComposerScreenState extends ConsumerState<PhotoComposerScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(leading: const Icon(FileIcons.rotate), title: const Text('Эргүүлэх'), onTap: () => Navigator.pop(ctx, 'rotate')),
-            if (i > 0)
-              ListTile(leading: const Icon(FileIcons.moveLeft), title: const Text('Өмнө нь шилжүүлэх'), onTap: () => Navigator.pop(ctx, 'left')),
-            if (i < _pages.length - 1)
-              ListTile(leading: const Icon(FileIcons.moveRight), title: const Text('Дараа нь шилжүүлэх'), onTap: () => Navigator.pop(ctx, 'right')),
             ListTile(
-              leading: Icon(FileIcons.remove, color: ctx.colors.error),
+              leading: const Icon(AppIcons.rotate),
+              title: const Text('Эргүүлэх'),
+              onTap: () => Navigator.pop(ctx, 'rotate'),
+            ),
+            if (i > 0)
+              ListTile(
+                leading: const Icon(AppIcons.back),
+                title: const Text('Өмнө нь шилжүүлэх'),
+                onTap: () => Navigator.pop(ctx, 'left'),
+              ),
+            if (i < _pages.length - 1)
+              ListTile(
+                leading: const Icon(AppIcons.forward),
+                title: const Text('Дараа нь шилжүүлэх'),
+                onTap: () => Navigator.pop(ctx, 'right'),
+              ),
+            ListTile(
+              leading: Icon(AppIcons.trash, color: ctx.colors.error),
               title: Text('Хасах', style: TextStyle(color: ctx.colors.error)),
               onTap: () => Navigator.pop(ctx, 'remove'),
             ),
@@ -230,11 +241,8 @@ class _PhotoComposerScreenState extends ConsumerState<PhotoComposerScreen> {
                   crossAxisSpacing: AppSpace.sm,
                   childAspectRatio: 3 / 4,
                 ),
-                itemBuilder: (context, i) => _Thumb(
-                  page: _pages[i],
-                  number: i + 1,
-                  onTap: _busy ? null : () => _pageActions(i),
-                ),
+                itemBuilder: (context, i) =>
+                    _Thumb(page: _pages[i], number: i + 1, onTap: _busy ? null : () => _pageActions(i)),
               ),
             const SizedBox(height: AppSpace.lg),
             Row(
@@ -281,7 +289,9 @@ class _PhotoComposerScreenState extends ConsumerState<PhotoComposerScreen> {
                   children: [
                     Icon(AppIcons.error, size: 18, color: c.error),
                     const SizedBox(width: AppSpace.sm),
-                    Expanded(child: Text(_error!, style: context.text.bodyMedium?.copyWith(color: c.error))),
+                    Expanded(
+                      child: Text(_error!, style: context.text.bodyMedium?.copyWith(color: c.error)),
+                    ),
                   ],
                 ),
               ),
@@ -308,8 +318,10 @@ class _PhotoComposerScreenState extends ConsumerState<PhotoComposerScreen> {
                   )
                 : FilledButton.icon(
                     onPressed: _pages.isEmpty ? null : _submit,
-                    icon: const Icon(FileIcons.send, size: 18),
-                    label: Text(_pages.isEmpty ? widget.submitLabel : '${widget.submitLabel} (${_pages.length} хуудас)'),
+                    icon: const Icon(AppIcons.send, size: 18),
+                    label: Text(
+                      _pages.isEmpty ? widget.submitLabel : '${widget.submitLabel} (${_pages.length} хуудас)',
+                    ),
                   ),
           ),
         ),
@@ -334,7 +346,10 @@ class _Thumb extends StatelessWidget {
       label: '$number-р хуудас. Эргүүлэх, шилжүүлэх, хасах',
       child: Material(
         color: c.surfaceSunken,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md), side: BorderSide(color: c.line)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          side: BorderSide(color: c.line),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
@@ -377,12 +392,7 @@ Future<(UploadedFile, int)> uploadPhotoSet(
   required PhotoUploadProgress onProgress,
   required CancelToken cancel,
 }) {
-  return ref.read(photoSetUploaderProvider).upload(
-        pages,
-        purpose: purpose,
-        maxPages: maxPages,
-        fileName: fileName,
-        onProgress: onProgress,
-        cancel: cancel,
-      );
+  return ref
+      .read(photoSetUploaderProvider)
+      .upload(pages, purpose: purpose, maxPages: maxPages, fileName: fileName, onProgress: onProgress, cancel: cancel);
 }

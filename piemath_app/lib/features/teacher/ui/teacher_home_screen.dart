@@ -6,7 +6,6 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Багшийн самбар (`/app/teacher`): сонгосон өдрийн хичээлтэй ангиуд. Хуваарийн онцгой өдөр
@@ -66,7 +65,7 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
             const SizedBox(height: AppSpace.lg),
             _Link(icon: AppIcons.myClass, label: 'Ангиуд', onTap: () => context.push('/app/classes')),
             const SizedBox(height: AppSpace.sm),
-            _Link(icon: TeacherIcons.hours, label: 'Цагийн бүртгэл', onTap: () => context.push('/app/teacher-hours')),
+            _Link(icon: AppIcons.timer, label: 'Цагийн бүртгэл', onTap: () => context.push('/app/teacher-hours')),
           ],
         ),
       ),
@@ -98,7 +97,7 @@ class _ClassCard extends StatelessWidget {
                     Flexible(child: Text(cls.name, style: context.text.titleMedium)),
                     if (cls.isOnline) ...[
                       const SizedBox(width: AppSpace.sm),
-                      Icon(TeacherIcons.online, size: 16, color: c.inkDim, semanticLabel: 'Онлайн'),
+                      Icon(AppIcons.laptop, size: 16, color: c.inkDim, semanticLabel: 'Онлайн'),
                     ],
                   ],
                 ),

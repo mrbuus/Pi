@@ -14,7 +14,6 @@ import '../../exam/ui/widgets/answer_inputs.dart';
 import '../data/mistake_models.dart';
 import '../data/mistakes_repository.dart';
 import '../domain/mistake_answer.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// Нэг алдааны бүтэн харагдац: бодлого, өмнөх хариу, шалтгаан, тэмдэглэл, дахин бодох, бодолт.
@@ -82,7 +81,9 @@ class _MistakeDetailState extends ConsumerState<MistakeDetail> {
       widget.onChanged(r.applyTo(_item));
       widget.onRetried?.call(r);
     } catch (e) {
-      if (mounted) setState(() => _error = errorText(e, 'Хариуг шалгаж чадсангүй. Холболтоо шалгаад дахин оролдоно уу.'));
+      if (mounted) {
+        setState(() => _error = errorText(e, 'Хариуг шалгаж чадсангүй. Холболтоо шалгаад дахин оролдоно уу.'));
+      }
     } finally {
       if (mounted) setState(() => _busy = _Busy.none);
     }
@@ -156,10 +157,7 @@ class _MistakeDetailState extends ConsumerState<MistakeDetail> {
           child: ProblemFigure(
             image: p.imageKey == null ? null : images.image(p.imageKey!),
             alt: 'Бодлогын зураг',
-            child: MathText(
-              p.statementText ?? 'Бодлогын нөхцөл олдсонгүй',
-              style: context.text.bodyLarge,
-            ),
+            child: MathText(p.statementText ?? 'Бодлогын нөхцөл олдсонгүй', style: context.text.bodyLarge),
           ),
         ),
         const SizedBox(height: AppSpace.md),
@@ -199,7 +197,7 @@ class _MistakeDetailState extends ConsumerState<MistakeDetail> {
           alignment: AlignmentDirectional.centerEnd,
           child: OutlinedButton.icon(
             onPressed: _busy == _Busy.none && _note.text.trim() != _savedNote ? _saveNote : null,
-            icon: const Icon(LearningIcons.save, size: 18),
+            icon: const Icon(AppIcons.save, size: 18),
             label: const Text('Тэмдэглэл хадгалах'),
           ),
         ),
@@ -219,10 +217,7 @@ class _MistakeDetailState extends ConsumerState<MistakeDetail> {
           onPressed: _ready && !_locked ? _retry : null,
           child: Text(_busy == _Busy.retry ? 'Шалгаж байна' : 'Хариуг шалгах'),
         ),
-        if (_error != null) ...[
-          const SizedBox(height: AppSpace.md),
-          InlineMessage(_error!),
-        ],
+        if (_error != null) ...[const SizedBox(height: AppSpace.md), InlineMessage(_error!)],
         if (_result != null) ...[
           const SizedBox(height: AppSpace.lg),
           InlineMessage(
@@ -292,13 +287,18 @@ class _FormulaTile extends StatelessWidget {
       childrenPadding: const EdgeInsets.only(bottom: AppSpace.md),
       children: [
         if (latex != null && latex.isNotEmpty)
-          Align(alignment: AlignmentDirectional.centerStart, child: MathText('\$\$$latex\$\$', displayAlignment: AlignmentDirectional.centerStart))
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: MathText('\$\$$latex\$\$', displayAlignment: AlignmentDirectional.centerStart),
+          )
         else
           Text('Томьёоны бичвэр одоогоор алга', style: context.text.bodySmall),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: TextButton(
-            onPressed: formula.slug.isEmpty ? null : () => context.push('/app/formulas/${Uri.encodeComponent(formula.slug)}'),
+            onPressed: formula.slug.isEmpty
+                ? null
+                : () => context.push('/app/formulas/${Uri.encodeComponent(formula.slug)}'),
             child: const Text('Томьёоны сан дотор нээх'),
           ),
         ),

@@ -8,7 +8,6 @@ import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
 import '../data/formula_models.dart';
 import '../data/formula_repository.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// `/app/formulas/:slug` — томьёоны дэлгэрэнгүй.
@@ -37,7 +36,10 @@ class FormulaDetailScreen extends ConsumerWidget {
 
 Widget _display(String latex) => Align(
   alignment: AlignmentDirectional.centerStart,
-  child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: MathText('\$\$$latex\$\$', displayAlignment: AlignmentDirectional.centerStart)),
+  child: SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: MathText('\$\$$latex\$\$', displayAlignment: AlignmentDirectional.centerStart),
+  ),
 );
 
 class _Block extends StatelessWidget {
@@ -82,7 +84,7 @@ class _Body extends StatelessWidget {
                 Expanded(child: _display(main)),
                 IconButton(
                   tooltip: 'Томьёог хуулах',
-                  icon: const Icon(LearningIcons.copy, size: 20),
+                  icon: const Icon(AppIcons.copy, size: 20),
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: main));
                     if (context.mounted) {
@@ -100,11 +102,26 @@ class _Body extends StatelessWidget {
           _display(v.latex),
         ],
         if (f.conditions.isNotEmpty)
-          _Block('Хэрэглэх нөхцөл', Column(crossAxisAlignment: CrossAxisAlignment.start, children: [for (final c in f.conditions) Padding(padding: const EdgeInsets.only(bottom: AppSpace.sm), child: MathText(c))])),
+          _Block(
+            'Хэрэглэх нөхцөл',
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final c in f.conditions)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpace.sm),
+                    child: MathText(c),
+                  ),
+              ],
+            ),
+          ),
         _Block(
           'Энгийнээр',
           f.explanation == null || f.explanation!.isEmpty
-              ? Text('Тайлбар хараахан нэмэгдээгүй байна', style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim))
+              ? Text(
+                  'Тайлбар хараахан нэмэгдээгүй байна',
+                  style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
+                )
               : MathText(f.explanation!),
         ),
         if (f.derivation.isNotEmpty) _Block('Яагаад ийм болдог вэ', _Steps(steps: f.derivation)),
@@ -114,7 +131,7 @@ class _Body extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(LearningIcons.tip, size: 20, color: context.colors.brand),
+                Icon(AppIcons.lightbulb, size: 20, color: context.colors.brand),
                 const SizedBox(width: AppSpace.sm),
                 Expanded(child: MathText(f.mnemonic!)),
               ],
@@ -133,10 +150,7 @@ class _Body extends StatelessWidget {
                         Text('Жишээ ${i + 1}', style: context.text.titleSmall),
                         const SizedBox(height: AppSpace.sm),
                         MathText(e.problem),
-                        if (e.steps.isNotEmpty) ...[
-                          const SizedBox(height: AppSpace.sm),
-                          _Steps(steps: e.steps),
-                        ],
+                        if (e.steps.isNotEmpty) ...[const SizedBox(height: AppSpace.sm), _Steps(steps: e.steps)],
                         if (e.answer.isNotEmpty) ...[
                           const SizedBox(height: AppSpace.sm),
                           Row(
@@ -169,7 +183,12 @@ class _Body extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 9, right: AppSpace.sm),
-                          child: SizedBox.square(dimension: 5, child: DecoratedBox(decoration: BoxDecoration(color: context.colors.inkDim, shape: BoxShape.circle))),
+                          child: SizedBox.square(
+                            dimension: 5,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(color: context.colors.inkDim, shape: BoxShape.circle),
+                            ),
+                          ),
                         ),
                         Expanded(child: MathText(m)),
                       ],
@@ -189,7 +208,9 @@ class _Body extends StatelessWidget {
                 for (final r in f.related)
                   ActionChip(
                     label: Text(r.title),
-                    onPressed: r.slug.isEmpty ? null : () => context.push('/app/formulas/${Uri.encodeComponent(r.slug)}'),
+                    onPressed: r.slug.isEmpty
+                        ? null
+                        : () => context.push('/app/formulas/${Uri.encodeComponent(r.slug)}'),
                   ),
               ],
             ),
@@ -215,7 +236,10 @@ class _Steps extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 28, child: Text('${i + 1}.', style: context.text.labelLarge?.copyWith(color: context.colors.inkDim))),
+              SizedBox(
+                width: 28,
+                child: Text('${i + 1}.', style: context.text.labelLarge?.copyWith(color: context.colors.inkDim)),
+              ),
               Expanded(child: MathText(s)),
             ],
           ),

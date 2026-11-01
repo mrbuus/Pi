@@ -6,7 +6,6 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../data/readiness_models.dart';
 import '../data/readiness_repository.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// `/app/readiness` — ЭЕШ-ийн бэлэн байдлын баримжаа. Тооцоолол серверт; албан оноо биш гэдгийг тодорхой хэлнэ.
@@ -110,7 +109,10 @@ class _Summary extends StatelessWidget {
                 Text('~${r.index}', style: context.text.displaySmall?.copyWith(fontWeight: FontWeight.w700)),
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpace.sm),
-                  child: Text('баримжаа муж ${r.low}-${r.high}', style: context.text.bodyMedium?.copyWith(color: c.inkDim)),
+                  child: Text(
+                    'баримжаа муж ${r.low}-${r.high}',
+                    style: context.text.bodyMedium?.copyWith(color: c.inkDim),
+                  ),
                 ),
               ],
             ),
@@ -162,7 +164,8 @@ class _History extends StatelessWidget {
     return AppCard(
       child: MergeSemantics(
         child: Semantics(
-          label: 'Сүүлийн ${weeks.length} долоо хоногийн бэлэн байдал: ${[for (final w in weeks) w.hasData ? '${w.index}' : 'хэмжээгүй'].join(', ')}',
+          label:
+              'Сүүлийн ${weeks.length} долоо хоногийн бэлэн байдал: ${[for (final w in weeks) w.hasData ? '${w.index}' : 'хэмжээгүй'].join(', ')}',
           excludeSemantics: true,
           child: Column(
             children: [
@@ -176,7 +179,10 @@ class _History extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text(w.hasData ? '${w.index}' : '', style: context.text.labelSmall?.copyWith(color: c.inkDim)),
+                            Text(
+                              w.hasData ? '${w.index}' : '',
+                              style: context.text.labelSmall?.copyWith(color: c.inkDim),
+                            ),
                             const SizedBox(height: 2),
                             Container(
                               height: w.hasData ? (maxH * w.index / 100).clamp(4, maxH) : 4,
@@ -197,7 +203,11 @@ class _History extends StatelessWidget {
                 children: [
                   for (final w in weeks)
                     Expanded(
-                      child: Text(_label(w.week), textAlign: TextAlign.center, style: context.text.labelSmall?.copyWith(color: c.inkDim)),
+                      child: Text(
+                        _label(w.week),
+                        textAlign: TextAlign.center,
+                        style: context.text.labelSmall?.copyWith(color: c.inkDim),
+                      ),
                     ),
                 ],
               ),
@@ -223,9 +233,9 @@ class _TopicRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final (icon, trendText) = switch (topic.trend) {
-      ReadinessTrend.up => (LearningIcons.trendUp, 'өсөж байна'),
-      ReadinessTrend.down => (LearningIcons.trendDown, 'буурч байна'),
-      ReadinessTrend.flat => (LearningIcons.trendFlat, 'тогтвортой'),
+      ReadinessTrend.up => (AppIcons.trendingUp, 'өсөж байна'),
+      ReadinessTrend.down => (AppIcons.trendingDown, 'буурч байна'),
+      ReadinessTrend.flat => (AppIcons.minus, 'тогтвортой'),
     };
     final m = topic.mastery ?? 0;
     return Semantics(
@@ -250,7 +260,12 @@ class _TopicRow extends StatelessWidget {
             children: [
               Icon(icon, size: 16, color: c.inkDim),
               const SizedBox(width: AppSpace.xs),
-              Expanded(child: Text('${topic.attempts} оролдлого, $trendText', style: context.text.bodySmall?.copyWith(color: c.inkDim))),
+              Expanded(
+                child: Text(
+                  '${topic.attempts} оролдлого, $trendText',
+                  style: context.text.bodySmall?.copyWith(color: c.inkDim),
+                ),
+              ),
             ],
           ),
         ],

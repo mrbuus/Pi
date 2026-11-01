@@ -5,7 +5,6 @@ import '../../../core/ui/ui.dart';
 import '../data/parent_models.dart';
 import '../data/parent_repository.dart';
 import '../domain/parent_labels.dart';
-import 'parent_icons.dart';
 
 /// Эцэг эхийн «Хамгийн сүүлийн дүн» карт (вэбийн `ExamResultCard`): оноо, хувь, хэсэг, сул сэдэв,
 /// «Дүнтэй танилцлаа». Карт ачаалагдахгүй бол энгийн мөр ([fallback]).
@@ -62,8 +61,8 @@ class _CardBody extends StatelessWidget {
     final tone = pct >= 70
         ? c.success
         : pct >= 40
-            ? c.warning
-            : c.error;
+        ? c.warning
+        : c.error;
     final parts = card.parts;
     return AppCard(
       child: Column(
@@ -117,8 +116,8 @@ class _CardBody extends StatelessWidget {
                         color: t.percent < 40
                             ? c.error
                             : t.percent < 70
-                                ? c.warning
-                                : c.ink,
+                            ? c.warning
+                            : c.ink,
                       ),
                     ),
                   ],
@@ -131,7 +130,7 @@ class _CardBody extends StatelessWidget {
           if (card.acknowledgedAt != null)
             Row(
               children: [
-                Icon(ParentIcons.ok, size: 16, color: c.success),
+                Icon(AppIcons.success, size: 16, color: c.success),
                 const SizedBox(width: AppSpace.xs),
                 Text('Танилцсан, ${dayLabel(card.acknowledgedAt)}', style: context.text.labelMedium),
               ],
@@ -139,7 +138,7 @@ class _CardBody extends StatelessWidget {
           else if (card.canAcknowledge)
             OutlinedButton.icon(
               onPressed: onAcknowledge,
-              icon: const Icon(ParentIcons.acknowledge, size: 18),
+              icon: const Icon(AppIcons.mailCheck, size: 18),
               label: const Text('Дүнтэй танилцлаа'),
             ),
         ],

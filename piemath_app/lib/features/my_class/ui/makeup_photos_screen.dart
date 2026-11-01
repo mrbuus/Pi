@@ -9,7 +9,6 @@ import '../data/hub_models.dart';
 import '../data/my_class_repository.dart';
 import '../domain/hub_logic.dart';
 import 'common.dart';
-import 'my_class_icons.dart';
 import 'photo_viewer.dart';
 
 /// `/app/makeup/photos/:classroomId/:date` — нөхөх хичээлийн онолын тэмдэглэлийн зураг илгээх.
@@ -75,7 +74,7 @@ class _MakeupPhotosScreenState extends ConsumerState<MakeupPhotosScreen> {
               .firstWhere((_) => true, orElse: () => null);
           if (item == null) {
             return const EmptyState(
-              icon: MyClassIcons.done,
+              icon: AppIcons.success,
               title: 'Энэ өдрийн нөхөх хичээл олдсонгүй',
               message: 'Багш шийдвэрлэсэн эсвэл нөхөх шаардлагагүй болсон байж магадгүй',
             );
@@ -96,7 +95,7 @@ class _MakeupPhotosScreenState extends ConsumerState<MakeupPhotosScreen> {
                     liveRegion: true,
                     child: Row(
                       children: [
-                        Icon(MyClassIcons.done, size: 18, color: c.success),
+                        Icon(AppIcons.success, size: 18, color: c.success),
                         const SizedBox(width: AppSpace.sm),
                         Expanded(child: Text('Зураг илгээгдлээ', style: context.text.titleSmall)),
                       ],
@@ -108,7 +107,7 @@ class _MakeupPhotosScreenState extends ConsumerState<MakeupPhotosScreen> {
                   padding: const EdgeInsets.only(bottom: AppSpace.md),
                   child: Row(
                     children: [
-                      Icon(MyClassIcons.resubmit, size: 16, color: c.warning),
+                      Icon(AppIcons.restart, size: 16, color: c.warning),
                       const SizedBox(width: AppSpace.xs),
                       Expanded(child: Text('Багш зургаа дахин илгээхийг хүссэн', style: context.text.bodyMedium)),
                     ],

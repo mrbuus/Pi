@@ -11,7 +11,6 @@ import '../data/hub_models.dart';
 import '../data/my_class_repository.dart';
 import '../domain/hub_logic.dart';
 import 'common.dart';
-import 'my_class_icons.dart';
 import 'photo_viewer.dart';
 
 /// Нэг хичээлийн өдрийн БҮХ мэдээлэл (вэбийн `DaySheet`): сэдэв, багш, бодлого, миний ирц,
@@ -35,16 +34,13 @@ class DayScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(dayTitle(date), maxLines: 1, overflow: TextOverflow.ellipsis),
-            if (day != null)
-              Meta(items: [day.classroomName, timeRange(day.startMinute, day.endMinute)]),
+            if (day != null) Meta(items: [day.classroomName, timeRange(day.startMinute, day.endMinute)]),
           ],
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () => refreshProviders(ref, [
-          hubDaysProvider(month),
-          theoryDayProvider((classroomId: classroomId, date: date)),
-        ]),
+        onRefresh: () =>
+            refreshProviders(ref, [hubDaysProvider(month), theoryDayProvider((classroomId: classroomId, date: date))]),
         child: AsyncBody(
           value: days,
           onRetry: () => ref.invalidate(hubDaysProvider(month)),
@@ -53,7 +49,7 @@ class DayScreen extends ConsumerWidget {
                   children: const [
                     SizedBox(height: AppSpace.xxl),
                     EmptyState(
-                      icon: MyClassIcons.noDay,
+                      icon: AppIcons.calendarEmpty,
                       title: 'Энэ өдөр хичээл олдсонгүй',
                       message: 'Хичээлүүдийн жагсаалтаас өдрөө сонгоно уу',
                     ),
@@ -230,8 +226,8 @@ class DayTestTile extends StatelessWidget {
       trailing: open
           ? Icon(AppIcons.forward, size: 18, color: context.colors.inkDim)
           : (test.testId != null && test.closedReason == TestClosedReason.tomorrow)
-              ? const InfoPill(label: 'Маргааш нээгдэнэ', icon: AppIcons.time)
-              : null,
+          ? const InfoPill(label: 'Маргааш нээгдэнэ', icon: AppIcons.time)
+          : null,
       onTap: open ? () => context.push('/app/my-class/tests/${Uri.encodeComponent(test.testId!)}') : null,
     );
   }
@@ -267,10 +263,7 @@ class _TheoryCard extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            set.isMine ? 'Миний илгээсэн' : set.uploaderName,
-                            style: context.text.titleSmall,
-                          ),
+                          child: Text(set.isMine ? 'Миний илгээсэн' : set.uploaderName, style: context.text.titleSmall),
                         ),
                         if (set.isAssigned) const InfoPill(label: 'Томилогдсон'),
                       ],
@@ -317,11 +310,7 @@ class _HomeworkPhotoCard extends StatelessWidget {
                 const SizedBox(width: AppSpace.sm),
                 Expanded(
                   child: Meta(
-                    items: [
-                      'Илгээсэн',
-                      '${photo.pages} хуудас',
-                      if (uploaded != null) DateMn.relative(uploaded),
-                    ],
+                    items: ['Илгээсэн', '${photo.pages} хуудас', if (uploaded != null) DateMn.relative(uploaded)],
                     style: context.text.bodyMedium,
                   ),
                 ),

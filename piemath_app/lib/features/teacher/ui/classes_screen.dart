@@ -6,7 +6,6 @@ import '../../../core/format/person_name.dart';
 import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Ангиуд (`/app/classes`). Багш бүх идэвхтэй ангийг харна; «Миний анги» = ахлах эсвэл туслах багш нь би.
@@ -94,7 +93,7 @@ class _ClassTile extends StatelessWidget {
                     Flexible(child: Text(cls.name, style: context.text.titleMedium)),
                     if (cls.isOnline) ...[
                       const SizedBox(width: AppSpace.sm),
-                      Icon(TeacherIcons.online, size: 16, color: c.inkDim),
+                      Icon(AppIcons.laptop, size: 16, color: c.inkDim),
                     ],
                   ],
                 ),
@@ -176,7 +175,7 @@ class ClassDetailScreen extends ConsumerWidget {
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(teacherTap)),
                     onPressed: () => context.push('/app/classes/${Uri.encodeComponent(classId)}/assignments'),
-                    icon: const Icon(TeacherIcons.online),
+                    icon: const Icon(AppIcons.laptop),
                     label: const Text('Онлайн даалгавар шалгах'),
                   ),
                 ],

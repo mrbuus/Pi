@@ -10,7 +10,6 @@ import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
 import '../data/teacher_repository.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Онлайн ангийн даалгаврууд (`/app/classes/:id/assignments`), шалгах хүлээгдэж буй тоотой.
@@ -245,20 +244,20 @@ class _SubmissionCardState extends ConsumerState<_SubmissionCard> {
                   FilledButton.icon(
                     style: FilledButton.styleFrom(minimumSize: const Size(0, teacherTap)),
                     onPressed: _busy ? null : () => _review(ReviewAction.approve),
-                    icon: const Icon(TeacherIcons.approve, size: 18),
+                    icon: const Icon(AppIcons.check, size: 18),
                     label: const Text('Зөвшөөрөх'),
                   ),
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(minimumSize: const Size(0, teacherTap)),
                     onPressed: _busy ? null : () => _review(ReviewAction.giveBack),
-                    icon: const Icon(TeacherIcons.giveBack, size: 18),
+                    icon: const Icon(AppIcons.undo, size: 18),
                     label: const Text('Буцаах'),
                   ),
                 ],
                 TextButton.icon(
                   style: TextButton.styleFrom(minimumSize: const Size(0, teacherTap)),
                   onPressed: _busy ? null : () => _review(ReviewAction.markInClass),
-                  icon: const Icon(TeacherIcons.inClass, size: 18),
+                  icon: const Icon(AppIcons.myClass, size: 18),
                   label: const Text('Ангид шалгасан'),
                 ),
               ],

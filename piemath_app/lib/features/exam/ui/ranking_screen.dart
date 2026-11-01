@@ -7,7 +7,6 @@ import '../../../core/ui/ui.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
 import '../data/ranking_models.dart';
-import 'exam_icons.dart';
 
 final testRankingProvider = FutureProvider.autoDispose.family<TestRanking, String>(
   (ref, id) => ref.watch(examRepositoryProvider).ranking(id),
@@ -31,7 +30,7 @@ class TestRankingScreen extends ConsumerWidget {
         error: (e, _) {
           if (e is ApiError && (e.kind == ApiErrorKind.notFound || e.kind == ApiErrorKind.forbidden)) {
             return const EmptyState(
-              icon: ExamIcons.locked,
+              icon: AppIcons.password,
               title: 'Байр одоогоор харагдахгүй байна',
               message: 'Дүн гарсан, байр тооцогдсон үед энд харагдана.',
             );
@@ -69,7 +68,7 @@ class _Body extends StatelessWidget {
         const SizedBox(height: AppSpace.lg),
         if (entries.isEmpty || !r.hasAnyRank)
           const EmptyState(
-            icon: ExamIcons.locked,
+            icon: AppIcons.password,
             title: 'Байр хараахан тооцогдоогүй байна',
             message: 'Оролцогч хангалттай болсон үед энд харагдана.',
           )

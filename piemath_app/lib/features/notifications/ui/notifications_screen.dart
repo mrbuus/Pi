@@ -10,7 +10,6 @@ import '../../../core/ui/ui.dart';
 import '../data/notification_models.dart';
 import '../domain/notification_link.dart';
 import '../domain/notifications_controller.dart';
-import 'notifications_icons.dart';
 
 /// Апп доторх мэдэгдэл (`/app/notifications`).
 class NotificationsScreen extends ConsumerWidget {
@@ -25,7 +24,7 @@ class NotificationsScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Имэйлийн тохиргоо',
-            icon: const Icon(NotificationsIcons.settings),
+            icon: const Icon(AppIcons.bellRing),
             onPressed: () => context.push('/app/notifications/settings'),
           ),
         ],
@@ -68,7 +67,7 @@ class _NotificationsList extends ConsumerWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(NotificationsIcons.bell, size: 18, color: context.colors.brand),
+                    Icon(AppIcons.notifications, size: 18, color: context.colors.brand),
                     const SizedBox(width: AppSpace.sm),
                     Text('Уншаагүй', style: context.text.bodyMedium),
                     const SizedBox(width: AppSpace.sm),
@@ -77,7 +76,7 @@ class _NotificationsList extends ConsumerWidget {
                 ),
                 TextButton.icon(
                   onPressed: state.unread == 0 || state.busyAll ? null : c.markAllRead,
-                  icon: const Icon(NotificationsIcons.markAll, size: 18),
+                  icon: const Icon(AppIcons.checkAll, size: 18),
                   label: const Text('Бүгдийг уншсан болгох'),
                 ),
               ],
@@ -123,7 +122,7 @@ class _NotificationsList extends ConsumerWidget {
           return SizedBox(
             height: 280,
             child: EmptyState(
-              icon: NotificationsIcons.bell,
+              icon: AppIcons.notifications,
               title: switch (state.filter) {
                 NotificationFilter.unread => 'Уншаагүй мэдэгдэл алга',
                 NotificationFilter.read => 'Уншсан мэдэгдэл алга',
@@ -144,7 +143,7 @@ class _NotificationsList extends ConsumerWidget {
                 onPressed: state.loadingMore ? null : c.loadMore,
                 icon: state.loadingMore
                     ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(NotificationsIcons.more, size: 18),
+                    : const Icon(AppIcons.expand, size: 18),
                 label: const Text('Дараагийн мэдэгдлүүд'),
               ),
             ),
@@ -201,7 +200,7 @@ class NotificationTile extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Icon(NotificationsIcons.forKind(item.kind), size: 20, color: unread ? c.brand : c.inkDim),
+                child: Icon(_notificationIcon(item.kind), size: 20, color: unread ? c.brand : c.inkDim),
               ),
               const SizedBox(width: AppSpace.md),
               Expanded(child: Text(item.title, style: context.text.titleSmall)),
@@ -230,7 +229,7 @@ class NotificationTile extends StatelessWidget {
                         if (unread && !disabled) onMarkRead();
                         context.push(target);
                       },
-                      icon: const Icon(NotificationsIcons.go, size: 18),
+                      icon: const Icon(AppIcons.arrowUpRight, size: 18),
                       label: const Text('Холбогдох хэсэг рүү очих'),
                     ),
                   if (unread)
@@ -270,3 +269,12 @@ class _StateChip extends StatelessWidget {
     );
   }
 }
+
+/// Мэдэгдлийн төрөлд тохирох дүрс.
+IconData _notificationIcon(String kind) => switch (kind) {
+  'PAYMENT_DUE' => AppIcons.payments,
+  'HOMEWORK' => AppIcons.homework,
+  'SCHEDULE_CHANGE' => AppIcons.schedule,
+  'ANNOUNCEMENT' => AppIcons.message,
+  _ => AppIcons.info,
+};

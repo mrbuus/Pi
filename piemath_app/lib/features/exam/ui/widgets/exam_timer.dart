@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/ui/ui.dart';
 import '../../domain/timer_format.dart';
-import '../exam_icons.dart';
 
 /// Үлдсэн хугацаа дуусахад ойртох үед (секунд) нуусан таймер өөрөө буцаж гарна.
 const examTimerReturnSeconds = 300;
@@ -110,7 +109,7 @@ class _TimerBox extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(ExamIcons.timer, size: 16, color: urgent ? c.ink : c.inkDim),
+          Icon(AppIcons.timer, size: 16, color: urgent ? c.ink : c.inkDim),
           const SizedBox(width: AppSpace.xs),
           Text(
             formatRemaining(seconds),

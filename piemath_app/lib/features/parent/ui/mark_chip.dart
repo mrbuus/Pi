@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/ui/ui.dart';
 import '../domain/parent_labels.dart';
-import 'parent_icons.dart';
 
 // Ирц/даалгаврын тэмдэгийн түр харагдац. `lib/shared/marks/` (өөр agent) бэлэн болмогц түүгээр солино.
 
@@ -13,11 +12,11 @@ class MarkLabel extends StatelessWidget {
   factory MarkLabel.attendance(BuildContext context, AttendanceMark m) {
     final c = context.colors;
     final (icon, color) = switch (m) {
-      AttendanceMark.present => (ParentIcons.ok, c.success),
-      AttendanceMark.late => (ParentIcons.waiting, c.warning),
-      AttendanceMark.absent => (ParentIcons.bad, c.error),
-      AttendanceMark.excused => (ParentIcons.excused, c.info),
-      AttendanceMark.unknown => (ParentIcons.unknown, c.inkDim),
+      AttendanceMark.present => (AppIcons.success, c.success),
+      AttendanceMark.late => (AppIcons.time, c.warning),
+      AttendanceMark.absent => (AppIcons.failure, c.error),
+      AttendanceMark.excused => (AppIcons.circleMinus, c.info),
+      AttendanceMark.unknown => (AppIcons.circleDot, c.inkDim),
     };
     return MarkLabel(icon: icon, label: m.label, color: color);
   }
@@ -25,12 +24,12 @@ class MarkLabel extends StatelessWidget {
   factory MarkLabel.homework(BuildContext context, HomeworkMark m) {
     final c = context.colors;
     final (icon, color) = switch (m) {
-      HomeworkMark.done || HomeworkMark.doneOnline || HomeworkMark.doneInClass => (ParentIcons.ok, c.success),
-      HomeworkMark.partial => (ParentIcons.partial, c.warning),
-      HomeworkMark.notDone => (ParentIcons.bad, c.error),
-      HomeworkMark.submitted => (ParentIcons.waiting, c.info),
-      HomeworkMark.returned => (ParentIcons.returned, c.warning),
-      HomeworkMark.unknown => (ParentIcons.unknown, c.inkDim),
+      HomeworkMark.done || HomeworkMark.doneOnline || HomeworkMark.doneInClass => (AppIcons.success, c.success),
+      HomeworkMark.partial => (AppIcons.circleDashed, c.warning),
+      HomeworkMark.notDone => (AppIcons.failure, c.error),
+      HomeworkMark.submitted => (AppIcons.time, c.info),
+      HomeworkMark.returned => (AppIcons.undo, c.warning),
+      HomeworkMark.unknown => (AppIcons.circleDot, c.inkDim),
     };
     return MarkLabel(icon: icon, label: m.label, color: color);
   }

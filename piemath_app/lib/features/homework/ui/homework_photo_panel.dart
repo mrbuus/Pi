@@ -9,7 +9,6 @@ import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
 import '../domain/homework_logic.dart';
 import 'composer/notebook_composer_screen.dart';
-import 'homework_icons.dart';
 import 'homework_providers.dart';
 
 /// Хичээлийн өдрийн дэвтрийн зураг: илгээх, харах, дахин илгээх, устгах (вэбийн `HomeworkPhotoPanel`).
@@ -46,12 +45,9 @@ class _HomeworkPhotoPanelState extends ConsumerState<HomeworkPhotoPanel> {
           cancel: cancel,
         );
         progress(PhotoUploadPhase.saving, 1);
-        await ref.read(homeworkRepositoryProvider).sendPhoto(
-              classroomId: day.classroomId,
-              date: day.date,
-              fileKey: file.key,
-              pages: count,
-            );
+        await ref
+            .read(homeworkRepositoryProvider)
+            .sendPhoto(classroomId: day.classroomId, date: day.date, fileKey: file.key, pages: count);
       },
     );
     if (ok) {
@@ -105,14 +101,15 @@ class _HomeworkPhotoPanelState extends ConsumerState<HomeworkPhotoPanel> {
           children: [
             Row(
               children: [
-                Icon(HomeworkIcons.photoSent, size: 20, color: c.success),
+                Icon(AppIcons.fileCheck, size: 20, color: c.success),
                 const SizedBox(width: AppSpace.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Зураг илгээсэн, ${photo.pages} хуудас', style: context.text.titleSmall),
-                      if (photo.uploadedAt != null) Text(DateMn.relative(photo.uploadedAt!), style: context.text.bodySmall),
+                      if (photo.uploadedAt != null)
+                        Text(DateMn.relative(photo.uploadedAt!), style: context.text.bodySmall),
                     ],
                   ),
                 ),
@@ -147,7 +144,7 @@ class _HomeworkPhotoPanelState extends ConsumerState<HomeworkPhotoPanel> {
                   TextButton.icon(
                     onPressed: _deleting ? null : () => _delete(photo),
                     style: TextButton.styleFrom(foregroundColor: c.error),
-                    icon: const Icon(FileIcons.remove, size: 18),
+                    icon: const Icon(AppIcons.trash, size: 18),
                     label: const Text('Устгах'),
                   ),
               ],
@@ -160,7 +157,7 @@ class _HomeworkPhotoPanelState extends ConsumerState<HomeworkPhotoPanel> {
     if (!canSend) {
       return Row(
         children: [
-          Icon(HomeworkIcons.deadline, size: 16, color: c.inkDim),
+          Icon(AppIcons.time, size: 16, color: c.inkDim),
           const SizedBox(width: AppSpace.sm),
           Text('Илгээх хугацаа дууссан', style: context.text.bodySmall),
         ],

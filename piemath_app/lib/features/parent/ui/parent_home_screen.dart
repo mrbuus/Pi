@@ -8,7 +8,6 @@ import '../data/parent_models.dart';
 import '../data/parent_repository.dart';
 import '../domain/parent_labels.dart';
 import 'child_panel.dart';
-import 'parent_icons.dart';
 
 /// Эцэг эхийн нүүр (`/app/parent`, вэбийн `app/parent/page.tsx`): хүүхэд сонгох, хүүхдийн самбар,
 /// өөр хүүхэд холбох.
@@ -61,7 +60,7 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
                     child: SizedBox(
                       height: 220,
                       child: EmptyState(
-                        icon: ParentIcons.children,
+                        icon: AppIcons.children,
                         title: 'Холбосон хүүхэд хараахан алга',
                         message: 'Доорх хэсэгт хүүхдийн утасны дугаараар хүсэлт илгээнэ үү.',
                       ),
@@ -100,7 +99,7 @@ class _ChildSelector extends StatelessWidget {
             ChoiceChip(
               label: Text(l.student.firstName.isEmpty ? l.student.fullName : l.student.firstName),
               selected: l.id == selectedId,
-              avatar: l.verified ? null : const Icon(ParentIcons.pending, size: 16),
+              avatar: l.verified ? null : const Icon(AppIcons.time, size: 16),
               onSelected: (_) => onSelect(l.id),
             ),
         ],
@@ -175,7 +174,7 @@ class _LinkChildCardState extends ConsumerState<_LinkChildCard> {
         children: [
           Row(
             children: [
-              Icon(ParentIcons.link, size: 18, color: context.colors.brand),
+              Icon(AppIcons.link, size: 18, color: context.colors.brand),
               const SizedBox(width: AppSpace.sm),
               Text(widget.hasChildren ? 'Өөр хүүхэд холбох' : 'Хүүхэд холбох', style: context.text.titleMedium),
             ],

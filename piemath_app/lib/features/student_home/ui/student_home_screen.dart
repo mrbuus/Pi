@@ -14,7 +14,6 @@ import '../../my_class/domain/hub_logic.dart';
 import '../../my_class/ui/common.dart';
 import '../../my_class/ui/day_row.dart';
 import '../../my_class/ui/day_screen.dart';
-import '../../my_class/ui/my_class_icons.dart';
 
 /// Сурагчийн «Миний самбар» (`/app/student`) — вэбийн `StudentDashboard` (SURAGCH-V2-GEREE):
 /// мэндчилгээ → өнөөдрийн хичээл + түргэн үйлдэл → ирц, даалгаврын хувь → багшийн сүүлийн
@@ -65,7 +64,7 @@ class StudentHomeScreen extends ConsumerWidget {
                     Expanded(
                       child: RateTile(
                         title: 'Ирц',
-                        icon: MyClassIcons.attendance,
+                        icon: AppIcons.calendarCheck,
                         rate: ov.attendance.rate,
                         total: ov.attendance.total,
                         items: [
@@ -81,19 +80,14 @@ class StudentHomeScreen extends ConsumerWidget {
                         icon: AppIcons.homework,
                         rate: ov.homework.rate,
                         total: ov.homework.total,
-                        items: [
-                          for (final s in homeworkOrder) (meta: homeworkMeta(s), value: ov.homework.count(s)),
-                        ],
+                        items: [for (final s in homeworkOrder) (meta: homeworkMeta(s), value: ov.homework.count(s))],
                         onTap: () => context.go('/app/my-class'),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (ov.latestMark != null) ...[
-                const SizedBox(height: AppSpace.md),
-                LatestMarkCard(mark: ov.latestMark!),
-              ],
+              if (ov.latestMark != null) ...[const SizedBox(height: AppSpace.md), LatestMarkCard(mark: ov.latestMark!)],
               const SizedBox(height: AppSpace.md),
               RecentDaysCard(today: today),
             ] else if (!hasOnline && !classrooms.isLoading)
@@ -167,10 +161,10 @@ class _Greeting extends ConsumerWidget {
     final user = session is SignedIn ? session.user : null;
     final c = context.colors;
     final first = user?.firstName.trim() ?? '';
-    final initials = [first, user?.lastName?.trim() ?? '']
-        .where((s) => s.isNotEmpty)
-        .map((s) => s.substring(0, 1).toUpperCase())
-        .join();
+    final initials = [
+      first,
+      user?.lastName?.trim() ?? '',
+    ].where((s) => s.isNotEmpty).map((s) => s.substring(0, 1).toUpperCase()).join();
     final avatar = user?.avatarUrl;
     return Row(
       children: [
@@ -190,7 +184,8 @@ class _Greeting extends ConsumerWidget {
                   height: 52,
                   fit: BoxFit.cover,
                   semanticLabel: 'Профайл зураг',
-                  errorBuilder: (_, _, _) => Text(initials, style: context.text.titleMedium?.copyWith(color: c.brandSoft)),
+                  errorBuilder: (_, _, _) =>
+                      Text(initials, style: context.text.titleMedium?.copyWith(color: c.brandSoft)),
                 )
               : Text(initials, style: context.text.titleMedium?.copyWith(color: c.brandSoft)),
         ),
@@ -326,7 +321,10 @@ class RateTile extends StatelessWidget {
               children: [
                 Icon(icon, size: 16, color: c.inkDim),
                 const SizedBox(width: 6),
-                Text(title, style: context.text.labelMedium?.copyWith(color: c.inkDim, fontWeight: FontWeight.w700)),
+                Text(
+                  title,
+                  style: context.text.labelMedium?.copyWith(color: c.inkDim, fontWeight: FontWeight.w700),
+                ),
               ],
             ),
             const SizedBox(height: AppSpace.sm),
@@ -337,7 +335,10 @@ class RateTile extends StatelessWidget {
                 TextSpan(
                   children: [
                     TextSpan(text: '$rate', style: context.text.displaySmall),
-                    TextSpan(text: '%', style: context.text.titleMedium?.copyWith(color: c.inkDim)),
+                    TextSpan(
+                      text: '%',
+                      style: context.text.titleMedium?.copyWith(color: c.inkDim),
+                    ),
                   ],
                 ),
               ),
@@ -386,7 +387,7 @@ class LatestMarkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionCard(
-      icon: MyClassIcons.teacherNote,
+      icon: AppIcons.messageSquareText,
       title: 'Багшийн тэмдэглэгээ',
       trailing: Text(dayShort(mark.date), style: context.text.bodySmall),
       child: Column(
@@ -418,7 +419,7 @@ class RecentDaysCard extends ConsumerWidget {
     final prev = prevKey == null ? null : ref.watch(hubDaysProvider(prevKey));
     final loading = curData == null && !cur.hasError || (prev != null && prev.value == null && !prev.hasError);
     return SectionCard(
-      icon: MyClassIcons.makeup,
+      icon: AppIcons.checklist,
       title: 'Сүүлийн хичээлүүд',
       padding: const EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.lg, AppSpace.lg, AppSpace.sm),
       trailing: TextButton(onPressed: () => context.go('/app/my-class'), child: const Text('Бүгд')),
@@ -534,29 +535,29 @@ class PaidUntilCard extends ConsumerWidget {
           final state = paidUntilState(left);
           final (IconData icon, Color tone, String title, String hint) = switch (state) {
             PaidUntilState.unknown => (
-                MyClassIcons.paidSoon,
-                c.inkDim,
-                'Төлбөрийн хугацаа тооцогдоогүй байна',
-                'Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана',
-              ),
+              AppIcons.upcoming,
+              c.inkDim,
+              'Төлбөрийн хугацаа тооцогдоогүй байна',
+              'Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана',
+            ),
             PaidUntilState.expired => (
-                MyClassIcons.paidExpired,
-                c.error,
-                '${left!.abs()} хоногийн өмнө дууссан',
-                'Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй',
-              ),
+              AppIcons.calendarExpired,
+              c.error,
+              '${left!.abs()} хоногийн өмнө дууссан',
+              'Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй',
+            ),
             PaidUntilState.endingSoon => (
-                MyClassIcons.paidSoon,
-                c.info,
-                left == 0 ? 'Өнөөдөр дуусна' : '$left хоногийн дараа дуусна',
-                'Удахгүй дуусах гэж байна — дараагийн сарын төлбөрөө бэлдээрэй',
-              ),
+              AppIcons.upcoming,
+              c.info,
+              left == 0 ? 'Өнөөдөр дуусна' : '$left хоногийн дараа дуусна',
+              'Удахгүй дуусах гэж байна — дараагийн сарын төлбөрөө бэлдээрэй',
+            ),
             PaidUntilState.ok => (
-                MyClassIcons.paidOk,
-                c.success,
-                '$left хоног үлдсэн',
-                'Бүх зүйл хэвийн. Хичээлдээ анхаараарай',
-              ),
+              AppIcons.calendarCheck,
+              c.success,
+              '$left хоног үлдсэн',
+              'Бүх зүйл хэвийн. Хичээлдээ анхаараарай',
+            ),
           };
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,15 +611,12 @@ class _AnnouncementsCardState extends ConsumerState<AnnouncementsCard> {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpace.md),
       child: SectionCard(
-        icon: MyClassIcons.announcement,
+        icon: AppIcons.megaphone,
         title: 'Төвийн мэдэгдэл',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final a in visible) ...[
-              _AnnouncementTile(a: a),
-              const SizedBox(height: AppSpace.sm),
-            ],
+            for (final a in visible) ...[_AnnouncementTile(a: a), const SizedBox(height: AppSpace.sm)],
             if (list.length > _maxVisible)
               OutlinedButton(
                 onPressed: () => setState(() => _expanded = !_expanded),
@@ -651,7 +649,10 @@ class _AnnouncementTile extends StatelessWidget {
           Row(
             children: [
               if (a.pinned) ...[
-                Semantics(label: 'Зангиатай', child: Icon(MyClassIcons.pinned, size: 14, color: context.colors.brandSoft)),
+                Semantics(
+                  label: 'Зангиатай',
+                  child: Icon(AppIcons.pin, size: 14, color: context.colors.brandSoft),
+                ),
                 const SizedBox(width: 6),
               ],
               Expanded(child: Text(a.title, style: context.text.titleSmall)),

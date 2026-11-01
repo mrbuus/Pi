@@ -5,7 +5,6 @@ import '../../../../core/math/math.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../shared/solution/solution.dart';
 import '../../data/exam_models.dart';
-import '../exam_icons.dart';
 import 'answer_inputs.dart';
 
 /// Бодлогын эргэн харалтын карт: нөхцөл, зураг, сонголт, өөрийн/зөв хариу, бодолт, бичлэг.
@@ -96,7 +95,7 @@ class ReviewProblemCard extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: TextButton.icon(
-                icon: const Icon(ExamIcons.video, size: 18),
+                icon: const Icon(AppIcons.video, size: 18),
                 label: const Text('Бодолтын бичлэг'),
                 onPressed: () => launchUrl(Uri.parse(p.youtube!.url), mode: LaunchMode.externalApplication),
               ),
@@ -154,8 +153,8 @@ class ReviewStatus extends StatelessWidget {
     final (icon, label, color) = switch (_kind) {
       0 => (AppIcons.success, 'Зөв', c.success),
       1 => (AppIcons.failure, 'Буруу', c.error),
-      2 => (ExamIcons.blank, 'Хариулаагүй', c.inkDim),
-      _ => (ExamIcons.unknown, 'Дүнд тооцогдоогүй', c.inkDim),
+      2 => (AppIcons.circleDashed, 'Хариулаагүй', c.inkDim),
+      _ => (AppIcons.circleMinus, 'Дүнд тооцогдоогүй', c.inkDim),
     };
     return Row(
       mainAxisSize: MainAxisSize.min,

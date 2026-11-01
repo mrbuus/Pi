@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../domain/test_run_row.dart';
-import 'teacher_icons.dart';
 
 /// Шалгалтын дүн (`/app/teacher/tests/:id/results`): сурагч бүрийн оноо, түүнчлэн бүртгэгдсэн
 /// «гарсан / скриншот / бичлэг» тоо (зөвхөн > 0 үед). Эдгээр нь багшийн хянах мэдээлэл, дүгнэлт БИШ.
@@ -34,10 +33,7 @@ class TestRunScreen extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
               children: [
-                for (final r in rows) ...[
-                  _RunCard(row: r),
-                  const SizedBox(height: AppSpace.sm),
-                ],
+                for (final r in rows) ...[_RunCard(row: r), const SizedBox(height: AppSpace.sm)],
                 const SizedBox(height: AppSpace.sm),
                 const IntegrityLegend(),
               ],
@@ -93,9 +89,9 @@ class IntegrityChip extends StatelessWidget {
   final int count;
 
   static IconData iconOf(IntegrityKind k) => switch (k) {
-    IntegrityKind.leave => TeacherIcons.leave,
-    IntegrityKind.screenshot => TeacherIcons.screenshot,
-    IntegrityKind.recording => TeacherIcons.recording,
+    IntegrityKind.leave => AppIcons.logout,
+    IntegrityKind.screenshot => AppIcons.camera,
+    IntegrityKind.recording => AppIcons.videoRecord,
   };
 
   @override

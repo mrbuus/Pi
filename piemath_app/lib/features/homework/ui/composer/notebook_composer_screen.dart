@@ -250,24 +250,24 @@ class _NotebookComposerScreenState extends ConsumerState<NotebookComposerScreen>
               onTap: () => Navigator.pop(ctx, 'crop'),
             ),
             ListTile(
-              leading: const Icon(FileIcons.rotate),
+              leading: const Icon(AppIcons.rotate),
               title: const Text('Эргүүлэх'),
               onTap: () => Navigator.pop(ctx, 'rotate'),
             ),
             if (i > 0)
               ListTile(
-                leading: const Icon(FileIcons.moveLeft),
+                leading: const Icon(AppIcons.back),
                 title: const Text('Өмнө нь шилжүүлэх'),
                 onTap: () => Navigator.pop(ctx, 'left'),
               ),
             if (i < _entries.length - 1)
               ListTile(
-                leading: const Icon(FileIcons.moveRight),
+                leading: const Icon(AppIcons.forward),
                 title: const Text('Дараа нь шилжүүлэх'),
                 onTap: () => Navigator.pop(ctx, 'right'),
               ),
             ListTile(
-              leading: Icon(FileIcons.remove, color: ctx.colors.error),
+              leading: Icon(AppIcons.trash, color: ctx.colors.error),
               title: Text('Хасах', style: TextStyle(color: ctx.colors.error)),
               onTap: () => Navigator.pop(ctx, 'remove'),
             ),
@@ -477,7 +477,7 @@ class _NotebookComposerScreenState extends ConsumerState<NotebookComposerScreen>
                   )
                 : FilledButton.icon(
                     onPressed: _entries.isEmpty ? null : _submit,
-                    icon: const Icon(FileIcons.send, size: 18),
+                    icon: const Icon(AppIcons.send, size: 18),
                     label: Text(
                       _entries.isEmpty ? widget.submitLabel : '${widget.submitLabel} (${_entries.length} хуудас)',
                     ),

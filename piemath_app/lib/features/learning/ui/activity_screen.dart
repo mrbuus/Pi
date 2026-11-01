@@ -7,7 +7,6 @@ import '../../../core/time/weekday.dart';
 import '../../../core/ui/ui.dart';
 import '../data/activity_models.dart';
 import '../data/activity_repository.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// `/app/activity` — сар бүрийн хуанли дээр бодсон бодлогын тоо. Дараалал, амжилтын оноо, зэмлэл үгүй:
@@ -60,21 +59,10 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
         data: (data) => ListView(
           padding: const EdgeInsets.all(AppSpace.gutter),
           children: [
-            _Header(
-              year: _year,
-              month: _month,
-              canNext: _canGoNext,
-              onPrev: () => _shift(-1),
-              onNext: () => _shift(1),
-            ),
+            _Header(year: _year, month: _month, canNext: _canGoNext, onPrev: () => _shift(-1), onNext: () => _shift(1)),
             const SizedBox(height: AppSpace.md),
             AppCard(
-              child: _MonthGrid(
-                year: _year,
-                month: _month,
-                data: data,
-                today: _today,
-              ),
+              child: _MonthGrid(year: _year, month: _month, data: data, today: _today),
             ),
             const SizedBox(height: AppSpace.md),
             _MonthSummary(data: data, year: _year, month: _month),
@@ -88,7 +76,13 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.year, required this.month, required this.canNext, required this.onPrev, required this.onNext});
+  const _Header({
+    required this.year,
+    required this.month,
+    required this.canNext,
+    required this.onPrev,
+    required this.onNext,
+  });
 
   final int year;
   final int month;
@@ -133,12 +127,7 @@ Color _levelFill(AppColors c, int level) => switch (level) {
 };
 
 class _MonthGrid extends StatelessWidget {
-  const _MonthGrid({
-    required this.year,
-    required this.month,
-    required this.data,
-    required this.today,
-  });
+  const _MonthGrid({required this.year, required this.month, required this.data, required this.today});
 
   final int year;
   final int month;
@@ -153,7 +142,9 @@ class _MonthGrid extends StatelessWidget {
     final lead = first.weekday - 1;
     final cells = <Widget>[
       for (var w = 1; w <= 7; w++)
-        Center(child: Text(weekdayShortMn(w), style: context.text.labelSmall?.copyWith(color: c.inkDim))),
+        Center(
+          child: Text(weekdayShortMn(w), style: context.text.labelSmall?.copyWith(color: c.inkDim)),
+        ),
       for (var i = 0; i < lead; i++) const SizedBox.shrink(),
       for (var d = 1; d <= daysInMonth; d++) _cell(context, UbDateTime(year, month, d)),
     ];
@@ -177,7 +168,12 @@ class _MonthGrid extends StatelessWidget {
     final isToday = date.isSameDay(today);
     final onFill = level >= 3;
     return Semantics(
-      label: '${DateMn.longWithWeekday(date)}: ${isFuture ? 'ирээдүй' : count > 0 ? '$count бодлого' : 'бодлого бодоогүй'}',
+      label:
+          '${DateMn.longWithWeekday(date)}: ${isFuture
+              ? 'ирээдүй'
+              : count > 0
+              ? '$count бодлого'
+              : 'бодлого бодоогүй'}',
       excludeSemantics: true,
       child: Container(
         alignment: Alignment.center,
@@ -215,11 +211,13 @@ class _MonthSummary extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(LearningIcons.activity, size: 20, color: c.brand),
+            Icon(AppIcons.calendarCheck, size: 20, color: c.brand),
             const SizedBox(width: AppSpace.sm),
             Expanded(
               child: Text(
-                total == 0 ? 'Энэ сард бодлого бодсон тэмдэглэл алга' : 'Энэ сард ${active.length} өдөр, нийт $total бодлого бодсон',
+                total == 0
+                    ? 'Энэ сард бодлого бодсон тэмдэглэл алга'
+                    : 'Энэ сард ${active.length} өдөр, нийт $total бодлого бодсон',
                 style: context.text.bodyMedium,
               ),
             ),
@@ -275,7 +273,9 @@ class _Legend extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpace.sm),
-              Flexible(child: Text('$text бодлого', style: context.text.bodySmall?.copyWith(color: c.inkDim))),
+              Flexible(
+                child: Text('$text бодлого', style: context.text.bodySmall?.copyWith(color: c.inkDim)),
+              ),
             ],
           ),
       ],

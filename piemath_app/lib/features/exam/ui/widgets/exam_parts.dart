@@ -8,7 +8,6 @@ import '../../data/exam_models.dart';
 import '../../domain/answer.dart';
 import '../../domain/autosave_engine.dart';
 import '../../domain/timer_format.dart';
-import '../exam_icons.dart';
 import 'answer_inputs.dart';
 import 'exam_timer.dart';
 
@@ -68,11 +67,7 @@ class ExamHeader extends StatelessWidget {
                   ),
                   const Spacer(),
                   ExamTimer(remaining: remainingSec),
-                  IconButton(
-                    tooltip: 'Бодлогын жагсаалт',
-                    icon: const Icon(ExamIcons.navigator),
-                    onPressed: onNavigator,
-                  ),
+                  IconButton(tooltip: 'Бодлогын жагсаалт', icon: const Icon(AppIcons.grid), onPressed: onNavigator),
                 ],
               ),
             ],
@@ -93,9 +88,9 @@ class SaveChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final (icon, label, color) = switch (state) {
-      SaveState.saved => (ExamIcons.saved, 'Хадгалагдсан', c.success),
-      SaveState.saving => (ExamIcons.saving, 'Хадгалж байна', c.inkDim),
-      SaveState.offline => (ExamIcons.offline, 'Утсанд хадгалсан', c.warning),
+      SaveState.saved => (AppIcons.cloudCheck, 'Хадгалагдсан', c.success),
+      SaveState.saving => (AppIcons.loaderCircle, 'Хадгалж байна', c.inkDim),
+      SaveState.offline => (AppIcons.cloudOff, 'Утсанд хадгалсан', c.warning),
     };
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -130,7 +125,7 @@ class ExamOfflineBanner extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.sm),
         child: Row(
           children: [
-            Icon(ExamIcons.offline, size: 18, color: c.surface),
+            Icon(AppIcons.cloudOff, size: 18, color: c.surface),
             const SizedBox(width: AppSpace.md),
             Expanded(
               child: Text(
@@ -231,7 +226,7 @@ class QuestionView extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
             onPressed: onToggleFlag,
-            icon: Icon(ExamIcons.flag, size: 18, color: flagged ? c.brand : c.inkDim),
+            icon: Icon(AppIcons.flag, size: 18, color: flagged ? c.brand : c.inkDim),
             label: Text(flagged ? 'Дараа харах: тэмдэглэсэн' : 'Дараа харах'),
           ),
         ),
@@ -282,7 +277,10 @@ class NavigatorGrid extends StatelessWidget {
     if (split == null || split == 0) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [grid(0, problems.length), if (legend != null) ...[const SizedBox(height: AppSpace.lg), legend]],
+        children: [
+          grid(0, problems.length),
+          if (legend != null) ...[const SizedBox(height: AppSpace.lg), legend],
+        ],
       );
     }
     return Column(
@@ -360,7 +358,11 @@ class NavigatorLegend extends StatelessWidget {
     final c = context.colors;
     Widget item(Widget mark, String label) => Row(
       mainAxisSize: MainAxisSize.min,
-      children: [mark, const SizedBox(width: AppSpace.xs), Text(label, style: context.text.bodySmall)],
+      children: [
+        mark,
+        const SizedBox(width: AppSpace.xs),
+        Text(label, style: context.text.bodySmall),
+      ],
     );
     Widget swatch({required bool answered, IconData? icon}) => Container(
       width: 20,
@@ -378,7 +380,7 @@ class NavigatorLegend extends StatelessWidget {
       children: [
         item(swatch(answered: true, icon: AppIcons.check), 'Хариулсан'),
         item(swatch(answered: false), 'Хариулаагүй'),
-        item(swatch(answered: false, icon: ExamIcons.flag), 'Дараа харах'),
+        item(swatch(answered: false, icon: AppIcons.flag), 'Дараа харах'),
       ],
     );
   }
@@ -436,7 +438,7 @@ class _NavCell extends StatelessWidget {
                 ),
               ),
               if (answered) Positioned(right: 3, bottom: 3, child: Icon(AppIcons.check, size: 11, color: c.brand)),
-              if (flagged) Positioned(right: 3, top: 3, child: Icon(ExamIcons.flag, size: 11, color: c.brand)),
+              if (flagged) Positioned(right: 3, top: 3, child: Icon(AppIcons.flag, size: 11, color: c.brand)),
             ],
           ),
         ),
@@ -500,7 +502,7 @@ class LeaveNoticeView extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 3),
                             child: Icon(
-                              i < leaveCount ? AppIcons.failure : ExamIcons.blank,
+                              i < leaveCount ? AppIcons.failure : AppIcons.circleDashed,
                               size: 18,
                               color: i < leaveCount ? c.error : c.line,
                             ),
@@ -545,7 +547,7 @@ class RecordingCover extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(ExamIcons.recording, size: 40, color: c.inkDim),
+              Icon(AppIcons.monitorOff, size: 40, color: c.inkDim),
               const SizedBox(height: AppSpace.lg),
               Text('Дэлгэц бичлэгийг зогсооно уу', style: context.text.titleLarge, textAlign: TextAlign.center),
               const SizedBox(height: AppSpace.sm),
@@ -631,8 +633,8 @@ class ExamIntroView extends StatelessWidget {
               ),
             ),
             const SectionHeader(title: 'Анхаарах зүйл'),
-            rule(ExamIcons.saved, 'Хариулт бүр шууд хадгалагдана — сүлжээ тасарсан ч үргэлжлүүлж болно.'),
-            rule(ExamIcons.timer, 'Цагийг сервер тоолно — хугацаа дуусахад хариулт автоматаар илгээгдэнэ.'),
+            rule(AppIcons.cloudCheck, 'Хариулт бүр шууд хадгалагдана — сүлжээ тасарсан ч үргэлжлүүлж болно.'),
+            rule(AppIcons.timer, 'Цагийг сервер тоолно — хугацаа дуусахад хариулт автоматаар илгээгдэнэ.'),
             rule(
               AppIcons.secure,
               'Шалгалтын үеэр аппаас гарвал багшид харагдана. 1, ${policy.maxLeaves - 1} дахь удаад анхааруулга '

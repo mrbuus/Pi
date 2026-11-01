@@ -6,7 +6,6 @@ import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
 import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
-import 'teacher_icons.dart';
 
 /// Багшийн дэлгэцийн хүрэх талбай — 48dp (утсанд хуруугаар хурдан тэмдэглэнэ).
 const double teacherTap = 48;
@@ -48,7 +47,7 @@ class DayStepper extends StatelessWidget {
         IconButton(
           tooltip: 'Өмнөх өдөр',
           constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-          icon: const Icon(TeacherIcons.prevDay),
+          icon: const Icon(AppIcons.back),
           onPressed: () => onChanged(date.addDays(-1)),
         ),
         Expanded(
@@ -61,7 +60,7 @@ class DayStepper extends StatelessWidget {
         IconButton(
           tooltip: 'Дараагийн өдөр',
           constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-          icon: const Icon(TeacherIcons.nextDay),
+          icon: const Icon(AppIcons.forward),
           onPressed: () => onChanged(date.addDays(1)),
         ),
         if (!isToday)
@@ -132,10 +131,10 @@ class SaveStatus extends StatelessWidget {
     final (IconData icon, Color color, String text) = error != null
         ? (AppIcons.error, c.error, 'Хадгалагдсангүй')
         : pending > 0
-        ? (TeacherIcons.saving, c.inkDim, 'Хадгалж байна')
+        ? (AppIcons.cloudUpload, c.inkDim, 'Хадгалж байна')
         : savedAt != null
-        ? (TeacherIcons.saved, c.success, 'Хадгалсан $savedAt')
-        : (TeacherIcons.saved, c.inkDim, 'Товшмогц хадгалагдана');
+        ? (AppIcons.cloudCheck, c.success, 'Хадгалсан $savedAt')
+        : (AppIcons.cloudCheck, c.inkDim, 'Товшмогц хадгалагдана');
     return Semantics(
       liveRegion: true,
       child: Row(

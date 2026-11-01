@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/time/date_mn.dart';
 import '../../core/time/ub_time.dart';
+import '../../core/ui/icons.dart';
 import '../../core/ui/tokens.dart';
-import 'payment_icons.dart';
 
 /// «Хэдий хүртэл төлсөн» төлөвийн ангилал (вэбийн `PaidUntilCard`).
 enum PaidUntilKind { unknown, expired, soon, ok }
@@ -23,8 +23,8 @@ class PaidUntilView {
     final kind = left < 0
         ? PaidUntilKind.expired
         : left < 7
-            ? PaidUntilKind.soon
-            : PaidUntilKind.ok;
+        ? PaidUntilKind.soon
+        : PaidUntilKind.ok;
     return PaidUntilView._(kind, date, left);
   }
 
@@ -36,29 +36,29 @@ class PaidUntilView {
   String? get dateLabel => date == null ? null : DateMn.numeric(date!);
 
   String get title => switch (kind) {
-        PaidUntilKind.unknown => 'Төлбөрийн хугацаа тооцогдоогүй байна',
-        PaidUntilKind.expired => '${daysLeft!.abs()} хоногийн өмнө дууссан',
-        PaidUntilKind.soon => daysLeft == 0 ? 'Өнөөдөр дуусна' : '$daysLeft хоногийн дараа дуусна',
-        PaidUntilKind.ok => '$daysLeft хоног үлдсэн',
-      };
+    PaidUntilKind.unknown => 'Төлбөрийн хугацаа тооцогдоогүй байна',
+    PaidUntilKind.expired => '${daysLeft!.abs()} хоногийн өмнө дууссан',
+    PaidUntilKind.soon => daysLeft == 0 ? 'Өнөөдөр дуусна' : '$daysLeft хоногийн дараа дуусна',
+    PaidUntilKind.ok => '$daysLeft хоног үлдсэн',
+  };
 
   String get hint => switch (kind) {
-        PaidUntilKind.unknown => 'Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана.',
-        PaidUntilKind.expired => 'Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй.',
-        PaidUntilKind.soon => 'Удахгүй дуусах гэж байна. Дараагийн сарын төлбөрөө бэлдээрэй.',
-        PaidUntilKind.ok => 'Бүх зүйл хэвийн. Хичээлдээ анхаараарай.',
-      };
+    PaidUntilKind.unknown => 'Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана.',
+    PaidUntilKind.expired => 'Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй.',
+    PaidUntilKind.soon => 'Удахгүй дуусах гэж байна. Дараагийн сарын төлбөрөө бэлдээрэй.',
+    PaidUntilKind.ok => 'Бүх зүйл хэвийн. Хичээлдээ анхаараарай.',
+  };
 
   IconData get icon => switch (kind) {
-        PaidUntilKind.unknown || PaidUntilKind.soon => PaymentIcons.paidUnknown,
-        PaidUntilKind.expired => PaymentIcons.paidExpired,
-        PaidUntilKind.ok => PaymentIcons.paidOk,
-      };
+    PaidUntilKind.unknown || PaidUntilKind.soon => AppIcons.upcoming,
+    PaidUntilKind.expired => AppIcons.calendarExpired,
+    PaidUntilKind.ok => AppIcons.calendarCheck,
+  };
 
   Color tone(AppColors c) => switch (kind) {
-        PaidUntilKind.unknown => c.inkDim,
-        PaidUntilKind.expired => c.error,
-        PaidUntilKind.soon => c.info,
-        PaidUntilKind.ok => c.success,
-      };
+    PaidUntilKind.unknown => c.inkDim,
+    PaidUntilKind.expired => c.error,
+    PaidUntilKind.soon => c.info,
+    PaidUntilKind.ok => c.success,
+  };
 }

@@ -7,16 +7,15 @@ import '../data/my_class_repository.dart';
 import 'attendance_tab.dart';
 import 'lesson_days_tab.dart';
 import 'makeup_view.dart';
-import 'my_class_icons.dart';
 import 'tests_tab.dart';
 
 /// «Хичээл» табуудын түлхүүр (`/app/my-class?tab=`), вэбтэй ижил.
 enum MyClassTab {
   lessons('Хичээлүүд', AppIcons.calendar),
-  attendance('Ирц', MyClassIcons.attendance),
+  attendance('Ирц', AppIcons.calendarCheck),
   tests('Тестүүд', AppIcons.exam),
-  makeup('Нөхөх', MyClassIcons.makeup),
-  schedule('Хуваарь', MyClassIcons.scheduleTab);
+  makeup('Нөхөх', AppIcons.checklist),
+  schedule('Хуваарь', AppIcons.calendarRange);
 
   const MyClassTab(this.label, this.icon);
   final String label;
@@ -42,9 +41,9 @@ class _MyClassScreenState extends ConsumerState<MyClassScreen> with TickerProvid
   late MyClassTab _current = widget.initialTab;
 
   List<MyClassTab> _visibleTabs(int makeupCount) => [
-        for (final t in MyClassTab.values)
-          if (t != MyClassTab.makeup || makeupCount > 0 || _current == MyClassTab.makeup) t,
-      ];
+    for (final t in MyClassTab.values)
+      if (t != MyClassTab.makeup || makeupCount > 0 || _current == MyClassTab.makeup) t,
+  ];
 
   void _sync(List<MyClassTab> tabs) {
     if (_controller != null && _listEquals(tabs, _tabs)) return;
@@ -100,10 +99,7 @@ class _MyClassScreenState extends ConsumerState<MyClassScreen> with TickerProvid
                     Icon(t.icon, size: 18),
                     const SizedBox(width: 6),
                     Text(t.label),
-                    if (t == MyClassTab.makeup && count > 0) ...[
-                      const SizedBox(width: 6),
-                      _CountBadge(count: count),
-                    ],
+                    if (t == MyClassTab.makeup && count > 0) ...[const SizedBox(width: 6), _CountBadge(count: count)],
                   ],
                 ),
               ),

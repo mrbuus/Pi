@@ -6,7 +6,6 @@ import '../../../core/ui/ui.dart';
 import '../domain/homework_history_logic.dart';
 import '../domain/homework_logic.dart';
 import 'homework_badges.dart';
-import 'homework_icons.dart';
 import 'homework_providers.dart';
 
 /// `/app/homework/history` — багшийн тэмдэглэгээний жилийн түүх (`GET /homework-marks/my?year=`).
@@ -93,19 +92,22 @@ class _MarksList extends StatelessWidget {
     final months = groupMarksByMonth(entries);
     final rows = <Widget Function()>[
       () => Padding(
-            padding: const EdgeInsets.only(top: AppSpace.lg),
-            child: AppCard(
-              child: Row(
-                children: [
-                  _Count(icon: HomeworkIcons.markDone, label: 'Хийсэн', value: s.done, color: context.colors.success),
-                  _Count(icon: HomeworkIcons.markPartial, label: 'Дутуу', value: s.partial, color: context.colors.warning),
-                  _Count(icon: HomeworkIcons.markMissing, label: 'Хийгээгүй', value: s.notDone, color: context.colors.error),
-                ],
-              ),
-            ),
+        padding: const EdgeInsets.only(top: AppSpace.lg),
+        child: AppCard(
+          child: Row(
+            children: [
+              _Count(icon: AppIcons.bookOpenCheck, label: 'Хийсэн', value: s.done, color: context.colors.success),
+              _Count(icon: AppIcons.circleDashed, label: 'Дутуу', value: s.partial, color: context.colors.warning),
+              _Count(icon: AppIcons.failure, label: 'Хийгээгүй', value: s.notDone, color: context.colors.error),
+            ],
           ),
+        ),
+      ),
       for (final (month, items) in months) ...[
-        () => SectionHeader(title: monthTitleMn(month), padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.sm)),
+        () => SectionHeader(
+          title: monthTitleMn(month),
+          padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.sm),
+        ),
         for (final e in items) () => _MarkRow(entry: e),
       ],
     ];
@@ -171,7 +173,7 @@ class _MarkRow extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(HomeworkIcons.comment, size: 14, color: c.inkDim, semanticLabel: 'Багшийн тайлбар'),
+                          Icon(AppIcons.messageSquareText, size: 14, color: c.inkDim, semanticLabel: 'Багшийн тайлбар'),
                           const SizedBox(width: AppSpace.xs),
                           Expanded(child: Text(entry.comment!, style: context.text.bodyMedium)),
                         ],

@@ -15,7 +15,6 @@ import '../data/exam_repository.dart';
 import '../domain/answer.dart';
 import '../domain/autosave_engine.dart';
 import '../domain/test_list_logic.dart';
-import 'exam_icons.dart';
 import 'widgets/exam_parts.dart';
 
 /// Дүн/эргэн харалтын зам (вэб: шалгалтын төрөлд `/result`, бусдад `/review`).
@@ -297,7 +296,9 @@ class _SubmitSheet extends StatelessWidget {
               Text('Илгээхээсээ өмнө шалгах', style: context.text.titleLarge),
               const SizedBox(height: AppSpace.sm),
               Text(
-                unanswered > 0 ? 'Илгээх үү? $unanswered бодлого хариулаагүй байна' : 'Илгээх үү? Бүх бодлогод хариулсан байна',
+                unanswered > 0
+                    ? 'Илгээх үү? $unanswered бодлого хариулаагүй байна'
+                    : 'Илгээх үү? Бүх бодлогод хариулсан байна',
                 style: context.text.bodyMedium,
               ),
               const SizedBox(height: AppSpace.xs),
@@ -340,7 +341,7 @@ class _SubmitSheet extends StatelessWidget {
                 child: Text('Илгээсний дараа засах боломжгүй.', style: context.text.bodySmall),
               ),
               FilledButton.icon(
-                icon: const Icon(ExamIcons.send, size: 18),
+                icon: const Icon(AppIcons.send, size: 18),
                 label: const Text('Шалгалт илгээх'),
                 onPressed: () => Navigator.pop(context, true),
               ),
@@ -379,7 +380,7 @@ class _Footer extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: canBack ? onPrevious : null,
-                  icon: const Icon(ExamIcons.previous, size: 18),
+                  icon: const Icon(AppIcons.arrowLeft, size: 18),
                   label: const Text('Өмнөх'),
                 ),
               ),
@@ -387,7 +388,7 @@ class _Footer extends StatelessWidget {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: onNext,
-                  icon: Icon(isLast ? ExamIcons.review : ExamIcons.next, size: 18),
+                  icon: Icon(isLast ? AppIcons.listTodo : AppIcons.arrowRight, size: 18),
                   label: Text(isLast ? 'Шалгах' : 'Дараах'),
                 ),
               ),

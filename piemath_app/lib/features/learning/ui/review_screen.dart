@@ -12,7 +12,6 @@ import '../../exam/data/exam_models.dart' show ChoiceMode;
 import '../application/study_review_controller.dart';
 import '../data/study_models.dart';
 import '../domain/study_logic.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// `/app/study/review` — хугацаатай, сэдвээр давтлага. [runId]: түүхээс нээсэн давтлага.
@@ -84,9 +83,7 @@ class _SetupState extends ConsumerState<_Setup> {
         const SizedBox(height: AppSpace.sm),
         SegmentedButton<int>(
           showSelectedIcon: false,
-          segments: [
-            for (final e in reviewBudgets.entries) ButtonSegment(value: e.key, label: Text('${e.key} мин')),
-          ],
+          segments: [for (final e in reviewBudgets.entries) ButtonSegment(value: e.key, label: Text('${e.key} мин'))],
           selected: {_budget},
           onSelectionChanged: (v) => setState(() => _budget = v.first),
         ),
@@ -101,8 +98,7 @@ class _SetupState extends ConsumerState<_Setup> {
             Expanded(child: Text('Сэдэв (1 - $maxReviewChapters)', style: context.text.titleSmall)),
             const InfoHint(
               title: 'Хувийн давтлага',
-              message:
-                  'Эхний хариулт хадгалагдана. Албан ёсны шалгалт, эрэмбэд орохгүй. Бодлогын тоо нь хязгаар бөгөөд бодох хурдны норм биш.',
+              message: 'Эхний хариулт хадгалагдана. Албан ёсны шалгалт, эрэмбэд орохгүй. Бодлогын тоо нь хязгаар бөгөөд бодох хурдны норм биш.',
             ),
           ],
         ),
@@ -126,15 +122,14 @@ class _SetupState extends ConsumerState<_Setup> {
               title: MathText(c.title),
               subtitle: Text('${c.freshCount} бодлого'),
             ),
-        if (s.error != null) ...[
-          const SizedBox(height: AppSpace.md),
-          InlineMessage(s.error!),
-        ],
+        if (s.error != null) ...[const SizedBox(height: AppSpace.md), InlineMessage(s.error!)],
         const SizedBox(height: AppSpace.xl),
         FilledButton(
           onPressed: s.busy || _selected.isEmpty
               ? null
-              : () => ref.read(studyReviewProvider.notifier).start(budgetMinutes: _budget, chapterIds: _selected.toList()),
+              : () => ref
+                    .read(studyReviewProvider.notifier)
+                    .start(budgetMinutes: _budget, chapterIds: _selected.toList()),
           child: Text(s.busy ? 'Эхэлж байна' : 'Давтлага эхлэх'),
         ),
       ],
@@ -179,7 +174,7 @@ class _RunViewState extends ConsumerState<_RunView> {
       children: [
         Row(
           children: [
-            Icon(LearningIcons.timer, size: 20, color: context.colors.inkDim),
+            Icon(AppIcons.timer, size: 20, color: context.colors.inkDim),
             const SizedBox(width: AppSpace.sm),
             run.isOpen
                 ? ReviewCountdown(
@@ -200,10 +195,7 @@ class _RunViewState extends ConsumerState<_RunView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _ItemBody(item: item),
-                if (item.first != null) ...[
-                  const SizedBox(height: AppSpace.lg),
-                  _FirstSummary(item: item),
-                ],
+                if (item.first != null) ...[const SizedBox(height: AppSpace.lg), _FirstSummary(item: item)],
                 if (canAnswer) ...[
                   const SizedBox(height: AppSpace.lg),
                   _AnswerBox(
@@ -249,15 +241,15 @@ class _RunViewState extends ConsumerState<_RunView> {
               ],
             ),
           ),
-        if (s.error != null) ...[
-          const SizedBox(height: AppSpace.md),
-          InlineMessage(s.error!),
-        ],
+        if (s.error != null) ...[const SizedBox(height: AppSpace.md), InlineMessage(s.error!)],
         const SizedBox(height: AppSpace.lg),
         Row(
           children: [
             Expanded(
-              child: OutlinedButton(onPressed: s.index == 0 || s.busy ? null : () => ctl.moveTo(s.index - 1), child: const Text('Өмнөх')),
+              child: OutlinedButton(
+                onPressed: s.index == 0 || s.busy ? null : () => ctl.moveTo(s.index - 1),
+                child: const Text('Өмнөх'),
+              ),
             ),
             const SizedBox(width: AppSpace.md),
             Expanded(
@@ -291,7 +283,9 @@ class _ItemBody extends ConsumerWidget {
       child: ProblemFigure(
         image: src.imageKey == null ? null : images.image(src.imageKey!),
         alt: 'Бодлогын зураг',
-        child: src.statement == null || src.statement!.isEmpty ? null : MathText(src.statement!, style: context.text.bodyLarge),
+        child: src.statement == null || src.statement!.isEmpty
+            ? null
+            : MathText(src.statement!, style: context.text.bodyLarge),
       ),
     );
   }
@@ -365,7 +359,9 @@ class _AnswerBoxState extends State<_AnswerBox> {
     final src = widget.item.source;
     if (src.hasChoices) {
       final letter = src.choiceMode == ChoiceMode.letter;
-      final selected = src.choices!.indexed.where((e) => choiceAnswerCode(src.choiceMode, e.$1) == _value).map((e) => e.$1);
+      final selected = src.choices!.indexed
+          .where((e) => choiceAnswerCode(src.choiceMode, e.$1) == _value)
+          .map((e) => e.$1);
       return ChoiceGrid(
         groupLabel: 'Хариултын сонголтууд',
         selectedIndex: selected.isEmpty ? null : selected.first,
@@ -514,6 +510,8 @@ class _ReviewCountdownState extends State<ReviewCountdown> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Semantics(label: 'Үлдсэн хугацаа', child: Text(formatCountdown(_left), style: context.text.titleSmall));
+  Widget build(BuildContext context) => Semantics(
+    label: 'Үлдсэн хугацаа',
+    child: Text(formatCountdown(_left), style: context.text.titleSmall),
+  );
 }

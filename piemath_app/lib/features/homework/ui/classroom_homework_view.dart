@@ -10,7 +10,6 @@ import '../../../core/ui/ui.dart';
 import '../data/homework_models.dart';
 import '../domain/homework_logic.dart';
 import 'homework_badges.dart';
-import 'homework_icons.dart';
 import 'homework_photo_panel.dart';
 import 'homework_providers.dart';
 
@@ -73,7 +72,12 @@ class _DayListState extends State<_DayList> {
     // Урт жагсаалт — зөвхөн харагдаж буйг зурна (PERFORMANCE §1). Хэсэг бүрийн гарчиг + картууд.
     final rows = <Widget Function()>[];
     for (final s in sections) {
-      rows.add(() => SectionHeader(title: s.title, padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.sm)));
+      rows.add(
+        () => SectionHeader(
+          title: s.title,
+          padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.sm),
+        ),
+      );
       for (final d in s.days) {
         rows.add(
           () => Padding(
@@ -88,7 +92,9 @@ class _DayListState extends State<_DayList> {
       onRefresh: () async => ProviderScope.containerOf(context).invalidate(homeworkDaysProvider),
       child: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _DayStrip(days: widget.days, today: widget.today, onTap: _jumpTo)),
+          SliverToBoxAdapter(
+            child: _DayStrip(days: widget.days, today: widget.today, onTap: _jumpTo),
+          ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xxl),
             sliver: SliverList.builder(itemCount: rows.length, itemBuilder: (_, i) => rows[i]()),
@@ -149,7 +155,8 @@ class _DayStripState extends State<_DayStrip> {
           return Semantics(
             button: true,
             selected: isToday,
-            label: '${dayLabel(key)}${done ? ', илгээсэн' : ''}${isToday ? ', өнөөдөр' : ''}${ahead ? ', урьдчилан' : ''}',
+            label:
+                '${dayLabel(key)}${done ? ', илгээсэн' : ''}${isToday ? ', өнөөдөр' : ''}${ahead ? ', урьдчилан' : ''}',
             child: ExcludeSemantics(
               child: Material(
                 color: isToday ? c.brand : c.surface,
@@ -168,7 +175,7 @@ class _DayStripState extends State<_DayStrip> {
                         Text(weekdayShortMn(d.weekday), style: context.text.labelSmall?.copyWith(color: fg)),
                         Text('${d.day}', style: context.text.titleMedium?.copyWith(color: fg)),
                         if (done)
-                          Icon(HomeworkIcons.submitted, size: 12, color: isToday ? c.onBrand : c.success)
+                          Icon(AppIcons.success, size: 12, color: isToday ? c.onBrand : c.success)
                         else
                           const SizedBox(height: 12),
                       ],
@@ -204,7 +211,7 @@ class _DayCard extends StatelessWidget {
             children: [
               Expanded(child: Text(dayLabel(day.date), style: context.text.titleMedium)),
               if (day.upcoming)
-                StatusPill(icon: HomeworkIcons.upcoming, label: 'Урьдчилан', color: c.brand, dashed: true)
+                StatusPill(icon: AppIcons.upcoming, label: 'Урьдчилан', color: c.brand, dashed: true)
               else
                 HomeworkMarkBadge(mark: day.mark),
             ],
@@ -214,12 +221,7 @@ class _DayCard extends StatelessWidget {
             Text(day.topic!, style: context.text.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
           ],
           const SizedBox(height: AppSpace.xs),
-          Meta(
-            items: [
-              day.classroomName,
-              if (day.deadlineAt != null) '${_deadline(day.deadlineAt!)} хүртэл',
-            ],
-          ),
+          Meta(items: [day.classroomName, if (day.deadlineAt != null) '${_deadline(day.deadlineAt!)} хүртэл']),
           if (comment != null && comment.isNotEmpty) ...[
             const SizedBox(height: AppSpace.sm),
             Container(
@@ -229,7 +231,7 @@ class _DayCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(HomeworkIcons.comment, size: 16, color: c.inkDim, semanticLabel: 'Багшийн тайлбар'),
+                  Icon(AppIcons.messageSquareText, size: 16, color: c.inkDim, semanticLabel: 'Багшийн тайлбар'),
                   const SizedBox(width: AppSpace.sm),
                   Expanded(child: Text(comment, style: context.text.bodyMedium)),
                 ],
@@ -270,7 +272,7 @@ class _ItemRow extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 56),
         child: Row(
           children: [
-            Icon(HomeworkIcons.test, size: 20, color: item.status == HwItemStatus.submitted ? c.success : c.brand),
+            Icon(AppIcons.bookOpenCheck, size: 20, color: item.status == HwItemStatus.submitted ? c.success : c.brand),
             const SizedBox(width: AppSpace.md),
             Expanded(
               child: Padding(
@@ -301,6 +303,7 @@ class _ItemRow extends StatelessWidget {
 }
 
 /// `/app/homework/:testId?date=&classroomId=` (вэбийн `solveHref`).
-String homeworkSolvePath(String testId, String date, String classroomId) =>
-    Uri(path: '/app/homework/${Uri.encodeComponent(testId)}', queryParameters: {'date': date, 'classroomId': classroomId})
-        .toString();
+String homeworkSolvePath(String testId, String date, String classroomId) => Uri(
+  path: '/app/homework/${Uri.encodeComponent(testId)}',
+  queryParameters: {'date': date, 'classroomId': classroomId},
+).toString();

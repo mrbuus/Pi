@@ -10,7 +10,6 @@ import '../application/chapter_problems_controller.dart';
 import '../data/chapter_problem_models.dart';
 import '../data/lesson_repository.dart';
 import '../domain/video_source.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// `/app/library/:chapterId/problems` — бүлгийн бодлогын жагсаалт. Хариу, шинжилгээ энд ирэхгүй (сервер хасна);
@@ -36,7 +35,7 @@ class ChapterProblemsScreen extends ConsumerWidget {
         data: (state) {
           if (state.items.isEmpty) {
             return const EmptyState(
-              icon: LearningIcons.problems,
+              icon: AppIcons.checklist,
               title: 'Энэ бүлэгт нээлттэй бодлого алга',
               message: 'Ангид нээгдсэн тестийн бодлогууд энд гарна',
             );
@@ -125,7 +124,10 @@ class _ProblemCard extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(width: 24, child: Text('${ch.label}.', style: context.text.bodyMedium?.copyWith(color: c.inkDim))),
+                    SizedBox(
+                      width: 24,
+                      child: Text('${ch.label}.', style: context.text.bodyMedium?.copyWith(color: c.inkDim)),
+                    ),
                     Expanded(
                       child: ch.imageKey != null && ch.text.isEmpty
                           ? ProblemFigure(image: images.image(ch.imageKey!), alt: 'Сонголт ${ch.label}')
@@ -147,7 +149,7 @@ class _ProblemCard extends ConsumerWidget {
               if (solution != null)
                 OutlinedButton.icon(
                   onPressed: () => _openSolution(context, ref, solution),
-                  icon: const Icon(LearningIcons.play, size: 18),
+                  icon: const Icon(AppIcons.play, size: 18),
                   label: const Text('Бодолтын бичлэг'),
                 ),
             ],

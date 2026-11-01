@@ -10,7 +10,6 @@ import '../data/teacher_extras.dart';
 import '../data/teacher_models.dart';
 import '../data/teacher_repository.dart';
 import '../domain/board_logic.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 const int lessonNoteMax = 500;
@@ -37,7 +36,9 @@ class LessonNotesCard extends ConsumerWidget {
     final c = context.colors;
     return async.when(
       skipLoadingOnRefresh: true,
-      loading: () => const AppCard(child: SizedBox(height: 48, child: Center(child: CircularProgressIndicator()))),
+      loading: () => const AppCard(
+        child: SizedBox(height: 48, child: Center(child: CircularProgressIndicator())),
+      ),
       error: (e, _) => AppCard(
         child: Row(
           children: [
@@ -56,12 +57,7 @@ class LessonNotesCard extends ConsumerWidget {
         children: [
           for (final (i, l) in scheduled.indexed) ...[
             if (i > 0) const SizedBox(height: AppSpace.sm),
-            _NoteTile(
-              date: date,
-              lesson: l,
-              note: notes[l.scheduleId],
-              showTime: scheduled.length > 1,
-            ),
+            _NoteTile(date: date, lesson: l, note: notes[l.scheduleId], showTime: scheduled.length > 1),
           ],
         ],
       ),
@@ -90,7 +86,7 @@ class _NoteTile extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(TeacherIcons.note, color: c.brand),
+          Icon(AppIcons.stickyNote, color: c.brand),
           const SizedBox(width: AppSpace.md),
           Expanded(
             child: Column(
@@ -115,7 +111,7 @@ class _NoteTile extends ConsumerWidget {
               ],
             ),
           ),
-          Icon(TeacherIcons.edit, size: 18, color: c.inkDim),
+          Icon(AppIcons.draft, size: 18, color: c.inkDim),
         ],
       ),
     );
@@ -270,7 +266,7 @@ class DismissalCard extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(TeacherIcons.clock, color: c.brand),
+            Icon(AppIcons.time, color: c.brand),
             const SizedBox(width: AppSpace.md),
             Expanded(
               child: Column(
@@ -281,9 +277,7 @@ class DismissalCard extends ConsumerWidget {
                   if (d == null)
                     Text('Тэмдэглээгүй', style: context.text.bodyMedium?.copyWith(color: c.inkDim))
                   else ...[
-                    Meta(
-                      items: ['Ойролцоо ${d.approximate}', if (d.lastLeft != null) 'Сүүлийн сурагч ${d.lastLeft}'],
-                    ),
+                    Meta(items: ['Ойролцоо ${d.approximate}', if (d.lastLeft != null) 'Сүүлийн сурагч ${d.lastLeft}']),
                     if (d.note != null && d.note!.trim().isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: AppSpace.xs),
@@ -298,7 +292,7 @@ class DismissalCard extends ConsumerWidget {
                 ],
               ),
             ),
-            Icon(TeacherIcons.edit, size: 18, color: c.inkDim),
+            Icon(AppIcons.draft, size: 18, color: c.inkDim),
           ],
         ),
       ),
@@ -486,7 +480,7 @@ class _TimeRow extends StatelessWidget {
           IconButton(
             tooltip: 'Цаг арилгах',
             constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-            icon: const Icon(TeacherIcons.clear),
+            icon: const Icon(AppIcons.eraser),
             onPressed: onClear,
           ),
       ],

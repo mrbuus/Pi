@@ -62,8 +62,14 @@ class PayInfoCard extends StatelessWidget {
             const SizedBox(height: AppSpace.md),
             Row(
               children: [
-                if (monthly != null) Expanded(child: _Amount(label: 'Сарын төлбөр', amount: monthly)),
-                if (yearly != null) Expanded(child: _Amount(label: 'Бүтэн жилийн төлбөр', amount: yearly)),
+                if (monthly != null)
+                  Expanded(
+                    child: _Amount(label: 'Сарын төлбөр', amount: monthly),
+                  ),
+                if (yearly != null)
+                  Expanded(
+                    child: _Amount(label: 'Бүтэн жилийн төлбөр', amount: yearly),
+                  ),
               ],
             ),
           ],
@@ -157,7 +163,7 @@ class CopyButton extends StatelessWidget {
           minimumSize: const Size(AppSizes.minTap, AppSizes.minTap),
           padding: const EdgeInsets.symmetric(horizontal: AppSpace.md),
         ),
-        icon: Icon(PaymentIcons.copy, size: 16, color: context.colors.inkDim),
+        icon: Icon(AppIcons.copy, size: 16, color: context.colors.inkDim),
         label: Text(caption),
         onPressed: () => unawaited(_copy(context)),
       ),

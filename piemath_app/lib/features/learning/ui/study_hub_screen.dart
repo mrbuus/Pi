@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ui/ui.dart';
 import '../application/mistakes_controller.dart';
-import '../learning_icons.dart';
 
 /// `/app/study` — бие даан суралцах хэсгүүдийн нүүр. Дараалал, оноо, дарамт үгүй: зөвхөн нээх товч.
 class StudyHubScreen extends ConsumerWidget {
@@ -19,16 +18,16 @@ class StudyHubScreen extends ConsumerWidget {
       error: (_, _) => 'Алдааны дэвтрээ нээж үзнэ үү',
     );
     final tiles = <_Tile>[
-      _Tile('Алдааны дэвтэр', todayText, LearningIcons.mistakes, '/app/mistakes'),
-      const _Tile('Давтлага', 'Сэдвээ сонгоод хугацаатай давтана', LearningIcons.review, '/app/study/review'),
+      _Tile('Алдааны дэвтэр', todayText, AppIcons.homework, '/app/mistakes'),
+      const _Tile('Давтлага', 'Сэдвээ сонгоод хугацаатай давтана', AppIcons.repeat, '/app/study/review'),
       const _Tile('Давтлагын түүх', 'Өмнөх давтлагууд', AppIcons.history, '/app/study/history'),
-      const _Tile('Дасгал', 'Танд тохирсон бодлогууд', LearningIcons.practice, '/app/practice'),
-      const _Tile('Хичээл үзэх', 'Онол, бичлэг, сэдвийн тест', LearningIcons.lesson, '/app/learn'),
-      const _Tile('Томьёоны сан', 'Хайх, дэлгэрэнгүй үзэх', LearningIcons.formula, '/app/formulas'),
+      const _Tile('Дасгал', 'Танд тохирсон бодлогууд', AppIcons.practice, '/app/practice'),
+      const _Tile('Хичээл үзэх', 'Онол, бичлэг, сэдвийн тест', AppIcons.theory, '/app/learn'),
+      const _Tile('Томьёоны сан', 'Хайх, дэлгэрэнгүй үзэх', AppIcons.formula, '/app/formulas'),
       const _Tile('Онлайн хичээл', 'Сэдвээр бичлэг үзэх', AppIcons.video, '/app/videos'),
       const _Tile('Зорилго', 'Өөрийн зорилго, хугацаа', AppIcons.goal, '/app/goals'),
-      const _Tile('Бэлэн байдал', 'Сэдэв бүрийн баримжаа', LearningIcons.readiness, '/app/readiness'),
-      const _Tile('Идэвх', 'Өдөр бүр бодсон бодлого', LearningIcons.activity, '/app/activity'),
+      const _Tile('Бэлэн байдал', 'Сэдэв бүрийн баримжаа', AppIcons.gauge, '/app/readiness'),
+      const _Tile('Идэвх', 'Өдөр бүр бодсон бодлого', AppIcons.calendarCheck, '/app/activity'),
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('Суралцах')),

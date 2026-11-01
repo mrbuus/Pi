@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/math/math.dart';
 import '../../core/ui/ui.dart';
-import 'solution_icons.dart';
 import 'solution_parser.dart';
 
 /// Бодлогын томьёоны лавлагаа (жишээ нь алдааны `formulas`) — товшвол томьёоны сан нээгдэнэ.
@@ -133,7 +132,7 @@ class _SolutionViewState extends State<SolutionView> {
                 IconButton(
                   tooltip: _searching ? 'Хайлтыг хаах' : 'Алхмаас хайх',
                   constraints: const BoxConstraints(minWidth: AppSizes.minTap, minHeight: AppSizes.minTap),
-                  icon: Icon(_searching ? SolutionIcons.close : SolutionIcons.search, size: 20),
+                  icon: Icon(_searching ? AppIcons.close : AppIcons.search, size: 20),
                   onPressed: () => setState(() {
                     _searching = !_searching;
                     if (!_searching) _query.clear();
@@ -153,13 +152,13 @@ class _SolutionViewState extends State<SolutionView> {
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
                       hintText: 'Алхмаас хайх',
-                      prefixIcon: const Icon(SolutionIcons.search, size: 20),
+                      prefixIcon: const Icon(AppIcons.search, size: 20),
                       suffixIcon: term.isEmpty
                           ? null
                           : IconButton(
                               tooltip: 'Арилгах',
                               constraints: const BoxConstraints(minWidth: AppSizes.minTap, minHeight: AppSizes.minTap),
-                              icon: const Icon(SolutionIcons.close, size: 18),
+                              icon: const Icon(AppIcons.close, size: 18),
                               onPressed: () => setState(_query.clear),
                             ),
                     ),
@@ -195,13 +194,13 @@ class _SolutionViewState extends State<SolutionView> {
               children: [
                 FilledButton.tonalIcon(
                   style: FilledButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap)),
-                  icon: const Icon(SolutionIcons.next, size: 18),
+                  icon: const Icon(AppIcons.expand, size: 18),
                   label: const Text('Дараагийн алхам'),
                   onPressed: () => setState(() => _shown++),
                 ),
                 TextButton.icon(
                   style: TextButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap)),
-                  icon: const Icon(SolutionIcons.all, size: 18),
+                  icon: const Icon(AppIcons.checklist, size: 18),
                   label: const Text('Бүгдийг харах'),
                   onPressed: () => setState(() => _shown = steps.length),
                 ),
@@ -261,7 +260,7 @@ class _StepTile extends StatelessWidget {
             border: Border.all(color: highlighted ? c.brand : c.line),
           ),
           child: badge == null
-              ? Icon(SolutionIcons.note, size: 14, color: c.inkDim)
+              ? Icon(AppIcons.note, size: 14, color: c.inkDim)
               : Text('$badge', style: context.text.labelMedium?.copyWith(color: c.brand)),
         ),
         const SizedBox(width: AppSpace.md),
@@ -278,10 +277,7 @@ class _StepTile extends StatelessWidget {
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton(
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(0, AppSizes.minTap),
-                      padding: EdgeInsets.zero,
-                    ),
+                    style: TextButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap), padding: EdgeInsets.zero),
                     onPressed: onToggle,
                     child: Text(open ? 'Хураах' : 'Дэлгэрэнгүй'),
                   ),
@@ -297,8 +293,13 @@ class _StepTile extends StatelessWidget {
         container: true,
         child: highlighted
             ? DecoratedBox(
-                decoration: BoxDecoration(border: Border(left: BorderSide(color: c.brand, width: 3))),
-                child: Padding(padding: const EdgeInsets.only(left: AppSpace.sm), child: body),
+                decoration: BoxDecoration(
+                  border: Border(left: BorderSide(color: c.brand, width: 3)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: AppSpace.sm),
+                  child: body,
+                ),
               )
             : body,
       ),
@@ -318,11 +319,13 @@ class _AnswerBlock extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: AppSpace.xs),
       padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: c.line))),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: c.line)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(SolutionIcons.answer, size: 20, color: c.brand),
+          Icon(AppIcons.success, size: 20, color: c.brand),
           const SizedBox(width: AppSpace.sm),
           Text('Хариу: ', style: context.text.titleSmall),
           Expanded(child: MathText(answer, style: context.text.titleSmall)),
@@ -360,7 +363,7 @@ class _FormulaChip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(SolutionIcons.formula, size: 18, color: c.brand),
+                Icon(AppIcons.formula, size: 18, color: c.brand),
                 const SizedBox(width: AppSpace.sm),
                 Flexible(child: MathText(formula.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
               ],
@@ -409,8 +412,8 @@ class _AppearState extends State<_Appear> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => SizeTransition(
-        sizeFactor: _curve,
-        alignment: Alignment.topCenter,
-        child: FadeTransition(opacity: _curve, child: widget.child),
-      );
+    sizeFactor: _curve,
+    alignment: Alignment.topCenter,
+    child: FadeTransition(opacity: _curve, child: widget.child),
+  );
 }

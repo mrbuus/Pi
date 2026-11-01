@@ -12,7 +12,6 @@ import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
 import '../domain/homework_logic.dart';
 import 'homework_badges.dart';
-import 'homework_icons.dart';
 import 'homework_providers.dart';
 
 /// `/app/homework/:testId?date=&classroomId=` — ангид хийсэн тестийн нөгөө (B) хувилбарыг гэртээ бодох.
@@ -215,7 +214,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
                   child: ExcludeSemantics(
                     child: Row(
                       children: [
-                        Icon(HomeworkIcons.deadline, size: 16, color: context.colors.inkDim),
+                        Icon(AppIcons.time, size: 16, color: context.colors.inkDim),
                         const SizedBox(width: AppSpace.xs),
                         Text(formatClock(_remaining!), style: context.text.titleSmall),
                       ],
@@ -233,8 +232,8 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
               onRetry: _loadError!.isRetryable ? _load : null,
             )
           : a == null
-              ? const LoadingState()
-              : _body(a),
+          ? const LoadingState()
+          : _body(a),
       bottomNavigationBar: a == null || _submitted ? null : _actions(a),
     );
   }
@@ -321,14 +320,15 @@ class _ResultHeader extends StatelessWidget {
     return AppCard(
       child: Row(
         children: [
-          Icon(HomeworkIcons.submitted, color: c.success, size: 32),
+          Icon(AppIcons.success, color: c.success, size: 32),
           const SizedBox(width: AppSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Илгээсэн', style: context.text.titleMedium),
-                if (score != null) Text('${score!.total} бодлогоос ${score!.correct} зөв', style: context.text.bodyMedium),
+                if (score != null)
+                  Text('${score!.total} бодлогоос ${score!.correct} зөв', style: context.text.bodyMedium),
               ],
             ),
           ),
@@ -439,9 +439,9 @@ class _ResultMark extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return switch (result) {
-      CheckResult.correct => StatusPill(icon: HomeworkIcons.submitted, label: 'Зөв', color: c.success),
-      CheckResult.wrong => StatusPill(icon: HomeworkIcons.wrong, label: 'Буруу', color: c.error),
-      CheckResult.blank => StatusPill(icon: HomeworkIcons.blank, label: 'Хариулаагүй', color: c.inkDim, dashed: true),
+      CheckResult.correct => StatusPill(icon: AppIcons.success, label: 'Зөв', color: c.success),
+      CheckResult.wrong => StatusPill(icon: AppIcons.failure, label: 'Буруу', color: c.error),
+      CheckResult.blank => StatusPill(icon: AppIcons.circleDashed, label: 'Хариулаагүй', color: c.inkDim, dashed: true),
     };
   }
 }

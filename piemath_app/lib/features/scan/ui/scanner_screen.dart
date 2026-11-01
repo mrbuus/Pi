@@ -7,7 +7,6 @@ import '../../../core/ui/ui.dart';
 import '../domain/scan_code.dart';
 import 'manual_code_sheet.dart';
 import 'qr_camera.dart';
-import 'scan_icons.dart';
 
 /// Номын QR уншигч (`/app/scan`, бүтэн дэлгэц).
 ///
@@ -99,11 +98,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
               if (mounted && _error == null) setState(() => _error = e);
             },
           ),
-          _Overlay(
-            foreign: _foreign,
-            camera: _camera!,
-            onManual: _manual,
-          ),
+          _Overlay(foreign: _foreign, camera: _camera!, onManual: _manual),
         ],
       );
     }
@@ -133,7 +128,8 @@ class _Explain extends StatelessWidget {
     return EmptyState(
       icon: AppIcons.camera,
       title: 'Камер хэрэгтэй',
-      message: 'Номын хуудсан дээрх QR кодыг уншихын тулд камерыг ашиглана. '
+      message:
+          'Номын хуудсан дээрх QR кодыг уншихын тулд камерыг ашиглана. '
           'Зураг хадгалагдахгүй, хаашаа ч илгээгдэхгүй.',
       action: Column(
         mainAxisSize: MainAxisSize.min,
@@ -145,7 +141,7 @@ class _Explain extends StatelessWidget {
           ),
           const SizedBox(height: AppSpace.sm),
           TextButton.icon(
-            icon: const Icon(ScanIcons.keyboard, size: 18),
+            icon: const Icon(AppIcons.keyboard, size: 18),
             label: const Text('Кодоо бичих'),
             onPressed: onManual,
           ),
@@ -165,24 +161,21 @@ class _CameraProblem extends StatelessWidget {
   Widget build(BuildContext context) {
     final (title, message) = switch (error) {
       QrCameraError.permissionDenied => (
-          'Камерын зөвшөөрөл алга',
-          'Утасныхаа Тохиргоо хэсэгт Piemath-д камер ашиглахыг зөвшөөрнө үү. Эсвэл кодоо гараар бичиж болно.',
-        ),
+        'Камерын зөвшөөрөл алга',
+        'Утасныхаа Тохиргоо хэсэгт Piemath-д камер ашиглахыг зөвшөөрнө үү. Эсвэл кодоо гараар бичиж болно.',
+      ),
       QrCameraError.unsupported => (
-          'Энэ утсанд камер ажиллахгүй байна',
-          'QR кодын доор бичсэн 8 тэмдэгтийг гараар оруулж болно.',
-        ),
-      QrCameraError.other => (
-          'Камер нээгдсэнгүй',
-          'Дахин оролдох эсвэл кодоо гараар бичнэ үү.',
-        ),
+        'Энэ утсанд камер ажиллахгүй байна',
+        'QR кодын доор бичсэн 8 тэмдэгтийг гараар оруулж болно.',
+      ),
+      QrCameraError.other => ('Камер нээгдсэнгүй', 'Дахин оролдох эсвэл кодоо гараар бичнэ үү.'),
     };
     return EmptyState(
-      icon: ScanIcons.cameraOff,
+      icon: AppIcons.cameraOff,
       title: title,
       message: message,
       action: FilledButton.icon(
-        icon: const Icon(ScanIcons.keyboard, size: 18),
+        icon: const Icon(AppIcons.keyboard, size: 18),
         label: const Text('Кодоо бичих'),
         onPressed: onManual,
       ),
@@ -243,7 +236,7 @@ class _Overlay extends StatelessWidget {
                           child: _Pill(
                             child: IconButton(
                               tooltip: on ? 'Гэрэл унтраах' : 'Гэрэл асаах',
-                              icon: Icon(on ? ScanIcons.torchOn : ScanIcons.torchOff, color: dark.ink),
+                              icon: Icon(on ? AppIcons.flashlight : AppIcons.flashlightOff, color: dark.ink),
                               onPressed: camera.toggleTorch,
                             ),
                           ),
@@ -252,7 +245,7 @@ class _Overlay extends StatelessWidget {
                 _Pill(
                   child: TextButton.icon(
                     style: TextButton.styleFrom(foregroundColor: dark.ink),
-                    icon: const Icon(ScanIcons.keyboard, size: 18),
+                    icon: const Icon(AppIcons.keyboard, size: 18),
                     label: const Text('Кодоо бичих'),
                     onPressed: onManual,
                   ),
@@ -275,7 +268,10 @@ class _Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(color: AppColors.scrim, borderRadius: BorderRadius.circular(AppRadius.lg)),
-      child: Padding(padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: AppSpace.xs), child: child),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: AppSpace.xs),
+        child: child,
+      ),
     );
   }
 }

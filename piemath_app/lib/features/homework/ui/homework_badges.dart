@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/ui/ui.dart';
 import '../data/homework_models.dart';
-import 'homework_icons.dart';
 
 /// Жижиг төлөвийн «pill»: дүрс + бичвэр (өнгө дангаараа утга илэрхийлэхгүй), хүрээтэй, дэвсгэргүй.
 class StatusPill extends StatelessWidget {
@@ -26,7 +25,10 @@ class StatusPill extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
-          Text(label, style: context.text.labelSmall?.copyWith(color: color, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: context.text.labelSmall?.copyWith(color: color, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
@@ -44,14 +46,16 @@ class HomeworkMarkBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final (icon, label, color) = switch (mark) {
-      HomeworkMark.done => (HomeworkIcons.markDone, 'Хийсэн', c.success),
-      HomeworkMark.partial => (HomeworkIcons.markPartial, 'Дутуу', c.warning),
-      HomeworkMark.notDone => (HomeworkIcons.markMissing, 'Хийгээгүй', c.error),
-      null => (HomeworkIcons.unchecked, 'Шалгаагүй', c.inkDim),
+      HomeworkMark.done => (AppIcons.bookOpenCheck, 'Хийсэн', c.success),
+      HomeworkMark.partial => (AppIcons.circleDashed, 'Дутуу', c.warning),
+      HomeworkMark.notDone => (AppIcons.failure, 'Хийгээгүй', c.error),
+      null => (AppIcons.circleDashed, 'Шалгаагүй', c.inkDim),
     };
     return Semantics(
       label: 'Багшийн тэмдэглэгээ: $label',
-      child: ExcludeSemantics(child: StatusPill(icon: icon, label: label, color: color, dashed: mark == null)),
+      child: ExcludeSemantics(
+        child: StatusPill(icon: icon, label: label, color: color, dashed: mark == null),
+      ),
     );
   }
 }
@@ -67,12 +71,12 @@ class HwItemStatusPill extends StatelessWidget {
     final c = context.colors;
     return switch (item.status) {
       HwItemStatus.submitted => StatusPill(
-          icon: HomeworkIcons.submitted,
-          label: item.score == null ? 'Илгээсэн' : 'Илгээсэн ${item.score!.correct}/${item.score!.total}',
-          color: c.success,
-        ),
-      HwItemStatus.inProgress => StatusPill(icon: HomeworkIcons.resume, label: 'Үргэлжлүүлэх', color: c.brand),
-      HwItemStatus.notStarted => StatusPill(icon: HomeworkIcons.start, label: 'Эхлээгүй', color: c.inkDim, dashed: true),
+        icon: AppIcons.success,
+        label: item.score == null ? 'Илгээсэн' : 'Илгээсэн ${item.score!.correct}/${item.score!.total}',
+        color: c.success,
+      ),
+      HwItemStatus.inProgress => StatusPill(icon: AppIcons.restart, label: 'Үргэлжлүүлэх', color: c.brand),
+      HwItemStatus.notStarted => StatusPill(icon: AppIcons.play, label: 'Эхлээгүй', color: c.inkDim, dashed: true),
     };
   }
 }
@@ -87,10 +91,10 @@ class AssignmentStatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final (icon, color) = switch (status) {
-      AssignmentStatus.notDone => (HomeworkIcons.unchecked, c.inkDim),
-      AssignmentStatus.submitted => (HomeworkIcons.photoSent, c.info),
-      AssignmentStatus.doneOnline || AssignmentStatus.doneInClass => (HomeworkIcons.approved, c.success),
-      AssignmentStatus.returned => (HomeworkIcons.returned, c.warning),
+      AssignmentStatus.notDone => (AppIcons.circleDashed, c.inkDim),
+      AssignmentStatus.submitted => (AppIcons.fileCheck, c.info),
+      AssignmentStatus.doneOnline || AssignmentStatus.doneInClass => (AppIcons.badgeCheck, c.success),
+      AssignmentStatus.returned => (AppIcons.undo, c.warning),
     };
     return StatusPill(icon: icon, label: status.label, color: color, dashed: status == AssignmentStatus.notDone);
   }

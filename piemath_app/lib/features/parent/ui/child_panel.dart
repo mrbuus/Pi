@@ -13,7 +13,6 @@ import '../domain/parent_labels.dart';
 import 'acknowledge_sheet.dart';
 import 'exam_result_card.dart';
 import 'mark_chip.dart';
-import 'parent_icons.dart';
 import 'parent_list_card.dart';
 
 /// Нэг хүүхдийн самбар (вэбийн `ChildPanel`): дүн, ирц, даалгавар, төлбөр.
@@ -36,7 +35,7 @@ class ChildPanel extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(ParentIcons.pending, size: 18, color: context.colors.info),
+                Icon(AppIcons.time, size: 18, color: context.colors.info),
                 const SizedBox(width: AppSpace.sm),
                 Expanded(
                   child: Text(
@@ -70,15 +69,11 @@ class ChildPanel extends ConsumerWidget {
             children: [
               Semantics(header: true, child: Text(child.fullName, style: context.text.titleLarge)),
               const SizedBox(height: AppSpace.xs),
-              Meta(items: [
-                if (grade != null) '$grade-р анги',
-                child.classroom?.name,
-                child.studentProfile?.school,
-              ]),
+              Meta(items: [if (grade != null) '$grade-р анги', child.classroom?.name, child.studentProfile?.school]),
               const SizedBox(height: AppSpace.sm),
               Row(
                 children: [
-                  Icon(ParentIcons.verified, size: 16, color: context.colors.success),
+                  Icon(AppIcons.shield, size: 16, color: context.colors.success),
                   const SizedBox(width: AppSpace.xs),
                   Text('Холболт баталгаажсан', style: context.text.labelMedium),
                 ],
@@ -86,13 +81,13 @@ class ChildPanel extends ConsumerWidget {
               const SizedBox(height: AppSpace.sm),
               OutlinedButton.icon(
                 onPressed: () => context.push('/app/parent/weekly?studentId=${Uri.encodeComponent(child.id)}'),
-                icon: const Icon(ParentIcons.weekly, size: 18),
+                icon: const Icon(AppIcons.chart, size: 18),
                 label: const Text('Долоо хоногийн тайлан'),
               ),
               const SizedBox(height: AppSpace.sm),
               OutlinedButton.icon(
                 onPressed: () => context.push('/app/parent/history?studentId=${Uri.encodeComponent(child.id)}'),
-                icon: const Icon(ParentIcons.history, size: 18),
+                icon: const Icon(AppIcons.historyLog, size: 18),
                 label: const Text('Жилийн түүх'),
               ),
             ],
@@ -168,7 +163,9 @@ class _HomeworkCard extends StatelessWidget {
               for (final m in child.dailyHomeworkMarks)
                 ParentDatedRow(
                   date: dayLabel(m.date),
-                  subtitle: m.comment == null || m.comment!.isEmpty ? m.classroom.name : '${m.classroom.name}: ${m.comment}',
+                  subtitle: m.comment == null || m.comment!.isEmpty
+                      ? m.classroom.name
+                      : '${m.classroom.name}: ${m.comment}',
                   trailing: MarkLabel.homework(context, HomeworkMark.fromApi(m.status)),
                 ),
             ]
@@ -207,7 +204,7 @@ class _ResultRow extends StatelessWidget {
           if (result.acknowledgedAt != null)
             Row(
               children: [
-                Icon(ParentIcons.ok, size: 16, color: context.colors.success),
+                Icon(AppIcons.success, size: 16, color: context.colors.success),
                 const SizedBox(width: AppSpace.xs),
                 Text('Танилцсан, ${dayLabel(result.acknowledgedAt)}', style: context.text.labelMedium),
               ],

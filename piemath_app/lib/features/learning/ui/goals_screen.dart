@@ -6,15 +6,14 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../data/goal_models.dart';
 import '../data/goals_repository.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 IconData _statusIcon(GoalStatus s) => switch (s) {
-  GoalStatus.planned => LearningIcons.pending,
-  GoalStatus.inProgress => LearningIcons.inProgress,
-  GoalStatus.done => LearningIcons.done,
-  GoalStatus.blocked => LearningIcons.blocked,
-  GoalStatus.cancelled => LearningIcons.cancelled,
+  GoalStatus.planned => AppIcons.circle,
+  GoalStatus.inProgress => AppIcons.video,
+  GoalStatus.done => AppIcons.success,
+  GoalStatus.blocked => AppIcons.ban,
+  GoalStatus.cancelled => AppIcons.failure,
 };
 
 Color _statusColor(AppColors c, GoalStatus s) => switch (s) {
@@ -36,7 +35,7 @@ class GoalsScreen extends ConsumerWidget {
       floatingActionButton: async.hasValue
           ? FloatingActionButton.extended(
               onPressed: () => showGoalSheet(context),
-              icon: const Icon(LearningIcons.add),
+              icon: const Icon(AppIcons.add),
               label: const Text('Зорилго нэмэх'),
             )
           : null,
@@ -55,7 +54,7 @@ class GoalsScreen extends ConsumerWidget {
               message: 'Жишээ нь «Уламжлалын бүлгийг дуусгах» гэж бичээд хугацаа тавьж болно',
               action: FilledButton.icon(
                 onPressed: () => showGoalSheet(context),
-                icon: const Icon(LearningIcons.add, size: 18),
+                icon: const Icon(AppIcons.add, size: 18),
                 label: const Text('Зорилго нэмэх'),
               ),
             );
@@ -73,7 +72,10 @@ class GoalsScreen extends ConsumerWidget {
                 if (active.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpace.md),
-                    child: Text('Идэвхтэй зорилго алга', style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim)),
+                    child: Text(
+                      'Идэвхтэй зорилго алга',
+                      style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
+                    ),
                   ),
                 for (final g in active) _GoalCard(goal: g),
                 if (finished.isNotEmpty) ...[
@@ -133,14 +135,16 @@ class _GoalCardState extends ConsumerState<_GoalCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    g.title,
-                    style: context.text.titleSmall?.copyWith(color: done ? c.inkDim : null),
-                  ),
+                  Text(g.title, style: context.text.titleSmall?.copyWith(color: done ? c.inkDim : null)),
                   if (g.description != null)
                     Padding(
                       padding: const EdgeInsets.only(top: AppSpace.xs),
-                      child: Text(g.description!, maxLines: 2, overflow: TextOverflow.ellipsis, style: context.text.bodySmall),
+                      child: Text(
+                        g.description!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.bodySmall,
+                      ),
                     ),
                   Meta(
                     items: [
@@ -330,10 +334,7 @@ class _GoalSheetState extends ConsumerState<GoalSheet> {
               ],
             ),
           ],
-          if (_error != null) ...[
-            const SizedBox(height: AppSpace.md),
-            InlineMessage(_error!),
-          ],
+          if (_error != null) ...[const SizedBox(height: AppSpace.md), InlineMessage(_error!)],
           const SizedBox(height: AppSpace.xl),
           FilledButton(onPressed: _busy ? null : _save, child: Text(_busy ? 'Хадгалж байна' : AppStrings.save)),
         ],

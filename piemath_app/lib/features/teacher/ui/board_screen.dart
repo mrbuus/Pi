@@ -15,7 +15,6 @@ import 'board_note_sheet.dart';
 import 'criteria_sheet.dart';
 import 'lesson_extras.dart';
 import 'presence_beat.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Ирц ба даалгаврын самбар (`/app/teacher/board/:classId?date=`). Товшилт бүр шууд хадгалагдана,
@@ -73,7 +72,7 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
             IconButton(
               tooltip: 'Эрсдэлийн шалгуур',
               constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-              icon: const Icon(TeacherIcons.criteria),
+              icon: const Icon(AppIcons.slidersHorizontal),
               onPressed: () async {
                 final saved = await CriteriaSheet.open(context, classId: widget.classId);
                 if (saved) await ctl.poll();
@@ -131,7 +130,7 @@ class _BoardBody extends ConsumerWidget {
         const SizedBox(height: AppSpace.md),
         if (p.holiday != null)
           AppCard(
-            child: EmptyState(icon: TeacherIcons.holiday, title: 'Амралтын өдөр', message: p.holiday),
+            child: EmptyState(icon: AppIcons.calendarOff, title: 'Амралтын өдөр', message: p.holiday),
           )
         else if (p.students.isEmpty)
           const AppCard(
@@ -171,7 +170,7 @@ class _BoardBody extends ConsumerWidget {
               onTap: () => context.push('/app/classes/${Uri.encodeComponent(p.classroom.id)}/assignments'),
               child: Row(
                 children: [
-                  Icon(TeacherIcons.online, color: c.brand),
+                  Icon(AppIcons.laptop, color: c.brand),
                   const SizedBox(width: AppSpace.md),
                   const Expanded(child: Text('Онлайн даалгавар шалгах')),
                   Icon(AppIcons.forward, color: c.inkDim),
@@ -295,7 +294,7 @@ class _StudentRow extends ConsumerWidget {
                   message: risk.map((r) => r.label).join(', '),
                   child: Semantics(
                     label: 'Анхаарах: ${risk.map((r) => r.label).join(', ')}',
-                    child: Icon(TeacherIcons.risk, size: 16, color: c.error),
+                    child: Icon(AppIcons.warning, size: 16, color: c.error),
                   ),
                 ),
               ],
@@ -303,7 +302,7 @@ class _StudentRow extends ConsumerWidget {
                 const SizedBox(width: AppSpace.xs),
                 Tooltip(
                   message: 'Даалгавраа илгээсэн',
-                  child: Icon(TeacherIcons.sent, size: 16, color: c.brand, semanticLabel: 'Даалгавраа илгээсэн'),
+                  child: Icon(AppIcons.send, size: 16, color: c.brand, semanticLabel: 'Даалгавраа илгээсэн'),
                 ),
               ],
               const Spacer(),
@@ -312,7 +311,7 @@ class _StudentRow extends ConsumerWidget {
                 tooltip: rec.hasNote ? 'Тэмдэглэл нээх' : 'Тэмдэглэл бичих',
                 constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
                 icon: Icon(
-                  rec.hasNote ? TeacherIcons.note : AppIcons.overflow,
+                  rec.hasNote ? AppIcons.stickyNote : AppIcons.overflow,
                   color: detail || rec.hasNote ? c.brand : c.inkDim,
                 ),
                 onPressed: () => BoardNoteSheet.open(context, args: args, studentId: studentId, name: name),
@@ -458,7 +457,7 @@ class _BulkButton extends StatelessWidget {
       return OutlinedButton.icon(
         style: OutlinedButton.styleFrom(minimumSize: size),
         onPressed: busy ? null : onUndo,
-        icon: const Icon(TeacherIcons.undo, size: 18),
+        icon: const Icon(AppIcons.restart, size: 18),
         label: Text('Буцаах ($undo)', semanticsLabel: '$label товчоор тэмдэглэсэн $undo сурагчийг буцаах'),
       );
     }

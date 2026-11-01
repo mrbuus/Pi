@@ -77,10 +77,14 @@ class PaymentHistoryView extends StatelessWidget {
         AppCard(
           child: Row(
             children: [
-              Expanded(child: _Total(label: 'Нийт төлсөн', amount: history.totalConfirmed)),
+              Expanded(
+                child: _Total(label: 'Нийт төлсөн', amount: history.totalConfirmed),
+              ),
               Container(width: 1, height: 40, color: context.colors.line),
               const SizedBox(width: AppSpace.lg),
-              Expanded(child: _Total(label: 'Баталгаажихыг хүлээж буй', amount: history.totalPending)),
+              Expanded(
+                child: _Total(label: 'Баталгаажихыг хүлээж буй', amount: history.totalPending),
+              ),
             ],
           ),
         ),
@@ -90,7 +94,7 @@ class PaymentHistoryView extends StatelessWidget {
             child: SizedBox(
               height: 240,
               child: EmptyState(
-                icon: PaymentIcons.receipt,
+                icon: AppIcons.receipt,
                 title: 'Төлбөр бүртгэгдээгүй байна',
                 message: 'Төлбөр төлж, ажилтан баталгаажуулмагц энд харагдана.',
               ),
@@ -100,7 +104,10 @@ class PaymentHistoryView extends StatelessWidget {
           for (final (month, rows) in history.groups) ...[
             Padding(
               padding: const EdgeInsets.only(top: AppSpace.sm, bottom: AppSpace.xs),
-              child: Text(paymentMonthLabel(month), style: context.text.labelMedium?.copyWith(color: context.colors.inkDim)),
+              child: Text(
+                paymentMonthLabel(month),
+                style: context.text.labelMedium?.copyWith(color: context.colors.inkDim),
+              ),
             ),
             AppCard(
               padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.xs),

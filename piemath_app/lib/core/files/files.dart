@@ -11,5 +11,4 @@ export 'photo_document.dart';
 export 'photo_set_upload.dart';
 export 'photo_source.dart';
 export 'ui/file_gallery_screen.dart';
-export 'ui/file_icons.dart';
 export 'ui/photo_composer_screen.dart';

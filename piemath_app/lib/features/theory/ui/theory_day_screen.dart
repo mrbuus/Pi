@@ -110,10 +110,7 @@ class _DayBody extends ConsumerWidget {
             const SizedBox(height: AppSpace.xs),
             Text(day.topic!, style: context.text.titleMedium),
           ],
-          if (day.tests.isNotEmpty) ...[
-            const SizedBox(height: AppSpace.xs),
-            Meta(items: day.tests),
-          ],
+          if (day.tests.isNotEmpty) ...[const SizedBox(height: AppSpace.xs), Meta(items: day.tests)],
           if (day.canUpload) ...[
             const SizedBox(height: AppSpace.lg),
             if (day.assignedToMe)
@@ -134,7 +131,7 @@ class _DayBody extends ConsumerWidget {
                   TextButton.icon(
                     onPressed: () => _delete(context, ref),
                     style: TextButton.styleFrom(foregroundColor: context.colors.error),
-                    icon: const Icon(FileIcons.remove, size: 18),
+                    icon: const Icon(AppIcons.trash, size: 18),
                     label: const Text('Устгах'),
                   ),
               ],
@@ -145,7 +142,9 @@ class _DayBody extends ConsumerWidget {
             EmptyState(
               icon: AppIcons.theoryPhoto,
               title: 'Онолын зураг алга',
-              message: day.assignedName != null ? 'Томилогдсон: ${day.assignedName}' : 'Ангийнхан илгээмэгц энд харагдана',
+              message: day.assignedName != null
+                  ? 'Томилогдсон: ${day.assignedName}'
+                  : 'Ангийнхан илгээмэгц энд харагдана',
             )
           else
             for (final set in day.photos) ...[
@@ -204,7 +203,7 @@ class _PhotoSetCard extends ConsumerWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(FileIcons.pages, color: c.inkDim),
+                                Icon(AppIcons.images, color: c.inkDim),
                                 const SizedBox(height: 4),
                                 Text('${set.pages} хуудас', style: context.text.labelSmall),
                               ],

@@ -9,7 +9,6 @@ import '../data/hub_models.dart';
 import '../data/my_class_repository.dart';
 import '../domain/hub_logic.dart';
 import 'common.dart';
-import 'my_class_icons.dart';
 
 /// Анги хийсэн тестийн бодлогууд (`/app/my-class/tests/:testId`): нөхцөл, сонголт (LaTeX), зураг,
 /// бодлого бүрийн зөв хариу товчоор нээгдэнэ (анхдагч нуусан — өөрийгөө шалгах).
@@ -52,17 +51,17 @@ class _TestDetailScreenState extends ConsumerState<TestDetailScreen> {
         onRetry: () => ref.invalidate(hubTestDetailProvider(widget.testId)),
         builder: (r) => switch (r) {
           TestDetailLocked(reason: TestLockReason.tomorrow) => const EmptyState(
-              icon: AppIcons.time,
-              title: 'Маргааш нээгдэнэ',
-              message: 'Ангид хийсэн тест дараагийн өдөр нь энд нээгдэнэ',
-            ),
+            icon: AppIcons.time,
+            title: 'Маргааш нээгдэнэ',
+            message: 'Ангид хийсэн тест дараагийн өдөр нь энд нээгдэнэ',
+          ),
           TestDetailLocked() => const EmptyState(icon: AppIcons.password, title: 'Танай анги энэ тестийг хийгээгүй'),
-          TestDetailMissing() => const EmptyState(icon: MyClassIcons.noProblem, title: 'Тест олдсонгүй'),
+          TestDetailMissing() => const EmptyState(icon: AppIcons.fileQuestion, title: 'Тест олдсонгүй'),
           TestDetailReady(:final detail) => _Problems(
-              detail: detail,
-              isOpen: (id) => _revealAll != _toggled.contains(id),
-              onToggle: (id) => setState(() => _toggled.contains(id) ? _toggled.remove(id) : _toggled.add(id)),
-            ),
+            detail: detail,
+            isOpen: (id) => _revealAll != _toggled.contains(id),
+            onToggle: (id) => setState(() => _toggled.contains(id) ? _toggled.remove(id) : _toggled.add(id)),
+          ),
         },
       ),
     );
@@ -79,7 +78,7 @@ class _Problems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final problems = [...detail.problems]..sort((a, b) => a.order.compareTo(b.order));
-    if (problems.isEmpty) return const EmptyState(icon: MyClassIcons.noProblem, title: 'Энэ тестэд бодлого алга');
+    if (problems.isEmpty) return const EmptyState(icon: AppIcons.fileQuestion, title: 'Энэ тестэд бодлого алга');
     return ListView.builder(
       padding: const EdgeInsets.all(AppSpace.gutter),
       itemCount: problems.length + 1,
@@ -108,7 +107,13 @@ class _Problems extends StatelessWidget {
 
 /// Нэг бодлого: дугаар, нөхцөл (MathText), зураг, сонголт, «Хариу харах».
 class ProblemCard extends ConsumerWidget {
-  const ProblemCard({super.key, required this.problem, required this.number, required this.open, required this.onToggle});
+  const ProblemCard({
+    super.key,
+    required this.problem,
+    required this.number,
+    required this.open,
+    required this.onToggle,
+  });
 
   final HubProblem problem;
   final int number;
@@ -136,7 +141,10 @@ class ProblemCard extends ConsumerWidget {
                   border: Border.all(color: c.brandBright),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
-                child: Text('$number', style: context.text.labelMedium?.copyWith(color: c.brandSoft, fontWeight: FontWeight.w700)),
+                child: Text(
+                  '$number',
+                  style: context.text.labelMedium?.copyWith(color: c.brandSoft, fontWeight: FontWeight.w700),
+                ),
               ),
               const SizedBox(width: AppSpace.md),
               Expanded(

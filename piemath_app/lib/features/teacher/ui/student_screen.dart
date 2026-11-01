@@ -10,7 +10,6 @@ import '../../../shared/payment_status/paid_until_card.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
 import 'independent_tab.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Сурагчийн хуудас (`/app/students/:id`): Ангийн явц, Шалгалт, Тэмдэглэл, Бие даасан явц.
@@ -218,7 +217,8 @@ class _ExamsTab extends ConsumerWidget {
             return AppCard(
               onTap: testId == null || testId.isEmpty
                   ? null
-                  : () => context.push('/app/teacher/tests/${Uri.encodeComponent(testId)}/results', extra: r.test?.title),
+                  : () =>
+                        context.push('/app/teacher/tests/${Uri.encodeComponent(testId)}/results', extra: r.test?.title),
               child: Row(
                 children: [
                   Expanded(
@@ -348,7 +348,7 @@ class _StudentNotesTabState extends ConsumerState<StudentNotesTab> {
           child: FilledButton.icon(
             style: FilledButton.styleFrom(minimumSize: const Size(140, teacherTap)),
             onPressed: _busy ? null : _add,
-            icon: const Icon(TeacherIcons.add),
+            icon: const Icon(AppIcons.add),
             label: const Text('Нэмэх'),
           ),
         ),
@@ -373,7 +373,7 @@ class _StudentNotesTabState extends ConsumerState<StudentNotesTab> {
               ? [
                   const SizedBox(
                     height: 200,
-                    child: EmptyState(icon: TeacherIcons.note, title: 'Тэмдэглэл алга'),
+                    child: EmptyState(icon: AppIcons.stickyNote, title: 'Тэмдэглэл алга'),
                   ),
                 ]
               : [
@@ -397,13 +397,13 @@ class _StudentNotesTabState extends ConsumerState<StudentNotesTab> {
                                 IconButton(
                                   tooltip: 'Засах',
                                   constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-                                  icon: Icon(TeacherIcons.edit, size: 18, color: c.inkDim),
+                                  icon: Icon(AppIcons.draft, size: 18, color: c.inkDim),
                                   onPressed: () => _edit(n),
                                 ),
                                 IconButton(
                                   tooltip: 'Устгах',
                                   constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-                                  icon: Icon(TeacherIcons.delete, size: 18, color: c.inkDim),
+                                  icon: Icon(AppIcons.trash, size: 18, color: c.inkDim),
                                   onPressed: () => _delete(n),
                                 ),
                               ],

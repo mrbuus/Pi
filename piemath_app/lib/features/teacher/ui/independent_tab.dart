@@ -5,7 +5,6 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_extras.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Сурагчийн «Бие даасан явц» таб: жилийн идэвхийн дулааны зураг + онлайн шалгалтын дүнгийн хураангуй
@@ -37,14 +36,14 @@ class _IndependentTabState extends ConsumerState<IndependentTab> {
             IconButton(
               tooltip: 'Өмнөх жил',
               constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-              icon: const Icon(TeacherIcons.prevDay),
+              icon: const Icon(AppIcons.back),
               onPressed: () => setState(() => _year = year - 1),
             ),
             Text('$year', style: context.text.titleSmall),
             IconButton(
               tooltip: 'Дараагийн жил',
               constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-              icon: const Icon(TeacherIcons.nextDay),
+              icon: const Icon(AppIcons.forward),
               onPressed: year >= today.year ? null : () => setState(() => _year = year + 1),
             ),
           ],
@@ -93,7 +92,9 @@ class _IndependentTabState extends ConsumerState<IndependentTab> {
         ),
       ],
       const SizedBox(height: AppSpace.md),
-      AppCard(child: ActivityHeatmap(year: a, scrollToEnd: current)),
+      AppCard(
+        child: ActivityHeatmap(year: a, scrollToEnd: current),
+      ),
       const SizedBox(height: AppSpace.sm),
       const _HeatmapLegend(),
     ];
@@ -113,7 +114,7 @@ class _StreakChip extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(TeacherIcons.streak, size: 16, color: context.colors.brand),
+        Icon(AppIcons.flame, size: 16, color: context.colors.brand),
         const SizedBox(width: AppSpace.xs),
         Text('$label $n', style: context.text.labelLarge),
       ],
@@ -133,7 +134,11 @@ class _HeatmapLegend extends StatelessWidget {
         children: [
           Text('Бага', style: style),
           const SizedBox(width: AppSpace.sm),
-          for (var l = 0; l <= 4; l++) Padding(padding: const EdgeInsets.only(right: 3), child: HeatCell(level: l)),
+          for (var l = 0; l <= 4; l++)
+            Padding(
+              padding: const EdgeInsets.only(right: 3),
+              child: HeatCell(level: l),
+            ),
           const SizedBox(width: AppSpace.xs),
           Text('Их', style: style),
         ],
@@ -258,11 +263,17 @@ class _TestStats extends ConsumerWidget {
         final best = pcts.reduce((a, b) => a > b ? a : b);
         return Row(
           children: [
-            Expanded(child: _Stat(label: 'Өгсөн тест', value: '${list.length}')),
+            Expanded(
+              child: _Stat(label: 'Өгсөн тест', value: '${list.length}'),
+            ),
             const SizedBox(width: AppSpace.sm),
-            Expanded(child: _Stat(label: 'Дундаж', value: '$avg%')),
+            Expanded(
+              child: _Stat(label: 'Дундаж', value: '$avg%'),
+            ),
             const SizedBox(width: AppSpace.sm),
-            Expanded(child: _Stat(label: 'Хамгийн сайн', value: '$best%')),
+            Expanded(
+              child: _Stat(label: 'Хамгийн сайн', value: '$best%'),
+            ),
           ],
         );
       },

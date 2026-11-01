@@ -13,7 +13,6 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
-import 'exam_icons.dart';
 import 'widgets/review_parts.dart';
 
 final examResultProvider = FutureProvider.autoDispose.family<ExamResultPage, String>(
@@ -133,7 +132,7 @@ class _ResultBody extends ConsumerWidget {
             AppCard(
               child: Row(
                 children: [
-                  Icon(ExamIcons.locked, color: c.inkDim),
+                  Icon(AppIcons.password, color: c.inkDim),
                   const SizedBox(width: AppSpace.md),
                   Expanded(
                     child: Column(
@@ -154,7 +153,7 @@ class _ResultBody extends ConsumerWidget {
             for (final w in wrong) ...[_WrongCard(item: w, files: files), const SizedBox(height: AppSpace.md)],
           if (d.fullReview)
             OutlinedButton.icon(
-              icon: const Icon(ExamIcons.review, size: 18),
+              icon: const Icon(AppIcons.listTodo, size: 18),
               label: const Text('Бүх бодлогыг харах'),
               onPressed: () => context.push('/app/tests/${d.testId}/review'),
             ),
@@ -163,7 +162,7 @@ class _ResultBody extends ConsumerWidget {
           const SizedBox(height: AppSpace.sm),
           // Анхдагчаар ангийн байр харуулахгүй — хэрэглэгч хүсвэл л нээнэ (UX-RESEARCH §7).
           TextButton.icon(
-            icon: const Icon(ExamIcons.ranking, size: 18),
+            icon: const Icon(AppIcons.medal, size: 18),
             label: const Text('Миний байрыг харах'),
             onPressed: () => context.push('/app/tests/${d.testId}/ranking'),
           ),
@@ -281,7 +280,7 @@ class _PracticeButtonState extends ConsumerState<_PracticeButton> {
     return AppCard(
       child: Row(
         children: [
-          Icon(ExamIcons.practice, color: context.colors.brand),
+          Icon(AppIcons.restart, color: context.colors.brand),
           const SizedBox(width: AppSpace.md),
           Expanded(
             child: Column(
@@ -392,7 +391,7 @@ class _ThousandReviewBody extends ConsumerWidget {
     final r = review;
     if (r.level == ReviewLevel.none) {
       return EmptyState(
-        icon: ExamIcons.locked,
+        icon: AppIcons.password,
         title: 'Эргэн харалт хараахан нээгдээгүй байна',
         message: r.opensAt == null ? 'Багш нээсний дараа бодлого, хариугаа харах боломжтой.' : _opensText(r.opensAt),
       );

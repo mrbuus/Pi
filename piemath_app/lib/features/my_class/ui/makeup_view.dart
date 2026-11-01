@@ -9,22 +9,21 @@ import '../data/hub_models.dart';
 import '../data/my_class_repository.dart';
 import '../domain/hub_logic.dart';
 import 'common.dart';
-import 'my_class_icons.dart';
 import 'photo_viewer.dart';
 
 /// Нөхөх хичээлийн төлөвийн шошго (вэбийн `makeup/types.ts` `STATUS_META`).
 ({String label, IconData icon, MarkTone tone}) makeupStatusMeta(MakeupStatus s) => switch (s) {
-      MakeupStatus.pending => (label: 'Нөхөөгүй', icon: MyClassIcons.makeupPending, tone: MarkTone.error),
-      MakeupStatus.partial => (label: 'Дутуу', icon: MyClassIcons.makeupPartial, tone: MarkTone.warning),
-      MakeupStatus.done => (label: 'Нөхсөн', icon: MyClassIcons.done, tone: MarkTone.success),
-      MakeupStatus.waived => (label: 'Чөлөөлсөн', icon: MyClassIcons.makeupWaived, tone: MarkTone.neutral),
-    };
+  MakeupStatus.pending => (label: 'Нөхөөгүй', icon: AppIcons.circleDashed, tone: MarkTone.error),
+  MakeupStatus.partial => (label: 'Дутуу', icon: AppIcons.circleDot, tone: MarkTone.warning),
+  MakeupStatus.done => (label: 'Нөхсөн', icon: AppIcons.success, tone: MarkTone.success),
+  MakeupStatus.waived => (label: 'Чөлөөлсөн', icon: AppIcons.circleSlash, tone: MarkTone.neutral),
+};
 
 AttendanceStatus _reasonStatus(MakeupReason r) => switch (r) {
-      MakeupReason.absent => AttendanceStatus.absent,
-      MakeupReason.excused => AttendanceStatus.excused,
-      MakeupReason.late => AttendanceStatus.late,
-    };
+  MakeupReason.absent => AttendanceStatus.absent,
+  MakeupReason.excused => AttendanceStatus.excused,
+  MakeupReason.late => AttendanceStatus.late,
+};
 
 /// `/app/makeup` — бүтэн дэлгэц (вэбийн `/app/makeup`).
 class MakeupScreen extends StatelessWidget {
@@ -63,7 +62,8 @@ class MakeupView extends ConsumerWidget {
                   Expanded(child: Text('Нөхөх хичээл', style: context.text.titleLarge)),
                   const InfoHint(
                     title: 'Нөхөх хичээл',
-                    message: 'Тасалсан, чөлөөтэй эсвэл хоцорсон өдрийн онолоо дэвтэртээ бичээд зургийг нь илгээж, '
+                    message:
+                        'Тасалсан, чөлөөтэй эсвэл хоцорсон өдрийн онолоо дэвтэртээ бичээд зургийг нь илгээж, '
                         'тэр өдрийн тестийн A, B хувилбарыг шалгалтын горимоор хийнэ. Ангид суусан бол ангид хийсэн '
                         'хувилбар тооцогдоно',
                   ),
@@ -73,22 +73,19 @@ class MakeupView extends ConsumerWidget {
               const SizedBox(height: AppSpace.md),
               if (pending.isEmpty)
                 const EmptyState(
-                  icon: MyClassIcons.done,
+                  icon: AppIcons.success,
                   title: 'Нөхөх хичээл алга',
                   message: 'Хичээл тасалсан, чөлөө авсан эсвэл хоцорсон өдөр энд гарч ирнэ',
                 )
               else
-                for (final item in pending) ...[
-                  MakeupCard(item: item),
-                  const SizedBox(height: AppSpace.md),
-                ],
+                for (final item in pending) ...[MakeupCard(item: item), const SizedBox(height: AppSpace.md)],
               if (done.isNotEmpty) ...[
                 const SizedBox(height: AppSpace.md),
                 AppCard(
                   padding: EdgeInsets.zero,
                   child: ExpansionTile(
                     shape: const Border(),
-                    leading: Icon(MyClassIcons.done, color: context.colors.success),
+                    leading: Icon(AppIcons.success, color: context.colors.success),
                     title: Text('Нөхсөн  ${done.length}'),
                     children: [
                       for (final item in done)
@@ -106,7 +103,7 @@ class MakeupView extends ConsumerWidget {
                 onTap: () => context.push('/app/theory'),
                 child: Row(
                   children: [
-                    Icon(MyClassIcons.photos, color: context.colors.brandSoft),
+                    Icon(AppIcons.images, color: context.colors.brandSoft),
                     const SizedBox(width: AppSpace.md),
                     Expanded(
                       child: Column(
@@ -150,7 +147,10 @@ class MakeupStatusChip extends StatelessWidget {
         children: [
           Icon(m.icon, size: 14, color: color),
           const SizedBox(width: 4),
-          Text(m.label, style: context.text.labelSmall?.copyWith(color: context.colors.ink, fontWeight: FontWeight.w600)),
+          Text(
+            m.label,
+            style: context.text.labelSmall?.copyWith(color: context.colors.ink, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
@@ -264,11 +264,14 @@ class _MakeupCardState extends ConsumerState<MakeupCard> {
           const SizedBox(height: AppSpace.lg),
           Row(
             children: [
-              Icon(MyClassIcons.notes, size: 18, color: c.brandSoft),
+              Icon(AppIcons.penLine, size: 18, color: c.brandSoft),
               const SizedBox(width: AppSpace.sm),
               Expanded(child: Text('Онолын тэмдэглэлийн зураг', style: context.text.titleSmall)),
               if (item.photosAccepted)
-                Semantics(label: 'Илгээсэн', child: Icon(MyClassIcons.done, size: 18, color: c.success)),
+                Semantics(
+                  label: 'Илгээсэн',
+                  child: Icon(AppIcons.success, size: 18, color: c.success),
+                ),
             ],
           ),
           if (item.resubmit)
@@ -276,7 +279,7 @@ class _MakeupCardState extends ConsumerState<MakeupCard> {
               padding: const EdgeInsets.only(top: AppSpace.xs),
               child: Row(
                 children: [
-                  Icon(MyClassIcons.resubmit, size: 16, color: c.warning),
+                  Icon(AppIcons.restart, size: 16, color: c.warning),
                   const SizedBox(width: AppSpace.xs),
                   Expanded(child: Text('Багш зургаа дахин илгээхийг хүссэн', style: context.text.bodyMedium)),
                 ],
@@ -291,9 +294,7 @@ class _MakeupCardState extends ConsumerState<MakeupCard> {
           OutlinedButton.icon(
             icon: const Icon(AppIcons.camera, size: 18),
             label: Text(item.imageKeys.isEmpty ? 'Дэвтрийн зураг илгээх' : 'Зургаа солих'),
-            onPressed: () => context.push(
-              '/app/makeup/photos/${Uri.encodeComponent(item.classroomId)}/${item.date}',
-            ),
+            onPressed: () => context.push('/app/makeup/photos/${Uri.encodeComponent(item.classroomId)}/${item.date}'),
           ),
         ],
       ),
@@ -323,7 +324,7 @@ class _MakeupCardState extends ConsumerState<MakeupCard> {
         children: [
           Semantics(
             label: t.done ? 'Хийсэн' : 'Хийгээгүй',
-            child: Icon(t.done ? MyClassIcons.done : MyClassIcons.todo, size: 20, color: t.done ? c.success : c.inkDim),
+            child: Icon(t.done ? AppIcons.success : AppIcons.circle, size: 20, color: t.done ? c.success : c.inkDim),
           ),
           const SizedBox(width: AppSpace.sm),
           Expanded(

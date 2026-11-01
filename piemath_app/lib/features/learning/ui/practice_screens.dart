@@ -10,7 +10,6 @@ import '../../exam/data/exam_models.dart' show ExamProblem, ProblemFormat;
 import '../../exam/ui/widgets/answer_inputs.dart';
 import '../data/practice_models.dart';
 import '../data/practice_repository.dart';
-import '../learning_icons.dart';
 import 'inline_message.dart';
 
 /// `/app/practice` — серверийн санал болгосон бодлогууд.
@@ -32,7 +31,7 @@ class PracticeScreen extends ConsumerWidget {
         data: (items) {
           if (items.isEmpty) {
             return const EmptyState(
-              icon: LearningIcons.practice,
+              icon: AppIcons.practice,
               title: 'Одоогоор санал болгох бодлого алга',
               message: 'Тест, дасгал хийх тусам танд тохирсон бодлогууд энд гарна',
             );
@@ -55,7 +54,10 @@ class PracticeScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('${i + 1}-р бодлого', style: context.text.titleSmall),
-                              Text(r.reason.label, style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+                              Text(
+                                r.reason.label,
+                                style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+                              ),
                               if (isMongolianText(r.explanation)) Text(r.explanation!, style: context.text.bodySmall),
                             ],
                           ),
@@ -152,10 +154,7 @@ class _PracticeProblemScreenState extends ConsumerState<PracticeProblemScreen> {
           child: ProblemFigure(
             image: p.imageKey == null ? null : images.image(p.imageKey!),
             alt: 'Бодлогын зураг',
-            child: MathText(
-              p.statementText ?? 'Бодлогын текст алга, зургаас уншина уу',
-              style: context.text.bodyLarge,
-            ),
+            child: MathText(p.statementText ?? 'Бодлогын текст алга, зургаас уншина уу', style: context.text.bodyLarge),
           ),
         ),
         const SizedBox(height: AppSpace.xl),
@@ -193,10 +192,7 @@ class _PracticeProblemScreenState extends ConsumerState<PracticeProblemScreen> {
             onPressed: _answer(p) == null || _busy ? null : () => _submit(p),
             child: Text(_busy ? 'Шалгаж байна' : 'Хариуг илгээх'),
           ),
-        if (_error != null) ...[
-          const SizedBox(height: AppSpace.md),
-          InlineMessage(_error!),
-        ],
+        if (_error != null) ...[const SizedBox(height: AppSpace.md), InlineMessage(_error!)],
         if (_result != null) ...[
           InlineMessage(
             switch (_result!.correct) {

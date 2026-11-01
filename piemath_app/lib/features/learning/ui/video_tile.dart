@@ -5,7 +5,6 @@ import '../../../core/ui/ui.dart';
 import '../data/lesson_models.dart';
 import '../data/lesson_repository.dart';
 import '../domain/video_source.dart';
-import '../learning_icons.dart';
 
 /// Бичлэгийн мөр. Бичлэгийг ЗӨВХӨН товшиход нээнэ (сул сүлжээнд автоматаар ачаалахгүй), YouTube nocookie.
 class VideoTile extends ConsumerWidget {
@@ -39,7 +38,7 @@ class VideoTile extends ConsumerWidget {
       semanticLabel: 'Бичлэг нээх: ${video.title}',
       child: Row(
         children: [
-          Icon(usable ? LearningIcons.play : AppIcons.warning, color: usable ? c.brand : c.inkDim),
+          Icon(usable ? AppIcons.play : AppIcons.warning, color: usable ? c.brand : c.inkDim),
           const SizedBox(width: AppSpace.md),
           Expanded(
             child: Column(
@@ -56,7 +55,7 @@ class VideoTile extends ConsumerWidget {
               ],
             ),
           ),
-          Icon(LearningIcons.open, size: 18, color: c.inkDim),
+          Icon(AppIcons.externalLink, size: 18, color: c.inkDim),
         ],
       ),
     );

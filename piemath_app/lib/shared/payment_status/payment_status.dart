@@ -5,6 +5,5 @@ library;
 export 'money.dart';
 export 'paid_until.dart';
 export 'paid_until_card.dart';
-export 'payment_icons.dart';
 export 'payment_labels.dart';
 export 'payment_row.dart';

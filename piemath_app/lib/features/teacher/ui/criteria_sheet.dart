@@ -6,7 +6,6 @@ import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_extras.dart';
 import '../data/teacher_repository.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Ангийн эрсдэлийн шалгуур засах. ЗӨВХӨН Багш+ / Админ (`canEditCriteria`) — эрхийг сервер мөн шалгана.
@@ -205,11 +204,13 @@ class _StepRow extends StatelessWidget {
     label: '$label $value$suffix',
     child: Row(
       children: [
-        Expanded(child: ExcludeSemantics(child: Text(label, style: context.text.bodyMedium))),
+        Expanded(
+          child: ExcludeSemantics(child: Text(label, style: context.text.bodyMedium)),
+        ),
         IconButton(
           tooltip: '$label, багасгах',
           constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-          icon: const Icon(TeacherIcons.minus),
+          icon: const Icon(AppIcons.minus),
           onPressed: value - step < min ? null : () => onChanged(value - step),
         ),
         SizedBox(
@@ -219,7 +220,7 @@ class _StepRow extends StatelessWidget {
         IconButton(
           tooltip: '$label, нэмэгдүүлэх',
           constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-          icon: const Icon(TeacherIcons.add),
+          icon: const Icon(AppIcons.add),
           onPressed: value + step > max ? null : () => onChanged(value + step),
         ),
       ],

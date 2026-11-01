@@ -10,7 +10,6 @@ import '../data/parent_models.dart';
 import '../data/parent_repository.dart';
 import '../data/weekly_report.dart';
 import '../domain/parent_labels.dart';
-import 'parent_icons.dart';
 
 /// Өнөөдөр (UB) — тестэд override.
 final parentTodayProvider = Provider<UbDateTime>((ref) => UbDateTime.now());
@@ -56,10 +55,13 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
           onRetry: () => ref.invalidate(parentChildrenProvider),
         ),
         data: (links) {
-          final verified = [for (final l in links) if (l.verified) l.student];
+          final verified = [
+            for (final l in links)
+              if (l.verified) l.student,
+          ];
           if (verified.isEmpty) {
             return const EmptyState(
-              icon: ParentIcons.children,
+              icon: AppIcons.children,
               title: 'Баталгаажсан хүүхэд алга',
               message: 'Баталгаажсан хүүхдийн долоо хоногийн тайлан энд харагдана.',
             );
@@ -142,7 +144,13 @@ class _ReportBody extends ConsumerWidget {
     return async.when(
       skipLoadingOnRefresh: false,
       loading: () => const SkeletonPulse(
-        child: Column(children: [SkeletonCard(), SizedBox(height: AppSpace.md), SkeletonCard(lines: 3)]),
+        child: Column(
+          children: [
+            SkeletonCard(),
+            SizedBox(height: AppSpace.md),
+            SkeletonCard(lines: 3),
+          ],
+        ),
       ),
       error: (e, _) => SizedBox(
         height: 300,
@@ -172,10 +180,7 @@ class WeeklyReportView extends StatelessWidget {
       children: [
         Meta(items: ['${r.student.firstName} ${r.student.lastName}'.trim(), '${r.week.start} – ${r.week.end}']),
         if (snapshot != null)
-          Text(
-            'Мэдээлэл ${DateMn.numericWithTime(UbDateTime.fromInstant(snapshot))} цагийн байдлаар',
-            style: dim,
-          ),
+          Text('Мэдээлэл ${DateMn.numericWithTime(UbDateTime.fromInstant(snapshot))} цагийн байдлаар', style: dim),
         const SizedBox(height: AppSpace.md),
         _Stat(
           title: 'Ирц',
@@ -198,7 +203,8 @@ class WeeklyReportView extends StatelessWidget {
           value: 'Сайн: ${r.topics.best?.topic ?? 'мэдээлэл алга'}',
           meta: [
             'Давтах: ${r.topics.weakest?.topic ?? 'мэдээлэл алга'}',
-            if (!r.topics.complete && r.topics.sampleLimit != null) 'Эхний ${r.topics.sampleLimit} оролдлогод тулгуурлав',
+            if (!r.topics.complete && r.topics.sampleLimit != null)
+              'Эхний ${r.topics.sampleLimit} оролдлогод тулгуурлав',
           ],
         ),
         const SectionHeader(title: 'Тест ба дүн'),
