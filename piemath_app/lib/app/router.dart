@@ -18,6 +18,7 @@ import '../features/student_home/student_home_routes.dart';
 import '../features/support/support_routes.dart';
 import '../features/teacher/teacher_routes.dart';
 import '../features/theory/theory_routes.dart';
+import '../features/tools/tools_routes.dart';
 import 'feature_routes.dart';
 import 'redirect.dart';
 import 'shell/app_shell.dart';
@@ -27,6 +28,7 @@ import 'shell/splash_screen.dart';
 
 /// Бүх feature-ийн маршрут. Шинэ feature нэмэхэд энд НЭГ мөр.
 final allFeatureRoutes = <FeatureRoutes>[
+  toolsRoutes,
   authRoutes,
   studentHomeRoutes,
   myClassRoutes,
@@ -75,7 +77,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 /// Маршрутын мод: public → бүтэн дэлгэц → shell (feature-ийнх, дараа нь «удахгүй» catch-all).
 @visibleForTesting
 List<RouteBase> buildRoutes(List<FeatureRoutes> features) {
-  Widget pending(BuildContext context, GoRouterState state) => PendingScreen(path: state.uri.path);
+  Widget pending(BuildContext context, GoRouterState state) =>
+      PendingScreen(path: state.uri.path);
   return [
     GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
     // Redirect нь «/», «/app»-ийг нүүр рүү шилжүүлнэ; энд хүрвэл зөвхөн хоосон дэлгэц үлдэхгүйн тулд.
@@ -86,7 +89,8 @@ List<RouteBase> buildRoutes(List<FeatureRoutes> features) {
       for (final r in f.fullscreen) _withParent(r, rootNavigatorKey),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
-      builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
+      builder: (context, state, child) =>
+          AppShell(location: state.uri.path, child: child),
       routes: [
         GoRoute(path: morePath, builder: (_, _) => const MoreScreen()),
         for (final f in features) ...f.shell,
