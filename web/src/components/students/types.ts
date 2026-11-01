@@ -62,6 +62,15 @@ export interface StudentFocus {
   practice: { days: number; problems: number; leaves: number };
 }
 
+export interface ClassHistoryRow {
+  classroomId: string;
+  name: string;
+  joinedAt: string;
+  leftAt: string | null;
+  attendance: number;
+  homework: number;
+}
+
 // Дэлгэрэнгүй хуудас (GET /users/:id → users.service.getUserDetail)
 export interface StudentDetailData {
   id: string;
@@ -79,6 +88,8 @@ export interface StudentDetailData {
   archiveReason?: string | null;
   /** Архивлагдсан сурагчийн сүүлийн анги */
   lastClassroom?: ClassroomLite | null;
+  /** Бүх элсэлт эрт → сүүл (анги солигдсон ч түүх; ирц, даалгавар тэр ангидаа) */
+  classHistory?: ClassHistoryRow[];
   focus?: StudentFocus | null;
   studentProfile: StudentProfileLite | null;
   currentClassroom: ClassroomLite | null;

@@ -1281,6 +1281,11 @@ export class UsersService {
         : Promise.resolve(null),
     ]);
 
+    // Ангийн түүх (эзэн 2026-11-01): анги солигдсон ч бүх хугацаа харагдана — элсэлт бүр
+    // (хэзээнээс хэзээ хүртэл) ба тэр ангид хадгалагдсан ирц, даалгаврын тоо.
+    const classHistory =
+      user.role === Role.STUDENT ? await this.classHistory(targetId) : [];
+
     const canSeePhones =
       requesterRole === Role.ADMIN || requesterRole === Role.TEACHER_PLUS;
 
@@ -1315,6 +1320,7 @@ export class UsersService {
           }
         : null,
       lastClassroom: lastEnrollment?.classroom ?? null,
+      classHistory,
       counts: {
         assignmentsCompleted,
         testResults,
@@ -1323,6 +1329,41 @@ export class UsersService {
       },
       focus,
     };
+  }
+
+  /** Сурагчийн бүх элсэлт (эрт → сүүл) + анги тус бүрт хадгалагдсан ирц, даалгаврын тоо */
+  private async classHistory(studentId: string) {
+    const [enrollments, attendance, homework] = await Promise.all([
+      this.prisma.enrollment.findMany({
+        where: { studentId },
+        orderBy: { joinedAt: 'asc' },
+        select: {
+          joinedAt: true,
+          leftAt: true,
+          classroom: { select: { id: true, name: true } },
+        },
+      }),
+      this.prisma.attendance.groupBy({
+        by: ['classroomId'],
+        where: { studentId },
+        _count: { _all: true },
+      }),
+      this.prisma.dailyHomeworkMark.groupBy({
+        by: ['classroomId'],
+        where: { studentId, status: { not: null } },
+        _count: { _all: true },
+      }),
+    ]);
+    const att = new Map(attendance.map((a) => [a.classroomId, a._count._all]));
+    const hw = new Map(homework.map((h) => [h.classroomId, h._count._all]));
+    return enrollments.map((e) => ({
+      classroomId: e.classroom.id,
+      name: e.classroom.name,
+      joinedAt: e.joinedAt,
+      leftAt: e.leftAt,
+      attendance: att.get(e.classroom.id) ?? 0,
+      homework: hw.get(e.classroom.id) ?? 0,
+    }));
   }
 
   /**

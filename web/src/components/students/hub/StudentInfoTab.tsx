@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
-import { Check, Pencil, TriangleAlert } from "lucide-react";
+import { Check, History, Pencil, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
 import { Meta } from "@/components/ui/Meta";
 import { formatMnDate } from "@/lib/dateMn";
@@ -313,6 +313,32 @@ export default function StudentInfoTab({
           ]}
         />
       </section>
+
+      {(detail.classHistory?.length ?? 0) > 0 && (
+        <section className="chunky p-4 md:p-6" aria-labelledby="class-history">
+          <h2 id="class-history" className="mb-3 flex items-center gap-2 font-bold text-brand-soft">
+            <History className="size-4" aria-hidden />
+            Ангийн түүх
+          </h2>
+          {/* Шинэ нь дээр; анги солигдсон ч өмнөх ангийн ирц, даалгавар тэр ангидаа хадгалагдана (эзэн 2026-11-01) */}
+          <ol className="space-y-2">
+            {[...detail.classHistory!].reverse().map((h) => (
+              <li
+                key={`${h.classroomId}-${h.joinedAt}`}
+                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg border border-line px-3 py-2"
+              >
+                <span className="min-w-0">
+                  <span className="font-semibold text-ink">{h.name.replace(/\s*\([^)]*\)$/, "")}</span>
+                  <span className="ml-2 text-sm tabular-nums text-ink-dim">
+                    {formatMnDate(h.joinedAt)} – {h.leftAt ? formatMnDate(h.leftAt) : "одоог хүртэл"}
+                  </span>
+                </span>
+                <Meta className="text-xs text-ink-dim" items={[`ирц ${h.attendance}`, `даалгавар ${h.homework}`]} />
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {showGuardians && (
         <section className="chunky p-4 md:p-6">
