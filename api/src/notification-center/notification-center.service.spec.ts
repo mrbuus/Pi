@@ -34,7 +34,7 @@ describe('NotificationCenterService', () => {
 
     expect(prisma.user.findMany).toHaveBeenCalledWith({
       where: { id: { in: ['student-1', 'missing'] } },
-      select: { id: true, email: true },
+      select: { id: true, email: true, role: true },
     });
     expect(prisma.notification.createMany).toHaveBeenCalledWith({
       data: [
