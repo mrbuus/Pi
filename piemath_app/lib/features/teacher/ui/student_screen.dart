@@ -8,10 +8,11 @@ import '../../../shared/marks/marks.dart';
 import '../../../shared/payment_status/paid_until_card.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
+import 'independent_tab.dart';
 import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
-/// Сурагчийн хуудас (`/app/students/:id`): Ангийн явц, Шалгалт, Тэмдэглэл.
+/// Сурагчийн хуудас (`/app/students/:id`): Ангийн явц, Шалгалт, Тэмдэглэл, Бие даасан явц.
 /// Төлбөрөөс зөвхөн «хэдий хүртэл төлсөн» төлөв (энгийн багш мөнгөн дүн харахгүй).
 class StudentScreen extends StatelessWidget {
   const StudentScreen({super.key, required this.studentId, this.name});
@@ -22,7 +23,7 @@ class StudentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Text(name ?? 'Сурагч'),
@@ -33,6 +34,7 @@ class StudentScreen extends StatelessWidget {
               Tab(text: 'Ангийн явц'),
               Tab(text: 'Шалгалт'),
               Tab(text: 'Тэмдэглэл'),
+              Tab(text: 'Бие даасан явц'),
             ],
           ),
         ),
@@ -41,6 +43,7 @@ class StudentScreen extends StatelessWidget {
             _ProgressTab(studentId: studentId),
             _ExamsTab(studentId: studentId),
             StudentNotesTab(studentId: studentId),
+            IndependentTab(studentId: studentId),
           ],
         ),
       ),

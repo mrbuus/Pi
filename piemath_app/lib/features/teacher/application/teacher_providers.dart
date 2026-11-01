@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/auth/session.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/time/ub_time.dart';
+import '../data/teacher_extras.dart';
 import '../data/teacher_models.dart';
 import '../data/teacher_repository.dart';
 
@@ -14,6 +15,9 @@ final teacherUserIdProvider = Provider<String?>((ref) {
   final s = ref.watch(sessionProvider);
   return s is SignedIn ? (s.user?.id ?? s.auth.userId) : null;
 });
+
+/// Presence цохилт асаалттай эсэх. Тестэд унтраана (`dispose` дахь «гарлаа» хүсэлт FakeAsync-д таймер үлдээдэг).
+final presenceEnabledProvider = Provider<bool>((ref) => true);
 
 final dayBoardProvider = FutureProvider.autoDispose.family<DayBoard, String>(
   (ref, date) => ref.watch(teacherRepositoryProvider).dayBoard(date),
@@ -54,6 +58,29 @@ final assignmentsProvider = FutureProvider.autoDispose.family<List<AssignmentSum
 
 final submissionsProvider = FutureProvider.autoDispose.family<List<Submission>, String>(
   (ref, id) => ref.watch(teacherRepositoryProvider).submissions(id),
+);
+
+typedef ActivityArgs = ({String studentId, int year});
+
+/// Сурагчийн нэг жилийн идэвх (бие даасан явц).
+final studentActivityProvider = FutureProvider.autoDispose.family<ActivityYear, ActivityArgs>(
+  (ref, a) => ref.watch(teacherRepositoryProvider).studentActivity(a.studentId, a.year),
+);
+
+/// Өдрийн хичээлийн тэмдэглэлүүд (`scheduleId`-аар).
+final lessonNotesProvider = FutureProvider.autoDispose.family<Map<String, LessonNote>, String>(
+  (ref, date) => ref.watch(teacherRepositoryProvider).lessonNotes(date),
+);
+
+typedef ClassDay = ({String classId, String date});
+
+/// Ангийн тарах цаг. null = тэмдэглээгүй. 403/404 = энэ ангид хамаарахгүй (UI нууна).
+final dismissalProvider = FutureProvider.autoDispose.family<DismissalInfo?, ClassDay>(
+  (ref, a) => ref.watch(teacherRepositoryProvider).dismissal(a.classId, a.date),
+);
+
+final criteriaProvider = FutureProvider.autoDispose.family<CriteriaPayload, String>(
+  (ref, classId) => ref.watch(teacherRepositoryProvider).criteria(classId),
 );
 
 // ───────── Сурагчийн тэмдэглэл ─────────

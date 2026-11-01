@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import 'teacher_extras.dart';
 import 'teacher_models.dart';
 
 Map<String, Object?> _map(Object? j) => (j! as Map).cast<String, Object?>();
@@ -134,6 +135,74 @@ class TeacherRepository {
 
   /// АНХААР: сервер ХАТУУ устгадаг — дуудахаас өмнө заавал баталгаажуул.
   Future<void> deleteNote(String noteId) => _api.delete<Object?>('/notes/${_enc(noteId)}');
+
+
+  // ───────── Бие даасан явц ─────────
+
+  Future<ActivityYear> studentActivity(String studentId, int year) => _api.get(
+    '/activity/student/${_enc(studentId)}',
+    query: {'year': year},
+    parse: (j) => ActivityYear.fromJson(_map(j)),
+  );
+
+  // ───────── Хичээлийн тэмдэглэл, тарах цаг ─────────
+
+  Future<Map<String, LessonNote>> lessonNotes(String date) =>
+      _api.get('/lesson-records/day', query: {'date': date}, parse: parseLessonDay);
+
+  /// [body] хоосон бол тэмдэглэл цэвэрлэгдэнэ (сервер зөөлөн устгана).
+  Future<void> saveLessonNote(String scheduleId, String date, String body) => _api.put<Object?>(
+    '/lesson-records/${_enc(scheduleId)}/note',
+    body: {'date': date, 'body': body.trim().isEmpty ? null : body.trim()},
+  );
+
+  Future<DismissalInfo?> dismissal(String classId, String date) => _api.get(
+    '/learning-lab/classrooms/${_enc(classId)}/dismissal',
+    query: {'date': date},
+    parse: DismissalInfo.fromJson,
+  );
+
+  /// Цаг «HH:mm» (UB). Өөр түлхүүр илгээхгүй — сервер 400 өгнө.
+  Future<void> saveDismissal(
+    String classId,
+    String date, {
+    required String approximate,
+    String? lastLeft,
+    String? note,
+  }) => _api.put<Object?>(
+    // ApiClient.put-д query байхгүй тул огноог замд шууд бичнэ.
+    '/learning-lab/classrooms/${_enc(classId)}/dismissal?date=${_enc(date)}',
+    body: {
+      'approximateTime': approximate,
+      'lastLeftTime': lastLeft,
+      'note': note == null || note.trim().isEmpty ? null : note.trim(),
+    },
+  );
+
+  // ───────── Эрсдэлийн шалгуур (Багш+ / Админ) ─────────
+
+  Future<CriteriaPayload> criteria(String classId) => _api.get(
+    '/attendance/classrooms/${_enc(classId)}/criteria',
+    parse: (j) => CriteriaPayload.fromJson(_map(j)),
+  );
+
+  Future<CriteriaPayload> saveCriteria(String classId, RiskCriteria c) => _api.put(
+    '/attendance/classrooms/${_enc(classId)}/criteria',
+    body: c.toJson(),
+    parse: (j) => CriteriaPayload.fromJson(_map(j)),
+  );
+
+  // ───────── Presence ─────────
+
+  /// Өөрийгөө «засаж байна» гэж тэмдэглээд бусад засагчдыг буцаана. [leave] — гарах үед.
+  Future<List<PresenceEditor>> presence(String key, {bool leave = false}) => _api.post(
+    '/presence',
+    body: {
+      'keys': [key],
+      if (leave) 'leave': true,
+    },
+    parse: (j) => parsePresence(j, key),
+  );
 
   // ───────── Цаг ─────────
 
