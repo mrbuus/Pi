@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'icons.dart';
 import 'tokens.dart';
 
 /// Апп-ын `ThemeData` — цагаан ба хар горим. Өнгө бүгд [AppColors]-оос.
@@ -58,6 +59,8 @@ abstract final class AppTheme {
       materialTapTargetSize: MaterialTapTargetSize.padded,
       visualDensity: VisualDensity.standard,
       extensions: <ThemeExtension<dynamic>>[c],
+      // Автомат «буцах» товч Lucide дүрстэй (Material сум биш).
+      actionIconTheme: ActionIconThemeData(backButtonIconBuilder: (_) => const Icon(AppIcons.back)),
       appBarTheme: AppBarTheme(
         backgroundColor: c.bg,
         foregroundColor: c.ink,

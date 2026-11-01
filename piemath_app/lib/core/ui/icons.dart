@@ -21,6 +21,25 @@ abstract final class AppIcons {
   static const IconData payments = LucideIcons.wallet;
   static const IconData scan = LucideIcons.scanLine;
   static const IconData qr = LucideIcons.qrCode;
+  static const IconData library = LucideIcons.layers;
+  static const IconData video = LucideIcons.circlePlay;
+  static const IconData exam = LucideIcons.clipboardCheck;
+  static const IconData calendar = LucideIcons.calendar;
+  static const IconData theoryPhoto = LucideIcons.camera;
+  static const IconData card = LucideIcons.creditCard;
+  static const IconData store = LucideIcons.store;
+  static const IconData tools = LucideIcons.shapes;
+  static const IconData goal = LucideIcons.target;
+  static const IconData enroll = LucideIcons.userPlus;
+  static const IconData bank = LucideIcons.building;
+  static const IconData chart = LucideIcons.chartColumn;
+  static const IconData message = LucideIcons.messageSquare;
+  static const IconData draft = LucideIcons.pencil;
+  static const IconData students = LucideIcons.users;
+  static const IconData shield = LucideIcons.shieldCheck;
+  static const IconData history = LucideIcons.clock;
+  static const IconData practice = LucideIcons.dumbbell;
+  static const IconData ranking = LucideIcons.trophy;
 
   // Үйлдэл
   static const IconData back = LucideIcons.chevronLeft;
