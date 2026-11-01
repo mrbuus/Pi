@@ -12,6 +12,9 @@ import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
 import 'board_note_sheet.dart';
+import 'criteria_sheet.dart';
+import 'lesson_extras.dart';
+import 'presence_beat.dart';
 import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
@@ -64,15 +67,35 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
               Text(DateMn.longWithWeekday(day), style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
           ],
         ),
+        actions: [
+          // Эрсдэлийн шалгуур — зөвхөн Багш+ / Админ (сервер `canEditCriteria`).
+          if (s.payload?.canEditCriteria ?? false)
+            IconButton(
+              tooltip: 'Эрсдэлийн шалгуур',
+              constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
+              icon: const Icon(TeacherIcons.criteria),
+              onPressed: () async {
+                final saved = await CriteriaSheet.open(context, classId: widget.classId);
+                if (saved) await ctl.poll();
+              },
+            ),
+        ],
       ),
-      body: switch (s.status) {
-        BoardLoad.loading => const LoadingState(cards: 4),
-        BoardLoad.error => ErrorState(message: s.loadError ?? AppStrings.genericError, onRetry: ctl.reload),
-        BoardLoad.ready => RefreshIndicator(
-          onRefresh: ctl.poll,
-          child: _BoardBody(args: _args, state: s),
-        ),
-      },
+      body: Column(
+        children: [
+          PresenceBeat(classId: _args.classId, date: _args.date),
+          Expanded(
+            child: switch (s.status) {
+              BoardLoad.loading => const LoadingState(cards: 4),
+              BoardLoad.error => ErrorState(message: s.loadError ?? AppStrings.genericError, onRetry: ctl.reload),
+              BoardLoad.ready => RefreshIndicator(
+                onRefresh: ctl.poll,
+                child: _BoardBody(args: _args, state: s),
+              ),
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -156,6 +179,10 @@ class _BoardBody extends ConsumerWidget {
               ),
             ),
           ],
+          const SizedBox(height: AppSpace.md),
+          LessonNotesCard(date: args.date, lessons: p.lessons),
+          const SizedBox(height: AppSpace.sm),
+          DismissalCard(classId: args.classId, date: args.date),
           if (_recorders(state).isNotEmpty) ...[
             const SizedBox(height: AppSpace.md),
             Text('Хэн тэмдэглэсэн', style: context.text.labelMedium?.copyWith(color: c.inkDim)),

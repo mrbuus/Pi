@@ -22,4 +22,9 @@ abstract final class TeacherIcons {
   static const IconData inClass = LucideIcons.school;
   static const IconData holiday = LucideIcons.calendarOff;
   static const IconData clear = LucideIcons.eraser;
+  static const IconData streak = LucideIcons.flame;
+  static const IconData criteria = LucideIcons.slidersHorizontal;
+  static const IconData clock = LucideIcons.clock;
+  static const IconData editors = LucideIcons.users;
+  static const IconData minus = LucideIcons.minus;
 }

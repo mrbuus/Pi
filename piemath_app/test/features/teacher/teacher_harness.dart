@@ -38,6 +38,7 @@ Future<void> pumpTeacher(
   required FakeHttp http,
   SessionState? session,
   Size size = const Size(390, 844),
+  bool presence = false,
 }) async {
   tester.view.physicalSize = size * 3;
   tester.view.devicePixelRatio = 3;
@@ -59,6 +60,7 @@ Future<void> pumpTeacher(
         ...testOverrides(http: http),
         sessionProvider.overrideWith(() => _FixedSession(session ?? teacherSession())),
         teacherTodayProvider.overrideWithValue(teacherToday),
+        presenceEnabledProvider.overrideWithValue(presence),
         paymentTodayProvider.overrideWithValue(teacherToday),
       ],
       retry: (_, _) => null,
