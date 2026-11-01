@@ -46,3 +46,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Firebase / нууц тохиргоо — репо PUBLIC (SECURITY §1)
+google-services.json
+GoogleService-Info.plist
+firebase_defines.json

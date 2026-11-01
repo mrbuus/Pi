@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/auth/session.dart';
 import '../../../core/files/file_image.dart';
 import '../../../core/ui/ui.dart';
+import '../../push/push_service.dart';
 import '../application/exam_controller.dart';
 import '../data/exam_draft_store.dart';
 import '../data/exam_models.dart';
@@ -33,6 +34,7 @@ class ExamScreen extends ConsumerStatefulWidget {
 
 class _ExamScreenState extends ConsumerState<ExamScreen> {
   late final ExamController _c;
+  late final PushQuietController _pushQuiet;
   String? _shownToast;
   bool _navigated = false;
 
@@ -49,10 +51,15 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
       config: ref.read(autosaveConfigProvider),
     )..addListener(_onChange);
     unawaited(_c.load());
+    // Шалгалтын үед push мэдэгдэл харуулахгүй (EXAM-INTEGRITY §3.5).
+    _pushQuiet = ref.read(pushQuietProvider.notifier);
+    Future.microtask(() => _pushQuiet.set(quiet: true));
   }
 
   @override
   void dispose() {
+    final quiet = _pushQuiet;
+    Future.microtask(() => quiet.set(quiet: false));
     _c
       ..removeListener(_onChange)
       ..dispose();

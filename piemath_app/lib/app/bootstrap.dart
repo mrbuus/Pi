@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/auth/session.dart';
 import '../features/exam/data/exam_draft_store.dart';
+import '../features/push/push_service.dart';
 import 'app.dart';
 import 'theme_mode.dart';
 
@@ -26,6 +27,8 @@ Future<void> bootstrap() async {
     // Riverpod 3-ын автомат давталтыг унтраана — давталтыг ApiClient хязгаартай хийдэг.
     retry: (_, _) => null,
   );
+  // Апп асахад push бүртгэлийг сонсож эхэлнэ (сэргээсэн сесс ч бүртгэгдэнэ).
+  container.read(pushSyncProvider);
   unawaited(container.read(sessionProvider.notifier).restore());
   runApp(UncontrolledProviderScope(container: container, child: const PiemathApp()));
 }

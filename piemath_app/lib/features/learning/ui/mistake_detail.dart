@@ -254,10 +254,7 @@ class _MistakeDetailState extends ConsumerState<MistakeDetail> {
                   ),
                 if ((_item.solutionOutline ?? '').isNotEmpty) ...[
                   if (correct != null) const SizedBox(height: AppSpace.md),
-                  SolutionView(
-                    source: _item.solutionOutline,
-                    formulas: [for (final f in _item.formulas) SolutionFormulaRef(slug: f.slug, title: f.title)],
-                  ),
+                  SolutionView(source: _item.solutionOutline),
                 ],
               ],
             ),
