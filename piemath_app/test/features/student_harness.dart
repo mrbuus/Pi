@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:piemath_app/core/auth/current_user.dart';
@@ -7,9 +8,11 @@ import 'package:piemath_app/core/auth/session.dart';
 import 'package:piemath_app/core/auth/token_store.dart';
 import 'package:piemath_app/core/auth/user_role.dart';
 import 'package:piemath_app/core/ui/theme.dart';
+import 'package:piemath_app/features/homework/homework_routes.dart';
 import 'package:piemath_app/features/my_class/my_class_routes.dart';
 import 'package:piemath_app/features/schedule/schedule_routes.dart';
 import 'package:piemath_app/features/student_home/student_home_routes.dart';
+import 'package:piemath_app/features/theory/theory_routes.dart';
 
 import '../helpers/fake_http.dart';
 import '../helpers/test_container.dart';
@@ -38,6 +41,7 @@ Future<GoRouter> pumpStudentRoute(
   UserRole role = UserRole.student,
   bool dark = false,
   Size size = const Size(390, 844),
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size * 2;
   tester.view.devicePixelRatio = 2;
@@ -48,6 +52,8 @@ Future<GoRouter> pumpStudentRoute(
       ...studentHomeRoutes.shell,
       ...myClassRoutes.shell,
       ...scheduleRoutes.shell,
+      ...theoryRoutes.shell,
+      ...homeworkRoutes.shell,
       GoRoute(path: '/app/:a', builder: (_, s) => Scaffold(body: Text('PENDING:${s.uri}'))),
       GoRoute(path: '/app/:a/:b', builder: (_, s) => Scaffold(body: Text('PENDING:${s.uri}'))),
     ],
@@ -58,6 +64,7 @@ Future<GoRouter> pumpStudentRoute(
       overrides: [
         ...testOverrides(http: http),
         sessionProvider.overrideWith(() => FixedSession(signedInAs(role))),
+        ...overrides,
       ],
       retry: (_, _) => null,
       child: MaterialApp.router(

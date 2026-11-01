@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/feature_routes.dart';
 import '../../app/shell/pending_screen.dart';
 import 'ui/day_screen.dart';
+import 'ui/makeup_photos_screen.dart';
 import 'ui/makeup_view.dart';
 import 'ui/my_class_screen.dart';
 import 'ui/test_detail_screen.dart';
@@ -14,7 +15,7 @@ final _dateKey = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 ///
 /// shell: /app/my-class (?tab=lessons|attendance|tests|makeup|schedule),
 /// /app/my-class/day/:date/:classroomId, /app/my-class/tests/:testId, /app/makeup,
-/// /app/makeup/photos/:classroomId/:date (зураг илгээх — homework/core/files-ийн дараа).
+/// /app/makeup/photos/:classroomId/:date (дэвтрийн зураг авч, тайрч илгээх).
 final myClassRoutes = FeatureRoutes(
   shell: [
     GoRoute(
@@ -40,8 +41,10 @@ final myClassRoutes = FeatureRoutes(
     GoRoute(path: '/app/makeup', builder: (context, state) => const MakeupScreen()),
     GoRoute(
       path: '/app/makeup/photos/:classroomId/:date',
-      // Зураг авах/шахах/байршуулах урсгал `core/files`-д бэлэн болмогц солигдоно.
-      builder: (context, state) => const PendingScreen(path: '/app/makeup', title: 'Дэвтрийн зураг'),
+      builder: (context, state) => MakeupPhotosScreen(
+        classroomId: state.pathParameters['classroomId']!,
+        date: state.pathParameters['date']!,
+      ),
     ),
   ],
 );

@@ -8,6 +8,7 @@ import '../../../core/ui/ui.dart';
 import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
 import '../domain/homework_logic.dart';
+import 'composer/notebook_composer_screen.dart';
 import 'homework_icons.dart';
 import 'homework_providers.dart';
 
@@ -29,7 +30,7 @@ class _HomeworkPhotoPanelState extends ConsumerState<HomeworkPhotoPanel> {
   HwDay get day => widget.day;
 
   Future<void> _compose() async {
-    final ok = await PhotoComposerScreen.open(
+    final ok = await NotebookComposerScreen.open(
       context,
       title: 'Дэвтрийн зураг',
       subtitle: '${dayLabel(day.date)}, ${PhotoDocumentLimits.homeworkMaxPages} хүртэл хуудас',

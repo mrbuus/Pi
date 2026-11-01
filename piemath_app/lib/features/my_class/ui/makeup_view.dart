@@ -287,8 +287,6 @@ class _MakeupCardState extends ConsumerState<MakeupCard> {
             PhotoStrip(keys: item.imageKeys, height: 96, semanticPrefix: 'Тэмдэглэлийн зураг')
           else
             Text('Зураг хараахан илгээгээгүй', style: context.text.bodySmall),
-          // TODO(homework agent): зураг авах → шахах → `POST /makeup/me/:c/:d/photos` (core/files upload).
-          // Тэр хүртэл онолын зургийн дэлгэц рүү (`/app/theory`) — тэнд байршуулах урсгал бий.
           const SizedBox(height: AppSpace.sm),
           OutlinedButton.icon(
             icon: const Icon(AppIcons.camera, size: 18),
