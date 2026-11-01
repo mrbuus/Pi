@@ -5,11 +5,12 @@
 
 ## Одоогийн төлөв
 
-- Milestone: **M0, M1, M2, M5 ✅; M3, M4, M7 ◐ (ажилладаг, зарим тест/golden дутуу); M8 эхлэл (зөвхөн загвар)**
+- Milestone: **M0–M5, M7 ✅; M8 багш ✅ (утсанд тохирох гол хэсэг); M6 серверийн тал ✅ (апп тал, Firebase [Э] үлдсэн); M9, M10 —**
 - **Эхлээд унш:** `docs/HOW-TO-CONTINUE.md` — ажлын арга, конвенц, тест, урхи, agent-д өгөх загвар
 - Branch: `piemath-app` (суурь: прод `4d3b648` + номын QR S1)
-- Flutter 3.47.9 stable / Dart 3.13.7 (cloud: `~/flutter`, `export PATH=~/flutter/bin:$PATH`)
-- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 542/542 ногоон (HEAD `51bec33`)
+- Flutter 3.47.9 stable / Dart 3.13.7 (cloud: `~/flutter`; эзний Mac: `export PATH=~/Development/flutter-3.47/bin:$PATH` — хуучин 3.35 тусдаа)
+- Шалгалт: `flutter analyze` 0, `flutter test -x golden` 767/767 (Mac), API 2492/2492. Golden-ыг Mac дээр бүү үүсгэ —
+  `gh workflow run "Piemath апп" --ref piemath-app -f update_goldens=true` → `gh run download <id> -n goldens -D test/goldens`
 - Ноорог PR (зөвхөн CI, merge хийхгүй): https://github.com/mrbuus/Pi/pull/53
 
 ## Ажлын хэв маяг — зэрэгцээ agent (эзэн 2026-11-01)
@@ -49,6 +50,30 @@
 | 6 | Шинэ домэйн (piemath) авах уу — `API_BASE_URL` солих | — | — |
 
 ## Бичлэгүүд
+
+### 2026-11-02 — локал session (эзний Mac), 5 зэрэгцээ agent
+
+Cloud кредит дууссан тул эзний Mac дээр үргэлжлүүлэв. Agent бүр тусдаа worktree (`~/Intern/piemath-wt/<нэр>`, branch `app/<нэр>`),
+үндсэн session нэгтгэж шалгасан.
+
+- **M8 багш** (`660f423`): өнөөдрийн хичээл, самбар (ирц шууд хадгалж бүтэлгүйтвэл буцаана, Хийсэн/Дутуу/Хийгээгүй, ⋯ тэмдэглэл,
+  «Бүгд ирсэн/хийсэн» доор), ангиуд, онлайн даалгавар шалгах, сурагчийн хуудас (төлбөр зөвхөн «хэдий хүртэл»), тэмдэглэл, цаг.
+  Үлдсэн: «Бие даасан явц» таб, хичээлийн тэмдэглэл, тарах цаг, эрсдэлийн шалгуур засах, presence.
+- **Суралцах** (`b15002a`): алдааны дэвтэр, давтлага (review, history), дадлага, томьёо, бүлэг/номын сан/видео (nocookie, дарсны дараа).
+  Үлдсэн: зорилго, бэлэн байдал, төлөвлөгч, learning-lab, номын сангийн бодлого үзэгч. Гэрээний залруулга: `learning.md`-д тэмдэглэх.
+- **Сурагч M3** (`2a12552`): бүх дэлгэцийн widget тест, нөхөх зураг илгээх, шинэ `NotebookComposerScreen` (2/6, тайрах, бүдэг
+  зөвлөмж, дахин авах, эрэмбэлэх, «PDF» үг үгүй), даалгаврын жилийн түүх. Бүдэг зургийн босго (45) утсан дээр шалгах.
+- **Шалгалт/эцэг эх** (`ea59e57`): нууж болох таймер (5 мин-д буцна), «Дараа харах», илгээхийн өмнөх тойм, дүнгийн байр (сонголтоор),
+  `clearExamDrafts`, эцэг эхийн жилийн түүх, санал хүсэлтэд зураг, төлбөр мөр бүр хуулах; дэлгэц уншигчийн 3 алдаа засав.
+- **API** (`ade1aca` + аюулгүй байдлын засвар `c0c9f1d`): шалгалтын SCREENSHOT/RECORDING үйл явдал (+ дүнд тоо), `POST/DELETE /devices`
+  (FCM env байхгүй бол no-op), `POST /auth/google/native`, `POST /auth/apple` (nonce заавал, токен нэг удаа, имэйлээр автомат
+  холболтгүй), бүртгэл устгах ХҮСЭЛТ (`/me/deletion-request`, админ). Миграци `20261102120000_mobile_app_support` (3 шинэ хүснэгт).
+  Env: `GOOGLE_NATIVE_CLIENT_IDS`, `APPLE_CLIENT_IDS`, `FCM_*`. Прод-д гаргаагүй.
+- **Үндсэн session:** UX токен (брэнд рүү хазайсан саарал, 48dp, iOS Reduce Motion), CI golden шинэчлэх гар ажиллагаа,
+  `signOutCleanupsProvider` (гарахад шалгалтын ноорог устгана), төлбөрийн картын 403 тайлбар, цэс.
+- **Дараагийн алхам:** (1) апп-д push (`firebase_messaging`, `POST /devices`) — Firebase [Э]; (2) Google/Apple native товч;
+  (3) M8 үлдсэн табууд; (4) «Нэгтгэх ажил» (feature-local дүрс → `AppIcons`, мэдэгдлийн badge); (5) M10 дэлгүүрт бэлдэх;
+  (6) iOS build — Xcode суулгах эсвэл CI-ийн `ios` (workflow_dispatch).
 
 ### 2026-11-01 — ЭЦСИЙН ТАЙЛАН (cloud session, кредит дуусав)
 
