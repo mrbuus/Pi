@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:piemath_app/app/shell/pending_screen.dart';
+import 'package:piemath_app/app/router.dart';
 import 'package:piemath_app/core/auth/session.dart';
 import 'package:piemath_app/core/auth/token_store.dart';
 import 'package:piemath_app/core/auth/user_role.dart';
@@ -69,9 +69,9 @@ void main() {
     expect((c.read(sessionProvider) as SignedIn).role, UserRole.student);
     expect(store.lastPersist, isTrue);
     expect(prefs.identifier, '99112233');
-    // Сурагчийн нүүр хараахан хийгдээгүй — «удахгүй» дэлгэц, нэвтрэх дэлгэц биш.
+    // Сурагчийн нүүр рүү шилжинэ.
     expect(find.byType(LoginScreen), findsNothing);
-    expect(find.byType(PendingScreen), findsOneWidget);
+    expect(c.read(routerProvider).routerDelegate.currentConfiguration.uri.path, '/app/student');
   });
 
   testWidgets('«Намайг сана» авбал remember: false, токен зөвхөн санах ойд', (tester) async {
@@ -142,7 +142,6 @@ void main() {
     expect(find.byType(LoginScreen), findsOneWidget);
     await fillAndSubmit(tester);
     expect(c.read(sessionProvider), isA<SignedIn>());
-    final pending = tester.widget<PendingScreen>(find.byType(PendingScreen));
-    expect(pending.path, '/app/notifications');
+    expect(c.read(routerProvider).routerDelegate.currentConfiguration.uri.path, '/app/notifications');
   });
 }
