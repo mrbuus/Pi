@@ -5,15 +5,36 @@
 
 ## Одоогийн төлөв
 
-- Milestone: **M0** — M0.1–M0.3 дууссан, дараагийнх M0.4
+- Milestone: **M0 дууссан, M2 дууссан.** Дараа нь M1, M3, M4, M5, M7, M8 — зэрэгцээ agent-уудаар (доор «Ажлын хэв маяг»)
 - Branch: `piemath-app` (суурь: прод `4d3b648` + номын QR S1)
 - Flutter 3.47.9 stable / Dart 3.13.7 (cloud: `~/flutter`, `export PATH=~/flutter/bin:$PATH`)
-- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` бүгд ногоон
+- Шалгалт: `flutter analyze` 0 асуудал, `flutter test` 252/252 ногоон
+- Ноорог PR (зөвхөн CI, merge хийхгүй): https://github.com/mrbuus/Pi/pull/53
+
+## Ажлын хэв маяг — зэрэгцээ agent (эзэн 2026-11-01)
+
+Эзний хүсэлтээр ажлыг хүндрэлээр нь хувааж хэд хэдэн agent зэрэг ажиллуулна. Зөрчилдөхгүйн дүрэм:
+- Agent бүр тусдаа git worktree-д (`.claude/worktrees/…`, `.git/info/exclude`-д), ЗӨВХӨН өөрт оноосон хавтсанд.
+  Push хийхгүй — үндсэн session нэгтгэж (merge), analyze/test шалгаад push хийнэ.
+- Нийтлэг файл (`PROGRESS.md`, `PARITY.md`, `lib/app/**`, `lib/core/ui/**`, `test/helpers/` дахь одоо байгаа файл)-ыг
+  зөвхөн үндсэн session засна. Feature бүр маршрутаа өөрийн `lib/features/<x>/<x>_routes.dart`-д.
+- Worktree хуучин `main` commit-оос үүсдэг тул agent эхлээд `git reset --hard <piemath-app HEAD>` хийнэ.
+- Widget тестэд HTTP дуудлагыг шууд `await` хийвэл FakeAsync-д гацна — `pump()` хий, эсвэл `tester.runAsync`.
 
 ## Mac дээр шалгах (Linux cloud-д боломжгүй)
 
 - [ ] `flutter build ios --debug --no-codesign` амжилттай (bundle `mn.piemath.app`, нэр «Piemath»)
 - [ ] Golden тест Linux-д үүсгэсэн — Mac дээр `flutter test -x golden`, эсвэл тусдаа `--update-goldens`
+- [ ] iOS: `AppDelegate.swift` доторх `ExamGuardPlugin` compile болно; скриншот → `screenshot`, Control Center бичлэг/AirPlay →
+      `recordingStarted/Stopped`, шалгалт эхлэхэд аль хэдийн бичиж байвал мэдэгдэнэ
+- [ ] iOS: апп background-д байхад гарах тоолуурын 2с таймер ажиллах уу, эсвэл буцаж ирэхэд тоологдох уу
+- [ ] iOS: inline томьёоны baseline, KaTeX фонт; бүтэн дэлгэцийн зургийг чимхэж томруулах
+- [ ] Android төхөөрөмж: шалгалтын үед скриншот/бичлэг хар, recent apps preview хоосон; `exit()`-ийн дараа хэвийн
+- [ ] Android 14+: скриншот callback (FLAG_SECURE асаалттай үед), Android 15+: бичлэгийн callback
+- [ ] Android release (minify) HTTPS-д хүрч, токен хадгална; Android 8/9 (API 26–28) дээр асна; debug нь `10.0.2.2`-ийн локал API-д
+- [ ] Android 12+: төхөөрөмж шилжүүлэх/сэргээхэд токен үлдэхгүй (дахин нэвтэрнэ)
+- [ ] Release APK (`--split-per-abi`) хэмжээ; Lucide variable фонт (~1.4MB APK дотор) багтсан эсэх
+- [ ] 2 GB RAM Android дээр бодлогын жагсаалт гүйлгэх 60fps
 
 ## Эзний шийдвэр хүлээж буй зүйлс
 
@@ -27,6 +48,42 @@
 | 6 | Шинэ домэйн (piemath) авах уу — `API_BASE_URL` солих | — | — |
 
 ## Бичлэгүүд
+
+### 2026-11-01 — M0.4, M0.5, M0.6, M2, API гэрээ (cloud session, зэрэгцээ agent)
+
+- **M0.4** (`5280b2b`): `core/config/env.dart` (API_BASE_URL, release-д зөвхөн HTTPS), `core/time/` (UbDateTime UTC+8,
+  `mnWeekdayFromJs`/`jsWeekdayFromMn`, `DateMn` = вэбийн dateMn/relativeTimeMn), `core/format/person_name.dart`
+  (shortName, staffName «+», rosterNames), `core/network/` (ApiClient: Bearer, 12с→jitter→60с retry ЗӨВХӨН GET/
+  `retry:true`, GET dedupe, токен солигдвол хариу хаях, 401 → session.expire; ApiError зөвхөн монгол мессеж;
+  reachability), `core/auth/` (TokenStore secure/memory, SessionController, CurrentUser freezed, UserRole).
+- **M0.5** (`d9f1165`): `lib/app/` — router (redirect цэвэр функц `appRedirect`, safeNext, `/q/<код>`), `FeatureRoutes`
+  (public/shell/fullscreen), `lib/features/*/<x>_routes.dart` 15 feature-ийн хоосон файл, AppShell (доод таб / 768dp+
+  rail), NavData (= вэбийн nav-data.ts), MoreScreen («Бусад», өнгөний горим, гарах), PendingScreen (хийгдээгүй зам →
+  «вэбээр нээх»), AppBackButton, SplashScreen, bootstrap. `features/auth/ui/login_screen.dart` — ТҮР (M1 солино).
+- **M0.6 + платформ** (agent, `1c9c014`): Android манифест (INTERNET main-д, cleartext хориг, allowBackup=false,
+  network security config, DETECT_SCREEN_CAPTURE/RECORDING), release signing `key.properties`-оос (жишээ файл),
+  minify. CI `.github/workflows/piemath-app.yml` (analyze, test, Android debug build; iOS зөвхөн гараар).
+  `lib/core/integrity/` — ExamGuard, MethodChannelExamGuard (Android FLAG_SECURE + скриншот/бичлэгийн callback,
+  iOS `AppDelegate.swift` дотор ExamGuardPlugin), LeaveTracker (2с-ээс богиныг тоолохгүй, LEAVE/RETURN, warn 1,
+  auto-submit 3, серверийн leaveCount-оор синк). **Android SDK суулгаж чадаагүй** (proxy `dl.google.com`-ийг хаадаг) —
+  APK-г CI дээр барина. Kotlin-ыг kotlinc-ээр compile хийж шалгасан.
+- **M2** (agent, `1f6f31f`): `lib/core/math/` (`math.dart` нэг импорт) — MathText (вэбийн задлал, inline/display,
+  wrap, parse-ийн pool, алдааны badge), tex_normalize, ChoiceGrid (5 / 3+2 / 1, өнчин үгүй), ProblemFigure (skeleton,
+  403 тайлбар, retry, бүтэн дэлгэцийн zoom). **LaTeX аудит:** 19,352 томьёо, 99.97% → 100% (`docs/LATEX-AUDIT.md`,
+  `flutter test tool/latex_audit/latex_audit_test.dart`). Сангийн 5 эвдэрсэн томьёо (200V3-ULAMJLALYN_HEREGLEE-10,
+  200V2-UTGYN_MUJ-01-A-01) — ӨС-д засах. Inline томьёог IntrinsicWidth/Height дотор бүү хий.
+- **API гэрээ** (2 agent): `docs/api-contract/` 12 файл (~130 endpoint) — дэлгэц бичихээс өмнө ЗААВАЛ унш.
+  Гол урхи: хуваарийн бүх `weekday` JS (0=Ням); `"YYYY-MM-DD"` vs `…T00:00:00.000Z` (эхний 10 тэмдэгт);
+  `/files` S3 дээр 302 → presigned (Authorization-ийг S3 руу бүү дамжуул); `StudentProfile.type` = `CLASSROOM|ONLINE`;
+  нууц үг сольсны дараа шинэ токен (7 хоног); вэб `POST /tests/:id/heartbeat`-г дууддаггүй (PATCH session-ээр
+  keepalive); A/B хувилбарын hash-ийг вэбтэй яг ижил; хугацаа дууссан шалгалтыг сервер зөвхөн дараагийн дуудлагаар
+  илгээдэг; `/schedule/days` цуцалсныг тооцдоггүй — өнөөдрийн хичээл `/attendance/board`-оос.
+- `core/files/file_image.dart` — `fileImageProvider` гэрээ (одоо NetworkImage stub; homework agent бүрэн болгоно).
+- Тест 252/252, analyze 0.
+- **[A] API-д дараа хэрэгтэй:** `SaveSessionDto`-ийн event-д `SCREENSHOT`, `RECORDING_START`, `RECORDING_STOP`
+  (leaveCount өсгөхгүй), багшийн дүнгийн хуудсанд харуулах.
+- **Дараагийн алхам:** feature agent-ууд — M1 нэвтрэлт/профайл, M3 сурагч (нүүр, хичээл, хуваарь), M3 даалгавар +
+  онол + core/files, M4 шалгалт, M5 QR + ном, M7 эцэг эх + мэдэгдэл + төлбөр, M8 багш.
 
 ### 2026-11-01 — M0.1–M0.3 (cloud session)
 
