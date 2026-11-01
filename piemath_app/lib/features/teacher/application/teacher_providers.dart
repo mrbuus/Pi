@@ -6,6 +6,7 @@ import '../../../core/time/ub_time.dart';
 import '../data/teacher_extras.dart';
 import '../data/teacher_models.dart';
 import '../data/teacher_repository.dart';
+import '../domain/test_run_row.dart';
 
 /// «Өнөөдөр» (UB). Тестэд тогтмол огноогоор солино.
 final teacherTodayProvider = Provider<UbDateTime>((ref) => UbDateTime.now());
@@ -46,6 +47,10 @@ final studentProgressProvider = FutureProvider.autoDispose
 
 final testResultsProvider = FutureProvider.autoDispose.family<List<StudentTestResult>, String>(
   (ref, id) => ref.watch(teacherRepositoryProvider).testResults(id),
+);
+
+final testRunProvider = FutureProvider.autoDispose.family<List<TestRunRow>, String>(
+  (ref, testId) => ref.watch(teacherRepositoryProvider).testRun(testId),
 );
 
 final teacherHoursProvider = FutureProvider.autoDispose.family<TeacherHours, String>(

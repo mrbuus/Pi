@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
@@ -213,7 +214,11 @@ class _ExamsTab extends ConsumerWidget {
           itemBuilder: (context, i) {
             final r = sorted[i];
             final at = parseApiInstant(r.createdAt);
+            final testId = r.test?.id;
             return AppCard(
+              onTap: testId == null || testId.isEmpty
+                  ? null
+                  : () => context.push('/app/teacher/tests/${Uri.encodeComponent(testId)}/results', extra: r.test?.title),
               child: Row(
                 children: [
                   Expanded(

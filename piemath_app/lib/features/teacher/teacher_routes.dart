@@ -7,6 +7,7 @@ import 'ui/classes_screen.dart';
 import 'ui/student_screen.dart';
 import 'ui/teacher_home_screen.dart';
 import 'ui/teacher_hours_screen.dart';
+import 'ui/test_run_screen.dart';
 
 /// `teacher` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
@@ -15,6 +16,7 @@ import 'ui/teacher_hours_screen.dart';
 /// - `/app/teacher-hours` — цагийн бүртгэл.
 /// - `/app/classes`, `/app/classes/:id` — ангиуд, ангийн самбар.
 /// - `/app/classes/:id/assignments[/:assignmentId]` — онлайн даалгавар шалгах.
+/// - `/app/teacher/tests/:id/results` — шалгалтын дүн + бүрэн бүтэн байдлын тоо (`extra` = шалгалтын нэр).
 /// - `/app/students/:id` — сурагчийн хуудас (`extra` = харуулах нэр).
 final teacherRoutes = FeatureRoutes(
   shell: [
@@ -38,6 +40,13 @@ final teacherRoutes = FeatureRoutes(
       path: '/app/classes/:id/assignments/:assignmentId',
       builder: (_, s) => SubmissionsScreen(
         assignmentId: s.pathParameters['assignmentId'] ?? '',
+        title: s.extra is String ? s.extra! as String : null,
+      ),
+    ),
+    GoRoute(
+      path: '/app/teacher/tests/:id/results',
+      builder: (_, s) => TestRunScreen(
+        testId: s.pathParameters['id'] ?? '',
         title: s.extra is String ? s.extra! as String : null,
       ),
     ),

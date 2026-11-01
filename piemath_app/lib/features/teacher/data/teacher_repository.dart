@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import '../domain/test_run_row.dart';
 import 'teacher_extras.dart';
 import 'teacher_models.dart';
 
@@ -116,6 +117,10 @@ class TeacherRepository {
 
   Future<List<StudentTestResult>> testResults(String id) =>
       _api.get('/students/${_enc(id)}/test-results', parse: (j) => _list(j, StudentTestResult.fromJson));
+
+  /// Нэг шалгалтын бүх сурагчийн дүн + бүрэн бүтэн байдлын тоо (`leave/screenshot/recording`).
+  Future<List<TestRunRow>> testRun(String testId) =>
+      _api.get('/tests/${_enc(testId)}/results', parse: (j) => _list(j, TestRunRow.fromJson));
 
   /// Зөвхөн GENERAL — төлбөрийн тэмдэглэл энгийн багшид харагдахгүй (гэрээ §6.1).
   Future<List<StudentNote>> notes(String studentId) => _api.get(
