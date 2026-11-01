@@ -11,6 +11,8 @@ abstract final class SupportIcons {
   static const IconData suggestion = LucideIcons.lightbulb;
   static const IconData question = LucideIcons.messageSquare;
   static const IconData feedback = LucideIcons.fileText;
+  static const IconData attachImage = LucideIcons.imagePlus;
+  static const IconData retryUpload = LucideIcons.refreshCw;
   static const IconData phone = LucideIcons.phone;
   static const IconData mail = LucideIcons.mail;
 }

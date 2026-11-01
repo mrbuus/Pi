@@ -272,6 +272,14 @@ class _SubmitSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = controller;
     final unanswered = c.unansweredCount;
+    final unansweredIdx = [
+      for (var i = 0; i < c.problems.length; i++)
+        if (!isAnswered(c.answers[c.problems[i].id])) i,
+    ];
+    final flaggedIdx = [
+      for (var i = 0; i < c.problems.length; i++)
+        if (c.flagged.contains(c.problems[i].id)) i,
+    ];
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xl),
@@ -281,38 +289,49 @@ class _SubmitSheet extends StatelessWidget {
             children: [
               Text('Илгээхээсээ өмнө шалгах', style: context.text.titleLarge),
               const SizedBox(height: AppSpace.sm),
+              Text(
+                unanswered > 0 ? 'Илгээх үү? $unanswered бодлого хариулаагүй байна' : 'Илгээх үү? Бүх бодлогод хариулсан байна',
+                style: context.text.bodyMedium,
+              ),
+              const SizedBox(height: AppSpace.xs),
               Meta(
                 items: [
                   '${c.answeredCount} хариулсан',
                   if (unanswered > 0) '$unanswered хариулаагүй',
-                  if (c.flagged.isNotEmpty) '${c.flagged.length} тэмдэглэсэн',
+                  if (flaggedIdx.isNotEmpty) '${flaggedIdx.length} дараа харах',
                 ],
               ),
-              const SizedBox(height: AppSpace.lg),
-              NavigatorGrid(
-                problems: c.problems,
-                answers: c.answers,
-                flagged: c.flagged,
-                current: c.index,
-                partIIStart: c.partIIStart,
-                onJump: (i) {
-                  Navigator.pop(context, false);
-                  c.goTo(i);
-                },
-              ),
+              if (unansweredIdx.isNotEmpty) ...[
+                const SizedBox(height: AppSpace.lg),
+                NumberJumpList(
+                  title: 'Хариулаагүй',
+                  indexes: unansweredIdx,
+                  onJump: (i) {
+                    Navigator.pop(context, false);
+                    c.goTo(i);
+                  },
+                ),
+              ],
+              if (flaggedIdx.isNotEmpty) ...[
+                const SizedBox(height: AppSpace.lg),
+                NumberJumpList(
+                  title: 'Дараа харах',
+                  indexes: flaggedIdx,
+                  onJump: (i) {
+                    Navigator.pop(context, false);
+                    c.goTo(i);
+                  },
+                ),
+              ],
               if (c.submitError != null) ...[
                 const SizedBox(height: AppSpace.lg),
                 Text(c.submitError!, style: context.text.bodyMedium?.copyWith(color: context.colors.error)),
               ],
               const SizedBox(height: AppSpace.xl),
-              if (unanswered > 0)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpace.md),
-                  child: Text(
-                    '$unanswered бодлого хариулаагүй байна. Илгээсний дараа засах боломжгүй.',
-                    style: context.text.bodyMedium,
-                  ),
-                ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpace.md),
+                child: Text('Илгээсний дараа засах боломжгүй.', style: context.text.bodySmall),
+              ),
               FilledButton.icon(
                 icon: const Icon(ExamIcons.send, size: 18),
                 label: const Text('Шалгалт илгээх'),

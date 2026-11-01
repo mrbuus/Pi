@@ -159,6 +159,15 @@ class _ResultBody extends ConsumerWidget {
               onPressed: () => context.push('/app/tests/${d.testId}/review'),
             ),
         ],
+        if (!d.absent && d.result != null) ...[
+          const SizedBox(height: AppSpace.sm),
+          // Анхдагчаар ангийн байр харуулахгүй — хэрэглэгч хүсвэл л нээнэ (UX-RESEARCH §7).
+          TextButton.icon(
+            icon: const Icon(ExamIcons.ranking, size: 18),
+            label: const Text('Миний байрыг харах'),
+            onPressed: () => context.push('/app/tests/${d.testId}/ranking'),
+          ),
+        ],
         const SizedBox(height: AppSpace.lg),
         TextButton(onPressed: () => _toList(context), child: const Text('Шалгалтын жагсаалт руу')),
       ],
@@ -212,6 +221,7 @@ class _TopicBar extends StatelessWidget {
     final c = context.colors;
     final p = topic.percent ?? (topic.max > 0 ? (topic.earned / topic.max * 100).round() : 0);
     return Semantics(
+      container: true,
       label: '${topic.name}: $p хувь',
       excludeSemantics: true,
       child: Column(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -48,11 +50,11 @@ class PayInfoCard extends StatelessWidget {
           Text(OrgInfo.centerName, style: context.text.bodySmall),
           const SizedBox(height: AppSpace.sm),
           Divider(height: 1, color: context.colors.line),
-          const _InfoRow(label: 'Дансны дугаар', value: BankInfo.account, copy: true),
+          _InfoRow(label: 'Дансны дугаар', value: BankInfo.account, display: groupChars(BankInfo.account), copy: true),
           Divider(height: 1, color: context.colors.line),
-          const _InfoRow(label: 'IBAN', value: BankInfo.iban, copy: true),
+          _InfoRow(label: 'IBAN', value: BankInfo.iban, display: groupChars(BankInfo.iban), copy: true),
           Divider(height: 1, color: context.colors.line),
-          const _InfoRow(label: 'Хүлээн авагч, ${BankInfo.name}', value: BankInfo.holder),
+          const _InfoRow(label: 'Хүлээн авагч', value: BankInfo.holder, copy: true),
           Divider(height: 1, color: context.colors.line),
           _InfoRow(label: 'Гүйлгээний утга', value: note, copy: true),
           Divider(height: 1, color: context.colors.line),
@@ -72,10 +74,15 @@ class PayInfoCard extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value, this.copy = false});
+  const _InfoRow({required this.label, required this.value, this.display, this.copy = false});
 
   final String label;
+
+  /// Хуулах утга (бүлэглээгүй).
   final String value;
+
+  /// Дэлгэцэд харуулах хэлбэр (бүлэглэсэн цифр); null бол [value].
+  final String? display;
   final bool copy;
 
   @override
@@ -89,7 +96,7 @@ class _InfoRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: context.text.bodySmall),
-                SelectableText(value, style: context.text.titleSmall),
+                SelectableText(display ?? value, style: context.text.titleSmall),
               ],
             ),
           ),
@@ -118,7 +125,7 @@ class _Amount extends StatelessWidget {
   }
 }
 
-/// «Хуулах» товч — санах ойд хуулаад «Хуулсан» гэж snackbar-аар мэдэгдэнэ.
+/// «Хуулах» товч — санах ойд хуулаад хөнгөн haptic өгч «Хуулагдлаа» гэж snackbar-аар мэдэгдэнэ.
 class CopyButton extends StatelessWidget {
   const CopyButton({super.key, required this.text, required this.label, this.caption = 'Хуулах'});
 
@@ -128,11 +135,22 @@ class CopyButton extends StatelessWidget {
   final String label;
   final String caption;
 
+  Future<void> _copy(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    unawaited(HapticFeedback.lightImpact());
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('$label хуулагдлаа')));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
       label: '$label хуулах',
+      // excludeSemantics нь доторх товчны үйлдлийг нууна — tap-ыг энд давхар зарлана (TalkBack/VoiceOver).
+      onTap: () => unawaited(_copy(context)),
       excludeSemantics: true,
       child: OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
@@ -141,13 +159,7 @@ class CopyButton extends StatelessWidget {
         ),
         icon: Icon(PaymentIcons.copy, size: 16, color: context.colors.inkDim),
         label: Text(caption),
-        onPressed: () async {
-          await Clipboard.setData(ClipboardData(text: text));
-          if (!context.mounted) return;
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text('$label хуулсан')));
-        },
+        onPressed: () => unawaited(_copy(context)),
       ),
     );
   }

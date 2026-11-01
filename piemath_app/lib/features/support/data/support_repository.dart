@@ -56,6 +56,7 @@ class SupportRepository {
     required String subject,
     required String body,
     String? contextPath,
+    List<String> attachmentKeys = const [],
   }) =>
       _api.post(
         '/feedback',
@@ -65,6 +66,7 @@ class SupportRepository {
           'subject': subject,
           'body': body,
           'contextPath': ?contextPath,
+          if (attachmentKeys.isNotEmpty) 'attachmentKeys': attachmentKeys,
         },
         retry: true,
         parse: (j) => FeedbackTicket.fromJson(_map(j)),

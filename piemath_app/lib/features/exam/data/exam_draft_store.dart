@@ -81,6 +81,21 @@ class PrefsExamDraftStore implements ExamDraftStore {
   Future<void> clear(String userId, String testId) => _prefs.remove(_key(userId, testId));
 }
 
+/// Гарах (sign-out) үед ХЭРЭГЛЭГЧ БҮРИЙН илгээгээгүй шалгалтын ноорогийг төхөөрөмжөөс устгана
+/// (`docs/SECURITY.md` §3). `SessionController.signOut`-оос дуудна. [prefs] өгөөгүй бол
+/// `SharedPreferences.getInstance()`. Буцаах: устгасан түлхүүрийн тоо.
+Future<int> clearExamDrafts([SharedPreferences? prefs]) async {
+  final p = prefs ?? await SharedPreferences.getInstance();
+  final keys = [
+    for (final k in p.getKeys())
+      if (k.startsWith(PrefsExamDraftStore.keyPrefix)) k,
+  ];
+  for (final k in keys) {
+    await p.remove(k);
+  }
+  return keys.length;
+}
+
 /// Тестэд.
 class MemoryExamDraftStore implements ExamDraftStore {
   final data = <String, ExamDraft>{};

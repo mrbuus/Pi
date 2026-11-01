@@ -14,6 +14,7 @@ import 'acknowledge_sheet.dart';
 import 'exam_result_card.dart';
 import 'mark_chip.dart';
 import 'parent_icons.dart';
+import 'parent_list_card.dart';
 
 /// Нэг хүүхдийн самбар (вэбийн `ChildPanel`): дүн, ирц, даалгавар, төлбөр.
 /// Бүх тооцоо (оноо, төлбөрийн хугацаа) — сервер; энд зөвхөн харуулна.
@@ -88,6 +89,12 @@ class ChildPanel extends ConsumerWidget {
                 icon: const Icon(ParentIcons.weekly, size: 18),
                 label: const Text('Долоо хоногийн тайлан'),
               ),
+              const SizedBox(height: AppSpace.sm),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/app/parent/history?studentId=${Uri.encodeComponent(child.id)}'),
+                icon: const Icon(ParentIcons.history, size: 18),
+                label: const Text('Жилийн түүх'),
+              ),
             ],
           ),
         ),
@@ -96,11 +103,11 @@ class ChildPanel extends ConsumerWidget {
           ExamResultCard(result: results.first, onAcknowledge: () => acknowledge(results.first)),
         ],
         const SectionHeader(title: 'Сүүлийн ирц'),
-        _ListCard(
+        ParentListCard(
           empty: 'Ирцийн бүртгэл хараахан алга',
           children: [
             for (final a in child.attendances)
-              _DatedRow(
+              ParentDatedRow(
                 date: dayLabel(a.date),
                 subtitle: a.classroom.name,
                 trailing: MarkLabel.attendance(context, AttendanceMark.fromApi(a.status)),
@@ -110,7 +117,7 @@ class ChildPanel extends ConsumerWidget {
         const SectionHeader(title: 'Даалгавар'),
         _HomeworkCard(child: child),
         const SectionHeader(title: 'Шалгалтын дүн'),
-        _ListCard(
+        ParentListCard(
           empty: 'Дүн хараахан бүртгээгүй',
           children: [
             for (final r in results)
@@ -124,7 +131,7 @@ class ChildPanel extends ConsumerWidget {
         const SectionHeader(title: 'Төлбөр'),
         PaidUntilCard(studentId: child.id, compact: true, studentName: child.firstName),
         const SizedBox(height: AppSpace.md),
-        _ListCard(
+        ParentListCard(
           empty: 'Төлбөрийн бүртгэл хараахан алга',
           children: [
             for (final p in child.payments)
@@ -154,12 +161,12 @@ class _HomeworkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Танхим: багшийн тэмдэглэгээ; онлайн: илгээлт. Тэмдэглэгээ байвал түүнийг (STATUS §7.11).
     final useMarks = child.dailyHomeworkMarks.isNotEmpty || !child.isOnline;
-    return _ListCard(
+    return ParentListCard(
       empty: 'Даалгаврын бүртгэл хараахан алга',
       children: useMarks
           ? [
               for (final m in child.dailyHomeworkMarks)
-                _DatedRow(
+                ParentDatedRow(
                   date: dayLabel(m.date),
                   subtitle: m.comment == null || m.comment!.isEmpty ? m.classroom.name : '${m.classroom.name}: ${m.comment}',
                   trailing: MarkLabel.homework(context, HomeworkMark.fromApi(m.status)),
@@ -167,7 +174,7 @@ class _HomeworkCard extends StatelessWidget {
             ]
           : [
               for (final s in child.submissions)
-                _DatedRow(
+                ParentDatedRow(
                   date: dayLabel(s.submittedAt ?? s.assignment.dueDate),
                   subtitle: s.assignment.title,
                   trailing: MarkLabel.homework(context, HomeworkMark.fromApi(s.state)),
@@ -214,64 +221,6 @@ class _ResultRow extends StatelessWidget {
             Text('Онлайн дүнгийн мэдээлэл', style: context.text.bodySmall),
         ],
       ),
-    );
-  }
-}
-
-class _DatedRow extends StatelessWidget {
-  const _DatedRow({required this.date, required this.subtitle, required this.trailing});
-
-  final String date;
-  final String subtitle;
-  final Widget trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(date, style: context.text.titleSmall),
-                if (subtitle.isNotEmpty) Text(subtitle, style: context.text.bodySmall),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpace.sm),
-          Flexible(child: trailing),
-        ],
-      ),
-    );
-  }
-}
-
-/// Мөрүүдтэй карт; хоосон бол тайлбар.
-class _ListCard extends StatelessWidget {
-  const _ListCard({required this.children, required this.empty});
-
-  final List<Widget> children;
-  final String empty;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.sm),
-      child: children.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
-              child: Text(empty, style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim)),
-            )
-          : Column(
-              children: [
-                for (var i = 0; i < children.length; i++) ...[
-                  if (i > 0) Divider(height: 1, color: context.colors.line),
-                  children[i],
-                ],
-              ],
-            ),
     );
   }
 }
