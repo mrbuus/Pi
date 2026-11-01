@@ -1,7 +1,14 @@
+import 'package:go_router/go_router.dart';
+
 import '../../app/feature_routes.dart';
+import 'ui/student_payments_screen.dart';
 
 /// `payments` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
-/// Төлөвлөсөн замууд (вэбийн замтай ижил) — shell: /app/student/payments, /app/payments.
-/// Бүртгээгүй `/app/...` замд shell автоматаар «удахгүй» дэлгэц (PendingScreen) харуулна.
-const paymentsRoutes = FeatureRoutes();
+/// - `/app/student/payments` — сурагчийн төлбөр (хэдий хүртэл, данс, түүх).
+/// - `/app/payments` — ажилтны төлбөрийн ledger (Багш+/Админ) одоогоор PendingScreen («вэбээр нээх», M9).
+final paymentsRoutes = FeatureRoutes(
+  shell: [
+    GoRoute(path: '/app/student/payments', builder: (_, _) => const StudentPaymentsScreen()),
+  ],
+);

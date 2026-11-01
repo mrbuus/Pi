@@ -1,7 +1,23 @@
+import 'package:go_router/go_router.dart';
+
 import '../../app/feature_routes.dart';
+import 'ui/parent_home_screen.dart';
+import 'ui/weekly_report_screen.dart';
 
 /// `parent` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
-/// Төлөвлөсөн замууд (вэбийн замтай ижил) — shell: /app/parent, /app/parent/weekly, /app/dismissal.
-/// Бүртгээгүй `/app/...` замд shell автоматаар «удахгүй» дэлгэц (PendingScreen) харуулна.
-const parentRoutes = FeatureRoutes();
+/// - `/app/parent` — хүүхдийн самбар (хүүхэд сонгох, дүн, ирц, даалгавар, төлбөр, холбох).
+/// - `/app/parent/weekly?studentId=&week=` — 7 хоногийн тайлан.
+/// `/app/dismissal` нь эцэг эхийн чөлөө БИШ (багшийн «анги тарах цаг», api-contract/parent.md) — M8.
+final parentRoutes = FeatureRoutes(
+  shell: [
+    GoRoute(path: '/app/parent', builder: (_, _) => const ParentHomeScreen()),
+    GoRoute(
+      path: '/app/parent/weekly',
+      builder: (_, state) => WeeklyReportScreen(
+        initialStudentId: state.uri.queryParameters['studentId'],
+        initialWeek: state.uri.queryParameters['week'],
+      ),
+    ),
+  ],
+);
