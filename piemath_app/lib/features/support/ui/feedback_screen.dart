@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/files/file_uploader.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
@@ -8,6 +9,7 @@ import '../../../core/ui/ui.dart';
 import '../data/support_models.dart';
 import '../data/support_repository.dart';
 import '../domain/feedback_form.dart';
+import 'feedback_attachments.dart';
 import 'support_icons.dart';
 
 final myFeedbackProvider = FutureProvider.autoDispose<FeedbackPage>(
@@ -15,7 +17,7 @@ final myFeedbackProvider = FutureProvider.autoDispose<FeedbackPage>(
 );
 
 /// Санал, асуулт, алдаа (`/app/feedback`, вэбийн `FeedbackWorkspace`): шинэ хүсэлт + түүх.
-/// Зураг хавсаргах нь `core/files` байршуулалт бэлэн болмогц нэмэгдэнэ.
+/// Зураг (3 хүртэл) хавсаргаж болно — `FileUploader`-аар байршуулж `attachmentKeys` илгээнэ.
 class FeedbackScreen extends ConsumerStatefulWidget {
   const FeedbackScreen({super.key});
 
@@ -32,9 +34,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   bool _sending = false;
   String? _message;
   bool _failed = false;
+  late final FeedbackAttachmentsController _attachments = FeedbackAttachmentsController(ref.read(fileUploaderProvider));
 
   @override
   void dispose() {
+    _attachments.dispose();
     _subject.dispose();
     _body.dispose();
     super.dispose();
@@ -42,9 +46,19 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
   Future<void> _send() async {
     if (_sending || !(_formKey.currentState?.validate() ?? false)) return;
+    if (_attachments.uploading || _attachments.hasFailed) {
+      setState(() {
+        _failed = true;
+        _message = _attachments.uploading
+            ? 'Зураг илгээгдэж дуустал түр хүлээнэ үү.'
+            : 'Илгээгдээгүй зураг байна. Дахин оролдох эсвэл хасна уу.';
+      });
+      return;
+    }
     final subject = _subject.text.trim();
     final body = _body.text.trim();
-    final id = _requestId.forPayload('${_kind.api}\n$subject\n$body');
+    final keys = _attachments.keys;
+    final id = _requestId.forPayload('${_kind.api}\n$subject\n$body\n${keys.join(',')}');
     setState(() {
       _sending = true;
       _message = null;
@@ -52,11 +66,12 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     try {
       final saved = await ref
           .read(supportRepositoryProvider)
-          .send(clientRequestId: id, kind: _kind.api, subject: subject, body: body);
+          .send(clientRequestId: id, kind: _kind.api, subject: subject, body: body, attachmentKeys: keys);
       if (!mounted) return;
       _requestId.reset();
       _subject.clear();
       _body.clear();
+      _attachments.clear();
       setState(() {
         _failed = false;
         _message = 'Хүсэлт хадгалагдлаа. Хариуг доорх түүхээс харна.';
@@ -154,6 +169,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                     ),
                     validator: (v) => validateBody(v ?? ''),
                   ),
+                  const SizedBox(height: AppSpace.md),
+                  FeedbackAttachmentsField(controller: _attachments, enabled: !_sending),
                   const SizedBox(height: AppSpace.md),
                   FilledButton.icon(
                     onPressed: _sending ? null : _send,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/shell/app_shell.dart' show AppBackButton;
 import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
@@ -46,7 +47,7 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     final childrenAsync = ref.watch(parentChildrenProvider);
     final weeks = weekOptions(ref.watch(parentTodayProvider));
     return Scaffold(
-      appBar: AppBar(title: const Text('Долоо хоногийн тайлан')),
+      appBar: AppBar(leading: const AppBackButton(), title: const Text('Долоо хоногийн тайлан')),
       body: childrenAsync.when(
         skipLoadingOnRefresh: false,
         loading: () => const LoadingState(),

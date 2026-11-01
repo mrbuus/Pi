@@ -18,6 +18,18 @@ abstract final class BankInfo {
   static const holder = 'О.Баасанжав';
 }
 
+/// Уншихад хялбар болгож тэмдэгтийг [size]-аар бүлэглэнэ: `5720838844` -> `5720 8388 44`.
+/// Зөвхөн харуулахад — хуулахдаа үргэлж бүлэглээгүй эх утгыг ашигла.
+String groupChars(String raw, {int size = 4}) {
+  final s = raw.replaceAll(RegExp(r'\s+'), '');
+  if (size <= 0 || s.length <= size) return s;
+  final parts = <String>[];
+  for (var i = 0; i < s.length; i += size) {
+    parts.add(s.substring(i, i + size > s.length ? s.length : i + size));
+  }
+  return parts.join(' ');
+}
+
 enum TuitionPlanKind { fullYear, installment, monthly }
 
 class TuitionPlan {

@@ -210,6 +210,7 @@ class _SlotCell extends StatelessWidget {
       button: true,
       selected: active,
       label: '$label${digit.isEmpty ? ', хоосон' : ', $digit'}',
+      onTap: onTap,
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,

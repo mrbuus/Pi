@@ -19,5 +19,6 @@ abstract final class ExamIcons {
   static const IconData practice = LucideIcons.rotateCcw;
   static const IconData next = LucideIcons.arrowRight;
   static const IconData previous = LucideIcons.arrowLeft;
+  static const IconData ranking = LucideIcons.medal;
   static const IconData review = LucideIcons.listTodo;
 }

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import 'parent_history.dart';
 import 'parent_models.dart';
 import 'weekly_report.dart';
 
@@ -38,6 +39,13 @@ class ParentRepository {
         body: {'code': code},
       );
 
+  /// Бүтэн түүх: [year] — UTC жил (сервер 2000..одоо+1), [page] 1..1000, хуудас бүр 50 мөр.
+  Future<ParentHistory> history({required String studentId, required int year, int page = 1}) => _api.get(
+        '/parent/children/${Uri.encodeComponent(studentId)}/history',
+        query: {'year': '$year', 'page': '$page'},
+        parse: ParentHistory.fromJson,
+      );
+
   /// АНХААР: угтвар `/parents` (олон тоо). [week] — Даваа гарагийн `YYYY-MM-DD` (UB).
   Future<WeeklyReport> weeklyReport({required String studentId, required String week}) => _api.get(
         '/parents/weekly-report',
@@ -61,4 +69,9 @@ final examResultCardProvider = FutureProvider.autoDispose.family<ExamResultCardD
 final weeklyReportProvider =
     FutureProvider.autoDispose.family<WeeklyReport, ({String studentId, String week})>(
   (ref, a) => ref.watch(parentRepositoryProvider).weeklyReport(studentId: a.studentId, week: a.week),
+);
+
+final parentHistoryProvider =
+    FutureProvider.autoDispose.family<ParentHistory, ({String studentId, int year, int page})>(
+  (ref, a) => ref.watch(parentRepositoryProvider).history(studentId: a.studentId, year: a.year, page: a.page),
 );

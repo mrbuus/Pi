@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/shell/app_shell.dart' show AppBackButton;
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../data/notification_models.dart';
@@ -18,7 +19,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(notificationSettingsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Мэдэгдлийн тохиргоо')),
+      appBar: AppBar(leading: const AppBackButton(), title: const Text('Мэдэгдлийн тохиргоо')),
       body: async.when(
         skipLoadingOnRefresh: false,
         loading: () => const LoadingState(cards: 1),

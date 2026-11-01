@@ -4,6 +4,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/network/network_providers.dart';
 import 'exam_models.dart';
+import 'ranking_models.dart';
 
 /// Шалгалтын API (`docs/api-contract/exam.md`). Бизнесийн дүрэм (оноо, нээгдэх, хаалт) серверт.
 class ExamRepository {
@@ -51,6 +52,10 @@ class ExamRepository {
 
   Future<ExamResultPage> examResult(String testId) =>
       _api.get('/exam-results/my/${_id(testId)}', parse: ExamResultPage.fromJson);
+
+  /// Ангийн байр — ЗӨВХӨН хэрэглэгч өөрөө нээхэд дуудна (анхдагчаар харуулахгүй).
+  Future<TestRanking> ranking(String testId) =>
+      _api.get('/test-rankings/${_id(testId)}', parse: TestRanking.fromJson);
 
   Future<PracticeReview> review(String testId) =>
       _api.get('/tests/${_id(testId)}/review', parse: PracticeReview.fromJson);

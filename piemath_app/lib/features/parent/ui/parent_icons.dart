@@ -8,6 +8,7 @@ abstract final class ParentIcons {
   static const IconData link = LucideIcons.link2;
   static const IconData result = LucideIcons.clipboardCheck;
   static const IconData weekly = LucideIcons.chartColumn;
+  static const IconData history = LucideIcons.history;
   static const IconData acknowledge = LucideIcons.mailCheck;
   static const IconData attendance = LucideIcons.calendarDays;
   static const IconData homework = LucideIcons.notebookPen;

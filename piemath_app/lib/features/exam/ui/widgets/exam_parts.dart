@@ -10,6 +10,7 @@ import '../../domain/autosave_engine.dart';
 import '../../domain/timer_format.dart';
 import '../exam_icons.dart';
 import 'answer_inputs.dart';
+import 'exam_timer.dart';
 
 /// Шалгалтын толгой: үлдсэн хугацаа, хадгалалтын төлөв, хариулсан тоо, навигатор, дуусгах.
 class ExamHeader extends StatelessWidget {
@@ -66,10 +67,7 @@ class ExamHeader extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  ValueListenableBuilder<int?>(
-                    valueListenable: remainingSec,
-                    builder: (context, r, _) => r == null ? const SizedBox.shrink() : _TimerBox(seconds: r),
-                  ),
+                  ExamTimer(remaining: remainingSec),
                   IconButton(
                     tooltip: 'Бодлогын жагсаалт',
                     icon: const Icon(ExamIcons.navigator),
@@ -79,44 +77,6 @@ class ExamHeader extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TimerBox extends StatelessWidget {
-  const _TimerBox({required this.seconds});
-
-  final int seconds;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final urgent = seconds <= 60;
-    return Semantics(
-      liveRegion: urgent,
-      label: 'Үлдсэн хугацаа ${spokenRemaining(seconds)}',
-      excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: AppSpace.xs),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: urgent ? c.error : c.line),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(ExamIcons.timer, size: 16, color: urgent ? c.error : c.inkDim),
-            const SizedBox(width: AppSpace.xs),
-            Text(
-              formatRemaining(seconds),
-              style: context.text.titleMedium?.copyWith(
-                color: urgent ? c.error : c.ink,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -272,7 +232,7 @@ class QuestionView extends StatelessWidget {
           child: TextButton.icon(
             onPressed: onToggleFlag,
             icon: Icon(ExamIcons.flag, size: 18, color: flagged ? c.brand : c.inkDim),
-            label: Text(flagged ? 'Тэмдэглэсэн' : 'Дараа эргэж харах'),
+            label: Text(flagged ? 'Дараа харах: тэмдэглэсэн' : 'Дараа харах'),
           ),
         ),
       ],
@@ -290,6 +250,7 @@ class NavigatorGrid extends StatelessWidget {
     required this.current,
     required this.onJump,
     this.partIIStart,
+    this.showLegend = true,
   });
 
   final List<ExamProblem> problems;
@@ -298,6 +259,7 @@ class NavigatorGrid extends StatelessWidget {
   final int current;
   final ValueChanged<int> onJump;
   final int? partIIStart;
+  final bool showLegend;
 
   @override
   Widget build(BuildContext context) {
@@ -316,7 +278,13 @@ class NavigatorGrid extends StatelessWidget {
       ],
     );
     final split = partIIStart;
-    if (split == null || split == 0) return grid(0, problems.length);
+    final legend = showLegend ? const NavigatorLegend() : null;
+    if (split == null || split == 0) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [grid(0, problems.length), if (legend != null) ...[const SizedBox(height: AppSpace.lg), legend]],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -327,6 +295,90 @@ class NavigatorGrid extends StatelessWidget {
         Text('II хэсэг — Тоо нөхөх (${problems.length - split})', style: context.text.labelMedium),
         const SizedBox(height: AppSpace.sm),
         grid(split, problems.length),
+        if (legend != null) ...[const SizedBox(height: AppSpace.lg), legend],
+      ],
+    );
+  }
+}
+
+/// Илгээхийн өмнөх жагсаалт: гарчиг + дугаарууд (товшоод тухайн бодлого руу).
+class NumberJumpList extends StatelessWidget {
+  const NumberJumpList({super.key, required this.title, required this.indexes, required this.onJump});
+
+  final String title;
+
+  /// 0-ээс эхлэх индекс; дэлгэцэд +1.
+  final List<int> indexes;
+  final ValueChanged<int> onJump;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(header: true, child: Text(title, style: context.text.labelMedium)),
+        const SizedBox(height: AppSpace.sm),
+        Wrap(
+          spacing: AppSpace.sm,
+          runSpacing: AppSpace.sm,
+          children: [
+            for (final i in indexes)
+              Semantics(
+                button: true,
+                label: '${i + 1}-р бодлого руу очих',
+                onTap: () => onJump(i),
+                excludeSemantics: true,
+                child: InkWell(
+                  onTap: () => onJump(i),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  child: Container(
+                    width: AppSizes.minTap,
+                    height: AppSizes.minTap,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      border: Border.all(color: c.line),
+                    ),
+                    child: Text('${i + 1}', style: context.text.labelLarge),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Торны тайлбар — жагсаалтын ДООР (RULES §3).
+class NavigatorLegend extends StatelessWidget {
+  const NavigatorLegend({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    Widget item(Widget mark, String label) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [mark, const SizedBox(width: AppSpace.xs), Text(label, style: context.text.bodySmall)],
+    );
+    Widget swatch({required bool answered, IconData? icon}) => Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        color: answered ? c.brandTint : c.surface,
+        borderRadius: BorderRadius.circular(AppRadius.sm / 2),
+        border: Border.all(color: c.line),
+      ),
+      child: icon == null ? null : Icon(icon, size: 12, color: c.brand),
+    );
+    return Wrap(
+      spacing: AppSpace.lg,
+      runSpacing: AppSpace.sm,
+      children: [
+        item(swatch(answered: true, icon: AppIcons.check), 'Хариулсан'),
+        item(swatch(answered: false), 'Хариулаагүй'),
+        item(swatch(answered: false, icon: ExamIcons.flag), 'Дараа харах'),
       ],
     );
   }
@@ -359,6 +411,7 @@ class _NavCell extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
+      onTap: onTap,
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
