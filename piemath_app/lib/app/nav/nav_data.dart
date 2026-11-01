@@ -84,7 +84,7 @@ abstract final class NavData {
       NavLink('/app/practice', 'Дасгал', AppIcons.practice),
       NavLink('/app/learn', 'Хичээл үзэх', AppIcons.theory),
       NavLink('/app/videos', 'Онлайн хичээл', AppIcons.video),
-      NavLink('/app/goals', 'Миний зорилго', AppIcons.goal, soon: true),
+      NavLink('/app/goals', 'Миний зорилго', AppIcons.goal),
     ],
     UserRole.teacher: [_library, _videos, _tests, _schedule, _classes, _students, _adminTheory, _tools],
     UserRole.teacherPlus: [
