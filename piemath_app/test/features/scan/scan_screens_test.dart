@@ -25,7 +25,7 @@ Map<String, Object?> scanJson({
     {
       'problemId': 'p1',
       'format': format,
-      'statementText': r'$x^2-5x+6=0$ тэгшитгэлийн том шийдийг ол.',
+      'statementText': r'$x^2-5x+6=0$ тэгшитгэлийн их шийдийг ол.',
       'imageKey': null,
       'hasImage': hasImage,
       'choices': format == 'CHOICE'
