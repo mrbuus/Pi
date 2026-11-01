@@ -88,12 +88,14 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color focus;
 
   static const light = AppColors(
-    bg: Color(0xFFF5F6F8),
+    // Саарал нь брэндийн өнгөний тойрог (OKLCH h≈264) руу бага зэрэг хазайсан —
+    // «хар-цагаан» биш тайван хүйтэн саарал (UX-RESEARCH §2).
+    bg: Color(0xFFF5F7FB),
     surface: Color(0xFFFFFFFF),
-    surfaceSunken: Color(0xFFF0F2F5),
-    line: Color(0xFFDDE1E8),
-    ink: Color(0xFF14171C),
-    inkDim: Color(0xFF51565E),
+    surfaceSunken: Color(0xFFEBEFF5),
+    line: Color(0xFFD7DBE3),
+    ink: Color(0xFF181E2A),
+    inkDim: Color(0xFF4E5564),
     brand: Color(0xFF273F74),
     brandBright: Color(0xFF3D6BC4),
     brandSoft: Color(0xFF1E3366),
@@ -110,12 +112,12 @@ class AppColors extends ThemeExtension<AppColors> {
   );
 
   static const dark = AppColors(
-    bg: Color(0xFF111317),
-    surface: Color(0xFF1B1E24),
-    surfaceSunken: Color(0xFF16181D),
-    line: Color(0xFF323843),
-    ink: Color(0xFFE8EAEE),
-    inkDim: Color(0xFFADB3BD),
+    bg: Color(0xFF0F1319),
+    surface: Color(0xFF1A1E26),
+    surfaceSunken: Color(0xFF15181F),
+    line: Color(0xFF383D48),
+    ink: Color(0xFFE3E6ED),
+    inkDim: Color(0xFFB2B8C3),
     brand: Color(0xFFAFC4EF),
     brandBright: Color(0xFF76B6F7),
     brandSoft: Color(0xFFC9D7F5),
@@ -237,15 +239,21 @@ abstract final class AppMotion {
   static const base = Duration(milliseconds: 180);
   static const enter = Duration(milliseconds: 260);
 
-  /// `MediaQuery.disableAnimations` үед анимацгүй.
+  /// Хөдөлгөөн багасгах тохиргоо: Android «Remove animations» (`disableAnimations`)
+  /// эсвэл iOS «Reduce Motion» (`accessibilityFeatures.reduceMotion`).
+  static bool reduced(BuildContext context) =>
+      (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
+      WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.reduceMotion;
+
+  /// Хөдөлгөөн багасгах үед анимацгүй.
   static Duration of(BuildContext context, Duration d) =>
-      MediaQuery.maybeDisableAnimationsOf(context) ?? false ? Duration.zero : d;
+      reduced(context) ? Duration.zero : d;
 }
 
 /// Хэмжээний хязгаар.
 abstract final class AppSizes {
-  /// Хүрэх талбайн доод хэмжээ (RULES, STATUS §6.9).
-  static const double minTap = 44;
+  /// Хүрэх талбайн доод хэмжээ — Material 48dp (хүүхэд гараа илүү алддаг, UX-RESEARCH §2).
+  static const double minTap = 48;
 
   /// Таблетын хил: үүнээс өргөн бол зүүн rail цэс.
   static const double tabletBreakpoint = 768;
