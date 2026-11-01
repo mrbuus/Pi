@@ -271,8 +271,11 @@ export class GoogleAuthService {
     return verifyIdTokenClaims(body.id_token, cfg.clientId);
   }
 
-  /** Нэвтрэх: холбогдсон бол тэр хэрэглэгч; эс бол имэйл таарвал автоматаар холбоно. */
-  private async resolveLoginUser(claims: GoogleClaims): Promise<string | null> {
+  /**
+   * Нэвтрэх: холбогдсон бол тэр хэрэглэгч; эс бол имэйл таарвал автоматаар холбоно.
+   * Гар утасны апп (auth/native) мөн ижил дүрмээр дуудна.
+   */
+  async resolveLoginUser(claims: GoogleClaims): Promise<string | null> {
     const identity = await this.prisma.googleIdentity.findUnique({
       where: { googleSubject: claims.sub },
     });
@@ -296,7 +299,7 @@ export class GoogleAuthService {
     return user.id;
   }
 
-  private async link(userId: string, claims: GoogleClaims): Promise<'linked' | 'taken'> {
+  async link(userId: string, claims: GoogleClaims): Promise<'linked' | 'taken'> {
     const other = await this.prisma.googleIdentity.findUnique({
       where: { googleSubject: claims.sub },
     });

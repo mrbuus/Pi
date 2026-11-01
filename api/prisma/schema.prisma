@@ -120,6 +120,12 @@ model User {
   googleOAuthStates    GoogleOAuthState[]
   googleLoginExchanges GoogleLoginExchange[]
 
+  // Piemath гар утасны апп (20261102120000_mobile_app_support): push токен,
+  // Apple-ээр нэвтрэх, бүртгэл устгах ХҮСЭЛТ (өгөгдөл устгахгүй, админ шийднэ).
+  deviceTokens             DeviceToken[]
+  appleIdentity            AppleIdentity?
+  accountDeletionRequests  AccountDeletionRequest[]
+
   // Secure schedule calendar feed tokens (G39). Only a one-way token hash is stored.
   calendarTokenHash    String?         @unique
   calendarTokenVersion Int?
@@ -3118,4 +3124,56 @@ model HomeworkPhoto {
   @@index([studentId, classroomId, lessonDate])
   @@index([classroomId, lessonDate])
   @@index([fileKey])
+}
+
+// ---------------------------------------------------------------------------
+// Piemath гар утасны апп (20261102120000_mobile_app_support) — зөвхөн шинэ хүснэгт.
+// ---------------------------------------------------------------------------
+
+// FCM push токен. «Устгах» = revokedAt (мөр үлдэнэ, дахин бүртгэвэл сэргэнэ).
+model DeviceToken {
+  id         String    @id @default(cuid())
+  userId     String
+  token      String    @unique
+  platform   String // 'ios' | 'android'
+  appVersion String?
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Apple-ээр нэвтрэх (App Store 4.8). Google-тэй ижил: бүртгэл ҮҮСГЭХГҮЙ, зөвхөн холбосон хүн.
+model AppleIdentity {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  appleSubject String   @unique // identityToken-ийн `sub`
+  email        String? // privaterelay байж болно
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Бүртгэл устгах ХҮСЭЛТ (App Store 5.1.1(v)). Өгөгдлийг ХЭЗЭЭ Ч автоматаар
+// устгахгүй (прод өгөгдлийн дүрэм) — админ хянаж, гараар шийднэ.
+model AccountDeletionRequest {
+  id           String    @id @default(cuid())
+  userId       String
+  reason       String?
+  status       String    @default("PENDING") // PENDING | IN_REVIEW | RESOLVED | REJECTED
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([userId])
 }

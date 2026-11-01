@@ -688,3 +688,18 @@ export type HomeworkCheck = Prisma.HomeworkCheckModel
  * Файл нь StoredFile (purpose "homework", 7 хоног). Шинээр илгээвэл хуучныг зөөлөн устгана.
  */
 export type HomeworkPhoto = Prisma.HomeworkPhotoModel
+/**
+ * Model DeviceToken
+ * 
+ */
+export type DeviceToken = Prisma.DeviceTokenModel
+/**
+ * Model AppleIdentity
+ * 
+ */
+export type AppleIdentity = Prisma.AppleIdentityModel
+/**
+ * Model AccountDeletionRequest
+ * 
+ */
+export type AccountDeletionRequest = Prisma.AccountDeletionRequestModel

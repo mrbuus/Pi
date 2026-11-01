@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsObject, IsOptional } from 'class-validator';
+import { SESSION_EVENTS, type SessionEvent } from '../integrity-events';
 
 // Session-ийн autosave БА эцсийн илгээлт хоёул ижил хэлбэртэй: клиент юу
 // өөрчлөгдснөө л явуулна, сервер session-ий draft дээр нэгтгэнэ. Ингэснээр
@@ -23,11 +24,13 @@ export class SaveSessionDto {
   @IsObject()
   problemTimes?: Record<string, number>;
 
-  // Анти-чит үйл явдал: шалгалтын горимоос гарсан/буцсан (Шийдвэр 3)
-  @ApiPropertyOptional({ enum: ['LEAVE', 'RETURN', 'FULLSCREEN_EXIT'] })
+  // Анти-чит үйл явдал: шалгалтын горимоос гарсан/буцсан (Шийдвэр 3).
+  // Гар утасны апп: SCREENSHOT, RECORDING_START/STOP — leaveCount-ийг нэмэхгүй,
+  // зөвхөн events-д бичигдэнэ (integrity-events.ts).
+  @ApiPropertyOptional({ enum: SESSION_EVENTS })
   @IsOptional()
-  @IsIn(['LEAVE', 'RETURN', 'FULLSCREEN_EXIT'])
-  event?: 'LEAVE' | 'RETURN' | 'FULLSCREEN_EXIT';
+  @IsIn(SESSION_EVENTS)
+  event?: SessionEvent;
 }
 
 export class SubmitTestDto extends SaveSessionDto {}
