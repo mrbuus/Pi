@@ -1111,6 +1111,20 @@ export class UsersService {
       studentProfile: target.studentProfile,
     };
 
+    // Нууц үг = утас (эзний дүрэм, 2026-11-01): дугаар солигдоход нууц үг нь
+    // ХУУЧИН дугаар хэвээрээ байвал шинэ дугаар болно. Хэрэглэгч өөрөө сольсон
+    // нууц үгийг хөндөхгүй. Сесс тасрахгүй (passwordChangedAt-ыг хөндөхгүй).
+    let passwordHash: string | undefined;
+    if (dto.phone && dto.phone !== target.phone) {
+      const defaultPassword = target.phone ?? target.email;
+      if (
+        defaultPassword &&
+        (await bcrypt.compare(defaultPassword, target.passwordHash))
+      )
+        passwordHash = await bcrypt.hash(dto.phone, 10);
+    }
+    const passwordFollowedPhone = passwordHash !== undefined;
+
     const result = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.update({
         where: { id: targetId },
@@ -1119,6 +1133,14 @@ export class UsersService {
           lastName: dto.lastName,
           phone: dto.phone,
           email: dto.email,
+          ...(passwordHash ? { passwordHash } : {}),
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          email: true,
         },
       });
 
@@ -1192,10 +1214,13 @@ export class UsersService {
           email: result.user.email,
         },
         studentProfile: result.studentProfile,
+        ...(dto.phone && dto.phone !== target.phone
+          ? { passwordFollowedPhone }
+          : {}),
       },
     });
 
-    return result;
+    return { ...result, passwordFollowedPhone };
   }
 
   // Ажилтанд зориулсан дэлгэрэнгүй харагдац: профайл + идэвхтэй анги + код +

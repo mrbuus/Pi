@@ -194,8 +194,15 @@ export default function StudentInfoTab({
       };
     });
     try {
-      await api(`/users/${studentId}/profile`, { method: "PATCH", body });
-      setMsg({ kind: "success", text: "Хадгалагдлаа" });
+      const res = await api<{ passwordFollowedPhone?: boolean }>(`/users/${studentId}/profile`, { method: "PATCH", body });
+      // Утас солигдвол нэвтрэх нууц үг хамт солигдсон эсэхийг ажилтанд хэлнэ
+      const pw =
+        body.phone === undefined
+          ? ""
+          : res?.passwordFollowedPhone
+            ? ". Нууц үг шинэ дугаар боллоо"
+            : ". Нууц үгээ өөрөө сольсон тул хэвээр";
+      setMsg({ kind: "success", text: `Хадгалагдлаа${pw}` });
       setForm(null);
       reload(); // серверийн бодит утгаар баталгаажуулна
     } catch (e) {
