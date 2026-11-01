@@ -4,7 +4,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, CalendarDays, ClipboardCheck, LayoutDashboard, ListChecks, MoreHorizontal, Pencil, Settings2, Trash2, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarDays, ClipboardCheck, Hash, LayoutDashboard, ListChecks, MoreHorizontal, Pencil, Settings2, Trash2, UserPlus, Users } from "lucide-react";
 import MakeupPanel from "@/components/makeup/MakeupPanel";
 import RequireRole from "@/components/nav/RequireRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
@@ -15,6 +15,7 @@ import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 import ClassChecksPanel from "./ClassChecksPanel";
+import CodesTab from "./CodesTab";
 import DisbandClassDialog from "./DisbandClassDialog";
 import MonthView, { METRICS } from "./MonthView";
 import OverviewTab from "./OverviewTab";
@@ -23,13 +24,14 @@ import TeacherPicker from "./TeacherPicker";
 import TopicsTab from "./TopicsTab";
 import type { ClassDashboard, MonthMetric, PersonRef } from "./types";
 
-type TabKey = "overview" | "month" | "students" | "makeup" | "topics";
+type TabKey = "overview" | "month" | "students" | "codes" | "makeup" | "topics";
 /** «Чек» нь табын жагсаалтад БИШ — толгойн товчоор нээгдэх тусдаа горим (#checks) */
 type ViewKey = TabKey | "checks";
 const TABS: { key: TabKey; label: string; icon: typeof Users }[] = [
   { key: "overview", label: "Тойм", icon: LayoutDashboard },
   { key: "month", label: "Сарын явц", icon: CalendarDays },
   { key: "students", label: "Сурагчид", icon: Users },
+  { key: "codes", label: "Код", icon: Hash },
   { key: "makeup", label: "Нөхөх", icon: ListChecks },
   { key: "topics", label: "Сэдэв, хөтөлбөр", icon: BookOpen },
 ];
@@ -252,6 +254,9 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                 </TabsContent>
                 <TabsContent value="students" className="mt-4">
                   <StudentsTab data={data} view={view} onViewChange={setView} onChanged={() => void load()} />
+                </TabsContent>
+                <TabsContent value="codes" className="mt-4">
+                  <CodesTab students={data.students} />
                 </TabsContent>
                 <TabsContent value="makeup" className="mt-4">
                   <MakeupPanel classroomId={data.classroom.id} {...makeupRange()} />
