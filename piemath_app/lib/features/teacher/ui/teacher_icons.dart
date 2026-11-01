@@ -27,4 +27,7 @@ abstract final class TeacherIcons {
   static const IconData clock = LucideIcons.clock;
   static const IconData editors = LucideIcons.users;
   static const IconData minus = LucideIcons.minus;
+  static const IconData leave = LucideIcons.logOut;
+  static const IconData screenshot = LucideIcons.camera;
+  static const IconData recording = LucideIcons.video;
 }
