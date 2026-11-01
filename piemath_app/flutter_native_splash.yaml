@@ -1,0 +1,15 @@
+# Үүсгэх: dart run flutter_native_splash:create
+# Тайван: цагаан дэвсгэр + хөх дугуй лого; хар горимд хөх дэвсгэр + цагаан тэмдэг.
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/branding/splash-light.png
+  color_dark: "#273F74"
+  image_dark: assets/branding/splash-dark.png
+  android_12:
+    color: "#FFFFFF"
+    image: assets/branding/splash-android12.png
+    color_dark: "#273F74"
+    image_dark: assets/branding/splash-android12.png
+  fullscreen: false
+  ios_content_mode: center
+  android_gravity: center
