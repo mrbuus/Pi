@@ -203,6 +203,22 @@ void main() {
     expect(S('eq', 'sin(x)>0').ok, isFalse);
   });
 
+  test('тооны шулуун вэбтэй ижил: зэргийн суурийн тэг (0) хасагдсан цэг', () {
+    final a = S('eq', 'x^2>0');
+    okHas(a, [r'\left(-\infty;\ 0\right)\cup \left(0;\ +\infty\right)']);
+    expect(a.numberLine!.points.map((p) => [p.label, p.filled]).toList(), [
+      ['0', false],
+    ]);
+    expect(a.numberLine!.signs, ['+', '+']);
+    final b = S('eq', 'x^2-3x+2<=0');
+    expect(b.numberLine!.points.map((p) => [p.label, p.filled]).toList(), [
+      ['0', false],
+      ['1', true],
+      ['2', true],
+    ]);
+    expect(b.numberLine!.signs, ['+', '+', '-', '+']);
+  });
+
   test('систем', () {
     okHas(S('sys', '2x+y=5\nx-y=1'), [r'\left(x;\ y\right) = \left(2;\ 1\right)']);
     okHas(S('sys', 'x+y+z=6; x-y+z=2; 2x+y-z=1'), [r'\left(1;\ 2;\ 3\right)']);
