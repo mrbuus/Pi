@@ -457,6 +457,7 @@ export const ModelName = {
   ExpenseRecord: 'ExpenseRecord',
   TuitionSettlement: 'TuitionSettlement',
   TuitionRefund: 'TuitionRefund',
+  StudentWithdrawal: 'StudentWithdrawal',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
   Notification: 'Notification',
@@ -540,7 +541,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4981,6 +4982,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TuitionRefundCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TuitionRefundCountAggregateOutputType> | number
+        }
+      }
+    }
+    StudentWithdrawal: {
+      payload: Prisma.$StudentWithdrawalPayload<ExtArgs>
+      fields: Prisma.StudentWithdrawalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StudentWithdrawalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StudentWithdrawalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>
+        }
+        findFirst: {
+          args: Prisma.StudentWithdrawalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StudentWithdrawalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>
+        }
+        findMany: {
+          args: Prisma.StudentWithdrawalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>[]
+        }
+        create: {
+          args: Prisma.StudentWithdrawalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>
+        }
+        createMany: {
+          args: Prisma.StudentWithdrawalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StudentWithdrawalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>[]
+        }
+        delete: {
+          args: Prisma.StudentWithdrawalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>
+        }
+        update: {
+          args: Prisma.StudentWithdrawalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>
+        }
+        deleteMany: {
+          args: Prisma.StudentWithdrawalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StudentWithdrawalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StudentWithdrawalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>[]
+        }
+        upsert: {
+          args: Prisma.StudentWithdrawalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentWithdrawalPayload>
+        }
+        aggregate: {
+          args: Prisma.StudentWithdrawalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStudentWithdrawal>
+        }
+        groupBy: {
+          args: Prisma.StudentWithdrawalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudentWithdrawalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StudentWithdrawalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudentWithdrawalCountAggregateOutputType> | number
         }
       }
     }
@@ -10994,6 +11069,25 @@ export const TuitionRefundScalarFieldEnum = {
 export type TuitionRefundScalarFieldEnum = (typeof TuitionRefundScalarFieldEnum)[keyof typeof TuitionRefundScalarFieldEnum]
 
 
+export const StudentWithdrawalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  leftOn: 'leftOn',
+  countFrom: 'countFrom',
+  reason: 'reason',
+  owed: 'owed',
+  paid: 'paid',
+  refund: 'refund',
+  detail: 'detail',
+  refundId: 'refundId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type StudentWithdrawalScalarFieldEnum = (typeof StudentWithdrawalScalarFieldEnum)[keyof typeof StudentWithdrawalScalarFieldEnum]
+
+
 export const AnnouncementScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -13093,6 +13187,7 @@ export type GlobalOmitConfig = {
   expenseRecord?: Prisma.ExpenseRecordOmit
   tuitionSettlement?: Prisma.TuitionSettlementOmit
   tuitionRefund?: Prisma.TuitionRefundOmit
+  studentWithdrawal?: Prisma.StudentWithdrawalOmit
   announcement?: Prisma.AnnouncementOmit
   announcementClassroomTarget?: Prisma.AnnouncementClassroomTargetOmit
   notification?: Prisma.NotificationOmit

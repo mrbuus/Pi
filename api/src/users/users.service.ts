@@ -402,6 +402,9 @@ export class UsersService {
         });
         closed = res?.count ?? 0;
       }
+      // Сэргээвэл «гарсан» огноо (сургалтаас хасах тооцоо) арилна — төлбөрийн ledger дахин идэвхтэй
+      if (restore)
+        await tx.studentProfile.updateMany({ where: { userId: id }, data: { leftOn: null } });
       if (restore && classroom)
         await tx.enrollment.create({
           data: { studentId: id, classroomId: classroom.id, movedById: actorId },

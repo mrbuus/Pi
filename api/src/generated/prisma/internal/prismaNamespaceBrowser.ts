@@ -111,6 +111,7 @@ export const ModelName = {
   ExpenseRecord: 'ExpenseRecord',
   TuitionSettlement: 'TuitionSettlement',
   TuitionRefund: 'TuitionRefund',
+  StudentWithdrawal: 'StudentWithdrawal',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
   Notification: 'Notification',
@@ -1134,6 +1135,25 @@ export const TuitionRefundScalarFieldEnum = {
 } as const
 
 export type TuitionRefundScalarFieldEnum = (typeof TuitionRefundScalarFieldEnum)[keyof typeof TuitionRefundScalarFieldEnum]
+
+
+export const StudentWithdrawalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  leftOn: 'leftOn',
+  countFrom: 'countFrom',
+  reason: 'reason',
+  owed: 'owed',
+  paid: 'paid',
+  refund: 'refund',
+  detail: 'detail',
+  refundId: 'refundId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type StudentWithdrawalScalarFieldEnum = (typeof StudentWithdrawalScalarFieldEnum)[keyof typeof StudentWithdrawalScalarFieldEnum]
 
 
 export const AnnouncementScalarFieldEnum = {

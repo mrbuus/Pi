@@ -24,16 +24,18 @@ import ClassProgressTab from "./ClassProgressTab";
 import IndependentProgressTab from "./IndependentProgressTab";
 import StudentOverview, { type ClassSummary } from "../hub/StudentOverview";
 import LessonHistoryTab from "../hub/LessonHistoryTab";
+import WithdrawalTab from "../withdrawal/WithdrawalTab";
 import PaymentsTab from "../hub/PaymentsTab";
 import StudentInfoTab from "../hub/StudentInfoTab";
 
-type TabKey = "class" | "exams" | "lessons" | "payments" | "notes" | "independent" | "info";
-const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "payments", "notes", "independent", "info"];
+type TabKey = "class" | "exams" | "lessons" | "payments" | "withdrawal" | "notes" | "independent" | "info";
+const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "payments", "withdrawal", "notes", "independent", "info"];
 const TAB_LABELS: Record<TabKey, string> = {
   class: "Ангийн явц",
   exams: "Шалгалт",
   lessons: "Хичээлийн түүх",
   payments: "Төлбөр",
+  withdrawal: "Гарсан тооцоо",
   notes: "Тэмдэглэл",
   independent: "Бие даасан явц",
   info: "Мэдээлэл",
@@ -51,10 +53,17 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
   const canSeeMoney = role === "ADMIN" || role === "TEACHER_PLUS";
   // Анги солих — Багш+ ба Админ (эзний шийдвэр 2026-10-11)
   const canMove = role === "ADMIN" || role === "TEACHER_PLUS";
-  const tabs = useMemo(() => ALL_TABS.filter((t) => t !== "payments" || canSeeMoney), [canSeeMoney]);
-
   const detailQ = useSection<StudentDetailData>(`/users/${studentId}`);
   const { data: detail, status, error, reload: load } = detailQ;
+  // «Гарсан тооцоо» — сургалтаас хасагдсан сурагчид, мөнгө харах эрхтэй ажилтанд
+  const archived = !!detail?.archivedAt;
+  const tabs = useMemo(
+    () =>
+      ALL_TABS.filter(
+        (t) => (t !== "payments" || canSeeMoney) && (t !== "withdrawal" || (canSeeMoney && archived)),
+      ),
+    [canSeeMoney, archived],
+  );
   const classId = detail?.currentClassroom?.id ?? null;
   const paymentsQ = useSection<StudentPaymentHistory | null>(
     canSeeMoney ? `/payments/student/${studentId}` : null,
@@ -67,7 +76,9 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
 
   const params = useSearchParams();
   const fromUrl = params.get("tab") as TabKey | null;
-  const [tab, setTab] = useState<TabKey>(fromUrl && tabs.includes(fromUrl) ? fromUrl : "class");
+  const [tab, setTab] = useState<TabKey>(
+    fromUrl && (tabs.includes(fromUrl) || (fromUrl === "withdrawal" && canSeeMoney)) ? fromUrl : "class",
+  );
   const changeTab = useCallback((next: TabKey) => {
     setTab(next);
     const url = new URL(window.location.href);
@@ -158,6 +169,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
             onRetry={paymentsQ.reload}
           />
         )}
+        {tab === "withdrawal" && canSeeMoney && <WithdrawalTab studentId={studentId} />}
         {tab === "notes" && (
           <StudentNotesPanel
             studentId={studentId}
@@ -187,7 +199,10 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
           <RemoveFromTrainingDialog
             student={{ id: studentId, name: fullName(detail) }}
             onClose={() => setDialog(null)}
-            onDone={load}
+            onDone={() => {
+              load();
+              changeTab("withdrawal");
+            }}
           />
         )}
         {dialog === "restore" && detail && (

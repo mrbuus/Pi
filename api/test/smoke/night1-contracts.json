@@ -298,6 +298,39 @@
   },
   {
     "gap": "G26",
+    "file": "tuition/withdrawal.controller",
+    "controller": "WithdrawalController",
+    "method": "GET",
+    "path": "/api/tuition/withdrawal/preview",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G26",
+    "file": "tuition/withdrawal.controller",
+    "controller": "WithdrawalController",
+    "method": "POST",
+    "path": "/api/tuition/withdrawal",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G26",
+    "file": "tuition/withdrawal.controller",
+    "controller": "WithdrawalController",
+    "method": "GET",
+    "path": "/api/tuition/withdrawal/student/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "G26",
     "file": "tuition/tuition.controller",
     "controller": "TuitionController",
     "method": "GET",

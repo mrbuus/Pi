@@ -182,6 +182,13 @@ export interface ResolvedPlan {
   first: number;
   /** Гараар бүтэн жилд тооцсон — гэрээ = бодит төлсөн дүн */
   settled: boolean;
+  /**
+   * Төлбөрөөр автоматаар бүтэн жил болсон (эзэн 2026-11-03): суудал баталгаажуулах төлбөр + үлдэгдэл
+   * хугацаандаа, эсвэл нэг дор бүтэн жилийн дүн
+   */
+  autoFull?: boolean;
+  /** Бүтэн жилийн дүн төлсөн ч хугацаа хэтэрсэн — Багш+ шалгаж гараар «Бүрэн» болгоно */
+  fullYearLate?: boolean;
 }
 
 export interface LedgerResult {
@@ -310,11 +317,67 @@ export function countsForYear(
   return true;
 }
 
+/**
+ * Суудал баталгаажуулах төлбөр төлснөөс хойш үлдэгдлийг төлөх дотоод хугацаа (хоног). Гэрээнд «1 сар /
+ * 30 хоног» гэж бичсэн ч эзэн 2026-11-03 дотооддоо 45 хоногоор тооцно (хүмүүст харуулахгүй).
+ */
+export const FULL_YEAR_GRACE_DAYS = 45;
+
+const addDays = (d: DateKey, n: number): DateKey =>
+  new Date(Date.parse(`${d}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+
+/**
+ * Төлбөрөөр бүтэн жил болох эсэх (эзэн 2026-11-03, гэрээ 8.x «Суудал баталгаажуулах төлбөр»):
+ *  - нэг дор бүтэн жилийн дүн (2.5 сая / 2 сая) төлсөн → FULL;
+ *  - эхэлсэн өдрөөс (жил эхлэхээс өмнө орсон бол 9-р сарын 1-нээс) 45 хоногийн дотор төлсөн нийт дүн
+ *    бүтэн жилийн дүнд хүрсэн (350 мянга + 2.15 сая) → FULL;
+ *  - хугацаа хэтэрсэн ч бүтэн жилийн дүнд хүрсэн, үлдэгдэл маягийн том төлбөртэй → LATE (Багш+ шалгана).
+ * Сар бүр төлөгчийн 8 сарын төлбөр 2.5 саяд хүрсэн нь LATE биш (том төлбөргүй).
+ */
+export function fullYearByPayments(
+  payments: LedgerPayment[],
+  tier: PriceTier,
+  startDate: DateKey | null,
+  year: AcademicYear = ACADEMIC_YEAR,
+): 'FULL' | 'LATE' | null {
+  const counted = payments
+    .filter((p) => countsForYear(p, 'FULL_YEAR', startDate, year))
+    .map((p) => ({
+      amount: Math.max(0, Math.round(p.amount)),
+      on: p.paidOn ?? (p.forMonth ? `${p.forMonth}-01` : null),
+    }));
+  const total = counted.reduce((s, p) => s + p.amount, 0);
+  if (total < tier.fullYear) return null;
+  if (counted.some((p) => p.amount >= tier.fullYear)) return 'FULL';
+  const yearStart = `${year.months[0]}-01`;
+  const anchor = startDate && startDate > yearStart ? startDate : yearStart;
+  const deadline = addDays(anchor, FULL_YEAR_GRACE_DAYS);
+  const early = counted
+    .filter((p) => p.on !== null && p.on <= deadline)
+    .reduce((s, p) => s + p.amount, 0);
+  if (early >= tier.fullYear) return 'FULL';
+  return counted.some((p) => p.amount >= tier.fullYear - tier.monthly) ? 'LATE' : null;
+}
+
 export function computeLedger(input: LedgerInput): LedgerResult {
   const year = input.year ?? ACADEMIC_YEAR;
   let plan = resolvePlan(input.plan, input.tuitionAmount, input.tier);
   if (input.settled)
     plan = { ...plan, kind: 'FULL_YEAR', guessed: false, fee: 0, settled: true };
+  else {
+    const byPay = fullYearByPayments(input.payments, input.tier, input.startDate, year);
+    if (byPay === 'FULL' && plan.kind !== 'FULL_YEAR')
+      plan = {
+        ...plan,
+        kind: 'FULL_YEAR',
+        guessed: false,
+        fee: 0,
+        total: input.tier.fullYear,
+        first: input.tier.installmentFirst ?? Math.round(input.tier.fullYear / 2),
+        autoFull: true,
+      };
+    else if (byPay === 'LATE' && plan.kind !== 'FULL_YEAR') plan = { ...plan, fullYearLate: true };
+  }
   const active = activeMonths(input.startDate, input.leftOn, year);
   const day = pad2(cycleDay(input.startDate, year));
   const startDue = active.length ? `${active[0]}-${day}` : null;

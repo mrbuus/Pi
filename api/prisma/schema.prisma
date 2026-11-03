@@ -1737,6 +1737,28 @@ model TuitionRefund {
   @@index([classroomId, leftOn])
 }
 
+/// Сургалтаас хасах үеийн төлбөрийн тооцоо (эзэн 2026-11-03, гэрээ «Найм»): «Сургалтаас хасах» товч
+/// дарахад л үүснэ, ХЭЗЭЭ Ч устгахгүй. Бүтэн сар = сарын төлбөр, гарсан сар = суусан хичээл × нэг хичээлийн
+/// үнэ. `detail` — тооцооны бүтэн хуулбар (мөчлөг, хассан өдөр, төлбөрүүд), хожим дүрэм өөрчлөгдсөн ч хэвээр.
+model StudentWithdrawal {
+  id          String   @id @default(cuid())
+  studentId   String
+  classroomId String?
+  leftOn      DateTime @db.Date
+  countFrom   DateTime @db.Date
+  reason      String
+  owed        Int
+  paid        Int
+  refund      Int
+  detail      Json
+  /// Буцаах дүн > 0 бол үүссэн TuitionRefund (DRAFT)
+  refundId    String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  @@index([studentId, createdAt])
+}
+
 // Төвийн зарлал — танхимын сурагчдын нийтийн самбарт харагдана
 enum AnnouncementAudience {
   ALL_STUDENTS // бүх сурагч

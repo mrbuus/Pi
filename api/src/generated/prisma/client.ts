@@ -359,6 +359,13 @@ export type TuitionSettlement = Prisma.TuitionSettlementModel
  */
 export type TuitionRefund = Prisma.TuitionRefundModel
 /**
+ * Model StudentWithdrawal
+ * Сургалтаас хасах үеийн төлбөрийн тооцоо (эзэн 2026-11-03, гэрээ «Найм»): «Сургалтаас хасах» товч
+ * дарахад л үүснэ, ХЭЗЭЭ Ч устгахгүй. Бүтэн сар = сарын төлбөр, гарсан сар = суусан хичээл × нэг хичээлийн
+ * үнэ. `detail` — тооцооны бүтэн хуулбар (мөчлөг, хассан өдөр, төлбөрүүд), хожим дүрэм өөрчлөгдсөн ч хэвээр.
+ */
+export type StudentWithdrawal = Prisma.StudentWithdrawalModel
+/**
  * Model Announcement
  * 
  */

@@ -7,6 +7,7 @@ describe('verified parent-link lookup', () => {
     const service = new TuitionService(
       { parentLink: { findFirst } } as unknown as PrismaService,
       {} as never,
+      {} as never,
     );
     await expect(
       service.hasVerifiedParentLink('parent-1', 'student-1'),
@@ -25,6 +26,7 @@ describe('verified parent-link lookup', () => {
     const findFirst = jest.fn().mockResolvedValue(null);
     const service = new TuitionService(
       { parentLink: { findFirst } } as unknown as PrismaService,
+      {} as never,
       {} as never,
     );
     await expect(

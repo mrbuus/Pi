@@ -27,7 +27,7 @@ import ReversePaymentModal from "./ReversePaymentModal";
 import PayDialog from "./PayDialog";
 import NoteDialog from "./NoteDialog";
 import PlanDialog from "./PlanDialog";
-import RefundDialog from "./RefundDialog";
+import { RemoveFromTrainingDialog } from "@/components/students/StudentActions";
 import SettleSwitch from "./SettleSwitch";
 import { BlockLegend, LargeBlocks } from "./MonthBlocks";
 import { dayLabel, mnt, monthName, PLAN_LABEL, stampLabel } from "./ledgerFormat";
@@ -202,7 +202,7 @@ export default function StudentLedger({ id }: { id: string }) {
             <MessageSquarePlus aria-hidden /> Тэмдэглэл
           </Button>
           <Button variant="outline" onClick={() => setRefundOpen(true)}>
-            <DoorOpen aria-hidden /> Төвөөс гарах
+            <DoorOpen aria-hidden /> Сургалтаас хасах
           </Button>
         </div>
 
@@ -343,7 +343,9 @@ export default function StudentLedger({ id }: { id: string }) {
       )}
       {noteOpen && <NoteDialog studentId={r.id} studentName={name} onClose={() => setNoteOpen(false)} onSaved={load} />}
       {planOpen && <PlanDialog data={data} onClose={() => setPlanOpen(false)} onSaved={load} />}
-      {refundOpen && <RefundDialog row={r} onClose={() => setRefundOpen(false)} onCreated={load} />}
+      {refundOpen && (
+        <RemoveFromTrainingDialog student={{ id: r.id, name }} onClose={() => setRefundOpen(false)} onDone={load} />
+      )}
       <PaymentEditModal
         open={!!editing}
         payment={editing}
