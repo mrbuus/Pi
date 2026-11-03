@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../core/ui/ui.dart';
+import '../../../../shared/anim/animation_slot.dart';
 import 'login_hero_media.dart';
 
 /// Нэвтрэх хуудасны дээд хэсэг. Медиа байхгүй бол лого (BrandMark); `assets/login_hero/`-д
@@ -119,6 +120,9 @@ class _LoginHeroState extends ConsumerState<LoginHero> with WidgetsBindingObserv
 
 /// Дуугүй, хяналтгүй, давтагдах видео. Эхний frame-ийн дараа л ачаална; алдаа гарвал юу ч харуулахгүй
 /// (доорх poster / лого үлдэнэ).
+///
+/// `AnimSlot.loginHero` слот (`assets/anim/manifest.yaml`): видео тоглож байх үед [AnimLoopGate]-ийг
+/// эзэмшинэ — өөр давталттай слот эхэлбэл энэ зогсож, тэр нь дуусахад үргэлжилнэ.
 class _HeroVideo extends ConsumerStatefulWidget {
   const _HeroVideo({required this.asset, required this.url, required this.active});
 
@@ -134,11 +138,15 @@ class _HeroVideoState extends ConsumerState<_HeroVideo> with WidgetsBindingObser
   VideoPlayerController? _c;
   bool _ready = false;
   bool _foreground = true;
+  bool _tickers = true;
+  final Object _gateToken = Object();
+  bool _claimed = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    AnimLoopGate.owner.addListener(_onGate);
     // Эхний frame зурагдсаны дараа — талбарууд шууд ашиглагдана.
     WidgetsBinding.instance.addPostFrameCallback((_) => _start());
   }
@@ -162,10 +170,20 @@ class _HeroVideoState extends ConsumerState<_HeroVideo> with WidgetsBindingObser
     }
   }
 
-  void _sync() {
+  void _onGate() => _sync(steal: false);
+
+  void _sync({bool steal = true}) {
     final c = _c;
     if (c == null || !_ready) return;
-    final play = widget.active && _foreground && TickerMode.valuesOf(context).enabled;
+    var play = widget.active && _foreground && _tickers;
+    if (play && !steal && !AnimLoopGate.isFree(_gateToken)) play = false;
+    if (play) {
+      AnimLoopGate.claim(_gateToken);
+      _claimed = true;
+    } else if (_claimed) {
+      _claimed = false;
+      AnimLoopGate.release(_gateToken);
+    }
     if (play && !c.value.isPlaying) {
       c.play();
     } else if (!play && c.value.isPlaying) {
@@ -182,6 +200,7 @@ class _HeroVideoState extends ConsumerState<_HeroVideo> with WidgetsBindingObser
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _tickers = TickerMode.valuesOf(context).enabled;
     _sync();
   }
 
@@ -193,6 +212,8 @@ class _HeroVideoState extends ConsumerState<_HeroVideo> with WidgetsBindingObser
 
   @override
   void dispose() {
+    AnimLoopGate.owner.removeListener(_onGate);
+    if (_claimed) AnimLoopGate.release(_gateToken);
     WidgetsBinding.instance.removeObserver(this);
     _c?.dispose();
     super.dispose();

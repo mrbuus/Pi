@@ -7,6 +7,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/anim/animation_slot.dart';
 import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
 import 'composer/notebook_composer_screen.dart';
@@ -34,6 +35,7 @@ class OnlineHomeworkView extends ConsumerWidget {
             icon: AppIcons.homework,
             title: 'Даалгавар алга',
             message: 'Багш даалгавар өгөхөөр энд харагдана',
+            art: AnimArt.emptyHomework,
           );
         }
         return RefreshIndicator(

@@ -35,6 +35,10 @@ class LoadingState extends StatelessWidget {
   }
 }
 
+/// Төлөвийн дүрсийг анимацаар солих: `(icon) => AnimationSlot(slot: ..., fallback: icon)`.
+/// Анимацын файл байхгүй бол [icon] яг хэвээр зурагдана.
+typedef StateArtBuilder = Widget Function(Widget icon);
+
 /// Төлөвийн нийтлэг байрлал: дүрс, гарчиг, тайлбар, товч.
 class _StateLayout extends StatelessWidget {
   const _StateLayout({
@@ -43,6 +47,7 @@ class _StateLayout extends StatelessWidget {
     required this.title,
     this.message,
     this.action,
+    this.art,
   });
 
   final IconData icon;
@@ -50,9 +55,11 @@ class _StateLayout extends StatelessWidget {
   final String title;
   final String? message;
   final Widget? action;
+  final StateArtBuilder? art;
 
   @override
   Widget build(BuildContext context) {
+    final iconView = Icon(icon, size: 40, color: iconColor);
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpace.xl),
@@ -61,7 +68,7 @@ class _StateLayout extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 40, color: iconColor),
+              art?.call(iconView) ?? iconView,
               const SizedBox(height: AppSpace.lg),
               Text(title, style: context.text.titleMedium, textAlign: TextAlign.center),
               if (message != null) ...[
@@ -93,12 +100,16 @@ class ErrorState extends StatelessWidget {
     this.message = AppStrings.genericError,
     this.onRetry,
     this.icon = AppIcons.error,
+    this.art,
   });
 
   final String title;
   final String message;
   final VoidCallback? onRetry;
   final IconData icon;
+
+  /// Дүрсийг анимацын слотоор солих ([StateArtBuilder]).
+  final StateArtBuilder? art;
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +120,7 @@ class ErrorState extends StatelessWidget {
         iconColor: context.colors.error,
         title: title,
         message: message,
+        art: art,
         action: onRetry == null
             ? null
             : FilledButton.icon(
@@ -129,12 +141,16 @@ class EmptyState extends StatelessWidget {
     this.message,
     this.icon = AppIcons.empty,
     this.action,
+    this.art,
   });
 
   final String title;
   final String? message;
   final IconData icon;
   final Widget? action;
+
+  /// Дүрсийг анимацын слотоор солих ([StateArtBuilder]).
+  final StateArtBuilder? art;
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +160,7 @@ class EmptyState extends StatelessWidget {
       title: title,
       message: message,
       action: action,
+      art: art,
     );
   }
 }
