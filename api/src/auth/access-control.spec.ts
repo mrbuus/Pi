@@ -5,6 +5,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { FinanceController } from '../finance/finance.controller';
 import { TuitionController } from '../tuition/tuition.controller';
 import { SheetSyncController } from '../sheet-sync/sheet-sync.controller';
+import { UsageController } from '../usage/usage.controller';
 
 /**
  * Мөнгөний маршрутуудын эрхийн хамгаалалт — 2026-09-26 (G02–G03).
@@ -37,6 +38,13 @@ describe('Төлбөрийн шийтийн синк — санхүүгийн э
   // Синк эхлүүлэх, гүйлгээ буцааж тааруулах, дансны дугаартай түүхий мөр — зөвхөн Админ
   it.each(['run', 'apply', 'rows'] as const)('%s — зөвхөн ADMIN', (name) => {
     expect(rolesOf(SheetSyncController.prototype[name])).toEqual(['ADMIN']);
+  });
+});
+
+describe('Хэрэглээний бүртгэл — нэгтгэлийг зөвхөн Админ харна', () => {
+  it('controller нь JwtAuthGuard-аар хамгаалагдсан, summary — ADMIN', () => {
+    expect(guardsOf(UsageController)).toContain(RolesGuard);
+    expect(rolesOf(UsageController.prototype.summary)).toEqual(['ADMIN']);
   });
 });
 

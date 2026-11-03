@@ -29,6 +29,9 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
   // Same light --brand token as manifest.ts.
   themeColor: "#1D4ED8",
+  // env(safe-area-inset-*) зөвхөн "cover" үед утгатай — өмнө нь 21 газар бичсэн ч 0 байсан тул
+  // iPhone-ий доод зурвас доод цэсэн дээр давхцдаг байв (2026-11-04). Хажуугийн зайг globals.css-д.
+  viewportFit: "cover",
 };
 
 // Эхний зурагт "буруу" горим гялсхийж харагдахаас сэргийлэх blocking script.

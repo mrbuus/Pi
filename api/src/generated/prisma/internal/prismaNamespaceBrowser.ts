@@ -179,7 +179,8 @@ export const ModelName = {
   SheetPayment: 'SheetPayment',
   HomeworkAttempt: 'HomeworkAttempt',
   HomeworkCheck: 'HomeworkCheck',
-  HomeworkPhoto: 'HomeworkPhoto'
+  HomeworkPhoto: 'HomeworkPhoto',
+  UiEvent: 'UiEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2170,6 +2171,20 @@ export const HomeworkPhotoScalarFieldEnum = {
 } as const
 
 export type HomeworkPhotoScalarFieldEnum = (typeof HomeworkPhotoScalarFieldEnum)[keyof typeof HomeworkPhotoScalarFieldEnum]
+
+
+export const UiEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  role: 'role',
+  kind: 'kind',
+  path: 'path',
+  target: 'target',
+  device: 'device',
+  createdAt: 'createdAt'
+} as const
+
+export type UiEventScalarFieldEnum = (typeof UiEventScalarFieldEnum)[keyof typeof UiEventScalarFieldEnum]
 
 
 export const SortOrder = {

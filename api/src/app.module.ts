@@ -36,6 +36,7 @@ import { ColorTagsModule } from './colortags/colortags.module';
 import { ContentModule } from './content/content.module';
 import { EnrollmentWindowsModule } from './enrollment-windows/enrollment-windows.module';
 import { EventsModule } from './events/events.module';
+import { UsageModule } from './usage/usage.module';
 import { FinanceModule } from './finance/finance.module';
 import { GoalsModule } from './goals/goals.module';
 import { InsightsModule } from './insights/insights.module';
@@ -150,6 +151,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ClassificationModule,
     VideosModule,
     EventsModule,
+    UsageModule,
     FinanceModule,
     EnrollmentWindowsModule,
     LeadsModule,

@@ -11,6 +11,7 @@ import Sidebar from "@/components/nav/Sidebar";
 import ClassHubTabs, { hubFor } from "@/components/nav/ClassHubTabs";
 import UserMenu from "@/components/nav/UserMenu";
 import ThemeToggle from "@/components/ThemeToggle";
+import UsageTracker from "@/components/usage/UsageTracker";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
@@ -221,7 +222,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <main
             id="main-content"
             className={`mx-auto w-full max-w-6xl px-4 pt-6 md:pb-8 lg:pt-8 ${
-              examFullscreen ? "pb-8" : "pb-28"
+              examFullscreen ? "pb-8" : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
             }`}
           >
             {displayRole === "GROUP_TEACHER" && pathname === "/app/teacher"
@@ -234,6 +235,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </main>
         </div>
       </div>
+      <UsageTracker />
       {!examFullscreen && (
         <BottomTabs
           role={displayRole ?? role}
