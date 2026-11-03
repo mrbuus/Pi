@@ -119,8 +119,12 @@ class _NativeSignInSectionState extends ConsumerState<NativeSignInSection> {
   @override
   Widget build(BuildContext context) {
     final native = ref.watch(nativeSignInProvider);
-    final showGoogle = native.googleConfigured && !_hidden.contains(NativeProvider.google);
     final showApple = _appleAvailable && !_hidden.contains(NativeProvider.apple);
+    // Apple 4.8: iOS дээр гуравдагч нэвтрэлт (Google) зөвхөн Sign in with Apple-тэй хамт.
+    final isIos = Theme.of(context).platform == TargetPlatform.iOS;
+    final showGoogle = native.googleConfigured &&
+        !_hidden.contains(NativeProvider.google) &&
+        (!isIos || showApple);
     if (!showGoogle && !showApple && _message == null) return const SizedBox.shrink();
     final enabled = widget.enabled && _busy == null;
 
