@@ -767,7 +767,7 @@ describe('Багшийн самбар «Онлайн» — илгээсэн гэ
       { testId: 'B1', studentId: 's1', score: 1, total: 2 },
       { testId: 'B1', studentId: 's2', score: 0, total: 2 }, // TestResult байгаа — тоологдохгүй
     ]);
-    const svc = new HomeworkMarksService(db, { record: jest.fn() } as never);
+    const svc = new HomeworkMarksService(db, { record: jest.fn(), recordMany: jest.fn() } as never);
     const res = await svc.online('c1', '2026-10-29', 'admin', Role.ADMIN);
     expect(res.previousLessonDate).toBe('2026-10-27');
     expect(res.tests.map((t) => t.testId)).toContain('B1');

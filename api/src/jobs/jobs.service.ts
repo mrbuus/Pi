@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TuitionService } from '../tuition/tuition.service';
 import { WeeklyReportService } from '../reports/weekly-report.service';
 import { JOB_NAMES, JobName } from './dto/run-job.dto';
+import { unreadCountCache } from '../notification-center/notification-center.service';
 
 const UB = 'Asia/Ulaanbaatar';
 const PAGE = 100;
@@ -103,6 +104,7 @@ export class JobsService {
           await tx.notification.create({ data: { userId: input.recipientId, kind: input.kind, title: input.title, body: input.body, link: input.link } });
           return tx.notificationDelivery.update({ where: { id: created.id }, data: { inAppSentAt: new Date() } });
         });
+        unreadCountCache.delete(input.recipientId);
       } catch (error) {
         if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error;
         duplicate = true;

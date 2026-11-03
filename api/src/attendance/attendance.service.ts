@@ -213,18 +213,16 @@ export class AttendanceService {
     });
 
     // Аудит (AuditService алдааг өөрөө залгина)
-    await Promise.all(
-      result.changes.map((c) =>
-        this.audit.record({
-          actorId: userId,
-          actorRole: role,
-          action: c.action,
-          entity: 'Attendance',
-          entityId: (c.after ?? c.before)!.id,
-          before: c.before,
-          after: c.after,
-        }),
-      ),
+    await this.audit.recordMany(
+      result.changes.map((c) => ({
+        actorId: userId,
+        actorRole: role,
+        action: c.action,
+        entity: 'Attendance',
+        entityId: (c.after ?? c.before)!.id,
+        before: c.before,
+        after: c.after,
+      })),
     );
 
     // Өнөөдөр ИРЭЭГҮЙ болсон сурагчийн баталгаажсан асран хамгаалагчид мэдэгдэнэ (fire-and-forget).

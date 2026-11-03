@@ -156,11 +156,12 @@ export class AttemptsService {
         select: { id: true, mistakeCollectedAt: true },
       });
     });
-    for (const attempt of createdAttempts) {
-      if (attempt.mistakeCollectedAt === null) {
-        await this.mistakes.collectAttempt(attempt.id);
-      }
-    }
+    // Хүсэлтийн дараа цуглуулна (docs/BACKEND-PERF.md) — алдаа гарвал pending үлдэнэ
+    this.mistakes.collectAttemptsInBackground(
+      createdAttempts
+        .filter((attempt) => attempt.mistakeCollectedAt === null)
+        .map((attempt) => attempt.id),
+    );
     return { recorded: rows.length, date: occurredOn };
   }
 
