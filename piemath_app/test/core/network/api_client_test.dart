@@ -57,11 +57,9 @@ void main() {
     final f = client.post<Object?>('/auth/login', body: {}, auth: false);
     await expectLater(
       f,
-      throwsA(
-        isA<ApiError>()
-            .having((e) => e.kind, 'kind', ApiErrorKind.unauthorized)
-            .having((e) => e.message, 'message', 'Утас эсвэл нууц үг буруу байна'),
-      ),
+      throwsA(isA<ApiError>()
+          .having((e) => e.kind, 'kind', ApiErrorKind.unauthorized)
+          .having((e) => e.message, 'message', 'Утас эсвэл нууц үг буруу байна')),
     );
     // Нэвтрэх хүсэлтийн 401 нь session-ийг дуусгахгүй.
     expect(unauthorized, isEmpty);

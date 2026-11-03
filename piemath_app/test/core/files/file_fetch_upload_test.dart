@@ -168,8 +168,12 @@ void main() {
       http
         ..json('POST', '$base/uploads/presign', {'message': 'Not Found'}, status: 404)
         ..json('POST', '$base/uploads', {'key': 'k2.pdf', 'size': 100, 'mime': 'application/pdf'});
-      final f = await FileUploader(client)
-          .upload(bytes: data, name: 'a.pdf', mime: 'application/pdf', purpose: UploadPurpose.theory);
+      final f = await FileUploader(client).upload(
+        bytes: data,
+        name: 'a.pdf',
+        mime: 'application/pdf',
+        purpose: UploadPurpose.theory,
+      );
       expect(f.key, 'k2.pdf');
       final multipart = http.requests.last;
       expect(multipart.headers['Authorization'], 'Bearer tok');
@@ -182,16 +186,14 @@ void main() {
       http
         ..json('POST', '$base/uploads/presign', {'direct': false})
         ..json('POST', '$base/uploads', {'key': 'k3.jpg', 'size': 100, 'mime': 'image/jpeg'});
-      final f = await FileUploader(client)
-          .upload(bytes: data, name: 'a.jpg', mime: 'image/jpeg', purpose: UploadPurpose.general);
+      final f = await FileUploader(client).upload(bytes: data, name: 'a.jpg', mime: 'image/jpeg', purpose: UploadPurpose.general);
       expect(f.key, 'k3.jpg');
     });
 
     test('серверийн шалгалтын алдаа (400) шууд, multipart руу шилжихгүй', () async {
       http.json('POST', '$base/uploads/presign', {'message': 'Файл 12 МБ-аас их байна'}, status: 400);
       await expectLater(
-        FileUploader(client)
-            .upload(bytes: data, name: 'a.pdf', mime: 'application/pdf', purpose: UploadPurpose.homework),
+        FileUploader(client).upload(bytes: data, name: 'a.pdf', mime: 'application/pdf', purpose: UploadPurpose.homework),
         throwsA(isA<ApiError>().having((e) => e.message, 'message', 'Файл 12 МБ-аас их байна')),
       );
       expect(http.to('POST', '$base/uploads'), isEmpty);
@@ -219,9 +221,13 @@ void main() {
       });
       final cancel = CancelToken()..cancel();
       await expectLater(
-        FileUploader(
-          client,
-        ).upload(bytes: data, name: 'a.pdf', mime: 'application/pdf', purpose: UploadPurpose.homework, cancel: cancel),
+        FileUploader(client).upload(
+          bytes: data,
+          name: 'a.pdf',
+          mime: 'application/pdf',
+          purpose: UploadPurpose.homework,
+          cancel: cancel,
+        ),
         throwsA(isA<UploadCancelled>()),
       );
     });

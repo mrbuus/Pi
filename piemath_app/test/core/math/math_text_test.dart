@@ -32,13 +32,8 @@ void main() {
   });
 
   testWidgets('display томьёо голлож, өргөн бол хэвтээ гүйлгэнэ (халихгүй)', (tester) async {
-    const long =
-        r'$$\frac{1}{2}+\frac{1}{3}+\frac{1}{4}+\frac{1}{5}+\frac{1}{6}+\frac{1}{7}+\frac{1}{8}+\frac{1}{9}+\frac{1}{10}+\frac{1}{11}+\frac{1}{12}+\frac{1}{13}$$';
-    await pumpThemed(
-      tester,
-      const SizedBox(width: 200, child: MathText('Нийлбэр:\n$long\nбол')),
-      size: const Size(320, 600),
-    );
+    const long = r'$$\frac{1}{2}+\frac{1}{3}+\frac{1}{4}+\frac{1}{5}+\frac{1}{6}+\frac{1}{7}+\frac{1}{8}+\frac{1}{9}+\frac{1}{10}+\frac{1}{11}+\frac{1}{12}+\frac{1}{13}$$';
+    await pumpThemed(tester, const SizedBox(width: 200, child: MathText('Нийлбэр:\n$long\nбол')), size: const Size(320, 600));
     expect(tester.takeException(), isNull);
     expect(find.byType(SingleChildScrollView), findsOneWidget);
     // Бичвэр — томьёо — бичвэр гурван блок.
@@ -47,13 +42,7 @@ void main() {
 
   testWidgets('урт мөр доторх томьёо нарийн дэлгэцэнд мөр шилжинэ', (tester) async {
     const src = r'Тэгшитгэл: $a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p = q+r+s+t+u+v+w$';
-    await pumpThemed(
-      tester,
-      const Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(width: 160, child: MathText(src)),
-      ),
-    );
+    await pumpThemed(tester, const Align(alignment: Alignment.topLeft, child: SizedBox(width: 160, child: MathText(src))));
     expect(tester.takeException(), isNull);
     final h = tester.getSize(find.byType(MathText)).height;
     expect(h, greaterThan(60), reason: 'хэд хэдэн мөрөнд хуваагдах ёстой');
