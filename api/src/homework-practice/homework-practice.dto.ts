@@ -13,6 +13,12 @@ export class HomeworkAnswersDto {
   @IsOptional()
   @IsObject()
   answers?: Record<string, unknown>;
+
+  // Идэвхийн тоолуур { activeSec, awaySec, leaveCount } — клиентийн хэмжилт, сервер mergeActivity-ээр шалгана
+  @ApiPropertyOptional({ type: Object, additionalProperties: true })
+  @IsOptional()
+  @IsObject()
+  activity?: Record<string, unknown>;
 }
 
 export class HomeworkPhotoDto {

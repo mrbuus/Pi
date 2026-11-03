@@ -11887,7 +11887,11 @@ export const HomeworkAttemptScalarFieldEnum = {
   score: 'score',
   total: 'total',
   submittedAt: 'submittedAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  activeSec: 'activeSec',
+  awaySec: 'awaySec',
+  leaveCount: 'leaveCount',
+  openCount: 'openCount'
 } as const
 
 export type HomeworkAttemptScalarFieldEnum = (typeof HomeworkAttemptScalarFieldEnum)[keyof typeof HomeworkAttemptScalarFieldEnum]

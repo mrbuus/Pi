@@ -174,6 +174,10 @@ function makeDb() {
           score: null,
           total: null,
           submittedAt: null,
+          activeSec: 0,
+          awaySec: 0,
+          leaveCount: 0,
+          openCount: 0,
           ...data,
         };
         attempts.push(row);
@@ -181,7 +185,9 @@ function makeDb() {
       }),
       updateMany: jest.fn(async ({ where, data }: any) => {
         const hit = attempts.filter((a) => matchAttempt(a, where));
-        for (const a of hit) Object.assign(a, data);
+        for (const a of hit)
+          for (const [k, v] of Object.entries<any>(data))
+            a[k] = v && typeof v === 'object' && 'increment' in v ? (a[k] ?? 0) + v.increment : v;
         return { count: hit.length };
       }),
       findMany: jest.fn(async ({ where }: any) =>
@@ -260,8 +266,23 @@ function makeDb() {
     lessonTopic: {
       findMany: jest.fn(async ({ where }: any) =>
         topics
-          .filter((t) => where.schedule.classroomId.in.includes(t.classroomId) && inRange(t.date, where.date))
-          .map((t) => ({ ...t, schedule: { classroomId: t.classroomId } })),
+          .filter(
+            (t) =>
+              where.schedule.classroomId.in.includes(t.classroomId) &&
+              inRange(t.date, where.date) &&
+              // Төлөвлөсөн тест (planned-tests) — testIds хоосон биш мөр л
+              (where.testIds?.isEmpty !== false || (t.testIds ?? []).length > 0),
+          )
+          .map((t) => ({
+            ...t,
+            testIds: t.testIds ?? [],
+            schedule: { classroomId: t.classroomId, endMinute: t.endMinute ?? 0 },
+          })),
+      ),
+      findFirst: jest.fn(async ({ where }: any) =>
+        topics.find(
+          (t) => t.classroomId === where.schedule.classroomId && (t.testIds ?? []).includes(where.testIds.has),
+        ) ?? null,
       ),
     },
     lessonRecord: {
@@ -283,6 +304,16 @@ function makeDb() {
       ),
     },
     academicCalendarDay: { findMany: jest.fn(async () => holidays) },
+    // Илгээсний дараах зөв хариу/бодолт (reviewOf): VERIFIED бодолттой бодлого
+    problem: {
+      findMany: jest.fn(async ({ where }: any) =>
+        where.id.in.map((id: string) => ({
+          id,
+          youtubeUrl: id === 'p2' ? 'https://youtu.be/abc' : null,
+          analysis: id === 'p1' ? { status: 'VERIFIED', solutionOutline: '$x=2$' } : { status: 'AUTO_DRAFT', solutionOutline: 'ноорог' },
+        })),
+      ),
+    },
     chapter: { findMany: jest.fn(async () => [{ id: 'ch1', title: 'Вектор' }]) },
     $transaction: jest.fn(async (fn: any) => fn(db)),
   };
@@ -780,5 +811,163 @@ describe('Багшийн самбар «Онлайн» — илгээсэн гэ
       status: 'SUBMITTED',
       lessonDate: d('2026-10-27'),
     });
+  });
+});
+
+
+describe('Хуваарьт төлөвлөсөн тест = гэрийн даалгавар (эзэн 2026-11-03)', () => {
+  let env: ReturnType<typeof makeDb>;
+  let svc: HomeworkPracticeService;
+  beforeEach(() => {
+    jest.useFakeTimers({ now: NOW, doNotFake: ['nextTick', 'setImmediate'] });
+    env = makeDb();
+    env.sessions.length = 0; // хичээл БАТЛАГДААГҮЙ — зөвхөн төлөвлөгөө
+    svc = new HomeworkPracticeService(env.db);
+  });
+  afterEach(() => jest.useRealTimers());
+
+  const plan = (date: string, testIds: string[], endMinute: number) =>
+    env.topics.push({ scheduleId: 'sch1', classroomId: 'c1', date: d(date), title: '', chapterId: null, testIds, endMinute });
+
+  it('хичээл тарсны дараа (өнгөрсөн өдөр) төлөвлөсөн A тестийн B хувилбар даалгавар болно', async () => {
+    plan('2026-10-27', ['A1'], 17 * 60);
+    const res = await svc.my('s1');
+    const day = res.days.find((x) => x.date === '2026-10-27');
+    expect(day?.items.map((i) => i.testId)).toEqual(['B1']);
+    const a = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect(a.status).toBe('IN_PROGRESS');
+  });
+
+  it('өнөөдрийн хичээл ДУУСААГҮЙ бол нээгдэхгүй, дууссан бол нээгдэнэ', async () => {
+    plan('2026-10-28', ['A1'], 19 * 60); // одоо УБ 18:00
+    expect((await svc.my('s1')).days.find((x) => x.date === '2026-10-28')?.items ?? []).toEqual([]);
+    await expect(svc.start('s1', { testId: 'B1', date: '2026-10-28' })).rejects.toBeInstanceOf(ForbiddenException);
+    jest.setSystemTime(new Date('2026-10-28T12:30:00Z')); // УБ 20:30 — хичээл тарсан
+    expect((await svc.my('s1')).days.find((x) => x.date === '2026-10-28')?.items.map((i) => i.testId)).toEqual(['B1']);
+  });
+
+  it('хичээл батлагдсан өдөр батлагдсан тест давамгайлна (төлөвлөгөөг үл тооно)', async () => {
+    plan('2026-10-27', ['B1'], 17 * 60); // төлөвлөгөө: B → даалгавар нь A1
+    env.sessions.push({ classroomId: 'c1', date: d('2026-10-27'), testId: 'A1' }); // бодит: A хийсэн
+    const day = (await svc.my('s1')).days.find((x) => x.date === '2026-10-27');
+    expect(day?.items.map((i) => i.testId)).toEqual(['B1']);
+  });
+
+  it('ирээдүйд ангид бодогдохоор төлөвлөсөн B хувилбар даалгавар болохгүй', async () => {
+    plan('2026-10-27', ['A1'], 17 * 60);
+    plan('2026-11-03', ['B1'], 17 * 60); // B-г ангид хийнэ
+    const day = (await svc.my('s1')).days.find((x) => x.date === '2026-10-27');
+    expect(day?.items ?? []).toEqual([]);
+  });
+
+  it('цуцалсан хичээлийн төлөвлөгөө даалгавар болохгүй', async () => {
+    env.schedules.push({
+      id: 'sch1', classroomId: 'c1', weekday: 2, startMinute: 600, endMinute: 690, room: null,
+      effectiveFrom: d('2026-09-01'), effectiveTo: null,
+      exceptions: [{ date: d('2026-10-27'), kind: 'CANCELLED', newDate: null }],
+    });
+    plan('2026-10-27', ['A1'], 17 * 60);
+    expect((await svc.my('s1')).days.find((x) => x.date === '2026-10-27')?.items ?? []).toEqual([]);
+  });
+});
+
+describe('Гэрийн даалгавар: идэвхийн хяналт ба илгээсний дараах хариу', () => {
+  let env: ReturnType<typeof makeDb>;
+  let svc: HomeworkPracticeService;
+  beforeEach(() => {
+    jest.useFakeTimers({ now: NOW, doNotFake: ['nextTick', 'setImmediate'] });
+    env = makeDb();
+    svc = new HomeworkPracticeService(env.db);
+  });
+  afterEach(() => jest.useRealTimers());
+
+  it('нээх бүрт openCount өснө; идэвх зөвхөн өснө, бодит хугацаанаас хэтрэхгүй', async () => {
+    const a = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect(a.activity).toEqual({ activeSec: 0, awaySec: 0, leaveCount: 0, openCount: 1 });
+    expect((await svc.start('s1', { testId: 'B1', date: '2026-10-27' })).activity.openCount).toBe(2);
+    jest.setSystemTime(new Date(NOW.getTime() + 100_000)); // 100 секунд өнгөрсөн
+    await svc.save('s1', a.attemptId, { p1: 'B' }, { activeSec: 90, awaySec: 5, leaveCount: 2 });
+    expect(env.attempts[0]).toMatchObject({ activeSec: 90, awaySec: 5, leaveCount: 2 });
+    // 0-ээс эхэлсэн (дахин ачаалсан) тоолуур буурахгүй; хэт том утга бодит хугацаагаар хязгаарлагдана
+    await svc.save('s1', a.attemptId, { p1: 'B' }, { activeSec: 3, awaySec: 99999, leaveCount: 1 });
+    expect(env.attempts[0]).toMatchObject({ activeSec: 90, awaySec: 100, leaveCount: 2 });
+    await svc.save('s1', a.attemptId, {}, { activeSec: 'x', leaveCount: -5 });
+    expect(env.attempts[0]).toMatchObject({ activeSec: 90, leaveCount: 2 });
+  });
+
+  it('илгээхэд идэвх хадгалагдана; зөв хариу, бодолт ЗӨВХӨН илгээсний дараа, алдсан бодлогод л', async () => {
+    const a = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    // илгээхээс өмнө (шалгах хүртэл) зөв хариу огт гарахгүй
+    expect(a.review).toBeNull();
+    const chk = await svc.check('s1', a.attemptId, { p1: 'A', p2: 'C' }, { activeSec: 10, awaySec: 0, leaveCount: 0 });
+    expect(JSON.stringify(chk)).not.toMatch(/correctAnswer|solution/);
+    jest.setSystemTime(new Date(NOW.getTime() + 60_000));
+    const res = await svc.submit('s1', a.attemptId, { p1: 'A', p2: 'C' }, { activeSec: 55, awaySec: 3, leaveCount: 1 });
+    expect(res.results).toEqual({ p1: 'WRONG', p2: 'CORRECT' });
+    expect(Object.keys(res.review)).toEqual(['p1']); // зөв бодсон p2 орохгүй
+    expect(res.review.p1).toEqual({ correct: 'B', solution: '$x=2$', videoUrl: null });
+    expect(env.attempts[0]).toMatchObject({ status: 'SUBMITTED', activeSec: 55, awaySec: 3, leaveCount: 1 });
+    // дахин нээхэд ч мөн адил
+    const again = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect(again.review).toEqual(res.review);
+  });
+
+  it('ноорог (VERIFIED биш) бодолт сурагчид харагдахгүй', async () => {
+    const a = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    const res = await svc.submit('s1', a.attemptId, { p1: 'B', p2: 'A' });
+    expect(res.review.p2).toEqual({ correct: 'C', solution: null, videoUrl: 'https://youtu.be/abc' });
+  });
+});
+
+describe('Багшийн самбар «Онлайн» дэлгэрэнгүй (эзэн 2026-11-03)', () => {
+  function setup() {
+    const env = makeDb();
+    const db = env.db;
+    db.classroom = { findUnique: jest.fn(async () => ({ id: 'c1', archived: false, teacherId: 't' })) };
+    db.classSchedule = { findMany: jest.fn(async () => []) };
+    db.scheduleException = { findMany: jest.fn(async () => []) };
+    db.academicCalendarDay = { findMany: jest.fn(async () => []) };
+    db.enrollment.findFirst = jest.fn(async ({ where }: any) =>
+      where.studentId === 's1' ? { student: { firstName: 'Бат', lastName: 'Болд' } } : null,
+    );
+    db.testResult = { findMany: jest.fn(async () => []) };
+    db.homeworkPhoto = {
+      findFirst: jest.fn(async () => ({ fileKey: 'hw.pdf', pages: 3, createdAt: new Date('2026-10-28T09:00:00Z') })),
+    };
+    db.testProblem = {
+      findMany: jest.fn(async () =>
+        [problem('p1', 'B'), problem('p2', 'C')].map((r) => ({ ...r, testId: 'B1' })),
+      ),
+    };
+    db.homeworkAttempt.findMany = jest.fn(async () => [
+      {
+        id: 'att1', testId: 'B1', status: 'SUBMITTED', answers: { p1: 'A', p2: 'C' },
+        startedAt: new Date('2026-10-28T08:00:00Z'), submittedAt: new Date('2026-10-28T08:30:00Z'),
+        deadlineAt: new Date('2026-10-28T16:00:00Z'), activeSec: 1500, awaySec: 300, leaveCount: 4, openCount: 2,
+        checksUsed: 1, score: 1, total: 2,
+      },
+    ]);
+    db.homeworkCheck.findMany = jest.fn(async () => [{ attemptId: 'att1', results: { p1: 'WRONG', p2: 'CORRECT' } }]);
+    return { db, svc: new HomeworkMarksService(db, { record: jest.fn() } as never) };
+  }
+
+  it('оноо, хугацаа, вэбээс гарсан тоо, хариу + зөв хариу, зураг; бодлогын агуулга илгээхгүй', async () => {
+    const { svc } = setup();
+    const res = await svc.onlineDetail('c1', '2026-10-29', 's1', 'admin', Role.ADMIN);
+    expect(res.student).toMatchObject({ firstName: 'Бат' });
+    expect(res.photo).toMatchObject({ fileKey: 'hw.pdf', pages: 3 });
+    const b1 = res.tests.find((t) => t.testId === 'B1');
+    const a = b1?.attempt as any;
+    expect(a).toMatchObject({ durationSec: 1800, activeSec: 1500, awaySec: 300, leaveCount: 4, openCount: 2, score: 1, total: 2, late: false });
+    expect(a.items).toEqual([
+      { n: 1, problemId: 'p1', mine: 'A', correct: 'B', result: 'WRONG' },
+      { n: 2, problemId: 'p2', mine: 'C', correct: 'C', result: 'CORRECT' },
+    ]);
+    expect(JSON.stringify(res)).not.toContain('statementText');
+  });
+
+  it('ангид байхгүй сурагч 404', async () => {
+    const { svc } = setup();
+    await expect(svc.onlineDetail('c1', '2026-10-29', 'zzz', 'admin', Role.ADMIN)).rejects.toBeInstanceOf(NotFoundException);
   });
 });

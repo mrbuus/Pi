@@ -3081,6 +3081,12 @@ model HomeworkAttempt {
   submittedAt  DateTime?
   updatedAt    DateTime              @updatedAt
   checks       HomeworkCheck[]
+  /// Идэвх (эзэн 2026-11-03): хуудас нүдэнд харагдаж байсан нийт секунд, вэбээс гарсан тоо/секунд,
+  /// хичээллэж нээсэн тоо. Клиент хэмжиж илгээнэ; сервер зөвхөн өсгөж (max), бодит хугацаагаар хязгаарлана
+  activeSec    Int                   @default(0)
+  awaySec      Int                   @default(0)
+  leaveCount   Int                   @default(0)
+  openCount    Int                   @default(0)
 
   @@unique([studentId, testId, lessonDate])
   @@index([classroomId, lessonDate])

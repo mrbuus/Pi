@@ -29,17 +29,22 @@ import {
   MAX_DAYS,
   buildSlots,
   clampDays,
+  correctAnswerView,
   gradeHomework,
   isLate,
+  mergeActivity,
   mergeAnswers,
+  myAnswerView,
   problemView,
   remainingSec,
   ubDayStart,
   variantOf,
+  type ActivityState,
   type CheckResult,
   type HomeworkProblemRow,
   type HomeworkSlot,
 } from './homework-logic';
+import { loadPlanned } from './planned-tests';
 
 const PDF_MAX_BYTES = 25 * 1024 * 1024;
 const MAX_PAGES = 6;
@@ -62,6 +67,23 @@ type AttemptRow = {
   score: number | null;
   total: number | null;
   submittedAt: Date | null;
+  activeSec: number;
+  awaySec: number;
+  leaveCount: number;
+  openCount: number;
+};
+
+const activityOf = (a: AttemptRow): ActivityState => ({
+  activeSec: a.activeSec ?? 0,
+  awaySec: a.awaySec ?? 0,
+  leaveCount: a.leaveCount ?? 0,
+  openCount: a.openCount ?? 0,
+});
+
+type HwReviewItem = {
+  correct: ReturnType<typeof correctAnswerView>;
+  solution: string | null;
+  videoUrl: string | null;
 };
 
 function asRecord(v: unknown): Record<string, unknown> {
@@ -134,10 +156,33 @@ export class HomeworkPracticeService {
       select: { classroomId: true, date: true, testId: true },
       orderBy: { createdAt: 'asc' },
     });
+    // Хуваарьт төлөвлөсөн («Орох тест») тест хичээл тарсны дараа даалгавар болно; хичээлийг
+    // батлаад ClassTestSession бүртгэсэн өдөрт батлагдсан нь давамгайлна (эзэн 2026-11-03)
+    const planned = await loadPlanned(
+      this.prisma,
+      classroomIds,
+      fromKey,
+      toKey,
+      dateKey(todayUB()),
+    );
+    const real = sessions.map((s) => ({
+      classroomId: s.classroomId,
+      date: dateKey(s.date),
+      testId: s.testId,
+    }));
+    const confirmedDays = new Set(
+      real.filter((s) => s.testId).map((s) => `${s.classroomId}|${s.date}`),
+    );
+    const merged = [
+      ...real,
+      ...planned.sessions.filter(
+        (s) => s.testId === null || !confirmedDays.has(`${s.classroomId}|${s.date}`),
+      ),
+    ];
     const doneIds = [
       ...new Set(
-        sessions
-          .filter((s) => s.testId && dateKey(s.date) <= toKey)
+        merged
+          .filter((s) => s.testId && s.date <= toKey)
           .map((s) => s.testId as string),
       ),
     ];
@@ -189,9 +234,19 @@ export class HomeworkPracticeService {
           }),
         ])
       : [[], []];
-    const reserved = [...inClass, ...futureAccess].flatMap((r) =>
-      r.testId ? [{ classroomId: r.classroomId, testId: r.testId }] : [],
-    );
+    const reserved = [
+      ...[...inClass, ...futureAccess].flatMap((r) =>
+        r.testId ? [{ classroomId: r.classroomId, testId: r.testId }] : [],
+      ),
+      ...planned.reserved
+        // Хичээл батлагдаж өөр тест бүртгэгдсэн өдрийн төлөвлөгөө хүчингүй — тэр тест нөөцлөгдөхгүй
+        .filter(
+          (r) =>
+            siblingIds.includes(r.testId) &&
+            !confirmedDays.has(`${r.classroomId}|${r.date}`),
+        )
+        .map((r) => ({ classroomId: r.classroomId, testId: r.testId })),
+    ];
     return buildSlots({
       reserved,
       enrollments: enrollments.map((e) => ({
@@ -199,11 +254,7 @@ export class HomeworkPracticeService {
         classroomName: e.classroom.name,
         joinedKey: ubDateKey(e.joinedAt),
       })),
-      sessions: sessions.map((s) => ({
-        classroomId: s.classroomId,
-        date: dateKey(s.date),
-        testId: s.testId,
-      })),
+      sessions: merged,
       done,
       siblings: siblings
         .filter((t) => t._count.problems > 0)
@@ -277,7 +328,7 @@ export class HomeworkPracticeService {
    * өдөр MAX_DAYS цонхонд. Бүтэн эрхийг (анги, B хувилбар) эхлүүлэх/илгээх үед шалгана.
    */
   private async assertStillHomework(attempt: AttemptRow) {
-    const [enrolled, inClass, futureAccess] = await Promise.all([
+    const [enrolled, inClass, plannedInClass, futureAccess] = await Promise.all([
       this.prisma.enrollment.findFirst({
         where: {
           studentId: attempt.studentId,
@@ -291,6 +342,13 @@ export class HomeworkPracticeService {
         where: { classroomId: attempt.classroomId, testId: attempt.testId },
         select: { id: true },
       }),
+      this.prisma.lessonTopic.findFirst({
+        where: {
+          testIds: { has: attempt.testId },
+          schedule: { classroomId: attempt.classroomId },
+        },
+        select: { id: true },
+      }),
       this.prisma.testAccess.findFirst({
         where: {
           classroomId: attempt.classroomId,
@@ -300,7 +358,7 @@ export class HomeworkPracticeService {
         select: { testId: true },
       }),
     ]);
-    if (!enrolled || inClass || futureAccess)
+    if (!enrolled || inClass || plannedInClass || futureAccess)
       throw new ForbiddenException('Энэ гэрийн даалгавар танд нээгдээгүй байна');
   }
 
@@ -588,6 +646,7 @@ export class HomeworkPracticeService {
             lessonDate: parseDateOnly(date),
             deadlineAt: slot.deadlineAt,
             timeLimitMin: item.timeLimitMin,
+            openCount: 1,
           },
         })) as AttemptRow;
       } catch (e) {
@@ -598,6 +657,14 @@ export class HomeworkPracticeService {
         })) as AttemptRow | null;
         if (!attempt) throw e;
       }
+    } else if (attempt.status === 'IN_PROGRESS') {
+      // Нээх бүрт +1 (дахин ачаалах, өөр төхөөрөмж) — багш «хэдэн удаа орсон»-ыг харна
+      const before = attempt.openCount ?? 0;
+      const res = await this.prisma.homeworkAttempt.updateMany({
+        where: { id: attempt.id, status: 'IN_PROGRESS' },
+        data: { openCount: { increment: 1 } },
+      });
+      if (res.count) attempt = { ...attempt, openCount: before + 1 };
     }
     return this.attemptView(attempt, slot.deadlineAt);
   }
@@ -637,7 +704,50 @@ export class HomeworkPracticeService {
       lastCheck: last
         ? (asRecord(last.results) as Record<string, CheckResult>)
         : null,
+      activity: activityOf(attempt),
+      // Илгээсний дараа л зөв хариу, бодолт нээгдэнэ (эзэн 2026-11-03)
+      review:
+        attempt.status === 'SUBMITTED'
+          ? await this.reviewOf(rows, last ? asRecord(last.results) : {})
+          : null,
     };
+  }
+
+  /**
+   * Илгээсэн даалгаврын алдсан/хоосон бодлого бүрийн зөв хариу + баталгаажсан бодолт (байвал) +
+   * бичлэг. Зөв бодсон бодлогод хүрэхгүй (ачаалал бага). ЗӨВХӨН илгээсний дараа дуудна.
+   */
+  private async reviewOf(
+    rows: HomeworkProblemRow[],
+    results: Record<string, unknown>,
+  ) {
+    const missed = rows.filter((r) => {
+      const res = results[r.problemId];
+      return res === 'WRONG' || res === 'BLANK';
+    });
+    if (!missed.length) return {} as Record<string, HwReviewItem>;
+    const extra = await this.prisma.problem.findMany({
+      where: { id: { in: missed.map((r) => r.problemId) } },
+      select: {
+        id: true,
+        youtubeUrl: true,
+        analysis: { select: { status: true, solutionOutline: true } },
+      },
+    });
+    const byId = new Map(extra.map((x) => [x.id, x]));
+    const out: Record<string, HwReviewItem> = {};
+    for (const r of missed) {
+      const x = byId.get(r.problemId);
+      const a = x?.analysis;
+      out[r.problemId] = {
+        correct: correctAnswerView(r),
+        // Бодолт зөвхөн VERIFIED үед (шалгалтын дүнтэй ижил дүрэм) — AI/авто ноорог задрахгүй
+        solution:
+          a?.status === 'VERIFIED' && a.solutionOutline ? a.solutionOutline : null,
+        videoUrl: x?.youtubeUrl ?? null,
+      };
+    }
+    return out;
   }
 
   /* ───────── PATCH /homework/attempts/:id ───────── */
@@ -649,15 +759,26 @@ export class HomeworkPracticeService {
     return Date.now() > new Date(attempt.startedAt).getTime() + limitMs;
   }
 
-  async save(studentId: string, attemptId: string, answers: unknown) {
+  async save(
+    studentId: string,
+    attemptId: string,
+    answers: unknown,
+    activity?: unknown,
+  ) {
     const attempt = await this.ownOpenAttempt(attemptId, studentId);
     if (this.timeExpired(attempt))
       throw new ConflictException('Хугацаа дууссан — илгээнэ үү');
     const rows = await this.loadProblems(attempt.testId);
     const merged = mergeAnswers(rows, attempt.answers, answers);
+    const act = mergeActivity(activityOf(attempt), activity, attempt.startedAt);
     const res = await this.prisma.homeworkAttempt.updateMany({
       where: { id: attempt.id, status: 'IN_PROGRESS' },
-      data: { answers: merged as Prisma.InputJsonValue },
+      data: {
+        answers: merged as Prisma.InputJsonValue,
+        activeSec: act.activeSec,
+        awaySec: act.awaySec,
+        leaveCount: act.leaveCount,
+      },
     });
     if (!res.count) throw new ConflictException('Гэрийн даалгавар илгээгдсэн байна');
     return { savedAt: new Date().toISOString() };
@@ -665,7 +786,12 @@ export class HomeworkPracticeService {
 
   /* ───────── POST /homework/attempts/:id/check ───────── */
 
-  async check(studentId: string, attemptId: string, answers: unknown) {
+  async check(
+    studentId: string,
+    attemptId: string,
+    answers: unknown,
+    activity?: unknown,
+  ) {
     const attempt = await this.ownOpenAttempt(attemptId, studentId);
     if (attempt.checksUsed >= MAX_CHECKS)
       throw new ConflictException('Шалгах эрх дууссан — одоо илгээнэ үү');
@@ -677,6 +803,7 @@ export class HomeworkPracticeService {
     const rows = await this.loadProblems(attempt.testId);
     const merged = mergeAnswers(rows, attempt.answers, answers);
     const graded = gradeHomework(rows, merged);
+    const act = mergeActivity(activityOf(attempt), activity, attempt.startedAt);
     const n = attempt.checksUsed + 1;
     await this.prisma.$transaction(async (tx) => {
       // Зэрэг хоёр «Шалгах» нэг эрхийг хоёр удаа хэрэглэхгүй (checksUsed-ээр түгжинэ)
@@ -688,6 +815,9 @@ export class HomeworkPracticeService {
         },
         data: {
           answers: merged as Prisma.InputJsonValue,
+          activeSec: act.activeSec,
+          awaySec: act.awaySec,
+          leaveCount: act.leaveCount,
           checksUsed: n,
           ...(attempt.checksUsed === 0
             ? { firstAnswers: merged as Prisma.InputJsonValue }
@@ -715,7 +845,12 @@ export class HomeworkPracticeService {
 
   /* ───────── POST /homework/attempts/:id/submit ───────── */
 
-  async submit(studentId: string, attemptId: string, answers: unknown) {
+  async submit(
+    studentId: string,
+    attemptId: string,
+    answers: unknown,
+    activity?: unknown,
+  ) {
     const { attempt } = await this.ownAttempt(attemptId, studentId);
     if (attempt.status === 'SUBMITTED') return this.submittedView(attempt);
     const rows = await this.loadProblems(attempt.testId);
@@ -726,6 +861,12 @@ export class HomeworkPracticeService {
       : mergeAnswers(rows, attempt.answers, answers);
     const graded = gradeHomework(rows, merged);
     const submittedAt = new Date();
+    const act = mergeActivity(
+      activityOf(attempt),
+      activity,
+      attempt.startedAt,
+      submittedAt,
+    );
     const done = await this.prisma.$transaction(async (tx) => {
       const res = await tx.homeworkAttempt.updateMany({
         where: { id: attempt.id, status: 'IN_PROGRESS' },
@@ -735,6 +876,9 @@ export class HomeworkPracticeService {
           score: graded.correct,
           total: graded.total,
           submittedAt,
+          activeSec: act.activeSec,
+          awaySec: act.awaySec,
+          leaveCount: act.leaveCount,
           ...(attempt.checksUsed === 0
             ? { firstAnswers: merged as Prisma.InputJsonValue }
             : {}),
@@ -763,18 +907,24 @@ export class HomeworkPracticeService {
       score: { correct: graded.correct, total: graded.total },
       results: graded.results,
       submittedAt: submittedAt.toISOString(),
+      review: await this.reviewOf(rows, graded.results),
     };
   }
 
   private async submittedView(attempt: AttemptRow) {
-    const final = await this.prisma.homeworkCheck.findFirst({
-      where: { attemptId: attempt.id, n: 0 },
-      select: { results: true },
-    });
+    const [final, rows] = await Promise.all([
+      this.prisma.homeworkCheck.findFirst({
+        where: { attemptId: attempt.id, n: 0 },
+        select: { results: true },
+      }),
+      this.loadProblems(attempt.testId),
+    ]);
+    const results = asRecord(final?.results) as Record<string, CheckResult>;
     return {
       score: { correct: attempt.score ?? 0, total: attempt.total ?? 0 },
-      results: asRecord(final?.results) as Record<string, CheckResult>,
+      results,
       submittedAt: attempt.submittedAt?.toISOString() ?? null,
+      review: await this.reviewOf(rows, results),
     };
   }
 

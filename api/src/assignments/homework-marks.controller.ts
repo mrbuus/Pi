@@ -45,6 +45,24 @@ export class HomeworkMarksController {
 
   // Тухайн хичээлийн гэрийн даалгаврын онлайн дүн: өмнөх хичээлд ангид хийсэн
   // тестийн нөгөө хувилбар (A → B) — самбарын «Онлайн» нүд (эзэн 2026-10-18)
+  // Нэг сурагчийн онлайн даалгаврын дэлгэрэнгүй: оноо, хугацаа, вэбээс гарсан тоо, хариу, зураг
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/homework-marks/online/:studentId')
+  onlineDetail(
+    @Param('id') classroomId: string,
+    @Param('studentId') studentId: string,
+    @Query('date') date: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.onlineDetail(
+      classroomId,
+      date,
+      studentId,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('classrooms/:id/homework-marks/online')
   online(
