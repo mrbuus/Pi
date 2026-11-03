@@ -56,6 +56,7 @@ export default function HomeworkResult({
   classroomId,
   date,
   backHref,
+  showPhoto = true,
 }: {
   title: string;
   score: HwScore | null;
@@ -66,6 +67,8 @@ export default function HomeworkResult({
   classroomId: string;
   date: string;
   backHref: string;
+  /** Дэвтрийн зураг илгээх товч (дахин бодох үед үгүй) */
+  showPhoto?: boolean;
 }) {
   const problemIds = problems.map((p) => p.id);
   const hasUngraded = !!results && problemIds.some((id) => !results[id]);
@@ -188,9 +191,11 @@ export default function HomeworkResult({
           <ArrowLeft className="size-4" aria-hidden />
           Жагсаалт руу
         </Link>
-        <span className="ml-auto">
-          <PhotoButton classroomId={classroomId} date={date} />
-        </span>
+        {showPhoto && (
+          <span className="ml-auto">
+            <PhotoButton classroomId={classroomId} date={date} />
+          </span>
+        )}
       </div>
     </div>
   );

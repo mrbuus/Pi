@@ -26,6 +26,32 @@ export const MAX_DAYS = 31;
 // өөр ангийн/дараагийн шалгалтад нөөцлөгдсөн байж болно — аюулгүй байдлын шалгалт 2026-10-29)
 export const EXCLUDED_TYPES = ['THOUSAND', 'EESH_MOCK', 'CHAPTER_EXAM'] as const;
 
+/** «Дахин бодох» (эзэн 2026-11-03): хичээлээс хойш ингэж олон хичээл өнгөрсний дараа А, Б нээгдэнэ */
+export const REDO_LESSONS = 2;
+/** Дахин бодох оролдлогын дугаар (нэг удаа) */
+export const REDO_ROUND = 2;
+
+/**
+ * Хичээл `date`-ээс хойш `today`-аас ӨМНӨ болсон хичээлийн тоо (өнөөдрийн хичээл өнгөрсөнд
+ * тооцогдохгүй — хамгаалах талаар). `lessonDates` — тухайн ангийн хичээлийн бүх өдөр «YYYY-MM-DD».
+ */
+export function lessonsPassedAfter(
+  lessonDates: readonly string[],
+  date: string,
+  today: string,
+): number {
+  return new Set(lessonDates.filter((d) => d > date && d < today)).size;
+}
+
+/** Хичээлээс хойш REDO_LESSONS хичээл өнгөрсөн үү */
+export function redoOpen(
+  lessonDates: readonly string[],
+  date: string,
+  today: string,
+): boolean {
+  return lessonsPassedAfter(lessonDates, date, today) >= REDO_LESSONS;
+}
+
 /** Хугацааны хязгаараас хойш зөвшөөрөх сүлжээний зай (секунд) */
 export const TIME_GRACE_SEC = 60;
 

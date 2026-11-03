@@ -126,7 +126,7 @@ export class AttendanceDaySummaryService {
     }));
     const [attempts, photos] = await Promise.all([
       this.prisma.homeworkAttempt.findMany({
-        where: { status: 'SUBMITTED', OR: pairs },
+        where: { status: 'SUBMITTED', round: 1, OR: pairs },
         select: { classroomId: true, studentId: true, score: true, total: true },
       }),
       this.prisma.homeworkPhoto.findMany({

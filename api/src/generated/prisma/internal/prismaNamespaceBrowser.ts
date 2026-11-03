@@ -2119,7 +2119,8 @@ export const HomeworkAttemptScalarFieldEnum = {
   activeSec: 'activeSec',
   awaySec: 'awaySec',
   leaveCount: 'leaveCount',
-  openCount: 'openCount'
+  openCount: 'openCount',
+  round: 'round'
 } as const
 
 export type HomeworkAttemptScalarFieldEnum = (typeof HomeworkAttemptScalarFieldEnum)[keyof typeof HomeworkAttemptScalarFieldEnum]

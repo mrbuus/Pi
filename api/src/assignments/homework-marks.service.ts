@@ -612,6 +612,7 @@ export class HomeworkMarksService {
         classroomId,
         lessonDate: parseDateOnly(prev),
         status: 'SUBMITTED',
+        round: 1,
         testId: { in: pairs.map((p) => p.testId) },
         studentId: { in: studentIds },
       },
@@ -709,6 +710,7 @@ export class HomeworkMarksService {
         student,
         tests: [],
         photo: photoView,
+        redos: [],
       };
 
     const testIds = pairs.map((p) => p.testId);
@@ -718,6 +720,7 @@ export class HomeworkMarksService {
           studentId,
           classroomId,
           lessonDate: parseDateOnly(prev),
+          round: 1,
           testId: { in: testIds },
         },
       }),
@@ -815,6 +818,51 @@ export class HomeworkMarksService {
         exam: exam ? { score: exam.totalScore, max: exam.maxScore } : null,
       };
     });
-    return { date: key, previousLessonDate: prev, student, tests, photo: photoView };
+    // «Дахин бодох» (2-р оролдлого): тэр хичээлийн А, Б тестийг сурагч дахин бодсон бол багш харна
+    const redoRows = await this.prisma.homeworkAttempt.findMany({
+      where: {
+        studentId,
+        classroomId,
+        lessonDate: parseDateOnly(prev),
+        round: { gt: 1 },
+      },
+      orderBy: { startedAt: 'asc' },
+    });
+    const redoTests = redoRows.length
+      ? await this.prisma.test.findMany({
+          where: { id: { in: redoRows.map((r) => r.testId) } },
+          select: { id: true, title: true, variantLabel: true },
+        })
+      : [];
+    const redoCounted = new Map(redoTests.map((t) => [t.id, t]));
+    const aIds = new Set(pairs.map((p) => p.fromTestId));
+    const redos = redoRows.map((a) => {
+      const t = redoCounted.get(a.testId);
+      return {
+        attemptId: a.id,
+        testId: a.testId,
+        title: t?.title ?? 'Тест',
+        variant: normalizeVariant(t?.variantLabel ?? null),
+        kind: aIds.has(a.testId) ? ('CLASS' as const) : ('HOME' as const),
+        round: a.round,
+        status: a.status,
+        startedAt: a.startedAt.toISOString(),
+        submittedAt: a.submittedAt?.toISOString() ?? null,
+        activeSec: a.activeSec,
+        awaySec: a.awaySec,
+        leaveCount: a.leaveCount,
+        openCount: a.openCount,
+        score: a.score,
+        total: a.total,
+      };
+    });
+    return {
+      date: key,
+      previousLessonDate: prev,
+      student,
+      tests,
+      photo: photoView,
+      redos,
+    };
   }
 }

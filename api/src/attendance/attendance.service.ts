@@ -416,6 +416,7 @@ export class AttendanceService {
         where: {
           classroomId,
           status: 'SUBMITTED',
+          round: 1,
           lessonDate: range,
           studentId: { in: studentIds },
         },

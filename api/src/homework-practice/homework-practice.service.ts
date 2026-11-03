@@ -27,6 +27,8 @@ import {
   TIME_GRACE_SEC,
   MAX_CHECKS,
   MAX_DAYS,
+  REDO_LESSONS,
+  REDO_ROUND,
   buildSlots,
   clampDays,
   correctAnswerView,
@@ -35,6 +37,8 @@ import {
   mergeActivity,
   mergeAnswers,
   myAnswerView,
+  redoOpen,
+  lessonsPassedAfter,
   problemView,
   remainingSec,
   ubDayStart,
@@ -59,6 +63,7 @@ type AttemptRow = {
   classroomId: string;
   testId: string;
   lessonDate: Date;
+  round: number;
   status: 'IN_PROGRESS' | 'SUBMITTED';
   startedAt: Date;
   deadlineAt: Date | null;
@@ -93,6 +98,22 @@ type HwReviewItem = {
   correct: ReturnType<typeof correctAnswerView>;
   solution: string | null;
   video: { url: string; embedUrl: string } | null;
+};
+
+type RedoItem = {
+  testId: string;
+  title: string;
+  variantLabel: string | null;
+  kind: 'CLASS' | 'HOME';
+  problemCount: number;
+  timeLimitMin: number | null;
+  rounds: {
+    round: number;
+    attemptId: string;
+    status: 'IN_PROGRESS' | 'SUBMITTED';
+    score: { correct: number; total: number } | null;
+    submittedAt: string | null;
+  }[];
 };
 
 function asRecord(v: unknown): Record<string, unknown> {
@@ -362,6 +383,7 @@ export class HomeworkPracticeService {
    * өдөр MAX_DAYS цонхонд. Бүтэн эрхийг (анги, B хувилбар) эхлүүлэх/илгээх үед шалгана.
    */
   private async assertStillHomework(attempt: AttemptRow) {
+    if (attempt.round >= REDO_ROUND) return this.assertRedoStillOpen(attempt);
     const [enrolled, inClass, plannedInClass, futureAccess] = await Promise.all([
       this.prisma.enrollment.findFirst({
         where: {
@@ -418,11 +440,12 @@ export class HomeworkPracticeService {
     })) as AttemptRow | null;
     if (!attempt || attempt.studentId !== studentId)
       throw new NotFoundException('Гэрийн даалгавар олдсонгүй');
-    const { slot } = await this.slotFor(
-      studentId,
-      attempt.testId,
-      dateKey(attempt.lessonDate),
-    );
+    const date = dateKey(attempt.lessonDate);
+    // Дахин бодох оролдлого: 2 хичээл өнгөрсөн, багш баталсан эсэхийг илгээхэд бүтнээр шалгана
+    const { slot } =
+      attempt.round >= REDO_ROUND
+        ? await this.redoFor(studentId, attempt.testId, date)
+        : await this.slotFor(studentId, attempt.testId, date);
     return { attempt, slot };
   }
 
@@ -508,6 +531,7 @@ export class HomeworkPracticeService {
         where: {
           studentId,
           testId: { in: testIds },
+          round: 1,
           lessonDate: { gte: parseDateOnly(fromKey) },
         },
         select: {
@@ -666,11 +690,35 @@ export class HomeworkPracticeService {
       throw new BadRequestException('testId шаардлагатай');
     const date = this.parseDate(body.date);
     const { slot, item } = await this.slotFor(studentId, body.testId, date);
+    const attempt = await this.openAttempt(studentId, {
+      classroomId: slot.classroomId,
+      testId: item.id,
+      date,
+      round: 1,
+      timeLimitMin: item.timeLimitMin,
+      deadlineAt: () => this.deadlineFor(studentId, slot, date),
+    });
+    return this.attemptView(attempt, attempt.deadlineAt ?? slot.deadlineAt);
+  }
+
+  /** Оролдлого олох/үүсгэх; байгаа IN_PROGRESS-ийг нээх бүрт openCount +1 */
+  private async openAttempt(
+    studentId: string,
+    o: {
+      classroomId: string;
+      testId: string;
+      date: string;
+      round: number;
+      timeLimitMin: number | null;
+      deadlineAt: () => Promise<Date | null>;
+    },
+  ): Promise<AttemptRow> {
     const where = {
-      studentId_testId_lessonDate: {
+      studentId_testId_lessonDate_round: {
         studentId,
-        testId: item.id,
-        lessonDate: parseDateOnly(date),
+        testId: o.testId,
+        lessonDate: parseDateOnly(o.date),
+        round: o.round,
       },
     };
     let attempt = (await this.prisma.homeworkAttempt.findUnique({
@@ -681,11 +729,12 @@ export class HomeworkPracticeService {
         attempt = (await this.prisma.homeworkAttempt.create({
           data: {
             studentId,
-            classroomId: slot.classroomId,
-            testId: item.id,
-            lessonDate: parseDateOnly(date),
-            deadlineAt: await this.deadlineFor(studentId, slot, date),
-            timeLimitMin: item.timeLimitMin,
+            classroomId: o.classroomId,
+            testId: o.testId,
+            lessonDate: parseDateOnly(o.date),
+            round: o.round,
+            deadlineAt: await o.deadlineAt(),
+            timeLimitMin: o.timeLimitMin,
             openCount: 1,
           },
         })) as AttemptRow;
@@ -706,7 +755,321 @@ export class HomeworkPracticeService {
       });
       if (res.count) attempt = { ...attempt, openCount: before + 1 };
     }
-    return this.attemptView(attempt, attempt.deadlineAt ?? slot.deadlineAt);
+    return attempt;
+  }
+
+  /* ───────── Дахин бодох (эзэн 2026-11-03) ───────── */
+
+  /**
+   * Хичээл `date`-ийн А (ангид бодсон) эсвэл Б (гэртээ) тестийг дахин бодох эрх: багш хичээлийг
+   * баталсан (ClassTestSession), тэр ангид хичээлээс хойш REDO_LESSONS хичээл өнгөрсөн, тест
+   * ирээдүйд тэр ангид дахин бодогдохоор төлөвлөгдөөгүй. Дуудлага бүрт сервер дахин шалгана.
+   */
+  private async redoFor(studentId: string, testId: string, date: string) {
+    const denied = () =>
+      new ForbiddenException('Энэ тестийг дахин бодох боломж танд нээгдээгүй байна');
+    const today = dateKey(todayUB());
+    if (date >= today || date < addDaysKey(today, -(MAX_DAYS - 1))) throw denied();
+    const slots = await this.loadSlots(studentId, date, date);
+    for (const slot of slots) {
+      if (slot.date !== date) continue;
+      const item = slot.items.find((i) => i.id === testId || i.fromTestId === testId);
+      if (!item) continue;
+      const lessons = await loadLessonDays(
+        this.prisma,
+        studentId,
+        date,
+        today,
+        slot.classroomId,
+      );
+      if (!redoOpen(lessons.byClass.get(slot.classroomId) ?? [], date, today))
+        throw denied();
+      const confirmed = await this.prisma.classTestSession.findFirst({
+        where: {
+          classroomId: slot.classroomId,
+          date: parseDateOnly(date),
+          testId: item.fromTestId,
+        },
+        select: { id: true },
+      });
+      if (!confirmed) throw denied();
+      if (testId === item.id) {
+        return {
+          slot,
+          test: {
+            id: item.id,
+            title: item.title,
+            variantLabel: variantOf(item),
+            timeLimitMin: item.timeLimitMin,
+            problemCount: item.problemCount,
+          },
+        };
+      }
+      const a = await this.prisma.test.findFirst({
+        where: {
+          id: item.fromTestId,
+          deletedAt: null,
+          isDraft: false,
+          gradingMode: 'AUTO',
+          type: { notIn: [...EXCLUDED_TYPES] },
+        },
+        select: {
+          id: true,
+          title: true,
+          variantLabel: true,
+          timeLimitMin: true,
+          _count: { select: { problems: true } },
+        },
+      });
+      if (!a || a._count.problems === 0) throw denied();
+      if (await this.reservedForClass(slot.classroomId, a.id, today)) throw denied();
+      return {
+        slot,
+        test: {
+          id: a.id,
+          title: a.title,
+          variantLabel: variantOf({ variantLabel: a.variantLabel }),
+          timeLimitMin: a.timeLimitMin,
+          problemCount: a._count.problems,
+        },
+      };
+    }
+    throw denied();
+  }
+
+  /** Тест тэр ангид ирээдүйд (өнөөдрөөс хойш) бодогдохоор хуваарьлагдсан эсвэл оноогдсон уу */
+  private async reservedForClass(
+    classroomId: string,
+    testId: string,
+    today: string,
+  ): Promise<boolean> {
+    const [session, topic, access] = await Promise.all([
+      this.prisma.classTestSession.findFirst({
+        where: { classroomId, testId, date: { gt: parseDateOnly(today) } },
+        select: { id: true },
+      }),
+      this.prisma.lessonTopic.findFirst({
+        where: {
+          testIds: { has: testId },
+          date: { gt: parseDateOnly(today) },
+          schedule: { classroomId },
+        },
+        select: { id: true },
+      }),
+      this.prisma.testAccess.findFirst({
+        where: { classroomId, testId, assignedAt: { gt: new Date() } },
+        select: { testId: true },
+      }),
+    ]);
+    return !!(session || topic || access);
+  }
+
+  /** «Шалгах» хөнгөн шалгалт: анги идэвхтэй, тест тэр ангид ирээдүйд бодогдохоор болоогүй */
+  private async assertRedoStillOpen(attempt: AttemptRow) {
+    const enrolled = await this.prisma.enrollment.findFirst({
+      where: {
+        studentId: attempt.studentId,
+        classroomId: attempt.classroomId,
+        leftAt: null,
+        classroom: { archived: false },
+      },
+      select: { id: true },
+    });
+    if (
+      !enrolled ||
+      (await this.reservedForClass(
+        attempt.classroomId,
+        attempt.testId,
+        dateKey(todayUB()),
+      ))
+    )
+      throw new ForbiddenException('Энэ тестийг дахин бодох боломж танд нээгдээгүй байна');
+  }
+
+  /** POST /homework/redo/attempts — дахин бодлогыг эхлүүлэх/үргэлжлүүлэх (нэг тест нэг удаа) */
+  async startRedo(studentId: string, body: { testId?: unknown; date?: unknown }) {
+    if (typeof body?.testId !== 'string' || !body.testId)
+      throw new BadRequestException('testId шаардлагатай');
+    const date = this.parseDate(body.date);
+    const { slot, test } = await this.redoFor(studentId, body.testId, date);
+    const attempt = await this.openAttempt(studentId, {
+      classroomId: slot.classroomId,
+      testId: test.id,
+      date,
+      round: REDO_ROUND,
+      timeLimitMin: test.timeLimitMin,
+      // Дахин бодолтод хугацаа тогтоохгүй — өөрийн цагаар (сорилын хугацаа л үйлчилнэ)
+      deadlineAt: () => Promise.resolve(null),
+    });
+    return this.attemptView(attempt, null);
+  }
+
+  /**
+   * GET /homework/redo — сүүлийн MAX_DAYS хоногийн баталгаажсан хичээл бүрийн А, Б тест:
+   * нээгдсэн эсэх, анхны ба дахин бодсон оролдлогын дүн.
+   */
+  async redoList(studentId: string) {
+    const today = dateKey(todayUB());
+    const fromKey = addDaysKey(today, -(MAX_DAYS - 1));
+    const slots = await this.loadSlots(studentId, fromKey, today);
+    if (!slots.length) return { lessonsToOpen: REDO_LESSONS, days: [] };
+    const classroomIds = [...new Set(slots.map((s) => s.classroomId))];
+    const aIds = [
+      ...new Set(slots.flatMap((s) => s.items.map((i) => i.fromTestId))),
+    ];
+    const bIds = slots.flatMap((s) => s.items.map((i) => i.id));
+    const dates = [...new Set(slots.map((s) => parseDateOnly(s.date)))];
+    const [lessons, confirmed, aTests, future, attempts] = await Promise.all([
+      loadLessonDays(this.prisma, studentId, fromKey, today),
+      this.prisma.classTestSession.findMany({
+        where: {
+          classroomId: { in: classroomIds },
+          testId: { in: aIds },
+          date: { in: dates },
+        },
+        select: { classroomId: true, testId: true, date: true },
+      }),
+      this.prisma.test.findMany({
+        where: {
+          id: { in: aIds },
+          deletedAt: null,
+          isDraft: false,
+          gradingMode: 'AUTO',
+          type: { notIn: [...EXCLUDED_TYPES] },
+        },
+        select: {
+          id: true,
+          title: true,
+          variantLabel: true,
+          timeLimitMin: true,
+          _count: { select: { problems: true } },
+        },
+      }),
+      Promise.all([
+        this.prisma.classTestSession.findMany({
+          where: {
+            classroomId: { in: classroomIds },
+            testId: { in: aIds },
+            date: { gt: parseDateOnly(today) },
+          },
+          select: { classroomId: true, testId: true },
+        }),
+        this.prisma.lessonTopic.findMany({
+          where: {
+            testIds: { hasSome: aIds },
+            date: { gt: parseDateOnly(today) },
+            schedule: { classroomId: { in: classroomIds } },
+          },
+          select: { testIds: true, schedule: { select: { classroomId: true } } },
+        }),
+        this.prisma.testAccess.findMany({
+          where: {
+            classroomId: { in: classroomIds },
+            testId: { in: aIds },
+            assignedAt: { gt: new Date() },
+          },
+          select: { classroomId: true, testId: true },
+        }),
+      ]),
+      this.prisma.homeworkAttempt.findMany({
+        where: {
+          studentId,
+          testId: { in: [...aIds, ...bIds] },
+          lessonDate: { in: dates },
+        },
+        select: {
+          id: true,
+          testId: true,
+          lessonDate: true,
+          round: true,
+          status: true,
+          score: true,
+          total: true,
+          submittedAt: true,
+        },
+        orderBy: { round: 'asc' },
+      }),
+    ]);
+    const confirmedKeys = new Set(
+      confirmed.map((c) => `${c.classroomId}|${dateKey(c.date)}|${c.testId}`),
+    );
+    const aById = new Map(aTests.map((t) => [t.id, t]));
+    const [fSessions, fTopics, fAccess] = future;
+    const reserved = new Set([
+      ...fSessions.flatMap((r) => (r.testId ? [`${r.classroomId}|${r.testId}`] : [])),
+      ...fTopics.flatMap((r) =>
+        r.testIds.map((id) => `${r.schedule.classroomId}|${id}`),
+      ),
+      ...fAccess.map((r) => `${r.classroomId}|${r.testId}`),
+    ]);
+    const roundsOf = (testId: string, date: string) =>
+      attempts
+        .filter((a) => a.testId === testId && dateKey(a.lessonDate) === date)
+        .map((a) => ({
+          round: a.round,
+          attemptId: a.id,
+          status: a.status,
+          score:
+            a.status === 'SUBMITTED' && a.score !== null && a.total !== null
+              ? { correct: a.score, total: a.total }
+              : null,
+          submittedAt: a.submittedAt?.toISOString() ?? null,
+        }));
+    const days = slots.flatMap((slot) => {
+      const passed = lessonsPassedAfter(
+        lessons.byClass.get(slot.classroomId) ?? [],
+        slot.date,
+        today,
+      );
+      const opened = passed >= REDO_LESSONS;
+      const items = slot.items.flatMap((item) => {
+        const out: RedoItem[] = [];
+        const a = aById.get(item.fromTestId);
+        if (
+          a &&
+          a._count.problems > 0 &&
+          confirmedKeys.has(`${slot.classroomId}|${slot.date}|${a.id}`) &&
+          !reserved.has(`${slot.classroomId}|${a.id}`)
+        )
+          out.push({
+            testId: a.id,
+            title: a.title,
+            variantLabel: variantOf({ variantLabel: a.variantLabel }),
+            kind: 'CLASS' as const,
+            problemCount: a._count.problems,
+            timeLimitMin: a.timeLimitMin,
+            rounds: roundsOf(a.id, slot.date),
+          });
+        if (confirmedKeys.has(`${slot.classroomId}|${slot.date}|${item.fromTestId}`))
+          out.push({
+            testId: item.id,
+            title: item.title,
+            variantLabel: variantOf(item),
+            kind: 'HOME' as const,
+            problemCount: item.problemCount,
+            timeLimitMin: item.timeLimitMin,
+            rounds: roundsOf(item.id, slot.date),
+          });
+        return out;
+      });
+      if (!items.length) return [];
+      return [
+        {
+          date: slot.date,
+          classroomId: slot.classroomId,
+          classroomName: slot.classroomName,
+          topic: lessons.topics.get(dayKey(slot.classroomId, slot.date)) ?? null,
+          opened,
+          lessonsLeft: Math.max(0, REDO_LESSONS - passed),
+          items,
+        },
+      ];
+    });
+    days.sort(
+      (x, y) =>
+        y.date.localeCompare(x.date) || x.classroomName.localeCompare(y.classroomName),
+    );
+    return { lessonsToOpen: REDO_LESSONS, days };
   }
 
   /**
@@ -746,6 +1109,7 @@ export class HomeworkPracticeService {
     ]);
     return {
       attemptId: attempt.id,
+      round: attempt.round,
       status: attempt.status,
       startedAt: attempt.startedAt.toISOString(),
       deadlineAt: deadlineAt?.toISOString() ?? null,

@@ -45,12 +45,31 @@ interface DetailTest {
   attempt: DetailAttempt | null;
   exam: { score: number; max: number } | null;
 }
+interface DetailRedo {
+  attemptId: string;
+  testId: string;
+  title: string;
+  variant: string | null;
+  /** CLASS = ангид бодсон (А), HOME = гэртээ (Б) */
+  kind: "CLASS" | "HOME";
+  status: "IN_PROGRESS" | "SUBMITTED";
+  startedAt: string;
+  submittedAt: string | null;
+  activeSec: number;
+  awaySec: number;
+  leaveCount: number;
+  openCount: number;
+  score: number | null;
+  total: number | null;
+}
 interface Detail {
   date: string;
   previousLessonDate: string | null;
   student: { id: string; firstName: string; lastName: string };
   tests: DetailTest[];
   photo: { fileKey: string; pages: number; uploadedAt: string } | null;
+  /** «Дахин бодох» (2-р оролдлого): хичээлээс хойш 2 хичээл өнгөрсний дараа сурагч дахин бодсон А, Б */
+  redos?: DetailRedo[];
 }
 
 const stamp = (iso: string) => formatMnDateTime(iso, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
@@ -311,6 +330,33 @@ export default function OnlineDetail({
 
                 {!data.photo && a && (
                   <p className="text-xs text-ink-dim">Дэвтрийн зураг илгээгээгүй</p>
+                )}
+
+                {!!data.redos?.length && (
+                  <section aria-label="Дахин бодсон" className="rounded-lg border border-line bg-surface px-3 py-2.5">
+                    <h3 className="mb-1.5 text-xs font-bold text-ink-dim">Дахин бодсон</h3>
+                    <ul className="divide-y divide-line">
+                      {data.redos.map((r) => (
+                        <li key={r.attemptId} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 py-1.5 text-sm">
+                          <span className="min-w-0 flex-1">
+                            <span className="cyrillic-tight block truncate font-semibold text-ink">{cleanTitle(r.title, r.variant)}</span>
+                            <Meta
+                              className="text-xs text-ink-dim"
+                              items={[
+                                r.kind === "CLASS" ? "Ангид бодсон тест" : "Гэрийн тест",
+                                r.submittedAt ? `илгээсэн ${stamp(r.submittedAt)}` : "илгээгээгүй",
+                                `бодсон ${span(r.activeSec)}`,
+                                r.leaveCount ? `вэбээс гарсан ${r.leaveCount} удаа` : null,
+                              ]}
+                            />
+                          </span>
+                          <b className="font-bold tabular-nums text-ink">
+                            {r.score !== null && r.total !== null ? `${r.score}/${r.total}` : "Бодож байна"}
+                          </b>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
                 )}
 
                 {(hw || hwNote.trim()) && (

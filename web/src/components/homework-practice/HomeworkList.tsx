@@ -14,6 +14,7 @@ import { cn } from "@/lib/cn";
 import { formatMnDateTime } from "@/lib/dateMn";
 import HomeworkPhotoPanel from "@/components/student-hub/HomeworkPhotoPanel";
 import { HOMEWORK_WINDOW_DAYS, dayDiff } from "@/components/student-hub/photo-types";
+import HomeworkRedo from "./HomeworkRedo";
 import { cleanTitle, solveHref, todayKeyUB } from "./lib";
 import type { HwDay, HwItem, HwMyResponse, HwPhoto } from "./types";
 
@@ -333,6 +334,7 @@ export default function HomeworkList() {
           )}
         </>
       )}
+      {days && <HomeworkRedo />}
     </div>
   );
 }

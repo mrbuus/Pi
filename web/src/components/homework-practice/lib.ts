@@ -23,7 +23,8 @@ export function formatElapsed(sec: number): string {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
 }
 
-export function solveHref(testId: string, date: string, classroomId: string): string {
+export function solveHref(testId: string, date: string, classroomId: string, redo = false): string {
   const q = new URLSearchParams({ date, classroomId });
+  if (redo) q.set("redo", "1");
   return `/app/homework/${encodeURIComponent(testId)}?${q.toString()}`;
 }

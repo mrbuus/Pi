@@ -27,6 +27,7 @@ import type {
   HwItem,
   HwMyResponse,
   HwProblem,
+  HwRedoResponse,
   HwReviewPayload,
   HwScore,
   HwSubmitResponse,
@@ -85,10 +86,13 @@ export default function HomeworkSolve({
   testId,
   date,
   classroomId,
+  redo = false,
 }: {
   testId: string;
   date: string;
   classroomId: string;
+  /** Дахин бодох (2-р оролдлого) — өөр endpoint, хугацаагүй */
+  redo?: boolean;
 }) {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
@@ -142,7 +146,10 @@ export default function HomeworkSolve({
     setPhase("loading");
     setError("");
     try {
-      const a = await api<HwAttempt>("/homework/attempts", { method: "POST", body: { testId, date } });
+      const a = await api<HwAttempt>(redo ? "/homework/redo/attempts" : "/homework/attempts", {
+        method: "POST",
+        body: { testId, date },
+      });
       setAttempt(a);
       answersRef.current = a.answers ?? {};
       setAnswers(a.answers ?? {});
@@ -167,7 +174,7 @@ export default function HomeworkSolve({
       setError(e instanceof Error && e.message ? e.message : "Даалгаврыг нээж чадсангүй");
       setPhase("error");
     }
-  }, [testId, date]);
+  }, [testId, date, redo]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- ачаалал эхлүүлэх
@@ -177,6 +184,36 @@ export default function HomeworkSolve({
   // Гарчиг, хугацаа, оноог жагсаалтаас (гэрээнд start хариунд гарчиг байхгүй)
   useEffect(() => {
     let cancelled = false;
+    if (redo) {
+      api<HwRedoResponse>("/homework/redo")
+        .then((r) => {
+          if (cancelled) return;
+          const day = r.days.find((d) => d.date === date && d.classroomId === classroomId);
+          const it = day?.items.find((i) => i.testId === testId);
+          setItem(
+            it
+              ? {
+                  testId: it.testId,
+                  title: it.title,
+                  variantLabel: it.variantLabel,
+                  problemCount: it.problemCount,
+                  timeLimitMin: it.timeLimitMin,
+                  status: "NOT_STARTED",
+                  attemptId: null,
+                  checksUsed: 0,
+                  maxChecks: 2,
+                  score: null,
+                  submittedAt: null,
+                  late: false,
+                }
+              : null,
+          );
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }
     api<HwMyResponse>("/homework/my?days=14")
       .then((r) => {
         if (cancelled) return;
@@ -187,7 +224,7 @@ export default function HomeworkSolve({
     return () => {
       cancelled = true;
     };
-  }, [testId, date, classroomId]);
+  }, [testId, date, classroomId, redo]);
 
   /* ---------- Цаг: өнгөрсөн (үргэлж) + үлдсэн (хугацаатай бол) ---------- */
   useEffect(() => {
@@ -387,7 +424,8 @@ export default function HomeworkSolve({
     [problems, answers, flagged, marks],
   );
 
-  const title = item ? cleanTitle(item.title, item.variantLabel) : "Гэрийн даалгавар";
+  const baseTitle = item ? cleanTitle(item.title, item.variantLabel) : redo ? "Тест" : "Гэрийн даалгавар";
+  const title = redo ? `Дахин: ${baseTitle}` : baseTitle;
   const backHref = "/app/homework";
 
   /* ====================== Ачаалал / алдаа ====================== */
@@ -423,6 +461,7 @@ export default function HomeworkSolve({
         classroomId={classroomId}
         date={date}
         backHref={backHref}
+        showPhoto={!redo}
       />
     );
   }
@@ -496,7 +535,7 @@ export default function HomeworkSolve({
             {formatElapsed(elapsed)}
           </span>
         )}
-        <PhotoButton classroomId={classroomId} date={date} compact />
+        {!redo && <PhotoButton classroomId={classroomId} date={date} compact />}
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 py-4">

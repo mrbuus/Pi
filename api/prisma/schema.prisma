@@ -3102,8 +3102,11 @@ model HomeworkAttempt {
   awaySec      Int                   @default(0)
   leaveCount   Int                   @default(0)
   openCount    Int                   @default(0)
+  /// 1 = гэрийн даалгавар (B) ; 2 = «Дахин бодох» (эзэн 2026-11-03): хичээлээс хойш 2 хичээл өнгөрсний
+  /// дараа ангийн А, гэрийн Б хоёрыг НЭГ удаа дахин бодно. Анхны оролдлогыг дарахгүй, тусдаа хадгална
+  round        Int                   @default(1)
 
-  @@unique([studentId, testId, lessonDate])
+  @@unique([studentId, testId, lessonDate, round])
   @@index([classroomId, lessonDate])
 }
 

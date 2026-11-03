@@ -58,6 +58,43 @@ export interface HwMyResponse {
   days: HwDay[];
 }
 
+/** Дахин бодох (эзэн 2026-11-03): хичээлээс хойш 2 хичээл өнгөрсний дараа А (ангид), Б (гэртээ) нэг удаа */
+export interface HwRedoRound {
+  /** 1 = гэрийн даалгавар, 2 = дахин бодсон */
+  round: number;
+  attemptId: string;
+  status: HwItemStatus;
+  score: HwScore | null;
+  submittedAt: string | null;
+}
+
+export interface HwRedoItem {
+  testId: string;
+  title: string;
+  variantLabel: string | null;
+  /** CLASS = ангид бодсон (А), HOME = гэртээ (Б) */
+  kind: "CLASS" | "HOME";
+  problemCount: number;
+  timeLimitMin: number | null;
+  rounds: HwRedoRound[];
+}
+
+export interface HwRedoDay {
+  date: string;
+  classroomId: string;
+  classroomName: string;
+  topic: string | null;
+  opened: boolean;
+  /** Нээгдэхэд үлдсэн хичээлийн тоо */
+  lessonsLeft: number;
+  items: HwRedoItem[];
+}
+
+export interface HwRedoResponse {
+  lessonsToOpen: number;
+  days: HwRedoDay[];
+}
+
 export interface HwChoice {
   label: string;
   text: string;
@@ -104,6 +141,8 @@ export interface HwReviewPayload {
 
 export interface HwAttempt {
   attemptId: string;
+  /** 1 = гэрийн даалгавар, 2 = дахин бодсон */
+  round?: number;
   status: HwItemStatus;
   startedAt: string;
   deadlineAt: string | null;
