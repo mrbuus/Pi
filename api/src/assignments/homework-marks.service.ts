@@ -701,6 +701,8 @@ export class HomeworkMarksService {
           fileKey: photo.fileKey,
           pages: photo.pages,
           uploadedAt: photo.createdAt.toISOString(),
+          // Энэ өдөр = дараагийн хичээл: өмнөх хичээлийн зургийг тэр өдрөөс хойш илгээсэн бол хоцорсон
+          late: photo.createdAt.getTime() >= new Date(`${key}T00:00:00+08:00`).getTime(),
         }
       : null;
     if (!prev || !pairs.length)

@@ -75,7 +75,7 @@ export default function HomeworkPhotoPanel({
         </div>
       )}
       <PhotoSetSender
-        sent={current ? { keys: [current.fileKey], pages: current.pages, at: current.uploadedAt } : null}
+        sent={current ? { keys: [current.fileKey], pages: current.pages, at: current.uploadedAt, late: current.late } : null}
         canEdit={canSend}
         onSave={save}
         onDelete={remove}

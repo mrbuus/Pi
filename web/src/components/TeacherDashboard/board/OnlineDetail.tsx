@@ -67,7 +67,7 @@ interface Detail {
   previousLessonDate: string | null;
   student: { id: string; firstName: string; lastName: string };
   tests: DetailTest[];
-  photo: { fileKey: string; pages: number; uploadedAt: string } | null;
+  photo: { fileKey: string; pages: number; uploadedAt: string; late?: boolean } | null;
   /** «Дахин бодох» (2-р оролдлого): хичээлээс хойш 2 хичээл өнгөрсний дараа сурагч дахин бодсон А, Б */
   redos?: DetailRedo[];
 }
@@ -281,7 +281,8 @@ export default function OnlineDetail({
                     <section aria-label="Илгээсэн дэвтрийн зураг" className="min-w-0 sm:order-1">
                       <h3 className="mb-1.5 text-xs font-bold text-ink-dim">
                         Дэвтрийн зураг
-                        <span className="ml-2 font-medium tabular-nums">{stamp(data.photo.uploadedAt)}</span>
+                        <span className="ml-2 font-medium tabular-nums">илгээсэн {stamp(data.photo.uploadedAt)}</span>
+                        {data.photo.late && <span className="ml-2 font-semibold text-error">Хоцорсон</span>}
                       </h3>
                       <PhotoPages
                         keys={[data.photo.fileKey]}

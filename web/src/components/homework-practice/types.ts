@@ -34,6 +34,8 @@ export interface HwPhoto {
   fileKey: string;
   pages: number;
   uploadedAt: string;
+  /** Дараагийн хичээлээс хойш илгээсэн */
+  late?: boolean;
 }
 
 /** V2 (SURAGCH-V2-GEREE): хичээлийн ӨДӨР БҮР ирнэ, `items` хоосон байж болно */

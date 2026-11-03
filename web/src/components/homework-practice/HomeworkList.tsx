@@ -11,7 +11,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { formatMnDateTime } from "@/lib/dateMn";
+import { formatMnDate } from "@/lib/dateMn";
 import HomeworkPhotoPanel from "@/components/student-hub/HomeworkPhotoPanel";
 import { HOMEWORK_WINDOW_DAYS, dayDiff } from "@/components/student-hub/photo-types";
 import HomeworkRedo from "./HomeworkRedo";
@@ -111,6 +111,52 @@ function MarkBadge({ day }: { day: HwDay }) {
   );
 }
 
+
+/** Нэг минутад нэг шинэчлэгдэх «одоо» — үлдсэн хугацааг шинэчилнэ */
+function useNow(): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
+
+/**
+ * Хугацаа энгийнээр (эзэн 2026-11-03): «Мягмар 23:59 хүртэл» + үлдсэн хугацаа («2 өдөр 5 цаг үлдсэн»).
+ * Сервер дараагийн хичээлийн өдрийн 00:00-ийг өгдөг — өмнөх өдрийн 23:59 гэж харуулна.
+ */
+function DeadlineChip({ iso }: { iso: string }) {
+  const now = useNow();
+  const end = new Date(iso).getTime();
+  if (!Number.isFinite(end)) return null;
+  const endKey = formatMnDate(new Date(end - 60_000), { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\./g, "-");
+  const left = end - now;
+  const mins = Math.floor(left / 60_000);
+  const days = Math.floor(mins / 1440);
+  const hours = Math.floor((mins % 1440) / 60);
+  const remain =
+    left <= 0
+      ? "Хугацаа дууссан"
+      : days > 0
+        ? `${days} өдөр${hours ? ` ${hours} цаг` : ""} үлдсэн`
+        : hours > 0
+          ? `${hours} цаг үлдсэн`
+          : `${Math.max(1, mins)} минут үлдсэн`;
+  const urgent = left > 0 && left < 6 * 3_600_000;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+        left <= 0 ? "border-error/50 text-error" : urgent ? "border-brand-bright/60 text-brand-soft" : "border-line",
+      )}
+    >
+      <Clock className="size-3" aria-hidden />
+      <Meta items={[`${weekdayShort(endKey)} 23:59 хүртэл`, remain]} />
+    </span>
+  );
+}
+
 function DayCard({
   day,
   today,
@@ -148,12 +194,7 @@ function DayCard({
         {day.topic && <p className="cyrillic-tight font-semibold text-ink">{day.topic}</p>}
         <div className="flex flex-wrap items-center gap-1.5 text-sm text-ink-dim">
           <span>{day.classroomName}</span>
-          {day.deadlineAt && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[11px] font-semibold tabular-nums">
-              <Clock className="size-3" aria-hidden />
-              {formatMnDateTime(day.deadlineAt, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })} хүртэл
-            </span>
-          )}
+          {day.deadlineAt && !day.upcoming && <DeadlineChip iso={day.deadlineAt} />}
         </div>
         {comment && (
           <p className="flex items-start gap-1.5 rounded-lg bg-panel px-3 py-2 text-sm text-ink">
@@ -319,13 +360,15 @@ export default function HomeworkList() {
                         !!d.upcoming ||
                         (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS)
                       }
-                      onPhoto={(photo) =>
+                      onPhoto={(photo) => {
                         setDays((prev) =>
                           (prev ?? []).map((x) =>
                             x.date === d.date && x.classroomId === d.classroomId ? { ...x, photo } : x,
                           ),
-                        )
-                      }
+                        );
+                        // «Хоцорсон» тэмдэг серверийн хугацаагаар тооцогддог — шинэчилж авна
+                        if (photo) void load();
+                      }}
                     />
                   ))}
                 </div>

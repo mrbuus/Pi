@@ -642,6 +642,8 @@ export class HomeworkPracticeService {
                 fileKey: photo.fileKey,
                 pages: photo.pages,
                 uploadedAt: photo.createdAt.toISOString(),
+                // Дараагийн хичээлийн өдрөөс хойш илгээсэн бол хоцорсон
+                late: isLate(photo.createdAt, deadlineAt),
               }
             : null,
           mark: mark?.status ?? null,
@@ -1505,6 +1507,7 @@ export class HomeworkPracticeService {
         },
       });
     });
+    // `late` энд тооцогдохгүй (хичээлийн өдрийн нэгдэл дахин уншихгүйн тулд) — жагсаалт дахин ачаалахад гарна
     return {
       id: photo.id,
       fileKey: photo.fileKey,
