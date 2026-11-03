@@ -12,6 +12,9 @@ import '../helpers/pump.dart';
 
 void main() {
   setUpAll(loadAppFonts);
+  // Курсорын анивчилт цаг хугацаанаас хамаардаг тул golden тогтворгүй болдог.
+  setUp(() => EditableText.debugDeterministicCursor = true);
+  tearDown(() => EditableText.debugDeterministicCursor = false);
 
   for (final dark in [false, true]) {
     final mode = dark ? 'dark' : 'light';
