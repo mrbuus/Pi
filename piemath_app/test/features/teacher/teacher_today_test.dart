@@ -152,13 +152,16 @@ void main() {
 
   group('Ангийн «Код» таб', () {
     FakeHttp http0() => FakeHttp()
-      ..json('GET', '/classrooms/c1', {
-        'classroom': {'id': 'c1', 'name': '12Б', 'type': 'IN_PERSON', 'grade': 12},
-        'students': [
-          {'id': 's2', 'firstName': 'Сарнай', 'lastName': 'Ганаа', 'studentCode': 'B27120002'},
-          {'id': 's1', 'firstName': 'Анужин', 'lastName': 'Дорж', 'studentCode': null},
-        ],
-      });
+      ..json(
+        'GET',
+        '/class-dashboard/classes/c1',
+        dashDetail(
+          students: [
+            dashStudent('s2', 'Сарнай', 'Ганаа', code: 'B27120002'),
+            dashStudent('s1', 'Анужин', 'Дорж'),
+          ],
+        ),
+      );
 
     testWidgets('нэр, код харагдаж, «Бүгдийг хуулах» түрээсэнд хуулна', (tester) async {
       String? copied;

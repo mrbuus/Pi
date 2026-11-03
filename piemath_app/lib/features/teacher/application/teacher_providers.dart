@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/auth/session.dart';
+import '../../../core/auth/user_role.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/time/ub_time.dart';
+import '../data/staff_repository.dart';
 import '../data/teacher_extras.dart';
 import '../data/teacher_models.dart';
 import '../data/teacher_repository.dart';
@@ -70,9 +72,24 @@ final dayTestPdfsProvider = FutureProvider.autoDispose.family<List<DayTestPdf>, 
   }
 });
 
-final teacherHoursProvider = FutureProvider.autoDispose.family<TeacherHours, String>(
-  (ref, month) => ref.watch(teacherRepositoryProvider).teacherHours(month),
-);
+/// Нийт багшийн цаг харах эсэх: Админ, эсвэл Багш+ дээр `time.review` (вэбийн `TeacherHoursClient`-тэй ижил).
+/// Багш үргэлж зөвхөн өөрийнхийг. Эрхийн жагсаалт нээгдэхгүй бол өөрийнх рүү буцна.
+final hoursAllScopeProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final s = ref.watch(sessionProvider);
+  if (s is! SignedIn) return false;
+  if (s.role == UserRole.admin) return true;
+  if (s.role != UserRole.teacherPlus) return false;
+  try {
+    return (await ref.watch(staffRepositoryProvider).myCapabilities()).has('time.review');
+  } on ApiError {
+    return false;
+  }
+});
+
+final teacherHoursProvider = FutureProvider.autoDispose.family<TeacherHours, String>((ref, month) async {
+  final all = await ref.watch(hoursAllScopeProvider.future);
+  return ref.watch(teacherRepositoryProvider).teacherHours(month, all: all);
+});
 
 final assignmentsProvider = FutureProvider.autoDispose.family<List<AssignmentSummary>, String>(
   (ref, classId) => ref.watch(teacherRepositoryProvider).assignments(classId),
@@ -156,3 +173,15 @@ class StudentNotesController extends AsyncNotifier<List<StudentNote>> {
 /// Хүснэгтийн алдааны бичвэр: ApiError бол түүний монгол мессеж, эс бөгөөс [fallback].
 String errorText(Object e, String fallback) =>
     e is ApiError && e.kind != ApiErrorKind.unknown && e.message.trim().isNotEmpty ? e.message : fallback;
+
+/// Нэвтэрсэн хүний эрх (UI нуух/харуулах; шийдвэр серверт).
+final teacherRoleProvider = Provider<UserRole?>((ref) {
+  final s = ref.watch(sessionProvider);
+  return s is SignedIn ? s.role : null;
+});
+
+/// Багш+ эсвэл Админ (Багшаас илүү өдөр тутмын үйлдэл харах).
+final canManageProvider = Provider<bool>((ref) {
+  final r = ref.watch(teacherRoleProvider);
+  return r == UserRole.admin || r == UserRole.teacherPlus;
+});

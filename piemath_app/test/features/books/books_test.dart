@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/core/auth/session.dart';
+import 'package:piemath_app/core/auth/token_store.dart';
+import 'package:piemath_app/core/auth/user_role.dart';
 import 'package:piemath_app/core/math/math.dart';
 import 'package:piemath_app/core/ui/ui.dart';
 import 'package:piemath_app/features/books/books_routes.dart';
@@ -196,6 +198,62 @@ void main() {
       await pumpRouted(tester, initial: '/books/100V3/topic/0', routes: booksRoutes.public, http: http);
       await settle(tester);
       expect(find.text('Эрхтэй бол нээх'), findsOneWidget);
+    });
+
+    testWidgets('сурагчид «Эх PDF» харагдахгүй', (tester) async {
+      final http = FakeHttp()..json('GET', '/catalog/books/100V3', detailJson);
+      await pumpRouted(tester, initial: '/books/100V3/topic/0', routes: booksRoutes.public, http: http);
+      await settle(tester);
+      expect(find.text('Эх PDF'), findsNothing);
+    });
+
+    testWidgets('багш: «Эх PDF» бүлэг бүрт', (tester) async {
+      final http = FakeHttp()..json('GET', '/catalog/books/100V3', detailJson);
+      await pumpRouted(
+        tester,
+        initial: '/books/100V3/topic/0',
+        routes: booksRoutes.public,
+        http: http,
+        session: const SignedIn(StoredAuth(token: 't', userId: 'u2', role: UserRole.teacher)),
+      );
+      await settle(tester);
+      expect(find.text('Эх PDF'), findsNWidgets(3));
+    });
+
+    testWidgets('багш: эх PDF-гүй бүлэг → тайван тайлбар, олдвол түлхүүр заасан хүсэлт', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/catalog/books/100V3', detailJson)
+        ..json('GET', '/tests/source-pdf', {'key': null});
+      await pumpRouted(
+        tester,
+        initial: '/books/100V3/topic/0',
+        routes: booksRoutes.public,
+        http: http,
+        session: const SignedIn(StoredAuth(token: 't', userId: 'u2', role: UserRole.teacherPlus)),
+      );
+      await settle(tester);
+      await tester.tap(find.text('Эх PDF').first);
+      await settle(tester);
+      expect(http.requests.last.path, '/tests/source-pdf');
+      expect(http.requests.last.queryParameters['chapterId'], 'ch1');
+      expect(find.text('Энэ бүлгийн эх PDF одоогоор алга'), findsOneWidget);
+    });
+
+    testWidgets('багш: эх PDF-д эрхгүй (403) → серверийн мессеж', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/catalog/books/100V3', detailJson)
+        ..error('GET', '/tests/source-pdf', 403, 'Танд энэ файлыг үзэх эрх алга');
+      await pumpRouted(
+        tester,
+        initial: '/books/100V3/topic/0',
+        routes: booksRoutes.public,
+        http: http,
+        session: const SignedIn(StoredAuth(token: 't', userId: 'u2', role: UserRole.teacher)),
+      );
+      await settle(tester);
+      await tester.tap(find.text('Эх PDF').first);
+      await settle(tester);
+      expect(find.text('Танд энэ файлыг үзэх эрх алга'), findsOneWidget);
     });
 
     testWidgets('үнэгүй тест: хариулаад дүгнүүлнэ, серверт зөв хэлбэрээр', (tester) async {

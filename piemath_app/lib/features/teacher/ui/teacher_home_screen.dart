@@ -6,19 +6,23 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
+import 'attention_students_banner.dart';
 import 'teacher_widgets.dart';
 
 /// Багшийн самбар (`/app/teacher`): сонгосон өдрийн хичээлтэй ангиуд. Хуваарийн онцгой өдөр
 /// (цуцалсан, зөөсөн, амралт) серверт тооцогдсон `/attendance/board`-оос.
 class TeacherHomeScreen extends ConsumerStatefulWidget {
-  const TeacherHomeScreen({super.key});
+  const TeacherHomeScreen({super.key, this.date});
+
+  /// `YYYY-MM-DD` (UB) — мэдэгдлийн холбоосоос; null бол өнөөдөр.
+  final String? date;
 
   @override
   ConsumerState<TeacherHomeScreen> createState() => _TeacherHomeScreenState();
 }
 
 class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
-  UbDateTime? _date;
+  late UbDateTime? _date = parseDateKey(widget.date);
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +38,7 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xxl),
           children: [
+            if (ref.watch(canManageProvider)) const AttentionStudentsBanner(),
             DayStepper(date: date, today: today, onChanged: (d) => setState(() => _date = d)),
             const SizedBox(height: AppSpace.sm),
             ...async.when(
@@ -66,6 +71,14 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
             _Link(icon: AppIcons.myClass, label: 'Ангиуд', onTap: () => context.push('/app/classes')),
             const SizedBox(height: AppSpace.sm),
             _Link(icon: AppIcons.timer, label: 'Цагийн бүртгэл', onTap: () => context.push('/app/teacher-hours')),
+            const SizedBox(height: AppSpace.sm),
+            _Link(icon: AppIcons.megaphone, label: 'Зар тавих', onTap: () => context.push('/app/teacher/announcements')),
+            if (ref.watch(canManageProvider)) ...[
+              const SizedBox(height: AppSpace.sm),
+              _Link(icon: AppIcons.checklist, label: 'Хүлээгдэж буй', onTap: () => context.push('/app/teacher/pending')),
+              const SizedBox(height: AppSpace.sm),
+              _Link(icon: AppIcons.enroll, label: 'Элсэлтийн хүсэлт', onTap: () => context.push('/app/admin/leads')),
+            ],
           ],
         ),
       ),

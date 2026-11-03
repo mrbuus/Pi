@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/format/person_name.dart';
 import '../../../core/ui/ui.dart';
+import '../application/staff_providers.dart';
 import '../application/teacher_providers.dart';
+import '../data/class_dashboard_models.dart';
 import '../data/teacher_models.dart';
 import 'class_codes_tab.dart';
-import 'teacher_widgets.dart';
+import 'class_dashboard_tabs.dart';
+import 'staff_widgets.dart';
 
-/// Ангиуд (`/app/classes`). Багш бүх идэвхтэй ангийг харна; «Миний анги» = ахлах эсвэл туслах багш нь би.
+enum _Sort { name, risk, attendance }
+
+/// Ангиуд (`/app/classes`). Вэбтэй ижил `GET /class-dashboard`: тоо, төлөв, анхаарах сурагч сервер тооцно.
+/// «Миний анги» = ахлах эсвэл туслах багш нь би.
 class ClassesScreen extends ConsumerStatefulWidget {
   const ClassesScreen({super.key});
 
@@ -19,10 +24,27 @@ class ClassesScreen extends ConsumerStatefulWidget {
 
 class _ClassesScreenState extends ConsumerState<ClassesScreen> {
   bool _mineOnly = true;
+  String _query = '';
+  _Sort _sort = _Sort.name;
+
+  static int _byName(DashClass a, DashClass b) => a.name.toLowerCase().compareTo(b.name.toLowerCase());
+
+  List<DashClass> _shown(List<DashClass> list) {
+    final out = list.where((c) => c.matches(_query)).toList();
+    out.sort(switch (_sort) {
+      _Sort.name => _byName,
+      _Sort.risk => (a, b) => b.riskCount != a.riskCount ? b.riskCount - a.riskCount : _byName(a, b),
+      _Sort.attendance => (a, b) {
+        final d = (a.attendanceRate ?? 101) - (b.attendanceRate ?? 101);
+        return d != 0 ? d : _byName(a, b);
+      },
+    });
+    return out;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(classroomsProvider);
+    final async = ref.watch(classDashboardProvider);
     final me = ref.watch(teacherUserIdProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Ангиуд')),
@@ -31,23 +53,31 @@ class _ClassesScreenState extends ConsumerState<ClassesScreen> {
         loading: () => const LoadingState(),
         error: (e, _) => ErrorState(
           message: errorText(e, 'Ангийн жагсаалт нээгдсэнгүй'),
-          onRetry: () => ref.invalidate(classroomsProvider),
+          onRetry: () => ref.invalidate(classDashboardProvider),
         ),
-        data: (all) {
-          final mine = me == null ? const <ClassroomSummary>[] : all.where((c) => c.isMine(me)).toList();
+        data: (d) {
+          final mine = me == null ? const <DashClass>[] : d.classes.where((c) => c.isMine(me)).toList();
           final showMine = _mineOnly && mine.isNotEmpty;
-          final list = showMine ? mine : all;
+          final list = _shown(showMine ? mine : d.classes);
           return RefreshIndicator(
-            onRefresh: () => ref.refresh(classroomsProvider.future).then((_) {}, onError: (_) {}),
+            onRefresh: () => ref.refresh(classDashboardProvider.future).then((_) {}, onError: (_) {}),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
               children: [
+                Meta(
+                  items: [
+                    '${d.classes.length} анги',
+                    '${d.studentTotal} сурагч',
+                    if (d.riskTotal > 0) '${d.riskTotal} анхаарах',
+                  ],
+                ),
+                const SizedBox(height: AppSpace.sm),
                 if (mine.isNotEmpty) ...[
                   SegmentedButton<bool>(
                     segments: [
                       ButtonSegment(value: true, label: Text('Миний анги (${mine.length})')),
-                      ButtonSegment(value: false, label: Text('Бүгд (${all.length})')),
+                      ButtonSegment(value: false, label: Text('Бүгд (${d.classes.length})')),
                     ],
                     selected: {showMine},
                     showSelectedIcon: false,
@@ -55,13 +85,47 @@ class _ClassesScreenState extends ConsumerState<ClassesScreen> {
                   ),
                   const SizedBox(height: AppSpace.md),
                 ],
-                if (list.isEmpty)
+                TextField(
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(AppIcons.search),
+                    hintText: 'Анги, багш хайх',
+                    isDense: true,
+                  ),
+                  onChanged: (v) => setState(() => _query = v),
+                ),
+                const SizedBox(height: AppSpace.sm),
+                SegmentedButton<_Sort>(
+                  segments: const [
+                    ButtonSegment(value: _Sort.name, label: Text('Нэрээр')),
+                    ButtonSegment(value: _Sort.risk, label: Text('Анхаарах')),
+                    ButtonSegment(value: _Sort.attendance, label: Text('Ирц сул')),
+                  ],
+                  selected: {_sort},
+                  showSelectedIcon: false,
+                  onSelectionChanged: (s) => setState(() => _sort = s.first),
+                ),
+                const SizedBox(height: AppSpace.md),
+                if (d.classes.isEmpty)
                   const SizedBox(
                     height: 280,
-                    child: EmptyState(icon: AppIcons.myClass, title: 'Идэвхтэй анги алга'),
+                    child: EmptyState(
+                      icon: AppIcons.myClass,
+                      title: 'Танд харагдах анги алга',
+                      message: 'Хуваарьт таныг багшаар оноосон үед энд гарна',
+                    ),
                   )
-                else
+                else if (list.isEmpty)
+                  const SizedBox(
+                    height: 200,
+                    child: EmptyState(icon: AppIcons.search, title: 'Хайлтад тохирох анги алга'),
+                  )
+                else ...[
                   for (final cls in list) ...[_ClassTile(cls: cls), const SizedBox(height: AppSpace.sm)],
+                  Text(
+                    'Ирц, даалгавар нь сүүлийн ${d.windowDays} хоногийнх',
+                    style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+                  ),
+                ],
               ],
             ),
           );
@@ -74,59 +138,74 @@ class _ClassesScreenState extends ConsumerState<ClassesScreen> {
 class _ClassTile extends StatelessWidget {
   const _ClassTile({required this.cls});
 
-  final ClassroomSummary cls;
+  final DashClass cls;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final t = cls.teacher;
-    final a = cls.assistantTeacher;
+    final pay = cls.payment;
+    final payTotal = pay == null ? 0 : pay.values.fold(0, (s, n) => s + n);
+    final teachers = [cls.classTeacher, cls.assistantTeacher].whereType<String>().toList();
     return AppCard(
       onTap: () => context.push('/app/classes/${Uri.encodeComponent(cls.id)}'),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(child: Text(cls.name, style: context.text.titleMedium)),
-                    if (cls.isOnline) ...[
-                      const SizedBox(width: AppSpace.sm),
-                      Icon(AppIcons.laptop, size: 16, color: c.inkDim),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: AppSpace.xs),
-                Meta(
-                  items: [
-                    classTypeLabel(cls.type),
-                    if (cls.grade != null) '${cls.grade}-р анги',
-                    '${cls.studentCount} сурагч',
-                  ],
-                ),
-                if (t != null || a != null) ...[
-                  const SizedBox(height: AppSpace.xs),
-                  Meta(
-                    style: context.text.bodySmall?.copyWith(color: c.inkDim),
-                    items: [
-                      if (t != null) staffName(firstName: t.firstName, lastName: t.lastName, role: t.role),
-                      if (a != null) 'Туслах: ${staffName(firstName: a.firstName, lastName: a.lastName, role: a.role)}',
-                    ],
-                  ),
-                ],
+          Row(
+            children: [
+              Flexible(child: Text(cls.name, style: context.text.titleMedium)),
+              if (cls.isOnline) ...[
+                const SizedBox(width: AppSpace.sm),
+                Icon(AppIcons.laptop, size: 16, color: c.inkDim, semanticLabel: 'Онлайн'),
               ],
-            ),
+              const Spacer(),
+              Icon(AppIcons.forward, color: c.inkDim),
+            ],
           ),
-          Icon(AppIcons.forward, color: c.inkDim),
+          const SizedBox(height: AppSpace.xs),
+          Meta(
+            style: context.text.bodySmall?.copyWith(color: c.inkDim),
+            items: [
+              '${cls.students} сурагч',
+              teachers.isEmpty
+                  ? (cls.teachers.isEmpty ? 'Багш оноогоогүй' : cls.teachers.take(2).join(', '))
+                  : teachers.join(', '),
+            ],
+          ),
+          if (cls.lastLessonDate != null) ...[
+            const SizedBox(height: AppSpace.xs),
+            Text(
+              'Сүүлийн хичээл ${cls.lastLessonDate}${cls.lastLessonTopic == null ? '' : ', ${cls.lastLessonTopic}'}',
+              style: context.text.bodySmall?.copyWith(color: c.inkDim),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: AppSpace.md),
+          Wrap(
+            spacing: AppSpace.xl,
+            runSpacing: AppSpace.md,
+            children: [
+              StatTile(label: 'Ирц', value: pct(cls.attendanceRate)),
+              StatTile(label: 'Даалгавар', value: pct(cls.homeworkRate)),
+              StatTile(label: 'Шалгалт', value: cls.examAvg == null ? (cls.examCount > 0 ? 'Дүн алга' : '-') : '${cls.examAvg}%'),
+              StatTile(
+                label: 'Анхаарах',
+                value: '${cls.riskCount}',
+                icon: cls.riskCount > 0 ? AppIcons.warning : null,
+                color: c.error,
+              ),
+              if (pay != null && payTotal > 0) StatTile(label: 'Энэ сар төлсөн', value: '${pay[PayState.paid] ?? 0}/$payTotal'),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-/// Ангийн самбар (`/app/classes/:id`): «Тойм» (өнөөдрийн ирц/даалгавар руу, онлайн даалгавар, сурагчид) ба «Код» (сурагч бүрийн код).
+/// Ангийн самбар (`/app/classes/:id`): вэбтэй ижил `GET /class-dashboard/classes/:id`.
+/// «Тойм», «Сурагчид», «Код», «Нөхөх».
 class ClassDetailScreen extends ConsumerWidget {
   const ClassDetailScreen({super.key, required this.classId});
 
@@ -134,88 +213,44 @@ class ClassDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(classroomDetailProvider(classId));
+    final async = ref.watch(classDashboardDetailProvider(classId));
     final today = ref.watch(teacherTodayProvider).dateKey;
-    final c = context.colors;
     return DefaultTabController(
-      length: 2,
+      length: 4,
       child: Scaffold(
-      appBar: AppBar(
-        title: Text(async.value?.classroom.name ?? 'Анги'),
-        bottom: const TabBar(tabs: [Tab(text: 'Тойм'), Tab(text: 'Код')]),
-      ),
-      body: async.when(
-        skipLoadingOnRefresh: false,
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(
-          message: errorText(e, 'Ангийн мэдээлэл нээгдсэнгүй'),
-          onRetry: () => ref.invalidate(classroomDetailProvider(classId)),
+        appBar: AppBar(
+          title: Text(async.value?.name ?? 'Анги'),
+          bottom: const TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: [Tab(text: 'Тойм'), Tab(text: 'Сурагчид'), Tab(text: 'Код'), Tab(text: 'Нөхөх')],
+          ),
         ),
-        data: (d) {
-          final names = rosterNames([
-            for (final s in d.students) (id: s.id, firstName: s.firstName, lastName: s.lastName, role: null),
-          ]);
-          final students = [...d.students]..sort((a, b) => (names[a.id] ?? '').compareTo(names[b.id] ?? ''));
-          final overview = RefreshIndicator(
-            onRefresh: () => ref.refresh(classroomDetailProvider(classId).future).then((_) {}, onError: (_) {}),
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
+        body: async.when(
+          skipLoadingOnRefresh: false,
+          loading: () => const LoadingState(),
+          error: (e, _) => ErrorState(
+            message: errorText(e, 'Ангийн мэдээлэл нээгдсэнгүй'),
+            onRetry: () => ref.invalidate(classDashboardDetailProvider(classId)),
+          ),
+          data: (d) {
+            Future<void> refresh() =>
+                ref.refresh(classDashboardDetailProvider(classId).future).then((_) {}, onError: (_) {});
+            return TabBarView(
               children: [
-                Meta(
-                  items: [
-                    classTypeLabel(d.classroom.type),
-                    if (d.classroom.grade != null) '${d.classroom.grade}-р анги',
-                    '${d.students.length} сурагч',
+                ClassOverviewTab(detail: d, today: today, onRefresh: refresh),
+                ClassStudentsTab(detail: d, onRefresh: refresh),
+                ClassCodesTab(
+                  students: [
+                    for (final s in d.students)
+                      RosterStudent(id: s.id, firstName: s.firstName, lastName: s.lastName, studentCode: s.studentCode),
                   ],
                 ),
-                const SizedBox(height: AppSpace.md),
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(teacherTap)),
-                  onPressed: () => context.push('/app/teacher/board/${Uri.encodeComponent(classId)}?date=$today'),
-                  icon: const Icon(AppIcons.exam),
-                  label: const Text('Өнөөдрийн ирц, даалгавар'),
-                ),
-                if (d.classroom.isOnline) ...[
-                  const SizedBox(height: AppSpace.sm),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(teacherTap)),
-                    onPressed: () => context.push('/app/classes/${Uri.encodeComponent(classId)}/assignments'),
-                    icon: const Icon(AppIcons.laptop),
-                    label: const Text('Онлайн даалгавар шалгах'),
-                  ),
-                ],
-                const SizedBox(height: AppSpace.lg),
-                const SectionHeader(title: 'Сурагчид', padding: EdgeInsets.zero),
-                const SizedBox(height: AppSpace.sm),
-                if (students.isEmpty)
-                  const AppCard(
-                    child: EmptyState(icon: AppIcons.students, title: 'Энэ ангид сурагч алга'),
-                  )
-                else
-                  AppCard(
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      children: [
-                        for (final (i, s) in students.indexed) ...[
-                          if (i > 0) Divider(height: 1, color: c.line),
-                          ListTile(
-                            minTileHeight: 56,
-                            title: Text(names[s.id] ?? s.firstName),
-                            subtitle: s.studentCode == null ? null : Text(s.studentCode!),
-                            trailing: Icon(AppIcons.forward, color: c.inkDim),
-                            onTap: () => context.push('/app/students/${Uri.encodeComponent(s.id)}', extra: names[s.id]),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                ClassMakeupTab(classId: classId, today: today),
               ],
-            ),
-          );
-          return TabBarView(children: [overview, ClassCodesTab(students: d.students)]);
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }

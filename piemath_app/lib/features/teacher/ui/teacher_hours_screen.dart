@@ -69,6 +69,7 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
               ),
             ],
             data: (h) {
+              if (ref.watch(hoursAllScopeProvider).value ?? false) return _allRows(context, h);
               final row = h.teachers.firstOrNull;
               if (row == null || row.sessions.isEmpty) {
                 return [
@@ -84,6 +85,64 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
         ],
       ),
     );
+  }
+
+  /// Нийт багшийн цаг (Админ, `time.review` эрхтэй Багш+): нийт дүн, багш бүр дэлгэгддэг.
+  List<Widget> _allRows(BuildContext context, TeacherHours h) {
+    final c = context.colors;
+    final rows = h.teachers.where((r) => r.sessions.isNotEmpty).toList()
+      ..sort((a, b) => a.teacherName.compareTo(b.teacherName));
+    if (rows.isEmpty) {
+      return [
+        const SizedBox(
+          height: 260,
+          child: EmptyState(icon: AppIcons.timer, title: 'Энэ сард орсон хичээл алга'),
+        ),
+      ];
+    }
+    final minutes = rows.fold(0, (s, r) => s + r.minutes);
+    final lessons = rows.fold(0, (s, r) => s + r.lessons);
+    return [
+      AppCard(
+        child: Row(
+          children: [
+            Expanded(child: _Stat(label: 'Хичээл', value: '$lessons')),
+            Expanded(child: _Stat(label: 'Нийт цаг', value: hoursLabel(minutes))),
+          ],
+        ),
+      ),
+      const SizedBox(height: AppSpace.md),
+      AppCard(
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            for (final (i, r) in rows.indexed) ...[
+              if (i > 0) Divider(height: 1, color: c.line),
+              Theme(
+                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  minTileHeight: teacherTap,
+                  title: Text(r.teacherName, style: context.text.titleSmall),
+                  subtitle: Text('${r.lessons} хичээл, ${hoursLabel(r.minutes)}', style: context.text.bodySmall),
+                  children: [
+                    for (final s in ([...r.sessions]..sort((a, b) => a.date == b.date ? a.startMinute - b.startMinute : a.date.compareTo(b.date))))
+                      ListTile(
+                        dense: true,
+                        title: Text(switch (parseDateKey(s.date)) {
+                          final d? => DateMn.longWithWeekday(d, shortWeekday: true),
+                          null => s.date,
+                        }),
+                        subtitle: Text(s.classroomName),
+                        trailing: Text('${hm(s.startMinute)}–${hm(s.endMinute)}'),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ];
   }
 
   List<Widget> _rows(BuildContext context, TeacherHoursRow row) {

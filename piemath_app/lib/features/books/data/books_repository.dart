@@ -57,3 +57,13 @@ Future<TryResult> gradeTryTest(WidgetRef ref, String testId, Map<String, Object>
 ImageProvider tryImage(WidgetRef ref, String testId, String key) => NetworkImage(
       '${ref.read(apiBaseUrlProvider)}/catalog/try/tests/${Uri.encodeComponent(testId)}/files/${Uri.encodeComponent(key)}',
     );
+
+/// `GET /tests/source-pdf?chapterId=` (Багш, Багш+, Админ) — бүлгийн эх PDF-ийн файлын түлхүүр, байхгүй бол null.
+/// Файлыг `core/files`-ийн `FileGalleryScreen`-ээр нээнэ (Authorization толгойтой, токен URL-д орохгүй).
+Future<String?> chapterSourcePdfKey(WidgetRef ref, String chapterId) {
+  return ref.read(apiClientProvider).get(
+        '/tests/source-pdf',
+        query: {'chapterId': chapterId},
+        parse: (j) => j is Map ? j['key'] as String? : null,
+      );
+}
