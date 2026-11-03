@@ -20,6 +20,7 @@ import {
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import { Role } from '../generated/prisma/enums';
 import { WithdrawalService } from './withdrawal.service';
 
@@ -57,9 +58,9 @@ interface AuthedRequest {
   user: { userId: string; role: Role };
 }
 
-/** Сургалтаас хасах үеийн төлбөрийн тооцоо — «Сургалтаас хасах»-тай ижил эрх (Багш+, Админ) */
+/** Сургалтаас хасах үеийн төлбөрийн тооцоо — Багш+, Админ, санхүүгийн эрх (буцаалттай ижил) */
 @Controller('tuition/withdrawal')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
 @Roles(Role.ADMIN, Role.TEACHER_PLUS)
 export class WithdrawalController {
   constructor(private readonly withdrawal: WithdrawalService) {}

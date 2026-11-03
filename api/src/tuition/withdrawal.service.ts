@@ -20,7 +20,6 @@ import {
 } from '../payments/ledger-load';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
-import { UsersService } from '../users/users.service';
 import {
   computeWithdrawal,
   heldLessonDays,
@@ -50,7 +49,6 @@ export class WithdrawalService {
   constructor(
     private prisma: PrismaService,
     private schedule: ScheduleService,
-    private users: UsersService,
     private audit: AuditService,
   ) {}
 
@@ -369,14 +367,25 @@ export class WithdrawalService {
       o.exclude,
       true,
     );
-    await this.users.archiveStudent(
-      studentId,
-      actor.userId,
-      reason,
-      actor.role,
-    );
     const r = calc.result;
+    const now = new Date();
+    // Архивлах, буцаалт, тооцоо НЭГ гүйлгээнд: зэрэг хоёр «Хасах» дарвал хоёр дахь нь
+    // archivedAt:null нөхцөлөөр тасарна (давхар буцаалт үүсэхгүй — аюулгүй байдлын шалгалт)
     const saved = await this.prisma.$transaction(async (tx) => {
+      const archived = await tx.user.updateMany({
+        where: { id: studentId, role: Role.STUDENT, archivedAt: null },
+        data: {
+          archivedAt: now,
+          archivedById: actor.userId,
+          archiveReason: reason,
+        },
+      });
+      if (archived.count === 0)
+        throw new BadRequestException('Сурагч аль хэдийн сургалтаас хасагдсан');
+      await tx.enrollment.updateMany({
+        where: { studentId, leftAt: null },
+        data: { leftAt: now, movedById: actor.userId },
+      });
       await tx.studentProfile.updateMany({
         where: { userId: studentId },
         data: { leftOn: new Date(`${o.leftOn}T00:00:00Z`) },
@@ -421,6 +430,16 @@ export class WithdrawalService {
           createdById: actor.userId,
         },
       });
+    });
+    await this.audit.record({
+      actorId: actor.userId,
+      actorRole: actor.role,
+      action: 'ARCHIVE',
+      entity: 'User',
+      entityId: studentId,
+      before: { archivedAt: null },
+      after: { archivedAt: now.toISOString(), withdrawalId: saved.id },
+      reason,
     });
     await this.audit.record({
       actorId: actor.userId,
