@@ -136,12 +136,14 @@ abstract final class NavData {
         ],
       ),
       NavSection('class', NavLink('/app/my-class', 'Хичээл', AppIcons.calendar, short: 'Хичээл')),
+      // Бие даан суралцах төв сурагчид доод цэснээс шууд харагдана (эзэн 2026-11-04)
       NavSection(
         'theory',
-        NavLink('/app/theory', 'Онолын зураг', AppIcons.theoryPhoto, short: 'Онол'),
-        title: 'Онол',
+        NavLink('/app/study', 'Бие даан суралцах', AppIcons.library, short: 'Суралцах'),
+        title: 'Суралцах',
         pages: [
-          NavLink('/app/theory', 'Онолын зураг', AppIcons.theoryPhoto, short: 'Онолын зураг'),
+          NavLink('/app/study', 'Бие даан суралцах', AppIcons.library, short: 'Бие даалт'),
+          NavLink('/app/theory', 'Онолын зураг', AppIcons.theoryPhoto, short: 'Онол'),
           NavLink('/app/library', 'Ном', AppIcons.theory, short: 'Ном'),
         ],
       ),
@@ -225,7 +227,6 @@ abstract final class NavData {
       _tests,
       NavLink('/app/library', 'Ном', AppIcons.theory),
       NavLink('/app/student/payments', 'Төлбөр', AppIcons.card),
-      NavLink('/app/study', 'Суралцах', AppIcons.library),
       NavLink('/app/study/history', 'Давтлага', AppIcons.history),
       NavLink('/app/practice', 'Дасгал', AppIcons.practice),
       NavLink('/app/learn', 'Хичээл үзэх', AppIcons.theory),

@@ -62,7 +62,7 @@ void main() {
       http: http,
     );
     expect(find.byType(AppNavBar), findsOneWidget);
-    for (final label in ['Нүүр', 'Даалгавар', 'Хичээл', 'Онол', 'Бусад']) {
+    for (final label in ['Нүүр', 'Даалгавар', 'Хичээл', 'Суралцах', 'Бусад']) {
       expect(find.text(label), findsWidgets, reason: label);
     }
     // Сурагчийн нүүр (M3) — хоосон цагаан биш (mock-д самбарын endpoint байхгүй тул алдааны төлөв).
@@ -239,7 +239,7 @@ void main() {
 
     testWidgets('Андройдын «буцах» табын эхэнд — нүүр таб руу', (tester) async {
       final (c, _) = await pumpRole(tester, UserRole.student);
-      await tester.tap(navItem('Онол'));
+      await tester.tap(navItem('Суралцах'));
       await tester.pumpAndSettle();
       expect(navIndex(tester), 3);
       await tester.binding.handlePopRoute();
@@ -283,7 +283,7 @@ void main() {
 
     // Role бүрийн дэд таб: deep link (go) нь зөв доод таб + зөв дэд таб нээнэ.
     const deepLinks = <UserRole, List<(String, int, int)>>{
-      UserRole.student: [('/app/tests', 1, 1), ('/app/homework', 1, 0), ('/app/library', 3, 1), ('/app/theory', 3, 0)],
+      UserRole.student: [('/app/tests', 1, 1), ('/app/homework', 1, 0), ('/app/study', 3, 0), ('/app/theory', 3, 1), ('/app/library', 3, 2)],
       UserRole.teacher: [('/app/admin/students', 1, 3), ('/app/videos', 2, 1), ('/app/tools', 2, 3)],
       UserRole.teacherPlus: [('/app/admin/reconcile', 2, 1), ('/app/admin/leads', 3, 1), ('/app/sms', 3, 5)],
       UserRole.admin: [

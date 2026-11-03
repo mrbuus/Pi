@@ -4,7 +4,7 @@ import 'package:piemath_app/core/auth/user_role.dart';
 
 void main() {
   test('доод таб = вэбийн BottomTabs (PRIMARY_BY_ROLE)', () {
-    expect(NavData.tabs(UserRole.student).map((t) => t.tabLabel), ['Нүүр', 'Даалгавар', 'Хичээл', 'Онол']);
+    expect(NavData.tabs(UserRole.student).map((t) => t.tabLabel), ['Нүүр', 'Даалгавар', 'Хичээл', 'Суралцах']);
     expect(NavData.tabs(UserRole.parent).map((t) => t.path), ['/app/parent', '/app/schedule']);
     expect(NavData.tabs(UserRole.teacher).map((t) => t.tabLabel), ['Нүүр', 'Хуваарь', 'Сан', 'Шалгалт']);
     expect(NavData.tabs(UserRole.teacherPlus).map((t) => t.tabLabel), ['Нүүр', 'Хуваарь', 'Төлбөр', 'Сурагчид']);
