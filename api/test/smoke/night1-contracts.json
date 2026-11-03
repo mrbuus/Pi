@@ -286,6 +286,17 @@
     ]
   },
   {
+    "gap": "G25",
+    "file": "users/students-export.controller",
+    "controller": "StudentsExportController",
+    "method": "GET",
+    "path": "/api/students/export.xlsx",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
     "gap": "G26",
     "file": "tuition/tuition.controller",
     "controller": "TuitionController",

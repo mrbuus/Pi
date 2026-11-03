@@ -50,6 +50,20 @@ function paymentStatusOf(
   return null;
 }
 
+/** Бүртгэлийн Excel (эх БҮРТГЭЛ-2027-той ижил таб, багана) — серверээс татна */
+async function downloadRegistrationXlsx(): Promise<void> {
+  const blob = await api<Blob>("/students/export.xlsx", { responseType: "blob" });
+  if (!(blob instanceof Blob)) throw new Error("Файл татаж чадсангүй");
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `burtgel-${dateOnlyUB(new Date().toISOString())}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 export default function StudentsDirectory() {
   const role = getRole();
   const router = useRouter();
@@ -57,6 +71,8 @@ export default function StudentsDirectory() {
   // Гараар бүртгэх эрх = элсэлт хариуцсан ажилтан (POST /users/students)
   const canRegister = canSeeMoney;
   const [registering, setRegistering] = useState(false);
+  const [xlsxBusy, setXlsxBusy] = useState(false);
+  const [xlsxError, setXlsxError] = useState("");
   const [creatingClass, setCreatingClass] = useState(false);
   // Анги солих, сургалтаас хасах, сэргээх, шинэ анги — Багш+ ба Админ
   const canManage = canSeeMoney;
@@ -256,6 +272,28 @@ export default function StudentsDirectory() {
             >
               Excel импорт
             </Link>
+          )}
+          {canManage && !showArchived && (
+            <button
+              type="button"
+              onClick={() => {
+                setXlsxBusy(true);
+                setXlsxError("");
+                downloadRegistrationXlsx()
+                  .catch((e) => setXlsxError(e instanceof Error && e.message ? e.message : "Excel татаж чадсангүй"))
+                  .finally(() => setXlsxBusy(false));
+              }}
+              disabled={xlsxBusy}
+              className="ml-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold text-ink disabled:opacity-60"
+            >
+              <Download size={15} aria-hidden />
+              {xlsxBusy ? "Бэлтгэж байна" : "Бүртгэл Excel татах"}
+            </button>
+          )}
+          {xlsxError && (
+            <span role="alert" className="ml-2 text-sm text-error">
+              {xlsxError}
+            </span>
           )}
           {canSeeMoney && (
             <button

@@ -174,8 +174,16 @@ function StudentCardImpl({
     onToggle(id);
   };
 
+  // Даалгавраа илгээсэн ч багш одоохондоо тэмдэглээгүй (эзэн 2026-11-03) — өөр өнгөөр тодорно; тэмдэглэмэгц энгийн болно
+  const awaiting = homework && sent && rec.hw === null;
   return (
-    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-1 rounded-xl border border-line bg-surface p-1.5 sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:gap-x-3 sm:p-2">
+    <li
+      data-awaiting={awaiting || undefined}
+      className={cn(
+        "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-1 rounded-xl border p-1.5 sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:gap-x-3 sm:p-2",
+        awaiting ? "border-brand-bright/60 bg-brand-bright/[0.08]" : "border-line bg-surface",
+      )}
+    >
       {/* Нэр: утсан дээр дээд мөр, компьютер дээр зүүн багана */}
       <div className="col-start-1 row-start-1 flex min-h-11 min-w-0 items-center gap-1.5 pl-1 sm:min-h-0 sm:flex-col sm:items-stretch sm:gap-0.5 sm:pt-1">
         <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:shrink">
@@ -191,6 +199,7 @@ function StudentCardImpl({
             {name}
           </button>
           {sent && <SentMark />}
+          {awaiting && <span className="shrink-0 rounded-full bg-brand-bright/15 px-1.5 py-0.5 text-[10px] font-bold text-brand-soft">Шалгаагүй</span>}
         </div>
         {makeup && (
           <span className="shrink-0 sm:pl-[2.625rem]">
