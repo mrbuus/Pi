@@ -244,7 +244,8 @@ function StudentCardImpl({
             className={cn(COLS, "rounded-lg bg-ink/[0.05] p-1")}
             leading={<RowLabel icon={NotebookPen} text="Даалгавар" className="text-ink-dim" />}
           >
-            {onlineTests ? (
+            {/* Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03) */}
+            {onlineTests || sent ? (
               <button
                 type="button"
                 onClick={() => onOnline(id)}
@@ -252,18 +253,20 @@ function StudentCardImpl({
                 aria-label={
                   online
                     ? `${name}, онлайн гэрийн даалгавар ${scoreText(online.score, online.max)}, дэлгэрэнгүй`
-                    : `${name}, онлайнаар бодоогүй, дэлгэрэнгүй`
+                    : sent
+                      ? `${name}, илгээсэн даалгавар харах`
+                      : `${name}, онлайнаар бодоогүй, дэлгэрэнгүй`
                 }
                 className={cn(
                   BOX,
                   "active:opacity-80",
-                  online
+                  online || sent
                     ? "border-brand-bright/40 bg-brand-bright/10 text-brand-soft hover:bg-brand-bright/20"
                     : "border-dashed border-line bg-transparent text-ink-dim/70 hover:border-ink/30 hover:text-ink",
                 )}
               >
                 <span className="inline-flex items-center gap-1">
-                  <Laptop className={cn("size-4 shrink-0", !online && "opacity-50")} aria-hidden />
+                  <Laptop className={cn("size-4 shrink-0", !online && !sent && "opacity-50")} aria-hidden />
                   <span className="hidden sm:inline">Онлайн</span>
                 </span>
                 {online ? (

@@ -225,13 +225,13 @@ export default function OnlineDetail({
               <p className="py-6 text-center text-sm text-ink-dim">Энэ хичээлд онлайн гэрийн даалгавар алга</p>
             )}
 
-            {data && current && (
+            {data && (current || data.photo) && (
               <div className="space-y-3">
-                {!a && !current.exam && (
+                {current && !a && !current.exam && (
                   <p className="rounded-lg border border-dashed border-line px-3 py-3 text-sm text-ink-dim">Онлайнаар бодоогүй</p>
                 )}
 
-                {!a && current.exam && (
+                {current && !a && current.exam && (
                   <div className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2.5">
                     <p className="text-sm text-ink">
                       Оноо{" "}
