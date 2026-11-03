@@ -25,6 +25,7 @@ Future<void> loadAppFonts() async {
     'assets/fonts/Onest-Bold.ttf',
   ]);
   await load('Unbounded', ['assets/fonts/Unbounded-SemiBold.ttf']);
+  await load('PiemathSymbols', ['assets/fonts/PiemathSymbols.ttf']);
 
   // Lucide: багцын фонт (fontPackage-тэй IconData нь 'packages/<pkg>/<family>' нэрээр хайдаг).
   final lucide = _packageFile('lucide_icons_flutter', 'assets/lucide.ttf');

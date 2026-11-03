@@ -80,6 +80,10 @@ flutter:
           weight: 600
         - asset: assets/fonts/Onest-Bold.ttf
           weight: 700
+    # ₮ (U+20AE) — Onest, Unbounded-д байхгүй; DejaVu Sans-аас зөвхөн энэ тэмдэгт (LICENSE-DejaVu.txt)
+    - family: PiemathSymbols
+      fonts:
+        - asset: assets/fonts/PiemathSymbols.ttf
     - family: Unbounded
       fonts:
         - asset: assets/fonts/Unbounded-SemiBold.ttf

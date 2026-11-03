@@ -11,7 +11,9 @@ abstract final class AppTheme {
 
   /// Том тоо, гарчиг. Unbounded-д Ө ө Ү ү глиф байхгүй тул Onest руу fallback.
   static const displayFont = 'Unbounded';
-  static const _displayFallback = <String>[bodyFont];
+  /// ₮ зэрэг Onest/Unbounded-д байхгүй тэмдэгт (системийн фонтоор холилдохгүй).
+  static const symbolsFont = 'PiemathSymbols';
+  static const _displayFallback = <String>[bodyFont, symbolsFont];
 
   static ThemeData light() => _build(AppColors.light, Brightness.light);
 
@@ -53,6 +55,7 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: scheme,
       fontFamily: bodyFont,
+      fontFamilyFallback: const [symbolsFont],
       textTheme: text,
       scaffoldBackgroundColor: c.bg,
       canvasColor: c.bg,
@@ -244,7 +247,15 @@ abstract final class AppTheme {
 
   static TextTheme _textTheme(AppColors c) {
     TextStyle body(double size, FontWeight w, {double height = 1.5}) =>
-        TextStyle(fontFamily: bodyFont, fontSize: size, fontWeight: w, height: height, color: c.ink, letterSpacing: 0);
+        TextStyle(
+          fontFamily: bodyFont,
+          fontFamilyFallback: const [symbolsFont],
+          fontSize: size,
+          fontWeight: w,
+          height: height,
+          color: c.ink,
+          letterSpacing: 0,
+        );
     TextStyle display(double size) => TextStyle(
       fontFamily: displayFont,
       fontFamilyFallback: _displayFallback,
