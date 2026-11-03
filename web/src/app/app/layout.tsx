@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import MakeupBanner from "@/components/makeup/MakeupBanner";
 import ContextNavigation from "@/components/layout/ContextNavigation";
 import BottomTabs from "@/components/nav/BottomTabs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -226,6 +227,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {displayRole === "GROUP_TEACHER" && pathname === "/app/teacher"
               ? <LoadingState label="Анги удирдах хэсгийг нээж байна…" />
               : <>
+                  {displayRole === "STUDENT" && !examFullscreen && <MakeupBanner />}
                   {hub && <ClassHubTabs pathname={pathname} tabs={hub.tabs} label={hub.label} />}
                   {children}
                 </>}

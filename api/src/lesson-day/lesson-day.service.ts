@@ -297,7 +297,34 @@ export class LessonDayService {
       select: { classroomId: true, studentId: true },
     });
     const enrolled = new Set(current.map((e) => `${e.classroomId}|${e.studentId}`));
-    const rows = attendance.filter((a) => enrolled.has(`${a.classroomId}|${a.studentId}`));
+    const enrolledRows = attendance.filter((a) => enrolled.has(`${a.classroomId}|${a.studentId}`));
+    if (!enrolledRows.length) return [];
+
+    const makeups = await this.prisma.lessonMakeup.findMany({
+      where: {
+        classroomId: { in: classIds },
+        studentId: { in: studentIds },
+        date: { gte: filter.from, lte: filter.to },
+      },
+    });
+    // Нөхөх үүрэг АВТОМАТААР, гэхдээ багш хичээлийг БАТЛАСНЫ дараа л (эзэн 2026-11-03): батлахаас өмнө
+    // ирцийн мөр түр өөрчлөгдөж болно. Аль хэдийн нөхөх мөр (зураг/шийдвэр) үүссэн бол хэвээр харагдана.
+    const confirmedLessons = await this.prisma.lessonRecord.findMany({
+      where: {
+        classroomId: { in: classIds },
+        date: { gte: filter.from, lte: filter.to },
+      },
+      select: { classroomId: true, date: true },
+    });
+    const confirmedKeys = new Set(confirmedLessons.map((r) => `${r.classroomId}|${dateKey(r.date)}`));
+    const engagedKeys = new Set(
+      makeups.map((m) => `${m.classroomId}|${m.studentId}|${dateKey(m.date)}`),
+    );
+    const rows = enrolledRows.filter(
+      (a) =>
+        confirmedKeys.has(`${a.classroomId}|${dateKey(a.date)}`) ||
+        engagedKeys.has(`${a.classroomId}|${a.studentId}|${dateKey(a.date)}`),
+    );
     if (!rows.length) return [];
 
     const sessions = await this.prisma.classTestSession.findMany({
@@ -337,13 +364,6 @@ export class LessonDayService {
     const siblingList = [...info.values()];
     const required = new Map<MakeupItem, RequiredTest[]>();
 
-    const makeups = await this.prisma.lessonMakeup.findMany({
-      where: {
-        classroomId: { in: classIds },
-        studentId: { in: studentIds },
-        date: { gte: filter.from, lte: filter.to },
-      },
-    });
     // Багш баталснаас 14 хоногийн дараа файл автоматаар устдаг (эзэн 2026-10-22) — устсан файлын
     // «Нээх» холбоос 404 болохгүй: зөвхөн байгаа файлыг үзүүлж, устсаныг тэмдэглэнэ
     const storedKeys = [...new Set(makeups.flatMap((m) => m.imageKeys))];

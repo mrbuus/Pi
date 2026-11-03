@@ -66,6 +66,11 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
     db.test.findMany.mockImplementation(async (args: any) =>
       args.where.groupKey ? tests : tests.filter((t) => args.where.id.in.includes(t.id)),
     );
+    // Багш хичээлийг батласан (нөхөх үүрэг батлагдсан хичээлд л автоматаар гарна)
+    db.lessonRecord.findMany.mockResolvedValue([
+      { classroomId: 'c1', date: D('2026-10-10') },
+      { classroomId: 'c1', date: D('2026-10-12') },
+    ]);
     db.lessonMakeup.findMany.mockResolvedValue([
       { classroomId: 'c1', studentId: 's2', date: D('2026-10-12'), imageKeys: ['n.jpg'], submittedAt: new Date(), confirmedById: 'owner', confirmedAt: new Date(), note: 'WAIVED\nӨвчтэй' },
     ]);
@@ -73,6 +78,13 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
   });
 
   const staff = (userId: string, role: Role) => ({ userId, role });
+
+  it('багш хичээлийг БАТЛААГҮЙ бол нөхөх үүрэг гарахгүй; батлаагүй ч нөхөх мөр (зураг/шийдвэр) үүссэн бол хэвээр', async () => {
+    db.lessonRecord.findMany.mockResolvedValue([]);
+    const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
+    // s1 (хоцорсон, нөхөх мөргүй) харагдахгүй; s2-д аль хэдийн мөр бий — хэвээр
+    expect(rows.map((r) => r.studentId)).toEqual(['s2']);
+  });
 
   it('хоцорсон сурагчид зөвхөн B, тасалсанд A+B; шийдвэр ба тэмдэглэл ажилтанд', async () => {
     const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
