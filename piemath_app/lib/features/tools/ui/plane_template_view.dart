@@ -20,6 +20,7 @@ class _PlaneTemplateViewState extends State<PlaneTemplateView> {
   PlaneShape _shape = PlaneShape.triangle;
   TriMode _tri = TriMode.sss;
   TrapMode _trap = TrapMode.iso;
+  TriExtras _extras = const TriExtras();
 
   @override
   void initState() {
@@ -40,6 +41,14 @@ class _PlaneTemplateViewState extends State<PlaneTemplateView> {
     _configure();
   }
 
+  TriExtras _toggle(TriExtras e, String k) => switch (k) {
+    'height' => e.copyWith(height: !e.height),
+    'median' => e.copyWith(median: !e.median),
+    'bisector' => e.copyWith(bisector: !e.bisector),
+    'incircle' => e.copyWith(incircle: !e.incircle),
+    _ => e.copyWith(circumcircle: !e.circumcircle),
+  };
+
   @override
   void dispose() {
     _params.dispose();
@@ -53,7 +62,7 @@ class _PlaneTemplateViewState extends State<PlaneTemplateView> {
     return ListenableBuilder(
       listenable: _params,
       builder: (context, _) {
-        final built = buildPlane(_shape, _params.values, tri: _tri, trap: _trap);
+        final built = buildPlane(_shape, _params.values, tri: _tri, trap: _trap, extras: _extras);
         final header = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -79,6 +88,37 @@ class _PlaneTemplateViewState extends State<PlaneTemplateView> {
                     ),
                 ],
               ),
+            if (_shape == PlaneShape.triangle || _shape == PlaneShape.right) ...[
+              PillRow(
+                children: [
+                  for (final (k, label, on) in [
+                    ('height', 'Өндөр', _extras.height),
+                    ('median', 'Медиан', _extras.median),
+                    ('bisector', 'Биссектрис', _extras.bisector),
+                    ('incircle', 'Багтсан тойрог', _extras.incircle),
+                    ('circumcircle', 'Багтаасан тойрог', _extras.circumcircle),
+                  ])
+                    ToolPill(
+                      key: ValueKey('extra-$k'),
+                      label: label,
+                      selected: on,
+                      onTap: () => setState(() => _extras = _toggle(_extras, k)),
+                    ),
+                ],
+              ),
+              if (_extras.usesVertex)
+                PillRow(
+                  children: [
+                    for (final v in TriVertex.values)
+                      ToolPill(
+                        key: ValueKey('extra-from-${v.name}'),
+                        label: v == TriVertex.all ? 'Бүх оройгоос' : '${v.label} оройгоос',
+                        selected: v == _extras.from,
+                        onTap: () => setState(() => _extras = _extras.copyWith(from: v)),
+                      ),
+                  ],
+                ),
+            ],
             if (_shape == PlaneShape.trapezoid)
               PillRow(
                 children: [

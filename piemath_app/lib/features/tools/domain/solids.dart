@@ -14,14 +14,16 @@ enum SolidKind {
   cuboid('Тэгш өнцөгт параллелепипед'),
   prism('Зөв призм'),
   pyramid('Зөв пирамид'),
+  frustum('Тайрсан пирамид'),
   cylinder('Цилиндр'),
   cone('Конус'),
+  fcone('Тайрсан конус'),
   sphere('Бөмбөрцөг');
 
   const SolidKind(this.label);
   final String label;
 
-  bool get curved => this == cylinder || this == cone || this == sphere;
+  bool get curved => this == cylinder || this == cone || this == fcone || this == sphere;
 }
 
 const _n = ParamSpec('n', 'n', 'Суурийн өнцгийн тоо', 4, kind: MathInputKind.integer);
@@ -39,8 +41,19 @@ List<ParamSpec> solidParams(SolidKind k) => switch (k) {
     ParamSpec('h', 'h', 'Өндөр', 6),
   ],
   SolidKind.pyramid => const [_n, ParamSpec('a', 'a', 'Суурийн тал', 4), ParamSpec('h', 'h', 'Өндөр', 5)],
+  SolidKind.frustum => const [
+    _n,
+    ParamSpec('a', 'a', 'Доод суурийн тал', 5),
+    ParamSpec('b', 'b', 'Дээд суурийн тал', 2),
+    ParamSpec('h', 'h', 'Өндөр', 4),
+  ],
   SolidKind.cylinder => const [ParamSpec('r', 'r', 'Радиус', 3), ParamSpec('h', 'h', 'Өндөр', 5)],
   SolidKind.cone => const [ParamSpec('r', 'r', 'Радиус', 3), ParamSpec('h', 'h', 'Өндөр', 4)],
+  SolidKind.fcone => const [
+    ParamSpec('R', 'R', 'Доод радиус', 4),
+    ParamSpec('r', 'r', 'Дээд радиус', 2),
+    ParamSpec('h', 'h', 'Өндөр', 4),
+  ],
   SolidKind.sphere => const [ParamSpec('R', 'R', 'Радиус', 4)],
 };
 
@@ -72,6 +85,7 @@ class SolidModel {
     this.inner = const [],
     this.dims = const [],
     this.r = 0,
+    this.r2 = 0,
     this.h = 0,
     required this.size,
   });
@@ -83,7 +97,7 @@ class SolidModel {
   /// Биетийн доторх шугам (өндөр SO) — үргэлж тасархай.
   final List<(String, String)> inner;
   final List<SolidDim> dims;
-  final double r, h;
+  final double r, r2, h;
 
   /// Хүрээний хэмжээ (масштаб тооцоход).
   final double size;
@@ -144,6 +158,8 @@ String? solidError(SolidKind k, Map<String, double> p) {
       return '${s.name} хэт их байна';
     }
   }
+  if (k == SolidKind.frustum && p['b']! >= p['a']!) return 'Дээд суурийн тал доод суурийнхаас бага байх ёстой';
+  if (k == SolidKind.fcone && p['r']! >= p['R']!) return 'Дээд радиус доод радиусаас бага байх ёстой';
   return null;
 }
 
@@ -184,6 +200,24 @@ SolidModel buildSolid(SolidKind k, Map<String, double> p) {
         dims: const [SolidDim('A', 'B', 'a'), SolidDim('S', 'O', 'h', inner: true)],
         size: math.max(h, p['a']! * 1.2),
       );
+    case SolidKind.frustum:
+      final n = p['n']!.round(), h = p['h']!;
+      return _loftModel(
+        k,
+        regularRing(n, p['a']!, 0),
+        regularRing(n, p['b']!, h),
+        const [SolidDim('A', 'B', 'a'), SolidDim('A_1', 'B_1', 'b'), SolidDim('O', 'O_1', 'h', inner: true)],
+        extra: {'O': const Vec3(0, 0, 0), 'O_1': Vec3(0, h, 0)},
+        inner: const [('O', 'O_1')],
+      );
+    case SolidKind.fcone:
+      return SolidModel(
+        kind: k,
+        r: p['R']!,
+        r2: p['r']!,
+        h: p['h']!,
+        size: math.max(p['h']!, 2 * p['R']!),
+      );
     case SolidKind.cylinder:
       return SolidModel(kind: k, r: p['r']!, h: p['h']!, size: math.max(p['h']!, 2 * p['r']!));
     case SolidKind.cone:
@@ -193,36 +227,51 @@ SolidModel buildSolid(SolidKind k, Map<String, double> p) {
   }
 }
 
-SolidModel _prismModel(SolidKind k, List<Vec3> base, double h, List<SolidDim> dims) {
+SolidModel _prismModel(SolidKind k, List<Vec3> base, double h, List<SolidDim> dims) =>
+    _loftModel(k, base, [for (final q in base) q + Vec3(0, h, 0)], dims);
+
+/// Доод ба дээд ижил тооны оройтой олон өнцөгт: призм, тайрсан пирамид.
+SolidModel _loftModel(
+  SolidKind k,
+  List<Vec3> base,
+  List<Vec3> top,
+  List<SolidDim> dims, {
+  Map<String, Vec3> extra = const {},
+  List<(String, String)> inner = const [],
+}) {
   final n = base.length;
   final pts = <String, Vec3>{
     for (var i = 0; i < n; i++) letters[i]: base[i],
-    for (var i = 0; i < n; i++) '${letters[i]}_1': base[i] + Vec3(0, h, 0),
+    for (var i = 0; i < n; i++) '${letters[i]}_1': top[i],
+    ...extra,
   };
   final faces = <List<String>>[
     [for (var i = n - 1; i >= 0; i--) letters[i]],
     [for (var i = 0; i < n; i++) '${letters[i]}_1'],
     for (var i = 0; i < n; i++) [letters[i], letters[(i + 1) % n], '${letters[(i + 1) % n]}_1', '${letters[i]}_1'],
   ];
-  var w = 0.0;
+  var w = 0.0, h = 0.0;
   for (final p in base) {
     w = math.max(w, math.sqrt(p.x * p.x + p.z * p.z) * 2);
   }
-  return SolidModel(kind: k, pts: pts, faces: faces, dims: dims, size: math.max(h, w));
+  for (final p in top) {
+    h = math.max(h, p.y);
+  }
+  return SolidModel(kind: k, pts: pts, faces: faces, inner: inner, dims: dims, size: math.max(h, w));
 }
 
 /* ---------------- Тооцоо ---------------- */
 
 /// Суурийн талбайн томьёо (зөв n өнцөгт).
-(String, double) _baseArea(int n, double a) {
+(String, double) _baseArea(int n, double a, [String v = 'a']) {
   final s = n * a * a / (4 * math.tan(math.pi / n));
   final na = num(a);
   final f = switch (n) {
-    3 => '\\frac{\\sqrt{3}}{4}a^2=\\frac{\\sqrt{3}}{4}\\cdot $na^2',
-    4 => 'a^2=$na^2',
-    6 => '\\frac{3\\sqrt{3}}{2}a^2=\\frac{3\\sqrt{3}}{2}\\cdot $na^2',
+    3 => '\\frac{\\sqrt{3}}{4}$v^2=\\frac{\\sqrt{3}}{4}\\cdot $na^2',
+    4 => '$v^2=$na^2',
+    6 => '\\frac{3\\sqrt{3}}{2}$v^2=\\frac{3\\sqrt{3}}{2}\\cdot $na^2',
     _ =>
-      '\\frac{na^2}{4\\operatorname{tg}\\frac{180^\\circ}{n}}=\\frac{$n\\cdot $na^2}{4\\operatorname{tg}${degTex(180.0 / n)}}',
+      '\\frac{n$v^2}{4\\operatorname{tg}\\frac{180^\\circ}{n}}=\\frac{$n\\cdot $na^2}{4\\operatorname{tg}${degTex(180.0 / n)}}',
   };
   return (f, s);
 }
@@ -303,6 +352,87 @@ List<Metric> solidMetrics(SolidKind k, Map<String, double> p) {
         ),
         m('Суурийн талбай', lenRow('S_{\\text{суурь}}', f, sb)),
         m('Суурийн багтсан тойргийн радиус', lenRow('r', '\\frac{a}{2\\operatorname{tg}\\frac{180^\\circ}{n}}', r)),
+      ];
+    case SolidKind.frustum:
+      final n = p['n']!.round(), a = p['a']!, b = p['b']!, h = p['h']!;
+      final (f1, s1) = _baseArea(n, a);
+      final (f2, s2) = _baseArea(n, b, 'b');
+      final tg = math.tan(math.pi / n), sn = math.sin(math.pi / n);
+      final r1 = a / (2 * tg), r2 = b / (2 * tg);
+      final bigR1 = a / (2 * sn), bigR2 = b / (2 * sn);
+      final ap = math.sqrt(h * h + (r1 - r2) * (r1 - r2));
+      final side = n * (a + b) / 2 * ap;
+      final v = h / 3 * (s1 + math.sqrt(s1 * s2) + s2);
+      return [
+        m(
+          'Эзлэхүүн',
+          lenRow(
+            'V',
+            '\\frac{h}{3}(S_1+\\sqrt{S_1S_2}+S_2)=\\frac{${num(h)}}{3}(${num(s1)}+\\sqrt{${num(s1)}\\cdot ${num(s2)}}+${num(s2)})',
+            v,
+          ),
+          key: true,
+        ),
+        m(
+          'Бүтэн гадаргуун талбай',
+          lenRow('S', 'S_1+S_2+S_{\\text{хажуу}}=${num(s1)}+${num(s2)}+${num(side)}', s1 + s2 + side),
+          key: true,
+        ),
+        m(
+          'Хажуу гадаргуун талбай',
+          lenRow(
+            'S_{\\text{хажуу}}',
+            '\\frac{n(a+b)}{2}m=\\frac{$n(${num(a)}+${num(b)})}{2}\\cdot ${num(ap)}',
+            side,
+          ),
+          key: true,
+        ),
+        m(
+          'Апофем',
+          lenRow('m', '\\sqrt{h^2+(r_1-r_2)^2}=\\sqrt{${num(h)}^2+(${num(r1)}-${num(r2)})^2}', ap),
+        ),
+        m(
+          'Хажуу ирмэг',
+          lenRow(
+            'AA_1',
+            '\\sqrt{h^2+(R_1-R_2)^2}=\\sqrt{${num(h)}^2+(${num(bigR1)}-${num(bigR2)})^2}',
+            math.sqrt(h * h + (bigR1 - bigR2) * (bigR1 - bigR2)),
+          ),
+        ),
+        m('Доод суурийн талбай', lenRow('S_1', f1, s1)),
+        m('Дээд суурийн талбай', lenRow('S_2', f2, s2)),
+      ];
+    case SolidKind.fcone:
+      final bigR = p['R']!, r = p['r']!, h = p['h']!;
+      final nR = num(bigR), nr = num(r), nh = num(h);
+      final l = math.sqrt(h * h + (bigR - r) * (bigR - r));
+      final nl = num(l);
+      return [
+        m(
+          'Эзлэхүүн',
+          piRow(
+            'V',
+            '\\frac{\\pi h}{3}(R^2+Rr+r^2)=\\frac{\\pi\\cdot $nh}{3}($nR^2+$nR\\cdot $nr+$nr^2)',
+            h * (bigR * bigR + bigR * r + r * r) / 3,
+          ),
+          key: true,
+        ),
+        m('Байгуулагч', lenRow('l', '\\sqrt{h^2+(R-r)^2}=\\sqrt{$nh^2+($nR-$nr)^2}', l), key: true),
+        m(
+          'Бүтэн гадаргуун талбай',
+          piRow(
+            'S',
+            '\\pi(R^2+r^2+(R+r)l)=\\pi($nR^2+$nr^2+($nR+$nr)\\cdot $nl)',
+            bigR * bigR + r * r + (bigR + r) * l,
+          ),
+          key: true,
+        ),
+        m(
+          'Хажуу гадаргуун талбай',
+          piRow('S_{\\text{хажуу}}', '\\pi(R+r)l=\\pi($nR+$nr)\\cdot $nl', (bigR + r) * l),
+        ),
+        m('Доод суурийн талбай', piRow('S_1', '\\pi R^2', bigR * bigR)),
+        m('Дээд суурийн талбай', piRow('S_2', '\\pi r^2', r * r)),
       ];
     case SolidKind.cylinder:
       final r = p['r']!, h = p['h']!, nr = num(r), nh = num(h);

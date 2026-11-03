@@ -42,6 +42,50 @@ enum TrapMode {
   final String label;
 }
 
+/// Гурвалжны нэмэлт шугам: аль оройгоос гаргах + асаах/унтраах сонголтууд.
+enum TriVertex {
+  a('A'),
+  b('B'),
+  c('C'),
+  all('Бүгд');
+
+  const TriVertex(this.label);
+  final String label;
+}
+
+class TriExtras {
+  const TriExtras({
+    this.from = TriVertex.a,
+    this.height = false,
+    this.median = false,
+    this.bisector = false,
+    this.incircle = false,
+    this.circumcircle = false,
+  });
+
+  final TriVertex from;
+  final bool height, median, bisector, incircle, circumcircle;
+
+  /// Оройгоос гарах шугам (өндөр, медиан, биссектрис) асаалттай юу.
+  bool get usesVertex => height || median || bisector;
+
+  TriExtras copyWith({
+    TriVertex? from,
+    bool? height,
+    bool? median,
+    bool? bisector,
+    bool? incircle,
+    bool? circumcircle,
+  }) => TriExtras(
+    from: from ?? this.from,
+    height: height ?? this.height,
+    median: median ?? this.median,
+    bisector: bisector ?? this.bisector,
+    incircle: incircle ?? this.incircle,
+    circumcircle: circumcircle ?? this.circumcircle,
+  );
+}
+
 /// Нэг параметрийн тодорхойлолт.
 class ParamSpec {
   const ParamSpec(this.key, this.tex, this.name, this.def, {this.kind = MathInputKind.length});
@@ -137,7 +181,7 @@ class _Ctx {
   }
 
   /// Өндөр: from цэгээс ab шулуун руу (тасархай + тэгш өнцгийн тэмдэг + H).
-  void height(Pt from, Pt a, Pt b, {String name = 'H'}) {
+  void height(Pt from, Pt a, Pt b, {String name = 'H', String? sub}) {
     final h = foot(from, a, b);
     final t = paramOn(h, a, b);
     if (t < -1e-9 || t > 1 + 1e-9) {
@@ -147,7 +191,27 @@ class _Ctx {
     final other = dist(h, a) > 1e-9 ? a : b;
     prims.add(AnglePrim(h, other, from, right: true));
     prims.add(DotPrim(h, tone: Tone.brand, radius: 2.5));
-    prims.add(LabelPrim(h, name, dir: norm(h - from), tone: Tone.brand));
+    prims.add(LabelPrim(h, name, sub: sub, dir: norm(h - from), tone: Tone.brand));
+  }
+
+  /// Оройгоос эсрэг талын дунд хүртэлх медиан (хоёр хагас нь тэнцүү зураастай).
+  void median(Pt from, Pt a, Pt b, String name, int idx) {
+    final m = mid(a, b);
+    prims.add(SegPrim(from, m, tone: Tone.brand, width: 1.8));
+    prims.add(TicksPrim(a, m, idx));
+    prims.add(TicksPrim(m, b, idx));
+    prims.add(DotPrim(m, tone: Tone.brand, radius: 2.5));
+    prims.add(LabelPrim(m, name, sub: '1', dir: norm(m - from), tone: Tone.brand));
+  }
+
+  /// Оройн өнцгийн биссектрис (хоёр тэнцүү өнцөг нум).
+  void bisector(Pt from, Pt a, Pt b, {String name = 'L', String? sub}) {
+    final l = bisectorFoot(from, a, b);
+    prims.add(SegPrim(from, l, tone: Tone.brand, width: 1.8));
+    prims.add(AnglePrim(from, a, l));
+    prims.add(AnglePrim(from, l, b));
+    prims.add(DotPrim(l, tone: Tone.brand, radius: 2.5));
+    prims.add(LabelPrim(l, name, sub: sub, dir: norm(l - from), tone: Tone.brand));
   }
 
   void push(String name, List<ResultRow> rows, {bool key = false}) => metrics.add(Metric(name, rows: rows, key: key));
@@ -162,6 +226,56 @@ class _Ctx {
 bool _near(double x, double y, [double tol = 1e-7]) => (x - y).abs() <= tol * math.max(1, math.max(x.abs(), y.abs()));
 
 /* ---------------- Гурвалжин ---------------- */
+
+/// Нэмэлт шугамууд: өндөр, медиан, биссектрис (A/B/C/бүгд оройгоос), багтсан ба багтаасан тойрог.
+void _triExtras(_Ctx c, TriExtras ex, Pt a, Pt b, Pt cP, Tri t) {
+  final verts = ex.from == TriVertex.all ? const [0, 1, 2] : [ex.from.index];
+  final single = verts.length == 1;
+  final p = [a, b, cP];
+  for (final k in verts) {
+    final v = p[k], u = p[(k + 1) % 3], w = p[(k + 2) % 3];
+    final idx = k + 1;
+    if (ex.height) {
+      if (single) {
+        c.height(v, u, w);
+      } else {
+        c.height(v, u, w, name: 'H', sub: '$idx');
+      }
+    }
+    if (ex.median) c.median(v, u, w, const ['A', 'B', 'C'][k], idx);
+    if (ex.bisector) {
+      if (single) {
+        c.bisector(v, u, w);
+      } else {
+        c.bisector(v, u, w, sub: '$idx');
+      }
+    }
+  }
+  final g = centroid(a, b, cP);
+  if (ex.incircle) {
+    final i = incenter(a, b, cP);
+    final r = inradius(t.a, t.b, t.c);
+    final f = foot(i, b, cP);
+    c.prims
+      ..add(CirclePrim(i, r, tone: Tone.brand, width: 1.8))
+      ..add(SegPrim(i, f, tone: Tone.brand, dash: true, width: 1.4))
+      ..add(SidePrim(i, f, 'r', cP, italic: true))
+      ..add(DotPrim(i, tone: Tone.accent, radius: 2.5))
+      ..add(LabelPrim(i, 'I', away: g, tone: Tone.accent));
+  }
+  if (ex.circumcircle) {
+    final o = circumcenter(a, b, cP);
+    if (o != null) {
+      final r = circumradius(t.a, t.b, t.c);
+      c.prims
+        ..add(CirclePrim(o, r, tone: Tone.brand, width: 1.8))
+        ..add(SegPrim(o, a, tone: Tone.brand, dash: true, width: 1.4))
+        ..add(SidePrim(o, a, 'R', cP, italic: true))
+        ..add(DotPrim(o, tone: Tone.accent, radius: 2.5))
+        ..add(LabelPrim(o, 'O', away: g, tone: Tone.accent));
+    }
+  }
+}
 
 String triangleKindText(Tri t) {
   final maxA = [t.A, t.B, t.C].reduce(math.max);
@@ -203,7 +317,7 @@ TriResult _solveTri(PlaneShape s, TriMode m, Map<String, double> p) {
   }
 }
 
-Built _buildTriangle(PlaneShape shape, TriMode mode, Map<String, double> p) {
+Built _buildTriangle(PlaneShape shape, TriMode mode, Map<String, double> p, TriExtras ex) {
   final r = _solveTri(shape, mode, p);
   if (!r.ok) return Built.bad(r.reason!, r.tex);
   final t = r.tri!;
@@ -221,8 +335,9 @@ Built _buildTriangle(PlaneShape shape, TriMode mode, Map<String, double> p) {
   c.angle(b, a, cP, t.A, arcs: angG[0]);
   c.angle(cP, b, a, t.B, arcs: angG[1]);
   c.angle(a, cP, b, t.C, arcs: angG[2]);
-  // Хамгийн урт тал руу буусан өндөр — тооцооны h-тэй холбоотой.
-  if (shape != PlaneShape.right) c.height(a, b, cP);
+  // Нэмэлт шугам байхгүй үед A оройн өндөр — тооцооны h-тэй холбоотой.
+  if (shape != PlaneShape.right && !ex.height) c.height(a, b, cP);
+  _triExtras(c, ex, a, b, cP, t);
 
   final s = heron(t.a, t.b, t.c);
   final per = t.a + t.b + t.c;
@@ -556,7 +671,13 @@ Built _buildCircle(double r, double th) {
 }
 
 /// Нэгдсэн оролт. Утга дутуу (NaN) бол тайлбартай алдаа.
-Built buildPlane(PlaneShape s, Map<String, double> p, {TriMode tri = TriMode.sss, TrapMode trap = TrapMode.iso}) {
+Built buildPlane(
+  PlaneShape s,
+  Map<String, double> p, {
+  TriMode tri = TriMode.sss,
+  TrapMode trap = TrapMode.iso,
+  TriExtras extras = const TriExtras(),
+}) {
   for (final spec in paramSpecs(s, tri: tri, trap: trap)) {
     final v = p[spec.key];
     if (v == null || !v.isFinite) return Built.bad('${spec.name}: утгаа бичнэ үү');
@@ -565,7 +686,7 @@ Built buildPlane(PlaneShape s, Map<String, double> p, {TriMode tri = TriMode.sss
   switch (s) {
     case PlaneShape.triangle:
     case PlaneShape.right:
-      return _buildTriangle(s, tri, p);
+      return _buildTriangle(s, tri, p, extras);
     case PlaneShape.rectangle:
       return _buildRectangle(g('a'), g('b'), false);
     case PlaneShape.square:

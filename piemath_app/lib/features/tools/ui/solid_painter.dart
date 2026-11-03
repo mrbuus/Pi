@@ -4,17 +4,21 @@ import 'package:flutter/material.dart';
 
 import '../domain/geom.dart';
 import '../domain/projection.dart';
+import '../domain/solid_section.dart' show SectionView;
 import '../domain/solids.dart';
 import 'figure_painter.dart';
 
 /// Сурах бичгийн хэв маягийн биет: харагдах ирмэг тод, нуугдсан нь тасархай,
 /// оройн нэр, хэмжээсийн үсэг. [view] нь ValueNotifier — эргүүлэхэд зөвхөн дахин зурна.
 class SolidPainter extends CustomPainter {
-  SolidPainter({required this.model, required this.view, required this.palette}) : super(repaint: view);
+  SolidPainter({required this.model, required this.view, required this.palette, this.section}) : super(repaint: view);
 
   final SolidModel model;
   final ValueNotifier<View3> view;
   final FigurePalette palette;
+
+  /// Огтлол: биет дээр будагтай олон өнцөгт (харагдах хэсэг тод, нуугдсан нь тасархай).
+  final SectionView? section;
 
   late double _s;
   late Offset _o;
@@ -32,6 +36,43 @@ class SolidPainter extends CustomPainter {
       _curved(canvas, v);
     } else {
       _poly(canvas, v);
+    }
+    if (section != null) _section(canvas, v, section!);
+  }
+
+  void _section(Canvas canvas, View3 v, SectionView sec) {
+    final scr = [for (final q in sec.pts) _scr(v.project(q))];
+    canvas.drawPath(Path()..addPolygon(scr, true), Paint()..color = palette.brand.withValues(alpha: 0.24));
+    final cam = v.camDir;
+    bool vis(int i) => sec.normals[i].isEmpty || sec.normals[i].any((n) => n.dot(cam) > 1e-9);
+    // Нуугдсан хэсгийг эхэлж, харагдахыг дээр нь.
+    for (final pass in [false, true]) {
+      for (var i = 0; i < scr.length; i++) {
+        if (vis(i) != pass) continue;
+        final a = scr[i], b = scr[(i + 1) % scr.length];
+        final path = Path()
+          ..moveTo(a.dx, a.dy)
+          ..lineTo(b.dx, b.dy);
+        final paint = Paint()
+          ..color = palette.brand
+          ..strokeWidth = pass ? 2.8 : 1.6
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+        canvas.drawPath(pass ? path : dashPath(path, 6, 5), paint);
+      }
+    }
+    if (sec.labels.isEmpty) return;
+    var c = Offset.zero;
+    for (final q in scr) {
+      c += q;
+    }
+    c = c / scr.length.toDouble();
+    for (var i = 0; i < scr.length; i++) {
+      if (sec.labels[i].isEmpty) continue;
+      canvas.drawCircle(scr[i], 3, Paint()..color = palette.brand);
+      final d = scr[i] - c;
+      final dir = d.distance < 1e-6 ? const Offset(0, -1) : d / d.distance;
+      _text(canvas, sec.labels[i], scr[i] + dir * 14, palette.brand, 16, italic: true);
     }
   }
 
@@ -145,6 +186,40 @@ class SolidPainter extends CustomPainter {
         _text(canvas, 'S', apex + const Offset(0, -14), palette.ink, 15, italic: true);
         _text(canvas, 'O', o + const Offset(-12, 6), palette.dim, 15, italic: true);
         _text(canvas, 'h', (o + apex) / 2 + const Offset(9, 0), palette.brand, 16, italic: true, alignLeft: true);
+      case SolidKind.fcone:
+        final bigR = m.r, r = m.r2;
+        final fullH = m.h * bigR / (bigR - r);
+        final base = circleAt(v, bigR, 0), top = circleAt(v, r, m.h);
+        final tg = coneTangents(v, bigR, fullH);
+        final o = _scr(base.c), o1 = _scr(top.c);
+        double mid;
+        if (tg == null) {
+          // Дээрээс босоо харахад суурийн тойрог л хүрээ болно.
+          _fillBody(canvas, _arc(base, 0, 2 * math.pi));
+          _arcPath(canvas, base, 0, 2 * math.pi, true);
+          mid = 0.8;
+        } else {
+          final (t1, t2) = tg;
+          _fillBody(canvas, [..._arc(base, t1, t2), ..._arc(top, t2, t1 + 2 * math.pi)]);
+          _arcPath(canvas, base, t1, t2, true);
+          _arcPath(canvas, base, t2, t1 + 2 * math.pi, false);
+          // Байгуулагчид нь орой дайрсан шулуун: хоёр тойргийн ижил параметр.
+          _seg(canvas, _scr(base.at(t1)), _scr(top.at(t1)), true);
+          _seg(canvas, _scr(base.at(t2)), _scr(top.at(t2)), true);
+          mid = (t1 + t2) / 2;
+        }
+        _arcPath(canvas, top, 0, 2 * math.pi, true);
+        final rb = _scr(base.at(mid - 0.6)), rt = _scr(top.at(mid - 0.6));
+        _seg(canvas, o, o1, false, color: palette.brand);
+        _seg(canvas, o, rb, false, color: palette.brand);
+        _seg(canvas, o1, rt, true, color: palette.brand);
+        _dot(canvas, o, false);
+        _dot(canvas, o1, true);
+        _text(canvas, 'O', o + const Offset(-12, 6), palette.dim, 15, italic: true);
+        _text(canvas, 'O', o1 + const Offset(-12, -10), palette.ink, 15, italic: true, sub: '1');
+        _text(canvas, 'h', (o + o1) / 2 + const Offset(9, 0), palette.brand, 16, italic: true, alignLeft: true);
+        _text(canvas, 'R', (o + rb) / 2 + const Offset(0, 11), palette.brand, 16, italic: true);
+        _text(canvas, 'r', (o1 + rt) / 2 + const Offset(0, -11), palette.brand, 16, italic: true);
       case SolidKind.sphere:
         final o = _scr(v.project(const Vec3(0, 0, 0)));
         final rad = m.r * _s;
@@ -238,5 +313,6 @@ class SolidPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SolidPainter old) => old.model != model || old.palette != palette || old.view != view;
+  bool shouldRepaint(SolidPainter old) =>
+      old.model != model || old.palette != palette || old.view != view || old.section != section;
 }
