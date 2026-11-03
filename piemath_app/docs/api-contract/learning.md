@@ -117,7 +117,14 @@ OPEN → мөр. (`gradeAnswer(problem, answer)` choiceOrder-гүй.) Сонго
 ## 5. Томьёоны сан (`/app/formulas`) — бүх нэвтэрсэн role
 
 - `GET /formulas/sections`, `GET /formulas?…` (`FormulaQueryDto` ★), `GET /formulas/:slug`, `GET /formulas/my?studentId=` (сурагчийн туулсан тестийн томьёо).
-- Нэвтрэлтгүй статик хувилбар: `https://pimath.mn/tools/formulas.json` (books-scan-public.md §5) — офлайн кэшэд тохиромжтой.
+- Нэвтрэлтгүй статик хувилбар (вэб `57f5fde`, `1a882b3`; апп жагсаалтыг эндээс эхэлж авна, унавал дээрх API-руу шилжинэ):
+  - `GET {web}/tools/formulas.json` — хөнгөн жагсаалт `{version: 2, detail: true, count, sections:[{slug,title,order,count}], formulas:[{slug,title,section,order,grade,level,latex,keywords,widget,simple?}]}`.
+    `simple` = `{say, formula, parts:[{tex,mean}]}` (385 томьёо); `formula`/`tex`/`say` дотор `\colA{…}`–`\colD{…}` өнгөт тэмдэглэгээ.
+  - `GET {web}/tools/formulas-detail/<бүлгийн slug>.json` — `{<томьёоны slug>: {explanation, examples, …, simpleMore:{steps, example:{problem,steps,answer}, watch?}}}`.
+    Апп зөвхөн `simpleMore`-ыг авна; «Алхамаар ойлгох»-ыг анх дарахад л татаж, бүлэг тутамд нэг удаа санах ойд кэшлэнэ. Алдаа → «Дахин оролдох».
+  - Өнгө: `\colA` = тодотгол хөх, `\colB` = улаавтар, `\colC` = ногоон, `\colD` = гүн хөх (`AppColors` токен, зөвхөн бичвэрт; шар/алт, өнгөт дэвсгэр хориотой).
+  - Хайлт нь нэр, slug, `simple.say`, `parts[].mean`-аар (томьёоны тэмдэгтгүй).
+  - Нэвтрэлтгүй (`auth:false`), `Env.webBaseUrl` суурьтай. Дэлгэрэнгүй (`related`, жишээ, алдаа) нь `GET /formulas/:slug` хэвээр.
 - `/app/formulas/review|print|widgets` — ажилтны **[ховор]**, `↗`.
 
 ## 6. Зорилго, бэлэн байдал, идэвх

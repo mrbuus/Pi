@@ -24,6 +24,73 @@ class FormulaSection {
   final int count;
 }
 
+/// Энгийн тайлбарын үсгийн утга: `tex` нь `\colA{…}` өнгөтэй байж болно.
+@immutable
+class FormulaSimplePart {
+  const FormulaSimplePart(this.tex, this.mean);
+
+  final String tex;
+  final String mean;
+}
+
+/// Энгийн өнгөт тайлбар (вэб `SheetSimple`). Жагсаалтын файлд [say], [formula], [parts] л ирнэ;
+/// алхам, жишээ, анхаарах зүйл ([FormulaSimpleMore]) бүлгийн дэлгэрэнгүй файлаас хойно ирнэ.
+@immutable
+class FormulaSimple {
+  const FormulaSimple({required this.say, required this.formula, this.parts = const []});
+
+  /// `say` ба `formula` байхгүй бол null (вэбийн `parseSimple`-тэй ижил).
+  static FormulaSimple? tryParse(Object? raw) {
+    final j = asMap(raw);
+    final say = asStr(j['say']);
+    final formula = asStr(j['formula']);
+    if (say == null || say.isEmpty || formula == null || formula.isEmpty) return null;
+    return FormulaSimple(
+      say: say,
+      formula: formula,
+      parts: [
+        for (final p in asList(j['parts']))
+          if ((asStr(asMap(p)['tex']) ?? '').isNotEmpty)
+            FormulaSimplePart(asStr(asMap(p)['tex'])!, asStr(asMap(p)['mean']) ?? ''),
+      ],
+    );
+  }
+
+  final String say;
+  final String formula;
+  final List<FormulaSimplePart> parts;
+}
+
+/// «Алхамаар ойлгох»: `formulas-detail/<бүлэг>.json` дахь `simpleMore`.
+@immutable
+class FormulaSimpleMore {
+  const FormulaSimpleMore({this.steps = const [], this.example, this.watch});
+
+  static FormulaSimpleMore? tryParse(Object? raw) {
+    final j = asMap(raw);
+    if (j.isEmpty) return null;
+    final ex = asMap(j['example']);
+    final problem = asStr(ex['problem']);
+    final watch = asStr(j['watch']);
+    final more = FormulaSimpleMore(
+      steps: [for (final x in asList(j['steps'])) if (x is String && x.isNotEmpty) x],
+      example: problem == null || problem.isEmpty
+          ? null
+          : FormulaExample(
+              problem: problem,
+              steps: [for (final x in asList(ex['steps'])) if (x is String && x.isNotEmpty) x],
+              answer: asStr(ex['answer']) ?? '',
+            ),
+      watch: watch == null || watch.trim().isEmpty ? null : watch,
+    );
+    return more.steps.isEmpty && more.example == null && more.watch == null ? null : more;
+  }
+
+  final List<String> steps;
+  final FormulaExample? example;
+  final String? watch;
+}
+
 @immutable
 class FormulaSummary {
   const FormulaSummary({
@@ -35,6 +102,7 @@ class FormulaSummary {
     this.grade,
     this.latex,
     this.general,
+    this.simple,
   });
 
   factory FormulaSummary.fromJson(Object? raw) {
@@ -48,6 +116,7 @@ class FormulaSummary {
       grade: asInt(j['grade']),
       latex: asStr(j['latex']),
       general: asStr(j['general']),
+      simple: FormulaSimple.tryParse(j['simple']),
     );
   }
 
@@ -62,8 +131,25 @@ class FormulaSummary {
   final String? latex;
   final String? general;
 
+  /// Энгийн өнгөт тайлбар (статик жагсаалтаас; API-аас ирэхгүй).
+  final FormulaSimple? simple;
+
   String? get display => (latex?.isNotEmpty ?? false) ? latex : general;
 }
+
+final _searchText = Expando<String>('formulaSearchText');
+
+/// Хайлтад: нэр, slug, энгийн өгүүлбэр, үсгийн утга (томьёоны тэмдэгтгүй). Нэг л удаа бодно.
+String searchTextOf(FormulaSummary f) =>
+    _searchText[f] ??= [
+      f.title,
+      f.slug,
+      if (f.simple != null) ...[stripTex(f.simple!.say), for (final p in f.simple!.parts) stripTex(p.mean)],
+    ].join(' ').toLowerCase();
+
+/// `$`, `\команд`, `{}`-г хасаж хайлтад зориулан цэвэрлэнэ.
+String stripTex(String s) =>
+    s.replaceAll(RegExp(r'\\[a-zA-Z]+'), ' ').replaceAll(RegExp(r'[\$\\{}]'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
 
 @immutable
 class FormulaVariant {
@@ -223,7 +309,7 @@ List<FormulaSummary> filterFormulas(
     for (final f in all)
       if ((level.isEmpty || f.level == level) &&
           (section.isEmpty || f.section == section) &&
-          (q.isEmpty || f.title.toLowerCase().contains(q) || f.slug.toLowerCase().contains(q)))
+          (q.isEmpty || searchTextOf(f).contains(q)))
         f,
   ];
 }
