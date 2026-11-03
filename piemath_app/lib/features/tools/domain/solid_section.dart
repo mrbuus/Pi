@@ -21,7 +21,7 @@ Vec3 _unit(Vec3 a) {
 
 Vec3 _lerp(Vec3 a, Vec3 b, double t) => a + (b - a) * t;
 
-/// Ньюэллийн нормаль (урт = 2·талбай).
+/// Ньюэллийн нормаль (урт нь талбайн хоёр дахин).
 Vec3 _newell(List<Vec3> pts) {
   var n = const Vec3(0, 0, 0);
   for (var i = 0; i < pts.length; i++) {
@@ -70,7 +70,7 @@ String? sectionError(Map<String, double> p) {
   return null;
 }
 
-/// Хавтгай: n·p = d, n нэгж, дээш чиглэсэн.
+/// Хавтгай: нормаль ба цэгийн скаляр үржвэр d, нормаль нэгж, дээш чиглэсэн.
 class SecPlane {
   const SecPlane(this.n, this.d);
   final Vec3 n;

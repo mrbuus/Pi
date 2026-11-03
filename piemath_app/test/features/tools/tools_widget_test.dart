@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/core/math/math.dart';
+import 'package:piemath_app/features/tools/domain/figure.dart';
 import 'package:piemath_app/features/tools/domain/free.dart';
+import 'package:piemath_app/features/tools/ui/figure_painter.dart';
 import 'package:piemath_app/features/tools/ui/plane_free_view.dart';
 import 'package:piemath_app/features/tools/ui/plane_screen.dart';
 import 'package:piemath_app/features/tools/ui/solid_screen.dart';
@@ -15,13 +17,15 @@ bool hasMath(String needle) =>
     find.byType(MathText).evaluate().any((e) => (e.widget as MathText).source.contains(needle));
 
 /// Хэвтээ сонголтын мөрөөс (lazy ListView) товч олж дарна.
-Future<void> pill(WidgetTester t, String k) async {
+Future<void> pill(WidgetTester t, String k, {int row = 0}) async {
   final f = find.byKey(ValueKey(k));
-  await t.scrollUntilVisible(
-    f,
-    150,
-    scrollable: find.descendant(of: find.byType(PillRow).first, matching: find.byType(Scrollable)),
-  );
+  final scrollable = find.descendant(of: find.byType(PillRow).at(row), matching: find.byType(Scrollable));
+  if (f.evaluate().isEmpty) {
+    // Мөр баруун тийш гүйсэн байж болно — эхэнд нь буцаана.
+    await t.drag(scrollable, const Offset(5000, 0));
+    await t.pumpAndSettle();
+  }
+  await t.scrollUntilVisible(f, 150, scrollable: scrollable);
   await t.ensureVisible(f);
   await t.pumpAndSettle();
   await t.tap(f);
@@ -152,5 +156,57 @@ void main() {
     final fig = tester.getRect(find.byKey(const ValueKey('solid-figure')));
     final field = tester.getRect(find.byKey(const ValueKey('field-a')));
     expect(field.left, greaterThan(fig.right));
+  });
+
+  List<Prim> planePrims(WidgetTester t) =>
+      (t.widget<CustomPaint>(find.byKey(const ValueKey('plane-figure'))).painter! as FigurePainter).prims;
+
+  testWidgets('гурвалжин: нэмэлт шугамын товчууд зурагт нөлөөлнө', (tester) async {
+    await pumpThemed(tester, const PlaneScreen(), size: const Size(390, 844));
+    expect(planePrims(tester).whereType<CirclePrim>(), isEmpty);
+    expect(find.byKey(const ValueKey('extra-from-a')), findsNothing);
+    await pill(tester, 'extra-incircle', row: 2);
+    await pill(tester, 'extra-circumcircle', row: 2);
+    expect(planePrims(tester).whereType<CirclePrim>().length, 2);
+    await pill(tester, 'extra-incircle', row: 2);
+    expect(planePrims(tester).whereType<CirclePrim>().length, 1);
+    // Медиан асаахад «аль оройгоос» мөр гарна
+    await pill(tester, 'extra-median', row: 2);
+    expect(find.byKey(const ValueKey('extra-from-a')), findsOneWidget);
+    expect(planePrims(tester).whereType<TicksPrim>(), isNotEmpty);
+    await pill(tester, 'extra-from-all', row: 3);
+    final marks = planePrims(tester).whereType<LabelPrim>().where((l) => l.sub == '1' && l.text.length == 1).length;
+    expect(marks, greaterThanOrEqualTo(3));
+  });
+
+  testWidgets('биет: тайрсан конус, дэлгэмэл, огтлол', (tester) async {
+    await pumpThemed(tester, const SolidScreen(), size: const Size(390, 844));
+    await pill(tester, 'solid-fcone');
+    expect(find.byKey(const ValueKey('field-R')), findsOneWidget);
+    expect(find.byKey(const ValueKey('field-r')), findsOneWidget);
+    expect(hasMath(r'\frac{\pi h}{3}'), isTrue);
+
+    await pill(tester, 'mode-net', row: 1);
+    expect(find.byKey(const ValueKey('net-figure')), findsOneWidget);
+    expect(find.textContaining('Секторын өнцөг'), findsOneWidget);
+
+    await pill(tester, 'solid-sphere');
+    expect(find.textContaining('дэлгэмэл байхгүй'), findsOneWidget);
+
+    await pill(tester, 'solid-cube');
+    await pill(tester, 'mode-section', row: 1);
+    expect(find.byKey(const ValueKey('field-y')), findsOneWidget);
+    expect(find.byKey(const ValueKey('field-alpha')), findsOneWidget);
+    expect(find.textContaining('Огтлолын хэлбэр'), findsOneWidget);
+    // Анхдагч: y=2, α=30° — куб a=4: тэгш өнцөгт
+    expect(find.textContaining('Тэгш өнцөгт'), findsWidgets);
+    // Налууг 120° болговол алдаа
+    await tester.tap(find.byKey(const ValueKey('field-alpha')));
+    await tester.pump();
+    await key(tester, 'clear');
+    await key(tester, 'd1');
+    await key(tester, 'd2');
+    await key(tester, 'd0');
+    expect(find.textContaining('0°-аас 90°'), findsOneWidget);
   });
 }

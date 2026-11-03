@@ -207,7 +207,7 @@ NetModel _cylinderNet(double r, double h) {
     ..add(CirclePrim(high, r, fill: true))
     ..add(DotPrim(Pt(cx, 0), tone: Tone.dim, radius: 2.2))
     ..add(DotPrim(Pt(cx, h), tone: Tone.dim, radius: 2.2));
-  b.label(Pt(0, h), Pt(w, h), '2πr', Pt(w / 2, 0));
+  b.label(Pt(0, h), Pt(w, h), 'C', Pt(w / 2, 0));
   b.label(Pt(w, 0), Pt(w, h), 'h', Pt(w / 2, h / 2));
   b.radius(high, Pt(cx + r, h + r), 'r', Pt(cx, h + 2 * r));
   return NetModel(b.prims, 3);
@@ -232,7 +232,6 @@ NetModel _coneNet(double r, double h) {
   final left = polar(apex, l, a1);
   b.radius(apex, left, 'l', Pt(0, l / 2));
   b.radius(circ, Pt(r, l + r), 'r', Pt(0, l + 2 * r));
-  b.prims.add(LabelPrim(polar(apex, l * 0.28, math.pi / 2), 'θ', dir: const Pt(0, 1), tone: Tone.brand));
   return NetModel(b.prims, 2);
 }
 
@@ -272,7 +271,7 @@ List<Metric> netMetrics(SolidKind k, Map<String, double> p) {
         Metric(
           'Хажуугийн тэгш өнцөгт',
           rows: [
-            piRow('2\\pi r', '2\\pi\\cdot ${num(r)}', 2 * r),
+            piRow('C', '2\\pi r=2\\pi\\cdot ${num(r)}', 2 * r),
             lenRow('h', '', h),
           ],
           key: true,
