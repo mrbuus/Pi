@@ -55,6 +55,16 @@ class _GraphScreenState extends State<GraphScreen> {
   (int, double)? _trace;
   bool _interacting = false;
   List<Special> _specials = const [];
+  bool _tangent = false;
+  bool _area = false;
+  double _areaA = 0;
+  double _areaB = 2;
+
+  // Тоон талбарын засвар (x/y муж, интегралын a, b) — функцийн гараар бичнэ.
+  _NumTarget? _numEdit;
+  FuncInputController? _numCtl;
+  ScrollController _panelScroll = ScrollController();
+  double _savedOffset = 0;
 
   // Чирэх/томруулах эхлэл
   GView? _startView;
@@ -75,7 +85,88 @@ class _GraphScreenState extends State<GraphScreen> {
       l.ctl.dispose();
     }
     _view.dispose();
+    _numCtl?.dispose();
+    _panelScroll.dispose();
     super.dispose();
+  }
+
+  /* ---------- Тоон талбар ---------- */
+
+  double _numValue(_NumTarget t) {
+    final v = _view.value;
+    return switch (t) {
+      _NumTarget.xMin => v.xMin,
+      _NumTarget.xMax => v.xMax,
+      _NumTarget.yMin => v.yMin,
+      _NumTarget.yMax => v.yMax,
+      _NumTarget.areaA => _areaA,
+      _NumTarget.areaB => _areaB,
+    };
+  }
+
+  void _openNum(_NumTarget t) {
+    if (_panelScroll.hasClients) _savedOffset = _panelScroll.offset;
+    _numCtl?.dispose();
+    final ctl = FuncInputController(_plainNum(_numValue(t)));
+    ctl.addListener(() => _applyNum(t, ctl));
+    setState(() {
+      _editing = null;
+      _numEdit = t;
+      _numCtl = ctl;
+    });
+  }
+
+  void _closeNum() {
+    _panelScroll.dispose();
+    _panelScroll = ScrollController(initialScrollOffset: _savedOffset);
+    setState(() => _numEdit = null);
+  }
+
+  /// Бичсэн илэрхийллийн утга; хүчингүй бол алдааны мессеж.
+  String? _numError(_NumTarget t, FuncInputController ctl) {
+    if (ctl.isEmpty) return 'Тоо бичнэ үү';
+    final x = evaluate(ctl.text);
+    if (x == null || !x.isFinite) return 'Тоо биш байна';
+    if (t.isRange && x.abs() > 1e6) return 'Утга хэт том байна';
+    if (t.isRange) {
+      final v = _view.value;
+      final r = _rangeWith(t, x, v);
+      if (r.$2 <= r.$1) return 'Дээд утга доод утгаасаа их байх ёстой';
+    }
+    return null;
+  }
+
+  /// (min, max) — [t] тэнхлэгийн шинэ муж.
+  (double, double) _rangeWith(_NumTarget t, double x, GView v) => switch (t) {
+    _NumTarget.xMin => (x, v.xMax),
+    _NumTarget.xMax => (v.xMin, x),
+    _NumTarget.yMin => (x, v.yMax),
+    _ => (v.yMin, x),
+  };
+
+  void _applyNum(_NumTarget t, FuncInputController ctl) {
+    if (_numError(t, ctl) != null) {
+      setState(() {});
+      return;
+    }
+    final x = evaluate(ctl.text)!;
+    setState(() {
+      final v = _view.value;
+      switch (t) {
+        case _NumTarget.areaA:
+          _areaA = x;
+        case _NumTarget.areaB:
+          _areaB = x;
+        default:
+          final r = _rangeWith(t, x, v);
+          _view.value = t.isX
+              ? GView.fromRange(r.$1, r.$2, v.yMin, v.yMax, v.w, v.h)
+              : GView.fromRange(v.xMin, v.xMax, r.$1, r.$2, v.w, v.h);
+          _trace = null;
+          _focus = null;
+          _recompute();
+      }
+    });
   }
 
   void _addLine(String src, {bool edit = true}) {
@@ -243,6 +334,22 @@ class _GraphScreenState extends State<GraphScreen> {
     });
   }
 
+  /* ---------- Шүргэгч, талбай (эхний харагдаж буй функцээр) ---------- */
+
+  ({int idx, double x0, double y0, double k, double b})? _tangentOf(_Line? first, Scope scope) {
+    if (!_tangent || first == null) return null;
+    final x0 = _trace?.$2 ?? 1;
+    final sc = Map.of(scope)..['x'] = x0;
+    final f = first.item.f!;
+    final y0 = f(sc);
+    final k = derivAt(f, Map.of(sc), x0);
+    if (!y0.isFinite || !k.isFinite) return null;
+    return (idx: first.id, x0: x0, y0: y0, k: k, b: y0 - k * x0);
+  }
+
+  double? _areaValue(_Line? first, Scope scope) =>
+      !_area || first == null ? null : simpson(first.item.f!, Map.of(scope), _areaA, _areaB);
+
   /* ---------- Зураг ---------- */
 
   @override
@@ -255,6 +362,10 @@ class _GraphScreenState extends State<GraphScreen> {
         if (l.on && l.item.kind != ItemKind.empty && l.item.kind != ItemKind.error)
           PlotLine(idx: l.id, item: l.item, color: _color(l.ci, c, dark), scope: Map.of(scope)),
     ];
+    final first = _lines.where((l) => l.on && l.item.kind == ItemKind.fn).firstOrNull;
+    final tan = _tangentOf(first, scope);
+    final areaVal = _areaValue(first, scope);
+    final areaScene = first != null && areaVal != null && areaVal.isFinite ? (idx: first.id, a: _areaA, b: _areaB) : null;
     final scene = GraphScene(
       lines: plot,
       grid: _grid,
@@ -265,8 +376,11 @@ class _GraphScreenState extends State<GraphScreen> {
       focus: _focus,
       trace: _trace,
       lowRes: _interacting,
+      tangent: tan,
+      area: areaScene,
     );
     final editing = _editing != null && _editing! < _lines.length ? _lines[_editing!] : null;
+    final numTarget = editing == null ? _numEdit : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -340,19 +454,29 @@ class _GraphScreenState extends State<GraphScreen> {
             if (editing != null) ...[
               _EditorRow(line: editing, color: _color(editing.ci, c, dark)),
               FuncKeyboard(controller: editing.ctl, onDone: _closeEditor),
+            ] else if (numTarget != null && _numCtl != null) ...[
+              _NumEditorRow(target: numTarget, ctl: _numCtl!, error: _numError(numTarget, _numCtl!)),
+              FuncKeyboard(controller: _numCtl!, onDone: _closeNum),
             ] else
-              Expanded(flex: 9, child: _panel(context, c, dark)),
+              Expanded(flex: 9, child: _panel(context, c, dark, first, tan, areaVal)),
           ],
         ),
       ),
     );
   }
 
-  Widget _panel(BuildContext context, AppColors c, bool dark) {
+  Widget _panel(
+    BuildContext context,
+    AppColors c,
+    bool dark,
+    _Line? firstFn,
+    ({int idx, double x0, double y0, double k, double b})? tan,
+    double? areaVal,
+  ) {
     final params = _usedParams;
-    final firstFn = _lines.where((l) => l.on && l.item.kind == ItemKind.fn).firstOrNull;
     return ListView(
       key: const ValueKey('graph-panel'),
+      controller: _panelScroll,
       padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.md, AppSpace.gutter, AppSpace.xl),
       children: [
         for (var i = 0; i < _lines.length; i++) ...[
@@ -360,7 +484,10 @@ class _GraphScreenState extends State<GraphScreen> {
             key: ValueKey('graph-line-$i'),
             line: _lines[i],
             color: _color(_lines[i].ci, c, dark),
-            onEdit: () => setState(() => _editing = i),
+            onEdit: () => setState(() {
+              _numEdit = null;
+              _editing = i;
+            }),
             onToggle: () => setState(() {
               _lines[i].on = !_lines[i].on;
               _trace = null;
@@ -418,6 +545,60 @@ class _GraphScreenState extends State<GraphScreen> {
           _ValueTable(rows: valueTable(firstFn.item.f!, _scope(), -3, 1, 7)),
         ],
         const SizedBox(height: AppSpace.md),
+        const _SectionTitle('Шүргэгч, интеграл'),
+        if (firstFn == null)
+          Text('Эхлээд y=f(x) хэлбэрийн функц нэм', style: TextStyle(fontSize: 14, color: c.inkDim))
+        else ...[
+          _Toggle(
+            label: 'Шүргэгч',
+            value: _tangent,
+            onChanged: (v) => setState(() => _tangent = v),
+          ),
+          if (_tangent)
+            tan == null
+                ? Text('Энэ цэгт шүргэгч тодорхойлогдохгүй', style: TextStyle(fontSize: 14, color: c.inkDim))
+                : Column(
+                    key: const ValueKey('graph-tangent-info'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Муруй дээр хүрч цэгээ сонгоно', style: TextStyle(fontSize: 13, color: c.inkDim)),
+                      const SizedBox(height: AppSpace.xs),
+                      MathText(
+                        "\$x_0=${niceTex(tan.x0)},\\quad k=f'(x_0)=${niceTex(tan.k)}\$",
+                        style: TextStyle(fontSize: 16, color: c.ink),
+                      ),
+                      const SizedBox(height: AppSpace.xs),
+                      MathText('\$y=${lineTex(tan.k, tan.b)}\$', style: TextStyle(fontSize: 18, color: c.ink)),
+                    ],
+                  ),
+          _Toggle(label: 'Интеграл, талбай', value: _area, onChanged: (v) => setState(() => _area = v)),
+          if (_area) ...[
+            const SizedBox(height: AppSpace.xs),
+            Row(
+              children: [
+                Expanded(child: _NumField(key: const ValueKey('graph-num-areaA'), tex: 'a', value: _areaA, onTap: () => _openNum(_NumTarget.areaA))),
+                const SizedBox(width: AppSpace.sm),
+                Expanded(child: _NumField(key: const ValueKey('graph-num-areaB'), tex: 'b', value: _areaB, onTap: () => _openNum(_NumTarget.areaB))),
+              ],
+            ),
+            const SizedBox(height: AppSpace.xs),
+            if (areaVal != null && areaVal.isFinite)
+              Padding(
+                key: const ValueKey('graph-area-info'),
+                padding: const EdgeInsets.only(top: AppSpace.xs),
+                child: MathText(
+                  '\$\\int_{${niceTex(_areaA)}}^{${niceTex(_areaB)}} f(x)\\,dx${approxTex(areaVal)}\$',
+                  style: TextStyle(fontSize: 18, color: c.ink),
+                ),
+              )
+            else
+              Text(
+                'Энэ завсарт функц тасралттай тул интеграл тодорхойлогдохгүй',
+                style: TextStyle(fontSize: 14, color: c.inkDim),
+              ),
+          ],
+        ],
+        const SizedBox(height: AppSpace.md),
         _SettingsCard(
           open: _settings,
           onToggle: () => setState(() => _settings = !_settings),
@@ -453,9 +634,24 @@ class _GraphScreenState extends State<GraphScreen> {
             const SizedBox(height: AppSpace.sm),
             ValueListenableBuilder(
               valueListenable: _view,
-              builder: (context, v, _) => MathText(
-                '\$x\\in\\left[${_r2(v.xMin)};\\ ${_r2(v.xMax)}\\right],\\quad y\\in\\left[${_r2(v.yMin)};\\ ${_r2(v.yMax)}\\right]\$',
-                style: TextStyle(fontSize: 14, color: c.inkDim),
+              builder: (context, v, _) => Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _NumField(key: const ValueKey('graph-num-xMin'), tex: r'x_{\min}', value: v.xMin, onTap: () => _openNum(_NumTarget.xMin))),
+                      const SizedBox(width: AppSpace.sm),
+                      Expanded(child: _NumField(key: const ValueKey('graph-num-xMax'), tex: r'x_{\max}', value: v.xMax, onTap: () => _openNum(_NumTarget.xMax))),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpace.sm),
+                  Row(
+                    children: [
+                      Expanded(child: _NumField(key: const ValueKey('graph-num-yMin'), tex: r'y_{\min}', value: v.yMin, onTap: () => _openNum(_NumTarget.yMin))),
+                      const SizedBox(width: AppSpace.sm),
+                      Expanded(child: _NumField(key: const ValueKey('graph-num-yMax'), tex: r'y_{\max}', value: v.yMax, onTap: () => _openNum(_NumTarget.yMax))),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -463,6 +659,34 @@ class _GraphScreenState extends State<GraphScreen> {
       ],
     );
   }
+}
+
+enum _NumTarget {
+  xMin,
+  xMax,
+  yMin,
+  yMax,
+  areaA,
+  areaB;
+
+  bool get isRange => index < 4;
+  bool get isX => this == xMin || this == xMax;
+
+  String get tex => switch (this) {
+    xMin => r'x_{\min}',
+    xMax => r'x_{\max}',
+    yMin => r'y_{\min}',
+    yMax => r'y_{\max}',
+    areaA => 'a',
+    areaB => 'b',
+  };
+}
+
+/// Засварт өгөх энгийн аравтын тоо (илүү тэг, экспонентгүй).
+String _plainNum(double v) {
+  var s = v.toStringAsFixed(4);
+  if (s.contains('.')) s = s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+  return s == '-0' ? '0' : s;
 }
 
 /// 2 оронтой LaTeX тоо.
@@ -845,6 +1069,106 @@ class _Toggle extends StatelessWidget {
           Switch(key: ValueKey('graph-toggle-$label'), value: value, onChanged: onChanged),
         ],
       ),
+    );
+  }
+}
+
+/// Дарж гараар бичих тоон талбар (системийн гар гарахгүй).
+class _NumField extends StatelessWidget {
+  const _NumField({super.key, required this.tex, required this.value, required this.onTap});
+  final String tex;
+  final double value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      button: true,
+      label: 'Утга өөрчлөх',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: AppSizes.minTap),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.md),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            border: Border.all(color: c.line),
+          ),
+          child: Row(
+            children: [
+              MathText('\$$tex\$', style: TextStyle(fontSize: 16, color: c.inkDim)),
+              const SizedBox(width: AppSpace.sm),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(_r2(value), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.ink)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Гарны дээрх тоо бичиж буй мөр: LaTeX урьдчилан харагдац + алдаа.
+class _NumEditorRow extends StatelessWidget {
+  const _NumEditorRow({required this.target, required this.ctl, required this.error});
+  final _NumTarget target;
+  final FuncInputController ctl;
+  final String? error;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return ListenableBuilder(
+      listenable: ctl,
+      builder: (context, _) {
+        final tex = previewTex(ctl.text);
+        return Container(
+          key: const ValueKey('graph-num-editor'),
+          color: c.surface,
+          padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                constraints: const BoxConstraints(minHeight: AppSizes.minTap),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpace.md),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: Border.all(color: error != null ? c.error : c.brandBright, width: 2),
+                ),
+                child: Row(
+                  children: [
+                    MathText('\$${target.tex}=\$', style: TextStyle(fontSize: 17, color: c.inkDim)),
+                    const SizedBox(width: AppSpace.sm),
+                    Flexible(
+                      child: tex.isEmpty
+                          ? Text('Жишээ: -2', style: TextStyle(fontSize: 14, color: c.inkDim))
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: MathText('\$$tex\$', style: TextStyle(fontSize: 19, color: c.ink)),
+                            ),
+                    ),
+                    Container(width: 2, height: 22, margin: const EdgeInsets.only(left: 2), color: c.brandBright),
+                  ],
+                ),
+              ),
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpace.xs),
+                  child: Text(error!, style: TextStyle(fontSize: 12, color: c.error)),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

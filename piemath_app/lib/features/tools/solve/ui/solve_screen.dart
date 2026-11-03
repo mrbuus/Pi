@@ -11,6 +11,7 @@ import '../../graph/input/func_input.dart';
 import '../../graph/input/func_keyboard.dart';
 import '../../graph/ui/graph_screen.dart';
 import '../../ui/tools_back.dart';
+import '../data/solve_history.dart';
 import '../domain/auto.dart';
 import '../domain/display.dart';
 import '../domain/live.dart';
@@ -98,10 +99,16 @@ class _SolveScreenState extends State<SolveScreen> {
   bool _otherOpen = false;
   String _seqSub = 'arith';
   Solution? _seqSol;
+  final _history = ValueNotifier<List<SolveHistoryItem>>(const []);
+  static const _store = SolveHistoryStore();
 
   @override
   void initState() {
     super.initState();
+    _store.load().then((h) {
+      // Хэрэглэгч хүлээх зуур бодсон бол түүний мөрийг алдахгүй.
+      if (mounted) _history.value = [..._history.value, ...h.where((x) => !_history.value.any((y) => y.key == x.key))].take(solveHistoryMax).toList();
+    });
     _input.addListener(_onInput);
     for (final c in _params.values) {
       c.addListener(_schedule);
@@ -116,6 +123,7 @@ class _SolveScreenState extends State<SolveScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _history.dispose();
     _input.dispose();
     for (final c in [..._params.values, ..._seq.values]) {
       c.dispose();
@@ -147,6 +155,61 @@ class _SolveScreenState extends State<SolveScreen> {
     );
   }
 
+  /* ---------- Түүх ---------- */
+
+  void _push(SolveHistoryItem item) {
+    _history.value = pushHistory(_history.value, item);
+    _store.save(_history.value);
+  }
+
+  /// Амжилттай бодогдсон одоогийн хариуг түүхэнд хадгална (вэбийн `remember`).
+  void _remember() {
+    final sol = _live.sol;
+    if (_live.status != LiveStatus.done || sol == null || !sol.ok) return;
+    final act = _live.action ?? _live.analysis?.primary;
+    _push(SolveHistoryItem(text: _input.text, action: act?.name, degrees: _deg, title: sol.title));
+  }
+
+  void _clearHistory() {
+    _history.value = const [];
+    _store.save(const []);
+  }
+
+  void _restore(SolveHistoryItem h) {
+    _timer?.cancel();
+    if (h.isSeq && _seqSubs.containsKey(h.seqSub)) {
+      setState(() {
+        _otherOpen = true;
+        _active = null;
+        _seqSub = h.seqSub!;
+        for (final (k, _) in _seqFields[_seqSub]!) {
+          _seqCtl(k).text = h.extra[k] ?? '';
+        }
+        _solveSeq();
+      });
+      return;
+    }
+    _deg = h.degrees;
+    _input.text = h.text; // _onInput үйлдлийг null болгоно
+    _timer?.cancel();
+    setState(() {
+      _action = SolveAction.values.where((a) => a.name == h.action).firstOrNull;
+      _active = null;
+      _run();
+      _remember();
+    });
+  }
+
+  Future<void> _openHistory() async {
+    final picked = await showModalBottomSheet<SolveHistoryItem>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _HistorySheet(history: _history, onClear: _clearHistory),
+    );
+    if (picked != null && mounted) _restore(picked);
+  }
+
   void _focus(FuncInputController c) => setState(() => _active = c);
 
   void _done() {
@@ -155,6 +218,7 @@ class _SolveScreenState extends State<SolveScreen> {
       if (_seq.values.contains(_active)) _solveSeq();
       _active = null;
       _run();
+      _remember();
     });
   }
 
@@ -167,6 +231,15 @@ class _SolveScreenState extends State<SolveScreen> {
         extra: {for (final (k, _) in _seqFields[_seqSub]!) k: _seqCtl(k).text},
       ),
     );
+    if (_seqSol!.ok) {
+      _push(
+        SolveHistoryItem(
+          seqSub: _seqSub,
+          extra: {for (final (k, _) in _seqFields[_seqSub]!) k: _seqCtl(k).text},
+          title: _seqSubs[_seqSub] ?? '',
+        ),
+      );
+    }
   }
 
   void _openGraph(List<String> exprs) {
@@ -183,7 +256,18 @@ class _SolveScreenState extends State<SolveScreen> {
     final c = context.colors;
     final hasTrig = RegExp(r'sin|cos|tg|ctg').hasMatch(_input.text);
     return Scaffold(
-      appBar: AppBar(leading: const ToolsBackButton(), title: const Text('Бодогч')),
+      appBar: AppBar(
+        leading: const ToolsBackButton(),
+        title: const Text('Бодогч'),
+        actions: [
+          IconButton(
+            key: const ValueKey('solve-history'),
+            tooltip: 'Түүх',
+            icon: const Icon(AppIcons.historyLog),
+            onPressed: _openHistory,
+          ),
+        ],
+      ),
       body: SafeArea(
         top: false,
         child: Column(
@@ -262,6 +346,7 @@ class _SolveScreenState extends State<SolveScreen> {
               onTap: () => setState(() {
                 _action = a;
                 _run();
+                _remember();
               }),
             ),
         ],
@@ -319,6 +404,7 @@ class _SolveScreenState extends State<SolveScreen> {
             setState(() {
               _active = null;
               _run();
+              _remember();
             });
           },
         );
@@ -765,6 +851,120 @@ class ResultView extends StatelessWidget {
           SolutionView(key: ValueKey(source.hashCode), source: source, title: 'Бодолт'),
         ],
       ],
+    );
+  }
+}
+
+/// Түүх: бодсон бодлогууд (энэ төхөөрөмжид), дарвал буцаж бодогдоно.
+class _HistorySheet extends StatelessWidget {
+  const _HistorySheet({required this.history, required this.onClear});
+  final ValueNotifier<List<SolveHistoryItem>> history;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
+        child: ListenableBuilder(
+          key: const ValueKey('solve-history-sheet'),
+          listenable: history,
+          builder: (context, _) {
+            final items = history.value;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.xs, AppSpace.xs),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text('Түүх', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: c.ink)),
+                      ),
+                      if (items.isNotEmpty)
+                        TextButton.icon(
+                          key: const ValueKey('solve-history-clear'),
+                          onPressed: onClear,
+                          icon: const Icon(AppIcons.trash, size: 18),
+                          label: const Text('Цэвэрлэх'),
+                        ),
+                    ],
+                  ),
+                ),
+                if (items.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xl),
+                    child: Row(
+                      children: [
+                        Icon(AppIcons.historyLog, size: 18, color: c.inkDim),
+                        const SizedBox(width: AppSpace.sm),
+                        Expanded(
+                          child: Text(
+                            'Бодсон бодлого энд хадгалагдана',
+                            style: TextStyle(fontSize: 15, color: c.inkDim),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.fromLTRB(AppSpace.sm, 0, AppSpace.sm, AppSpace.lg),
+                      itemCount: items.length,
+                      itemBuilder: (context, i) => _HistoryRow(
+                        key: ValueKey('solve-history-$i'),
+                        item: items[i],
+                        onTap: () => Navigator.of(context).pop(items[i]),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryRow extends StatelessWidget {
+  const _HistoryRow({super.key, required this.item, required this.onTap});
+  final SolveHistoryItem item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final lines = item.isSeq
+        ? [for (final e in item.extra.entries) if (e.value.isNotEmpty) '${e.key}=${e.value}'].join(',  ')
+        : null;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: AppSizes.minTap),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: AppSpace.xs),
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(item.title, style: TextStyle(fontSize: 12, color: c.inkDim)),
+            if (lines != null)
+              Text(lines, style: TextStyle(fontSize: 15, color: c.ink))
+            else
+              for (final l in item.text.split('\n'))
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: MathText('\$${previewTex(l)}\$', style: TextStyle(fontSize: 16, color: c.ink)),
+                ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -46,7 +46,7 @@ class ScheduleScreen extends ConsumerWidget {
   }
 }
 
-/// «Утасны хуанлид нэмэх» — `/schedule/me/ics` татаж, хуанлийн апп руу нээнэ. Зөвхөн товшиход ажиллана.
+/// «Утасны хуанлид нэмэх» — `/schedule/me/ics` татаж, системийн хуваалцах цонхоор хуанлийн апп руу өгнө. Зөвхөн товшиход ажиллана.
 class _CalendarExportButton extends ConsumerStatefulWidget {
   const _CalendarExportButton();
 
@@ -66,8 +66,10 @@ class _CalendarExportButtonState extends ConsumerState<_CalendarExportButton> {
       final export = await ref.read(scheduleRepositoryProvider).exportIcs();
       if (!export.hasEvents) {
         message = 'Хуанлид нэмэх хичээл одоогоор алга';
-      } else if (!await ref.read(icsOpenerProvider).open(export.ics)) {
-        message = 'Хуваарийн файлыг нээж чадсангүй. Дахин оролдоно уу';
+      } else if (!mounted) {
+        return;
+      } else if (!await ref.read(icsOpenerProvider).open(export, origin: _origin())) {
+        message = 'Хуваарийн файлыг хуваалцаж чадсангүй. Дахин оролдоно уу';
       }
     } catch (e) {
       message = e is ApiError ? e.message : 'Хуваарийн файлыг татаж чадсангүй. Дахин оролдоно уу';
@@ -79,6 +81,13 @@ class _CalendarExportButtonState extends ConsumerState<_CalendarExportButton> {
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(message)));
     }
+  }
+
+  /// iPad-ийн хуваалцах цонх товчны дэргэд гарахын тулд.
+  Rect? _origin() {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
 import 'class_dashboard_models.dart';
+import 'day_summary.dart';
 import 'staff_models.dart';
 
 Map<String, Object?> _map(Object? j) => (j! as Map).cast<String, Object?>();
@@ -27,6 +28,10 @@ class StaffRepository {
 
   Future<DashDetail> classDashboardDetail(String id) =>
       _api.get('/class-dashboard/classes/${_enc(id)}', parse: (j) => DashDetail.fromJson(_map(j)));
+
+  /// «Ангиуд» → «Өнөөдөр»: [date] (`YYYY-MM-DD`)-ийн хичээлтэй ангиудын ирц, даалгаврын тойм.
+  Future<DaySummary> daySummary(String date) =>
+      _api.get('/attendance/day-summary', query: {'date': date}, parse: (j) => DaySummary.fromJson(_map(j)));
 
   // ───────── Самбарын нэмэлт ─────────
 

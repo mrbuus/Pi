@@ -136,4 +136,34 @@ void main() {
       expect(textWidth('(2; −1)', 12), greaterThan(20));
     });
   });
+
+  group('шүргэгч, талбай', () {
+    test('lineTex: y = kx + b-ийн цэвэр бичлэг', () {
+      expect(lineTex(-2, 2), '-2x+2');
+      expect(lineTex(1, 0), 'x');
+      expect(lineTex(-1, -3), '-x-3');
+      expect(lineTex(0, 5), '5');
+      expect(lineTex(0, 0), '0');
+    });
+
+    test('approxTex: бүхэл/бутархай нь «=», урт бутархай нь «\\approx»', () {
+      expect(approxTex(3), '=3');
+      expect(approxTex(2 / 3), r'=\frac{2}{3}');
+      expect(approxTex(1.234567891), r'\approx 1.23');
+    });
+
+    test('areaPolygon: суурь y=0 дээр хаагдсан, эхний/сүүлийн цэг a, b', () {
+      const v = GView(cx: 0, cy: 0, sx: 50, sy: 50, w: 400, h: 400);
+      final f = analyzeGraph('x^2').f!;
+      final pts = areaPolygon(f, {}, v, 0, 2);
+      expect(pts.first, v.pxOf(0));
+      expect(pts[1], v.pyOf(0));
+      expect(pts[pts.length - 2], v.pxOf(2));
+      expect(pts.last, v.pyOf(0));
+      expect(pts.length % 2, 0);
+      // a > b бол ижил полигон
+      final rev = areaPolygon(f, {}, v, 2, 0);
+      expect(rev.length, pts.length);
+    });
+  });
 }

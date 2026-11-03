@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'dart:ui' show Rect;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// `GET /schedule/me/ics`-ийн хариу: файлын нэр + `.ics` агуулга.
 class IcsExport {
@@ -20,26 +21,44 @@ class IcsExport {
   bool get hasEvents => ics.contains('BEGIN:VEVENT');
 }
 
-/// `.ics` файлыг утасны хуанли руу нээх үйлдэл. Тестэд солино.
+/// `.ics` файлыг утасны хуанли руу хуваалцах үйлдэл. Тестэд солино.
 abstract class IcsOpener {
-  Future<bool> open(String ics);
+  /// [origin] — iPad-ийн хуваалцах цонхны байрлал (товчны дэлгэц дээрх хэсэг).
+  /// Амжилттай гарсан эсвэл хэрэглэгч хаасан бол true; хуваалцах боломжгүй бол false.
+  Future<bool> open(IcsExport export, {Rect? origin});
 }
 
-/// Түр файл болгож бичээд системд нээлгэнэ (хуанлийн апп хүлээж авна). Түр хавтас систем өөрөө цэвэрлэнэ.
-class SystemIcsOpener implements IcsOpener {
-  const SystemIcsOpener();
+/// Файлын нэрийг аюулгүй болгоно: зам тусгаарлагчгүй, `.ics` өргөтгөлтэй.
+String icsFileName(String filename) {
+  final base = filename.trim().replaceAll(RegExp(r'[\\/:*?"<>|\x00-\x1f]'), '_');
+  if (base.isEmpty || base == '.ics') return 'huvaari.ics';
+  return base.toLowerCase().endsWith('.ics') ? base : '$base.ics';
+}
+
+/// Түр файл болгож бичээд системийн хуваалцах цонхоор (Хуанли, Google Calendar, Имэйл …) өгнө.
+/// Түр хавтас систем өөрөө цэвэрлэнэ.
+class ShareIcsOpener implements IcsOpener {
+  const ShareIcsOpener();
 
   @override
-  Future<bool> open(String ics) async {
+  Future<bool> open(IcsExport export, {Rect? origin}) async {
     try {
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/huvaari.ics');
-      await file.writeAsString(ics, flush: true);
-      return await launchUrl(Uri.file(file.path), mode: LaunchMode.externalApplication);
+      final file = File('${dir.path}/${icsFileName(export.filename)}');
+      await file.writeAsString(export.ics, flush: true);
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'text/calendar')],
+          fileNameOverrides: [icsFileName(export.filename)],
+          subject: 'Хичээлийн хуваарь',
+          sharePositionOrigin: origin,
+        ),
+      );
+      return result.status != ShareResultStatus.unavailable;
     } catch (_) {
       return false;
     }
   }
 }
 
-final icsOpenerProvider = Provider<IcsOpener>((ref) => const SystemIcsOpener());
+final icsOpenerProvider = Provider<IcsOpener>((ref) => const ShareIcsOpener());

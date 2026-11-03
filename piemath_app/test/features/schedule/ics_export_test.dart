@@ -1,3 +1,5 @@
+import 'dart:ui' show Rect;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/core/auth/user_role.dart';
 import 'package:piemath_app/features/schedule/data/ics_opener.dart';
@@ -13,8 +15,8 @@ class _Opener implements IcsOpener {
   final opened = <String>[];
 
   @override
-  Future<bool> open(String ics) async {
-    opened.add(ics);
+  Future<bool> open(IcsExport export, {Rect? origin}) async {
+    opened.add(export.ics);
     return ok;
   }
 }
@@ -27,6 +29,12 @@ FakeHttp _http(Object? ics) => FakeHttp()
   ..json('GET', '/schedule/me/ics', ics);
 
 void main() {
+  test('icsFileName: аюулгүй нэр, .ics өргөтгөл', () {
+    expect(icsFileName('huvaari.ics'), 'huvaari.ics');
+    expect(icsFileName('../x/хуваарь'), '.._x_хуваарь.ics');
+    expect(icsFileName(''), 'huvaari.ics');
+  });
+
   test('IcsExport.hasEvents: үйл явдалгүй хуанли', () {
     expect(IcsExport.fromJson({'filename': 'a.ics', 'ics': _ics}).hasEvents, isTrue);
     expect(IcsExport.fromJson({'filename': 'a.ics', 'ics': 'BEGIN:VCALENDAR\r\nEND:VCALENDAR'}).hasEvents, isFalse);
@@ -66,7 +74,7 @@ void main() {
     expect(find.text('Хуанлид нэмэх хичээл одоогоор алга'), findsOneWidget);
   });
 
-  testWidgets('нээж чадаагүй: монгол мессеж', (tester) async {
+  testWidgets('хуваалцаж чадаагүй: монгол мессеж', (tester) async {
     final opener = _Opener(ok: false);
     await pumpStudentRoute(
       tester,
@@ -77,7 +85,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byTooltip('Утасны хуанлид нэмэх'));
     await settle(tester);
-    expect(find.textContaining('нээж чадсангүй'), findsOneWidget);
+    expect(find.textContaining('хуваалцаж чадсангүй'), findsOneWidget);
   });
 
   testWidgets('эцэг эхэд товч харагдахгүй (API зөвхөн сурагч, багш)', (tester) async {

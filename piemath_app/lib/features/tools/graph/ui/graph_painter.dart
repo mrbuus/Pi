@@ -31,6 +31,8 @@ class GraphScene {
     this.focus,
     this.trace,
     this.lowRes = false,
+    this.tangent,
+    this.area,
   });
 
   final List<PlotLine> lines;
@@ -48,6 +50,12 @@ class GraphScene {
 
   /// Чирж, томруулж байх үед далд муруйг бүдүүн тороор (сул утсанд гөлгөр).
   final bool lowRes;
+
+  /// Шүргэгч y = kx + b, шүргэх цэг (x0, y0); [idx] — функцийн мөр.
+  final ({int idx, double x0, double y0, double k, double b})? tangent;
+
+  /// Интегралын талбай [a, b] (утга төгсгөлөг үед л дамжуулна).
+  final ({int idx, double a, double b})? area;
 }
 
 /// Цэгийн шошгоны LaTeX-гүй канвас бичвэр (KaTeX фонтоор): «(2; -1)».
@@ -189,6 +197,9 @@ class GraphPainter extends CustomPainter {
       _drawLine(canvas, v, ln);
     }
 
+    _paintArea(canvas, v);
+    _paintTangent(canvas, v);
+
     // Онцгой цэгүүд
     if (scene.showSpecials) {
       final fill = Paint()..color = colors.surface;
@@ -286,6 +297,40 @@ class GraphPainter extends CustomPainter {
         ..color = colors.line,
     );
     tp.paint(canvas, at);
+  }
+
+  PlotLine? _lineOf(int idx) {
+    for (final ln in scene.lines) {
+      if (ln.idx == idx && ln.item.kind == ItemKind.fn) return ln;
+    }
+    return null;
+  }
+
+  void _paintArea(Canvas canvas, GView v) {
+    final a = scene.area;
+    if (a == null) return;
+    final ln = _lineOf(a.idx);
+    if (ln == null) return;
+    final pts = areaPolygon(ln.item.f!, ln.scope, v, a.a, a.b);
+    final path = Path()..moveTo(pts[0], pts[1]);
+    for (var i = 2; i < pts.length; i += 2) {
+      path.lineTo(pts[i], pts[i + 1]);
+    }
+    path.close();
+    canvas.drawPath(path, Paint()..color = ln.color.withValues(alpha: 0.18));
+  }
+
+  void _paintTangent(Canvas canvas, GView v) {
+    final t = scene.tangent;
+    if (t == null) return;
+    double py(double x) => clampD(v.pyOf(t.k * x + t.b), -1e5, 1e5);
+    final p = Paint()
+      ..color = colors.ink
+      ..strokeWidth = 1.6;
+    _dashed(canvas, Offset(0, py(v.xMin)), Offset(v.w, py(v.xMax)), p);
+    final c = Offset(v.pxOf(t.x0), v.pyOf(t.y0));
+    canvas.drawCircle(c, 6.5, Paint()..color = colors.surface);
+    canvas.drawCircle(c, 5, Paint()..color = colors.ink);
   }
 
   void _dashed(Canvas canvas, Offset a, Offset b, Paint p) {
