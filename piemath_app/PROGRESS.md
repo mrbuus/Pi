@@ -51,6 +51,18 @@
 
 ## Бичлэгүүд
 
+### 2026-11-03 — ЗОГСООСОН (эзний хүсэлтээр), дараа үргэлжлүүлнэ
+
+Нийлсэн (`piemath-app`, push хийгээгүй): прод `pi-mn-v2-test`-ийн 8 commit, нэвтрэх hero слот (`docs/LOGIN-HERO.md`),
+томьёоны энгийн тайлбар + хойшлуулсан ачаалалт, `docs/PARITY-AUDIT.md` (топ 15 засвар). Тест 942/942.
+Дутуу WIP (тест бүрэн шалгаагүй, нийлүүлээгүй) — worktree `~/Intern/piemath-wt/<нэр>`:
+`app/smooth` 9d5d802 (хөдөлгөөн, шилжилт, PerfTier, Lucide subset, perf тест), `app/t-today` 808a27a (Код таб, ангийн түүх,
+профайл засах, эх PDF), `app/geo-extra` 04f078e (дэлгэмэл, огтлол), `app/store2` 6f7baaa (PrivacyInfo, COMPLIANCE.md),
+`app/backend` bc90a74 (TTL кэш, гүйцэтгэл), `app/graph` be1a1a6 (бодогч). Эхлээгүй: аудитын #2 (үнийг серверээс), #3 (A/B),
+#4/7/8/12 (багш), #6/11/13/14/15. Эзний шийдвэр: сурагчийн 6 цэс «Тун удахгүй» вэбтэй ижил хаах уу.
+Mac: Xcode лиценз зөвшөөрөөгүй → тест `xcrun` shim-тэй (`DEVELOPER_DIR=/Library/Developer/CommandLineTools`); эзэн
+`sudo xcodebuild -license accept` ажиллуулна. Вэб `/tools` засвар: branch `web/tools-input` (push хийсэн, deploy хүлээгдэж байна).
+
 ### 2026-11-02 (2-р ээлж) — локал session, 9 agent
 
 - **M8 үлдэгдэл** (`461c9f0`): «Бие даасан явц» таб, хичээлийн тэмдэглэл, тарах цаг, эрсдэлийн шалгуур (Багш+), presence.
