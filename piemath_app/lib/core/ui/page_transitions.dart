@@ -202,7 +202,17 @@ class _BackGestureDriver extends StatefulWidget {
 }
 
 class _BackGestureDriverState extends State<_BackGestureDriver> with WidgetsBindingObserver {
-  bool get _enabled => widget.route.isCurrent && widget.route.popGestureEnabled;
+  // Доод табын идэвхгүй салбарын хуудас (TickerMode унтраастай) системийн буцах зангааг булаахгүй —
+  // салбар бүр өөрийн navigator-тэй тул тэдгээрийн дээд хуудас ч `isCurrent`.
+  bool _visible = true;
+
+  bool get _enabled => _visible && widget.route.isCurrent && widget.route.popGestureEnabled;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _visible = TickerMode.valuesOf(context).enabled;
+  }
 
   @override
   void initState() {
