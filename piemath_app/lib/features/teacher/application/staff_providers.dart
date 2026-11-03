@@ -48,6 +48,13 @@ final onlineMarksProvider = FutureProvider.autoDispose.family<OnlineMarks, Class
   }
 });
 
+typedef OnlineDetailArgs = ({String classId, String studentId, String date});
+
+/// Самбарын «Онлайн» дэлгэрэнгүй (нэг сурагч). Алдааг дэлгэц харуулж «Дахин оролдох» өгнө.
+final onlineDetailProvider = FutureProvider.autoDispose.family<OnlineDetail, OnlineDetailArgs>(
+  (ref, a) => ref.watch(staffRepositoryProvider).onlineDetail(a.classId, a.studentId, a.date),
+);
+
 final classAttentionProvider = FutureProvider.autoDispose.family<ClassAttention, ClassDay>(
   (ref, a) => ref.watch(staffRepositoryProvider).attention(a.classId, a.date),
 );

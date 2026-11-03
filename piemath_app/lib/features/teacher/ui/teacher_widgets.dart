@@ -117,6 +117,56 @@ class MarkButton extends StatelessWidget {
   }
 }
 
+/// Тасархай хүрээтэй хайрцаг (вэбийн `border-dashed`): хоосон, идэвхгүй төлөв.
+class DashedBox extends StatelessWidget {
+  const DashedBox({
+    super.key,
+    required this.child,
+    this.padding = EdgeInsets.zero,
+    this.color,
+    this.radius = AppRadius.md,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  /// Хүрээний өнгө; өгөөгүй бол `line`.
+  final Color? color;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+    painter: _DashedRRectPainter(color: color ?? context.colors.line, radius: radius),
+    child: Padding(padding: padding, child: child),
+  );
+}
+
+class _DashedRRectPainter extends CustomPainter {
+  const _DashedRRectPainter({required this.color, required this.radius});
+
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final rect = RRect.fromRectAndRadius((Offset.zero & size).deflate(0.5), Radius.circular(radius));
+    const dash = 4.0;
+    const gap = 3.0;
+    for (final m in (Path()..addRRect(rect)).computeMetrics()) {
+      for (var d = 0.0; d < m.length; d += dash + gap) {
+        canvas.drawPath(m.extractPath(d, d + dash), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedRRectPainter old) => old.color != color || old.radius != radius;
+}
+
 /// Хадгалалтын төлөв: «Хадгалж байна», «Хадгалсан 15:32», «Хадгалагдсангүй».
 class SaveStatus extends StatelessWidget {
   const SaveStatus({super.key, required this.pending, this.savedAt, this.error});

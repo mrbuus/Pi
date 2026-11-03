@@ -63,6 +63,13 @@ class StaffRepository {
     parse: (j) => OnlineMarks.fromJson(_map(j)),
   );
 
+  /// Нэг сурагчийн онлайн гэрийн даалгаврын дэлгэрэнгүй: оноо, хугацаа, хариу, дэвтрийн зураг.
+  Future<OnlineDetail> onlineDetail(String classId, String studentId, String date) => _api.get(
+    '/classrooms/${_enc(classId)}/homework-marks/online/${_enc(studentId)}',
+    query: {'date': date},
+    parse: (j) => OnlineDetail.fromJson(_map(j)),
+  );
+
   // ───────── Багш+, Админ ─────────
 
   Future<List<ParentLinkRequest>> pendingParentLinks() =>

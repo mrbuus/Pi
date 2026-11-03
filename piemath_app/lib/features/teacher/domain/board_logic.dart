@@ -2,6 +2,8 @@
 // Сүлжээ, Riverpod, widget-гүй: зөвхөн өгөгдөл → өгөгдөл (unit тесттэй).
 import 'package:flutter/foundation.dart';
 
+import '../../../core/time/ub_time.dart';
+import '../data/staff_models.dart';
 import '../data/teacher_models.dart';
 
 /// Хоёр багш зэрэг тэмдэглэх үед серверээс шинэчлэх давтамж (вэб `POLL_MS`).
@@ -324,3 +326,55 @@ String hoursLabel(int minutes) {
   if (h == 0) return '$m мин';
   return m == 0 ? '$h цаг' : '$h цаг $m мин';
 }
+
+// ───────── «Онлайн» гэрийн даалгавар (вэбийн `StudentCard`, `OnlineDetail`) ─────────
+
+/// Даалгаврын мөрийн 4-р хайрцгийн төрөл.
+enum OnlineBox {
+  /// Онлайн тест алга, илгээсэн ч үгүй — дарахгүй тасархай хайрцаг.
+  placeholder,
+
+  /// Дарж болно, оноогүй, илгээгээгүй — тасархай, бүдэг.
+  idle,
+
+  /// Дарж болно, оноотой эсвэл даалгавар илгээсэн — брэнд өнгөтэй.
+  active,
+}
+
+/// Онлайн тест байгаа эсвэл сурагч илгээсэн бол дарж дэлгэрэнгүйг нээнэ (эзэн 2026-11-03).
+OnlineBox onlineBox({required bool onlineTests, required bool sent, OnlineCell? cell}) {
+  if (!onlineTests && !sent) return OnlineBox.placeholder;
+  return cell != null || sent ? OnlineBox.active : OnlineBox.idle;
+}
+
+/// Дэлгэц уншигчийн шошго (вэбтэй ижил).
+String onlineBoxLabel(String name, {required bool onlineTests, required bool sent, OnlineCell? cell}) {
+  if (onlineBox(onlineTests: onlineTests, sent: sent, cell: cell) == OnlineBox.placeholder) {
+    return 'Онлайн гэрийн даалгавар алга';
+  }
+  if (cell != null) return '$name, онлайн гэрийн даалгавар ${cell.text}, дэлгэрэнгүй';
+  if (sent) return '$name, илгээсэн даалгавар харах';
+  return '$name, онлайнаар бодоогүй, дэлгэрэнгүй';
+}
+
+/// 75 мин → «1ц 15м»; 40 сек → «40с»; 125 сек → «2м 5с».
+String durationSpan(num sec) {
+  final s = sec.round() < 0 ? 0 : sec.round();
+  if (s < 60) return '$sс';
+  final m = s ~/ 60;
+  if (m < 60) return s % 60 == 0 ? '$mм' : '$mм ${s % 60}с';
+  return m % 60 == 0 ? '${m ~/ 60}ц' : '${m ~/ 60}ц ${m % 60}м';
+}
+
+/// ISO агшин → UB «11.03 14:05» (сар.өдөр цаг:минут). Задрахгүй бол хоосон.
+String onlineStamp(String? iso) {
+  final at = parseApiInstant(iso);
+  if (at == null) return '';
+  final t = UbDateTime.fromInstant(at);
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${two(t.month)}.${two(t.day)} ${two(t.hour)}:${two(t.minute)}';
+}
+
+/// `2026-10-28` → «10.28-ны даалгавар».
+String? previousLessonLabel(String? date) =>
+    date == null || date.length < 10 ? null : '${date.substring(5).replaceFirst('-', '.')}-ны даалгавар';

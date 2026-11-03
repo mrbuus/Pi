@@ -168,6 +168,18 @@ class MakeupRow {
 
 // ───────── Онлайн гэрийн даалгаврын оноо ─────────
 
+/// Онлайн дүн: «9/12», «8,5/12» (вэбийн `scoreText`; аравтын таслал).
+String scoreText(num score, num max) {
+  String f(num n) {
+    final r = (n * 10).round() / 10;
+    return (r == r.roundToDouble() ? '${r.toInt()}' : '$r').replaceAll('.', ',');
+  }
+
+  return '${f(score)}/${f(max)}';
+}
+
+num? _num(Object? v) => v is num ? v : null;
+
 class OnlineCell {
   const OnlineCell({required this.score, required this.max, required this.testId});
 
@@ -175,14 +187,31 @@ class OnlineCell {
   final num max;
   final String testId;
 
-  String get text => '${_trim(score)}/${_trim(max)}';
+  String get text => scoreText(score, max);
+}
 
-  static String _trim(num n) => n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(1);
+/// Өмнөх хичээлд ангид хийсэн тестийн нөгөө хувилбар = гэрийн даалгавар.
+class OnlineTest {
+  const OnlineTest({required this.testId, required this.title, this.variant, this.problems = 0, this.fromTestId});
+
+  factory OnlineTest.fromJson(Map<String, Object?> j) => OnlineTest(
+    testId: (j['testId'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    variant: _str(j['variant']),
+    problems: _int(j['problems']),
+    fromTestId: _str(j['fromTestId']),
+  );
+
+  final String testId;
+  final String title;
+  final String? variant;
+  final int problems;
+  final String? fromTestId;
 }
 
 /// `GET /classrooms/:id/homework-marks/online?date=`.
 class OnlineMarks {
-  const OnlineMarks({this.hasTests = false, this.students = const {}});
+  const OnlineMarks({this.tests = const [], this.students = const {}, this.previousLessonDate});
 
   factory OnlineMarks.fromJson(Map<String, Object?> j) {
     final students = <String, OnlineCell>{};
@@ -199,12 +228,254 @@ class OnlineMarks {
         }
       }
     }
-    return OnlineMarks(hasTests: ((j['tests'] as List?) ?? const []).isNotEmpty, students: students);
+    return OnlineMarks(
+      tests: _list(j['tests'], OnlineTest.fromJson),
+      students: students,
+      previousLessonDate: _str(j['previousLessonDate']),
+    );
   }
 
-  /// Өмнөх хичээлд онлайн даалгаврын тест байсан эсэх.
-  final bool hasTests;
+  final List<OnlineTest> tests;
   final Map<String, OnlineCell> students;
+  final String? previousLessonDate;
+
+  /// Өмнөх хичээлд онлайн даалгаврын тест байсан эсэх.
+  bool get hasTests => tests.isNotEmpty;
+}
+
+// ───────── Нэг сурагчийн онлайн даалгаврын дэлгэрэнгүй ─────────
+
+/// Бодлого бүрийн дүн (`null` = шалгагдаагүй).
+enum OnlineItemResult {
+  correct('CORRECT'),
+  wrong('WRONG'),
+  blank('BLANK');
+
+  const OnlineItemResult(this.api);
+
+  final String api;
+
+  static OnlineItemResult? parse(Object? v) {
+    for (final r in values) {
+      if (r.api == v) return r;
+    }
+    return null;
+  }
+}
+
+/// Хариуны харагдац (вэбийн `show`): «A», «35», «a=3 b=5»; `null` = хариу байхгүй.
+String? answerText(Object? v) {
+  if (v == null) return null;
+  if (v is String) return v;
+  if (v is num) return '$v';
+  if (v is Map) {
+    return v.entries
+        .map((e) {
+          final x = e.value;
+          return '${e.key}=${x == null || (x is String && x.isEmpty) ? '_' : x}';
+        })
+        .join(' ');
+  }
+  return null;
+}
+
+class OnlineItem {
+  const OnlineItem({required this.n, required this.problemId, this.mine, this.correct, this.result});
+
+  factory OnlineItem.fromJson(Map<String, Object?> j) => OnlineItem(
+    n: _int(j['n']),
+    problemId: (j['problemId'] as String?) ?? '',
+    mine: answerText(j['mine']),
+    correct: answerText(j['correct']),
+    result: OnlineItemResult.parse(j['result']),
+  );
+
+  final int n;
+  final String problemId;
+  final String? mine;
+  final String? correct;
+  final OnlineItemResult? result;
+
+  bool get wrong => result == OnlineItemResult.wrong;
+
+  /// Хариулаагүй (вэб: `BLANK` эсвэл хариугүй, шалгагдаагүй).
+  bool get blank => result == OnlineItemResult.blank || (mine == null && result == null);
+}
+
+class OnlineAttempt {
+  const OnlineAttempt({
+    required this.submitted,
+    required this.startedAt,
+    this.submittedAt,
+    this.durationSec,
+    this.activeSec = 0,
+    this.awaySec = 0,
+    this.leaveCount = 0,
+    this.openCount = 0,
+    this.checksUsed = 0,
+    this.late = false,
+    this.score,
+    this.total,
+    this.items = const [],
+  });
+
+  factory OnlineAttempt.fromJson(Map<String, Object?> j) => OnlineAttempt(
+    submitted: j['status'] == 'SUBMITTED',
+    startedAt: (j['startedAt'] as String?) ?? '',
+    submittedAt: _str(j['submittedAt']),
+    durationSec: j['durationSec'] is num ? _int(j['durationSec']) : null,
+    activeSec: _int(j['activeSec']),
+    awaySec: _int(j['awaySec']),
+    leaveCount: _int(j['leaveCount']),
+    openCount: _int(j['openCount']),
+    checksUsed: _int(j['checksUsed']),
+    late: j['late'] == true,
+    score: _num(j['score']),
+    total: _num(j['total']),
+    items: _list(j['items'], OnlineItem.fromJson),
+  );
+
+  /// `SUBMITTED`; эс бөгөөс `IN_PROGRESS`.
+  final bool submitted;
+  final String startedAt;
+  final String? submittedAt;
+  final int? durationSec;
+  final int activeSec;
+  final int awaySec;
+  final int leaveCount;
+  final int openCount;
+  final int checksUsed;
+  final bool late;
+  final num? score;
+  final num? total;
+  final List<OnlineItem> items;
+}
+
+class OnlineDetailTest {
+  const OnlineDetailTest({
+    required this.testId,
+    required this.title,
+    this.variant,
+    this.problems = 0,
+    this.attempt,
+    this.exam,
+  });
+
+  factory OnlineDetailTest.fromJson(Map<String, Object?> j) {
+    final e = j['exam'] is Map ? _map(j['exam']) : null;
+    return OnlineDetailTest(
+      testId: (j['testId'] as String?) ?? '',
+      title: (j['title'] as String?) ?? '',
+      variant: _str(j['variant']),
+      problems: _int(j['problems']),
+      attempt: j['attempt'] is Map ? OnlineAttempt.fromJson(_map(j['attempt'])) : null,
+      exam: e != null && e['score'] is num && e['max'] is num
+          ? (score: e['score']! as num, max: e['max']! as num)
+          : null,
+    );
+  }
+
+  final String testId;
+  final String title;
+  final String? variant;
+  final int problems;
+  final OnlineAttempt? attempt;
+
+  /// Шалгалтын дүн (TestResult) — онлайн оролдлогогүй ч дүн байж болно.
+  final ({num score, num max})? exam;
+}
+
+/// «Дахин бодох» (2-р оролдлого).
+class OnlineRedo {
+  const OnlineRedo({
+    required this.attemptId,
+    required this.testId,
+    required this.title,
+    this.variant,
+    required this.inClass,
+    required this.submitted,
+    this.submittedAt,
+    this.activeSec = 0,
+    this.leaveCount = 0,
+    this.score,
+    this.total,
+  });
+
+  factory OnlineRedo.fromJson(Map<String, Object?> j) => OnlineRedo(
+    attemptId: (j['attemptId'] as String?) ?? '',
+    testId: (j['testId'] as String?) ?? '',
+    title: (j['title'] as String?) ?? '',
+    variant: _str(j['variant']),
+    inClass: j['kind'] == 'CLASS',
+    submitted: j['status'] == 'SUBMITTED',
+    submittedAt: _str(j['submittedAt']),
+    activeSec: _int(j['activeSec']),
+    leaveCount: _int(j['leaveCount']),
+    score: _num(j['score']),
+    total: _num(j['total']),
+  );
+
+  final String attemptId;
+  final String testId;
+  final String title;
+  final String? variant;
+
+  /// `CLASS` = ангид бодсон тест (А), `HOME` = гэрийн тест (Б).
+  final bool inClass;
+  final bool submitted;
+  final String? submittedAt;
+  final int activeSec;
+  final int leaveCount;
+  final num? score;
+  final num? total;
+}
+
+/// Илгээсэн дэвтрийн зураг (PDF).
+class OnlinePhoto {
+  const OnlinePhoto({required this.fileKey, required this.pages, required this.uploadedAt, this.late = false});
+
+  factory OnlinePhoto.fromJson(Map<String, Object?> j) => OnlinePhoto(
+    fileKey: (j['fileKey'] as String?) ?? '',
+    pages: _int(j['pages'], 1),
+    uploadedAt: (j['uploadedAt'] as String?) ?? '',
+    late: j['late'] == true,
+  );
+
+  final String fileKey;
+  final int pages;
+  final String uploadedAt;
+  final bool late;
+}
+
+/// `GET /classrooms/:id/homework-marks/online/:studentId?date=`. Бодлогын агуулга ирэхгүй.
+class OnlineDetail {
+  const OnlineDetail({
+    required this.date,
+    this.previousLessonDate,
+    this.tests = const [],
+    this.photo,
+    this.redos = const [],
+  });
+
+  factory OnlineDetail.fromJson(Map<String, Object?> j) => OnlineDetail(
+    date: (j['date'] as String?) ?? '',
+    previousLessonDate: _str(j['previousLessonDate']),
+    tests: _list(j['tests'], OnlineDetailTest.fromJson),
+    photo: j['photo'] is Map ? OnlinePhoto.fromJson(_map(j['photo'])) : null,
+    redos: _list(j['redos'], OnlineRedo.fromJson),
+  );
+
+  final String date;
+  final String? previousLessonDate;
+  final List<OnlineDetailTest> tests;
+  final OnlinePhoto? photo;
+  final List<OnlineRedo> redos;
+
+  /// Харуулах тест: сонгосон, эс бөгөөс бодсон эхний тест, эс бөгөөс эхний тест (вэбтэй ижил).
+  OnlineDetailTest? current(String? pick) =>
+      tests.where((t) => t.testId == pick).firstOrNull ??
+      tests.where((t) => t.attempt != null).firstOrNull ??
+      tests.firstOrNull;
 }
 
 // ───────── Анхаарах сурагчид (ангигүй, ирэхгүй) — Багш+, Админ ─────────

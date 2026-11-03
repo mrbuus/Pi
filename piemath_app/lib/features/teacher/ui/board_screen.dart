@@ -18,6 +18,7 @@ import 'board_other_info.dart';
 import 'criteria_sheet.dart';
 import 'day_pdf_card.dart';
 import 'lesson_extras.dart';
+import 'online_homework_sheet.dart';
 import 'presence_beat.dart';
 import 'staff_widgets.dart';
 import 'teacher_widgets.dart';
@@ -123,6 +124,7 @@ class _BoardBody extends ConsumerWidget {
     final past = args.date.compareTo(ref.watch(teacherTodayProvider).dateKey) < 0;
     final makeup = past ? ref.watch(dayMakeupProvider(day)).value : null;
     final online = p.isOnline ? null : ref.watch(onlineMarksProvider(day)).value;
+    final hasOnline = state.homework && (online?.hasTests ?? false);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
@@ -151,7 +153,10 @@ class _BoardBody extends ConsumerWidget {
             ),
           )
         else ...[
-          _Counts(state: state),
+          _Counts(
+            state: state,
+            online: hasOnline ? p.students.where((st) => online!.students.containsKey(st.id)).length : null,
+          ),
           const SizedBox(height: AppSpace.md),
           AppCard(
             padding: EdgeInsets.zero,
@@ -161,6 +166,7 @@ class _BoardBody extends ConsumerWidget {
                   if (i > 0) Divider(height: 1, color: c.line),
                   _StudentRow(
                     args: args,
+                    className: p.classroom.name,
                     studentId: st.id,
                     name: names[st.id] ?? st.firstName,
                     rec: state.recs[st.id] ?? DayRec.empty,
@@ -169,7 +175,7 @@ class _BoardBody extends ConsumerWidget {
                     sent: state.sent.contains(st.id),
                     makeup: makeup?[st.id],
                     online: online?.students[st.id],
-                    onlineTests: online?.hasTests ?? false,
+                    onlineTests: hasOnline,
                   ),
                 ],
               ],
@@ -235,9 +241,12 @@ class _BoardBody extends ConsumerWidget {
 
 /// Төлөв бүрийн тоо (Ирсэн ба Хоцорсон тусдаа).
 class _Counts extends StatelessWidget {
-  const _Counts({required this.state});
+  const _Counts({required this.state, this.online});
 
   final BoardState state;
+
+  /// Онлайнаар бодсон сурагчийн тоо — онлайн тест байгаа танхимын ангид л (вэбийн «Онлайн N/M»).
+  final int? online;
 
   @override
   Widget build(BuildContext context) {
@@ -261,6 +270,22 @@ class _Counts extends StatelessWidget {
       children: [
         for (final a in AttendanceStatus.values) item(attendanceMeta(a), k.attendance[a]!),
         item(AttendanceMarkView.noneMeta, k.attUnmarked),
+        if (online != null)
+          Semantics(
+            key: const ValueKey('online-count'),
+            label: 'Онлайн $online/${state.studentIds.length}',
+            excludeSemantics: true,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(AppIcons.laptop, size: 16, color: context.colors.brand),
+                const SizedBox(width: AppSpace.xs),
+                Text('Онлайн', style: context.text.labelLarge?.copyWith(color: context.colors.inkDim)),
+                const SizedBox(width: AppSpace.xs),
+                Text('$online/${state.studentIds.length}', style: context.text.labelLarge),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -269,6 +294,7 @@ class _Counts extends StatelessWidget {
 class _StudentRow extends ConsumerWidget {
   const _StudentRow({
     required this.args,
+    required this.className,
     required this.studentId,
     required this.name,
     required this.rec,
@@ -281,6 +307,7 @@ class _StudentRow extends ConsumerWidget {
   });
 
   final BoardArgs args;
+  final String className;
   final String studentId;
   final String name;
   final DayRec rec;
@@ -293,6 +320,8 @@ class _StudentRow extends ConsumerWidget {
 
   /// Өмнөх хичээлийн онлайн гэрийн даалгаврын оноо.
   final OnlineCell? online;
+
+  /// Өмнөх хичээлд онлайн гэрийн даалгаврын тест байсан (танхимын анги).
   final bool onlineTests;
 
   @override
@@ -354,27 +383,7 @@ class _StudentRow extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpace.xs),
           ],
-          if (showMakeup || homework && (online != null || onlineTests)) ...[
-            Wrap(
-              spacing: AppSpace.sm,
-              runSpacing: AppSpace.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (showMakeup) makeupPill(context, makeup!),
-                if (homework && online != null)
-                  TextButton.icon(
-                    key: ValueKey('online-$studentId'),
-                    style: TextButton.styleFrom(minimumSize: const Size(teacherTap, teacherTap)),
-                    onPressed: () => context.push('/app/teacher/tests/${Uri.encodeComponent(online!.testId)}/results'),
-                    icon: const Icon(AppIcons.laptop, size: 16),
-                    label: Text('Онлайн даалгавар ${online!.text}'),
-                  )
-                else if (homework && onlineTests)
-                  const Pill(icon: AppIcons.laptop, label: 'Онлайнаар бодоогүй'),
-              ],
-            ),
-            const SizedBox(height: AppSpace.xs),
-          ],
+          if (showMakeup) ...[makeupPill(context, makeup!), const SizedBox(height: AppSpace.xs)],
           Wrap(
             spacing: AppSpace.lg,
             runSpacing: AppSpace.sm,
@@ -402,6 +411,20 @@ class _StudentRow extends ConsumerWidget {
                         label: '$name, даалгавар ${homeworkMeta(h).label}',
                         onTap: () => ctl.setHomework(studentId, rec.hw == h ? null : h),
                       ),
+                    // Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03)
+                    OnlineBoxButton(
+                      key: ValueKey('online-$studentId'),
+                      kind: onlineBox(onlineTests: onlineTests, sent: sent, cell: online),
+                      cell: online,
+                      label: onlineBoxLabel(name, onlineTests: onlineTests, sent: sent, cell: online),
+                      onTap: () => OnlineHomeworkSheet.open(
+                        context,
+                        args: args,
+                        className: className,
+                        studentId: studentId,
+                        name: name,
+                      ),
+                    ),
                   ],
                 ),
             ],
@@ -516,6 +539,92 @@ class _BulkButton extends StatelessWidget {
       onPressed: count == 0 || busy ? null : onApply,
       icon: MarkIcon(meta.glyph, color: count == 0 ? context.colors.inkDim : meta.tone.color(context.colors), size: 18),
       label: Text('$label ($count)'),
+    );
+  }
+}
+
+/// Даалгаврын мөрийн 4-р хайрцаг «Онлайн» (вэбийн `StudentCard`): оноо «9/12» эсвэл зураас.
+/// Оноотой/илгээсэн бол брэнд өнгөтэй, эс бөгөөс тасархай бүдэг; онлайн тест, илгээлт хоёулаа
+/// байхгүй бол дарахгүй.
+class OnlineBoxButton extends StatelessWidget {
+  const OnlineBoxButton({super.key, required this.kind, required this.label, required this.onTap, this.cell});
+
+  final OnlineBox kind;
+  final OnlineCell? cell;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final active = kind == OnlineBox.active;
+    final fg = active ? c.brandSoft : c.inkDim.withValues(alpha: 0.7);
+    final wide = MediaQuery.sizeOf(context).width >= AppSizes.tabletBreakpoint;
+    final icon = Icon(AppIcons.laptop, size: 16, color: active ? fg : fg.withValues(alpha: 0.5));
+    final value = cell != null
+        ? Text(
+            cell!.text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.labelSmall?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          )
+        : Icon(AppIcons.minus, size: 14, color: fg.withValues(alpha: 0.6));
+    final content = ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap, maxHeight: teacherTap),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.xs + 2),
+        child: wide
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  icon,
+                  const SizedBox(width: AppSpace.xs),
+                  Text('Онлайн', style: context.text.labelMedium?.copyWith(color: fg)),
+                  const SizedBox(width: AppSpace.sm - 2),
+                  value,
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [icon, const SizedBox(height: 2), value],
+              ),
+      ),
+    );
+    final radius = BorderRadius.circular(AppRadius.md);
+    if (kind == OnlineBox.placeholder) {
+      return Tooltip(
+        message: label,
+        child: Semantics(
+          container: true,
+          label: label,
+          excludeSemantics: true,
+          child: DashedBox(child: content),
+        ),
+      );
+    }
+    final Widget box = active
+        ? DecoratedBox(
+            decoration: BoxDecoration(
+              color: c.brandBright.withValues(alpha: 0.1),
+              borderRadius: radius,
+              border: Border.all(color: c.brandBright.withValues(alpha: 0.4)),
+            ),
+            child: content,
+          )
+        : DashedBox(child: content);
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(borderRadius: radius, onTap: onTap, child: box),
+      ),
     );
   }
 }

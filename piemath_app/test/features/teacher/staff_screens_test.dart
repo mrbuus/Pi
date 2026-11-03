@@ -59,18 +59,18 @@ void main() {
             },
           });
 
-    testWidgets('нөхөх хичээлийн төлөв (зөвхөн тасалсан сурагчид), онлайн оноо → дүн рүү', (tester) async {
-      final http = http0();
+    testWidgets('нөхөх хичээлийн төлөв (зөвхөн тасалсан сурагчид), «Онлайн» хайрцагт оноо', (tester) async {
+      final http = http0()..json('GET', '/classrooms/c1/homework-marks/online/s2', {'date': past, 'tests': <Object?>[]});
       await pumpTeacher(tester, const BoardScreen(classId: 'c1', date: past), http: http);
       expect(http.requests.any((r) => r.path == '/makeup/classrooms/c1' && r.queryParameters['date'] == past), isTrue);
       expect(find.text('Нөхөх хичээл: Нөхөөгүй'), findsOneWidget);
       // s2 ирсэн тул нөхөх шошго гарахгүй
       expect(find.text('Нөхөх хичээл: Нөхсөн'), findsNothing);
-      expect(find.text('Онлайн даалгавар 8/10'), findsOneWidget);
-      expect(find.text('Онлайнаар бодоогүй'), findsWidgets);
-      await tester.tap(find.text('Онлайн даалгавар 8/10'));
+      expect(find.descendant(of: find.byKey(const ValueKey('online-s2')), matching: find.text('8/10')), findsOneWidget);
+      await reveal(tester, find.byKey(const ValueKey('online-s2')));
+      await tester.tap(find.byKey(const ValueKey('online-s2')));
       await settle(tester);
-      expect(find.text('ROUTE:/app/teacher/tests/t1/results'), findsOneWidget);
+      expect(http.count('GET', '/classrooms/c1/homework-marks/online/s2'), 1);
     });
 
     testWidgets('өнөөдөр нөхөх хичээл татахгүй; онлайн анги онлайн оноо татахгүй', (tester) async {
