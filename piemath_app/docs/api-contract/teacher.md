@@ -238,6 +238,29 @@ HTTP 200: `{ "editors": { "<key>": [{ "name": "Б. Болд", "since": "<ISO>" }
   originalDate}|null }] }`). ТОДРУУЛАХ: `/schedule/me`, `/schedule/week`-ийн яг wrapper хэлбэр (part 1 schedule гэрээтэй давхцана).
 - Хуваарь засах бүх маршрут ADMIN/TEACHER_PLUS — M9 (таблет/вэб).
 
+## 10. Вэбийн 2026-11-01..03-ны шинэчлэл (апп-д орсон)
+
+- **Ангийн «Код» таб** (`49d09fe`): шинэ endpoint үгүй — `GET /classrooms/:id`-ийн `students[].studentCode`. Нэрээр эрэмбэлж
+  «Нэр Овог - код» (кодгүй бол «кодгүй»), «Бүгдийг хуулах» нэг товч.
+- **Сурагчийн «Мэдээлэл» таб** (`665ae6b`): `GET /users/:id` (TEACHER, TEACHER_PLUS, ADMIN; Багш зөвхөн сурагчийг). Хариу:
+  `{ id, role, firstName, lastName, phone|null, email, studentCode, studentProfile: { grade, school, fatherPhone|null, motherPhone|null,
+  guardianNote, ... }, classHistory: [{ classroomId, name, joinedAt, leftAt|null, attendance, homework }] }` (`classHistory` эрт -> сүүл,
+  апп шинэ нь дээр харуулна; нэрийн «(Зүүн 4)» хаалт хасна). Утас, эцэг эхийн утас Багшид `null` (Багш+/Админ л харна). Төлбөрийн
+  талбар (`tuition*`) апп-д БАЙХГҮЙ.
+- **Профайл засах** (`482c030`, `7e9c1bf`, `3f3e7b1`): `PATCH /users/:id/profile` (TEACHER_PLUS, ADMIN) бие = зөвхөн өөрчилсөн
+  талбар: `firstName, lastName, phone (8 орон), email, grade (1..12), school, fatherPhone, motherPhone, guardianNote`.
+  Хариу: `{ user, studentProfile, passwordFollowedPhone? }`. Дүрэм: Багш+ сурагч/эцэг эхийг засна; багш, Багш+, админ (ажилтан)-ыг
+  зөвхөн Админ (403 «Ажилтны мэдээллийг зөвхөн Админ засна»); өөр админыг хэн ч (403). Утас солигдоход ЗӨВХӨН СУРАГЧИЙН нууц
+  үг (хуучин утас хэвээр байсан бол) шинэ утас болно — `passwordFollowedPhone: true|false`; шийдвэр серверт. Апп «Засах» товчийг
+  `ADMIN` эсвэл (`TEACHER_PLUS` ба засагдах хүн ажилтан биш) үед л харуулна; 403 бол серверийн мессежийг формд тайван харуулна.
+- **Тестийн эх PDF** (`c6289a1`): төвийн бүх багш (TEACHER, TEACHER_PLUS, ADMIN); сурагч, эцэг эх, гадны багш 403.
+  - `GET /schedule/day-plan?date=` -> `tests[testId].sourcePdfKey` (`chapter-pdf-<chapterId>.pdf` | null) ба `entries[].plan.testIds`,
+    `entries[].done[].testId`, `entries[].previous.tests[].testId`. Апп ангийнхаа (`entries[].classroomId`) тестүүдийг авна: хийсэн
+    тест байвал тэр, үгүй бол төлөвлөсөн; өмнөх хичээлийн тест тусдаа тэмдэглэгээтэй. Файлгүй (`null`) тестийг харуулахгүй.
+  - `GET /tests/source-pdf?chapterId=` -> `{ key: string | null }` (номын бүлгээр; ном-ын хуудас feature-д хэрэгтэй).
+  - Файл: `GET /files/:key` (`core/files`, Authorization толгойтой; токен URL-д орохгүй); сервер тестийн нэрээр
+    `Content-Disposition: attachment` өгнө. Апп `FileGalleryScreen`-ээр хуудас хуудсаар харуулна.
+
 ## ТОДРУУЛАХ
 
 1. `day-summary`, `studentCard`, `class-dashboard detail/month`, `daily-summary`, `attention` хариуны бүтэн хэлбэр — M8 эхлэхэд
