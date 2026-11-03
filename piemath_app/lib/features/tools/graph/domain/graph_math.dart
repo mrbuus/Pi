@@ -751,3 +751,49 @@ double simpson(Fn f, Scope scope, double a, double b, [int n = 2000]) {
   }
   return s * h / 3;
 }
+
+/// ∫ f талбайн полигон (пикселийн x, y ээлжлэн): [a,b] завсар, y=0 суурьтай (вэбийн `areaPath`).
+List<double> areaPolygon(Fn f, Scope scope, GView v, double a, double b) {
+  final lo = math.min(a, b), hi = math.max(a, b);
+  final n = math.max(20, math.min(600, (v.pxOf(hi) - v.pxOf(lo)).abs().ceil()));
+  final y0 = v.pyOf(0);
+  final out = <double>[v.pxOf(lo), y0];
+  for (var i = 0; i <= n; i++) {
+    final x = lo + (hi - lo) * i / n;
+    scope['x'] = x;
+    final y = f(scope);
+    if (!y.isFinite) continue;
+    out
+      ..add(v.pxOf(x))
+      ..add(clampD(v.pyOf(y), -5 * v.h, 6 * v.h));
+  }
+  out
+    ..add(v.pxOf(hi))
+    ..add(y0);
+  return out;
+}
+
+/// y = kx + b-ийн цэвэр LaTeX (вэбийн `lineTex`).
+String lineTex(double k, double b) {
+  final kt = k.abs() < 1e-9
+      ? ''
+      : (k - 1).abs() < 1e-9
+      ? 'x'
+      : (k + 1).abs() < 1e-9
+      ? '-x'
+      : '${niceTex(k)}x';
+  if (b.abs() < 1e-9) return kt.isEmpty ? '0' : kt;
+  final bt = niceTex(b.abs());
+  if (kt.isEmpty) return niceTex(b);
+  return '$kt${b < 0 ? '-' : '+'}$bt';
+}
+
+/// Интегралын утга: «=3» эсвэл урт бутархай бол «\approx 2.67» (вэбийн `approxTex`).
+String approxTex(double v) {
+  final t = niceTex(v);
+  if (RegExp(r'^-?\d+\.\d{3,}').hasMatch(t) || RegExp(r'\.\d{4}').hasMatch(t)) {
+    final r = (v * 100).roundToDouble() / 100;
+    return r'\approx ' + (r == r.roundToDouble() ? r.toInt().toString() : r.toString());
+  }
+  return '=$t';
+}

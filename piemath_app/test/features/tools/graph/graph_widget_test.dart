@@ -100,4 +100,76 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('муж: x_max-ыг гарнаас бичнэ, буруу муж алдаа харуулна', (tester) async {
+    await pumpThemed(tester, const GraphScreen(), size: const Size(360, 760));
+    await tester.pump();
+    final settings = find.byKey(const ValueKey('graph-settings'));
+    await tester.scrollUntilVisible(settings, 120, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(settings);
+    await tester.pump();
+    await tester.tap(settings);
+    await tester.pump();
+    final xmax = find.byKey(const ValueKey('graph-num-xMax'));
+    await tester.scrollUntilVisible(xmax, 120, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(xmax);
+    await tester.pump();
+    await tester.tap(xmax);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('graph-num-editor')), findsOneWidget);
+    expect(find.byKey(const ValueKey('func-keyboard')), findsOneWidget);
+    expect(find.byType(EditableText), findsNothing);
+    await press(tester, 'Цэвэрлэх');
+    expect(find.text('Тоо бичнэ үү'), findsOneWidget);
+    await press(tester, '1');
+    await press(tester, '0');
+    await press(tester, 'Болсон');
+    expect(find.byKey(const ValueKey('graph-num-editor')), findsNothing);
+    expect(find.text('10'), findsOneWidget, reason: 'x_max = 10');
+    // x_max < x_min болгох оролдлого
+    await tester.tap(find.byKey(const ValueKey('graph-num-xMax')));
+    await tester.pump();
+    await press(tester, 'Цэвэрлэх');
+    await press(tester, 'Хасах');
+    await press(tester, '9');
+    await press(tester, '9');
+    expect(find.text('Дээд утга доод утгаасаа их байх ёстой'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('шүргэгч: x0=1 дээр y=x^2-4x+3 → y=-2x+2', (tester) async {
+    await pumpThemed(tester, const GraphScreen(), size: const Size(360, 760));
+    await tester.pump();
+    final tog = find.byKey(const ValueKey('graph-toggle-Шүргэгч'));
+    await tester.scrollUntilVisible(tog, 120, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(tog);
+    await tester.pump();
+    await tester.tap(tog);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('graph-tangent-info')), findsOneWidget);
+    expect(hasMath('y=-2x+2'), isTrue);
+    expect(hasMath("k=f'(x_0)=-2"), isTrue);
+  });
+
+  testWidgets('талбай: ∫_0^2 (x^2-4x+3) dx = 2/3, a, b гараар', (tester) async {
+    await pumpThemed(tester, const GraphScreen(), size: const Size(360, 760));
+    await tester.pump();
+    final tog = find.byKey(const ValueKey('graph-toggle-Интеграл, талбай'));
+    await tester.scrollUntilVisible(tog, 120, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(tog);
+    await tester.pump();
+    await tester.tap(tog);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('graph-area-info')), findsOneWidget);
+    expect(hasMath(r'\int_{0}^{2}'), isTrue);
+    expect(hasMath(r'\frac{2}{3}'), isTrue);
+    await tester.tap(find.byKey(const ValueKey('graph-num-areaB')));
+    await tester.pump();
+    await press(tester, 'Цэвэрлэх');
+    await press(tester, '3');
+    await press(tester, 'Болсон');
+    expect(hasMath(r'\int_{0}^{3}'), isTrue);
+    expect(hasMath('=0'), isTrue, reason: '∫_0^3 (x^2-4x+3) = 9-18+9 = 0');
+    expect(tester.takeException(), isNull);
+  });
 }

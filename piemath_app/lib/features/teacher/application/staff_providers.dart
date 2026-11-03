@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_error.dart';
 import '../data/class_dashboard_models.dart';
+import '../data/day_summary.dart';
 import '../data/staff_models.dart';
 import '../data/staff_repository.dart';
 import 'teacher_providers.dart';
@@ -9,6 +10,11 @@ import 'teacher_providers.dart';
 /// Ангийн жагсаалт (вэбийн «Ангиуд»: `/class-dashboard`).
 final classDashboardProvider = FutureProvider.autoDispose<DashList>(
   (ref) => ref.watch(staffRepositoryProvider).classDashboard(),
+);
+
+/// «Ангиуд» → «Өнөөдөр»: өдрийн хичээлтэй ангиуд (`/attendance/day-summary`).
+final daySummaryProvider = FutureProvider.autoDispose.family<DaySummary, String>(
+  (ref, date) => ref.watch(staffRepositoryProvider).daySummary(date),
 );
 
 /// Нэг ангийн самбар (`/class-dashboard/classes/:id`).
