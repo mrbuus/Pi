@@ -6,6 +6,8 @@ import 'package:piemath_app/core/math/math.dart';
 import 'package:piemath_app/features/tools/domain/free.dart';
 import 'package:piemath_app/features/tools/domain/geom.dart';
 import 'package:piemath_app/features/tools/domain/shapes.dart';
+import 'package:piemath_app/features/tools/domain/solid_net.dart';
+import 'package:piemath_app/features/tools/domain/solid_section.dart';
 import 'package:piemath_app/features/tools/domain/solids.dart';
 
 import '../../core/math/math_test_helpers.dart';
@@ -29,6 +31,9 @@ void main() {
     for (final n in [3, 4, 5, 6]) {
       final p = {for (final s in solidParams(k)) s.key: s.def, 'n': n.toDouble()};
       texs.addAll(solidMetrics(k, p).expand((x) => x.rows).map((r) => r.tex));
+      if (hasNet(k)) texs.addAll(netMetrics(k, p).expand((x) => x.rows).map((r) => r.tex));
+      final sp = {...p, 'y': solidHeight(k, p) / 2, 'alpha': 30.0, 'beta': 0.0, 's': 0.0};
+      texs.addAll(sectionOf(k, sp).metrics.expand((x) => x.rows).map((r) => r.tex));
     }
   }
   var st = const FreeState();

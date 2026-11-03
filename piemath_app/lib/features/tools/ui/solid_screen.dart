@@ -3,13 +3,26 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/ui/ui.dart';
 import '../../../shared/math_keyboard/math_keyboard_lib.dart';
+import '../domain/figure.dart' show Metric;
 import '../domain/projection.dart';
+import '../domain/solid_net.dart';
+import '../domain/solid_section.dart';
 import '../domain/solids.dart';
 import 'figure_painter.dart';
 import 'param_state.dart';
 import 'solid_painter.dart';
 import 'tool_widgets.dart';
 import 'tools_back.dart';
+
+/// Харагдац: биет (чирж эргүүлнэ), дэлгэмэл (хавтгай дээр), огтлол (хавтгайн утга бичнэ).
+enum SolidMode {
+  solid('Биет'),
+  net('Дэлгэмэл'),
+  section('Огтлол');
+
+  const SolidMode(this.label);
+  final String label;
+}
 
 /// Огторгуйн биет: биет сонгох, хэмжээг гарнаас бичих, зураг дээр чирж эргүүлэх.
 class SolidScreen extends StatefulWidget {
@@ -24,16 +37,32 @@ class _SolidScreenState extends State<SolidScreen> {
   late final ParamState _params = ParamState(_group);
   final _view = ValueNotifier(const View3());
   SolidKind _kind = SolidKind.cube;
+  SolidMode _mode = SolidMode.solid;
 
   @override
   void initState() {
     super.initState();
-    _params.configure(_kind.name, solidParams(_kind));
+    _configure();
+  }
+
+  /// Огтлолын горимд биетийн утгад хавтгайн дөрвөн утга нэмэгдэнэ.
+  void _configure() {
+    final sec = _mode == SolidMode.section;
+    _params.configure(
+      '${_kind.name}/${sec ? 'sec' : 'main'}',
+      [...solidParams(_kind), if (sec) ...sectionParams(_kind)],
+    );
   }
 
   void _select(SolidKind k) {
     setState(() => _kind = k);
-    _params.configure(k.name, solidParams(k));
+    _configure();
+  }
+
+  void _setMode(SolidMode m) {
+    if (m == _mode) return;
+    setState(() => _mode = m);
+    _configure();
   }
 
   @override
@@ -57,22 +86,60 @@ class _SolidScreenState extends State<SolidScreen> {
           builder: (context, _) {
             final values = _params.values;
             final error = solidError(_kind, values);
-            final header = PillRow(
+            final header = Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                for (final k in SolidKind.values)
-                  ToolPill(
-                    key: ValueKey('solid-${k.name}'),
-                    label: k.label,
-                    selected: k == _kind,
-                    onTap: () => _select(k),
-                  ),
+                PillRow(
+                  children: [
+                    for (final k in SolidKind.values)
+                      ToolPill(
+                        key: ValueKey('solid-${k.name}'),
+                        label: k.label,
+                        selected: k == _kind,
+                        onTap: () => _select(k),
+                      ),
+                  ],
+                ),
+                PillRow(
+                  children: [
+                    for (final m in SolidMode.values)
+                      ToolPill(
+                        key: ValueKey('mode-${m.name}'),
+                        label: m.label,
+                        selected: m == _mode,
+                        onTap: () => _setMode(m),
+                      ),
+                  ],
+                ),
               ],
             );
+            final secError = _mode == SolidMode.section ? sectionError(values) : null;
             final Widget figure;
-            if (error != null) {
-              figure = FigureMessage(message: error);
+            List<Metric> metrics = const [];
+            if (error != null || secError != null) {
+              figure = FigureMessage(message: (error ?? secError)!);
+            } else if (_mode == SolidMode.net) {
+              final net = buildNet(_kind, values);
+              if (net == null) {
+                figure = const FigureMessage(
+                  message: 'Бөмбөрцгийн гадаргуу хавтгайд дэлгэгдэхгүй тул дэлгэмэл байхгүй',
+                );
+              } else {
+                metrics = netMetrics(_kind, values);
+                figure = Semantics(
+                  label: '${_kind.label}-ийн дэлгэмэл',
+                  image: true,
+                  child: CustomPaint(
+                    key: const ValueKey('net-figure'),
+                    painter: FigurePainter(prims: net.prims, palette: palette),
+                    size: Size.infinite,
+                  ),
+                );
+              }
             } else {
               final model = buildSolid(_kind, values);
+              final sec = _mode == SolidMode.section ? sectionOf(_kind, values) : null;
+              metrics = [...?sec?.metrics, ...solidMetrics(_kind, values)];
               figure = Stack(
                 children: [
                   Positioned.fill(
@@ -84,7 +151,7 @@ class _SolidScreenState extends State<SolidScreen> {
                         behavior: HitTestBehavior.opaque,
                         onPanUpdate: (d) => _view.value = _view.value.rotate(d.delta.dx * 0.012, d.delta.dy * 0.008),
                         child: CustomPaint(
-                          painter: SolidPainter(model: model, view: _view, palette: palette),
+                          painter: SolidPainter(model: model, view: _view, palette: palette, section: sec?.view),
                           size: Size.infinite,
                         ),
                       ),
@@ -112,7 +179,7 @@ class _SolidScreenState extends State<SolidScreen> {
                 group: _group,
                 invalid: _params.invalid,
               ),
-              results: error == null ? ResultsList(metrics: solidMetrics(_kind, values)) : const SizedBox.shrink(),
+              results: metrics.isEmpty ? const SizedBox.shrink() : ResultsList(metrics: metrics),
             );
           },
         ),
