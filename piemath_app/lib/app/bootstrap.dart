@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/auth/session.dart';
+import '../core/perf/perf_tier.dart';
 import '../features/exam/data/exam_draft_store.dart';
 import '../features/push/push_service.dart';
 import 'app.dart';
@@ -18,7 +20,9 @@ Future<void> bootstrap() async {
     // Release-д log хэвлэхгүй (нэр, утас, токен log-д үлдэхгүй — SECURITY §3).
     debugPrint = (String? message, {int? wrapWidth}) {};
   }
-  final prefs = await SharedPreferences.getInstance();
+  // Edge-to-edge: Android 15+ (targetSdk 35) заавал; доод хувилбарт ч ижил харагдана.
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
+  final (prefs, _) = await (SharedPreferences.getInstance(), DevicePerf.detect()).wait;
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),

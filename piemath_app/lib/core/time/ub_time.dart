@@ -40,8 +40,7 @@ class UbDateTime implements Comparable<UbDateTime> {
   UbDateTime get startOfDay => UbDateTime(year, month, day);
 
   /// «2026-11-02» — API-ийн огнооны түлхүүр (`YYYY-MM-DD`).
-  String get dateKey =>
-      '${year.toString().padLeft(4, '0')}-${_two(month)}-${_two(day)}';
+  String get dateKey => '${year.toString().padLeft(4, '0')}-${_two(month)}-${_two(day)}';
 
   /// UB-ийн хуанлийн өдрийн дугаар (1970-01-01-ээс) — «өнөөдөр/өчигдөр»-ийг тооцоход.
   int get dayIndex => DateTime.utc(year, month, day).millisecondsSinceEpoch ~/ Duration.millisecondsPerDay;

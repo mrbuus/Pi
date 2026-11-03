@@ -23,7 +23,13 @@ class NativeDocumentRenderer implements DocumentRenderer {
         try {
           final w = width.toDouble();
           final h = w * page.height / page.width;
-          final image = await page.render(width: w, height: h, format: PdfPageImageFormat.jpeg, quality: 85, backgroundColor: '#FFFFFF');
+          final image = await page.render(
+            width: w,
+            height: h,
+            format: PdfPageImageFormat.jpeg,
+            quality: 85,
+            backgroundColor: '#FFFFFF',
+          );
           if (image != null) out.add(image.bytes);
         } finally {
           await page.close();

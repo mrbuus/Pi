@@ -31,8 +31,8 @@ class ApiClient {
     this.firstTryTimeout = const Duration(seconds: 12),
     this.wakeTryTimeout = const Duration(seconds: 60),
     this.retryBaseDelay = const Duration(milliseconds: 500),
-  })  : _random = random ?? math.Random(),
-        dio = dio ?? Dio() {
+  }) : _random = random ?? math.Random(),
+       dio = dio ?? Dio() {
     this.dio.options
       ..baseUrl = baseUrl
       ..connectTimeout = firstTryTimeout
@@ -98,7 +98,12 @@ class ApiClient {
         (timeout) => dio.request<Object?>(
           path,
           data: body,
-          queryParameters: query == null ? null : {for (final e in query.entries) if (e.value != null) e.key: e.value},
+          queryParameters: query == null
+              ? null
+              : {
+                  for (final e in query.entries)
+                    if (e.value != null) e.key: e.value,
+                },
           options: Options(
             method: method,
             headers: {if (token != null) 'Authorization': 'Bearer $token'},
@@ -127,9 +132,11 @@ class ApiClient {
       data = run();
       if (key != null) {
         _inflight[key] = data;
-        unawaited(data.then((_) => null, onError: (_) => null).whenComplete(() {
-          if (identical(_inflight[key], data)) _inflight.remove(key);
-        }));
+        unawaited(
+          data.then((_) => null, onError: (_) => null).whenComplete(() {
+            if (identical(_inflight[key], data)) _inflight.remove(key);
+          }),
+        );
       }
     }
     final json = await data;

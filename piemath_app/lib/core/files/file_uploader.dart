@@ -29,7 +29,11 @@ class UploadedFile {
 
   factory UploadedFile.fromJson(Object? json) {
     final m = (json! as Map).cast<String, Object?>();
-    return UploadedFile(key: m['key']! as String, size: (m['size'] as num?)?.toInt() ?? 0, mime: m['mime'] as String? ?? '');
+    return UploadedFile(
+      key: m['key']! as String,
+      size: (m['size'] as num?)?.toInt() ?? 0,
+      mime: m['mime'] as String? ?? '',
+    );
   }
 
   final String key;
@@ -157,7 +161,9 @@ class FileUploader {
     // `purpose`-ийг файлаас ӨМНӨ — multer body-г файлын өмнөх талбараас уншина.
     final form = FormData()
       ..fields.add(MapEntry('purpose', purpose.apiValue))
-      ..files.add(MapEntry('file', MultipartFile.fromBytes(bytes, filename: name, contentType: DioMediaType.parse(mime))));
+      ..files.add(
+        MapEntry('file', MultipartFile.fromBytes(bytes, filename: name, contentType: DioMediaType.parse(mime))),
+      );
     try {
       final res = await _client.dio.post<Object?>(
         '/uploads',

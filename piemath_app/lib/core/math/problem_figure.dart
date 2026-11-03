@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../ui/icons.dart';
+import '../ui/motion.dart';
 import '../ui/skeleton.dart';
 import '../ui/strings.dart';
 import '../ui/tokens.dart';
@@ -67,6 +68,10 @@ class _ProblemFigureState extends State<ProblemFigure> {
   _Phase _phase = _Phase.loading;
   ImageProvider? _resolved;
 
+  /// `resolve` дотор шууд (кэшээс) ирсэн эсэх — тэгвэл бүдгэрүүлэхгүй.
+  bool _resolvingSync = false;
+  bool _fadeIn = false;
+
   /// Шалгалтын дэлгэцний өндрийн хязгаар (вэб: `max-h-[60vh]`, өргөн зураг `50vh`).
   static const _maxHeightFactor = 0.6;
   static const _wideAspect = 1.6;
@@ -115,20 +120,31 @@ class _ProblemFigureState extends State<ProblemFigure> {
     _info = null;
     final stream = target.resolve(createLocalImageConfiguration(context));
     final listener = ImageStreamListener(
-      (info, _) {
+      (info, sync) {
         if (!mounted) return;
-        setState(() {
+        final immediate = sync || _resolvingSync;
+        void apply() {
           _info?.dispose();
           _info = info;
+          _fadeIn = !immediate && _phase == _Phase.loading;
           _phase = _Phase.ready;
-        });
+        }
+
+        // Шууд ирвэл build удахгүй явагдана (didChangeDependencies/didUpdateWidget) — setState хэрэггүй.
+        if (_resolvingSync) {
+          apply();
+        } else {
+          setState(apply);
+        }
       },
       onError: (error, _) {
         if (!mounted) return;
         setState(() => _phase = widget.isForbidden(error) ? _Phase.forbidden : _Phase.failed);
       },
     );
+    _resolvingSync = true;
     stream.addListener(listener);
+    _resolvingSync = false;
     _stream = stream;
     _listener = listener;
   }
@@ -181,7 +197,11 @@ class _ProblemFigureState extends State<ProblemFigure> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
-        children: [child, const SizedBox(height: AppSpace.md), figure],
+        children: [
+          child,
+          const SizedBox(height: AppSpace.md),
+          figure,
+        ],
       );
     }
     return LayoutBuilder(
@@ -191,7 +211,11 @@ class _ProblemFigureState extends State<ProblemFigure> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
-            children: [figure, const SizedBox(height: AppSpace.lg), child],
+            children: [
+              figure,
+              const SizedBox(height: AppSpace.lg),
+              child,
+            ],
           );
         }
         return Row(
@@ -214,30 +238,29 @@ class _ProblemFigureState extends State<ProblemFigure> {
 
     final Widget inner = switch (_phase) {
       _Phase.loading => SkeletonPulse(
-          child: Container(
-            height: stacked ? _stackedHeight - AppSpace.lg : 180,
-            decoration: BoxDecoration(color: c.skeleton, borderRadius: BorderRadius.circular(AppRadius.sm)),
-          ),
-        ),
+        child: SkeletonBox(height: stacked ? _stackedHeight - AppSpace.lg : 180, radius: AppRadius.sm),
+      ),
       _Phase.forbidden => _FigureNotice(
-          icon: AppIcons.password,
-          iconColor: c.inkDim,
-          title: widget.forbiddenTitle,
-          message: widget.forbiddenMessage,
-        ),
+        icon: AppIcons.password,
+        iconColor: c.inkDim,
+        title: widget.forbiddenTitle,
+        message: widget.forbiddenMessage,
+      ),
       _Phase.failed => _FigureNotice(
-          icon: AppIcons.gallery,
-          iconColor: c.inkDim,
-          title: 'Зураг ачаалагдсангүй',
-          message: AppStrings.networkError,
-          action: TextButton.icon(
-            onPressed: _retry,
-            icon: const Icon(AppIcons.retry, size: 18),
-            label: const Text(AppStrings.retry),
-          ),
+        icon: AppIcons.gallery,
+        iconColor: c.inkDim,
+        title: 'Зураг ачаалагдсангүй',
+        message: AppStrings.networkError,
+        action: TextButton.icon(
+          onPressed: _retry,
+          icon: const Icon(AppIcons.retry, size: 18),
+          label: const Text(AppStrings.retry),
         ),
+      ),
       _Phase.ready => ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxH),
+        constraints: BoxConstraints(maxHeight: maxH),
+        child: FadeInOnce(
+          enabled: _fadeIn,
           child: RawImage(
             image: _info!.image,
             scale: _info!.scale,
@@ -245,6 +268,7 @@ class _ProblemFigureState extends State<ProblemFigure> {
             filterQuality: FilterQuality.medium,
           ),
         ),
+      ),
     };
 
     final box = Container(
@@ -265,10 +289,7 @@ class _ProblemFigureState extends State<ProblemFigure> {
       image: true,
       button: _phase == _Phase.ready,
       label: alt,
-      child: GestureDetector(
-        onTap: _phase == _Phase.ready ? _openViewer : null,
-        child: box,
-      ),
+      child: GestureDetector(onTap: _phase == _Phase.ready ? _openViewer : null, child: box),
     );
   }
 }
@@ -299,11 +320,7 @@ class _FigureNotice extends StatelessWidget {
           const SizedBox(height: AppSpace.sm),
           Text(title, style: context.text.titleSmall, textAlign: TextAlign.center),
           const SizedBox(height: AppSpace.xs),
-          Text(
-            message,
-            style: context.text.bodySmall,
-            textAlign: TextAlign.center,
-          ),
+          Text(message, style: context.text.bodySmall, textAlign: TextAlign.center),
           if (action != null) ...[const SizedBox(height: AppSpace.sm), action!],
         ],
       ),
@@ -349,10 +366,7 @@ class _FigureViewerState extends State<FigureViewer> {
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpace.lg),
                       child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: c.surface,
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                        ),
+                        decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(AppRadius.md)),
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpace.sm),
                           child: Image(

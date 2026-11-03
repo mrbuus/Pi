@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'icons.dart';
+import 'page_transitions.dart';
 import 'tokens.dart';
 
 /// Апп-ын `ThemeData` — цагаан ба хар горим. Өнгө бүгд [AppColors]-оос.
@@ -59,6 +61,8 @@ abstract final class AppTheme {
       materialTapTargetSize: MaterialTapTargetSize.padded,
       visualDensity: VisualDensity.standard,
       extensions: <ThemeExtension<dynamic>>[c],
+      // Хуудасны шилжилт төхөөрөмжийн түвшнээр (shared-axis / гулсах, predictive back).
+      pageTransitionsTheme: AppPageTransitions.theme(),
       // Автомат «буцах» товч Lucide дүрстэй (Material сум биш).
       actionIconTheme: ActionIconThemeData(backButtonIconBuilder: (_) => const Icon(AppIcons.back)),
       appBarTheme: AppBarTheme(
@@ -69,6 +73,7 @@ abstract final class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: text.titleLarge,
+        systemOverlayStyle: systemBars(brightness),
       ),
       dividerTheme: DividerThemeData(color: c.line, thickness: 1, space: 1),
       cardTheme: CardThemeData(
@@ -112,10 +117,7 @@ abstract final class AppTheme {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          foregroundColor: c.ink,
-          minimumSize: const Size(AppSizes.minTap, AppSizes.minTap),
-        ),
+        style: IconButton.styleFrom(foregroundColor: c.ink, minimumSize: const Size(AppSizes.minTap, AppSizes.minTap)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -155,10 +157,7 @@ abstract final class AppTheme {
         height: 64,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith(
-          (s) => IconThemeData(
-            size: 22,
-            color: s.contains(WidgetState.selected) ? c.brand : c.inkDim,
-          ),
+          (s) => IconThemeData(size: 22, color: s.contains(WidgetState.selected) ? c.brand : c.inkDim),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (s) => text.labelSmall?.copyWith(
@@ -209,9 +208,7 @@ abstract final class AppTheme {
         side: BorderSide(color: c.inkDim, width: 1.5),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? c.onBrand : c.inkDim,
-        ),
+        thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.onBrand : c.inkDim),
         trackColor: WidgetStateProperty.resolveWith(
           (s) => s.contains(WidgetState.selected) ? c.brand : c.surfaceSunken,
         ),
@@ -230,24 +227,33 @@ abstract final class AppTheme {
     );
   }
 
+  /// Edge-to-edge (Android 15+ заавал, доод хувилбарт ч ижил): тунгалаг статус, навигацийн мөр,
+  /// дүрсний өнгө сэдвээр. Агуулга safe-area-г `SafeArea`/`AppBar`/`NavigationBar`-аар тойрно.
+  static SystemUiOverlayStyle systemBars(Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+      statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: brightness,
+      systemNavigationBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+    );
+  }
+
   static TextTheme _textTheme(AppColors c) {
-    TextStyle body(double size, FontWeight w, {double height = 1.5}) => TextStyle(
-          fontFamily: bodyFont,
-          fontSize: size,
-          fontWeight: w,
-          height: height,
-          color: c.ink,
-          letterSpacing: 0,
-        );
+    TextStyle body(double size, FontWeight w, {double height = 1.5}) =>
+        TextStyle(fontFamily: bodyFont, fontSize: size, fontWeight: w, height: height, color: c.ink, letterSpacing: 0);
     TextStyle display(double size) => TextStyle(
-          fontFamily: displayFont,
-          fontFamilyFallback: _displayFallback,
-          fontSize: size,
-          fontWeight: FontWeight.w600,
-          height: 1.2,
-          color: c.ink,
-          letterSpacing: 0,
-        );
+      fontFamily: displayFont,
+      fontFamilyFallback: _displayFallback,
+      fontSize: size,
+      fontWeight: FontWeight.w600,
+      height: 1.2,
+      color: c.ink,
+      letterSpacing: 0,
+    );
     return TextTheme(
       // Том тоо, оноо, нүүрний гарчиг — Unbounded.
       displayLarge: display(40),

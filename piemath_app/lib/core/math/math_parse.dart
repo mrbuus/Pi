@@ -42,10 +42,10 @@ class MathSegment {
 
   @override
   String toString() => switch (type) {
-        MathSegmentType.text => value,
-        MathSegmentType.inline => '[$value]',
-        MathSegmentType.display => '[[$value]]',
-      };
+    MathSegmentType.text => value,
+    MathSegmentType.inline => '[$value]',
+    MathSegmentType.display => '[[$value]]',
+  };
 }
 
 /// Эхлээд `$$...$$` display, дараа нь `$...$` inline (вэбийн `parse`).
@@ -54,10 +54,7 @@ final _segmentRe = RegExp(r'\$\$([\s\S]+?)\$\$|\$([^$]+?)\$');
 /// Зэргийг илрүүлэх ЦОРЫН ГАНЦ дүрэм (вэбийн `POWER_RE`):
 /// caret (`x^2`, `x^{12}`, `b^-3`) эсвэл docx-оос алдагдсан (`x2`, `x 2`).
 /// Кирилл үсгийг ЗОРИУДААР оруулаагүй — «функцийн 2» зэрэг болохгүй.
-final _powerRe = RegExp(
-  r'([a-zA-Z\u{1D400}-\u{1D7FF}])(?:\^\{?([+-]?\d+)\}?|\s?(\d))',
-  unicode: true,
-);
+final _powerRe = RegExp(r'([a-zA-Z\u{1D400}-\u{1D7FF}])(?:\^\{?([+-]?\d+)\}?|\s?(\d))', unicode: true);
 
 /// Хэмжээний тэмдэглэгээ («100x100», «200 x 200») — номын цувралын нэр, математик биш.
 final _dimensionRe = RegExp(r'\d+\s*[xх]\s*\d+', caseSensitive: false);
@@ -74,10 +71,7 @@ String normalizePowers(String text) {
     dims.add(m.group(0)!);
     return _dimMark;
   });
-  final powered = masked.replaceAllMapped(
-    _powerRe,
-    (m) => '\$${m.group(1)}^{${m.group(2) ?? m.group(3) ?? ''}}\$',
-  );
+  final powered = masked.replaceAllMapped(_powerRe, (m) => '\$${m.group(1)}^{${m.group(2) ?? m.group(3) ?? ''}}\$');
   var i = 0;
   return powered.replaceAllMapped(_dimMarkRe, (_) => i < dims.length ? dims[i++] : '');
 }

@@ -103,7 +103,13 @@ abstract class JpegCompressor {
 
   /// [width] өргөн, [height] өндөр хэмжээтэй (эргүүлэхээс өмнөх тэнхлэгээр), [quality] чанартай,
   /// [rotation] градус эргүүлсэн JPEG.
-  Future<Uint8List> compress(Uint8List bytes, {required int width, required int height, required int quality, required int rotation});
+  Future<Uint8List> compress(
+    Uint8List bytes, {
+    required int width,
+    required int height,
+    required int quality,
+    required int rotation,
+  });
 }
 
 /// Натив шахагч (flutter_image_compress) — EXIF чиглэлийг хэрэгжүүлж, мета өгөгдлийг хасна
@@ -128,7 +134,13 @@ class NativeJpegCompressor implements JpegCompressor {
   }
 
   @override
-  Future<Uint8List> compress(Uint8List bytes, {required int width, required int height, required int quality, required int rotation}) {
+  Future<Uint8List> compress(
+    Uint8List bytes, {
+    required int width,
+    required int height,
+    required int quality,
+    required int rotation,
+  }) {
     return FlutterImageCompress.compressWithList(
       bytes,
       minWidth: width,

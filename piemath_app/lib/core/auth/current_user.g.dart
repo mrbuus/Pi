@@ -8,11 +8,7 @@ part of 'current_user.dart';
 
 _CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => _CurrentUser(
   id: json['id'] as String,
-  role: $enumDecode(
-    _$UserRoleEnumMap,
-    json['role'],
-    unknownValue: UserRole.unknown,
-  ),
+  role: $enumDecode(_$UserRoleEnumMap, json['role'], unknownValue: UserRole.unknown),
   firstName: json['firstName'] as String? ?? '',
   lastName: json['lastName'] as String?,
   phone: json['phone'] as String?,
@@ -24,27 +20,25 @@ _CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => _CurrentUser(
   mustChangePassword: json['mustChangePassword'] as bool? ?? false,
   studentProfile: json['studentProfile'] as Map<String, dynamic>?,
   teacherProfile: json['teacherProfile'] as Map<String, dynamic>?,
-  externalTeacherProfile:
-      json['externalTeacherProfile'] as Map<String, dynamic>?,
+  externalTeacherProfile: json['externalTeacherProfile'] as Map<String, dynamic>?,
 );
 
-Map<String, dynamic> _$CurrentUserToJson(_CurrentUser instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'role': _$UserRoleEnumMap[instance.role]!,
-      'firstName': instance.firstName,
-      'lastName': instance.lastName,
-      'phone': instance.phone,
-      'email': instance.email,
-      'username': instance.username,
-      'studentCode': instance.studentCode,
-      'teacherCode': instance.teacherCode,
-      'avatarUrl': instance.avatarUrl,
-      'mustChangePassword': instance.mustChangePassword,
-      'studentProfile': instance.studentProfile,
-      'teacherProfile': instance.teacherProfile,
-      'externalTeacherProfile': instance.externalTeacherProfile,
-    };
+Map<String, dynamic> _$CurrentUserToJson(_CurrentUser instance) => <String, dynamic>{
+  'id': instance.id,
+  'role': _$UserRoleEnumMap[instance.role]!,
+  'firstName': instance.firstName,
+  'lastName': instance.lastName,
+  'phone': instance.phone,
+  'email': instance.email,
+  'username': instance.username,
+  'studentCode': instance.studentCode,
+  'teacherCode': instance.teacherCode,
+  'avatarUrl': instance.avatarUrl,
+  'mustChangePassword': instance.mustChangePassword,
+  'studentProfile': instance.studentProfile,
+  'teacherProfile': instance.teacherProfile,
+  'externalTeacherProfile': instance.externalTeacherProfile,
+};
 
 const _$UserRoleEnumMap = {
   UserRole.admin: 'ADMIN',
