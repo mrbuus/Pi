@@ -6,6 +6,7 @@ export 'document_renderer.dart';
 export 'file_cache.dart';
 export 'file_fetcher.dart';
 export 'file_image.dart';
+export 'file_image_view.dart';
 export 'file_uploader.dart';
 export 'photo_document.dart';
 export 'photo_set_upload.dart';

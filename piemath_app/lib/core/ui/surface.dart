@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'icons.dart';
+import 'motion.dart';
 import 'tokens.dart';
 
 /// Карт — дэвсгэр нь ҮРГЭЛЖ `surface` (цагаан/бараан саарал), нимгэн хүрээтэй.
@@ -36,17 +37,22 @@ class AppCard extends StatelessWidget {
         child: content,
       );
     }
-    return Semantics(
+    final Widget card = Semantics(
       container: true,
       button: onTap != null,
       label: semanticLabel,
       child: Material(
         color: c.surface,
-        shape: RoundedRectangleBorder(borderRadius: radius, side: BorderSide(color: c.line)),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: c.line),
+        ),
         clipBehavior: Clip.antiAlias,
         child: onTap == null ? content : InkWell(onTap: onTap, child: content),
       ),
     );
+    // Дарахад шууд хариу (UX-RESEARCH §4): 0.97 scale, зөвхөн transform.
+    return onTap == null ? card : PressableScale(child: card);
   }
 }
 
@@ -65,10 +71,7 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(title, style: context.text.titleMedium),
-            ),
+            child: Semantics(header: true, child: Text(title, style: context.text.titleMedium)),
           ),
           ?trailing,
         ],

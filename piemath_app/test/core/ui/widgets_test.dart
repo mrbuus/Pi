@@ -71,15 +71,15 @@ void main() {
     });
 
     testWidgets('LoadingState: анимац унтраасан үед хөдөлгөөнгүй', (tester) async {
-      tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
+      tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
+        disableAnimations: true,
+      );
       addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
       await pumpThemed(tester, const LoadingState());
-      final fade = tester.widget<FadeTransition>(
-        find.descendant(of: find.byType(SkeletonPulse), matching: find.byType(FadeTransition)),
-      );
-      expect(fade.opacity.value, 1);
+      // Opacity давхаргагүй (өнгөний лугшилт), 300ms-ийн хүлээлтийн дараа статик.
+      expect(find.descendant(of: find.byType(SkeletonPulse), matching: find.byType(FadeTransition)), findsNothing);
       await tester.pump(const Duration(milliseconds: 450));
-      expect(fade.opacity.value, 1);
+      expect(tester.hasRunningAnimations, isFalse);
     });
   });
 
@@ -102,7 +102,9 @@ void main() {
       var tapped = false;
       await pumpThemed(
         tester,
-        Center(child: AppCard(onTap: () => tapped = true, child: const Text('Карт'))),
+        Center(
+          child: AppCard(onTap: () => tapped = true, child: const Text('Карт')),
+        ),
       );
       await tester.tap(find.text('Карт'));
       expect(tapped, isTrue);

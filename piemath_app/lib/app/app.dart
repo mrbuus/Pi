@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/network_providers.dart';
+import '../core/perf/perf_tier.dart';
 import '../core/ui/ui.dart';
 import 'router.dart';
 import 'theme_mode.dart';
@@ -19,6 +21,8 @@ class PiemathApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ref.watch(themeModeProvider),
+      // Сул төхөөрөмжид цагаан/хар горим солиход ThemeData-г кадр бүрт lerp хийхгүй.
+      themeAnimationDuration: ref.watch(perfTierProvider).isLow ? Duration.zero : kThemeAnimationDuration,
       locale: const Locale('mn'),
       supportedLocales: const [Locale('mn')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -37,13 +41,19 @@ class _OfflineFrame extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final offline = !ref.watch(reachabilityProvider);
-    return ColoredBox(
-      color: context.colors.bg,
-      child: Column(
-        children: [
-          Expanded(child: MediaQuery.removePadding(context: context, removeBottom: offline, child: child)),
-          ConnectionBanner(offline: offline),
-        ],
+    // AppBar-гүй дэлгэцэд ч (нэвтрэх, splash) системийн мөр тунгалаг, дүрс нь сэдвийн өнгөөр.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: AppTheme.systemBars(Theme.of(context).brightness),
+      child: ColoredBox(
+        color: context.colors.bg,
+        child: Column(
+          children: [
+            Expanded(
+              child: MediaQuery.removePadding(context: context, removeBottom: offline, child: child),
+            ),
+            ConnectionBanner(offline: offline),
+          ],
+        ),
       ),
     );
   }
