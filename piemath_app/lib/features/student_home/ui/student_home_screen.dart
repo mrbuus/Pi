@@ -8,12 +8,14 @@ import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
+import '../../learning/data/activity_repository.dart';
 import '../../my_class/data/hub_models.dart';
 import '../../my_class/data/my_class_repository.dart';
 import '../../my_class/domain/hub_logic.dart';
 import '../../my_class/ui/common.dart';
 import '../../my_class/ui/day_row.dart';
 import '../../my_class/ui/day_screen.dart';
+import 'activity_week_card.dart';
 
 /// Сурагчийн «Миний самбар» (`/app/student`) — вэбийн `StudentDashboard` (SURAGCH-V2-GEREE):
 /// мэндчилгээ → өнөөдрийн хичээл + түргэн үйлдэл → ирц, даалгаврын хувь → багшийн сүүлийн
@@ -44,6 +46,8 @@ class StudentHomeScreen extends ConsumerWidget {
           hubDaysProvider(month),
           paidUntilProvider,
           announcementsProvider,
+          activityYearProvider(today.year),
+          activityStreakProvider,
         ]),
         child: ListView(
           padding: const EdgeInsets.all(AppSpace.gutter),
@@ -105,6 +109,8 @@ class StudentHomeScreen extends ConsumerWidget {
                 onTap: () => context.go('/app/homework'),
               ),
             ],
+            const SizedBox(height: AppSpace.md),
+            ActivityWeekCard(today: today),
             const SizedBox(height: AppSpace.md),
             const _QuickLinks(),
             const SizedBox(height: AppSpace.md),

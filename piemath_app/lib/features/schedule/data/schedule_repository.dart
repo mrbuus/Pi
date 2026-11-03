@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/auth/session.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import 'ics_opener.dart';
 import 'schedule_models.dart';
 
 class ScheduleRepository {
@@ -18,6 +19,9 @@ class ScheduleRepository {
   /// `start` = `YYYY-MM-DD` (апп Даваагаас өгнө). Цуцалсан/зөөсөн/амралтыг сервер шийднэ.
   Future<ScheduleWeek> week(String start) =>
       _api.get('/schedule/week', query: {'start': start}, parse: (j) => ScheduleWeek.fromJson(_map(j)));
+
+  /// STUDENT/TEACHER/TEACHER_PLUS: өөрийн ойрын хичээлүүдийг `.ics` болгож (вэбийн `CalendarSubscriptionCard`).
+  Future<IcsExport> exportIcs() => _api.get('/schedule/me/ics', parse: IcsExport.fromJson);
 }
 
 final scheduleRepositoryProvider = Provider<ScheduleRepository>(

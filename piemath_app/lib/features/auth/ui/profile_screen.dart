@@ -10,13 +10,14 @@ import '../../../core/files/file_image.dart';
 import '../../../core/network/network_providers.dart';
 import '../../../core/ui/ui.dart';
 import '../../push/push_service.dart';
+import 'avatar_change_button.dart';
 import 'change_password_form.dart';
 import 'linked_accounts_card.dart';
 
 /// «Миний мэдээлэл» — хувийн мэдээлэл, код, нууц үг солих нэг дор (вэбийн `/app/profile`).
 ///
 /// Нэр, утас, имэйлийг ЗАСАХ endpoint API-д байхгүй — зөвхөн харуулна. Google/Apple холбох,
-/// бүртгэл устгах хүсэлт (M6) энд. Профайл зураг солих нь дараагийн шатанд (файл байршуулалт).
+/// бүртгэл устгах хүсэлт (M6) энд. Профайл зураг: `AvatarChangeButton` (`/uploads` → `/auth/me/avatar`).
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -100,6 +101,7 @@ class _ProfileBody extends ConsumerWidget {
                             Text(user.displayName, style: context.text.titleLarge),
                             const SizedBox(height: AppSpace.xs),
                             Text(user.role.labelMn, style: context.text.bodySmall),
+                            AvatarChangeButton(hasAvatar: (user.avatarUrl ?? '').isNotEmpty),
                           ],
                         ),
                       ),

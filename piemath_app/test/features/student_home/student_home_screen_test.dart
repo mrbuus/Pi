@@ -10,6 +10,8 @@ FakeHttp homeHttp({Map<String, Object?>? overview, List<Map<String, Object?>> cl
   ..json('GET', '/student-hub/overview', overview ?? overviewJson())
   ..json('GET', '/assignments/my-classrooms', classrooms)
   ..json('GET', '/student-hub/days', daysJson())
+  ..json('GET', '/activity/me', {'year': 2026, 'totalActiveDays': 0, 'days': <Object?>[]})
+  ..json('GET', '/activity/streak', {'currentStreak': 0, 'longestStreak': 0, 'totalActiveDays': 0})
   ..json('GET', '/tuition/paid-until/my', {'paidUntil': '2099-01-01T00:00:00.000Z'})
   ..json('GET', '/announcements', [
     {'id': 'a1', 'title': 'Амралтын мэдэгдэл', 'body': '11-р сарын 26-нд хичээл орохгүй', 'pinned': true, 'createdAt': '2026-11-01T02:00:00.000Z'},
@@ -42,6 +44,7 @@ void main() {
     expect(find.text('2099.01.01'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Амралтын мэдэгдэл'), 300);
     expect(find.text('Төвийн мэдэгдэл'), findsOneWidget);
+    await settle(tester); // жагсаалтад хожуу барьсан картуудын (идэвх) хүсэлт дуустал
   });
 
   testWidgets('ангид элсээгүй: тайлбартай хоосон төлөв', (tester) async {
