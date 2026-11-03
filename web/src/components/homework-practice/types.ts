@@ -76,6 +76,8 @@ export interface HwRedoItem {
   kind: "CLASS" | "HOME";
   problemCount: number;
   timeLimitMin: number | null;
+  /** Бусад ангид бодогдох хүлээгдэж байгаа — түр хаалттай */
+  locked: boolean;
   rounds: HwRedoRound[];
 }
 

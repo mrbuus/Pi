@@ -107,6 +107,8 @@ type RedoItem = {
   kind: 'CLASS' | 'HOME';
   problemCount: number;
   timeLimitMin: number | null;
+  /** Бусад ангид бодогдох хүлээгдэж байгаа — түр хаалттай */
+  locked: boolean;
   rounds: {
     round: number;
     attemptId: string;
@@ -793,6 +795,15 @@ export class HomeworkPracticeService {
         select: { id: true },
       });
       if (!confirmed) throw denied();
+      if (
+        (
+          await this.redoReservedKeys(
+            [{ testId, classroomId: slot.classroomId, date }],
+            today,
+          )
+        ).size
+      )
+        throw denied();
       if (testId === item.id) {
         return {
           slot,
@@ -822,7 +833,6 @@ export class HomeworkPracticeService {
         },
       });
       if (!a || a._count.problems === 0) throw denied();
-      if (await this.reservedForClass(slot.classroomId, a.id, today)) throw denied();
       return {
         slot,
         test: {
@@ -837,31 +847,59 @@ export class HomeworkPracticeService {
     throw denied();
   }
 
-  /** Тест тэр ангид ирээдүйд (өнөөдрөөс хойш) бодогдохоор хуваарьлагдсан эсвэл оноогдсон уу */
-  private async reservedForClass(
-    classroomId: string,
-    testId: string,
+  /**
+   * Дахин бодох тест түр хаалттай юу (аюулгүй байдлын шалгалт): «Шалгах» зөв/бурууг хэлдэг тул тест
+   * ДАРААГИЙН ямар ч ангид (өнөөдөр ба хойш — `gte`) бодогдохоор хуваарьлагдсан, ирээдүйд оноогдсон, эсвэл
+   * сүүлийн 14 хоногт (зөөсөн хичээл байж болно) өөр хичээлд төлөвлөгдсөн бол хаана. Энэ сурагчийн
+   * ӨӨРИЙН хичээл (анги + огноо) хаалтад тооцогдохгүй. Түлхүүр: «testId|classroomId|date».
+   */
+  private async redoReservedKeys(
+    items: { testId: string; classroomId: string; date: string }[],
     today: string,
-  ): Promise<boolean> {
-    const [session, topic, access] = await Promise.all([
-      this.prisma.classTestSession.findFirst({
-        where: { classroomId, testId, date: { gt: parseDateOnly(today) } },
-        select: { id: true },
+  ): Promise<Set<string>> {
+    const ids = [...new Set(items.map((i) => i.testId))];
+    if (!ids.length) return new Set();
+    const [sessions, topics, access] = await Promise.all([
+      this.prisma.classTestSession.findMany({
+        where: { testId: { in: ids }, date: { gte: parseDateOnly(today) } },
+        select: { testId: true },
       }),
-      this.prisma.lessonTopic.findFirst({
+      this.prisma.lessonTopic.findMany({
         where: {
-          testIds: { has: testId },
-          date: { gt: parseDateOnly(today) },
-          schedule: { classroomId },
+          testIds: { hasSome: ids },
+          date: { gte: parseDateOnly(addDaysKey(today, -14)) },
         },
-        select: { id: true },
+        select: {
+          date: true,
+          testIds: true,
+          schedule: { select: { classroomId: true } },
+        },
       }),
-      this.prisma.testAccess.findFirst({
-        where: { classroomId, testId, assignedAt: { gt: new Date() } },
+      this.prisma.testAccess.findMany({
+        where: { testId: { in: ids }, assignedAt: { gt: new Date() } },
         select: { testId: true },
       }),
     ]);
-    return !!(session || topic || access);
+    const hot = new Set([
+      ...sessions.flatMap((r) => (r.testId ? [r.testId] : [])),
+      ...access.map((r) => r.testId),
+    ]);
+    return new Set(
+      items
+        .filter(
+          (i) =>
+            hot.has(i.testId) ||
+            topics.some(
+              (t) =>
+                t.testIds.includes(i.testId) &&
+                !(
+                  t.schedule.classroomId === i.classroomId &&
+                  dateKey(t.date) === i.date
+                ),
+            ),
+        )
+        .map((i) => `${i.testId}|${i.classroomId}|${i.date}`),
+    );
   }
 
   /** «Шалгах» хөнгөн шалгалт: анги идэвхтэй, тест тэр ангид ирээдүйд бодогдохоор болоогүй */
@@ -877,11 +915,18 @@ export class HomeworkPracticeService {
     });
     if (
       !enrolled ||
-      (await this.reservedForClass(
-        attempt.classroomId,
-        attempt.testId,
-        dateKey(todayUB()),
-      ))
+      (
+        await this.redoReservedKeys(
+          [
+            {
+              testId: attempt.testId,
+              classroomId: attempt.classroomId,
+              date: dateKey(attempt.lessonDate),
+            },
+          ],
+          dateKey(todayUB()),
+        )
+      ).size
     )
       throw new ForbiddenException('Энэ тестийг дахин бодох боломж танд нээгдээгүй байна');
   }
@@ -919,7 +964,7 @@ export class HomeworkPracticeService {
     ];
     const bIds = slots.flatMap((s) => s.items.map((i) => i.id));
     const dates = [...new Set(slots.map((s) => parseDateOnly(s.date)))];
-    const [lessons, confirmed, aTests, future, attempts] = await Promise.all([
+    const [lessons, confirmed, aTests, attempts] = await Promise.all([
       loadLessonDays(this.prisma, studentId, fromKey, today),
       this.prisma.classTestSession.findMany({
         where: {
@@ -945,32 +990,6 @@ export class HomeworkPracticeService {
           _count: { select: { problems: true } },
         },
       }),
-      Promise.all([
-        this.prisma.classTestSession.findMany({
-          where: {
-            classroomId: { in: classroomIds },
-            testId: { in: aIds },
-            date: { gt: parseDateOnly(today) },
-          },
-          select: { classroomId: true, testId: true },
-        }),
-        this.prisma.lessonTopic.findMany({
-          where: {
-            testIds: { hasSome: aIds },
-            date: { gt: parseDateOnly(today) },
-            schedule: { classroomId: { in: classroomIds } },
-          },
-          select: { testIds: true, schedule: { select: { classroomId: true } } },
-        }),
-        this.prisma.testAccess.findMany({
-          where: {
-            classroomId: { in: classroomIds },
-            testId: { in: aIds },
-            assignedAt: { gt: new Date() },
-          },
-          select: { classroomId: true, testId: true },
-        }),
-      ]),
       this.prisma.homeworkAttempt.findMany({
         where: {
           studentId,
@@ -994,14 +1013,18 @@ export class HomeworkPracticeService {
       confirmed.map((c) => `${c.classroomId}|${dateKey(c.date)}|${c.testId}`),
     );
     const aById = new Map(aTests.map((t) => [t.id, t]));
-    const [fSessions, fTopics, fAccess] = future;
-    const reserved = new Set([
-      ...fSessions.flatMap((r) => (r.testId ? [`${r.classroomId}|${r.testId}`] : [])),
-      ...fTopics.flatMap((r) =>
-        r.testIds.map((id) => `${r.schedule.classroomId}|${id}`),
+    // Бусад ангид бодогдоогүй тест «Шалгах»-аар хариугаа задруулахгүй — түр хаалттай
+    const reserved = await this.redoReservedKeys(
+      slots.flatMap((slot) =>
+        slot.items.flatMap((item) => [
+          { testId: item.fromTestId, classroomId: slot.classroomId, date: slot.date },
+          { testId: item.id, classroomId: slot.classroomId, date: slot.date },
+        ]),
       ),
-      ...fAccess.map((r) => `${r.classroomId}|${r.testId}`),
-    ]);
+      today,
+    );
+    const lockedOf = (testId: string, classroomId: string, date: string) =>
+      reserved.has(`${testId}|${classroomId}|${date}`);
     const roundsOf = (testId: string, date: string) =>
       attempts
         .filter((a) => a.testId === testId && dateKey(a.lessonDate) === date)
@@ -1028,8 +1051,7 @@ export class HomeworkPracticeService {
         if (
           a &&
           a._count.problems > 0 &&
-          confirmedKeys.has(`${slot.classroomId}|${slot.date}|${a.id}`) &&
-          !reserved.has(`${slot.classroomId}|${a.id}`)
+          confirmedKeys.has(`${slot.classroomId}|${slot.date}|${a.id}`)
         )
           out.push({
             testId: a.id,
@@ -1038,6 +1060,7 @@ export class HomeworkPracticeService {
             kind: 'CLASS' as const,
             problemCount: a._count.problems,
             timeLimitMin: a.timeLimitMin,
+            locked: lockedOf(a.id, slot.classroomId, slot.date),
             rounds: roundsOf(a.id, slot.date),
           });
         if (confirmedKeys.has(`${slot.classroomId}|${slot.date}|${item.fromTestId}`))
@@ -1048,6 +1071,7 @@ export class HomeworkPracticeService {
             kind: 'HOME' as const,
             problemCount: item.problemCount,
             timeLimitMin: item.timeLimitMin,
+            locked: lockedOf(item.id, slot.classroomId, slot.date),
             rounds: roundsOf(item.id, slot.date),
           });
         return out;

@@ -41,9 +41,16 @@ function RoundChips({ rounds }: { rounds: HwRedoRound[] }) {
   );
 }
 
-function Action({ rounds, opened }: { rounds: HwRedoRound[]; opened: boolean }) {
+function Action({ rounds, opened, locked }: { rounds: HwRedoRound[]; opened: boolean; locked: boolean }) {
   const redo = rounds.find((r) => r.round > 1);
   if (!opened) return null;
+  if (locked && redo?.status !== "SUBMITTED")
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-line px-2.5 py-1 text-xs font-semibold text-ink-dim">
+        <Lock className="size-3.5" aria-hidden />
+        Түр хаалттай
+      </span>
+    );
   if (redo?.status === "SUBMITTED")
     return <span className="shrink-0 text-xs font-semibold text-ink-dim">Харах</span>;
   if (redo?.status === "IN_PROGRESS")
@@ -63,6 +70,8 @@ function Action({ rounds, opened }: { rounds: HwRedoRound[]; opened: boolean }) 
 
 function ItemRow({ day, item }: { day: HwRedoDay; item: HwRedoItem }) {
   const title = cleanTitle(item.title, item.variantLabel);
+  // Бусад ангид бодогдох хүлээгдэж байгаа тест түр хаалттай (хариу задрахаас сэргийлнэ); илгээсэн дүнг харж болно
+  const canOpen = day.opened && (!item.locked || item.rounds.some((r) => r.round > 1 && r.status === "SUBMITTED"));
   const body = (
     <>
       <Repeat2 className={cn("size-5 shrink-0", day.opened ? "text-brand-soft" : "text-ink-dim")} aria-hidden />
@@ -74,13 +83,13 @@ function ItemRow({ day, item }: { day: HwRedoDay; item: HwRedoItem }) {
         />
         <RoundChips rounds={item.rounds} />
       </span>
-      <Action rounds={item.rounds} opened={day.opened} />
-      {day.opened && <ChevronRight className="size-4 shrink-0 text-ink-dim" aria-hidden />}
+      <Action rounds={item.rounds} opened={day.opened} locked={item.locked} />
+      {canOpen && <ChevronRight className="size-4 shrink-0 text-ink-dim" aria-hidden />}
     </>
   );
   return (
     <li>
-      {day.opened ? (
+      {canOpen ? (
         <Link
           href={solveHref(item.testId, day.date, day.classroomId, true)}
           className="flex min-h-14 items-center gap-3 py-2.5 transition hover:bg-ink/[0.03] focus-visible:ring-2 focus-visible:ring-brand-bright"

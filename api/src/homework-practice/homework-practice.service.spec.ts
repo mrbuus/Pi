@@ -102,7 +102,7 @@ function makeDb() {
       findMany: jest.fn(async ({ where }: any) =>
         sessions.filter(
           (s) =>
-            (where.classroomId.in ? where.classroomId.in.includes(s.classroomId) : s.classroomId === where.classroomId) &&
+            (!where.classroomId || (where.classroomId.in ? where.classroomId.in.includes(s.classroomId) : s.classroomId === where.classroomId)) &&
             (!where.date?.gte || s.date >= where.date.gte) &&
             (!where.date?.lte || s.date <= where.date.lte) &&
             (!where.date?.lt || s.date < where.date.lt) &&
@@ -126,7 +126,7 @@ function makeDb() {
       findMany: jest.fn(async ({ where }: any) =>
         accesses.filter(
           (a) =>
-            where.classroomId.in.includes(a.classroomId) &&
+            (!where.classroomId || where.classroomId.in.includes(a.classroomId)) &&
             (!where.testId?.in || where.testId.in.includes(a.testId)) &&
             (!where.assignedAt?.gt || a.assignedAt > where.assignedAt.gt),
         ),
@@ -291,7 +291,7 @@ function makeDb() {
         topics
           .filter(
             (t) =>
-              where.schedule.classroomId.in.includes(t.classroomId) &&
+              (!where.schedule || where.schedule.classroomId.in.includes(t.classroomId)) &&
               inRange(t.date, where.date) &&
               // Төлөвлөсөн тест (planned-tests) — testIds хоосон биш мөр л
               (where.testIds?.isEmpty !== false || (t.testIds ?? []).length > 0) &&
@@ -1124,12 +1124,29 @@ describe('Дахин бодох: 2 хичээл өнгөрсний дараа А
     expect(env.attempts.filter((x) => x.round === 2)).toHaveLength(1);
   });
 
-  it('ангид ирээдүйд дахин бодогдохоор төлөвлөсөн А нээгдэхгүй (Б нээгдсэн хэвээр)', async () => {
+  it('ангид ирээдүйд дахин бодогдохоор төлөвлөсөн А түр хаалттай (Б нээгдсэн хэвээр), дараа нь дахин нээгдэнэ', async () => {
     jest.setSystemTime(LATER);
     env.topics.push({ classroomId: 'c1', date: d('2026-11-20'), title: 'Дахин', chapterId: null, testIds: ['A1'] });
     await expect(svc.startRedo('s1', { testId: 'A1', date: '2026-10-27' })).rejects.toBeInstanceOf(ForbiddenException);
     const list = await svc.redoList('s1');
-    expect(list.days[0].items.map((i) => i.testId)).toEqual(['B1']);
+    expect(list.days[0].items.map((i) => [i.testId, i.locked])).toEqual([['A1', true], ['B1', false]]);
+    await expect(svc.startRedo('s1', { testId: 'B1', date: '2026-10-27' })).resolves.toMatchObject({ round: 2 });
+  });
+
+  it('бусад анги тестийг өнөөдөр/ирээдүйд бодох бол А, Б хоёул түр хаалттай; өөрийн хичээл хаахгүй', async () => {
+    jest.setSystemTime(LATER);
+    // Өөрийн анги, өөрийн хичээл (10-27) төлөвлөгөө — хаахгүй
+    env.topics.push({ classroomId: 'c1', date: d('2026-10-27'), title: 'Өөрийн', chapterId: null, testIds: ['A1'] });
+    await expect(svc.startRedo('s1', { testId: 'A1', date: '2026-10-27' })).resolves.toMatchObject({ round: 2 });
+    // Өөр анги ӨНӨӨДӨР бодож байна (date >= өнөөдөр) — хаана
+    env.sessions.push({ classroomId: 'c9', date: d('2026-11-05'), testId: 'B1' });
+    await expect(svc.startRedo('s1', { testId: 'B1', date: '2026-10-27' })).rejects.toBeInstanceOf(ForbiddenException);
+    // Дуусаагүй A-ийн «Шалгах» ч хаагдана (хариу задрахгүй)
+    env.sessions.push({ classroomId: 'c9', date: d('2026-11-08'), testId: 'A1' });
+    const a = env.attempts.find((x) => x.testId === 'A1' && x.round === 2)!;
+    await expect(svc.check('s1', a.id, { p1: 'A' })).rejects.toBeInstanceOf(ForbiddenException);
+    const list = await svc.redoList('s1');
+    expect(list.days[0].items.every((i) => i.locked)).toBe(true);
   });
 
   it('бусдын тест/багш батлаагүй өдөр/ирээдүйн өдөр — 403; өөр сурагч нээж чадахгүй', async () => {
