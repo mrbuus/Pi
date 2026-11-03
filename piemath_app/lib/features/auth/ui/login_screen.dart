@@ -8,6 +8,7 @@ import '../../../core/ui/ui.dart';
 import '../../push/push_service.dart';
 import '../data/auth_repository.dart';
 import '../data/login_prefs.dart';
+import 'hero/login_hero.dart';
 import 'native_sign_in_section.dart';
 import 'widgets/auth_widgets.dart';
 
@@ -140,8 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Align(alignment: AlignmentDirectional.centerStart, child: BrandMark(logoSize: 52)),
-            const SizedBox(height: AppSpace.xl),
+            const LoginHero(),
             Semantics(header: true, child: Text('Нэвтрэх', style: context.text.headlineMedium)),
             const SizedBox(height: AppSpace.xs),
             Text(
