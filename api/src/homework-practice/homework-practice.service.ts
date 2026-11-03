@@ -44,6 +44,7 @@ import {
   type HomeworkProblemRow,
   type HomeworkSlot,
 } from './homework-logic';
+import { youtubeOf } from '../exams/exam-data';
 import { loadPlanned } from './planned-tests';
 
 const PDF_MAX_BYTES = 25 * 1024 * 1024;
@@ -80,10 +81,18 @@ const activityOf = (a: AttemptRow): ActivityState => ({
   openCount: a.openCount ?? 0,
 });
 
+type HwReviewPayload = {
+  /** Тест ангид бодогдох тул зөв хариу нээгдэхгүй */
+  locked: boolean;
+  /** Хариулаагүй бодлогын зөв хариу нээгдэх цаг (нууж байгаа үед) */
+  opensAt: string | null;
+  items: Record<string, HwReviewItem>;
+};
+
 type HwReviewItem = {
   correct: ReturnType<typeof correctAnswerView>;
   solution: string | null;
-  videoUrl: string | null;
+  video: { url: string; embedUrl: string } | null;
 };
 
 function asRecord(v: unknown): Record<string, unknown> {
@@ -175,7 +184,7 @@ export class HomeworkPracticeService {
     );
     const merged = [
       ...real,
-      ...planned.sessions.filter(
+      ...planned.filter(
         (s) => s.testId === null || !confirmedDays.has(`${s.classroomId}|${s.date}`),
       ),
     ];
@@ -238,14 +247,7 @@ export class HomeworkPracticeService {
       ...[...inClass, ...futureAccess].flatMap((r) =>
         r.testId ? [{ classroomId: r.classroomId, testId: r.testId }] : [],
       ),
-      ...planned.reserved
-        // Хичээл батлагдаж өөр тест бүртгэгдсэн өдрийн төлөвлөгөө хүчингүй — тэр тест нөөцлөгдөхгүй
-        .filter(
-          (r) =>
-            siblingIds.includes(r.testId) &&
-            !confirmedDays.has(`${r.classroomId}|${r.date}`),
-        )
-        .map((r) => ({ classroomId: r.classroomId, testId: r.testId })),
+      ...(await this.plannedReserved(classroomIds, siblingIds, confirmedDays)),
     ];
     return buildSlots({
       reserved,
@@ -269,6 +271,38 @@ export class HomeworkPracticeService {
       fromKey,
       toKey,
     });
+  }
+
+  /**
+   * Хуваарьт (ямар ч өдөр, ирээдүй ч) төлөвлөсөн, ангид бодогдох тест — гэрийн даалгавар болгохгүй
+   * (урьдчилан харж/хариугаа мэдэж очихгүй). Хугацааны цонхгүй. Хичээл батлагдаж өөр тест
+   * бүртгэгдсэн өдрийн төлөвлөгөө хүчингүй (анхны огноогоор; зөөсөн бол хамгаалах талаар нөөцлөгдөнө).
+   */
+  private async plannedReserved(
+    classroomIds: string[],
+    siblingIds: string[],
+    confirmedDays: Set<string>,
+  ): Promise<{ classroomId: string; testId: string }[]> {
+    if (!siblingIds.length) return [];
+    const rows = await this.prisma.lessonTopic.findMany({
+      where: {
+        testIds: { hasSome: siblingIds },
+        schedule: { classroomId: { in: classroomIds } },
+      },
+      select: {
+        date: true,
+        testIds: true,
+        schedule: { select: { classroomId: true } },
+      },
+    });
+    const ids = new Set(siblingIds);
+    return rows.flatMap((r) =>
+      confirmedDays.has(`${r.schedule.classroomId}|${dateKey(r.date)}`)
+        ? []
+        : r.testIds
+            .filter((id) => ids.has(id))
+            .map((testId) => ({ classroomId: r.schedule.classroomId, testId })),
+    );
   }
 
   /** testId + огноо нь энэ сурагчийн жагсаалтад байгаа эсэх — үгүй бол 403 */
@@ -708,46 +742,96 @@ export class HomeworkPracticeService {
       // Илгээсний дараа л зөв хариу, бодолт нээгдэнэ (эзэн 2026-11-03)
       review:
         attempt.status === 'SUBMITTED'
-          ? await this.reviewOf(rows, last ? asRecord(last.results) : {})
+          ? await this.reviewOf(
+              attempt.testId,
+              attempt.deadlineAt,
+              attempt.submittedAt,
+              rows,
+              last ? asRecord(last.results) : {},
+            )
           : null,
     };
   }
 
   /**
-   * Илгээсэн даалгаврын алдсан/хоосон бодлого бүрийн зөв хариу + баталгаажсан бодолт (байвал) +
-   * бичлэг. Зөв бодсон бодлогод хүрэхгүй (ачаалал бага). ЗӨВХӨН илгээсний дараа дуудна.
+   * Тест ангийн хуваарьт (өнөөдөр/ирээдүйд) ямар ч ангид бодогдох, эсвэл ирээдүйд оноогдох уу —
+   * тэгвэл зөв хариуг ХЭЗЭЭ Ч нээхгүй (хариу бусад ангид дамжих эрсдэл; аюулгүй байдлын шалгалт).
+   */
+  private async reservedAnywhere(testId: string): Promise<boolean> {
+    const today = todayUB();
+    const [session, topic, access] = await Promise.all([
+      this.prisma.classTestSession.findFirst({
+        where: { testId, date: { gte: today } },
+        select: { id: true },
+      }),
+      this.prisma.lessonTopic.findFirst({
+        where: { testIds: { has: testId }, date: { gte: today } },
+        select: { id: true },
+      }),
+      this.prisma.testAccess.findFirst({
+        where: { testId, assignedAt: { gt: new Date() } },
+        select: { testId: true },
+      }),
+    ]);
+    return !!(session || topic || access);
+  }
+
+  /**
+   * Илгээсэн даалгаврын алдсан бодлого бүрийн зөв хариу + баталгаажсан бодолт (байвал) + бичлэг.
+   * ЗӨВХӨН илгээсний дараа. Хоосон (хариулаагүй) бодлогын хариуг даалгаврын хугацаа (дараагийн
+   * хичээл) өнгөрсний дараа л нээнэ — хоосон илгээгээд хариуны түлхүүр авч бусдад дамжуулахаас
+   * сэргийлнэ. Ангид бодогдох тест (reservedAnywhere) бол юу ч нээхгүй (`locked`).
    */
   private async reviewOf(
+    testId: string,
+    deadlineAt: Date | null,
+    submittedAt: Date | null,
     rows: HomeworkProblemRow[],
     results: Record<string, unknown>,
-  ) {
+  ): Promise<HwReviewPayload> {
     const missed = rows.filter((r) => {
       const res = results[r.problemId];
       return res === 'WRONG' || res === 'BLANK';
     });
-    if (!missed.length) return {} as Record<string, HwReviewItem>;
-    const extra = await this.prisma.problem.findMany({
-      where: { id: { in: missed.map((r) => r.problemId) } },
-      select: {
-        id: true,
-        youtubeUrl: true,
-        analysis: { select: { status: true, solutionOutline: true } },
-      },
-    });
+    if (!missed.length) return { locked: false, opensAt: null, items: {} };
+    if (await this.reservedAnywhere(testId))
+      return { locked: true, opensAt: null, items: {} };
+    const opensAt =
+      deadlineAt ??
+      (submittedAt ? new Date(submittedAt.getTime() + 72 * 3600_000) : null);
+    const blankOpen = !!opensAt && Date.now() >= opensAt.getTime();
+    const shown = missed.filter(
+      (r) => results[r.problemId] === 'WRONG' || blankOpen,
+    );
+    const hasHiddenBlank = shown.length < missed.length;
+    const extra = shown.length
+      ? await this.prisma.problem.findMany({
+          where: { id: { in: shown.map((r) => r.problemId) } },
+          select: {
+            id: true,
+            youtubeUrl: true,
+            analysis: { select: { status: true, solutionOutline: true } },
+          },
+        })
+      : [];
     const byId = new Map(extra.map((x) => [x.id, x]));
-    const out: Record<string, HwReviewItem> = {};
-    for (const r of missed) {
+    const items: Record<string, HwReviewItem> = {};
+    for (const r of shown) {
       const x = byId.get(r.problemId);
       const a = x?.analysis;
-      out[r.problemId] = {
+      items[r.problemId] = {
         correct: correctAnswerView(r),
         // Бодолт зөвхөн VERIFIED үед (шалгалтын дүнтэй ижил дүрэм) — AI/авто ноорог задрахгүй
         solution:
           a?.status === 'VERIFIED' && a.solutionOutline ? a.solutionOutline : null,
-        videoUrl: x?.youtubeUrl ?? null,
+        video: youtubeOf(x?.youtubeUrl),
       };
     }
-    return out;
+    return {
+      locked: false,
+      opensAt: hasHiddenBlank ? (opensAt?.toISOString() ?? null) : null,
+      items,
+    };
   }
 
   /* ───────── PATCH /homework/attempts/:id ───────── */
@@ -907,7 +991,13 @@ export class HomeworkPracticeService {
       score: { correct: graded.correct, total: graded.total },
       results: graded.results,
       submittedAt: submittedAt.toISOString(),
-      review: await this.reviewOf(rows, graded.results),
+      review: await this.reviewOf(
+        attempt.testId,
+        attempt.deadlineAt,
+        submittedAt,
+        rows,
+        graded.results,
+      ),
     };
   }
 
@@ -924,7 +1014,13 @@ export class HomeworkPracticeService {
       score: { correct: attempt.score ?? 0, total: attempt.total ?? 0 },
       results,
       submittedAt: attempt.submittedAt?.toISOString() ?? null,
-      review: await this.reviewOf(rows, results),
+      review: await this.reviewOf(
+        attempt.testId,
+        attempt.deadlineAt,
+        attempt.submittedAt,
+        rows,
+        results,
+      ),
     };
   }
 

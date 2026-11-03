@@ -506,7 +506,7 @@ export class HomeworkMarksService {
       );
       doneIds = [
         ...new Set(
-          planned.sessions
+          planned
             .filter((s) => s.date === prev && s.testId)
             .map((s) => s.testId as string),
         ),

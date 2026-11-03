@@ -50,40 +50,27 @@ export function plannedAvailable(
 /**
  * ЦЭВЭР: төлөвлөсөн сэдвүүдээс «хичээл болсон өдөр + тест» мөрүүд. Цуцалсан хичээл алгасагдана,
  * зөөсөн нь шинэ өдөр рүү шилжинэ. Нээгдээгүй (ирээдүй/дуусаагүй) өдөр testId=null тэмдэглэгээ.
- * `reserved` = төлөвлөсөн БҮХ (анги, тест, өдөр) — ирээдүйд ангид бодогдох тестийг гэрийн даалгавар
- * болгохгүй (хичээл батлагдаж өөр тест бүртгэгдсэн өдрийн төлөвлөгөөг дуудагч хасна).
+ * Нөөцлөлт (ирээдүйд ангид бодогдох тестийг даалгавар болгохгүй) энд БИШ — хугацааны цонхгүй,
+ * тусдаа асуулгаар (HomeworkPracticeService.plannedReserved).
  */
 export function resolvePlanned(
   topics: readonly PlannedTopic[],
   exceptions: readonly ExceptionLite[],
   todayKey: string,
   nowMinute: number,
-): {
-  sessions: PlannedSession[];
-  reserved: { classroomId: string; testId: string; date: string }[];
-} {
+): PlannedSession[] {
   const index = exceptionIndex(exceptions);
   const sessions: PlannedSession[] = [];
-  const reserved = new Map<
-    string,
-    { classroomId: string; testId: string; date: string }
-  >();
   for (const t of topics) {
     if (!t.testIds.length) continue;
     const date = lessonDateOf(t.scheduleId, t.date, index);
     if (!date) continue;
-    for (const testId of t.testIds)
-      reserved.set(`${t.classroomId}|${testId}|${date}`, {
-        classroomId: t.classroomId,
-        testId,
-        date,
-      });
     if (plannedAvailable(date, t.endMinute, todayKey, nowMinute))
       for (const testId of t.testIds)
         sessions.push({ classroomId: t.classroomId, date, testId });
     else sessions.push({ classroomId: t.classroomId, date, testId: null });
   }
-  return { sessions, reserved: [...reserved.values()] };
+  return sessions;
 }
 
 /** Анги бүрийн [fromKey, toKey] хоорондох төлөвлөсөн тестүүд (зөөлт ±14 хоногийг тооцно) */
@@ -95,8 +82,7 @@ export async function loadPlanned(
   todayKey: string,
   nowMinute: number = ubMinuteNow(),
 ) {
-  if (!classroomIds.length)
-    return { sessions: [] as PlannedSession[], reserved: [] };
+  if (!classroomIds.length) return [] as PlannedSession[];
   const range = {
     gte: parseDateOnly(addDaysKey(fromKey, -14)),
     lte: parseDateOnly(addDaysKey(toKey, 14)),
@@ -114,7 +100,7 @@ export async function loadPlanned(
       schedule: { select: { classroomId: true, endMinute: true } },
     },
   });
-  if (!rows.length) return { sessions: [] as PlannedSession[], reserved: [] };
+  if (!rows.length) return [] as PlannedSession[];
   const exceptions = await prisma.scheduleException.findMany({
     where: {
       date: range,
@@ -122,7 +108,7 @@ export async function loadPlanned(
     },
     select: { scheduleId: true, date: true, kind: true, newDate: true },
   });
-  const resolved = resolvePlanned(
+  const sessions = resolvePlanned(
     rows.map((r) => ({
       scheduleId: r.scheduleId,
       classroomId: r.schedule.classroomId,
@@ -134,10 +120,7 @@ export async function loadPlanned(
     todayKey,
     nowMinute,
   );
-  return {
-    ...resolved,
-    sessions: resolved.sessions.filter(
-      (s) => s.date >= fromKey && s.date <= addDaysKey(toKey, 60),
-    ),
-  };
+  return sessions.filter(
+    (s) => s.date >= fromKey && s.date <= addDaysKey(toKey, 60),
+  );
 }

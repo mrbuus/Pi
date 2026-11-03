@@ -76,7 +76,7 @@ describe('planned-tests', () => {
     expect(plannedAvailable('2026-11-03', 1000, '2026-11-02', 2000)).toBe(false);
   });
 
-  it('resolvePlanned: цуцалсан алгасна, зөөсөн нь шинэ өдөр, нээгдээгүй нь testId=null, reserved бүгд', () => {
+  it('resolvePlanned: цуцалсан алгасна, зөөсөн нь шинэ өдөр, нээгдээгүй нь testId=null', () => {
     const topics = [
       { scheduleId: 's1', classroomId: 'c1', date: '2026-10-30', endMinute: 600, testIds: ['T1'] },
       { scheduleId: 's1', classroomId: 'c1', date: '2026-10-31', endMinute: 600, testIds: ['T2'] },
@@ -89,16 +89,10 @@ describe('planned-tests', () => {
       { scheduleId: 's2', date: '2026-11-01', kind: 'MOVED' as const, newDate: '2026-11-02' },
     ];
     const r = resolvePlanned(topics, ex, '2026-11-02', 700);
-    expect(r.sessions).toEqual([
+    expect(r).toEqual([
       { classroomId: 'c1', date: '2026-10-30', testId: 'T1' },
       { classroomId: 'c1', date: '2026-11-02', testId: 'T3' }, // зөөгдсөн, өнөөдөр 11:40 > 10:00 дууссан
       { classroomId: 'c1', date: '2026-11-05', testId: null },
-    ]);
-    expect(r.reserved.map((x) => `${x.testId}@${x.date}`).sort()).toEqual([
-      'T1@2026-10-30',
-      'T3@2026-11-02',
-      'T4@2026-11-05',
-      'T5@2026-11-05',
     ]);
   });
 });

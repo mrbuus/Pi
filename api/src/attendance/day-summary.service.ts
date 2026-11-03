@@ -88,7 +88,7 @@ export class AttendanceDaySummaryService {
       if ((latest.get(classroomId) ?? '') < date) latest.set(classroomId, date);
     };
     for (const r of real) note(r.classroomId, dateKey(r.date));
-    for (const s of planned.sessions) if (s.testId) note(s.classroomId, s.date);
+    for (const s of planned) if (s.testId) note(s.classroomId, s.date);
     if (!latest.size) return out;
     const pairs = [...latest].map(([classroomId, date]) => ({
       classroomId,

@@ -108,7 +108,10 @@ function makeDb() {
       ),
       findFirst: jest.fn(async ({ where }: any) =>
         sessions.find(
-          (s) => s.classroomId === where.classroomId && s.testId === where.testId,
+          (s) =>
+            (where.classroomId === undefined || s.classroomId === where.classroomId) &&
+            s.testId === where.testId &&
+            (!where.date?.gte || s.date >= where.date.gte),
         ) ?? null,
       ),
     },
@@ -124,7 +127,7 @@ function makeDb() {
       findFirst: jest.fn(async ({ where }: any) =>
         accesses.find(
           (a) =>
-            a.classroomId === where.classroomId &&
+            (where.classroomId === undefined || a.classroomId === where.classroomId) &&
             a.testId === where.testId &&
             (!where.assignedAt?.gt || a.assignedAt > where.assignedAt.gt),
         ) ?? null,
@@ -271,7 +274,8 @@ function makeDb() {
               where.schedule.classroomId.in.includes(t.classroomId) &&
               inRange(t.date, where.date) &&
               // Төлөвлөсөн тест (planned-tests) — testIds хоосон биш мөр л
-              (where.testIds?.isEmpty !== false || (t.testIds ?? []).length > 0),
+              (where.testIds?.isEmpty !== false || (t.testIds ?? []).length > 0) &&
+              (!where.testIds?.hasSome || (t.testIds ?? []).some((id: string) => where.testIds.hasSome.includes(id))),
           )
           .map((t) => ({
             ...t,
@@ -281,7 +285,10 @@ function makeDb() {
       ),
       findFirst: jest.fn(async ({ where }: any) =>
         topics.find(
-          (t) => t.classroomId === where.schedule.classroomId && (t.testIds ?? []).includes(where.testIds.has),
+          (t) =>
+            (!where.schedule || t.classroomId === where.schedule.classroomId) &&
+            (t.testIds ?? []).includes(where.testIds.has) &&
+            (!where.date?.gte || t.date >= where.date.gte),
         ) ?? null,
       ),
     },
@@ -309,7 +316,7 @@ function makeDb() {
       findMany: jest.fn(async ({ where }: any) =>
         where.id.in.map((id: string) => ({
           id,
-          youtubeUrl: id === 'p2' ? 'https://youtu.be/abc' : null,
+          youtubeUrl: id === 'p2' ? 'https://youtu.be/abcdefghijk' : null,
           analysis: id === 'p1' ? { status: 'VERIFIED', solutionOutline: '$x=2$' } : { status: 'AUTO_DRAFT', solutionOutline: 'ноорог' },
         })),
       ),
@@ -860,6 +867,12 @@ describe('Хуваарьт төлөвлөсөн тест = гэрийн даал
     expect(day?.items ?? []).toEqual([]);
   });
 
+  it('хэдэн сарын дараа ангид бодогдохоор төлөвлөсөн B ч нөөцлөгдөнө (хугацааны цонхгүй)', async () => {
+    plan('2026-10-27', ['A1'], 17 * 60);
+    plan('2027-03-01', ['B1'], 17 * 60);
+    expect((await svc.my('s1')).days.find((x) => x.date === '2026-10-27')?.items ?? []).toEqual([]);
+  });
+
   it('цуцалсан хичээлийн төлөвлөгөө даалгавар болохгүй', async () => {
     env.schedules.push({
       id: 'sch1', classroomId: 'c1', weekday: 2, startMinute: 600, endMinute: 690, room: null,
@@ -904,18 +917,39 @@ describe('Гэрийн даалгавар: идэвхийн хяналт ба и
     jest.setSystemTime(new Date(NOW.getTime() + 60_000));
     const res = await svc.submit('s1', a.attemptId, { p1: 'A', p2: 'C' }, { activeSec: 55, awaySec: 3, leaveCount: 1 });
     expect(res.results).toEqual({ p1: 'WRONG', p2: 'CORRECT' });
-    expect(Object.keys(res.review)).toEqual(['p1']); // зөв бодсон p2 орохгүй
-    expect(res.review.p1).toEqual({ correct: 'B', solution: '$x=2$', videoUrl: null });
+    expect(Object.keys(res.review.items)).toEqual(['p1']); // зөв бодсон p2 орохгүй
+    expect(res.review).toMatchObject({ locked: false, opensAt: null });
+    expect(res.review.items.p1).toEqual({ correct: 'B', solution: '$x=2$', video: null });
     expect(env.attempts[0]).toMatchObject({ status: 'SUBMITTED', activeSec: 55, awaySec: 3, leaveCount: 1 });
     // дахин нээхэд ч мөн адил
     const again = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
     expect(again.review).toEqual(res.review);
   });
 
+  it('хоосон илгээсэн бодлогын зөв хариу дараагийн хичээл (хугацаа) хүртэл нээгдэхгүй', async () => {
+    const a = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    const res = await svc.submit('s1', a.attemptId, { p1: 'A' }); // p2 хоосон
+    expect(res.results).toEqual({ p1: 'WRONG', p2: 'BLANK' });
+    expect(Object.keys(res.review.items)).toEqual(['p1']);
+    expect(res.review.opensAt).toBe('2026-10-28T16:00:00.000Z'); // дараагийн хичээл 10-29 00:00 УБ
+    jest.setSystemTime(new Date('2026-10-29T02:00:00Z'));
+    const later = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect(Object.keys(later.review!.items).sort()).toEqual(['p1', 'p2']);
+    expect(later.review!.opensAt).toBeNull();
+  });
+
+  it('тест ирээдүйд ангид бодогдохоор төлөвлөгдсөн (ямар ч ангид) бол зөв хариу огт нээгдэхгүй', async () => {
+    env.topics.push({ scheduleId: 'schX', classroomId: 'c2', date: d('2026-11-10'), title: '', chapterId: null, testIds: ['B1'], endMinute: 600 });
+    const a = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    const res = await svc.submit('s1', a.attemptId, { p1: 'A', p2: 'A' });
+    expect(res.results).toEqual({ p1: 'WRONG', p2: 'WRONG' });
+    expect(res.review).toEqual({ locked: true, opensAt: null, items: {} });
+  });
+
   it('ноорог (VERIFIED биш) бодолт сурагчид харагдахгүй', async () => {
     const a = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
     const res = await svc.submit('s1', a.attemptId, { p1: 'B', p2: 'A' });
-    expect(res.review.p2).toEqual({ correct: 'C', solution: null, videoUrl: 'https://youtu.be/abc' });
+    expect(res.review.items.p2).toEqual({ correct: 'C', solution: null, video: { url: 'https://www.youtube.com/watch?v=abcdefghijk', embedUrl: expect.stringContaining('abcdefghijk') } });
   });
 });
 
@@ -956,7 +990,7 @@ describe('Багшийн самбар «Онлайн» дэлгэрэнгүй (�
     const res = await svc.onlineDetail('c1', '2026-10-29', 's1', 'admin', Role.ADMIN);
     expect(res.student).toMatchObject({ firstName: 'Бат' });
     expect(res.photo).toMatchObject({ fileKey: 'hw.pdf', pages: 3 });
-    const b1 = res.tests.find((t) => t.testId === 'B1');
+    const b1 = (res.tests as any[]).find((t) => t.testId === 'B1');
     const a = b1?.attempt as any;
     expect(a).toMatchObject({ durationSec: 1800, activeSec: 1500, awaySec: 300, leaveCount: 4, openCount: 2, score: 1, total: 2, late: false });
     expect(a.items).toEqual([
