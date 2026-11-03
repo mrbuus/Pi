@@ -8,6 +8,8 @@ import MathText from "@/components/MathText";
 import { Badge } from "@/components/ui/kit/badge";
 import { cn } from "@/lib/cn";
 import { conditionMath, displayMath, type SheetFormula } from "./formulaSheet.ts";
+import SimpleView from "./SimpleView";
+import { useFormulaDetail } from "./detail";
 
 /** LaTeX-ийг санах ойд хуулна (хуучин хөтөчид textarea-аар) */
 export async function copyLatex(latex: string) {
@@ -46,8 +48,11 @@ interface Props {
   loggedIn: boolean;
 }
 
-function FormulaCardImpl({ f, sectionName, inBasket, onToggleBasket, onProject, onWidget, loggedIn }: Props) {
+function FormulaCardImpl({ f: base, sectionName, inBasket, onToggleBasket, onProject, onWidget, loggedIn }: Props) {
   const [open, setOpen] = useState(false);
+  const [stepsOpen, setStepsOpen] = useState(false);
+  // Дэлгэрэнгүйг (алхам, жишээ, нэмэлт) хэрэглэгч нээх үед л татна
+  const { f, loading, failed, retry } = useFormulaDetail(base, open || stepsOpen);
   const detailsId = useId();
   return (
     <article className="flex min-w-0 flex-col rounded-2xl border border-line bg-surface p-4" aria-labelledby={`${detailsId}-t`}>
@@ -62,20 +67,30 @@ function FormulaCardImpl({ f, sectionName, inBasket, onToggleBasket, onProject, 
         </div>
       </header>
 
-      <div className="mt-2 min-w-0 max-w-full overflow-x-auto py-1 text-lg text-ink [&_.katex-display]:!my-1 [&_.katex-display]:!text-left">
-        <MathText>{displayMath(f.latex)}</MathText>
-      </div>
-
-      {f.conditions.length > 0 && (
-        <div className="mt-1 text-sm text-ink-dim">
-          <span className="font-medium text-ink">Нөхцөл</span>
-          {/* Нөхцөл бүр тусдаа мөрөнд, урт бол хэвтээ гүйлгэнэ: томьёо дундуураа тасарч овоорохгүй */}
-          {f.conditions.map((c, i) => (
-            <div key={i} className="min-w-0 overflow-x-auto overflow-y-hidden whitespace-nowrap py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <MathText>{conditionMath(c)}</MathText>
-            </div>
-          ))}
+      {f.simple ? (
+        // Энгийн тайлбартай томьёо: өнгөтэй томьёо, нэг өгүүлбэр, үсгийн утга, алхам (эзэн 2026-11-02)
+        <div className="mt-2">
+          <SimpleView s={f.simple} open={stepsOpen} onToggle={() => setStepsOpen((v) => !v)} loading={loading} failed={failed} onRetry={retry} />
         </div>
+      ) : (
+        <>
+          <div className="mt-2 min-w-0 max-w-full overflow-x-auto py-1 text-lg text-ink [&_.katex-display]:!my-1 [&_.katex-display]:!text-left">
+            <MathText>{displayMath(f.latex)}</MathText>
+          </div>
+
+          {f.conditions.length > 0 && (
+            <div className="mt-1 text-sm text-ink-dim">
+              <span className="font-medium text-ink">Нөхцөл</span>
+              {/* Нөхцөл бүр тусдаа мөрөнд, урт бол хэвтээ гүйлгэнэ: томьёо дундуураа тасарч овоорохгүй */}
+              {f.conditions.map((c, i) => (
+                <div key={i} className="min-w-0 overflow-x-auto overflow-y-hidden whitespace-nowrap py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <MathText>{conditionMath(c)}</MathText>
+                </div>
+              ))}
+            </div>
+          )}
+
+        </>
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -116,13 +131,39 @@ function FormulaCardImpl({ f, sectionName, inBasket, onToggleBasket, onProject, 
           aria-controls={detailsId}
           onClick={() => setOpen((o) => !o)}
         >
-          <span>Тайлбар</span>
+          <span>{f.simple ? "Нэмэлт" : "Тайлбар"}</span>
           <ChevronDown className={cn("h-4 w-4 transition-transform duration-[var(--dur-base)]", open && "rotate-180")} aria-hidden />
         </button>
       </div>
 
-      {open && (
+      {open && loading && (
+        <div className="mt-3 space-y-2 border-t border-line pt-3" aria-busy="true">
+          <div className="skeleton h-4 w-11/12 rounded" />
+          <div className="skeleton h-4 w-8/12 rounded" />
+        </div>
+      )}
+      {open && failed && (
+        <p className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3 text-sm text-ink-dim">
+          Тайлбарыг ачаалж чадсангүй
+          <button type="button" onClick={retry} className="min-h-10 rounded-xl px-2 font-semibold text-brand-soft">
+            Дахин оролдох
+          </button>
+        </p>
+      )}
+      {open && !loading && !failed && (
         <div id={detailsId} className="mt-3 space-y-3 border-t border-line pt-3 text-sm text-ink">
+          {f.simple && (
+            <Block title="Томьёо, нөхцөл">
+              <div className="overflow-x-auto [&_.katex-display]:!my-1 [&_.katex-display]:!text-left">
+                <MathText>{displayMath(f.latex)}</MathText>
+              </div>
+              {f.conditions.map((c, i) => (
+                <div key={i} className="min-w-0 overflow-x-auto overflow-y-hidden whitespace-nowrap py-0.5 text-ink-dim [scrollbar-width:none]">
+                  <MathText>{conditionMath(c)}</MathText>
+                </div>
+              ))}
+            </Block>
+          )}
           {f.explanation && <MathText className="block text-ink">{f.explanation}</MathText>}
           {f.general && (
             <Block title="Ерөнхий хэлбэр">

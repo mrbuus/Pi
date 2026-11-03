@@ -13,6 +13,7 @@ import { Panel, Segmented, Toggle } from "../core/ToolFrame";
 import { loadState, saveState } from "../core/export";
 import { FormulaCard } from "./FormulaCard";
 import ProjectorView from "./ProjectorView";
+import { withDetails } from "./detail";
 import PrintSheet, { DEFAULT_PRINT, type PrintDetail, type PrintOpts } from "./PrintSheet";
 import WidgetPanel, { WIDGET_KEYS } from "./WidgetPanel";
 import {
@@ -29,7 +30,8 @@ import {
 let sheetPromise: Promise<FormulaSheet> | null = null;
 function loadSheet(): Promise<FormulaSheet> {
   if (!sheetPromise) {
-    sheetPromise = fetch("/tools/formulas.json", { cache: "force-cache" })
+    // no-cache: ETag-аар шалгана (өөрчлөгдөөгүй бол 304, хурдан) — deploy-ийн дараа шинэ тайлбар шууд харагдана
+    sheetPromise = fetch("/tools/formulas.json", { cache: "no-cache" })
       .then((r) => {
         if (!r.ok) throw new Error("status");
         return r.json();
@@ -145,10 +147,11 @@ function FormulaBrowser({ sheet }: { sheet: FormulaSheet }) {
   }, []);
   const endPrint = useCallback(() => setPrinting(null), []);
 
-  const startPrint = (list: SheetFormula[]) => {
+  const startPrint = async (list: SheetFormula[]) => {
     if (!list.length) return;
     if (list.length > 150) toast.message(`${list.length} томьёо хэвлэгдэнэ, хэдэн хуудас болно`);
-    setPrinting(list);
+    // Нөхцөл, тайлбар дэлгэрэнгүй файлд байдаг — хэвлэхийн өмнө татна
+    setPrinting(await withDetails(list));
   };
 
   const clearBasket = () => {

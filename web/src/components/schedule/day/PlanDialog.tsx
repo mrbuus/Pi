@@ -25,6 +25,7 @@ import { ErrorState } from "@/components/ui/StateBlock";
 import { clockUB, dismissalOpen, NOTE_MAX, shiftClock, stampUB } from "@/components/lesson-records/types";
 import RoomBadge from "../RoomBadge";
 import { formatMinutes, WEEKDAY_LABELS } from "../types";
+import PdfLink from "./PdfLink";
 import { Excluded, roadOf } from "./RoadMap";
 import TestPicker from "./TestPicker";
 import TestProblems from "./TestProblems";
@@ -168,10 +169,13 @@ function ReadOnly(p: Props & { entry: DayEntry }) {
   const testIds = [
     ...new Set(doneToday ? e.done.flatMap((d) => (d.testId ? [d.testId] : [])) : (e.plan?.testIds ?? [])),
   ];
-  const line = (x: { key: string; full: string; excluded: number[] }) => (
-    <li key={x.key} className="text-sm text-ink">
-      {x.full}
-      <Excluded numbers={x.excluded} />
+  const line = (x: { key: string; full: string; excluded: number[]; pdf: string | null }) => (
+    <li key={x.key} className="flex items-center gap-2 text-sm text-ink">
+      <span className="min-w-0 flex-1">
+        {x.full}
+        <Excluded numbers={x.excluded} />
+      </span>
+      <PdfLink pdfKey={x.pdf} label={x.full} />
     </li>
   );
   return (
@@ -324,6 +328,20 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
             customTopics={topics}
             onCustomTopicsChange={setTopics}
           />
+          {/* Хадгалсан тестийн эх PDF (шинээр сонгосных хадгалсны дараа гарна) */}
+          {testIds.some((id) => p.tests[id]?.sourcePdfKey) && (
+            <ul className="flex flex-wrap gap-x-2">
+              {testIds.map((id) => {
+                const t = p.tests[id];
+                return t?.sourcePdfKey ? (
+                  <li key={id} className="inline-flex items-center text-xs text-ink-dim">
+                    {t.short}
+                    <PdfLink pdfKey={t.sourcePdfKey} label={t.short} />
+                  </li>
+                ) : null;
+              })}
+            </ul>
+          )}
         </Section>
 
         {testIds.length > 0 && (

@@ -2,8 +2,8 @@
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useRef, useState, type ComponentType } from "react";
-import { BarChart3, BookOpen, Clock, MoreHorizontal, PencilLine, RotateCw, Sigma, Users } from "lucide-react";
-import { api } from "@/lib/api";
+import { BarChart3, BookOpen, Clock, FileDown, MoreHorizontal, PencilLine, RotateCw, Sigma, Users } from "lucide-react";
+import { api, fileUrl } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { Meta, MetaTitle } from "@/components/ui/Meta";
 import { SkeletonLine } from "@/components/ui/Skeleton";
@@ -61,6 +61,8 @@ export default function TestMenu({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [action, setAction] = useState<MenuAction | null>(null);
+  /** Бүлгийн эх PDF (A, B хамт) — байхгүй бол null */
+  const [pdfKey, setPdfKey] = useState<string | null>(null);
   const stale = useRef(true);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const requestRef = useRef(0);
@@ -70,9 +72,15 @@ export default function TestMenu({
     setLoading(true);
     setError("");
     try {
-      const rows = await api<MenuTest[]>(`/tests?chapterId=${encodeURIComponent(chapterId)}`);
+      const q = encodeURIComponent(chapterId);
+      const [rows, pdf] = await Promise.all([
+        api<MenuTest[]>(`/tests?chapterId=${q}`),
+        // Эх PDF алдаа гаргавал цэсний бусад үйлдэлд саад болохгүй
+        api<{ key: string | null }>(`/tests/source-pdf?chapterId=${q}`).catch(() => ({ key: null })),
+      ]);
       if (id !== requestRef.current) return;
       setTests(sortVariants(rows));
+      setPdfKey(pdf.key);
       stale.current = false;
     } catch (e) {
       if (id === requestRef.current) setError(errorMessage(e, "Тестийн мэдээллийг ачаалж чадсангүй"));
@@ -185,6 +193,26 @@ export default function TestMenu({
                   <span className="flex-1">Дахин оролдох</span>
                 </DropdownMenu.Item>
               )}
+              {/* Эх PDF — гараар шивсэн файл (A, B хамт), бүх багшид */}
+              <DropdownMenu.Item
+                className={itemClass}
+                disabled={!pdfKey}
+                onSelect={() => {
+                  // Сервер «attachment; filename=<тестийн нэр>.pdf» илгээнэ — хуудас хэвээр үлдэж татагдана
+                  const href = fileUrl(pdfKey);
+                  if (!href) return;
+                  const a = document.createElement("a");
+                  a.href = href;
+                  a.rel = "noopener";
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                }}
+              >
+                <FileDown className="h-4 w-4 shrink-0 text-ink-dim" aria-hidden />
+                <span className="flex-1">PDF татах</span>
+                {tests && !pdfKey && <span className="text-xs font-normal text-ink-dim">файлгүй</span>}
+              </DropdownMenu.Item>
               {items
                 .filter((i) => i.show !== false)
                 .map(({ key, label, icon: Icon, hint, disabled }) => (

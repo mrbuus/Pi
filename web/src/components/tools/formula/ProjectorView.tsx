@@ -7,6 +7,8 @@ import MathText from "@/components/MathText";
 import { Toggle } from "../core/ToolFrame";
 import { copyLatex } from "./FormulaCard";
 import { conditionMath, displayMath, type SheetFormula } from "./formulaSheet.ts";
+import { colorize } from "./SimpleView";
+import { useFormulaDetail } from "./detail";
 
 /* ============================================================================
  * Проектор: нэг томьёог дэлгэц дүүрэн, том үсгээр. Сум/товчоор дараагийнх руу.
@@ -33,7 +35,8 @@ export default function ProjectorView({
   const [example, setExample] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const f = list[i];
+  // Слайдад жишээ, нөхцөл хэрэгтэй тул тухайн томьёоны дэлгэрэнгүйг татна
+  const { f } = useFormulaDetail(list[i] as SheetFormula | undefined, true);
 
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -136,8 +139,23 @@ export default function ProjectorView({
           className="max-w-full overflow-x-auto text-center [&_.katex-display]:!my-0"
           style={{ fontSize: `clamp(1.25rem, ${SIZES[size] * 1.6}vw, ${SIZES[size]}rem)` }}
         >
-          <MathText>{displayMath(f.latex)}</MathText>
+          <MathText>{f.simple ? `$$${colorize(f.simple.formula)}$$` : displayMath(f.latex)}</MathText>
         </div>
+        {f.simple && (
+          // Өнгөт томьёоны үсэг бүрийн утга — самбарт тайлбарлахад
+          <div className="max-w-4xl space-y-3 text-center">
+            <p className="text-lg text-ink sm:text-2xl">
+              <MathText>{colorize(f.simple.say)}</MathText>
+            </p>
+            <ul className="flex flex-wrap justify-center gap-2 text-base sm:text-xl">
+              {f.simple.parts.map((p, k) => (
+                <li key={k} className="rounded-xl bg-bg px-3 py-1.5">
+                  <MathText>{`$${colorize(p.tex)}$`}</MathText> <span className="text-ink-dim">{p.mean && <MathText>{colorize(p.mean)}</MathText>}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {cond && f.conditions.length > 0 && (
           <p className="max-w-4xl text-center text-lg text-ink-dim sm:text-2xl">
             {f.conditions.map((c, k) => (

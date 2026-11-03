@@ -100,6 +100,18 @@ function main() {
       const general = str(f.general);
       if (general && general !== latex) out.general = general;
       if (variants.length) out.variants = variants;
+      // Энгийн тайлбар (web/scripts/check-formula-simple.cjs-ээр шалгагдсан)
+      const sm = f.simple;
+      if (sm && str(sm.say) && str(sm.formula) && Array.isArray(sm.steps) && sm.example) {
+        out.simple = {
+          say: str(sm.say),
+          formula: str(sm.formula),
+          parts: (Array.isArray(sm.parts) ? sm.parts : []).filter((x) => x && str(x.tex)).map((x) => ({ tex: str(x.tex), mean: str(x.mean) })),
+          steps: strArr(sm.steps),
+          example: { problem: str(sm.example.problem), steps: strArr(sm.example.steps), answer: str(sm.example.answer) },
+        };
+        if (str(sm.watch)) out.simple.watch = str(sm.watch);
+      }
       formulas.push(out);
     });
   }
@@ -113,11 +125,37 @@ function main() {
   );
   for (const s of sections) s.count = formulas.filter((f) => f.section === s.slug).length;
 
-  const sheet = { version: 1, count: formulas.length, sections, formulas };
+  // Хоёр хуваана (эзэн 2026-11-02: «томьёо руу орсон хүн л хүлээлтийг мэдэрнэ»):
+  //   formulas.json            — жагсаалт: гарчиг, томьёо, нөхцөл, энгийн тайлбарын эхний хэсэг (Томьёо таб нээхэд)
+  //   formulas-detail/<бүлэг>.json — алхам, жишээ, нэмэлт тайлбар («Алхамаар ойлгох»/«Нэмэлт» анх дарахад)
+  const DETAIL = ["explanation", "examples", "commonMistakes", "mnemonic", "eeshTip", "conditions", "general", "variants"];
+  const details = new Map();
+  const light = formulas.map((f) => {
+    const l = { ...f };
+    const d = {};
+    for (const k of DETAIL) {
+      if (k in l) d[k] = l[k];
+      delete l[k];
+    }
+    if (l.simple) {
+      const { steps, example, watch, ...head } = l.simple;
+      d.simpleMore = { steps, example, ...(watch ? { watch } : {}) };
+      l.simple = head;
+    }
+    if (!details.has(f.section)) details.set(f.section, {});
+    details.get(f.section)[f.slug] = d;
+    return l;
+  });
+  const sheet = { version: 2, detail: true, count: formulas.length, sections, formulas: light };
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(sheet) + "\n", "utf8");
+  const dir = path.join(path.dirname(OUT), "formulas-detail");
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  for (const [sec, map] of details) fs.writeFileSync(path.join(dir, `${sec}.json`), JSON.stringify(map) + "\n", "utf8");
   const kb = (fs.statSync(OUT).size / 1024).toFixed(0);
-  console.log(`formulas.json: ${formulas.length} томьёо, ${sections.length} бүлэг, ${kb} KB -> ${path.relative(process.cwd(), OUT)}`);
+  const dkb = [...details.keys()].reduce((a, s) => a + fs.statSync(path.join(dir, `${s}.json`)).size, 0) / 1024;
+  console.log(`formulas.json: ${formulas.length} томьёо, ${sections.length} бүлэг, ${kb} KB; дэлгэрэнгүй ${details.size} файл ${dkb.toFixed(0)} KB -> ${path.relative(process.cwd(), OUT)}`);
 }
 
 function fail(msg) {

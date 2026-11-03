@@ -23,6 +23,7 @@ import {
   type DismissMode,
 } from './lesson-plan.logic';
 import { ScheduleService, teacherDisplayNames } from './schedule.service';
+import { chaptersWithSourcePdf, sourcePdfKey } from '../tests/source-pdf';
 import {
   excludedNumbersOf,
   shortTestName,
@@ -49,6 +50,8 @@ export interface TestMeta {
   chapterTitle: string | null;
   problemIds: string[];
   available: boolean;
+  /** Эх PDF-ийн файлын түлхүүр (бүх багш татна) — байхгүй бол null */
+  sourcePdfKey: string | null;
 }
 
 /** Сурагчийн нэр — «Б. Анар» (овгийн эхний үсэг + нэр). */
@@ -107,6 +110,10 @@ export class LessonPlanService {
         problems: { orderBy: { order: 'asc' }, select: { problemId: true } },
       },
     });
+    const withPdf = await chaptersWithSourcePdf(
+      this.prisma,
+      rows.map((t) => t.chapterId),
+    );
     return new Map(
       rows.map((t) => [
         t.id,
@@ -123,6 +130,8 @@ export class LessonPlanService {
           chapterTitle: t.chapter?.title ?? null,
           problemIds: t.problems.map((p) => p.problemId),
           available: !t.deletedAt && !t.isDraft,
+          sourcePdfKey:
+            t.chapterId && withPdf.has(t.chapterId) ? sourcePdfKey(t.chapterId) : null,
         },
       ]),
     );
@@ -604,6 +613,7 @@ export class LessonPlanService {
             bookDisplayName: t.bookDisplayName,
             chapterTitle: t.chapterTitle,
             problemIds: t.problemIds,
+            sourcePdfKey: t.sourcePdfKey,
           },
         ]),
       ),

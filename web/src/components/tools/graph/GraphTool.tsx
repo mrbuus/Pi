@@ -167,6 +167,9 @@ export default function GraphTool() {
   const handles = useRef(new Map<number, MathInputHandle | null>());
   const activeField = useRef<MathInputHandle | null>(null);
   const [kbOpen, setKbOpen] = useState(false);
+  // Жагсаалтаас сонгосон онцгой цэг (график дээр тодорно)
+  const [focusPt, setFocusPt] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const clipId = useId().replace(/[^a-zA-Z0-9]/g, "");
 
   const view: View = useMemo(() => ({ ...vp, w: size.w, h: size.h }), [vp, size]);
@@ -340,7 +343,10 @@ export default function GraphTool() {
   };
 
   /* ---------- Мөрүүд ---------- */
-  const update = (id: number, patch: Partial<Line>) => setLines((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
+  const update = (id: number, patch: Partial<Line>) => {
+    setFocusPt(null); // муруй өөрчлөгдвөл сонгосон цэг хуучирна
+    setLines((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
+  };
   const addLine = (src = "") =>
     setLines((ls) => {
       const used = new Set(ls.map((l) => l.ci));
@@ -454,6 +460,17 @@ export default function GraphTool() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tangent, area, areaAB, trace, items, lines, params, paramNames, view]);
 
+  /** Онцгой цэгийг сонгоно: дахин дарвал болино; зургаас гадна бол түүн рүү шилжинэ */
+  const focusSpecial = (k: number) => {
+    if (focusPt === k) return setFocusPt(null);
+    setFocusPt(k);
+    const p = specials[k];
+    if (!p) return;
+    const px = pxOf(view, p.x), py = pyOf(view, p.y);
+    if (px < 20 || px > view.w - 20 || py < 20 || py > view.h - 20) setVp((v) => ({ ...v, cx: p.x, cy: p.y }));
+    if (typeof window !== "undefined" && window.innerWidth < 1024) svgRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   /* ---------- Харагдац ---------- */
   const setRange = (which: "xmin" | "xmax" | "ymin" | "ymax", v: number) => {
     const r = { xmin: xa, xmax: xb, ymin: ya, ymax: yb, [which]: v };
@@ -461,7 +478,8 @@ export default function GraphTool() {
     setView(viewFromRange(r.xmin, r.xmax, r.ymin, r.ymax, view.w, view.h));
     setLock(false);
   };
-  const r4 = (v: number) => Math.round(v * 1e4) / 1e4;
+  // Харагдацын хүрээ: хэт олон оронгүй (эзэн 2026-11-02)
+  const r4 = (v: number) => Math.round(v * 100) / 100;
 
   const toggleDeg = (on: boolean) => {
     setDeg(on);
@@ -531,7 +549,7 @@ export default function GraphTool() {
       footer={
         <div className="min-h-12 px-3 py-2 text-sm" aria-live="polite">
           {traceX === null || !traceVals.length ? (
-            <p className="text-ink-dim">Муруй дээр хулгана аваачих эсвэл хүрч утгыг харна</p>
+            <p className="text-ink-dim">Утгыг харах бол муруй дээр хүр</p>
           ) : (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <MathText>{`$x=${fmt(traceX, 3)}$`}</MathText>
@@ -637,6 +655,33 @@ export default function GraphTool() {
             {kbOpen && <div className="h-[22rem] lg:hidden" aria-hidden />}
           </Panel>
 
+          {special && specials.length > 0 && (
+            <Panel title="Онцгой цэгүүд" action={<span className="text-xs text-ink-dim">Дарвал график дээр тодорно</span>}>
+              <ul className="max-h-72 space-y-1 overflow-y-auto text-sm">
+                {specials.map((s, k) => (
+                  <li key={k}>
+                    <button
+                      type="button"
+                      aria-pressed={focusPt === k}
+                      onClick={() => focusSpecial(k)}
+                      className={cn(
+                        "flex min-h-11 w-full flex-wrap items-center justify-between gap-x-3 gap-y-0.5 rounded-xl px-2 text-left transition-colors duration-[var(--dur-micro)]",
+                        focusPt === k ? "bg-brand-bright/12 ring-1 ring-brand-bright/40" : "hover:bg-bg",
+                      )}
+                    >
+                    <span className="flex items-center gap-1.5 text-ink-dim">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: colorOf(lines[s.line].ci) }} aria-hidden />
+                      {KIND_LABEL[s.kind]}
+                      {s.kind === "cross" && s.other !== undefined && ` (${s.line + 1} ба ${s.other + 1})`}
+                    </span>
+                    <MathText>{`$${coordTex(s.x, s.y)}$`}</MathText>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          )}
+
           {paramNames.length > 0 && (
             <Panel title="Параметр">
               <ul className="space-y-3">
@@ -726,7 +771,21 @@ export default function GraphTool() {
           </Panel>
 
 
-          <Panel title="Харагдац">
+          <Panel
+            title="Тохиргоо"
+            action={
+              <button
+                type="button"
+                aria-expanded={showSettings}
+                onClick={() => setShowSettings((v) => !v)}
+                className="inline-flex min-h-10 items-center gap-1 rounded-xl px-2 text-sm font-medium text-ink-dim hover:text-ink"
+              >
+                {showSettings ? "Хураах" : "Нээх"}
+              </button>
+            }
+          >
+            {showSettings && (
+            <>
             <div className="flex flex-wrap gap-1.5">
               <Toggle on={grid} onChange={setGrid}>Тор</Toggle>
               <Toggle on={special} onChange={setSpecial}>Онцгой цэг</Toggle>
@@ -751,6 +810,8 @@ export default function GraphTool() {
               <NumberField label={<MathText>{"$y_{\\min}$"}</MathText>} value={r4(ya)} onChange={(v) => setRange("ymin", v)} min={-1e6} max={1e6} slider={false} />
               <NumberField label={<MathText>{"$y_{\\max}$"}</MathText>} value={r4(yb)} onChange={(v) => setRange("ymax", v)} min={-1e6} max={1e6} slider={false} />
             </div>
+            </>
+            )}
           </Panel>
 
           {showTable && (
@@ -786,22 +847,6 @@ export default function GraphTool() {
             </Panel>
           )}
 
-          {special && specials.length > 0 && (
-            <Panel title="Онцгой цэгүүд">
-              <ul className="max-h-64 space-y-1.5 overflow-y-auto text-sm">
-                {specials.map((s, k) => (
-                  <li key={k} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-b border-line pb-1.5 last:border-0">
-                    <span className="flex items-center gap-1.5 text-ink-dim">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: colorOf(lines[s.line].ci) }} aria-hidden />
-                      {KIND_LABEL[s.kind]}
-                      {s.kind === "cross" && s.other !== undefined && ` (${s.line + 1} ба ${s.other + 1})`}
-                    </span>
-                    <MathText>{`$${coordTex(s.x, s.y)}$`}</MathText>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          )}
         </>
       }
     >
@@ -847,14 +892,15 @@ export default function GraphTool() {
               {yTicks.map((t) => ox >= 0 && ox <= view.w && Math.abs(t) > yStep * 1e-6 && <path key={`yt${t}`} d={`M${ox - 3} ${pyOf(view, t).toFixed(1)}h6`} />)}
             </g>
             {xTicks.map((t) =>
-              Math.abs(t) < xStep * 1e-6 ? null : (
+              // Тэнхлэг дэлгэцээс гарч шошго захад наалдсан үед булан дахь y шошготой давхцахгүй
+              Math.abs(t) < xStep * 1e-6 || (Math.abs(pxOf(view, t) - lblX) < 26 && (oy < 0 || oy > view.h || ox < 0 || ox > view.w)) || pxOf(view, t) < 12 || pxOf(view, t) > view.w - 12 ? null : (
                 <text key={`xl${t}`} x={pxOf(view, t)} y={lblY} textAnchor="middle" fontFamily={MATH_FONT} fontSize="13" fill="var(--ink-dim)" stroke="var(--surface)" strokeWidth="3" paintOrder="stroke">
                   {piAxis ? piLabel(t) : numLabel(t, xStep)}
                 </text>
               ),
             )}
             {yTicks.map((t) =>
-              Math.abs(t) < yStep * 1e-6 ? null : (
+              Math.abs(t) < yStep * 1e-6 || Math.abs(pyOf(view, t) - lblY) < 16 || pyOf(view, t) < 10 || pyOf(view, t) > view.h - 8 ? null : (
                 <text key={`yl${t}`} x={lblX} y={pyOf(view, t) + 4} textAnchor="end" fontFamily={MATH_FONT} fontSize="13" fill="var(--ink-dim)" stroke="var(--surface)" strokeWidth="3" paintOrder="stroke">
                   {numLabel(t, yStep)}
                 </text>
@@ -914,10 +960,28 @@ export default function GraphTool() {
                 const px = pxOf(view, s.x);
                 const py = pyOf(view, s.y);
                 if (px < -10 || px > view.w + 10 || py < -10 || py > view.h + 10) return null;
+                const sel = focusPt === k;
+                const col = s.kind === "cross" ? "var(--ink)" : colorOf(lines[s.line].ci);
+                if (sel) {
+                  const t = `(${shortNum(s.x)}; ${shortNum(s.y)})`;
+                  const tw = textWidth(t, 14) + 14;
+                  const bx = clamp(px - tw / 2, 4, view.w - tw - 4);
+                  const by = py - 44 < 4 ? py + 16 : py - 44;
+                  return (
+                    <g key={k}>
+                      <circle cx={px} cy={py} r="14" fill={col} opacity="0.18" />
+                      <circle cx={px} cy={py} r="7" fill={col} stroke="var(--surface)" strokeWidth="2.5" />
+                      <rect x={bx} y={by} width={tw} height="26" rx="8" fill="var(--surface)" stroke={col} strokeWidth="1.5" />
+                      <text x={bx + tw / 2} y={by + 13} textAnchor="middle" dominantBaseline="central" fontFamily={MATH_FONT} fontSize="14" fill="var(--ink)">
+                        {t}
+                      </text>
+                    </g>
+                  );
+                }
                 return (
                   <g key={k}>
-                    <circle cx={px} cy={py} r="4.5" fill="var(--surface)" stroke={s.kind === "cross" ? "var(--ink)" : colorOf(lines[s.line].ci)} strokeWidth="2" />
-                    {placed[k] && (
+                    <circle cx={px} cy={py} r="4.5" fill="var(--surface)" stroke={col} strokeWidth="2" />
+                    {placed[k] && focusPt !== k && (
                       <text x={placed[k]!.tx} y={placed[k]!.ty} dominantBaseline="central" fontFamily={MATH_FONT} fontSize={LABEL} fill="var(--ink)" stroke="var(--surface)" strokeWidth="3" paintOrder="stroke">
                         {placed[k]!.t}
                       </text>

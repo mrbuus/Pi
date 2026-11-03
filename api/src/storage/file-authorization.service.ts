@@ -7,8 +7,10 @@ import {
   canAccessProblem,
   canAccessVideoChapter,
   hasCoveringPass,
+  internalTeachingRole,
 } from '../common/access';
 import { canStaffClassDay, staffDays } from '../lesson-day/staff-access';
+import { SOURCE_PDF_PREFIX } from '../tests/source-pdf';
 import { addDateDays, todayUB } from '../common/date';
 
 /** Гэрийн даалгаврын бодлогын зургийг харах хугацаа (хичээлийн өдрөөс, хоног) */
@@ -38,6 +40,9 @@ export class FileAuthorizationService {
   }
   async allowed(actor: FileActor, key: string): Promise<boolean> {
     if (actor.role === Role.ADMIN) return true;
+    // Тестийн эх PDF — төвийн бүх багш (эзэн 2026-11-03); гадны багш, сурагч, эцэг эхэд хаалттай
+    if (key.startsWith(SOURCE_PDF_PREFIX))
+      return (await internalTeachingRole(this.prisma, actor.id)) !== null;
     // Түвшин тогтоох шалгалтын бодолтын зураг — төвийн багш нар үзэж түвшин тогтооно
     if (
       staff(actor.role) &&

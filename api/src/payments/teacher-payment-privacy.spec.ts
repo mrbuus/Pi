@@ -106,10 +106,23 @@ describe('Төлбөрийн нууцлал — Багш (TEACHER)', () => {
             studentProfile: { ...studentProfile },
           }),
         },
-        enrollment: { findFirst: jest.fn().mockResolvedValue(null) },
+        enrollment: {
+          findFirst: jest.fn().mockResolvedValue(null),
+          // Ангийн түүх: 11-2 → 11-1 шилжсэн (эзэн 2026-11-01)
+          findMany: jest.fn().mockResolvedValue([
+            { joinedAt: new Date('2026-09-01'), leftAt: new Date('2026-11-01'), classroom: { id: 'c2', name: '11-2 (Баруун 4)' } },
+            { joinedAt: new Date('2026-11-01'), leftAt: null, classroom: { id: 'c1', name: '11-1 (Баруун 4)' } },
+          ]),
+        },
         submission: { count: jest.fn().mockResolvedValue(0) },
         testResult: { count: jest.fn().mockResolvedValue(0) },
-        attendance: { count: jest.fn().mockResolvedValue(0) },
+        attendance: {
+          count: jest.fn().mockResolvedValue(0),
+          groupBy: jest.fn().mockResolvedValue([{ classroomId: 'c2', _count: { _all: 24 } }]),
+        },
+        dailyHomeworkMark: {
+          groupBy: jest.fn().mockResolvedValue([{ classroomId: 'c2', _count: { _all: 20 } }]),
+        },
         attempt: { count: jest.fn().mockResolvedValue(0) },
       };
       const service = new UsersService(
@@ -136,6 +149,14 @@ describe('Төлбөрийн нууцлал — Багш (TEACHER)', () => {
         motherPhone: null,
         grade: 10,
       });
+    });
+
+    it('ангийн түүх: шилжсэн ч өмнөх анги, ирц, даалгаврын тоо харагдана', async () => {
+      const res = await setup().getUserDetail('s1', 't1', Role.TEACHER);
+      expect(res.classHistory).toEqual([
+        expect.objectContaining({ classroomId: 'c2', attendance: 24, homework: 20 }),
+        expect.objectContaining({ classroomId: 'c1', leftAt: null, attendance: 0, homework: 0 }),
+      ]);
     });
 
     it('Багш+/Админ: бүрэн харна', async () => {

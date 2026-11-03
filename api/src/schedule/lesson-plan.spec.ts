@@ -127,6 +127,7 @@ function makePlanService() {
       update: jest.fn(async ({ data }: any) => ({ id: 'lt1', updatedAt: new Date(), ...data })),
       delete: jest.fn(async () => ({})),
     },
+    storedFile: { findMany: jest.fn(async () => []) },
     test: {
       findMany: jest.fn(async () => [
         {

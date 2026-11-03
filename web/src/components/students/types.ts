@@ -62,6 +62,15 @@ export interface StudentFocus {
   practice: { days: number; problems: number; leaves: number };
 }
 
+export interface ClassHistoryRow {
+  classroomId: string;
+  name: string;
+  joinedAt: string;
+  leftAt: string | null;
+  attendance: number;
+  homework: number;
+}
+
 // Дэлгэрэнгүй хуудас (GET /users/:id → users.service.getUserDetail)
 export interface StudentDetailData {
   id: string;
@@ -79,6 +88,8 @@ export interface StudentDetailData {
   archiveReason?: string | null;
   /** Архивлагдсан сурагчийн сүүлийн анги */
   lastClassroom?: ClassroomLite | null;
+  /** Бүх элсэлт эрт → сүүл (анги солигдсон ч түүх; ирц, даалгавар тэр ангидаа) */
+  classHistory?: ClassHistoryRow[];
   focus?: StudentFocus | null;
   studentProfile: StudentProfileLite | null;
   currentClassroom: ClassroomLite | null;
@@ -173,6 +184,8 @@ export function canSeeGuardianPhones(role: string | null): boolean {
 }
 
 /** Сурагчийн профайл засах (нэр/утас/анги/төлбөрийн багц…) эрхтэй эсэх. */
-export function canEditProfile(role: string | null): boolean {
-  return role === "ADMIN" || role === "TEACHER_PLUS";
+// Багш+ сурагчийг засна; ажилтны (багш/Багш+/админ) мэдээллийг зөвхөн Админ (эзэн 2026-11-01)
+export function canEditProfile(role: string | null, targetRole?: string): boolean {
+  const staffTarget = targetRole === "ADMIN" || targetRole === "TEACHER_PLUS" || targetRole === "TEACHER";
+  return role === "ADMIN" || (role === "TEACHER_PLUS" && !staffTarget);
 }

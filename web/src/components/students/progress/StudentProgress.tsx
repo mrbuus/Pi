@@ -175,7 +175,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
                 load();
                 paymentsQ.reload();
               }}
-              canEdit={canEditProfile(role)}
+              canEdit={canEditProfile(role, detail.role)}
               showGuardians={canSeeGuardianPhones(role)}
               canSeeMoney={canSeeMoney}
             />

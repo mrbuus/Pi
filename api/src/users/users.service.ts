@@ -1057,6 +1057,18 @@ export class UsersService {
     });
     if (!target) throw new NotFoundException('Хэрэглэгч олдсонгүй');
 
+    // Эрхийн хил (эзэн 2026-11-01): Багш+ сурагч/эцэг эх/худалдан авагчийг
+    // засна; багш, Багш+, админы мэдээллийг (утас = нэвтрэх түлхүүр) зөвхөн
+    // Админ. Өөр админыг хэн ч засахгүй.
+    const staffTarget =
+      target.role === Role.ADMIN ||
+      target.role === Role.TEACHER_PLUS ||
+      target.role === Role.TEACHER;
+    if (staffTarget && actorRole !== Role.ADMIN)
+      throw new ForbiddenException('Ажилтны мэдээллийг зөвхөн Админ засна');
+    if (target.role === Role.ADMIN && targetId !== actorId)
+      throw new ForbiddenException('Өөр админы мэдээллийг засах боломжгүй');
+
     const studentFields: (keyof UpdateUserProfileDto)[] = [
       'grade',
       'school',
@@ -1111,6 +1123,25 @@ export class UsersService {
       studentProfile: target.studentProfile,
     };
 
+    // Нууц үг = утас (эзний дүрэм, 2026-11-01): дугаар солигдоход нууц үг нь
+    // ХУУЧИН дугаар хэвээрээ байвал шинэ дугаар болно. Хэрэглэгч өөрөө сольсон
+    // нууц үгийг хөндөхгүй. Сесс тасрахгүй (passwordChangedAt-ыг хөндөхгүй).
+    // Зөвхөн СУРАГЧ — Багш+ ажилтан/админы нууц үгийг ингэж тогтоож болохгүй.
+    let passwordHash: string | undefined;
+    if (
+      target.role === Role.STUDENT &&
+      dto.phone &&
+      dto.phone !== target.phone
+    ) {
+      const defaultPassword = target.phone ?? target.email;
+      if (
+        defaultPassword &&
+        (await bcrypt.compare(defaultPassword, target.passwordHash))
+      )
+        passwordHash = await bcrypt.hash(dto.phone, 10);
+    }
+    const passwordFollowedPhone = passwordHash !== undefined;
+
     const result = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.update({
         where: { id: targetId },
@@ -1119,6 +1150,14 @@ export class UsersService {
           lastName: dto.lastName,
           phone: dto.phone,
           email: dto.email,
+          ...(passwordHash ? { passwordHash } : {}),
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          email: true,
         },
       });
 
@@ -1192,10 +1231,15 @@ export class UsersService {
           email: result.user.email,
         },
         studentProfile: result.studentProfile,
+        ...(target.role === Role.STUDENT &&
+        dto.phone &&
+        dto.phone !== target.phone
+          ? { passwordFollowedPhone }
+          : {}),
       },
     });
 
-    return result;
+    return { ...result, passwordFollowedPhone };
   }
 
   // Ажилтанд зориулсан дэлгэрэнгүй харагдац: профайл + идэвхтэй анги + код +
@@ -1281,6 +1325,11 @@ export class UsersService {
         : Promise.resolve(null),
     ]);
 
+    // Ангийн түүх (эзэн 2026-11-01): анги солигдсон ч бүх хугацаа харагдана — элсэлт бүр
+    // (хэзээнээс хэзээ хүртэл) ба тэр ангид хадгалагдсан ирц, даалгаврын тоо.
+    const classHistory =
+      user.role === Role.STUDENT ? await this.classHistory(targetId) : [];
+
     const canSeePhones =
       requesterRole === Role.ADMIN || requesterRole === Role.TEACHER_PLUS;
 
@@ -1315,6 +1364,7 @@ export class UsersService {
           }
         : null,
       lastClassroom: lastEnrollment?.classroom ?? null,
+      classHistory,
       counts: {
         assignmentsCompleted,
         testResults,
@@ -1323,6 +1373,41 @@ export class UsersService {
       },
       focus,
     };
+  }
+
+  /** Сурагчийн бүх элсэлт (эрт → сүүл) + анги тус бүрт хадгалагдсан ирц, даалгаврын тоо */
+  private async classHistory(studentId: string) {
+    const [enrollments, attendance, homework] = await Promise.all([
+      this.prisma.enrollment.findMany({
+        where: { studentId },
+        orderBy: { joinedAt: 'asc' },
+        select: {
+          joinedAt: true,
+          leftAt: true,
+          classroom: { select: { id: true, name: true } },
+        },
+      }),
+      this.prisma.attendance.groupBy({
+        by: ['classroomId'],
+        where: { studentId },
+        _count: { _all: true },
+      }),
+      this.prisma.dailyHomeworkMark.groupBy({
+        by: ['classroomId'],
+        where: { studentId, status: { not: null } },
+        _count: { _all: true },
+      }),
+    ]);
+    const att = new Map(attendance.map((a) => [a.classroomId, a._count._all]));
+    const hw = new Map(homework.map((h) => [h.classroomId, h._count._all]));
+    return enrollments.map((e) => ({
+      classroomId: e.classroom.id,
+      name: e.classroom.name,
+      joinedAt: e.joinedAt,
+      leftAt: e.leftAt,
+      attendance: att.get(e.classroom.id) ?? 0,
+      homework: hw.get(e.classroom.id) ?? 0,
+    }));
   }
 
   /**

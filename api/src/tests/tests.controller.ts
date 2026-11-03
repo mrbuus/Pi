@@ -88,6 +88,13 @@ export class TestsController {
     );
   }
 
+  // Бүлгийн эх PDF (A, B хамт) — бодлогын сангийн «⋯» цэсний «PDF татах»
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('source-pdf')
+  sourcePdf(@Req() req: AuthedRequest, @Query('chapterId') chapterId?: string) {
+    return this.tests.sourcePdf(req.user.userId, String(chapterId ?? '').trim());
+  }
+
   @Roles(Role.STUDENT, Role.BUYER)
   @Get('my-results')
   myResults(@Req() req: AuthedRequest) {

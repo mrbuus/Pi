@@ -59,6 +59,8 @@ export interface TestInfo {
   bookTitle: string | null;
   chapterTitle: string | null;
   problemIds: string[];
+  /** Эх PDF (A, B хамт) — бүх багш татна; байхгүй бол null */
+  sourcePdfKey?: string | null;
 }
 
 export interface DayPlanResponse {
