@@ -8,10 +8,10 @@ import 'ui/tests_list_screen.dart';
 
 /// `exam` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
-/// - shell: `/app/tests` (жагсаалт), `/app/tests/:id/result` (шалгалтын дүн), `/app/tests/:id/review` (эргэн харалт),
+/// - shell: `/app/tests` (жагсаалт: `?tab=give|done|rank`), `/app/tests/:id/result` (шалгалтын дүн), `/app/tests/:id/review` (эргэн харалт),
 ///   `/app/tests/:id/ranking` (өөрийн байр — зөвхөн хэрэглэгч товшиж нээнэ)
 /// - fullscreen: `/app/tests/:id` (интро + шалгалт өгөх — доод табгүй, буцах товч = илгээх эсэхийг асууна)
-/// - `/app/thousand/...` → `/app/tests` (вэбтэй ижил redirect)
+/// - `/app/thousand/...` → `/app/tests`, `/app/results-ranking` → `/app/tests?tab=rank` (вэбтэй ижил redirect)
 final examRoutes = FeatureRoutes(
   fullscreen: [
     GoRoute(
@@ -20,7 +20,12 @@ final examRoutes = FeatureRoutes(
     ),
   ],
   shell: [
-    GoRoute(path: '/app/tests', builder: (context, state) => const TestsListScreen()),
+    GoRoute(
+      path: '/app/tests',
+      builder: (context, state) => TestsListScreen(initialTab: state.uri.queryParameters['tab']),
+    ),
+    // Вэбийн `/app/results-ranking` → `/app/tests?tab=rank` (цэс, хуучин холбоос).
+    GoRoute(path: '/app/results-ranking', redirect: (context, state) => '/app/tests?tab=rank'),
     GoRoute(
       path: '/app/tests/:id/result',
       builder: (context, state) => ExamResultScreen(testId: state.pathParameters['id']!),

@@ -22,8 +22,14 @@ class ExamRepository {
   /// Шалгалтууд (CHAPTER_EXAM / EESH_MOCK / THOUSAND) — оноосон, өгсөн, ирээгүй.
   Future<List<TestRow>> myExams() => _api.get(
     '/exam-results/my',
-    parse: (j) => [for (final r in ((j as Map?)?['exams'] as List? ?? const [])) TestRow.fromJson(r)],
+    parse: (j) => [
+      for (final r in ((j as Map?)?['exams'] as List? ?? const [])) TestRow.fromJson(r, deriveUpcoming: true),
+    ],
   );
+
+  /// Миний бүх дүн (дасгал тест ч) — вэбийн «Өгсөн, дүн» ба «Эрэмбэ» табын эх (`/tests/my-results`).
+  Future<List<MyResult>> myResults() =>
+      _api.get('/tests/my-results', parse: (j) => [for (final r in (j as List? ?? const [])) MyResult.fromJson(r)]);
 
   Future<TestMeta> meta(String testId) => _api.get('/tests/${_id(testId)}', parse: TestMeta.fromJson);
 
@@ -54,8 +60,7 @@ class ExamRepository {
       _api.get('/exam-results/my/${_id(testId)}', parse: ExamResultPage.fromJson);
 
   /// Ангийн байр — ЗӨВХӨН хэрэглэгч өөрөө нээхэд дуудна (анхдагчаар харуулахгүй).
-  Future<TestRanking> ranking(String testId) =>
-      _api.get('/test-rankings/${_id(testId)}', parse: TestRanking.fromJson);
+  Future<TestRanking> ranking(String testId) => _api.get('/test-rankings/${_id(testId)}', parse: TestRanking.fromJson);
 
   Future<PracticeReview> review(String testId) =>
       _api.get('/tests/${_id(testId)}/review', parse: PracticeReview.fromJson);

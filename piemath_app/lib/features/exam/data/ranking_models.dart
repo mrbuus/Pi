@@ -19,7 +19,7 @@ class RankEntry {
   final int? rank;
   final int participants;
 
-  /// Ижил оноотой (өөрийгөө оруулаад биш) хүмүүсийн тоо.
+  /// Ижил хувийн дүнтэй хүмүүсийн тоо, ӨӨРИЙГӨӨ ОРУУЛСАН (`ranking.service.ts`): 1 = өөр хэн ч биш.
   final int tied;
 }
 
@@ -40,9 +40,7 @@ class TestRanking {
       title: test['title'] is String ? test['title'] as String : '',
       totalScore: (j['totalScore'] as num?) ?? 0,
       maxScore: (j['maxScore'] as num?) ?? 0,
-      classes: [
-        for (final c in (j['classes'] as List? ?? const [])) RankEntry.fromJson(c, fallbackLabel: 'Анги'),
-      ],
+      classes: [for (final c in (j['classes'] as List? ?? const [])) RankEntry.fromJson(c, fallbackLabel: 'Анги')],
       school: j['school'] is Map ? RankEntry.fromJson(j['school'], fallbackLabel: 'Сургууль') : null,
       exam: j['exam'] is Map ? RankEntry.fromJson(j['exam'], fallbackLabel: 'Нийт шалгалт') : null,
     );

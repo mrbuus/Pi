@@ -84,8 +84,10 @@ class TestRow {
     this.absent = false,
   });
 
-  factory TestRow.fromJson(Object? raw) {
+  /// [deriveUpcoming] — `/exam-results/my`: `upcoming` ирээгүй бол `assignedAt > одоо` (вэб `useMyExams`).
+  factory TestRow.fromJson(Object? raw, {bool deriveUpcoming = false, DateTime? now}) {
     final j = _map(raw);
+    final assigned = parseApiInstant(_str(j['assignedAt']));
     final chapter = _map(j['chapter']);
     final book = _map(chapter['book']);
     return TestRow(
@@ -102,8 +104,10 @@ class TestRow {
       problemCount: _int(_map(j['_count'])['problems']) ?? _int(j['problemCount']) ?? 0,
       results: [for (final r in _list(j['results'])) ScorePair.fromJson(r)],
       sessionStatus: SessionStatus.parse(j['sessionStatus']),
-      upcoming: _bool(j['upcoming']),
-      assignedAt: parseApiInstant(_str(j['assignedAt'])),
+      upcoming: j['upcoming'] is bool
+          ? j['upcoming'] == true
+          : deriveUpcoming && assigned != null && assigned.isAfter(now ?? DateTime.now()),
+      assignedAt: assigned,
       percent: _int(j['percent']),
       takenAt: parseApiInstant(_str(j['takenAt'])),
       absent: _bool(j['absent']),
@@ -130,6 +134,39 @@ class TestRow {
   bool get manual => gradingMode == 'MANUAL';
   ScorePair? get result => results.isEmpty ? null : results.first;
   bool get done => result != null || sessionStatus == SessionStatus.submitted;
+}
+
+/// `GET /tests/my-results` — миний бүх дүн (дасгал тест ч). Апп зөвхөн энэ талбарыг уншина (§1.3).
+@immutable
+class MyResult {
+  const MyResult({
+    required this.id,
+    required this.testId,
+    required this.title,
+    required this.type,
+    required this.score,
+    this.createdAt,
+  });
+
+  factory MyResult.fromJson(Object? raw) {
+    final j = _map(raw);
+    final test = _map(j['test']);
+    return MyResult(
+      id: _str(j['id']) ?? '',
+      testId: _str(test['id']) ?? _str(j['testId']) ?? '',
+      title: _str(test['title']) ?? '',
+      type: _str(test['type']) ?? 'CUSTOM',
+      score: ScorePair.fromJson(j),
+      createdAt: parseApiInstant(_str(j['createdAt'])),
+    );
+  }
+
+  final String id;
+  final String testId;
+  final String title;
+  final String type;
+  final ScorePair score;
+  final DateTime? createdAt;
 }
 
 /// `GET /tests/:id` — интро мета.

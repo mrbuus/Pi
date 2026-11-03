@@ -9,21 +9,26 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
+import '../data/ranking_models.dart';
 import '../domain/test_list_logic.dart';
+import 'ranking_screen.dart' show testRankingProvider;
 
-/// «Өгөх» / «Өгсөн, дүн» табын өгөгдөл — вэбийн `StudentExamsHub` (+ `StudentExamLists`).
+/// «Өгөх» / «Өгсөн, дүн» / «Эрэмбэ» табын өгөгдөл — вэбийн `StudentExamsHub` (+ `StudentExamLists`).
 @immutable
 class TestsHub {
-  const TestsHub({required this.practice, required this.examsToTake, required this.done});
+  const TestsHub({required this.practice, required this.examsToTake, required this.done, required this.results});
 
   /// Дасгал тест (А/Б нэгтгэсэн), сэдвээр бүлэглэхэд.
   final List<TestRow> practice;
 
-  /// Оноосон шалгалт (эхлэх / үргэлжлүүлэх / удахгүй).
+  /// Оноосон шалгалт (эхлэх / үргэлжлүүлэх / удахгүй) — А/Б-оос нэг.
   final List<TestRow> examsToTake;
 
-  /// Өгсөн (дүнтэй, ирээгүй, дүн гараагүй) — шалгалт + дасгал.
-  final List<TestRow> done;
+  /// «Өгсөн, дүн»: шалгалтын өгсөн + `/tests/my-results`-ийн бусад дүн (вэбтэй ижил).
+  final List<DoneRow> done;
+
+  /// «Эрэмбэ» таб: миний бүх дүн (`/tests/my-results`). Байрыг товшиж нээхэд л татна.
+  final List<MyResult> results;
 
   List<TestRow> get inProgress => [
     ...examsToTake.where((r) => r.sessionStatus == SessionStatus.inProgress),
@@ -35,19 +40,22 @@ final testsHubProvider = FutureProvider.autoDispose<TestsHub>((ref) async {
   final repo = ref.watch(examRepositoryProvider);
   final s = ref.watch(sessionProvider);
   final studentId = s is SignedIn ? (s.user?.id ?? s.auth.userId) : null;
-  final results = await Future.wait([repo.tests(), repo.myExams()]);
-  final tests = results[0];
-  final exams = results[1];
-  final practiceAll = tests.where((r) => !isExamType(r.type) && !r.upcoming).toList();
-  final practice = collapseVariants(practiceAll, studentId);
-  final examsToTake = exams.where((r) => !r.done && !r.absent).toList();
-  final done = [...exams.where((r) => r.done || r.absent), ...practice.where((r) => r.done)];
-  return TestsHub(practice: practice.where((r) => !r.done).toList(), examsToTake: examsToTake, done: done);
+  final (tests, exams, results) = await (repo.tests(), repo.myExams(), repo.myResults()).wait;
+  final practice = collapseVariants(tests.where((r) => !isExamType(r.type) && !r.upcoming).toList(), studentId);
+  final picked = collapseVariants(exams, studentId);
+  return TestsHub(
+    practice: practice.where((r) => !r.done).toList(),
+    examsToTake: sortExamsToTake(picked.where((r) => !examIsTaken(r))),
+    done: buildDoneRows(takenExams: picked.where(examIsTaken).toList(), allExams: exams, results: results),
+    results: results,
+  );
 });
 
-/// `/app/tests` — шалгалт, тестийн жагсаалт.
+/// `/app/tests` — шалгалт, тестийн жагсаалт. [initialTab] = `give | done | rank` (вэбийн `?tab=`).
 class TestsListScreen extends ConsumerStatefulWidget {
-  const TestsListScreen({super.key});
+  const TestsListScreen({super.key, this.initialTab});
+
+  final String? initialTab;
 
   @override
   ConsumerState<TestsListScreen> createState() => _TestsListScreenState();
@@ -56,11 +64,15 @@ class TestsListScreen extends ConsumerStatefulWidget {
 class _TestsListScreenState extends ConsumerState<TestsListScreen> {
   String _query = '';
 
+  static const _tabs = ['give', 'done', 'rank'];
+
   @override
   Widget build(BuildContext context) {
     final hub = ref.watch(testsHubProvider);
+    final initial = _tabs.indexOf(widget.initialTab ?? '');
     return DefaultTabController(
-      length: 2,
+      length: _tabs.length,
+      initialIndex: initial < 0 ? 0 : initial,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Шалгалт'),
@@ -68,6 +80,7 @@ class _TestsListScreenState extends ConsumerState<TestsListScreen> {
             tabs: [
               Tab(text: 'Өгөх'),
               Tab(text: 'Өгсөн, дүн'),
+              Tab(text: 'Эрэмбэ'),
             ],
           ),
         ),
@@ -83,6 +96,7 @@ class _TestsListScreenState extends ConsumerState<TestsListScreen> {
             children: [
               _TakeTab(hub: h, query: _query, onQuery: (q) => setState(() => _query = q)),
               _DoneTab(rows: h.done),
+              _RankTab(results: h.results),
             ],
           ),
         ),
@@ -171,7 +185,7 @@ class _TakeTab extends ConsumerWidget {
 class _DoneTab extends ConsumerWidget {
   const _DoneTab({required this.rows});
 
-  final List<TestRow> rows;
+  final List<DoneRow> rows;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -188,8 +202,197 @@ class _DoneTab extends ConsumerWidget {
         padding: const EdgeInsets.all(AppSpace.gutter),
         itemCount: rows.length,
         separatorBuilder: (_, _) => const SizedBox(height: AppSpace.sm),
-        itemBuilder: (_, i) => _TestTile(row: rows[i]),
+        itemBuilder: (_, i) => _DoneTile(row: rows[i]),
       ),
+    );
+  }
+}
+
+/// Өгсөн дүнгийн мөр: гарчиг, огноо, хувь + оноо (вэбийн `DoneTab`: хувь = `round(total/max*100)`).
+class _DoneTile extends StatelessWidget {
+  const _DoneTile({required this.row});
+
+  final DoneRow row;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final r = row;
+    final score = r.score;
+    final percent = score?.percent;
+    final date = r.date == null ? null : DateMn.numeric(UbDateTime.fromInstant(r.date!));
+    final String status;
+    if (r.absent) {
+      status = 'Ирээгүй';
+    } else if (score != null) {
+      status = '${percent == null ? '' : '$percent%, '}${formatScore(score.total)}/${formatScore(score.max)}';
+    } else {
+      status = 'Дүн гараагүй';
+    }
+    return AppCard(
+      onTap: r.absent ? null : () => context.push(r.path),
+      semanticLabel: [r.title, ?date, status].join(', '),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MetaTitle(r.title, style: context.text.titleSmall),
+                if (date != null) Text(date, style: context.text.bodySmall),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpace.sm),
+          if (score != null && !r.absent)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (percent != null) Text('$percent%', style: context.text.titleMedium),
+                Text('${formatScore(score.total)}/${formatScore(score.max)}', style: context.text.bodySmall),
+              ],
+            )
+          else
+            Text(status, style: context.text.labelMedium?.copyWith(color: c.inkDim)),
+        ],
+      ),
+    );
+  }
+}
+
+/// «Эрэмбэ» таб — вэбийн `MyRankings`: дүн бүр дээр «Миний эрэмбэ» товч. Байрыг ТОВШИЖ нээсний дараа л
+/// `/test-rankings/:id` татна (анхдагчаар харуулахгүй — хүүхдэд өөрөө сонгох эрх).
+class _RankTab extends ConsumerWidget {
+  const _RankTab({required this.results});
+
+  final List<MyResult> results;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (results.isEmpty) {
+      return const EmptyState(
+        icon: AppIcons.ranking,
+        title: 'Эрэмбэ хараахан алга',
+        message: 'Шалгалт өгмөгц ангидаа хэддүгээрт орсноо энд харна',
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(testsHubProvider.future),
+      child: ListView.separated(
+        padding: const EdgeInsets.all(AppSpace.gutter),
+        itemCount: results.length,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpace.sm),
+        itemBuilder: (_, i) => _RankCard(result: results[i]),
+      ),
+    );
+  }
+}
+
+class _RankCard extends ConsumerStatefulWidget {
+  const _RankCard({required this.result});
+
+  final MyResult result;
+
+  @override
+  ConsumerState<_RankCard> createState() => _RankCardState();
+}
+
+class _RankCardState extends ConsumerState<_RankCard> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.result;
+    final date = r.createdAt == null ? null : DateMn.numeric(UbDateTime.fromInstant(r.createdAt!));
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () =>
+                context.push(isExamType(r.type) ? '/app/tests/${r.testId}/result' : '/app/tests/${r.testId}/review'),
+            child: Row(
+              children: [
+                Expanded(child: MetaTitle(r.title, style: context.text.titleSmall)),
+                const SizedBox(width: AppSpace.sm),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('${formatScore(r.score.total)}/${formatScore(r.score.max)}', style: context.text.titleMedium),
+                    if (date != null) Text(date, style: context.text.bodySmall),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpace.xs),
+          TextButton.icon(
+            onPressed: () => setState(() => _open = !_open),
+            icon: AnimatedRotation(
+              turns: _open ? 0.5 : 0,
+              duration: AppMotion.base,
+              child: const Icon(AppIcons.expand, size: 18),
+            ),
+            label: const Text('Миний эрэмбэ'),
+          ),
+          if (_open) _RankBody(testId: r.testId),
+        ],
+      ),
+    );
+  }
+}
+
+class _RankBody extends ConsumerWidget {
+  const _RankBody({required this.testId});
+
+  final String testId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(testRankingProvider(testId));
+    return async.when(
+      loading: () => const Padding(padding: EdgeInsets.all(AppSpace.md), child: LoadingState()),
+      error: (e, _) => e is ApiError && (e.kind == ApiErrorKind.notFound || e.kind == ApiErrorKind.forbidden)
+          ? Text('Байр одоогоор харагдахгүй байна', style: context.text.bodySmall)
+          : ErrorState(
+              title: 'Эрэмбийг ачаалж чадсангүй',
+              message: e is ApiError ? e.message : AppStrings.genericError,
+              onRetry: () => ref.invalidate(testRankingProvider(testId)),
+            ),
+      data: (r) {
+        final entries = [
+          ...r.classes,
+          ?r.school,
+          if (r.exam != null)
+            RankEntry(label: 'Энэ шалгалт', rank: r.exam!.rank, participants: r.exam!.participants, tied: r.exam!.tied),
+        ];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final e in entries)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(e.label, style: context.text.bodyMedium)),
+                    Text(
+                      [
+                        e.rank == null ? 'Эрэмбэ тооцохгүй' : '${e.rank} / ${e.participants}',
+                        ?tiedLabel(e.tied),
+                      ].join(', '),
+                      style: context.text.titleSmall,
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: AppSpace.xs),
+            Text(
+              'Ижил хувийн дүнтэй сурагчид ижил байр эзэлнэ. Бусдын нэр, код харагдахгүй',
+              style: context.text.bodySmall,
+            ),
+          ],
+        );
+      },
     );
   }
 }

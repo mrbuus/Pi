@@ -150,7 +150,7 @@ void main() {
       expect(find.text('Таны оноо 31 / 40'), findsOneWidget);
       expect(find.text('12Б'), findsOneWidget);
       expect(find.text('3-р байр'), findsOneWidget);
-      expect(find.text('24 оролцогчоос, ижил оноотой 1 хүн'), findsOneWidget);
+      expect(find.text('24 оролцогчоос'), findsOneWidget);
       expect(find.text('Жишээ сургууль'), findsOneWidget);
       expect(find.text('41-р байр'), findsOneWidget);
       expect(find.text('Нийт шалгалт'), findsOneWidget);
