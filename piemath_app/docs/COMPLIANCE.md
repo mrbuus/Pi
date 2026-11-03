@@ -22,6 +22,7 @@
 | 1.14 | Xcode 26 / iOS 26 SDK-ээр build (2026-04-28-аас). Доод iOS 15 (≥13 шаардлага) | ✅ / `[Э]` | `IPHONEOS_DEPLOYMENT_TARGET = 15.0` |
 | 1.15 | Push: `aps-environment` = development; App Store-д export хийхэд Xcode provisioning profile-оор production болгоно | ✅ | |
 | 1.16 | Universal Links (`/q/<код>`): заавал биш. Хийх бол [Э] App ID-д Associated Domains + вэбд `apple-app-site-association` | `[Э]` сонголт | §2.10 |
+| 1.18 | iOS build (Swift Package Manager): `firebase_messaging 17` (Firebase iOS 13, gtm-session-fetcher ≥4) ба `google_sign_in_ios 6.3.8` (GoogleSignIn 9, gtm-session-fetcher <4) зөрчилдөж **iOS build огт гарахгүй** байсан. `firebase_core ^4.15.2`, `firebase_messaging ^16.7.1` (Firebase iOS 12) болгож шийдэв; Dart API өөрчлөгдөөгүй, `analyze` 0. `google_sign_in_ios` GoogleSignIn 10-ийг дэмжвэл Firebase-ийг буцааж шинэчилнэ. `Package.resolved` commit хийсэн | ✅ | `pubspec.yaml`, `ios/**/swiftpm/Package.resolved`. `flutter build ios --debug --no-codesign` амжилттай |
 | 1.17 | Нууцлалын бодлогын URL апп дотор ба дэлгүүрт | ✅ / `[Э]` | `consent_screen.dart`, `/privacy`; [Э] нийтийн URL батлах |
 
 ## 2. Google Play
