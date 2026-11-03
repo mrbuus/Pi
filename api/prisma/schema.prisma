@@ -59,6 +59,8 @@ model User {
   formulaReviews         FormulaReview[]
   formulaReviewDays       FormulaReviewDay[]
   formulaReviewAttempts   FormulaReviewAttempt[]
+  problemReviews          ProblemReview[]
+  studyWeeklyGoal         StudyWeeklyGoal?
 
   staffCapabilities      StaffCapabilityGrant[]
   feedback               Feedback[]
@@ -861,6 +863,7 @@ model Problem {
   choiceOptions ProblemChoice[] // бүтэцтэй сонголтууд (correct/wrong + алдааны шалтгаан)
   attempts      Attempt[]
   mistakeEntries MistakeEntry[]
+  problemReviews ProblemReview[]
   videos        Video[]
   testItems     TestProblem[]
   studyReviewItems StudyReviewItem[]
@@ -2423,6 +2426,42 @@ model FormulaReview {
   formula Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
   @@id([userId, formulaId])
   @@index([userId, dueAt])
+}
+
+// Алдсан бодлогыг хугацаатайгаар давтах (SM-2-ийн хялбар хувилбар, 2026-11-04).
+// Дасгал, давтлага, тест, онлайн гэрийн даалгаварт буруу бодсон бодлого маргааш давтагдана;
+// давтлагаар зөв бодвол интервал уртасна, буруу бол дахин 1 хоног. Логик: mistakes/problem-review-scheduling.ts
+model ProblemReview {
+  id           String    @id @default(cuid())
+  studentId    String
+  problemId    String
+  dueAt        DateTime
+  intervalDays Int       @default(1)
+  ease         Float     @default(2.5)
+  reps         Int       @default(0)
+  lapses       Int       @default(0)
+  lastResult   String? // WRONG | CORRECT
+  source       String // PRACTICE | TEST | STUDY_REVIEW | HOMEWORK | REVIEW
+  // Сүүлийн үйл явдлын мөч — хоцорч ирсэн/давтагдсан үйл явдал хуваарийг дахин тэглэхгүй
+  lastEventAt  DateTime
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  student      User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  problem      Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, problemId])
+  @@index([studentId, dueAt])
+}
+
+// Сурагчийн өөрөө тавьсан 7 хоногийн зорилго (7-оос хэдэн өдөр). Арилгах = зөөлөн (deletedAt).
+model StudyWeeklyGoal {
+  id          String    @id @default(cuid())
+  studentId   String    @unique
+  daysPerWeek Int
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model FormulaReviewDay {

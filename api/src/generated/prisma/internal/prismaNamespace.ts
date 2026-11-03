@@ -488,6 +488,8 @@ export const ModelName = {
   GoogleLoginExchange: 'GoogleLoginExchange',
   StoredFile: 'StoredFile',
   FormulaReview: 'FormulaReview',
+  ProblemReview: 'ProblemReview',
+  StudyWeeklyGoal: 'StudyWeeklyGoal',
   FormulaReviewDay: 'FormulaReviewDay',
   FormulaReviewAttempt: 'FormulaReviewAttempt',
   Feedback: 'Feedback',
@@ -544,7 +546,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -7282,6 +7284,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ProblemReview: {
+      payload: Prisma.$ProblemReviewPayload<ExtArgs>
+      fields: Prisma.ProblemReviewFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProblemReviewFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProblemReviewFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        findFirst: {
+          args: Prisma.ProblemReviewFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProblemReviewFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        findMany: {
+          args: Prisma.ProblemReviewFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>[]
+        }
+        create: {
+          args: Prisma.ProblemReviewCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        createMany: {
+          args: Prisma.ProblemReviewCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProblemReviewCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>[]
+        }
+        delete: {
+          args: Prisma.ProblemReviewDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        update: {
+          args: Prisma.ProblemReviewUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProblemReviewDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProblemReviewUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProblemReviewUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProblemReviewUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        aggregate: {
+          args: Prisma.ProblemReviewAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProblemReview>
+        }
+        groupBy: {
+          args: Prisma.ProblemReviewGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProblemReviewGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProblemReviewCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProblemReviewCountAggregateOutputType> | number
+        }
+      }
+    }
+    StudyWeeklyGoal: {
+      payload: Prisma.$StudyWeeklyGoalPayload<ExtArgs>
+      fields: Prisma.StudyWeeklyGoalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StudyWeeklyGoalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StudyWeeklyGoalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        findFirst: {
+          args: Prisma.StudyWeeklyGoalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StudyWeeklyGoalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        findMany: {
+          args: Prisma.StudyWeeklyGoalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>[]
+        }
+        create: {
+          args: Prisma.StudyWeeklyGoalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        createMany: {
+          args: Prisma.StudyWeeklyGoalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StudyWeeklyGoalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>[]
+        }
+        delete: {
+          args: Prisma.StudyWeeklyGoalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        update: {
+          args: Prisma.StudyWeeklyGoalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        deleteMany: {
+          args: Prisma.StudyWeeklyGoalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StudyWeeklyGoalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StudyWeeklyGoalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>[]
+        }
+        upsert: {
+          args: Prisma.StudyWeeklyGoalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        aggregate: {
+          args: Prisma.StudyWeeklyGoalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStudyWeeklyGoal>
+        }
+        groupBy: {
+          args: Prisma.StudyWeeklyGoalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudyWeeklyGoalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StudyWeeklyGoalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudyWeeklyGoalCountAggregateOutputType> | number
+        }
+      }
+    }
     FormulaReviewDay: {
       payload: Prisma.$FormulaReviewDayPayload<ExtArgs>
       fields: Prisma.FormulaReviewDayFieldRefs
@@ -11721,6 +11871,37 @@ export const FormulaReviewScalarFieldEnum = {
 export type FormulaReviewScalarFieldEnum = (typeof FormulaReviewScalarFieldEnum)[keyof typeof FormulaReviewScalarFieldEnum]
 
 
+export const ProblemReviewScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  problemId: 'problemId',
+  dueAt: 'dueAt',
+  intervalDays: 'intervalDays',
+  ease: 'ease',
+  reps: 'reps',
+  lapses: 'lapses',
+  lastResult: 'lastResult',
+  source: 'source',
+  lastEventAt: 'lastEventAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProblemReviewScalarFieldEnum = (typeof ProblemReviewScalarFieldEnum)[keyof typeof ProblemReviewScalarFieldEnum]
+
+
+export const StudyWeeklyGoalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  daysPerWeek: 'daysPerWeek',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StudyWeeklyGoalScalarFieldEnum = (typeof StudyWeeklyGoalScalarFieldEnum)[keyof typeof StudyWeeklyGoalScalarFieldEnum]
+
+
 export const FormulaReviewDayScalarFieldEnum = {
   userId: 'userId',
   day: 'day',
@@ -13489,6 +13670,8 @@ export type GlobalOmitConfig = {
   googleLoginExchange?: Prisma.GoogleLoginExchangeOmit
   storedFile?: Prisma.StoredFileOmit
   formulaReview?: Prisma.FormulaReviewOmit
+  problemReview?: Prisma.ProblemReviewOmit
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalOmit
   formulaReviewDay?: Prisma.FormulaReviewDayOmit
   formulaReviewAttempt?: Prisma.FormulaReviewAttemptOmit
   feedback?: Prisma.FeedbackOmit

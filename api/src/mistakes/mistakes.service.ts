@@ -50,7 +50,7 @@ function gradable(entry: EntryWithProblem): GradableProblem {
   };
 }
 
-function safeAnswerFields(problem: GradableProblem): string[] | undefined {
+export function safeAnswerFields(problem: GradableProblem): string[] | undefined {
   const answer = problem.correctAnswer;
   if (
     !hasKnownAnswer(problem) ||
@@ -68,7 +68,7 @@ function safeAnswerFields(problem: GradableProblem): string[] | undefined {
   return fields.length > 0 && fields.length <= 20 ? fields : undefined;
 }
 
-function publicCorrectAnswer(problem: GradableProblem): unknown {
+export function publicCorrectAnswer(problem: GradableProblem): unknown {
   if (choiceModeOf(problem) === 'TEXT') {
     const options = [...(problem.choiceOptions ?? [])].sort(
       (a, b) => a.order - b.order,
@@ -144,7 +144,8 @@ function serializeEntry(entry: EntryWithProblem) {
 export class MistakesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async accessibleChapterWhere(
+  /** Сурагчийн хандах эрхтэй бүлгийн шүүлтүүр (давтлага `problem-review.service` ч ашиглана). */
+  async accessibleChapterWhere(
     userId: string,
   ): Promise<Prisma.ChapterWhereInput> {
     const contentNotDeleted: Prisma.ChapterWhereInput = {

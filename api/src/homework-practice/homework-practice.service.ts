@@ -4,11 +4,13 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { addDaysKey, ubDateKey } from '../attendance/board-logic';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProblemReviewService } from '../mistakes/problem-review.service';
 import {
   currentClass,
   loadLessonDays,
@@ -132,7 +134,10 @@ function asRecord(v: unknown): Record<string, unknown> {
  */
 @Injectable()
 export class HomeworkPracticeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private readonly reviews?: ProblemReviewService,
+  ) {}
 
   private problemsCache = new Map<
     string,
@@ -1410,6 +1415,12 @@ export class HomeworkPracticeService {
       if (fresh?.status === 'SUBMITTED') return this.submittedView(fresh);
       throw new ConflictException('Гэрийн даалгаврыг илгээж чадсангүй');
     }
+    // Хугацаатай давталт: буруу бодлогууд маргааш давтагдана (commit-ийн дараа, дүнг өөрчлөхгүй)
+    this.reviews?.recordWrongInBackground(
+      Object.entries(graded.results)
+        .filter(([, result]) => result === 'WRONG')
+        .map(([problemId]) => ({ studentId, problemId, source: 'HOMEWORK' as const, occurredAt: submittedAt })),
+    );
     return {
       score: { correct: graded.correct, total: graded.total },
       results: graded.results,

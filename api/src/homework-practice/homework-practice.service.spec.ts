@@ -526,6 +526,21 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     });
   });
 
+  it('илгээх: буруу бодлогыг хугацаатай давталтад өгнө, дүн өөрчлөгдөхгүй', async () => {
+    const reviews = { recordWrongInBackground: jest.fn() };
+    const hooked = new HomeworkPracticeService(env.db, reviews as never);
+    const { attemptId } = await hooked.start('s1', { testId: 'B1', date: '2026-10-27' });
+    const res = await hooked.submit('s1', attemptId, { p1: 'B', p2: 'D' });
+    expect(res.score).toEqual({ correct: 1, total: 2 });
+    expect(reviews.recordWrongInBackground).toHaveBeenCalledTimes(1);
+    expect(reviews.recordWrongInBackground.mock.calls[0][0]).toEqual([
+      { studentId: 's1', problemId: 'p2', source: 'HOMEWORK', occurredAt: expect.any(Date) },
+    ]);
+    // Давтан илгээлт (аль хэдийн SUBMITTED) дахин бүртгэхгүй
+    await hooked.submit('s1', attemptId, { p1: 'A' });
+    expect(reviews.recordWrongInBackground).toHaveBeenCalledTimes(1);
+  });
+
   it('хоцорсон: хугацаа (дараагийн хичээлийн 00:00) өнгөрсний дараа илгээвэл late', async () => {
     jest.setSystemTime(new Date('2026-10-28T10:00:00Z')); // УБ 10-28 18:00
     const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });

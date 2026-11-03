@@ -1,8 +1,9 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, Optional } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Prisma } from '../generated/prisma/client';
 import { SelfState } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProblemReviewService } from './problem-review.service';
 
 type MistakeSource = 'PRACTICE' | 'TEST';
 
@@ -22,7 +23,10 @@ export class MistakeCollector implements OnModuleDestroy {
   /** Хүсэлтийн дараа ажиллаж буй цуглуулга — унтрахдаа дуусахыг хүлээнэ */
   private readonly background = new Set<Promise<void>>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly reviews?: ProblemReviewService,
+  ) {}
 
   /**
    * Record one wrong-attempt event. A row lock and monotonically increasing
@@ -93,6 +97,14 @@ export class MistakeCollector implements OnModuleDestroy {
             nextRetryAt: null,
           },
         });
+      });
+      // Хугацаатай давталт: алдааны дэвтэр commit болсны дараа, тусдаа. recordWrong хэзээ ч
+      // шиддэггүй, идэмпотент (lastEventAt) — цуглуулгын үр дүнг өөрчлөхгүй.
+      await this.reviews?.recordWrong({
+        studentId: input.userId,
+        problemId: input.problemId,
+        source: input.source,
+        occurredAt: input.sourceOccurredAt,
       });
       return true;
     } catch (error) {

@@ -233,3 +233,37 @@ describe('Гар утасны апп — шинэ маршрутын эрх', ()
     expect(Reflect.getMetadata(THROTTLER_LIMIT + 'default', handler)).toBe(10);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Бие даан суралцах (2026-11-04): алдсан бодлогын хугацаатай давталт, 7 хоногийн
+// зорилго, сэдвээр дасгал. Сурагч зөвхөн ӨӨРИЙНХӨӨ — userId токеноос, параметрээр
+// өөр сурагчийн ID авдаггүй. Бусад role 403.
+// ---------------------------------------------------------------------------
+import { ProblemReviewController } from '../mistakes/problem-review.controller';
+import { WeeklyGoalController } from '../activity/weekly-goal.controller';
+import { RecommendController } from '../recommend/recommend.controller';
+import { ActivityController } from '../activity/activity.controller';
+
+describe('Бие даан суралцах — шинэ маршрутын эрх (сурагч өөрөө)', () => {
+  const routes: [string, object, object, string[]][] = [
+    ['GET /api/review/problems/due', ProblemReviewController, ProblemReviewController.prototype.due, ['STUDENT']],
+    ['POST /api/review/problems/:id/answer', ProblemReviewController, ProblemReviewController.prototype.answer, ['STUDENT']],
+    ['GET /api/study/weekly-goal', WeeklyGoalController, WeeklyGoalController.prototype.get, ['STUDENT']],
+    ['PUT /api/study/weekly-goal', WeeklyGoalController, WeeklyGoalController.prototype.set, ['STUDENT']],
+    ['GET /api/recommend/chapter-match', RecommendController, RecommendController.prototype.chapterMatch, ['STUDENT', 'BUYER']],
+    ['GET /api/recommend/next', RecommendController, RecommendController.prototype.next, ['STUDENT', 'BUYER']],
+    ['GET /api/activity/streak', ActivityController, ActivityController.prototype.streak, ['STUDENT']],
+  ];
+
+  it.each(routes)('%s — JwtAuthGuard + RolesGuard + role матриц', (route, controller, handler, roles) => {
+    expect(routeOf(controller, handler)).toBe(route);
+    const guards = [...guardsOf(controller), ...guardsOf(handler)];
+    expect(guards).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
+    expect([...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort()).toEqual([...roles].sort());
+    expectRoleMatrix(controller, handler, roles);
+  });
+
+  it('маршрутын замд сурагчийн ID байхгүй (өөр сурагчийн өгөгдөл уншиж болохгүй)', () => {
+    for (const [route] of routes) expect(route).not.toMatch(/student|userId|:studentId/i);
+  });
+});

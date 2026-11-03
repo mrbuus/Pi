@@ -331,6 +331,8 @@ TestResult баганууд (enteredById г.м.) мөн ирнэ — апп зө
 - `practice`: «Ижил сэдвийн бодлого бодох» → `POST /study-review` `{clientRequestId: uuid, budgetMinutes: 10, chapterIds}`
   → `{id}` → давтлага (learning.md).
 - Ангийн байр (rank) энд харуулахгүй (§8.6) — тусдаа `/test-rankings/:id`.
+- Нэмэлт (2026-11-04): `itemTimes: [{ n, timeSpentSec }]` — онлайнаар өгсөн бол бодлого бүрт зарцуулсан секунд (хугацаагүйг алгасна;
+  цаасан дүнд `[]`). `wrong[].timeSpentSec: number|null`. Зөв/буруу, хариу задрахгүй — «Удаан бодсон» хэсэгт.
 
 ### 5.2 `GET /tests/:id/review` — энгийн (дасгал) тестийн эргэн харалт
 
@@ -350,6 +352,7 @@ TestResult баганууд (enteredById г.м.) мөн ирнэ — апп зө
 - THOUSAND: `{ result, items: [], leaveCount, gatedReview: true }` → `/thousand/tests/:id/review`-ээр.
 - `myAnswer`: TEXT сонголтод **сонгосон бичвэр** (үсэг биш), бусдад түүхий утга мөрөөр; хариулаагүй бол null.
 - `answerUnknown: true` → «буруу» гэж бүү харуул («хариу тодорхойгүй»).
+- Нэмэлт (2026-11-04): `items[].timeSpentSec: number|null` — сессийн бодлогод зарцуулсан секунд.
 - Зөв хариу задрахгүй. `solution` — зөвхөн VERIFIED бодолт (LaTeX бичвэр).
 
 ### 5.3 `GET /thousand/tests/:testId/review` — 1000 бодлогын эргэн харалт (сервер талын хаалт)

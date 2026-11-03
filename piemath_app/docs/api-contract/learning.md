@@ -83,11 +83,25 @@ OPEN → мөр. (`gradeAnswer(problem, answer)` choiceOrder-гүй.) Сонго
 - `GET /recommend/next?limit=N` (0–99, анхдагч 10) **[хүнд]** → `[{ problemId, topicId, score, reason: RETRY_TOPIC|WEAK_TOPIC|RIGHT_LEVEL|NEW_TOPIC|CONFIDENCE,
   evidence: {...}, uncertainty: "small-sample"|"observed-only", explanation: string, contract: "observed-independent-v1" }]`.
   Бодлогын агуулга энэ хариунд байхгүй — тусад нь ★ (вэб `practice/AttemptModal`).
+- Сэдвээр дасгал (2026-11-04): `GET /recommend/next?limit=N&chapterId=a,b` — сонголттой, 12 хүртэл бүлэг (таслалаар эсвэл давтан). Зөвхөн
+  тэдгээр бүлгээс, эрхийн шүүлтүүр хэвээр; эрхгүй бол `[]`; бүх бодлогыг бодсон бол бодсоноос нь давтуулна. Буруу ID 400.
+- `GET /recommend/chapter-match?topic=` (STUDENT, BUYER) → `{ chapterId: string|null, chapterIds: string[], title: string|null }` — хичээлийн
+  чөлөөт сэдвийг зөвхөн яг/хэвшүүлсэн гарчгаар («Х · Тест N» бүлгүүдийг суурь гарчгаар) тааруулна; эргэлзээтэй/эрхгүй бол `null`.
 - `POST /recommend/attempt` `{ problemId, givenAnswer?, autoCorrect?, selfState? }` — **`autoCorrect`-ыг сервер ҮЛ ТООМСОРЛОНО**,
   өөрөө дүгнэнэ (`void autoCorrect`). TEXT сонголтын хариуг бичвэр эсвэл үсгээр ч хүлээнэ. 400 «Хариултаа шалгана уу.»
 - `/app/study` нүүр: `GET /learning-lab/history`, `GET /assignments/my`, `GET /recommend/next?limit=3`, `GET /lessons/chapters`, `GET /activity/me`.
 - `learning-lab/*` (`problem`, `bank/:id`, `response`, `correction`, `solution`, `history`) — туршилтын «лаборатори» урсгал **[ховор]**,
   апп-д эхний шатанд хэрэггүй. ★
+
+## 3.1 Алдсан бодлогын хугацаатай давталт (2026-11-04) — STUDENT
+
+Дасгал, давтлага, тест, онлайн гэрийн даалгаварт буруу бодсон бодлого маргааш (УБ шөнө дунд) давтагдана. Давтлагаар зөв: 3 → 7 →
+интервал × ease хоног (≤180); буруу: 1 хоног.
+- `GET /review/problems/due?limit=` (1–30, анхдагч 10) → `{ total, items: [{ id, problem: {id, statementText, choices, choiceMode, answerFields,
+  format, imageKey}, dueAt, intervalDays, reps, lapses, lastResult: WRONG|CORRECT, source, formulas }] }`. `problem` нь `/mistakes/today`-тэй
+  ижил хэлбэр; хариуны түлхүүр, бодолт ИРЭХГҮЙ.
+- `POST /review/problems/:id/answer` `{ answer }` (§1.1-ийн retry хэлбэр) → `{ correct, correctAnswer, solutionOutline|null, scheduled, dueAt,
+  intervalDays, reps, lapses }`. Хугацаа болоогүй бол дүгнэнэ, хуваарь өөрчлөгдөхгүй (`scheduled: false`). Бусдын мөр 404, зэрэг 409.
 
 ## 4. Хичээл, номын сан, видео (`/app/learn`, `/app/library`, `/app/videos`)
 
@@ -137,8 +151,13 @@ OPEN → мөр. (`gradeAnswer(problem, answer)` choiceOrder-гүй.) Сонго
   `{ index (0–100), low, high, dataPoints, effectiveDataPoints, coverage, topics: [{ topic, title, mastery: number|null, measured, weight, attempts, effectiveAttempts, trend: UP|DOWN|FLAT }] }`.
   Нэмэлт: `nextBestTopics` (сул тал × ЭЕШ-ийн жингээр эхний 3 сэдэв, `topics`-тэй ижил хэлбэр), `weeklyHistory: [{ week: "YYYY-MM-DD", index, coverage }]` (8 долоо хоног; `coverage` 0 бол хэмжилтгүй). `topic` нь кодын нэр (ALG, DERIV), `title` монгол.
   Тооцоолол серверт — апп зөвхөн харуулна (`low..high` муж = тодорхойгүй байдал; «таамаг» гэж хэт итгэлтэй бүү харуул).
+  Нэмэлт (2026-11-04): сэдэв бүрт `chapterId: string|null` — тухайн сэдэвт сурагчийн хамгийн их бодсон бүлэг (сэдвээр дасгал нээхэд).
 - Идэвх: `GET /activity/me?year=` → `{ year, totalActiveDays, days: [{ date: "YYYY-MM-DD", count, level, isHoliday, isClassDay }] }` (бүтэн жил —
-  ~365 мөр; `level` 0-4: 0, 1-3, 4-7, 8-14, 15+ бодлого). `GET /activity/streak` байдаг ч апп ашиглахгүй (UX-RESEARCH §10: дарамттай дараалал).
+  ~365 мөр; `level` 0-4: 0, 1-3, 4-7, 8-14, 15+ бодлого). `GET /activity/streak` → `{ currentStreak, longestStreak, totalActiveDays }` (вэб) +
+  нэмэлт (2026-11-04): `flexStreak` (ISO 7 хоног бүрт 1 идэвхгүй өдрийг тэвчинэ), `restDayUsedThisWeek`, `activeDaysThisWeek`, `weeklyGoal: number|null`.
+  Апп цувралын тоог дарамттай харуулахгүй (UX-RESEARCH §10) — зөвхөн амралтын өдрийн тайван мэдээлэл.
+- 7 хоногийн зорилго: `GET /study/weekly-goal` → `{ daysPerWeek: 1..7|null, updatedAt }`; `PUT /study/weekly-goal` `{ daysPerWeek: 1..7|null }`
+  (null = арилгах, зөөлөн устгал). STUDENT, зөвхөн өөрийнх.
 
 ## 7. Сурагчид хамааралгүй (PARITY засвар)
 

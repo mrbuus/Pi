@@ -142,6 +142,8 @@ export const ModelName = {
   GoogleLoginExchange: 'GoogleLoginExchange',
   StoredFile: 'StoredFile',
   FormulaReview: 'FormulaReview',
+  ProblemReview: 'ProblemReview',
+  StudyWeeklyGoal: 'StudyWeeklyGoal',
   FormulaReviewDay: 'FormulaReviewDay',
   FormulaReviewAttempt: 'FormulaReviewAttempt',
   Feedback: 'Feedback',
@@ -1565,6 +1567,37 @@ export const FormulaReviewScalarFieldEnum = {
 } as const
 
 export type FormulaReviewScalarFieldEnum = (typeof FormulaReviewScalarFieldEnum)[keyof typeof FormulaReviewScalarFieldEnum]
+
+
+export const ProblemReviewScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  problemId: 'problemId',
+  dueAt: 'dueAt',
+  intervalDays: 'intervalDays',
+  ease: 'ease',
+  reps: 'reps',
+  lapses: 'lapses',
+  lastResult: 'lastResult',
+  source: 'source',
+  lastEventAt: 'lastEventAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProblemReviewScalarFieldEnum = (typeof ProblemReviewScalarFieldEnum)[keyof typeof ProblemReviewScalarFieldEnum]
+
+
+export const StudyWeeklyGoalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  daysPerWeek: 'daysPerWeek',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StudyWeeklyGoalScalarFieldEnum = (typeof StudyWeeklyGoalScalarFieldEnum)[keyof typeof StudyWeeklyGoalScalarFieldEnum]
 
 
 export const FormulaReviewDayScalarFieldEnum = {

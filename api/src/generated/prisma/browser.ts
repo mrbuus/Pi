@@ -494,6 +494,16 @@ export type StoredFile = Prisma.StoredFileModel
  */
 export type FormulaReview = Prisma.FormulaReviewModel
 /**
+ * Model ProblemReview
+ * 
+ */
+export type ProblemReview = Prisma.ProblemReviewModel
+/**
+ * Model StudyWeeklyGoal
+ * 
+ */
+export type StudyWeeklyGoal = Prisma.StudyWeeklyGoalModel
+/**
  * Model FormulaReviewDay
  * 
  */

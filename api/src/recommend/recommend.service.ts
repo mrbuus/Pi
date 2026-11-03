@@ -25,11 +25,20 @@ import {
   GradableProblem,
   hasKnownAnswer,
 } from '../tests/grading';
+import { matchChapter } from './chapter-match';
 import {
   recommend,
   type CandidateProblem,
   type Recommendation,
 } from './scheduler';
+
+/** Сэдвээр дасгалд нэг дор хүлээн авах бүлгийн дээд тоо. */
+export const MAX_FOCUS_CHAPTERS = 12;
+
+/** cuid / uuid маягийн бүлгийн ID (query-гээр ирдэг тул хатуу шалгана). */
+export function isSafeChapterId(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(value);
+}
 
 export function canonicalizePracticeChoiceInput(
   problem: GradableProblem,
@@ -97,9 +106,17 @@ export class RecommendService {
     studentId: string,
     limit = 10,
     role: Role = Role.STUDENT,
+    chapterIds?: string[],
   ): Promise<EvidenceRecommendation[]> {
     if (!Number.isInteger(limit) || limit < 1 || limit > 50)
       throw new BadRequestException('Тоо 1–50 байна.');
+    if (
+      chapterIds !== undefined &&
+      (chapterIds.length < 1 ||
+        chapterIds.length > MAX_FOCUS_CHAPTERS ||
+        !chapterIds.every(isSafeChapterId))
+    )
+      throw new BadRequestException('Бүлэг буруу байна.');
     if (role !== Role.STUDENT && role !== Role.BUYER)
       throw new ForbiddenException();
     const [attemptRows, enrollment, exposures, labFirst] = await Promise.all([
@@ -225,7 +242,30 @@ export class RecommendService {
         ...labRows.map((r) => r.topicId),
       ]),
     ];
-    const historical = historicalIds.length
+    // Сэдвээр дасгал: зөвхөн тэр нэг бүлэг (эрхийн шүүлтүүр хэвээр). Ахицын хязгаарыг үл тооно —
+    // сурагч өөрөө сонгосон сул сэдэв.
+    const focused = chapterIds
+      ? await this.prisma.chapter.findMany({
+          where: {
+            id: { in: [...new Set(chapterIds)] },
+            deletedAt: null,
+            AND: [entitlement],
+          },
+          select: {
+            id: true,
+            bookId: true,
+            freePreview: true,
+            order: true,
+            grade: true,
+          },
+          orderBy: [{ order: 'asc' }, { id: 'asc' }],
+          take: MAX_FOCUS_CHAPTERS,
+        })
+      : null;
+    if (focused && !focused.length) return [];
+    const historical = focused
+      ? []
+      : historicalIds.length
       ? await this.prisma.chapter.findMany({
           where: {
             id: { in: historicalIds },
@@ -243,7 +283,7 @@ export class RecommendService {
           take: 30,
         })
       : [];
-    const initial = await this.prisma.chapter.findMany({
+    const initial = focused ?? await this.prisma.chapter.findMany({
       where: {
         deletedAt: null,
         AND: [entitlement],
@@ -268,7 +308,7 @@ export class RecommendService {
         if (eligible.size >= 12) break;
       }
     const lastClassSession =
-      enrollment && !enrollment.classroom.progressChapterId
+      !focused && enrollment && !enrollment.classroom.progressChapterId
         ? await this.prisma.classTestSession.findFirst({
             where: {
               classroomId: enrollment.classroomId,
@@ -284,8 +324,9 @@ export class RecommendService {
           select: { chapterId: true },
         })
       : null;
-    const progressId =
-      enrollment?.classroom.progressChapterId ?? lastTest?.chapterId;
+    const progressId = focused
+      ? null
+      : (enrollment?.classroom.progressChapterId ?? lastTest?.chapterId);
     const progress = progressId
       ? await this.prisma.chapter.findUnique({
           where: { id: progressId },
@@ -327,8 +368,31 @@ export class RecommendService {
         ),
       )
     ).flat();
+    // Сонгосон бүлгийн бүх бодлогыг бодсон бол бодсон бодлогоос нь давтуулна (хоосон буцаахаас дээр)
+    const revisit = !!focused && problems.length === 0;
+    if (revisit)
+      for (const chapter of focused)
+        problems.push(
+          ...(await this.prisma.problem.findMany({
+            where: {
+              deletedAt: null,
+              chapterId: chapter.id,
+              ...(releasedOnly(chapter)
+                ? { id: { in: [...release!.problemIds] } }
+                : {}),
+            },
+            select: {
+              id: true,
+              chapterId: true,
+              attemptCount: true,
+              correctRate: true,
+            },
+            orderBy: [{ page: 'asc' }, { number: 'asc' }, { id: 'asc' }],
+            take: Math.floor(400 / focused.length),
+          })),
+        );
     const candidates: CandidateProblem[] = problems
-      .filter((p) => !measured.seen.has(p.id))
+      .filter((p) => revisit || !measured.seen.has(p.id))
       .map((p) => ({
         id: p.id,
         topicId: p.chapterId,
@@ -351,7 +415,7 @@ export class RecommendService {
       now: Date.now(),
       limit,
       maxConsecutiveSameTopic: 1,
-      sameProblemOk: false,
+      sameProblemOk: revisit,
     }).map((r) => {
       const evidence = measured.topics.get(r.topicId) ?? emptyEvidence();
       return {
@@ -483,5 +547,43 @@ export class RecommendService {
       }
     }
     return { attemptId: attempt.id, correct: attempt.autoCorrect };
+  }
+
+  /**
+   * Хичээлийн чөлөөт сэдвийг (ж: «Логарифм тэгшитгэл») сурагчийн эрхтэй бүлэгтэй тааруулна.
+   * Зөвхөн яг/хэвшүүлсэн гарчиг; эргэлзээтэй эсвэл эрхгүй бол `chapterId: null`.
+   */
+  async matchLessonTopic(studentId: string, topic: unknown, role: Role = Role.STUDENT) {
+    if (role !== Role.STUDENT && role !== Role.BUYER) throw new ForbiddenException();
+    if (typeof topic !== 'string' || !topic.trim() || topic.length > 160)
+      throw new BadRequestException('Сэдэв буруу байна.');
+    const [chapters, enrollment] = await Promise.all([
+      this.prisma.chapter.findMany({
+        where: {
+          deletedAt: null,
+          OR: [{ bookId: null }, { book: { is: { deletedAt: null } } }],
+        },
+        select: { id: true, title: true, order: true, grade: true },
+        take: 5000,
+      }),
+      this.prisma.enrollment.findFirst({
+        where: { studentId, leftAt: null, classroom: { archived: false } },
+        select: { classroom: { select: { grade: true } } },
+      }),
+    ]);
+    const match = matchChapter(topic, chapters, enrollment?.classroom.grade ?? null);
+    const none = { chapterId: null, chapterIds: [] as string[], title: null };
+    if (!match) return none;
+    const targets = await this.prisma.chapter.findMany({
+      where: { id: { in: match.chapterIds } },
+      select: { id: true, bookId: true, freePreview: true },
+    });
+    const allowed = new Set<string>();
+    for (const target of targets)
+      if (await canAccessChapter(this.prisma, studentId, role, target))
+        allowed.add(target.id);
+    const chapterIds = match.chapterIds.filter((id) => allowed.has(id));
+    if (!chapterIds.length) return none;
+    return { chapterId: chapterIds[0], chapterIds, title: match.title };
   }
 }

@@ -46,6 +46,7 @@ import {
 import { SaveSessionDto } from './dto/submit-test.dto';
 import { countIntegrityEvents, countsAsLeave } from './integrity-events';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
+import { spentSeconds } from './problem-time';
 import {
   answerToken,
   buildChoiceOrder,
@@ -1317,6 +1318,7 @@ export class TestsService {
       string,
       number[]
     >;
+    const times = asRecord(session.problemTimes);
 
     const items = orderIds.map((pid, i) => {
       const tp = byId.get(pid)!;
@@ -1355,6 +1357,8 @@ export class TestsService {
           a?.status === 'VERIFIED' && a.solutionOutline
             ? a.solutionOutline
             : null,
+        // Нэмэлт (2026-11-04): бодлогод зарцуулсан секунд, сессийн problemTimes-аас. Байхгүй бол null
+        timeSpentSec: spentSeconds(times[pid]),
       };
     });
 

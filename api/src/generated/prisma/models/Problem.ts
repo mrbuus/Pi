@@ -391,6 +391,7 @@ export type ProblemWhereInput = {
   choiceOptions?: Prisma.ProblemChoiceListRelationFilter
   attempts?: Prisma.AttemptListRelationFilter
   mistakeEntries?: Prisma.MistakeEntryListRelationFilter
+  problemReviews?: Prisma.ProblemReviewListRelationFilter
   videos?: Prisma.VideoListRelationFilter
   testItems?: Prisma.TestProblemListRelationFilter
   studyReviewItems?: Prisma.StudyReviewItemListRelationFilter
@@ -428,6 +429,7 @@ export type ProblemOrderByWithRelationInput = {
   choiceOptions?: Prisma.ProblemChoiceOrderByRelationAggregateInput
   attempts?: Prisma.AttemptOrderByRelationAggregateInput
   mistakeEntries?: Prisma.MistakeEntryOrderByRelationAggregateInput
+  problemReviews?: Prisma.ProblemReviewOrderByRelationAggregateInput
   videos?: Prisma.VideoOrderByRelationAggregateInput
   testItems?: Prisma.TestProblemOrderByRelationAggregateInput
   studyReviewItems?: Prisma.StudyReviewItemOrderByRelationAggregateInput
@@ -468,6 +470,7 @@ export type ProblemWhereUniqueInput = Prisma.AtLeast<{
   choiceOptions?: Prisma.ProblemChoiceListRelationFilter
   attempts?: Prisma.AttemptListRelationFilter
   mistakeEntries?: Prisma.MistakeEntryListRelationFilter
+  problemReviews?: Prisma.ProblemReviewListRelationFilter
   videos?: Prisma.VideoListRelationFilter
   testItems?: Prisma.TestProblemListRelationFilter
   studyReviewItems?: Prisma.StudyReviewItemListRelationFilter
@@ -566,6 +569,7 @@ export type ProblemCreateInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -602,6 +606,7 @@ export type ProblemUncheckedCreateInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -638,6 +643,7 @@ export type ProblemUpdateInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -674,6 +680,7 @@ export type ProblemUncheckedUpdateInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -1052,6 +1059,20 @@ export type ProblemUpdateOneRequiredWithoutMistakeEntriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProblemUpdateToOneWithWhereWithoutMistakeEntriesInput, Prisma.ProblemUpdateWithoutMistakeEntriesInput>, Prisma.ProblemUncheckedUpdateWithoutMistakeEntriesInput>
 }
 
+export type ProblemCreateNestedOneWithoutProblemReviewsInput = {
+  create?: Prisma.XOR<Prisma.ProblemCreateWithoutProblemReviewsInput, Prisma.ProblemUncheckedCreateWithoutProblemReviewsInput>
+  connectOrCreate?: Prisma.ProblemCreateOrConnectWithoutProblemReviewsInput
+  connect?: Prisma.ProblemWhereUniqueInput
+}
+
+export type ProblemUpdateOneRequiredWithoutProblemReviewsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProblemCreateWithoutProblemReviewsInput, Prisma.ProblemUncheckedCreateWithoutProblemReviewsInput>
+  connectOrCreate?: Prisma.ProblemCreateOrConnectWithoutProblemReviewsInput
+  upsert?: Prisma.ProblemUpsertWithoutProblemReviewsInput
+  connect?: Prisma.ProblemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProblemUpdateToOneWithWhereWithoutProblemReviewsInput, Prisma.ProblemUpdateWithoutProblemReviewsInput>, Prisma.ProblemUncheckedUpdateWithoutProblemReviewsInput>
+}
+
 export type ProblemCreateNestedOneWithoutStudyReviewItemsInput = {
   create?: Prisma.XOR<Prisma.ProblemCreateWithoutStudyReviewItemsInput, Prisma.ProblemUncheckedCreateWithoutStudyReviewItemsInput>
   connectOrCreate?: Prisma.ProblemCreateOrConnectWithoutStudyReviewItemsInput
@@ -1096,6 +1117,7 @@ export type ProblemCreateWithoutChapterInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -1131,6 +1153,7 @@ export type ProblemUncheckedCreateWithoutChapterInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -1223,6 +1246,7 @@ export type ProblemCreateWithoutVideosInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
 }
@@ -1258,6 +1282,7 @@ export type ProblemUncheckedCreateWithoutVideosInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
 }
@@ -1309,6 +1334,7 @@ export type ProblemUpdateWithoutVideosInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
 }
@@ -1344,6 +1370,7 @@ export type ProblemUncheckedUpdateWithoutVideosInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
 }
@@ -1378,6 +1405,7 @@ export type ProblemCreateWithoutChoiceOptionsInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -1413,6 +1441,7 @@ export type ProblemUncheckedCreateWithoutChoiceOptionsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -1464,6 +1493,7 @@ export type ProblemUpdateWithoutChoiceOptionsInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -1499,6 +1529,7 @@ export type ProblemUncheckedUpdateWithoutChoiceOptionsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -1534,6 +1565,7 @@ export type ProblemCreateWithoutTagsInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -1569,6 +1601,7 @@ export type ProblemUncheckedCreateWithoutTagsInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -1620,6 +1653,7 @@ export type ProblemUpdateWithoutTagsInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -1655,6 +1689,7 @@ export type ProblemUncheckedUpdateWithoutTagsInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -1690,6 +1725,7 @@ export type ProblemCreateWithoutFormulasInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -1725,6 +1761,7 @@ export type ProblemUncheckedCreateWithoutFormulasInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -1776,6 +1813,7 @@ export type ProblemUpdateWithoutFormulasInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -1811,6 +1849,7 @@ export type ProblemUncheckedUpdateWithoutFormulasInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -1846,6 +1885,7 @@ export type ProblemCreateWithoutAnalysisInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -1881,6 +1921,7 @@ export type ProblemUncheckedCreateWithoutAnalysisInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -1932,6 +1973,7 @@ export type ProblemUpdateWithoutAnalysisInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -1967,6 +2009,7 @@ export type ProblemUncheckedUpdateWithoutAnalysisInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -2003,6 +2046,7 @@ export type ProblemCreateWithoutTestItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
 }
@@ -2038,6 +2082,7 @@ export type ProblemUncheckedCreateWithoutTestItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
 }
@@ -2089,6 +2134,7 @@ export type ProblemUpdateWithoutTestItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
 }
@@ -2124,6 +2170,7 @@ export type ProblemUncheckedUpdateWithoutTestItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
 }
@@ -2158,6 +2205,7 @@ export type ProblemCreateWithoutAttemptsInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -2193,6 +2241,7 @@ export type ProblemUncheckedCreateWithoutAttemptsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -2244,6 +2293,7 @@ export type ProblemUpdateWithoutAttemptsInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -2279,6 +2329,7 @@ export type ProblemUncheckedUpdateWithoutAttemptsInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -2314,6 +2365,7 @@ export type ProblemCreateWithoutMistakeEntriesInput = {
   analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
@@ -2349,6 +2401,7 @@ export type ProblemUncheckedCreateWithoutMistakeEntriesInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
@@ -2400,6 +2453,7 @@ export type ProblemUpdateWithoutMistakeEntriesInput = {
   analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -2435,6 +2489,167 @@ export type ProblemUncheckedUpdateWithoutMistakeEntriesInput = {
   analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
+  videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
+  testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
+  studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
+}
+
+export type ProblemCreateWithoutProblemReviewsInput = {
+  id?: string
+  token: string
+  page?: number | null
+  number?: number | null
+  format: $Enums.ProblemFormat
+  statementText?: string | null
+  imageKey?: string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: number
+  price?: number | null
+  createdById: string
+  createdAt?: Date | string
+  eloRating?: number
+  attemptCount?: number
+  correctRate?: number | null
+  youtubeUrl?: string | null
+  scanCode?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
+  deletedAt?: Date | string | null
+  chapter: Prisma.ChapterCreateNestedOneWithoutProblemsInput
+  tags?: Prisma.ProblemTagCreateNestedManyWithoutProblemInput
+  formulas?: Prisma.ProblemFormulaCreateNestedManyWithoutProblemInput
+  analysis?: Prisma.ProblemAnalysisCreateNestedOneWithoutProblemInput
+  choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
+  testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
+  studyReviewItems?: Prisma.StudyReviewItemCreateNestedManyWithoutProblemInput
+}
+
+export type ProblemUncheckedCreateWithoutProblemReviewsInput = {
+  id?: string
+  token: string
+  chapterId: string
+  page?: number | null
+  number?: number | null
+  format: $Enums.ProblemFormat
+  statementText?: string | null
+  imageKey?: string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: number
+  price?: number | null
+  createdById: string
+  createdAt?: Date | string
+  eloRating?: number
+  attemptCount?: number
+  correctRate?: number | null
+  youtubeUrl?: string | null
+  scanCode?: string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
+  updatedAt?: Date | string | null
+  updatedById?: string | null
+  deletedAt?: Date | string | null
+  tags?: Prisma.ProblemTagUncheckedCreateNestedManyWithoutProblemInput
+  formulas?: Prisma.ProblemFormulaUncheckedCreateNestedManyWithoutProblemInput
+  analysis?: Prisma.ProblemAnalysisUncheckedCreateNestedOneWithoutProblemInput
+  choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
+  testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
+  studyReviewItems?: Prisma.StudyReviewItemUncheckedCreateNestedManyWithoutProblemInput
+}
+
+export type ProblemCreateOrConnectWithoutProblemReviewsInput = {
+  where: Prisma.ProblemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProblemCreateWithoutProblemReviewsInput, Prisma.ProblemUncheckedCreateWithoutProblemReviewsInput>
+}
+
+export type ProblemUpsertWithoutProblemReviewsInput = {
+  update: Prisma.XOR<Prisma.ProblemUpdateWithoutProblemReviewsInput, Prisma.ProblemUncheckedUpdateWithoutProblemReviewsInput>
+  create: Prisma.XOR<Prisma.ProblemCreateWithoutProblemReviewsInput, Prisma.ProblemUncheckedCreateWithoutProblemReviewsInput>
+  where?: Prisma.ProblemWhereInput
+}
+
+export type ProblemUpdateToOneWithWhereWithoutProblemReviewsInput = {
+  where?: Prisma.ProblemWhereInput
+  data: Prisma.XOR<Prisma.ProblemUpdateWithoutProblemReviewsInput, Prisma.ProblemUncheckedUpdateWithoutProblemReviewsInput>
+}
+
+export type ProblemUpdateWithoutProblemReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  page?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumProblemFormatFieldUpdateOperationsInput | $Enums.ProblemFormat
+  statementText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: Prisma.IntFieldUpdateOperationsInput | number
+  price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scanCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  chapter?: Prisma.ChapterUpdateOneRequiredWithoutProblemsNestedInput
+  tags?: Prisma.ProblemTagUpdateManyWithoutProblemNestedInput
+  formulas?: Prisma.ProblemFormulaUpdateManyWithoutProblemNestedInput
+  analysis?: Prisma.ProblemAnalysisUpdateOneWithoutProblemNestedInput
+  choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
+  testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
+  studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
+}
+
+export type ProblemUncheckedUpdateWithoutProblemReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  chapterId?: Prisma.StringFieldUpdateOperationsInput | string
+  page?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.EnumProblemFormatFieldUpdateOperationsInput | $Enums.ProblemFormat
+  statementText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  choices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  correctAnswer?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  points?: Prisma.IntFieldUpdateOperationsInput | number
+  price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eloRating?: Prisma.FloatFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  correctRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  youtubeUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scanCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scoringGroups?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tags?: Prisma.ProblemTagUncheckedUpdateManyWithoutProblemNestedInput
+  formulas?: Prisma.ProblemFormulaUncheckedUpdateManyWithoutProblemNestedInput
+  analysis?: Prisma.ProblemAnalysisUncheckedUpdateOneWithoutProblemNestedInput
+  choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -2471,6 +2686,7 @@ export type ProblemCreateWithoutStudyReviewItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemCreateNestedManyWithoutProblemInput
 }
@@ -2506,6 +2722,7 @@ export type ProblemUncheckedCreateWithoutStudyReviewItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedCreateNestedManyWithoutProblemInput
   attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutProblemInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutProblemInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutProblemInput
   videos?: Prisma.VideoUncheckedCreateNestedManyWithoutProblemInput
   testItems?: Prisma.TestProblemUncheckedCreateNestedManyWithoutProblemInput
 }
@@ -2557,6 +2774,7 @@ export type ProblemUpdateWithoutStudyReviewItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
 }
@@ -2592,6 +2810,7 @@ export type ProblemUncheckedUpdateWithoutStudyReviewItemsInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
 }
@@ -2652,6 +2871,7 @@ export type ProblemUpdateWithoutChapterInput = {
   choiceOptions?: Prisma.ProblemChoiceUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUpdateManyWithoutProblemNestedInput
@@ -2687,6 +2907,7 @@ export type ProblemUncheckedUpdateWithoutChapterInput = {
   choiceOptions?: Prisma.ProblemChoiceUncheckedUpdateManyWithoutProblemNestedInput
   attempts?: Prisma.AttemptUncheckedUpdateManyWithoutProblemNestedInput
   mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutProblemNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutProblemNestedInput
   videos?: Prisma.VideoUncheckedUpdateManyWithoutProblemNestedInput
   testItems?: Prisma.TestProblemUncheckedUpdateManyWithoutProblemNestedInput
   studyReviewItems?: Prisma.StudyReviewItemUncheckedUpdateManyWithoutProblemNestedInput
@@ -2729,6 +2950,7 @@ export type ProblemCountOutputType = {
   choiceOptions: number
   attempts: number
   mistakeEntries: number
+  problemReviews: number
   videos: number
   testItems: number
   studyReviewItems: number
@@ -2740,6 +2962,7 @@ export type ProblemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   choiceOptions?: boolean | ProblemCountOutputTypeCountChoiceOptionsArgs
   attempts?: boolean | ProblemCountOutputTypeCountAttemptsArgs
   mistakeEntries?: boolean | ProblemCountOutputTypeCountMistakeEntriesArgs
+  problemReviews?: boolean | ProblemCountOutputTypeCountProblemReviewsArgs
   videos?: boolean | ProblemCountOutputTypeCountVideosArgs
   testItems?: boolean | ProblemCountOutputTypeCountTestItemsArgs
   studyReviewItems?: boolean | ProblemCountOutputTypeCountStudyReviewItemsArgs
@@ -2788,6 +3011,13 @@ export type ProblemCountOutputTypeCountAttemptsArgs<ExtArgs extends runtime.Type
  */
 export type ProblemCountOutputTypeCountMistakeEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MistakeEntryWhereInput
+}
+
+/**
+ * ProblemCountOutputType without action
+ */
+export type ProblemCountOutputTypeCountProblemReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProblemReviewWhereInput
 }
 
 /**
@@ -2844,6 +3074,7 @@ export type ProblemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   choiceOptions?: boolean | Prisma.Problem$choiceOptionsArgs<ExtArgs>
   attempts?: boolean | Prisma.Problem$attemptsArgs<ExtArgs>
   mistakeEntries?: boolean | Prisma.Problem$mistakeEntriesArgs<ExtArgs>
+  problemReviews?: boolean | Prisma.Problem$problemReviewsArgs<ExtArgs>
   videos?: boolean | Prisma.Problem$videosArgs<ExtArgs>
   testItems?: boolean | Prisma.Problem$testItemsArgs<ExtArgs>
   studyReviewItems?: boolean | Prisma.Problem$studyReviewItemsArgs<ExtArgs>
@@ -2942,6 +3173,7 @@ export type ProblemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   choiceOptions?: boolean | Prisma.Problem$choiceOptionsArgs<ExtArgs>
   attempts?: boolean | Prisma.Problem$attemptsArgs<ExtArgs>
   mistakeEntries?: boolean | Prisma.Problem$mistakeEntriesArgs<ExtArgs>
+  problemReviews?: boolean | Prisma.Problem$problemReviewsArgs<ExtArgs>
   videos?: boolean | Prisma.Problem$videosArgs<ExtArgs>
   testItems?: boolean | Prisma.Problem$testItemsArgs<ExtArgs>
   studyReviewItems?: boolean | Prisma.Problem$studyReviewItemsArgs<ExtArgs>
@@ -2964,6 +3196,7 @@ export type $ProblemPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     choiceOptions: Prisma.$ProblemChoicePayload<ExtArgs>[]
     attempts: Prisma.$AttemptPayload<ExtArgs>[]
     mistakeEntries: Prisma.$MistakeEntryPayload<ExtArgs>[]
+    problemReviews: Prisma.$ProblemReviewPayload<ExtArgs>[]
     videos: Prisma.$VideoPayload<ExtArgs>[]
     testItems: Prisma.$TestProblemPayload<ExtArgs>[]
     studyReviewItems: Prisma.$StudyReviewItemPayload<ExtArgs>[]
@@ -3394,6 +3627,7 @@ export interface Prisma__ProblemClient<T, Null = never, ExtArgs extends runtime.
   choiceOptions<T extends Prisma.Problem$choiceOptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$choiceOptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProblemChoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attempts<T extends Prisma.Problem$attemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mistakeEntries<T extends Prisma.Problem$mistakeEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$mistakeEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MistakeEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  problemReviews<T extends Prisma.Problem$problemReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$problemReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProblemReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   videos<T extends Prisma.Problem$videosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$videosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   testItems<T extends Prisma.Problem$testItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$testItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestProblemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studyReviewItems<T extends Prisma.Problem$studyReviewItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Problem$studyReviewItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudyReviewItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3987,6 +4221,30 @@ export type Problem$mistakeEntriesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.MistakeEntryScalarFieldEnum | Prisma.MistakeEntryScalarFieldEnum[]
+}
+
+/**
+ * Problem.problemReviews
+ */
+export type Problem$problemReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProblemReview
+   */
+  select?: Prisma.ProblemReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProblemReview
+   */
+  omit?: Prisma.ProblemReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProblemReviewInclude<ExtArgs> | null
+  where?: Prisma.ProblemReviewWhereInput
+  orderBy?: Prisma.ProblemReviewOrderByWithRelationInput | Prisma.ProblemReviewOrderByWithRelationInput[]
+  cursor?: Prisma.ProblemReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProblemReviewScalarFieldEnum | Prisma.ProblemReviewScalarFieldEnum[]
 }
 
 /**
