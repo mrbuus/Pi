@@ -9,7 +9,7 @@
 - **Эхлээд унш:** `docs/HOW-TO-CONTINUE.md` — ажлын арга, конвенц, тест, урхи, agent-д өгөх загвар
 - Branch: `piemath-app` (суурь: прод `4d3b648` + номын QR S1)
 - Flutter 3.47.9 stable / Dart 3.13.7 (cloud: `~/flutter`; эзний Mac: `export PATH=~/Development/flutter-3.47/bin:$PATH` — хуучин 3.35 тусдаа)
-- Шалгалт: `flutter analyze` 0, `flutter test -x golden` 925/925 (Mac), API 2510/2510, iOS debug build (CI macOS) ✅. Golden-ыг Mac дээр бүү үүсгэ —
+- Шалгалт: `flutter analyze` 0, `flutter test -x golden` 1221/1221 (Mac), API 2554/2554, iOS debug build (Mac + CI) ✅, Android release/AAB ✅. Golden-ыг Mac дээр бүү үүсгэ —
   `gh workflow run "Piemath апп" --ref piemath-app -f update_goldens=true` → `gh run download <id> -n goldens -D test/goldens`
 - Ноорог PR (зөвхөн CI, merge хийхгүй): https://github.com/mrbuus/Pi/pull/53
 
@@ -50,6 +50,28 @@
 | 6 | Шинэ домэйн (piemath) авах уу — `API_BASE_URL` солих | — | — |
 
 ## Бичлэгүүд
+
+### 2026-11-03 (орой) — үргэлжлүүлж дуусгав, 10 agent нийлэв
+
+- **Өнөөдрийн вэб → апп:** багшийн «Код» таб, «Ангийн түүх», профайл засах эрх, «Эх PDF» (самбар + номын бүлэг); томьёоны
+  энгийн өнгөт тайлбар, хойшлуулсан ачаалалт; график + бодогч (вэбийн тоон шулууны үйлдэлтэй ИЖИЛ); геометрийн нэмэлт
+  (таслагдсан конус/пирамид, дэлгэмэл, огтлол, медиан/өндөр/биссектрис/тойрог).
+- **Аудитын засвар (PARITY-AUDIT топ 15):** үнийг кодоос хасав — зөвхөн серверээс; **Багш+ зөвхөн төлөв, мөнгөн дүнг зөвхөн
+  Админ** (сервер буцаасан ч); A/B хувилбар вэбтэй байт ижил (25 golden vector); дүн/эрэмбэ эх сурвалж нэгтгэв; багшийн
+  «Ангиуд» `/class-dashboard`; самбарын нэмэлт, хүлээгдэж буй зөвшөөрөл, мэдэгдэл бичих; идэвх, бодлогын видео, томьёо SRS,
+  профайл зураг, ICS, худалдан авагчийн нүүр. Үлдсэн: #1 сурагчийн 6 цэс «Тун удахгүй» [Э].
+- **Гөлгөр байдал:** PerfTier, spring хөдөлгөөн, theme-ийн хуудасны шилжилт, skeleton, FileImageView, edge-to-edge,
+  Lucide subset фонт (159 глиф, 60KB; шинэ дүрс → `python3 tool/icon_font/build_icon_font.py`), perf integration тест.
+  arm64 release 26.6MB (native ~23MB тул <25MB-д хүрээгүй).
+- **Backend:** submit 319→24 query, давхар submit хаав, ирц 71→40, кэш, Postgres унтарвал 503 (`docs/BACKEND-PERF.md`).
+- **Дэлгүүр:** `PrivacyInfo.xcprivacy`, Apple sign-in entitlement, encryption flag, SDK 36, 16KB, зөвшөөрөл цэвэрлэв,
+  Firebase хувилбар бууруулж iOS build засав; `docs/COMPLIANCE.md`. Үндсэн session: худалдан авалт руу хөтлөх бүх холбоос
+  хасав (Apple 3.1.1), iOS-д Google зөвхөн Apple-тэй (4.8), sheet-д useSafeArea, ₮ тэмдэгтэд `PiemathSymbols` фонт.
+- **Нэвтрэх hero:** `assets/login_hero/hero.mp4` + `poster.webp` хийхэд ажиллана (`docs/LOGIN-HERO.md`).
+- **[Э] хүлээгдэж буй:** сурагчийн 6 цэс; Firebase, Google client ID, `GoogleSignIn.xcconfig`; Apple/Play бүртгэл, D-U-N-S,
+  privacy/deletion URL, demo бүртгэл; bundle ID; багшийн тэмдэглэл, зорилгын серверийн hard delete.
+- **Дараагийн алхам:** прод deploy (API миграци `20261101120000_problem_scan_code`, `20261102120000_mobile_app_support`;
+  backend засвар; `pg_dump` эхлээд; 18–24 цагт биш), вэб `web/tools-input` deploy, дэлгүүрт TestFlight / Play internal.
 
 ### 2026-11-03 — ЗОГСООСОН (эзний хүсэлтээр), дараа үргэлжлүүлнэ
 
