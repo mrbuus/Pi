@@ -44,7 +44,7 @@ class PaidUntilView {
 
   String get hint => switch (kind) {
     PaidUntilKind.unknown => 'Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана.',
-    PaidUntilKind.expired => 'Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй.',
+    PaidUntilKind.expired => 'Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй',
     PaidUntilKind.soon => 'Удахгүй дуусах гэж байна. Дараагийн сарын төлбөрөө бэлдээрэй.',
     PaidUntilKind.ok => 'Бүх зүйл хэвийн. Хичээлдээ анхаараарай.',
   };
